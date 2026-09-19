@@ -100,6 +100,17 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | Flowering log (orchid, peace lily): spike started, blooming, done | Could | v1.x |
 | ☐ | Optional care intervals per plant ("fertilise every 2 weeks") that show up on Today | Could | v1.x |
 
+## 4b. Light
+
+| ✓ | Feature | Priority | When |
+|---|---|---|---|
+| ☐ | Light level per plant: low, medium, bright indirect, some direct sun | Should | v1.x |
+| ☐ | Window direction for each room (north, east, south, west), so plants in a room show what light they get | Could | v1.x |
+| ☐ | **Grow lights**: your lamps with a name, wattage and hours on per day, and which plants are under each one | Should | v1.x |
+| ☐ | Moving a plant under or away from a grow light is recorded in its history, like a room change | Should | v1.x |
+| ☐ | Filter by light, e.g. "under grow light" or "low light", to find a spot for a new plant | Could | v1.x |
+| ☐ | Winter note: flag plants that may need a grow light when daylight gets short | Could | v1.x |
+
 ## 5. Pests & treatments
 
 | ✓ | Feature | Priority | When |

@@ -1,9 +1,112 @@
 @page "/propagations"
+@inject IPropagationRepository Repository
+@inject IPlantRepository PlantRepository
 
 <PageTitle>Propagations · Stikling</PageTitle>
 
-<h1>Propagations</h1>
-
-<div class="empty-state">
-    <p>No propagations yet.</p>
+<div class="page-heading">
+    <h1>Propagations</h1>
+    @if (all is { Count: > 0 })
+    {
+        <span class="text-body-secondary small">@visible.Count of @all.Count</span>
+    }
 </div>
+
+@if (all is null)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (all.Count == 0)
+{
+    <div class="empty-state">
+        <p>No propagations yet. Open a plant and tap <em>Propagate</em>, or start one without a parent plant, e.g. seeds.</p>
+        <a class="btn btn-primary mt-3" href="propagations/new">Start a propagation</a>
+    </div>
+}
+else
+{
+    <div class="list-filters">
+        <input type="search" class="form-control" placeholder="Search by name…"
+               aria-label="Search propagations" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
+
+        <div class="btn-group segmented" role="radiogroup" aria-label="Progress">
+            @foreach (var (value, label) in progressOptions)
+            {
+                var id = $"progress-{value}";
+                <input type="radio" class="btn-check" name="progress" id="@id"
+                       checked="@(progress == value)" @onchange="() => SetProgress(value)" />
+                <label class="btn btn-outline-primary btn-sm" for="@id">@label</label>
+            }
+        </div>
+    </div>
+
+    <div class="list-body">
+    @if (visible.Count == 0)
+    {
+        <div class="empty-state"><p>No propagations match.</p></div>
+    }
+    else if (progress == ProgressFilter.Active)
+    {
+        @foreach (var (stage, items) in PropagationFilter.ByStage(visible))
+        {
+            <section class="stage-group">
+                <h2>@Labels.Stage(stage) <span class="text-body-secondary">(@items.Count)</span></h2>
+                <ul class="item-list">
+                    @foreach (var propagation in items)
+                    {
+                        <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" /></li>
+                    }
+                </ul>
+            </section>
+        }
+    }
+    else
+    {
+        <ul class="item-list">
+            @foreach (var propagation in visible)
+            {
+                <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" /></li>
+            }
+        </ul>
+    }
+    </div>
+}
+
+<a class="fab" href="propagations/new" aria-label="Start a propagation" title="Start a propagation">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+</a>
+
+@code {
+    private static readonly (ProgressFilter Value, string Label)[] progressOptions =
+    [
+        (ProgressFilter.Active, "In progress"),
+        (ProgressFilter.Finished, "Finished"),
+        (ProgressFilter.All, "All")
+    ];
+
+    private IReadOnlyList<Propagation>? all;
+    private List<Propagation> visible = [];
+    private Dictionary<Guid, Plant> plants = [];
+
+    private string? search;
+    private ProgressFilter progress = ProgressFilter.Active;
+
+    protected override async Task OnInitializedAsync()
+    {
+        plants = (await PlantRepository.GetAllAsync()).ToDictionary(p => p.Id);
+        all = await Repository.GetAllAsync();
+        Refresh();
+    }
+
+    private void SetProgress(ProgressFilter value)
+    {
+        progress = value;
+        Refresh();
+    }
+
+    private void Refresh() =>
+        visible = new PropagationFilter(search, progress).Apply(all ?? []).ToList();
+
+    private string? ParentName(Propagation propagation) =>
+        propagation.ParentPlantId is { } id && plants.TryGetValue(id, out var parent) ? parent.DisplayName : null;
+}

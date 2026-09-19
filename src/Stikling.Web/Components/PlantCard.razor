@@ -3,14 +3,14 @@
 
 @if (Selectable)
 {
-    <label class="plant-card selectable @(Selected ? "selected" : null)">
+    <label class="item-card selectable @(Selected ? "selected" : null)">
         <input type="checkbox" class="form-check-input plant-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Plant)" />
         @Content
     </label>
 }
 else
 {
-    <a class="plant-card" href="plants/@Plant.Id">
+    <a class="item-card" href="plants/@Plant.Id">
         @Content
     </a>
 }
@@ -34,7 +34,7 @@ else
             : Labels.For(Plant.Origin);
 
     private RenderFragment Content => @<text>
-        <div class="plant-thumb" aria-hidden="true">
+        <div class="item-thumb" aria-hidden="true">
             @if (Plant.CoverPhotoId is { } coverId)
             {
                 <PhotoImage PhotoId="coverId" />
@@ -45,13 +45,13 @@ else
             }
         </div>
 
-        <div class="plant-text">
-            <div class="plant-name">@Plant.DisplayName</div>
+        <div class="item-text">
+            <div class="item-name">@Plant.DisplayName</div>
             @if (!string.IsNullOrWhiteSpace(Plant.Nickname) && Plant.BotanicalName is { } botanical)
             {
-                <div class="plant-botanical">@botanical</div>
+                <div class="item-sub">@botanical</div>
             }
-            <div class="plant-meta">
+            <div class="item-meta">
                 @if (Plant.Status != PlantStatus.Active)
                 {
                     <span class="badge text-bg-secondary">@Labels.For(Plant.Status)</span>

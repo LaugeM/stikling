@@ -1,0 +1,61 @@
+@* One row in a propagation list: "3× corm · LECA · day 24". *@
+@inject TimeProvider Time
+
+<a class="item-card" href="propagations/@Propagation.Id">
+    <div class="item-thumb" aria-hidden="true">
+        @if (Propagation.CoverPhotoId is { } coverId)
+        {
+            <PhotoImage PhotoId="coverId" />
+        }
+        else
+        {
+            <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+        }
+    </div>
+
+    <div class="item-text">
+        <div class="item-name">@Propagation.DisplayName</div>
+        @if (ParentName is not null)
+        {
+            <div class="item-sub">from @ParentName</div>
+        }
+        else if (!string.IsNullOrWhiteSpace(Propagation.Nickname) && Propagation.BotanicalName is { } botanical)
+        {
+            <div class="item-sub">@botanical</div>
+        }
+        <div class="item-meta">
+            @if (Propagation.IsActive)
+            {
+                @if (ShowStage)
+                {
+                    <span class="badge stage-badge">@Labels.Stage(Propagation.Stage, Propagation.Type)</span>
+                }
+                <span>@Labels.Summary(Propagation) · @Labels.Age(Propagation, Today)</span>
+                @if (Propagation.RemainingCount != Propagation.InitialCount)
+                {
+                    <span>· @Propagation.RemainingCount left</span>
+                }
+            }
+            else
+            {
+                <span class="badge @(Propagation.Stage == PropagationStage.Failed ? "text-bg-secondary" : "stage-badge")">@Labels.Stage(Propagation.Stage)</span>
+                <span>@Labels.Summary(Propagation) · @PropagationService.Outcome(Propagation)</span>
+            }
+        </div>
+    </div>
+</a>
+
+@code {
+    [Parameter, EditorRequired]
+    public required Propagation Propagation { get; set; }
+
+    /// <summary>Shown as "from Big alocasia" when set.</summary>
+    [Parameter]
+    public string? ParentName { get; set; }
+
+    /// <summary>Show the stage as a badge (lists that aren't already grouped by stage).</summary>
+    [Parameter]
+    public bool ShowStage { get; set; }
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+}

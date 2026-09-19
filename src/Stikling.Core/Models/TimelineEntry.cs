@@ -23,7 +23,10 @@ public enum TimelineKind
     Photo,
 
     /// <summary>Recorded automatically when details such as status, room or medium change.</summary>
-    Change
+    Change,
+
+    /// <summary>On a parent plant: a propagation was taken from it.</summary>
+    Propagated
 }
 
 /// <summary>
@@ -43,4 +46,12 @@ public sealed class TimelineEntry : Entity
     public string? Text { get; set; }
 
     public List<Guid> PhotoIds { get; set; } = [];
+
+    /// <summary>
+    /// Another plant or propagation the entry is about, shown as a link. E.g. the propagation
+    /// taken from a plant, or the propagation a plant was potted up from.
+    /// </summary>
+    public SubjectType? RelatedType { get; set; }
+
+    public Guid? RelatedId { get; set; }
 }
