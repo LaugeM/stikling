@@ -34,6 +34,21 @@ public static class Labels
         _ => medium.ToString()
     };
 
+    /// <summary>Any of the app's enums, for code that works with several (e.g. history text).</summary>
+    public static string For(Enum value) => value switch
+    {
+        PlantStatus s => For(s),
+        PlantOrigin o => For(o),
+        GrowingMedium m => For(m),
+        _ => value.ToString()
+    };
+
+    /// <summary>"1 plant" / "3 plants".</summary>
+    public static string Plants(int count) => count == 1 ? "1 plant" : $"{count} plants";
+
+    public static string Time(DateTimeOffset moment) =>
+        moment.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture);
+
     // Invariant culture gives "19 Sep 2026" (en-GB would write "Sept")
     public static string Date(DateOnly date) => date.ToString("d MMM yyyy", CultureInfo.InvariantCulture);
 }

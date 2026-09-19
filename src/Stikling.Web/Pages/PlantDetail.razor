@@ -12,10 +12,20 @@
 }
 else
 {
-    <header class="plant-header">
-        <div class="plant-cover" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+    @if (plant.CoverPhotoId is { } coverId)
+    {
+        <div class="plant-hero">
+            <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {plant.DisplayName}")" />
         </div>
+    }
+
+    <header class="plant-header">
+        @if (plant.CoverPhotoId is null)
+        {
+            <div class="plant-cover" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+            </div>
+        }
         <div class="min-w-0">
             <h1>@plant.DisplayName</h1>
             @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is { } botanical)
@@ -34,107 +44,133 @@ else
         <a class="btn btn-outline-primary" href="plants/new?parent=@plant.Id">Add offspring</a>
     </div>
 
-    <section class="detail-card">
-        <dl class="detail-list">
-            <dt>Got it</dt>
-            <dd>
-                @Labels.For(plant.Origin)
-                @if (plant.AcquiredOn is { } date)
+    <div class="detail-tabs" role="tablist" aria-label="Plant sections">
+        <button type="button" role="tab" id="tab-info" aria-controls="panel-info" aria-selected="@(tab == "info")"
+                class="detail-tab @(tab == "info" ? "active" : null)" @onclick='() => SetTab("info")'>Info</button>
+        <button type="button" role="tab" id="tab-history" aria-controls="panel-history" aria-selected="@(tab == "history")"
+                class="detail-tab @(tab == "history" ? "active" : null)" @onclick='() => SetTab("history")'>History</button>
+    </div>
+
+    @if (tab == "history")
+    {
+        <div id="panel-history" role="tabpanel" aria-labelledby="tab-history">
+            <Timeline SubjectType="SubjectType.Plant" SubjectId="plant.Id"
+                      CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" />
+        </div>
+    }
+    else
+    {
+        <div id="panel-info" role="tabpanel" aria-labelledby="tab-info">
+            <section class="detail-card">
+                <dl class="detail-list">
+                    <dt>Got it</dt>
+                    <dd>
+                        @Labels.For(plant.Origin)
+                        @if (plant.AcquiredOn is { } date)
+                        {
+                            <text> · @Labels.Date(date)</text>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(plant.Source))
+                        {
+                            <text> · @plant.Source</text>
+                        }
+                    </dd>
+
+                    <dt>Location</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(plant.Location) ? "Not set" : plant.Location)</dd>
+
+                    <dt>Grows in</dt>
+                    <dd>
+                        @Labels.For(plant.Medium)
+                        @if (!string.IsNullOrWhiteSpace(plant.Container))
+                        {
+                            <text> · @plant.Container</text>
+                        }
+                    </dd>
+                </dl>
+
+                @if (!string.IsNullOrWhiteSpace(plant.Notes))
                 {
-                    <text> · @Labels.Date(date)</text>
+                    <h2>Notes</h2>
+                    <p class="plant-notes">@plant.Notes</p>
                 }
-                @if (!string.IsNullOrWhiteSpace(plant.Source))
+            </section>
+
+            <section class="detail-card">
+                <h2>Family</h2>
+                @if (ancestors.Count == 0 && offspring.Count == 0)
                 {
-                    <text> · @plant.Source</text>
+                    <p class="text-body-secondary mb-0">
+                        No parent or offspring recorded. Use <em>Add offspring</em> when you pot up a cutting from this plant.
+                    </p>
                 }
-            </dd>
-
-            <dt>Location</dt>
-            <dd>@(string.IsNullOrWhiteSpace(plant.Location) ? "—" : plant.Location)</dd>
-
-            <dt>Grows in</dt>
-            <dd>
-                @Labels.For(plant.Medium)
-                @if (!string.IsNullOrWhiteSpace(plant.Container))
+                else
                 {
-                    <text> · @plant.Container</text>
-                }
-            </dd>
-        </dl>
-
-        @if (!string.IsNullOrWhiteSpace(plant.Notes))
-        {
-            <h2>Notes</h2>
-            <p class="plant-notes">@plant.Notes</p>
-        }
-    </section>
-
-    <section class="detail-card">
-        <h2>Family</h2>
-        @if (ancestors.Count == 0 && offspring.Count == 0)
-        {
-            <p class="text-body-secondary mb-0">
-                No parent or offspring recorded. Use <em>Add offspring</em> when you pot up a cutting from this plant.
-            </p>
-        }
-        else
-        {
-            @if (ancestors.Count > 0)
-            {
-                <h3>Came from</h3>
-                <ul class="family-list">
-                    @foreach (var ancestor in ancestors)
+                    @if (ancestors.Count > 0)
                     {
-                        <li><a href="plants/@ancestor.Id">@ancestor.DisplayName</a></li>
-                    }
-                </ul>
-            }
-            @if (offspring.Count > 0)
-            {
-                <h3>Offspring (@offspring.Count)</h3>
-                <ul class="family-list">
-                    @foreach (var child in offspring)
-                    {
-                        <li>
-                            <a href="plants/@child.Id">@child.DisplayName</a>
-                            @if (child.Status != PlantStatus.Active)
+                        <h3>Came from</h3>
+                        <ul class="family-list">
+                            @foreach (var ancestor in ancestors)
                             {
-                                <span class="text-body-secondary small"> · @Labels.For(child.Status)</span>
+                                <li><a href="plants/@ancestor.Id">@ancestor.DisplayName</a></li>
                             }
-                        </li>
+                        </ul>
                     }
-                </ul>
-            }
-        }
-    </section>
+                    @if (offspring.Count > 0)
+                    {
+                        <h3>Offspring (@offspring.Count)</h3>
+                        <ul class="family-list">
+                            @foreach (var child in offspring)
+                            {
+                                <li>
+                                    <a href="plants/@child.Id">@child.DisplayName</a>
+                                    @if (child.Status != PlantStatus.Active)
+                                    {
+                                        <span class="text-body-secondary small"> · @Labels.For(child.Status)</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                }
+            </section>
 
-    <section class="danger-zone">
-        @if (confirmDelete)
-        {
-            <p class="mb-2">Delete <strong>@plant.DisplayName</strong>? If it died or you gave it away, consider changing its status instead so its history is kept.</p>
-            <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
-            <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
-        }
-        else
-        {
-            <button class="btn btn-link btn-sm text-danger p-0" @onclick="() => confirmDelete = true">Delete plant</button>
-        }
-    </section>
+            <section class="danger-zone">
+                @if (confirmDelete)
+                {
+                    <p class="mb-2">Delete <strong>@plant.DisplayName</strong>? If it died or you gave it away, consider changing its status instead so its history is kept.</p>
+                    <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
+                    <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+                }
+                else
+                {
+                    <button class="btn btn-link btn-sm text-danger p-0" @onclick="() => confirmDelete = true">Delete plant</button>
+                }
+            </section>
+        </div>
+    }
 }
 
 @code {
     [Parameter]
     public Guid Id { get; set; }
 
+    /// <summary>"info" (default) or "history", so a tab can be linked to directly.</summary>
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? Tab { get; set; }
+
     private Plant? plant;
     private bool loaded;
     private bool confirmDelete;
+    private string tab = "info";
     private IReadOnlyList<Plant> ancestors = [];
     private IReadOnlyList<Plant> offspring = [];
 
     protected override async Task OnParametersSetAsync()
     {
         confirmDelete = false;
+        tab = Tab == "history" ? "history" : "info";
+
         var all = await Repository.GetAllAsync();
         plant = all.FirstOrDefault(p => p.Id == Id);
         if (plant is not null)
@@ -143,6 +179,18 @@ else
             offspring = PlantLineage.Offspring(plant, all);
         }
         loaded = true;
+    }
+
+    // Keeps the tab in the address so Back and reloads return to it
+    private void SetTab(string value) =>
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("tab", value == "info" ? null : value), replace: true);
+
+    private async Task SetCoverAsync(Guid? photoId)
+    {
+        if (plant is null || plant.CoverPhotoId == photoId)
+            return;
+        plant.CoverPhotoId = photoId;
+        await Repository.SaveAsync(plant);
     }
 
     private async Task DeleteAsync()

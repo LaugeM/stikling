@@ -1,0 +1,151 @@
+.composer {
+    margin-bottom: 1.25rem;
+    padding: 0.75rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.composer-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+}
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.icon-btn svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.composer-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.composer-date input {
+    width: auto;
+}
+
+.composer-status {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.timeline,
+.timeline ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.timeline-day + .timeline-day {
+    margin-top: 1rem;
+}
+
+.timeline-day h3 {
+    margin: 0 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.timeline-entry {
+    position: relative;
+    margin-bottom: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-left: 3px solid var(--pa-green);
+    border-radius: 0.6rem;
+}
+
+.timeline-entry.kind-change,
+.timeline-entry.kind-created {
+    border-left-color: var(--pa-muted);
+}
+
+.entry-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.entry-kind {
+    font-weight: 600;
+}
+
+.entry-delete {
+    margin-left: auto;
+    width: 2rem;
+    height: 2rem;
+    margin-block: -0.4rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--pa-muted);
+}
+
+.entry-delete:hover,
+.entry-delete:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+.entry-text {
+    margin: 0.3rem 0 0;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.entry-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+}
+
+.entry-photo {
+    padding: 0;
+    border: 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: var(--pa-green-soft);
+}
+
+.entry-photo ::deep img,
+.entry-photo ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.entry-confirm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}

@@ -1,5 +1,6 @@
 @page "/plants"
 @inject IPlantRepository Repository
+@inject PlantService PlantService
 
 <PageTitle>Plants · Stikling</PageTitle>
 
@@ -7,7 +8,12 @@
     <h1>Plants</h1>
     @if (all is { Count: > 0 })
     {
-        <span class="text-body-secondary small">@visible.Count of @all.Count</span>
+        <div class="d-flex align-items-baseline gap-2">
+            <span class="text-body-secondary small">@visible.Count of @all.Count</span>
+            <button type="button" class="btn btn-link btn-sm p-0" @onclick="ToggleSelectMode">
+                @(selecting ? "Done" : "Select")
+            </button>
+        </div>
     }
 </div>
 
@@ -53,6 +59,17 @@ else
         </div>
     </div>
 
+    @if (selecting)
+    {
+        <div class="select-all">
+            <button type="button" class="btn btn-link btn-sm p-0" @onclick="SelectAllVisible">Select all shown</button>
+            @if (selected.Count > 0)
+            {
+                <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => selected.Clear()">Clear</button>
+            }
+        </div>
+    }
+
     @if (visible.Count == 0)
     {
         <div class="empty-state"><p>No plants match.</p></div>
@@ -62,15 +79,55 @@ else
         <ul class="plant-list">
             @foreach (var plant in visible)
             {
-                <li><PlantCard Plant="plant" /></li>
+                <li>
+                    <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)" OnToggle="Toggle" />
+                </li>
             }
         </ul>
     }
 }
 
-<a class="fab" href="plants/new" aria-label="Add a plant" title="Add a plant">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-</a>
+@if (selecting)
+{
+    <div class="bulk-bar" role="region" aria-label="Actions for selected plants">
+        @if (bulkNoteOpen)
+        {
+            <textarea class="form-control form-control-sm" rows="2" placeholder="Note for all selected plants, e.g. Sprayed for thrips"
+                      aria-label="Note" @bind="bulkNote" @bind:event="oninput"></textarea>
+            <div class="bulk-row">
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(bulkNote))"
+                        @onclick="AddBulkNoteAsync">Add to @Labels.Plants(selected.Count)</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkNoteOpen = false">Cancel</button>
+            </div>
+        }
+        else
+        {
+            <div class="bulk-row">
+                <span class="bulk-count">@selected.Count selected</span>
+                <select class="form-select form-select-sm w-auto" aria-label="Set status" disabled="@(busy || selected.Count == 0)"
+                        @bind="bulkStatus" @bind:after="SetBulkStatusAsync">
+                    <option value="">Set status…</option>
+                    @foreach (var s in Enum.GetValues<PlantStatus>())
+                    {
+                        <option value="@s">@Labels.For(s)</option>
+                    }
+                </select>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
+                        @onclick="() => bulkNoteOpen = true">Add note</button>
+            </div>
+        }
+        @if (bulkMessage is not null)
+        {
+            <p class="bulk-message" role="status">@bulkMessage</p>
+        }
+    </div>
+}
+else
+{
+    <a class="fab" href="plants/new" aria-label="Add a plant" title="Add a plant">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+    </a>
+}
 
 @code {
     private static readonly (StatusFilter Value, string Label)[] statusOptions =
@@ -88,7 +145,17 @@ else
     private StatusFilter status = StatusFilter.Active;
     private string? location;
 
-    protected override async Task OnInitializedAsync()
+    private bool selecting;
+    private readonly HashSet<Guid> selected = [];
+    private string bulkStatus = ""; // the "Set status…" dropdown, reset after each use
+    private bool bulkNoteOpen;
+    private string? bulkNote;
+    private string? bulkMessage;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
     {
         all = await Repository.GetAllAsync();
         locations = PlantFilter.Locations(all);
@@ -103,4 +170,58 @@ else
 
     private void Refresh() =>
         visible = new PlantFilter(search, status, location).Apply(all ?? []).ToList();
+
+    private void ToggleSelectMode()
+    {
+        selecting = !selecting;
+        selected.Clear();
+        bulkNoteOpen = false;
+        bulkMessage = null;
+    }
+
+    private void Toggle(Plant plant)
+    {
+        if (!selected.Remove(plant.Id))
+            selected.Add(plant.Id);
+        bulkMessage = null;
+    }
+
+    private void SelectAllVisible()
+    {
+        foreach (var plant in visible)
+            selected.Add(plant.Id);
+    }
+
+    private List<Plant> SelectedPlants => (all ?? []).Where(p => selected.Contains(p.Id)).ToList();
+
+    private async Task SetBulkStatusAsync()
+    {
+        var value = bulkStatus;
+        bulkStatus = "";
+        if (!Enum.TryParse<PlantStatus>(value, out var newStatus))
+            return;
+
+        busy = true;
+        var plants = SelectedPlants;
+        await PlantService.SetStatusAsync(plants, newStatus, Labels.For);
+        bulkMessage = $"{Labels.For(newStatus)}: {Labels.Plants(plants.Count)} updated.";
+        selected.Clear();
+        await LoadAsync();
+        busy = false;
+    }
+
+    private async Task AddBulkNoteAsync()
+    {
+        if (string.IsNullOrWhiteSpace(bulkNote))
+            return;
+
+        busy = true;
+        var plants = SelectedPlants;
+        await PlantService.AddNoteAsync(plants, bulkNote);
+        bulkMessage = $"Note added to {Labels.Plants(plants.Count)}.";
+        bulkNote = null;
+        bulkNoteOpen = false;
+        selected.Clear();
+        busy = false;
+    }
 }

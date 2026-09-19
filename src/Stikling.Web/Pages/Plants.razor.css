@@ -13,3 +13,50 @@
     flex-direction: column;
     gap: 0.6rem;
 }
+
+.select-all {
+    display: flex;
+    gap: 1rem;
+    margin: -0.25rem 0 0.6rem;
+}
+
+/* Sits above the bottom navigation while selecting */
+.bulk-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    z-index: 11;
+    padding: 0.6rem 1rem;
+    background: var(--pa-surface);
+    border-top: 1px solid var(--pa-border);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+}
+
+.bulk-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+}
+
+.bulk-row:first-child {
+    margin-top: 0;
+}
+
+.bulk-count {
+    font-weight: 600;
+    margin-right: auto;
+}
+
+.bulk-message {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+/* Leave room at the end of the list for the add button and the action bar */
+.plant-list {
+    padding-bottom: 5rem;
+}

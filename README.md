@@ -61,7 +61,7 @@ Because Pages serves the site from `/<repo-name>/`, [`prepare-pages.py`](.github
 
 1. Scaffold, layout and deployment ✅
 2. Plants ✅
-3. Photos and timeline
+3. Photos and timeline ✅
 4. Propagations and lineage
 5. Backup/restore and the Today screen
 6. Later: care and fertiliser log, pest treatment tracking, success rates per medium, QR labels, optional accounts and sync

@@ -69,6 +69,19 @@ export async function remove(storeName, key) {
     await run(storeName, "readwrite", store => store.delete(key));
 }
 
+// Binary data (photos) lives in its own store with the key given explicitly
+export async function putBlob(key, blob) {
+    await run("photoBlobs", "readwrite", store => store.put(blob, key));
+}
+
+export async function getBlob(key) {
+    return (await run("photoBlobs", "readonly", store => store.get(key))) ?? null;
+}
+
+export async function removeBlob(key) {
+    await run("photoBlobs", "readwrite", store => store.delete(key));
+}
+
 // Asks the browser not to clear our data when the device is low on space.
 // Installed PWAs usually get this automatically. Returns true when granted.
 export async function requestPersistence() {
