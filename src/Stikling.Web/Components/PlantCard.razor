@@ -1,36 +1,67 @@
-@* One row in the plant list: thumbnail, names, and a short status line *@
+@* One row in the plant list: thumbnail, names, and a short status line.
+   In select mode the card is a checkbox instead of a link. *@
 
-<a class="plant-card" href="plants/@Plant.Id">
-    <div class="plant-thumb" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
-    </div>
-
-    <div class="plant-text">
-        <div class="plant-name">@Plant.DisplayName</div>
-        @if (!string.IsNullOrWhiteSpace(Plant.Nickname) && Plant.BotanicalName is { } botanical)
-        {
-            <div class="plant-botanical">@botanical</div>
-        }
-        <div class="plant-meta">
-            @if (Plant.Status != PlantStatus.Active)
-            {
-                <span class="badge text-bg-secondary">@Labels.For(Plant.Status)</span>
-            }
-            <span>@OriginText</span>
-            @if (!string.IsNullOrWhiteSpace(Plant.Location))
-            {
-                <span>· @Plant.Location</span>
-            }
-        </div>
-    </div>
-</a>
+@if (Selectable)
+{
+    <label class="plant-card selectable @(Selected ? "selected" : null)">
+        <input type="checkbox" class="form-check-input plant-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Plant)" />
+        @Content
+    </label>
+}
+else
+{
+    <a class="plant-card" href="plants/@Plant.Id">
+        @Content
+    </a>
+}
 
 @code {
     [Parameter, EditorRequired]
     public required Plant Plant { get; set; }
 
+    [Parameter]
+    public bool Selectable { get; set; }
+
+    [Parameter]
+    public bool Selected { get; set; }
+
+    [Parameter]
+    public EventCallback<Plant> OnToggle { get; set; }
+
     private string OriginText =>
         Plant.AcquiredOn is { } date
             ? $"{Labels.For(Plant.Origin)} {Labels.Date(date)}"
             : Labels.For(Plant.Origin);
+
+    private RenderFragment Content => @<text>
+        <div class="plant-thumb" aria-hidden="true">
+            @if (Plant.CoverPhotoId is { } coverId)
+            {
+                <PhotoImage PhotoId="coverId" />
+            }
+            else
+            {
+                <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+            }
+        </div>
+
+        <div class="plant-text">
+            <div class="plant-name">@Plant.DisplayName</div>
+            @if (!string.IsNullOrWhiteSpace(Plant.Nickname) && Plant.BotanicalName is { } botanical)
+            {
+                <div class="plant-botanical">@botanical</div>
+            }
+            <div class="plant-meta">
+                @if (Plant.Status != PlantStatus.Active)
+                {
+                    <span class="badge text-bg-secondary">@Labels.For(Plant.Status)</span>
+                }
+                <span>@OriginText</span>
+                @if (!string.IsNullOrWhiteSpace(Plant.Location))
+                {
+                    <span>· @Plant.Location</span>
+                }
+            </div>
+        </div>
+    </text>;
 }

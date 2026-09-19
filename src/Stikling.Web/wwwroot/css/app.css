@@ -41,6 +41,8 @@
 
 .btn-outline-primary {
     --bs-btn-color: var(--pa-green-dark);
+    --bs-btn-disabled-color: var(--pa-green-dark);
+    --bs-btn-disabled-border-color: var(--pa-green);
     --bs-btn-border-color: var(--pa-green);
     --bs-btn-hover-color: #fff;
     --bs-btn-hover-bg: var(--pa-green);
@@ -78,6 +80,9 @@ h1 {
 
 .btn-primary {
     --bs-btn-bg: var(--pa-green);
+    --bs-btn-disabled-bg: var(--pa-green);
+    --bs-btn-disabled-border-color: var(--pa-green);
+    --bs-btn-disabled-opacity: 0.45;
     --bs-btn-border-color: var(--pa-green);
     --bs-btn-hover-bg: var(--pa-green-dark);
     --bs-btn-hover-border-color: var(--pa-green-dark);
@@ -90,6 +95,18 @@ h1 {
 .form-select {
     background-color: var(--pa-surface);
     border-color: var(--pa-border);
+}
+
+.form-check-input:checked {
+    background-color: var(--pa-green);
+    border-color: var(--pa-green);
+}
+
+.form-check-input:focus,
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--pa-green);
+    box-shadow: 0 0 0 0.2rem rgb(var(--bs-primary-rgb) / 0.25);
 }
 
 .form-control::placeholder {

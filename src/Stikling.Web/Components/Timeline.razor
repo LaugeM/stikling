@@ -1,0 +1,288 @@
+@* History of a plant or propagation: write notes, add photos, browse by day. *@
+@inject ITimelineRepository Entries
+@inject IPhotoRepository PhotoRepository
+@inject PhotoService Photos
+@inject TimeProvider Time
+
+<section class="composer" aria-label="Add to history">
+    <textarea class="form-control" rows="2" placeholder="Add a note… (new leaf, roots showing, repotted)"
+              aria-label="Note" @bind="noteText" @bind:event="oninput"></textarea>
+
+    <div class="composer-row">
+        <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+            Camera
+        </label>
+        <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+               @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput)" disabled="@busy" />
+
+        <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+            Gallery
+        </label>
+        <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
+               @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput)" disabled="@busy" />
+
+        <button type="button" class="btn btn-primary btn-sm ms-auto" @onclick="SaveNoteAsync"
+                disabled="@(busy || string.IsNullOrWhiteSpace(noteText))">Add note</button>
+    </div>
+
+    <div class="composer-date">
+        @if (pickDate)
+        {
+            <label for="@dateId">Happened on</label>
+            <input id="@dateId" type="date" class="form-control form-control-sm" @bind="occurredOn" max="@Today.ToString("yyyy-MM-dd")" />
+            <button type="button" class="btn btn-link btn-sm p-0" @onclick="ResetDate">Use today</button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => pickDate = true">Happened earlier?</button>
+        }
+    </div>
+
+    @if (status is not null)
+    {
+        <p class="composer-status" role="status">@status</p>
+    }
+</section>
+
+@if (days is null)
+{
+    <p class="text-body-secondary">Loading history…</p>
+}
+else if (days.Count == 0)
+{
+    <div class="empty-state"><p>No history yet. Add a note or a photo above.</p></div>
+}
+else
+{
+    <ol class="timeline">
+        @foreach (var (day, entries) in days)
+        {
+            <li class="timeline-day">
+                <h3>@DayLabel(day)</h3>
+                <ol>
+                    @foreach (var entry in entries)
+                    {
+                        var entryPhotos = entry.PhotoIds.Where(photoIndex.ContainsKey).ToList();
+                        <li class="timeline-entry kind-@entry.Kind.ToString().ToLowerInvariant()">
+                            <div class="entry-head">
+                                <span class="entry-kind">@KindLabel(entry.Kind)</span>
+                                @* "Added" is dated by the acquired date, which has no real time of day *@
+                                @if (entry.Kind != TimelineKind.Created)
+                                {
+                                    <time datetime="@entry.OccurredAt.ToString("o")">@Labels.Time(entry.OccurredAt)</time>
+                                    <button type="button" class="entry-delete" @onclick="() => confirmDeleteId = entry.Id"
+                                            aria-label="Delete entry" title="Delete entry">✕</button>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(entry.Text))
+                            {
+                                <p class="entry-text">@entry.Text</p>
+                            }
+
+                            @if (entryPhotos.Count > 0)
+                            {
+                                <div class="entry-photos">
+                                    @foreach (var photoId in entryPhotos)
+                                    {
+                                        <button type="button" class="entry-photo" @onclick="() => viewerIndex = photoIndex[photoId]"
+                                                aria-label="Open photo">
+                                            <PhotoImage PhotoId="photoId" />
+                                        </button>
+                                    }
+                                </div>
+                            }
+
+                            @if (confirmDeleteId == entry.Id)
+                            {
+                                <div class="entry-confirm">
+                                    <span>@(entryPhotos.Count > 0 ? "Delete this entry and its photos?" : "Delete this entry?")</span>
+                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteEntryAsync(entry)">Delete</button>
+                                    <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmDeleteId = null">Cancel</button>
+                                </div>
+                            }
+                        </li>
+                    }
+                </ol>
+            </li>
+        }
+    </ol>
+}
+
+<PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId"
+             OnSetCover="SetCoverAsync" OnDelete="DeletePhotoAsync" />
+
+@code {
+    [Parameter, EditorRequired]
+    public SubjectType SubjectType { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    [Parameter]
+    public Guid? CoverPhotoId { get; set; }
+
+    /// <summary>Raised when the cover photo should change (null = no cover).</summary>
+    [Parameter]
+    public EventCallback<Guid?> OnCoverChanged { get; set; }
+
+    private readonly string cameraId = $"camera-{Guid.NewGuid():N}";
+    private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
+    private readonly string dateId = $"date-{Guid.NewGuid():N}";
+
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    private IReadOnlyList<(DateOnly Day, IReadOnlyList<TimelineEntry> Entries)>? days;
+    private IReadOnlyList<Photo> photos = [];
+    private Dictionary<Guid, int> photoIndex = [];
+
+    private string? noteText;
+    private DateOnly? occurredOn;
+    private bool pickDate;
+    private string? status;
+    private bool busy;
+    private Guid? confirmDeleteId;
+    private int? viewerIndex;
+    private Guid loadedFor;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor != SubjectId)
+        {
+            loadedFor = SubjectId;
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        var entries = await Entries.GetForAsync(SubjectId);
+        var stored = await PhotoRepository.GetForAsync(SubjectId);
+
+        // The viewer pages through photos in the same order as the timeline shows them
+        var byId = stored.ToDictionary(p => p.Id);
+        var inTimeline = entries.SelectMany(e => e.PhotoIds).Where(byId.ContainsKey).Distinct().Select(id => byId[id]);
+        photos = inTimeline.Concat(stored.Where(p => !entries.Any(e => e.PhotoIds.Contains(p.Id)))).ToList();
+        photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
+        days = TimelineOrder.ByDay(entries, Time.GetLocalNow().Offset);
+    }
+
+    // An earlier date has no time of day, so it's recorded at noon; today means "now"
+    private DateTimeOffset OccurredAt =>
+        occurredOn is { } d && d != Today
+            ? new DateTimeOffset(d.ToDateTime(new TimeOnly(12, 0)), Time.GetLocalNow().Offset)
+            : Time.GetUtcNow();
+
+    private async Task SaveNoteAsync()
+    {
+        if (string.IsNullOrWhiteSpace(noteText))
+            return;
+
+        busy = true;
+        await Entries.AddAsync(new TimelineEntry
+        {
+            SubjectType = SubjectType,
+            SubjectId = SubjectId,
+            Kind = TimelineKind.Note,
+            OccurredAt = OccurredAt,
+            Text = noteText.Trim()
+        });
+        noteText = null;
+        ResetDate();
+        status = null;
+        await LoadAsync();
+        busy = false;
+    }
+
+    // Choosing photos saves them straight away, together with any note typed so far
+    private async Task AddPhotosAsync(ElementReference input)
+    {
+        busy = true;
+        status = "Saving photos…";
+        StateHasChanged();
+
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType, SubjectId);
+            if (result.Saved.Count > 0)
+            {
+                var hasText = !string.IsNullOrWhiteSpace(noteText);
+                await Entries.AddAsync(new TimelineEntry
+                {
+                    SubjectType = SubjectType,
+                    SubjectId = SubjectId,
+                    Kind = hasText ? TimelineKind.Note : TimelineKind.Photo,
+                    OccurredAt = occurredOn is null ? result.Saved.Max(p => p.TakenAt) : OccurredAt,
+                    Text = hasText ? noteText!.Trim() : null,
+                    PhotoIds = result.Saved.Select(p => p.Id).ToList()
+                });
+                noteText = null;
+                ResetDate();
+
+                if (CoverPhotoId is null)
+                    await OnCoverChanged.InvokeAsync(result.Saved[0].Id);
+            }
+
+            status = result.Failed > 0
+                ? result.Failed == 1 ? "1 file couldn't be read as an image and was skipped." : $"{result.Failed} files couldn't be read as images and were skipped."
+                : null;
+        }
+        catch (Exception ex)
+        {
+            status = $"Couldn't save the photos: {ex.Message}";
+        }
+
+        await LoadAsync();
+        busy = false;
+    }
+
+    private async Task DeleteEntryAsync(TimelineEntry entry)
+    {
+        confirmDeleteId = null;
+        foreach (var photoId in entry.PhotoIds)
+            await RemovePhotoAsync(photoId);
+        await Entries.DeleteAsync(entry.Id);
+        await LoadAsync();
+    }
+
+    private async Task DeletePhotoAsync(Photo photo)
+    {
+        await RemovePhotoAsync(photo.Id);
+        await LoadAsync();
+        viewerIndex = photos.Count == 0 ? null : Math.Min(viewerIndex ?? 0, photos.Count - 1);
+    }
+
+    private async Task RemovePhotoAsync(Guid photoId)
+    {
+        await Photos.DeleteAsync(photoId);
+        if (photoId == CoverPhotoId)
+            await OnCoverChanged.InvokeAsync(null);
+    }
+
+    private void ResetDate()
+    {
+        occurredOn = null;
+        pickDate = false;
+    }
+
+    private Task SetCoverAsync(Photo photo) => OnCoverChanged.InvokeAsync(photo.Id);
+
+    private string DayLabel(DateOnly day) =>
+        day == Today ? "Today"
+        : day == Today.AddDays(-1) ? "Yesterday"
+        : Labels.Date(day);
+
+    private static string KindLabel(TimelineKind kind) => kind switch
+    {
+        TimelineKind.Created => "Added",
+        TimelineKind.Note => "Note",
+        TimelineKind.Photo => "Photo",
+        TimelineKind.Change => "Updated",
+        _ => kind.ToString()
+    };
+}

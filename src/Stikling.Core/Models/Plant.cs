@@ -47,6 +47,9 @@ public sealed class Plant : Entity
     public string DisplayName =>
         !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? "Unnamed plant";
 
+    /// <summary>A shallow copy, e.g. to compare with after editing.</summary>
+    public Plant Copy() => (Plant)MemberwiseClone();
+
     /// <summary>Validation rules shared by every place a plant can be saved from.</summary>
     public IReadOnlyList<string> Validate()
     {

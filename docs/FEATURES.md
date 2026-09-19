@@ -20,7 +20,7 @@ A working list of what Stikling could do, grouped by area and tagged with a prio
 | ✅ | Status: in collection, died, given away, sold. Gone plants are hidden but keep their history | Must | M2 |
 | ✅ | Search on all name fields; filter by status and room | Must | M2 |
 | ✅ | Parent plant and offspring, "Add offspring" | Must | M2 |
-| ☐ | Cover photo on cards and the plant page | Must | M3 |
+| ✅ | Cover photo on cards and the plant page | Must | M3 |
 | ☐ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | Must | M3–M4 |
 | ☐ | Select several plants at once: change status, move to a room, add a note to all | Should | M3 |
 | ☐ | Favourites / pinned plants at the top of the list | Could | v1.x |
@@ -43,11 +43,11 @@ Every plant and propagation gets its own history. Entries are only ever added, n
 
 | ✓ | Feature | Priority | When |
 |---|---|---|---|
-| ☐ | Take a photo with the camera or pick from the gallery. Photos are resized and compressed on the phone (≈1600 px) with a thumbnail | Must | M3 |
-| ☐ | Photo timeline per plant and per propagation, newest first, tap to view full screen | Must | M3 |
-| ☐ | Notes on the timeline ("new leaf unfurling", "roots 2 cm") | Must | M3 |
-| ☐ | Automatic timeline entries for changes: status, medium/pot ("moved to semi-hydro"), room, stage | Must | M3 |
-| ☐ | Choose the cover photo | Must | M3 |
+| ✅ | Take a photo with the camera or pick from the gallery. Photos are resized and compressed on the phone (≈1600 px) with a thumbnail | Must | M3 |
+| ✅ | Photo timeline per plant and per propagation, newest first, tap to view full screen | Must | M3 |
+| ✅ | Notes on the timeline ("new leaf unfurling", "roots 2 cm") | Must | M3 |
+| ✅ | Automatic timeline entries for changes: status, medium/pot ("moved to semi-hydro"), room, stage | Must | M3 |
+| ✅ | Choose the cover photo | Must | M3 |
 | ☐ | Swipe through photos side by side to compare growth | Should | v1.x |
 | ☐ | Correct or hide a timeline entry by adding a new entry, keeping the original | Should | M3 |
 | ☐ | Measurements on an entry: number of leaves, height, root length | Could | v1.x |

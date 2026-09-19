@@ -1,0 +1,113 @@
+@* Full-screen photo viewer with previous/next, "set as cover" and delete. *@
+
+@if (Current is { } photo)
+{
+    <div class="viewer" role="dialog" aria-modal="true" aria-label="Photo viewer" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
+        <div class="viewer-bar">
+            <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))</span>
+            <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="Close">✕</button>
+        </div>
+
+        <div class="viewer-stage">
+            <PhotoImage PhotoId="photo.Id" Thumbnail="false" Class="viewer-img" Alt="Photo" />
+            @if (PhotoList.Count > 1)
+            {
+                <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="Previous photo">‹</button>
+                <button type="button" class="viewer-nav next" @onclick="() => Move(1)" aria-label="Next photo">›</button>
+            }
+        </div>
+
+        <div class="viewer-actions">
+            @if (confirmDelete)
+            {
+                <span>Delete this photo?</span>
+                <button type="button" class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
+                <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+            }
+            else
+            {
+                @if (OnSetCover.HasDelegate)
+                {
+                    <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)"
+                            disabled="@(photo.Id == CoverPhotoId)">
+                        @(photo.Id == CoverPhotoId ? "Cover photo" : "Set as cover")
+                    </button>
+                }
+                <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">Delete</button>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Photo> PhotoList { get; set; } = [];
+
+    /// <summary>Index of the photo being shown, or null when the viewer is closed.</summary>
+    [Parameter]
+    public int? Index { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> IndexChanged { get; set; }
+
+    [Parameter]
+    public Guid? CoverPhotoId { get; set; }
+
+    [Parameter]
+    public EventCallback<Photo> OnSetCover { get; set; }
+
+    [Parameter]
+    public EventCallback<Photo> OnDelete { get; set; }
+
+    private ElementReference dialog;
+    private bool confirmDelete;
+    private bool focusPending;
+
+    private Photo? Current => Index is { } i && i >= 0 && i < PhotoList.Count ? PhotoList[i] : null;
+
+    protected override void OnParametersSet()
+    {
+        if (Current is not null)
+            focusPending = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Focus the dialog so arrow keys and Escape work straight away
+        if (focusPending && Current is not null)
+        {
+            focusPending = false;
+            await dialog.FocusAsync();
+        }
+    }
+
+    private async Task Move(int step)
+    {
+        confirmDelete = false;
+        var next = ((Index ?? 0) + step + PhotoList.Count) % PhotoList.Count;
+        await IndexChanged.InvokeAsync(next);
+    }
+
+    private async Task CloseAsync()
+    {
+        confirmDelete = false;
+        await IndexChanged.InvokeAsync(null);
+    }
+
+    private async Task DeleteAsync()
+    {
+        confirmDelete = false;
+        if (Current is { } photo)
+            await OnDelete.InvokeAsync(photo);
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "Escape": await CloseAsync(); break;
+            case "ArrowLeft" when PhotoList.Count > 1: await Move(-1); break;
+            case "ArrowRight" when PhotoList.Count > 1: await Move(1); break;
+        }
+    }
+}

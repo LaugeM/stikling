@@ -1,0 +1,40 @@
+@* Shows a stored photo. The image data is read from the device database via PhotoService. *@
+@inject PhotoService Photos
+
+@if (url is not null)
+{
+    <img src="@url" alt="@Alt" class="@Class" loading="lazy" decoding="async" />
+}
+else
+{
+    <span class="@Class photo-placeholder" role="img" aria-label="@(missing ? "Photo missing" : "Loading photo")"></span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid PhotoId { get; set; }
+
+    /// <summary>Use the small version (lists, grids) instead of the full-size one.</summary>
+    [Parameter]
+    public bool Thumbnail { get; set; } = true;
+
+    [Parameter]
+    public string Alt { get; set; } = "";
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string? url;
+    private bool missing;
+    private (Guid, bool) loadedFor;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor == (PhotoId, Thumbnail) && (url is not null || missing))
+            return;
+
+        loadedFor = (PhotoId, Thumbnail);
+        url = await Photos.GetUrlAsync(PhotoId, Thumbnail);
+        missing = url is null;
+    }
+}

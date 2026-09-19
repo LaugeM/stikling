@@ -1,6 +1,7 @@
 @page "/plants/new"
 @page "/plants/{Id:guid}/edit"
 @inject IPlantRepository Repository
+@inject PlantService PlantService
 @inject NavigationManager Navigation
 
 <PageTitle>@(IsNew ? "Add plant" : "Edit plant") · Stikling</PageTitle>
@@ -154,6 +155,7 @@ else
     public Guid? ParentId { get; set; }
 
     private Plant? plant;
+    private Plant? original; // the plant as it was before editing, to record what changed
     private bool notFound;
     private bool saving;
     private List<string> errors = [];
@@ -187,6 +189,7 @@ else
         else
         {
             plant = all.FirstOrDefault(p => p.Id == Id);
+            original = plant?.Copy();
             notFound = plant is null;
         }
 
@@ -206,7 +209,10 @@ else
         saving = true;
         try
         {
-            await Repository.SaveAsync(plant);
+            if (IsNew)
+                await PlantService.CreateAsync(plant);
+            else
+                await PlantService.UpdateAsync(original!, plant, Labels.For);
             Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
         }
         catch (Exception ex)
