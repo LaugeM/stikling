@@ -21,7 +21,7 @@ A working list of what Stikling could do, grouped by area and tagged with a prio
 | ✅ | Search on all name fields; filter by status and room | Must | M2 |
 | ✅ | Parent plant and offspring, "Add offspring" | Must | M2 |
 | ✅ | Cover photo on cards and the plant page | Must | M3 |
-| ☐ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | Must | M3–M4 |
+| ✅ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | Must | M3–M4 |
 | ☐ | Select several plants at once: change status, move to a room, add a note to all | Should | M3 |
 | ☐ | Favourites / pinned plants at the top of the list | Could | v1.x |
 | ☐ | Tags (e.g. "variegated", "rare", "quarantine", "for swap") and a tag filter | Should | v1.x |
@@ -64,14 +64,14 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 
 | ✓ | Feature | Priority | When |
 |---|---|---|---|
-| ☐ | One-tap **Propagate** on a plant page, which creates a propagation linked to that plant | Must | M4 |
-| ☐ | Type: cutting, corm, offset/pup, seed, division, air layer, leaf | Must | M4 |
-| ☐ | Medium: water, perlite, sphagnum, LECA, PON, soil, "humidity dome", other | Must | M4 |
-| ☐ | Stages: started, rooting, rooted and done (or failed). The date of each stage change is saved | Must | M4 |
-| ☐ | Batches with a count ("3 corms in LECA"); mark some as failed | Must | M4 |
-| ☐ | **Promote to plant**: turn 1..n units of a batch into plants and keep the lineage | Must | M4 |
-| ☐ | Propagations list grouped by stage, with cards like "3× corm · LECA · day 24" | Must | M4 |
-| ☐ | Propagations without a parent plant (bought seeds, e.g. the bay laurel) | Must | M4 |
+| ✅ | One-tap **Propagate** on a plant page, which creates a propagation linked to that plant | Must | M4 |
+| ✅ | Type: cutting, corm, offset/pup, seed, division, air layer, leaf | Must | M4 |
+| ✅ | Medium: water, perlite, sphagnum, LECA, PON, soil, "humidity dome", other | Must | M4 |
+| ✅ | Stages: started, rooting, rooted and done (or failed). The date of each stage change is saved | Must | M4 |
+| ✅ | Batches with a count ("3 corms in LECA"); mark some as failed | Must | M4 |
+| ✅ | **Promote to plant**: turn 1..n units of a batch into plants and keep the lineage | Must | M4 |
+| ✅ | Propagations list grouped by stage, with cards like "3× corm · LECA · day 24" | Must | M4 |
+| ✅ | Propagations without a parent plant (bought seeds, e.g. the bay laurel) | Must | M4 |
 | ☐ | "Check on it" reminder in the app: a propagation not looked at for X days shows on Today | Should | M5 |
 | ☐ | **Experiments**: group propagations started together to compare mediums (your corm test: perlite vs sphagnum vs LECA vs humidity dome) | Should | v1.x |
 | ☐ | Success rate and average days-to-root per medium and per type | Should | v1.x |

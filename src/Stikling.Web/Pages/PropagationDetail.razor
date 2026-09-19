@@ -71,7 +71,7 @@ else
                 }
                 <div class="mb-2">
                     <label class="form-label" for="potup-name">Nickname</label>
-                    <input id="potup-name" class="form-control" @bind="potUp.Nickname" placeholder="@(propagation.BotanicalName ?? "")" />
+                    <input id="potup-name" class="form-control" @bind="potUp.Nickname" @bind:event="oninput" placeholder="@(propagation.BotanicalName ?? "")" />
                     @if (potUp.Count > 1 || propagation.PottedUpCount > 0)
                     {
                         <div class="form-text">Numbered when there are several, e.g. "@(string.IsNullOrWhiteSpace(potUp.Nickname) ? "Coleus" : potUp.Nickname.Trim()) @(propagation.PottedUpCount + 1)".</div>
@@ -89,13 +89,13 @@ else
                     </div>
                     <div class="col-6">
                         <label class="form-label" for="potup-pot">Pot</label>
-                        <input id="potup-pot" class="form-control" @bind="potUp.Container" placeholder="e.g. 9 cm nursery pot" />
+                        <input id="potup-pot" class="form-control" @bind="potUp.Container" @bind:event="oninput" placeholder="e.g. 9 cm nursery pot" />
                     </div>
                 </div>
                 <div class="row g-2 mb-3">
                     <div class="col-6">
                         <label class="form-label" for="potup-location">Location</label>
-                        <input id="potup-location" class="form-control" @bind="potUp.Location" list="potup-locations" autocomplete="off" />
+                        <input id="potup-location" class="form-control" @bind="potUp.Location" @bind:event="oninput" list="potup-locations" autocomplete="off" />
                         <datalist id="potup-locations">
                             @foreach (var l in locations)
                             {
@@ -130,7 +130,7 @@ else
                 }
                 <div class="mb-3">
                     <label class="form-label" for="failed-reason">What happened? (optional)</label>
-                    <input id="failed-reason" class="form-control" @bind="failedReason" placeholder="e.g. rotted, dried out" />
+                    <input id="failed-reason" class="form-control" @bind="failedReason" @bind:event="oninput" placeholder="e.g. rotted, dried out" />
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-danger" disabled="@(busy || !CountIsValid(failedCount))" @onclick="MarkFailedAsync">
