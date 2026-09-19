@@ -22,7 +22,7 @@ Stikling is a Progressive Web App: it runs in the browser, can be installed on y
 - Bootstrap 5
 - IndexedDB for on-device storage (via a small JS interop module)
 - xUnit for the domain logic
-- GitHub Actions → GitHub Pages (free static hosting)
+- Hosted for free on GitHub Pages and deployed with GitHub Actions
 
 ### Why Blazor WebAssembly?
 
@@ -53,7 +53,7 @@ dotnet test Stikling.slnx
 
 ## Deployment
 
-Every push to `main` runs the tests, publishes the app and deploys it to GitHub Pages. In the repository settings, set **Pages → Source** to **GitHub Actions**.
+Every push to `main` runs the tests, publishes the app and deploys it to GitHub Pages. In the repo settings under Pages, the source needs to be set to GitHub Actions.
 
 Because Pages serves the site from `/<repo-name>/`, [`prepare-pages.py`](.github/scripts/prepare-pages.py) rewrites the `<base href>`, updates the service worker's hash for `index.html`, and adds a `404.html` copy so deep links work.
 
