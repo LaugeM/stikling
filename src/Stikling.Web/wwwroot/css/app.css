@@ -1,0 +1,176 @@
+:root {
+    --pa-green: #2f7d4f;
+    --pa-green-dark: #1f5a37;
+    --pa-green-soft: #e6f2ea;
+    --pa-bg: #f6f7f4;
+    --pa-surface: #ffffff;
+    --pa-border: #dde3dc;
+    --pa-text: #1d2520;
+    --pa-muted: #5f6b63;
+
+    /* Point Bootstrap's primary colour at the app green */
+    --bs-primary: var(--pa-green);
+    --bs-primary-rgb: 47, 125, 79;
+    --bs-link-color: var(--pa-green-dark);
+    --bs-link-color-rgb: 31, 90, 55;
+    --bs-body-bg: var(--pa-bg);
+    --bs-body-color: var(--pa-text);
+}
+
+/* Dark theme: theme.js sets data-bs-theme="dark" on <html> */
+:root[data-bs-theme="dark"] {
+    color-scheme: dark;
+
+    --pa-green: #5fb883;
+    --pa-green-dark: #86d1a4;
+    --pa-green-soft: #1f3327;
+    --pa-bg: #121814;
+    --pa-surface: #1a221d;
+    --pa-border: #2c3830;
+    --pa-text: #e3e9e4;
+    --pa-muted: #9aa89f;
+
+    --bs-primary: var(--pa-green);
+    --bs-primary-rgb: 95, 184, 131;
+    --bs-link-color: var(--pa-green-dark);
+    --bs-link-color-rgb: 134, 209, 164;
+    --bs-body-bg: var(--pa-bg);
+    --bs-body-color: var(--pa-text);
+    --bs-border-color: var(--pa-border);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--pa-green-dark);
+    --bs-btn-border-color: var(--pa-green);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--pa-green);
+    --bs-btn-hover-border-color: var(--pa-green);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--pa-green);
+    --bs-btn-active-border-color: var(--pa-green);
+}
+
+/* Dark text on the lighter green keeps button labels readable in dark mode */
+:root[data-bs-theme="dark"] .btn-primary,
+:root[data-bs-theme="dark"] .btn-outline-primary {
+    --bs-btn-hover-color: #0f1a13;
+    --bs-btn-active-color: #0f1a13;
+}
+
+:root[data-bs-theme="dark"] .btn-primary {
+    --bs-btn-color: #0f1a13;
+}
+
+html, body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: var(--pa-bg);
+    color: var(--pa-text);
+}
+
+h1:focus {
+    outline: none;
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--pa-green);
+    --bs-btn-border-color: var(--pa-green);
+    --bs-btn-hover-bg: var(--pa-green-dark);
+    --bs-btn-hover-border-color: var(--pa-green-dark);
+    --bs-btn-active-bg: var(--pa-green-dark);
+    --bs-btn-active-border-color: var(--pa-green-dark);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--pa-muted);
+    background: var(--pa-surface);
+    border: 1px dashed var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.empty-state p {
+    margin-bottom: 0;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #26b050;
+}
+
+.invalid {
+    outline: 1px solid red;
+}
+
+.validation-message {
+    color: red;
+}
+
+#blazor-error-ui {
+    color-scheme: light only;
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+
+.blazor-error-boundary {
+    background: #b32121;
+    padding: 1rem;
+    color: white;
+}
+
+    .blazor-error-boundary::after {
+        content: "An error has occurred."
+    }
+
+.loading-progress {
+    position: absolute;
+    display: block;
+    width: 8rem;
+    height: 8rem;
+    inset: 20vh 0 auto 0;
+    margin: 0 auto 0 auto;
+}
+
+    .loading-progress circle {
+        fill: none;
+        stroke: var(--pa-border);
+        stroke-width: 0.6rem;
+        transform-origin: 50% 50%;
+        transform: rotate(-90deg);
+    }
+
+        .loading-progress circle:last-child {
+            stroke: var(--pa-green);
+            stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+            transition: stroke-dasharray 0.05s ease-in-out;
+        }
+
+.loading-progress-text {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+}
+
+    .loading-progress-text:after {
+        content: var(--blazor-load-percentage-text, "Loading");
+    }

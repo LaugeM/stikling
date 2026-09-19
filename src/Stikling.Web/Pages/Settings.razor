@@ -1,0 +1,60 @@
+@page "/settings"
+@implements IDisposable
+@inject ThemeService Theme
+
+<PageTitle>Settings · Stikling</PageTitle>
+
+<h1>Settings</h1>
+
+<section class="settings-section">
+    <h2>Appearance</h2>
+    <div class="btn-group w-100" role="radiogroup" aria-label="Theme">
+        @foreach (var option in options)
+        {
+            var id = $"theme-{option.Mode.ToString().ToLowerInvariant()}";
+            <input type="radio" class="btn-check" name="theme" id="@id"
+                   checked="@(mode == option.Mode)" @onchange="() => SetModeAsync(option.Mode)" />
+            <label class="btn btn-outline-primary" for="@id">@option.Label</label>
+        }
+    </div>
+    <p class="settings-hint">"Match system" follows your phone or computer's light/dark setting.</p>
+</section>
+
+<section class="settings-section">
+    <h2>Backup</h2>
+    <div class="empty-state">
+        <p>Backup, restore and storage info will live here.</p>
+    </div>
+</section>
+
+@code {
+    private static readonly (ThemeMode Mode, string Label)[] options =
+    [
+        (ThemeMode.System, "Match system"),
+        (ThemeMode.Light, "Light"),
+        (ThemeMode.Dark, "Dark")
+    ];
+
+    private ThemeMode mode;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Theme.Changed += OnThemeChanged;
+        mode = await Theme.GetModeAsync();
+    }
+
+    private async Task SetModeAsync(ThemeMode newMode)
+    {
+        mode = newMode;
+        await Theme.SetModeAsync(newMode);
+    }
+
+    // Keeps the selection in sync when the header toggle is used
+    private async void OnThemeChanged()
+    {
+        mode = await Theme.GetModeAsync();
+        StateHasChanged();
+    }
+
+    public void Dispose() => Theme.Changed -= OnThemeChanged;
+}

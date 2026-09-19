@@ -1,0 +1,21 @@
+{
+  "enabledPlugins": {
+    "dotnet-blazor@dotnet-agent-skills": true,
+    "dotnet-test@dotnet-agent-skills": true,
+    "impeccable@impeccable": true
+  },
+  "extraKnownMarketplaces": {
+    "dotnet-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "dotnet/skills"
+      }
+    },
+    "impeccable": {
+      "source": {
+        "source": "github",
+        "repo": "pbakaus/impeccable"
+      }
+    }
+  }
+}
