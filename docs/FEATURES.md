@@ -29,6 +29,7 @@ A working list of what Stikling could do, grouped by area and tagged with a prio
 | ☐ | Grid view with large photos as an alternative to the list | Could | v1.x |
 | ☐ | Species autocomplete beyond genus (a bundled list of common houseplant species and cultivars) | Should | v1.x |
 | ☐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline | Should | v1.x |
+| ☐ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary, including hybrids and named varieties. Anything not on the list can still be typed | Should | v1.x |
 | ☐ | Duplicate a plant (e.g. a second basil pot) | Could | v1.x |
 | ☐ | Wishlist: plants you want, with notes on where to find them | Could | v1.x |
 | ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | Should | v1.x |
@@ -134,6 +135,10 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | **Supplies stock**: LECA, PON, perlite, sphagnum, fertilisers, sticky traps, alcohol, pots | Should | v1.x |
 | ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | Should | v1.x |
 | ☐ | Money spent on supplies, to see what the hobby costs | Could | v1.x |
+| ☐ | **Pot suggestions**: the pot field suggests pots you've already used, so the same one isn't typed differently every time. The same for a propagation's container | Should | v1.x |
+| ☐ | **Your pots**: register the pots you own by kind (nursery pot, self-watering, terracotta, glass jar, net pot, humidity box) and size, then pick one from a list when adding a plant or potting up | Should | v1.x |
+| ☐ | See which of your pots are in use and which are free, so it's clear what's available before repotting | Could | v1.x |
+| ☐ | Default medium per pot kind, e.g. a net pot suggests LECA, so potting up is one tap less | Could | v1.x |
 
 ## 6. Today screen
 
