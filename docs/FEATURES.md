@@ -28,6 +28,7 @@ A working list of what Stikling could do, grouped by area and tagged with a prio
 | ☐ | Sort options: name, newest, room, last activity | Could | v1.x |
 | ☐ | Grid view with large photos as an alternative to the list | Could | v1.x |
 | ☐ | Species autocomplete beyond genus (a bundled list of common houseplant species and cultivars) | Should | v1.x |
+| ☐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline | Should | v1.x |
 | ☐ | Duplicate a plant (e.g. a second basil pot) | Could | v1.x |
 | ☐ | Wishlist: plants you want, with notes on where to find them | Could | v1.x |
 | ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | Should | v1.x |
