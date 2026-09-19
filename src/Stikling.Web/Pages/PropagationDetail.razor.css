@@ -1,0 +1,32 @@
+.prop-summary {
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.action-panel {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-green);
+    border-radius: 0.75rem;
+}
+
+.action-panel h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.finished-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.action-message {
+    margin: -0.25rem 0 1rem;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}

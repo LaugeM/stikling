@@ -47,9 +47,13 @@ public sealed record PlantFilter(string? Search = null, StatusFilter Status = St
 
     /// <summary>Distinct, sorted locations used by the given plants, for the location filter.</summary>
     public static IReadOnlyList<string> Locations(IEnumerable<Plant> plants) =>
-        plants
-            .Where(p => !p.IsDeleted && !string.IsNullOrWhiteSpace(p.Location))
-            .Select(p => p.Location!.Trim())
+        Locations(plants.Where(p => !p.IsDeleted).Select(p => p.Location));
+
+    /// <summary>Distinct, sorted room names, e.g. to suggest while typing.</summary>
+    public static IReadOnlyList<string> Locations(IEnumerable<string?> locations) =>
+        locations
+            .Where(l => !string.IsNullOrWhiteSpace(l))
+            .Select(l => l!.Trim())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.CurrentCultureIgnoreCase)
             .ToList();

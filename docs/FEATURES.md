@@ -21,13 +21,14 @@ A working list of what Stikling could do, grouped by area and tagged with a prio
 | ✅ | Search on all name fields; filter by status and room | Must | M2 |
 | ✅ | Parent plant and offspring, "Add offspring" | Must | M2 |
 | ✅ | Cover photo on cards and the plant page | Must | M3 |
-| ☐ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | Must | M3–M4 |
+| ✅ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | Must | M3–M4 |
 | ☐ | Select several plants at once: change status, move to a room, add a note to all | Should | M3 |
 | ☐ | Favourites / pinned plants at the top of the list | Could | v1.x |
 | ☐ | Tags (e.g. "variegated", "rare", "quarantine", "for swap") and a tag filter | Should | v1.x |
 | ☐ | Sort options: name, newest, room, last activity | Could | v1.x |
 | ☐ | Grid view with large photos as an alternative to the list | Could | v1.x |
 | ☐ | Species autocomplete beyond genus (a bundled list of common houseplant species and cultivars) | Should | v1.x |
+| ☐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline | Should | v1.x |
 | ☐ | Duplicate a plant (e.g. a second basil pot) | Could | v1.x |
 | ☐ | Wishlist: plants you want, with notes on where to find them | Could | v1.x |
 | ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | Should | v1.x |
@@ -63,14 +64,14 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 
 | ✓ | Feature | Priority | When |
 |---|---|---|---|
-| ☐ | One-tap **Propagate** on a plant page, which creates a propagation linked to that plant | Must | M4 |
-| ☐ | Type: cutting, corm, offset/pup, seed, division, air layer, leaf | Must | M4 |
-| ☐ | Medium: water, perlite, sphagnum, LECA, PON, soil, "humidity dome", other | Must | M4 |
-| ☐ | Stages: started, rooting, rooted and done (or failed). The date of each stage change is saved | Must | M4 |
-| ☐ | Batches with a count ("3 corms in LECA"); mark some as failed | Must | M4 |
-| ☐ | **Promote to plant**: turn 1..n units of a batch into plants and keep the lineage | Must | M4 |
-| ☐ | Propagations list grouped by stage, with cards like "3× corm · LECA · day 24" | Must | M4 |
-| ☐ | Propagations without a parent plant (bought seeds, e.g. the bay laurel) | Must | M4 |
+| ✅ | One-tap **Propagate** on a plant page, which creates a propagation linked to that plant | Must | M4 |
+| ✅ | Type: cutting, corm, offset/pup, seed, division, air layer, leaf | Must | M4 |
+| ✅ | Medium: water, perlite, sphagnum, LECA, PON, soil, "humidity dome", other | Must | M4 |
+| ✅ | Stages: started, rooting, rooted and done (or failed). The date of each stage change is saved | Must | M4 |
+| ✅ | Batches with a count ("3 corms in LECA"); mark some as failed | Must | M4 |
+| ✅ | **Promote to plant**: turn 1..n units of a batch into plants and keep the lineage | Must | M4 |
+| ✅ | Propagations list grouped by stage, with cards like "3× corm · LECA · day 24" | Must | M4 |
+| ✅ | Propagations without a parent plant (bought seeds, e.g. the bay laurel) | Must | M4 |
 | ☐ | "Check on it" reminder in the app: a propagation not looked at for X days shows on Today | Should | M5 |
 | ☐ | **Experiments**: group propagations started together to compare mediums (your corm test: perlite vs sphagnum vs LECA vs humidity dome) | Should | v1.x |
 | ☐ | Success rate and average days-to-root per medium and per type | Should | v1.x |
@@ -99,6 +100,17 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | Harvest log for herbs (basil, parsley): date and amount | Could | v1.x |
 | ☐ | Flowering log (orchid, peace lily): spike started, blooming, done | Could | v1.x |
 | ☐ | Optional care intervals per plant ("fertilise every 2 weeks") that show up on Today | Could | v1.x |
+
+## 4b. Light
+
+| ✓ | Feature | Priority | When |
+|---|---|---|---|
+| ☐ | Light level per plant: low, medium, bright indirect, some direct sun | Should | v1.x |
+| ☐ | Window direction for each room (north, east, south, west), so plants in a room show what light they get | Could | v1.x |
+| ☐ | **Grow lights**: your lamps with a name, wattage and hours on per day, and which plants are under each one | Should | v1.x |
+| ☐ | Moving a plant under or away from a grow light is recorded in its history, like a room change | Should | v1.x |
+| ☐ | Filter by light, e.g. "under grow light" or "low light", to find a spot for a new plant | Could | v1.x |
+| ☐ | Winter note: flag plants that may need a grow light when daylight gets short | Could | v1.x |
 
 ## 5. Pests & treatments
 

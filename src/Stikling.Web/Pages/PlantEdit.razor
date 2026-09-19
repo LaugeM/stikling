@@ -15,7 +15,7 @@
 }
 else
 {
-    <EditForm Model="plant" OnSubmit="SaveAsync" class="plant-form">
+    <EditForm Model="plant" OnSubmit="SaveAsync" class="edit-form">
         @if (errors.Count > 0)
         {
             <div class="alert alert-danger" role="alert">
@@ -150,7 +150,7 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
-    /// <summary>Pre-selects a parent, e.g. from "Add offspring" on a plant's page.</summary>
+    /// <summary>Pre-selects a parent, e.g. from the Family section on a plant's page.</summary>
     [SupplyParameterFromQuery(Name = "parent")]
     public Guid? ParentId { get; set; }
 

@@ -1,88 +1,11 @@
-.plant-card {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    padding: 0.7rem;
-    background: var(--pa-surface);
-    border: 1px solid var(--pa-border);
-    border-radius: 0.75rem;
-    color: inherit;
-    text-decoration: none;
-}
+/* The card itself is styled in app.css (.item-card), shared with propagation cards */
 
-.plant-card:hover,
-.plant-card:focus-visible {
-    border-color: var(--pa-green);
-}
-
-.plant-thumb {
-    flex: none;
-    width: 3.5rem;
-    height: 3.5rem;
-    display: grid;
-    place-items: center;
-    border-radius: 0.6rem;
-    background: var(--pa-green-soft);
-    color: var(--pa-green);
-}
-
-.plant-thumb svg {
-    width: 1.75rem;
-    height: 1.75rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.75;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.plant-text {
-    min-width: 0;
-}
-
-.plant-name {
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.plant-botanical {
-    font-style: italic;
-    font-size: 0.875rem;
-    color: var(--pa-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.plant-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.3rem;
-    margin-top: 0.15rem;
-    font-size: 0.8rem;
-    color: var(--pa-muted);
-}
-
-.plant-thumb {
-    overflow: hidden;
-}
-
-.plant-thumb ::deep img,
-.plant-thumb ::deep .photo-placeholder {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.plant-card.selectable {
+.item-card.selectable {
     cursor: pointer;
     margin: 0;
 }
 
-.plant-card.selected {
+.item-card.selected {
     border-color: var(--pa-green);
     background: var(--pa-green-soft);
 }

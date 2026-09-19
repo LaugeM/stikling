@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
+using Stikling.Core.Propagations;
 using Stikling.Core.Timeline;
 
 namespace Stikling.Core.Tests;
@@ -26,6 +27,32 @@ internal sealed class FakePlantRepository : IPlantRepository
     public Task DeleteAsync(Guid id)
     {
         if (Plants.TryGetValue(id, out var p))
+            p.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakePropagationRepository : IPropagationRepository
+{
+    public Dictionary<Guid, Propagation> Propagations { get; } = [];
+
+    public Task<IReadOnlyList<Propagation>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Propagation>>(Propagations.Values.Where(p => !p.IsDeleted).ToList());
+
+    public Task<Propagation?> GetAsync(Guid id) =>
+        Task.FromResult(Propagations.TryGetValue(id, out var p) && !p.IsDeleted ? p : null);
+
+    public Task SaveAsync(Propagation propagation)
+    {
+        if (propagation.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid propagation");
+        Propagations[propagation.Id] = propagation;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Propagations.TryGetValue(id, out var p))
             p.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
@@ -59,4 +86,7 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
 internal sealed class FixedTime(DateTimeOffset now) : TimeProvider
 {
     public override DateTimeOffset GetUtcNow() => now;
+
+    // UTC keeps "today" the same on every machine the tests run on
+    public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
 }

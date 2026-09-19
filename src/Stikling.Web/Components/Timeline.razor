@@ -82,6 +82,13 @@ else
                                 <p class="entry-text">@entry.Text</p>
                             }
 
+                            @if (entry.RelatedId is { } relatedId)
+                            {
+                                <a class="entry-link" href="@(entry.RelatedType == SubjectType.Plant ? "plants" : "propagations")/@relatedId">
+                                    @(entry.RelatedType == SubjectType.Plant ? "Open plant" : "Open propagation") ›
+                                </a>
+                            }
+
                             @if (entryPhotos.Count > 0)
                             {
                                 <div class="entry-photos">
@@ -283,6 +290,7 @@ else
         TimelineKind.Note => "Note",
         TimelineKind.Photo => "Photo",
         TimelineKind.Change => "Updated",
+        TimelineKind.Propagated => "Propagated",
         _ => kind.ToString()
     };
 }

@@ -38,3 +38,31 @@ public enum GrowingMedium
     Water,
     Other
 }
+
+/// <summary>What was taken from the parent (or sown) to start a propagation.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<PropagationType>))]
+public enum PropagationType
+{
+    Cutting,
+    Corm,
+    Offset,
+    Seed,
+    Division,
+    AirLayer,
+    Leaf,
+    Other
+}
+
+/// <summary>
+/// How far a propagation has come. Started, Rooting and Rooted are set by hand; Done and
+/// Failed are set automatically once every unit has been potted up or has failed.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<PropagationStage>))]
+public enum PropagationStage
+{
+    Started,
+    Rooting,
+    Rooted,
+    Done,
+    Failed
+}

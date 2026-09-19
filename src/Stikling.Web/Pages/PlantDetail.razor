@@ -1,5 +1,6 @@
 @page "/plants/{Id:guid}"
 @inject IPlantRepository Repository
+@inject IPropagationRepository PropagationRepository
 @inject NavigationManager Navigation
 
 <PageTitle>@(plant?.DisplayName ?? "Plant") · Stikling</PageTitle>
@@ -14,15 +15,15 @@ else
 {
     @if (plant.CoverPhotoId is { } coverId)
     {
-        <div class="plant-hero">
+        <div class="detail-hero">
             <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {plant.DisplayName}")" />
         </div>
     }
 
-    <header class="plant-header">
+    <header class="detail-header">
         @if (plant.CoverPhotoId is null)
         {
-            <div class="plant-cover" aria-hidden="true">
+            <div class="detail-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
             </div>
         }
@@ -30,7 +31,7 @@ else
             <h1>@plant.DisplayName</h1>
             @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is { } botanical)
             {
-                <p class="plant-botanical">@botanical</p>
+                <p class="detail-sub">@botanical</p>
             }
             @if (plant.Status != PlantStatus.Active)
             {
@@ -39,19 +40,44 @@ else
         </div>
     </header>
 
-    <div class="plant-actions">
+    <div class="detail-actions">
         <a class="btn btn-primary" href="plants/@plant.Id/edit">Edit</a>
-        <a class="btn btn-outline-primary" href="plants/new?parent=@plant.Id">Add offspring</a>
+        <a class="btn btn-outline-primary" href="propagations/new?parent=@plant.Id">Propagate</a>
     </div>
 
     <div class="detail-tabs" role="tablist" aria-label="Plant sections">
         <button type="button" role="tab" id="tab-info" aria-controls="panel-info" aria-selected="@(tab == "info")"
                 class="detail-tab @(tab == "info" ? "active" : null)" @onclick='() => SetTab("info")'>Info</button>
+        <button type="button" role="tab" id="tab-props" aria-controls="panel-props" aria-selected="@(tab == "props")"
+                class="detail-tab @(tab == "props" ? "active" : null)" @onclick='() => SetTab("props")'>
+            Props@(propagations.Count > 0 ? $" ({propagations.Count})" : "")
+        </button>
         <button type="button" role="tab" id="tab-history" aria-controls="panel-history" aria-selected="@(tab == "history")"
                 class="detail-tab @(tab == "history" ? "active" : null)" @onclick='() => SetTab("history")'>History</button>
     </div>
 
-    @if (tab == "history")
+    @if (tab == "props")
+    {
+        <div id="panel-props" role="tabpanel" aria-labelledby="tab-props">
+            @if (propagations.Count == 0)
+            {
+                <div class="empty-state">
+                    <p>No propagations taken from this plant yet.</p>
+                    <a class="btn btn-primary mt-3" href="propagations/new?parent=@plant.Id">Propagate</a>
+                </div>
+            }
+            else
+            {
+                <ul class="item-list">
+                    @foreach (var propagation in propagations)
+                    {
+                        <li><PropagationCard Propagation="propagation" ShowStage="true" /></li>
+                    }
+                </ul>
+            }
+        </div>
+    }
+    else if (tab == "history")
     {
         <div id="panel-history" role="tabpanel" aria-labelledby="tab-history">
             <Timeline SubjectType="SubjectType.Plant" SubjectId="plant.Id"
@@ -92,24 +118,31 @@ else
                 @if (!string.IsNullOrWhiteSpace(plant.Notes))
                 {
                     <h2>Notes</h2>
-                    <p class="plant-notes">@plant.Notes</p>
+                    <p class="detail-notes">@plant.Notes</p>
                 }
             </section>
 
             <section class="detail-card">
                 <h2>Family</h2>
-                @if (ancestors.Count == 0 && offspring.Count == 0)
+                @if (ancestors.Count == 0 && offspring.Count == 0 && fromPropagation is null)
                 {
                     <p class="text-body-secondary mb-0">
-                        No parent or offspring recorded. Use <em>Add offspring</em> when you pot up a cutting from this plant.
+                        No parent or offspring recorded. Use <em>Propagate</em> when you take a cutting from this plant.
                     </p>
                 }
                 else
                 {
-                    @if (ancestors.Count > 0)
+                    @if (ancestors.Count > 0 || fromPropagation is not null)
                     {
                         <h3>Came from</h3>
                         <ul class="family-list">
+                            @if (fromPropagation is not null)
+                            {
+                                <li>
+                                    <a href="propagations/@fromPropagation.Id">@Labels.For(fromPropagation.Type)</a>
+                                    <span class="text-body-secondary small"> · started @Labels.Date(fromPropagation.StartedOn)</span>
+                                </li>
+                            }
                             @foreach (var ancestor in ancestors)
                             {
                                 <li><a href="plants/@ancestor.Id">@ancestor.DisplayName</a></li>
@@ -133,6 +166,7 @@ else
                         </ul>
                     }
                 }
+                <a class="btn btn-link btn-sm p-0 mt-2" href="plants/new?parent=@plant.Id">Add an offspring plant directly</a>
             </section>
 
             <section class="danger-zone">
@@ -155,7 +189,7 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    /// <summary>"info" (default) or "history", so a tab can be linked to directly.</summary>
+    /// <summary>"info" (default), "props" or "history", so a tab can be linked to directly.</summary>
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
 
@@ -165,11 +199,13 @@ else
     private string tab = "info";
     private IReadOnlyList<Plant> ancestors = [];
     private IReadOnlyList<Plant> offspring = [];
+    private IReadOnlyList<Propagation> propagations = [];
+    private Propagation? fromPropagation;
 
     protected override async Task OnParametersSetAsync()
     {
         confirmDelete = false;
-        tab = Tab == "history" ? "history" : "info";
+        tab = Tab is "history" or "props" ? Tab : "info";
 
         var all = await Repository.GetAllAsync();
         plant = all.FirstOrDefault(p => p.Id == Id);
@@ -177,6 +213,12 @@ else
         {
             ancestors = PlantLineage.Ancestors(plant, all);
             offspring = PlantLineage.Offspring(plant, all);
+
+            var allPropagations = await PropagationRepository.GetAllAsync();
+            propagations = new PropagationFilter(Progress: ProgressFilter.All)
+                .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
+                .ToList();
+            fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
         }
         loaded = true;
     }

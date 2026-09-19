@@ -1,0 +1,239 @@
+@page "/propagations/new"
+@page "/propagations/{Id:guid}/edit"
+@inject IPropagationRepository Repository
+@inject IPlantRepository PlantRepository
+@inject PropagationService PropagationService
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+
+<PageTitle>@(IsNew ? "Start propagation" : "Edit propagation") · Stikling</PageTitle>
+
+<a class="back-link" href="@BackUrl">‹ Back</a>
+<h1>@(IsNew ? "Start propagation" : "Edit propagation")</h1>
+
+@if (propagation is null)
+{
+    <p class="text-body-secondary">@(notFound ? "That propagation doesn't exist." : "Loading…")</p>
+}
+else
+{
+    <EditForm Model="propagation" OnSubmit="SaveAsync" class="edit-form">
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        <fieldset>
+            <legend>What you're propagating</legend>
+            <div class="mb-3">
+                <label class="form-label" for="parent">Taken from</label>
+                <InputSelect id="parent" class="form-select" @bind-Value="propagation.ParentPlantId" @bind-Value:after="ParentChanged">
+                    <option value="">No parent plant (e.g. bought seeds)</option>
+                    @foreach (var p in plants)
+                    {
+                        <option value="@p.Id">@p.DisplayName</option>
+                    }
+                </InputSelect>
+            </div>
+            @if (propagation.ParentPlantId is null)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="source">Source</label>
+                    <InputText id="source" class="form-control" @bind-Value="propagation.Source" placeholder="e.g. Seed shop, a friend's plant" />
+                </div>
+            }
+            <div class="row g-2 mb-3">
+                <div class="col-7">
+                    <label class="form-label" for="type">Type</label>
+                    <InputSelect id="type" class="form-select" @bind-Value="propagation.Type">
+                        @foreach (var type in Enum.GetValues<PropagationType>())
+                        {
+                            <option value="@type">@Labels.For(type)</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-5">
+                    <label class="form-label" for="count">How many</label>
+                    <InputNumber id="count" class="form-control" @bind-Value="propagation.InitialCount" min="@MinCount" inputmode="numeric" />
+                </div>
+            </div>
+            <div class="mb-1">
+                <label class="form-label" for="started">Started on</label>
+                <InputDate id="started" class="form-control" @bind-Value="propagation.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Name</legend>
+            <div class="mb-3">
+                <label class="form-label" for="nickname">Nickname</label>
+                <InputText id="nickname" class="form-control" @bind-Value="propagation.Nickname" placeholder="e.g. Corm test: perlite" />
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label" for="genus">Genus</label>
+                    <InputText id="genus" class="form-control" @bind-Value="propagation.Genus" list="genus-list" placeholder="e.g. Alocasia" autocomplete="off" />
+                    <datalist id="genus-list">
+                        @foreach (var genus in PlantNames.CommonGenera)
+                        {
+                            <option value="@genus"></option>
+                        }
+                    </datalist>
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="species">Species</label>
+                    <InputText id="species" class="form-control" @bind-Value="propagation.Species" placeholder="e.g. zebrina" autocomplete="off" />
+                </div>
+            </div>
+            <div class="mb-1">
+                <label class="form-label" for="cultivar">Cultivar / variety</label>
+                <InputText id="cultivar" class="form-control" @bind-Value="propagation.Cultivar" autocomplete="off" />
+            </div>
+            <div class="form-text">
+                @(propagation.ParentPlantId is null ? "" : "Filled in from the parent plant. ")Give it a nickname, a genus, or both.
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Setup</legend>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label" for="medium">Grows in</label>
+                    <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium">
+                        @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                        {
+                            <option value="@medium">@Labels.For(medium)</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="container">Container</label>
+                    <InputText id="container" class="form-control" @bind-Value="propagation.Container" placeholder="e.g. Humidity box" />
+                </div>
+            </div>
+            <div class="mb-1">
+                <label class="form-label" for="location">Location</label>
+                <InputText id="location" class="form-control" @bind-Value="propagation.Location" list="location-list" placeholder="e.g. Kitchen window" autocomplete="off" />
+                <datalist id="location-list">
+                    @foreach (var l in locations)
+                    {
+                        <option value="@l"></option>
+                    }
+                </datalist>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Notes</legend>
+            <InputTextArea class="form-control" rows="3" @bind-Value="propagation.Notes" aria-label="Notes" />
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Start propagation" : "Save")</button>
+            <a class="btn btn-link" href="@BackUrl">Cancel</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    /// <summary>The plant it's taken from, e.g. from "Propagate" on a plant's page.</summary>
+    [SupplyParameterFromQuery(Name = "parent")]
+    public Guid? ParentId { get; set; }
+
+    private Propagation? propagation;
+    private Propagation? original; // as it was before editing, to record what changed
+    private bool notFound;
+    private bool saving;
+    private List<string> errors = [];
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<string> locations = [];
+
+    private bool IsNew => Id is null;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    // Units already potted up or failed can't be counted away
+    private int MinCount => Math.Max(1, (propagation?.PottedUpCount ?? 0) + (propagation?.FailedCount ?? 0));
+
+    private string BackUrl =>
+        !IsNew ? $"propagations/{Id}"
+        : ParentId is { } parentId ? $"plants/{parentId}?tab=props"
+        : "propagations";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var allPlants = await PlantRepository.GetAllAsync();
+        var allPropagations = await Repository.GetAllAsync();
+        plants = allPlants.OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
+        locations = PlantFilter.Locations(allPlants.Select(p => p.Location).Concat(allPropagations.Select(p => p.Location)));
+
+        if (IsNew)
+        {
+            propagation = ParentId is { } parentId && allPlants.FirstOrDefault(p => p.Id == parentId) is { } parent
+                ? PropagationService.StartFrom(parent)
+                : new Propagation { StartedOn = Today };
+        }
+        else
+        {
+            propagation = allPropagations.FirstOrDefault(p => p.Id == Id);
+            original = propagation?.Copy();
+            notFound = propagation is null;
+        }
+    }
+
+    // Picking a parent fills in empty name fields from it
+    private void ParentChanged()
+    {
+        if (propagation?.ParentPlantId is not { } parentId || plants.FirstOrDefault(p => p.Id == parentId) is not { } parent)
+            return;
+        if (string.IsNullOrWhiteSpace(propagation.Nickname) && string.IsNullOrWhiteSpace(propagation.Genus))
+        {
+            var filled = PropagationService.StartFrom(parent);
+            propagation.Nickname = filled.Nickname;
+            propagation.Genus = filled.Genus;
+            propagation.Species = filled.Species;
+            propagation.Cultivar = filled.Cultivar;
+        }
+        if (string.IsNullOrWhiteSpace(propagation.Location))
+            propagation.Location = parent.Location;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (propagation is null)
+            return;
+
+        errors = propagation.Validate().ToList();
+        if (errors.Count > 0)
+            return;
+
+        saving = true;
+        try
+        {
+            if (propagation.ParentPlantId is not null)
+                propagation.Source = null;
+
+            if (IsNew)
+                await PropagationService.CreateAsync(propagation, Labels.For(propagation));
+            else
+                await PropagationService.UpdateAsync(original!, propagation, Labels.For(propagation));
+            Navigation.NavigateTo($"propagations/{propagation.Id}", replace: IsNew);
+        }
+        catch (Exception ex)
+        {
+            errors = [$"Couldn't save: {ex.Message}"];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+}
