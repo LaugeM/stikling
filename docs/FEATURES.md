@@ -30,6 +30,12 @@ A working list of what Stikling could do, grouped by area and tagged with a prio
 | ☐ | Species autocomplete beyond genus (a bundled list of common houseplant species and cultivars) | Should | v1.x |
 | ☐ | Duplicate a plant (e.g. a second basil pot) | Could | v1.x |
 | ☐ | Wishlist: plants you want, with notes on where to find them | Could | v1.x |
+| ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | Should | v1.x |
+| ☐ | **Dormancy status**: e.g. alocasias dropping leaves in winter. Pauses "check on it" reminders and keeps the plant from looking dead | Should | v1.x |
+| ☐ | **Soil → semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | Should | v1.x |
+| ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | Should | v1.x |
+| ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | Should | v1.x |
+| ☐ | Purchase price per plant | Could | v1.x |
 
 ## 2. Photos & timeline
 
@@ -46,6 +52,10 @@ Every plant and propagation gets its own history. Entries are only ever added, n
 | ☐ | Correct or hide a timeline entry by adding a new entry, keeping the original | Should | M3 |
 | ☐ | Measurements on an entry: number of leaves, height, root length | Could | v1.x |
 | ☐ | Time-lapse / before-and-after image from a plant's photos | Could | v1.x |
+| ☐ | **Import existing photos with their dates**: pick old photos from the gallery and each is placed on the timeline by the date it was taken (EXIF), so a plant's history starts from day one | Should | v1.x |
+| ☐ | **Ghost overlay** when taking a photo: a faint copy of the previous photo to line up the same angle every time | Could | v1.x |
+| ☐ | **Share into Stikling**: the installed app appears in Android's share menu, so a photo from the gallery can go straight to a plant (Web Share Target) | Could | v1.x |
+| ☐ | **Voice notes**: a microphone button on note fields using the phone's speech-to-text | Should | v1.x |
 
 ## 3. Propagations
 
@@ -67,6 +77,9 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ☐ | Seed germination: sown count, germinated count and dates | Should | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | Could | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | Could | v1.x |
+| ☐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare | Could | v1.x |
+| ☐ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | Could | v1.x |
+| ☐ | **"Available for swap" list**: mark propagations as available and share a simple list or image before a plant swap | Could | v1.x |
 
 ## 4. Care log
 
@@ -81,6 +94,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | Which product and dose was used, e.g. "Hydro fertiliser, 2 ml/L" | Should | v1.x |
 | ☐ | Water type: tap, demineralised, rain | Could | v1.x |
 | ☐ | Semi-hydro details: reservoir level, flush interval, last flush | Could | v1.x |
+| ☐ | **Nutrient dose calculator**: reservoir size × the product's dose per litre = ml to add | Could | v1.x |
 | ☐ | "Last watered / fertilised / flushed" summary on each plant | Should | v1.x |
 | ☐ | Harvest log for herbs (basil, parsley): date and amount | Could | v1.x |
 | ☐ | Flowering log (orchid, peace lily): spike started, blooming, done | Could | v1.x |
@@ -97,6 +111,17 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | Quarantine flag and a "Quarantine" filter; badge on the card | Should | v1.x |
 | ☐ | Inspection log: "checked, no signs", so you can see how long a plant has been clean | Could | v1.x |
 | ☐ | Pest overview: all active cases in one list | Could | v1.x |
+| ☐ | **Sticky trap counts**: log how many pests a (blue/yellow) sticky trap caught each week; a small chart shows whether treatment is working | Should | v1.x |
+| ☐ | **Check the neighbours**: opening a pest case lists other plants in the same room to inspect, with "last inspected" dates | Should | v1.x |
+| ☐ | **Biological control log**: release dates for predatory mites and similar | Could | v1.x |
+
+## 5b. Supplies & shopping
+
+| ✓ | Feature | Priority | When |
+|---|---|---|---|
+| ☐ | **Supplies stock**: LECA, PON, perlite, sphagnum, fertilisers, sticky traps, alcohol, pots | Should | v1.x |
+| ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | Should | v1.x |
+| ☐ | Money spent on supplies, to see what the hobby costs | Could | v1.x |
 
 ## 6. Today screen
 
@@ -120,6 +145,17 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | CSV export of plants and propagations for spreadsheets | Could | v1.x |
 | ☐ | Units and date format settings | Could | v1.x |
 | ☐ | Danish translation | Could | v1.x |
+| ☐ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | Must | M5 |
+| ☐ | "What's new" page and app version in Settings | Could | v1.x |
+| ☐ | **Species autocomplete from GBIF** (free botanical database, no API key): correct spelling for genus/species, plus family and native region | Could | v1.x |
+
+## 7b. Phone conveniences
+
+| ✓ | Feature | Priority | When |
+|---|---|---|---|
+| ☐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation" | Could | v1.x |
+| ☐ | **Badge on the app icon** with the number of things due today | Could | v1.x |
+| ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | Could | v1.x |
 
 ## 8. Sharing & later versions
 
@@ -129,6 +165,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | Plant-sitter sheet: a printable/shareable care list for someone watering while you're away | Could | v1.x |
 | ☐ | Accounts and sync between devices (ASP.NET Core Web API, EF Core, Identity) | Later | v2 |
 | ☐ | Public read-only collection page | Later | v2 |
+| ☐ | Plant identification from a photo via an identification API (needs a backend to keep the API key secret) | Later | v2 |
 | ☐ | Push notifications, widgets and a Google Play release (MAUI Blazor Hybrid) | Later | v3 |
 
 ## 9. Quality (not features, but part of each milestone)
@@ -138,6 +175,19 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 - Performance: the list stays quick with 200+ plants and 1000+ photos (thumbnails, lazy loading).
 - Database migrations: schema changes upgrade existing data and never wipe it.
 - Every PR builds and tests in CI; `main` always deploys.
+- Component tests for Razor components with bUnit.
+- End-to-end tests with Playwright in CI (add a plant, promote a propagation, export/import).
+- Lighthouse audit in CI (PWA, accessibility, performance) with a badge in the README.
+
+---
+
+## Top picks from the second round of ideas
+
+1. "New version available" banner: small, and needed for a PWA.
+2. Import existing photos with their dates.
+3. Sticky trap counts: useful for the thrips right now.
+4. Supplies stock and shopping list.
+5. Soil → semi-hydro transition tracker.
 
 ---
 
