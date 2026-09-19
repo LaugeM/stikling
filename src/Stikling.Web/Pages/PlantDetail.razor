@@ -127,7 +127,8 @@ else
                 @if (ancestors.Count == 0 && offspring.Count == 0 && fromPropagation is null)
                 {
                     <p class="text-body-secondary mb-0">
-                        No parent or offspring recorded. Use <em>Propagate</em> when you take a cutting from this plant.
+                        No parent or offspring recorded. Use <em>Propagate</em> for a cutting, corm or offset that
+                        still has to root, and it shows up under Props while it does.
                     </p>
                 }
                 else
@@ -166,7 +167,10 @@ else
                         </ul>
                     }
                 }
-                <a class="btn btn-link btn-sm p-0 mt-2" href="plants/new?parent=@plant.Id">Add an offspring plant directly</a>
+                <p class="family-hint">
+                    Already rooted and potted on its own?
+                    <a href="plants/new?parent=@plant.Id">Add it straight away as a plant</a>.
+                </p>
             </section>
 
             <section class="danger-zone">

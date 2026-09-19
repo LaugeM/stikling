@@ -6,29 +6,6 @@
     border-radius: 0.75rem;
 }
 
-.composer-row {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin-top: 0.5rem;
-}
-
-.icon-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.icon-btn svg {
-    width: 1.1rem;
-    height: 1.1rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.75;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
 .composer-date {
     display: flex;
     align-items: center;
@@ -40,12 +17,6 @@
 
 .composer-date input {
     width: auto;
-}
-
-.composer-status {
-    margin: 0.5rem 0 0;
-    font-size: 0.85rem;
-    color: var(--pa-muted);
 }
 
 .timeline,

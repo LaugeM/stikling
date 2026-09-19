@@ -444,6 +444,79 @@ a.item-card:focus-visible {
     font-size: 0.9rem;
 }
 
+/* Camera and gallery buttons, used when adding photos */
+.composer-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+}
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.icon-btn svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.composer-status {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+/* Photos picked while adding a plant */
+.photo-picks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.photo-pick {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--pa-green-soft);
+}
+
+.photo-pick img,
+.photo-pick .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-remove {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.2rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.55);
+    color: #fff;
+    line-height: 1;
+}
+
+.family-hint {
+    margin: 0.75rem 0 0;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
 .back-link {
     display: inline-block;
     margin-bottom: 0.5rem;

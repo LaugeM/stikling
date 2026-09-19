@@ -9,9 +9,15 @@ namespace Stikling.Core.Plants;
 /// </summary>
 public sealed class PlantService(IPlantRepository plants, ITimelineRepository timeline, TimeProvider time)
 {
-    /// <summary>Saves a new plant and records "Added to collection".</summary>
-    public async Task CreateAsync(Plant plant)
+    /// <summary>
+    /// Saves a new plant and records "Added to collection". Photos taken while adding it start
+    /// its history, and the first one becomes the cover.
+    /// </summary>
+    public async Task CreateAsync(Plant plant, IReadOnlyList<Photo>? photos = null)
     {
+        if (photos is { Count: > 0 })
+            plant.CoverPhotoId ??= photos[0].Id;
+
         await plants.SaveAsync(plant);
         await timeline.AddAsync(new TimelineEntry
         {
@@ -21,6 +27,18 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             OccurredAt = StartOf(plant.AcquiredOn) ?? time.GetUtcNow(),
             Text = plant.Origin == PlantOrigin.Propagated ? "Added as a propagated plant" : "Added to collection"
         });
+
+        if (photos is { Count: > 0 })
+        {
+            await timeline.AddAsync(new TimelineEntry
+            {
+                SubjectType = SubjectType.Plant,
+                SubjectId = plant.Id,
+                Kind = TimelineKind.Photo,
+                OccurredAt = photos.Max(p => p.TakenAt),
+                PhotoIds = photos.Select(p => p.Id).ToList()
+            });
+        }
     }
 
     /// <summary>Saves an edited plant and records what changed (status, room, medium, pot).</summary>

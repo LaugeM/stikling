@@ -41,6 +41,25 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Create_with_photos_sets_the_cover_and_starts_the_history()
+    {
+        var taken = Now.AddHours(-2);
+        var photos = new[]
+        {
+            new Photo { SubjectType = SubjectType.Plant, TakenAt = taken },
+            new Photo { SubjectType = SubjectType.Plant, TakenAt = taken.AddMinutes(5) }
+        };
+        var plant = new Plant { Nickname = "Coleus" };
+
+        await service.CreateAsync(plant, photos);
+
+        Assert.Equal(photos[0].Id, plant.CoverPhotoId);
+        var entry = Assert.Single(timeline.Entries, e => e.Kind == TimelineKind.Photo);
+        Assert.Equal(photos.Select(p => p.Id), entry.PhotoIds);
+        Assert.Equal(taken.AddMinutes(5), entry.OccurredAt);
+    }
+
+    [Fact]
     public async Task Create_rejects_invalid_plants_without_writing_history()
     {
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateAsync(new Plant()));
