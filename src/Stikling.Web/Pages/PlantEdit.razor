@@ -4,6 +4,7 @@
 @inject PlantService PlantService
 @inject PhotoService Photos
 @inject NavigationManager Navigation
+@implements IAsyncDisposable
 
 <PageTitle>@(IsNew ? "Add plant" : "Edit plant") · Stikling</PageTitle>
 
@@ -297,10 +298,28 @@ else
     // Leaving without saving the plant: the photos would belong to nothing
     private async Task CancelAsync()
     {
+        await DiscardPhotosAsync();
+        Navigation.NavigateTo(IsNew ? "plants" : $"plants/{Id}");
+    }
+
+    private async Task DiscardPhotosAsync()
+    {
         foreach (var photo in photos)
             await Photos.DeleteAsync(photo.Id);
         photos.Clear();
-        Navigation.NavigateTo(IsNew ? "plants" : $"plants/{Id}");
+    }
+
+    /// <summary>Also covers leaving by the back link or the phone's back button.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await DiscardPhotosAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away; the photos go with it
+        }
     }
 
     private async Task SaveAsync()
@@ -316,9 +335,14 @@ else
         try
         {
             if (IsNew)
+            {
                 await PlantService.CreateAsync(plant, photos);
+                photos.Clear(); // they belong to the saved plant now
+            }
             else
+            {
                 await PlantService.UpdateAsync(original!, plant, Labels.For);
+            }
             Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
         }
         catch (Exception ex)

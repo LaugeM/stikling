@@ -10,6 +10,9 @@ public interface ITimelineRepository
     /// <summary>The newest entry per subject, for "last activity" in lists.</summary>
     Task<IReadOnlyDictionary<Guid, TimelineEntry>> GetLatestPerSubjectAsync();
 
+    /// <summary>The newest entries across everything, for the activity list on Today.</summary>
+    Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count);
+
     Task AddAsync(TimelineEntry entry);
 
     /// <summary>Soft-deletes an entry, e.g. a note added by mistake.</summary>

@@ -71,3 +71,8 @@
     stroke-linecap: round;
     stroke-linejoin: round;
 }
+
+/* Room for the "new version ready" bar so it can't cover a button */
+.app-content.with-banner {
+    padding-bottom: calc(8.5rem + env(safe-area-inset-bottom));
+}

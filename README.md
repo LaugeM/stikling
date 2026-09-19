@@ -6,7 +6,7 @@
 
 Stikling is a Progressive Web App: it runs in the browser, can be installed on your phone's home screen, and works offline. All data stays on your own device. There are no accounts and nothing is sent to a server.
 
-> Status: early development. See [Roadmap](#roadmap).
+> Status: v1 features are in place. See [Roadmap](#roadmap).
 
 ## Features (planned for v1)
 
@@ -63,7 +63,7 @@ Because Pages serves the site from `/<repo-name>/`, [`prepare-pages.py`](.github
 2. Plants ✅
 3. Photos and timeline ✅
 4. Propagations and lineage ✅
-5. Backup/restore and the Today screen
+5. Backup/restore and the Today screen ✅
 6. Later: care and fertiliser log, pest treatment tracking, success rates per medium, QR labels, optional accounts and sync
 
 ## About

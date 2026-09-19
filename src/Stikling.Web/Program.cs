@@ -26,5 +26,7 @@ builder.Services.AddScoped<IPhotoRepository, IndexedDbPhotoRepository>();
 builder.Services.AddScoped<PlantService>();
 builder.Services.AddScoped<PropagationService>();
 builder.Services.AddScoped<PhotoService>();
+builder.Services.AddScoped<DeviceFiles>();
+builder.Services.AddScoped<BackupService>();
 
 await builder.Build().RunAsync();

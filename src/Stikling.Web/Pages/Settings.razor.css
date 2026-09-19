@@ -13,3 +13,27 @@
     font-size: 0.875rem;
     color: var(--pa-muted);
 }
+
+.settings-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.confirm-card {
+    margin-top: 0.75rem;
+    padding: 0.85rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-green);
+    border-radius: 0.75rem;
+}
+
+.confirm-card p {
+    margin-bottom: 0.25rem;
+}
+
+.settings-message {
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+}

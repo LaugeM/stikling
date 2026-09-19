@@ -85,3 +85,23 @@ export async function remove(id) {
         await removeBlob(key);
     }
 }
+
+// Backup and restore work on raw bytes: the photo itself and its thumbnail.
+export async function getBytes(id, thumbnail) {
+    const blob = await getBlob(thumbnail ? thumbKey(id) : id);
+    return blob ? new Uint8Array(await blob.arrayBuffer()) : null;
+}
+
+export async function putBytes(id, bytes, thumbBytes) {
+    await putBlob(id, new Blob([bytes], { type: "image/jpeg" }));
+    if (thumbBytes) await putBlob(thumbKey(id), new Blob([thumbBytes], { type: "image/jpeg" }));
+
+    // Drop any object URL made before the photo came back
+    for (const key of [id, thumbKey(id)]) {
+        const url = urlCache.get(key);
+        if (url) {
+            URL.revokeObjectURL(url);
+            urlCache.delete(key);
+        }
+    }
+}

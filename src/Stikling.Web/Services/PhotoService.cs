@@ -53,6 +53,14 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     public async Task<string?> GetUrlAsync(Guid id, bool thumbnail) =>
         await (await Module).InvokeAsync<string?>("getUrl", id, thumbnail);
 
+    /// <summary>The stored image data, for writing into a backup. Null when it's missing.</summary>
+    public async Task<byte[]?> GetBytesAsync(Guid id, bool thumbnail) =>
+        await (await Module).InvokeAsync<byte[]?>("getBytes", id, thumbnail);
+
+    /// <summary>Puts image data back from a backup.</summary>
+    public async Task PutBytesAsync(Guid id, byte[] bytes, byte[]? thumbnail) =>
+        await (await Module).InvokeVoidAsync("putBytes", id, bytes, thumbnail);
+
     /// <summary>Removes the photo: its metadata is soft-deleted and the image data is freed.</summary>
     public async Task DeleteAsync(Guid id)
     {

@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@inject IndexedDb Db
 
 <div class="app-shell">
     <header class="app-header">
@@ -6,9 +7,11 @@
         <ThemeToggle />
     </header>
 
-    <main class="app-content">
+    <main class="app-content @(updateReady ? "with-banner" : null)">
         @Body
     </main>
+
+    <UpdateBanner ReadyChanged="ready => updateReady = ready" />
 
     <nav class="bottom-nav" aria-label="Main">
         <NavLink class="bottom-nav-link" href="" Match="NavLinkMatch.All">
@@ -29,3 +32,24 @@
         </NavLink>
     </nav>
 </div>
+
+@code {
+    private bool updateReady;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            // Asks the browser to keep the data when space runs low. Installed apps are
+            // usually granted this without asking the user anything.
+            await Db.RequestPersistenceAsync();
+        }
+        catch (JSException)
+        {
+            // Storage that can't be made persistent still works
+        }
+    }
+}

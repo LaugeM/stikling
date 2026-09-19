@@ -1,0 +1,71 @@
+@* Shows a bar when a new version of the app has been downloaded in the background. *@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+@if (ready)
+{
+    <div class="update-banner" role="status">
+        <span>A new version of Stikling is ready.</span>
+        <button type="button" class="btn btn-primary btn-sm" @onclick="ReloadAsync">Reload</button>
+        <button type="button" class="btn btn-link btn-sm" @onclick="() => SetReadyAsync(false)">Later</button>
+    </div>
+}
+
+@code {
+    /// <summary>Raised when the banner appears, so the page can leave room for it.</summary>
+    [Parameter]
+    public EventCallback<bool> ReadyChanged { get; set; }
+
+    internal const string ModulePath = "./js/update.js";
+    internal const string WatchMethod = "watch";
+    internal const string ApplyMethod = "apply";
+
+    private IJSObjectReference? module;
+    private DotNetObjectReference<UpdateBanner>? self;
+    private bool ready;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", ModulePath);
+            self = DotNetObjectReference.Create(this);
+            await module.InvokeVoidAsync(WatchMethod, self);
+        }
+        catch (JSException)
+        {
+            // No service worker (e.g. running from dotnet run): nothing to watch
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnUpdateReady() => await InvokeAsync(async () =>
+    {
+        await SetReadyAsync(true);
+        StateHasChanged();
+    });
+
+    private async Task SetReadyAsync(bool value)
+    {
+        if (ready == value)
+            return;
+        ready = value;
+        await ReadyChanged.InvokeAsync(value);
+    }
+
+    private async Task ReloadAsync()
+    {
+        if (module is not null)
+            await module.InvokeVoidAsync(ApplyMethod);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is not null)
+            await module.DisposeAsync();
+        self?.Dispose();
+    }
+}

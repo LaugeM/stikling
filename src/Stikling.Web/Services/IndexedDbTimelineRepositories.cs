@@ -13,6 +13,9 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
             .GroupBy(e => e.SubjectId)
             .ToDictionary(g => g.Key, g => g.First());
 
+    public async Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count) =>
+        TimelineOrder.NewestFirst(await db.GetAllAsync<TimelineEntry>(Stores.Timeline)).Take(count).ToList();
+
     public async Task AddAsync(TimelineEntry entry)
     {
         entry.CreatedAt = entry.UpdatedAt = time.GetUtcNow();

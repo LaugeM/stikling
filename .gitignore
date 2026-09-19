@@ -480,3 +480,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# "Backup*/" above is meant for Visual Studio's own upgrade backups, but it also hid the
+# app's backup code. This keeps that folder in the repository.
+!src/Stikling.Core/Backup/

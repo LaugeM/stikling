@@ -1,9 +1,170 @@
 @page "/"
+@inject IPlantRepository Plants
+@inject IPropagationRepository Propagations
+@inject ITimelineRepository Entries
+@inject DeviceFiles Files
+@inject TimeProvider Time
 
 <PageTitle>Today · Stikling</PageTitle>
 
 <h1>Today</h1>
 
-<div class="empty-state">
-    <p>Nothing to check yet. Propagations that need a look will show up here.</p>
-</div>
+@if (!loaded)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (plants.Count == 0 && propagations.Count == 0)
+{
+    <div class="empty-state">
+        <p>Nothing here yet. Add your first plant and it shows up in your collection.</p>
+        <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
+    </div>
+}
+else
+{
+    <p class="today-counts">
+        @Labels.Plants(plants.Count) · @Labels.Count(active.Count, "propagation") going
+    </p>
+
+    @if (backupReminder is { } reminder)
+    {
+        <div class="reminder">
+            <span>@reminder</span>
+            <a class="btn btn-outline-primary btn-sm" href="settings">Back up</a>
+        </div>
+    }
+
+    <section class="today-section">
+        <h2>Worth a look</h2>
+        @if (checks.Count == 0)
+        {
+            <p class="text-body-secondary mb-0">
+                @(active.Count == 0
+                    ? "No propagations on the go. Open a plant and tap Propagate to start one."
+                    : "Nothing waiting. Every propagation has been looked at in the last week.")
+            </p>
+        }
+        else
+        {
+            <ul class="item-list">
+                @foreach (var check in checks)
+                {
+                    <li>
+                        <a class="item-card" href="propagations/@check.Propagation.Id">
+                            <div class="item-thumb" aria-hidden="true">
+                                @if (check.Propagation.CoverPhotoId is { } coverId)
+                                {
+                                    <PhotoImage PhotoId="coverId" />
+                                }
+                                else
+                                {
+                                    <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+                                }
+                            </div>
+                            <div class="item-text">
+                                <div class="item-name">@check.Propagation.DisplayName</div>
+                                <div class="item-meta">
+                                    <span class="badge stage-badge">@Labels.Stage(check.Propagation.Stage, check.Propagation.Type)</span>
+                                    <span>@Labels.Summary(check.Propagation) · last seen @Labels.DaysAgo(check.DaysSince)</span>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="today-section">
+        <h2>Lately</h2>
+        @if (recent.Count == 0)
+        {
+            <p class="text-body-secondary mb-0">Nothing written down yet.</p>
+        }
+        else
+        {
+            <ul class="activity-list">
+                @foreach (var entry in recent)
+                {
+                    <li>
+                        <a href="@LinkTo(entry)">
+                            <span class="activity-subject">@NameOf(entry)</span>
+                            <span class="activity-text">@Summary(entry)</span>
+                        </a>
+                        <span class="activity-day">@DayLabel(entry.OccurredAt)</span>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+}
+
+@code {
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Propagation> propagations = [];
+    private List<Propagation> active = [];
+    private IReadOnlyList<PropagationCheck> checks = [];
+    private IReadOnlyList<TimelineEntry> recent = [];
+    private Dictionary<Guid, string> names = [];
+    private string? backupReminder;
+    private bool loaded;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    protected override async Task OnInitializedAsync()
+    {
+        plants = await Plants.GetAllAsync();
+        propagations = await Propagations.GetAllAsync();
+        active = propagations.Where(p => p.IsActive).ToList();
+
+        var latest = await Entries.GetLatestPerSubjectAsync();
+        checks = TodayBoard.NeedsChecking(propagations, latest, Today);
+        recent = await Entries.GetRecentAsync(8);
+
+        names = plants.ToDictionary(p => p.Id, p => p.DisplayName);
+        foreach (var propagation in propagations)
+            names[propagation.Id] = propagation.DisplayName;
+
+        backupReminder = await BackupReminderAsync();
+        loaded = true;
+    }
+
+    // Nagging once a month is enough, and only when there's something to lose
+    private async Task<string?> BackupReminderAsync()
+    {
+        if (plants.Count == 0 && propagations.Count == 0)
+            return null;
+
+        var last = await Files.GetLastBackupAsync();
+        return TodayBoard.DaysSinceBackup(last, Today) switch
+        {
+            null => "No backup yet. Your plants live on this device only.",
+            >= 30 and var days => $"Last backup was {Labels.DaysAgo(days)}.",
+            _ => null
+        };
+    }
+
+    private string NameOf(TimelineEntry entry) =>
+        names.TryGetValue(entry.SubjectId, out var name) ? name : "Deleted";
+
+    private string LinkTo(TimelineEntry entry) =>
+        entry.SubjectType == SubjectType.Plant
+            ? $"plants/{entry.SubjectId}?tab=history"
+            : $"propagations/{entry.SubjectId}?tab=history";
+
+    private static string Summary(TimelineEntry entry)
+    {
+        var text = entry.Text?.ReplaceLineEndings(" · ");
+        if (!string.IsNullOrWhiteSpace(text))
+            return text;
+        return entry.PhotoIds.Count == 1 ? "Photo added" : $"{entry.PhotoIds.Count} photos added";
+    }
+
+    private string DayLabel(DateTimeOffset moment)
+    {
+        var day = DateOnly.FromDateTime(moment.ToLocalTime().DateTime);
+        return day == Today ? "today"
+            : day == Today.AddDays(-1) ? "yesterday"
+            : Labels.Date(day);
+    }
+}

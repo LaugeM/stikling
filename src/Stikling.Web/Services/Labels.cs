@@ -78,8 +78,29 @@ public static class Labels
             var days => $"day {days}"
         };
 
+    /// <summary>"12.4 MB", for the storage line in Settings.</summary>
+    public static string Bytes(long bytes) => bytes switch
+    {
+        < 1024 => $"{bytes} B",
+        < 1024 * 1024 => $"{bytes / 1024d:0.#} KB",
+        < 1024L * 1024 * 1024 => $"{bytes / (1024d * 1024):0.#} MB",
+        _ => $"{bytes / (1024d * 1024 * 1024):0.##} GB"
+    };
+
+    /// <summary>"today", "yesterday", "12 days ago".</summary>
+    public static string DaysAgo(int days) => days switch
+    {
+        <= 0 => "today",
+        1 => "yesterday",
+        _ => $"{days} days ago"
+    };
+
     /// <summary>"1 plant" / "3 plants".</summary>
-    public static string Plants(int count) => count == 1 ? "1 plant" : $"{count} plants";
+    public static string Plants(int count) => Count(count, "plant");
+
+    /// <summary>"1 propagation" / "3 propagations". Plural is the singular plus "s" unless given.</summary>
+    public static string Count(int count, string singular, string? plural = null) =>
+        count == 1 ? $"1 {singular}" : $"{count} {plural ?? singular + "s"}";
 
     public static string Time(DateTimeOffset moment) =>
         moment.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture);
