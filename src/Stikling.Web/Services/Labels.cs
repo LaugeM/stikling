@@ -31,6 +31,7 @@ public static class Labels
         GrowingMedium.Leca => "LECA",
         GrowingMedium.Pon => "PON",
         GrowingMedium.Sphagnum => "Sphagnum moss",
+        GrowingMedium.CormRiser => "Corm riser",
         _ => medium.ToString()
     };
 

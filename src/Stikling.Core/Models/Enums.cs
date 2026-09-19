@@ -36,6 +36,10 @@ public enum GrowingMedium
     Perlite,
     Sphagnum,
     Water,
+
+    /// <summary>Held above water rather than in it, e.g. a corm on a riser in a sealed box.</summary>
+    CormRiser,
+
     Other
 }
 

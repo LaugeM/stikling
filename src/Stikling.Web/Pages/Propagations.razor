@@ -1,6 +1,7 @@
 @page "/propagations"
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
+@inject TimeProvider Time
 
 <PageTitle>Propagations · Stikling</PageTitle>
 
@@ -45,9 +46,40 @@ else
     {
         <div class="empty-state"><p>No propagations match.</p></div>
     }
-    else if (progress == ProgressFilter.Active)
+
+    @foreach (var experiment in experiments)
     {
-        @foreach (var (stage, items) in PropagationFilter.ByStage(visible))
+        <section class="stage-group">
+            <h2>@experiment.Name <span class="text-body-secondary">(@Labels.Count(experiment.Entries.Count, "batch", "batches"))</span></h2>
+            <ul class="item-list experiment-list">
+                @foreach (var entry in experiment.Entries)
+                {
+                    <li>
+                        <a class="experiment-row" href="propagations/@entry.Propagation.Id"
+                           aria-label="@entry.Propagation.DisplayName in @Labels.For(entry.Propagation.Medium)">
+                            <span class="experiment-medium">@Labels.For(entry.Propagation.Medium)</span>
+                            @if (entry.DaysToRoot is { } days)
+                            {
+                                <span class="experiment-result rooted">Rooted in @Labels.Count(days, "day")</span>
+                            }
+                            else
+                            {
+                                <span class="experiment-result">@(Labels.Stage(entry.Propagation.Stage, entry.Propagation.Type)) · day @entry.DaysRunning</span>
+                            }
+                            @if (entry.Propagation.PottedUpCount > 0 || entry.Propagation.FailedCount > 0)
+                            {
+                                <span class="experiment-outcome">@PropagationService.Outcome(entry.Propagation)</span>
+                            }
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (ungrouped.Count > 0 && progress == ProgressFilter.Active)
+    {
+        @foreach (var (stage, items) in PropagationFilter.ByStage(ungrouped))
         {
             <section class="stage-group">
                 <h2>@Labels.Stage(stage) <span class="text-body-secondary">(@items.Count)</span></h2>
@@ -60,10 +92,10 @@ else
             </section>
         }
     }
-    else
+    else if (ungrouped.Count > 0)
     {
         <ul class="item-list">
-            @foreach (var propagation in visible)
+            @foreach (var propagation in ungrouped)
             {
                 <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" /></li>
             }
@@ -86,6 +118,11 @@ else
 
     private IReadOnlyList<Propagation>? all;
     private List<Propagation> visible = [];
+
+    // Batches in an experiment are shown under it instead of in the stage groups, so nothing appears twice
+    private IReadOnlyList<ExperimentGroup> experiments = [];
+    private List<Propagation> ungrouped = [];
+
     private Dictionary<Guid, Plant> plants = [];
 
     private string? search;
@@ -104,8 +141,14 @@ else
         Refresh();
     }
 
-    private void Refresh() =>
+    private void Refresh()
+    {
         visible = new PropagationFilter(search, progress).Apply(all ?? []).ToList();
+        experiments = Experiments.Group(visible, DateOnly.FromDateTime(Time.GetLocalNow().DateTime));
+
+        var grouped = experiments.SelectMany(e => e.Entries).Select(e => e.Propagation.Id).ToHashSet();
+        ungrouped = visible.Where(p => !grouped.Contains(p.Id)).ToList();
+    }
 
     private string? ParentName(Propagation propagation) =>
         propagation.ParentPlantId is { } id && plants.TryGetValue(id, out var parent) ? parent.DisplayName : null;

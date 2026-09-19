@@ -72,6 +72,7 @@ public sealed class PropagationService(
     public async Task UpdateAsync(Propagation before, Propagation after, Func<Enum, string> label)
     {
         after.SyncStageWithCounts();
+        after.NoteRooted(Today);
         await propagations.SaveAsync(after);
 
         var changes = PropagationChanges.Describe(before, after, label);

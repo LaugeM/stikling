@@ -78,6 +78,15 @@ else
                 </div>
             </div>
             <div class="form-text">Already rooting when you write it down? Say so here, the stage can be changed later.</div>
+            @if (propagation.Stage == PropagationStage.Rooted || propagation.RootedOn is not null)
+            {
+                <div class="mt-3">
+                    <label class="form-label" for="rooted">Rooted on</label>
+                    <InputDate id="rooted" class="form-control" @bind-Value="propagation.RootedOn"
+                               min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    <div class="form-text">Filled in by itself when you move it to rooted. Change it if it rooted earlier.</div>
+                </div>
+            }
         </fieldset>
 
         <fieldset>
@@ -128,6 +137,18 @@ else
                     <InputText id="container" class="form-control" @bind-Value="propagation.Container" placeholder="e.g. Humidity box" />
                 </div>
             </div>
+            <div class="mb-3">
+                <label class="form-label" for="experiment">Experiment</label>
+                <InputText id="experiment" class="form-control" @bind-Value="propagation.Experiment" list="experiment-list"
+                           placeholder="e.g. Alocasia corm test" autocomplete="off" />
+                <datalist id="experiment-list">
+                    @foreach (var name in experiments)
+                    {
+                        <option value="@name"></option>
+                    }
+                </datalist>
+                <div class="form-text">Give batches you started together the same name and they're compared side by side.</div>
+            </div>
             <div class="mb-1">
                 <label class="form-label" for="location">Location</label>
                 <InputText id="location" class="form-control" @bind-Value="propagation.Location" list="location-list" placeholder="e.g. Kitchen window" autocomplete="off" />
@@ -170,6 +191,7 @@ else
     private List<string> errors = [];
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<string> locations = [];
+    private IReadOnlyList<string> experiments = [];
 
     private bool IsNew => Id is null;
 
@@ -189,6 +211,7 @@ else
         var allPropagations = await Repository.GetAllAsync();
         plants = allPlants.OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
         locations = PlantFilter.Locations(allPlants.Select(p => p.Location).Concat(allPropagations.Select(p => p.Location)));
+        experiments = Experiments.Names(allPropagations);
 
         if (IsNew)
         {
