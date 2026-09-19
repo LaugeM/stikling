@@ -29,7 +29,16 @@ public sealed class Propagation : Entity
 
     public string? Location { get; set; }
 
+    /// <summary>
+    /// Groups propagations started together so they can be compared, e.g. "Alocasia corm test"
+    /// for the same corms in LECA, perlite, sphagnum and on a riser.
+    /// </summary>
+    public string? Experiment { get; set; }
+
     public DateOnly StartedOn { get; set; }
+
+    /// <summary>The day it first reached Rooted, kept so batches can be compared.</summary>
+    public DateOnly? RootedOn { get; set; }
 
     /// <summary>How many units the batch started with.</summary>
     public int InitialCount { get; set; } = 1;
@@ -58,8 +67,23 @@ public sealed class Propagation : Entity
     public string DisplayName =>
         !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? "Unnamed propagation";
 
+    /// <summary>How long it took to root, or null while it hasn't.</summary>
+    [JsonIgnore]
+    public int? DaysToRoot =>
+        RootedOn is { } rooted ? Math.Max(0, rooted.DayNumber - StartedOn.DayNumber) : null;
+
     /// <summary>Days since it was started: 0 on the day itself.</summary>
     public int DaysSinceStart(DateOnly today) => Math.Max(0, today.DayNumber - StartedOn.DayNumber);
+
+    /// <summary>
+    /// Remembers the day it first reached Rooted. Only Rooted, never Done: a batch can go
+    /// straight from Started to potted up, and a guessed date would spoil the comparison.
+    /// </summary>
+    public void NoteRooted(DateOnly today)
+    {
+        if (Stage == PropagationStage.Rooted && RootedOn is null)
+            RootedOn = today;
+    }
 
     public Propagation Copy() => (Propagation)MemberwiseClone();
 
@@ -118,6 +142,8 @@ public sealed class Propagation : Entity
             errors.Add("Start with at least 1.");
         else if (InitialCount < PottedUpCount + FailedCount)
             errors.Add($"The count can't be lower than the {PottedUpCount + FailedCount} already potted up or failed.");
+        if (RootedOn is { } rooted && rooted < StartedOn)
+            errors.Add("It can't have rooted before it was started.");
         return errors;
     }
 }

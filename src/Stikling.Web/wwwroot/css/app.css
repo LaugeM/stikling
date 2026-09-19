@@ -249,6 +249,52 @@ a.item-card:focus-visible {
     gap: 0.6rem;
 }
 
+/* Experiment rows: one line per batch, so the substrates can be compared at a glance */
+.experiment-list {
+    gap: 0;
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.experiment-list li + li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.experiment-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.15rem 0.5rem;
+    min-height: 44px;
+    padding: 0.7rem 0.9rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.experiment-medium {
+    flex: 1 1 auto;
+    font-weight: 600;
+}
+
+.experiment-result {
+    flex: 0 0 auto;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.experiment-result.rooted {
+    color: var(--pa-green-dark);
+    font-weight: 600;
+}
+
+.experiment-outcome {
+    flex: 1 0 100%;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
 /* Radio buttons shown as a segmented control (filters, propagation stage) */
 .segmented {
     display: flex;
