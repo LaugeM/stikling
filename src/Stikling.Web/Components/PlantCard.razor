@@ -1,0 +1,36 @@
+@* One row in the plant list: thumbnail, names, and a short status line *@
+
+<a class="plant-card" href="plants/@Plant.Id">
+    <div class="plant-thumb" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+    </div>
+
+    <div class="plant-text">
+        <div class="plant-name">@Plant.DisplayName</div>
+        @if (!string.IsNullOrWhiteSpace(Plant.Nickname) && Plant.BotanicalName is { } botanical)
+        {
+            <div class="plant-botanical">@botanical</div>
+        }
+        <div class="plant-meta">
+            @if (Plant.Status != PlantStatus.Active)
+            {
+                <span class="badge text-bg-secondary">@Labels.For(Plant.Status)</span>
+            }
+            <span>@OriginText</span>
+            @if (!string.IsNullOrWhiteSpace(Plant.Location))
+            {
+                <span>· @Plant.Location</span>
+            }
+        </div>
+    </div>
+</a>
+
+@code {
+    [Parameter, EditorRequired]
+    public required Plant Plant { get; set; }
+
+    private string OriginText =>
+        Plant.AcquiredOn is { } date
+            ? $"{Labels.For(Plant.Origin)} {Labels.Date(date)}"
+            : Labels.For(Plant.Origin);
+}

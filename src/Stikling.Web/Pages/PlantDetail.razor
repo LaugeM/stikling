@@ -1,0 +1,153 @@
+@page "/plants/{Id:guid}"
+@inject IPlantRepository Repository
+@inject NavigationManager Navigation
+
+<PageTitle>@(plant?.DisplayName ?? "Plant") · Stikling</PageTitle>
+
+<a class="back-link" href="plants">‹ Plants</a>
+
+@if (plant is null)
+{
+    <p class="text-body-secondary">@(loaded ? "That plant doesn't exist or was deleted." : "Loading…")</p>
+}
+else
+{
+    <header class="plant-header">
+        <div class="plant-cover" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+        </div>
+        <div class="min-w-0">
+            <h1>@plant.DisplayName</h1>
+            @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is { } botanical)
+            {
+                <p class="plant-botanical">@botanical</p>
+            }
+            @if (plant.Status != PlantStatus.Active)
+            {
+                <span class="badge text-bg-secondary">@Labels.For(plant.Status)</span>
+            }
+        </div>
+    </header>
+
+    <div class="plant-actions">
+        <a class="btn btn-primary" href="plants/@plant.Id/edit">Edit</a>
+        <a class="btn btn-outline-primary" href="plants/new?parent=@plant.Id">Add offspring</a>
+    </div>
+
+    <section class="detail-card">
+        <dl class="detail-list">
+            <dt>Got it</dt>
+            <dd>
+                @Labels.For(plant.Origin)
+                @if (plant.AcquiredOn is { } date)
+                {
+                    <text> · @Labels.Date(date)</text>
+                }
+                @if (!string.IsNullOrWhiteSpace(plant.Source))
+                {
+                    <text> · @plant.Source</text>
+                }
+            </dd>
+
+            <dt>Location</dt>
+            <dd>@(string.IsNullOrWhiteSpace(plant.Location) ? "—" : plant.Location)</dd>
+
+            <dt>Grows in</dt>
+            <dd>
+                @Labels.For(plant.Medium)
+                @if (!string.IsNullOrWhiteSpace(plant.Container))
+                {
+                    <text> · @plant.Container</text>
+                }
+            </dd>
+        </dl>
+
+        @if (!string.IsNullOrWhiteSpace(plant.Notes))
+        {
+            <h2>Notes</h2>
+            <p class="plant-notes">@plant.Notes</p>
+        }
+    </section>
+
+    <section class="detail-card">
+        <h2>Family</h2>
+        @if (ancestors.Count == 0 && offspring.Count == 0)
+        {
+            <p class="text-body-secondary mb-0">
+                No parent or offspring recorded. Use <em>Add offspring</em> when you pot up a cutting from this plant.
+            </p>
+        }
+        else
+        {
+            @if (ancestors.Count > 0)
+            {
+                <h3>Came from</h3>
+                <ul class="family-list">
+                    @foreach (var ancestor in ancestors)
+                    {
+                        <li><a href="plants/@ancestor.Id">@ancestor.DisplayName</a></li>
+                    }
+                </ul>
+            }
+            @if (offspring.Count > 0)
+            {
+                <h3>Offspring (@offspring.Count)</h3>
+                <ul class="family-list">
+                    @foreach (var child in offspring)
+                    {
+                        <li>
+                            <a href="plants/@child.Id">@child.DisplayName</a>
+                            @if (child.Status != PlantStatus.Active)
+                            {
+                                <span class="text-body-secondary small"> · @Labels.For(child.Status)</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        }
+    </section>
+
+    <section class="danger-zone">
+        @if (confirmDelete)
+        {
+            <p class="mb-2">Delete <strong>@plant.DisplayName</strong>? If it died or you gave it away, consider changing its status instead so its history is kept.</p>
+            <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
+            <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+        }
+        else
+        {
+            <button class="btn btn-link btn-sm text-danger p-0" @onclick="() => confirmDelete = true">Delete plant</button>
+        }
+    </section>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private Plant? plant;
+    private bool loaded;
+    private bool confirmDelete;
+    private IReadOnlyList<Plant> ancestors = [];
+    private IReadOnlyList<Plant> offspring = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        confirmDelete = false;
+        var all = await Repository.GetAllAsync();
+        plant = all.FirstOrDefault(p => p.Id == Id);
+        if (plant is not null)
+        {
+            ancestors = PlantLineage.Ancestors(plant, all);
+            offspring = PlantLineage.Offspring(plant, all);
+        }
+        loaded = true;
+    }
+
+    private async Task DeleteAsync()
+    {
+        await Repository.DeleteAsync(Id);
+        Navigation.NavigateTo("plants", replace: true);
+    }
+}
