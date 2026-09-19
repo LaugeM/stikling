@@ -62,10 +62,22 @@ else
                     <InputNumber id="count" class="form-control" @bind-Value="propagation.InitialCount" min="@MinCount" inputmode="numeric" />
                 </div>
             </div>
-            <div class="mb-1">
-                <label class="form-label" for="started">Started on</label>
-                <InputDate id="started" class="form-control" @bind-Value="propagation.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
+            <div class="row g-2 mb-1">
+                <div class="col-6">
+                    <label class="form-label" for="started">Started on</label>
+                    <InputDate id="started" class="form-control" @bind-Value="propagation.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="stage">How far along</label>
+                    <InputSelect id="stage" class="form-select" @bind-Value="propagation.Stage" disabled="@(!propagation.IsActive)">
+                        @foreach (var stage in ManualStages)
+                        {
+                            <option value="@stage">@Labels.Stage(stage, propagation.Type)</option>
+                        }
+                    </InputSelect>
+                </div>
             </div>
+            <div class="form-text">Already rooting when you write it down? Say so here, the stage can be changed later.</div>
         </fieldset>
 
         <fieldset>
@@ -147,6 +159,9 @@ else
     /// <summary>The plant it's taken from, e.g. from "Propagate" on a plant's page.</summary>
     [SupplyParameterFromQuery(Name = "parent")]
     public Guid? ParentId { get; set; }
+
+    private static readonly PropagationStage[] ManualStages =
+        [PropagationStage.Started, PropagationStage.Rooting, PropagationStage.Rooted];
 
     private Propagation? propagation;
     private Propagation? original; // as it was before editing, to record what changed

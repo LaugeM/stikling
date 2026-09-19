@@ -21,6 +21,7 @@ A working list of what Stikling could do, grouped by area and tagged with a prio
 | ✅ | Search on all name fields; filter by status and room | Must | M2 |
 | ✅ | Parent plant and offspring, "Add offspring" | Must | M2 |
 | ✅ | Cover photo on cards and the plant page | Must | M3 |
+| ✅ | Add a photo while adding the plant, not only afterwards. The first one becomes the cover | Should | M4 |
 | ✅ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | Must | M3–M4 |
 | ☐ | Select several plants at once: change status, move to a room, add a note to all | Should | M3 |
 | ☐ | Favourites / pinned plants at the top of the list | Could | v1.x |
@@ -168,6 +169,17 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation" | Could | v1.x |
 | ☐ | **Badge on the app icon** with the number of things due today | Could | v1.x |
 | ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | Could | v1.x |
+
+## 7c. Help & first visit
+
+| ✓ | Feature | Priority | When |
+|---|---|---|---|
+| ☐ | **Guided tour on the first visit**: a short walk through the app (plants, propagations, photos, backup) that can be skipped | Should | v1.x |
+| ☐ | Start the tour again from Settings whenever you want | Should | v1.x |
+| ☐ | **FAQ page**: how the app stores everything on your device, what happens if you clear the browser, how to back up, how propagation and lineage work, how to install it on the phone | Should | v1.x |
+| ☐ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | Could | v1.x |
+| ☐ | Empty screens that say what to do next instead of just "nothing here" | Could | v1.x |
+| ☐ | A demo plant and propagation that can be loaded and removed again, so the app can be tried out without adding real plants | Could | v1.x |
 
 ## 8. Sharing & later versions
 

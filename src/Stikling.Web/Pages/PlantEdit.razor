@@ -2,6 +2,7 @@
 @page "/plants/{Id:guid}/edit"
 @inject IPlantRepository Repository
 @inject PlantService PlantService
+@inject PhotoService Photos
 @inject NavigationManager Navigation
 
 <PageTitle>@(IsNew ? "Add plant" : "Edit plant") · Stikling</PageTitle>
@@ -84,6 +85,14 @@ else
                             <option value="@p.Id">@p.DisplayName</option>
                         }
                     </InputSelect>
+                    @if (IsNew && plant.ParentPlantId is { } parentId)
+                    {
+                        <div class="form-text">
+                            This is for a plant that already grows on its own. Still rooting?
+                            <a href="propagations/new?parent=@parentId">Start a propagation instead</a>,
+                            and pot it up when it's ready.
+                        </div>
+                    }
                 </div>
             }
 
@@ -134,14 +143,56 @@ else
             }
         </fieldset>
 
+        @if (IsNew)
+        {
+            <fieldset>
+                <legend>Photo</legend>
+                @if (photos.Count > 0)
+                {
+                    <div class="photo-picks">
+                        @foreach (var photo in photos)
+                        {
+                            <div class="photo-pick">
+                                <PhotoImage PhotoId="photo.Id" Alt="Photo of the new plant" />
+                                <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
+                                        aria-label="Remove photo" title="Remove photo">✕</button>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="composer-row">
+                    <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        Camera
+                    </label>
+                    <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                           @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput)" disabled="@busy" />
+
+                    <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                        Gallery
+                    </label>
+                    <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
+                           @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput)" disabled="@busy" />
+                </div>
+
+                <div class="form-text">The first photo becomes the cover. You can add more later on the plant's page.</div>
+                @if (photoStatus is not null)
+                {
+                    <p class="composer-status" role="status">@photoStatus</p>
+                }
+            </fieldset>
+        }
+
         <fieldset>
             <legend>Notes</legend>
             <InputTextArea class="form-control" rows="3" @bind-Value="plant.Notes" aria-label="Notes" />
         </fieldset>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Add plant" : "Save")</button>
-            <a class="btn btn-link" href="@(IsNew ? "plants" : $"plants/{Id}")">Cancel</a>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">@(IsNew ? "Add plant" : "Save")</button>
+            <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
         </div>
     </EditForm>
 }
@@ -153,6 +204,16 @@ else
     /// <summary>Pre-selects a parent, e.g. from the Family section on a plant's page.</summary>
     [SupplyParameterFromQuery(Name = "parent")]
     public Guid? ParentId { get; set; }
+
+    private readonly string cameraId = $"camera-{Guid.NewGuid():N}";
+    private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    /// <summary>Photos taken while adding the plant. They're saved with the plant.</summary>
+    private readonly List<Photo> photos = [];
+    private string? photoStatus;
+    private bool busy;
 
     private Plant? plant;
     private Plant? original; // the plant as it was before editing, to record what changed
@@ -175,7 +236,8 @@ else
 
         if (IsNew)
         {
-            plant = new Plant { AcquiredOn = DateOnly.FromDateTime(DateTime.Today) };
+            // The draft keeps its id, so photos taken before saving stay with it
+            plant ??= new Plant { AcquiredOn = DateOnly.FromDateTime(DateTime.Today) };
             if (ParentId is { } parentId && all.FirstOrDefault(p => p.Id == parentId) is { } parent)
             {
                 plant.Origin = PlantOrigin.Propagated;
@@ -197,6 +259,50 @@ else
             possibleParents = PlantLineage.PossibleParents(plant, all);
     }
 
+    private async Task AddPhotosAsync(ElementReference input)
+    {
+        if (plant is null)
+            return;
+
+        busy = true;
+        photoStatus = "Saving photos…";
+        StateHasChanged();
+
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType.Plant, plant.Id);
+            photos.AddRange(result.Saved);
+            photoStatus = result.Failed switch
+            {
+                0 => null,
+                1 => "1 file couldn't be read as an image and was skipped.",
+                var n => $"{n} files couldn't be read as images and were skipped."
+            };
+        }
+        catch (Exception ex)
+        {
+            photoStatus = $"Couldn't save the photos: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task RemovePhotoAsync(Photo photo)
+    {
+        await Photos.DeleteAsync(photo.Id);
+        photos.Remove(photo);
+        photoStatus = null;
+    }
+
+    // Leaving without saving the plant: the photos would belong to nothing
+    private async Task CancelAsync()
+    {
+        foreach (var photo in photos)
+            await Photos.DeleteAsync(photo.Id);
+        photos.Clear();
+        Navigation.NavigateTo(IsNew ? "plants" : $"plants/{Id}");
+    }
+
     private async Task SaveAsync()
     {
         if (plant is null)
@@ -210,7 +316,7 @@ else
         try
         {
             if (IsNew)
-                await PlantService.CreateAsync(plant);
+                await PlantService.CreateAsync(plant, photos);
             else
                 await PlantService.UpdateAsync(original!, plant, Labels.For);
             Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
