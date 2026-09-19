@@ -31,6 +31,10 @@
                     <span class="badge stage-badge">@Labels.Stage(Propagation.Stage, Propagation.Type)</span>
                 }
                 <span>@Labels.Summary(Propagation) · @Labels.Age(Propagation, Today)</span>
+                @if (Propagation.DaysToRoot is { } days)
+                {
+                    <span class="rooted-in">· rooted in @Labels.Count(days, "day")</span>
+                }
                 @if (Propagation.RemainingCount != Propagation.InitialCount)
                 {
                     <span>· @Propagation.RemainingCount left</span>
@@ -40,6 +44,10 @@
             {
                 <span class="badge @(Propagation.Stage == PropagationStage.Failed ? "text-bg-secondary" : "stage-badge")">@Labels.Stage(Propagation.Stage)</span>
                 <span>@Labels.Summary(Propagation) · @PropagationService.Outcome(Propagation)</span>
+                @if (Propagation.DaysToRoot is { } days)
+                {
+                    <span class="rooted-in">· rooted in @Labels.Count(days, "day")</span>
+                }
             }
         </div>
     </div>

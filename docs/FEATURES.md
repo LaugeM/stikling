@@ -33,7 +33,7 @@ In the order I would build them. The care log is the only whole area that is sti
 2. **"Last watered / fertilised / flushed"** on each plant. This is what makes the care log worth keeping.
 3. **Pest cases and a treatment log**, with the interval showing up on Today.
 4. **Quarantine flag and tags.** Both are small, and tags cover "variegated", "for swap" and "rare" at the same time.
-5. **Success rate and days to root per medium.** The data is already stored, so this is only a calculation and a small page.
+5. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
 6. **Import old photos with their dates**, so a plant's history can start before the app did.
 7. **Pot suggestions** in the pot field, the same way rooms are already suggested.
 8. **Correct or hide a timeline entry.** Left over from M3.
@@ -100,15 +100,15 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 |---|---|---|---|---|
 | ✅ | One-tap **Propagate** on a plant page, which creates a propagation linked to that plant | 1 | M | M4 |
 | ✅ | Type: cutting, corm, offset/pup, seed, division, air layer, leaf | 1 | S | M4 |
-| ✅ | Medium: water, perlite, sphagnum, LECA, PON, soil, "humidity dome", other | 1 | S | M4 |
+| ✅ | Medium: water, perlite, sphagnum, LECA, PON, soil, corm riser, other | 1 | S | M4 |
 | ✅ | Stages: started, rooting, rooted and done (or failed). The date of each stage change is saved | 1 | M | M4 |
 | ✅ | Batches with a count ("3 corms in LECA"); mark some as failed | 1 | M | M4 |
 | ✅ | **Promote to plant**: turn 1..n units of a batch into plants and keep the lineage | 1 | M | M4 |
 | ✅ | Propagations list grouped by stage, with cards like "3× corm · LECA · day 24" | 1 | M | M4 |
 | ✅ | Propagations without a parent plant (bought seeds, e.g. the bay laurel) | 1 | S | M4 |
 | ✅ | "Check on it" reminder in the app: a propagation not looked at for X days shows on Today | 2 | S | M5 |
-| ☐ | Success rate and average days-to-root per medium and per type | 3 | S | v1.x |
-| ☐ | **Experiments**: group propagations started together to compare mediums (your corm test: perlite vs sphagnum vs LECA vs humidity dome) | 4 | M | v1.x |
+| ☐ | Success rate and average days-to-root per medium and per type. The rooted date is stored now, so the numbers are there | 3 | S | v1.x |
+| ✅ | **Experiments**: group propagations started together to compare mediums (the corm test: perlite vs sphagnum vs LECA vs corm riser) | 4 | M | v1.x |
 | ☐ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
 | ☐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
@@ -262,5 +262,5 @@ Most people mix their own soil instead of using it straight from the bag. This i
 
 1. **Moisture meter:** what scale does yours use (1–10, or dry/moist/wet)?
 2. **Semi-hydro:** do you want to track reservoir top-ups and flushes, or is "watered/fertilised" enough?
-3. **Experiments:** would comparing your corm mediums side by side (success rate, days to root) be useful, or is that overkill? The success rate table at priority 3 gets part of the way there on its own.
+3. **Experiments:** now that the corm test is grouped on the propagations list, is that enough, or is a page of its own worth it later?
 4. **Anything missing?** Things you do with your plants that aren't on this list.

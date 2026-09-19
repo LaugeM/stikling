@@ -289,6 +289,12 @@ a.item-card:focus-visible {
     font-weight: 600;
 }
 
+/* How long it took to root, on a card as well as in an experiment group */
+.rooted-in {
+    color: var(--pa-green-dark);
+    font-weight: 600;
+}
+
 .experiment-outcome {
     flex: 1 0 100%;
     font-size: 0.8rem;
