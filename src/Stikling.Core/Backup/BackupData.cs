@@ -23,8 +23,15 @@ public sealed class BackupData
     public List<TimelineEntry> Timeline { get; set; } = [];
     public List<Photo> Photos { get; set; } = [];
 
-    /// <summary>What the file contains, for the line shown before restoring.</summary>
-    public BackupCounts Counts => new(Plants.Count, Propagations.Count, Timeline.Count, Photos.Count);
+    /// <summary>
+    /// What the file contains, for the line shown before restoring. Deleted items are in the
+    /// file too, so a restore can carry a delete over, but they aren't counted as content.
+    /// </summary>
+    public BackupCounts Counts => new(
+        Plants.Count(p => !p.IsDeleted),
+        Propagations.Count(p => !p.IsDeleted),
+        Timeline.Count(e => !e.IsDeleted),
+        Photos.Count(p => !p.IsDeleted));
 }
 
 public sealed record BackupCounts(int Plants, int Propagations, int Entries, int Photos);

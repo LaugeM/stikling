@@ -76,15 +76,51 @@ public class BackupTests
     }
 
     [Fact]
+    public void A_plant_deleted_here_comes_back_from_the_backup()
+    {
+        var id = Guid.NewGuid();
+        var mine = Plant("Coleus", Now, id);
+        mine.DeletedAt = Now;
+        var theirs = Plant("Coleus", Now.AddDays(-2), id);
+
+        var result = BackupMerge.Merge([mine], [theirs]);
+
+        var saved = Assert.Single(result.ToSave);
+        Assert.False(saved.IsDeleted);
+        Assert.Equal(1, result.BroughtBack);
+        Assert.Equal(0, result.Skipped);
+    }
+
+    [Fact]
+    public void A_plant_deleted_in_both_places_stays_deleted()
+    {
+        var id = Guid.NewGuid();
+        var mine = Plant("Coleus", Now, id);
+        mine.DeletedAt = Now;
+        var theirs = Plant("Coleus", Now.AddDays(-2), id);
+        theirs.DeletedAt = Now.AddDays(-2);
+
+        var result = BackupMerge.Merge([mine], [theirs]);
+
+        Assert.Empty(result.ToSave);
+        Assert.Equal(1, result.Skipped);
+        Assert.Equal(0, result.BroughtBack);
+    }
+
+    [Fact]
     public void Counts_describe_what_a_file_holds()
     {
+        var gone = Plant("Basil", Now);
+        gone.DeletedAt = Now;
+
         var data = new BackupData
         {
             ExportedAt = Now,
-            Plants = [Plant("Coleus", Now)],
+            Plants = [Plant("Coleus", Now), gone],
             Photos = [new Photo(), new Photo()]
         };
 
+        // The deleted plant is in the file, but it isn't something the restore brings back
         Assert.Equal(new BackupCounts(1, 0, 0, 2), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }

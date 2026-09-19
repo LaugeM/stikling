@@ -59,7 +59,8 @@
                 @Labels.Count(file.Data.Counts.Photos, "photo").
             </p>
             <p class="settings-hint">
-                Restoring adds what's missing here. Anything you've changed on this device since the backup is kept.
+                Restoring adds what's missing here and brings back anything you've deleted since.
+                Changes you've made on this device are kept.
             </p>
             <div class="settings-actions">
                 <button type="button" class="btn btn-primary" disabled="@busy" @onclick="RestoreAsync">Restore</button>
@@ -205,6 +206,7 @@
             var summary = await Backup.ImportAsync(file.Zip);
             message = summary.ChangedAnything
                 ? $"Restored {Labels.Count(summary.Added, "new item")} and {summary.Updated} updated, including {Labels.Count(summary.Photos, "photo")}."
+                    + (summary.BroughtBack > 0 ? $" {Labels.Count(summary.BroughtBack, "item")} deleted here came back." : "")
                     + (summary.Kept > 0 ? $" {Labels.Count(summary.Kept, "item")} here {(summary.Kept == 1 ? "was" : "were")} already up to date." : "")
                 : "Everything in that backup was already here.";
         }
