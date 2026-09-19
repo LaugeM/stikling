@@ -32,7 +32,7 @@ A working list of what Stikling could do, grouped by area and tagged with a prio
 | ☐ | Wishlist: plants you want, with notes on where to find them | Could | v1.x |
 | ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | Should | v1.x |
 | ☐ | **Dormancy status**: e.g. alocasias dropping leaves in winter. Pauses "check on it" reminders and keeps the plant from looking dead | Should | v1.x |
-| ☐ | **Soil → semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | Should | v1.x |
+| ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | Should | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | Should | v1.x |
 | ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | Should | v1.x |
 | ☐ | Purchase price per plant | Could | v1.x |
@@ -66,7 +66,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ☐ | One-tap **Propagate** on a plant page, which creates a propagation linked to that plant | Must | M4 |
 | ☐ | Type: cutting, corm, offset/pup, seed, division, air layer, leaf | Must | M4 |
 | ☐ | Medium: water, perlite, sphagnum, LECA, PON, soil, "humidity dome", other | Must | M4 |
-| ☐ | Stages: started → rooting → rooted → done, or failed. The date of each stage change is saved | Must | M4 |
+| ☐ | Stages: started, rooting, rooted and done (or failed). The date of each stage change is saved | Must | M4 |
 | ☐ | Batches with a count ("3 corms in LECA"); mark some as failed | Must | M4 |
 | ☐ | **Promote to plant**: turn 1..n units of a batch into plants and keep the lineage | Must | M4 |
 | ☐ | Propagations list grouped by stage, with cards like "3× corm · LECA · day 24" | Must | M4 |
@@ -187,7 +187,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 2. Import existing photos with their dates.
 3. Sticky trap counts: useful for the thrips right now.
 4. Supplies stock and shopping list.
-5. Soil → semi-hydro transition tracker.
+5. Soil to semi-hydro transition tracker.
 
 ---
 
