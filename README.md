@@ -60,7 +60,7 @@ Because Pages serves the site from `/<repo-name>/`, [`prepare-pages.py`](.github
 ## Roadmap
 
 1. Scaffold, layout and deployment ✅
-2. Plants
+2. Plants ✅
 3. Photos and timeline
 4. Propagations and lineage
 5. Backup/restore and the Today screen

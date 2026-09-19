@@ -1,0 +1,72 @@
+using Stikling.Core.Models;
+using Stikling.Core.Plants;
+
+namespace Stikling.Core.Tests;
+
+public class PlantFilterTests
+{
+    private static readonly Plant Thai = new() { Genus = "Monstera", Species = "deliciosa", Cultivar = "Thai Constellation", Location = "Living room" };
+    private static readonly Plant Monstera = new() { Nickname = "Big Monstera", Genus = "Monstera", Species = "deliciosa", Location = "living room " };
+    private static readonly Plant Basil = new() { Nickname = "Kitchen basil", Genus = "Ocimum", Location = "Kitchen" };
+    private static readonly Plant DeadColeus = new() { Nickname = "Coleus", Status = PlantStatus.Died };
+    private static readonly Plant GivenAway = new() { Nickname = "Pothos", Status = PlantStatus.GivenAway };
+    private static readonly Plant Deleted = new() { Nickname = "Deleted", DeletedAt = DateTimeOffset.UnixEpoch };
+
+    private static readonly Plant[] All = [Thai, Monstera, Basil, DeadColeus, GivenAway, Deleted];
+
+    [Fact]
+    public void Default_shows_active_plants_sorted_by_name()
+    {
+        var result = new PlantFilter().Apply(All).ToList();
+
+        Assert.Equal([Monstera, Basil, Thai], result);
+    }
+
+    [Fact]
+    public void Gone_shows_plants_that_are_no_longer_in_the_collection()
+    {
+        var result = new PlantFilter(Status: StatusFilter.Gone).Apply(All).ToList();
+
+        Assert.Equal([DeadColeus, GivenAway], result);
+    }
+
+    [Fact]
+    public void All_never_includes_deleted_plants()
+    {
+        var result = new PlantFilter(Status: StatusFilter.All).Apply(All).ToList();
+
+        Assert.Equal(5, result.Count);
+        Assert.DoesNotContain(Deleted, result);
+    }
+
+    [Theory]
+    [InlineData("thai monstera")]
+    [InlineData("CONSTELLATION")]
+    [InlineData("  thai  ")]
+    public void Search_matches_every_word_in_any_name_field(string search)
+    {
+        var result = new PlantFilter(search).Apply(All).ToList();
+
+        Assert.Equal([Thai], result);
+    }
+
+    [Fact]
+    public void Search_finds_nicknames()
+    {
+        Assert.Equal([Basil], new PlantFilter("basil").Apply(All));
+    }
+
+    [Fact]
+    public void Location_filter_ignores_case_and_whitespace()
+    {
+        var result = new PlantFilter(Location: "LIVING ROOM").Apply(All).ToList();
+
+        Assert.Equal([Monstera, Thai], result);
+    }
+
+    [Fact]
+    public void Locations_are_distinct_and_sorted()
+    {
+        Assert.Equal(["Kitchen", "Living room"], PlantFilter.Locations(All));
+    }
+}

@@ -85,6 +85,73 @@ h1 {
     --bs-btn-active-border-color: var(--pa-green-dark);
 }
 
+/* Inputs use the card colour so they don't look disabled against the page background */
+.form-control,
+.form-select {
+    background-color: var(--pa-surface);
+    border-color: var(--pa-border);
+}
+
+.form-control::placeholder {
+    color: var(--pa-muted);
+    opacity: 0.8;
+}
+
+.page-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.page-heading h1 {
+    margin: 0;
+}
+
+/* Round "add" button floating above the bottom navigation */
+.fab {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    z-index: 11;
+    width: 3.5rem;
+    height: 3.5rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--pa-green);
+    color: #fff;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
+}
+
+.fab:hover,
+.fab:focus-visible {
+    background: var(--pa-green-dark);
+    color: #fff;
+}
+
+.fab svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+}
+
+:root[data-bs-theme="dark"] .fab,
+:root[data-bs-theme="dark"] .fab:hover {
+    color: #0f1a13;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
 .empty-state {
     text-align: center;
     padding: 2.5rem 1rem;

@@ -1,0 +1,110 @@
+.plant-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.plant-header h1 {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.plant-cover {
+    flex: none;
+    width: 5rem;
+    height: 5rem;
+    display: grid;
+    place-items: center;
+    border-radius: 0.9rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-green);
+}
+
+.plant-cover svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+
+.plant-botanical {
+    margin: 0.1rem 0 0.3rem;
+    font-style: italic;
+    color: var(--pa-muted);
+}
+
+.plant-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.detail-card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.detail-card h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+}
+
+.detail-card dl + h2 {
+    margin-top: 1rem;
+}
+
+.detail-card h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+    margin: 0.75rem 0 0.35rem;
+}
+
+.detail-card h2 + h3 {
+    margin-top: 0;
+}
+
+.detail-list {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 1rem;
+    margin: 0;
+}
+
+.detail-list dt {
+    font-weight: 500;
+    color: var(--pa-muted);
+}
+
+.detail-list dd {
+    margin: 0;
+}
+
+.plant-notes {
+    margin: 0;
+    white-space: pre-line;
+}
+
+.family-list {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.danger-zone {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+}

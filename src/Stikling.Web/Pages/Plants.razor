@@ -1,9 +1,106 @@
 @page "/plants"
+@inject IPlantRepository Repository
 
 <PageTitle>Plants · Stikling</PageTitle>
 
-<h1>Plants</h1>
-
-<div class="empty-state">
-    <p>No plants yet.</p>
+<div class="page-heading">
+    <h1>Plants</h1>
+    @if (all is { Count: > 0 })
+    {
+        <span class="text-body-secondary small">@visible.Count of @all.Count</span>
+    }
 </div>
+
+@if (all is null)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (all.Count == 0)
+{
+    <div class="empty-state">
+        <p>No plants yet. Add the first one to start your collection.</p>
+        <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
+    </div>
+}
+else
+{
+    <div class="plant-filters">
+        <input type="search" class="form-control" placeholder="Search by name, genus, species…"
+               aria-label="Search plants" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
+
+        <div class="d-flex gap-2">
+            <div class="btn-group flex-grow-1" role="radiogroup" aria-label="Status">
+                @foreach (var (value, label) in statusOptions)
+                {
+                    var id = $"status-{value}";
+                    <input type="radio" class="btn-check" name="status" id="@id"
+                           checked="@(status == value)" @onchange="() => SetStatus(value)" />
+                    <label class="btn btn-outline-primary btn-sm" for="@id">@label</label>
+                }
+            </div>
+
+            @if (locations.Count > 1)
+            {
+                <select class="form-select form-select-sm w-auto" aria-label="Location"
+                        @bind="location" @bind:after="Refresh">
+                    <option value="">All rooms</option>
+                    @foreach (var l in locations)
+                    {
+                        <option value="@l">@l</option>
+                    }
+                </select>
+            }
+        </div>
+    </div>
+
+    @if (visible.Count == 0)
+    {
+        <div class="empty-state"><p>No plants match.</p></div>
+    }
+    else
+    {
+        <ul class="plant-list">
+            @foreach (var plant in visible)
+            {
+                <li><PlantCard Plant="plant" /></li>
+            }
+        </ul>
+    }
+}
+
+<a class="fab" href="plants/new" aria-label="Add a plant" title="Add a plant">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+</a>
+
+@code {
+    private static readonly (StatusFilter Value, string Label)[] statusOptions =
+    [
+        (StatusFilter.Active, "In collection"),
+        (StatusFilter.Gone, "Gone"),
+        (StatusFilter.All, "All")
+    ];
+
+    private IReadOnlyList<Plant>? all;
+    private IReadOnlyList<string> locations = [];
+    private List<Plant> visible = [];
+
+    private string? search;
+    private StatusFilter status = StatusFilter.Active;
+    private string? location;
+
+    protected override async Task OnInitializedAsync()
+    {
+        all = await Repository.GetAllAsync();
+        locations = PlantFilter.Locations(all);
+        Refresh();
+    }
+
+    private void SetStatus(StatusFilter value)
+    {
+        status = value;
+        Refresh();
+    }
+
+    private void Refresh() =>
+        visible = new PlantFilter(search, status, location).Apply(all ?? []).ToList();
+}

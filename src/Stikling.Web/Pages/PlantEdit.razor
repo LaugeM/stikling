@@ -1,0 +1,221 @@
+@page "/plants/new"
+@page "/plants/{Id:guid}/edit"
+@inject IPlantRepository Repository
+@inject NavigationManager Navigation
+
+<PageTitle>@(IsNew ? "Add plant" : "Edit plant") · Stikling</PageTitle>
+
+<a class="back-link" href="@(IsNew ? "plants" : $"plants/{Id}")">‹ Back</a>
+<h1>@(IsNew ? "Add plant" : "Edit plant")</h1>
+
+@if (plant is null)
+{
+    <p class="text-body-secondary">@(notFound ? "That plant doesn't exist." : "Loading…")</p>
+}
+else
+{
+    <EditForm Model="plant" OnSubmit="SaveAsync" class="plant-form">
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        <fieldset>
+            <legend>Name</legend>
+            <div class="mb-3">
+                <label class="form-label" for="nickname">Nickname</label>
+                <InputText id="nickname" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Big Monstera" />
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label" for="genus">Genus</label>
+                    <InputText id="genus" class="form-control" @bind-Value="plant.Genus" list="genus-list" placeholder="e.g. Monstera" autocomplete="off" />
+                    <datalist id="genus-list">
+                        @foreach (var genus in PlantNames.CommonGenera)
+                        {
+                            <option value="@genus"></option>
+                        }
+                    </datalist>
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="species">Species</label>
+                    <InputText id="species" class="form-control" @bind-Value="plant.Species" placeholder="e.g. deliciosa" autocomplete="off" />
+                </div>
+            </div>
+            <div class="mb-1">
+                <label class="form-label" for="cultivar">Cultivar / variety</label>
+                <InputText id="cultivar" class="form-control" @bind-Value="plant.Cultivar" placeholder="e.g. Thai Constellation" autocomplete="off" />
+            </div>
+            <div class="form-text">Give it a nickname, a genus, or both.</div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Where it came from</legend>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label" for="origin">How you got it</label>
+                    <InputSelect id="origin" class="form-select" @bind-Value="plant.Origin">
+                        @foreach (var origin in Enum.GetValues<PlantOrigin>())
+                        {
+                            <option value="@origin">@Labels.For(origin)</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="acquired">Date</label>
+                    <InputDate id="acquired" class="form-control" @bind-Value="plant.AcquiredOn" />
+                </div>
+            </div>
+
+            @if (ShowParent)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="parent">Parent plant</label>
+                    <InputSelect id="parent" class="form-select" @bind-Value="plant.ParentPlantId">
+                        <option value="">Not one of mine / unknown</option>
+                        @foreach (var p in possibleParents)
+                        {
+                            <option value="@p.Id">@p.DisplayName</option>
+                        }
+                    </InputSelect>
+                </div>
+            }
+
+            <div class="mb-3">
+                <label class="form-label" for="source">Source</label>
+                <InputText id="source" class="form-control" @bind-Value="plant.Source" placeholder="Shop, friend, plant swap…" />
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Where it lives</legend>
+            <div class="mb-3">
+                <label class="form-label" for="location">Location</label>
+                <InputText id="location" class="form-control" @bind-Value="plant.Location" list="location-list" placeholder="e.g. Living room" autocomplete="off" />
+                <datalist id="location-list">
+                    @foreach (var l in locations)
+                    {
+                        <option value="@l"></option>
+                    }
+                </datalist>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label" for="medium">Grows in</label>
+                    <InputSelect id="medium" class="form-select" @bind-Value="plant.Medium">
+                        @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                        {
+                            <option value="@medium">@Labels.For(medium)</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="container">Pot</label>
+                    <InputText id="container" class="form-control" @bind-Value="plant.Container" placeholder="e.g. Lechuza pot" />
+                </div>
+            </div>
+            @if (!IsNew)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="status">Status</label>
+                    <InputSelect id="status" class="form-select" @bind-Value="plant.Status">
+                        @foreach (var s in Enum.GetValues<PlantStatus>())
+                        {
+                            <option value="@s">@Labels.For(s)</option>
+                        }
+                    </InputSelect>
+                </div>
+            }
+        </fieldset>
+
+        <fieldset>
+            <legend>Notes</legend>
+            <InputTextArea class="form-control" rows="3" @bind-Value="plant.Notes" aria-label="Notes" />
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Add plant" : "Save")</button>
+            <a class="btn btn-link" href="@(IsNew ? "plants" : $"plants/{Id}")">Cancel</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    /// <summary>Pre-selects a parent, e.g. from "Add offspring" on a plant's page.</summary>
+    [SupplyParameterFromQuery(Name = "parent")]
+    public Guid? ParentId { get; set; }
+
+    private Plant? plant;
+    private bool notFound;
+    private bool saving;
+    private List<string> errors = [];
+    private IReadOnlyList<Plant> possibleParents = [];
+    private IReadOnlyList<string> locations = [];
+
+    private bool IsNew => Id is null;
+
+    private bool ShowParent =>
+        plant is not null
+        && (plant.Origin is PlantOrigin.Propagated or PlantOrigin.GrownFromSeed || plant.ParentPlantId is not null);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var all = await Repository.GetAllAsync();
+        locations = PlantFilter.Locations(all);
+
+        if (IsNew)
+        {
+            plant = new Plant { AcquiredOn = DateOnly.FromDateTime(DateTime.Today) };
+            if (ParentId is { } parentId && all.FirstOrDefault(p => p.Id == parentId) is { } parent)
+            {
+                plant.Origin = PlantOrigin.Propagated;
+                plant.ParentPlantId = parent.Id;
+                plant.Genus = parent.Genus;
+                plant.Species = parent.Species;
+                plant.Cultivar = parent.Cultivar;
+                plant.Location = parent.Location;
+            }
+        }
+        else
+        {
+            plant = all.FirstOrDefault(p => p.Id == Id);
+            notFound = plant is null;
+        }
+
+        if (plant is not null)
+            possibleParents = PlantLineage.PossibleParents(plant, all);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (plant is null)
+            return;
+
+        errors = plant.Validate().ToList();
+        if (errors.Count > 0)
+            return;
+
+        saving = true;
+        try
+        {
+            await Repository.SaveAsync(plant);
+            Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
+        }
+        catch (Exception ex)
+        {
+            errors = [$"Couldn't save: {ex.Message}"];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+}
