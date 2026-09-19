@@ -6,9 +6,10 @@ using Stikling.Core.Models;
 namespace Stikling.Web.Services;
 
 /// <summary>What a restore did, for the line shown afterwards.</summary>
-public sealed record ImportSummary(int Added, int Updated, int Kept, int Photos)
+/// <param name="BroughtBack">Things deleted on this device that the backup still had.</param>
+public sealed record ImportSummary(int Added, int Updated, int BroughtBack, int Kept, int Photos)
 {
-    public bool ChangedAnything => Added > 0 || Updated > 0;
+    public bool ChangedAnything => Added > 0 || Updated > 0 || BroughtBack > 0;
 }
 
 /// <summary>
@@ -79,6 +80,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
     /// <summary>
     /// Restores a backup. Anything already here is kept unless the backup has a newer version
     /// of it, so restoring onto a device that has been used since doesn't lose anything.
+    /// Things deleted here since the backup was made come back.
     /// </summary>
     public async Task<ImportSummary> ImportAsync(Stream zipStream)
     {
@@ -103,6 +105,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
         return new ImportSummary(
             plants.Added + propagations.Added + timeline.Added + photoMeta.Added,
             plants.Updated + propagations.Updated + timeline.Updated + photoMeta.Updated,
+            plants.BroughtBack + propagations.BroughtBack + timeline.BroughtBack + photoMeta.BroughtBack,
             plants.Skipped + propagations.Skipped + timeline.Skipped + photoMeta.Skipped,
             restoredPhotos);
     }

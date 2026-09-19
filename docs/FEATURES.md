@@ -141,6 +141,22 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | See which of your pots are in use and which are free, so it's clear what's available before repotting | Could | v1.x |
 | ☐ | Default medium per pot kind, e.g. a net pot suggests LECA, so potting up is one tap less | Could | v1.x |
 
+## 5c. Soil mixes
+
+Most people mix their own soil instead of using it straight from the bag. This is for keeping track of what is actually in it.
+
+| ✓ | Feature | Priority | When |
+|---|---|---|---|
+| ☐ | **Your mixes**: save a mix under a name ("aroid mix", "seedling mix", "cactus mix") | Should | v1.x |
+| ☐ | What a mix is made of, as percentages: potting soil, perlite, LECA, bark, pumice, coco coir, sphagnum, worm castings, sand, charcoal. The app adds them up and says when they don't reach 100% | Should | v1.x |
+| ☐ | Add your own ingredient if something isn't on the list | Should | v1.x |
+| ☐ | Pick a mix when adding a plant or potting up, instead of typing the medium by hand. The plant page shows which mix it's in | Should | v1.x |
+| ☐ | Editing a mix doesn't rewrite history: a plant keeps the recipe as it was on the day it was potted | Should | v1.x |
+| ☐ | See which plants are in a given mix, so a mix that isn't working shows up | Could | v1.x |
+| ☐ | Use a mix on a propagation too, for the ones that go straight into soil | Could | v1.x |
+| ☐ | Batch calculator: pick a mix and a volume, and get how much of each ingredient to measure out | Could | v1.x |
+| ☐ | Mixing a batch takes the ingredients off the supplies stock | Could | v1.x |
+
 ## 6. Today screen
 
 | ✓ | Feature | Priority | When |
