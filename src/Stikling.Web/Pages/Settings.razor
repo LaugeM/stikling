@@ -1,6 +1,10 @@
 @page "/settings"
 @implements IDisposable
 @inject ThemeService Theme
+@inject BackupService Backup
+@inject DeviceFiles Files
+@inject IndexedDb Db
+@inject TimeProvider Time
 
 <PageTitle>Settings · Stikling</PageTitle>
 
@@ -22,9 +26,78 @@
 
 <section class="settings-section">
     <h2>Backup</h2>
-    <div class="empty-state">
-        <p>Backup, restore and storage info will live here.</p>
+    <p class="settings-hint">
+        Everything you add stays on this device. A backup is a ZIP file with your plants and photos in it,
+        which you can keep in cloud storage or move to another phone.
+    </p>
+
+    <div class="settings-actions">
+        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ExportAsync">Save a backup</button>
+        <label class="btn btn-outline-primary @(busy ? "disabled" : null)" for="restore-file">Restore a backup</label>
+        <InputFile id="restore-file" class="visually-hidden" accept=".zip" OnChange="ChooseFileAsync" disabled="@busy" />
     </div>
+
+    <p class="settings-hint">
+        @if (lastBackup is { } date)
+        {
+            <text>Last backup: @Labels.Date(date) (@Labels.DaysAgo(TodayDate.DayNumber - date.DayNumber)).</text>
+        }
+        else
+        {
+            <text>No backup taken on this device yet.</text>
+        }
+    </p>
+
+    @if (pending is { } file)
+    {
+        <div class="confirm-card">
+            <p>
+                <strong>@file.Name</strong><br />
+                Made @Labels.Date(DateOnly.FromDateTime(file.Data.ExportedAt.LocalDateTime)), holding
+                @Labels.Plants(file.Data.Counts.Plants), @Labels.Count(file.Data.Counts.Propagations, "propagation"),
+                @Labels.Count(file.Data.Counts.Entries, "history entry", "history entries") and
+                @Labels.Count(file.Data.Counts.Photos, "photo").
+            </p>
+            <p class="settings-hint">
+                Restoring adds what's missing here. Anything you've changed on this device since the backup is kept.
+            </p>
+            <div class="settings-actions">
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="RestoreAsync">Restore</button>
+                <button type="button" class="btn btn-link" @onclick="() => pending = null">Cancel</button>
+            </div>
+        </div>
+    }
+
+    @if (message is not null)
+    {
+        <p class="settings-message" role="status">@message</p>
+    }
+</section>
+
+<section class="settings-section">
+    <h2>Storage</h2>
+    @if (storage is { } estimate)
+    {
+        <p class="settings-hint">
+            Stikling is using @Labels.Bytes(estimate.Usage)@(estimate.Quota > 0 ? $" of the roughly {Labels.Bytes(estimate.Quota)} this browser offers" : "").
+        </p>
+        @if (estimate.Persisted)
+        {
+            <p class="settings-hint">The browser has been asked to keep your data and agreed. It won't be cleared when space runs low.</p>
+        }
+        else
+        {
+            <p class="settings-hint">
+                The browser may clear your data if the device runs low on space. Installing Stikling to the home screen usually
+                settles this, and you can ask directly:
+            </p>
+            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="RequestPersistenceAsync">Ask to keep my data</button>
+        }
+    }
+    else
+    {
+        <p class="settings-hint">This browser doesn't say how much space is in use.</p>
+    }
 </section>
 
 @code {
@@ -35,12 +108,24 @@
         (ThemeMode.Dark, "Dark")
     ];
 
+    /// <summary>A chosen file, read and described, waiting for the restore to be confirmed.</summary>
+    private sealed record PendingRestore(string Name, BackupData Data, MemoryStream Zip);
+
     private ThemeMode mode;
+    private DateOnly? lastBackup;
+    private StorageEstimate? storage;
+    private PendingRestore? pending;
+    private string? message;
+    private bool busy;
+
+    private DateOnly TodayDate => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
 
     protected override async Task OnInitializedAsync()
     {
         Theme.Changed += OnThemeChanged;
         mode = await Theme.GetModeAsync();
+        lastBackup = await Files.GetLastBackupAsync();
+        storage = await Db.EstimateAsync();
     }
 
     private async Task SetModeAsync(ThemeMode newMode)
@@ -56,5 +141,98 @@
         StateHasChanged();
     }
 
-    public void Dispose() => Theme.Changed -= OnThemeChanged;
+    private async Task ExportAsync()
+    {
+        busy = true;
+        message = "Packing your plants and photos…";
+        StateHasChanged();
+
+        try
+        {
+            var counts = await Backup.ExportAsync();
+            lastBackup = TodayDate;
+            message = $"Saved a backup with {Labels.Plants(counts.Plants)}, {Labels.Count(counts.Propagations, "propagation")} "
+                + $"and {Labels.Count(counts.Photos, "photo")}. Check your downloads.";
+        }
+        catch (Exception ex)
+        {
+            message = $"Couldn't save the backup: {ex.Message}";
+        }
+
+        storage = await Db.EstimateAsync();
+        busy = false;
+    }
+
+    private async Task ChooseFileAsync(InputFileChangeEventArgs e)
+    {
+        busy = true;
+        message = "Reading the backup…";
+        pending = null;
+        StateHasChanged();
+
+        try
+        {
+            var file = e.File;
+            var zip = new MemoryStream();
+            // 512 MB is far more than a phone-sized collection needs
+            await using (var stream = file.OpenReadStream(512L * 1024 * 1024))
+                await stream.CopyToAsync(zip);
+
+            zip.Position = 0;
+            pending = new PendingRestore(file.Name, await BackupService.ReadAsync(zip), zip);
+            message = null;
+        }
+        catch (Exception ex)
+        {
+            message = $"Couldn't read that file: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task RestoreAsync()
+    {
+        if (pending is not { } file)
+            return;
+
+        busy = true;
+        message = "Restoring…";
+        StateHasChanged();
+
+        try
+        {
+            file.Zip.Position = 0;
+            var summary = await Backup.ImportAsync(file.Zip);
+            message = summary.ChangedAnything
+                ? $"Restored {Labels.Count(summary.Added, "new item")} and {summary.Updated} updated, including {Labels.Count(summary.Photos, "photo")}."
+                    + (summary.Kept > 0 ? $" {Labels.Count(summary.Kept, "item")} here {(summary.Kept == 1 ? "was" : "were")} already up to date." : "")
+                : "Everything in that backup was already here.";
+        }
+        catch (Exception ex)
+        {
+            message = $"Couldn't restore: {ex.Message}";
+        }
+
+        await file.Zip.DisposeAsync();
+        pending = null;
+        storage = await Db.EstimateAsync();
+        busy = false;
+    }
+
+    private async Task RequestPersistenceAsync()
+    {
+        busy = true;
+        var granted = await Db.RequestPersistenceAsync();
+        message = granted
+            ? "The browser agreed to keep your data."
+            : "The browser said no for now. Installing Stikling to the home screen usually changes that.";
+        storage = await Db.EstimateAsync();
+        busy = false;
+    }
+
+    public void Dispose()
+    {
+        Theme.Changed -= OnThemeChanged;
+        pending?.Zip.Dispose();
+    }
 }

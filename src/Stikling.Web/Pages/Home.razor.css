@@ -1,0 +1,78 @@
+.today-counts {
+    margin: -0.25rem 0 1rem;
+    color: var(--pa-muted);
+}
+
+.reminder {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem;
+    background: var(--pa-green-soft);
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.reminder span {
+    flex: 1;
+}
+
+.today-section {
+    margin-bottom: 1.75rem;
+}
+
+.today-section h2 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+    margin-bottom: 0.5rem;
+}
+
+.activity-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.activity-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.activity-list li:last-child {
+    border-bottom: 0;
+}
+
+.activity-list a {
+    flex: 1;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.activity-subject {
+    display: block;
+    font-weight: 600;
+}
+
+.activity-text {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.activity-day {
+    flex: none;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}

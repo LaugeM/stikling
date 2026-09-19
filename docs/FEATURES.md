@@ -74,7 +74,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **Promote to plant**: turn 1..n units of a batch into plants and keep the lineage | Must | M4 |
 | ✅ | Propagations list grouped by stage, with cards like "3× corm · LECA · day 24" | Must | M4 |
 | ✅ | Propagations without a parent plant (bought seeds, e.g. the bay laurel) | Must | M4 |
-| ☐ | "Check on it" reminder in the app: a propagation not looked at for X days shows on Today | Should | M5 |
+| ✅ | "Check on it" reminder in the app: a propagation not looked at for X days shows on Today | Should | M5 |
 | ☐ | **Experiments**: group propagations started together to compare mediums (your corm test: perlite vs sphagnum vs LECA vs humidity dome) | Should | v1.x |
 | ☐ | Success rate and average days-to-root per medium and per type | Should | v1.x |
 | ☐ | Seed germination: sown count, germinated count and dates | Should | v1.x |
@@ -145,10 +145,10 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 
 | ✓ | Feature | Priority | When |
 |---|---|---|---|
-| ☐ | Propagations that haven't been checked recently | Should | M5 |
+| ✅ | Propagations that haven't been checked recently | Should | M5 |
 | ☐ | Pest treatments due or overdue | Should | v1.x |
 | ☐ | Care intervals due (if set) | Could | v1.x |
-| ☐ | Recent activity feed | Could | M5 |
+| ✅ | Recent activity feed | Could | M5 |
 | ☐ | Counts: plants, active propagations, success rate this month | Could | v1.x |
 
 ## 7. Data, backup & settings
@@ -157,13 +157,13 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 |---|---|---|---|
 | ✅ | Light / dark / match-system theme | Must | M1 |
 | ✅ | All data on the device (IndexedDB), works offline, installable | Must | M1–M2 |
-| ☐ | Export everything to a ZIP (data + photos) and import it again | Must | M5 |
-| ☐ | Ask the browser for persistent storage; show storage used | Must | M5 |
-| ☐ | Backup reminder ("last backup 30 days ago") | Should | M5 |
+| ✅ | Export everything to a ZIP (data + photos) and import it again | Must | M5 |
+| ✅ | Ask the browser for persistent storage; show storage used | Must | M5 |
+| ✅ | Backup reminder ("last backup 30 days ago") | Should | M5 |
 | ☐ | CSV export of plants and propagations for spreadsheets | Could | v1.x |
 | ☐ | Units and date format settings | Could | v1.x |
 | ☐ | Danish translation | Could | v1.x |
-| ☐ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | Must | M5 |
+| ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | Must | M5 |
 | ☐ | "What's new" page and app version in Settings | Could | v1.x |
 | ☐ | **Species autocomplete from GBIF** (free botanical database, no API key): correct spelling for genus/species, plus family and native region | Could | v1.x |
 
