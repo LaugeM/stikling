@@ -35,6 +35,14 @@ public static class Labels
         _ => medium.ToString()
     };
 
+    public static string For(CareKind kind) => kind switch
+    {
+        CareKind.ToppedUp => "Topped up",
+        CareKind.LeavesCleaned => "Leaves cleaned",
+        CareKind.MoistureReading => "Moisture reading",
+        _ => kind.ToString()
+    };
+
     public static string For(PropagationType type) => type switch
     {
         PropagationType.Offset => "Offset / pup",
@@ -58,6 +66,7 @@ public static class Labels
         PlantStatus s => For(s),
         PlantOrigin o => For(o),
         GrowingMedium m => For(m),
+        CareKind c => For(c),
         PropagationType t => For(t),
         PropagationStage s => Stage(s),
         _ => value.ToString()

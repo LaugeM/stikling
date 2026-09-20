@@ -1,3 +1,4 @@
+using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
@@ -54,6 +55,35 @@ internal sealed class FakePropagationRepository : IPropagationRepository
     {
         if (Propagations.TryGetValue(id, out var p))
             p.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeCareLogRepository : ICareLogRepository
+{
+    /// <summary>In the order they were saved, which the multi-plant tests rely on.</summary>
+    public List<CareLog> Logs { get; } = [];
+
+    public Task<IReadOnlyList<CareLog>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<CareLog>>(Logs.Where(l => !l.IsDeleted).ToList());
+
+    public Task<CareLog?> GetAsync(Guid id) =>
+        Task.FromResult(Logs.FirstOrDefault(l => l.Id == id && !l.IsDeleted));
+
+    public Task SaveAsync(CareLog entry)
+    {
+        var index = Logs.FindIndex(l => l.Id == entry.Id);
+        if (index >= 0)
+            Logs[index] = entry;
+        else
+            Logs.Add(entry);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Logs.FirstOrDefault(l => l.Id == id) is { } entry)
+            entry.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }

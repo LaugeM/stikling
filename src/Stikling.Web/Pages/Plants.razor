@@ -1,6 +1,8 @@
 @page "/plants"
 @inject IPlantRepository Repository
 @inject PlantService PlantService
+@inject ICareLogRepository CareLogRepository
+@inject TimeProvider Time
 
 <PageTitle>Plants · Stikling</PageTitle>
 
@@ -80,7 +82,8 @@ else
             @foreach (var plant in visible)
             {
                 <li>
-                    <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)" OnToggle="Toggle" />
+                    <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
+                               OnToggle="Toggle" Moisture="@MoistureFor(plant)" />
                 </li>
             }
         </ul>
@@ -90,7 +93,11 @@ else
 @if (selecting)
 {
     <div class="bulk-bar" role="region" aria-label="Actions for selected plants">
-        @if (bulkNoteOpen)
+        @if (bulkCareOpen)
+        {
+            <CareSheet PlantIds="@selected.ToList()" OnLogged="AfterBulkCareAsync" OnCancel="() => bulkCareOpen = false" />
+        }
+        else if (bulkNoteOpen)
         {
             <textarea class="form-control form-control-sm" rows="2" placeholder="Note for all selected plants, e.g. Sprayed for thrips"
                       aria-label="Note" @bind="bulkNote" @bind:event="oninput"></textarea>
@@ -112,6 +119,8 @@ else
                         <option value="@s">@Labels.For(s)</option>
                     }
                 </select>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
+                        @onclick="() => bulkCareOpen = true">Log care</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
                         @onclick="() => bulkNoteOpen = true">Add note</button>
             </div>
@@ -149,6 +158,8 @@ else
     private readonly HashSet<Guid> selected = [];
     private string bulkStatus = ""; // the "Set status…" dropdown, reset after each use
     private bool bulkNoteOpen;
+    private bool bulkCareOpen;
+    private IReadOnlyList<CareLog> careLogs = [];
     private string? bulkNote;
     private string? bulkMessage;
     private bool busy;
@@ -159,6 +170,7 @@ else
     {
         all = await Repository.GetAllAsync();
         locations = PlantFilter.Locations(all);
+        careLogs = await CareLogRepository.GetAllAsync();
         Refresh();
     }
 
@@ -176,6 +188,7 @@ else
         selecting = !selecting;
         selected.Clear();
         bulkNoteOpen = false;
+        bulkCareOpen = false;
         bulkMessage = null;
     }
 
@@ -190,6 +203,18 @@ else
     {
         foreach (var plant in visible)
             selected.Add(plant.Id);
+    }
+
+    private MoistureReading? MoistureFor(Plant plant) =>
+        CareSummary.LatestMoisture(careLogs, plant.Id, DateOnly.FromDateTime(Time.GetLocalNow().DateTime));
+
+    private async Task AfterBulkCareAsync()
+    {
+        var count = selected.Count;
+        bulkMessage = $"Care logged for {Labels.Plants(count)}.";
+        bulkCareOpen = false;
+        selected.Clear();
+        await LoadAsync();
     }
 
     private List<Plant> SelectedPlants => (all ?? []).Where(p => selected.Contains(p.Id)).ToList();

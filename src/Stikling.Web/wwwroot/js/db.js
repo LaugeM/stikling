@@ -3,10 +3,11 @@
 // JSON objects with an "id" property as the key.
 
 const DB_NAME = "stikling";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
-// Created up front so later milestones don't need a schema upgrade for them.
-const STORES = ["plants", "propagations", "timeline", "photos", "photoBlobs"];
+// The stores the first version created. Later versions add theirs in their own
+// upgrade block below, so don't add to this list.
+const STORES_V1 = ["plants", "propagations", "timeline", "photos", "photoBlobs"];
 
 let dbPromise;
 
@@ -14,15 +15,20 @@ function openDb() {
     dbPromise ??= new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-        // Runs when the database is created or DB_VERSION goes up. Future schema
-        // changes go in new "if (event.oldVersion < N)" blocks so existing data is kept.
+        // Runs when the database is created or DB_VERSION goes up. Each version's changes
+        // go in their own "if (event.oldVersion < N)" block, and the blocks run in order:
+        // a new device runs all of them, an existing one only the blocks it hasn't yet.
+        // Never change an old block, or devices that already ran it won't get the fix.
         request.onupgradeneeded = event => {
             const db = request.result;
             if (event.oldVersion < 1) {
-                for (const name of STORES) {
+                for (const name of STORES_V1) {
                     if (name === "photoBlobs") db.createObjectStore(name); // key given on put
                     else db.createObjectStore(name, { keyPath: "id" });
                 }
+            }
+            if (event.oldVersion < 2) {
+                db.createObjectStore("careLogs", { keyPath: "id" });
             }
         };
 

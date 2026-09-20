@@ -22,6 +22,7 @@ public sealed class BackupData
     public List<Propagation> Propagations { get; set; } = [];
     public List<TimelineEntry> Timeline { get; set; } = [];
     public List<Photo> Photos { get; set; } = [];
+    public List<CareLog> CareLogs { get; set; } = [];
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the
@@ -31,7 +32,8 @@ public sealed class BackupData
         Plants.Count(p => !p.IsDeleted),
         Propagations.Count(p => !p.IsDeleted),
         Timeline.Count(e => !e.IsDeleted),
-        Photos.Count(p => !p.IsDeleted));
+        Photos.Count(p => !p.IsDeleted),
+        CareLogs.Count(l => !l.IsDeleted));
 }
 
-public sealed record BackupCounts(int Plants, int Propagations, int Entries, int Photos);
+public sealed record BackupCounts(int Plants, int Propagations, int Entries, int Photos, int CareEntries);
