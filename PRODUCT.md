@@ -13,7 +13,7 @@ The primary user is the developer, tracking his own houseplants and the cuttings
 Two further audiences are real:
 
 - **Houseplant hobbyists.** The app is public on GitHub Pages so anyone can use it. Some of them are casual plant owners who will never take a cutting. Features aimed at them, mainly watering and care logging, are built on purpose even though the developer does not use them.
-- **Employers and other developers.** The project is meant for a CV. The code gets read and the live app gets opened. An app with real users is worth more here than an app that earns money.
+- **Developers.** The repository is public and the code gets read as closely as the app gets used. Both have to hold up. Reach and real use matter more here than revenue, which is why the app is free and stays free.
 
 Danish speakers may be the easier early audience, because the subject is niche and the app has a Danish name.
 
