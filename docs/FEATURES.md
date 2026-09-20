@@ -115,6 +115,22 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 8 | L | v1.x |
 | ☐ | **"Available for swap" list**: mark propagations as available and share a simple list or image before a plant swap | 8 | M | v1.x |
 
+## 3b. Crossbreeding
+
+For people who pollinate their own plants and raise the seedlings. A cross is two parents, a date and a method, and then a long wait, so most of the value is in writing it down on the day it happens. A plant only has one parent in the app today, so holding on to both is the real work in this section.
+
+| ✓ | Feature | Priority | Effort | When |
+|---|---|---|---|---|
+| ☐ | **Crosses**: record a pollination with the pod parent, the pollen parent and the date | 7 | M | v1.x |
+| ☐ | How it was done: brush or by hand, fresh or stored pollen, whether the flower was bagged, and a note for anything else | 7 | S | v1.x |
+| ☐ | Outcome: whether it took, when the seed was ripe, how much there was, and when it was sown | 7 | S | v1.x |
+| ☐ | Seedlings from a cross keep both parents, so the family tree shows where a hybrid came from | 7 | M | v1.x |
+| ☐ | A working name for the cross, used on the seedlings until they earn a real one | 7 | S | v1.x |
+| ☐ | Cross log: every cross in one list with what came of it, so the ones worth repeating stand out | 8 | S | v1.x |
+| ☐ | **Pollen store**: what is in the freezer, from which plant and when it was collected, since pollen doesn't keep forever | 8 | M | v1.x |
+| ☐ | A plant coming into flower shows on Today together with the pollen you have stored for it | 8 | M | v1.x |
+| ☐ | Compare the seedlings from one cross side by side, to pick the keepers | 8 | M | v1.x |
+
 ## 4. Care log
 
 Built around your routine: moisture meter instead of a watering schedule, semi-hydro reservoirs, and different fertilisers for different plants. The basics are in. Only the notable kinds (repotted, flushed, pruned) go on a plant's history, so watering doesn't bury the photos and notes.
@@ -248,6 +264,17 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | Start the tour again from Settings whenever you want | 6 | S | v1.x |
 | ☐ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | 6 | S | v1.x |
 | ☐ | A demo plant and propagation that can be loaded and removed again, so the app can be tried out without adding real plants | 7 | M | v1.x |
+
+## 7d. Guides & references
+
+Questions come up that the app can't answer from your own data: how long a cutting should take to root, what thrips damage looks like, how much perlite goes in a mix. There are two ways to handle it. Point at a good page somewhere else, or keep a short guide inside the app. Linking is much less work and there is nothing to maintain, so that comes first. Anything written into the app has to be kept correct afterwards.
+
+| ✓ | Feature | Priority | Effort | When |
+|---|---|---|---|---|
+| ☐ | **Reference links**: a short, checked list of outside pages (care by genus, pest identification, semi-hydro, soil), opened in the browser | 7 | S | v1.x |
+| ☐ | Links where they apply: a pest case links to a page about that pest, a plant links to a care page for its genus | 7 | M | v1.x |
+| ☐ | **Built-in guides** that work offline: taking a cutting, converting to semi-hydro, treating thrips, mixing soil. Short, part of the app, no backend and no network | 8 | L | v1.x |
+| ☐ | A guide opens from the place it is about, e.g. the stages on a propagation link to the cutting guide | 8 | S | v1.x |
 
 ## 8. Sharing & later versions
 
