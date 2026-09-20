@@ -150,14 +150,7 @@ else
                 <div class="form-text">Give batches you started together the same name and they're compared side by side.</div>
             </div>
             <div class="mb-1">
-                <label class="form-label" for="location">Location</label>
-                <InputText id="location" class="form-control" @bind-Value="propagation.Location" list="location-list" placeholder="e.g. Kitchen window" autocomplete="off" />
-                <datalist id="location-list">
-                    @foreach (var l in locations)
-                    {
-                        <option value="@l"></option>
-                    }
-                </datalist>
+                <RoomPicker @bind-Value="propagation.Location" Rooms="rooms" SpotPlaceholder="e.g. Kitchen window" />
             </div>
         </fieldset>
 
@@ -190,7 +183,7 @@ else
     private bool saving;
     private List<string> errors = [];
     private IReadOnlyList<Plant> plants = [];
-    private IReadOnlyList<string> locations = [];
+    private IReadOnlyList<Room> rooms = [];
     private IReadOnlyList<string> experiments = [];
 
     private bool IsNew => Id is null;
@@ -210,7 +203,7 @@ else
         var allPlants = await PlantRepository.GetAllAsync();
         var allPropagations = await Repository.GetAllAsync();
         plants = allPlants.OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
-        locations = PlantFilter.Locations(allPlants.Select(p => p.Location).Concat(allPropagations.Select(p => p.Location)));
+        rooms = Room.List(allPlants, allPropagations);
         experiments = Experiments.Names(allPropagations);
 
         if (IsNew)

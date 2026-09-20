@@ -722,3 +722,38 @@ a.item-card:focus-visible {
     .loading-progress-text:after {
         content: var(--blazor-load-percentage-text, "Loading");
     }
+
+/* Rooms and spots are picked from buttons rather than a datalist, which a phone won't show */
+.room-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.room-chip {
+    min-height: 2.25rem;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 999px;
+    background: var(--pa-surface);
+    color: var(--pa-text);
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+.room-chip.picked {
+    border-color: var(--pa-green);
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+    font-weight: 600;
+}
+
+/* Dashed, so adding a name doesn't look like another room you already have */
+.room-chip.new {
+    border-style: dashed;
+    color: var(--pa-muted);
+}
+
+.room-chip.new.picked {
+    color: var(--pa-green-dark);
+}

@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Plants;
 
@@ -11,6 +12,7 @@ public enum StatusFilter
 }
 
 /// <summary>Search, filter and sort rules for the plant list.</summary>
+/// <param name="Location">A room, or a spot inside one. A room also shows what's in its spots.</param>
 public sealed record PlantFilter(string? Search = null, StatusFilter Status = StatusFilter.Active, string? Location = null)
 {
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
@@ -29,8 +31,7 @@ public sealed record PlantFilter(string? Search = null, StatusFilter Status = St
     };
 
     private bool MatchesLocation(Plant plant) =>
-        string.IsNullOrWhiteSpace(Location)
-        || string.Equals(plant.Location?.Trim(), Location.Trim(), StringComparison.OrdinalIgnoreCase);
+        string.IsNullOrWhiteSpace(Location) || RoomName.IsIn(plant.Location, Location);
 
     // Every word typed must appear somewhere in the plant's names, so "thai monstera" finds
     // "Monstera deliciosa 'Thai Constellation'"
@@ -44,17 +45,4 @@ public sealed record PlantFilter(string? Search = null, StatusFilter Status = St
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase));
     }
-
-    /// <summary>Distinct, sorted locations used by the given plants, for the location filter.</summary>
-    public static IReadOnlyList<string> Locations(IEnumerable<Plant> plants) =>
-        Locations(plants.Where(p => !p.IsDeleted).Select(p => p.Location));
-
-    /// <summary>Distinct, sorted room names, e.g. to suggest while typing.</summary>
-    public static IReadOnlyList<string> Locations(IEnumerable<string?> locations) =>
-        locations
-            .Where(l => !string.IsNullOrWhiteSpace(l))
-            .Select(l => l!.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Order(StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
 }

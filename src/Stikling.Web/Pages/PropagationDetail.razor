@@ -92,21 +92,12 @@ else
                         <input id="potup-pot" class="form-control" @bind="potUp.Container" @bind:event="oninput" placeholder="e.g. 9 cm nursery pot" />
                     </div>
                 </div>
-                <div class="row g-2 mb-3">
-                    <div class="col-6">
-                        <label class="form-label" for="potup-location">Location</label>
-                        <input id="potup-location" class="form-control" @bind="potUp.Location" @bind:event="oninput" list="potup-locations" autocomplete="off" />
-                        <datalist id="potup-locations">
-                            @foreach (var l in locations)
-                            {
-                                <option value="@l"></option>
-                            }
-                        </datalist>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label" for="potup-date">Date</label>
-                        <input id="potup-date" type="date" class="form-control" @bind="potUp.Date" max="@Today.ToString("yyyy-MM-dd")" />
-                    </div>
+                <div class="mb-2">
+                    <label class="form-label" for="potup-date">Date</label>
+                    <input id="potup-date" type="date" class="form-control" @bind="potUp.Date" max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="mb-3">
+                    <RoomPicker @bind-Value="potUp.Location" Rooms="rooms" Label="Where it goes" />
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-primary" disabled="@(busy || !CountIsValid(potUp.Count))" @onclick="PotUpAsync">
@@ -294,7 +285,7 @@ else
     private Propagation? propagation;
     private Plant? parent;
     private IReadOnlyList<Plant> offspring = [];
-    private IReadOnlyList<string> locations = [];
+    private IReadOnlyList<Room> rooms = [];
     private bool loaded;
     private bool busy;
     private bool confirmDelete;
@@ -345,7 +336,7 @@ else
         offspring = plants.Where(p => p.FromPropagationId == Id)
                           .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                           .ToList();
-        locations = PlantFilter.Locations(plants.Select(p => p.Location).Concat(propagations.Select(p => p.Location)));
+        rooms = Room.List(plants, propagations);
     }
 
     private void SetTab(string value) =>

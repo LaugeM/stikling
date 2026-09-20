@@ -1,0 +1,158 @@
+@* Picking where something lives. The rooms already in use are buttons rather than an
+   autocomplete, because a datalist is invisible on a phone and you end up inventing a
+   second name for a room you already have. *@
+
+<div class="room-picker">
+    <div class="form-label">@Label</div>
+
+    <div class="room-chips" role="group" aria-label="@Label">
+        <button type="button" class="room-chip @Picked(Value is null && !typingRoom)"
+                @onclick="() => PickRoomAsync(null)">No room</button>
+        @foreach (var room in RoomNames)
+        {
+            <button type="button" class="room-chip @Picked(!typingRoom && RoomName.Same(room, PickedRoom))"
+                    @onclick="() => PickRoomAsync(room)">@room</button>
+        }
+        <button type="button" class="room-chip new @Picked(typingRoom)" @onclick="StartNewRoomAsync">+ New room</button>
+    </div>
+
+    @if (typingRoom)
+    {
+        <input class="form-control mt-2" placeholder="@RoomPlaceholder" autocomplete="off" aria-label="New room"
+               value="@draft" @oninput="TypeRoomAsync" @ref="draftInput" />
+    }
+
+    @if (!typingRoom && PickedRoom is { } room1)
+    {
+        <div class="room-chips spots" role="group" aria-label="Spot in @room1">
+            <button type="button" class="room-chip @Picked(PickedSpot is null && !typingSpot)"
+                    @onclick="() => PickSpotAsync(null)">Anywhere in @room1</button>
+            @foreach (var spot in SpotNames)
+            {
+                <button type="button" class="room-chip @Picked(!typingSpot && RoomName.Same(spot, PickedSpot))"
+                        @onclick="() => PickSpotAsync(spot)">@spot</button>
+            }
+            <button type="button" class="room-chip new @Picked(typingSpot)" @onclick="StartNewSpotAsync">+ New spot</button>
+        </div>
+
+        @if (typingSpot)
+        {
+            <input class="form-control mt-2" placeholder="@SpotPlaceholder" autocomplete="off" aria-label="New spot in @room1"
+                   value="@draft" @oninput="TypeSpotAsync" @ref="draftInput" />
+        }
+    }
+
+    <div class="form-text">A spot is a place inside a room, like a windowsill or the top of a desk.</div>
+</div>
+
+@code {
+    /// <summary>The place, e.g. "Living room" or "Living room / On top of the PC".</summary>
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>The rooms already in use, which is what you get to pick from.</summary>
+    [Parameter]
+    public IReadOnlyList<Room> Rooms { get; set; } = [];
+
+    [Parameter]
+    public string Label { get; set; } = "Location";
+
+    [Parameter]
+    public string RoomPlaceholder { get; set; } = "e.g. Living room";
+
+    [Parameter]
+    public string SpotPlaceholder { get; set; } = "e.g. On top of the PC";
+
+    private bool typingRoom;
+    private bool typingSpot;
+
+    // What's in the text box while a new name is being typed. Kept apart from Value so that
+    // trimming the place doesn't fight with the cursor on every keystroke.
+    private string draft = "";
+    private ElementReference draftInput;
+    private bool focusDraft;
+
+    private string? PickedRoom => RoomName.RoomOf(Value);
+    private string? PickedSpot => RoomName.SpotOf(Value);
+
+    private static string? Picked(bool picked) => picked ? "picked" : null;
+
+    /// <summary>
+    /// The known rooms, plus the room this thing is already in when it isn't one of them, so
+    /// editing an old plant doesn't quietly drop where it lives.
+    /// </summary>
+    private IEnumerable<string> RoomNames =>
+        !typingRoom && PickedRoom is { } picked && !Rooms.Any(r => RoomName.Same(r.Name, picked))
+            ? Rooms.Select(r => r.Name).Append(picked)
+            : Rooms.Select(r => r.Name);
+
+    private IEnumerable<string> SpotNames
+    {
+        get
+        {
+            var known = Rooms.FirstOrDefault(r => RoomName.Same(r.Name, PickedRoom))?.Spots.Select(s => s.Name) ?? [];
+            return !typingSpot && PickedSpot is { } picked && !known.Any(s => RoomName.Same(s, picked))
+                ? known.Append(picked)
+                : known;
+        }
+    }
+
+    private Task PickRoomAsync(string? room)
+    {
+        typingRoom = typingSpot = false;
+        return SetAsync(RoomName.Combine(room, null));
+    }
+
+    private Task PickSpotAsync(string? spot)
+    {
+        typingSpot = false;
+        return SetAsync(RoomName.Combine(PickedRoom, spot));
+    }
+
+    private Task StartNewRoomAsync()
+    {
+        typingRoom = true;
+        typingSpot = false;
+        draft = "";
+        focusDraft = true;
+        return SetAsync(null);
+    }
+
+    private Task StartNewSpotAsync()
+    {
+        typingSpot = true;
+        draft = "";
+        focusDraft = true;
+        return SetAsync(RoomName.Combine(PickedRoom, null));
+    }
+
+    private Task TypeRoomAsync(ChangeEventArgs e)
+    {
+        draft = e.Value?.ToString() ?? "";
+        return SetAsync(RoomName.Combine(draft, null));
+    }
+
+    private Task TypeSpotAsync(ChangeEventArgs e)
+    {
+        draft = e.Value?.ToString() ?? "";
+        return SetAsync(RoomName.Combine(PickedRoom, draft));
+    }
+
+    private Task SetAsync(string? place)
+    {
+        Value = place;
+        return ValueChanged.InvokeAsync(place);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!focusDraft)
+            return;
+
+        focusDraft = false;
+        await draftInput.FocusAsync();
+    }
+}

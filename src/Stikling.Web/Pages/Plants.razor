@@ -47,18 +47,31 @@ else
                 }
             </div>
 
-            @if (locations.Count > 1)
+            @if (HasRoomChoice)
             {
-                <select class="form-select form-select-sm w-auto" aria-label="Location"
-                        @bind="location" @bind:after="Refresh">
+                <select class="form-select form-select-sm w-auto" aria-label="Room"
+                        @bind="room" @bind:after="RoomPicked">
                     <option value="">All rooms</option>
-                    @foreach (var l in locations)
+                    @foreach (var r in rooms)
                     {
-                        <option value="@l">@l</option>
+                        <option value="@r.Name">@r.Name</option>
                     }
                 </select>
             }
         </div>
+
+        @if (PickedRoom is { Spots.Count: > 0 } picked)
+        {
+            <div class="spot-filters" role="group" aria-label="Spot in @picked.Name">
+                <button type="button" class="room-chip @(spot is null ? "picked" : null)"
+                        @onclick="() => PickSpot(null)">All of @picked.Name</button>
+                @foreach (var s in picked.Spots)
+                {
+                    <button type="button" class="room-chip @(RoomName.Same(s.Name, spot) ? "picked" : null)"
+                            @onclick="() => PickSpot(s.Name)">@s.Name</button>
+                }
+            </div>
+        }
     </div>
 
     @if (selecting)
@@ -147,12 +160,13 @@ else
     ];
 
     private IReadOnlyList<Plant>? all;
-    private IReadOnlyList<string> locations = [];
+    private IReadOnlyList<Room> rooms = [];
     private List<Plant> visible = [];
 
     private string? search;
     private StatusFilter status = StatusFilter.Active;
-    private string? location;
+    private string? room;
+    private string? spot;
 
     private bool selecting;
     private readonly HashSet<Guid> selected = [];
@@ -169,7 +183,7 @@ else
     private async Task LoadAsync()
     {
         all = await Repository.GetAllAsync();
-        locations = PlantFilter.Locations(all);
+        rooms = Room.List(all, []);
         careLogs = await CareLogRepository.GetAllAsync();
         Refresh();
     }
@@ -180,8 +194,26 @@ else
         Refresh();
     }
 
+    /// <summary>The room dropdown is worth showing once there's more than one place to choose.</summary>
+    private bool HasRoomChoice => rooms.Count > 1 || rooms.Any(r => r.Spots.Count > 0);
+
+    private Room? PickedRoom => rooms.FirstOrDefault(r => RoomName.Same(r.Name, room));
+
+    // Spots belong to the room above them, so picking another room starts over
+    private void RoomPicked()
+    {
+        spot = null;
+        Refresh();
+    }
+
+    private void PickSpot(string? name)
+    {
+        spot = name;
+        Refresh();
+    }
+
     private void Refresh() =>
-        visible = new PlantFilter(search, status, location).Apply(all ?? []).ToList();
+        visible = new PlantFilter(search, status, RoomName.Combine(room, spot)).Apply(all ?? []).ToList();
 
     private void ToggleSelectMode()
     {

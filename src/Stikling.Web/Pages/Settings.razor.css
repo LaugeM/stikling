@@ -37,3 +37,45 @@
     margin: 0.75rem 0 0;
     font-size: 0.9rem;
 }
+
+.room-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.room-list > li {
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.room-list > li:first-child {
+    border-top: 0;
+}
+
+.room-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.room-name {
+    font-weight: 600;
+}
+
+.room-count {
+    margin-right: auto;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+/* Spots read as part of the room above them */
+.room-spot {
+    margin: 0.4rem 0 0 0.75rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--pa-border);
+}
+
+.room-spot .room-name {
+    font-weight: 400;
+}

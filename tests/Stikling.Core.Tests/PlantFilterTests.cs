@@ -65,8 +65,22 @@ public class PlantFilterTests
     }
 
     [Fact]
-    public void Locations_are_distinct_and_sorted()
+    public void A_room_also_shows_what_sits_in_its_spots()
     {
-        Assert.Equal(["Kitchen", "Living room"], PlantFilter.Locations(All));
+        var pc = new Plant { Nickname = "Pilea", Location = "Living room / On top of the PC" };
+
+        var result = new PlantFilter(Location: "Living room").Apply([.. All, pc]).ToList();
+
+        Assert.Equal([Monstera, Thai, pc], result);
+    }
+
+    [Fact]
+    public void A_spot_shows_only_what_sits_in_it()
+    {
+        var pc = new Plant { Nickname = "Pilea", Location = "Living room / On top of the PC" };
+
+        var result = new PlantFilter(Location: "Living room / On top of the PC").Apply([.. All, pc]).ToList();
+
+        Assert.Equal([pc], result);
     }
 }
