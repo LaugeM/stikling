@@ -1,5 +1,6 @@
 using System.Globalization;
 using Stikling.Core.Models;
+using Stikling.Core.Pots;
 
 namespace Stikling.Web.Services;
 
@@ -104,6 +105,9 @@ public static class Labels
         PropagationStage s => Stage(s),
         Pest p => For(p),
         PestCaseStatus s => For(s),
+        PotGroup g => For(g),
+        PotMaterial m => For(m),
+        PotWatering w => For(w),
         _ => value.ToString()
     };
 
@@ -155,4 +159,40 @@ public static class Labels
 
     /// <summary>"2024", "June 2024" or "12 Jun 2024", depending on how much is known.</summary>
     public static string Date(LooseDate date) => date.Text();
+
+    public static string For(PotGroup group) => group switch
+    {
+        PotGroup.Inner => "Nursery pot",
+        PotGroup.Outer => "Outer pot",
+        _ => "Stands on its own"
+    };
+
+    /// <summary>The heading over a group of pots in the library.</summary>
+    public static string Heading(PotGroup group) => group switch
+    {
+        PotGroup.Inner => "Nursery pots",
+        PotGroup.Outer => "Outer pots",
+        _ => "Pots that stand on their own"
+    };
+
+    public static string For(PotMaterial material) => material switch
+    {
+        PotMaterial.Terracotta => "Terracotta",
+        PotMaterial.Ceramic => "Ceramic",
+        PotMaterial.Glass => "Glass",
+        PotMaterial.Metal => "Metal",
+        PotMaterial.Other => "Other",
+        _ => "Plastic"
+    };
+
+    public static string For(PotWatering watering) =>
+        watering == PotWatering.Wick ? "Wick" : "Submerged";
+
+    /// <summary>"2 of 3 in use, 1 free", so the library says what is still available.</summary>
+    public static string Use(PotUse use) => use switch
+    {
+        { InUse: 0 } => use.Owned == 1 ? "free" : $"all {use.Owned} free",
+        { Free: 0 } => use.Owned == 1 ? "in use" : $"all {use.Owned} in use",
+        _ => $"{use.InUse} of {use.Owned} in use, {use.Free} free"
+    };
 }

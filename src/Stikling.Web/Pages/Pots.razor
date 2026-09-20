@@ -1,0 +1,364 @@
+@page "/pots"
+@inject IPotRepository Repository
+@inject PotService PotService
+
+<PageTitle>Pots · Stikling</PageTitle>
+
+<a class="back-link" href="settings">‹ Settings</a>
+<h1>Pots</h1>
+
+<p class="settings-hint">
+    The pots you own, so a plant can point at one instead of you typing it again. A nursery pot goes
+    inside something, an outer pot has no drainage and holds a nursery pot, and some pots need nothing
+    around them. Register a pot once per size, with how many of it you have.
+</p>
+
+@if (errors.Count > 0)
+{
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in errors)
+        {
+            <div>@error</div>
+        }
+    </div>
+}
+
+@if (draft is not null)
+{
+    <section class="settings-section">
+        <h2>@(editing is null ? "Add a pot" : "Edit pot")</h2>
+
+        <div class="mb-3">
+            <div class="form-label">What kind</div>
+            <div class="chip-row" role="group" aria-label="What kind of pot">
+                @foreach (var group in Enum.GetValues<PotGroup>())
+                {
+                    <button type="button" class="chip @Picked(draft.Group == group)"
+                            @onclick="() => draft.Group = group">@Labels.For(group)</button>
+                }
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="pot-name">Name</label>
+            @if (Names.Count > 0)
+            {
+                <div class="chip-row mb-2" role="group" aria-label="Names you already use">
+                    @foreach (var name in Names)
+                    {
+                        <button type="button" class="chip @Picked(Same(name, draft.Name))"
+                                @onclick="() => draft.Name = name">@name</button>
+                    }
+                </div>
+            }
+            <input id="pot-name" class="form-control" placeholder="e.g. Clear nursery pot" autocomplete="off"
+                   value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
+            <div class="form-text">Every size of the same pot shares a name, so they stay together in the list.</div>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label">Made of</div>
+            <div class="chip-row" role="group" aria-label="What the pot is made of">
+                @foreach (var material in Enum.GetValues<PotMaterial>())
+                {
+                    <button type="button" class="chip @Picked(draft.Material == material)"
+                            @onclick="() => draft.Material = material">@Labels.For(material)</button>
+                }
+            </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-6">
+                <label class="form-label" for="pot-top">Across the top (cm)</label>
+                <input id="pot-top" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
+                       @bind="draft.TopCm" />
+            </div>
+            <div class="col-6">
+                <label class="form-label" for="pot-owned">How many</label>
+                <input id="pot-owned" class="form-control" type="number" inputmode="numeric" min="1" step="1"
+                       @bind="draft.Owned" />
+            </div>
+        </div>
+
+        <details class="more-measurements mb-3" open="@detailsOpen">
+            <summary>More measurements</summary>
+
+            <div class="row g-2 mt-2">
+                <div class="col-6">
+                    <label class="form-label" for="pot-bottom">Across the bottom (cm)</label>
+                    <input id="pot-bottom" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
+                           @bind="draft.BottomCm" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="pot-height">Height (cm)</label>
+                    <input id="pot-height" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
+                           @bind="draft.HeightCm" />
+                </div>
+            </div>
+            <div class="form-text">
+                On an outer pot these mean the inside. The bottom is the one that decides whether a nursery
+                pot really fits, since both usually taper.
+            </div>
+
+            <div class="mt-3">
+                <label class="form-label" for="pot-rim">Rim (mm)</label>
+                <input id="pot-rim" class="form-control" type="number" inputmode="decimal" min="0" step="0.5"
+                       @bind="draft.RimMm" />
+                <div class="form-text">A rim lets the pot hang on an outer pot instead of standing in it.</div>
+            </div>
+
+            <div class="mt-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="pot-self-watering"
+                           checked="@(draft.SelfWatering is not null)"
+                           @onchange="e => SetSelfWatering((bool?)e.Value == true)" />
+                    <label class="form-check-label" for="pot-self-watering">Waters itself</label>
+                </div>
+                @if (draft.SelfWatering is { } watering)
+                {
+                    <div class="chip-row mt-2" role="group" aria-label="How it waters itself">
+                        @foreach (var option in Enum.GetValues<PotWatering>())
+                        {
+                            <button type="button" class="chip @Picked(watering == option)"
+                                    @onclick="() => draft.SelfWatering = option">@Labels.For(option)</button>
+                        }
+                    </div>
+                    <div class="form-text">A wick draws the water up. Submerged means the pot stands in it.</div>
+                }
+            </div>
+
+            <div class="mt-3">
+                <label class="form-label" for="pot-notes">Notes</label>
+                <textarea id="pot-notes" class="form-control" rows="2" @bind="draft.Notes"></textarea>
+            </div>
+        </details>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => SaveAsync(again: false)">
+                @(editing is null ? "Add pot" : "Save")
+            </button>
+            @if (editing is null)
+            {
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => SaveAsync(again: true)">
+                    Save and add another size
+                </button>
+            }
+            <button type="button" class="btn btn-link" @onclick="Cancel">Cancel</button>
+        </div>
+    </section>
+}
+else
+{
+    <div class="form-actions mb-3">
+        <button type="button" class="btn btn-primary" @onclick="() => StartNew(null)">+ Add a pot</button>
+    </div>
+}
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (uses.Count == 0)
+{
+    <div class="empty-state">
+        <p>No pots yet.</p>
+        <p class="text-body-secondary">
+            Add the ones you use most first. A set of nursery pots is one entry per size, with how many
+            of that size you have.
+        </p>
+    </div>
+}
+else
+{
+    @foreach (var group in uses.GroupBy(use => use.Pot.Group))
+    {
+        <section class="settings-section">
+            <h2>@Labels.Heading(group.Key)</h2>
+
+            @foreach (var family in group.GroupBy(use => use.Pot.Name, StringComparer.CurrentCultureIgnoreCase))
+            {
+                <h3 class="pot-family">@family.Key</h3>
+                <ul class="pot-list">
+                    @foreach (var use in family)
+                    {
+                        <li>
+                            @if (confirming == use.Pot.Id)
+                            {
+                                <div class="pot-confirm">
+                                    <p>@DeleteWarning(use.Pot)</p>
+                                    <div class="care-actions">
+                                        <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
+                                                @onclick="() => DeleteAsync(use.Pot)">Delete</button>
+                                        <button type="button" class="btn btn-link btn-sm"
+                                                @onclick="() => confirming = null">Cancel</button>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="pot-row">
+                                    <span class="pot-size">@SizeText(use.Pot)</span>
+                                    <span class="pot-about">@About(use.Pot)</span>
+                                    <span class="pot-use">@Labels.Use(use)</span>
+                                    <span class="pot-actions">
+                                        <button type="button" class="btn btn-link btn-sm p-0"
+                                                @onclick="() => StartEdit(use.Pot)">Edit</button>
+                                        <button type="button" class="btn btn-link btn-sm p-0"
+                                                @onclick="() => ConfirmAsync(use.Pot)">Delete</button>
+                                    </span>
+                                </div>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    }
+}
+
+@code {
+    private IReadOnlyList<PotUse> uses = [];
+    private IReadOnlyList<Pot> all = [];
+    private bool loading = true;
+    private bool busy;
+    private List<string> errors = [];
+
+    private Pot? draft;
+    private Pot? editing;
+    private bool detailsOpen;
+    private Guid? confirming;
+    private int inUse;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        all = await Repository.GetAllAsync();
+        uses = await PotService.GetAllAsync();
+        loading = false;
+    }
+
+    private IReadOnlyList<string> Names => PotUse.Names(all);
+
+    private static string? Picked(bool picked) => picked ? "picked" : null;
+
+    private static bool Same(string? a, string? b) =>
+        string.Equals(a?.Trim(), b?.Trim(), StringComparison.OrdinalIgnoreCase);
+
+    private static string SizeText(Pot pot) => pot.TopCm is { } top ? $"{Pot.Size(top)} cm" : "No size";
+
+    /// <summary>The muted line beside a pot: what it's made of, and anything unusual about it.</summary>
+    private static string About(Pot pot)
+    {
+        var parts = new List<string> { Labels.For(pot.Material) };
+        if (pot.SelfWatering is { } watering)
+            parts.Add($"self-watering ({Labels.For(watering).ToLowerInvariant()})");
+        if (pot.HasRim)
+            parts.Add($"{Pot.Size(pot.RimMm!.Value)} mm rim");
+        if (pot.HeightCm is { } height)
+            parts.Add($"{Pot.Size(height)} cm tall");
+        return string.Join(" · ", parts);
+    }
+
+    private void StartNew(Pot? like)
+    {
+        editing = null;
+        errors = [];
+        confirming = null;
+        detailsOpen = false;
+        draft = like ?? new Pot();
+    }
+
+    private void StartEdit(Pot pot)
+    {
+        editing = pot;
+        errors = [];
+        confirming = null;
+        // Open when there's something in there to see, so editing doesn't hide what's already set
+        detailsOpen = pot.BottomCm is not null || pot.HeightCm is not null || pot.RimMm is not null
+            || pot.SelfWatering is not null || !string.IsNullOrWhiteSpace(pot.Notes);
+        draft = pot.Copy();
+    }
+
+    private void Cancel()
+    {
+        draft = null;
+        editing = null;
+        errors = [];
+    }
+
+    private void SetSelfWatering(bool on) => draft!.SelfWatering = on ? PotWatering.Wick : null;
+
+    /// <summary>
+    /// Saving with "again" keeps everything but the measurements, because registering a set of
+    /// nursery pots is one full entry and then five sizes.
+    /// </summary>
+    private async Task SaveAsync(bool again)
+    {
+        if (draft is null)
+            return;
+
+        errors = draft.Validate().ToList();
+        if (errors.Count > 0)
+            return;
+
+        busy = true;
+        try
+        {
+            await Repository.SaveAsync(draft);
+            await LoadAsync();
+
+            if (again)
+            {
+                var next = draft.Copy();
+                next.Id = Guid.NewGuid();
+                next.CreatedAt = next.UpdatedAt = default;
+                next.TopCm = next.BottomCm = next.HeightCm = null;
+                StartNew(next);
+            }
+            else
+            {
+                Cancel();
+            }
+        }
+        catch (InvalidOperationException e)
+        {
+            errors = [e.Message];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    /// <summary>What deleting a pot does to the plants in it, said before it happens.</summary>
+    private string DeleteWarning(Pot pot) => inUse switch
+    {
+        0 => $"Delete {pot.DisplayName}?",
+        1 => "1 plant is using this pot. Deleting it takes the pot off that plant, and changes nothing else about it.",
+        _ => $"{inUse} plants are using this pot. Deleting it takes the pot off them, and changes nothing else about them."
+    };
+
+    private async Task ConfirmAsync(Pot pot)
+    {
+        inUse = await PotService.InUseAsync(pot.Id);
+        confirming = pot.Id;
+    }
+
+    private async Task DeleteAsync(Pot pot)
+    {
+        busy = true;
+        try
+        {
+            await Repository.DeleteAsync(pot.Id);
+            confirming = null;
+            if (editing?.Id == pot.Id)
+                Cancel();
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

@@ -2,6 +2,7 @@ using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
+using Stikling.Core.Pots;
 using Stikling.Core.Propagations;
 
 namespace Stikling.Web.Services;
@@ -10,6 +11,12 @@ public sealed class IndexedDbPlantRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<Plant>(db, time, Stores.Plants), IPlantRepository
 {
     protected override IReadOnlyList<string> Validate(Plant plant) => plant.Validate(Today);
+}
+
+public sealed class IndexedDbPotRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Pot>(db, time, Stores.Pots), IPotRepository
+{
+    protected override IReadOnlyList<string> Validate(Pot pot) => pot.Validate();
 }
 
 public sealed class IndexedDbPropagationRepository(IndexedDb db, TimeProvider time)

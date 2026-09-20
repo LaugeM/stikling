@@ -2,6 +2,7 @@
 @page "/plants/{Id:guid}/edit"
 @inject IPlantRepository Repository
 @inject IPropagationRepository Propagations
+@inject IPotRepository PotRepository
 @inject PlantService PlantService
 @inject PhotoService Photos
 @inject NavigationManager Navigation
@@ -109,20 +110,37 @@ else
             <div class="mb-3">
                 <RoomPicker @bind-Value="plant.Location" Rooms="rooms" />
             </div>
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                    <label class="form-label" for="medium">Grows in</label>
-                    <InputSelect id="medium" class="form-select" @bind-Value="plant.Medium">
-                        @foreach (var medium in Enum.GetValues<GrowingMedium>())
-                        {
-                            <option value="@medium">@Labels.For(medium)</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div class="col-6">
-                    <label class="form-label" for="container">Pot</label>
-                    <InputText id="container" class="form-control" @bind-Value="plant.Container" placeholder="e.g. Lechuza pot" />
-                </div>
+            <div class="mb-3">
+                <label class="form-label" for="medium">Grows in</label>
+                <InputSelect id="medium" class="form-select" @bind-Value="plant.Medium">
+                    @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                    {
+                        <option value="@medium">@Labels.For(medium)</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <PotPicker @bind-Value="plant.InnerPotId" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                @if (OldPotText is { } noted)
+                {
+                    <div class="form-text">Noted before the pot library: @noted. Picking a pot replaces it.</div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <PotPicker Value="plant.OuterPotId" ValueChanged="SetOuterPot" Pots="pots" Groups="OuterSlot"
+                           Label="Outer pot" NoneText="No outer pot" PotAdded="AddPot" />
+                @if (plant.OuterPotId is not null)
+                {
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="water-outer"
+                               checked="@plant.WaterInOuterPot"
+                               @onchange="e => plant.WaterInOuterPot = (bool?)e.Value == true" />
+                        <label class="form-check-label" for="water-outer">Keep water in the outer pot</label>
+                    </div>
+                    <div class="form-text">For a plain outer pot you keep water in, with the medium wicking it up.</div>
+                }
             </div>
             @if (!IsNew)
             {
@@ -217,8 +235,30 @@ else
     private List<string> errors = [];
     private IReadOnlyList<Plant> possibleParents = [];
     private IReadOnlyList<Room> rooms = [];
+    private IReadOnlyList<Pot> pots = [];
+
+    private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
+    private static readonly PotGroup[] OuterSlot = [PotGroup.Outer];
 
     private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    /// <summary>The pot typed in before the library existed, shown until a real pot is picked.</summary>
+    private string? OldPotText =>
+        plant is { InnerPotId: null, OuterPotId: null, Container: var text } && !string.IsNullOrWhiteSpace(text)
+            ? text.Trim()
+            : null;
+
+    private string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
+
+    private void AddPot(Pot pot) => pots = [.. pots, pot];
+
+    // Clearing the outer pot clears what would be kept in it
+    private void SetOuterPot(Guid? id)
+    {
+        plant!.OuterPotId = id;
+        if (id is null)
+            plant.WaterInOuterPot = false;
+    }
 
     private bool IsNew => Id is null;
 
@@ -230,6 +270,7 @@ else
     {
         var all = await Repository.GetAllAsync();
         rooms = Room.List(all, await Propagations.GetAllAsync());
+        pots = await PotRepository.GetAllAsync();
 
         if (IsNew)
         {
@@ -337,7 +378,7 @@ else
             }
             else
             {
-                await PlantService.UpdateAsync(original!, plant, Labels.For);
+                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName);
             }
             Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
         }

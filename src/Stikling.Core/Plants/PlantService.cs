@@ -42,11 +42,16 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     }
 
     /// <summary>Saves an edited plant and records what changed (status, room, medium, pot).</summary>
-    public async Task UpdateAsync(Plant before, Plant after, Func<Enum, string> label)
+    /// <param name="potName">Turns a pot id into its name, so the history can say which pot.</param>
+    public async Task UpdateAsync(
+        Plant before,
+        Plant after,
+        Func<Enum, string> label,
+        Func<Guid, string?>? potName = null)
     {
         await plants.SaveAsync(after);
 
-        var changes = PlantChanges.Describe(before, after, label);
+        var changes = PlantChanges.Describe(before, after, label, potName);
         if (changes.Count > 0)
             await AddChangeAsync(after.Id, string.Join("\n", changes));
     }

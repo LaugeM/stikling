@@ -1,6 +1,7 @@
 using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
+using Stikling.Core.Pots;
 using Stikling.Core.Propagations;
 using Stikling.Core.Timeline;
 using Stikling.Core.Today;
@@ -124,4 +125,30 @@ internal sealed class FixedTime(DateTimeOffset now) : TimeProvider
 
     // UTC keeps "today" the same on every machine the tests run on
     public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
+}
+
+internal sealed class FakePotRepository : IPotRepository
+{
+    public Dictionary<Guid, Pot> Pots { get; } = [];
+
+    public Task<IReadOnlyList<Pot>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Pot>>(Pots.Values.Where(p => !p.IsDeleted).ToList());
+
+    public Task<Pot?> GetAsync(Guid id) =>
+        Task.FromResult(Pots.TryGetValue(id, out var pot) && !pot.IsDeleted ? pot : null);
+
+    public Task SaveAsync(Pot pot)
+    {
+        if (pot.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid pot");
+        Pots[pot.Id] = pot;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Pots.TryGetValue(id, out var pot))
+            pot.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
 }

@@ -83,4 +83,13 @@ public class PlantTests
 
         Assert.Empty(plant.Validate(Today));
     }
+
+    [Fact]
+    public void Validate_rejects_the_same_pot_inside_and_outside()
+    {
+        var pot = Guid.NewGuid();
+        var plant = new Plant { Nickname = "Coleus", InnerPotId = pot, OuterPotId = pot };
+
+        Assert.Contains("A plant can't have the same pot inside and outside.", plant.Validate(Today));
+    }
 }

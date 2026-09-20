@@ -2,6 +2,7 @@
 @implements IDisposable
 @inject ThemeService Theme
 @inject RoomService RoomService
+@inject PotService PotService
 @inject BackupService Backup
 @inject DeviceFiles Files
 @inject IndexedDb Db
@@ -88,6 +89,20 @@
 </section>
 
 <section class="settings-section">
+    <h2>Pots</h2>
+    <p class="settings-hint">
+        The pots you own, so a plant can point at one instead of you typing it again. Nursery pots,
+        outer pots, and the ones that stand on their own.
+    </p>
+
+    <div class="room-row">
+        <span class="room-name">@PotSummary</span>
+        <a class="btn btn-link btn-sm p-0" href="pots">Manage pots</a>
+    </div>
+</section>
+
+
+<section class="settings-section">
     <h2>Backup</h2>
     <p class="settings-hint">
         Everything you add stays on this device. A backup is a ZIP file with your plants and photos in it,
@@ -120,8 +135,9 @@
                 @Labels.Plants(file.Data.Counts.Plants), @Labels.Count(file.Data.Counts.Propagations, "propagation"),
                 @Labels.Count(file.Data.Counts.Entries, "history entry", "history entries"),
                 @Labels.Count(file.Data.Counts.Photos, "photo"),
-                @Labels.Count(file.Data.Counts.CareEntries, "care entry", "care entries") and
-                @Labels.Count(file.Data.Counts.PestCases, "pest case").
+                @Labels.Count(file.Data.Counts.CareEntries, "care entry", "care entries"),
+                @Labels.Count(file.Data.Counts.PestCases, "pest case") and
+                @Labels.Count(file.Data.Counts.Pots, "pot").
             </p>
             <p class="settings-hint">
                 Restoring adds what's missing here and brings back anything you've deleted since.
@@ -179,6 +195,7 @@
 
     private ThemeMode mode;
     private IReadOnlyList<Room> rooms = [];
+    private IReadOnlyList<PotUse> pots = [];
     private string? renaming; // the whole place being renamed, e.g. "Living room / On top of the PC"
     private string? roomMessage;
     private DateOnly? lastBackup;
@@ -196,7 +213,14 @@
         lastBackup = await Files.GetLastBackupAsync();
         storage = await Db.EstimateAsync();
         rooms = await RoomService.GetAllAsync();
+        pots = await PotService.GetAllAsync();
     }
+
+    /// <summary>"6 pots, 2 free", for the line linking to the pot library.</summary>
+    private string PotSummary =>
+        pots.Count == 0
+            ? "No pots registered yet"
+            : $"{Labels.Count(pots.Sum(p => p.Owned), "pot")}, {pots.Sum(p => p.Free)} free";
 
     /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
     private static string Held(int plants, int propagations) => (plants, propagations) switch
