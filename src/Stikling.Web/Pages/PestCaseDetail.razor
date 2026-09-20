@@ -1,0 +1,205 @@
+@page "/pests/{Id:guid}"
+@inject IPestCaseRepository Repository
+@inject IPestTreatmentRepository Treatments
+@inject IPlantRepository PlantRepository
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+
+<PageTitle>@(view is null ? "Pest case" : Labels.For(view.Case.Pest)) · Stikling</PageTitle>
+
+<a class="back-link" href="pests">‹ Pests</a>
+
+@if (view is null)
+{
+    <p class="text-body-secondary">@(loaded ? "That case doesn't exist or was deleted." : "Loading…")</p>
+}
+else
+{
+    <header class="detail-header">
+        <div class="detail-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+        </div>
+        <div class="min-w-0">
+            <h1>@Labels.For(view.Case.Pest)</h1>
+            <p class="detail-sub">@Labels.Scope(view.Case, view.Plants.Count) · found @Labels.Date(view.Case.StartedOn)</p>
+            @if (view.Case.IsOpen)
+            {
+                <span class="badge stage-badge">@Labels.For(view.Case.Status)</span>
+            }
+            else
+            {
+                <span class="badge text-bg-secondary">@Labels.For(view.Case.Status)</span>
+            }
+        </div>
+    </header>
+
+    <div class="detail-actions">
+        @if (view.Case.IsOpen)
+        {
+            <button type="button" class="btn btn-primary" @onclick="() => logging = !logging">
+                @(logging ? "Close" : "Log treatment")
+            </button>
+        }
+        <a class="btn btn-outline-primary" href="pests/@view.Case.Id/edit">Edit</a>
+    </div>
+
+    @if (logging && view.Case.IsOpen)
+    {
+        <section class="detail-card">
+            <h2>Log treatment</h2>
+            <TreatmentSheet Case="view.Case" Existing="treatments" OnLogged="ReloadAsync" OnCancel="() => logging = false" />
+        </section>
+    }
+
+    <section class="detail-card">
+        <dl class="detail-list">
+            <dt>Covers</dt>
+            <dd>@Labels.Scope(view.Case, view.Plants.Count) · @Labels.Plants(view.Plants.Count)</dd>
+
+            <dt>Treating</dt>
+            <dd>Every @Labels.Count(view.Case.IntervalDays, "day")</dd>
+
+            <dt>Next one</dt>
+            <dd>
+                @if (view.NextDue is { } due && view.DaysUntilDue is { } days)
+                {
+                    <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days)</span>
+                    <text> · @Labels.Date(due)</text>
+                }
+                else
+                {
+                    <text>Nothing due, the case is closed.</text>
+                }
+            </dd>
+
+            <dt>Last one</dt>
+            <dd>@(view.Last is { } last ? $"{Labels.Date(last.OccurredOn)} · {last.What ?? "not written down"}" : "No treatments yet.")</dd>
+        </dl>
+
+        @if (!string.IsNullOrWhiteSpace(view.Case.Notes))
+        {
+            <h2>Notes</h2>
+            <p class="detail-notes">@view.Case.Notes</p>
+        }
+    </section>
+
+    <section class="detail-card">
+        <h2>Treatments</h2>
+        @if (treatments.Count == 0)
+        {
+            <p class="text-body-secondary mb-0">
+                Nothing logged yet. Each treatment you log moves the next one along by the interval.
+            </p>
+        }
+        else
+        {
+            <ul class="care-list">
+                @foreach (var treatment in treatments)
+                {
+                    <li>
+                        <div class="care-entry">
+                            <span class="care-what">
+                                @(string.IsNullOrWhiteSpace(treatment.What) ? "Treated" : treatment.What)
+                                @if (!string.IsNullOrWhiteSpace(treatment.Notes))
+                                {
+                                    <span class="text-body-secondary"> · @treatment.Notes</span>
+                                }
+                            </span>
+                            <span class="care-when">@Labels.Date(treatment.OccurredOn)</span>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="detail-card">
+        <h2>Plants</h2>
+        @if (view.Plants.Count == 0)
+        {
+            <p class="text-body-secondary mb-0">
+                @(view.Case.Scope == PestScope.Room
+                    ? "Nothing is in that room at the moment."
+                    : "No plants are covered at the moment.")
+            </p>
+        }
+        else
+        {
+            <ul class="family-list">
+                @foreach (var plant in view.Plants)
+                {
+                    <li>
+                        <a href="plants/@plant.Id">@plant.DisplayName</a>
+                        @if (!string.IsNullOrWhiteSpace(plant.Location))
+                        {
+                            <span class="text-body-secondary small"> · @plant.Location</span>
+                        }
+                    </li>
+                }
+            </ul>
+            @if (view.Case.Scope != PestScope.PickedPlants)
+            {
+                <p class="family-hint">
+                    Worked out from where the plants are now, so anything moved in while the case is
+                    open is covered too.
+                </p>
+            }
+        }
+    </section>
+
+    <section class="danger-zone">
+        @if (confirmDelete)
+        {
+            <p class="mb-2">Delete this case and its treatments? If it is over, mark it resolved instead so what you did is kept.</p>
+            <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
+            <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+        }
+        else
+        {
+            <button class="btn btn-link btn-sm text-danger p-0" @onclick="() => confirmDelete = true">Delete case</button>
+        }
+    </section>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private PestCaseView? view;
+    private IReadOnlyList<PestTreatment> treatments = [];
+    private bool loaded;
+    private bool logging;
+    private bool confirmDelete;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        confirmDelete = false;
+        logging = false;
+        await ReloadAsync();
+        loaded = true;
+    }
+
+    private async Task ReloadAsync()
+    {
+        if (await Repository.GetAsync(Id) is not { } item)
+        {
+            view = null;
+            return;
+        }
+
+        var all = await Treatments.GetAllAsync();
+        treatments = PestService.TreatmentsFor(all, item.Id);
+        view = PestService.Describe(item, await PlantRepository.GetAllAsync(), all, Today);
+    }
+
+    private async Task DeleteAsync()
+    {
+        foreach (var treatment in treatments)
+            await Treatments.DeleteAsync(treatment.Id);
+
+        await Repository.DeleteAsync(Id);
+        Navigation.NavigateTo("pests", replace: true);
+    }
+}

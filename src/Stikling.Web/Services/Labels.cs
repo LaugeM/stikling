@@ -50,6 +50,39 @@ public static class Labels
         _ => type.ToString()
     };
 
+    public static string For(Pest pest) => pest switch
+    {
+        Pest.SpiderMites => "Spider mites",
+        Pest.FungusGnats => "Fungus gnats",
+        _ => pest.ToString()
+    };
+
+    public static string For(PestCaseStatus status) => status switch
+    {
+        PestCaseStatus.Active => "Treating",
+        PestCaseStatus.Monitoring => "Watching",
+        PestCaseStatus.Resolved => "Resolved",
+        _ => status.ToString()
+    };
+
+    /// <summary>"Everywhere", "Living room" or "4 plants", for a case's one-line summary.</summary>
+    public static string Scope(PestCase item, int plantCount) => item.Scope switch
+    {
+        PestScope.Everywhere => "Everywhere",
+        PestScope.Room => item.Room ?? "A room",
+        _ => Plants(plantCount)
+    };
+
+    /// <summary>"due today", "2 days overdue", "next in 3 days".</summary>
+    public static string Due(int daysUntil) => daysUntil switch
+    {
+        0 => "due today",
+        -1 => "1 day overdue",
+        < 0 => $"{-daysUntil} days overdue",
+        1 => "next tomorrow",
+        _ => $"next in {daysUntil} days"
+    };
+
     /// <summary>Stage names. Seeds get their own words: sown, germinating, sprouted.</summary>
     public static string Stage(PropagationStage stage, PropagationType type = PropagationType.Cutting) =>
         (stage, type == PropagationType.Seed) switch
@@ -69,6 +102,8 @@ public static class Labels
         CareKind c => For(c),
         PropagationType t => For(t),
         PropagationStage s => Stage(s),
+        Pest p => For(p),
+        PestCaseStatus s => For(s),
         _ => value.ToString()
     };
 

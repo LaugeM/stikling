@@ -1,0 +1,135 @@
+@* Logging a treatment on a pest case. The next date is prefilled from the case's interval.
+   Changing it here is how you get a different gap without changing the interval itself. *@
+@inject IPestTreatmentRepository Repository
+@inject TimeProvider Time
+
+<div class="care-sheet">
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
+    }
+
+    <div class="row g-2">
+        <div class="col-7">
+            <label class="form-label" for="treatment-what">What you used</label>
+            <input type="text" id="treatment-what" class="form-control form-control-sm"
+                   placeholder="e.g. Alcohol spray, both sides" @bind="what" @bind:event="oninput" />
+        </div>
+        <div class="col-5">
+            <label class="form-label" for="treatment-date">When</label>
+            <input type="date" id="treatment-date" class="form-control form-control-sm"
+                   max="@Today.ToString("yyyy-MM-dd")" value="@occurredOn.ToString("yyyy-MM-dd")"
+                   @onchange="DateChanged" />
+        </div>
+    </div>
+
+    <div class="mt-2">
+        <label class="form-label" for="treatment-next">Next one due</label>
+        <input type="date" id="treatment-next" class="form-control form-control-sm"
+               min="@occurredOn.ToString("yyyy-MM-dd")" value="@nextDue.ToString("yyyy-MM-dd")"
+               @onchange="NextDueChanged" />
+        <div class="form-text">Every @Labels.Count(Case.IntervalDays, "day") by default. Change it to leave a longer gap.</div>
+    </div>
+
+    <div class="mt-2">
+        <label class="form-label" for="treatment-notes">Notes</label>
+        <input type="text" id="treatment-notes" class="form-control form-control-sm"
+               placeholder="e.g. Still webbing under the new leaf" @bind="notes" @bind:event="oninput" />
+    </div>
+
+    <div class="care-actions">
+        <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="LogAsync">Log treatment</button>
+        @if (OnCancel.HasDelegate)
+        {
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OnCancel">Cancel</button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required PestCase Case { get; set; }
+
+    /// <summary>The treatments so far, so the last recipe can be offered again.</summary>
+    [Parameter]
+    public IReadOnlyList<PestTreatment> Existing { get; set; } = [];
+
+    /// <summary>Called after a treatment is saved, so the page can reload what it shows.</summary>
+    [Parameter]
+    public EventCallback OnLogged { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private string? what;
+    private string? notes;
+    private DateOnly occurredOn;
+    private DateOnly nextDue;
+    private string? error;
+    private bool busy;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    protected override void OnInitialized() => Reset();
+
+    private void Reset()
+    {
+        var draft = PestService.StartTreatment(Case, Existing, Today);
+        what = draft.What;
+        notes = null;
+        occurredOn = draft.OccurredOn;
+        nextDue = Default(occurredOn);
+    }
+
+    private DateOnly Default(DateOnly on) => on.AddDays(Case.IntervalDays);
+
+    // Moving the treatment moves the default gap with it, unless a date was picked by hand
+    private void DateChanged(ChangeEventArgs e)
+    {
+        if (!DateOnly.TryParse(e.Value?.ToString(), out var picked))
+            return;
+
+        var followed = nextDue == Default(occurredOn);
+        occurredOn = picked;
+        if (followed)
+            nextDue = Default(picked);
+    }
+
+    private void NextDueChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var picked))
+            nextDue = picked;
+    }
+
+    private async Task LogAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await Repository.SaveAsync(new PestTreatment
+            {
+                CaseId = Case.Id,
+                OccurredOn = occurredOn,
+                What = Clean(what),
+                Notes = Clean(notes),
+                // Only a date that isn't the plain interval is worth storing, so changing the
+                // interval later still moves the cases that never had a gap set by hand
+                NextDueOn = nextDue == Default(occurredOn) ? null : nextDue
+            });
+
+            Reset();
+            await OnLogged.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            error = $"Couldn't log that: {ex.Message}";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+}

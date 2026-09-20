@@ -1,0 +1,246 @@
+@page "/pests/new"
+@page "/pests/{Id:guid}/edit"
+@inject IPestCaseRepository Repository
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+
+<PageTitle>@(IsNew ? "Open a case" : "Edit case") · Stikling</PageTitle>
+
+<a class="back-link" href="@BackUrl">‹ Back</a>
+<h1>@(IsNew ? "Open a case" : "Edit case")</h1>
+
+@if (item is null)
+{
+    <p class="text-body-secondary">@(notFound ? "That case doesn't exist." : "Loading…")</p>
+}
+else
+{
+    <EditForm Model="item" OnSubmit="SaveAsync" class="edit-form">
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        <fieldset>
+            <legend>What you found</legend>
+            <div class="row g-2 mb-3">
+                <div class="col-7">
+                    <label class="form-label" for="pest">Pest</label>
+                    <InputSelect id="pest" class="form-select" @bind-Value="item.Pest">
+                        @foreach (var pest in Enum.GetValues<Pest>())
+                        {
+                            <option value="@pest">@Labels.For(pest)</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-5">
+                    <label class="form-label" for="started">Found on</label>
+                    <InputDate id="started" class="form-control" @bind-Value="item.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+            </div>
+            <div class="mb-1">
+                <label class="form-label" for="status">How it stands</label>
+                <InputSelect id="status" class="form-select" @bind-Value="item.Status" @bind-Value:after="StatusChanged">
+                    @foreach (var status in Enum.GetValues<PestCaseStatus>())
+                    {
+                        <option value="@status">@Labels.For(status)</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="form-text">
+                Watching means the treatments have stopped but you are still checking. A resolved case
+                stops showing up.
+            </div>
+            @if (item.Status == PestCaseStatus.Resolved)
+            {
+                <div class="mt-3">
+                    <label class="form-label" for="resolved">Resolved on</label>
+                    <InputDate id="resolved" class="form-control" @bind-Value="item.ResolvedOn"
+                               min="@item.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+            }
+        </fieldset>
+
+        <fieldset>
+            <legend>What it covers</legend>
+            <div class="btn-group segmented mb-3" role="radiogroup" aria-label="What the case covers">
+                @foreach (var (value, label) in scopeOptions)
+                {
+                    var id = $"scope-{value}";
+                    <input type="radio" class="btn-check" name="scope" id="@id"
+                           checked="@(item.Scope == value)" @onchange="() => SetScope(value)" />
+                    <label class="btn btn-outline-primary btn-sm" for="@id">@label</label>
+                }
+            </div>
+
+            @if (item.Scope == PestScope.Room)
+            {
+                <div class="mb-1">
+                    <RoomPicker Value="@item.Room" ValueChanged="RoomPicked" Rooms="rooms" Label="Room" />
+                </div>
+            }
+            else if (item.Scope == PestScope.PickedPlants)
+            {
+                <ul class="item-list pick-list">
+                    @foreach (var plant in plants)
+                    {
+                        <li>
+                            <label class="item-card selectable @(item.PlantIds.Contains(plant.Id) ? "selected" : null)">
+                                <input type="checkbox" class="form-check-input plant-check"
+                                       checked="@item.PlantIds.Contains(plant.Id)" @onchange="() => Toggle(plant.Id)" />
+                                <div class="item-text">
+                                    <div class="item-name">@plant.DisplayName</div>
+                                    @if (!string.IsNullOrWhiteSpace(plant.Location))
+                                    {
+                                        <div class="item-meta"><span>@plant.Location</span></div>
+                                    }
+                                </div>
+                            </label>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-body-secondary mb-0">
+                    Every plant in the collection, including ones added while the case is open.
+                </p>
+            }
+        </fieldset>
+
+        <fieldset>
+            <legend>Treatment</legend>
+            <div class="mb-1">
+                <label class="form-label" for="interval">Treat every</label>
+                <div class="input-group">
+                    <InputNumber id="interval" class="form-control" @bind-Value="item.IntervalDays" min="1" inputmode="numeric" />
+                    <span class="input-group-text">days</span>
+                </div>
+            </div>
+            <div class="form-text">Spider mites want 3 to 5 days, so the next round lands before the eggs hatch.</div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Notes</legend>
+            <InputTextArea class="form-control" rows="3" @bind-Value="item.Notes" aria-label="Notes" />
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Open case" : "Save")</button>
+            <a class="btn btn-link" href="@BackUrl">Cancel</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private static readonly (PestScope Value, string Label)[] scopeOptions =
+    [
+        (PestScope.Everywhere, "Everywhere"),
+        (PestScope.Room, "One room"),
+        (PestScope.PickedPlants, "Pick plants")
+    ];
+
+    private PestCase? item;
+    private bool notFound;
+    private bool saving;
+    private List<string> errors = [];
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Room> rooms = [];
+
+    private bool IsNew => Id is null;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    private string BackUrl => IsNew ? "pests" : $"pests/{Id}";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var allPlants = await PlantRepository.GetAllAsync();
+        plants = allPlants
+            .Where(p => p.Status == PlantStatus.Active)
+            .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        rooms = Room.List(allPlants, await PropagationRepository.GetAllAsync());
+
+        if (IsNew)
+        {
+            item = PestService.Start(Today);
+        }
+        else
+        {
+            item = (await Repository.GetAsync(Id!.Value))?.Copy();
+            notFound = item is null;
+        }
+    }
+
+    private void SetScope(PestScope scope)
+    {
+        if (item is null)
+            return;
+
+        item.Scope = scope;
+        if (scope != PestScope.Room)
+            item.Room = null;
+        if (scope != PestScope.PickedPlants)
+            item.PlantIds.Clear();
+    }
+
+    private void RoomPicked(string? place)
+    {
+        if (item is not null)
+            item.Room = place;
+    }
+
+    private void Toggle(Guid plantId)
+    {
+        if (item is null)
+            return;
+
+        if (!item.PlantIds.Remove(plantId))
+            item.PlantIds.Add(plantId);
+    }
+
+    // Marking it resolved fills in today's date, so the usual case is one tap
+    private void StatusChanged()
+    {
+        if (item is null)
+            return;
+
+        item.ResolvedOn = item.Status == PestCaseStatus.Resolved ? item.ResolvedOn ?? Today : null;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (item is null)
+            return;
+
+        errors = item.Validate(Today).ToList();
+        if (errors.Count > 0)
+            return;
+
+        saving = true;
+        try
+        {
+            await Repository.SaveAsync(item);
+            Navigation.NavigateTo($"pests/{item.Id}", replace: IsNew);
+        }
+        catch (Exception ex)
+        {
+            errors = [$"Couldn't save: {ex.Message}"];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+}

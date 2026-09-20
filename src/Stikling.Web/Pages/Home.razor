@@ -2,6 +2,8 @@
 @inject IPlantRepository Plants
 @inject IPropagationRepository Propagations
 @inject ITimelineRepository Entries
+@inject IPestCaseRepository PestCases
+@inject IPestTreatmentRepository PestTreatments
 @inject DeviceFiles Files
 @inject TimeProvider Time
 
@@ -32,6 +34,32 @@ else
             <span>@reminder</span>
             <a class="btn btn-outline-primary btn-sm" href="settings">Back up</a>
         </div>
+    }
+
+    @if (dueTreatments.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Treatment due</h2>
+            <ul class="item-list">
+                @foreach (var view in dueTreatments)
+                {
+                    <li>
+                        <a class="item-card" href="pests/@view.Case.Id">
+                            <div class="item-thumb" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+                            </div>
+                            <div class="item-text">
+                                <div class="item-name">@Labels.For(view.Case.Pest)</div>
+                                <div class="item-meta">
+                                    <span class="pest-due now">@Labels.Due(view.DaysUntilDue ?? 0)</span>
+                                    <span>· @Labels.Scope(view.Case, view.Plants.Count) · @Labels.Plants(view.Plants.Count)</span>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
     }
 
     <section class="today-section">
@@ -104,6 +132,7 @@ else
     private IReadOnlyList<Propagation> propagations = [];
     private List<Propagation> active = [];
     private IReadOnlyList<PropagationCheck> checks = [];
+    private IReadOnlyList<PestCaseView> dueTreatments = [];
     private IReadOnlyList<TimelineEntry> recent = [];
     private Dictionary<Guid, string> names = [];
     private string? backupReminder;
@@ -119,6 +148,9 @@ else
 
         var latest = await Entries.GetLatestPerSubjectAsync();
         checks = TodayBoard.NeedsChecking(propagations, latest, Today);
+
+        dueTreatments = PestService.Due(
+            PestService.Describe(await PestCases.GetAllAsync(), plants, await PestTreatments.GetAllAsync(), Today));
 
         names = plants.ToDictionary(p => p.Id, p => p.DisplayName);
         foreach (var propagation in propagations)

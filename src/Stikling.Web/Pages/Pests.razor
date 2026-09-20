@@ -1,0 +1,134 @@
+@page "/pests"
+@inject IPestCaseRepository Cases
+@inject IPestTreatmentRepository Treatments
+@inject IPlantRepository PlantRepository
+@inject TimeProvider Time
+
+<PageTitle>Pests · Stikling</PageTitle>
+
+<div class="page-heading">
+    <h1>Pests</h1>
+    @if (open.Count > 0)
+    {
+        <span class="text-body-secondary small">@Labels.Count(open.Count, "open case")</span>
+    }
+</div>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (views.Count == 0)
+{
+    <div class="empty-state">
+        <p>
+            No pest cases. Open one when you find something, and the treatments you log keep track
+            of when the next round is due.
+        </p>
+        <a class="btn btn-primary mt-3" href="pests/new">Open a case</a>
+    </div>
+}
+else
+{
+    <div class="list-body">
+        @if (due.Count > 0)
+        {
+            <section class="stage-group">
+                <h2>Due now <span class="text-body-secondary">(@due.Count)</span></h2>
+                <ul class="item-list">
+                    @foreach (var view in due)
+                    {
+                        <li>@Card(view)</li>
+                    }
+                </ul>
+            </section>
+        }
+
+        @if (waiting.Count > 0)
+        {
+            <section class="stage-group">
+                <h2>Open <span class="text-body-secondary">(@waiting.Count)</span></h2>
+                <ul class="item-list">
+                    @foreach (var view in waiting)
+                    {
+                        <li>@Card(view)</li>
+                    }
+                </ul>
+            </section>
+        }
+
+        @if (resolved.Count > 0)
+        {
+            <section class="stage-group">
+                <h2>Resolved <span class="text-body-secondary">(@resolved.Count)</span></h2>
+                <ul class="item-list">
+                    @foreach (var view in resolved)
+                    {
+                        <li>@Card(view)</li>
+                    }
+                </ul>
+            </section>
+        }
+    </div>
+}
+
+<a class="fab" href="pests/new" aria-label="Open a pest case" title="Open a pest case">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+</a>
+
+@code {
+    private IReadOnlyList<PestCaseView> views = [];
+    private List<PestCaseView> open = [];
+    private List<PestCaseView> due = [];
+    private List<PestCaseView> waiting = [];
+    private List<PestCaseView> resolved = [];
+    private bool loaded;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    protected override async Task OnInitializedAsync()
+    {
+        views = PestService.Describe(
+            await Cases.GetAllAsync(),
+            await PlantRepository.GetAllAsync(),
+            await Treatments.GetAllAsync(),
+            Today);
+
+        open = views.Where(v => v.Case.IsOpen).ToList();
+        due = PestService.Due(open).ToList();
+        waiting = open.Where(v => !v.IsDue).ToList();
+        resolved = views.Where(v => !v.Case.IsOpen).ToList();
+        loaded = true;
+    }
+
+    private RenderFragment Card(PestCaseView view) => @<a class="item-card" href="pests/@view.Case.Id">
+        <div class="item-thumb" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+        </div>
+        <div class="item-text">
+            <div class="item-name">@Labels.For(view.Case.Pest)</div>
+            <div class="item-meta">
+                @if (view.Case.IsOpen)
+                {
+                    <span class="badge stage-badge">@Labels.For(view.Case.Status)</span>
+                }
+                <span>@Labels.Scope(view.Case, view.Plants.Count) · @Labels.Plants(view.Plants.Count)</span>
+            </div>
+            <div class="item-meta">
+                @if (view.DaysUntilDue is { } days)
+                {
+                    <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days)</span>
+                    <span>· found @Labels.Date(view.Case.StartedOn)</span>
+                }
+                else if (view.Case.ResolvedOn is { } on)
+                {
+                    <span>Resolved @Labels.Date(on)</span>
+                }
+                else
+                {
+                    <span>Found @Labels.Date(view.Case.StartedOn)</span>
+                }
+            </div>
+        </div>
+    </a>;
+}

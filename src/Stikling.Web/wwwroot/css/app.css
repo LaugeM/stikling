@@ -8,6 +8,10 @@
     --pa-text: #1d2520;
     --pa-muted: #5f6b63;
 
+    /* Pests: the one thing in the app that should catch the eye rather than blend in */
+    --pa-alert: #a8442a;
+    --pa-alert-soft: #fae7e0;
+
     /* Point Bootstrap's primary colour at the app green */
     --bs-primary: var(--pa-green);
     --bs-primary-rgb: 47, 125, 79;
@@ -29,6 +33,9 @@
     --pa-border: #2c3830;
     --pa-text: #e3e9e4;
     --pa-muted: #9aa89f;
+
+    --pa-alert: #f0a58c;
+    --pa-alert-soft: #3a211a;
 
     --bs-primary: var(--pa-green);
     --bs-primary-rgb: 95, 184, 131;
@@ -546,6 +553,32 @@ a.item-card:focus-visible {
 .family-list {
     margin: 0;
     padding-left: 1.2rem;
+}
+
+/* Pests */
+
+.pest-badge {
+    padding: 0.05rem 0.4rem;
+    background: var(--pa-alert-soft);
+    color: var(--pa-alert);
+    border-radius: 0.6rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.pest-due {
+    font-weight: 600;
+}
+
+/* Only a treatment that is actually due is worth colouring; "next in 3 days" is not news */
+.pest-due.now {
+    color: var(--pa-alert);
+}
+
+/* Picking the plants a case covers: a plain list of checkbox cards */
+.pick-list {
+    max-height: 18rem;
+    overflow-y: auto;
 }
 
 .danger-zone {

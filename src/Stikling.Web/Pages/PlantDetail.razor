@@ -2,6 +2,7 @@
 @inject IPlantRepository Repository
 @inject IPropagationRepository PropagationRepository
 @inject ICareLogRepository CareLogRepository
+@inject IPestCaseRepository PestCaseRepository
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
@@ -38,6 +39,10 @@ else
             @if (plant.Status != PlantStatus.Active)
             {
                 <span class="badge text-bg-secondary">@Labels.For(plant.Status)</span>
+            }
+            @foreach (var item in pests)
+            {
+                <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
             }
         </div>
     </header>
@@ -175,6 +180,25 @@ else
                 }
             </section>
 
+            @if (pests.Count > 0)
+            {
+                <section class="detail-card">
+                    <h2>Pests</h2>
+                    <ul class="family-list">
+                        @foreach (var item in pests)
+                        {
+                            <li>
+                                <a href="pests/@item.Id">@Labels.For(item.Pest)</a>
+                                <span class="text-body-secondary small">
+                                    · @Labels.For(item.Status).ToLowerInvariant() since @Labels.Date(item.StartedOn)
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                    <p class="family-hint">Treatments are logged on the case, because a case is treated as a whole.</p>
+                </section>
+            }
+
             <section class="detail-card">
                 <h2>Family</h2>
                 @if (ancestors.Count == 0 && offspring.Count == 0 && fromPropagation is null)
@@ -261,6 +285,7 @@ else
     private IReadOnlyList<CareLog> care = [];
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
     private MoistureReading? moisture;
+    private IReadOnlyList<PestCase> pests = [];
 
     private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
 
@@ -281,6 +306,8 @@ else
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
                 .ToList();
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
+
+            pests = PestService.CasesFor(plant, await PestCaseRepository.GetAllAsync());
 
             await ReloadCareAsync();
         }
