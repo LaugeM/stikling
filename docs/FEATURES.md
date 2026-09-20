@@ -35,15 +35,15 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 ## Next up
 
-In the order I would build them. Pests come first because thrips are the problem right now.
+In the order I would build them.
 
-1. **Pest cases and a treatment log**, with the interval showing up on Today.
-2. **Quarantine flag and tags.** Both are small, and tags cover "variegated", "for swap" and "rare" at the same time.
-3. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
-4. **Products and doses on a care entry.** The care log is in, so "Hydro fertiliser, 2 ml/L" only needs somewhere to keep the products.
-5. **Import old photos with their dates**, so a plant's history can start before the app did.
-6. **Pot suggestions** in the pot field, picked from the pots already used, the way rooms are.
-7. **Correct or hide a timeline entry.** Left over from M3.
+1. **Quarantine flag and tags.** Both are small, and tags cover "variegated", "for swap" and "rare" at the same time.
+2. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
+3. **Products and doses on a care entry.** The care log is in, so "Hydro fertiliser, 2 ml/L" only needs somewhere to keep the products.
+4. **Import old photos with their dates**, so a plant's history can start before the app did.
+5. **Pot suggestions** in the pot field, picked from the pots already used, the way rooms are.
+6. **Correct or hide a timeline entry.** Left over from M3.
+7. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
 
 ### Cheap ones to slot in whenever
 
@@ -173,14 +173,19 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 
 ## 5. Pests & treatments
 
+A case covers a group of plants rather than one, because that is how treating works: you see mites
+on one plant and spray the whole room. A case is either everywhere, one room, or a set of plants you
+pick, and everywhere and a room are worked out from where the plants are now, so a plant moved in
+while a case is open is covered too. Treatments are logged on the case, so one spray is one entry.
+
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | **Pest cases** per plant: pest (thrips, spider mites, fungus gnats, mealybugs, scale, other), start date, status (active / monitoring / resolved) | 2 | M | v1.x |
-| ☐ | Treatment log on a case: what was used and when | 2 | S | v1.x |
-| ☐ | Interval ("every 3–5 days") with "next treatment due" shown on Today | 3 | S | v1.x |
+| ✅ | **Pest cases** covering a group of plants: pest (spider mites, thrips, fungus gnats, mealybugs, scale, aphids, whitefly, other), start date, status (treating / watching / resolved) | 2 | M | v1.x |
+| ✅ | Treatment log on a case: what was used and when | 2 | S | v1.x |
+| ✅ | Interval ("every 3–5 days") with "next treatment due" shown on Today | 3 | S | v1.x |
 | ☐ | Quarantine flag and a "Quarantine" filter; badge on the card | 3 | S | v1.x |
 | ☐ | **Treatment recipes**, e.g. "Thrips spray: alcohol + demineralised water + a drop of dish soap". Each log entry saves the recipe as it was that day, so changing the recipe doesn't rewrite history | 4 | M | v1.x |
-| ☐ | Pest overview: all active cases in one list | 4 | S | v1.x |
+| ✅ | Pest overview: all active cases in one list | 4 | S | v1.x |
 | ☐ | **Sticky trap counts**: log how many pests a (blue/yellow) sticky trap caught each week; a small chart shows whether treatment is working | 4 | M | v1.x |
 | ☐ | Inspection log: "checked, no signs", so you can see how long a plant has been clean | 5 | S | v1.x |
 | ☐ | **Check the neighbours**: opening a pest case lists other plants in the same room to inspect, with "last inspected" dates | 5 | S | v1.x |

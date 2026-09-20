@@ -112,16 +112,35 @@ public class BackupTests
     {
         var gone = Plant("Basil", Now);
         gone.DeletedAt = Now;
+        var goneCase = new PestCase { DeletedAt = Now };
 
         var data = new BackupData
         {
             ExportedAt = Now,
             Plants = [Plant("Coleus", Now), gone],
-            Photos = [new Photo(), new Photo()]
+            Photos = [new Photo(), new Photo()],
+            PestCases = [new PestCase(), goneCase],
+            PestTreatments = [new PestTreatment()]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
+    }
+
+    [Fact]
+    public void A_pest_case_and_its_treatments_survive_a_restore()
+    {
+        var caseId = Guid.NewGuid();
+        var mine = new PestCase { Id = caseId, UpdatedAt = Now.AddDays(-3) };
+        var theirs = new PestCase { Id = caseId, UpdatedAt = Now, Status = PestCaseStatus.Resolved };
+        var treatment = new PestTreatment { CaseId = caseId, UpdatedAt = Now, What = "Alcohol spray" };
+
+        var cases = BackupMerge.Merge([mine], [theirs]);
+        var treatments = BackupMerge.Merge<PestTreatment>([], [treatment]);
+
+        Assert.Equal(PestCaseStatus.Resolved, Assert.Single(cases.ToSave).Status);
+        Assert.Equal(caseId, Assert.Single(treatments.ToSave).CaseId);
+        Assert.Equal(1, treatments.Added);
     }
 }

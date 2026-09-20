@@ -32,6 +32,10 @@ else
     [Parameter]
     public MoistureReading? Moisture { get; set; }
 
+    /// <summary>Open pest cases covering this plant, so an outbreak is visible from the list.</summary>
+    [Parameter]
+    public IReadOnlyList<PestCase> Pests { get; set; } = [];
+
     private string OriginText =>
         Plant.AcquiredOn is { } date
             ? $"{Labels.For(Plant.Origin)} {Labels.Date(date)}"
@@ -59,6 +63,10 @@ else
                 @if (Plant.Status != PlantStatus.Active)
                 {
                     <span class="badge text-bg-secondary">@Labels.For(Plant.Status)</span>
+                }
+                @foreach (var pest in Pests)
+                {
+                    <span class="badge pest-badge">@Labels.For(pest.Pest)</span>
                 }
                 <span>@OriginText</span>
                 @if (!string.IsNullOrWhiteSpace(Plant.Location))

@@ -1,5 +1,6 @@
 using Stikling.Core.Care;
 using Stikling.Core.Models;
+using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
 
@@ -21,4 +22,16 @@ public sealed class IndexedDbCareLogRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<CareLog>(db, time, Stores.CareLogs), ICareLogRepository
 {
     protected override IReadOnlyList<string> Validate(CareLog entry) => entry.Validate(Today);
+}
+
+public sealed class IndexedDbPestCaseRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<PestCase>(db, time, Stores.PestCases), IPestCaseRepository
+{
+    protected override IReadOnlyList<string> Validate(PestCase item) => item.Validate(Today);
+}
+
+public sealed class IndexedDbPestTreatmentRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<PestTreatment>(db, time, Stores.PestTreatments), IPestTreatmentRepository
+{
+    protected override IReadOnlyList<string> Validate(PestTreatment treatment) => treatment.Validate(Today);
 }

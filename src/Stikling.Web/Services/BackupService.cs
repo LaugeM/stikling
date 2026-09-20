@@ -33,7 +33,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
             Propagations = await db.GetAllAsync<Propagation>(Stores.Propagations),
             Timeline = await db.GetAllAsync<TimelineEntry>(Stores.Timeline),
             Photos = await db.GetAllAsync<Photo>(Stores.Photos),
-            CareLogs = await db.GetAllAsync<CareLog>(Stores.CareLogs)
+            CareLogs = await db.GetAllAsync<CareLog>(Stores.CareLogs),
+            PestCases = await db.GetAllAsync<PestCase>(Stores.PestCases),
+            PestTreatments = await db.GetAllAsync<PestTreatment>(Stores.PestTreatments)
         };
 
         using var buffer = new MemoryStream();
@@ -93,6 +95,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
         var timeline = await MergeAsync(Stores.Timeline, data.Timeline);
         var photoMeta = await MergeAsync(Stores.Photos, data.Photos);
         var care = await MergeAsync(Stores.CareLogs, data.CareLogs);
+        var pests = await MergeAsync(Stores.PestCases, data.PestCases);
+        var treatments = await MergeAsync(Stores.PestTreatments, data.PestTreatments);
 
         var restoredPhotos = 0;
         foreach (var photo in photoMeta.ToSave.Where(p => !p.IsDeleted))
@@ -105,10 +109,11 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
         }
 
         return new ImportSummary(
-            plants.Added + propagations.Added + timeline.Added + photoMeta.Added + care.Added,
-            plants.Updated + propagations.Updated + timeline.Updated + photoMeta.Updated + care.Updated,
-            plants.BroughtBack + propagations.BroughtBack + timeline.BroughtBack + photoMeta.BroughtBack + care.BroughtBack,
-            plants.Skipped + propagations.Skipped + timeline.Skipped + photoMeta.Skipped + care.Skipped,
+            plants.Added + propagations.Added + timeline.Added + photoMeta.Added + care.Added + pests.Added + treatments.Added,
+            plants.Updated + propagations.Updated + timeline.Updated + photoMeta.Updated + care.Updated + pests.Updated + treatments.Updated,
+            plants.BroughtBack + propagations.BroughtBack + timeline.BroughtBack + photoMeta.BroughtBack + care.BroughtBack
+                + pests.BroughtBack + treatments.BroughtBack,
+            plants.Skipped + propagations.Skipped + timeline.Skipped + photoMeta.Skipped + care.Skipped + pests.Skipped + treatments.Skipped,
             restoredPhotos);
     }
 

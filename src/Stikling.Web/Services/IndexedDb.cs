@@ -11,6 +11,8 @@ public static class Stores
     public const string Photos = "photos";
     public const string PhotoBlobs = "photoBlobs";
     public const string CareLogs = "careLogs";
+    public const string PestCases = "pestCases";
+    public const string PestTreatments = "pestTreatments";
 }
 
 public sealed record StorageEstimate(long Usage, long Quota, bool Persisted);
