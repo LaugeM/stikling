@@ -18,7 +18,7 @@ public class PlantServiceTests
     [Fact]
     public async Task Create_saves_the_plant_and_records_it_on_the_acquired_date()
     {
-        var plant = new Plant { Nickname = "Basil", AcquiredOn = new DateOnly(2026, 5, 1) };
+        var plant = new Plant { Nickname = "Basil", AcquiredOn = LooseDate.Of(new DateOnly(2026, 5, 1)) };
 
         await service.CreateAsync(plant);
 
@@ -133,5 +133,15 @@ public class PlantServiceTests
     public async Task AddNote_requires_text()
     {
         await Assert.ThrowsAsync<ArgumentException>(() => service.AddNoteAsync([new Plant { Nickname = "X" }], "  "));
+    }
+
+    [Fact]
+    public async Task A_date_that_is_only_a_year_is_said_on_the_first_entry()
+    {
+        await service.CreateAsync(new Plant { Nickname = "Fig", AcquiredOn = LooseDate.Of(2024) });
+
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Equal("Added to collection, 2024", entry.Text);
+        Assert.Equal(new DateOnly(2024, 1, 1), DateOnly.FromDateTime(entry.OccurredAt.UtcDateTime));
     }
 }

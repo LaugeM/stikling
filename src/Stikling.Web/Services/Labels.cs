@@ -152,4 +152,7 @@ public static class Labels
 
     // Invariant culture gives "19 Sep 2026" (en-GB would write "Sept")
     public static string Date(DateOnly date) => date.ToString("d MMM yyyy", CultureInfo.InvariantCulture);
+
+    /// <summary>"2024", "June 2024" or "12 Jun 2024", depending on how much is known.</summary>
+    public static string Date(LooseDate date) => date.Text();
 }

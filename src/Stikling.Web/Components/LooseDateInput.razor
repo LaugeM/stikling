@@ -1,0 +1,85 @@
+@using System.Globalization
+
+@* A date you only half remember. Pick how much you know first, because a picker that insists
+   on a day makes you invent one, and then the app can't tell a guess from a real date. *@
+
+<div class="loose-date">
+    <div class="form-label">@Label</div>
+
+    <div class="chip-row" role="group" aria-label="How much of the date you know">
+        @foreach (var option in new[] { DatePrecision.Day, DatePrecision.Month, DatePrecision.Year })
+        {
+            <button type="button" class="chip @(precision == option ? "picked" : null)"
+                    @onclick="() => PickAsync(option)">@Word(option)</button>
+        }
+    </div>
+
+    @* Keyed on the precision so switching gives a fresh element: changing an input's type in
+       place leaves the browser holding the old value string. *@
+    @if (precision == DatePrecision.Year)
+    {
+        <input class="form-control mt-2" type="number" inputmode="numeric" min="1900" max="@Today.Year"
+               step="1" placeholder="e.g. 2024" aria-label="@Label, year" @key="precision"
+               value="@Value?.Year" @onchange="SetAsync" />
+    }
+    else if (precision == DatePrecision.Month)
+    {
+        <input class="form-control mt-2" type="month" max="@Text(Today, "yyyy-MM")" aria-label="@Label, month"
+               @key="precision" value="@Value?.Start.ToString("yyyy-MM")" @onchange="SetAsync" />
+    }
+    else
+    {
+        <input class="form-control mt-2" type="date" max="@Text(Today, "yyyy-MM-dd")" aria-label="@Label"
+               @key="precision" value="@Value?.Start.ToString("yyyy-MM-dd")" @onchange="SetAsync" />
+    }
+</div>
+
+@code {
+    /// <summary>The date, to whatever precision is known. Null when it isn't known at all.</summary>
+    [Parameter]
+    public LooseDate? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<LooseDate?> ValueChanged { get; set; }
+
+    /// <summary>Today, so a date can't be set in the future.</summary>
+    [Parameter]
+    public DateOnly Today { get; set; }
+
+    [Parameter]
+    public string Label { get; set; } = "Date";
+
+    private DatePrecision precision = DatePrecision.Day;
+
+    protected override void OnParametersSet()
+    {
+        if (Value is { } value)
+            precision = value.Precision;
+    }
+
+    private static string Word(DatePrecision precision) => precision switch
+    {
+        DatePrecision.Year => "Year only",
+        DatePrecision.Month => "Month",
+        _ => "Exact day"
+    };
+
+    private static string Text(DateOnly date, string format) =>
+        date.ToString(format, CultureInfo.InvariantCulture);
+
+    // Switching keeps the date and drops what's no longer shown, so what's saved is what's on screen.
+    private Task PickAsync(DatePrecision pick)
+    {
+        precision = pick;
+        return Set(Value?.To(pick));
+    }
+
+    private Task SetAsync(ChangeEventArgs e) =>
+        Set(LooseDate.TryParse(e.Value?.ToString(), out var date) ? date : null);
+
+    private Task Set(LooseDate? date)
+    {
+        Value = date;
+        return ValueChanged.InvokeAsync(date);
+    }
+}

@@ -103,7 +103,7 @@ public sealed class PropagationService(
             Species = propagation.Species,
             Cultivar = propagation.Cultivar,
             Origin = propagation.Type == PropagationType.Seed ? PlantOrigin.GrownFromSeed : PlantOrigin.Propagated,
-            AcquiredOn = request.Date,
+            AcquiredOn = LooseDate.Of(request.Date),
             Source = propagation.Source,
             Location = Clean(request.Location),
             Medium = request.Medium,
@@ -113,7 +113,7 @@ public sealed class PropagationService(
         }).ToList();
 
         // Check everything before saving anything
-        if (newPlants.SelectMany(p => p.Validate()).FirstOrDefault() is { } error)
+        if (newPlants.SelectMany(p => p.Validate(Today)).FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
         propagation.RecordPottedUp(request.Count);
 

@@ -756,13 +756,16 @@ a.item-card:focus-visible {
         content: var(--blazor-load-percentage-text, "Loading");
     }
 
-/* Rooms and spots are picked from buttons rather than a datalist, which a phone won't show */
+/* Chips: picked from buttons rather than a datalist, which a phone will not show. Used for
+   rooms and spots, and for anything else you pick one of. */
+.chip-row,
 .room-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
 }
 
+.chip,
 .room-chip {
     min-height: 2.25rem;
     padding: 0.3rem 0.75rem;
@@ -774,6 +777,7 @@ a.item-card:focus-visible {
     line-height: 1.3;
 }
 
+.chip.picked,
 .room-chip.picked {
     border-color: var(--pa-green);
     background: var(--pa-green-soft);
@@ -782,11 +786,13 @@ a.item-card:focus-visible {
 }
 
 /* Dashed, so adding a name doesn't look like another room you already have */
+.chip.new,
 .room-chip.new {
     border-style: dashed;
     color: var(--pa-muted);
 }
 
+.chip.new.picked,
 .room-chip.new.picked {
     color: var(--pa-green-dark);
 }

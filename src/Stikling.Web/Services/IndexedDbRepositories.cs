@@ -9,7 +9,7 @@ namespace Stikling.Web.Services;
 public sealed class IndexedDbPlantRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<Plant>(db, time, Stores.Plants), IPlantRepository
 {
-    protected override IReadOnlyList<string> Validate(Plant plant) => plant.Validate();
+    protected override IReadOnlyList<string> Validate(Plant plant) => plant.Validate(Today);
 }
 
 public sealed class IndexedDbPropagationRepository(IndexedDb db, TimeProvider time)
