@@ -25,7 +25,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             SubjectId = plant.Id,
             Kind = TimelineKind.Created,
             OccurredAt = StartOf(plant.AcquiredOn) ?? time.GetUtcNow(),
-            Text = plant.Origin == PlantOrigin.Propagated ? "Added as a propagated plant" : "Added to collection"
+            Text = FirstEntryText(plant)
         });
 
         if (photos is { Count: > 0 })
@@ -91,7 +91,15 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             Text = text
         });
 
+    // A date that is only a month or a year cannot be read off the timeline's day headings,
+    // so it is said in the text instead.
+    private static string FirstEntryText(Plant plant)
+    {
+        var text = plant.Origin == PlantOrigin.Propagated ? "Added as a propagated plant" : "Added to collection";
+        return plant.AcquiredOn is { Precision: not DatePrecision.Day } acquired ? $"{text}, {acquired.Text()}" : text;
+    }
+
     // Acquisition dates have no time of day; use noon so the entry lands on the right day in any timezone
-    private static DateTimeOffset? StartOf(DateOnly? date) =>
-        date is { } d ? new DateTimeOffset(d.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero) : null;
+    private static DateTimeOffset? StartOf(LooseDate? date) =>
+        date is { } d ? new DateTimeOffset(d.Start.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero) : null;
 }

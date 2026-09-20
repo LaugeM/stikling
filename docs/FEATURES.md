@@ -64,6 +64,7 @@ These need no new storage and no new screens worth the name: counts on the Today
 | ✅ | Cover photo on cards and the plant page | 1 | S | M3 |
 | ✅ | Add a photo while adding the plant, not only afterwards. The first one becomes the cover | 2 | S | M4 |
 | ✅ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | 1 | M | M3–M4 |
+| ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
 | ☐ | Tags (e.g. "variegated", "rare", "quarantine", "for swap") and a tag filter | 3 | S | v1.x |
 | ☐ | Select several plants at once: change status, move to a room, add a note to all | 4 | M | v1.x |
 | ☐ | **Dormancy status**: e.g. alocasias dropping leaves in winter. Pauses "check on it" reminders and keeps the plant from looking dead | 4 | S | v1.x |

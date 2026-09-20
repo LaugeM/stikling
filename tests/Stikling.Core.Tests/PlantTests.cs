@@ -4,6 +4,8 @@ namespace Stikling.Core.Tests;
 
 public class PlantTests
 {
+    private static readonly DateOnly Today = new(2026, 9, 20);
+
     [Theory]
     [InlineData("monstera", "Deliciosa", "Thai Constellation", "Monstera deliciosa 'Thai Constellation'")]
     [InlineData("ALOCASIA", null, null, "Alocasia")]
@@ -40,9 +42,9 @@ public class PlantTests
     [Fact]
     public void Validate_requires_nickname_or_genus()
     {
-        Assert.Contains("Give the plant a nickname or a genus.", new Plant { Species = "deliciosa" }.Validate());
-        Assert.Empty(new Plant { Nickname = "Basil" }.Validate());
-        Assert.Empty(new Plant { Genus = "Ocimum" }.Validate());
+        Assert.Contains("Give the plant a nickname or a genus.", new Plant { Species = "deliciosa" }.Validate(Today));
+        Assert.Empty(new Plant { Nickname = "Basil" }.Validate(Today));
+        Assert.Empty(new Plant { Genus = "Ocimum" }.Validate(Today));
     }
 
     [Fact]
@@ -51,7 +53,7 @@ public class PlantTests
         var plant = new Plant { Nickname = "Coleus" };
         plant.ParentPlantId = plant.Id;
 
-        Assert.Contains("A plant can't be its own parent.", plant.Validate());
+        Assert.Contains("A plant can't be its own parent.", plant.Validate(Today));
     }
 
     [Fact]
@@ -64,5 +66,21 @@ public class PlantTests
         Assert.Equal(PlantStatus.Active, a.Status);
         Assert.Equal(GrowingMedium.Soil, a.Medium);
         Assert.False(a.IsDeleted);
+    }
+
+    [Fact]
+    public void Validate_rejects_a_date_in_the_future()
+    {
+        var plant = new Plant { Nickname = "Coleus", AcquiredOn = LooseDate.Of(Today.AddDays(1)) };
+
+        Assert.Contains("The date you got it can't be in the future.", plant.Validate(Today));
+    }
+
+    [Fact]
+    public void This_year_is_fine_even_before_the_year_is_over()
+    {
+        var plant = new Plant { Nickname = "Coleus", AcquiredOn = LooseDate.Of(Today.Year) };
+
+        Assert.Empty(plant.Validate(Today));
     }
 }

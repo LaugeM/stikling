@@ -136,7 +136,7 @@ public class PropagationServiceTests
             Assert.Equal("Alocasia zebrina", plant.BotanicalName);
             Assert.Equal("Bedroom", plant.Location);
             Assert.Equal(GrowingMedium.Pon, plant.Medium);
-            Assert.Equal(Today, plant.AcquiredOn);
+            Assert.Equal(LooseDate.Of(Today), plant.AcquiredOn);
 
             var created = Assert.Single(HistoryOf(plant.Id));
             Assert.Equal("Potted up from a propagation", created.Text);

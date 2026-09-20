@@ -16,7 +16,9 @@ public sealed class Plant : Entity
     public string? Location { get; set; }
 
     public PlantOrigin Origin { get; set; } = PlantOrigin.Purchased;
-    public DateOnly? AcquiredOn { get; set; }
+
+    /// <summary>When it was got, to whatever precision is remembered: a day, a month or a year.</summary>
+    public LooseDate? AcquiredOn { get; set; }
 
     /// <summary>Where it came from: a shop, a friend, a swap event...</summary>
     public string? Source { get; set; }
@@ -51,13 +53,15 @@ public sealed class Plant : Entity
     public Plant Copy() => (Plant)MemberwiseClone();
 
     /// <summary>Validation rules shared by every place a plant can be saved from.</summary>
-    public IReadOnlyList<string> Validate()
+    public IReadOnlyList<string> Validate(DateOnly today)
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus))
             errors.Add("Give the plant a nickname or a genus.");
         if (ParentPlantId is not null && ParentPlantId == Id)
             errors.Add("A plant can't be its own parent.");
+        if (AcquiredOn is { } acquired && acquired.Start > today)
+            errors.Add("The date you got it can't be in the future.");
         return errors;
     }
 }

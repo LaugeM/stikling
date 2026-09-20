@@ -20,7 +20,8 @@ internal sealed class FakePlantRepository : IPlantRepository
 
     public Task SaveAsync(Plant plant)
     {
-        if (plant.Validate().Count > 0)
+        // DateOnly.MaxValue: the fake has no clock, and the future-date rule is tested on the model itself
+        if (plant.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid plant");
         Plants[plant.Id] = plant;
         return Task.CompletedTask;
