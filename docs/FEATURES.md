@@ -2,6 +2,14 @@
 
 A working list of what Stikling could do, grouped by area. Each row has a priority from 1 to 10, a rough effort, and the milestone it shipped in or is aimed at. Tick items off as they ship, and change the numbers as the app gets used.
 
+**Status** is the first column on every row.
+
+| | |
+|---|---|
+| ✅ | Built and in the app. |
+| ◐ | Partly built. Some of what the row describes already works, and the row says what is still missing. |
+| ☐ | Not started. |
+
 **Priority: 1 is next, 10 is furthest away.**
 
 | | |
@@ -182,7 +190,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | **Pot suggestions**: the pot field suggests pots you've already used, so the same one isn't typed differently every time. The same for a propagation's container | 3 | S | v1.x |
+| ◐ | **Pot suggestions**: the pot field suggests pots you've already used, so the same one isn't typed differently every time. The same for a propagation's container. The field is already there on both plants and propagations, so only the suggestions are missing | 3 | S | v1.x |
 | ☐ | **Supplies stock**: LECA, PON, perlite, sphagnum, fertilisers, sticky traps, alcohol, pots | 5 | M | v1.x |
 | ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | 5 | S | v1.x |
 | ☐ | **Your pots**: register the pots you own by kind (nursery pot, self-watering, terracotta, glass jar, net pot, humidity box) and size, then pick one from a list when adding a plant or potting up | 6 | M | v1.x |
@@ -243,7 +251,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Backup reminder ("last backup 30 days ago") | 2 | S | M5 |
 | ✅ | Rooms list in Settings: rename a room or a spot everywhere at once, and merge two names for the same room | 2 | M | v1.x |
 | ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
-| ☐ | "What's new" page and app version in Settings | 5 | S | v1.x |
+| ☐ | "What's new" page and app version in Settings. Entries are written by hand in plain language for the people using the app, not generated from commit or pull request titles | 5 | S | v1.x |
 | ☐ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
 | ☐ | Units and date format settings | 7 | M | v1.x |
 | ☐ | Danish translation | 7 | L | v1.x |
