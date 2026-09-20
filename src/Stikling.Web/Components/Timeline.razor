@@ -67,7 +67,7 @@ else
                         var entryPhotos = entry.PhotoIds.Where(photoIndex.ContainsKey).ToList();
                         <li class="timeline-entry kind-@entry.Kind.ToString().ToLowerInvariant()">
                             <div class="entry-head">
-                                <span class="entry-kind">@KindLabel(entry.Kind)</span>
+                                <span class="entry-kind">@KindIcon(entry.Kind)@KindLabel(entry.Kind)</span>
                                 @* "Added" is dated by the acquired date, which has no real time of day *@
                                 @if (entry.Kind != TimelineKind.Created)
                                 {
@@ -293,4 +293,16 @@ else
         TimelineKind.Propagated => "Propagated",
         _ => kind.ToString()
     };
+
+    // Static markup, one icon per kind, so the entry can be placed at a glance
+    // without reading the label.
+    private static MarkupString KindIcon(TimelineKind kind) => new(kind switch
+    {
+        TimelineKind.Created => """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-8" /><path d="M12 13c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>""",
+        TimelineKind.Note => """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>""",
+        TimelineKind.Photo => """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h3.5L8 6h8l1.5 2H21v11H3Z" /><circle cx="12" cy="13" r="3.5" /></svg>""",
+        TimelineKind.Change => """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h14l-3.5-3.5" /><path d="M20 15H6l3.5 3.5" /></svg>""",
+        TimelineKind.Propagated => """<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6.5" r="2.5" /><circle cx="6" cy="17.5" r="2.5" /><path d="M8.2 7.8 19 17M8.2 16.2 19 7" /></svg>""",
+        _ => ""
+    });
 }

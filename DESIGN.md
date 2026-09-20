@@ -216,7 +216,7 @@ Icons are inline SVG, stroked and never filled, at stroke widths from 1.5 to 2.2
 
 **The Stroked Icon Rule.** Every icon is a stroked outline with round caps, drawn inline as SVG and coloured with `currentColor`. No filled glyphs, no icon fonts, no two-tone icons.
 
-**The Hairline Rule.** Borders are 1px. A thicker border means something specific: 2px underlines the active tab, and 3px marks the left edge of a timeline entry.
+**The Hairline Rule.** Borders are 1px. A thicker border has to mean something specific, and right now exactly one does: the 2px underline on an active tab.
 
 ## Components
 
@@ -250,9 +250,9 @@ Four fixed destinations in a bottom bar: a stroked icon over a 0.75rem label, Mu
 The header is sticky, holds the app title in Deep Moss at 1.125rem and weight 700, and the theme toggle on the right. Within a detail page, tabs are a simple underline strip: Muted Ink at rest, Deep Moss with a 2px Potting Green underline when active.
 
 ### Timeline Entry
-A card with a 3px left border, Potting Green for entries a person wrote and Muted Ink for entries the app recorded itself. Entries group under a date heading set in Label. Photos attach as a grid of square tiles at 0.5rem radius.
+One record on a plant or propagation history. Each entry opens with its kind set in Label, with a small stroked icon beside it: a sprout for Added, a pencil for Note, a camera for Photo, swap arrows for Updated, scissors for Propagated. Entries someone wrote take Deep Moss and entries the app recorded itself stay Muted Ink, so a long history can be scanned for the human notes without reading every line. Entries group under a date heading set in Label, and photos attach as a grid of square tiles at 0.5rem radius.
 
-The left accent border is the one element in the system flagged as a generic AI-interface tell. It is kept here because it encodes real meaning, the difference between a human note and an automatic record, but that meaning deserves a better carrier and this is the first place to look when warming the system up.
+This replaced a 3px coloured bar down the left edge. The bar was flagged as a generic interface tell, and it was also redundant: the label already named the entry in words, and the bar had two colours for five kinds. The icon carries the same at-a-glance signal at a fraction of the visual weight, and it uses the icon system the rest of the app already follows.
 
 ### Empty State
 Centred Muted Ink text on Surface inside a dashed Border at 0.75rem radius, with 2.5rem of vertical padding. Given how much weight the product places on the first run, this component matters more than its current plainness suggests.

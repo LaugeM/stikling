@@ -62,19 +62,49 @@
       }
     },
     "typographyMeta": {
-      "headline": { "displayName": "Headline", "purpose": "The page title, one per screen. Also the plant or propagation name on a detail page, where it wraps rather than truncating." },
-      "title": { "displayName": "Title", "purpose": "Card headings, form fieldset legends, the heading inside an action panel." },
-      "body": { "displayName": "Body", "purpose": "Everything read as prose. Notes preserve their line breaks." },
-      "label": { "displayName": "Label", "purpose": "The section marker, uppercase and muted. Groupings on Today, stage groups, subheadings in a detail card, timeline date headings." },
-      "caption": { "displayName": "Caption", "purpose": "Supporting lines. The species line under a plant name is set in italic here." }
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The page title, one per screen. Also the plant or propagation name on a detail page, where it wraps rather than truncating."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card headings, form fieldset legends, the heading inside an action panel."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Everything read as prose. Notes preserve their line breaks."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "The section marker, uppercase and muted. Groupings on Today, stage groups, subheadings in a detail card, timeline date headings."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Supporting lines. The species line under a plant name is set in italic here."
+      }
     },
     "shadows": [
-      { "name": "floating-action", "value": "0 4px 12px rgb(0 0 0 / 0.25)", "purpose": "The round add button, which hovers over scrolling content." },
-      { "name": "anchored-bar", "value": "0 -4px 12px rgb(0 0 0 / 0.08)", "purpose": "Bars pinned above the bottom navigation: the update banner and the bulk action bar. Points upward because the bar sits below the content it covers." },
-      { "name": "focus-ring", "value": "0 0 0 0.2rem rgb(47 125 79 / 0.25)", "purpose": "Every focused input and control. A state rather than elevation, and never to be removed." }
+      {
+        "name": "floating-action",
+        "value": "0 4px 12px rgb(0 0 0 / 0.25)",
+        "purpose": "The round add button, which hovers over scrolling content."
+      },
+      {
+        "name": "anchored-bar",
+        "value": "0 -4px 12px rgb(0 0 0 / 0.08)",
+        "purpose": "Bars pinned above the bottom navigation: the update banner and the bulk action bar. Points upward because the bar sits below the content it covers."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 0.2rem rgb(47 125 79 / 0.25)",
+        "purpose": "Every focused input and control. A state rather than elevation, and never to be removed."
+      }
     ],
     "breakpoints": [
-      { "name": "wide", "value": "48rem" }
+      {
+        "name": "wide",
+        "value": "48rem"
+      }
     ]
   },
   "components": [
@@ -138,9 +168,9 @@
       "name": "Timeline Entry",
       "kind": "custom",
       "refersTo": null,
-      "description": "One record on a plant or propagation history. The left border is Potting Green for something a person wrote and Muted Ink for something the app recorded itself.",
-      "html": "<li class=\"ds-entry\"><span class=\"ds-entry-head\"><span class=\"ds-entry-kind\">Note</span><span>14:20</span></span><p class=\"ds-entry-text\">Roots 2 cm, first new leaf unfurling.</p></li>",
-      "css": ".ds-entry { list-style: none; padding: 0.6rem 0.75rem; background: var(--pa-surface, #fff); border: 1px solid var(--pa-border, #dde3dc); border-left: 3px solid var(--pa-green, #2f7d4f); border-radius: 0.6rem; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--pa-text, #1d2520); } .ds-entry.kind-change { border-left-color: var(--pa-muted, #5f6b63); } .ds-entry-head { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--pa-muted, #5f6b63); } .ds-entry-kind { font-weight: 600; } .ds-entry-text { margin: 0.3rem 0 0; white-space: pre-line; overflow-wrap: anywhere; }"
+      "description": "One record on a plant or propagation history. The kind is named in words and carries a stroked icon, accented for something a person wrote and muted for something the app recorded itself.",
+      "html": "<li class=\"ds-entry\"><span class=\"ds-entry-head\"><span class=\"ds-entry-kind\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z\"/></svg>Note</span><span>14:20</span></span><p class=\"ds-entry-text\">Roots 2 cm, first new leaf unfurling.</p></li>",
+      "css": ".ds-entry { list-style: none; padding: 0.6rem 0.75rem; background: var(--pa-surface, #fff); border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.6rem; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--pa-text, #1d2520); } .ds-entry-head { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--pa-muted, #5f6b63); } .ds-entry-kind { display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 600; color: var(--pa-green-dark, #1f5a37); } .ds-entry-kind svg { width: 0.95rem; height: 0.95rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; } .ds-entry-text { margin: 0.3rem 0 0; white-space: pre-line; overflow-wrap: anywhere; }"
     },
     {
       "name": "Empty State",
@@ -163,17 +193,61 @@
       "Exact values shown plainly: counts, days, stages, measurements."
     ],
     "rules": [
-      { "name": "The One Green Rule", "body": "There is one hue in this system. Every accent, state, badge and highlight is Potting Green, Deep Moss or Leaf Tint. A second hue enters only to mean danger, and only through Bootstrap's existing red.", "section": "colors" },
-      { "name": "The Warm Neutral Rule", "body": "No neutral in this system is a pure grey. Every one of them carries green. A #f5f5f5 or a #888 anywhere in this app is a bug, because it is the fastest way to turn the bench back into a clinic.", "section": "colors" },
-      { "name": "The Two Greens Rule", "body": "Potting Green fills, Deep Moss reads. Never set small text in Potting Green, and never fill a large area with Deep Moss.", "section": "colors" },
-      { "name": "The Quiet Label Rule", "body": "Section headings are small, uppercase and muted. They mark structure without competing with the content beneath them. They are never coloured, never large, and never heavier than 600.", "section": "typography" },
-      { "name": "The Italic Species Rule", "body": "Genus and species are set in italic wherever they appear. Cultivar names are not.", "section": "typography" },
-      { "name": "The Thumb Rule", "body": "Anything tapped often lives in the bottom third. The navigation, the add button and the action bars are all anchored there. The top of the screen is for reading, not for reaching.", "section": "layout" },
-      { "name": "The Safe Area Rule", "body": "Any element fixed to the bottom adds env(safe-area-inset-bottom) to its own padding, and anything stacked above it offsets by the height of what it sits on. Nothing is allowed to hide under a home indicator.", "section": "layout" },
-      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. If a new component wants a shadow, the honest questions are whether it overlaps other content and whether it would still read in dark mode. If either answer is no, use tone and a hairline instead.", "section": "elevation" },
-      { "name": "The Tonal Depth Rule", "body": "Warmth and depth are added by moving between Paper, Surface and Leaf Tint, not by adding shadows. This is the intended route out of the current restraint.", "section": "elevation" },
-      { "name": "The Stroked Icon Rule", "body": "Every icon is a stroked outline with round caps, drawn inline as SVG and coloured with currentColor. No filled glyphs, no icon fonts, no two-tone icons.", "section": "shapes" },
-      { "name": "The Hairline Rule", "body": "Borders are 1px. A thicker border means something specific: 2px underlines the active tab, and 3px marks the left edge of a timeline entry.", "section": "shapes" }
+      {
+        "name": "The One Green Rule",
+        "body": "There is one hue in this system. Every accent, state, badge and highlight is Potting Green, Deep Moss or Leaf Tint. A second hue enters only to mean danger, and only through Bootstrap's existing red.",
+        "section": "colors"
+      },
+      {
+        "name": "The Warm Neutral Rule",
+        "body": "No neutral in this system is a pure grey. Every one of them carries green. A #f5f5f5 or a #888 anywhere in this app is a bug, because it is the fastest way to turn the bench back into a clinic.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Greens Rule",
+        "body": "Potting Green fills, Deep Moss reads. Never set small text in Potting Green, and never fill a large area with Deep Moss.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Label Rule",
+        "body": "Section headings are small, uppercase and muted. They mark structure without competing with the content beneath them. They are never coloured, never large, and never heavier than 600.",
+        "section": "typography"
+      },
+      {
+        "name": "The Italic Species Rule",
+        "body": "Genus and species are set in italic wherever they appear. Cultivar names are not.",
+        "section": "typography"
+      },
+      {
+        "name": "The Thumb Rule",
+        "body": "Anything tapped often lives in the bottom third. The navigation, the add button and the action bars are all anchored there. The top of the screen is for reading, not for reaching.",
+        "section": "layout"
+      },
+      {
+        "name": "The Safe Area Rule",
+        "body": "Any element fixed to the bottom adds env(safe-area-inset-bottom) to its own padding, and anything stacked above it offsets by the height of what it sits on. Nothing is allowed to hide under a home indicator.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces are flat at rest. If a new component wants a shadow, the honest questions are whether it overlaps other content and whether it would still read in dark mode. If either answer is no, use tone and a hairline instead.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Tonal Depth Rule",
+        "body": "Warmth and depth are added by moving between Paper, Surface and Leaf Tint, not by adding shadows. This is the intended route out of the current restraint.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Stroked Icon Rule",
+        "body": "Every icon is a stroked outline with round caps, drawn inline as SVG and coloured with currentColor. No filled glyphs, no icon fonts, no two-tone icons.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Borders are 1px. A thicker border has to mean something specific, and right now exactly one does: the 2px underline on an active tab.",
+        "section": "shapes"
+      }
     ],
     "dos": [
       "Do use one hue. Every accent is Potting Green, Deep Moss or Leaf Tint.",

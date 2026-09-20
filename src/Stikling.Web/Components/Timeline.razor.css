@@ -45,13 +45,7 @@
     padding: 0.6rem 0.75rem;
     background: var(--pa-surface);
     border: 1px solid var(--pa-border);
-    border-left: 3px solid var(--pa-green);
     border-radius: 0.6rem;
-}
-
-.timeline-entry.kind-change,
-.timeline-entry.kind-created {
-    border-left-color: var(--pa-muted);
 }
 
 .entry-head {
@@ -63,7 +57,29 @@
 }
 
 .entry-kind {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     font-weight: 600;
+}
+
+/* The icon comes from KindIcon as raw markup, so it has no scope attribute */
+.entry-kind ::deep svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* The accent marks entries someone typed, so a long history can be scanned for
+   them. Added, Updated and Propagated are written by the services and stay
+   muted; Propagated is already distinct through its own icon. */
+.kind-note .entry-kind,
+.kind-photo .entry-kind {
+    color: var(--pa-green-dark);
 }
 
 .entry-delete {
