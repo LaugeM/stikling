@@ -1,0 +1,84 @@
+.mix-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* The row wraps: the move and remove buttons need 44px each, which leaves the name
+   box too narrow on a phone if everything sits on one line. */
+.mix-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.35rem 0;
+}
+
+.mix-name {
+    flex: 1 1 8rem;
+    min-width: 0;
+}
+
+.mix-amount {
+    flex: 0 0 5rem;
+}
+
+/* Muted and borderless, so the tools read as chrome rather than three more fields */
+.mix-tools {
+    flex: 1 0 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.25rem;
+}
+
+.mix-tool {
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    background: none;
+    color: var(--pa-muted);
+}
+
+.mix-tool:disabled {
+    opacity: 0.35;
+}
+
+.mix-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.mix-list > li {
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.mix-list > li:first-child {
+    border-top: 0;
+}
+
+.mix-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.mix-title {
+    font-weight: 600;
+}
+
+.mix-count {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.mix-recipe {
+    margin: 0.15rem 0 0.35rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.mix-confirm p {
+    margin-bottom: 0.5rem;
+}

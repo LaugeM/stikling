@@ -80,6 +80,53 @@ public class PlantChangesTests
         Assert.Equal("Big alocasia", Original.Nickname);
         Assert.Equal(Original.Id, copy.Id);
     }
+
+    [Fact]
+    public void Potting_into_a_pot_from_the_library_is_written_down()
+    {
+        var pot = Guid.NewGuid();
+        var edited = Original.Copy();
+        edited.InnerPotId = pot;
+
+        Assert.Equal(
+            ["Potted into Clear nursery pot, 13 cm"],
+            PlantChanges.Describe(Original, edited, Label, _ => "Clear nursery pot, 13 cm"));
+    }
+
+    [Fact]
+    public void A_pot_nobody_can_name_is_left_unsaid()
+    {
+        var edited = Original.Copy();
+        edited.InnerPotId = Guid.NewGuid();
+
+        Assert.Empty(PlantChanges.Describe(Original, edited, Label));
+    }
+
+    [Fact]
+    public void Taking_a_plant_out_of_its_outer_pot_is_written_down()
+    {
+        var before = Original.Copy();
+        before.OuterPotId = Guid.NewGuid();
+        before.WaterInOuterPot = true;
+        var edited = before.Copy();
+        edited.OuterPotId = null;
+        edited.WaterInOuterPot = false;
+
+        Assert.Equal(
+            ["No longer in an outer pot", "No longer watered in the outer pot"],
+            PlantChanges.Describe(before, edited, Label));
+    }
+
+    [Fact]
+    public void Moving_a_plant_into_a_saved_mix_is_written_down()
+    {
+        var edited = Original.Copy();
+        edited.SoilMixId = Guid.NewGuid();
+
+        Assert.Equal(
+            ["Now in Chunky soil"],
+            PlantChanges.Describe(Original, edited, Label, mixName: _ => "Chunky soil"));
+    }
 }
 
 public class TimelineOrderTests

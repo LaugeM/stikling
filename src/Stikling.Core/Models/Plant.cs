@@ -27,8 +27,26 @@ public sealed class Plant : Entity
 
     public GrowingMedium Medium { get; set; } = GrowingMedium.Soil;
 
-    /// <summary>Free text for the pot/container, e.g. "Lechuza self-watering pot".</summary>
+    /// <summary>
+    /// Free text for the pot, from before the pot library. Kept so nothing typed disappears:
+    /// it is shown while no pot is picked, and picking one replaces it.
+    /// </summary>
     public string? Container { get; set; }
+
+    /// <summary>The pot the roots are in.</summary>
+    public Guid? InnerPotId { get; set; }
+
+    /// <summary>What it stands in, when there is one.</summary>
+    public Guid? OuterPotId { get; set; }
+
+    /// <summary>
+    /// Water kept in the outer pot, wicking up through the medium. An ordinary ceramic run as a
+    /// self-watering pot, which is a different thing from a pot built to water itself.
+    /// </summary>
+    public bool WaterInOuterPot { get; set; }
+
+    /// <summary>The soil mix it was potted in, when it is one you have saved.</summary>
+    public Guid? SoilMixId { get; set; }
 
     public string? Notes { get; set; }
 
@@ -62,6 +80,8 @@ public sealed class Plant : Entity
             errors.Add("A plant can't be its own parent.");
         if (AcquiredOn is { } acquired && acquired.Start > today)
             errors.Add("The date you got it can't be in the future.");
+        if (InnerPotId is not null && InnerPotId == OuterPotId)
+            errors.Add("A plant can't have the same pot inside and outside.");
         return errors;
     }
 }

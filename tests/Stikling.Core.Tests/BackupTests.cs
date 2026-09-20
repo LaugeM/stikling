@@ -120,11 +120,13 @@ public class BackupTests
             Plants = [Plant("Coleus", Now), gone],
             Photos = [new Photo(), new Photo()],
             PestCases = [new PestCase(), goneCase],
-            PestTreatments = [new PestTreatment()]
+            PestTreatments = [new PestTreatment()],
+            Pots = [new Pot { Name = "Clear nursery pot" }],
+            SoilMixes = [new SoilMix { Name = "Chunky soil" }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -142,5 +144,44 @@ public class BackupTests
         Assert.Equal(PestCaseStatus.Resolved, Assert.Single(cases.ToSave).Status);
         Assert.Equal(caseId, Assert.Single(treatments.ToSave).CaseId);
         Assert.Equal(1, treatments.Added);
+    }
+
+    [Fact]
+    public void Pots_survive_a_restore()
+    {
+        var id = Guid.NewGuid();
+        var mine = new Pot { Id = id, Name = "Clear nursery pot", Owned = 5, UpdatedAt = Now.AddDays(-3) };
+        var theirs = new Pot { Id = id, Name = "Clear nursery pot", Owned = 6, UpdatedAt = Now, TopCm = 13 };
+
+        var merged = BackupMerge.Merge([mine], [theirs]);
+
+        var restored = Assert.Single(merged.ToSave);
+        Assert.Equal(6, restored.Owned);
+        Assert.Equal(13, restored.TopCm);
+        Assert.Equal(1, merged.Updated);
+    }
+
+    [Fact]
+    public void A_mix_and_the_order_of_its_ingredients_survive_a_restore()
+    {
+        var id = Guid.NewGuid();
+        var mine = new SoilMix { Id = id, Name = "Chunky soil", UpdatedAt = Now.AddDays(-3) };
+        var theirs = new SoilMix
+        {
+            Id = id,
+            Name = "Chunky soil",
+            UpdatedAt = Now,
+            Ingredients =
+            [
+                new MixIngredient { Name = "Potting soil" },
+                new MixIngredient { Name = "Bark" },
+                new MixIngredient { Name = "Perlite" }
+            ]
+        };
+
+        var merged = BackupMerge.Merge([mine], [theirs]);
+
+        var restored = Assert.Single(merged.ToSave);
+        Assert.Equal(["Potting soil", "Bark", "Perlite"], restored.Ingredients.Select(i => i.Name));
     }
 }

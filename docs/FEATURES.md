@@ -41,9 +41,9 @@ In the order I would build them.
 2. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
 3. **Products and doses on a care entry.** The care log is in, so "Hydro fertiliser, 2 ml/L" only needs somewhere to keep the products.
 4. **Import old photos with their dates**, so a plant's history can start before the app did.
-5. **Pot suggestions** in the pot field, picked from the pots already used, the way rooms are.
-6. **Correct or hide a timeline entry.** Left over from M3.
-7. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
+5. **Correct or hide a timeline entry.** Left over from M3.
+6. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
+7. **A pot fit helper**: given a nursery pot, which of your free outer pots it would go in.
 
 ### Cheap ones to slot in whenever
 
@@ -196,28 +196,30 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ◐ | **Pot suggestions**: the pot field suggests pots you've already used, so the same one isn't typed differently every time. The same for a propagation's container. The field is already there on both plants and propagations, so only the suggestions are missing | 3 | S | v1.x |
+| ◐ | **Pot suggestions**: a plant's pot is picked from your pot library, on the plant form and when potting up. A propagation's container is still typed by hand, because a jar or a humidity box isn't a pot | 3 | S | v1.x |
 | ☐ | **Supplies stock**: LECA, PON, perlite, sphagnum, fertilisers, sticky traps, alcohol, pots | 5 | M | v1.x |
 | ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | 5 | S | v1.x |
-| ☐ | **Your pots**: register the pots you own by kind (nursery pot, self-watering, terracotta, glass jar, net pot, humidity box) and size, then pick one from a list when adding a plant or potting up | 6 | M | v1.x |
-| ☐ | See which of your pots are in use and which are free, so it's clear what's available before repotting | 7 | S | v1.x |
+| ✅ | **Your pots**: the pots you own, by kind (nursery, outer, stands on its own), what they're made of, their measurements, whether they self-water, and how many you have. A plant points at a pot and, when it has one, an outer pot | 6 | M | v1.x |
+| ✅ | See which of your pots are in use and which are free, so it's clear what's available before repotting | 7 | S | v1.x |
+| ☐ | **Does it fit?**: given a nursery pot, which of your free outer pots it would go in. Compares the tops, allows for a rim only having to clear the opening, and says when the bottom is the tighter measurement | 7 | M | v1.x |
 | ☐ | Default medium per pot kind, e.g. a net pot suggests LECA, so potting up is one tap less | 8 | S | v1.x |
 | ☐ | Money spent on supplies, to see what the hobby costs | 8 | S | v1.x |
 
 ## 5c. Soil mixes
 
-Most people mix their own soil instead of using it straight from the bag. This is for keeping track of what is actually in it. The first five rows are really one feature and should be built together.
+Most people mix their own soil instead of using it straight from the bag. This is for keeping track of what is actually in it, including the mixes you never measured.
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | **Your mixes**: save a mix under a name ("aroid mix", "seedling mix", "cactus mix") | 5 | M | v1.x |
-| ☐ | What a mix is made of, as percentages: potting soil, perlite, LECA, bark, pumice, coco coir, sphagnum, worm castings, sand, charcoal. The app adds them up and says when they don't reach 100% | 5 | S | v1.x |
-| ☐ | Add your own ingredient if something isn't on the list | 5 | S | v1.x |
-| ☐ | Pick a mix when adding a plant or potting up, instead of typing the medium by hand. The plant page shows which mix it's in | 5 | M | v1.x |
-| ☐ | Editing a mix doesn't rewrite history: a plant keeps the recipe as it was on the day it was potted | 5 | M | v1.x |
-| ☐ | See which plants are in a given mix, so a mix that isn't working shows up | 7 | S | v1.x |
+| ✅ | **Your mixes**: save a mix under a name ("aroid mix", "seedling mix", "cactus mix") | 5 | M | v1.x |
+| ✅ | What a mix is made of, in the order you mix it, most of first. Amounts are optional and can be parts or percent, and percentages are added up with a note when they don't reach 100% | 5 | S | v1.x |
+| ✅ | Add your own ingredient if something isn't on the list | 5 | S | v1.x |
+| ✅ | Pick a mix when adding a plant or potting up, instead of typing the medium by hand. The plant page shows which mix it's in, and what's in it | 5 | M | v1.x |
+| ◐ | Editing a mix that plants are already in says so first, and offers to save the edit as a new mix instead, dated so the versions read in order. A plant still points at the mix rather than keeping its own copy of the recipe, so a mix can also be marked as no longer mixed to keep it off the picker | 5 | M | v1.x |
+| ◐ | The mixes list says how many plants are in each mix. Tapping through to those plants isn't built | 7 | S | v1.x |
 | ☐ | Use a mix on a propagation too, for the ones that go straight into soil | 7 | S | v1.x |
 | ☐ | Batch calculator: pick a mix and a volume, and get how much of each ingredient to measure out | 7 | S | v1.x |
+| ☐ | **Batches**: mix a dated batch from a recipe and top it up as it runs low, so a plant can point at the batch it was actually potted in rather than the recipe | 8 | L | v1.x |
 | ☐ | Mixing a batch takes the ingredients off the supplies stock | 8 | M | v1.x |
 
 ## 5d. Fertiliser mixes

@@ -1,6 +1,8 @@
 @page "/propagations/{Id:guid}"
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
+@inject IPotRepository PotRepository
+@inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
@@ -77,20 +79,20 @@ else
                         <div class="form-text">Numbered when there are several, e.g. "@(string.IsNullOrWhiteSpace(potUp.Nickname) ? "Coleus" : potUp.Nickname.Trim()) @(propagation.PottedUpCount + 1)".</div>
                     }
                 </div>
-                <div class="row g-2 mb-2">
-                    <div class="col-6">
-                        <label class="form-label" for="potup-medium">Grows in</label>
-                        <select id="potup-medium" class="form-select" @bind="potUp.Medium">
-                            @foreach (var medium in Enum.GetValues<GrowingMedium>())
-                            {
-                                <option value="@medium">@Labels.For(medium)</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label" for="potup-pot">Pot</label>
-                        <input id="potup-pot" class="form-control" @bind="potUp.Container" @bind:event="oninput" placeholder="e.g. 9 cm nursery pot" />
-                    </div>
+                <div class="mb-2">
+                    <label class="form-label" for="potup-medium">Grows in</label>
+                    <select id="potup-medium" class="form-select" @bind="potUp.Medium">
+                        @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                        {
+                            <option value="@medium">@Labels.For(medium)</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
+                </div>
+                <div class="mb-2">
+                    <PotPicker @bind-Value="potUp.PotId" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
                 </div>
                 <div class="mb-2">
                     <label class="form-label" for="potup-date">Date</label>
@@ -276,8 +278,11 @@ else
         public DateOnly Date { get; set; }
         public string? Location { get; set; }
         public GrowingMedium Medium { get; set; }
-        public string? Container { get; set; }
+        public Guid? PotId { get; set; }
+        public Guid? SoilMixId { get; set; }
     }
+
+    private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
 
     private static readonly PropagationStage[] ManualStages =
         [PropagationStage.Started, PropagationStage.Rooting, PropagationStage.Rooted];
@@ -286,6 +291,10 @@ else
     private Plant? parent;
     private IReadOnlyList<Plant> offspring = [];
     private IReadOnlyList<Room> rooms = [];
+    private IReadOnlyList<Pot> pots = [];
+    private IReadOnlyList<SoilMix> mixes = [];
+
+    private void AddPot(Pot pot) => pots = [.. pots, pot];
     private bool loaded;
     private bool busy;
     private bool confirmDelete;
@@ -337,6 +346,8 @@ else
                           .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                           .ToList();
         rooms = Room.List(plants, propagations);
+        pots = await PotRepository.GetAllAsync();
+        mixes = await MixRepository.GetAllAsync();
     }
 
     private void SetTab(string value) =>
@@ -389,7 +400,7 @@ else
         try
         {
             madePlants = await PropagationService.PotUpAsync(propagation, new PotUpRequest(
-                potUp.Count, potUp.Date, potUp.Nickname, potUp.Location, potUp.Medium, potUp.Container));
+                potUp.Count, potUp.Date, potUp.Nickname, potUp.Location, potUp.Medium, potUp.PotId, potUp.SoilMixId));
             message = madePlants.Count == 1 ? "Potted up:" : $"Potted up {madePlants.Count}:";
             panel = Panel.None;
             await LoadAsync();

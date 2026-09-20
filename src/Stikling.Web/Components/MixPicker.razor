@@ -1,0 +1,59 @@
+@* Picking a saved soil mix. Chips again, and no way out of the form: leaving a new plant's
+   form throws away the draft and any photos taken on it. *@
+
+<div class="mix-picker">
+    <div class="form-label">@Label</div>
+
+    @if (Choices.Count == 0)
+    {
+        <div class="form-text">No mixes yet. You can add them under Settings, then Soil mixes.</div>
+    }
+    else
+    {
+        <div class="chip-row" role="group" aria-label="@Label">
+            <button type="button" class="chip @Picked(Value is null)" @onclick="() => PickAsync(null)">No mix</button>
+            @foreach (var mix in Choices)
+            {
+                <button type="button" class="chip @Picked(Value == mix.Id)"
+                        @onclick="() => PickAsync(mix.Id)">@mix.Name</button>
+            }
+        </div>
+
+        @if (Picked() is { } picked && !string.IsNullOrWhiteSpace(picked.Recipe))
+        {
+            <div class="form-text">@picked.Recipe</div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid?> ValueChanged { get; set; }
+
+    /// <summary>Every mix. The retired ones are left out unless this plant is already in one.</summary>
+    [Parameter]
+    public IReadOnlyList<SoilMix> Mixes { get; set; } = [];
+
+    [Parameter]
+    public string Label { get; set; } = "Soil mix";
+
+    private static string? Picked(bool picked) => picked ? "picked" : null;
+
+    private SoilMix? Picked() => Value is { } id ? Mixes.FirstOrDefault(m => m.Id == id) : null;
+
+    /// <summary>
+    /// The mixes still being made, plus the one this plant is already in, so a mix that was
+    /// retired after the plant went into it doesn't quietly vanish from the form.
+    /// </summary>
+    private IReadOnlyList<SoilMix> Choices =>
+        [.. Mixes.Where(mix => !mix.IsRetired || mix.Id == Value)];
+
+    private Task PickAsync(Guid? id)
+    {
+        Value = id;
+        return ValueChanged.InvokeAsync(id);
+    }
+}

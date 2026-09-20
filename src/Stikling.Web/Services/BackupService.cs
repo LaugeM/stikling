@@ -35,7 +35,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
             Photos = await db.GetAllAsync<Photo>(Stores.Photos),
             CareLogs = await db.GetAllAsync<CareLog>(Stores.CareLogs),
             PestCases = await db.GetAllAsync<PestCase>(Stores.PestCases),
-            PestTreatments = await db.GetAllAsync<PestTreatment>(Stores.PestTreatments)
+            PestTreatments = await db.GetAllAsync<PestTreatment>(Stores.PestTreatments),
+            Pots = await db.GetAllAsync<Pot>(Stores.Pots),
+            SoilMixes = await db.GetAllAsync<SoilMix>(Stores.SoilMixes)
         };
 
         using var buffer = new MemoryStream();
@@ -90,13 +92,31 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
         using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read, leaveOpen: true);
         var data = await ReadAsync(zip);
 
-        var plants = await MergeAsync(Stores.Plants, data.Plants);
-        var propagations = await MergeAsync(Stores.Propagations, data.Propagations);
-        var timeline = await MergeAsync(Stores.Timeline, data.Timeline);
-        var photoMeta = await MergeAsync(Stores.Photos, data.Photos);
-        var care = await MergeAsync(Stores.CareLogs, data.CareLogs);
-        var pests = await MergeAsync(Stores.PestCases, data.PestCases);
-        var treatments = await MergeAsync(Stores.PestTreatments, data.PestTreatments);
+        // One tally for every store, so adding a store is one line instead of four sums to keep in step
+        var added = 0;
+        var updated = 0;
+        var broughtBack = 0;
+        var kept = 0;
+
+        async Task<MergeResult<T>> Restore<T>(string store, List<T> incoming) where T : Entity
+        {
+            var result = await MergeAsync(store, incoming);
+            added += result.Added;
+            updated += result.Updated;
+            broughtBack += result.BroughtBack;
+            kept += result.Skipped;
+            return result;
+        }
+
+        await Restore(Stores.Plants, data.Plants);
+        await Restore(Stores.Propagations, data.Propagations);
+        await Restore(Stores.Timeline, data.Timeline);
+        var photoMeta = await Restore(Stores.Photos, data.Photos);
+        await Restore(Stores.CareLogs, data.CareLogs);
+        await Restore(Stores.PestCases, data.PestCases);
+        await Restore(Stores.PestTreatments, data.PestTreatments);
+        await Restore(Stores.Pots, data.Pots);
+        await Restore(Stores.SoilMixes, data.SoilMixes);
 
         var restoredPhotos = 0;
         foreach (var photo in photoMeta.ToSave.Where(p => !p.IsDeleted))
@@ -108,13 +128,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
             restoredPhotos++;
         }
 
-        return new ImportSummary(
-            plants.Added + propagations.Added + timeline.Added + photoMeta.Added + care.Added + pests.Added + treatments.Added,
-            plants.Updated + propagations.Updated + timeline.Updated + photoMeta.Updated + care.Updated + pests.Updated + treatments.Updated,
-            plants.BroughtBack + propagations.BroughtBack + timeline.BroughtBack + photoMeta.BroughtBack + care.BroughtBack
-                + pests.BroughtBack + treatments.BroughtBack,
-            plants.Skipped + propagations.Skipped + timeline.Skipped + photoMeta.Skipped + care.Skipped + pests.Skipped + treatments.Skipped,
-            restoredPhotos);
+        return new ImportSummary(added, updated, broughtBack, kept, restoredPhotos);
     }
 
     private async Task<MergeResult<T>> MergeAsync<T>(string store, List<T> incoming) where T : Entity

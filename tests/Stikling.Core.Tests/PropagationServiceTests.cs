@@ -124,7 +124,9 @@ public class PropagationServiceTests
     {
         var corms = await StartCormsAsync();
 
-        var made = await service.PotUpAsync(corms, new PotUpRequest(2, Today, "Zebrina", "Bedroom", GrowingMedium.Pon, "Lechuza pot"));
+        var pot = Guid.NewGuid();
+
+        var made = await service.PotUpAsync(corms, new PotUpRequest(2, Today, "Zebrina", "Bedroom", GrowingMedium.Pon, pot));
 
         Assert.Equal(2, made.Count);
         Assert.All(made, plant =>
@@ -137,6 +139,7 @@ public class PropagationServiceTests
             Assert.Equal("Bedroom", plant.Location);
             Assert.Equal(GrowingMedium.Pon, plant.Medium);
             Assert.Equal(LooseDate.Of(Today), plant.AcquiredOn);
+            Assert.Equal(pot, plant.InnerPotId);
 
             var created = Assert.Single(HistoryOf(plant.Id));
             Assert.Equal("Potted up from a propagation", created.Text);

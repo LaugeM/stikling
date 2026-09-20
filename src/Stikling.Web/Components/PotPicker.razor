@@ -1,0 +1,174 @@
+@* Picking a pot from the library. Chips rather than a datalist, for the same reason rooms are:
+   a datalist is invisible on a phone. Adding a pot here saves it straight away and never
+   navigates, because leaving the plant form throws away the draft and any photos on it. *@
+
+@inject IPotRepository Repository
+
+<div class="pot-picker">
+    <div class="form-label">@Label</div>
+
+    <div class="chip-row" role="group" aria-label="@Label">
+        <button type="button" class="chip @Picked(Value is null && !adding)"
+                @onclick="() => PickAsync(null)">@NoneText</button>
+        @foreach (var pot in Choices)
+        {
+            <button type="button" class="chip @Picked(!adding && Value == pot.Id)"
+                    @onclick="() => PickAsync(pot.Id)">@pot.DisplayName</button>
+        }
+        <button type="button" class="chip new @Picked(adding)" @onclick="StartAdding">+ New pot</button>
+    </div>
+
+    @if (adding)
+    {
+        @if (Names.Count > 0)
+        {
+            <div class="chip-row mt-2" role="group" aria-label="Pots you already have">
+                @foreach (var name in Names)
+                {
+                    <button type="button" class="chip @Picked(name == draftName)"
+                            @onclick="() => draftName = name">@name</button>
+                }
+            </div>
+        }
+
+        <div class="row g-2 mt-2">
+            <div class="col-8">
+                <input class="form-control" placeholder="e.g. Clear nursery pot" autocomplete="off"
+                       aria-label="Pot name" value="@draftName" @oninput="e => draftName = e.Value?.ToString()"
+                       @ref="draftInput" />
+            </div>
+            <div class="col-4">
+                <input class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
+                       placeholder="cm" aria-label="Across the top in centimetres" @bind="draftSize" />
+            </div>
+        </div>
+
+        @if (error is not null)
+        {
+            <div class="form-text text-danger">@error</div>
+        }
+
+        <div class="care-actions mt-2">
+            <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="AddAsync">Add pot</button>
+            <button type="button" class="btn btn-link btn-sm" @onclick="StopAdding">Cancel</button>
+        </div>
+        <div class="form-text">It joins your pot library. The rest of its details can be filled in under Settings, then Pots.</div>
+    }
+</div>
+
+@code {
+    /// <summary>The pot that's picked, if any.</summary>
+    [Parameter]
+    public Guid? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid?> ValueChanged { get; set; }
+
+    /// <summary>Every pot in the library. The picker shows the ones that fit this slot.</summary>
+    [Parameter]
+    public IReadOnlyList<Pot> Pots { get; set; } = [];
+
+    /// <summary>Which kinds of pot belong in this slot.</summary>
+    [Parameter]
+    public IReadOnlyList<PotGroup> Groups { get; set; } = [PotGroup.Inner];
+
+    [Parameter]
+    public string Label { get; set; } = "Pot";
+
+    [Parameter]
+    public string NoneText { get; set; } = "No pot";
+
+    /// <summary>Raised when a pot is added here, so the page can put it in its own list.</summary>
+    [Parameter]
+    public EventCallback<Pot> PotAdded { get; set; }
+
+    private bool adding;
+    private bool busy;
+    private string? draftName;
+    private decimal? draftSize;
+    private string? error;
+    private ElementReference draftInput;
+    private bool focusDraft;
+
+    private static string? Picked(bool picked) => picked ? "picked" : null;
+
+    /// <summary>
+    /// The pots that fit this slot, plus the one already picked when it doesn't, so editing an
+    /// old plant never quietly drops its pot.
+    /// </summary>
+    private IEnumerable<Pot> Choices
+    {
+        get
+        {
+            var offered = Pots.Where(pot => Groups.Contains(pot.Group)).ToList();
+            return Value is { } id && offered.TrueForAll(pot => pot.Id != id)
+                   && Pots.FirstOrDefault(pot => pot.Id == id) is { } picked
+                ? offered.Append(picked)
+                : offered;
+        }
+    }
+
+    private IReadOnlyList<string> Names => PotUse.Names(Pots);
+
+    private Task PickAsync(Guid? id)
+    {
+        adding = false;
+        error = null;
+        Value = id;
+        return ValueChanged.InvokeAsync(id);
+    }
+
+    private void StartAdding()
+    {
+        adding = true;
+        error = null;
+        draftName = null;
+        draftSize = null;
+        focusDraft = true;
+    }
+
+    private void StopAdding()
+    {
+        adding = false;
+        error = null;
+    }
+
+    private async Task AddAsync()
+    {
+        var pot = new Pot
+        {
+            Group = Groups[0],
+            Name = draftName?.Trim(),
+            TopCm = draftSize,
+            // A guess that matches the slot, and is the one thing most worth correcting later
+            Material = Groups[0] == PotGroup.Outer ? PotMaterial.Ceramic : PotMaterial.Plastic
+        };
+
+        if (pot.Validate() is { Count: > 0 } problems)
+        {
+            error = problems[0];
+            return;
+        }
+
+        busy = true;
+        try
+        {
+            await Repository.SaveAsync(pot);
+            await PotAdded.InvokeAsync(pot);
+            await PickAsync(pot.Id);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!focusDraft)
+            return;
+
+        focusDraft = false;
+        await draftInput.FocusAsync();
+    }
+}

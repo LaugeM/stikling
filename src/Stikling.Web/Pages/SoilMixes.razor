@@ -1,0 +1,354 @@
+@page "/soil-mixes"
+@inject ISoilMixRepository Repository
+@inject SoilMixService MixService
+@inject TimeProvider Time
+
+<PageTitle>Soil mixes · Stikling</PageTitle>
+
+<a class="back-link" href="settings">‹ Settings</a>
+<h1>Soil mixes</h1>
+
+<p class="settings-hint">
+    The mixes you make yourself, saved under a name. Amounts are optional: a mix you mix by eye is
+    still worth writing down. Put the ingredient there's most of first.
+</p>
+
+@if (errors.Count > 0)
+{
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in errors)
+        {
+            <div>@error</div>
+        }
+    </div>
+}
+
+@if (draft is not null)
+{
+    <section class="settings-section">
+        <h2>@(editing is null ? "Add a mix" : "Edit mix")</h2>
+
+        <div class="mb-3">
+            <label class="form-label" for="mix-name">Name</label>
+            <input id="mix-name" class="form-control" placeholder="e.g. Chunky soil" autocomplete="off"
+                   value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label">Amounts</div>
+            <div class="chip-row" role="group" aria-label="How the amounts are counted">
+                @foreach (var unit in Enum.GetValues<MixUnit>())
+                {
+                    <button type="button" class="chip @Picked(draft.Unit == unit)"
+                            @onclick="() => draft.Unit = unit">@Labels.For(unit)</button>
+                }
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label">What's in it</div>
+
+            @if (draft.Ingredients.Count > 0)
+            {
+                <ol class="mix-rows">
+                    @for (var i = 0; i < draft.Ingredients.Count; i++)
+                    {
+                        var index = i;
+                        var ingredient = draft.Ingredients[index];
+                        <li class="mix-row">
+                            <input class="form-control mix-name" placeholder="e.g. perlite" autocomplete="off"
+                                   aria-label="Ingredient @(index + 1)" value="@ingredient.Name"
+                                   @oninput="e => ingredient.Name = e.Value?.ToString() ?? string.Empty" />
+                            @if (draft.Unit != MixUnit.None)
+                            {
+                                <input class="form-control mix-amount" type="number" inputmode="decimal"
+                                       min="0" step="any" aria-label="How much @Some(ingredient)"
+                                       @bind="ingredient.Amount" />
+                            }
+                            <div class="mix-tools">
+                                <button type="button" class="mix-tool" disabled="@(index == 0)"
+                                        aria-label="Move @Some(ingredient) up"
+                                        @onclick="() => draft.MoveUp(index)">▲</button>
+                                <button type="button" class="mix-tool" disabled="@(index == draft.Ingredients.Count - 1)"
+                                        aria-label="Move @Some(ingredient) down"
+                                        @onclick="() => draft.MoveDown(index)">▼</button>
+                                <button type="button" class="mix-tool remove" aria-label="Remove @Some(ingredient)"
+                                        @onclick="() => draft.Ingredients.RemoveAt(index)">✕</button>
+                            </div>
+                        </li>
+                    }
+                </ol>
+
+                @if (draft.Unit == MixUnit.Percent && !draft.PercentAddsUp)
+                {
+                    <p class="form-text">@Labels.PercentTotal(draft.Total)</p>
+                }
+                else
+                {
+                    <div class="form-text">The first one is what there's most of.</div>
+                }
+            }
+
+            <div class="chip-row mt-2" role="group" aria-label="Ingredients to add">
+                @foreach (var name in Suggestions)
+                {
+                    <button type="button" class="chip" @onclick="() => Add(name)">@name</button>
+                }
+                <button type="button" class="chip new" @onclick="() => Add(null)">+ Something else</button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="mix-notes">Notes</label>
+            <textarea id="mix-notes" class="form-control" rows="2" @bind="draft.Notes"></textarea>
+        </div>
+
+        @if (editing is not null && plantsInMix > 0)
+        {
+            <div class="confirm-card">
+                <p>@EditWarning</p>
+                <p class="settings-hint">@CopyHint</p>
+            </div>
+        }
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => SaveAsync(asCopy: false)">
+                @(editing is null ? "Add mix" : "Save changes")
+            </button>
+            @if (editing is not null && plantsInMix > 0)
+            {
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => SaveAsync(asCopy: true)">
+                    Save as a new mix
+                </button>
+            }
+            <button type="button" class="btn btn-link" @onclick="Cancel">Cancel</button>
+        </div>
+    </section>
+}
+else
+{
+    <div class="form-actions mb-3">
+        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a mix</button>
+    </div>
+}
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (uses.Count == 0)
+{
+    <div class="empty-state">
+        <p>No mixes yet.</p>
+        <p class="text-body-secondary">
+            Start with the one you use most. A name and a list of what's in it is enough; the amounts
+            can wait until you next mix a batch and write them down.
+        </p>
+    </div>
+}
+else
+{
+    @foreach (var group in uses.GroupBy(use => use.Mix.IsRetired))
+    {
+        <section class="settings-section">
+            <h2>@(group.Key ? "No longer mixed" : "Your mixes")</h2>
+
+            <ul class="mix-list">
+                @foreach (var use in group)
+                {
+                    <li>
+                        @if (confirming == use.Mix.Id)
+                        {
+                            <div class="mix-confirm">
+                                <p>@DeleteWarning(use)</p>
+                                <div class="care-actions">
+                                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
+                                            @onclick="() => DeleteAsync(use.Mix)">Delete</button>
+                                    <button type="button" class="btn btn-link btn-sm"
+                                            @onclick="() => confirming = null">Cancel</button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mix-head">
+                                <span class="mix-title">@use.Mix.Name</span>
+                                <span class="mix-count">@PlantCount(use)</span>
+                            </div>
+                            <div class="mix-recipe">@use.Mix.Recipe</div>
+                            @if (use.Mix.RetiredOn is { } retired)
+                            {
+                                <div class="mix-recipe">Last mixed @Labels.Date(retired)</div>
+                            }
+                            <div class="care-actions">
+                                <button type="button" class="btn btn-link btn-sm p-0"
+                                        @onclick="() => StartEditAsync(use)">Edit</button>
+                                <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                        @onclick="() => RetireAsync(use.Mix)">
+                                    @(use.Mix.IsRetired ? "Mixing it again" : "No longer mixing it")
+                                </button>
+                                <button type="button" class="btn btn-link btn-sm p-0"
+                                        @onclick="() => ConfirmAsync(use)">Delete</button>
+                            </div>
+                        }
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}
+
+@code {
+    private IReadOnlyList<MixUse> uses = [];
+    private IReadOnlyList<SoilMix> all = [];
+    private bool loading = true;
+    private bool busy;
+    private List<string> errors = [];
+
+    private SoilMix? draft;
+    private SoilMix? editing;
+    private int plantsInMix;
+    private Guid? confirming;
+    private int confirmingPlants;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        all = await Repository.GetAllAsync();
+        uses = await MixService.GetAllAsync();
+        loading = false;
+    }
+
+    private IReadOnlyList<string> Suggestions => SoilMixIngredients.Suggestions(all);
+
+    private static string? Picked(bool picked) => picked ? "picked" : null;
+
+    /// <summary>The ingredient's name for a screen reader, before one has been typed.</summary>
+    private static string Some(MixIngredient ingredient) =>
+        string.IsNullOrWhiteSpace(ingredient.Name) ? "this ingredient" : ingredient.Name.Trim();
+
+    private static string PlantCount(MixUse use) =>
+        use.Plants == 0 ? "no plants in it" : $"{Labels.Plants(use.Plants)} in it";
+
+    /// <summary>What saving does to the plants already in the mix, said before it happens.</summary>
+    private string EditWarning => plantsInMix == 1
+        ? "1 plant is in this mix. Saving changes what it shows, because a plant points at the mix rather than keeping its own copy of the recipe."
+        : $"{plantsInMix} plants are in this mix. Saving changes what they all show, because a plant points at the mix rather than keeping its own copy of the recipe.";
+
+    private string CopyHint => plantsInMix == 1
+        ? "Saving it as a new mix leaves that plant on the mix as it was, and the new one is there for what you pot from now on."
+        : "Saving it as a new mix leaves those plants on the mix as it was, and the new one is there for what you pot from now on.";
+
+    private string DeleteWarning(MixUse use) => confirmingPlants == 0
+        ? $"Delete {use.Mix.Name}?"
+        : $"{Labels.Plants(confirmingPlants)} in this mix. Deleting it takes the mix off them, and changes nothing else about them.";
+
+    private void Add(string? name)
+    {
+        draft!.Ingredients.Add(new MixIngredient { Name = name ?? "" });
+    }
+
+    private void StartNew()
+    {
+        editing = null;
+        plantsInMix = 0;
+        errors = [];
+        confirming = null;
+        draft = new SoilMix();
+    }
+
+    private async Task StartEditAsync(MixUse use)
+    {
+        editing = use.Mix;
+        plantsInMix = await MixService.PlantsInAsync(use.Mix.Id);
+        errors = [];
+        confirming = null;
+        draft = use.Mix.Copy();
+    }
+
+    private void Cancel()
+    {
+        draft = null;
+        editing = null;
+        errors = [];
+    }
+
+    /// <summary>
+    /// Saving as a copy is the escape for a mix that's already in use: the plants stay on the mix
+    /// as it was, and the copy is what gets used from now on.
+    /// </summary>
+    private async Task SaveAsync(bool asCopy)
+    {
+        if (draft is null)
+            return;
+
+        var mix = asCopy ? draft.CopyAsNew(NextName(draft.Name)) : draft;
+        mix.Tidy();
+
+        errors = mix.Validate().ToList();
+        if (errors.Count > 0)
+            return;
+
+        busy = true;
+        try
+        {
+            await Repository.SaveAsync(mix);
+            await LoadAsync();
+            Cancel();
+        }
+        catch (InvalidOperationException e)
+        {
+            errors = [e.Message];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    /// <summary>"Chunky soil (Sep 2026)", so a second version says when it started.</summary>
+    private string NextName(string? name) =>
+        $"{name?.Trim()} ({Today.ToString("MMM yyyy", System.Globalization.CultureInfo.InvariantCulture)})";
+
+    private async Task RetireAsync(SoilMix mix)
+    {
+        busy = true;
+        try
+        {
+            var saved = mix.Copy();
+            saved.RetiredOn = mix.IsRetired ? null : Today;
+            await Repository.SaveAsync(saved);
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task ConfirmAsync(MixUse use)
+    {
+        confirmingPlants = await MixService.PlantsInAsync(use.Mix.Id);
+        confirming = use.Mix.Id;
+    }
+
+    private async Task DeleteAsync(SoilMix mix)
+    {
+        busy = true;
+        try
+        {
+            await Repository.DeleteAsync(mix.Id);
+            confirming = null;
+            if (editing?.Id == mix.Id)
+                Cancel();
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

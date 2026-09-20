@@ -1,0 +1,61 @@
+/* The name is the heading and the sizes sit under it, so a set of nursery pots reads as one thing */
+.pot-family {
+    margin: 0.9rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.pot-list {
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+}
+
+.pot-list > li {
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.pot-list > li:first-child {
+    border-top: 0;
+}
+
+.pot-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.5rem;
+}
+
+.pot-size {
+    font-weight: 600;
+    min-width: 4.5rem;
+}
+
+.pot-about {
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.pot-use {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+/* The buttons drop to their own line on a narrow phone rather than squeezing the text */
+.pot-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-left: auto;
+}
+
+.pot-confirm p {
+    margin-bottom: 0.5rem;
+}
+
+.more-measurements > summary {
+    padding: 0.4rem 0;
+    color: var(--pa-muted);
+    cursor: pointer;
+}

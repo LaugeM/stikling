@@ -9,7 +9,14 @@ namespace Stikling.Core.Timeline;
 public static class PlantChanges
 {
     /// <param name="label">Turns enum values into display text, e.g. Leca becomes "LECA".</param>
-    public static IReadOnlyList<string> Describe(Plant before, Plant after, Func<Enum, string> label)
+    /// <param name="potName">Turns a pot id into its name. Pots the caller can't name are left unsaid.</param>
+    /// <param name="mixName">The same for a soil mix.</param>
+    public static IReadOnlyList<string> Describe(
+        Plant before,
+        Plant after,
+        Func<Enum, string> label,
+        Func<Guid, string?>? potName = null,
+        Func<Guid, string?>? mixName = null)
     {
         var changes = new List<string>();
 
@@ -19,6 +26,14 @@ public static class PlantChanges
         ChangeText.AddLocation(changes, before.Location, after.Location);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
         ChangeText.AddContainer(changes, before.Container, after.Container, "New pot");
+
+        var name = potName ?? (_ => null);
+        ChangeText.AddPot(changes, before.InnerPotId, after.InnerPotId, name, "Potted into", "Taken out of its pot");
+        ChangeText.AddPot(changes, before.OuterPotId, after.OuterPotId, name, "Now stands in", "No longer in an outer pot");
+        ChangeText.AddPot(changes, before.SoilMixId, after.SoilMixId, mixName ?? (_ => null), "Now in", "No longer in a saved mix");
+
+        if (before.WaterInOuterPot != after.WaterInOuterPot)
+            changes.Add(after.WaterInOuterPot ? "Now watered in the outer pot" : "No longer watered in the outer pot");
 
         return changes;
     }
@@ -68,6 +83,23 @@ internal static class ChangeText
     {
         if (!SameText(before, after) && Clean(after) is { } container)
             changes.Add($"{prefix}: {container}");
+    }
+
+    public static void AddPot(
+        List<string> changes,
+        Guid? before,
+        Guid? after,
+        Func<Guid, string?> name,
+        string into,
+        string outOf)
+    {
+        if (before == after)
+            return;
+
+        if (after is null)
+            changes.Add(outOf);
+        else if (name(after.Value) is { } pot)
+            changes.Add($"{into} {pot}");
     }
 
     private static bool SameText(string? a, string? b) =>
