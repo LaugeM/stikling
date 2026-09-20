@@ -119,11 +119,13 @@ else
 
         var latest = await Entries.GetLatestPerSubjectAsync();
         checks = TodayBoard.NeedsChecking(propagations, latest, Today);
-        recent = await Entries.GetRecentAsync(8);
 
         names = plants.ToDictionary(p => p.Id, p => p.DisplayName);
         foreach (var propagation in propagations)
             names[propagation.Id] = propagation.DisplayName;
+
+        // Only what's still here: entries left behind by a deleted plant have nowhere to go
+        recent = await Entries.GetRecentAsync(8, names.Keys.ToHashSet());
 
         backupReminder = await BackupReminderAsync();
         loaded = true;
@@ -144,8 +146,7 @@ else
         };
     }
 
-    private string NameOf(TimelineEntry entry) =>
-        names.TryGetValue(entry.SubjectId, out var name) ? name : "Deleted";
+    private string NameOf(TimelineEntry entry) => names[entry.SubjectId];
 
     private string LinkTo(TimelineEntry entry) =>
         entry.SubjectType == SubjectType.Plant

@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
+using Stikling.Core.Today;
 
 namespace Stikling.Web.Services;
 
@@ -13,8 +14,8 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
             .GroupBy(e => e.SubjectId)
             .ToDictionary(g => g.Key, g => g.First());
 
-    public async Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count) =>
-        TimelineOrder.NewestFirst(await db.GetAllAsync<TimelineEntry>(Stores.Timeline)).Take(count).ToList();
+    public async Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds) =>
+        TodayBoard.RecentActivity(await db.GetAllAsync<TimelineEntry>(Stores.Timeline), subjectIds, count);
 
     public async Task AddAsync(TimelineEntry entry)
     {

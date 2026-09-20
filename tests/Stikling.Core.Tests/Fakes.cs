@@ -3,6 +3,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
 using Stikling.Core.Timeline;
+using Stikling.Core.Today;
 
 namespace Stikling.Core.Tests;
 
@@ -99,8 +100,8 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
         Task.FromResult<IReadOnlyDictionary<Guid, TimelineEntry>>(
             TimelineOrder.NewestFirst(Entries).GroupBy(e => e.SubjectId).ToDictionary(g => g.Key, g => g.First()));
 
-    public Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count) =>
-        Task.FromResult<IReadOnlyList<TimelineEntry>>(TimelineOrder.NewestFirst(Entries).Take(count).ToList());
+    public Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds) =>
+        Task.FromResult(TodayBoard.RecentActivity(Entries, subjectIds, count));
 
     public Task AddAsync(TimelineEntry entry)
     {
