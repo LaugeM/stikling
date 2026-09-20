@@ -40,9 +40,16 @@ public static class TodayBoard
             .ToList();
     }
 
-    /// <summary>The newest entries across every plant and propagation.</summary>
-    public static IReadOnlyList<TimelineEntry> RecentActivity(IEnumerable<TimelineEntry> entries, int count = 8) =>
-        Timeline.TimelineOrder.NewestFirst(entries).Take(count).ToList();
+    /// <summary>
+    /// The newest entries across the given plants and propagations. Anything written down about a
+    /// subject that has since been deleted is left out, so the list only shows what you can open.
+    /// </summary>
+    public static IReadOnlyList<TimelineEntry> RecentActivity(
+        IEnumerable<TimelineEntry> entries, IReadOnlySet<Guid> subjectIds, int count = 8) =>
+        Timeline.TimelineOrder.NewestFirst(entries)
+            .Where(e => subjectIds.Contains(e.SubjectId))
+            .Take(count)
+            .ToList();
 
     /// <summary>Days since the last backup, or null when there hasn't been one.</summary>
     public static int? DaysSinceBackup(DateOnly? lastBackup, DateOnly today) =>

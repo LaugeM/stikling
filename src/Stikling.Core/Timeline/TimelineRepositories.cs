@@ -10,8 +10,11 @@ public interface ITimelineRepository
     /// <summary>The newest entry per subject, for "last activity" in lists.</summary>
     Task<IReadOnlyDictionary<Guid, TimelineEntry>> GetLatestPerSubjectAsync();
 
-    /// <summary>The newest entries across everything, for the activity list on Today.</summary>
-    Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count);
+    /// <summary>
+    /// The newest entries for these subjects, for the activity list on Today. Deleted plants and
+    /// propagations are left out by passing only the ones that are still there.
+    /// </summary>
+    Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds);
 
     Task AddAsync(TimelineEntry entry);
 

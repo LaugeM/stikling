@@ -70,11 +70,40 @@ public class TodayBoardTests
     public void Recent_activity_is_newest_first_and_limited()
     {
         var entries = Enumerable.Range(1, 12).Select(i => Entry(Guid.NewGuid(), i)).ToList();
+        var subjects = entries.Select(e => e.SubjectId).ToHashSet();
 
-        var recent = TodayBoard.RecentActivity(entries, 5);
+        var recent = TodayBoard.RecentActivity(entries, subjects, 5);
 
         Assert.Equal(5, recent.Count);
         Assert.Equal(entries[0].Id, recent[0].Id);
+    }
+
+    [Fact]
+    public void Recent_activity_leaves_out_entries_from_deleted_subjects()
+    {
+        var kept = Guid.NewGuid();
+        var gone = Guid.NewGuid();
+        var entries = new List<TimelineEntry> { Entry(gone, 1), Entry(kept, 2), Entry(gone, 3) };
+
+        var recent = TodayBoard.RecentActivity(entries, new HashSet<Guid> { kept });
+
+        var entry = Assert.Single(recent);
+        Assert.Equal(kept, entry.SubjectId);
+    }
+
+    [Fact]
+    public void Recent_activity_fills_up_from_what_is_left()
+    {
+        var kept = Guid.NewGuid();
+        var gone = Guid.NewGuid();
+        var entries = Enumerable.Range(1, 12)
+            .Select(i => Entry(i <= 4 ? gone : kept, i))
+            .ToList();
+
+        var recent = TodayBoard.RecentActivity(entries, new HashSet<Guid> { kept }, 5);
+
+        Assert.Equal(5, recent.Count);
+        Assert.All(recent, e => Assert.Equal(kept, e.SubjectId));
     }
 
     [Theory]
