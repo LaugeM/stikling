@@ -3,6 +3,7 @@
 @inject IPlantRepository Repository
 @inject IPropagationRepository Propagations
 @inject IPotRepository PotRepository
+@inject ISoilMixRepository MixRepository
 @inject PlantService PlantService
 @inject PhotoService Photos
 @inject NavigationManager Navigation
@@ -121,6 +122,10 @@ else
             </div>
 
             <div class="mb-3">
+                <MixPicker @bind-Value="plant.SoilMixId" Mixes="mixes" />
+            </div>
+
+            <div class="mb-3">
                 <PotPicker @bind-Value="plant.InnerPotId" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
                 @if (OldPotText is { } noted)
                 {
@@ -236,6 +241,7 @@ else
     private IReadOnlyList<Plant> possibleParents = [];
     private IReadOnlyList<Room> rooms = [];
     private IReadOnlyList<Pot> pots = [];
+    private IReadOnlyList<SoilMix> mixes = [];
 
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
     private static readonly PotGroup[] OuterSlot = [PotGroup.Outer];
@@ -249,6 +255,8 @@ else
             : null;
 
     private string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
+
+    private string? MixName(Guid id) => mixes.FirstOrDefault(m => m.Id == id)?.Name;
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
 
@@ -271,6 +279,7 @@ else
         var all = await Repository.GetAllAsync();
         rooms = Room.List(all, await Propagations.GetAllAsync());
         pots = await PotRepository.GetAllAsync();
+        mixes = await MixRepository.GetAllAsync();
 
         if (IsNew)
         {
@@ -378,7 +387,7 @@ else
             }
             else
             {
-                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName);
+                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName);
             }
             Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
         }

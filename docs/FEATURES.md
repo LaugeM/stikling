@@ -207,18 +207,19 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 
 ## 5c. Soil mixes
 
-Most people mix their own soil instead of using it straight from the bag. This is for keeping track of what is actually in it. The first five rows are really one feature and should be built together.
+Most people mix their own soil instead of using it straight from the bag. This is for keeping track of what is actually in it, including the mixes you never measured.
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | **Your mixes**: save a mix under a name ("aroid mix", "seedling mix", "cactus mix") | 5 | M | v1.x |
-| ☐ | What a mix is made of, as percentages: potting soil, perlite, LECA, bark, pumice, coco coir, sphagnum, worm castings, sand, charcoal. The app adds them up and says when they don't reach 100% | 5 | S | v1.x |
-| ☐ | Add your own ingredient if something isn't on the list | 5 | S | v1.x |
-| ☐ | Pick a mix when adding a plant or potting up, instead of typing the medium by hand. The plant page shows which mix it's in | 5 | M | v1.x |
-| ☐ | Editing a mix doesn't rewrite history: a plant keeps the recipe as it was on the day it was potted | 5 | M | v1.x |
-| ☐ | See which plants are in a given mix, so a mix that isn't working shows up | 7 | S | v1.x |
+| ✅ | **Your mixes**: save a mix under a name ("aroid mix", "seedling mix", "cactus mix") | 5 | M | v1.x |
+| ✅ | What a mix is made of, in the order you mix it, most of first. Amounts are optional and can be parts or percent, and percentages are added up with a note when they don't reach 100% | 5 | S | v1.x |
+| ✅ | Add your own ingredient if something isn't on the list | 5 | S | v1.x |
+| ✅ | Pick a mix when adding a plant or potting up, instead of typing the medium by hand. The plant page shows which mix it's in, and what's in it | 5 | M | v1.x |
+| ◐ | Editing a mix that plants are already in says so first, and offers to save the edit as a new mix instead, dated so the versions read in order. A plant still points at the mix rather than keeping its own copy of the recipe, so a mix can also be marked as no longer mixed to keep it off the picker | 5 | M | v1.x |
+| ◐ | The mixes list says how many plants are in each mix. Tapping through to those plants isn't built | 7 | S | v1.x |
 | ☐ | Use a mix on a propagation too, for the ones that go straight into soil | 7 | S | v1.x |
 | ☐ | Batch calculator: pick a mix and a volume, and get how much of each ingredient to measure out | 7 | S | v1.x |
+| ☐ | **Batches**: mix a dated batch from a recipe and top it up as it runs low, so a plant can point at the batch it was actually potted in rather than the recipe | 8 | L | v1.x |
 | ☐ | Mixing a batch takes the ingredients off the supplies stock | 8 | M | v1.x |
 
 ## 5d. Fertiliser mixes

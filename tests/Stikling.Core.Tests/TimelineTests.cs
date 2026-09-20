@@ -116,6 +116,17 @@ public class PlantChangesTests
             ["No longer in an outer pot", "No longer watered in the outer pot"],
             PlantChanges.Describe(before, edited, Label));
     }
+
+    [Fact]
+    public void Moving_a_plant_into_a_saved_mix_is_written_down()
+    {
+        var edited = Original.Copy();
+        edited.SoilMixId = Guid.NewGuid();
+
+        Assert.Equal(
+            ["Now in Chunky soil"],
+            PlantChanges.Describe(Original, edited, Label, mixName: _ => "Chunky soil"));
+    }
 }
 
 public class TimelineOrderTests

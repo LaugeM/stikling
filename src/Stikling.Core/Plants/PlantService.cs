@@ -47,11 +47,12 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Plant before,
         Plant after,
         Func<Enum, string> label,
-        Func<Guid, string?>? potName = null)
+        Func<Guid, string?>? potName = null,
+        Func<Guid, string?>? mixName = null)
     {
         await plants.SaveAsync(after);
 
-        var changes = PlantChanges.Describe(before, after, label, potName);
+        var changes = PlantChanges.Describe(before, after, label, potName, mixName);
         if (changes.Count > 0)
             await AddChangeAsync(after.Id, string.Join("\n", changes));
     }

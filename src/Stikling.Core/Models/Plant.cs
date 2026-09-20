@@ -45,6 +45,9 @@ public sealed class Plant : Entity
     /// </summary>
     public bool WaterInOuterPot { get; set; }
 
+    /// <summary>The soil mix it was potted in, when it is one you have saved.</summary>
+    public Guid? SoilMixId { get; set; }
+
     public string? Notes { get; set; }
 
     public Guid? CoverPhotoId { get; set; }

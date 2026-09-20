@@ -3,6 +3,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
 using Stikling.Core.Propagations;
+using Stikling.Core.SoilMixes;
 using Stikling.Core.Timeline;
 using Stikling.Core.Today;
 
@@ -149,6 +150,32 @@ internal sealed class FakePotRepository : IPotRepository
     {
         if (Pots.TryGetValue(id, out var pot))
             pot.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeSoilMixRepository : ISoilMixRepository
+{
+    public Dictionary<Guid, SoilMix> Mixes { get; } = [];
+
+    public Task<IReadOnlyList<SoilMix>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<SoilMix>>(Mixes.Values.Where(m => !m.IsDeleted).ToList());
+
+    public Task<SoilMix?> GetAsync(Guid id) =>
+        Task.FromResult(Mixes.TryGetValue(id, out var mix) && !mix.IsDeleted ? mix : null);
+
+    public Task SaveAsync(SoilMix mix)
+    {
+        if (mix.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid mix");
+        Mixes[mix.Id] = mix;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Mixes.TryGetValue(id, out var mix))
+            mix.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }

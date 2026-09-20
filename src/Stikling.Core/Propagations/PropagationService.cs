@@ -11,7 +11,8 @@ public sealed record PotUpRequest(
     string? Nickname = null,
     string? Location = null,
     GrowingMedium Medium = GrowingMedium.Soil,
-    Guid? PotId = null);
+    Guid? PotId = null,
+    Guid? SoilMixId = null);
 
 /// <summary>
 /// Propagation operations that keep the counts, the new plants and the history of both in step.
@@ -108,6 +109,7 @@ public sealed class PropagationService(
             Location = Clean(request.Location),
             Medium = request.Medium,
             InnerPotId = request.PotId,
+            SoilMixId = request.SoilMixId,
             ParentPlantId = propagation.ParentPlantId,
             FromPropagationId = propagation.Id
         }).ToList();

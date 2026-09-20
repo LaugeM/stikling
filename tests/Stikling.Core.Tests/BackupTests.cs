@@ -121,11 +121,12 @@ public class BackupTests
             Photos = [new Photo(), new Photo()],
             PestCases = [new PestCase(), goneCase],
             PestTreatments = [new PestTreatment()],
-            Pots = [new Pot { Name = "Clear nursery pot" }]
+            Pots = [new Pot { Name = "Clear nursery pot" }],
+            SoilMixes = [new SoilMix { Name = "Chunky soil" }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -158,5 +159,29 @@ public class BackupTests
         Assert.Equal(6, restored.Owned);
         Assert.Equal(13, restored.TopCm);
         Assert.Equal(1, merged.Updated);
+    }
+
+    [Fact]
+    public void A_mix_and_the_order_of_its_ingredients_survive_a_restore()
+    {
+        var id = Guid.NewGuid();
+        var mine = new SoilMix { Id = id, Name = "Chunky soil", UpdatedAt = Now.AddDays(-3) };
+        var theirs = new SoilMix
+        {
+            Id = id,
+            Name = "Chunky soil",
+            UpdatedAt = Now,
+            Ingredients =
+            [
+                new MixIngredient { Name = "Potting soil" },
+                new MixIngredient { Name = "Bark" },
+                new MixIngredient { Name = "Perlite" }
+            ]
+        };
+
+        var merged = BackupMerge.Merge([mine], [theirs]);
+
+        var restored = Assert.Single(merged.ToSave);
+        Assert.Equal(["Potting soil", "Bark", "Perlite"], restored.Ingredients.Select(i => i.Name));
     }
 }

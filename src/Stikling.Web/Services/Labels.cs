@@ -1,6 +1,7 @@
 using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Pots;
+using Stikling.Core.SoilMixes;
 
 namespace Stikling.Web.Services;
 
@@ -108,6 +109,7 @@ public static class Labels
         PotGroup g => For(g),
         PotMaterial m => For(m),
         PotWatering w => For(w),
+        MixUnit u => For(u),
         _ => value.ToString()
     };
 
@@ -195,4 +197,15 @@ public static class Labels
         { Free: 0 } => use.Owned == 1 ? "in use" : $"all {use.Owned} in use",
         _ => $"{use.InUse} of {use.Owned} in use, {use.Free} free"
     };
+
+    public static string For(MixUnit unit) => unit switch
+    {
+        MixUnit.Parts => "Parts",
+        MixUnit.Percent => "Percent",
+        _ => "No amounts"
+    };
+
+    /// <summary>Said under the ingredients when the percentages do not reach 100. Never blocks a save.</summary>
+    public static string PercentTotal(decimal total) =>
+        $"That adds up to {SoilMix.Number(total)}%, not 100%. You can still save it.";
 }

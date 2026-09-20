@@ -4,6 +4,7 @@
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject IPotRepository PotRepository
+@inject ISoilMixRepository MixRepository
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
@@ -182,6 +183,15 @@ else
                                 Standing in @outer@(plant.WaterInOuterPot ? ", with water kept in it" : "")
                             </div>
                         }
+
+                        @if (Mix is { } mix)
+                        {
+                            <div class="detail-sub">In @mix.Name@(mix.IsRetired ? " (no longer mixed)" : "")</div>
+                            @if (!string.IsNullOrWhiteSpace(mix.Recipe))
+                            {
+                                <div class="detail-sub">@mix.Recipe</div>
+                            }
+                        }
                     </dd>
                 </dl>
 
@@ -299,6 +309,9 @@ else
     private MoistureReading? moisture;
     private IReadOnlyList<PestCase> pests = [];
     private IReadOnlyList<Pot> pots = [];
+    private IReadOnlyList<SoilMix> mixes = [];
+
+    private SoilMix? Mix => plant?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id) : null;
 
     private string? PotName(Guid? id) =>
         id is { } potId ? pots.FirstOrDefault(p => p.Id == potId)?.DisplayName : null;
@@ -325,6 +338,7 @@ else
 
             pests = PestService.CasesFor(plant, await PestCaseRepository.GetAllAsync());
             pots = await PotRepository.GetAllAsync();
+            mixes = await MixRepository.GetAllAsync();
 
             await ReloadCareAsync();
         }

@@ -3,6 +3,7 @@
 @inject ThemeService Theme
 @inject RoomService RoomService
 @inject PotService PotService
+@inject SoilMixService MixService
 @inject BackupService Backup
 @inject DeviceFiles Files
 @inject IndexedDb Db
@@ -101,6 +102,19 @@
     </div>
 </section>
 
+<section class="settings-section">
+    <h2>Soil mixes</h2>
+    <p class="settings-hint">
+        The mixes you make yourself, saved under a name, so a plant can say what it is actually
+        potted in. Amounts are optional.
+    </p>
+
+    <div class="room-row">
+        <span class="room-name">@MixSummary</span>
+        <a class="btn btn-link btn-sm p-0" href="soil-mixes">Manage mixes</a>
+    </div>
+</section>
+
 
 <section class="settings-section">
     <h2>Backup</h2>
@@ -136,8 +150,9 @@
                 @Labels.Count(file.Data.Counts.Entries, "history entry", "history entries"),
                 @Labels.Count(file.Data.Counts.Photos, "photo"),
                 @Labels.Count(file.Data.Counts.CareEntries, "care entry", "care entries"),
-                @Labels.Count(file.Data.Counts.PestCases, "pest case") and
-                @Labels.Count(file.Data.Counts.Pots, "pot").
+                @Labels.Count(file.Data.Counts.PestCases, "pest case"),
+                @Labels.Count(file.Data.Counts.Pots, "pot") and
+                @Labels.Count(file.Data.Counts.SoilMixes, "soil mix", "soil mixes").
             </p>
             <p class="settings-hint">
                 Restoring adds what's missing here and brings back anything you've deleted since.
@@ -196,6 +211,7 @@
     private ThemeMode mode;
     private IReadOnlyList<Room> rooms = [];
     private IReadOnlyList<PotUse> pots = [];
+    private IReadOnlyList<MixUse> mixes = [];
     private string? renaming; // the whole place being renamed, e.g. "Living room / On top of the PC"
     private string? roomMessage;
     private DateOnly? lastBackup;
@@ -214,6 +230,7 @@
         storage = await Db.EstimateAsync();
         rooms = await RoomService.GetAllAsync();
         pots = await PotService.GetAllAsync();
+        mixes = await MixService.GetAllAsync();
     }
 
     /// <summary>"6 pots, 2 free", for the line linking to the pot library.</summary>
@@ -221,6 +238,15 @@
         pots.Count == 0
             ? "No pots registered yet"
             : $"{Labels.Count(pots.Sum(p => p.Owned), "pot")}, {pots.Sum(p => p.Free)} free";
+
+    /// <summary>"3 mixes, 1 no longer made", for the line linking to the soil mixes.</summary>
+    private string MixSummary => mixes.Count switch
+    {
+        0 => "No mixes saved yet",
+        _ when mixes.Any(m => m.Mix.IsRetired) =>
+            $"{Labels.Count(mixes.Count, "mix", "mixes")}, {mixes.Count(m => m.Mix.IsRetired)} no longer mixed",
+        var count => Labels.Count(count, "mix", "mixes")
+    };
 
     /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
     private static string Held(int plants, int propagations) => (plants, propagations) switch

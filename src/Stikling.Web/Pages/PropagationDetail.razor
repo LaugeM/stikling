@@ -2,6 +2,7 @@
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
 @inject IPotRepository PotRepository
+@inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
@@ -86,6 +87,9 @@ else
                             <option value="@medium">@Labels.For(medium)</option>
                         }
                     </select>
+                </div>
+                <div class="mb-2">
+                    <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
                 </div>
                 <div class="mb-2">
                     <PotPicker @bind-Value="potUp.PotId" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
@@ -275,6 +279,7 @@ else
         public string? Location { get; set; }
         public GrowingMedium Medium { get; set; }
         public Guid? PotId { get; set; }
+        public Guid? SoilMixId { get; set; }
     }
 
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
@@ -287,6 +292,7 @@ else
     private IReadOnlyList<Plant> offspring = [];
     private IReadOnlyList<Room> rooms = [];
     private IReadOnlyList<Pot> pots = [];
+    private IReadOnlyList<SoilMix> mixes = [];
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
     private bool loaded;
@@ -341,6 +347,7 @@ else
                           .ToList();
         rooms = Room.List(plants, propagations);
         pots = await PotRepository.GetAllAsync();
+        mixes = await MixRepository.GetAllAsync();
     }
 
     private void SetTab(string value) =>
@@ -393,7 +400,7 @@ else
         try
         {
             madePlants = await PropagationService.PotUpAsync(propagation, new PotUpRequest(
-                potUp.Count, potUp.Date, potUp.Nickname, potUp.Location, potUp.Medium, potUp.PotId));
+                potUp.Count, potUp.Date, potUp.Nickname, potUp.Location, potUp.Medium, potUp.PotId, potUp.SoilMixId));
             message = madePlants.Count == 1 ? "Potted up:" : $"Potted up {madePlants.Count}:";
             panel = Panel.None;
             await LoadAsync();
