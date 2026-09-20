@@ -188,6 +188,22 @@ Most people mix their own soil instead of using it straight from the bag. This i
 | ☐ | Batch calculator: pick a mix and a volume, and get how much of each ingredient to measure out | 7 | S | v1.x |
 | ☐ | Mixing a batch takes the ingredients off the supplies stock | 8 | M | v1.x |
 
+## 5d. Fertiliser mixes
+
+Most feeds are more than one bottle. A fertiliser, then a rooting or growth stimulant, and often silica for the exotics so the leaf tips don't go brown. This is for saving what goes in the water and in what order, and builds on the products in the care log.
+
+| ✓ | Feature | Priority | Effort | When |
+|---|---|---|---|---|
+| ☐ | **Your feeds**: save a mix of products under a name ("weekly aroid feed", "rooting water"), each product with its own dose per litre | 5 | M | v1.x |
+| ☐ | Several products in one feed: fertiliser, rooting or growth stimulant, silica, cal-mag, pH down. Anything not on the list can be added as your own product | 5 | S | v1.x |
+| ☐ | The mix keeps the order the products go in the water, since silica has to go in first and be stirred before anything else | 5 | S | v1.x |
+| ☐ | Log a feed by picking the mix and the amount of water. The care entry saves each product and dose as it was that day, so changing the mix doesn't rewrite history | 5 | M | v1.x |
+| ☐ | Batch calculator: pick a mix and a water volume, and get how much of each product to measure out | 6 | S | v1.x |
+| ☐ | See which plants got a given feed and when, so a mix that isn't working shows up | 7 | S | v1.x |
+| ☐ | A different mix for propagations, e.g. quarter strength with a rooting stimulant | 7 | S | v1.x |
+| ☐ | EC and pH reading on a feed, for the semi-hydro reservoirs | 8 | S | v1.x |
+| ☐ | Mixing a feed takes the products off the supplies stock | 8 | M | v1.x |
+
 ## 6. Today screen
 
 | ✓ | Feature | Priority | Effort | When |
@@ -255,9 +271,3 @@ Most people mix their own soil instead of using it straight from the bag. This i
 - End-to-end tests with Playwright in CI (add a plant, promote a propagation, export/import).
 - Lighthouse audit in CI (PWA, accessibility, performance) with a badge in the README.
 
----
-
-## Questions for you
-
-1. **Experiments:** now that the corm test is grouped on the propagations list, is that enough, or is a page of its own worth it later?
-2. **Anything missing?** Things you do with your plants that aren't on this list.
