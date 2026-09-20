@@ -60,3 +60,10 @@
 .plant-list {
     padding-bottom: 5rem;
 }
+
+/* Narrowing to a spot once a room is picked */
+.spot-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}

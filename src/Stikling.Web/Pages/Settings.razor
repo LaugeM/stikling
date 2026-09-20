@@ -1,6 +1,7 @@
 @page "/settings"
 @implements IDisposable
 @inject ThemeService Theme
+@inject RoomService RoomService
 @inject BackupService Backup
 @inject DeviceFiles Files
 @inject IndexedDb Db
@@ -22,6 +23,68 @@
         }
     </div>
     <p class="settings-hint">"Match system" follows your phone or computer's light/dark setting.</p>
+</section>
+
+<section class="settings-section">
+    <h2>Rooms</h2>
+    <p class="settings-hint">
+        Rooms come from where your plants and propagations are. Renaming one here changes it everywhere,
+        and renaming it to a name you already use merges the two.
+    </p>
+
+    @if (rooms.Count == 0)
+    {
+        <p class="settings-hint">No rooms yet. They appear as you place plants.</p>
+    }
+    else
+    {
+        <ul class="room-list">
+            @foreach (var r in rooms)
+            {
+                <li>
+                    @if (renaming == r.Name)
+                    {
+                        <RoomRenameRow Name="@r.Name" Busy="busy" OnSave="name => RenameAsync(r.Name, name)" OnCancel="StopRenaming" />
+                    }
+                    else
+                    {
+                        <div class="room-row">
+                            <span class="room-name">@r.Name</span>
+                            <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
+                            <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                    @onclick="() => renaming = r.Name">Rename</button>
+                        </div>
+                    }
+
+                    @foreach (var spot in r.Spots)
+                    {
+                        <div class="room-spot">
+                            @if (renaming == spot.Place)
+                            {
+                                <RoomRenameRow Name="@spot.Name" Busy="busy"
+                                               OnSave="name => RenameAsync(spot.Place, RoomName.Combine(r.Name, name))"
+                                               OnCancel="StopRenaming" />
+                            }
+                            else
+                            {
+                                <div class="room-row">
+                                    <span class="room-name">@spot.Name</span>
+                                    <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
+                                    <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                            @onclick="() => renaming = spot.Place">Rename</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (roomMessage is not null)
+    {
+        <p class="settings-message" role="status">@roomMessage</p>
+    }
 </section>
 
 <section class="settings-section">
@@ -114,6 +177,9 @@
     private sealed record PendingRestore(string Name, BackupData Data, MemoryStream Zip);
 
     private ThemeMode mode;
+    private IReadOnlyList<Room> rooms = [];
+    private string? renaming; // the whole place being renamed, e.g. "Living room / On top of the PC"
+    private string? roomMessage;
     private DateOnly? lastBackup;
     private StorageEstimate? storage;
     private PendingRestore? pending;
@@ -128,6 +194,45 @@
         mode = await Theme.GetModeAsync();
         lastBackup = await Files.GetLastBackupAsync();
         storage = await Db.EstimateAsync();
+        rooms = await RoomService.GetAllAsync();
+    }
+
+    /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
+    private static string Held(int plants, int propagations) => (plants, propagations) switch
+    {
+        (0, 0) => "empty",
+        (_, 0) => Labels.Plants(plants),
+        (0, _) => Labels.Count(propagations, "propagation"),
+        _ => $"{Labels.Plants(plants)}, {Labels.Count(propagations, "propagation")}"
+    };
+
+    private void StopRenaming()
+    {
+        renaming = null;
+        roomMessage = null;
+    }
+
+    private async Task RenameAsync(string from, string? to)
+    {
+        busy = true;
+        try
+        {
+            var result = await RoomService.RenameAsync(from, to);
+            rooms = await RoomService.GetAllAsync();
+            roomMessage = (result.Total, result.Merged) switch
+            {
+                (0, _) => $"Nothing was in {from}, so there was nothing to rename.",
+                (_, true) => $"{Held(result.Plants, result.Propagations)} moved into {result.Name}, which you were already using.",
+                _ => $"Renamed to {result.Name}, with {Held(result.Plants, result.Propagations)} in it."
+            };
+            renaming = null;
+        }
+        catch (Exception ex)
+        {
+            roomMessage = $"Couldn't rename: {ex.Message}";
+        }
+
+        busy = false;
     }
 
     private async Task SetModeAsync(ThemeMode newMode)

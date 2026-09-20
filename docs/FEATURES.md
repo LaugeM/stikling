@@ -34,7 +34,7 @@ In the order I would build them. Pests come first because thrips are the problem
 3. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
 4. **Products and doses on a care entry.** The care log is in, so "Hydro fertiliser, 2 ml/L" only needs somewhere to keep the products.
 5. **Import old photos with their dates**, so a plant's history can start before the app did.
-6. **Pot suggestions** in the pot field, the same way rooms are already suggested.
+6. **Pot suggestions** in the pot field, picked from the pots already used, the way rooms are.
 7. **Correct or hide a timeline entry.** Left over from M3.
 
 ### Cheap ones to slot in whenever
@@ -50,6 +50,8 @@ These need no new storage and no new screens worth the name: counts on the Today
 | ✅ | Add, edit and delete plants: nickname, genus, species, cultivar, location, origin, date, source, medium, pot, notes | 1 | M | M2 |
 | ✅ | Status: in collection, died, given away, sold. Gone plants are hidden but keep their history | 1 | S | M2 |
 | ✅ | Search on all name fields; filter by status and room | 1 | S | M2 |
+| ✅ | Pick a room from the ones already used instead of typing it again, so the same room never gets two names | 1 | S | v1.x |
+| ✅ | Spots inside a room, e.g. "Living room / On top of the PC". Filtering by the room includes its spots | 2 | M | v1.x |
 | ✅ | Parent plant and offspring, "Add offspring" | 1 | M | M2 |
 | ✅ | Cover photo on cards and the plant page | 1 | S | M3 |
 | ✅ | Add a photo while adding the plant, not only afterwards. The first one becomes the cover | 2 | S | M4 |
@@ -239,6 +241,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Export everything to a ZIP (data + photos) and import it again | 1 | L | M5 |
 | ✅ | Ask the browser for persistent storage; show storage used | 1 | S | M5 |
 | ✅ | Backup reminder ("last backup 30 days ago") | 2 | S | M5 |
+| ✅ | Rooms list in Settings: rename a room or a spot everywhere at once, and merge two names for the same room | 2 | M | v1.x |
 | ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
 | ☐ | "What's new" page and app version in Settings | 5 | S | v1.x |
 | ☐ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |

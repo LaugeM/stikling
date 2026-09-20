@@ -1,6 +1,7 @@
 @page "/plants/new"
 @page "/plants/{Id:guid}/edit"
 @inject IPlantRepository Repository
+@inject IPropagationRepository Propagations
 @inject PlantService PlantService
 @inject PhotoService Photos
 @inject NavigationManager Navigation
@@ -106,14 +107,7 @@ else
         <fieldset>
             <legend>Where it lives</legend>
             <div class="mb-3">
-                <label class="form-label" for="location">Location</label>
-                <InputText id="location" class="form-control" @bind-Value="plant.Location" list="location-list" placeholder="e.g. Living room" autocomplete="off" />
-                <datalist id="location-list">
-                    @foreach (var l in locations)
-                    {
-                        <option value="@l"></option>
-                    }
-                </datalist>
+                <RoomPicker @bind-Value="plant.Location" Rooms="rooms" />
             </div>
             <div class="row g-2 mb-3">
                 <div class="col-6">
@@ -222,7 +216,7 @@ else
     private bool saving;
     private List<string> errors = [];
     private IReadOnlyList<Plant> possibleParents = [];
-    private IReadOnlyList<string> locations = [];
+    private IReadOnlyList<Room> rooms = [];
 
     private bool IsNew => Id is null;
 
@@ -233,7 +227,7 @@ else
     protected override async Task OnParametersSetAsync()
     {
         var all = await Repository.GetAllAsync();
-        locations = PlantFilter.Locations(all);
+        rooms = Room.List(all, await Propagations.GetAllAsync());
 
         if (IsNew)
         {

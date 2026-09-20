@@ -1,0 +1,45 @@
+@* One room or spot being renamed in the Settings list. *@
+
+<div class="room-rename">
+    <input class="form-control form-control-sm" aria-label="New name for @Name" autocomplete="off"
+           value="@draft" @oninput="Type" @ref="input" />
+    <button type="button" class="btn btn-primary btn-sm" disabled="@(Busy || string.IsNullOrWhiteSpace(draft))"
+            @onclick="() => OnSave.InvokeAsync(draft)">Save</button>
+    <button type="button" class="btn btn-link btn-sm" disabled="@Busy" @onclick="OnCancel">Cancel</button>
+</div>
+
+@code {
+    /// <summary>The name as it stands, which is what the box starts with.</summary>
+    [Parameter]
+    public string Name { get; set; } = "";
+
+    [Parameter]
+    public bool Busy { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private string draft = "";
+    private string? started; // the name the box was filled from, so typing survives a redraw
+    private ElementReference input;
+
+    protected override void OnParametersSet()
+    {
+        if (started == Name)
+            return;
+
+        started = Name;
+        draft = Name;
+    }
+
+    private void Type(ChangeEventArgs e) => draft = e.Value?.ToString() ?? "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await input.FocusAsync();
+    }
+}

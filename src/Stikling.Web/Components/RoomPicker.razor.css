@@ -1,0 +1,10 @@
+.room-picker .form-label {
+    margin-bottom: 0.35rem;
+}
+
+/* The spots sit under their room, indented enough to read as part of it */
+.room-chips.spots {
+    margin-top: 0.4rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--pa-border);
+}
