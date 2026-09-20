@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-20T00:00:00.000Z",
+  "title": "Design System: Stikling",
+  "extensions": {
+    "colorMeta": {
+      "potting-green": {
+        "role": "primary",
+        "displayName": "Potting Green",
+        "canonical": "#2f7d4f",
+        "dark": "#5fb883",
+        "tonalRamp": ["#0a1f13", "#12331f", "#1b4a2d", "#25643c", "#2f7d4f", "#5a9c74", "#8fc2a4", "#e6f2ea"]
+      },
+      "deep-moss": {
+        "role": "primary",
+        "displayName": "Deep Moss",
+        "canonical": "#1f5a37",
+        "dark": "#86d1a4",
+        "tonalRamp": ["#07170e", "#0d2a1a", "#143f27", "#1a4d30", "#1f5a37", "#3d7c56", "#74a88c", "#d7e8de"]
+      },
+      "leaf-tint": {
+        "role": "primary",
+        "displayName": "Leaf Tint",
+        "canonical": "#e6f2ea",
+        "dark": "#1f3327",
+        "tonalRamp": ["#0f2418", "#173726", "#215034", "#2d6b46", "#55926f", "#8fbfa4", "#c2dfd0", "#e6f2ea"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#f6f7f4",
+        "dark": "#121814",
+        "tonalRamp": ["#121814", "#1a221d", "#2c3830", "#485349", "#6e7a70", "#9aa89f", "#d3dad2", "#f6f7f4"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#ffffff",
+        "dark": "#1a221d",
+        "tonalRamp": ["#141a16", "#1a221d", "#2c3830", "#4a564d", "#79857c", "#a8b3aa", "#dde3dc", "#ffffff"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "canonical": "#dde3dc",
+        "dark": "#2c3830",
+        "tonalRamp": ["#111714", "#1b231d", "#2c3830", "#3f4c43", "#5f6b63", "#8b978f", "#c0c9bf", "#dde3dc"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1d2520",
+        "dark": "#e3e9e4",
+        "tonalRamp": ["#0a0e0c", "#121815", "#1d2520", "#2c3830", "#4a564d", "#79857c", "#b5bfb8", "#e3e9e4"]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#5f6b63",
+        "dark": "#9aa89f",
+        "tonalRamp": ["#0f1411", "#1a211c", "#2a332d", "#3f4a43", "#5f6b63", "#8b978f", "#b9c2bb", "#e0e5e1"]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The page title, one per screen. Also the plant or propagation name on a detail page, where it wraps rather than truncating."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card headings, form fieldset legends, the heading inside an action panel."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Everything read as prose. Notes preserve their line breaks."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "The section marker, uppercase and muted. Groupings on Today, stage groups, subheadings in a detail card, timeline date headings."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Supporting lines. The species line under a plant name is set in italic here."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-action",
+        "value": "0 4px 12px rgb(0 0 0 / 0.25)",
+        "purpose": "The round add button, which hovers over scrolling content."
+      },
+      {
+        "name": "anchored-bar",
+        "value": "0 -4px 12px rgb(0 0 0 / 0.08)",
+        "purpose": "Bars pinned above the bottom navigation: the update banner and the bulk action bar. Points upward because the bar sits below the content it covers."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 0.2rem rgb(47 125 79 / 0.25)",
+        "purpose": "Every focused input and control. A state rather than elevation, and never to be removed."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "48rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The committing action on a screen: save, add, promote.",
+      "html": "<button class=\"ds-btn-primary\">Save plant</button>",
+      "css": ".ds-btn-primary { background: var(--pa-green, #2f7d4f); color: #fff; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; padding: 0.375rem 0.75rem; border: 1px solid var(--pa-green, #2f7d4f); border-radius: 0.375rem; cursor: pointer; transition: background 0.15s ease-in-out, border-color 0.15s ease-in-out; } .ds-btn-primary:hover { background: var(--pa-green-dark, #1f5a37); border-color: var(--pa-green-dark, #1f5a37); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); } .ds-btn-primary:active { background: var(--pa-green-dark, #1f5a37); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "The secondary action beside a primary one, and the default for a row of equal choices.",
+      "html": "<button class=\"ds-btn-outline\">Cancel</button>",
+      "css": ".ds-btn-outline { background: transparent; color: var(--pa-green-dark, #1f5a37); font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; padding: 0.375rem 0.75rem; border: 1px solid var(--pa-green, #2f7d4f); border-radius: 0.375rem; cursor: pointer; transition: background 0.15s ease-in-out, color 0.15s ease-in-out; } .ds-btn-outline:hover { background: var(--pa-green, #2f7d4f); color: #fff; } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); }"
+    },
+    {
+      "name": "List Row",
+      "kind": "card",
+      "refersTo": "item-card",
+      "description": "The signature component. One plant or propagation in a list: tinted thumbnail, name, italic species line, and a meta line of small facts. Every line truncates so row height never varies.",
+      "html": "<a class=\"ds-item-card\" href=\"#\"><span class=\"ds-item-thumb\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 21V11\"/><path d=\"M12 13c0-4 3-7 8-7 0 5-3 8-8 8z\"/><path d=\"M12 16c0-3-2-5-6-5 0 4 2 6 6 6z\"/></svg></span><span class=\"ds-item-text\"><span class=\"ds-item-name\">Kitchen window monstera</span><span class=\"ds-item-sub\">Monstera deliciosa</span><span class=\"ds-item-meta\">Living room · Semi-hydro · 3 props</span></span></a>",
+      "css": ".ds-item-card { display: flex; align-items: center; gap: 0.85rem; padding: 0.7rem; background: var(--pa-surface, #fff); border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.75rem; color: var(--pa-text, #1d2520); text-decoration: none; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; transition: border-color 0.15s ease-in-out; } .ds-item-card:hover, .ds-item-card:focus-visible { border-color: var(--pa-green, #2f7d4f); outline: none; } .ds-item-thumb { flex: none; width: 3.5rem; height: 3.5rem; display: grid; place-items: center; border-radius: 0.6rem; background: var(--pa-green-soft, #e6f2ea); color: var(--pa-green, #2f7d4f); } .ds-item-thumb svg { width: 1.75rem; height: 1.75rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; } .ds-item-text { min-width: 0; } .ds-item-name, .ds-item-sub, .ds-item-meta { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-item-name { font-weight: 600; } .ds-item-sub { font-style: italic; font-size: 0.875rem; color: var(--pa-muted, #5f6b63); } .ds-item-meta { margin-top: 0.15rem; font-size: 0.8rem; color: var(--pa-muted, #5f6b63); }"
+    },
+    {
+      "name": "Floating Add Button",
+      "kind": "button",
+      "refersTo": "fab",
+      "description": "The one action that is always reachable with a thumb. Fixed above the bottom navigation on list screens.",
+      "html": "<button class=\"ds-fab\" aria-label=\"Add plant\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 5v14\"/><path d=\"M5 12h14\"/></svg></button>",
+      "css": ".ds-fab { width: 3.5rem; height: 3.5rem; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--pa-green, #2f7d4f); color: #fff; box-shadow: 0 4px 12px rgb(0 0 0 / 0.25); cursor: pointer; transition: background 0.15s ease-in-out; } .ds-fab:hover, .ds-fab:focus-visible { background: var(--pa-green-dark, #1f5a37); outline: none; } .ds-fab svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": null,
+      "description": "A form field. Filled with the card colour rather than the page colour so it does not read as disabled.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search plants\" />",
+      "css": ".ds-input { width: 100%; padding: 0.375rem 0.75rem; background: var(--pa-surface, #fff); color: var(--pa-text, #1d2520); font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.375rem; } .ds-input::placeholder { color: var(--pa-muted, #5f6b63); opacity: 0.8; } .ds-input:focus { outline: none; border-color: var(--pa-green, #2f7d4f); box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); }"
+    },
+    {
+      "name": "Bottom Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link-active",
+      "description": "Four fixed destinations. Icon over label, colour and weight carry the active state with no fill, pill or indicator bar.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link active\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 11l9-7 9 7\"/><path d=\"M5 10v9h14v-9\"/></svg>Today</a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 21V11\"/><path d=\"M12 13c0-4 3-7 8-7 0 5-3 8-8 8z\"/></svg>Plants</a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M7 3v6a5 5 0 0 0 10 0V3\"/><path d=\"M12 14v7\"/></svg>Props</a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M12 3v2m0 14v2M3 12h2m14 0h2\"/></svg>Settings</a></nav>",
+      "css": ".ds-nav { display: flex; justify-content: space-around; background: var(--pa-surface, #fff); border-top: 1px solid var(--pa-border, #dde3dc); } .ds-nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; min-height: 3.5rem; font: 400 0.75rem/1.2 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--pa-muted, #5f6b63); text-decoration: none; } .ds-nav-link.active { color: var(--pa-green-dark, #1f5a37); font-weight: 600; } .ds-nav-link:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); } .ds-nav-link svg { width: 1.5rem; height: 1.5rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }"
+    },
+    {
+      "name": "Stage Badge",
+      "kind": "chip",
+      "refersTo": "stage-badge",
+      "description": "A propagation stage or the latest moisture reading. Tinted rather than filled, so it states a fact without shouting.",
+      "html": "<span class=\"ds-badge\">Rooting</span>",
+      "css": ".ds-badge { display: inline-block; padding: 0.35em 0.65em; background: var(--pa-green-soft, #e6f2ea); color: var(--pa-green-dark, #1f5a37); font: 600 0.875rem/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; border-radius: 0.6rem; }"
+    },
+    {
+      "name": "Timeline Entry",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "One record on a plant or propagation history. The kind is named in words and carries a stroked icon, accented for something a person wrote and muted for something the app recorded itself.",
+      "html": "<li class=\"ds-entry\"><span class=\"ds-entry-head\"><span class=\"ds-entry-kind\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z\"/></svg>Note</span><span>14:20</span></span><p class=\"ds-entry-text\">Roots 2 cm, first new leaf unfurling.</p></li>",
+      "css": ".ds-entry { list-style: none; padding: 0.6rem 0.75rem; background: var(--pa-surface, #fff); border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.6rem; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--pa-text, #1d2520); } .ds-entry-head { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--pa-muted, #5f6b63); } .ds-entry-kind { display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 600; color: var(--pa-green-dark, #1f5a37); } .ds-entry-kind svg { width: 0.95rem; height: 0.95rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; } .ds-entry-text { margin: 0.3rem 0 0; white-space: pre-line; overflow-wrap: anywhere; }"
+    },
+    {
+      "name": "Empty State",
+      "kind": "custom",
+      "refersTo": "empty-state",
+      "description": "What a screen says before there is anything on it. Dashed so it reads as a placeholder rather than as content.",
+      "html": "<div class=\"ds-empty\"><p>No propagations yet. Take a cutting and it will show up here.</p></div>",
+      "css": ".ds-empty { text-align: center; padding: 2.5rem 1rem; background: var(--pa-surface, #fff); color: var(--pa-muted, #5f6b63); border: 1px dashed var(--pa-border, #dde3dc); border-radius: 0.75rem; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-empty p { margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Potting Bench",
+    "overview": "A potting bench is a working surface. Things are within reach, nothing is precious, and the person using it knows exactly what they are doing. The expertise shows in the labels and the dates, not in the decoration. Stikling should feel like that bench: warm, hands-on and unbothered, run by someone with soil under their fingernails who still knows precisely how many days that corm has been on the riser.\n\nThe tension that defines this system is warm and precise at the same time. The data is genuinely experimental, with mediums compared and days counted, but nothing about the interface should feel clinical or sterile. Numbers are rendered exactly and never decorated. Everything around them is soft, green and welcoming.\n\nThe built system is currently quieter than this target. It was built functionally, with structure settled before appearance, so it reads as restrained rather than warm: white cards, thin grey borders, small muted labels, and one green used sparingly. That gap is recorded on purpose and is not a description of the goal. Later work has licence to add warmth and presence within the rules below. The one confirmed rejection is the dark glassy look: no neon gradients over black, no glow shadows, no frosted glass.",
+    "keyCharacteristics": [
+      "Phone first, one hand, content centred in a 48rem column that never gets wider.",
+      "One green, in three strengths, against warm neutrals.",
+      "Flat surfaces separated by tone and a hairline, not by shadow.",
+      "Stroked line icons throughout, never filled.",
+      "A full dark theme that is a real second skin, not a filter.",
+      "Exact values shown plainly: counts, days, stages, measurements."
+    ],
+    "rules": [
+      {
+        "name": "The One Green Rule",
+        "body": "There is one hue in this system. Every accent, state, badge and highlight is Potting Green, Deep Moss or Leaf Tint. A second hue enters only to mean danger, and only through Bootstrap's existing red.",
+        "section": "colors"
+      },
+      {
+        "name": "The Warm Neutral Rule",
+        "body": "No neutral in this system is a pure grey. Every one of them carries green. A #f5f5f5 or a #888 anywhere in this app is a bug, because it is the fastest way to turn the bench back into a clinic.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Greens Rule",
+        "body": "Potting Green fills, Deep Moss reads. Never set small text in Potting Green, and never fill a large area with Deep Moss.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Label Rule",
+        "body": "Section headings are small, uppercase and muted. They mark structure without competing with the content beneath them. They are never coloured, never large, and never heavier than 600.",
+        "section": "typography"
+      },
+      {
+        "name": "The Italic Species Rule",
+        "body": "Genus and species are set in italic wherever they appear. Cultivar names are not.",
+        "section": "typography"
+      },
+      {
+        "name": "The Thumb Rule",
+        "body": "Anything tapped often lives in the bottom third. The navigation, the add button and the action bars are all anchored there. The top of the screen is for reading, not for reaching.",
+        "section": "layout"
+      },
+      {
+        "name": "The Safe Area Rule",
+        "body": "Any element fixed to the bottom adds env(safe-area-inset-bottom) to its own padding, and anything stacked above it offsets by the height of what it sits on. Nothing is allowed to hide under a home indicator.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces are flat at rest. If a new component wants a shadow, the honest questions are whether it overlaps other content and whether it would still read in dark mode. If either answer is no, use tone and a hairline instead.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Tonal Depth Rule",
+        "body": "Warmth and depth are added by moving between Paper, Surface and Leaf Tint, not by adding shadows. This is the intended route out of the current restraint.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Stroked Icon Rule",
+        "body": "Every icon is a stroked outline with round caps, drawn inline as SVG and coloured with currentColor. No filled glyphs, no icon fonts, no two-tone icons.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Borders are 1px. A thicker border has to mean something specific, and right now exactly one does: the 2px underline on an active tab.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do use one hue. Every accent is Potting Green, Deep Moss or Leaf Tint.",
+      "Do keep neutrals warm. Every grey in this app has green in it.",
+      "Do reach for Leaf Tint when a screen feels cold. Tonal surface is the intended route to warmth.",
+      "Do define both themes at once. A new colour without a dark counterpart is unfinished.",
+      "Do pad fixed bottom elements with env(safe-area-inset-bottom) and offset anything stacked above them.",
+      "Do truncate to one line in list rows so row height never varies.",
+      "Do set genus and species in italic.",
+      "Do draw icons as inline stroked SVG using currentColor.",
+      "Do show counts, days and stages as exact values."
+    ],
+    "donts": [
+      "Don't use neon gradients over black, glow shadows or frosted glass. This is the one confirmed rejection.",
+      "Don't add a shadow to a resting surface. Use tone and a hairline.",
+      "Don't introduce a second font family or a second hue.",
+      "Don't set small text in Potting Green, or fill a large area with Deep Moss.",
+      "Don't use a pure grey anywhere.",
+      "Don't let a fixed element cover the last row of a list; lists reserve 5rem at the end.",
+      "Don't use filled icons or an icon font.",
+      "Don't read this file as a description of the finished look. The built system is quieter than the target, and the Overview says so on purpose."
+    ]
+  }
+}
