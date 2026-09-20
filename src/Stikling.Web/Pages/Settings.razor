@@ -55,8 +55,9 @@
                 <strong>@file.Name</strong><br />
                 Made @Labels.Date(DateOnly.FromDateTime(file.Data.ExportedAt.LocalDateTime)), holding
                 @Labels.Plants(file.Data.Counts.Plants), @Labels.Count(file.Data.Counts.Propagations, "propagation"),
-                @Labels.Count(file.Data.Counts.Entries, "history entry", "history entries") and
-                @Labels.Count(file.Data.Counts.Photos, "photo").
+                @Labels.Count(file.Data.Counts.Entries, "history entry", "history entries"),
+                @Labels.Count(file.Data.Counts.Photos, "photo") and
+                @Labels.Count(file.Data.Counts.CareEntries, "care entry", "care entries").
             </p>
             <p class="settings-hint">
                 Restoring adds what's missing here and brings back anything you've deleted since.

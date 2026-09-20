@@ -121,7 +121,7 @@ public class BackupTests
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back
-        Assert.Equal(new BackupCounts(1, 0, 0, 2), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 }

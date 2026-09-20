@@ -1,0 +1,125 @@
+@* Logging care. Used on one plant from its page, and on several at once from the plants list. *@
+@inject CareService CareService
+@inject TimeProvider Time
+
+<div class="care-sheet">
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
+    }
+
+    <div class="row g-2">
+        <div class="col-7">
+            <label class="form-label" for="care-kind">What you did</label>
+            <select id="care-kind" class="form-select form-select-sm" @bind="kind" @bind:after="KindChanged">
+                @foreach (var value in Enum.GetValues<CareKind>())
+                {
+                    <option value="@value">@Labels.For(value)</option>
+                }
+            </select>
+        </div>
+        <div class="col-5">
+            <label class="form-label" for="care-date">When</label>
+            <input type="date" id="care-date" class="form-control form-control-sm"
+                   max="@Today.ToString("yyyy-MM-dd")" value="@occurredOn.ToString("yyyy-MM-dd")"
+                   @onchange="DateChanged" />
+        </div>
+    </div>
+
+    @if (kind == CareKind.MoistureReading)
+    {
+        <div class="mt-2">
+            <label class="form-label" for="care-moisture">Reading (1 to 10)</label>
+            <input type="number" id="care-moisture" class="form-control form-control-sm"
+                   min="1" max="10" inputmode="numeric" @bind="moisture" />
+        </div>
+    }
+
+    <div class="mt-2">
+        <label class="form-label" for="care-notes">Notes</label>
+        <input type="text" id="care-notes" class="form-control form-control-sm"
+               placeholder="@NotesHint" @bind="notes" @bind:event="oninput" />
+    </div>
+
+    <div class="care-actions">
+        <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || PlantIds.Count == 0)" @onclick="LogAsync">
+            @SubmitText
+        </button>
+        @if (OnCancel.HasDelegate)
+        {
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OnCancel">Cancel</button>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>The plants this entry is for. One from a plant page, several from the list.</summary>
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<Guid> PlantIds { get; set; }
+
+    /// <summary>Called after the entry is saved, so the page can reload what it shows.</summary>
+    [Parameter]
+    public EventCallback OnLogged { get; set; }
+
+    /// <summary>When set, a Cancel button is shown.</summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private CareKind kind = CareKind.Watered;
+    private DateOnly occurredOn;
+    private int? moisture;
+    private string? notes;
+    private string? error;
+    private bool busy;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+
+    private string SubmitText =>
+        PlantIds.Count == 1 ? "Log it" : $"Log for {Labels.Plants(PlantIds.Count)}";
+
+    private string NotesHint => kind switch
+    {
+        CareKind.Fertilised => "e.g. Hydro fertiliser, 2 ml/L",
+        CareKind.Repotted => "e.g. Into the big terracotta",
+        CareKind.Harvested => "e.g. A good handful of basil",
+        _ => "Optional"
+    };
+
+    protected override void OnInitialized() => occurredOn = Today;
+
+    // Only a moisture reading carries a number, so clear it when switching away
+    private void KindChanged()
+    {
+        if (kind != CareKind.MoistureReading)
+            moisture = null;
+        error = null;
+    }
+
+    private void DateChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var parsed))
+            occurredOn = parsed;
+    }
+
+    private async Task LogAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, Labels.For, moisture);
+            notes = null;
+            moisture = null;
+            occurredOn = Today;
+            await OnLogged.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

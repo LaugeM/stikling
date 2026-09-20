@@ -28,6 +28,10 @@ else
     [Parameter]
     public EventCallback<Plant> OnToggle { get; set; }
 
+    /// <summary>The newest moisture meter reading, when there is one.</summary>
+    [Parameter]
+    public MoistureReading? Moisture { get; set; }
+
     private string OriginText =>
         Plant.AcquiredOn is { } date
             ? $"{Labels.For(Plant.Origin)} {Labels.Date(date)}"
@@ -60,6 +64,12 @@ else
                 @if (!string.IsNullOrWhiteSpace(Plant.Location))
                 {
                     <span>· @Plant.Location</span>
+                }
+                @if (Moisture is { } reading)
+                {
+                    <span class="moisture-badge" title="@($"Moisture {reading.Value}/10, {Labels.DaysAgo(reading.DaysAgo)}")">
+                        @reading.Value/10
+                    </span>
                 }
             </div>
         </div>

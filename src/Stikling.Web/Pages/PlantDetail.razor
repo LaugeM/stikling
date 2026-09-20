@@ -1,7 +1,9 @@
 @page "/plants/{Id:guid}"
 @inject IPlantRepository Repository
 @inject IPropagationRepository PropagationRepository
+@inject ICareLogRepository CareLogRepository
 @inject NavigationManager Navigation
+@inject TimeProvider Time
 
 <PageTitle>@(plant?.DisplayName ?? "Plant") · Stikling</PageTitle>
 
@@ -48,6 +50,8 @@ else
     <div class="detail-tabs" role="tablist" aria-label="Plant sections">
         <button type="button" role="tab" id="tab-info" aria-controls="panel-info" aria-selected="@(tab == "info")"
                 class="detail-tab @(tab == "info" ? "active" : null)" @onclick='() => SetTab("info")'>Info</button>
+        <button type="button" role="tab" id="tab-care" aria-controls="panel-care" aria-selected="@(tab == "care")"
+                class="detail-tab @(tab == "care" ? "active" : null)" @onclick='() => SetTab("care")'>Care</button>
         <button type="button" role="tab" id="tab-props" aria-controls="panel-props" aria-selected="@(tab == "props")"
                 class="detail-tab @(tab == "props" ? "active" : null)" @onclick='() => SetTab("props")'>
             Props@(propagations.Count > 0 ? $" ({propagations.Count})" : "")
@@ -56,7 +60,56 @@ else
                 class="detail-tab @(tab == "history" ? "active" : null)" @onclick='() => SetTab("history")'>History</button>
     </div>
 
-    @if (tab == "props")
+    @if (tab == "care")
+    {
+        <div id="panel-care" role="tabpanel" aria-labelledby="tab-care">
+            <section class="detail-card">
+                <h2>Last done</h2>
+                @if (headline.Count == 0)
+                {
+                    <p class="text-body-secondary mb-0">Nothing logged yet. Log the first watering or feed below.</p>
+                }
+                else
+                {
+                    <dl class="detail-list">
+                        @foreach (var (kind, last) in headline)
+                        {
+                            <dt>@Labels.For(kind)</dt>
+                            <dd>@(last is null ? "Never" : $"{Labels.DaysAgo(last.DaysAgo)} · {Labels.Date(last.On)}")</dd>
+                        }
+                    </dl>
+                }
+                @if (moisture is { } reading)
+                {
+                    <p class="care-moisture mb-0">Moisture @reading.Value/10, @Labels.DaysAgo(reading.DaysAgo)</p>
+                }
+            </section>
+
+            <section class="detail-card">
+                <h2>Log care</h2>
+                <CareSheet PlantIds="@(new[] { plant.Id })" OnLogged="ReloadCareAsync" />
+            </section>
+
+            @if (care.Count > 0)
+            {
+                <section class="detail-card">
+                    <h2>History</h2>
+                    <ul class="care-list">
+                        @foreach (var entry in care)
+                        {
+                            <li>
+                                <div class="care-entry">
+                                    <span class="care-what">@CareService.Describe(entry, Labels.For)</span>
+                                    <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
+        </div>
+    }
+    else if (tab == "props")
     {
         <div id="panel-props" role="tabpanel" aria-labelledby="tab-props">
             @if (propagations.Count == 0)
@@ -205,11 +258,16 @@ else
     private IReadOnlyList<Plant> offspring = [];
     private IReadOnlyList<Propagation> propagations = [];
     private Propagation? fromPropagation;
+    private IReadOnlyList<CareLog> care = [];
+    private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
+    private MoistureReading? moisture;
+
+    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
 
     protected override async Task OnParametersSetAsync()
     {
         confirmDelete = false;
-        tab = Tab is "history" or "props" ? Tab : "info";
+        tab = Tab is "history" or "props" or "care" ? Tab : "info";
 
         var all = await Repository.GetAllAsync();
         plant = all.FirstOrDefault(p => p.Id == Id);
@@ -223,8 +281,24 @@ else
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
                 .ToList();
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
+
+            await ReloadCareAsync();
         }
         loaded = true;
+    }
+
+    private async Task ReloadCareAsync()
+    {
+        if (plant is null)
+            return;
+
+        var all = await CareLogRepository.GetAllAsync();
+        care = CareSummary.For(all, plant.Id);
+        // Always show the headline kinds, even the ones never done, so "never flushed" is visible
+        headline = CareSummary.Headline
+            .Select(kind => (kind, CareSummary.Latest(all, plant.Id, kind, Today)))
+            .ToList();
+        moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
     }
 
     // Keeps the tab in the address so Back and reloads return to it

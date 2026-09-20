@@ -27,16 +27,15 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 ## Next up
 
-In the order I would build them. The care log is the only whole area that is still empty, and pests come next because thrips are the problem right now.
+In the order I would build them. Pests come first because thrips are the problem right now.
 
-1. **Quick-log care** and logging several plants at once. The care log is the last unbuilt part of the daily routine.
-2. **"Last watered / fertilised / flushed"** on each plant. This is what makes the care log worth keeping.
-3. **Pest cases and a treatment log**, with the interval showing up on Today.
-4. **Quarantine flag and tags.** Both are small, and tags cover "variegated", "for swap" and "rare" at the same time.
-5. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
-6. **Import old photos with their dates**, so a plant's history can start before the app did.
-7. **Pot suggestions** in the pot field, the same way rooms are already suggested.
-8. **Correct or hide a timeline entry.** Left over from M3.
+1. **Pest cases and a treatment log**, with the interval showing up on Today.
+2. **Quarantine flag and tags.** Both are small, and tags cover "variegated", "for swap" and "rare" at the same time.
+3. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
+4. **Products and doses on a care entry.** The care log is in, so "Hydro fertiliser, 2 ml/L" only needs somewhere to keep the products.
+5. **Import old photos with their dates**, so a plant's history can start before the app did.
+6. **Pot suggestions** in the pot field, the same way rooms are already suggested.
+7. **Correct or hide a timeline entry.** Left over from M3.
 
 ### Cheap ones to slot in whenever
 
@@ -118,14 +117,14 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 
 ## 4. Care log
 
-Built around your routine: moisture meter instead of a watering schedule, semi-hydro reservoirs, and different fertilisers for different plants. Nothing here is built yet, and it is the last part of the daily routine the app can't hold.
+Built around your routine: moisture meter instead of a watering schedule, semi-hydro reservoirs, and different fertilisers for different plants. The basics are in. Only the notable kinds (repotted, flushed, pruned) go on a plant's history, so watering doesn't bury the photos and notes.
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | Quick-log care: watered, fertilised, reservoir topped up, flushed, repotted, pruned, rotated, cleaned leaves, harvested | 1 | L | v1.x |
-| ☐ | Log several plants at once ("fertilised all semi-hydro plants") | 2 | M | v1.x |
-| ☐ | "Last watered / fertilised / flushed" summary on each plant | 2 | S | v1.x |
-| ☐ | **Moisture meter reading** (1–10) as a log type, with the latest reading shown on the card | 3 | S | v1.x |
+| ✅ | Quick-log care: watered, fertilised, reservoir topped up, flushed, repotted, pruned, rotated, cleaned leaves, harvested | 1 | L | v1.x |
+| ✅ | Log several plants at once ("fertilised all semi-hydro plants") | 2 | M | v1.x |
+| ✅ | "Last watered / fertilised / flushed" summary on each plant | 2 | S | v1.x |
+| ✅ | **Moisture meter reading** (1–10) as a log type, with the latest reading shown on the card | 3 | S | v1.x |
 | ☐ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a default dose | 4 | M | v1.x |
 | ☐ | Which product and dose was used, e.g. "Hydro fertiliser, 2 ml/L" | 4 | S | v1.x |
 | ☐ | Water type: tap, demineralised, rain | 6 | S | v1.x |
@@ -260,7 +259,5 @@ Most people mix their own soil instead of using it straight from the bag. This i
 
 ## Questions for you
 
-1. **Moisture meter:** what scale does yours use (1–10, or dry/moist/wet)?
-2. **Semi-hydro:** do you want to track reservoir top-ups and flushes, or is "watered/fertilised" enough?
-3. **Experiments:** now that the corm test is grouped on the propagations list, is that enough, or is a page of its own worth it later?
-4. **Anything missing?** Things you do with your plants that aren't on this list.
+1. **Experiments:** now that the corm test is grouped on the propagations list, is that enough, or is a page of its own worth it later?
+2. **Anything missing?** Things you do with your plants that aren't on this list.

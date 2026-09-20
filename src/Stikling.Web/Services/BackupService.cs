@@ -32,7 +32,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
             Plants = await db.GetAllAsync<Plant>(Stores.Plants),
             Propagations = await db.GetAllAsync<Propagation>(Stores.Propagations),
             Timeline = await db.GetAllAsync<TimelineEntry>(Stores.Timeline),
-            Photos = await db.GetAllAsync<Photo>(Stores.Photos)
+            Photos = await db.GetAllAsync<Photo>(Stores.Photos),
+            CareLogs = await db.GetAllAsync<CareLog>(Stores.CareLogs)
         };
 
         using var buffer = new MemoryStream();
@@ -91,6 +92,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
         var propagations = await MergeAsync(Stores.Propagations, data.Propagations);
         var timeline = await MergeAsync(Stores.Timeline, data.Timeline);
         var photoMeta = await MergeAsync(Stores.Photos, data.Photos);
+        var care = await MergeAsync(Stores.CareLogs, data.CareLogs);
 
         var restoredPhotos = 0;
         foreach (var photo in photoMeta.ToSave.Where(p => !p.IsDeleted))
@@ -103,10 +105,10 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
         }
 
         return new ImportSummary(
-            plants.Added + propagations.Added + timeline.Added + photoMeta.Added,
-            plants.Updated + propagations.Updated + timeline.Updated + photoMeta.Updated,
-            plants.BroughtBack + propagations.BroughtBack + timeline.BroughtBack + photoMeta.BroughtBack,
-            plants.Skipped + propagations.Skipped + timeline.Skipped + photoMeta.Skipped,
+            plants.Added + propagations.Added + timeline.Added + photoMeta.Added + care.Added,
+            plants.Updated + propagations.Updated + timeline.Updated + photoMeta.Updated + care.Updated,
+            plants.BroughtBack + propagations.BroughtBack + timeline.BroughtBack + photoMeta.BroughtBack + care.BroughtBack,
+            plants.Skipped + propagations.Skipped + timeline.Skipped + photoMeta.Skipped + care.Skipped,
             restoredPhotos);
     }
 
