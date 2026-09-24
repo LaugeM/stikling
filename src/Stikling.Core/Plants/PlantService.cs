@@ -18,6 +18,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         if (photos is { Count: > 0 })
             plant.CoverPhotoId ??= photos[0].Id;
 
+        plant.Tags = PlantTags.Normalize(plant.Tags);
         await plants.SaveAsync(plant);
         await timeline.AddAsync(new TimelineEntry
         {
@@ -50,6 +51,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Func<Guid, string?>? potName = null,
         Func<Guid, string?>? mixName = null)
     {
+        after.Tags = PlantTags.Normalize(after.Tags);
         await plants.SaveAsync(after);
 
         var changes = PlantChanges.Describe(before, after, label, potName, mixName);
@@ -66,6 +68,40 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             plant.Status = status;
             await UpdateAsync(before, plant, label);
         }
+    }
+
+    /// <summary>Puts a plant in quarantine from the given day, or takes it out with null.</summary>
+    public async Task SetQuarantineAsync(Plant plant, DateOnly? since, Func<Enum, string> label)
+    {
+        if (plant.QuarantinedSince == since)
+            return;
+
+        var before = plant.Copy();
+        plant.QuarantinedSince = since;
+        await UpdateAsync(before, plant, label);
+    }
+
+    /// <summary>
+    /// Adds the same tags to several plants, e.g. "For swap" before a plant swap. Tags are only
+    /// labels, so nothing goes on the history. Returns how many plants got something new.
+    /// </summary>
+    public async Task<int> AddTagsAsync(IEnumerable<Plant> selected, IEnumerable<string> tags)
+    {
+        var adding = PlantTags.Normalize(tags);
+        var changed = 0;
+
+        foreach (var plant in selected)
+        {
+            var updated = PlantTags.Normalize([.. plant.Tags, .. adding]);
+            if (updated.Count == PlantTags.Normalize(plant.Tags).Count)
+                continue;
+
+            plant.Tags = updated;
+            await plants.SaveAsync(plant);
+            changed++;
+        }
+
+        return changed;
     }
 
     /// <summary>Adds the same note to several plants, e.g. "Sprayed for thrips".</summary>
@@ -102,7 +138,9 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     private static string FirstEntryText(Plant plant)
     {
         var text = plant.Origin == PlantOrigin.Propagated ? "Added as a propagated plant" : "Added to collection";
-        return plant.AcquiredOn is { Precision: not DatePrecision.Day } acquired ? $"{text}, {acquired.Text()}" : text;
+        if (plant.AcquiredOn is { Precision: not DatePrecision.Day } acquired)
+            text = $"{text}, {acquired.Text()}";
+        return plant.InQuarantine ? $"{text}\nPut in quarantine" : text;
     }
 
     // Acquisition dates have no time of day; use noon so the entry lands on the right day in any timezone

@@ -83,4 +83,30 @@ public class PlantFilterTests
 
         Assert.Equal([pc], result);
     }
+
+    [Fact]
+    public void Picked_tags_must_all_be_on_the_plant()
+    {
+        var rare = new Plant { Nickname = "Rare one", Tags = ["Rare"] };
+        var both = new Plant { Nickname = "Swap one", Tags = ["rare", "For swap"] };
+
+        Assert.Equal([rare, both], new PlantFilter(Tags: ["RARE"]).Apply([.. All, rare, both]));
+        Assert.Equal([both], new PlantFilter(Tags: ["Rare", "for swap"]).Apply([.. All, rare, both]));
+    }
+
+    [Fact]
+    public void Quarantine_shows_only_plants_in_quarantine()
+    {
+        var isolated = new Plant { Nickname = "New alocasia", QuarantinedSince = new DateOnly(2026, 9, 1) };
+
+        Assert.Equal([isolated], new PlantFilter(Quarantine: true).Apply([.. All, isolated]));
+    }
+
+    [Fact]
+    public void Search_also_finds_tags()
+    {
+        var swap = new Plant { Nickname = "Hoya", Tags = ["For swap"] };
+
+        Assert.Equal([swap], new PlantFilter("swap").Apply([.. All, swap]));
+    }
 }

@@ -5,6 +5,7 @@
 @inject IPestCaseRepository PestCaseRepository
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
+@inject PlantService PlantService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
@@ -41,6 +42,10 @@ else
             @if (plant.Status != PlantStatus.Active)
             {
                 <span class="badge text-bg-secondary">@Labels.For(plant.Status)</span>
+            }
+            @if (plant.InQuarantine)
+            {
+                <span class="badge quarantine-badge">Quarantine</span>
             }
             @foreach (var item in pests)
             {
@@ -193,6 +198,28 @@ else
                             }
                         }
                     </dd>
+
+                    @if (plant.QuarantinedSince is { } since)
+                    {
+                        <dt>Quarantine</dt>
+                        <dd>
+                            @(since == Today ? "Since today" : $"Since {Labels.Date(since)} · {Labels.Count(plant.DaysInQuarantine(Today) ?? 0, "day")}")
+                            <div>
+                                <button type="button" class="btn btn-link btn-sm p-0" @onclick="EndQuarantineAsync">End quarantine</button>
+                            </div>
+                        </dd>
+                    }
+
+                    @if (plant.Tags.Count > 0)
+                    {
+                        <dt>Tags</dt>
+                        <dd class="detail-tags">
+                            @foreach (var tag in plant.Tags)
+                            {
+                                <a class="tag-label" href="@TagLink(tag)">@tag</a>
+                            }
+                        </dd>
+                    }
                 </dl>
 
                 @if (!string.IsNullOrWhiteSpace(plant.Notes))
@@ -369,6 +396,15 @@ else
             return;
         plant.CoverPhotoId = photoId;
         await Repository.SaveAsync(plant);
+    }
+
+    private string TagLink(string tag) => $"plants?tag={Uri.EscapeDataString(tag)}";
+
+    private async Task EndQuarantineAsync()
+    {
+        if (plant is null)
+            return;
+        await PlantService.SetQuarantineAsync(plant, null, Labels.For);
     }
 
     private async Task DeleteAsync()
