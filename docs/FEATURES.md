@@ -38,11 +38,10 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them.
 
 1. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
-2. **Products and doses on a care entry.** The care log is in, so "Hydro fertiliser, 2 ml/L" only needs somewhere to keep the products.
-3. **Import old photos with their dates**, so a plant's history can start before the app did.
-4. **Correct or hide a timeline entry.** Left over from M3.
-5. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
-6. **A pot fit helper**: given a nursery pot, which of your free outer pots it would go in.
+2. **Import old photos with their dates**, so a plant's history can start before the app did.
+3. **Correct or hide a timeline entry.** Left over from M3.
+4. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
+5. **A pot fit helper**: given a nursery pot, which of your free outer pots it would go in.
 
 ### Cheap ones to slot in whenever
 
@@ -152,8 +151,8 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | Log several plants at once ("fertilised all semi-hydro plants") | 2 | M | v1.x |
 | ✅ | "Last watered / fertilised / flushed" summary on each plant | 2 | S | v1.x |
 | ✅ | **Moisture meter reading** (1–10) as a log type, with the latest reading shown on the card | 3 | S | v1.x |
-| ☐ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a default dose | 4 | M | v1.x |
-| ☐ | Which product and dose was used, e.g. "Hydro fertiliser, 2 ml/L" | 4 | S | v1.x |
+| ✅ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a usual dose in ml, g or drops per litre. The dose is optional | 4 | M | v1.x |
+| ✅ | Which products and doses went in on a feed or a top-up, e.g. "Hydro fertiliser, 2 ml/L". The dose starts at the product's usual one and can be changed for that time, and the entry keeps its own copy, so editing or deleting a product doesn't change what was logged | 4 | S | v1.x |
 | ☐ | Water type: tap, demineralised, rain | 6 | S | v1.x |
 | ☐ | Semi-hydro details: reservoir level, flush interval, last flush | 6 | M | v1.x |
 | ☐ | Optional care intervals per plant ("fertilise every 2 weeks") that show up on Today | 6 | M | v1.x |

@@ -1,0 +1,45 @@
+.product-dose {
+    max-width: 8rem;
+}
+
+.product-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.product-list > li {
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.product-list > li:first-child {
+    border-top: 0;
+}
+
+.product-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.product-title {
+    font-weight: 600;
+}
+
+.product-dose-text {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+    white-space: nowrap;
+}
+
+.product-use {
+    margin: 0.15rem 0 0.35rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.product-confirm p {
+    margin-bottom: 0.5rem;
+}

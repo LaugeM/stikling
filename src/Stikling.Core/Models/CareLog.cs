@@ -41,9 +41,20 @@ public sealed class CareLog : Entity
     /// <summary>The moisture meter reading, 1 to 10. Only on <see cref="CareKind.MoistureReading"/>.</summary>
     public int? Moisture { get; set; }
 
+    /// <summary>
+    /// What went in the water, in the order it went in. Only on the kinds that take a product,
+    /// and each one is a copy of the product as it was that day.
+    /// </summary>
+    public List<ProductDose> Products { get; set; } = [];
+
     public string? Notes { get; set; }
 
-    public CareLog Copy() => (CareLog)MemberwiseClone();
+    public CareLog Copy()
+    {
+        var copy = (CareLog)MemberwiseClone();
+        copy.Products = [.. Products.Select(p => p.Copy())];
+        return copy;
+    }
 
     public IReadOnlyList<string> Validate(DateOnly today)
     {
@@ -67,6 +78,15 @@ public sealed class CareLog : Entity
             errors.Add("Only a moisture reading has a number.");
         }
 
+        if (Products.Count > 0 && !CareKinds.TakesProducts(Kind))
+            errors.Add("Only fertilising and topping up can have a product.");
+
+        if (Products.Any(p => string.IsNullOrWhiteSpace(p.Name)))
+            errors.Add("A product on the entry needs a name.");
+
+        if (Products.Any(p => p.Amount < 0))
+            errors.Add("A dose can't be less than 0.");
+
         return errors;
     }
 }
@@ -80,4 +100,11 @@ public static class CareKinds
     /// </summary>
     public static bool IsNotable(CareKind kind) =>
         kind is CareKind.Repotted or CareKind.Flushed or CareKind.Pruned;
+
+    /// <summary>
+    /// Fertilising, and topping up a semi-hydro reservoir, which is usually done with the
+    /// fertilised water rather than plain.
+    /// </summary>
+    public static bool TakesProducts(CareKind kind) =>
+        kind is CareKind.Fertilised or CareKind.ToppedUp;
 }

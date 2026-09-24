@@ -110,6 +110,7 @@ public static class Labels
         PotMaterial m => For(m),
         PotWatering w => For(w),
         MixUnit u => For(u),
+        DoseUnit u => For(u),
         _ => value.ToString()
     };
 
@@ -204,6 +205,8 @@ public static class Labels
         MixUnit.Percent => "Percent",
         _ => "No amounts"
     };
+
+    public static string For(DoseUnit unit) => Doses.Symbol(unit);
 
     /// <summary>Said under the ingredients when the percentages do not reach 100. Never blocks a save.</summary>
     public static string PercentTotal(decimal total) =>

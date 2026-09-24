@@ -2,6 +2,7 @@ using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
+using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.SoilMixes;
 using Stikling.Core.Timeline;
@@ -176,6 +177,32 @@ internal sealed class FakeSoilMixRepository : ISoilMixRepository
     {
         if (Mixes.TryGetValue(id, out var mix))
             mix.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeProductRepository : IProductRepository
+{
+    public Dictionary<Guid, Product> Products { get; } = [];
+
+    public Task<IReadOnlyList<Product>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Product>>(Products.Values.Where(p => !p.IsDeleted).ToList());
+
+    public Task<Product?> GetAsync(Guid id) =>
+        Task.FromResult(Products.TryGetValue(id, out var product) && !product.IsDeleted ? product : null);
+
+    public Task SaveAsync(Product product)
+    {
+        if (product.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid product");
+        Products[product.Id] = product;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Products.TryGetValue(id, out var product))
+            product.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }

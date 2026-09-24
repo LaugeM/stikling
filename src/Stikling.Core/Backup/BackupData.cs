@@ -27,6 +27,7 @@ public sealed class BackupData
     public List<PestTreatment> PestTreatments { get; set; } = [];
     public List<Pot> Pots { get; set; } = [];
     public List<SoilMix> SoilMixes { get; set; } = [];
+    public List<Product> Products { get; set; } = [];
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the
@@ -41,7 +42,8 @@ public sealed class BackupData
         PestCases.Count(c => !c.IsDeleted),
         PestTreatments.Count(t => !t.IsDeleted),
         Pots.Count(p => !p.IsDeleted),
-        SoilMixes.Count(m => !m.IsDeleted));
+        SoilMixes.Count(m => !m.IsDeleted),
+        Products.Count(p => !p.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -53,4 +55,5 @@ public sealed record BackupCounts(
     int PestCases,
     int Treatments,
     int Pots,
-    int SoilMixes);
+    int SoilMixes,
+    int Products);

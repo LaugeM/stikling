@@ -37,7 +37,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
             PestCases = await db.GetAllAsync<PestCase>(Stores.PestCases),
             PestTreatments = await db.GetAllAsync<PestTreatment>(Stores.PestTreatments),
             Pots = await db.GetAllAsync<Pot>(Stores.Pots),
-            SoilMixes = await db.GetAllAsync<SoilMix>(Stores.SoilMixes)
+            SoilMixes = await db.GetAllAsync<SoilMix>(Stores.SoilMixes),
+            Products = await db.GetAllAsync<Product>(Stores.Products)
         };
 
         using var buffer = new MemoryStream();
@@ -117,6 +118,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
         await Restore(Stores.PestTreatments, data.PestTreatments);
         await Restore(Stores.Pots, data.Pots);
         await Restore(Stores.SoilMixes, data.SoilMixes);
+        await Restore(Stores.Products, data.Products);
 
         var restoredPhotos = 0;
         foreach (var photo in photoMeta.ToSave.Where(p => !p.IsDeleted))
