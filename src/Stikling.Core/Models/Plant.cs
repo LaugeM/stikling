@@ -50,6 +50,24 @@ public sealed class Plant : Entity
 
     public string? Notes { get; set; }
 
+    /// <summary>Your own labels, e.g. "variegated", "rare" or "for swap". See <see cref="Plants.PlantTags"/>.</summary>
+    public List<string> Tags
+    {
+        get => tags;
+        set => tags = value ?? []; // plants saved before tags existed have none
+    }
+
+    private List<string> tags = [];
+
+    /// <summary>
+    /// The day it went into quarantine, kept apart from the other plants. Null when it isn't in
+    /// quarantine, so there is no flag that can disagree with the date.
+    /// </summary>
+    public DateOnly? QuarantinedSince { get; set; }
+
+    [JsonIgnore]
+    public bool InQuarantine => QuarantinedSince is not null;
+
     public Guid? CoverPhotoId { get; set; }
 
     /// <summary>The plant this one was propagated from, if known.</summary>
@@ -67,8 +85,17 @@ public sealed class Plant : Entity
     public string DisplayName =>
         !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? "Unnamed plant";
 
-    /// <summary>A shallow copy, e.g. to compare with after editing.</summary>
-    public Plant Copy() => (Plant)MemberwiseClone();
+    /// <summary>A copy to compare with after editing. The tags get their own list.</summary>
+    public Plant Copy()
+    {
+        var copy = (Plant)MemberwiseClone();
+        copy.Tags = [.. Tags];
+        return copy;
+    }
+
+    /// <summary>Days in quarantine, counting the day it went in as day 0.</summary>
+    public int? DaysInQuarantine(DateOnly today) =>
+        QuarantinedSince is { } since ? Math.Max(0, today.DayNumber - since.DayNumber) : null;
 
     /// <summary>Validation rules shared by every place a plant can be saved from.</summary>
     public IReadOnlyList<string> Validate(DateOnly today)
@@ -82,6 +109,8 @@ public sealed class Plant : Entity
             errors.Add("The date you got it can't be in the future.");
         if (InnerPotId is not null && InnerPotId == OuterPotId)
             errors.Add("A plant can't have the same pot inside and outside.");
+        if (QuarantinedSince > today)
+            errors.Add("The quarantine can't start in the future.");
         return errors;
     }
 }

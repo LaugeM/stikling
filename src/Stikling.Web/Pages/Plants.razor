@@ -73,6 +73,23 @@ else
                 }
             </div>
         }
+
+        @if (TagChoices.Count > 0 || all.Any(p => p.InQuarantine))
+        {
+            <div class="tag-filters" role="group" aria-label="Tags">
+                @if (all.Any(p => p.InQuarantine))
+                {
+                    <button type="button" class="chip @(quarantine ? "picked" : null)"
+                            aria-pressed="@(quarantine ? "true" : "false")" @onclick="ToggleQuarantine">Quarantine</button>
+                }
+                @foreach (var t in TagChoices)
+                {
+                    var on = pickedTags.Contains(t);
+                    <button type="button" class="chip @(on ? "picked" : null)" aria-pressed="@(on ? "true" : "false")"
+                            @onclick="() => ToggleTag(t)">@t</button>
+                }
+            </div>
+        }
     </div>
 
     @if (selecting)
@@ -111,6 +128,15 @@ else
         {
             <CareSheet PlantIds="@selected.ToList()" OnLogged="AfterBulkCareAsync" OnCancel="() => bulkCareOpen = false" />
         }
+        else if (bulkTagOpen)
+        {
+            <TagPicker @bind-Value="bulkTags" Suggestions="@PlantTags.Suggestions(all ?? [])" Label="Tags to add" />
+            <div class="bulk-row">
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || bulkTags.Count == 0)"
+                        @onclick="AddBulkTagsAsync">Add to @Labels.Plants(selected.Count)</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkTagOpen = false">Cancel</button>
+            </div>
+        }
         else if (bulkNoteOpen)
         {
             <textarea class="form-control form-control-sm" rows="2" placeholder="Note for all selected plants, e.g. Sprayed for thrips"
@@ -137,6 +163,8 @@ else
                         @onclick="() => bulkCareOpen = true">Log care</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
                         @onclick="() => bulkNoteOpen = true">Add note</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
+                        @onclick="OpenBulkTags">Tag</button>
             </div>
         }
         @if (bulkMessage is not null)
@@ -153,6 +181,10 @@ else
 }
 
 @code {
+    /// <summary>Starts the list on one tag, e.g. from a tag on a plant's page.</summary>
+    [SupplyParameterFromQuery(Name = "tag")]
+    public string? Tag { get; set; }
+
     private static readonly (StatusFilter Value, string Label)[] statusOptions =
     [
         (StatusFilter.Active, "In collection"),
@@ -168,24 +200,38 @@ else
     private StatusFilter status = StatusFilter.Active;
     private string? room;
     private string? spot;
+    private IReadOnlyList<TagCount> tags = [];
+    private readonly HashSet<string> pickedTags = new(StringComparer.OrdinalIgnoreCase);
+    private bool quarantine;
 
     private bool selecting;
     private readonly HashSet<Guid> selected = [];
     private string bulkStatus = ""; // the "Set status…" dropdown, reset after each use
     private bool bulkNoteOpen;
     private bool bulkCareOpen;
+    private bool bulkTagOpen;
+    private List<string> bulkTags = [];
     private IReadOnlyList<CareLog> careLogs = [];
     private IReadOnlyList<PestCase> pestCases = [];
     private string? bulkNote;
     private string? bulkMessage;
     private bool busy;
 
-    protected override async Task OnInitializedAsync() => await LoadAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        if (PlantTags.Clean(Tag) is { } tag)
+        {
+            pickedTags.Add(tag);
+            status = StatusFilter.All; // a tag is asked for by name, so show every plant carrying it
+        }
+        await LoadAsync();
+    }
 
     private async Task LoadAsync()
     {
         all = await Repository.GetAllAsync();
         rooms = Room.List(all, []);
+        tags = PlantTags.InUse(all);
         careLogs = await CareLogRepository.GetAllAsync();
         pestCases = await PestCaseRepository.GetAllAsync();
         Refresh();
@@ -215,8 +261,26 @@ else
         Refresh();
     }
 
+    // A picked tag stays on the row even if no plant has it any more, so it can be unpicked
+    private IReadOnlyList<string> TagChoices => PlantTags.Normalize([.. tags.Select(t => t.Name), .. pickedTags]);
+
+    private void ToggleTag(string tag)
+    {
+        if (!pickedTags.Remove(tag))
+            pickedTags.Add(tag);
+        Refresh();
+    }
+
+    private void ToggleQuarantine()
+    {
+        quarantine = !quarantine;
+        Refresh();
+    }
+
     private void Refresh() =>
-        visible = new PlantFilter(search, status, RoomName.Combine(room, spot)).Apply(all ?? []).ToList();
+        visible = new PlantFilter(search, status, RoomName.Combine(room, spot), pickedTags.Count > 0 ? pickedTags : null, quarantine)
+            .Apply(all ?? [])
+            .ToList();
 
     private void ToggleSelectMode()
     {
@@ -224,6 +288,14 @@ else
         selected.Clear();
         bulkNoteOpen = false;
         bulkCareOpen = false;
+        bulkTagOpen = false;
+        bulkMessage = null;
+    }
+
+    private void OpenBulkTags()
+    {
+        bulkTags = [];
+        bulkTagOpen = true;
         bulkMessage = null;
     }
 
@@ -267,6 +339,20 @@ else
         var plants = SelectedPlants;
         await PlantService.SetStatusAsync(plants, newStatus, Labels.For);
         bulkMessage = $"{Labels.For(newStatus)}: {Labels.Plants(plants.Count)} updated.";
+        selected.Clear();
+        await LoadAsync();
+        busy = false;
+    }
+
+    private async Task AddBulkTagsAsync()
+    {
+        busy = true;
+        var plants = SelectedPlants;
+        var changed = await PlantService.AddTagsAsync(plants, bulkTags);
+        bulkMessage = changed == plants.Count
+            ? $"Tagged {Labels.Plants(changed)}."
+            : $"Tagged {Labels.Plants(changed)}. {Labels.Plants(plants.Count - changed)} already had {(bulkTags.Count == 1 ? "it" : "them")}.";
+        bulkTagOpen = false;
         selected.Clear();
         await LoadAsync();
         busy = false;

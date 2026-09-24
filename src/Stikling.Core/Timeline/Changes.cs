@@ -35,6 +35,10 @@ public static class PlantChanges
         if (before.WaterInOuterPot != after.WaterInOuterPot)
             changes.Add(after.WaterInOuterPot ? "Now watered in the outer pot" : "No longer watered in the outer pot");
 
+        // Tags are only labels and stay out of the history, but quarantine is something that happened
+        if (before.InQuarantine != after.InQuarantine)
+            changes.Add(after.InQuarantine ? "Put in quarantine" : "Out of quarantine");
+
         return changes;
     }
 }
