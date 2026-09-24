@@ -32,8 +32,10 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
         DateOnly occurredOn,
         string? notes,
         Func<Enum, string> label,
-        int? moisture = null)
+        int? moisture = null,
+        IReadOnlyList<ProductDose>? products = null)
     {
+        var used = Tidy(products);
         var entries = plantIds
             .Distinct()
             .Select(id => new CareLog
@@ -42,6 +44,8 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
                 Kind = kind,
                 OccurredOn = occurredOn,
                 Moisture = moisture,
+                // Each entry gets its own copy, so changing one later can't change the others
+                Products = [.. used.Select(p => p.Copy())],
                 Notes = Clean(notes)
             })
             .ToList();
@@ -61,13 +65,21 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
 
     public Task DeleteAsync(Guid id) => logs.DeleteAsync(id);
 
-    /// <summary>"Repotted" or "Watered: rainwater".</summary>
+    /// <summary>
+    /// "Repotted", "Watered: rainwater" or "Fertilised: Hydro fertiliser, 2 ml/L · half strength".
+    /// </summary>
     public static string Describe(CareLog entry, Func<Enum, string> label)
     {
         var what = label(entry.Kind);
         if (entry.Kind == CareKind.MoistureReading && entry.Moisture is { } moisture)
             what = $"{what}: {moisture}/10";
-        return Clean(entry.Notes) is { } notes ? $"{what}: {notes}" : what;
+
+        var notes = Clean(entry.Notes);
+        if (entry.Products.Count == 0)
+            return notes is null ? what : $"{what}: {notes}";
+
+        var products = string.Join(" + ", entry.Products);
+        return notes is null ? $"{what}: {products}" : $"{what}: {products} · {notes}";
     }
 
     private Task RecordAsync(CareLog entry, Func<Enum, string> label)
@@ -90,4 +102,13 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
         date == Today ? time.GetUtcNow() : new DateTimeOffset(date.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero);
 
     private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
+    // Rows without a name are dropped rather than refused, the way a blank soil mix row is
+    private static List<ProductDose> Tidy(IReadOnlyList<ProductDose>? products) =>
+        [.. (products ?? []).Where(p => !string.IsNullOrWhiteSpace(p.Name)).Select(p =>
+        {
+            var copy = p.Copy();
+            copy.Name = p.Name.Trim();
+            return copy;
+        })];
 }

@@ -15,6 +15,7 @@ public static class Stores
     public const string PestTreatments = "pestTreatments";
     public const string Pots = "pots";
     public const string SoilMixes = "soilMixes";
+    public const string Products = "products";
 }
 
 public sealed record StorageEstimate(long Usage, long Quota, bool Persisted);

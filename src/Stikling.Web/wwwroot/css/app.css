@@ -507,6 +507,27 @@ a.item-card:focus-visible {
     margin-top: 0.75rem;
 }
 
+/* One picked product and its dose. The name takes what's left, so a long one wraps rather
+   than squeezing the dose box. */
+.care-dose {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.care-dose label {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.care-dose .input-group {
+    flex: 0 0 9rem;
+    width: 9rem;
+}
+
 .care-moisture {
     margin-top: 0.6rem;
     color: var(--pa-green-dark);

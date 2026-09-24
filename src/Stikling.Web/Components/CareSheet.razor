@@ -1,5 +1,6 @@
 @* Logging care. Used on one plant from its page, and on several at once from the plants list. *@
 @inject CareService CareService
+@inject IProductRepository ProductRepository
 @inject TimeProvider Time
 
 <div class="care-sheet">
@@ -32,6 +33,42 @@
             <label class="form-label" for="care-moisture">Reading (1 to 10)</label>
             <input type="number" id="care-moisture" class="form-control form-control-sm"
                    min="1" max="10" inputmode="numeric" @bind="moisture" />
+        </div>
+    }
+
+    @if (CareKinds.TakesProducts(kind))
+    {
+        <div class="mt-2">
+            <div class="form-label">What went in the water</div>
+            @if (products.Count == 0)
+            {
+                <div class="form-text mt-0">No products yet. You can add your fertilisers under Settings, then Products.</div>
+            }
+            else
+            {
+                <div class="chip-row" role="group" aria-label="Products">
+                    @foreach (var product in products)
+                    {
+                        <button type="button" class="chip @(IsPicked(product) ? "picked" : null)"
+                                aria-pressed="@(IsPicked(product) ? "true" : "false")"
+                                @onclick="() => Toggle(product)">@product.Name</button>
+                    }
+                </div>
+
+                @for (var i = 0; i < doses.Count; i++)
+                {
+                    var dose = doses[i];
+                    var id = $"care-dose-{i}";
+                    <div class="care-dose">
+                        <label for="@id">@dose.Name</label>
+                        <div class="input-group input-group-sm">
+                            <input type="number" id="@id" class="form-control" min="0" step="any"
+                                   inputmode="decimal" placeholder="Dose" @bind="dose.Amount" />
+                            <span class="input-group-text">@Labels.For(dose.Unit)</span>
+                        </div>
+                    </div>
+                }
+            }
         </div>
     }
 
@@ -68,6 +105,9 @@
     private CareKind kind = CareKind.Watered;
     private DateOnly occurredOn;
     private int? moisture;
+    private IReadOnlyList<Product> products = [];
+    // The products picked for this entry, in the order they were picked, each with its own dose
+    private readonly List<ProductDose> doses = [];
     private string? notes;
     private string? error;
     private bool busy;
@@ -79,20 +119,39 @@
 
     private string NotesHint => kind switch
     {
-        CareKind.Fertilised => "e.g. Hydro fertiliser, 2 ml/L",
+        CareKind.Fertilised => "e.g. Half strength",
         CareKind.Repotted => "e.g. Into the big terracotta",
         CareKind.Harvested => "e.g. A good handful of basil",
         _ => "Optional"
     };
 
-    protected override void OnInitialized() => occurredOn = Today;
+    protected override async Task OnInitializedAsync()
+    {
+        occurredOn = Today;
+        products = (await ProductRepository.GetAllAsync())
+            .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+    }
 
-    // Only a moisture reading carries a number, so clear it when switching away
+    // Only a moisture reading carries a number, and only a feed has products, so clear them when switching away
     private void KindChanged()
     {
         if (kind != CareKind.MoistureReading)
             moisture = null;
+        if (!CareKinds.TakesProducts(kind))
+            doses.Clear();
         error = null;
+    }
+
+    private bool IsPicked(Product product) => doses.Any(d => d.ProductId == product.Id);
+
+    // Picking a product adds it at its usual dose, which can then be changed for this entry
+    private void Toggle(Product product)
+    {
+        if (doses.FindIndex(d => d.ProductId == product.Id) is var index and >= 0)
+            doses.RemoveAt(index);
+        else
+            doses.Add(ProductDose.From(product));
     }
 
     private void DateChanged(ChangeEventArgs e)
@@ -107,9 +166,10 @@
         error = null;
         try
         {
-            await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, Labels.For, moisture);
+            await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, Labels.For, moisture, doses);
             notes = null;
             moisture = null;
+            doses.Clear();
             occurredOn = Today;
             await OnLogged.InvokeAsync();
         }

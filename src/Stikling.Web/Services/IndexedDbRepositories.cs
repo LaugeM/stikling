@@ -3,6 +3,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
+using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.SoilMixes;
 
@@ -24,6 +25,12 @@ public sealed class IndexedDbSoilMixRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<SoilMix>(db, time, Stores.SoilMixes), ISoilMixRepository
 {
     protected override IReadOnlyList<string> Validate(SoilMix mix) => mix.Validate();
+}
+
+public sealed class IndexedDbProductRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Product>(db, time, Stores.Products), IProductRepository
+{
+    protected override IReadOnlyList<string> Validate(Product product) => product.Validate();
 }
 
 public sealed class IndexedDbPropagationRepository(IndexedDb db, TimeProvider time)

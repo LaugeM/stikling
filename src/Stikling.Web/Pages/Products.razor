@@ -1,0 +1,227 @@
+@page "/products"
+@inject IProductRepository Repository
+@inject ProductService ProductService
+
+<PageTitle>Products · Stikling</PageTitle>
+
+<a class="back-link" href="settings">‹ Settings</a>
+<h1>Products</h1>
+
+<p class="settings-hint">
+    Your fertilisers, each with the dose you usually use. Logging a feed fills the dose in, and you
+    can change it for that one time. A care entry keeps the name and dose it was logged with, so
+    editing a product here doesn't change what you've already logged.
+</p>
+
+@if (errors.Count > 0)
+{
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in errors)
+        {
+            <div>@error</div>
+        }
+    </div>
+}
+
+@if (draft is not null)
+{
+    <section class="settings-section">
+        <h2>@(editing ? "Edit product" : "Add a product")</h2>
+
+        <div class="mb-3">
+            <label class="form-label" for="product-name">Name</label>
+            <input id="product-name" class="form-control" placeholder="e.g. Hydro fertiliser" autocomplete="off"
+                   value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="product-dose">Usual dose</label>
+            <input id="product-dose" class="form-control product-dose" type="number" inputmode="decimal"
+                   min="0" step="any" @bind="draft.DefaultDose" />
+            <div class="chip-row mt-2" role="group" aria-label="What the dose is measured in">
+                @foreach (var unit in Enum.GetValues<DoseUnit>())
+                {
+                    <button type="button" class="chip @Picked(draft.Unit == unit)"
+                            @onclick="() => draft.Unit = unit">@Labels.For(unit)</button>
+                }
+            </div>
+            <div class="form-text">Per litre of water. Leave it empty if you don't know it yet.</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="product-notes">Notes</label>
+            <textarea id="product-notes" class="form-control" rows="2" @bind="draft.Notes"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">
+                @(editing ? "Save changes" : "Add product")
+            </button>
+            <button type="button" class="btn btn-link" @onclick="Cancel">Cancel</button>
+        </div>
+    </section>
+}
+else
+{
+    <div class="form-actions mb-3">
+        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a product</button>
+    </div>
+}
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (uses.Count == 0)
+{
+    <div class="empty-state">
+        <p>No products yet.</p>
+        <p class="text-body-secondary">
+            Start with the fertiliser you use most. A name is enough; the dose can wait until you
+            next have the bottle in your hand.
+        </p>
+    </div>
+}
+else
+{
+    <section class="settings-section">
+        <h2>Your products</h2>
+
+        <ul class="product-list">
+            @foreach (var use in uses)
+            {
+                <li>
+                    @if (confirming == use.Product.Id)
+                    {
+                        <div class="product-confirm">
+                            <p>@DeleteWarning(use)</p>
+                            <div class="care-actions">
+                                <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
+                                        @onclick="() => DeleteAsync(use.Product)">Delete</button>
+                                <button type="button" class="btn btn-link btn-sm"
+                                        @onclick="() => confirming = null">Cancel</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="product-head">
+                            <span class="product-title">@use.Product.Name</span>
+                            <span class="product-dose-text">@(use.Product.DoseText ?? "no usual dose")</span>
+                        </div>
+                        <div class="product-use">@Used(use)</div>
+                        @if (!string.IsNullOrWhiteSpace(use.Product.Notes))
+                        {
+                            <div class="product-use">@use.Product.Notes</div>
+                        }
+                        <div class="care-actions">
+                            <button type="button" class="btn btn-link btn-sm p-0"
+                                    @onclick="() => StartEdit(use.Product)">Edit</button>
+                            <button type="button" class="btn btn-link btn-sm p-0"
+                                    @onclick="() => confirming = use.Product.Id">Delete</button>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+@code {
+    private IReadOnlyList<ProductUse> uses = [];
+    private bool loading = true;
+    private bool busy;
+    private List<string> errors = [];
+
+    private Product? draft;
+    private bool editing;
+    private Guid? confirming;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        uses = await ProductService.GetAllAsync();
+        loading = false;
+    }
+
+    private static string? Picked(bool picked) => picked ? "picked" : null;
+
+    /// <summary>"Used on 4 plants, last 12 Sep 2026".</summary>
+    private static string Used(ProductUse use) => use.LastUsed is { } last
+        ? $"Used on {Labels.Plants(use.Plants)}, last {Labels.Date(last)}"
+        : "Not logged yet";
+
+    private static string DeleteWarning(ProductUse use) => use.Plants == 0
+        ? $"Delete {use.Product.Name}?"
+        : $"Delete {use.Product.Name}? It's been logged on {Labels.Plants(use.Plants)}, and those entries keep its name and dose.";
+
+    private void StartNew()
+    {
+        editing = false;
+        errors = [];
+        confirming = null;
+        draft = new Product();
+    }
+
+    private void StartEdit(Product product)
+    {
+        editing = true;
+        errors = [];
+        confirming = null;
+        draft = product.Copy();
+    }
+
+    private void Cancel()
+    {
+        draft = null;
+        editing = false;
+        errors = [];
+    }
+
+    private async Task SaveAsync()
+    {
+        if (draft is null)
+            return;
+
+        draft.Name = draft.Name?.Trim();
+        draft.Notes = string.IsNullOrWhiteSpace(draft.Notes) ? null : draft.Notes.Trim();
+
+        errors = draft.Validate().ToList();
+        if (errors.Count > 0)
+            return;
+
+        busy = true;
+        try
+        {
+            await Repository.SaveAsync(draft);
+            await LoadAsync();
+            Cancel();
+        }
+        catch (InvalidOperationException e)
+        {
+            errors = [e.Message];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task DeleteAsync(Product product)
+    {
+        busy = true;
+        try
+        {
+            await Repository.DeleteAsync(product.Id);
+            confirming = null;
+            if (draft?.Id == product.Id)
+                Cancel();
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}
