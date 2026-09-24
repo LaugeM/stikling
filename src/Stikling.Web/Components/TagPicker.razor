@@ -1,0 +1,110 @@
+@* Picking tags. The tags already in use are chips to tap, for the same reason rooms are:
+   a datalist is invisible on a phone, and you end up with "for swap" next to "For swap".
+   A new tag counts as soon as it's typed, so saving without tapping Add doesn't lose it. *@
+
+<div class="tag-picker">
+    <div class="form-label">@Label</div>
+
+    <div class="room-chips" role="group" aria-label="@Label">
+        @foreach (var tag in Choices)
+        {
+            var picked = Has(tag);
+            <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                    @onclick="() => ToggleAsync(tag)">@tag</button>
+        }
+        <button type="button" class="chip new @(typing ? "picked" : null)" aria-expanded="@(typing ? "true" : "false")"
+                @onclick="ToggleTyping">+ New tag</button>
+    </div>
+
+    @if (typing)
+    {
+        @* form points at nothing, so Enter here adds the tag instead of submitting the page's form *@
+        <div class="tag-draft">
+            <input class="form-control" form="tag-draft-none" placeholder="e.g. Variegated" autocomplete="off"
+                   aria-label="New tag" enterkeyhint="done" value="@draft" @oninput="TypeAsync" @onkeydown="Key"
+                   @ref="draftInput" />
+            <button type="button" class="btn btn-outline-primary" disabled="@(PlantTags.Clean(draft) is null)"
+                    @onclick="Commit">Add</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<string> Value { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<List<string>> ValueChanged { get; set; }
+
+    /// <summary>The tags to offer, usually <see cref="PlantTags.Suggestions"/>.</summary>
+    [Parameter]
+    public IReadOnlyList<string> Suggestions { get; set; } = [];
+
+    [Parameter]
+    public string Label { get; set; } = "Tags";
+
+    private bool typing;
+    private string draft = "";
+    private List<string> beforeDraft = []; // the tags as they were when typing started
+    private ElementReference draftInput;
+    private bool focusDraft;
+
+    // The draft is left out while it's being typed, so a chip doesn't grow one letter at a time
+    private IReadOnlyList<string> Choices => PlantTags.Normalize([.. Suggestions, .. typing ? beforeDraft : Value]);
+
+    private bool Has(string tag) => Value.Any(t => PlantTags.Same(t, tag));
+
+    // Tapping a chip ends typing. Whatever was typed is already one of the tags.
+    private Task ToggleAsync(string tag)
+    {
+        typing = false;
+        draft = "";
+        return SetAsync(Has(tag) ? PlantTags.Remove(Value, tag) : PlantTags.Add(Value, tag));
+    }
+
+    private void ToggleTyping()
+    {
+        typing = !typing;
+        draft = "";
+        beforeDraft = [.. Value];
+        focusDraft = typing;
+    }
+
+    private Task TypeAsync(ChangeEventArgs e)
+    {
+        draft = e.Value?.ToString() ?? "";
+        return SetAsync(PlantTags.Add(beforeDraft, draft));
+    }
+
+    private void Key(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            Commit();
+    }
+
+    // The typed tag is in Value already. Committing clears the box for the next one.
+    private void Commit()
+    {
+        if (PlantTags.Clean(draft) is null)
+            return;
+
+        beforeDraft = [.. Value];
+        draft = "";
+        focusDraft = true;
+    }
+
+    private Task SetAsync(List<string> tags)
+    {
+        Value = tags;
+        return ValueChanged.InvokeAsync(tags);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!focusDraft)
+            return;
+
+        focusDraft = false;
+        await draftInput.FocusAsync();
+    }
+}

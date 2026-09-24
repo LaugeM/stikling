@@ -37,13 +37,12 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Quarantine flag and tags.** Both are small, and tags cover "variegated", "for swap" and "rare" at the same time.
-2. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
-3. **Products and doses on a care entry.** The care log is in, so "Hydro fertiliser, 2 ml/L" only needs somewhere to keep the products.
-4. **Import old photos with their dates**, so a plant's history can start before the app did.
-5. **Correct or hide a timeline entry.** Left over from M3.
-6. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
-7. **A pot fit helper**: given a nursery pot, which of your free outer pots it would go in.
+1. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
+2. **Products and doses on a care entry.** The care log is in, so "Hydro fertiliser, 2 ml/L" only needs somewhere to keep the products.
+3. **Import old photos with their dates**, so a plant's history can start before the app did.
+4. **Correct or hide a timeline entry.** Left over from M3.
+5. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
+6. **A pot fit helper**: given a nursery pot, which of your free outer pots it would go in.
 
 ### Cheap ones to slot in whenever
 
@@ -65,8 +64,9 @@ These need no new storage and no new screens worth the name: counts on the Today
 | ✅ | Add a photo while adding the plant, not only afterwards. The first one becomes the cover | 2 | S | M4 |
 | ✅ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | 1 | M | M3–M4 |
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
-| ☐ | Tags (e.g. "variegated", "rare", "quarantine", "for swap") and a tag filter | 3 | S | v1.x |
-| ☐ | Select several plants at once: change status, move to a room, add a note to all | 4 | M | v1.x |
+| ✅ | Tags (e.g. "variegated", "rare", "for swap") and a tag filter. Picking several tags narrows the list to plants that have all of them, the search finds tags too, and a tag on a plant's page opens the list filtered by it | 3 | S | v1.x |
+| ☐ | Rename or merge a tag everywhere at once, the way rooms can be in Settings | 6 | S | v1.x |
+| ◐ | Select several plants at once: change status, log care, add a note or tags to all. Moving them all to a room isn't built | 4 | M | v1.x |
 | ☐ | **Dormancy status**: e.g. alocasias dropping leaves in winter. Pauses "check on it" reminders and keeps the plant from looking dead | 4 | S | v1.x |
 | ☐ | Sort options: name, newest, room, last activity | 5 | S | v1.x |
 | ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | 5 | S | v1.x |
@@ -184,7 +184,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | **Pest cases** covering a group of plants: pest (spider mites, thrips, fungus gnats, mealybugs, scale, aphids, whitefly, other), start date, status (treating / watching / resolved) | 2 | M | v1.x |
 | ✅ | Treatment log on a case: what was used and when | 2 | S | v1.x |
 | ✅ | Interval ("every 3–5 days") with "next treatment due" shown on Today | 3 | S | v1.x |
-| ☐ | Quarantine flag and a "Quarantine" filter; badge on the card | 3 | S | v1.x |
+| ✅ | Quarantine flag with the day it started, a "Quarantine" filter and a badge on the card. Going in and coming out are recorded on the plant's history | 3 | S | v1.x |
 | ☐ | **Treatment recipes**, e.g. "Thrips spray: alcohol + demineralised water + a drop of dish soap". Each log entry saves the recipe as it was that day, so changing the recipe doesn't rewrite history | 4 | M | v1.x |
 | ✅ | Pest overview: all active cases in one list | 4 | S | v1.x |
 | ☐ | **Sticky trap counts**: log how many pests a (blue/yellow) sticky trap caught each week; a small chart shows whether treatment is working | 4 | M | v1.x |
@@ -244,7 +244,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 |---|---|---|---|---|
 | ✅ | Propagations that haven't been checked recently | 2 | M | M5 |
 | ✅ | Recent activity feed | 5 | S | M5 |
-| ☐ | Pest treatments due or overdue | 3 | S | v1.x |
+| ✅ | Pest treatments due or overdue | 3 | S | v1.x |
 | ☐ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
 

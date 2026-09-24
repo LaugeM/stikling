@@ -570,6 +570,59 @@ a.item-card:focus-visible {
     font-weight: 600;
 }
 
+/* Quarantine is a precaution rather than a problem, so it gets the pest colour in outline only */
+.quarantine-badge {
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--pa-alert);
+    color: var(--pa-alert);
+    border-radius: 0.6rem;
+    font-weight: 600;
+}
+
+/* Your own labels. Quiet on purpose, so they don't compete with status and pests */
+.tag-label {
+    display: inline-block;
+    padding: 0.05rem 0.45rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.6rem;
+    color: var(--pa-muted);
+    font-size: 0.78rem;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+a.tag-label:hover {
+    border-color: var(--pa-green);
+    color: var(--pa-green-dark);
+}
+
+.item-tags,
+.detail-tags,
+.tag-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.item-tags {
+    margin-top: 0.3rem;
+}
+
+.detail-tags .tag-label {
+    font-size: 0.85rem;
+    padding: 0.15rem 0.6rem;
+}
+
+.tag-filters {
+    gap: 0.35rem;
+}
+
+.tag-draft {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
 /* Only a treatment that is actually due is worth colouring; "next in 3 days" is not news */
 .pest-due.now {
     color: var(--pa-alert);
@@ -795,4 +848,8 @@ a.item-card:focus-visible {
 .chip.new.picked,
 .room-chip.new.picked {
     color: var(--pa-green-dark);
+}
+
+.tag-picker .form-label {
+    margin-bottom: 0.35rem;
 }

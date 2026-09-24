@@ -64,6 +64,10 @@ else
                 {
                     <span class="badge text-bg-secondary">@Labels.For(Plant.Status)</span>
                 }
+                @if (Plant.InQuarantine)
+                {
+                    <span class="badge quarantine-badge">Quarantine</span>
+                }
                 @foreach (var pest in Pests)
                 {
                     <span class="badge pest-badge">@Labels.For(pest.Pest)</span>
@@ -80,6 +84,15 @@ else
                     </span>
                 }
             </div>
+            @if (Plant.Tags.Count > 0)
+            {
+                <div class="item-tags">
+                    @foreach (var tag in Plant.Tags)
+                    {
+                        <span class="tag-label">@tag</span>
+                    }
+                </div>
+            }
         </div>
     </text>;
 }

@@ -161,6 +161,28 @@ else
             }
         </fieldset>
 
+        <fieldset>
+            <legend>Tags and quarantine</legend>
+            <div class="mb-3">
+                <TagPicker @bind-Value="plant.Tags" Suggestions="tagSuggestions" />
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="quarantine"
+                       checked="@plant.InQuarantine" @onchange="SetQuarantine" />
+                <label class="form-check-label" for="quarantine">In quarantine</label>
+            </div>
+            @if (plant.InQuarantine)
+            {
+                <div class="mt-2">
+                    <label class="form-label" for="quarantined-since">Since</label>
+                    <InputDate id="quarantined-since" class="form-control" @bind-Value="plant.QuarantinedSince"
+                               max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+            }
+            <div class="form-text">Kept apart from your other plants, e.g. while a new plant shows it has no pests.</div>
+        </fieldset>
+
         @if (IsNew)
         {
             <fieldset>
@@ -242,6 +264,7 @@ else
     private IReadOnlyList<Room> rooms = [];
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
+    private IReadOnlyList<string> tagSuggestions = [];
 
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
     private static readonly PotGroup[] OuterSlot = [PotGroup.Outer];
@@ -259,6 +282,10 @@ else
     private string? MixName(Guid id) => mixes.FirstOrDefault(m => m.Id == id)?.Name;
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
+
+    // Ticking it again after unticking keeps the date it had, so a slip doesn't restart the count
+    private void SetQuarantine(ChangeEventArgs e) =>
+        plant!.QuarantinedSince = (bool?)e.Value == true ? original?.QuarantinedSince ?? Today : null;
 
     // Clearing the outer pot clears what would be kept in it
     private void SetOuterPot(Guid? id)
@@ -280,6 +307,7 @@ else
         rooms = Room.List(all, await Propagations.GetAllAsync());
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
+        tagSuggestions = PlantTags.Suggestions(all);
 
         if (IsNew)
         {
