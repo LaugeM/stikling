@@ -5,6 +5,7 @@
 @inject PotService PotService
 @inject SoilMixService MixService
 @inject ProductService ProductService
+@inject IFeedRepository FeedRepository
 @inject BackupService Backup
 @inject DeviceFiles Files
 @inject IndexedDb Db
@@ -119,13 +120,26 @@
 <section class="settings-section">
     <h2>Products</h2>
     <p class="settings-hint">
-        Your fertilisers, each with the dose you usually use, so logging a feed says what went in
-        the water without typing it.
+        Your fertilisers, stimulants, silica and the rest, each with the dose you usually use, so
+        logging a feed says what went in the water without typing it.
     </p>
 
     <div class="room-row">
         <span class="room-name">@ProductSummary</span>
         <a class="btn btn-link btn-sm p-0" href="products">Manage products</a>
+    </div>
+</section>
+
+<section class="settings-section">
+    <h2>Feeds</h2>
+    <p class="settings-hint">
+        The feeds you mix from your products, in the order they go in the water, so logging one is a
+        tap and a batch can be measured out for any amount of water.
+    </p>
+
+    <div class="room-row">
+        <span class="room-name">@FeedSummary</span>
+        <a class="btn btn-link btn-sm p-0" href="feeds">Manage feeds</a>
     </div>
 </section>
 
@@ -166,8 +180,9 @@
                 @Labels.Count(file.Data.Counts.CareEntries, "care entry", "care entries"),
                 @Labels.Count(file.Data.Counts.PestCases, "pest case"),
                 @Labels.Count(file.Data.Counts.Pots, "pot"),
-                @Labels.Count(file.Data.Counts.SoilMixes, "soil mix", "soil mixes") and
-                @Labels.Count(file.Data.Counts.Products, "product").
+                @Labels.Count(file.Data.Counts.SoilMixes, "soil mix", "soil mixes"),
+                @Labels.Count(file.Data.Counts.Products, "product") and
+                @Labels.Count(file.Data.Counts.Feeds, "feed").
             </p>
             <p class="settings-hint">
                 Restoring adds what's missing here and brings back anything you've deleted since.
@@ -228,6 +243,7 @@
     private IReadOnlyList<PotUse> pots = [];
     private IReadOnlyList<MixUse> mixes = [];
     private IReadOnlyList<ProductUse> products = [];
+    private int feeds;
     private string? renaming; // the whole place being renamed, e.g. "Living room / On top of the PC"
     private string? roomMessage;
     private DateOnly? lastBackup;
@@ -248,6 +264,7 @@
         pots = await PotService.GetAllAsync();
         mixes = await MixService.GetAllAsync();
         products = await ProductService.GetAllAsync();
+        feeds = (await FeedRepository.GetAllAsync()).Count;
     }
 
     /// <summary>"6 pots, 2 free", for the line linking to the pot library.</summary>
@@ -268,6 +285,9 @@
     /// <summary>"2 products", for the line linking to the products.</summary>
     private string ProductSummary =>
         products.Count == 0 ? "No products saved yet" : Labels.Count(products.Count, "product");
+
+    /// <summary>"2 feeds", for the line linking to the feeds.</summary>
+    private string FeedSummary => feeds == 0 ? "No feeds saved yet" : Labels.Count(feeds, "feed");
 
     /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
     private static string Held(int plants, int propagations) => (plants, propagations) switch

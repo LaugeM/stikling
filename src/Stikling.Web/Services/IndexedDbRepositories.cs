@@ -1,4 +1,5 @@
 using Stikling.Core.Care;
+using Stikling.Core.Feeds;
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
@@ -31,6 +32,12 @@ public sealed class IndexedDbProductRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<Product>(db, time, Stores.Products), IProductRepository
 {
     protected override IReadOnlyList<string> Validate(Product product) => product.Validate();
+}
+
+public sealed class IndexedDbFeedRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Feed>(db, time, Stores.Feeds), IFeedRepository
+{
+    protected override IReadOnlyList<string> Validate(Feed feed) => feed.Validate();
 }
 
 public sealed class IndexedDbPropagationRepository(IndexedDb db, TimeProvider time)

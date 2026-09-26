@@ -111,6 +111,7 @@ public static class Labels
         PotWatering w => For(w),
         MixUnit u => For(u),
         DoseUnit u => For(u),
+        ProductKind k => For(k),
         _ => value.ToString()
     };
 
@@ -207,6 +208,15 @@ public static class Labels
     };
 
     public static string For(DoseUnit unit) => Doses.Symbol(unit);
+
+    public static string For(ProductKind kind) => kind switch
+    {
+        ProductKind.Stimulant => "Rooting or growth stimulant",
+        ProductKind.CalMag => "Cal-mag",
+        ProductKind.Ph => "pH up or down",
+        ProductKind.Other => "Something else",
+        _ => kind.ToString()
+    };
 
     /// <summary>Said under the ingredients when the percentages do not reach 100. Never blocks a save.</summary>
     public static string PercentTotal(decimal total) =>

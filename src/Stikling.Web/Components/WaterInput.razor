@@ -1,0 +1,49 @@
+@* An amount of water in litres or millilitres, handed on in litres. Updates as it's typed, so the amounts to measure out follow along. *@
+
+<div class="input-group input-group-sm water-input">
+    <input type="number" id="@Id" class="form-control" min="0" step="any" inputmode="decimal"
+           placeholder="@Placeholder" @bind="amount" @bind:event="oninput" @bind:after="NotifyAsync" />
+    <select class="form-select water-unit" aria-label="Litres or millilitres" @bind="unit" @bind:after="NotifyAsync">
+        @foreach (var value in Enum.GetValues<WaterUnit>())
+        {
+            <option value="@value">@Doses.Symbol(value)</option>
+        }
+    </select>
+</div>
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    /// <summary>The water in litres, or null while nothing above 0 is typed.</summary>
+    [Parameter]
+    public decimal? Litres { get; set; }
+
+    [Parameter]
+    public EventCallback<decimal?> LitresChanged { get; set; }
+
+    private decimal? amount;
+    private WaterUnit unit = WaterUnit.Litres;
+
+    // What was last handed on, so a change from outside (clearing it after logging) can be told
+    // apart from the echo of what was typed. Without it, typing "0.5" would be wiped at the "0".
+    private decimal? sent;
+
+    protected override void OnParametersSet()
+    {
+        if (Litres == sent)
+            return;
+
+        sent = Litres;
+        amount = Litres is { } litres && unit == WaterUnit.Millilitres ? litres * 1000 : Litres;
+    }
+
+    private Task NotifyAsync()
+    {
+        sent = amount > 0 ? Doses.ToLitres(amount.Value, unit) : null;
+        return LitresChanged.InvokeAsync(sent);
+    }
+}

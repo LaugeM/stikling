@@ -150,12 +150,12 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | Log several plants at once ("fertilised all semi-hydro plants") | 2 | M | v1.x |
 | ✅ | "Last watered / fertilised / flushed" summary on each plant | 2 | S | v1.x |
 | ✅ | **Moisture meter reading** (1–10) as a log type, with the latest reading shown on the card | 3 | S | v1.x |
-| ✅ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a usual dose in ml, g or drops per litre. The dose is optional | 4 | M | v1.x |
+| ✅ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a usual dose in ml, g or drops. The dose is typed the way the bottle puts it, e.g. 5 ml per 4 L or 1 ml per 500 ml, and is optional | 4 | M | v1.x |
 | ✅ | Which products and doses went in on a feed or a top-up, e.g. "Hydro fertiliser, 2 ml/L". The dose starts at the product's usual one and can be changed for that time, and the entry keeps its own copy, so editing or deleting a product doesn't change what was logged | 4 | S | v1.x |
 | ☐ | Water type: tap, demineralised, rain | 6 | S | v1.x |
 | ☐ | Semi-hydro details: reservoir level, flush interval, last flush | 6 | M | v1.x |
 | ☐ | Optional care intervals per plant ("fertilise every 2 weeks") that show up on Today | 6 | M | v1.x |
-| ☐ | **Nutrient dose calculator**: reservoir size × the product's dose per litre = ml to add | 7 | S | v1.x |
+| ✅ | **Nutrient dose calculator**: fill in the water on a feed or a top-up, in litres or millilitres, and each product shows how much to add | 7 | S | v1.x |
 | ☐ | Harvest log for herbs (basil, parsley): date and amount | 7 | S | v1.x |
 | ☐ | Flowering log (orchid, peace lily): spike started, blooming, done | 7 | S | v1.x |
 
@@ -226,12 +226,12 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | **Your feeds**: save a mix of products under a name ("weekly aroid feed", "rooting water"), each product with its own dose per litre | 5 | M | v1.x |
-| ☐ | Several products in one feed: fertiliser, rooting or growth stimulant, silica, cal-mag, pH down. Anything not on the list can be added as your own product | 5 | S | v1.x |
-| ☐ | The mix keeps the order the products go in the water, since silica has to go in first and be stirred before anything else | 5 | S | v1.x |
-| ☐ | Log a feed by picking the mix and the amount of water. The care entry saves each product and dose as it was that day, so changing the mix doesn't rewrite history | 5 | M | v1.x |
-| ☐ | Batch calculator: pick a mix and a water volume, and get how much of each product to measure out | 6 | S | v1.x |
-| ☐ | See which plants got a given feed and when, so a mix that isn't working shows up | 7 | S | v1.x |
+| ✅ | **Your feeds**: save a mix of products under a name ("weekly aroid feed", "rooting water"), each product with its own dose, e.g. 5 ml per 4 L. The dose starts at the product's usual one | 5 | M | v1.x |
+| ✅ | Several products in one feed. A product says what it is: fertiliser, rooting or growth stimulant, silica, cal-mag, pH up or down, or something else | 5 | S | v1.x |
+| ✅ | The mix keeps the order the products go in the water, since silica has to go in first and be stirred before anything else. A note says so when silica isn't first or pH isn't last, without stopping the save | 5 | S | v1.x |
+| ✅ | Log a feed by picking the mix and the amount of water. The care entry saves each product and dose as it was that day, so changing the mix doesn't rewrite history. The water is optional, and the doses can still be changed for that one time | 5 | M | v1.x |
+| ✅ | Batch calculator: pick a mix and a water volume, and get how much of each product to measure out. On the feeds page, and on the care entry once the water is filled in | 6 | S | v1.x |
+| ◐ | See which plants got a given feed and when, so a mix that isn't working shows up. The feeds list says how many plants have had each feed and when it was last given. A list of the plants and dates isn't built | 7 | S | v1.x |
 | ☐ | A different mix for propagations, e.g. quarter strength with a rooting stimulant | 7 | S | v1.x |
 | ☐ | EC and pH reading on a feed, for the semi-hydro reservoirs | 8 | S | v1.x |
 | ☐ | Mixing a feed takes the products off the supplies stock | 8 | M | v1.x |

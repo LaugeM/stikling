@@ -1,4 +1,5 @@
 using Stikling.Core.Care;
+using Stikling.Core.Feeds;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
@@ -203,6 +204,32 @@ internal sealed class FakeProductRepository : IProductRepository
     {
         if (Products.TryGetValue(id, out var product))
             product.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeFeedRepository : IFeedRepository
+{
+    public Dictionary<Guid, Feed> Feeds { get; } = [];
+
+    public Task<IReadOnlyList<Feed>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Feed>>(Feeds.Values.Where(f => !f.IsDeleted).ToList());
+
+    public Task<Feed?> GetAsync(Guid id) =>
+        Task.FromResult(Feeds.TryGetValue(id, out var feed) && !feed.IsDeleted ? feed : null);
+
+    public Task SaveAsync(Feed feed)
+    {
+        if (feed.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid feed");
+        Feeds[feed.Id] = feed;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Feeds.TryGetValue(id, out var feed))
+            feed.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }

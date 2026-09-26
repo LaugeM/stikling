@@ -33,7 +33,9 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
         string? notes,
         Func<Enum, string> label,
         int? moisture = null,
-        IReadOnlyList<ProductDose>? products = null)
+        IReadOnlyList<ProductDose>? products = null,
+        Feed? feed = null,
+        decimal? waterLitres = null)
     {
         var used = Tidy(products);
         var entries = plantIds
@@ -46,6 +48,9 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
                 Moisture = moisture,
                 // Each entry gets its own copy, so changing one later can't change the others
                 Products = [.. used.Select(p => p.Copy())],
+                FeedId = feed?.Id,
+                FeedName = Clean(feed?.Name),
+                WaterLitres = waterLitres,
                 Notes = Clean(notes)
             })
             .ToList();
@@ -66,13 +71,18 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
     public Task DeleteAsync(Guid id) => logs.DeleteAsync(id);
 
     /// <summary>
-    /// "Repotted", "Watered: rainwater" or "Fertilised: Hydro fertiliser, 2 ml/L · half strength".
+    /// "Repotted", "Watered: rainwater", "Fertilised: Hydro fertiliser, 2 ml/L · half strength"
+    /// or "Fertilised with Aroid feed (2 L): Silica, 0.5 ml/L + Hydro fertiliser, 2 ml/L".
     /// </summary>
     public static string Describe(CareLog entry, Func<Enum, string> label)
     {
         var what = label(entry.Kind);
         if (entry.Kind == CareKind.MoistureReading && entry.Moisture is { } moisture)
             what = $"{what}: {moisture}/10";
+        if (Clean(entry.FeedName) is { } feed)
+            what = $"{what} with {feed}";
+        if (entry.WaterLitres is { } litres)
+            what = $"{what} ({Doses.Water(litres)})";
 
         var notes = Clean(entry.Notes);
         if (entry.Products.Count == 0)

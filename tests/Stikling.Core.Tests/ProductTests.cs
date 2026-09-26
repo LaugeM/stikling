@@ -26,10 +26,10 @@ public class ProductTests
     private static string Label(Enum value) => value.ToString();
 
     private static Product Hydro() =>
-        new() { Name = "Hydro fertiliser", DefaultDose = 2, Unit = DoseUnit.MlPerLitre };
+        new() { Name = "Hydro fertiliser", DefaultDose = 2, Unit = DoseUnit.Millilitres };
 
     private static Product Silica() =>
-        new() { Name = "Silica", DefaultDose = 0.5m, Unit = DoseUnit.MlPerLitre };
+        new() { Name = "Silica", DefaultDose = 0.5m, Unit = DoseUnit.Millilitres };
 
     private CareLog Feed(CareKind kind = CareKind.Fertilised, params Product[] used) => new()
     {
@@ -57,7 +57,7 @@ public class ProductTests
     public void The_usual_dose_reads_with_its_unit()
     {
         Assert.Equal("2 ml/L", Hydro().DoseText);
-        Assert.Equal("1.5 g/L", new Product { Name = "Cal-mag", DefaultDose = 1.5m, Unit = DoseUnit.GramsPerLitre }.DoseText);
+        Assert.Equal("1.5 g/L", new Product { Name = "Cal-mag", DefaultDose = 1.5m, Unit = DoseUnit.Grams }.DoseText);
         Assert.Null(new Product { Name = "Hydro" }.DoseText);
     }
 
@@ -238,7 +238,7 @@ public class ProductTests
         Assert.Equal("Hydro fertiliser, 2 ml/L", dose.ToString());
         Assert.Equal(1, restored.Counts.Products);
         // Stored as text, so reordering the units can't change what old data means
-        Assert.Contains("\"MlPerLitre\"", json);
+        Assert.Contains("\"Millilitres\"", json);
     }
 
     [Fact]
