@@ -1,0 +1,328 @@
+@page "/feeds"
+@inject IFeedRepository Repository
+@inject FeedService FeedService
+@inject IProductRepository ProductRepository
+
+<PageTitle>Feeds · Stikling</PageTitle>
+
+<a class="back-link" href="settings">‹ Settings</a>
+<h1>Feeds</h1>
+
+<p class="settings-hint">
+    The feeds you mix, saved under a name, with each product's dose in the order it goes in the
+    water. Logging a feed copies what's in it onto the care entry, so editing a feed here
+    doesn't change what you've already logged.
+</p>
+
+@if (errors.Count > 0)
+{
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in errors)
+        {
+            <div>@error</div>
+        }
+    </div>
+}
+
+@if (draft is not null)
+{
+    <section class="settings-section">
+        <h2>@(editing ? "Edit feed" : "Add a feed")</h2>
+
+        <div class="mb-3">
+            <label class="form-label" for="feed-name">Name</label>
+            <input id="feed-name" class="form-control" placeholder="e.g. Weekly aroid feed" autocomplete="off"
+                   value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label">What goes in the water</div>
+
+            @if (draft.Products.Count > 0)
+            {
+                <ol class="feed-rows">
+                    @for (var i = 0; i < draft.Products.Count; i++)
+                    {
+                        var index = i;
+                        var dose = draft.Products[index];
+                        var id = $"feed-dose-{index}";
+                        <li class="feed-row">
+                            <label class="feed-product" for="@id">
+                                <span class="feed-step">@(index + 1)</span>
+                                @NameOf(dose)
+                            </label>
+                            <div class="feed-tools">
+                                <button type="button" class="feed-tool" disabled="@(index == 0)"
+                                        aria-label="Move @NameOf(dose) up"
+                                        @onclick="() => draft.MoveUp(index)">▲</button>
+                                <button type="button" class="feed-tool" disabled="@(index == draft.Products.Count - 1)"
+                                        aria-label="Move @NameOf(dose) down"
+                                        @onclick="() => draft.MoveDown(index)">▼</button>
+                                <button type="button" class="feed-tool remove" aria-label="Remove @NameOf(dose)"
+                                        @onclick="() => draft.Products.RemoveAt(index)">✕</button>
+                            </div>
+                            <DoseInput Id="@id" Unit="dose.Unit"
+                                       @bind-Amount="dose.Amount" @bind-Per="dose.Per" @bind-PerUnit="dose.PerUnit" />
+                        </li>
+                    }
+                </ol>
+
+                @if (draft.OrderNote(products) is { } note)
+                {
+                    <p class="form-text">@note</p>
+                }
+                else
+                {
+                    <div class="form-text">In the order they go in the water.</div>
+                }
+            }
+
+            @if (products.Count == 0)
+            {
+                <p class="form-text">
+                    No products yet. Add your fertilisers and the rest under <a href="products">Products</a> first.
+                </p>
+            }
+            else if (Addable.Count > 0)
+            {
+                <div class="chip-row mt-2" role="group" aria-label="Products to add">
+                    @foreach (var product in Addable)
+                    {
+                        <button type="button" class="chip" @onclick="() => draft.Products.Add(ProductDose.From(product))">
+                            + @product.Name
+                        </button>
+                    }
+                </div>
+                <div class="form-text">Something missing? Add it under <a href="products">Products</a>.</div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="feed-notes">Notes</label>
+            <textarea id="feed-notes" class="form-control" rows="2" placeholder="e.g. Stir for a minute after the silica"
+                      @bind="draft.Notes"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">
+                @(editing ? "Save changes" : "Add feed")
+            </button>
+            <button type="button" class="btn btn-link" @onclick="Cancel">Cancel</button>
+        </div>
+    </section>
+}
+else
+{
+    <div class="form-actions mb-3">
+        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a feed</button>
+    </div>
+}
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (uses.Count == 0)
+{
+    <div class="empty-state">
+        <p>No feeds yet.</p>
+        <p class="text-body-secondary">
+            Start with the one you mix most. Pick the products in the order they go in the water, and
+            the doses start at each product's usual one.
+        </p>
+    </div>
+}
+else
+{
+    <section class="settings-section">
+        <h2>Your feeds</h2>
+
+        <ul class="feed-list">
+            @foreach (var use in uses)
+            {
+                <li>
+                    @if (confirming == use.Feed.Id)
+                    {
+                        <div class="feed-confirm">
+                            <p>@DeleteWarning(use)</p>
+                            <div class="care-actions">
+                                <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
+                                        @onclick="() => DeleteAsync(use.Feed)">Delete</button>
+                                <button type="button" class="btn btn-link btn-sm"
+                                        @onclick="() => confirming = null">Cancel</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        var measuring = mixing == use.Feed.Id;
+                        <div class="feed-title">@use.Feed.Name</div>
+                        <div class="feed-use">@Given(use)</div>
+
+                        @if (measuring)
+                        {
+                            var id = $"feed-water-{use.Feed.Id}";
+                            <div class="feed-water">
+                                <label for="@id">Water</label>
+                                <WaterInput Id="@id" Placeholder="e.g. 2" @bind-Litres="litres" />
+                            </div>
+                        }
+
+                        <ol class="feed-recipe">
+                            @foreach (var dose in use.Feed.Doses(products))
+                            {
+                                <li>
+                                    <span class="feed-recipe-name">@dose.Name</span>
+                                    <span class="feed-recipe-dose">@DoseText(dose)</span>
+                                    @if (measuring && litres > 0 && dose.For(litres.Value) is { } amount)
+                                    {
+                                        <span class="feed-measure">@Doses.Measured(amount, dose.Unit)</span>
+                                    }
+                                </li>
+                            }
+                        </ol>
+
+                        @if (!string.IsNullOrWhiteSpace(use.Feed.Notes))
+                        {
+                            <div class="feed-notes">@use.Feed.Notes</div>
+                        }
+
+                        <div class="care-actions">
+                            <button type="button" class="btn btn-link btn-sm p-0"
+                                    @onclick="() => ToggleMixing(use.Feed)">@(measuring ? "Done" : "Mix a batch")</button>
+                            <button type="button" class="btn btn-link btn-sm p-0"
+                                    @onclick="() => StartEdit(use.Feed)">Edit</button>
+                            <button type="button" class="btn btn-link btn-sm p-0"
+                                    @onclick="() => { confirming = use.Feed.Id; mixing = null; }">Delete</button>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+@code {
+    private IReadOnlyList<FeedUse> uses = [];
+    private IReadOnlyList<Product> products = [];
+    private bool loading = true;
+    private bool busy;
+    private List<string> errors = [];
+
+    private Feed? draft;
+    private bool editing;
+    private Guid? confirming;
+
+    // The feed being measured out, and for how much water. The water is kept between feeds,
+    // since it's usually the same watering can.
+    private Guid? mixing;
+    private decimal? litres;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        products = (await ProductRepository.GetAllAsync())
+            .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        uses = await FeedService.GetAllAsync();
+        loading = false;
+    }
+
+    /// <summary>The products not in the draft yet, so the same one can't go in twice.</summary>
+    private List<Product> Addable =>
+        [.. products.Where(p => draft?.Products.Any(d => d.ProductId == p.Id) != true)];
+
+    /// <summary>The product's name as it is now, or the one saved on the feed if it's been deleted.</summary>
+    private string NameOf(ProductDose dose) =>
+        products.FirstOrDefault(p => p.Id == dose.ProductId)?.Name ?? dose.Name;
+
+    private static string DoseText(ProductDose dose) =>
+        dose.Amount is { } amount ? Doses.Text(amount, dose.Unit, dose.Per, dose.PerUnit) : "no dose";
+
+    /// <summary>"Given to 4 plants, last 12 Sep 2026".</summary>
+    private static string Given(FeedUse use) => use.LastUsed is { } last
+        ? $"Given to {Labels.Plants(use.Plants)}, last {Labels.Date(last)}"
+        : "Not given yet";
+
+    private static string DeleteWarning(FeedUse use) => use.Plants == 0
+        ? $"Delete {use.Feed.Name}?"
+        : $"Delete {use.Feed.Name}? It's been given to {Labels.Plants(use.Plants)}, and those entries keep what was in it.";
+
+    private void ToggleMixing(Feed feed)
+    {
+        mixing = mixing == feed.Id ? null : feed.Id;
+        confirming = null;
+    }
+
+    private void StartNew()
+    {
+        editing = false;
+        errors = [];
+        confirming = null;
+        draft = new Feed();
+    }
+
+    private void StartEdit(Feed feed)
+    {
+        editing = true;
+        errors = [];
+        confirming = null;
+        draft = feed.Copy();
+    }
+
+    private void Cancel()
+    {
+        draft = null;
+        editing = false;
+        errors = [];
+    }
+
+    private async Task SaveAsync()
+    {
+        if (draft is null)
+            return;
+
+        draft.Name = draft.Name?.Trim();
+        draft.Notes = string.IsNullOrWhiteSpace(draft.Notes) ? null : draft.Notes.Trim();
+        // Saved with the names as they are now, so a feed read on its own still makes sense
+        draft.Products = draft.Doses(products);
+
+        errors = draft.Validate().ToList();
+        if (errors.Count > 0)
+            return;
+
+        busy = true;
+        try
+        {
+            await Repository.SaveAsync(draft);
+            await LoadAsync();
+            Cancel();
+        }
+        catch (InvalidOperationException e)
+        {
+            errors = [e.Message];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task DeleteAsync(Feed feed)
+    {
+        busy = true;
+        try
+        {
+            await Repository.DeleteAsync(feed.Id);
+            confirming = null;
+            if (draft?.Id == feed.Id)
+                Cancel();
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

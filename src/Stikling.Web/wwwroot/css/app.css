@@ -507,25 +507,63 @@ a.item-card:focus-visible {
     margin-top: 0.75rem;
 }
 
-/* One picked product and its dose. The name takes what's left, so a long one wraps rather
-   than squeezing the dose box. */
+/* One picked product and its dose. The name and what to measure out sit on one line and the
+   dose under them, since "5 ml per 4 L" needs the width. */
 .care-dose {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    margin-top: 0.6rem;
 }
 
-.care-dose label {
+.care-dose-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.2rem;
+}
+
+.care-dose-head label {
     flex: 1 1 auto;
     min-width: 0;
     margin: 0;
     font-size: 0.9rem;
 }
 
-.care-dose .input-group {
-    flex: 0 0 9rem;
+/* What to measure out for the water given, next to the product it's for */
+.care-measure {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--pa-green-dark);
+    font-variant-numeric: tabular-nums;
+}
+
+.care-water .water-input {
     width: 9rem;
+}
+
+/* A dose the way the bottle puts it. The two numbers stay narrow so the whole thing fits
+   on a phone; the unit boxes size to their text. */
+.dose-input {
+    flex-wrap: nowrap;
+    max-width: 20rem;
+}
+
+.dose-input .dose-amount {
+    flex: 1 1 4rem;
+    min-width: 3.5rem;
+}
+
+.dose-input .dose-per {
+    flex: 1 1 3.5rem;
+    min-width: 3rem;
+}
+
+/* Bootstrap gives a select in a small input group 3rem on the right for its arrow, which
+   leaves no room for "ml" */
+.input-group.dose-input > .dose-per-unit,
+.input-group.water-input > .water-unit {
+    flex: 0 0 4.5rem;
+    padding-right: 1.75rem;
+    background-position: right 0.5rem center;
 }
 
 .care-moisture {

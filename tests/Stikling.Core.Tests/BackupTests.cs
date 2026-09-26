@@ -123,11 +123,12 @@ public class BackupTests
             PestTreatments = [new PestTreatment()],
             Pots = [new Pot { Name = "Clear nursery pot" }],
             SoilMixes = [new SoilMix { Name = "Chunky soil" }],
-            Products = [new Product { Name = "Hydro fertiliser" }, new Product { Name = "Silica" }]
+            Products = [new Product { Name = "Hydro fertiliser" }, new Product { Name = "Silica" }],
+            Feeds = [new Feed { Name = "Aroid feed" }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 

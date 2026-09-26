@@ -8,9 +8,10 @@
 <h1>Products</h1>
 
 <p class="settings-hint">
-    Your fertilisers, each with the dose you usually use. Logging a feed fills the dose in, and you
-    can change it for that one time. A care entry keeps the name and dose it was logged with, so
-    editing a product here doesn't change what you've already logged.
+    Your fertilisers, stimulants, silica and anything else that goes in the water, each with the
+    dose you usually use. Logging a feed fills the dose in, and you can change it for that one time.
+    A care entry keeps the name and dose it was logged with, so editing a product here doesn't
+    change what you've already logged.
 </p>
 
 @if (errors.Count > 0)
@@ -35,17 +36,33 @@
         </div>
 
         <div class="mb-3">
+            <div class="form-label">What it is</div>
+            <div class="chip-row" role="group" aria-label="What it is">
+                @foreach (var kind in Enum.GetValues<ProductKind>())
+                {
+                    <button type="button" class="chip @Picked(draft.Kind == kind)"
+                            aria-pressed="@(draft.Kind == kind ? "true" : "false")"
+                            @onclick="() => draft.Kind = kind">@Labels.For(kind)</button>
+                }
+            </div>
+            <div class="form-text">A feed uses this to check that silica goes in first and pH last.</div>
+        </div>
+
+        <div class="mb-3">
             <label class="form-label" for="product-dose">Usual dose</label>
-            <input id="product-dose" class="form-control product-dose" type="number" inputmode="decimal"
-                   min="0" step="any" @bind="draft.DefaultDose" />
-            <div class="chip-row mt-2" role="group" aria-label="What the dose is measured in">
+            <DoseInput Id="product-dose" Small="false" Unit="draft.Unit"
+                       @bind-Amount="draft.DefaultDose" @bind-Per="draft.Per" @bind-PerUnit="draft.PerUnit" />
+            <div class="chip-row mt-2" role="group" aria-label="What the product is measured in">
                 @foreach (var unit in Enum.GetValues<DoseUnit>())
                 {
                     <button type="button" class="chip @Picked(draft.Unit == unit)"
+                            aria-pressed="@(draft.Unit == unit ? "true" : "false")"
                             @onclick="() => draft.Unit = unit">@Labels.For(unit)</button>
                 }
             </div>
-            <div class="form-text">Per litre of water. Leave it empty if you don't know it yet.</div>
+            <div class="form-text">
+                The way the bottle puts it, e.g. 5 ml per 4 L. Leave the dose empty if you don't know it yet.
+            </div>
         </div>
 
         <div class="mb-3">
@@ -109,7 +126,7 @@ else
                             <span class="product-title">@use.Product.Name</span>
                             <span class="product-dose-text">@(use.Product.DoseText ?? "no usual dose")</span>
                         </div>
-                        <div class="product-use">@Used(use)</div>
+                        <div class="product-use">@Labels.For(use.Product.Kind) · @Used(use)</div>
                         @if (!string.IsNullOrWhiteSpace(use.Product.Notes))
                         {
                             <div class="product-use">@use.Product.Notes</div>
@@ -147,10 +164,10 @@ else
 
     private static string? Picked(bool picked) => picked ? "picked" : null;
 
-    /// <summary>"Used on 4 plants, last 12 Sep 2026".</summary>
+    /// <summary>"used on 4 plants, last 12 Sep 2026".</summary>
     private static string Used(ProductUse use) => use.LastUsed is { } last
-        ? $"Used on {Labels.Plants(use.Plants)}, last {Labels.Date(last)}"
-        : "Not logged yet";
+        ? $"used on {Labels.Plants(use.Plants)}, last {Labels.Date(last)}"
+        : "not logged yet";
 
     private static string DeleteWarning(ProductUse use) => use.Plants == 0
         ? $"Delete {use.Product.Name}?"

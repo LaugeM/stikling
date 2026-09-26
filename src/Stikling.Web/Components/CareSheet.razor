@@ -1,6 +1,7 @@
 @* Logging care. Used on one plant from its page, and on several at once from the plants list. *@
 @inject CareService CareService
 @inject IProductRepository ProductRepository
+@inject IFeedRepository FeedRepository
 @inject TimeProvider Time
 
 <div class="care-sheet">
@@ -38,6 +39,26 @@
 
     @if (CareKinds.TakesProducts(kind))
     {
+        @if (feeds.Count > 0)
+        {
+            <div class="mt-2">
+                <div class="form-label">Feed</div>
+                <div class="chip-row" role="group" aria-label="Feeds">
+                    @foreach (var item in feeds)
+                    {
+                        <button type="button" class="chip @(feed?.Id == item.Id ? "picked" : null)"
+                                aria-pressed="@(feed?.Id == item.Id ? "true" : "false")"
+                                @onclick="() => PickFeed(item)">@item.Name</button>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="mt-2 care-water">
+            <label class="form-label" for="care-water">Water</label>
+            <WaterInput Id="care-water" Placeholder="Optional" @bind-Litres="water" />
+        </div>
+
         <div class="mt-2">
             <div class="form-label">What went in the water</div>
             @if (products.Count == 0)
@@ -60,12 +81,15 @@
                     var dose = doses[i];
                     var id = $"care-dose-{i}";
                     <div class="care-dose">
-                        <label for="@id">@dose.Name</label>
-                        <div class="input-group input-group-sm">
-                            <input type="number" id="@id" class="form-control" min="0" step="any"
-                                   inputmode="decimal" placeholder="Dose" @bind="dose.Amount" />
-                            <span class="input-group-text">@Labels.For(dose.Unit)</span>
+                        <div class="care-dose-head">
+                            <label for="@id">@dose.Name</label>
+                            @if (water > 0)
+                            {
+                                <span class="care-measure">@Measure(dose)</span>
+                            }
                         </div>
+                        <DoseInput Id="@id" Unit="dose.Unit"
+                                   @bind-Amount="dose.Amount" @bind-Per="dose.Per" @bind-PerUnit="dose.PerUnit" />
                     </div>
                 }
             }
@@ -106,6 +130,11 @@
     private DateOnly occurredOn;
     private int? moisture;
     private IReadOnlyList<Product> products = [];
+    private IReadOnlyList<Feed> feeds = [];
+    // The feed the doses came from, if one was picked. The doses can still be changed for this entry.
+    private Feed? feed;
+    // The water the products went into in litres, which is what turns a dose into an amount to measure
+    private decimal? water;
     // The products picked for this entry, in the order they were picked, each with its own dose
     private readonly List<ProductDose> doses = [];
     private string? notes;
@@ -131,6 +160,9 @@
         products = (await ProductRepository.GetAllAsync())
             .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
+        feeds = (await FeedRepository.GetAllAsync())
+            .OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
     }
 
     // Only a moisture reading carries a number, and only a feed has products, so clear them when switching away
@@ -139,7 +171,11 @@
         if (kind != CareKind.MoistureReading)
             moisture = null;
         if (!CareKinds.TakesProducts(kind))
+        {
             doses.Clear();
+            feed = null;
+            water = null;
+        }
         error = null;
     }
 
@@ -152,7 +188,29 @@
             doses.RemoveAt(index);
         else
             doses.Add(ProductDose.From(product));
+
+        // Taking everything out of a feed leaves nothing of it to log
+        if (doses.Count == 0)
+            feed = null;
     }
+
+    // Picking a feed puts its products in, in order and at its doses. Picking it again takes them out.
+    private void PickFeed(Feed item)
+    {
+        doses.Clear();
+        if (feed?.Id == item.Id)
+        {
+            feed = null;
+            return;
+        }
+
+        feed = item;
+        doses.AddRange(item.Doses(products));
+    }
+
+    /// <summary>"4 ml" for the water given, or nothing when the dose isn't known.</summary>
+    private string? Measure(ProductDose dose) =>
+        water is { } litres && dose.For(litres) is { } amount ? Doses.Measured(amount, dose.Unit) : null;
 
     private void DateChanged(ChangeEventArgs e)
     {
@@ -166,10 +224,13 @@
         error = null;
         try
         {
-            await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, Labels.For, moisture, doses);
+            await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, Labels.For, moisture, doses,
+                feed, water > 0 ? water : null);
             notes = null;
             moisture = null;
             doses.Clear();
+            feed = null;
+            water = null;
             occurredOn = Today;
             await OnLogged.InvokeAsync();
         }

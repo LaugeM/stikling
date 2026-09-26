@@ -47,6 +47,15 @@ public sealed class CareLog : Entity
     /// </summary>
     public List<ProductDose> Products { get; set; } = [];
 
+    /// <summary>The saved feed the products came from, for finding the plants that had it.</summary>
+    public Guid? FeedId { get; set; }
+
+    /// <summary>The feed's name as it was that day, so renaming or deleting it leaves the entry alone.</summary>
+    public string? FeedName { get; set; }
+
+    /// <summary>How much water the products went into. The whole batch, when one was mixed for several plants.</summary>
+    public decimal? WaterLitres { get; set; }
+
     public string? Notes { get; set; }
 
     public CareLog Copy()
@@ -81,11 +90,20 @@ public sealed class CareLog : Entity
         if (Products.Count > 0 && !CareKinds.TakesProducts(Kind))
             errors.Add("Only fertilising and topping up can have a product.");
 
+        if ((FeedName is not null || WaterLitres is not null) && !CareKinds.TakesProducts(Kind))
+            errors.Add("Only fertilising and topping up can have a feed.");
+
+        if (WaterLitres <= 0)
+            errors.Add("The amount of water has to be more than 0.");
+
         if (Products.Any(p => string.IsNullOrWhiteSpace(p.Name)))
             errors.Add("A product on the entry needs a name.");
 
         if (Products.Any(p => p.Amount < 0))
             errors.Add("A dose can't be less than 0.");
+
+        if (Products.Any(p => p.Per <= 0))
+            errors.Add(Doses.NoWater);
 
         return errors;
     }
