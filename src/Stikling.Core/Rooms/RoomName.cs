@@ -3,8 +3,8 @@ namespace Stikling.Core.Rooms;
 /// <summary>
 /// Where a plant or a propagation sits, written as one line of text: a room on its own
 /// ("Living room"), or a spot inside a room ("Living room / On top of the PC"). Keeping both
-/// in one field means old data and backups stay exactly as they were, and anything that only
-/// names a room still reads normally.
+/// in one field means a place is a single value to compare, rename and match against a pest
+/// case, and a place that only names a room needs nothing special.
 /// </summary>
 public static class RoomName
 {

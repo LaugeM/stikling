@@ -11,8 +11,7 @@ public class PlantChangesTests
     {
         Nickname = "Big alocasia",
         Location = "Living room",
-        Medium = GrowingMedium.Soil,
-        Container = "Plastic nursery pot"
+        Medium = GrowingMedium.Soil
     };
 
     [Fact]
@@ -30,11 +29,11 @@ public class PlantChangesTests
     {
         var edited = Original.Copy();
         edited.Medium = GrowingMedium.Leca;
-        edited.Container = "Lechuza pot";
+        edited.InnerPotId = Guid.NewGuid();
 
         Assert.Equal(
-            ["Now grows in Leca (was Soil)", "New pot: Lechuza pot"],
-            PlantChanges.Describe(Original, edited, Label));
+            ["Now grows in Leca (was Soil)", "Potted into Lechuza pot"],
+            PlantChanges.Describe(Original, edited, Label, _ => "Lechuza pot"));
     }
 
     [Theory]
@@ -60,15 +59,6 @@ public class PlantChangesTests
         var changes = PlantChanges.Describe(Original, edited, v => v is PlantStatus.GivenAway ? "Given away" : v.ToString());
 
         Assert.Equal(["Status: Given away (was Active)"], changes);
-    }
-
-    [Fact]
-    public void Removing_the_pot_text_is_not_reported()
-    {
-        var edited = Original.Copy();
-        edited.Container = null;
-
-        Assert.Empty(PlantChanges.Describe(Original, edited, Label));
     }
 
     [Fact]
@@ -126,6 +116,21 @@ public class PlantChangesTests
         Assert.Equal(
             ["Now in Chunky soil"],
             PlantChanges.Describe(Original, edited, Label, mixName: _ => "Chunky soil"));
+    }
+}
+
+public class PropagationChangesTests
+{
+    private static string Label(Enum value) => value.ToString();
+
+    [Fact]
+    public void Clearing_the_container_is_not_reported()
+    {
+        var before = new Propagation { Genus = "Alocasia", Container = "Humidity box" };
+        var edited = before.Copy();
+        edited.Container = null;
+
+        Assert.Empty(PropagationChanges.Describe(before, edited, Label));
     }
 }
 

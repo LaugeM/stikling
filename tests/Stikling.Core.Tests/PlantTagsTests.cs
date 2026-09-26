@@ -76,23 +76,6 @@ public class PlantTagsTests
     }
 
     [Fact]
-    public void Tags_set_to_null_become_empty()
-    {
-        var plant = new Plant { Tags = null! };
-
-        Assert.Empty(plant.Tags);
-    }
-
-    [Fact]
-    public void Old_plants_without_tags_load_with_none()
-    {
-        var plant = System.Text.Json.JsonSerializer.Deserialize<Plant>("""{"Nickname":"Old","Tags":null}""")!;
-
-        Assert.Empty(plant.Tags);
-        Assert.Null(plant.QuarantinedSince);
-    }
-
-    [Fact]
     public void Days_in_quarantine_count_from_the_day_it_went_in()
     {
         var plant = new Plant { QuarantinedSince = Today.AddDays(-12) };

@@ -177,10 +177,6 @@ else
                         {
                             <text> · @inner</text>
                         }
-                        else if (plant.OuterPotId is null && !string.IsNullOrWhiteSpace(plant.Container))
-                        {
-                            <text> · @plant.Container</text>
-                        }
 
                         @if (PotName(plant.OuterPotId) is { } outer)
                         {
