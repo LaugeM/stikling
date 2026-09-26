@@ -18,6 +18,9 @@ public interface ITimelineRepository
 
     Task AddAsync(TimelineEntry entry);
 
+    /// <summary>Saves a corrected entry.</summary>
+    Task UpdateAsync(TimelineEntry entry);
+
     /// <summary>Soft-deletes an entry, e.g. a note added by mistake.</summary>
     Task DeleteAsync(Guid id);
 }
@@ -31,6 +34,9 @@ public interface IPhotoRepository
 
     /// <summary>Saves photo metadata. The image data is stored separately by the photo service.</summary>
     Task AddAsync(Photo photo);
+
+    /// <summary>Saves changed metadata, e.g. a new date when its timeline entry was corrected.</summary>
+    Task UpdateAsync(Photo photo);
 
     Task DeleteAsync(Guid id);
 }

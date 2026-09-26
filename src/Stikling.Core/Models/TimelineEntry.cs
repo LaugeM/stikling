@@ -30,8 +30,9 @@ public enum TimelineKind
 }
 
 /// <summary>
-/// One event in the history of a plant or propagation. Entries are added, not edited:
-/// the history stays a faithful record of what happened when.
+/// One event in the history of a plant or propagation. Notes and photos can be corrected
+/// afterwards, but the version they replace is kept in <see cref="Edits"/>, so the history
+/// still shows what was written at the time.
 /// </summary>
 public sealed class TimelineEntry : Entity
 {
@@ -54,4 +55,17 @@ public sealed class TimelineEntry : Entity
     public SubjectType? RelatedType { get; set; }
 
     public Guid? RelatedId { get; set; }
+
+    /// <summary>Earlier versions of the entry, oldest first. Empty when it was never corrected.</summary>
+    public List<TimelineEdit> Edits { get; set; } = [];
+}
+
+/// <summary>How a timeline entry read before it was corrected.</summary>
+public sealed class TimelineEdit
+{
+    public string? Text { get; set; }
+    public DateTimeOffset OccurredAt { get; set; }
+
+    /// <summary>When the correction was made.</summary>
+    public DateTimeOffset ReplacedAt { get; set; }
 }

@@ -37,14 +37,15 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Correct or hide a timeline entry.** Left over from M3.
-2. **Import old photos with their dates**, so a plant's history can start before the app did.
-3. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
-4. **A pot fit helper**: given a nursery pot, which of your free outer pots it would go in.
+1. **Import old photos with their dates**, so a plant's history can start before the app did. A photo that lands on the wrong date can be corrected on the timeline.
+2. **Dormancy status**, so a resting plant doesn't look dead or keep showing up to be checked on.
+3. **Treatment recipes and sticky trap counts**, the two priority-4 rows left in the pest section.
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screens worth the name: counts on the Today screen, sort options and favourites on the plant list, purchase price, duplicating a plant, quick add from a pasted list of names, home screen shortcuts, an app version and a "what's new" page, and empty screens that say what to do next.
+These need no new storage and no new screens worth the name: counts on the Today screen, sort options and favourites on the plant list, purchase price, duplicating a plant, quick add from a pasted list of names, home screen shortcuts, an app version and a "what's new" page, an FAQ page, and empty screens that say what to do next.
+
+The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it, and the list of plants that got a feed.
 
 ---
 
@@ -82,7 +83,7 @@ These need no new storage and no new screens worth the name: counts on the Today
 
 ## 2. Photos & timeline
 
-Every plant and propagation gets its own history. Entries are only ever added, never overwritten, so the full history is kept.
+Every plant and propagation gets its own history. Entries are only ever added, and a corrected note or photo keeps the version it replaced, so the full history is kept.
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
@@ -91,7 +92,7 @@ Every plant and propagation gets its own history. Entries are only ever added, n
 | ✅ | Notes on the timeline ("new leaf unfurling", "roots 2 cm") | 1 | S | M3 |
 | ✅ | Automatic timeline entries for changes: status, medium/pot ("moved to semi-hydro"), room, stage | 1 | M | M3 |
 | ✅ | Choose the cover photo | 1 | S | M3 |
-| ☐ | Correct or hide a timeline entry by adding a new entry, keeping the original | 3 | S | v1.x |
+| ✅ | Correct a timeline entry: fix the text or the date of a note or a photo, and its photos move with it. The earlier versions are kept and shown under "edited". Automatic entries are fixed where they come from, and any entry can be deleted | 3 | S | v1.x |
 | ☐ | **Import existing photos with their dates**: pick old photos from the gallery and each is placed on the timeline by the date it was taken (EXIF), so a plant's history starts from day one | 3 | M | v1.x |
 | ☐ | Swipe through photos side by side to compare growth | 5 | M | v1.x |
 | ☐ | **Voice notes**: a microphone button on note fields using the phone's speech-to-text | 5 | S | v1.x |
@@ -194,7 +195,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ◐ | **Pot suggestions**: a plant's pot is picked from your pot library, on the plant form and when potting up. A propagation's container is still typed by hand, because a jar or a humidity box isn't a pot | 3 | S | v1.x |
+| ✅ | **Pot suggestions**: a plant's pot is picked from your pot library, on the plant form and when potting up. A propagation's container is typed by hand, because a jar or a humidity box isn't a pot | 3 | S | v1.x |
 | ☐ | **Supplies stock**: LECA, PON, perlite, sphagnum, fertilisers, sticky traps, alcohol, pots | 5 | M | v1.x |
 | ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | 5 | S | v1.x |
 | ✅ | **Your pots**: the pots you own, by kind (nursery, outer, stands on its own), what they're made of, their measurements, whether they self-water, and how many you have. A plant points at a pot and, when it has one, an outer pot | 6 | M | v1.x |

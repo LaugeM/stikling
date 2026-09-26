@@ -25,6 +25,12 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
         await db.PutAsync(Stores.Timeline, entry);
     }
 
+    public async Task UpdateAsync(TimelineEntry entry)
+    {
+        entry.UpdatedAt = time.GetUtcNow();
+        await db.PutAsync(Stores.Timeline, entry);
+    }
+
     public async Task DeleteAsync(Guid id)
     {
         var entry = await db.GetAsync<TimelineEntry>(Stores.Timeline, id);
@@ -52,6 +58,12 @@ public sealed class IndexedDbPhotoRepository(IndexedDb db, TimeProvider time) : 
     public async Task AddAsync(Photo photo)
     {
         photo.CreatedAt = photo.UpdatedAt = time.GetUtcNow();
+        await db.PutAsync(Stores.Photos, photo);
+    }
+
+    public async Task UpdateAsync(Photo photo)
+    {
+        photo.UpdatedAt = time.GetUtcNow();
         await db.PutAsync(Stores.Photos, photo);
     }
 
