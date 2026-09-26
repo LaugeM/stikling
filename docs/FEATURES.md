@@ -37,11 +37,10 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Success rate and days to root per medium.** The rooted date is stored now, so this is only a calculation and a small page.
+1. **Correct or hide a timeline entry.** Left over from M3.
 2. **Import old photos with their dates**, so a plant's history can start before the app did.
-3. **Correct or hide a timeline entry.** Left over from M3.
-4. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
-5. **A pot fit helper**: given a nursery pot, which of your free outer pots it would go in.
+3. **Inspection log and treatment recipes**, the next two rows of the pest section now that cases are in.
+4. **A pot fit helper**: given a nursery pot, which of your free outer pots it would go in.
 
 ### Cheap ones to slot in whenever
 
@@ -116,7 +115,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | Propagations list grouped by stage, with cards like "3× corm · LECA · day 24" | 1 | M | M4 |
 | ✅ | Propagations without a parent plant (bought seeds, e.g. the bay laurel) | 1 | S | M4 |
 | ✅ | "Check on it" reminder in the app: a propagation not looked at for X days shows on Today | 2 | S | M5 |
-| ☐ | Success rate and average days-to-root per medium and per type. The rooted date is stored now, so the numbers are there | 3 | S | v1.x |
+| ✅ | Success rate and average days-to-root per medium and per type, on a results page linked from Propagations. Success is counted in units, and a unit has made it once it's potted up or its batch has rooted | 3 | S | v1.x |
 | ✅ | **Experiments**: group propagations started together to compare mediums (the corm test: perlite vs sphagnum vs LECA vs corm riser) | 4 | M | v1.x |
 | ☐ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
 | ☐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare | 5 | S | v1.x |
