@@ -37,10 +37,9 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Correct a timeline entry**, the text or the date of a note or a photo. Left over from M3.
-2. **Import old photos with their dates**, so a plant's history can start before the app did. Right after the first one, since a photo will sometimes land on the wrong date.
-3. **Dormancy status**, so a resting plant doesn't look dead or keep showing up to be checked on.
-4. **Treatment recipes and sticky trap counts**, the two priority-4 rows left in the pest section.
+1. **Import old photos with their dates**, so a plant's history can start before the app did. A photo that lands on the wrong date can be corrected on the timeline.
+2. **Dormancy status**, so a resting plant doesn't look dead or keep showing up to be checked on.
+3. **Treatment recipes and sticky trap counts**, the two priority-4 rows left in the pest section.
 
 ### Cheap ones to slot in whenever
 
@@ -84,7 +83,7 @@ The partly built rows also have small pieces left: moving selected plants to a r
 
 ## 2. Photos & timeline
 
-Every plant and propagation gets its own history. Entries are only ever added, never overwritten, so the full history is kept.
+Every plant and propagation gets its own history. Entries are only ever added, and a corrected note or photo keeps the version it replaced, so the full history is kept.
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
@@ -93,7 +92,7 @@ Every plant and propagation gets its own history. Entries are only ever added, n
 | ✅ | Notes on the timeline ("new leaf unfurling", "roots 2 cm") | 1 | S | M3 |
 | ✅ | Automatic timeline entries for changes: status, medium/pot ("moved to semi-hydro"), room, stage | 1 | M | M3 |
 | ✅ | Choose the cover photo | 1 | S | M3 |
-| ◐ | Correct a timeline entry: fix the text or the date of a note or a photo. Deleting an entry works, correcting one isn't built | 3 | S | v1.x |
+| ✅ | Correct a timeline entry: fix the text or the date of a note or a photo, and its photos move with it. The earlier versions are kept and shown under "edited". Automatic entries are fixed where they come from, and any entry can be deleted | 3 | S | v1.x |
 | ☐ | **Import existing photos with their dates**: pick old photos from the gallery and each is placed on the timeline by the date it was taken (EXIF), so a plant's history starts from day one | 3 | M | v1.x |
 | ☐ | Swipe through photos side by side to compare growth | 5 | M | v1.x |
 | ☐ | **Voice notes**: a microphone button on note fields using the phone's speech-to-text | 5 | S | v1.x |

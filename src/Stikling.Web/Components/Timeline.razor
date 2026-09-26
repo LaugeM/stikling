@@ -1,5 +1,6 @@
 @* History of a plant or propagation: write notes, add photos, browse by day. *@
 @inject ITimelineRepository Entries
+@inject TimelineService TimelineService
 @inject IPhotoRepository PhotoRepository
 @inject PhotoService Photos
 @inject TimeProvider Time
@@ -72,14 +73,73 @@ else
                                 @if (entry.Kind != TimelineKind.Created)
                                 {
                                     <time datetime="@entry.OccurredAt.ToString("o")">@Labels.Time(entry.OccurredAt)</time>
-                                    <button type="button" class="entry-delete" @onclick="() => confirmDeleteId = entry.Id"
-                                            aria-label="Delete entry" title="Delete entry">✕</button>
+                                    @if (entry.Edits.Count > 0)
+                                    {
+                                        <button type="button" class="entry-edited" aria-expanded="@(versionsId == entry.Id ? "true" : "false")"
+                                                @onclick="() => versionsId = versionsId == entry.Id ? null : entry.Id">edited</button>
+                                    }
+                                    <span class="entry-actions">
+                                        @if (TimelineService.CanCorrect(entry) && editId != entry.Id)
+                                        {
+                                            <button type="button" class="entry-action" @onclick="() => StartEdit(entry)"
+                                                    aria-label="Correct entry" title="Correct entry">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+                                            </button>
+                                        }
+                                        <button type="button" class="entry-action" @onclick="() => confirmDeleteId = entry.Id"
+                                                aria-label="Delete entry" title="Delete entry">✕</button>
+                                    </span>
                                 }
                             </div>
 
-                            @if (!string.IsNullOrWhiteSpace(entry.Text))
+                            @if (editId == entry.Id)
+                            {
+                                <div class="entry-editor">
+                                    <textarea class="form-control" rows="2" aria-label="Corrected note" @bind="editText" @bind:event="oninput"></textarea>
+                                    <div class="entry-editor-row">
+                                        <label for="@editDateId">Happened on</label>
+                                        <input id="@editDateId" type="date" class="form-control form-control-sm" @bind="editDay"
+                                               max="@Today.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                    @if (editError is not null)
+                                    {
+                                        <p class="entry-editor-error" role="alert">@editError</p>
+                                    }
+                                    <div class="entry-editor-row">
+                                        <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveEditAsync(entry)"
+                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)))">Save</button>
+                                        <button type="button" class="btn btn-link btn-sm" @onclick="CancelEdit">Cancel</button>
+                                    </div>
+                                </div>
+                            }
+                            else if (!string.IsNullOrWhiteSpace(entry.Text))
                             {
                                 <p class="entry-text">@entry.Text</p>
+                            }
+
+                            @if (versionsId == entry.Id)
+                            {
+                                <div class="entry-versions">
+                                    <p class="entry-versions-title">Earlier versions</p>
+                                    <ol>
+                                        @foreach (var version in Enumerable.Reverse(entry.Edits))
+                                        {
+                                            <li>
+                                                <span class="entry-versions-meta">
+                                                    Dated @Labels.Date(LocalDay(version.OccurredAt)) · changed @Labels.Date(LocalDay(version.ReplacedAt))
+                                                </span>
+                                                @if (string.IsNullOrWhiteSpace(version.Text))
+                                                {
+                                                    <span class="entry-versions-empty">No text</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="entry-text">@version.Text</span>
+                                                }
+                                            </li>
+                                        }
+                                    </ol>
+                                </div>
                             }
 
                             @if (entry.RelatedId is { } relatedId)
@@ -139,6 +199,7 @@ else
     private readonly string cameraId = $"camera-{Guid.NewGuid():N}";
     private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
     private readonly string dateId = $"date-{Guid.NewGuid():N}";
+    private readonly string editDateId = $"edit-date-{Guid.NewGuid():N}";
 
     private ElementReference cameraInput;
     private ElementReference galleryInput;
@@ -154,6 +215,11 @@ else
     private bool busy;
     private Guid? confirmDeleteId;
     private int? viewerIndex;
+    private Guid? editId;
+    private string? editText;
+    private DateOnly editDay;
+    private string? editError;
+    private Guid? versionsId;
     private Guid loadedFor;
 
     private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
@@ -180,11 +246,8 @@ else
         days = TimelineOrder.ByDay(entries, Time.GetLocalNow().Offset);
     }
 
-    // An earlier date has no time of day, so it's recorded at noon; today means "now"
     private DateTimeOffset OccurredAt =>
-        occurredOn is { } d && d != Today
-            ? new DateTimeOffset(d.ToDateTime(new TimeOnly(12, 0)), Time.GetLocalNow().Offset)
-            : Time.GetUtcNow();
+        occurredOn is { } d ? TimelineService.MomentOn(d, Time.GetLocalNow()) : Time.GetUtcNow();
 
     private async Task SaveNoteAsync()
     {
@@ -271,6 +334,42 @@ else
         if (photoId == CoverPhotoId)
             await OnCoverChanged.InvokeAsync(null);
     }
+
+    private void StartEdit(TimelineEntry entry)
+    {
+        editId = entry.Id;
+        editText = entry.Text;
+        editDay = LocalDay(entry.OccurredAt);
+        editError = null;
+        confirmDeleteId = null;
+    }
+
+    private void CancelEdit()
+    {
+        editId = null;
+        editError = null;
+    }
+
+    private async Task SaveEditAsync(TimelineEntry entry)
+    {
+        busy = true;
+        try
+        {
+            await TimelineService.CorrectAsync(entry, editText, editDay);
+            CancelEdit();
+        }
+        catch (ArgumentException ex)
+        {
+            // The rule's own message, without " (Parameter 'day')"
+            editError = ex.Message.Split(" (Parameter")[0];
+        }
+
+        await LoadAsync();
+        busy = false;
+    }
+
+    private DateOnly LocalDay(DateTimeOffset moment) =>
+        DateOnly.FromDateTime(moment.ToOffset(Time.GetLocalNow().Offset).DateTime);
 
     private void ResetDate()
     {

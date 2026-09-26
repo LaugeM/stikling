@@ -37,6 +37,7 @@ builder.Services.AddScoped<IProductRepository, IndexedDbProductRepository>();
 builder.Services.AddScoped<IFeedRepository, IndexedDbFeedRepository>();
 builder.Services.AddScoped<ITimelineRepository, IndexedDbTimelineRepository>();
 builder.Services.AddScoped<IPhotoRepository, IndexedDbPhotoRepository>();
+builder.Services.AddScoped<TimelineService>();
 builder.Services.AddScoped<PlantService>();
 builder.Services.AddScoped<PropagationService>();
 builder.Services.AddScoped<RoomService>();

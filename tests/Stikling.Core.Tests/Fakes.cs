@@ -114,9 +114,48 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
         return Task.CompletedTask;
     }
 
+    public Task UpdateAsync(TimelineEntry entry)
+    {
+        Updated.Add(entry.Id);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Ids of the entries saved through <see cref="UpdateAsync"/>.</summary>
+    public List<Guid> Updated { get; } = [];
+
     public Task DeleteAsync(Guid id)
     {
         Entries.First(e => e.Id == id).DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakePhotoRepository : IPhotoRepository
+{
+    public Dictionary<Guid, Photo> Photos { get; } = [];
+
+    public Task<IReadOnlyList<Photo>> GetForAsync(Guid subjectId) =>
+        Task.FromResult<IReadOnlyList<Photo>>(
+            Photos.Values.Where(p => p.SubjectId == subjectId && !p.IsDeleted).OrderByDescending(p => p.TakenAt).ToList());
+
+    public Task<Photo?> GetAsync(Guid id) =>
+        Task.FromResult(Photos.GetValueOrDefault(id) is { IsDeleted: false } photo ? photo : null);
+
+    public Task AddAsync(Photo photo)
+    {
+        Photos[photo.Id] = photo;
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateAsync(Photo photo)
+    {
+        Photos[photo.Id] = photo;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        Photos[id].DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }
