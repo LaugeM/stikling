@@ -1,0 +1,125 @@
+@page "/propagations/results"
+@inject IPropagationRepository Repository
+
+<PageTitle>Results · Stikling</PageTitle>
+
+<a class="back-link" href="propagations">‹ Propagations</a>
+<h1>Results</h1>
+
+<p class="results-hint">
+    How each medium and each type has done. The success rate counts units, so a batch of 5 corms
+    where 4 made it counts as 4 of 5. A unit has made it once it's potted up or its batch has rooted,
+    and units still on their way aren't counted either way. Days to root only uses batches that were
+    marked as rooted, so one that went straight to potted up isn't in it.
+</p>
+
+@if (all is null)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (overall is null)
+{
+    <div class="empty-state">
+        <p>No propagations yet. The numbers show up here once you've started some.</p>
+    </div>
+}
+else
+{
+    <section class="results-section">
+        <h2>All propagations</h2>
+        <ul class="results-list">
+            <li>@Row("All", overall, "Rooted")</li>
+        </ul>
+    </section>
+
+    <section class="results-section">
+        <h2>By medium</h2>
+        <ul class="results-list">
+            @foreach (var result in byMedium)
+            {
+                <li>@Row(Labels.For(result.Key), result, "Rooted")</li>
+            }
+        </ul>
+    </section>
+
+    <section class="results-section">
+        <h2>By type</h2>
+        <ul class="results-list">
+            @foreach (var result in byType)
+            {
+                <li>@Row(Labels.For(result.Key), result, Labels.Stage(PropagationStage.Rooted, result.Key))</li>
+            }
+        </ul>
+    </section>
+}
+
+@code {
+    private IReadOnlyList<Propagation>? all;
+    private PropagationResult<string>? overall;
+    private IReadOnlyList<PropagationResult<GrowingMedium>> byMedium = [];
+    private IReadOnlyList<PropagationResult<PropagationType>> byType = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        all = await Repository.GetAllAsync();
+        overall = PropagationResults.Overall(all);
+        byMedium = PropagationResults.ByMedium(all);
+        byType = PropagationResults.ByType(all);
+    }
+
+    private static RenderFragment Row<TKey>(string name, PropagationResult<TKey> result, string rooted) => __builder =>
+    {
+        <div class="result-row">
+            <div class="result-head">
+                <span class="result-name">@name</span>
+                <span class="result-batches">@Labels.Count(result.Batches, "batch", "batches")</span>
+            </div>
+
+            @if (result.SuccessRate is { } rate)
+            {
+                <div class="result-bar" role="img" aria-label="@Percent(rate) made it">
+                    <span style="width: @(Percent(rate))"></span>
+                </div>
+                <div class="result-line">
+                    <strong>@Percent(rate)</strong> made it · @result.Succeeded of @result.Decided
+                    @if (result.Growing > 0)
+                    {
+                        <span class="text-body-secondary"> · @result.Growing still going</span>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="result-line text-body-secondary">
+                    Nothing has made it or failed yet · @result.Growing still going
+                </div>
+            }
+
+            <div class="result-line">
+                @if (result.AverageDaysToRoot is { } average)
+                {
+                    @if (result.DaysToRoot.Count == 1)
+                    {
+                        <span>@rooted in @Labels.Count(result.FastestDaysToRoot!.Value, "day")</span>
+                    }
+                    else
+                    {
+                        <span>@rooted in @Labels.Count(Days(average), "day") on average</span>
+                        <span class="text-body-secondary">
+                            · @result.FastestDaysToRoot to @result.SlowestDaysToRoot days over @Labels.Count(result.DaysToRoot.Count, "batch", "batches")
+                        </span>
+                    }
+                }
+                else
+                {
+                    <span class="text-body-secondary">No @rooted.ToLowerInvariant() dates yet</span>
+                }
+            </div>
+        </div>
+    };
+
+    private static string Percent(double rate) =>
+        $"{Math.Round(rate * 100, MidpointRounding.AwayFromZero):0}%";
+
+    private static int Days(double average) => (int)Math.Round(average, MidpointRounding.AwayFromZero);
+}

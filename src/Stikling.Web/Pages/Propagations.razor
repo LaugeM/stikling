@@ -13,6 +13,11 @@
     }
 </div>
 
+@if (all is { Count: > 0 })
+{
+    <a class="results-link" href="propagations/results">Success rate and days to root</a>
+}
+
 @if (all is null)
 {
     <p class="text-body-secondary">Loading…</p>
