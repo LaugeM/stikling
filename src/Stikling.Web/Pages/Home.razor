@@ -1,4 +1,5 @@
 @page "/"
+@using System.Globalization
 @inject IPlantRepository Plants
 @inject IPropagationRepository Propagations
 @inject ITimelineRepository Entries
@@ -9,7 +10,10 @@
 
 <PageTitle>Today · Stikling</PageTitle>
 
-<h1>Today</h1>
+<div class="page-heading">
+    <h1>Today</h1>
+    <span class="today-date">@Today.ToString("dddd d MMMM", CultureInfo.InvariantCulture)</span>
+</div>
 
 @if (!loaded)
 {
@@ -17,8 +21,13 @@
 }
 else if (plants.Count == 0 && propagations.Count == 0)
 {
-    <div class="empty-state">
-        <p>Nothing here yet. Add your first plant and it shows up in your collection.</p>
+    <div class="empty-state first-run">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path class="pot" d="M18 36h28v6H18Z" /><path class="pot" d="M21 42h22l-3 16H24Z" />
+            <path class="growth" d="M32 36V18" /><path class="growth" d="M32 28c0-8-6-13-14-13 0 8 6 13 14 13Z" /><path class="growth" d="M32 23c0-7 6-11 13-11 0 7-6 11-13 11Z" />
+        </svg>
+        <h2>Nothing here yet</h2>
+        <p>Add your first plant and it shows up in your collection.</p>
         <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
     </div>
 }
@@ -45,14 +54,14 @@ else
                 {
                     <li>
                         <a class="item-card" href="pests/@view.Case.Id">
-                            <div class="item-thumb" aria-hidden="true">
+                            <div class="item-thumb alert" aria-hidden="true">
                                 <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
                             </div>
                             <div class="item-text">
                                 <div class="item-name">@Labels.For(view.Case.Pest)</div>
                                 <div class="item-meta">
                                     <span class="pest-due now">@Labels.Due(view.DaysUntilDue ?? 0)</span>
-                                    <span>· @Labels.Scope(view.Case, view.Plants.Count) · @Labels.Plants(view.Plants.Count)</span>
+                                    <span>· @Labels.ScopeAndCount(view.Case, view.Plants.Count)</span>
                                 </div>
                             </div>
                         </a>
@@ -79,21 +88,12 @@ else
                 {
                     <li>
                         <a class="item-card" href="propagations/@check.Propagation.Id">
-                            <div class="item-thumb" aria-hidden="true">
-                                @if (check.Propagation.CoverPhotoId is { } coverId)
-                                {
-                                    <PhotoImage PhotoId="coverId" />
-                                }
-                                else
-                                {
-                                    <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
-                                }
-                            </div>
+                            <PropagationThumb Propagation="check.Propagation" Days="check.Propagation.DaysSinceStart(Today)" />
                             <div class="item-text">
                                 <div class="item-name">@check.Propagation.DisplayName</div>
                                 <div class="item-meta">
-                                    <span class="badge stage-badge">@Labels.Stage(check.Propagation.Stage, check.Propagation.Type)</span>
-                                    <span>@Labels.Summary(check.Propagation) · last seen @Labels.DaysAgo(check.DaysSince)</span>
+                                    <StageBadge Stage="check.Propagation.Stage" Type="check.Propagation.Type" />
+                                    <span>@Labels.Summary(check.Propagation) · @LastSeen(check)</span>
                                 </div>
                             </div>
                         </a>
@@ -177,6 +177,13 @@ else
             _ => null
         };
     }
+
+    // The tile already says how long it has been going, so don't repeat that number when
+    // nothing has been noted since it started
+    private string LastSeen(PropagationCheck check) =>
+        check.DaysSince >= check.Propagation.DaysSinceStart(Today)
+            ? "no notes yet"
+            : $"last seen {Labels.DaysAgo(check.DaysSince)}";
 
     private string NameOf(TimelineEntry entry) => names[entry.SubjectId];
 

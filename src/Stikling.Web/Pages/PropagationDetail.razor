@@ -9,7 +9,7 @@
 
 <PageTitle>@(propagation?.DisplayName ?? "Propagation") · Stikling</PageTitle>
 
-<a class="back-link" href="propagations">‹ Propagations</a>
+<a class="back-link" href="propagations">Propagations</a>
 
 @if (propagation is null)
 {
@@ -25,7 +25,16 @@ else
     }
 
     <header class="detail-header">
-        @if (propagation.CoverPhotoId is null)
+        @if (propagation.CoverPhotoId is null && propagation.IsActive)
+        {
+            // With no photo to show, the tile shows how long it has been going instead
+            var days = propagation.DaysSinceStart(Today);
+            <div class="detail-icon day-tile" aria-hidden="true">
+                <b>@days</b>
+                <small>@(days == 1 ? "day" : "days")</small>
+            </div>
+        }
+        else if (propagation.CoverPhotoId is null)
         {
             <div class="detail-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
@@ -49,13 +58,13 @@ else
 
     @if (propagation.IsActive)
     {
-        <div class="btn-group segmented mb-3" role="radiogroup" aria-label="Stage">
+        <div class="btn-group segmented stage-track mb-3" role="radiogroup" aria-label="Stage">
             @foreach (var stage in ManualStages)
             {
                 var id = $"stage-{stage}";
                 <input type="radio" class="btn-check" name="stage" id="@id" disabled="@busy"
                        checked="@(propagation.Stage == stage)" @onchange="() => SetStageAsync(stage)" />
-                <label class="btn btn-outline-primary btn-sm" for="@id">@Labels.Stage(stage, propagation.Type)</label>
+                <label class="btn btn-outline-primary btn-sm @(stage < propagation.Stage ? "passed" : null)" for="@id">@Labels.Stage(stage, propagation.Type)</label>
             }
         </div>
 

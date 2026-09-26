@@ -2,16 +2,7 @@
 @inject TimeProvider Time
 
 <a class="item-card" href="propagations/@Propagation.Id">
-    <div class="item-thumb" aria-hidden="true">
-        @if (Propagation.CoverPhotoId is { } coverId)
-        {
-            <PhotoImage PhotoId="coverId" />
-        }
-        else
-        {
-            <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
-        }
-    </div>
+    <PropagationThumb Propagation="Propagation" Days="@(Propagation.IsActive ? Propagation.DaysSinceStart(Today) : null)" />
 
     <div class="item-text">
         <div class="item-name">@Propagation.DisplayName</div>
@@ -28,9 +19,9 @@
             {
                 @if (ShowStage)
                 {
-                    <span class="badge stage-badge">@Labels.Stage(Propagation.Stage, Propagation.Type)</span>
+                    <StageBadge Stage="Propagation.Stage" Type="Propagation.Type" />
                 }
-                <span>@Labels.Summary(Propagation) · @Labels.Age(Propagation, Today)</span>
+                <span>@Labels.Summary(Propagation)</span>
                 @if (Propagation.DaysToRoot is { } days)
                 {
                     <span class="rooted-in">· rooted in @Labels.Count(days, "day")</span>

@@ -42,7 +42,7 @@ else
             : Labels.For(Plant.Origin);
 
     private RenderFragment Content => @<text>
-        <div class="item-thumb" aria-hidden="true">
+        <div class="item-thumb potted" aria-hidden="true">
             @if (Plant.CoverPhotoId is { } coverId)
             {
                 <PhotoImage PhotoId="coverId" />

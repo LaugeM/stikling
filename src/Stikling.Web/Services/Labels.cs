@@ -75,6 +75,12 @@ public static class Labels
         _ => Plants(plantCount)
     };
 
+    /// <summary>"Living room · 4 plants", or just "2 plants" when the case covers picked plants.</summary>
+    public static string ScopeAndCount(PestCase item, int plantCount) =>
+        item.Scope == PestScope.PickedPlants
+            ? Plants(plantCount)
+            : $"{Scope(item, plantCount)} · {Plants(plantCount)}";
+
     /// <summary>"due today", "2 days overdue", "next in 3 days".</summary>
     public static string Due(int daysUntil) => daysUntil switch
     {
