@@ -25,7 +25,6 @@ public static class PlantChanges
 
         ChangeText.AddLocation(changes, before.Location, after.Location);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
-        ChangeText.AddContainer(changes, before.Container, after.Container, "New pot");
 
         var name = potName ?? (_ => null);
         ChangeText.AddPot(changes, before.InnerPotId, after.InnerPotId, name, "Potted into", "Taken out of its pot");

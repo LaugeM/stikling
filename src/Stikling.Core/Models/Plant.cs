@@ -27,12 +27,6 @@ public sealed class Plant : Entity
 
     public GrowingMedium Medium { get; set; } = GrowingMedium.Soil;
 
-    /// <summary>
-    /// Free text for the pot, from before the pot library. Kept so nothing typed disappears:
-    /// it is shown while no pot is picked, and picking one replaces it.
-    /// </summary>
-    public string? Container { get; set; }
-
     /// <summary>The pot the roots are in.</summary>
     public Guid? InnerPotId { get; set; }
 
@@ -51,13 +45,7 @@ public sealed class Plant : Entity
     public string? Notes { get; set; }
 
     /// <summary>Your own labels, e.g. "variegated", "rare" or "for swap". See <see cref="Plants.PlantTags"/>.</summary>
-    public List<string> Tags
-    {
-        get => tags;
-        set => tags = value ?? []; // plants saved before tags existed have none
-    }
-
-    private List<string> tags = [];
+    public List<string> Tags { get; set; } = [];
 
     /// <summary>
     /// The day it went into quarantine, kept apart from the other plants. Null when it isn't in

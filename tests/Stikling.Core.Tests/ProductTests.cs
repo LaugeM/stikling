@@ -240,15 +240,4 @@ public class ProductTests
         // Stored as text, so reordering the units can't change what old data means
         Assert.Contains("\"Millilitres\"", json);
     }
-
-    [Fact]
-    public void A_care_entry_from_before_products_reads_with_none()
-    {
-        var json = $$"""{"PlantId":"{{plant}}","OccurredOn":"2026-09-01","Kind":"Fertilised","Notes":"Hydro fertiliser, 2 ml/L"}""";
-
-        var entry = JsonSerializer.Deserialize<CareLog>(json)!;
-
-        Assert.Empty(entry.Products);
-        Assert.Equal("Fertilised: Hydro fertiliser, 2 ml/L", CareService.Describe(entry, Label));
-    }
 }

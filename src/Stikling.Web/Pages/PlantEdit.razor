@@ -127,10 +127,6 @@ else
 
             <div class="mb-3">
                 <PotPicker @bind-Value="plant.InnerPotId" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
-                @if (OldPotText is { } noted)
-                {
-                    <div class="form-text">Noted before the pot library: @noted. Picking a pot replaces it.</div>
-                }
             </div>
 
             <div class="mb-3">
@@ -270,12 +266,6 @@ else
     private static readonly PotGroup[] OuterSlot = [PotGroup.Outer];
 
     private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
-
-    /// <summary>The pot typed in before the library existed, shown until a real pot is picked.</summary>
-    private string? OldPotText =>
-        plant is { InnerPotId: null, OuterPotId: null, Container: var text } && !string.IsNullOrWhiteSpace(text)
-            ? text.Trim()
-            : null;
 
     private string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
 
