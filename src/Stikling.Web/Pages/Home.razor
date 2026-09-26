@@ -88,16 +88,7 @@ else
                 {
                     <li>
                         <a class="item-card" href="propagations/@check.Propagation.Id">
-                            <div class="item-thumb" aria-hidden="true">
-                                @if (check.Propagation.CoverPhotoId is { } coverId)
-                                {
-                                    <PhotoImage PhotoId="coverId" />
-                                }
-                                else
-                                {
-                                    <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
-                                }
-                            </div>
+                            <PropagationThumb Propagation="check.Propagation" Days="check.Propagation.DaysSinceStart(Today)" />
                             <div class="item-text">
                                 <div class="item-name">@check.Propagation.DisplayName</div>
                                 <div class="item-meta">
@@ -105,7 +96,6 @@ else
                                     <span>@Labels.Summary(check.Propagation) · @LastSeen(check)</span>
                                 </div>
                             </div>
-                            <DayStamp Days="check.Propagation.DaysSinceStart(Today)" />
                         </a>
                     </li>
                 }
@@ -188,11 +178,11 @@ else
         };
     }
 
-    // The day stamp already says how long it has been going, so don't repeat that number
-    // when nothing has been noted since it started
+    // The tile already says how long it has been going, so don't repeat that number when
+    // nothing has been noted since it started
     private string LastSeen(PropagationCheck check) =>
         check.DaysSince >= check.Propagation.DaysSinceStart(Today)
-            ? "nothing noted since"
+            ? "no notes yet"
             : $"last seen {Labels.DaysAgo(check.DaysSince)}";
 
     private string NameOf(TimelineEntry entry) => names[entry.SubjectId];

@@ -23,7 +23,7 @@ typography:
     letterSpacing: "-0.02em"
   count:
     fontFamily: "'Bricolage Grotesque', system-ui, sans-serif"
-    fontSize: "1.6rem"
+    fontSize: "1.4rem"
     fontWeight: 700
     lineHeight: 1
     letterSpacing: "-0.02em"
@@ -96,9 +96,12 @@ components:
     textColor: "{colors.clay}"
     rounded: "{rounded.md}"
     size: "3.5rem"
-  day-stamp:
+  day-thumb:
+    backgroundColor: "{colors.leaf-tint}"
     textColor: "{colors.deep-moss}"
     typography: "{typography.count}"
+    rounded: "{rounded.md}"
+    size: "3.5rem"
   fab:
     backgroundColor: "{colors.potting-green}"
     textColor: "#ffffff"
@@ -195,7 +198,7 @@ Green carries the system, in three strengths. Clay is the second material, in tw
 
 ### Hierarchy
 - **Headline** (Bricolage 700, 2rem, 92% width, -0.02em): the page title, one per screen. On a detail page the name is 1.75rem and wraps rather than truncating, because a cultivar name is allowed to be long.
-- **Count** (Bricolage 700, 1.6rem, 80% width, tabular figures): the day count on a propagation row, and 2.25rem in the tile on a propagation page. Narrow so three digits still fit.
+- **Count** (Bricolage 700, 1.4rem, 80% width, tabular figures): the day count in a propagation row's tile, and 2.25rem in the tile on a propagation page. Narrow so three digits still fit.
 - **Title** (Bricolage 600, 1.125rem): card headings and form fieldset legends.
 - **Name** (Bricolage 600, 1.0625rem): the name on a list row.
 - **Body** (400, 1rem, 1.5 line-height): everything read as prose. Notes preserve their line breaks.
@@ -283,9 +286,9 @@ Arrows are icons too: the back links and the photo viewer use a stroked chevron,
 ### List Row
 The signature component, shared by plants and propagations. A 3.5rem tinted thumbnail, then a name at weight 600, a species line in italic Muted Ink, and a meta line of small facts. All three text lines truncate to one line with an ellipsis, so a row never changes height and a long list stays scannable.
 
-The thumbnail holds either a photo cropped to fill or, when there is no photo, a stroked icon: a sprout in Clay on Clay Soft for a plant, a glass in Potting Green on Leaf Tint for a propagation, and a bug in Alert on Alert Soft for an open pest case. Rows separate by 0.6rem of space, and a row scales to 98.5% while pressed.
+The thumbnail holds either a photo cropped to fill or, when there is no photo, a stroked icon: a sprout in Clay on Clay Soft for a plant, a glass in Potting Green on Leaf Tint for a finished propagation (one still going shows its day count instead), and a bug in Alert on Alert Soft for an open pest case. Rows separate by 0.6rem of space, and a row scales to 98.5% while pressed.
 
-A propagation that is still going carries a day stamp on the right: the number of days in Count type and Deep Moss, with "days" under it in small Muted Ink. It is the one number worth reading from arm's length, so it gets the size. The meta line no longer repeats it. The same stamp sits on the propagation rows on Today, next to "last seen".
+A propagation that is still going shows how many days it has been going in its tile, on Today and on the Propagations list. With no photo, the tile holds the number in Count type and Deep Moss with "days" under it in small Muted Ink, in place of the glass icon. With a photo, the photo stays and a small "14d" label sits in its bottom left corner on a solid Leaf Tint patch, so any photo keeps it readable. It is the one number worth reading from arm's length, and keeping it inside the tile leaves the full width for the name and one line of meta on a phone. The meta line does not repeat it: on Today, a propagation with nothing noted since it started says "no notes yet" instead of "last seen" with the same number.
 
 ### Experiment Group
 Batches in an experiment close up into one bordered block divided by hairlines, so mediums can be compared line by line. Each row carries a bar on a shared scale, where the longest batch fills the width: solid Potting Green for the days it took to root, a dashed outline up to today for a batch still going, and no bar for a batch that finished without rooting. The bars grow in once on load, and not at all with reduced motion.

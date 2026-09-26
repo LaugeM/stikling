@@ -309,32 +309,50 @@ a.item-card:active {
     color: var(--pa-alert);
 }
 
-/* How many days a propagation has been going, big enough to read from arm's length */
-.day-stamp {
-    flex: none;
-    align-self: center;
-    min-width: 3rem;
-    padding-left: 0.25rem;
-    text-align: right;
+/* How many days a propagation has been going, in the tile where a photo would be. Big
+   enough to read from arm's length, and narrow so three digits still fit. */
+.day-thumb {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     line-height: 1;
     color: var(--pa-green-dark);
 }
 
-.day-stamp b {
-    display: block;
+.day-thumb b {
     font-family: var(--pa-font-display);
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     font-weight: 700;
     font-stretch: 80%;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
 }
 
-.day-stamp small {
-    display: block;
-    margin-top: 0.15rem;
+.day-thumb small {
+    margin-top: 0.1rem;
     font-size: 0.7rem;
     color: var(--pa-muted);
+}
+
+/* The same count on a photo, in a corner, on a solid tile so any photo keeps it readable */
+.item-thumb {
+    position: relative;
+}
+
+.thumb-days {
+    position: absolute;
+    left: 0.2rem;
+    bottom: 0.2rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.35rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+    font-family: var(--pa-font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
 }
 
 .item-thumb svg {

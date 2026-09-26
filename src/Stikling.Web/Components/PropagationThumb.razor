@@ -1,0 +1,38 @@
+@* The tile at the start of a propagation row. While it's going the tile shows how many days
+   it has been: the number fills the tile when there's no photo, and sits in a corner of the
+   photo when there is one. A finished propagation shows its photo or the glass icon. *@
+
+@if (Propagation.CoverPhotoId is { } coverId)
+{
+    <div class="item-thumb">
+        <PhotoImage PhotoId="coverId" />
+        @if (Days is { } days)
+        {
+            <span class="thumb-days" title="@DaysText(days)"><span aria-hidden="true">@(days)d</span><span class="visually-hidden">@DaysText(days)</span></span>
+        }
+    </div>
+}
+else if (Days is { } days)
+{
+    <div class="item-thumb day-thumb">
+        <b>@days</b>
+        <small>@(days == 1 ? "day" : "days")</small>
+    </div>
+}
+else
+{
+    <div class="item-thumb" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required Propagation Propagation { get; set; }
+
+    /// <summary>Days since it started, or null for a finished propagation.</summary>
+    [Parameter]
+    public int? Days { get; set; }
+
+    private static string DaysText(int days) => days == 1 ? "1 day" : $"{days} days";
+}

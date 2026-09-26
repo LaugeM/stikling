@@ -220,7 +220,7 @@
       },
       "count": {
         "displayName": "Count",
-        "purpose": "The day count on a propagation row and in the tile on a propagation page. Narrow Bricolage with tabular figures."
+        "purpose": "The day count in a propagation row's tile and in the tile on a propagation page. Narrow Bricolage with tabular figures."
       },
       "name": {
         "displayName": "Name",
@@ -325,12 +325,12 @@
       "css": ".ds-empty { text-align: center; padding: 2.5rem 1rem; background: var(--pa-surface, #fff); color: var(--pa-muted, #5f6b63); border: 1px dashed var(--pa-border, #dde3dc); border-radius: 0.75rem; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-empty p { margin: 0; }"
     },
     {
-      "name": "Day Stamp",
+      "name": "Day Tile",
       "kind": "data",
-      "refersTo": "day-stamp",
-      "description": "How many days a propagation has been going, on the right of its row.",
-      "html": "<div class=\"ds-day-stamp\"><b>14</b><small>days</small></div>",
-      "css": ".ds-day-stamp { text-align: right; line-height: 1; color: var(--pa-green-dark, #1f5a37); } .ds-day-stamp b { display: block; font: 700 1.6rem/1 'Bricolage Grotesque', system-ui, sans-serif; font-stretch: 80%; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; } .ds-day-stamp small { display: block; margin-top: 0.15rem; font-size: 0.7rem; color: var(--pa-muted, #5f6b63); }"
+      "refersTo": "day-thumb",
+      "description": "How many days a propagation has been going, in its row's tile when there is no photo. With a photo, a small label sits in the photo's corner instead.",
+      "html": "<div class=\"ds-day-thumb\"><b>14</b><small>days</small></div>",
+      "css": ".ds-day-thumb { width: 3.5rem; height: 3.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 0.6rem; background: var(--pa-green-soft, #e6f2ea); line-height: 1; color: var(--pa-green-dark, #1f5a37); } .ds-day-thumb b { font: 700 1.4rem/1 'Bricolage Grotesque', system-ui, sans-serif; font-stretch: 80%; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; } .ds-day-thumb small { margin-top: 0.1rem; font-size: 0.7rem; color: var(--pa-muted, #5f6b63); }"
     },
     {
       "name": "Experiment Bar",
