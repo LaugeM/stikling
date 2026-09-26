@@ -28,9 +28,9 @@
             {
                 @if (ShowStage)
                 {
-                    <span class="badge stage-badge">@Labels.Stage(Propagation.Stage, Propagation.Type)</span>
+                    <StageBadge Stage="Propagation.Stage" Type="Propagation.Type" />
                 }
-                <span>@Labels.Summary(Propagation) · @Labels.Age(Propagation, Today)</span>
+                <span>@Labels.Summary(Propagation)</span>
                 @if (Propagation.DaysToRoot is { } days)
                 {
                     <span class="rooted-in">· rooted in @Labels.Count(days, "day")</span>
@@ -51,6 +51,11 @@
             }
         </div>
     </div>
+
+    @if (Propagation.IsActive)
+    {
+        <DayStamp Days="Propagation.DaysSinceStart(Today)" />
+    }
 </a>
 
 @code {

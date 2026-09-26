@@ -66,8 +66,16 @@
     border-radius: 0.5rem;
     background: rgb(0 0 0 / 0.35);
     color: #fff;
-    font-size: 2rem;
-    line-height: 1;
+}
+
+.viewer-nav svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .viewer-nav.prev {

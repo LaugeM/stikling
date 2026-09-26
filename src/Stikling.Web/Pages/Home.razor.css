@@ -1,3 +1,10 @@
+.today-date {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    color: var(--pa-muted);
+    white-space: nowrap;
+}
+
 .today-counts {
     margin: -0.25rem 0 1rem;
     color: var(--pa-muted);

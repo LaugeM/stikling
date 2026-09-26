@@ -13,14 +13,27 @@
     justify-content: space-between;
     padding: 0.75rem 1rem;
     padding-top: calc(0.75rem + env(safe-area-inset-top));
+    /* On a wide screen the title and toggle line up with the 48rem content column */
+    padding-inline: max(1rem, calc((100% - 48rem) / 2 + 1rem));
     background: var(--pa-surface);
     border-bottom: 1px solid var(--pa-border);
 }
 
 .app-title {
-    font-weight: 700;
-    font-size: 1.125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--pa-font-display);
+    font-weight: 800;
+    font-size: 1.375rem;
+    font-stretch: 88%;
+    letter-spacing: -0.02em;
     color: var(--pa-green-dark);
+    text-decoration: none;
+}
+
+.app-title img {
+    border-radius: 0.45rem;
 }
 
 .app-content {
@@ -42,6 +55,7 @@
     background: var(--pa-surface);
     border-top: 1px solid var(--pa-border);
     padding-bottom: env(safe-area-inset-bottom);
+    padding-inline: max(0px, calc((100% - 48rem) / 2));
 }
 
 .bottom-nav ::deep .bottom-nav-link {
@@ -60,6 +74,22 @@
 .bottom-nav ::deep .bottom-nav-link.active {
     color: var(--pa-green-dark);
     font-weight: 600;
+}
+
+/* The active tab's icon sits on a leaf-tinted tile, so where you are shows before you read */
+.bottom-nav ::deep .bottom-nav-link svg {
+    box-sizing: content-box;
+    padding: 0.2rem 0.9rem;
+    border-radius: 999px;
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bottom-nav ::deep .bottom-nav-link.active svg {
+    background: var(--pa-green-soft);
+}
+
+.bottom-nav ::deep .bottom-nav-link span {
+    font-family: var(--pa-font-display);
 }
 
 .bottom-nav ::deep svg {

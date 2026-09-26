@@ -12,8 +12,8 @@
             <PhotoImage PhotoId="photo.Id" Thumbnail="false" Class="viewer-img" Alt="Photo" />
             @if (PhotoList.Count > 1)
             {
-                <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="Previous photo">‹</button>
-                <button type="button" class="viewer-nav next" @onclick="() => Move(1)" aria-label="Next photo">›</button>
+                <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="Previous photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg></button>
+                <button type="button" class="viewer-nav next" @onclick="() => Move(1)" aria-label="Next photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg></button>
             }
         </div>
 

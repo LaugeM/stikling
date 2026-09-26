@@ -7,7 +7,7 @@
 
 <PageTitle>@(view is null ? "Pest case" : Labels.For(view.Case.Pest)) · Stikling</PageTitle>
 
-<a class="back-link" href="pests">‹ Pests</a>
+<a class="back-link" href="pests">Pests</a>
 
 @if (view is null)
 {
@@ -16,7 +16,7 @@
 else
 {
     <header class="detail-header">
-        <div class="detail-icon" aria-hidden="true">
+        <div class="detail-icon @(view.Case.IsOpen ? "alert" : null)" aria-hidden="true">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
         </div>
         <div class="min-w-0">
@@ -54,7 +54,7 @@ else
     <section class="detail-card">
         <dl class="detail-list">
             <dt>Covers</dt>
-            <dd>@Labels.Scope(view.Case, view.Plants.Count) · @Labels.Plants(view.Plants.Count)</dd>
+            <dd>@Labels.ScopeAndCount(view.Case, view.Plants.Count)</dd>
 
             <dt>Treating</dt>
             <dd>Every @Labels.Count(view.Case.IntervalDays, "day")</dd>

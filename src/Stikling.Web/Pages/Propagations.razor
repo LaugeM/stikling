@@ -1,4 +1,5 @@
 @page "/propagations"
+@using System.Globalization
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
 @inject TimeProvider Time
@@ -24,8 +25,15 @@
 }
 else if (all.Count == 0)
 {
-    <div class="empty-state">
-        <p>No propagations yet. Open a plant and tap <em>Propagate</em>, or start one without a parent plant, e.g. seeds.</p>
+    <div class="empty-state first-run">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path class="glass" d="M21 26h22v26a6 6 0 0 1-6 6H27a6 6 0 0 1-6-6Z" /><path class="glass" d="M21 37h22" opacity="0.45" />
+            <path class="growth" d="M32 53V14" /><path class="growth" d="M32 25c0-7-5-11-12-11 0 7 5 11 12 11Z" /><path class="growth" d="M32 20c0-6 5-10 12-10 0 6-5 10-12 10Z" />
+            <path class="growth" d="M32 53c-2 0-5-1-6-3M32 53c2 0 5-1 6-3M32 49c-2 0-4-1-5-2M32 49c2 0 4-1 5-2" />
+        </svg>
+        <h2>No propagations yet</h2>
+        <p>A propagation is a new plant grown from one you have, like a cutting in water or a few seeds.</p>
+        <p>Open a plant and tap <em>Propagate</em>, or start one without a parent plant, e.g. seeds.</p>
         <a class="btn btn-primary mt-3" href="propagations/new">Start a propagation</a>
     </div>
 }
@@ -54,6 +62,7 @@ else
 
     @foreach (var experiment in experiments)
     {
+        var longest = Math.Max(1, experiment.Entries.Max(e => BarDays(e) ?? 0));
         <section class="stage-group">
             <h2>@experiment.Name <span class="text-body-secondary">(@Labels.Count(experiment.Entries.Count, "batch", "batches"))</span></h2>
             <ul class="item-list experiment-list">
@@ -70,6 +79,13 @@ else
                             else
                             {
                                 <span class="experiment-result">@(Labels.Stage(entry.Propagation.Stage, entry.Propagation.Type)) · day @entry.DaysRunning</span>
+                            }
+                            @if (BarDays(entry) is { } barDays)
+                            {
+                                var share = (barDays / (double)longest).ToString("0.###", CultureInfo.InvariantCulture);
+                                <span class="experiment-bar @(entry.DaysToRoot is null ? "running" : null)" aria-hidden="true">
+                                    <span style="--share: @share"></span>
+                                </span>
                             }
                             @if (entry.Propagation.PottedUpCount > 0 || entry.Propagation.FailedCount > 0)
                             {
@@ -154,6 +170,11 @@ else
         var grouped = experiments.SelectMany(e => e.Entries).Select(e => e.Propagation.Id).ToHashSet();
         ungrouped = visible.Where(p => !grouped.Contains(p.Id)).ToList();
     }
+
+    // Days to root, or days so far for a batch still going. A batch that finished without
+    // rooting gets no bar, since its count of days stopped meaning anything.
+    private static int? BarDays(ExperimentEntry entry) =>
+        entry.DaysToRoot ?? (entry.Propagation.IsActive ? entry.DaysRunning : null);
 
     private string? ParentName(Propagation propagation) =>
         propagation.ParentPlantId is { } id && plants.TryGetValue(id, out var parent) ? parent.DisplayName : null;

@@ -102,7 +102,7 @@ else
     }
 
     private RenderFragment Card(PestCaseView view) => @<a class="item-card" href="pests/@view.Case.Id">
-        <div class="item-thumb" aria-hidden="true">
+        <div class="item-thumb @(view.Case.IsOpen ? "alert" : null)" aria-hidden="true">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
         </div>
         <div class="item-text">
@@ -112,7 +112,7 @@ else
                 {
                     <span class="badge stage-badge">@Labels.For(view.Case.Status)</span>
                 }
-                <span>@Labels.Scope(view.Case, view.Plants.Count) · @Labels.Plants(view.Plants.Count)</span>
+                <span>@Labels.ScopeAndCount(view.Case, view.Plants.Count)</span>
             </div>
             <div class="item-meta">
                 @if (view.DaysUntilDue is { } days)

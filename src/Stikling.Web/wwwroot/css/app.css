@@ -1,4 +1,17 @@
+/* Headings, names, numbers and buttons. Self-hosted so it works offline. Latin only, which
+   covers Danish. */
+@font-face {
+    font-family: "Bricolage Grotesque";
+    font-style: normal;
+    font-weight: 200 800;
+    font-stretch: 75% 100%;
+    font-display: swap;
+    src: url("../fonts/bricolage-grotesque-latin.woff2") format("woff2");
+}
+
 :root {
+    --pa-font-display: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
     --pa-green: #2f7d4f;
     --pa-green-dark: #1f5a37;
     --pa-green-soft: #e6f2ea;
@@ -8,9 +21,23 @@
     --pa-text: #1d2520;
     --pa-muted: #5f6b63;
 
-    /* Pests: the one thing in the app that should catch the eye rather than blend in */
-    --pa-alert: #a8442a;
-    --pa-alert-soft: #fae7e0;
+    /* Clay: plants, the things that live in pots. Green is for growing and for actions. */
+    --pa-clay: #b85c38;
+    --pa-clay-soft: #f6e6dc;
+
+    /* Pests: the one thing in the app that should catch the eye rather than blend in. Redder
+       than clay so an outbreak never reads as just another plant. */
+    --pa-alert: #b3261e;
+    --pa-alert-soft: #fbe3e0;
+
+    /* Delete buttons and links use the same red as pests, so the app has one red */
+    --bs-danger: var(--pa-alert);
+    --bs-danger-rgb: 179, 38, 30;
+    --bs-danger-text-emphasis: var(--pa-alert);
+
+    --bs-border-radius: 0.6rem;
+    --bs-border-radius-sm: 0.5rem;
+    --bs-border-radius-lg: 0.75rem;
 
     /* Point Bootstrap's primary colour at the app green */
     --bs-primary: var(--pa-green);
@@ -34,8 +61,15 @@
     --pa-text: #e3e9e4;
     --pa-muted: #9aa89f;
 
-    --pa-alert: #f0a58c;
-    --pa-alert-soft: #3a211a;
+    --pa-clay: #e08a64;
+    --pa-clay-soft: #36241b;
+
+    --pa-alert: #ff978b;
+    --pa-alert-soft: #3d1c1a;
+
+    --bs-danger: var(--pa-alert);
+    --bs-danger-rgb: 255, 151, 139;
+    --bs-danger-text-emphasis: var(--pa-alert);
 
     --bs-primary: var(--pa-green);
     --bs-primary-rgb: 95, 184, 131;
@@ -74,6 +108,19 @@ html, body {
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     background: var(--pa-bg);
     color: var(--pa-text);
+    accent-color: var(--pa-green);
+    caret-color: var(--pa-green);
+    scrollbar-color: var(--pa-border) transparent;
+}
+
+::selection {
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+}
+
+a {
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
 }
 
 h1:focus {
@@ -81,8 +128,50 @@ h1:focus {
 }
 
 h1 {
-    font-size: 1.5rem;
+    font-family: var(--pa-font-display);
+    font-size: 2rem;
     font-weight: 700;
+    font-stretch: 92%;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+}
+
+.btn {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+}
+
+.btn-danger {
+    --bs-btn-bg: var(--pa-alert);
+    --bs-btn-border-color: var(--pa-alert);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--pa-alert) 85%, black);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--pa-alert) 85%, black);
+    --bs-btn-active-bg: color-mix(in srgb, var(--pa-alert) 85%, black);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--pa-alert) 85%, black);
+    --bs-btn-disabled-bg: var(--pa-alert);
+    --bs-btn-disabled-border-color: var(--pa-alert);
+}
+
+:root[data-bs-theme="dark"] .btn-danger {
+    --bs-btn-color: #2a0d0a;
+    --bs-btn-hover-color: #2a0d0a;
+    --bs-btn-active-color: #2a0d0a;
+    --bs-btn-disabled-color: #2a0d0a;
+}
+
+.alert-danger {
+    --bs-alert-bg: var(--pa-alert-soft);
+    --bs-alert-border-color: color-mix(in srgb, var(--pa-alert) 30%, transparent);
+}
+
+/* Counts, days and doses line up when they're stacked */
+.item-meta,
+.detail-list,
+.experiment-result,
+.prop-summary,
+.today-counts {
+    font-variant-numeric: tabular-nums;
 }
 
 .btn-primary {
@@ -136,7 +225,7 @@ h1 {
 /* Round "add" button floating above the bottom navigation */
 .fab {
     position: fixed;
-    right: 1rem;
+    right: max(1rem, calc((100% - 48rem) / 2 + 1rem));
     bottom: calc(4.5rem + env(safe-area-inset-bottom));
     z-index: 11;
     width: 3.5rem;
@@ -182,9 +271,17 @@ h1 {
     text-decoration: none;
 }
 
+a.item-card {
+    transition: border-color 0.15s ease-out, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 a.item-card:hover,
 a.item-card:focus-visible {
     border-color: var(--pa-green);
+}
+
+a.item-card:active {
+    transform: scale(0.985);
 }
 
 .item-thumb {
@@ -197,6 +294,47 @@ a.item-card:focus-visible {
     border-radius: 0.6rem;
     background: var(--pa-green-soft);
     color: var(--pa-green);
+}
+
+/* A plant sits in a pot, so its placeholder is clay. Propagations keep the green. */
+.item-thumb.potted,
+.detail-icon.potted {
+    background: var(--pa-clay-soft);
+    color: var(--pa-clay);
+}
+
+.item-thumb.alert,
+.detail-icon.alert {
+    background: var(--pa-alert-soft);
+    color: var(--pa-alert);
+}
+
+/* How many days a propagation has been going, big enough to read from arm's length */
+.day-stamp {
+    flex: none;
+    align-self: center;
+    min-width: 3rem;
+    padding-left: 0.25rem;
+    text-align: right;
+    line-height: 1;
+    color: var(--pa-green-dark);
+}
+
+.day-stamp b {
+    display: block;
+    font-family: var(--pa-font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-stretch: 80%;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.day-stamp small {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.7rem;
+    color: var(--pa-muted);
 }
 
 .item-thumb svg {
@@ -220,6 +358,10 @@ a.item-card:focus-visible {
     min-width: 0;
 }
 
+.item-card .item-text {
+    flex: 1 1 auto;
+}
+
 .item-name,
 .item-sub {
     overflow: hidden;
@@ -228,7 +370,10 @@ a.item-card:focus-visible {
 }
 
 .item-name {
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
     font-weight: 600;
+    letter-spacing: -0.005em;
 }
 
 .item-sub {
@@ -282,7 +427,47 @@ a.item-card:focus-visible {
 
 .experiment-medium {
     flex: 1 1 auto;
+    font-family: var(--pa-font-display);
     font-weight: 600;
+}
+
+/* Days on a shared scale, so the batches compare by length. A batch that hasn't rooted yet
+   is drawn hollow up to today, since it's still running. */
+.experiment-bar {
+    flex: 1 0 100%;
+    order: 3;
+    height: 0.5rem;
+    margin: 0.35rem 0 0.1rem;
+    border-radius: 999px;
+    background: var(--pa-green-soft);
+}
+
+.experiment-bar span {
+    display: block;
+    width: calc(var(--share) * 100%);
+    min-width: 0.5rem;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--pa-green);
+    transform-origin: left;
+    animation: bar-grow 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.experiment-bar.running span {
+    background: transparent;
+    border: 1.5px dashed var(--pa-green);
+}
+
+@keyframes bar-grow {
+    from {
+        transform: scaleX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .experiment-bar span {
+        animation: none;
+    }
 }
 
 .experiment-result {
@@ -304,7 +489,22 @@ a.item-card:focus-visible {
 
 .experiment-outcome {
     flex: 1 0 100%;
+    order: 4;
     font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+/* Groups in a list (stages on Propagations, due and open on Pests) */
+.stage-group + .stage-group {
+    margin-top: 1.25rem;
+}
+
+.stage-group h2 {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
     color: var(--pa-muted);
 }
 
@@ -318,9 +518,43 @@ a.item-card:focus-visible {
 }
 
 .stage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
     background: var(--pa-green-soft);
     color: var(--pa-green-dark);
     font-weight: 600;
+}
+
+/* Three ticks in front of a propagation's stage: how far along started, rooting, rooted it is */
+.stage-steps {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.stage-steps i {
+    width: 0.3rem;
+    height: 0.65rem;
+    border-radius: 1px;
+    background: var(--pa-green);
+    opacity: 0.25;
+}
+
+.stage-steps[data-step="1"] i:nth-child(-n+1),
+.stage-steps[data-step="2"] i:nth-child(-n+2),
+.stage-steps[data-step="3"] i {
+    opacity: 1;
+}
+
+/* The stage picker on a propagation reads as a path: stages behind you stay tinted */
+.stage-track .btn-outline-primary.passed {
+    --bs-btn-bg: var(--pa-green-soft);
+    --bs-btn-color: var(--pa-green-dark);
+}
+
+.stage-track .btn {
+    position: relative;
+    transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease-out;
 }
 
 /* Add/edit forms: each group of fields is a card */
@@ -335,8 +569,6 @@ a.item-card:focus-visible {
 /* Bootstrap floats the legend inside the fieldset; only the text is restyled */
 .edit-form legend {
     margin-bottom: 0.75rem;
-    font-size: 1rem;
-    font-weight: 600;
 }
 
 .form-actions {
@@ -383,6 +615,7 @@ a.item-card:focus-visible {
     margin-bottom: -1px;
     background: transparent;
     color: var(--pa-muted);
+    font-family: var(--pa-font-display);
     font-weight: 500;
 }
 
@@ -401,6 +634,7 @@ a.item-card:focus-visible {
 
 .detail-header h1 {
     margin: 0;
+    font-size: 1.75rem;
     overflow-wrap: anywhere;
 }
 
@@ -423,6 +657,30 @@ a.item-card:focus-visible {
     stroke-width: 1.5;
     stroke-linecap: round;
     stroke-linejoin: round;
+}
+
+.day-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    color: var(--pa-green-dark);
+}
+
+.day-tile b {
+    font-family: var(--pa-font-display);
+    font-size: 2.25rem;
+    font-weight: 700;
+    font-stretch: 80%;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+}
+
+.day-tile small {
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    color: var(--pa-muted);
 }
 
 .min-w-0 {
@@ -449,9 +707,15 @@ a.item-card:focus-visible {
     border-radius: 0.75rem;
 }
 
-.detail-card h2 {
-    font-size: 1rem;
+.detail-card h2,
+.edit-form legend {
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
     font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+.detail-card h2 {
     margin: 0 0 0.5rem;
 }
 
@@ -772,10 +1036,33 @@ a.tag-label:hover {
 }
 
 .back-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
     text-decoration: none;
+}
+
+/* A stroked chevron in front of the label, drawn like the rest of the icons */
+.back-link::before {
+    content: "";
+    width: 1rem;
+    height: 1rem;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5-7 7 7 7'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5-7 7 7 7'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.link-chevron {
+    width: 0.9em;
+    height: 0.9em;
+    vertical-align: -0.1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .empty-state {
@@ -789,6 +1076,55 @@ a.tag-label:hover {
 
 .empty-state p {
     margin-bottom: 0;
+}
+
+/* The first thing a new visitor sees, so it gets a drawing and a real heading */
+.empty-state.first-run {
+    padding: 2rem 1.25rem 2.25rem;
+    background: var(--pa-green-soft);
+    border-color: color-mix(in srgb, var(--pa-green) 35%, transparent);
+    color: var(--pa-text);
+}
+
+.empty-state.first-run svg {
+    width: 5.5rem;
+    height: 5.5rem;
+    margin-bottom: 0.75rem;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.empty-state.first-run .glass {
+    stroke: var(--pa-green-dark);
+}
+
+.empty-state.first-run .growth {
+    stroke: var(--pa-green);
+}
+
+.empty-state.first-run .pot {
+    stroke: var(--pa-clay);
+}
+
+.empty-state.first-run h2 {
+    margin: 0 0 0.35rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--pa-green-dark);
+}
+
+.empty-state.first-run p + p {
+    margin-top: 0.5rem;
+}
+
+.empty-state.first-run p {
+    max-width: 28rem;
+    margin-inline: auto;
+    color: var(--pa-muted);
 }
 
 .valid.modified:not([type=checkbox]) {

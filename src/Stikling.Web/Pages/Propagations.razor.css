@@ -5,19 +5,6 @@
     margin-bottom: 1rem;
 }
 
-.stage-group + .stage-group {
-    margin-top: 1.25rem;
-}
-
-.stage-group h2 {
-    margin: 0 0 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--pa-muted);
-}
-
 /* Room at the end of the list for the add button */
 .list-body {
     padding-bottom: 5rem;

@@ -26,8 +26,13 @@
 }
 else if (all.Count == 0)
 {
-    <div class="empty-state">
-        <p>No plants yet. Add the first one to start your collection.</p>
+    <div class="empty-state first-run">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path class="pot" d="M18 36h28v6H18Z" /><path class="pot" d="M21 42h22l-3 16H24Z" />
+            <path class="growth" d="M32 36V18" /><path class="growth" d="M32 28c0-8-6-13-14-13 0 8 6 13 14 13Z" /><path class="growth" d="M32 23c0-7 6-11 13-11 0 7-6 11-13 11Z" />
+        </svg>
+        <h2>No plants yet</h2>
+        <p>Add the first one to start your collection.</p>
         <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
     </div>
 }

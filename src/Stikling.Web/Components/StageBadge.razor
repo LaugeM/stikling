@@ -1,0 +1,22 @@
+@* A propagation's stage, with three ticks showing how far along it is: "▮▯▯ Started". *@
+
+<span class="badge stage-badge">
+    <span class="stage-steps" data-step="@Step" aria-hidden="true"><i></i><i></i><i></i></span>
+    @Labels.Stage(Stage, Type)
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public PropagationStage Stage { get; set; }
+
+    [Parameter]
+    public PropagationType Type { get; set; } = PropagationType.Cutting;
+
+    private int Step => Stage switch
+    {
+        PropagationStage.Started => 1,
+        PropagationStage.Rooting => 2,
+        PropagationStage.Failed => 0,
+        _ => 3
+    };
+}
