@@ -36,6 +36,7 @@ The app runs entirely in the browser, so it can work offline and keep data on th
 src/Stikling.Core/          Models and domain rules (no browser dependencies, unit tested)
 src/Stikling.Web/           Blazor WebAssembly PWA
 tests/Stikling.Core.Tests/  xUnit tests
+tools/plant-names/          Builds the plant names the app suggests while you type
 .github/                   Build/test/deploy workflow and GitHub Pages prep script
 ```
 

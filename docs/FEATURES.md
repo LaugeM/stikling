@@ -69,13 +69,12 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ☐ | **Dormancy status**: e.g. alocasias dropping leaves in winter. Pauses "check on it" reminders and keeps the plant from looking dead | 4 | S | v1.x |
 | ☐ | Sort options: name, newest, room, last activity | 5 | S | v1.x |
 | ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | 5 | S | v1.x |
-| ☐ | Species autocomplete beyond genus (a bundled list of common houseplant species and cultivars) | 5 | M | v1.x |
 | ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | 5 | M | v1.x |
 | ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | 5 | M | v1.x |
 | ☐ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
 | ☐ | Grid view with large photos as an alternative to the list | 6 | S | v1.x |
-| ☐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline | 6 | L | v1.x |
-| ☐ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary, including hybrids and named varieties. Anything not on the list can still be typed | 6 | M | v1.x |
+| ◐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline. Built for the aroids (Araceae): every genus and species from Kew's checklist, the old names, and a starter list of cultivars. Other families, common names, family and native region, and a page to browse it aren't built. See `tools/plant-names` | 6 | L | v1.x |
+| ✅ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary and the names already on your plants and propagations, including hybrids and named varieties. An old name offers the one it goes by now, and a cultivar fills in its genus and species. Anything not on the list can still be typed | 6 | M | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
 | ☐ | Duplicate a plant (e.g. a second basil pot) | 7 | S | v1.x |
 | ☐ | Purchase price per plant | 7 | S | v1.x |
@@ -262,7 +261,6 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
 | ☐ | Units and date format settings | 7 | M | v1.x |
 | ☐ | Danish translation | 7 | L | v1.x |
-| ☐ | **Species autocomplete from GBIF** (free botanical database, no API key): correct spelling for genus/species, plus family and native region | 7 | M | v1.x |
 
 ## 7b. Phone conveniences
 
