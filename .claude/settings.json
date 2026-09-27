@@ -9,5 +9,18 @@
         "repo": "pbakaus/impeccable"
       }
     }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -Command \"git fetch --quiet origin; git merge --ff-only --quiet origin/main 2>&1 | Out-Null; exit 0\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }
