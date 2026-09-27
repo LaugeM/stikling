@@ -8,7 +8,7 @@ namespace Stikling.Web.Services;
 public abstract class IndexedDbEntityRepository<T>(IndexedDb db, TimeProvider time, string store) where T : Entity
 {
     /// <summary>For subclasses whose validation depends on the date.</summary>
-    protected DateOnly Today => DateOnly.FromDateTime(time.GetLocalNow().DateTime);
+    protected DateOnly Today => time.Today();
 
     protected abstract IReadOnlyList<string> Validate(T entity);
 

@@ -265,7 +265,7 @@ else
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
     private static readonly PotGroup[] OuterSlot = [PotGroup.Outer];
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     private string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
 

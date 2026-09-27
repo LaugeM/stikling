@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Stikling.Core.Pests;
 using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Tests;
@@ -7,8 +8,9 @@ public class RoomServiceTests
 {
     private readonly FakePlantRepository plants = new();
     private readonly FakePropagationRepository propagations = new();
+    private readonly FakePestCaseRepository pestCases = new();
 
-    private RoomService Service => new(plants, propagations);
+    private RoomService Service => new(plants, propagations, pestCases);
 
     private Plant AddPlant(string name, string? location)
     {
@@ -97,6 +99,31 @@ public class RoomServiceTests
         await Service.RenameAsync("Stue", "Living room");
 
         Assert.Equal("Kitchen", basil.Location);
+    }
+
+    [Fact]
+    public async Task A_pest_case_on_the_room_follows_the_rename()
+    {
+        var plant = AddPlant("Monstera", "Stue / Windowsill");
+        var item = new PestCase { Scope = PestScope.Room, Room = "Stue" };
+        pestCases.Cases[item.Id] = item;
+
+        await Service.RenameAsync("Stue", "Living room");
+
+        Assert.Equal("Living room", item.Room);
+        Assert.Equal([plant], PestService.PlantsIn(item, [plant]));
+    }
+
+    [Fact]
+    public async Task A_pest_case_on_another_room_is_left_alone()
+    {
+        AddPlant("Monstera", "Stue");
+        var item = new PestCase { Scope = PestScope.Room, Room = "Kitchen" };
+        pestCases.Cases[item.Id] = item;
+
+        await Service.RenameAsync("Stue", "Living room");
+
+        Assert.Equal("Kitchen", item.Room);
     }
 
     [Fact]

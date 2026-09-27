@@ -13,15 +13,6 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
         !entry.IsDeleted && entry.Kind is TimelineKind.Note or TimelineKind.Photo;
 
     /// <summary>
-    /// The moment to record for something that happened on a given day. Today means now, and
-    /// an earlier day has no time of day, so it is recorded at noon to land on the right day.
-    /// </summary>
-    public static DateTimeOffset MomentOn(DateOnly day, DateTimeOffset localNow) =>
-        day == DateOnly.FromDateTime(localNow.DateTime)
-            ? localNow
-            : new DateTimeOffset(day.ToDateTime(new TimeOnly(12, 0)), localNow.Offset);
-
-    /// <summary>
     /// Changes an entry's text and day, keeping the version it replaces. Photos on the entry
     /// move to the new day with it. Returns false when nothing changed.
     /// </summary>
@@ -30,8 +21,7 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
         if (!CanCorrect(entry))
             throw new InvalidOperationException("Only notes and photos can be corrected.");
 
-        var localNow = time.GetLocalNow();
-        if (day > DateOnly.FromDateTime(localNow.DateTime))
+        if (day > time.Today())
             throw new ArgumentException("An entry can't be dated in the future.", nameof(day));
 
         var entryPhotos = new List<Photo>();
@@ -46,8 +36,8 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
             throw new ArgumentException("A note needs some text.", nameof(text));
 
         // The same day keeps the time it was recorded at
-        var sameDay = DateOnly.FromDateTime(entry.OccurredAt.ToOffset(localNow.Offset).DateTime) == day;
-        var occurredAt = sameDay ? entry.OccurredAt : MomentOn(day, localNow);
+        var sameDay = time.LocalDay(entry.OccurredAt) == day;
+        var occurredAt = sameDay ? entry.OccurredAt : time.MomentOn(day);
         if (cleanText == entry.Text && occurredAt == entry.OccurredAt)
             return false;
 
@@ -72,5 +62,25 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Call after deleting a photo. An entry that only held photos goes too once none of them
+    /// are left, so the history doesn't keep an empty "Photo" line. An entry with text stays.
+    /// </summary>
+    public async Task RemoveEmptiedEntriesAsync(Guid subjectId, Guid photoId)
+    {
+        foreach (var entry in await timeline.GetForAsync(subjectId))
+        {
+            if (!entry.PhotoIds.Contains(photoId) || !string.IsNullOrWhiteSpace(entry.Text))
+                continue;
+
+            var anyLeft = false;
+            foreach (var id in entry.PhotoIds)
+                anyLeft |= await photos.GetAsync(id) is not null;
+
+            if (!anyLeft)
+                await timeline.DeleteAsync(entry.Id);
+        }
     }
 }

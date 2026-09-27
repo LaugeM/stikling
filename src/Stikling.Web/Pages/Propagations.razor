@@ -165,7 +165,7 @@ else
     private void Refresh()
     {
         visible = new PropagationFilter(search, progress).Apply(all ?? []).ToList();
-        experiments = Experiments.Group(visible, DateOnly.FromDateTime(Time.GetLocalNow().DateTime));
+        experiments = Experiments.Group(visible, Time.Today());
 
         var grouped = experiments.SelectMany(e => e.Entries).Select(e => e.Propagation.Id).ToHashSet();
         ungrouped = visible.Where(p => !grouped.Contains(p.Id)).ToList();

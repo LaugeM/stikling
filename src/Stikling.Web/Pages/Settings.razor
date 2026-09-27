@@ -253,7 +253,7 @@
     private string? message;
     private bool busy;
 
-    private DateOnly TodayDate => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly TodayDate => Time.Today();
 
     protected override async Task OnInitializedAsync()
     {
@@ -403,11 +403,15 @@
         {
             file.Zip.Position = 0;
             var summary = await Backup.ImportAsync(file.Zip);
-            message = summary.ChangedAnything
-                ? $"Restored {Labels.Count(summary.Added, "new item")} and {summary.Updated} updated, including {Labels.Count(summary.Photos, "photo")}."
+            message = summary switch
+            {
+                { ChangedRecords: true } =>
+                    $"Restored {Labels.Count(summary.Added, "new item")} and {summary.Updated} updated, including {Labels.Count(summary.Photos, "photo")}."
                     + (summary.BroughtBack > 0 ? $" {Labels.Count(summary.BroughtBack, "item")} deleted here came back." : "")
-                    + (summary.Kept > 0 ? $" {Labels.Count(summary.Kept, "item")} here {(summary.Kept == 1 ? "was" : "were")} already up to date." : "")
-                : "Everything in that backup was already here.";
+                    + (summary.Kept > 0 ? $" {Labels.Count(summary.Kept, "item")} here {(summary.Kept == 1 ? "was" : "were")} already up to date." : ""),
+                { Photos: > 0 } => $"Put back the pictures for {Labels.Count(summary.Photos, "photo")} that had lost them. Everything else was already here.",
+                _ => "Everything in that backup was already here."
+            };
         }
         catch (Exception ex)
         {

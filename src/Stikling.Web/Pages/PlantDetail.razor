@@ -339,7 +339,7 @@ else
     private string? PotName(Guid? id) =>
         id is { } potId ? pots.FirstOrDefault(p => p.Id == potId)?.DisplayName : null;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     protected override async Task OnParametersSetAsync()
     {

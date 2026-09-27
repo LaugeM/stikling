@@ -56,5 +56,5 @@
     [Parameter]
     public bool ShowStage { get; set; }
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 }

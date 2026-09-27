@@ -141,7 +141,7 @@
     private string? error;
     private bool busy;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     private string SubmitText =>
         PlantIds.Count == 1 ? "Log it" : $"Log for {Labels.Plants(PlantIds.Count)}";

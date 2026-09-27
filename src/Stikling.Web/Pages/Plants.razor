@@ -320,7 +320,7 @@ else
     private IReadOnlyList<PestCase> PestsFor(Plant plant) => PestService.CasesFor(plant, pestCases);
 
     private MoistureReading? MoistureFor(Plant plant) =>
-        CareSummary.LatestMoisture(careLogs, plant.Id, DateOnly.FromDateTime(Time.GetLocalNow().DateTime));
+        CareSummary.LatestMoisture(careLogs, plant.Id, Time.Today());
 
     private async Task AfterBulkCareAsync()
     {

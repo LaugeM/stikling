@@ -57,6 +57,10 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     public async Task<byte[]?> GetBytesAsync(Guid id, bool thumbnail) =>
         await (await Module).InvokeAsync<byte[]?>("getBytes", id, thumbnail);
 
+    /// <summary>True when the photo's image data is on this device.</summary>
+    public async Task<bool> HasBytesAsync(Guid id) =>
+        await (await Module).InvokeAsync<bool>("hasBytes", id);
+
     /// <summary>Puts image data back from a backup.</summary>
     public async Task PutBytesAsync(Guid id, byte[] bytes, byte[]? thumbnail) =>
         await (await Module).InvokeVoidAsync("putBytes", id, bytes, thumbnail);
@@ -65,8 +69,12 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     public async Task DeleteAsync(Guid id)
     {
         await photos.DeleteAsync(id);
-        await (await Module).InvokeVoidAsync("remove", id);
+        await RemoveBytesAsync(id);
     }
+
+    /// <summary>Frees the image data only, for a photo whose metadata is already marked deleted.</summary>
+    public async Task RemoveBytesAsync(Guid id) =>
+        await (await Module).InvokeVoidAsync("remove", id);
 
     public async ValueTask DisposeAsync()
     {

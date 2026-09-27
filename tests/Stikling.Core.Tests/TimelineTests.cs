@@ -225,6 +225,34 @@ public class TimelineCorrectionTests
     }
 
     [Fact]
+    public async Task A_photo_entry_goes_when_its_last_photo_is_deleted()
+    {
+        var first = Photo();
+        var second = Photo();
+        var entry = Note(null, first, second);
+
+        await photos.DeleteAsync(first.Id);
+        await service.RemoveEmptiedEntriesAsync(entry.SubjectId, first.Id);
+        Assert.False(entry.IsDeleted);
+
+        await photos.DeleteAsync(second.Id);
+        await service.RemoveEmptiedEntriesAsync(entry.SubjectId, second.Id);
+        Assert.True(entry.IsDeleted);
+    }
+
+    [Fact]
+    public async Task A_note_stays_when_its_photos_are_deleted()
+    {
+        var photo = Photo();
+        var entry = Note("Roots 2 cm", photo);
+
+        await photos.DeleteAsync(photo.Id);
+        await service.RemoveEmptiedEntriesAsync(entry.SubjectId, photo.Id);
+
+        Assert.False(entry.IsDeleted);
+    }
+
+    [Fact]
     public async Task Every_correction_is_kept_in_order()
     {
         var entry = Note("First");

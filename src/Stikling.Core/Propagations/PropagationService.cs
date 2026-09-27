@@ -23,7 +23,7 @@ public sealed class PropagationService(
     ITimelineRepository timeline,
     TimeProvider time)
 {
-    private DateOnly Today => DateOnly.FromDateTime(time.GetLocalNow().DateTime);
+    private DateOnly Today => time.Today();
 
     /// <summary>A new propagation from a plant, with its names and room filled in.</summary>
     public Propagation StartFrom(Plant parent) => new()
@@ -44,7 +44,7 @@ public sealed class PropagationService(
         await propagations.SaveAsync(propagation);
 
         var what = Describe(propagation, label);
-        var occurredAt = MomentOf(propagation.StartedOn);
+        var occurredAt = time.MomentOn(propagation.StartedOn);
         await timeline.AddAsync(new TimelineEntry
         {
             SubjectType = SubjectType.Propagation,
@@ -119,7 +119,7 @@ public sealed class PropagationService(
             throw new InvalidOperationException(error);
         propagation.RecordPottedUp(request.Count);
 
-        var occurredAt = MomentOf(request.Date);
+        var occurredAt = time.MomentOn(request.Date);
         foreach (var plant in newPlants)
         {
             await plants.SaveAsync(plant);
@@ -198,10 +198,6 @@ public sealed class PropagationService(
             RelatedType = plantId is null ? null : SubjectType.Plant,
             RelatedId = plantId
         });
-
-    // A date without a time: "now" for today, otherwise noon so it lands on the right day
-    private DateTimeOffset MomentOf(DateOnly date) =>
-        date == Today ? time.GetUtcNow() : new DateTimeOffset(date.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero);
 
     private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 }

@@ -68,7 +68,7 @@
     private string? error;
     private bool busy;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     protected override void OnInitialized() => Reset();
 

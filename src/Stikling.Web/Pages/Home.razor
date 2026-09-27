@@ -138,7 +138,7 @@ else
     private string? backupReminder;
     private bool loaded;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     protected override async Task OnInitializedAsync()
     {
@@ -147,7 +147,7 @@ else
         active = propagations.Where(p => p.IsActive).ToList();
 
         var latest = await Entries.GetLatestPerSubjectAsync();
-        checks = TodayBoard.NeedsChecking(propagations, latest, Today);
+        checks = TodayBoard.NeedsChecking(propagations, latest, Time);
 
         dueTreatments = PestService.Due(
             PestService.Describe(await PestCases.GetAllAsync(), plants, await PestTreatments.GetAllAsync(), Today));
@@ -202,7 +202,7 @@ else
 
     private string DayLabel(DateTimeOffset moment)
     {
-        var day = DateOnly.FromDateTime(moment.ToLocalTime().DateTime);
+        var day = Time.LocalDay(moment);
         return day == Today ? "today"
             : day == Today.AddDays(-1) ? "yesterday"
             : Labels.Date(day);

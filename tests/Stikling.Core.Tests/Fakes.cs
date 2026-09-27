@@ -1,6 +1,7 @@
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Models;
+using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
 using Stikling.Core.Products;
@@ -161,12 +162,15 @@ internal sealed class FakePhotoRepository : IPhotoRepository
 }
 
 /// <summary>A clock that always returns the same moment.</summary>
-internal sealed class FixedTime(DateTimeOffset now) : TimeProvider
+/// <param name="offset">The device's time zone. UTC unless a test is about time zones.</param>
+internal sealed class FixedTime(DateTimeOffset now, TimeSpan offset = default) : TimeProvider
 {
     public override DateTimeOffset GetUtcNow() => now;
 
-    // UTC keeps "today" the same on every machine the tests run on
-    public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
+    // A fixed zone keeps "today" the same on every machine the tests run on
+    public override TimeZoneInfo LocalTimeZone { get; } = offset == TimeSpan.Zero
+        ? TimeZoneInfo.Utc
+        : TimeZoneInfo.CreateCustomTimeZone("Test", offset, "Test", "Test");
 }
 
 internal sealed class FakePotRepository : IPotRepository
@@ -269,6 +273,30 @@ internal sealed class FakeFeedRepository : IFeedRepository
     {
         if (Feeds.TryGetValue(id, out var feed))
             feed.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakePestCaseRepository : IPestCaseRepository
+{
+    public Dictionary<Guid, PestCase> Cases { get; } = [];
+
+    public Task<IReadOnlyList<PestCase>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<PestCase>>(Cases.Values.Where(c => !c.IsDeleted).ToList());
+
+    public Task<PestCase?> GetAsync(Guid id) =>
+        Task.FromResult(Cases.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
+
+    public Task SaveAsync(PestCase item)
+    {
+        Cases[item.Id] = item;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Cases.TryGetValue(id, out var item))
+            item.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }
