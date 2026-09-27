@@ -6,6 +6,7 @@ namespace Stikling.Core.Tests;
 public class TodayBoardTests
 {
     private static readonly DateOnly Today = new(2026, 9, 20);
+    private static readonly FixedTime Time = new(new DateTimeOffset(Today.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero));
 
     private static Propagation Started(string name, int daysAgo) => new()
     {
@@ -27,7 +28,7 @@ public class TodayBoardTests
         var quiet = Started("Corms", 9);
         var fresh = Started("Coleus", 2);
 
-        var checks = TodayBoard.NeedsChecking([quiet, fresh], new Dictionary<Guid, TimelineEntry>(), Today);
+        var checks = TodayBoard.NeedsChecking([quiet, fresh], new Dictionary<Guid, TimelineEntry>(), Time);
 
         var check = Assert.Single(checks);
         Assert.Same(quiet, check.Propagation);
@@ -41,7 +42,23 @@ public class TodayBoardTests
         var propagation = Started("Corms", 30);
         var latest = new Dictionary<Guid, TimelineEntry> { [propagation.Id] = Entry(propagation.Id, 3) };
 
-        Assert.Empty(TodayBoard.NeedsChecking([propagation], latest, Today));
+        Assert.Empty(TodayBoard.NeedsChecking([propagation], latest, Time));
+    }
+
+    [Fact]
+    public void A_note_written_just_after_midnight_counts_for_that_day()
+    {
+        // 00:30 on the 20th in Denmark in summer is still the 19th in UTC
+        var danish = new FixedTime(new DateTimeOffset(2026, 9, 27, 10, 0, 0, TimeSpan.Zero), TimeSpan.FromHours(2));
+        var propagation = Started("Corms", 30);
+        var note = Entry(propagation.Id, 0);
+        note.OccurredAt = new DateTimeOffset(2026, 9, 20, 0, 30, 0, TimeSpan.FromHours(2));
+        var latest = new Dictionary<Guid, TimelineEntry> { [propagation.Id] = note };
+
+        var check = Assert.Single(TodayBoard.NeedsChecking([propagation], latest, danish));
+
+        Assert.Equal(Today, check.LastSeen);
+        Assert.Equal(7, check.DaysSince);
     }
 
     [Fact]
@@ -52,7 +69,7 @@ public class TodayBoardTests
         var deleted = Started("Deleted", 20);
         deleted.DeletedAt = DateTimeOffset.UtcNow;
 
-        Assert.Empty(TodayBoard.NeedsChecking([done, deleted], new Dictionary<Guid, TimelineEntry>(), Today));
+        Assert.Empty(TodayBoard.NeedsChecking([done, deleted], new Dictionary<Guid, TimelineEntry>(), Time));
     }
 
     [Fact]
@@ -61,7 +78,7 @@ public class TodayBoardTests
         var older = Started("Older", 20);
         var newer = Started("Newer", 8);
 
-        var checks = TodayBoard.NeedsChecking([newer, older], new Dictionary<Guid, TimelineEntry>(), Today);
+        var checks = TodayBoard.NeedsChecking([newer, older], new Dictionary<Guid, TimelineEntry>(), Time);
 
         Assert.Equal(["Older", "Newer"], checks.Select(c => c.Propagation.DisplayName));
     }

@@ -84,7 +84,7 @@ else
     private List<PestCaseView> resolved = [];
     private bool loaded;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,7 +117,7 @@ else
             <div class="item-meta">
                 @if (view.DaysUntilDue is { } days)
                 {
-                    <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days)</span>
+                    <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days, view.IsCheck)</span>
                     <span>· found @Labels.Date(view.Case.StartedOn)</span>
                 }
                 else if (view.Case.ResolvedOn is { } on)

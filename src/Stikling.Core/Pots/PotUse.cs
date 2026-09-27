@@ -6,16 +6,23 @@ namespace Stikling.Core.Pots;
 /// A pot and how many of it are taken, so the library can say what's still free before you
 /// start repotting.
 /// </summary>
-public sealed record PotUse(Pot Pot, int InUse)
+/// <param name="InUse">Plants in the collection sitting in it.</param>
+/// <param name="Gone">Pots that went with a plant given away or sold. Owned still counts them, so
+/// setting the plant back to "In collection" puts the pot back without touching the pot itself.</param>
+public sealed record PotUse(Pot Pot, int InUse, int Gone)
 {
     public int Owned => Pot.Owned;
 
+    /// <summary>How many of it are still in the house.</summary>
+    public int Here => Math.Max(0, Owned - Gone);
+
     /// <summary>Never below zero: more plants than pots means none are free, not minus one.</summary>
-    public int Free => Math.Max(0, Owned - InUse);
+    public int Free => Math.Max(0, Here - InUse);
 
     /// <summary>
     /// Every pot with the plants counted against it, sorted the way the library reads: nursery
     /// pots first, then by name, then smallest first, so the sizes of one pot line up together.
+    /// A plant that died frees its pots; one given away or sold takes the ones that went with it.
     /// </summary>
     public static IReadOnlyList<PotUse> List(IEnumerable<Pot> pots, IEnumerable<Plant> plants)
     {
@@ -23,7 +30,7 @@ public sealed record PotUse(Pot Pot, int InUse)
 
         return pots
             .Where(pot => !pot.IsDeleted)
-            .Select(pot => new PotUse(pot, alive.Count(p => p.InnerPotId == pot.Id || p.OuterPotId == pot.Id)))
+            .Select(pot => new PotUse(pot, alive.Count(p => p.Uses(pot.Id)), alive.Count(p => p.TookAway(pot.Id))))
             .OrderBy(use => use.Pot.Group)
             .ThenBy(use => use.Pot.Name, StringComparer.CurrentCultureIgnoreCase)
             .ThenBy(use => use.Pot.TopCm ?? decimal.MaxValue)

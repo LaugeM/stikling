@@ -211,7 +211,7 @@ else
     private Guid? confirming;
     private int confirmingPlants;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     protected override Task OnInitializedAsync() => LoadAsync();
 

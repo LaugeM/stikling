@@ -100,6 +100,10 @@ export async function getBlob(key) {
     return (await run("photoBlobs", "readonly", store => store.get(key))) ?? null;
 }
 
+export async function hasBlob(key) {
+    return (await run("photoBlobs", "readonly", store => store.count(key))) > 0;
+}
+
 export async function removeBlob(key) {
     await run("photoBlobs", "readwrite", store => store.delete(key));
 }

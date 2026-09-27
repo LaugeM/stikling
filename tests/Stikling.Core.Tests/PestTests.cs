@@ -147,11 +147,46 @@ public class PestTests
     }
 
     [Fact]
-    public void A_case_being_monitored_is_still_due()
+    public void A_case_being_watched_is_due_a_check_a_week_after_the_last_treatment()
     {
-        var item = Case(status: PestCaseStatus.Monitoring, interval: 4, started: Today.AddDays(-4));
+        var item = Case(status: PestCaseStatus.Monitoring, interval: 4, started: Today.AddDays(-20));
+        var last = Treatment(item, Today.AddDays(-7), nextDue: Today.AddDays(-3));
 
-        Assert.Equal(Today, PestService.NextDue(item, []));
+        var view = PestService.Describe(item, [], [last], Today);
+
+        Assert.Equal(Today, view.NextDue);
+        Assert.True(view.IsCheck);
+        Assert.Single(PestService.Due([view]));
+    }
+
+    [Fact]
+    public void Logging_a_check_moves_the_next_one_a_week_along()
+    {
+        var item = Case(status: PestCaseStatus.Monitoring, started: Today.AddDays(-20));
+        var treated = Treatment(item, Today.AddDays(-9));
+        var check = PestService.StartCheck(item, Today.AddDays(-2));
+
+        Assert.Equal(Today.AddDays(5), PestService.NextDue(item, [treated, check]));
+    }
+
+    [Fact]
+    public void A_check_is_not_offered_as_the_last_recipe()
+    {
+        var item = Case();
+        var treated = Treatment(item, Today.AddDays(-9));
+        treated.What = "Neem oil";
+        var check = PestService.StartCheck(item, Today.AddDays(-2));
+
+        Assert.Equal("Neem oil", PestService.StartTreatment(item, [treated, check], Today).What);
+    }
+
+    [Fact]
+    public void A_check_only_has_a_date_and_notes()
+    {
+        var check = PestService.StartCheck(Case(), Today);
+        check.What = "Neem oil";
+
+        Assert.Contains("A check only has a date and notes.", check.Validate(Today));
     }
 
     // What Today shows

@@ -222,7 +222,7 @@ else
     private Guid? versionsId;
     private Guid loadedFor;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -247,7 +247,7 @@ else
     }
 
     private DateTimeOffset OccurredAt =>
-        occurredOn is { } d ? TimelineService.MomentOn(d, Time.GetLocalNow()) : Time.GetUtcNow();
+        occurredOn is { } d ? Time.MomentOn(d) : Time.GetUtcNow();
 
     private async Task SaveNoteAsync()
     {
@@ -324,6 +324,7 @@ else
     private async Task DeletePhotoAsync(Photo photo)
     {
         await RemovePhotoAsync(photo.Id);
+        await TimelineService.RemoveEmptiedEntriesAsync(SubjectId, photo.Id);
         await LoadAsync();
         viewerIndex = photos.Count == 0 ? null : Math.Min(viewerIndex ?? 0, photos.Count - 1);
     }
@@ -368,8 +369,7 @@ else
         busy = false;
     }
 
-    private DateOnly LocalDay(DateTimeOffset moment) =>
-        DateOnly.FromDateTime(moment.ToOffset(Time.GetLocalNow().Offset).DateTime);
+    private DateOnly LocalDay(DateTimeOffset moment) => Time.LocalDay(moment);
 
     private void ResetDate()
     {

@@ -60,6 +60,81 @@ public class PotUseTests
     }
 
     [Fact]
+    public void A_plant_that_died_frees_its_pot()
+    {
+        var pot = Nursery(owned: 2);
+        var dead = In(pot);
+        dead.Status = PlantStatus.Died;
+
+        var use = Assert.Single(PotUse.List([pot], [In(pot), dead]));
+
+        Assert.Equal(1, use.InUse);
+        Assert.Equal(0, use.Gone);
+        Assert.Equal(1, use.Free);
+    }
+
+    [Fact]
+    public void A_plant_given_away_on_its_own_leaves_its_pot_free()
+    {
+        var pot = Nursery(owned: 1);
+        var given = In(pot);
+        given.Status = PlantStatus.GivenAway;
+
+        var use = Assert.Single(PotUse.List([pot], [given]));
+
+        Assert.Equal(0, use.InUse);
+        Assert.Equal(1, use.Free);
+    }
+
+    [Theory]
+    [InlineData(PlantStatus.GivenAway)]
+    [InlineData(PlantStatus.Sold)]
+    public void A_pot_that_went_with_a_plant_is_gone_rather_than_free(PlantStatus status)
+    {
+        var pot = Nursery(owned: 3);
+        var left = In(pot);
+        left.Status = status;
+        left.PotsTaken = PotsTaken.Inner;
+
+        var use = Assert.Single(PotUse.List([pot], [In(pot), left]));
+
+        Assert.Equal(1, use.InUse);
+        Assert.Equal(1, use.Gone);
+        Assert.Equal(2, use.Here);
+        Assert.Equal(1, use.Free);
+    }
+
+    [Fact]
+    public void Only_the_inner_pot_goes_unless_both_did()
+    {
+        var nursery = Nursery();
+        var ceramic = new Pot { Name = "Grey ceramic", Group = PotGroup.Outer };
+        var inner = new Plant { Nickname = "Pilea", InnerPotId = nursery.Id, OuterPotId = ceramic.Id, Status = PlantStatus.GivenAway, PotsTaken = PotsTaken.Inner };
+        var both = new Plant { Nickname = "Hoya", InnerPotId = nursery.Id, OuterPotId = ceramic.Id, Status = PlantStatus.GivenAway, PotsTaken = PotsTaken.All };
+
+        var withInner = PotUse.List([nursery, ceramic], [inner]);
+        var withBoth = PotUse.List([nursery, ceramic], [both]);
+
+        Assert.Equal([1, 0], withInner.Select(u => u.Gone));
+        Assert.Equal([1, 1], withBoth.Select(u => u.Gone));
+    }
+
+    [Fact]
+    public void A_plant_back_in_the_collection_uses_its_pot_again()
+    {
+        var pot = Nursery();
+        var plant = In(pot);
+        plant.Status = PlantStatus.GivenAway;
+        plant.PotsTaken = PotsTaken.Inner;
+        plant.Status = PlantStatus.Active;
+
+        var use = Assert.Single(PotUse.List([pot], [plant]));
+
+        Assert.Equal(1, use.InUse);
+        Assert.Equal(0, use.Gone);
+    }
+
+    [Fact]
     public void A_deleted_pot_is_off_the_list()
     {
         var pot = Nursery();

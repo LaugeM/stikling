@@ -39,6 +39,12 @@ public sealed class Plant : Entity
     /// </summary>
     public bool WaterInOuterPot { get; set; }
 
+    /// <summary>
+    /// Which pots went with it when it was given away or sold. The pot ids stay on the plant, so
+    /// its history still says what it lived in; this says whether they left the house with it.
+    /// </summary>
+    public PotsTaken PotsTaken { get; set; } = PotsTaken.None;
+
     /// <summary>The soil mix it was potted in, when it is one you have saved.</summary>
     public Guid? SoilMixId { get; set; }
 
@@ -55,6 +61,10 @@ public sealed class Plant : Entity
 
     [JsonIgnore]
     public bool InQuarantine => QuarantinedSince is not null;
+
+    /// <summary>Given away or sold: gone to someone else, and possibly with its pots.</summary>
+    [JsonIgnore]
+    public bool HasLeft => Status is PlantStatus.GivenAway or PlantStatus.Sold;
 
     public Guid? CoverPhotoId { get; set; }
 
@@ -81,6 +91,32 @@ public sealed class Plant : Entity
         return copy;
     }
 
+    /// <summary>
+    /// True while the plant takes up this pot. Only a plant in the collection does: a pot whose
+    /// plant died or left is either free again or went with it.
+    /// </summary>
+    public bool Uses(Guid potId) =>
+        Status == PlantStatus.Active && (InnerPotId == potId || OuterPotId == potId);
+
+    /// <summary>True when this pot left the house with the plant.</summary>
+    public bool TookAway(Guid potId) => HasLeft && PotsTaken switch
+    {
+        PotsTaken.Inner => InnerPotId == potId,
+        PotsTaken.All => InnerPotId == potId || OuterPotId == potId,
+        _ => false
+    };
+
+    /// <summary>
+    /// The choice as far as this plant's pots allow, so several plants given away together can
+    /// share one answer: a plant without an outer pot can't take one, and one without pots takes none.
+    /// </summary>
+    public PotsTaken Fit(PotsTaken choice) => choice switch
+    {
+        PotsTaken.All when OuterPotId is not null => PotsTaken.All,
+        PotsTaken.All or PotsTaken.Inner when InnerPotId is not null => PotsTaken.Inner,
+        _ => PotsTaken.None
+    };
+
     /// <summary>Days in quarantine, counting the day it went in as day 0.</summary>
     public int? DaysInQuarantine(DateOnly today) =>
         QuarantinedSince is { } since ? Math.Max(0, today.DayNumber - since.DayNumber) : null;
@@ -99,6 +135,8 @@ public sealed class Plant : Entity
             errors.Add("A plant can't have the same pot inside and outside.");
         if (QuarantinedSince > today)
             errors.Add("The quarantine can't start in the future.");
+        if (PotsTaken != PotsTaken.None && !HasLeft)
+            errors.Add("Only a plant that was given away or sold can take its pots with it.");
         return errors;
     }
 }

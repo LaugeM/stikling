@@ -317,7 +317,7 @@ else
     private string? message;
     private IReadOnlyList<Plant> madePlants = [];
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     private string CountText
     {

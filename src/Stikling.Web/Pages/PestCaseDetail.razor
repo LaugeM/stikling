@@ -37,8 +37,13 @@ else
         @if (view.Case.IsOpen)
         {
             <button type="button" class="btn btn-primary" @onclick="() => logging = !logging">
-                @(logging ? "Close" : "Log treatment")
+                @(logging ? "Close" : view.IsCheck ? "Log check" : "Log treatment")
             </button>
+        }
+        @if (view.IsCheck)
+        {
+            @* Pests seen again: back to treating, with the treatment sheet ready *@
+            <button type="button" class="btn btn-outline-primary" @onclick="FoundSomeAsync">Found some</button>
         }
         <a class="btn btn-outline-primary" href="pests/@view.Case.Id/edit">Edit</a>
     </div>
@@ -46,8 +51,9 @@ else
     @if (logging && view.Case.IsOpen)
     {
         <section class="detail-card">
-            <h2>Log treatment</h2>
-            <TreatmentSheet Case="view.Case" Existing="treatments" OnLogged="ReloadAsync" OnCancel="() => logging = false" />
+            <h2>@(view.IsCheck ? "Log check" : "Log treatment")</h2>
+            <TreatmentSheet @key="view.Case.Status" Case="view.Case" Existing="treatments" Check="view.IsCheck"
+                            OnLogged="ReloadAsync" OnCancel="() => logging = false" />
         </section>
     }
 
@@ -56,14 +62,22 @@ else
             <dt>Covers</dt>
             <dd>@Labels.ScopeAndCount(view.Case, view.Plants.Count)</dd>
 
-            <dt>Treating</dt>
-            <dd>Every @Labels.Count(view.Case.IntervalDays, "day")</dd>
+            @if (view.IsCheck)
+            {
+                <dt>Checking</dt>
+                <dd>Every @Labels.Count(PestService.CheckEveryDays, "day")</dd>
+            }
+            else
+            {
+                <dt>Treating</dt>
+                <dd>Every @Labels.Count(view.Case.IntervalDays, "day")</dd>
+            }
 
             <dt>Next one</dt>
             <dd>
                 @if (view.NextDue is { } due && view.DaysUntilDue is { } days)
                 {
-                    <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days)</span>
+                    <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days, view.IsCheck)</span>
                     <text> · @Labels.Date(due)</text>
                 }
                 else
@@ -73,7 +87,7 @@ else
             </dd>
 
             <dt>Last one</dt>
-            <dd>@(view.Last is { } last ? $"{Labels.Date(last.OccurredOn)} · {last.What ?? "not written down"}" : "No treatments yet.")</dd>
+            <dd>@(view.Last is { } last ? $"{Labels.Date(last.OccurredOn)} · {What(last)}" : "No treatments yet.")</dd>
         </dl>
 
         @if (!string.IsNullOrWhiteSpace(view.Case.Notes))
@@ -84,7 +98,7 @@ else
     </section>
 
     <section class="detail-card">
-        <h2>Treatments</h2>
+        <h2>@(treatments.Any(t => t.Kind == PestTreatmentKind.Checked) ? "Treatments and checks" : "Treatments")</h2>
         @if (treatments.Count == 0)
         {
             <p class="text-body-secondary mb-0">
@@ -99,7 +113,7 @@ else
                     <li>
                         <div class="care-entry">
                             <span class="care-what">
-                                @(string.IsNullOrWhiteSpace(treatment.What) ? "Treated" : treatment.What)
+                                @What(treatment)
                                 @if (!string.IsNullOrWhiteSpace(treatment.Notes))
                                 {
                                     <span class="text-body-secondary"> · @treatment.Notes</span>
@@ -171,7 +185,7 @@ else
     private bool logging;
     private bool confirmDelete;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -192,6 +206,24 @@ else
         var all = await Treatments.GetAllAsync();
         treatments = PestService.TreatmentsFor(all, item.Id);
         view = PestService.Describe(item, await PlantRepository.GetAllAsync(), all, Today);
+    }
+
+    private static string What(PestTreatment treatment) => treatment switch
+    {
+        { Kind: PestTreatmentKind.Checked } => "Checked",
+        { What: { } what } when !string.IsNullOrWhiteSpace(what) => what,
+        _ => "Treated"
+    };
+
+    private async Task FoundSomeAsync()
+    {
+        if (view is null)
+            return;
+
+        view.Case.Status = PestCaseStatus.Active;
+        await Repository.SaveAsync(view.Case);
+        await ReloadAsync();
+        logging = true;
     }
 
     private async Task DeleteAsync()

@@ -159,7 +159,7 @@ else
 
     private bool IsNew => Id is null;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     private string BackUrl => IsNew ? "pests" : $"pests/{Id}";
 

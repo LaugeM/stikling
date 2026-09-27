@@ -7,9 +7,11 @@ namespace Stikling.Web.Services;
 
 /// <summary>What a restore did, for the line shown afterwards.</summary>
 /// <param name="BroughtBack">Things deleted on this device that the backup still had.</param>
+/// <param name="Photos">Images put back because they were missing here.</param>
 public sealed record ImportSummary(int Added, int Updated, int BroughtBack, int Kept, int Photos)
 {
-    public bool ChangedAnything => Added > 0 || Updated > 0 || BroughtBack > 0;
+    /// <summary>True when any records changed. Photos alone can come back without one.</summary>
+    public bool ChangedRecords => Added > 0 || Updated > 0 || BroughtBack > 0;
 }
 
 /// <summary>
@@ -55,7 +57,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
             }
         }
 
-        var today = DateOnly.FromDateTime(time.GetLocalNow().DateTime);
+        var today = time.Today();
         await files.DownloadAsync($"stikling-backup-{today:yyyy-MM-dd}.zip", buffer.ToArray());
         await files.SetLastBackupAsync(today);
 
@@ -122,9 +124,19 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
         await Restore(Stores.Products, data.Products);
         await Restore(Stores.Feeds, data.Feeds);
 
+        // A delete carried over from the backup frees the image too
+        foreach (var photo in photoMeta.ToSave.Where(p => p.IsDeleted))
+            await photos.RemoveBytesAsync(photo.Id);
+
+        // Every photo in the backup gets its image back when it's missing here, not only the ones
+        // saved just now. A restore that stopped halfway, e.g. when storage ran out, has already
+        // saved the photo details, so restoring again would otherwise leave those photos blank.
+        // A photo the backup has is never deleted here after the merge, since it comes back.
         var restoredPhotos = 0;
-        foreach (var photo in photoMeta.ToSave.Where(p => !p.IsDeleted))
+        foreach (var photo in BackupMerge.Newest(data.Photos).Where(p => !p.IsDeleted))
         {
+            if (await photos.HasBytesAsync(photo.Id))
+                continue;
             if (await ReadEntryAsync(zip, PhotoPath(photo.Id, thumbnail: false)) is not { } full)
                 continue;
             var thumbnail = await ReadEntryAsync(zip, PhotoPath(photo.Id, thumbnail: true));

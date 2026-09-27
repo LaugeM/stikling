@@ -1,7 +1,7 @@
 // Photo handling that stays in the browser: resizing, compressing, storing and
 // displaying. Full-size camera photos (often 5-10 MB) never cross into .NET.
 
-import { putBlob, getBlob, removeBlob } from "./db.js";
+import { putBlob, getBlob, hasBlob, removeBlob } from "./db.js";
 
 const FULL_SIZE = 1600;   // longest side in pixels
 const THUMB_SIZE = 360;
@@ -90,6 +90,10 @@ export async function remove(id) {
 export async function getBytes(id, thumbnail) {
     const blob = await getBlob(thumbnail ? thumbKey(id) : id);
     return blob ? new Uint8Array(await blob.arrayBuffer()) : null;
+}
+
+export function hasBytes(id) {
+    return hasBlob(id);
 }
 
 export async function putBytes(id, bytes, thumbBytes) {

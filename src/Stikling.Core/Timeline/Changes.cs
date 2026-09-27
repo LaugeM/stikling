@@ -31,6 +31,9 @@ public static class PlantChanges
         ChangeText.AddPot(changes, before.OuterPotId, after.OuterPotId, name, "Now stands in", "No longer in an outer pot");
         ChangeText.AddPot(changes, before.SoilMixId, after.SoilMixId, mixName ?? (_ => null), "Now in", "No longer in a saved mix");
 
+        if (before.PotsTaken != after.PotsTaken && after.HasLeft)
+            changes.Add(PotsTakenText(after));
+
         if (before.WaterInOuterPot != after.WaterInOuterPot)
             changes.Add(after.WaterInOuterPot ? "Now watered in the outer pot" : "No longer watered in the outer pot");
 
@@ -40,6 +43,14 @@ public static class PlantChanges
 
         return changes;
     }
+
+    private static string PotsTakenText(Plant plant) => plant.PotsTaken switch
+    {
+        PotsTaken.Inner => "Its pot went with it",
+        PotsTaken.All when plant.InnerPotId is null => "Its outer pot went with it",
+        PotsTaken.All => "Its pot and outer pot went with it",
+        _ => "Its pots stayed here"
+    };
 }
 
 /// <summary>The same kind of description for propagations ("Stage: Rooting (was Started)").</summary>

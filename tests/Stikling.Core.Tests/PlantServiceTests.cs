@@ -112,6 +112,43 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Giving_plants_away_with_their_pots_takes_what_each_one_has()
+    {
+        var both = new Plant { Nickname = "Hoya", InnerPotId = Guid.NewGuid(), OuterPotId = Guid.NewGuid() };
+        var inner = new Plant { Nickname = "Pilea", InnerPotId = Guid.NewGuid() };
+        var bare = new Plant { Nickname = "Cutting" };
+
+        await service.SetStatusAsync([both, inner, bare], PlantStatus.GivenAway, Label, PotsTaken.All);
+
+        Assert.Equal(PotsTaken.All, both.PotsTaken);
+        Assert.Equal(PotsTaken.Inner, inner.PotsTaken);
+        Assert.Equal(PotsTaken.None, bare.PotsTaken);
+        Assert.Equal("Status: GivenAway (was Active)\nIts pot and outer pot went with it",
+            timeline.Entries.Single(e => e.SubjectId == both.Id).Text);
+        Assert.Equal("Status: GivenAway (was Active)", timeline.Entries.Single(e => e.SubjectId == bare.Id).Text);
+    }
+
+    [Fact]
+    public async Task A_plant_back_in_the_collection_has_its_pots_again()
+    {
+        var plant = new Plant { Nickname = "Hoya", InnerPotId = Guid.NewGuid(), Status = PlantStatus.Sold, PotsTaken = PotsTaken.Inner };
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Active;
+
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Equal(PotsTaken.None, plant.PotsTaken);
+    }
+
+    [Fact]
+    public void Only_a_plant_that_left_can_take_its_pots()
+    {
+        var plant = new Plant { Nickname = "Hoya", PotsTaken = PotsTaken.Inner };
+
+        Assert.Contains("Only a plant that was given away or sold can take its pots with it.", plant.Validate(DateOnly.FromDateTime(Now.Date)));
+    }
+
+    [Fact]
     public async Task AddNote_adds_the_same_trimmed_note_to_each_plant()
     {
         var a = new Plant { Nickname = "Philodendron A" };

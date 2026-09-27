@@ -1,3 +1,4 @@
+using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
 
@@ -14,7 +15,7 @@ public sealed record RoomRename(string Name, int Plants, int Propagations, bool 
 /// Renaming a room or a spot everywhere it is used. Renaming onto a name that already exists
 /// merges the two, which is how duplicates like "Stue" and "Living room" get sorted out.
 /// </summary>
-public sealed class RoomService(IPlantRepository plants, IPropagationRepository propagations)
+public sealed class RoomService(IPlantRepository plants, IPropagationRepository propagations, IPestCaseRepository pestCases)
 {
     /// <summary>The rooms in use, with the spots inside them.</summary>
     public async Task<IReadOnlyList<Room>> GetAllAsync() =>
@@ -23,6 +24,7 @@ public sealed class RoomService(IPlantRepository plants, IPropagationRepository 
     /// <summary>
     /// Renames a room or a spot on every plant and propagation in it. Spots move with their room,
     /// so renaming "Stue" also turns "Stue / Windowsill" into "Living room / Windowsill".
+    /// A pest case that covers the room follows it, or it would stop covering anything.
     /// </summary>
     public async Task<RoomRename> RenameAsync(string? from, string? to)
     {
@@ -61,6 +63,12 @@ public sealed class RoomService(IPlantRepository plants, IPropagationRepository 
             propagation.Location = renamed;
             await propagations.SaveAsync(propagation);
             changedPropagations++;
+        }
+
+        foreach (var item in (await pestCases.GetAllAsync()).Where(c => RoomName.IsIn(c.Room, source)))
+        {
+            item.Room = RoomName.Rename(item.Room, source, target);
+            await pestCases.SaveAsync(item);
         }
 
         return new RoomRename(target, changedPlants, changedPropagations, merged);

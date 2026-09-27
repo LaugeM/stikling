@@ -24,8 +24,7 @@ public static class BackupMerge
         var save = new List<T>();
         int added = 0, updated = 0, broughtBack = 0, skipped = 0;
 
-        // The same id can appear more than once in a hand-edited file; the newest one wins
-        foreach (var item in incoming.GroupBy(i => i.Id).Select(g => g.MaxBy(i => i.UpdatedAt)!))
+        foreach (var item in Newest(incoming))
         {
             if (!mine.TryGetValue(item.Id, out var current))
                 added++;
@@ -45,4 +44,11 @@ public static class BackupMerge
 
         return new MergeResult<T>(save, added, updated, broughtBack, skipped);
     }
+
+    /// <summary>
+    /// One version of each item. The same id can appear more than once in a hand-edited file;
+    /// the newest one wins.
+    /// </summary>
+    public static IEnumerable<T> Newest<T>(IEnumerable<T> items) where T : Entity =>
+        items.GroupBy(i => i.Id).Select(g => g.MaxBy(i => i.UpdatedAt)!);
 }

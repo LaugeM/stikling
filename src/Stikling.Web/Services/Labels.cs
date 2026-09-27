@@ -81,15 +81,19 @@ public static class Labels
             ? Plants(plantCount)
             : $"{Scope(item, plantCount)} · {Plants(plantCount)}";
 
-    /// <summary>"due today", "2 days overdue", "next in 3 days".</summary>
-    public static string Due(int daysUntil) => daysUntil switch
+    /// <summary>"due today", "2 days overdue", "next in 3 days", or "check due today" and so on for a check.</summary>
+    public static string Due(int daysUntil, bool check = false)
     {
-        0 => "due today",
-        -1 => "1 day overdue",
-        < 0 => $"{-daysUntil} days overdue",
-        1 => "next tomorrow",
-        _ => $"next in {daysUntil} days"
-    };
+        var what = check ? "check " : "";
+        return daysUntil switch
+        {
+            0 => $"{what}due today",
+            -1 => $"{what}1 day overdue",
+            < 0 => $"{what}{-daysUntil} days overdue",
+            1 => $"next {what}tomorrow",
+            _ => $"next {what}in {daysUntil} days"
+        };
+    }
 
     /// <summary>Stage names. Seeds get their own words: sown, germinating, sprouted.</summary>
     public static string Stage(PropagationStage stage, PropagationType type = PropagationType.Cutting) =>
@@ -199,12 +203,49 @@ public static class Labels
         watering == PotWatering.Wick ? "Wick" : "Submerged";
 
     /// <summary>"2 of 3 in use, 1 free", so the library says what is still available.</summary>
-    public static string Use(PotUse use) => use switch
+    public static string Use(PotUse use)
     {
-        { InUse: 0 } => use.Owned == 1 ? "free" : $"all {use.Owned} free",
-        { Free: 0 } => use.Owned == 1 ? "in use" : $"all {use.Owned} in use",
-        _ => $"{use.InUse} of {use.Owned} in use, {use.Free} free"
-    };
+        var here = use switch
+        {
+            { Here: 0 } => null,
+            { InUse: 0 } => use.Here == 1 ? "free" : $"all {use.Here} free",
+            { Free: 0 } => use.Here == 1 ? "in use" : $"all {use.Here} in use",
+            _ => $"{use.InUse} of {use.Here} in use, {use.Free} free"
+        };
+        var gone = use.Gone switch
+        {
+            0 => null,
+            1 => "1 went with a plant",
+            var n => $"{n} went with plants"
+        };
+        return string.Join(", ", new[] { here, gone }.OfType<string>());
+    }
+
+    /// <summary>
+    /// The answers to "what went with it" that fit the plants' pots: always just the plant, then
+    /// its pot, then both when there is an outer pot too. Empty when none of them has a pot.
+    /// </summary>
+    public static IReadOnlyList<(PotsTaken Value, string Label)> PotsTakenChoices(IReadOnlyCollection<Plant> plants)
+    {
+        var inner = plants.Any(p => p.InnerPotId is not null);
+        var outer = plants.Any(p => p.OuterPotId is not null);
+        var one = plants.Count == 1;
+
+        if (!inner && !outer)
+            return [];
+
+        var choices = new List<(PotsTaken, string)> { (PotsTaken.None, one ? "Just the plant" : "Just the plants") };
+        if (inner)
+            choices.Add((PotsTaken.Inner, one ? "With its pot" : "With their pots"));
+        if (outer)
+            choices.Add((PotsTaken.All, (one, inner) switch
+            {
+                (true, true) => "With both pots",
+                (true, false) => "With its outer pot",
+                _ => "With outer pots too"
+            }));
+        return choices;
+    }
 
     public static string For(MixUnit unit) => unit switch
     {

@@ -9,7 +9,7 @@ namespace Stikling.Core.Care;
 /// </summary>
 public sealed class CareService(ICareLogRepository logs, ITimelineRepository timeline, TimeProvider time)
 {
-    private DateOnly Today => DateOnly.FromDateTime(time.GetLocalNow().DateTime);
+    private DateOnly Today => time.Today();
 
     /// <summary>A blank entry for one plant, dated today.</summary>
     public CareLog Start(Guid plantId, CareKind kind = CareKind.Watered) =>
@@ -102,14 +102,10 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
             SubjectType = SubjectType.Plant,
             SubjectId = entry.PlantId,
             Kind = TimelineKind.Change,
-            OccurredAt = MomentOf(entry.OccurredOn),
+            OccurredAt = time.MomentOn(entry.OccurredOn),
             Text = Describe(entry, label)
         });
     }
-
-    // A date without a time: "now" for today, otherwise noon so it lands on the right day
-    private DateTimeOffset MomentOf(DateOnly date) =>
-        date == Today ? time.GetUtcNow() : new DateTimeOffset(date.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero);
 
     private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 

@@ -18,7 +18,7 @@ public enum Pest
 
 /// <summary>
 /// How far along a case is. Active means still treating, Monitoring means the treatments have
-/// stopped but you're still watching, Resolved means done.
+/// stopped but the plants are still checked now and then, Resolved means done.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<PestCaseStatus>))]
 public enum PestCaseStatus

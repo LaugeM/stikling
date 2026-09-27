@@ -25,7 +25,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             SubjectType = SubjectType.Plant,
             SubjectId = plant.Id,
             Kind = TimelineKind.Created,
-            OccurredAt = StartOf(plant.AcquiredOn) ?? time.GetUtcNow(),
+            OccurredAt = plant.AcquiredOn is { } acquired ? time.MomentOn(acquired.Start) : time.GetUtcNow(),
             Text = FirstEntryText(plant)
         });
 
@@ -52,6 +52,8 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Func<Guid, string?>? mixName = null)
     {
         after.Tags = PlantTags.Normalize(after.Tags);
+        // Only a plant that left can take pots, and only the ones it has
+        after.PotsTaken = after.HasLeft ? after.Fit(after.PotsTaken) : PotsTaken.None;
         await plants.SaveAsync(after);
 
         var changes = PlantChanges.Describe(before, after, label, potName, mixName);
@@ -60,12 +62,19 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     }
 
     /// <summary>Sets the same status on several plants, recording it on each.</summary>
-    public async Task SetStatusAsync(IEnumerable<Plant> selected, PlantStatus status, Func<Enum, string> label)
+    /// <param name="potsTaken">For plants given away or sold: which of their pots went with them.
+    /// Each plant takes as much of that as its own pots allow.</param>
+    public async Task SetStatusAsync(
+        IEnumerable<Plant> selected,
+        PlantStatus status,
+        Func<Enum, string> label,
+        PotsTaken potsTaken = PotsTaken.None)
     {
         foreach (var plant in selected.Where(p => p.Status != status))
         {
             var before = plant.Copy();
             plant.Status = status;
+            plant.PotsTaken = potsTaken;
             await UpdateAsync(before, plant, label);
         }
     }
@@ -142,8 +151,4 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             text = $"{text}, {acquired.Text()}";
         return plant.InQuarantine ? $"{text}\nPut in quarantine" : text;
     }
-
-    // Acquisition dates have no time of day; use noon so the entry lands on the right day in any timezone
-    private static DateTimeOffset? StartOf(LooseDate? date) =>
-        date is { } d ? new DateTimeOffset(d.Start.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero) : null;
 }

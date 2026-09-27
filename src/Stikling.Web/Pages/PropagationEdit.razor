@@ -170,7 +170,7 @@ else
 
     private bool IsNew => Id is null;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    private DateOnly Today => Time.Today();
 
     // Units already potted up or failed can't be counted away
     private int MinCount => Math.Max(1, (propagation?.PottedUpCount ?? 0) + (propagation?.FailedCount ?? 0));

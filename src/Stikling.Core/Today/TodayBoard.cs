@@ -18,15 +18,16 @@ public static class TodayBoard
     public static IReadOnlyList<PropagationCheck> NeedsChecking(
         IEnumerable<Propagation> propagations,
         IReadOnlyDictionary<Guid, TimelineEntry> latestPerSubject,
-        DateOnly today,
+        TimeProvider time,
         int afterDays = CheckAfterDays)
     {
+        var today = time.Today();
         var checks = new List<PropagationCheck>();
 
         foreach (var propagation in propagations.Where(p => !p.IsDeleted && p.IsActive))
         {
             var lastSeen = latestPerSubject.TryGetValue(propagation.Id, out var entry)
-                ? Later(DateOnly.FromDateTime(entry.OccurredAt.UtcDateTime), propagation.StartedOn)
+                ? Later(time.LocalDay(entry.OccurredAt), propagation.StartedOn)
                 : propagation.StartedOn;
 
             var days = today.DayNumber - lastSeen.DayNumber;
