@@ -19,6 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The plant names the app comes with, to check the file still reads -->
+    <None Include="..\..\src\Stikling.Web\wwwroot\data\plant-names.json" Link="plant-names.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Stikling.Core\Stikling.Core.csproj" />
   </ItemGroup>
 

@@ -38,26 +38,7 @@ else
                 <label class="form-label" for="nickname">Nickname</label>
                 <InputText id="nickname" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Big Monstera" />
             </div>
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                    <label class="form-label" for="genus">Genus</label>
-                    <InputText id="genus" class="form-control" @bind-Value="plant.Genus" list="genus-list" placeholder="e.g. Monstera" autocomplete="off" />
-                    <datalist id="genus-list">
-                        @foreach (var genus in PlantNames.CommonGenera)
-                        {
-                            <option value="@genus"></option>
-                        }
-                    </datalist>
-                </div>
-                <div class="col-6">
-                    <label class="form-label" for="species">Species</label>
-                    <InputText id="species" class="form-control" @bind-Value="plant.Species" placeholder="e.g. deliciosa" autocomplete="off" />
-                </div>
-            </div>
-            <div class="mb-1">
-                <label class="form-label" for="cultivar">Cultivar / variety</label>
-                <InputText id="cultivar" class="form-control" @bind-Value="plant.Cultivar" placeholder="e.g. Thai Constellation" autocomplete="off" />
-            </div>
+            <PlantNameFields @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar" />
             <div class="form-text">Give it a nickname, a genus, or both.</div>
         </fieldset>
 

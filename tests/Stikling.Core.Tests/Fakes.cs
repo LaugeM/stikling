@@ -1,6 +1,7 @@
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Models;
+using Stikling.Core.Names;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
@@ -298,5 +299,21 @@ internal sealed class FakePestCaseRepository : IPestCaseRepository
         if (Cases.TryGetValue(id, out var item))
             item.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakePlantNameSource(PlantNameData data) : IPlantNameSource
+{
+    /// <summary>Acts like the file can't be read, e.g. offline before it was ever cached.</summary>
+    public bool Fail { get; set; }
+
+    public int Loads { get; private set; }
+
+    public Task<PlantNameData> LoadAsync()
+    {
+        if (Fail)
+            throw new HttpRequestException("Offline");
+        Loads++;
+        return Task.FromResult(data);
     }
 }

@@ -1,0 +1,170 @@
+@* The genus, species and cultivar fields, with names to tap under the one being typed in. Chips
+   rather than a datalist, which a phone won't show. Anything can still be typed. The chips keep
+   the field focused when tapped (mousedown is cancelled), so the keyboard stays up. *@
+@inject PlantNameService Names
+
+<div class="row g-2 mb-3">
+    <div class="col-6">
+        <label class="form-label" for="genus">Genus</label>
+        <input id="genus" class="form-control" value="@Genus" placeholder="@GenusPlaceholder"
+               autocomplete="off" autocapitalize="words" spellcheck="false"
+               @oninput="e => TypeAsync(NameField.Genus, e)" @onfocus="() => active = NameField.Genus" @onblur="Blur"
+               @ref="genusInput" />
+    </div>
+    <div class="col-6">
+        <label class="form-label" for="species">Species</label>
+        <input id="species" class="form-control" value="@Species" placeholder="@SpeciesPlaceholder"
+               autocomplete="off" autocapitalize="none" spellcheck="false"
+               @oninput="e => TypeAsync(NameField.Species, e)" @onfocus="() => active = NameField.Species" @onblur="Blur"
+               @ref="speciesInput" />
+    </div>
+    @if (active is NameField.Genus or NameField.Species)
+    {
+        <div class="col-12">@Chips</div>
+    }
+</div>
+<div class="mb-1">
+    <label class="form-label" for="cultivar">Cultivar / variety</label>
+    <input id="cultivar" class="form-control" value="@Cultivar" placeholder="@CultivarPlaceholder"
+           autocomplete="off" autocapitalize="words" spellcheck="false"
+           @oninput="e => TypeAsync(NameField.Cultivar, e)" @onfocus="() => active = NameField.Cultivar" @onblur="Blur"
+           @ref="cultivarInput" />
+    @if (active is NameField.Cultivar)
+    {
+        <div class="mt-2">@Chips</div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Genus { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> GenusChanged { get; set; }
+
+    [Parameter]
+    public string? Species { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> SpeciesChanged { get; set; }
+
+    [Parameter]
+    public string? Cultivar { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> CultivarChanged { get; set; }
+
+    [Parameter]
+    public string GenusPlaceholder { get; set; } = "e.g. Monstera";
+
+    [Parameter]
+    public string SpeciesPlaceholder { get; set; } = "e.g. deliciosa";
+
+    [Parameter]
+    public string CultivarPlaceholder { get; set; } = "e.g. Thai Constellation";
+
+    private NameSuggester? suggester;
+    private NameField? active;
+    private ElementReference genusInput;
+    private ElementReference speciesInput;
+    private ElementReference cultivarInput;
+    private ElementReference? focusNext;
+
+    // The fields work straight away. Suggestions turn up once the names are read.
+    protected override async Task OnInitializedAsync() => suggester = await Names.GetSuggesterAsync();
+
+    private IReadOnlyList<NameSuggestion> Suggestions =>
+        suggester is not null && active is { } typing ? suggester.Suggest(typing, Genus, Species, Cultivar) : [];
+
+    private RenderFragment Chips => @<text>
+        @if (Suggestions is { Count: > 0 } suggestions)
+        {
+            <div class="chip-row" role="group" aria-label="Suggested names">
+                @foreach (var suggestion in suggestions)
+                {
+                    <button type="button" class="chip name-chip" tabindex="-1"
+                            @onmousedown:preventDefault @onclick="() => PickAsync(suggestion)">
+                        @ChipText(suggestion)
+                    </button>
+                }
+            </div>
+        }
+    </text>;
+
+    // Only what the field needs: a species on its own when the genus is already there, and an old
+    // name with the one it goes by now.
+    private RenderFragment ChipText(NameSuggestion s) => active switch
+    {
+        NameField.Genus when s.Formerly is { } old =>
+            @<text><i>@old</i> <span class="chip-note">now <i>@s.Genus</i></span></text>,
+        NameField.Genus => @<i>@s.Genus</i>,
+        NameField.Species when s.Formerly is { } old =>
+            @<text><i>@(SameGenus(old.Split(' ', 2)[0]) ? old.Split(' ', 2)[1] : old)</i> <span class="chip-note">now <i>@s.Genus @s.Species</i></span></text>,
+        NameField.Species => SameGenus(s.Genus) ? @<i>@s.Species</i> : @<i>@s.Genus @s.Species</i>,
+        _ when !SameGenus(s.Genus) =>
+            @<text>'@s.Cultivar' <span class="chip-note"><i>@s.Genus @s.Species</i></span></text>,
+        _ when s.Species is not null && string.IsNullOrWhiteSpace(Species) =>
+            @<text>'@s.Cultivar' <span class="chip-note"><i>@s.Species</i></span></text>,
+        _ => @<text>'@s.Cultivar'</text>
+    };
+
+    private bool SameGenus(string genus) => string.Equals(PlantNames.Genus(Genus), genus, StringComparison.OrdinalIgnoreCase);
+
+    private Task TypeAsync(NameField field, ChangeEventArgs e)
+    {
+        var text = e.Value?.ToString();
+        return field switch
+        {
+            NameField.Genus => SetGenusAsync(text),
+            NameField.Species => SetSpeciesAsync(text),
+            _ => SetCultivarAsync(text)
+        };
+    }
+
+    // Picking fills in the rest of the name it belongs to, then moves on to the next field
+    private async Task PickAsync(NameSuggestion suggestion)
+    {
+        var field = active;
+        await SetGenusAsync(suggestion.Genus);
+        if (field is not NameField.Genus && suggestion.Species is not null)
+            await SetSpeciesAsync(suggestion.Species);
+        if (field is NameField.Cultivar)
+            await SetCultivarAsync(suggestion.Cultivar);
+
+        focusNext = field switch
+        {
+            NameField.Genus => speciesInput,
+            NameField.Species => cultivarInput,
+            _ => null
+        };
+    }
+
+    private void Blur() => active = null;
+
+    private Task SetGenusAsync(string? value)
+    {
+        Genus = value;
+        return GenusChanged.InvokeAsync(value);
+    }
+
+    private Task SetSpeciesAsync(string? value)
+    {
+        Species = value;
+        return SpeciesChanged.InvokeAsync(value);
+    }
+
+    private Task SetCultivarAsync(string? value)
+    {
+        Cultivar = value;
+        return CultivarChanged.InvokeAsync(value);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusNext is not { } input)
+            return;
+
+        focusNext = null;
+        await input.FocusAsync();
+    }
+}
