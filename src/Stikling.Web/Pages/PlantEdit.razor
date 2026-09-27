@@ -154,6 +154,22 @@ else
                         }
                     </InputSelect>
                 </div>
+                @if (plant.HasLeft && Labels.PotsTakenChoices([plant]) is { Count: > 0 } choices)
+                {
+                    <div class="mb-3">
+                        <span class="form-label d-block" id="pots-taken">What went with it</span>
+                        <div class="btn-group segmented" role="radiogroup" aria-labelledby="pots-taken">
+                            @foreach (var (value, label) in choices)
+                            {
+                                var id = $"taken-{value}";
+                                <input type="radio" class="btn-check" name="pots-taken" id="@id"
+                                       checked="@(plant.Fit(plant.PotsTaken) == value)" @onchange="() => plant.PotsTaken = value" />
+                                <label class="btn btn-outline-primary btn-sm" for="@id">@label</label>
+                            }
+                        </div>
+                        <div class="form-text">A pot that went with it no longer counts as yours. One left here is free again.</div>
+                    </div>
+                }
             }
         </fieldset>
 

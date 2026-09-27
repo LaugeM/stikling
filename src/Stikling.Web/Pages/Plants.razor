@@ -152,6 +152,20 @@ else
                 <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkNoteOpen = false">Cancel</button>
             </div>
         }
+        else if (leaving is { } status)
+        {
+            <div class="bulk-row">
+                <span class="bulk-count">@Labels.For(status): what went with @(selected.Count == 1 ? "it" : "them")?</span>
+            </div>
+            <div class="bulk-row">
+                @foreach (var (value, label) in Labels.PotsTakenChoices(SelectedPlants))
+                {
+                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
+                            @onclick="() => ApplyStatusAsync(status, value)">@label</button>
+                }
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => leaving = null">Cancel</button>
+            </div>
+        }
         else
         {
             <div class="bulk-row">
@@ -212,6 +226,7 @@ else
     private bool selecting;
     private readonly HashSet<Guid> selected = [];
     private string bulkStatus = ""; // the "Set status…" dropdown, reset after each use
+    private PlantStatus? leaving; // given away or sold, waiting for which pots went too
     private bool bulkNoteOpen;
     private bool bulkCareOpen;
     private bool bulkTagOpen;
@@ -340,9 +355,23 @@ else
         if (!Enum.TryParse<PlantStatus>(value, out var newStatus))
             return;
 
+        // Plants leaving with pots get asked which went too; everything else changes straight away
+        if (newStatus is PlantStatus.GivenAway or PlantStatus.Sold && Labels.PotsTakenChoices(SelectedPlants).Count > 0)
+        {
+            leaving = newStatus;
+            bulkMessage = null;
+            return;
+        }
+
+        await ApplyStatusAsync(newStatus, PotsTaken.None);
+    }
+
+    private async Task ApplyStatusAsync(PlantStatus newStatus, PotsTaken potsTaken)
+    {
         busy = true;
+        leaving = null;
         var plants = SelectedPlants;
-        await PlantService.SetStatusAsync(plants, newStatus, Labels.For);
+        await PlantService.SetStatusAsync(plants, newStatus, Labels.For, potsTaken);
         bulkMessage = $"{Labels.For(newStatus)}: {Labels.Plants(plants.Count)} updated.";
         selected.Clear();
         await LoadAsync();

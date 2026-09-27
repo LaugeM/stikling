@@ -14,6 +14,24 @@ public enum PlantStatus
     Sold
 }
 
+/// <summary>
+/// Which of its pots went with a plant that was given away or sold. A rooted cutting usually
+/// goes without one, a plant for someone without soil at home in its pot, and now and then one
+/// goes in its outer pot too.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<PotsTaken>))]
+public enum PotsTaken
+{
+    /// <summary>Just the plant. Its pots stay and are free again.</summary>
+    None,
+
+    /// <summary>The pot its roots are in.</summary>
+    Inner,
+
+    /// <summary>Every pot it had: the inner pot and the outer one.</summary>
+    All
+}
+
 /// <summary>How the plant came into the collection.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<PlantOrigin>))]
 public enum PlantOrigin

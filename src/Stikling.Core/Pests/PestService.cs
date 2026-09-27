@@ -7,6 +7,9 @@ namespace Stikling.Core.Pests;
 /// <param name="Plants">The plants the case covers right now.</param>
 /// <param name="Last">The most recent treatment, or null when there hasn't been one.</param>
 /// <param name="NextDue">When the next treatment is due, or null for a resolved case.</param>
+/// <param name="Last">The most recent treatment or check, or null when there hasn't been one.</param>
+/// <param name="NextDue">When the next treatment is due, or the next check on a case being watched.
+/// Null for a resolved case.</param>
 /// <param name="DaysUntilDue">Negative when it's overdue, 0 when it's due today.</param>
 public sealed record PestCaseView(
     PestCase Case,
@@ -16,6 +19,9 @@ public sealed record PestCaseView(
     int? DaysUntilDue)
 {
     public bool IsDue => DaysUntilDue is <= 0;
+
+    /// <summary>What's due is a look for pests rather than a treatment.</summary>
+    public bool IsCheck => Case.Status == PestCaseStatus.Monitoring;
 }
 
 /// <summary>
@@ -24,6 +30,12 @@ public sealed record PestCaseView(
 /// </summary>
 public static class PestService
 {
+    /// <summary>
+    /// How often a case being watched is checked. Most sprays don't kill the eggs, so pests can
+    /// come back weeks after the last treatment, and a weekly look is the usual way to catch that.
+    /// </summary>
+    public const int CheckEveryDays = 7;
+
     /// <summary>
     /// The plants a case covers. Everywhere and Room are worked out from the plants as they
     /// are now, so a plant moved into the room mid-outbreak is covered from then on.
@@ -63,7 +75,8 @@ public static class PestService
     /// <summary>
     /// When the next treatment is due: the last treatment's own date if one was set, otherwise
     /// the last treatment plus the case's interval, otherwise the day the case started plus the
-    /// interval. A resolved case is never due.
+    /// interval. A case being watched is due a check a week after the last treatment or check
+    /// instead. A resolved case is never due.
     /// </summary>
     public static DateOnly? NextDue(PestCase item, IEnumerable<PestTreatment> treatments)
     {
@@ -71,10 +84,12 @@ public static class PestService
             return null;
 
         var last = TreatmentsFor(treatments, item.Id).FirstOrDefault();
-        if (last is null)
-            return item.StartedOn.AddDays(item.IntervalDays);
+        var since = last?.OccurredOn ?? item.StartedOn;
 
-        return last.NextDueOn ?? last.OccurredOn.AddDays(item.IntervalDays);
+        if (item.Status == PestCaseStatus.Monitoring)
+            return since.AddDays(CheckEveryDays);
+
+        return last?.NextDueOn ?? since.AddDays(item.IntervalDays);
     }
 
     /// <summary>Everything a screen needs about one case.</summary>
@@ -131,8 +146,12 @@ public static class PestService
             CaseId = item.Id,
             OccurredOn = today,
             // The same spray is usually used again, so it's offered rather than retyped
-            What = TreatmentsFor(treatments, item.Id).FirstOrDefault()?.What
+            What = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated)?.What
         };
+
+    /// <summary>A blank check for a case being watched, dated today.</summary>
+    public static PestTreatment StartCheck(PestCase item, DateOnly today) =>
+        new() { CaseId = item.Id, OccurredOn = today, Kind = PestTreatmentKind.Checked };
 
     private static bool Covers(PestCase item, Plant plant) => item.Scope switch
     {

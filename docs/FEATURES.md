@@ -183,11 +183,12 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | **Pest cases** covering a group of plants: pest (spider mites, thrips, fungus gnats, mealybugs, scale, aphids, whitefly, other), start date, status (treating / watching / resolved) | 2 | M | v1.x |
 | ✅ | Treatment log on a case: what was used and when | 2 | S | v1.x |
 | ✅ | Interval ("every 3–5 days") with "next treatment due" shown on Today | 3 | S | v1.x |
+| ✅ | A case being watched is due a check for pests once a week instead of a treatment. Checks are logged on the case, and "Found some" puts it back to treating | 3 | S | v1.x |
 | ✅ | Quarantine flag with the day it started, a "Quarantine" filter and a badge on the card. Going in and coming out are recorded on the plant's history | 3 | S | v1.x |
 | ☐ | **Treatment recipes**, e.g. "Thrips spray: alcohol + demineralised water + a drop of dish soap". Each log entry saves the recipe as it was that day, so changing the recipe doesn't rewrite history | 4 | M | v1.x |
 | ✅ | Pest overview: all active cases in one list | 4 | S | v1.x |
 | ☐ | **Sticky trap counts**: log how many pests a (blue/yellow) sticky trap caught each week; a small chart shows whether treatment is working | 4 | M | v1.x |
-| ☐ | Inspection log: "checked, no signs", so you can see how long a plant has been clean | 5 | S | v1.x |
+| ◐ | Inspection log: "checked, no signs", so you can see how long a plant has been clean. Checks are logged on a case being watched, but not on a single plant outside a case | 5 | S | v1.x |
 | ☐ | **Check the neighbours**: opening a pest case lists other plants in the same room to inspect, with "last inspected" dates | 5 | S | v1.x |
 | ☐ | **Biological control log**: release dates for predatory mites and similar | 8 | S | v1.x |
 
@@ -199,7 +200,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ☐ | **Supplies stock**: LECA, PON, perlite, sphagnum, fertilisers, sticky traps, alcohol, pots | 5 | M | v1.x |
 | ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | 5 | S | v1.x |
 | ✅ | **Your pots**: the pots you own, by kind (nursery, outer, stands on its own), what they're made of, their measurements, whether they self-water, and how many you have. A plant points at a pot and, when it has one, an outer pot | 6 | M | v1.x |
-| ✅ | See which of your pots are in use and which are free, so it's clear what's available before repotting | 7 | S | v1.x |
+| ✅ | See which of your pots are in use and which are free, so it's clear what's available before repotting. A plant that died frees its pots, and giving a plant away or selling it asks which of its pots went with it | 7 | S | v1.x |
 | ☐ | **Does it fit?**: given a nursery pot, which of your free outer pots it would go in. Compares the tops, allows for a rim only having to clear the opening, and says when the bottom is the tighter measurement | 7 | M | v1.x |
 | ☐ | Default medium per pot kind, e.g. a net pot suggests LECA, so potting up is one tap less | 8 | S | v1.x |
 | ☐ | Money spent on supplies, to see what the hobby costs | 8 | S | v1.x |
@@ -243,7 +244,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 |---|---|---|---|---|
 | ✅ | Propagations that haven't been checked recently | 2 | M | M5 |
 | ✅ | Recent activity feed | 5 | S | M5 |
-| ✅ | Pest treatments due or overdue | 3 | S | v1.x |
+| ✅ | Pest treatments due or overdue, and checks due on cases being watched | 3 | S | v1.x |
 | ☐ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
 

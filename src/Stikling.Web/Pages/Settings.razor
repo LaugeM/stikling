@@ -272,7 +272,7 @@
     private string PotSummary =>
         pots.Count == 0
             ? "No pots registered yet"
-            : $"{Labels.Count(pots.Sum(p => p.Owned), "pot")}, {pots.Sum(p => p.Free)} free";
+            : $"{Labels.Count(pots.Sum(p => p.Here), "pot")}, {pots.Sum(p => p.Free)} free";
 
     /// <summary>"3 mixes, 1 no longer made", for the line linking to the soil mixes.</summary>
     private string MixSummary => mixes.Count switch

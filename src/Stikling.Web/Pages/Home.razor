@@ -45,12 +45,12 @@ else
         </div>
     }
 
-    @if (dueTreatments.Count > 0)
+    @foreach (var (heading, cases) in DuePests)
     {
         <section class="today-section">
-            <h2>Treatment due</h2>
+            <h2>@heading</h2>
             <ul class="item-list">
-                @foreach (var view in dueTreatments)
+                @foreach (var view in cases)
                 {
                     <li>
                         <a class="item-card" href="pests/@view.Case.Id">
@@ -60,7 +60,7 @@ else
                             <div class="item-text">
                                 <div class="item-name">@Labels.For(view.Case.Pest)</div>
                                 <div class="item-meta">
-                                    <span class="pest-due now">@Labels.Due(view.DaysUntilDue ?? 0)</span>
+                                    <span class="pest-due now">@Labels.Due(view.DaysUntilDue ?? 0, view.IsCheck)</span>
                                     <span>· @Labels.ScopeAndCount(view.Case, view.Plants.Count)</span>
                                 </div>
                             </div>
@@ -139,6 +139,14 @@ else
     private bool loaded;
 
     private DateOnly Today => Time.Today();
+
+    // Treatments first, then the cases only being watched, each under its own heading when there are any
+    private IEnumerable<(string Heading, List<PestCaseView> Cases)> DuePests =>
+        new[]
+        {
+            ("Treatment due", dueTreatments.Where(v => !v.IsCheck).ToList()),
+            ("Check for pests", dueTreatments.Where(v => v.IsCheck).ToList())
+        }.Where(group => group.Item2.Count > 0);
 
     protected override async Task OnInitializedAsync()
     {
