@@ -1266,3 +1266,13 @@ a.tag-label:hover {
 .tag-picker .form-label {
     margin-bottom: 0.35rem;
 }
+
+/* Names to tap under the name field being typed in. A long one wraps inside its chip. */
+.name-chip {
+    text-align: left;
+}
+
+.chip-note {
+    color: var(--pa-muted);
+    font-size: 0.8rem;
+}

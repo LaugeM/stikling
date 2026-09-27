@@ -9,6 +9,7 @@
 @inject BackupService Backup
 @inject DeviceFiles Files
 @inject IndexedDb Db
+@inject PlantNameService PlantNames
 @inject TimeProvider Time
 
 <PageTitle>Settings · Stikling</PageTitle>
@@ -228,6 +229,26 @@
     }
 </section>
 
+<section class="settings-section">
+    <h2>Plant names</h2>
+    <p class="settings-hint">
+        The names suggested while you type come with the app, so they work offline. They cover the aroids (Araceae)
+        in full, the genus of some other common houseplants, and a list of cultivars and trade names kept by hand.
+    </p>
+    @if (nameSources.Count > 0)
+    {
+        <ul class="settings-hint">
+            @foreach (var source in nameSources)
+            {
+                <li>
+                    <a href="@source.Url" target="_blank" rel="noopener">@source.Name</a>@(source.Version is null ? "" : $" ({source.Version})"):
+                    @source.Covers. @source.Licence.
+                </li>
+            }
+        </ul>
+    }
+</section>
+
 @code {
     private static readonly (ThemeMode Mode, string Label)[] options =
     [
@@ -249,6 +270,7 @@
     private string? roomMessage;
     private DateOnly? lastBackup;
     private StorageEstimate? storage;
+    private IReadOnlyList<NameSource> nameSources = [];
     private PendingRestore? pending;
     private string? message;
     private bool busy;
@@ -266,6 +288,7 @@
         mixes = await MixService.GetAllAsync();
         products = await ProductService.GetAllAsync();
         feeds = (await FeedRepository.GetAllAsync()).Count;
+        nameSources = (await PlantNames.GetDictionaryAsync()).Sources;
     }
 
     /// <summary>"6 pots, 2 free", for the line linking to the pot library.</summary>

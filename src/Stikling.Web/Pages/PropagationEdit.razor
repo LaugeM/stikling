@@ -95,26 +95,8 @@ else
                 <label class="form-label" for="nickname">Nickname</label>
                 <InputText id="nickname" class="form-control" @bind-Value="propagation.Nickname" placeholder="e.g. Corm test: perlite" />
             </div>
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                    <label class="form-label" for="genus">Genus</label>
-                    <InputText id="genus" class="form-control" @bind-Value="propagation.Genus" list="genus-list" placeholder="e.g. Alocasia" autocomplete="off" />
-                    <datalist id="genus-list">
-                        @foreach (var genus in PlantNames.CommonGenera)
-                        {
-                            <option value="@genus"></option>
-                        }
-                    </datalist>
-                </div>
-                <div class="col-6">
-                    <label class="form-label" for="species">Species</label>
-                    <InputText id="species" class="form-control" @bind-Value="propagation.Species" placeholder="e.g. zebrina" autocomplete="off" />
-                </div>
-            </div>
-            <div class="mb-1">
-                <label class="form-label" for="cultivar">Cultivar / variety</label>
-                <InputText id="cultivar" class="form-control" @bind-Value="propagation.Cultivar" autocomplete="off" />
-            </div>
+            <PlantNameFields @bind-Genus="propagation.Genus" @bind-Species="propagation.Species" @bind-Cultivar="propagation.Cultivar"
+                             GenusPlaceholder="e.g. Alocasia" SpeciesPlaceholder="e.g. zebrina" CultivarPlaceholder="" />
             <div class="form-text">
                 @(propagation.ParentPlantId is null ? "" : "Filled in from the parent plant. ")Give it a nickname, a genus, or both.
             </div>

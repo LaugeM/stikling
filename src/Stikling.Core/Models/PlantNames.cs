@@ -10,28 +10,32 @@ public static class PlantNames
     {
         var parts = new List<string>(3);
 
-        if (!string.IsNullOrWhiteSpace(genus))
-        {
-            var g = genus.Trim();
-            parts.Add(char.ToUpperInvariant(g[0]) + g[1..].ToLowerInvariant());
-        }
+        if (Genus(genus) is { } g)
+            parts.Add(g);
 
-        if (!string.IsNullOrWhiteSpace(species))
-            parts.Add(species.Trim().ToLowerInvariant());
+        if (Species(species) is { } s)
+            parts.Add(s);
 
-        if (!string.IsNullOrWhiteSpace(cultivar))
-            parts.Add($"'{cultivar.Trim().Trim('\'', '"')}'");
+        if (Cultivar(cultivar) is { } c)
+            parts.Add($"'{c}'");
 
         return parts.Count == 0 ? null : string.Join(' ', parts);
     }
 
-    /// <summary>Genera offered as suggestions when typing. Anything else can still be typed in.</summary>
-    public static IReadOnlyList<string> CommonGenera { get; } =
-    [
-        "Aglaonema", "Alocasia", "Anthurium", "Asparagus", "Begonia", "Calathea", "Crassula",
-        "Ctenanthe", "Dieffenbachia", "Dracaena", "Epipremnum", "Ficus", "Goeppertia", "Hoya",
-        "Laurus", "Maranta", "Monstera", "Musa", "Ocimum", "Pachira", "Peperomia", "Petroselinum",
-        "Phalaenopsis", "Philodendron", "Pilea", "Plectranthus", "Rhaphidophora", "Sansevieria",
-        "Scindapsus", "Spathiphyllum", "Strelitzia", "Syngonium", "Tradescantia", "Zamioculcas"
-    ];
+    /// <summary>"monstera " becomes "Monstera". Null when nothing was typed.</summary>
+    public static string? Genus(string? genus)
+    {
+        if (string.IsNullOrWhiteSpace(genus))
+            return null;
+        var g = genus.Trim();
+        return char.ToUpperInvariant(g[0]) + g[1..].ToLowerInvariant();
+    }
+
+    /// <summary>" Deliciosa" becomes "deliciosa". Null when nothing was typed.</summary>
+    public static string? Species(string? species) =>
+        string.IsNullOrWhiteSpace(species) ? null : species.Trim().ToLowerInvariant();
+
+    /// <summary>The cultivar without the quotes around it, which are added when the name is shown.</summary>
+    public static string? Cultivar(string? cultivar) =>
+        string.IsNullOrWhiteSpace(cultivar) || cultivar.Trim().Trim('\'', '"') is not { Length: > 0 } c ? null : c;
 }
