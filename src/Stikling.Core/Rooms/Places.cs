@@ -9,9 +9,6 @@ namespace Stikling.Core.Rooms;
 /// </summary>
 public sealed class Places
 {
-    // Far more than any real chain of merges, and it stops a loop from running forever
-    private const int MaxMerges = 32;
-
     private readonly Dictionary<Guid, Place> byId;
 
     public Places(IEnumerable<Place> places)
@@ -30,21 +27,34 @@ public sealed class Places
     public IEnumerable<Place> SpotsIn(Guid roomId) =>
         Live.Where(p => p.IsSpot && Find(p.RoomId)?.Id == roomId);
 
+    // The places nothing else stands in for, which includes the one kept from a merge loop
     private IEnumerable<Place> Live =>
-        byId.Values.Where(p => !p.IsDeleted).OrderBy(p => p.CreatedAt).ThenBy(p => p.Id);
+        byId.Values.Where(p => Find(p.Id) == p).OrderBy(p => p.CreatedAt).ThenBy(p => p.Id);
 
     /// <summary>
     /// The place with this id, or the one it was merged into. Null for no id, an unknown one,
     /// and a place that was deleted without being merged.
     /// </summary>
+    /// <remarks>
+    /// Two devices can merge the same two places in opposite directions, so after a sync each is
+    /// deleted and points at the other. The oldest place in such a loop is the one kept, which
+    /// every device works out the same way.
+    /// </remarks>
     public Place? Find(Guid? id)
     {
-        for (var hops = 0; id is { } current && hops <= MaxMerges; hops++)
+        var path = new List<Place>();
+        while (id is { } current)
         {
             if (!byId.TryGetValue(current, out var place))
                 return null;
             if (!place.IsDeleted)
                 return place;
+
+            var seen = path.IndexOf(place);
+            if (seen >= 0)
+                return path[seen..].OrderBy(p => p.CreatedAt).ThenBy(p => p.Id).First();
+
+            path.Add(place);
             id = place.MergedIntoId;
         }
         return null;

@@ -137,6 +137,66 @@ public class RoomServiceTests
     }
 
     [Fact]
+    public async Task Two_rooms_merged_into_each_other_on_different_devices_become_one()
+    {
+        var stue = places.Add("Stue");
+        var living = places.Add("Living room");
+        var danish = AddPlant("Monstera", stue);
+        var english = AddPlant("Basil", living);
+        var cutting = AddPropagation("Coleus", places.Add("Windowsill", living));
+
+        // One device renamed Stue to Living room, the other Living room to Stue, and a restore
+        // brought both merges together
+        stue.MergedIntoId = living.Id;
+        living.MergedIntoId = stue.Id;
+        await places.DeleteAsync(stue.Id);
+        await places.DeleteAsync(living.Id);
+
+        var room = (await Service.GetAllAsync()).Single();
+        Assert.Equal(stue.Id, room.Id);
+        Assert.Equal(2, room.AllPlants);
+        Assert.Equal("Stue", NameOf(danish.PlaceId));
+        Assert.Equal("Stue", NameOf(english.PlaceId));
+        Assert.Equal("Stue / Windowsill", NameOf(cutting.PlaceId));
+    }
+
+    [Fact]
+    public async Task A_room_kept_from_a_merge_loop_can_be_renamed()
+    {
+        var stue = places.Add("Stue");
+        var living = places.Add("Living room");
+        var plant = AddPlant("Monstera", living);
+        stue.MergedIntoId = living.Id;
+        living.MergedIntoId = stue.Id;
+        await places.DeleteAsync(stue.Id);
+        await places.DeleteAsync(living.Id);
+
+        var result = await Service.RenameAsync(living.Id, "Lounge");
+
+        Assert.Equal("Lounge", NameOf(plant.PlaceId));
+        Assert.Equal(1, result.Plants);
+        Assert.False(result.Merged);
+    }
+
+    [Fact]
+    public async Task A_spot_whose_room_was_deleted_can_still_be_renamed()
+    {
+        // The room was deleted on another device, without being merged into anything
+        var shed = places.Add("Shed");
+        var shelf = places.Add("Shelf", shed);
+        places.Add("Bench", shed);
+        var plant = AddPlant("Pilea", shelf);
+        await places.DeleteAsync(shed.Id);
+
+        var result = await Service.RenameAsync(shelf.Id, "Bench");
+
+        Assert.False(result.Merged);
+        Assert.Equal(1, result.Plants);
+        Assert.Equal("Bench", NameOf(plant.PlaceId));
+        Assert.Same(shelf, Places.Find(plant.PlaceId));
+    }
+
+    [Fact]
     public async Task A_spot_can_be_renamed_without_touching_the_rest_of_the_room()
     {
         var living = places.Add("Living room");
