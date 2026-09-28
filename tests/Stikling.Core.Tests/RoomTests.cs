@@ -93,7 +93,7 @@ public class PlacesTests
     [Fact]
     public void The_ids_in_a_room_are_the_room_and_its_spots()
     {
-        Assert.Equal([living.Id, windowsill.Id], Places.IdsIn(living.Id).Order());
+        Assert.Equal(new HashSet<Guid> { living.Id, windowsill.Id }, Places.IdsIn(living.Id));
         Assert.Equal([windowsill.Id], Places.IdsIn(windowsill.Id));
     }
 
