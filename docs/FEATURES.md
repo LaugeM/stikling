@@ -39,14 +39,13 @@ In the order I would build them.
 
 1. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
 2. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished, and I want it in place before winter.
-3. **Empty screens that say what to do next, and the FAQ page.** Someone new sees an empty app first, and the first person I showed the app to asked what propagation means.
-4. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-5. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-6. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-7. **Seed germination**: sown and germinated counts with their dates.
-8. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-9. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
-10. **Comparing photos side by side, and voice notes.**
+3. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+4. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+5. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+6. **Seed germination**: sown and germinated counts with their dates.
+7. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+8. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
+9. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
@@ -303,8 +302,8 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | **FAQ page**: how the app stores everything on your device, what happens if you clear the browser, how to back up, how propagation and lineage work, how to install it on the phone | 4 | S | v1.x |
-| ☐ | Empty screens that say what to do next instead of just "nothing here" | 4 | S | v1.x |
+| ✅ | **Help page** with short questions and answers: how the app stores everything on your device, what happens if you clear the browser, how to back up, how propagation and lineage work, how to install it on the phone, and a few answers for each part of the app. Each question folds open, and the topics at the top jump to their section. Opened from Settings and from the first screens someone new sees | 4 | S | v1.x |
+| ✅ | Empty screens that say what to do next instead of just "nothing here": the first screen on Today says what the app is for and offers a plant or a propagation, a list with nothing matching offers to clear the search and filters, and the ones that use a word like feed or propagation say what it means | 4 | S | v1.x |
 | ☐ | **Guided tour on the first visit**: a short walk through the app (plants, propagations, photos, backup) that can be skipped | 6 | M | v1.x |
 | ☐ | Start the tour again from Settings whenever you want | 6 | S | v1.x |
 | ☐ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | 6 | S | v1.x |

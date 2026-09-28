@@ -34,7 +34,10 @@ else if (all.Count == 0)
         <h2>No propagations yet</h2>
         <p>A propagation is a new plant grown from one you have, like a cutting in water or a few seeds.</p>
         <p>Open a plant and tap <em>Propagate</em>, or start one without a parent plant, e.g. seeds.</p>
-        <a class="btn btn-primary mt-3" href="propagations/new">Start a propagation</a>
+        <div class="first-run-actions">
+            <a class="btn btn-primary" href="propagations/new">Start a propagation</a>
+        </div>
+        <a class="first-run-help" href="help#propagations">More about propagations in Help</a>
     </div>
 }
 else
@@ -57,7 +60,22 @@ else
     <div class="list-body">
     @if (visible.Count == 0)
     {
-        <div class="empty-state"><p>No propagations match.</p></div>
+        <div class="empty-state">
+            @if (!string.IsNullOrWhiteSpace(search))
+            {
+                <p>No propagations match.</p>
+                <button type="button" class="btn btn-outline-primary mt-3" @onclick="ClearSearch">Clear search</button>
+            }
+            else if (progress == ProgressFilter.Active)
+            {
+                <p>Nothing in progress. The ones that were potted up or failed are under Finished.</p>
+                <a class="btn btn-primary mt-3" href="propagations/new">Start a propagation</a>
+            }
+            else
+            {
+                <p>None finished yet. A propagation is finished once all of it has been potted up or has failed.</p>
+            }
+        </div>
     }
 
     @foreach (var experiment in experiments)
@@ -169,6 +187,12 @@ else
     private void SetProgress(ProgressFilter value)
     {
         progress = value;
+        Refresh();
+    }
+
+    private void ClearSearch()
+    {
+        search = null;
         Refresh();
     }
 

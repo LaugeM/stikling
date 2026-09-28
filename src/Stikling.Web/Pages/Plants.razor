@@ -32,8 +32,11 @@ else if (all.Count == 0)
             <path class="growth" d="M32 36V18" /><path class="growth" d="M32 28c0-8-6-13-14-13 0 8 6 13 14 13Z" /><path class="growth" d="M32 23c0-7 6-11 13-11 0 7-6 11-13 11Z" />
         </svg>
         <h2>No plants yet</h2>
-        <p>Add the first one to start your collection.</p>
-        <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
+        <p>Add the first one to start your collection. A name is enough, and the rest can wait.</p>
+        <div class="first-run-actions">
+            <a class="btn btn-primary" href="plants/new">Add a plant</a>
+        </div>
+        <a class="first-run-help" href="help#plants">More about plants in Help</a>
     </div>
 }
 else
@@ -115,7 +118,22 @@ else
 
     @if (visible.Count == 0)
     {
-        <div class="empty-state"><p>No plants match.</p></div>
+        <div class="empty-state">
+            @if (Narrowed)
+            {
+                <p>No plants match.</p>
+                <button type="button" class="btn btn-outline-primary mt-3" @onclick="ClearFilters">Clear filters</button>
+            }
+            else if (status == StatusFilter.Active)
+            {
+                <p>None of your plants are in the collection now. The ones that died or left are under Gone.</p>
+                <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
+            }
+            else
+            {
+                <p>No plants here. A plant ends up under Gone when you mark it as died, given away or sold.</p>
+            }
+        </div>
     }
     else
     {
@@ -306,6 +324,22 @@ else
     private void ToggleDormant()
     {
         dormant = !dormant;
+        Refresh();
+    }
+
+    /// <summary>Anything besides the status is narrowing the list.</summary>
+    private bool Narrowed =>
+        !string.IsNullOrWhiteSpace(search) || !string.IsNullOrEmpty(room) || pickedTags.Count > 0 || quarantine || dormant;
+
+    // Leaves the status alone, since its buttons are always in view
+    private void ClearFilters()
+    {
+        search = null;
+        room = null;
+        spot = null;
+        pickedTags.Clear();
+        quarantine = false;
+        dormant = false;
         Refresh();
     }
 

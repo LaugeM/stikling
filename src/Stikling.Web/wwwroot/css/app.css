@@ -1352,7 +1352,7 @@ a.tag-label:hover {
     color: var(--pa-green-dark);
 }
 
-.empty-state.first-run p + p {
+.empty-state p + p {
     margin-top: 0.5rem;
 }
 
@@ -1360,6 +1360,20 @@ a.tag-label:hover {
     max-width: 28rem;
     margin-inline: auto;
     color: var(--pa-muted);
+}
+
+.first-run-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.first-run-help {
+    display: inline-block;
+    margin-top: 0.85rem;
+    font-size: 0.9rem;
 }
 
 .valid.modified:not([type=checkbox]) {

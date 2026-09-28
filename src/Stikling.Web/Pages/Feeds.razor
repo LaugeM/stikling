@@ -127,9 +127,14 @@ else if (uses.Count == 0)
     <div class="empty-state">
         <p>No feeds yet.</p>
         <p class="text-body-secondary">
+            A feed is a few products mixed into the water together, like a fertiliser with silica.
             Start with the one you mix most. Pick the products in the order they go in the water, and
             the doses start at each product's usual one.
         </p>
+        @if (products.Count == 0)
+        {
+            <a class="btn btn-outline-primary mt-3" href="products">Add your products first</a>
+        }
     </div>
 }
 else

@@ -29,9 +29,17 @@ else if (plants.Count == 0 && propagations.Count == 0)
             <path class="pot" d="M18 36h28v6H18Z" /><path class="pot" d="M21 42h22l-3 16H24Z" />
             <path class="growth" d="M32 36V18" /><path class="growth" d="M32 28c0-8-6-13-14-13 0 8 6 13 14 13Z" /><path class="growth" d="M32 23c0-7 6-11 13-11 0 7-6 11-13 11Z" />
         </svg>
-        <h2>Nothing here yet</h2>
-        <p>Add your first plant and it shows up in your collection.</p>
-        <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
+        <h2>Start with a plant</h2>
+        <p>
+            Stikling keeps track of your plants and the cuttings you grow from them, with notes and photos
+            as they go. Add a plant you have, and this page fills up with what needs doing.
+        </p>
+        <p>Everything stays on this device. There is no account to make.</p>
+        <div class="first-run-actions">
+            <a class="btn btn-primary" href="plants/new">Add a plant</a>
+            <a class="btn btn-outline-primary" href="propagations/new">Start a propagation</a>
+        </div>
+        <a class="first-run-help" href="help">How Stikling works</a>
     </div>
 }
 else
@@ -169,7 +177,7 @@ else
         <h2>Lately</h2>
         @if (recent.Count == 0)
         {
-            <p class="text-body-secondary mb-0">Nothing written down yet.</p>
+            <p class="text-body-secondary mb-0">Nothing written down yet. Notes and photos you add to a plant or propagation show up here.</p>
         }
         else
         {
