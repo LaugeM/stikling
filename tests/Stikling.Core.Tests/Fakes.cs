@@ -279,6 +279,32 @@ internal sealed class FakeFeedRepository : IFeedRepository
     }
 }
 
+internal sealed class FakeTreatmentRecipeRepository : ITreatmentRecipeRepository
+{
+    public Dictionary<Guid, TreatmentRecipe> Recipes { get; } = [];
+
+    public Task<IReadOnlyList<TreatmentRecipe>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<TreatmentRecipe>>(Recipes.Values.Where(r => !r.IsDeleted).ToList());
+
+    public Task<TreatmentRecipe?> GetAsync(Guid id) =>
+        Task.FromResult(Recipes.TryGetValue(id, out var recipe) && !recipe.IsDeleted ? recipe : null);
+
+    public Task SaveAsync(TreatmentRecipe recipe)
+    {
+        if (recipe.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid recipe");
+        Recipes[recipe.Id] = recipe;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Recipes.TryGetValue(id, out var recipe))
+            recipe.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakePestCaseRepository : IPestCaseRepository
 {
     public Dictionary<Guid, PestCase> Cases { get; } = [];

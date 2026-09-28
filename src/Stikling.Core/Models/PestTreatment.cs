@@ -26,8 +26,23 @@ public sealed class PestTreatment : Entity
     /// <summary>The day it was done, which can be earlier than when it was written down.</summary>
     public DateOnly OccurredOn { get; set; }
 
-    /// <summary>What was used, e.g. "alcohol spray, both sides of the leaves".</summary>
+    /// <summary>
+    /// What was used, e.g. "alcohol spray, both sides of the leaves". With a recipe it's the
+    /// recipe's name as it was that day.
+    /// </summary>
     public string? What { get; set; }
+
+    /// <summary>The recipe it was made from, for counting how often each one is used.</summary>
+    public Guid? RecipeId { get; set; }
+
+    /// <summary>
+    /// What went in, copied from the recipe on the day, so editing or deleting the recipe
+    /// leaves this entry alone. Empty when no recipe was used.
+    /// </summary>
+    public List<RecipeIngredient> Ingredients { get; set; } = [];
+
+    /// <summary>How the recipe said to use it, copied the same way.</summary>
+    public string? Method { get; set; }
 
     public string? Notes { get; set; }
 
@@ -37,7 +52,21 @@ public sealed class PestTreatment : Entity
     /// </summary>
     public DateOnly? NextDueOn { get; set; }
 
-    public PestTreatment Copy() => (PestTreatment)MemberwiseClone();
+    public PestTreatment Copy()
+    {
+        var copy = (PestTreatment)MemberwiseClone();
+        copy.Ingredients = [.. Ingredients.Select(i => i.Copy())];
+        return copy;
+    }
+
+    /// <summary>Fills in the recipe as it is today, replacing whatever was typed.</summary>
+    public void Use(TreatmentRecipe recipe)
+    {
+        RecipeId = recipe.Id;
+        What = recipe.Name?.Trim();
+        Ingredients = recipe.CopyIngredients();
+        Method = string.IsNullOrWhiteSpace(recipe.Method) ? null : recipe.Method.Trim();
+    }
 
     public IReadOnlyList<string> Validate(DateOnly today)
     {
@@ -52,8 +81,11 @@ public sealed class PestTreatment : Entity
         if (NextDueOn is { } next && next < OccurredOn)
             errors.Add("The next treatment can't be due before this one happened.");
 
-        if (Kind == PestTreatmentKind.Checked && (What is not null || NextDueOn is not null))
+        if (Kind == PestTreatmentKind.Checked
+            && (What is not null || NextDueOn is not null || RecipeId is not null || Ingredients.Count > 0 || Method is not null))
             errors.Add("A check only has a date and notes.");
+
+        errors.AddRange(RecipeIngredient.Validate(Ingredients));
 
         return errors;
     }

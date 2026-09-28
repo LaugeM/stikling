@@ -33,6 +33,7 @@ builder.Services.AddScoped<IPropagationRepository, IndexedDbPropagationRepositor
 builder.Services.AddScoped<ICareLogRepository, IndexedDbCareLogRepository>();
 builder.Services.AddScoped<IPestCaseRepository, IndexedDbPestCaseRepository>();
 builder.Services.AddScoped<IPestTreatmentRepository, IndexedDbPestTreatmentRepository>();
+builder.Services.AddScoped<ITreatmentRecipeRepository, IndexedDbTreatmentRecipeRepository>();
 builder.Services.AddScoped<IPotRepository, IndexedDbPotRepository>();
 builder.Services.AddScoped<ISoilMixRepository, IndexedDbSoilMixRepository>();
 builder.Services.AddScoped<IProductRepository, IndexedDbProductRepository>();

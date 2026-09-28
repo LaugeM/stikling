@@ -121,6 +121,11 @@ else
                             </span>
                             <span class="care-when">@Labels.Date(treatment.OccurredOn)</span>
                         </div>
+                        @if (treatment.Ingredients.Count > 0)
+                        {
+                            @* The recipe as it was that day, not as it is now *@
+                            <div class="treatment-recipe">@string.Join(" · ", treatment.Ingredients)</div>
+                        }
                     </li>
                 }
             </ul>

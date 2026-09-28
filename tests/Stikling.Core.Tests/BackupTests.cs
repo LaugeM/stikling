@@ -124,11 +124,12 @@ public class BackupTests
             Pots = [new Pot { Name = "Clear nursery pot" }],
             SoilMixes = [new SoilMix { Name = "Chunky soil" }],
             Products = [new Product { Name = "Hydro fertiliser" }, new Product { Name = "Silica" }],
-            Feeds = [new Feed { Name = "Aroid feed" }]
+            Feeds = [new Feed { Name = "Aroid feed" }],
+            TreatmentRecipes = [new TreatmentRecipe { Name = "Alcohol spray" }, new TreatmentRecipe { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -146,6 +147,25 @@ public class BackupTests
         Assert.Equal(PestCaseStatus.Resolved, Assert.Single(cases.ToSave).Status);
         Assert.Equal(caseId, Assert.Single(treatments.ToSave).CaseId);
         Assert.Equal(1, treatments.Added);
+    }
+
+    [Fact]
+    public void Treatment_recipes_survive_a_restore()
+    {
+        var id = Guid.NewGuid();
+        var mine = new TreatmentRecipe { Id = id, Name = "Alcohol spray", UpdatedAt = Now.AddDays(-3) };
+        var theirs = new TreatmentRecipe
+        {
+            Id = id,
+            Name = "Alcohol spray",
+            UpdatedAt = Now,
+            Ingredients = [new RecipeIngredient { Name = "Isopropyl alcohol", Amount = 250 }]
+        };
+
+        var merged = BackupMerge.Merge([mine], [theirs]);
+
+        Assert.Equal("Isopropyl alcohol", Assert.Single(Assert.Single(merged.ToSave).Ingredients).Name);
+        Assert.Equal(1, merged.Updated);
     }
 
     [Fact]

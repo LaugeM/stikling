@@ -139,15 +139,32 @@ public static class PestService
     /// <summary>A blank case starting today, for the new-case form.</summary>
     public static PestCase Start(DateOnly today) => new() { StartedOn = today };
 
-    /// <summary>A blank treatment for a case, dated today and carrying the last one's recipe forward.</summary>
-    public static PestTreatment StartTreatment(PestCase item, IEnumerable<PestTreatment> treatments, DateOnly today) =>
-        new()
+    /// <summary>
+    /// A blank treatment for a case, dated today and carrying the last one forward, since the
+    /// same spray is usually used again. A saved recipe comes back as it is now, so an edit to
+    /// it since is picked up. One that has been deleted isn't offered at all.
+    /// </summary>
+    public static PestTreatment StartTreatment(
+        PestCase item,
+        IEnumerable<PestTreatment> treatments,
+        DateOnly today,
+        IEnumerable<TreatmentRecipe>? recipes = null)
+    {
+        var draft = new PestTreatment { CaseId = item.Id, OccurredOn = today };
+        var last = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated);
+
+        if (last?.RecipeId is { } id)
         {
-            CaseId = item.Id,
-            OccurredOn = today,
-            // The same spray is usually used again, so it's offered rather than retyped
-            What = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated)?.What
-        };
+            if (recipes?.FirstOrDefault(r => r.Id == id && !r.IsDeleted) is { } recipe)
+                draft.Use(recipe);
+        }
+        else
+        {
+            draft.What = last?.What;
+        }
+
+        return draft;
+    }
 
     /// <summary>A blank check for a case being watched, dated today.</summary>
     public static PestTreatment StartCheck(PestCase item, DateOnly today) =>
