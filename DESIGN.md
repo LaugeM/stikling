@@ -315,7 +315,12 @@ This replaced a 3px coloured bar down the left edge. The bar was flagged as a ge
 ### Empty State
 Centred Muted Ink text on Surface inside a dashed Border at 0.75rem radius, with 2.5rem of vertical padding. Used for "nothing matches" and for empty sections.
 
-The first-run version, on Today, Plants and Propagations when there is nothing at all yet, is louder on purpose: Leaf Tint with a green dashed edge, a stroked drawing at 5.5rem (a sprout in a clay pot, or a cutting rooting in a glass), a Bricolage heading in Deep Moss, and the sentence and button under it. The Propagations one also says in plain words what a propagation is, because that is the first question a new person asked.
+An empty state never just says there is nothing. It says why the space is empty and what to do next, with a button when there is one thing to do: add the first one, clear the search and filters, or go and add what this depends on first. When the screen is about something with a name a newcomer may not know, like a feed or a propagation, it says what that is in half a sentence.
+
+The first-run version, on Today, Plants and Propagations when there is nothing at all yet, is louder on purpose: Leaf Tint with a green dashed edge, a stroked drawing at 5.5rem (a sprout in a clay pot, or a cutting rooting in a glass), a Bricolage heading in Deep Moss, and the sentences and buttons under it, with a small link to the Help page at the bottom. The one on Today says what the app is for and that nothing leaves the device. The Propagations one says in plain words what a propagation is, because that is the first question a new person asked.
+
+### Help Page
+Questions and answers grouped by topic, each topic under a Label heading. The questions in a topic close up into one bordered block divided by hairlines, like an experiment group, and each folds open with a stroked chevron on the right that turns over when open. Questions are set in the system font at weight 600, because they are sentences. A row of chips at the top jumps to each topic. The page is reached from the top of Settings and from the first-run empty states, not from the header, so it doesn't compete with the app itself.
 
 ## Do's and Don'ts
 

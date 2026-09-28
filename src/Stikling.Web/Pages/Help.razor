@@ -1,0 +1,432 @@
+@page "/help"
+@* Short answers to what people ask. Keep this in step with the app: a feature that is added or
+   changed should have its answer added or changed here in the same pull request. *@
+@inject IJSRuntime JS
+
+<PageTitle>Help · Stikling</PageTitle>
+
+<a class="back-link" href="settings">Settings</a>
+<h1>Help</h1>
+
+<p class="help-intro">
+    Short answers to the questions that come up most. Tap a question to open it.
+</p>
+
+<nav class="help-toc" aria-label="Topics">
+    @foreach (var (id, title) in topics)
+    {
+        <a class="chip" href="help#@id">@title</a>
+    }
+</nav>
+
+<section class="help-section" id="start">
+    <h2>Getting started</h2>
+
+    <details class="help-item">
+        <summary>What is Stikling for?</summary>
+        <p>
+            Keeping track of your houseplants and the new plants you grow from them, with a history of
+            notes and photos for each one. It also keeps a care log, pest treatments, and the pots, soil
+            mixes and fertilisers you use, but all of that is optional. A plant with just a name is fine.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What is a propagation?</summary>
+        <p>
+            A new plant you are growing from one you already have, or from seeds. A cutting in a glass of
+            water is the usual example. Others are a corm, an offset or pup, a leaf, a division, an air
+            layer, and seeds. Stikling calls all of them propagations and keeps them apart from your plants
+            until they have rooted and you pot them up.
+        </p>
+        <p>
+            <em>Stikling</em> is the Danish word for a cutting.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>Where do I start?</summary>
+        <p>
+            Add a plant from the Plants tab with the round + button. A name is all it needs, and the rest
+            can be filled in later. When you take a cutting from it, open the plant and tap
+            <em>Propagate</em>.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How do I put it on my phone's home screen?</summary>
+        <p>
+            On an iPhone, open Stikling in Safari, tap the Share button, and pick
+            <em>Add to Home Screen</em>.
+        </p>
+        <p>
+            On Android, open it in Chrome, tap the menu with the three dots, and pick
+            <em>Install app</em> or <em>Add to home screen</em>.
+        </p>
+        <p>
+            It then opens like any other app, without the browser around it. It is still the same app and
+            the same data, so nothing has to be moved.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>Does it work without signal?</summary>
+        <p>
+            Yes. Once it has been opened, everything it needs is kept on the phone, including the plant
+            name suggestions. It only goes online to check for a new version, and when there is one a
+            banner at the bottom asks you to reload.
+        </p>
+    </details>
+</section>
+
+<section class="help-section" id="data">
+    <h2>Your data and backups</h2>
+
+    <details class="help-item">
+        <summary>Where is my data kept?</summary>
+        <p>
+            On this device only, in the browser's own storage. There is no account and no server, so nothing
+            you add leaves the phone unless you save a backup and move it yourself.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What happens if I clear the browser or delete the app?</summary>
+        <p>
+            Your plants, propagations and photos go with it. Clearing the site data for Stikling, or
+            deleting the installed app, removes everything, and without a backup there is no way to get it
+            back.
+        </p>
+        <p>
+            Some browsers also clear data by themselves when the phone runs low on space, or when a site
+            hasn't been opened for a while. Installing Stikling to the home screen usually stops that. Under
+            Storage in Settings you can see whether the browser has agreed to keep your data, and ask it to.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How do I back up?</summary>
+        <p>
+            In Settings, under Backup, tap <em>Save a backup</em>. You get a ZIP file with everything in it,
+            photos included. Keep it somewhere other than the phone, like cloud storage or your computer.
+        </p>
+        <p>
+            Today reminds you when you haven't taken a backup, or when the last one is 30 days old.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How do I move to a new phone?</summary>
+        <p>
+            Save a backup on the old phone, get the file over to the new one, open Stikling there and tap
+            <em>Restore a backup</em> in Settings.
+        </p>
+        <p>
+            A restore adds to what is already there instead of replacing it. Anything missing is added,
+            anything deleted since the backup comes back, and where the same thing was changed in both
+            places, the newer change wins. Restoring the same backup twice does no harm.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>Can I use it on two devices?</summary>
+        <p>
+            Not at the same time. Each device has its own copy and they don't sync. You can move your data
+            across with a backup and a restore whenever you switch.
+        </p>
+    </details>
+</section>
+
+<section class="help-section" id="plants">
+    <h2>Plants</h2>
+
+    <details class="help-item">
+        <summary>What are genus, species and cultivar?</summary>
+        <p>
+            The parts of a plant's botanical name. In <em>Monstera deliciosa</em> 'Thai Constellation',
+            Monstera is the genus, deliciosa the species, and Thai Constellation the cultivar, a named
+            variety. Suggestions come up as you type, but anything can be typed, and all three can be left
+            empty if you give the plant a nickname.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How do rooms and spots work?</summary>
+        <p>
+            A room is where a plant lives, and a spot is a place inside it, like "Living room / On top of
+            the PC". Pick one you have used before so the same room doesn't end up with two names.
+            Filtering the plant list by a room includes its spots. Rooms can be renamed or merged under
+            Rooms in Settings.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What happens when a plant dies or I give it away?</summary>
+        <p>
+            Change its status when editing it, or for several at once with <em>Select</em> on the plant
+            list. It leaves the list but keeps its history, and you can still find it under
+            <em>Gone</em>. Deleting a plant removes it along with its history, so the status is usually the better choice.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What do dormant and quarantine mean?</summary>
+        <p>
+            Dormant is for a plant that is resting, like an alocasia dropping its leaves for the winter, so it
+            doesn't look dead. Quarantine is for a new or sick plant you are keeping apart from the rest.
+            Both are ticked when editing a plant, show as a badge, have a filter on the plant list, and are
+            written on the plant's history when they start and end.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How do I log watering and feeding?</summary>
+        <p>
+            Open the plant and go to the Care tab. It shows when it was last watered, fed and so on, and
+            logging is a tap. To log for several plants at once, tap <em>Select</em> on the plant list, pick
+            them and tap <em>Log care</em>.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What are tags for?</summary>
+        <p>
+            Your own labels, like "variegated", "rare" or "for swap". Picking tags on the plant list shows
+            the plants that have all of them, and tapping a tag on a plant's page does the same.
+        </p>
+    </details>
+</section>
+
+<section class="help-section" id="propagations">
+    <h2>Propagations</h2>
+
+    <details class="help-item">
+        <summary>How do I start one?</summary>
+        <p>
+            Open the plant you took it from and tap <em>Propagate</em>, so the new plant stays linked to it.
+            For something without a parent plant, like bought seeds, use the round + button on the
+            Propagations tab.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What do the stages mean?</summary>
+        <p>
+            <strong>Started</strong> is the day you put it in water or a medium.
+            <strong>Rooting</strong> is when the first roots show.
+            <strong>Rooted</strong> is when it has roots enough to be potted up.
+            Tap the stage at the top of a propagation to move it on. For seeds the same stages are called
+            Sown, Germinating and Sprouted.
+        </p>
+        <p>
+            A propagation is finished once all of it has been potted up or has failed. It is then
+            <strong>Done</strong> if any of it made it, and <strong>Failed</strong> if none did.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What if I have several cuttings in one glass?</summary>
+        <p>
+            Give the propagation a count, like 3 corms in LECA. They are tracked as one batch, and you can
+            pot up or mark failed one or a few at a time as each goes its own way.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What does Pot up do?</summary>
+        <p>
+            It turns one or more from the propagation into plants in your collection. Each new plant keeps
+            a link to the plant the propagation came from, so you can always see where it started.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How does the family tree work?</summary>
+        <p>
+            On a plant's Info tab, Family shows what it came from and the offspring grown from it. It
+            follows the links across generations, so a cutting of a cutting still leads back to the first
+            plant. Propagations still on their way are under the plant's Props tab.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How do I compare mediums, like water and perlite?</summary>
+        <p>
+            Give the batches you started together the same name under Experiment when editing them. The
+            Propagations list then shows them side by side, with a bar for how long each took to root and
+            the dates of the first root and first leaf.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What is on the results page?</summary>
+        <p>
+            <em>Success rate and days to root</em> on the Propagations list shows how each medium, each type
+            and each rooting aid has done across everything you have propagated. Once three batches of the
+            same type in the same medium have rooted, a propagation still going also says whether it is on
+            time or slower than usual.
+        </p>
+    </details>
+</section>
+
+<section class="help-section" id="today">
+    <h2>Today</h2>
+
+    <details class="help-item">
+        <summary>What shows up on Today?</summary>
+        <p>
+            Pest treatments that are due, anything you have flagged, propagations nobody has looked at for
+            a week, the monthly photo reminder if it is turned on, and the notes you wrote lately. It also
+            reminds you to back up.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How do I get a propagation off "Worth a look"?</summary>
+        <p>
+            Add a note or a photo to it, or move its stage. Anything on its history counts as looking at it.
+            If there is nothing to say yet, tap the clock on the row to put it off until tomorrow, for 3 days
+            or for a week. It comes back by itself after that.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How do I flag something to do later?</summary>
+        <p>
+            Tap <em>Flag</em> on a plant or propagation and say what it needs, like "Repot soon". It stays on
+            Today under Needs attention until you tick it off there or on its page.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What is the photo reminder?</summary>
+        <p>
+            Once a month, Today lists the plants and propagations that haven't had a photo that month, room
+            by room, with a camera button on each. It keeps every history growing. It is off until you turn
+            it on under Today in Settings.
+        </p>
+    </details>
+</section>
+
+<section class="help-section" id="history">
+    <h2>Photos and history</h2>
+
+    <details class="help-item">
+        <summary>What is the History tab?</summary>
+        <p>
+            Everything that happened to a plant or propagation, newest first: your notes, your photos, and
+            changes the app wrote down by itself, like a new stage or a move to another room. Tap a photo to
+            see it full screen, and choose which one is the cover.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>Can I add old photos from before I used the app?</summary>
+        <p>
+            Yes. Tap <em>Gallery</em> on the History tab and pick them. Each photo lands on the day it was
+            taken, read from the photo itself, so the history starts from the beginning. If some photos
+            have no date of their own, the app says how many so you can check them.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>How do I fix a note with the wrong date?</summary>
+        <p>
+            Tap the pencil next to a note or photo on the History tab to change its text or date. The earlier version is kept and shown
+            under <em>edited</em>. To write something down that happened earlier, tap
+            <em>Happened earlier?</em> before adding the note.
+        </p>
+    </details>
+</section>
+
+<section class="help-section" id="pests">
+    <h2>Pests</h2>
+
+    <details class="help-item">
+        <summary>What is a pest case?</summary>
+        <p>
+            One outbreak, like spider mites in the living room. A case covers the whole collection, one room,
+            or the plants you pick, because pests spread and are treated together. You say how often to
+            treat, and Today shows when the next round is due.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What is the difference between treating and watching?</summary>
+        <p>
+            While a case is <strong>Treating</strong>, each treatment you log moves the next one along by the
+            interval. Set it to <strong>Watching</strong> when the pests seem gone, and Today asks for a check
+            once a week instead. If a check finds some, <em>Found some</em> puts it back to treating.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What are sticky trap counts?</summary>
+        <p>
+            Count what is on a yellow or blue sticky trap now and then, and the app works out how many were
+            caught since last time. The chart of the catch per week shows whether the treatment is working.
+        </p>
+    </details>
+</section>
+
+<section class="help-section" id="supplies">
+    <h2>Pots, mixes and fertilisers</h2>
+
+    <details class="help-item">
+        <summary>Do I have to fill in pots, soil mixes and products?</summary>
+        <p>
+            No. They are all under Settings for anyone who wants them. Once they are there, a plant can pick
+            its pot and mix from a list, and logging a feed says what went in the water without typing.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What is the difference between a product and a feed?</summary>
+        <p>
+            A product is one bottle or bag, like a fertiliser or silica, with the dose you usually use. A
+            feed is several products mixed into the water together, in the order they go in. Fill in how
+            much water you are mixing, and the app says how much of each to add.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What are nursery pots and outer pots?</summary>
+        <p>
+            A nursery pot is the plain one the plant actually sits in, and an outer pot is the decorative one
+            without drainage that it goes inside. Some pots are neither and stand on their own. The Pots page
+            shows which of yours are in use and which are free.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What are treatment recipes?</summary>
+        <p>
+            Sprays and drenches you make up yourself against pests, like an alcohol spray. Save one under
+            Settings, and logging a treatment is then a tap. <em>Mix a batch</em> works out the amounts for
+            any size of bottle.
+        </p>
+    </details>
+</section>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+        await module.InvokeVoidAsync("scrollToFragment");
+    }
+
+    private static readonly (string Id, string Title)[] topics =
+    [
+        ("start", "Getting started"),
+        ("data", "Data and backups"),
+        ("plants", "Plants"),
+        ("propagations", "Propagations"),
+        ("today", "Today"),
+        ("history", "History"),
+        ("pests", "Pests"),
+        ("supplies", "Supplies")
+    ];
+}
