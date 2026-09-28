@@ -3,9 +3,10 @@
   "configurations": [
     {
       "name": "stikling-web",
-      "runtimeExecutable": "dotnet",
-      "runtimeArgs": ["run", "--project", "src/Stikling.Web", "--no-launch-profile", "--urls", "http://localhost:5170"],
-      "port": 5170
+      "runtimeExecutable": "pwsh",
+      "runtimeArgs": ["-NoProfile", "-Command", "dotnet run --project src/Stikling.Web --no-launch-profile --urls \"http://localhost:$(if ($env:PORT) { $env:PORT } else { 5170 })\""],
+      "port": 5170,
+      "autoPort": true
     }
   ]
 }
