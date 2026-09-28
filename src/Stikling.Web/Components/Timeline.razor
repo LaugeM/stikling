@@ -15,14 +15,14 @@
             Camera
         </label>
         <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
-               @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput)" disabled="@busy" />
+               @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
 
         <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
             Gallery
         </label>
         <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
-               @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput)" disabled="@busy" />
+               @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
 
         <button type="button" class="btn btn-primary btn-sm ms-auto" @onclick="SaveNoteAsync"
                 disabled="@(busy || string.IsNullOrWhiteSpace(noteText))">Add note</button>
@@ -243,7 +243,7 @@ else
         var inTimeline = entries.SelectMany(e => e.PhotoIds).Where(byId.ContainsKey).Distinct().Select(id => byId[id]);
         photos = inTimeline.Concat(stored.Where(p => !entries.Any(e => e.PhotoIds.Contains(p.Id)))).ToList();
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
-        days = TimelineOrder.ByDay(entries, Time.GetLocalNow().Offset);
+        days = TimelineOrder.ByDay(entries, Time);
     }
 
     private DateTimeOffset OccurredAt =>
@@ -271,7 +271,7 @@ else
     }
 
     // Choosing photos saves them straight away, together with any note typed so far
-    private async Task AddPhotosAsync(ElementReference input)
+    private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
     {
         busy = true;
         status = "Saving photos…";
@@ -280,28 +280,17 @@ else
         try
         {
             var result = await Photos.SaveFromInputAsync(input, SubjectType, SubjectId);
+            status = result.Message(guessesMatter: !fromCamera && occurredOn is null);
+
             if (result.Saved.Count > 0)
             {
-                var hasText = !string.IsNullOrWhiteSpace(noteText);
-                await Entries.AddAsync(new TimelineEntry
-                {
-                    SubjectType = SubjectType,
-                    SubjectId = SubjectId,
-                    Kind = hasText ? TimelineKind.Note : TimelineKind.Photo,
-                    OccurredAt = occurredOn is null ? result.Saved.Max(p => p.TakenAt) : OccurredAt,
-                    Text = hasText ? noteText!.Trim() : null,
-                    PhotoIds = result.Saved.Select(p => p.Id).ToList()
-                });
+                await TimelineService.AddPhotosAsync(SubjectType, SubjectId, result.Saved, noteText, occurredOn);
                 noteText = null;
                 ResetDate();
 
                 if (CoverPhotoId is null)
-                    await OnCoverChanged.InvokeAsync(result.Saved[0].Id);
+                    await OnCoverChanged.InvokeAsync(PhotoEntries.Cover(result.Saved).Id);
             }
-
-            status = result.Failed > 0
-                ? result.Failed == 1 ? "1 file couldn't be read as an image and was skipped." : $"{result.Failed} files couldn't be read as images and were skipped."
-                : null;
         }
         catch (Exception ex)
         {

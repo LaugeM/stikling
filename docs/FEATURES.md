@@ -37,9 +37,8 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Import old photos with their dates**, so a plant's history can start before the app did. A photo that lands on the wrong date can be corrected on the timeline.
-2. **Dormancy status**, so a resting plant doesn't look dead or keep showing up to be checked on.
-3. **Treatment recipes and sticky trap counts**, the two priority-4 rows left in the pest section.
+1. **Dormancy status**, so a resting plant doesn't look dead or keep showing up to be checked on.
+2. **Treatment recipes and sticky trap counts**, the two priority-4 rows left in the pest section.
 
 ### Cheap ones to slot in whenever
 
@@ -60,7 +59,7 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ✅ | Spots inside a room, e.g. "Living room / On top of the PC". Filtering by the room includes its spots | 2 | M | v1.x |
 | ✅ | Parent plant and offspring, "Add offspring" | 1 | M | M2 |
 | ✅ | Cover photo on cards and the plant page | 1 | S | M3 |
-| ✅ | Add a photo while adding the plant, not only afterwards. The first one becomes the cover | 2 | S | M4 |
+| ✅ | Add a photo while adding the plant, not only afterwards. The newest one becomes the cover | 2 | S | M4 |
 | ✅ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | 1 | M | M3–M4 |
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
 | ✅ | Tags (e.g. "variegated", "rare", "for swap") and a tag filter. Picking several tags narrows the list to plants that have all of them, the search finds tags too, and a tag on a plant's page opens the list filtered by it | 3 | S | v1.x |
@@ -92,7 +91,7 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ✅ | Automatic timeline entries for changes: status, medium/pot ("moved to semi-hydro"), room, stage | 1 | M | M3 |
 | ✅ | Choose the cover photo | 1 | S | M3 |
 | ✅ | Correct a timeline entry: fix the text or the date of a note or a photo, and its photos move with it. The earlier versions are kept and shown under "edited". Automatic entries are fixed where they come from, and any entry can be deleted | 3 | S | v1.x |
-| ☐ | **Import existing photos with their dates**: pick old photos from the gallery and each is placed on the timeline by the date it was taken (EXIF), so a plant's history starts from day one | 3 | M | v1.x |
+| ✅ | **Import existing photos with their dates**: pick old photos from the gallery and each lands on the day it was taken, so a plant's history starts from day one. The date comes from the photo itself (EXIF), then from a date in the file name, then from the file. Photos from the same day share an entry, a note keeps the photos picked with it together, and the app says how many photos had no date of their own so they can be checked | 3 | M | v1.x |
 | ☐ | Swipe through photos side by side to compare growth | 5 | M | v1.x |
 | ☐ | **Voice notes**: a microphone button on note fields using the phone's speech-to-text | 5 | S | v1.x |
 | ☐ | Measurements on an entry: number of leaves, height, root length | 6 | S | v1.x |

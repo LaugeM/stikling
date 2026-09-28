@@ -11,11 +11,11 @@ public static class TimelineOrder
                .ThenByDescending(e => e.CreatedAt)
                .ToList();
 
-    /// <summary>Groups entries by calendar day (in the given offset), newest day first.</summary>
+    /// <summary>Groups entries by the local day they happened on, newest day first.</summary>
     public static IReadOnlyList<(DateOnly Day, IReadOnlyList<TimelineEntry> Entries)> ByDay(
-        IEnumerable<TimelineEntry> entries, TimeSpan offset) =>
+        IEnumerable<TimelineEntry> entries, TimeProvider time) =>
         NewestFirst(entries)
-            .GroupBy(e => DateOnly.FromDateTime(e.OccurredAt.ToOffset(offset).DateTime))
+            .GroupBy(e => time.LocalDay(e.OccurredAt))
             .Select(g => (g.Key, (IReadOnlyList<TimelineEntry>)g.ToList()))
             .ToList();
 }

@@ -41,7 +41,7 @@ public class PlantServiceTests
     }
 
     [Fact]
-    public async Task Create_with_photos_sets_the_cover_and_starts_the_history()
+    public async Task Create_with_photos_makes_the_newest_the_cover_and_starts_the_history()
     {
         var taken = Now.AddHours(-2);
         var photos = new[]
@@ -53,10 +53,28 @@ public class PlantServiceTests
 
         await service.CreateAsync(plant, photos);
 
-        Assert.Equal(photos[0].Id, plant.CoverPhotoId);
+        Assert.Equal(photos[1].Id, plant.CoverPhotoId);
         var entry = Assert.Single(timeline.Entries, e => e.Kind == TimelineKind.Photo);
         Assert.Equal(photos.Select(p => p.Id), entry.PhotoIds);
         Assert.Equal(taken.AddMinutes(5), entry.OccurredAt);
+    }
+
+    [Fact]
+    public async Task Create_with_old_photos_puts_each_day_on_the_history()
+    {
+        var photos = new[]
+        {
+            new Photo { SubjectType = SubjectType.Plant, TakenAt = new(2024, 3, 1, 9, 0, 0, TimeSpan.Zero) },
+            new Photo { SubjectType = SubjectType.Plant, TakenAt = Now }
+        };
+        var plant = new Plant { Nickname = "Coleus" };
+
+        await service.CreateAsync(plant, photos);
+
+        Assert.Equal(photos[1].Id, plant.CoverPhotoId);
+        Assert.Equal(
+            [photos[0].TakenAt, Now],
+            timeline.Entries.Where(e => e.Kind == TimelineKind.Photo).Select(e => e.OccurredAt).Order());
     }
 
     [Fact]
