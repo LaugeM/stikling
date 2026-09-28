@@ -40,6 +40,12 @@ public sealed class IndexedDbFeedRepository(IndexedDb db, TimeProvider time)
     protected override IReadOnlyList<string> Validate(Feed feed) => feed.Validate();
 }
 
+public sealed class IndexedDbTreatmentRecipeRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<TreatmentRecipe>(db, time, Stores.TreatmentRecipes), ITreatmentRecipeRepository
+{
+    protected override IReadOnlyList<string> Validate(TreatmentRecipe recipe) => recipe.Validate();
+}
+
 public sealed class IndexedDbPropagationRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<Propagation>(db, time, Stores.Propagations), IPropagationRepository
 {

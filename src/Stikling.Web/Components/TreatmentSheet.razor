@@ -1,7 +1,9 @@
 @* Logging a treatment on a pest case. The next date is prefilled from the case's interval.
    Changing it here is how you get a different gap without changing the interval itself.
-   With Check set it logs a look for pests on a case being watched: only a date and notes. *@
+   With Check set it logs a look for pests on a case being watched: only a date and notes.
+   A saved recipe is picked from chips and copied onto the treatment. Anything else is typed. *@
 @inject IPestTreatmentRepository Repository
+@inject ITreatmentRecipeRepository Recipes
 @inject TimeProvider Time
 
 <div class="care-sheet">
@@ -10,8 +12,37 @@
         <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
     }
 
+    @if (!Check && recipes.Count > 0)
+    {
+        <div class="mb-2">
+            <div class="form-label">Recipe</div>
+            <div class="chip-row" role="group" aria-label="Recipes">
+                @foreach (var recipe in recipes)
+                {
+                    <button type="button" class="chip @(recipeId == recipe.Id ? "picked" : null)"
+                            aria-pressed="@(recipeId == recipe.Id ? "true" : "false")"
+                            @onclick="() => recipeId = recipe.Id">@recipe.Name</button>
+                }
+                <button type="button" class="chip new @(recipeId is null ? "picked" : null)"
+                        aria-pressed="@(recipeId is null ? "true" : "false")"
+                        @onclick="() => recipeId = null">Something else</button>
+            </div>
+            @if (Picked is { } picked)
+            {
+                @if (picked.Ingredients.Count > 0)
+                {
+                    <div class="form-text">@string.Join(" · ", picked.Ingredients)</div>
+                }
+                @if (!string.IsNullOrWhiteSpace(picked.Method))
+                {
+                    <div class="form-text treatment-method">@picked.Method</div>
+                }
+            }
+        </div>
+    }
+
     <div class="row g-2">
-        @if (!Check)
+        @if (!Check && recipeId is null)
         {
             <div class="col-7">
                 <label class="form-label" for="treatment-what">What you used</label>
@@ -35,6 +66,14 @@
                    min="@occurredOn.ToString("yyyy-MM-dd")" value="@nextDue.ToString("yyyy-MM-dd")"
                    @onchange="NextDueChanged" />
             <div class="form-text">Every @Labels.Count(Case.IntervalDays, "day") by default. Change it to leave a longer gap.</div>
+        </div>
+    }
+
+    @if (!Check && loaded && recipes.Count == 0)
+    {
+        <div class="form-text">
+            Make up the same spray each time? Save it under <a href="treatment-recipes">Treatment recipes</a>
+            and pick it here.
         </div>
     }
 
@@ -74,6 +113,9 @@
     public bool Check { get; set; }
 
     private string? what;
+    private Guid? recipeId;
+    private IReadOnlyList<TreatmentRecipe> recipes = [];
+    private bool loaded;
     private string? notes;
     private DateOnly occurredOn;
     private DateOnly nextDue;
@@ -82,12 +124,24 @@
 
     private DateOnly Today => Time.Today();
 
-    protected override void OnInitialized() => Reset();
+    private TreatmentRecipe? Picked => recipes.FirstOrDefault(r => r.Id == recipeId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        Reset();
+        recipes = (await Recipes.GetAllAsync())
+            .OrderBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        loaded = true;
+        // Again now the recipes are here, so the last one used can be offered
+        Reset();
+    }
 
     private void Reset()
     {
-        var draft = PestService.StartTreatment(Case, Existing, Today);
-        what = draft.What;
+        var draft = PestService.StartTreatment(Case, Existing, Today, recipes);
+        recipeId = draft.RecipeId;
+        what = draft.RecipeId is null ? draft.What : null;
         notes = null;
         occurredOn = draft.OccurredOn;
         nextDue = Default(occurredOn);
@@ -128,6 +182,8 @@
                 // interval later still moves the cases that never had a gap set by hand
                 NextDueOn = nextDue == Default(occurredOn) ? null : nextDue
             };
+            if (!Check && Picked is { } recipe)
+                entry.Use(recipe);
             entry.Notes = Clean(notes);
             await Repository.SaveAsync(entry);
 

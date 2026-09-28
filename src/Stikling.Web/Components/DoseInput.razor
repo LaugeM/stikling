@@ -1,9 +1,23 @@
-@* A dose the way the bottle puts it: "5 ml per 4 L". Used for a product's usual dose, a feed's doses and the doses on a care entry. *@
+@* A dose the way the bottle puts it: "5 ml per 4 L". Used for a product's usual dose, a feed's doses and the doses on a care entry,
+   and for the amounts in a treatment recipe, where there's no product to take the unit from and it's picked here instead. *@
 
 <div class="input-group dose-input @(Small ? "input-group-sm" : null)">
     <input type="number" id="@Id" class="form-control dose-amount" min="0" step="any" inputmode="decimal"
            placeholder="Dose" aria-label="@Label" @bind="AmountValue" />
-    <span class="input-group-text">@Doses.Symbol(Unit) per</span>
+    @if (UnitChanged.HasDelegate)
+    {
+        <select class="form-select dose-unit" aria-label="Millilitres, grams or drops" @bind="UnitValue">
+            @foreach (var unit in Enum.GetValues<DoseUnit>())
+            {
+                <option value="@unit">@Doses.Symbol(unit)</option>
+            }
+        </select>
+        <span class="input-group-text">per</span>
+    }
+    else
+    {
+        <span class="input-group-text">@Doses.Symbol(Unit) per</span>
+    }
     <input type="number" class="form-control dose-per" min="0" step="any" inputmode="decimal"
            aria-label="How much water @(Label is null ? "the dose" : Label.ToLowerInvariant()) is for" @bind="PerValue" />
     <select class="form-select dose-per-unit" aria-label="Litres or millilitres" @bind="PerUnitValue">
@@ -29,9 +43,12 @@
     [Parameter]
     public EventCallback<decimal?> AmountChanged { get; set; }
 
-    /// <summary>What the product is measured in. Picked on the product, so only shown here.</summary>
+    /// <summary>What the product is measured in. Picked on the product, so only shown here unless <see cref="UnitChanged"/> is bound.</summary>
     [Parameter]
     public DoseUnit Unit { get; set; }
+
+    [Parameter]
+    public EventCallback<DoseUnit> UnitChanged { get; set; }
 
     [Parameter]
     public decimal Per { get; set; } = 1;
@@ -52,6 +69,12 @@
     {
         get => Amount;
         set => AmountChanged.InvokeAsync(value);
+    }
+
+    private DoseUnit UnitValue
+    {
+        get => Unit;
+        set => UnitChanged.InvokeAsync(value);
     }
 
     private decimal PerValue

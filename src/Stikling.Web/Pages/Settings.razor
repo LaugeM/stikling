@@ -6,6 +6,7 @@
 @inject SoilMixService MixService
 @inject ProductService ProductService
 @inject IFeedRepository FeedRepository
+@inject ITreatmentRecipeRepository RecipeRepository
 @inject BackupService Backup
 @inject DeviceFiles Files
 @inject IndexedDb Db
@@ -144,6 +145,19 @@
     </div>
 </section>
 
+<section class="settings-section">
+    <h2>Treatment recipes</h2>
+    <p class="settings-hint">
+        The sprays and drenches you make up yourself against pests, so logging a treatment is a tap
+        and a bottle can be measured out for any size.
+    </p>
+
+    <div class="room-row">
+        <span class="room-name">@RecipeSummary</span>
+        <a class="btn btn-link btn-sm p-0" href="treatment-recipes">Manage recipes</a>
+    </div>
+</section>
+
 
 <section class="settings-section">
     <h2>Backup</h2>
@@ -183,8 +197,9 @@
                 @Labels.Count(file.Data.Counts.Treatments, "treatment"),
                 @Labels.Count(file.Data.Counts.Pots, "pot"),
                 @Labels.Count(file.Data.Counts.SoilMixes, "soil mix", "soil mixes"),
-                @Labels.Count(file.Data.Counts.Products, "product") and
-                @Labels.Count(file.Data.Counts.Feeds, "feed").
+                @Labels.Count(file.Data.Counts.Products, "product"),
+                @Labels.Count(file.Data.Counts.Feeds, "feed") and
+                @Labels.Count(file.Data.Counts.Recipes, "treatment recipe").
             </p>
             <p class="settings-hint">
                 Restoring adds what's missing here and brings back anything you've deleted since.
@@ -266,6 +281,7 @@
     private IReadOnlyList<MixUse> mixes = [];
     private IReadOnlyList<ProductUse> products = [];
     private int feeds;
+    private int recipes;
     private string? renaming; // the whole place being renamed, e.g. "Living room / On top of the PC"
     private string? roomMessage;
     private DateOnly? lastBackup;
@@ -288,6 +304,7 @@
         mixes = await MixService.GetAllAsync();
         products = await ProductService.GetAllAsync();
         feeds = (await FeedRepository.GetAllAsync()).Count;
+        recipes = (await RecipeRepository.GetAllAsync()).Count;
         nameSources = (await PlantNames.GetDictionaryAsync()).Sources;
     }
 
@@ -312,6 +329,9 @@
 
     /// <summary>"2 feeds", for the line linking to the feeds.</summary>
     private string FeedSummary => feeds == 0 ? "No feeds saved yet" : Labels.Count(feeds, "feed");
+
+    /// <summary>"2 recipes", for the line linking to the treatment recipes.</summary>
+    private string RecipeSummary => recipes == 0 ? "No recipes saved yet" : Labels.Count(recipes, "recipe");
 
     /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
     private static string Held(int plants, int propagations) => (plants, propagations) switch

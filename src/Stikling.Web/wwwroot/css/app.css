@@ -848,6 +848,24 @@ a.item-card:active {
     background-position: right 0.5rem center;
 }
 
+/* The unit picked on a recipe ingredient, wide enough for "drops" */
+.input-group.dose-input > .dose-unit {
+    flex: 0 0 5.25rem;
+    padding-right: 1.75rem;
+    background-position: right 0.5rem center;
+}
+
+/* How a recipe says to use it, kept to the lines it was typed on */
+.treatment-method {
+    white-space: pre-line;
+}
+
+/* What was in a recipe on the day, under the treatment it was used on */
+.treatment-recipe {
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
 .care-moisture {
     margin-top: 0.6rem;
     color: var(--pa-green-dark);
