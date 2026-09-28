@@ -75,12 +75,27 @@ public static class PropagationChanges
         ChangeText.AddLocation(changes, before.Location, after.Location);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
         ChangeText.AddContainer(changes, before.Container, after.Container, "New setup");
+        AddMilestone(changes, before.FirstRootOn, after.FirstRootOn, after.DaysToFirstRoot, "First root");
+        AddMilestone(changes, before.FirstLeafOn, after.FirstLeafOn, after.DaysToFirstLeaf, "First leaf");
+
+        if (!before.RootingAids.Order().SequenceEqual(after.RootingAids.Order()))
+            changes.Add(after.RootingAids.Count == 0
+                ? "No rooting aids"
+                : $"Rooting aids: {string.Join(", ", after.RootingAids.Order().Select(aid => label(aid)))}");
 
         // Finishing ends dormancy too, and the stage change already says so
         if (before.IsDormant != after.IsDormant && after.IsActive)
             changes.Add(PlantChanges.DormancyText(after.IsDormant));
 
         return changes;
+    }
+
+    // "First root on day 12"
+    private static void AddMilestone(List<string> changes, DateOnly? before, DateOnly? after, int? days, string name)
+    {
+        if (before == after)
+            return;
+        changes.Add(days is { } d ? $"{name} on day {d}" : $"{name} date cleared");
     }
 }
 

@@ -40,6 +40,15 @@ public sealed class Propagation : Entity
     /// <summary>The day it first reached Rooted, kept so batches can be compared.</summary>
     public DateOnly? RootedOn { get; set; }
 
+    /// <summary>The day the first root showed on any unit in the batch.</summary>
+    public DateOnly? FirstRootOn { get; set; }
+
+    /// <summary>The day the first new leaf showed on any unit in the batch.</summary>
+    public DateOnly? FirstLeafOn { get; set; }
+
+    /// <summary>What was used to help it root, e.g. cinnamon on the cut or a dome for humidity.</summary>
+    public List<RootingAid> RootingAids { get; set; } = [];
+
     /// <summary>How many units the batch started with.</summary>
     public int InitialCount { get; set; } = 1;
 
@@ -84,6 +93,17 @@ public sealed class Propagation : Entity
     public int? DaysToRoot =>
         RootedOn is { } rooted ? Math.Max(0, rooted.DayNumber - StartedOn.DayNumber) : null;
 
+    /// <summary>Days from the start to the first root, or null while none has shown.</summary>
+    [JsonIgnore]
+    public int? DaysToFirstRoot => DaysFromStart(FirstRootOn);
+
+    /// <summary>Days from the start to the first leaf, or null while none has shown.</summary>
+    [JsonIgnore]
+    public int? DaysToFirstLeaf => DaysFromStart(FirstLeafOn);
+
+    private int? DaysFromStart(DateOnly? date) =>
+        date is { } d ? Math.Max(0, d.DayNumber - StartedOn.DayNumber) : null;
+
     /// <summary>Days dormant, counting the day it went dormant as day 0.</summary>
     public int? DaysDormant(DateOnly today) =>
         DormantSince is { } since ? Math.Max(0, today.DayNumber - since.DayNumber) : null;
@@ -101,7 +121,34 @@ public sealed class Propagation : Entity
             RootedOn = today;
     }
 
-    public Propagation Copy() => (Propagation)MemberwiseClone();
+    /// <summary>
+    /// A root showing means it's rooting, so a first root date on one still at Started moves it
+    /// on. The stage never fills in the date, since a stage set in passing isn't a close look.
+    /// </summary>
+    public void NoteFirstRoot()
+    {
+        if (FirstRootOn is not null && Stage == PropagationStage.Started)
+            Stage = PropagationStage.Rooting;
+    }
+
+    /// <summary>Sets a milestone to the given day. Only on one still going.</summary>
+    public void RecordMilestone(Milestone milestone, DateOnly on)
+    {
+        if (!IsActive)
+            throw new InvalidOperationException("This propagation is finished.");
+        if (milestone == Milestone.FirstRoot)
+            FirstRootOn = on;
+        else
+            FirstLeafOn = on;
+        NoteFirstRoot();
+    }
+
+    public Propagation Copy()
+    {
+        var copy = (Propagation)MemberwiseClone();
+        copy.RootingAids = [.. RootingAids];
+        return copy;
+    }
 
     /// <summary>Moves between Started, Rooting and Rooted. Done and Failed follow from the counts.</summary>
     public void SetStage(PropagationStage stage)
@@ -165,8 +212,19 @@ public sealed class Propagation : Entity
             errors.Add($"The count can't be lower than the {PottedUpCount + FailedCount} already potted up or failed.");
         if (RootedOn is { } rooted && rooted < StartedOn)
             errors.Add("It can't have rooted before it was started.");
+        if (FirstRootOn < StartedOn || FirstLeafOn < StartedOn)
+            errors.Add("A root or leaf can't show before it was started.");
+        if (FirstRootOn > today || FirstLeafOn > today)
+            errors.Add("A root or leaf can't show in the future.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
         return errors;
     }
+}
+
+/// <summary>The first signs of growth a propagation is compared on.</summary>
+public enum Milestone
+{
+    FirstRoot,
+    FirstLeaf
 }

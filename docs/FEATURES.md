@@ -37,23 +37,22 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Milestones, rooting aids, and on time or slow** for propagations. First root and first leaf give my corm experiment dates to compare, rooting aids let me see on the results page whether they made a difference, and a propagation still rooting can then say whether it is keeping up with my own average.
-2. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
-3. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished, and I want it in place before winter.
-4. **Empty screens that say what to do next, and the FAQ page.** Someone new sees an empty app first, and the first person I showed the app to asked what propagation means.
-5. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-6. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-7. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-8. **Seed germination**: sown and germinated counts with their dates.
-9. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-10. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
-11. **Comparing photos side by side, and voice notes.**
+1. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
+2. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished, and I want it in place before winter.
+3. **Empty screens that say what to do next, and the FAQ page.** Someone new sees an empty app first, and the first person I showed the app to asked what propagation means.
+4. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+5. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+6. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+7. **Seed germination**: sown and germinated counts with their dates.
+8. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+9. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
+10. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
 These need no new storage and no new screens worth the name: counts on the Today screen, sort options and favourites on the plant list, purchase price, duplicating a plant, quick add from a pasted list of names, a note when adding a plant you already have, renaming or merging a tag, home screen shortcuts, and an app version and a "what's new" page.
 
-The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it, and the list of plants that got a feed.
+The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it, the list of plants that got a feed, and corm size on a propagation.
 
 ---
 
@@ -135,10 +134,10 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | "Check on it" reminder in the app: a propagation not looked at for X days shows on Today | 2 | S | M5 |
 | ✅ | Success rate and average days-to-root per medium and per type, on a results page linked from Propagations. Success is counted in units, and a unit has made it once it's potted up or its batch has rooted | 3 | S | v1.x |
 | ✅ | **Experiments**: group propagations started together to compare mediums (the corm test: perlite vs sphagnum vs LECA vs corm riser) | 4 | M | v1.x |
-| ☐ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are enough finished propagations to compare with | 4 | S | v1.x |
+| ✅ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are at least 3 rooted batches to compare with, and the list cards only mention it when it's slow | 4 | S | v1.x |
 | ☐ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
-| ☐ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page can then compare with and without | 5 | S | v1.x |
-| ☐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare | 5 | S | v1.x |
+| ✅ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page compares each one with the batches that went without it | 5 | S | v1.x |
+| ◐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. First root and first leaf are built and show in experiments. Corm size is still missing | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
 | ☐ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 8 | L | v1.x |

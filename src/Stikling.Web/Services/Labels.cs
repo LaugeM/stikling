@@ -37,6 +37,16 @@ public static class Labels
         _ => medium.ToString()
     };
 
+    public static string For(RootingAid aid) => aid switch
+    {
+        RootingAid.RootingPowder => "Rooting powder",
+        RootingAid.RootingGel => "Rooting gel",
+        RootingAid.WillowWater => "Willow water",
+        RootingAid.HumidityDome => "Humidity dome or bag",
+        RootingAid.HeatMat => "Heat mat",
+        _ => aid.ToString()
+    };
+
     public static string For(CareKind kind) => kind switch
     {
         CareKind.ToppedUp => "Topped up",
@@ -111,6 +121,7 @@ public static class Labels
         PlantStatus s => For(s),
         PlantOrigin o => For(o),
         GrowingMedium m => For(m),
+        RootingAid a => For(a),
         CareKind c => For(c),
         PropagationType t => For(t),
         PropagationStage s => Stage(s),

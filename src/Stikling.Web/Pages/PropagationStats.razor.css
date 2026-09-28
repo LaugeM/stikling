@@ -75,3 +75,25 @@
 .result-line + .result-line {
     margin-top: 0.1rem;
 }
+
+.aid-note {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+/* The aid's name over its with and without rows */
+.aid-name {
+    padding: 0.75rem 0.9rem 0;
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+}
+
+.aid-name + .result-row {
+    padding-top: 0.4rem;
+}
+
+.aid-name ~ .result-row .result-name {
+    font-weight: 400;
+    color: var(--pa-muted);
+}

@@ -172,7 +172,7 @@ Green carries the system, in three strengths. Clay is the second material, in tw
 - **Clay Soft** (`#f6e6dc`): the tinted clay surface behind a plant's placeholder icon. Dark mode `#36241b`.
 
 ### Alert
-- **Alert** (`#b3261e`) and **Alert Soft** (`#fbe3e0`): pests and anything overdue. Deliberately redder than clay, so an outbreak never reads as just another plant. Used for pest badges, the due date on a treatment, the tile of an open pest case, and every delete button and error message: Bootstrap's danger colour points at Alert, so the app has one red. Dark mode `#ff978b` and `#3d1c1a`.
+- **Alert** (`#b3261e`) and **Alert Soft** (`#fbe3e0`): pests and anything overdue. Deliberately redder than clay, so an outbreak never reads as just another plant. Used for pest badges, the due date on a treatment, the tile of an open pest case, a propagation that is slower to root than usual, and every delete button and error message: Bootstrap's danger colour points at Alert, so the app has one red. Dark mode `#ff978b` and `#3d1c1a`.
 
 ### Neutral
 - **Paper** (`#f6f7f4`): the page. Warm off-white, never pure white, so cards can sit on top of it without a shadow. Dark mode `#121814`.

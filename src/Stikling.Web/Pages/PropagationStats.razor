@@ -51,6 +51,35 @@ else
             }
         </ul>
     </section>
+
+    <section class="results-section">
+        <h2>Rooting aids</h2>
+        @if (byAid.Count == 0)
+        {
+            <p class="aid-note">Pick the rooting aids you used when editing a propagation, and each one is compared here with the batches that went without it.</p>
+        }
+        else
+        {
+            <p class="aid-note">Each aid next to every batch that went without it, whatever the type or medium.</p>
+            <ul class="results-list">
+                @foreach (var result in byAid)
+                {
+                    <li>
+                        <div class="aid-name">@Labels.For(result.Aid)</div>
+                        @Row("With", result.With, "Rooted")
+                        @if (result.Without.Batches == 0)
+                        {
+                            <div class="result-row result-line text-body-secondary">Every batch used it, so there's nothing to compare with yet.</div>
+                        }
+                        else
+                        {
+                            @Row("Without", result.Without, "Rooted")
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </section>
 }
 
 @code {
@@ -58,6 +87,7 @@ else
     private PropagationResult<string>? overall;
     private IReadOnlyList<PropagationResult<GrowingMedium>> byMedium = [];
     private IReadOnlyList<PropagationResult<PropagationType>> byType = [];
+    private IReadOnlyList<RootingAidResult> byAid = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,6 +95,7 @@ else
         overall = PropagationResults.Overall(all);
         byMedium = PropagationResults.ByMedium(all);
         byType = PropagationResults.ByType(all);
+        byAid = PropagationResults.ByRootingAid(all);
     }
 
     private static RenderFragment Row<TKey>(string name, PropagationResult<TKey> result, string rooted) => __builder =>
