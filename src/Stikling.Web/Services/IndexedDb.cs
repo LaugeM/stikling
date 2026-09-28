@@ -18,6 +18,7 @@ public static class Stores
     public const string Products = "products";
     public const string Feeds = "feeds";
     public const string TreatmentRecipes = "treatmentRecipes";
+    public const string Places = "places";
 }
 
 public sealed record StorageEstimate(long Usage, long Quota, bool Persisted);

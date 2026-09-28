@@ -1,5 +1,4 @@
 using Stikling.Core.Models;
-using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Plants;
 
@@ -12,14 +11,15 @@ public enum StatusFilter
 }
 
 /// <summary>Search, filter and sort rules for the plant list.</summary>
-/// <param name="Location">A room, or a spot inside one. A room also shows what's in its spots.</param>
+/// <param name="PlaceIds">The room or spot picked, as every id that counts as being in it
+/// (see <see cref="Rooms.Places.IdsIn"/>). A room also shows what's in its spots.</param>
 /// <param name="Tags">Picking several tags narrows the list: a plant has to carry all of them.</param>
 /// <param name="Quarantine">Only the plants in quarantine.</param>
 /// <param name="Dormant">Only the dormant plants.</param>
 public sealed record PlantFilter(
     string? Search = null,
     StatusFilter Status = StatusFilter.Active,
-    string? Location = null,
+    IReadOnlySet<Guid>? PlaceIds = null,
     IReadOnlyCollection<string>? Tags = null,
     bool Quarantine = false,
     bool Dormant = false)
@@ -43,7 +43,7 @@ public sealed record PlantFilter(
     };
 
     private bool MatchesLocation(Plant plant) =>
-        string.IsNullOrWhiteSpace(Location) || RoomName.IsIn(plant.Location, Location);
+        PlaceIds is null || plant.PlaceId is { } id && PlaceIds.Contains(id);
 
     // Every word typed must appear somewhere in the plant's names or tags, so "thai monstera"
     // finds "Monstera deliciosa 'Thai Constellation'"

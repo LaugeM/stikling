@@ -7,10 +7,14 @@ public class PlantChangesTests
 {
     private static string Label(Enum value) => value.ToString();
 
+    private static readonly FakePlaceRepository Places = new();
+
+    private static string? PlaceName(Guid id) => Places.Current.NameOf(id);
+
     private static readonly Plant Original = new()
     {
         Nickname = "Big alocasia",
-        Location = "Living room",
+        PlaceId = Places.IdOf("Living room"),
         Medium = GrowingMedium.Soil
     };
 
@@ -19,9 +23,9 @@ public class PlantChangesTests
     {
         var edited = Original.Copy();
         edited.Notes = "Only the notes changed";
-        edited.Location = " living ROOM ";
+        edited.PlaceId = Places.IdOf(" living ROOM ");
 
-        Assert.Empty(PlantChanges.Describe(Original, edited, Label));
+        Assert.Empty(PlantChanges.Describe(Original, edited, Label, placeName: PlaceName));
     }
 
     [Fact]
@@ -43,11 +47,32 @@ public class PlantChangesTests
     public void Location_changes_are_described(string? from, string? to, string expected)
     {
         var before = Original.Copy();
-        before.Location = from;
+        before.PlaceId = Places.IdOf(from);
         var after = Original.Copy();
-        after.Location = to;
+        after.PlaceId = Places.IdOf(to);
 
-        Assert.Equal([expected], PlantChanges.Describe(before, after, Label));
+        Assert.Equal([expected], PlantChanges.Describe(before, after, Label, placeName: PlaceName));
+    }
+
+    [Fact]
+    public void Pointing_at_the_room_a_merged_one_went_into_is_no_move()
+    {
+        var stue = Places.Add("Stue");
+        stue.MergedIntoId = Original.PlaceId;
+        stue.DeletedAt = DateTimeOffset.UnixEpoch;
+        var before = Original.Copy();
+        before.PlaceId = stue.Id;
+
+        Assert.Empty(PlantChanges.Describe(before, Original, Label, placeName: PlaceName));
+    }
+
+    [Fact]
+    public void A_move_to_a_place_it_cant_name_is_left_unsaid()
+    {
+        var after = Original.Copy();
+        after.PlaceId = Guid.NewGuid();
+
+        Assert.Empty(PlantChanges.Describe(Original, after, Label, placeName: PlaceName));
     }
 
     [Fact]

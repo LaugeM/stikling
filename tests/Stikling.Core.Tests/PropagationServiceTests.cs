@@ -14,7 +14,9 @@ public class PropagationServiceTests
     private readonly FakeTimelineRepository timeline = new();
     private readonly PropagationService service;
 
-    private readonly Plant parent = new() { Nickname = "Big alocasia", Genus = "Alocasia", Species = "zebrina", Location = "Living room" };
+    private static readonly FakePlaceRepository Places = new();
+
+    private readonly Plant parent = new() { Nickname = "Big alocasia", Genus = "Alocasia", Species = "zebrina", PlaceId = Places.IdOf("Living room") };
 
     public PropagationServiceTests()
     {
@@ -48,7 +50,7 @@ public class PropagationServiceTests
         Assert.Equal(parent.Id, corms.ParentPlantId);
         Assert.Equal("Alocasia zebrina", corms.DisplayName);
         Assert.Null(corms.Nickname);
-        Assert.Equal("Living room", corms.Location);
+        Assert.Equal(parent.PlaceId, corms.PlaceId);
         Assert.Equal(Today, corms.StartedOn);
     }
 
@@ -126,7 +128,7 @@ public class PropagationServiceTests
 
         var pot = Guid.NewGuid();
 
-        var made = await service.PotUpAsync(corms, new PotUpRequest(2, Today, "Zebrina", "Bedroom", GrowingMedium.Pon, pot));
+        var made = await service.PotUpAsync(corms, new PotUpRequest(2, Today, "Zebrina", Places.IdOf("Bedroom"), GrowingMedium.Pon, pot));
 
         Assert.Equal(2, made.Count);
         Assert.All(made, plant =>
@@ -136,7 +138,7 @@ public class PropagationServiceTests
             Assert.Equal(corms.Id, plant.FromPropagationId);
             Assert.Equal(PlantOrigin.Propagated, plant.Origin);
             Assert.Equal("Alocasia zebrina", plant.BotanicalName);
-            Assert.Equal("Bedroom", plant.Location);
+            Assert.Equal(Places.IdOf("Bedroom"), plant.PlaceId);
             Assert.Equal(GrowingMedium.Pon, plant.Medium);
             Assert.Equal(LooseDate.Of(Today), plant.AcquiredOn);
             Assert.Equal(pot, plant.InnerPotId);

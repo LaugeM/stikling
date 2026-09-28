@@ -1,9 +1,11 @@
 using Stikling.Core.Models;
+using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Today;
 
 /// <summary>A plant or propagation still waiting for its photo this month.</summary>
 /// <param name="Subject">The <see cref="Plant"/> or <see cref="Propagation"/>.</param>
+/// <param name="Location">The room or spot it's in, "Living room / Windowsill".</param>
 /// <param name="LastPhoto">The day its newest photo was taken, or null when it has none.</param>
 public sealed record PhotoDue(Entity Subject, string Name, string? Location, DateOnly? LastPhoto);
 
@@ -23,6 +25,7 @@ public static class PhotoRound
         IEnumerable<Plant> plants,
         IEnumerable<Propagation> propagations,
         IReadOnlyDictionary<Guid, Photo> newestPhotos,
+        Places places,
         TimeProvider time)
     {
         var monthStart = StartOfMonth(time.Today());
@@ -32,9 +35,9 @@ public static class PhotoRound
 
         var subjects =
             plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && !p.IsDormant)
-                .Select(p => new PhotoDue(p, p.DisplayName, p.Location, LastPhoto(p.Id)))
+                .Select(p => new PhotoDue(p, p.DisplayName, places.NameOf(p.PlaceId), LastPhoto(p.Id)))
             .Concat(propagations.Where(p => !p.IsDeleted && p.IsActive && !p.IsDormant)
-                .Select(p => new PhotoDue(p, p.DisplayName, p.Location, LastPhoto(p.Id))));
+                .Select(p => new PhotoDue(p, p.DisplayName, places.NameOf(p.PlaceId), LastPhoto(p.Id))));
 
         return subjects
             .Where(d => d.LastPhoto is null || d.LastPhoto < monthStart)

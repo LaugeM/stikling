@@ -2,6 +2,7 @@
 @inject IPestCaseRepository Cases
 @inject IPestTreatmentRepository Treatments
 @inject IPlantRepository PlantRepository
+@inject RoomService RoomService
 @inject TimeProvider Time
 
 <PageTitle>Pests · Stikling</PageTitle>
@@ -92,6 +93,7 @@ else
             await Cases.GetAllAsync(),
             await PlantRepository.GetAllAsync(),
             await Treatments.GetAllAsync(),
+            await RoomService.GetPlacesAsync(),
             Today);
 
         open = views.Where(v => v.Case.IsOpen).ToList();
@@ -112,7 +114,7 @@ else
                 {
                     <span class="badge stage-badge">@Labels.For(view.Case.Status)</span>
                 }
-                <span>@Labels.ScopeAndCount(view.Case, view.Plants.Count)</span>
+                <span>@Labels.ScopeAndCount(view)</span>
             </div>
             <div class="item-meta">
                 @if (view.DaysUntilDue is { } days)

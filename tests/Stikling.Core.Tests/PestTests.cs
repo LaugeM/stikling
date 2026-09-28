@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
+using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Tests;
 
@@ -7,10 +8,14 @@ public class PestTests
 {
     private static readonly DateOnly Today = new(2026, 9, 20);
 
-    private static Plant Plant(string name, string? location = null, PlantStatus status = PlantStatus.Active) =>
-        new() { Nickname = name, Location = location, Status = status };
+    private readonly FakePlaceRepository places = new();
 
-    private static PestCase Case(
+    private Places Places => places.Current;
+
+    private Plant Plant(string name, string? location = null, PlantStatus status = PlantStatus.Active) =>
+        new() { Nickname = name, PlaceId = places.IdOf(location), Status = status };
+
+    private PestCase Case(
         PestScope scope = PestScope.Everywhere,
         string? room = null,
         int interval = 4,
@@ -19,7 +24,7 @@ public class PestTests
         new()
         {
             Scope = scope,
-            Room = room,
+            PlaceId = places.IdOf(room),
             IntervalDays = interval,
             Status = status,
             StartedOn = started ?? Today.AddDays(-10)
@@ -36,7 +41,7 @@ public class PestTests
         var item = Case();
         var plants = new[] { Plant("Monstera", "Living room"), Plant("Basil", "Kitchen") };
 
-        Assert.Equal(2, PestService.PlantsIn(item, plants).Count);
+        Assert.Equal(2, PestService.PlantsIn(item, plants, Places).Count);
     }
 
     [Fact]
@@ -50,7 +55,7 @@ public class PestTests
             Plant("Basil", "Kitchen")
         };
 
-        var covered = PestService.PlantsIn(item, plants).Select(p => p.DisplayName);
+        var covered = PestService.PlantsIn(item, plants, Places).Select(p => p.DisplayName);
 
         Assert.Equal(["Alocasia", "Monstera"], covered);
     }
@@ -61,11 +66,11 @@ public class PestTests
         var item = Case(PestScope.Room, room: "Living room");
         var plant = Plant("Basil", "Kitchen");
 
-        Assert.Empty(PestService.PlantsIn(item, [plant]));
+        Assert.Empty(PestService.PlantsIn(item, [plant], Places));
 
-        plant.Location = "Living room / Windowsill";
+        plant.PlaceId = places.IdOf("Living room / Windowsill");
 
-        Assert.Single(PestService.PlantsIn(item, [plant]));
+        Assert.Single(PestService.PlantsIn(item, [plant], Places));
     }
 
     [Fact]
@@ -75,7 +80,7 @@ public class PestTests
         var item = Case(PestScope.PickedPlants);
         item.PlantIds = [monstera.Id];
 
-        var covered = PestService.PlantsIn(item, [monstera, Plant("Basil")]);
+        var covered = PestService.PlantsIn(item, [monstera, Plant("Basil")], Places);
 
         Assert.Equal("Monstera", Assert.Single(covered).DisplayName);
     }
@@ -88,7 +93,7 @@ public class PestTests
         var deleted = Plant("Fern");
         deleted.DeletedAt = DateTimeOffset.UtcNow;
 
-        Assert.Empty(PestService.PlantsIn(item, [died, deleted]));
+        Assert.Empty(PestService.PlantsIn(item, [died, deleted], Places));
     }
 
     // When the next treatment is due
@@ -152,7 +157,7 @@ public class PestTests
         var item = Case(status: PestCaseStatus.Monitoring, interval: 4, started: Today.AddDays(-20));
         var last = Treatment(item, Today.AddDays(-7), nextDue: Today.AddDays(-3));
 
-        var view = PestService.Describe(item, [], [last], Today);
+        var view = PestService.Describe(item, [], [last], Places, Today);
 
         Assert.Equal(Today, view.NextDue);
         Assert.True(view.IsCheck);
@@ -266,7 +271,7 @@ public class PestTests
         var item = Case(interval: 4, started: Today.AddDays(-10));
         var treated = Treatment(item, Today.AddDays(-3));
 
-        var view = PestService.Describe(item, [], [treated, Trap(item, Today, 8)], Today);
+        var view = PestService.Describe(item, [], [treated, Trap(item, Today, 8)], Places, Today);
 
         Assert.Equal(Today.AddDays(1), view.NextDue);
         Assert.Same(treated, view.Last);
@@ -318,7 +323,7 @@ public class PestTests
         var dueToday = Case(interval: 4, started: Today.AddDays(-4));
         var later = Case(interval: 4, started: Today.AddDays(-1));
 
-        var views = PestService.Describe([overdue, dueToday, later], [], [], Today);
+        var views = PestService.Describe([overdue, dueToday, later], [], [], Places, Today);
         var due = PestService.Due(views);
 
         Assert.Equal([overdue.Id, dueToday.Id], due.Select(v => v.Case.Id));
@@ -332,7 +337,7 @@ public class PestTests
         var item = Case(interval: 1, started: Today.AddDays(-5));
         item.DeletedAt = DateTimeOffset.UtcNow;
 
-        Assert.Empty(PestService.Describe([item], [], [], Today));
+        Assert.Empty(PestService.Describe([item], [], [], Places, Today));
     }
 
     // The badge on a plant
@@ -345,7 +350,7 @@ public class PestTests
         var elsewhere = Case(PestScope.Room, room: "Kitchen");
         var done = Case(status: PestCaseStatus.Resolved);
 
-        var found = PestService.CasesFor(plant, [mites, elsewhere, done]);
+        var found = PestService.CasesFor(plant, [mites, elsewhere, done], Places);
 
         Assert.Equal(mites.Id, Assert.Single(found).Id);
     }

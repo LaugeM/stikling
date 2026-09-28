@@ -9,6 +9,7 @@
 @inject DeviceFiles Files
 @inject PlantService PlantService
 @inject PropagationService PropagationService
+@inject RoomService RoomService
 @inject TimeProvider Time
 
 <PageTitle>Today · Stikling</PageTitle>
@@ -72,7 +73,7 @@ else
                                 <div class="item-name">@Labels.For(view.Case.Pest)</div>
                                 <div class="item-meta">
                                     <span class="pest-due now">@Labels.Due(view.DaysUntilDue ?? 0, view.IsCheck)</span>
-                                    <span>· @Labels.ScopeAndCount(view.Case, view.Plants.Count)</span>
+                                    <span>· @Labels.ScopeAndCount(view)</span>
                                 </div>
                             </div>
                         </a>
@@ -244,12 +245,13 @@ else
         flagged = TodayBoard.NeedsAttention(plants, propagations);
         putOffs = await Files.GetPutOffsAsync(Today);
 
+        var places = await RoomService.GetPlacesAsync();
         photoRound = await Files.GetPhotoReminderAsync()
-            ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), Time)
+            ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
             : [];
 
         dueTreatments = PestService.Due(
-            PestService.Describe(await PestCases.GetAllAsync(), plants, await PestTreatments.GetAllAsync(), Today));
+            PestService.Describe(await PestCases.GetAllAsync(), plants, await PestTreatments.GetAllAsync(), places, Today));
 
         names = plants.ToDictionary(p => p.Id, p => p.DisplayName);
         foreach (var propagation in propagations)

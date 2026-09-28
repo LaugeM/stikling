@@ -6,6 +6,7 @@ using Stikling.Core.Plants;
 using Stikling.Core.Pots;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
+using Stikling.Core.Rooms;
 using Stikling.Core.SoilMixes;
 
 namespace Stikling.Web.Services;
@@ -50,6 +51,16 @@ public sealed class IndexedDbPropagationRepository(IndexedDb db, TimeProvider ti
     : IndexedDbEntityRepository<Propagation>(db, time, Stores.Propagations), IPropagationRepository
 {
     protected override IReadOnlyList<string> Validate(Propagation propagation) => propagation.Validate(Today);
+}
+
+public sealed class IndexedDbPlaceRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Place>(db, time, Stores.Places), IPlaceRepository
+{
+    // Merged places are deleted, but they're kept so what still points at them can find where they went
+    public async Task<Places> GetPlacesAsync() =>
+        new((await GetStoredAsync()).Where(p => !p.IsDeleted || p.MergedIntoId is not null));
+
+    protected override IReadOnlyList<string> Validate(Place place) => place.Validate();
 }
 
 public sealed class IndexedDbCareLogRepository(IndexedDb db, TimeProvider time)

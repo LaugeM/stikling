@@ -2,6 +2,7 @@
 @inject IPestCaseRepository Repository
 @inject IPestTreatmentRepository Treatments
 @inject IPlantRepository PlantRepository
+@inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
@@ -21,7 +22,7 @@ else
         </div>
         <div class="min-w-0">
             <h1>@Labels.For(view.Case.Pest)</h1>
-            <p class="detail-sub">@Labels.Scope(view.Case, view.Plants.Count) · found @Labels.Date(view.Case.StartedOn)</p>
+            <p class="detail-sub">@Labels.Scope(view) · found @Labels.Date(view.Case.StartedOn)</p>
             @if (view.Case.IsOpen)
             {
                 <span class="badge stage-badge">@Labels.For(view.Case.Status)</span>
@@ -60,7 +61,7 @@ else
     <section class="detail-card">
         <dl class="detail-list">
             <dt>Covers</dt>
-            <dd>@Labels.ScopeAndCount(view.Case, view.Plants.Count)</dd>
+            <dd>@Labels.ScopeAndCount(view)</dd>
 
             @if (view.IsCheck)
             {
@@ -201,9 +202,9 @@ else
                 {
                     <li>
                         <a href="plants/@plant.Id">@plant.DisplayName</a>
-                        @if (!string.IsNullOrWhiteSpace(plant.Location))
+                        @if (places.NameOf(plant.PlaceId) is { } location)
                         {
-                            <span class="text-body-secondary small"> · @plant.Location</span>
+                            <span class="text-body-secondary small"> · @location</span>
                         }
                     </li>
                 }
@@ -237,6 +238,7 @@ else
     public Guid Id { get; set; }
 
     private PestCaseView? view;
+    private Places places = Places.None;
     private IReadOnlyList<PestTreatment> treatments = [];
     private IReadOnlyList<TrapCatch> catches = [];
     private bool loaded;
@@ -268,7 +270,8 @@ else
         var all = await Treatments.GetAllAsync();
         treatments = PestService.TreatmentsFor(all, item.Id);
         catches = PestService.Catches(item, all);
-        view = PestService.Describe(item, await PlantRepository.GetAllAsync(), all, Today);
+        places = await RoomService.GetPlacesAsync();
+        view = PestService.Describe(item, await PlantRepository.GetAllAsync(), all, places, Today);
     }
 
     private bool Trapped => treatments.Any(t => t.Kind == PestTreatmentKind.TrapCount);

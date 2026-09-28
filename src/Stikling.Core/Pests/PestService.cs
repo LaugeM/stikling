@@ -11,8 +11,10 @@ namespace Stikling.Core.Pests;
 /// <param name="NextDue">When the next treatment is due, or the next check on a case being watched.
 /// Null for a resolved case.</param>
 /// <param name="DaysUntilDue">Negative when it's overdue, 0 when it's due today.</param>
+/// <param name="Room">The room or spot the case covers, "Living room", when it covers one.</param>
 public sealed record PestCaseView(
     PestCase Case,
+    string? Room,
     IReadOnlyList<Plant> Plants,
     PestTreatment? Last,
     DateOnly? NextDue,
@@ -41,14 +43,14 @@ public static class PestService
     /// are now, so a plant moved into the room mid-outbreak is covered from then on.
     /// Plants that are no longer in the collection are left out either way.
     /// </summary>
-    public static IReadOnlyList<Plant> PlantsIn(PestCase item, IEnumerable<Plant> plants)
+    public static IReadOnlyList<Plant> PlantsIn(PestCase item, IEnumerable<Plant> plants, Places places)
     {
         var here = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active);
 
         var covered = item.Scope switch
         {
             PestScope.Everywhere => here,
-            PestScope.Room => here.Where(p => RoomName.IsIn(p.Location, item.Room)),
+            PestScope.Room => here.Where(p => places.IsIn(p.PlaceId, item.PlaceId)),
             _ => here.Where(p => item.PlantIds.Contains(p.Id))
         };
 
@@ -58,9 +60,9 @@ public static class PestService
     }
 
     /// <summary>The open cases covering one plant, so its card and page can say so.</summary>
-    public static IReadOnlyList<PestCase> CasesFor(Plant plant, IEnumerable<PestCase> cases) =>
+    public static IReadOnlyList<PestCase> CasesFor(Plant plant, IEnumerable<PestCase> cases, Places places) =>
         cases
-            .Where(c => !c.IsDeleted && c.IsOpen && Covers(c, plant))
+            .Where(c => !c.IsDeleted && c.IsOpen && Covers(c, plant, places))
             .OrderBy(c => c.StartedOn)
             .ToList();
 
@@ -97,12 +99,14 @@ public static class PestService
         PestCase item,
         IEnumerable<Plant> plants,
         IEnumerable<PestTreatment> treatments,
+        Places places,
         DateOnly today)
     {
         var next = NextDue(item, treatments);
         return new PestCaseView(
             item,
-            PlantsIn(item, plants),
+            item.Scope == PestScope.Room ? places.NameOf(item.PlaceId) : null,
+            PlantsIn(item, plants, places),
             LastFor(item, treatments),
             next,
             next is { } due ? due.DayNumber - today.DayNumber : null);
@@ -113,6 +117,7 @@ public static class PestService
         IEnumerable<PestCase> cases,
         IEnumerable<Plant> plants,
         IEnumerable<PestTreatment> treatments,
+        Places places,
         DateOnly today)
     {
         var all = plants.ToList();
@@ -120,7 +125,7 @@ public static class PestService
 
         return cases
             .Where(c => !c.IsDeleted)
-            .Select(c => Describe(c, all, logged, today))
+            .Select(c => Describe(c, all, logged, places, today))
             .OrderByDescending(v => v.Case.StartedOn)
             .ThenByDescending(v => v.Case.CreatedAt)
             .ToList();
@@ -219,10 +224,10 @@ public static class PestService
             t.Kind != PestTreatmentKind.TrapCount
             || (item.Status == PestCaseStatus.Monitoring && t.OnTrap is not null));
 
-    private static bool Covers(PestCase item, Plant plant) => item.Scope switch
+    private static bool Covers(PestCase item, Plant plant, Places places) => item.Scope switch
     {
         PestScope.Everywhere => true,
-        PestScope.Room => RoomName.IsIn(plant.Location, item.Room),
+        PestScope.Room => places.IsIn(plant.PlaceId, item.PlaceId),
         _ => item.PlantIds.Contains(plant.Id)
     };
 }

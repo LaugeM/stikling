@@ -1,5 +1,6 @@
 using System.Globalization;
 using Stikling.Core.Models;
+using Stikling.Core.Pests;
 using Stikling.Core.Pots;
 using Stikling.Core.SoilMixes;
 
@@ -78,18 +79,18 @@ public static class Labels
     };
 
     /// <summary>"Everywhere", "Living room" or "4 plants", for a case's one-line summary.</summary>
-    public static string Scope(PestCase item, int plantCount) => item.Scope switch
+    public static string Scope(PestCaseView view) => view.Case.Scope switch
     {
         PestScope.Everywhere => "Everywhere",
-        PestScope.Room => item.Room ?? "A room",
-        _ => Plants(plantCount)
+        PestScope.Room => view.Room ?? "A room",
+        _ => Plants(view.Plants.Count)
     };
 
     /// <summary>"Living room · 4 plants", or just "2 plants" when the case covers picked plants.</summary>
-    public static string ScopeAndCount(PestCase item, int plantCount) =>
-        item.Scope == PestScope.PickedPlants
-            ? Plants(plantCount)
-            : $"{Scope(item, plantCount)} · {Plants(plantCount)}";
+    public static string ScopeAndCount(PestCaseView view) =>
+        view.Case.Scope == PestScope.PickedPlants
+            ? Plants(view.Plants.Count)
+            : $"{Scope(view)} · {Plants(view.Plants.Count)}";
 
     /// <summary>"due today", "2 days overdue", "next in 3 days", or "check due today" and so on for a check.</summary>
     public static string Due(int daysUntil, bool check = false)

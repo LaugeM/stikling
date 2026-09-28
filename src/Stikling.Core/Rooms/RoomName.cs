@@ -1,10 +1,9 @@
 namespace Stikling.Core.Rooms;
 
 /// <summary>
-/// Where a plant or a propagation sits, written as one line of text: a room on its own
-/// ("Living room"), or a spot inside a room ("Living room / On top of the PC"). Keeping both
-/// in one field means a place is a single value to compare, rename and match against a pest
-/// case, and a place that only names a room needs nothing special.
+/// A place written as one line of text: a room on its own ("Living room"), or a spot inside a
+/// room ("Living room / On top of the PC"). Places are stored as <see cref="Models.Place"/>
+/// records; this is how they're typed in and shown.
 /// </summary>
 public static class RoomName
 {
@@ -45,28 +44,4 @@ public static class RoomName
     /// <summary>Two places are the same when they only differ in case or spacing.</summary>
     public static bool Same(string? a, string? b) =>
         string.Equals(Clean(a), Clean(b), StringComparison.OrdinalIgnoreCase);
-
-    /// <summary>True when the place is the given room, or a spot inside it.</summary>
-    public static bool IsIn(string? place, string? room)
-    {
-        if (Clean(room) is not { } scope || Clean(place) is not { } actual)
-            return false;
-
-        return actual.Equals(scope, StringComparison.OrdinalIgnoreCase)
-            || actual.StartsWith(scope + Separator, StringComparison.OrdinalIgnoreCase);
-    }
-
-    /// <summary>
-    /// The place with <paramref name="from"/> renamed to <paramref name="to"/>, keeping whatever
-    /// sits inside it: renaming "Stue" to "Living room" turns "Stue / Windowsill" into
-    /// "Living room / Windowsill". Places outside the rename are left alone.
-    /// </summary>
-    public static string? Rename(string? place, string? from, string? to)
-    {
-        if (!IsIn(place, from) || Clean(to) is not { } target)
-            return Clean(place);
-
-        var inside = Clean(place)![Clean(from)!.Length..];
-        return Clean(target + inside);
-    }
 }

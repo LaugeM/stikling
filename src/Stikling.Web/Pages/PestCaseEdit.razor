@@ -3,6 +3,7 @@
 @inject IPestCaseRepository Repository
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
+@inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
@@ -83,7 +84,7 @@ else
             @if (item.Scope == PestScope.Room)
             {
                 <div class="mb-1">
-                    <RoomPicker Value="@item.Room" ValueChanged="RoomPicked" Rooms="rooms" Label="Room" />
+                    <RoomPicker @bind-Value="room" Rooms="rooms" Label="Room" />
                 </div>
             }
             else if (item.Scope == PestScope.PickedPlants)
@@ -97,9 +98,9 @@ else
                                        checked="@item.PlantIds.Contains(plant.Id)" @onchange="() => Toggle(plant.Id)" />
                                 <div class="item-text">
                                     <div class="item-name">@plant.DisplayName</div>
-                                    @if (!string.IsNullOrWhiteSpace(plant.Location))
+                                    @if (places.NameOf(plant.PlaceId) is { } location)
                                     {
-                                        <div class="item-meta"><span>@plant.Location</span></div>
+                                        <div class="item-meta"><span>@location</span></div>
                                     }
                                 </div>
                             </label>
@@ -156,6 +157,8 @@ else
     private List<string> errors = [];
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<Room> rooms = [];
+    private Places places = Places.None;
+    private string? room; // as picked, "Living room"; made into a room when saving
 
     private bool IsNew => Id is null;
 
@@ -170,7 +173,8 @@ else
             .Where(p => p.Status == PlantStatus.Active)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
-        rooms = Room.List(allPlants, await PropagationRepository.GetAllAsync());
+        places = await RoomService.GetPlacesAsync();
+        rooms = Room.List(places, allPlants, await PropagationRepository.GetAllAsync());
 
         if (IsNew)
         {
@@ -181,6 +185,8 @@ else
             item = (await Repository.GetAsync(Id!.Value))?.Copy();
             notFound = item is null;
         }
+
+        room = places.NameOf(item?.PlaceId);
     }
 
     private void SetScope(PestScope scope)
@@ -190,15 +196,9 @@ else
 
         item.Scope = scope;
         if (scope != PestScope.Room)
-            item.Room = null;
+            room = null;
         if (scope != PestScope.PickedPlants)
             item.PlantIds.Clear();
-    }
-
-    private void RoomPicked(string? place)
-    {
-        if (item is not null)
-            item.Room = place;
     }
 
     private void Toggle(Guid plantId)
@@ -224,13 +224,14 @@ else
         if (item is null)
             return;
 
-        errors = item.Validate(Today).ToList();
-        if (errors.Count > 0)
-            return;
-
         saving = true;
         try
         {
+            item.PlaceId = item.Scope == PestScope.Room ? await RoomService.PlaceIdAsync(room) : null;
+            errors = item.Validate(Today).ToList();
+            if (errors.Count > 0)
+                return;
+
             await Repository.SaveAsync(item);
             Navigation.NavigateTo($"pests/{item.Id}", replace: IsNew);
         }

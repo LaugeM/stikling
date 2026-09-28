@@ -1,4 +1,4 @@
-using Stikling.Core.Pests;
+using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
 
@@ -12,65 +12,89 @@ public sealed record RoomRename(string Name, int Plants, int Propagations, bool 
 }
 
 /// <summary>
-/// Renaming a room or a spot everywhere it is used. Renaming onto a name that already exists
-/// merges the two, which is how duplicates like "Stue" and "Living room" get sorted out.
+/// Rooms and spots: finding or making the one a form typed in, and renaming. Renaming onto a
+/// name that already exists merges the two, which is how duplicates like "Stue" and
+/// "Living room" get sorted out.
 /// </summary>
-public sealed class RoomService(IPlantRepository plants, IPropagationRepository propagations, IPestCaseRepository pestCases)
+public sealed class RoomService(IPlaceRepository places, IPlantRepository plants, IPropagationRepository propagations)
 {
     /// <summary>The rooms in use, with the spots inside them.</summary>
     public async Task<IReadOnlyList<Room>> GetAllAsync() =>
-        Room.List(await plants.GetAllAsync(), await propagations.GetAllAsync());
+        Room.List(await places.GetPlacesAsync(), await plants.GetAllAsync(), await propagations.GetAllAsync());
+
+    public Task<Places> GetPlacesAsync() => places.GetPlacesAsync();
 
     /// <summary>
-    /// Renames a room or a spot on every plant and propagation in it. Spots move with their room,
-    /// so renaming "Stue" also turns "Stue / Windowsill" into "Living room / Windowsill".
-    /// A pest case that covers the room follows it, or it would stop covering anything.
+    /// The place written as "Living room" or "Living room / On top of the PC", made if it doesn't
+    /// exist yet. Null when nothing was written.
     /// </summary>
-    public async Task<RoomRename> RenameAsync(string? from, string? to)
+    public async Task<Guid?> PlaceIdAsync(string? place)
     {
-        if (RoomName.Clean(from) is not { } source)
-            throw new ArgumentException("Say which room to rename.", nameof(from));
-        if (RoomName.Clean(to) is not { } target)
-            throw new ArgumentException("Give the room a name.", nameof(to));
+        var (roomName, spotName) = RoomName.Split(place);
+        if (roomName is null)
+            return null;
 
-        var allPlants = await plants.GetAllAsync();
-        var allPropagations = await propagations.GetAllAsync();
+        var all = await places.GetPlacesAsync();
+        var room = all.RoomNamed(roomName) ?? await AddAsync(new Place { Name = roomName });
+        if (spotName is null)
+            return room.Id;
 
-        // Worked out before anything moves, while the old and the new name still tell each other apart
-        var merged = allPlants.Select(p => p.Location)
-            .Concat(allPropagations.Select(p => p.Location))
-            .Any(place => RoomName.IsIn(place, target) && !RoomName.IsIn(place, source));
+        var spot = all.SpotNamed(room.Id, spotName) ?? await AddAsync(new Place { Name = spotName, RoomId = room.Id });
+        return spot.Id;
+    }
 
-        var changedPlants = 0;
-        foreach (var plant in allPlants.Where(p => RoomName.IsIn(p.Location, source)))
+    /// <summary>
+    /// Renames a room or a spot. Only the place itself changes, so whatever is in it, and the
+    /// spots inside a room, go along without being touched.
+    /// </summary>
+    public async Task<RoomRename> RenameAsync(Guid id, string? name)
+    {
+        var all = await places.GetPlacesAsync();
+        if (all.Find(id) is not { } place)
+            throw new ArgumentException("That room isn't there any more.", nameof(id));
+
+        var renamed = new Place { Name = RoomName.Clean(name) ?? "", RoomId = place.RoomId };
+        if (renamed.Validate().FirstOrDefault() is { } error)
+            throw new ArgumentException(error, nameof(name));
+
+        var plantCount = (await plants.GetAllAsync()).Count(p => all.IsIn(p.PlaceId, place.Id));
+        var propagationCount = (await propagations.GetAllAsync()).Count(p => all.IsIn(p.PlaceId, place.Id));
+
+        var existing = place.IsSpot
+            ? all.SpotNamed(all.RoomOf(place.Id)!.Id, renamed.Name)
+            : all.RoomNamed(renamed.Name);
+
+        if (existing is null || existing.Id == place.Id)
         {
-            var renamed = RoomName.Rename(plant.Location, source, target);
-            if (renamed == plant.Location)
-                continue;
-
-            plant.Location = renamed;
-            await plants.SaveAsync(plant);
-            changedPlants++;
+            place.Name = renamed.Name;
+            await places.SaveAsync(place);
+            return new RoomRename(place.Name, plantCount, propagationCount, Merged: false);
         }
 
-        var changedPropagations = 0;
-        foreach (var propagation in allPropagations.Where(p => RoomName.IsIn(p.Location, source)))
+        // A spot in both rooms becomes one spot too. The others follow the room they were in.
+        if (!place.IsSpot)
         {
-            var renamed = RoomName.Rename(propagation.Location, source, target);
-            if (renamed == propagation.Location)
-                continue;
-
-            propagation.Location = renamed;
-            await propagations.SaveAsync(propagation);
-            changedPropagations++;
+            foreach (var spot in all.SpotsIn(place.Id).ToList())
+            {
+                if (all.SpotNamed(existing.Id, spot.Name) is { } twin)
+                    await MergeAsync(spot, twin);
+            }
         }
 
-        foreach (var item in (await pestCases.GetAllAsync()).Where(c => RoomName.IsIn(c.Room, source)))
-        {
-            item.Room = RoomName.Rename(item.Room, source, target);
-            await pestCases.SaveAsync(item);
-        }
+        await MergeAsync(place, existing);
+        return new RoomRename(existing.Name, plantCount, propagationCount, Merged: true);
+    }
 
-        return new RoomRename(target, changedPlants, changedPropagations, merged);
+    private async Task MergeAsync(Place from, Place into)
+    {
+        from.MergedIntoId = into.Id;
+        await places.SaveAsync(from);
+        await places.DeleteAsync(from.Id);
+    }
+
+    private async Task<Place> AddAsync(Place place)
+    {
+        await places.SaveAsync(place);
+        return place;
     }
 }

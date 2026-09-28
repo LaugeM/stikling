@@ -65,8 +65,8 @@ public sealed class PestCase : Entity
 
     public PestScope Scope { get; set; } = PestScope.Everywhere;
 
-    /// <summary>The room the case covers, e.g. "Living room". Only on <see cref="PestScope.Room"/>.</summary>
-    public string? Room { get; set; }
+    /// <summary>The room or spot the case covers. Only on <see cref="PestScope.Room"/>.</summary>
+    public Guid? PlaceId { get; set; }
 
     /// <summary>The plants the case covers. Only on <see cref="PestScope.PickedPlants"/>.</summary>
     public List<Guid> PlantIds { get; set; } = [];
@@ -97,7 +97,7 @@ public sealed class PestCase : Entity
         if (IntervalDays < 1)
             errors.Add("Treat at least every day, so the interval has to be 1 or more.");
 
-        if (Scope == PestScope.Room && string.IsNullOrWhiteSpace(Room))
+        if (Scope == PestScope.Room && PlaceId is null)
             errors.Add("Pick the room the case covers.");
 
         if (Scope == PestScope.PickedPlants && PlantIds.Count == 0)

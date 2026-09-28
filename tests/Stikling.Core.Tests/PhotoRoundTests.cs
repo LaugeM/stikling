@@ -6,6 +6,7 @@ namespace Stikling.Core.Tests;
 public class PhotoRoundTests
 {
     private static readonly DateOnly Today = new(2026, 9, 28);
+    private static readonly FakePlaceRepository Places = new();
     private static readonly FixedTime Time = new(new DateTimeOffset(2026, 9, 28, 12, 0, 0, TimeSpan.Zero));
 
     private static Photo TakenOn(Guid subjectId, DateOnly day) => new()
@@ -26,7 +27,7 @@ public class PhotoRoundTests
         var due = PhotoRound.Due(
             [lastMonth, thisMonth], [never],
             Newest(TakenOn(lastMonth.Id, new DateOnly(2026, 8, 31)), TakenOn(thisMonth.Id, new DateOnly(2026, 9, 1))),
-            Time);
+            Places.Current, Time);
 
         Assert.Equal(["Coleus", "Monstera"], due.Select(d => d.Name));
         Assert.Null(due[0].LastPhoto);
@@ -42,18 +43,18 @@ public class PhotoRoundTests
         var sleepingCorm = new Propagation { Nickname = "Corm", StartedOn = Today, DormantSince = Today };
         var done = new Propagation { Nickname = "Coleus", StartedOn = Today, Stage = PropagationStage.Done };
 
-        Assert.Empty(PhotoRound.Due([dormant, died, deleted], [sleepingCorm, done], Newest(), Time));
+        Assert.Empty(PhotoRound.Due([dormant, died, deleted], [sleepingCorm, done], Newest(), Places.Current, Time));
     }
 
     [Fact]
     public void The_round_goes_room_by_room_with_no_room_last()
     {
         var nowhere = new Plant { Nickname = "Aloe" };
-        var kitchen = new Plant { Nickname = "Basil", Location = "Kitchen" };
-        var bedroom = new Plant { Nickname = "Pothos", Location = "Bedroom" };
-        var bedroomToo = new Propagation { Nickname = "Coleus", Location = "Bedroom", StartedOn = Today };
+        var kitchen = new Plant { Nickname = "Basil", PlaceId = Places.IdOf("Kitchen") };
+        var bedroom = new Plant { Nickname = "Pothos", PlaceId = Places.IdOf("Bedroom") };
+        var bedroomToo = new Propagation { Nickname = "Coleus", PlaceId = Places.IdOf("Bedroom"), StartedOn = Today };
 
-        var due = PhotoRound.Due([nowhere, kitchen, bedroom], [bedroomToo], Newest(), Time);
+        var due = PhotoRound.Due([nowhere, kitchen, bedroom], [bedroomToo], Newest(), Places.Current, Time);
 
         Assert.Equal(["Coleus", "Pothos", "Basil", "Aloe"], due.Select(d => d.Name));
     }

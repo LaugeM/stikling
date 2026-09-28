@@ -9,7 +9,7 @@ public sealed record PotUpRequest(
     int Count,
     DateOnly Date,
     string? Nickname = null,
-    string? Location = null,
+    Guid? PlaceId = null,
     GrowingMedium Medium = GrowingMedium.Soil,
     Guid? PotId = null,
     Guid? SoilMixId = null);
@@ -34,7 +34,7 @@ public sealed class PropagationService(
         Genus = parent.Genus,
         Species = parent.Species,
         Cultivar = parent.Cultivar,
-        Location = parent.Location,
+        PlaceId = parent.PlaceId,
         StartedOn = Today
     };
 
@@ -70,14 +70,19 @@ public sealed class PropagationService(
     }
 
     /// <summary>Saves an edited propagation and records what changed.</summary>
-    public async Task UpdateAsync(Propagation before, Propagation after, Func<Enum, string> label)
+    /// <param name="placeName">Turns a room or spot id into its name, so the history can say where it went.</param>
+    public async Task UpdateAsync(
+        Propagation before,
+        Propagation after,
+        Func<Enum, string> label,
+        Func<Guid, string?>? placeName = null)
     {
         after.SyncStageWithCounts();
         after.NoteFirstRoot();
         after.NoteRooted(Today);
         await propagations.SaveAsync(after);
 
-        var changes = PropagationChanges.Describe(before, after, label);
+        var changes = PropagationChanges.Describe(before, after, label, placeName);
         if (changes.Count > 0)
             await AddChangeAsync(after, string.Join("\n", changes));
     }
@@ -135,7 +140,7 @@ public sealed class PropagationService(
             Origin = propagation.Type == PropagationType.Seed ? PlantOrigin.GrownFromSeed : PlantOrigin.Propagated,
             AcquiredOn = LooseDate.Of(request.Date),
             Source = propagation.Source,
-            Location = Clean(request.Location),
+            PlaceId = request.PlaceId,
             Medium = request.Medium,
             InnerPotId = request.PotId,
             SoilMixId = request.SoilMixId,

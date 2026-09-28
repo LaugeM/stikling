@@ -7,6 +7,7 @@ using Stikling.Core.Plants;
 using Stikling.Core.Pots;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
+using Stikling.Core.Rooms;
 using Stikling.Core.SoilMixes;
 using Stikling.Core.Timeline;
 using Stikling.Core.Today;
@@ -204,6 +205,49 @@ internal sealed class FakePotRepository : IPotRepository
         if (Pots.TryGetValue(id, out var pot))
             pot.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakePlaceRepository : IPlaceRepository
+{
+    // Each new place is a second newer than the last, so "oldest first" is the order they were made
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Place> Places { get; } = [];
+
+    public Task<Places> GetPlacesAsync() =>
+        Task.FromResult(new Places(Places.Values.Where(p => !p.IsDeleted || p.MergedIntoId is not null)));
+
+    public Task SaveAsync(Place place)
+    {
+        if (place.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        if (place.CreatedAt == default)
+            place.CreatedAt = clock = clock.AddSeconds(1);
+        Places[place.Id] = place;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Places.TryGetValue(id, out var place))
+            place.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Every place as it stands now.</summary>
+    public Places Current => GetPlacesAsync().Result;
+
+    /// <summary>The place written out, "Living room / Windowsill", made the first time it's named.</summary>
+    public Guid? IdOf(string? place) =>
+        new RoomService(this, new FakePlantRepository(), new FakePropagationRepository()).PlaceIdAsync(place).Result;
+
+    /// <summary>Adds a room, or a spot when a room is given, and returns it.</summary>
+    public Place Add(string name, Place? room = null)
+    {
+        var place = new Place { Name = name, RoomId = room?.Id };
+        SaveAsync(place);
+        return place;
     }
 }
 

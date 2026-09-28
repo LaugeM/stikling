@@ -5,14 +5,14 @@ namespace Stikling.Core.Rooms;
 /// <summary>A spot inside a room, e.g. "On top of the PC" in the living room.</summary>
 /// <param name="Name">The spot on its own, "On top of the PC".</param>
 /// <param name="Place">The whole place, "Living room / On top of the PC".</param>
-public sealed record RoomSpot(string Name, string Place, int Plants, int Propagations)
+public sealed record RoomSpot(Guid Id, string Name, string Place, int Plants, int Propagations)
 {
     public int Total => Plants + Propagations;
 }
 
 /// <summary>A room in use, and the spots inside it.</summary>
 /// <param name="Plants">Plants placed in the room itself, not counting the spots.</param>
-public sealed record Room(string Name, IReadOnlyList<RoomSpot> Spots, int Plants, int Propagations)
+public sealed record Room(Guid Id, string Name, IReadOnlyList<RoomSpot> Spots, int Plants, int Propagations)
 {
     /// <summary>Plants in the room itself and in every spot inside it.</summary>
     public int AllPlants => Plants + Spots.Sum(s => s.Plants);
@@ -21,56 +21,39 @@ public sealed record Room(string Name, IReadOnlyList<RoomSpot> Spots, int Plants
 
     public int Total => AllPlants + AllPropagations;
 
-    /// <summary>The rooms in use by these plants and propagations, sorted, with their spots.</summary>
-    public static IReadOnlyList<Room> List(IEnumerable<Plant> plants, IEnumerable<Propagation> propagations) =>
-        List(plants.Where(p => !p.IsDeleted).Select(p => p.Location),
-             propagations.Where(p => !p.IsDeleted).Select(p => p.Location));
-
-    /// <summary>The same from bare place names, e.g. when the plants have already been filtered.</summary>
-    public static IReadOnlyList<Room> List(IEnumerable<string?> plantPlaces, IEnumerable<string?> propagationPlaces)
+    /// <summary>
+    /// The rooms something is in, sorted, with the spots that have something in them. A room or
+    /// spot with nothing in it is left out, so it stops showing once the last plant leaves.
+    /// </summary>
+    public static IReadOnlyList<Room> List(Places places, IEnumerable<Plant> plants, IEnumerable<Propagation> propagations)
     {
-        var places = new Dictionary<string, Tally>(StringComparer.OrdinalIgnoreCase);
+        var plantsIn = Tally(places, plants.Where(p => !p.IsDeleted).Select(p => p.PlaceId));
+        var propagationsIn = Tally(places, propagations.Where(p => !p.IsDeleted).Select(p => p.PlaceId));
 
-        foreach (var place in plantPlaces)
-            Count(places, place, plants: 1, propagations: 0);
-        foreach (var place in propagationPlaces)
-            Count(places, place, plants: 0, propagations: 1);
+        int PlantsIn(Place place) => plantsIn.GetValueOrDefault(place.Id);
+        int PropagationsIn(Place place) => propagationsIn.GetValueOrDefault(place.Id);
 
-        // A room stays on the list even when everything in it sits in one of its spots
-        foreach (var room in places.Values.Select(t => RoomName.RoomOf(t.Place)).OfType<string>().ToList())
-            Count(places, room, plants: 0, propagations: 0);
-
-        return places.Values
-            .Where(t => RoomName.SpotOf(t.Place) is null)
-            .Select(room => new Room(room.Place, SpotsOf(places, room.Place), room.Plants, room.Propagations))
+        return places.Rooms
+            .Select(room => new Room(
+                room.Id,
+                room.Name,
+                places.SpotsIn(room.Id)
+                    .Select(s => new RoomSpot(s.Id, s.Name, places.NameOf(s.Id)!, PlantsIn(s), PropagationsIn(s)))
+                    .Where(s => s.Total > 0)
+                    .OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase)
+                    .ToList(),
+                PlantsIn(room),
+                PropagationsIn(room)))
+            .Where(r => r.Total > 0)
             .OrderBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
     }
 
-    private static IReadOnlyList<RoomSpot> SpotsOf(Dictionary<string, Tally> places, string room) =>
-        places.Values
-            .Where(t => RoomName.SpotOf(t.Place) is not null && RoomName.Same(RoomName.RoomOf(t.Place), room))
-            .Select(t => new RoomSpot(RoomName.SpotOf(t.Place)!, t.Place, t.Plants, t.Propagations))
-            .OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
-
-    private static void Count(Dictionary<string, Tally> places, string? place, int plants, int propagations)
-    {
-        if (RoomName.Clean(place) is not { } cleaned)
-            return;
-
-        // The first spelling seen wins, so "Kitchen" and "kitchen" stay one place
-        if (!places.TryGetValue(cleaned, out var tally))
-            places[cleaned] = tally = new Tally(cleaned);
-
-        tally.Plants += plants;
-        tally.Propagations += propagations;
-    }
-
-    private sealed class Tally(string place)
-    {
-        public string Place { get; } = place;
-        public int Plants { get; set; }
-        public int Propagations { get; set; }
-    }
+    // How many point at each place, counting what points at a merged place towards the one it went into
+    private static Dictionary<Guid, int> Tally(Places places, IEnumerable<Guid?> placeIds) =>
+        placeIds
+            .Select(places.Find)
+            .OfType<Place>()
+            .GroupBy(p => p.Id)
+            .ToDictionary(g => g.Key, g => g.Count());
 }
