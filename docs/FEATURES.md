@@ -65,8 +65,9 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ☐ | Rename or merge a tag everywhere at once, the way rooms can be in Settings | 6 | S | v1.x |
 | ◐ | Select several plants at once: change status, log care, add a note or tags to all. Moving them all to a room isn't built | 4 | M | v1.x |
 | ✅ | **Dormancy status** for plants and propagations, e.g. an alocasia dropping its leaves in winter or a corm sitting still. A badge and the day it went dormant show it's resting rather than dead, the plant list has a "Dormant" filter, and going dormant and waking up are recorded on the history. A dormant propagation doesn't come up on Today to be checked on. Dormancy ends by itself when a plant dies or leaves, or a propagation finishes | 4 | S | v1.x |
+| ☐ | **Growing season**: mark a plant as growing in summer or in winter. When its usual resting time comes round, the app asks whether it has gone dormant | 5 | S | v1.x |
 | ☐ | Sort options: name, newest, room, last activity | 5 | S | v1.x |
-| ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | 5 | S | v1.x |
+| ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once. Each name is matched against the plant dictionary, and anything else on the line goes into the notes | 5 | S | v1.x |
 | ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | 5 | M | v1.x |
 | ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | 5 | M | v1.x |
 | ☐ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
@@ -79,10 +80,12 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ◐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline. Built for the aroids (Araceae): every genus and species from Kew's checklist, the old names, and a starter list of cultivars. Other families, common names, family and native region, and a page to browse it aren't built. See `tools/plant-names` | 6 | L | v1.x |
 | ✅ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary and the names already on your plants and propagations, including hybrids and named varieties. An old name offers the one it goes by now, and a cultivar fills in its genus and species. Anything not on the list can still be typed | 6 | M | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
-| ☐ | **Wishlist**: plants you want, with notes on where to find them and what you liked about them. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
+| ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
 | ☐ | Duplicate a plant (e.g. a second basil pot) | 7 | S | v1.x |
 | ☐ | Purchase price per plant | 7 | S | v1.x |
+| ☐ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
 | ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 7 | M | v1.x |
+| ☐ | **Home map**: a simple plan of each room with the plants placed where they stand, to see what is where and to go round them in order | 7 | L | v1.x |
 
 ## 2. Photos & timeline
 
@@ -167,11 +170,12 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | Harvest log for herbs (basil, parsley): date and amount | 7 | S | v1.x |
 | ☐ | Flowering log (orchid, peace lily): spike started, blooming, done | 7 | S | v1.x |
 
-## 4b. Light
+## 4b. Light and climate
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
 | ☐ | Light level per plant: low, medium, bright indirect, some direct sun | 5 | S | v1.x |
+| ☐ | **Room climate**: temperature and humidity readings for a room or spot, e.g. from a hygrometer in a cabinet, so a plant shows the conditions it lives in | 6 | M | v1.x |
 | ☐ | **Grow lights**: your lamps with a name, wattage and hours on per day, and which plants are under each one | 6 | M | v1.x |
 | ☐ | Moving a plant under or away from a grow light is recorded in its history, like a room change | 6 | S | v1.x |
 | ☐ | Window direction for each room (north, east, south, west), so plants in a room show what light they get | 7 | M | v1.x |
@@ -192,6 +196,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | Interval ("every 3–5 days") with "next treatment due" shown on Today | 3 | S | v1.x |
 | ✅ | A case being watched is due a check for pests once a week instead of a treatment. Checks are logged on the case, and "Found some" puts it back to treating | 3 | S | v1.x |
 | ✅ | Quarantine flag with the day it started, a "Quarantine" filter and a badge on the card. Going in and coming out are recorded on the plant's history | 3 | S | v1.x |
+| ☐ | A length for quarantine, e.g. two weeks. When it is up, Today says it is time to check the plant and let it out | 4 | S | v1.x |
 | ☐ | **Treatment recipes**, e.g. "Thrips spray: alcohol + demineralised water + a drop of dish soap". Each log entry saves the recipe as it was that day, so changing the recipe doesn't rewrite history | 4 | M | v1.x |
 | ✅ | Pest overview: all active cases in one list | 4 | S | v1.x |
 | ☐ | **Sticky trap counts**: log how many pests a (blue/yellow) sticky trap caught each week; a small chart shows whether treatment is working | 4 | M | v1.x |
@@ -210,7 +215,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | See which of your pots are in use and which are free, so it's clear what's available before repotting. A plant that died frees its pots, and giving a plant away or selling it asks which of its pots went with it | 7 | S | v1.x |
 | ☐ | **Does it fit?**: given a nursery pot, which of your free outer pots it would go in. Compares the tops, allows for a rim only having to clear the opening, and says when the bottom is the tighter measurement | 7 | M | v1.x |
 | ☐ | Default medium per pot kind, e.g. a net pot suggests LECA, so potting up is one tap less | 8 | S | v1.x |
-| ☐ | Money spent on supplies, to see what the hobby costs | 8 | S | v1.x |
+| ☐ | Money spent on plants and supplies, per year, to see what the hobby costs | 8 | S | v1.x |
 
 ## 5c. Soil mixes
 
@@ -253,9 +258,10 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Recent activity feed | 5 | S | M5 |
 | ✅ | Pest treatments due or overdue, and checks due on cases being watched | 3 | S | v1.x |
 | ☐ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
-| ☐ | **Needs attention**: flag a plant with a reason ("repot soon", "look closer") and it stays on Today until the flag is cleared | 4 | S | v1.x |
+| ☐ | **Needs attention**: flag a plant with a reason ("repot soon", "look closer", "ready to divide") and it stays on Today until the flag is cleared | 4 | S | v1.x |
 | ☐ | Put something on Today off for 1, 3 or 7 days, or skip it this time, without logging anything | 5 | S | v1.x |
 | ☐ | **Photo reminder**: once a month, Today lists plants that haven't had a new photo in a month, so every plant's history keeps growing. Can be turned off | 5 | S | v1.x |
+| ☐ | **A daily round**: Today suggests one room or spot to go through each day, working round the home over the week instead of everything at once. Off until turned on | 6 | S | v1.x |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
 | ☐ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |
 
@@ -310,6 +316,7 @@ Questions come up that the app can't answer from your own data: how long a cutti
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
+| ☐ | Share your plant list or wishlist as text, e.g. to send to a friend or take to a swap | 6 | S | v1.x |
 | ☐ | Share a plant card as an image (photo + name + "propagated from…") | 7 | M | v1.x |
 | ☐ | Plant-sitter sheet: a printable/shareable care list for someone watering while you're away | 7 | M | v1.x |
 | ☐ | Accounts and sync between devices (ASP.NET Core Web API, EF Core, Identity) | 9 | L | v2 |
