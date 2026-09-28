@@ -920,6 +920,15 @@ a.item-card:active {
     font-weight: 600;
 }
 
+/* Dormant is a plant resting, not a problem, so it stays in the quiet ink of the meta line */
+.dormant-badge {
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--pa-muted);
+    color: var(--pa-muted);
+    border-radius: 0.6rem;
+    font-weight: 600;
+}
+
 /* Your own labels. Quiet on purpose, so they don't compete with status and pests */
 .tag-label {
     display: inline-block;

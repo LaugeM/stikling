@@ -15,12 +15,14 @@ public enum StatusFilter
 /// <param name="Location">A room, or a spot inside one. A room also shows what's in its spots.</param>
 /// <param name="Tags">Picking several tags narrows the list: a plant has to carry all of them.</param>
 /// <param name="Quarantine">Only the plants in quarantine.</param>
+/// <param name="Dormant">Only the dormant plants.</param>
 public sealed record PlantFilter(
     string? Search = null,
     StatusFilter Status = StatusFilter.Active,
     string? Location = null,
     IReadOnlyCollection<string>? Tags = null,
-    bool Quarantine = false)
+    bool Quarantine = false,
+    bool Dormant = false)
 {
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
         plants
@@ -28,6 +30,7 @@ public sealed record PlantFilter(
             .Where(MatchesStatus)
             .Where(MatchesLocation)
             .Where(p => !Quarantine || p.InQuarantine)
+            .Where(p => !Dormant || p.IsDormant)
             .Where(p => Tags is null || Tags.All(tag => PlantTags.Has(p, tag)))
             .Where(MatchesSearch)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase);

@@ -79,13 +79,18 @@ else
             </div>
         }
 
-        @if (TagChoices.Count > 0 || all.Any(p => p.InQuarantine))
+        @if (TagChoices.Count > 0 || all.Any(p => p.InQuarantine) || all.Any(p => p.IsDormant))
         {
             <div class="tag-filters" role="group" aria-label="Tags">
                 @if (all.Any(p => p.InQuarantine))
                 {
                     <button type="button" class="chip @(quarantine ? "picked" : null)"
                             aria-pressed="@(quarantine ? "true" : "false")" @onclick="ToggleQuarantine">Quarantine</button>
+                }
+                @if (all.Any(p => p.IsDormant))
+                {
+                    <button type="button" class="chip @(dormant ? "picked" : null)"
+                            aria-pressed="@(dormant ? "true" : "false")" @onclick="ToggleDormant">Dormant</button>
                 }
                 @foreach (var t in TagChoices)
                 {
@@ -222,6 +227,7 @@ else
     private IReadOnlyList<TagCount> tags = [];
     private readonly HashSet<string> pickedTags = new(StringComparer.OrdinalIgnoreCase);
     private bool quarantine;
+    private bool dormant;
 
     private bool selecting;
     private readonly HashSet<Guid> selected = [];
@@ -297,8 +303,14 @@ else
         Refresh();
     }
 
+    private void ToggleDormant()
+    {
+        dormant = !dormant;
+        Refresh();
+    }
+
     private void Refresh() =>
-        visible = new PlantFilter(search, status, RoomName.Combine(room, spot), pickedTags.Count > 0 ? pickedTags : null, quarantine)
+        visible = new PlantFilter(search, status, RoomName.Combine(room, spot), pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant)
             .Apply(all ?? [])
             .ToList();
 

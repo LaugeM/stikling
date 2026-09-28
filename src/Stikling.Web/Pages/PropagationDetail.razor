@@ -46,6 +46,10 @@ else
             {
                 <p class="detail-sub">@botanical</p>
             }
+            @if (propagation.IsDormant)
+            {
+                <span class="badge dormant-badge">Dormant</span>
+            }
             <p class="prop-summary">
                 @Labels.Summary(propagation) · @Labels.Age(propagation, Today)
                 @if (parent is not null)
@@ -220,6 +224,17 @@ else
 
                     <dt>Location</dt>
                     <dd>@(string.IsNullOrWhiteSpace(propagation.Location) ? "Not set" : propagation.Location)</dd>
+
+                    @if (propagation.DormantSince is { } dormantSince)
+                    {
+                        <dt>Dormant</dt>
+                        <dd>
+                            @(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(propagation.DaysDormant(Today) ?? 0, "day")}")
+                            <div>
+                                <button type="button" class="btn btn-link btn-sm p-0" @onclick="EndDormancyAsync">It's woken up</button>
+                            </div>
+                        </dd>
+                    }
                 </dl>
 
                 @if (!string.IsNullOrWhiteSpace(propagation.Notes))
@@ -373,6 +388,14 @@ else
         message = null;
         historyVersion++;
         busy = false;
+    }
+
+    private async Task EndDormancyAsync()
+    {
+        if (propagation is null)
+            return;
+        await PropagationService.SetDormantAsync(propagation, null, Labels.For(propagation));
+        historyVersion++;
     }
 
     private void OpenPotUp()

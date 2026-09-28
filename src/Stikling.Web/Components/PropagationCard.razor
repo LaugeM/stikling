@@ -21,6 +21,10 @@
                 {
                     <StageBadge Stage="Propagation.Stage" Type="Propagation.Type" />
                 }
+                @if (Propagation.IsDormant)
+                {
+                    <span class="badge dormant-badge">Dormant</span>
+                }
                 <span>@Labels.Summary(Propagation)</span>
                 @if (Propagation.DaysToRoot is { } days)
                 {

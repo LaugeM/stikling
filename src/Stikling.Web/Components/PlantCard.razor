@@ -68,6 +68,10 @@ else
                 {
                     <span class="badge quarantine-badge">Quarantine</span>
                 }
+                @if (Plant.IsDormant && Plant.Status == PlantStatus.Active)
+                {
+                    <span class="badge dormant-badge">Dormant</span>
+                }
                 @foreach (var pest in Pests)
                 {
                     <span class="badge pest-badge">@Labels.For(pest.Pest)</span>

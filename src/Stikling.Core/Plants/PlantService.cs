@@ -45,6 +45,9 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         after.Tags = PlantTags.Normalize(after.Tags);
         // Only a plant that left can take pots, and only the ones it has
         after.PotsTaken = after.HasLeft ? after.Fit(after.PotsTaken) : PotsTaken.None;
+        // Only a plant still in the collection can be resting
+        if (after.Status != PlantStatus.Active)
+            after.DormantSince = null;
         await plants.SaveAsync(after);
 
         var changes = PlantChanges.Describe(before, after, label, potName, mixName);
@@ -78,6 +81,17 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 
         var before = plant.Copy();
         plant.QuarantinedSince = since;
+        await UpdateAsync(before, plant, label);
+    }
+
+    /// <summary>Marks a plant dormant from the given day, or woken up again with null.</summary>
+    public async Task SetDormantAsync(Plant plant, DateOnly? since, Func<Enum, string> label)
+    {
+        if (plant.DormantSince == since)
+            return;
+
+        var before = plant.Copy();
+        plant.DormantSince = since;
         await UpdateAsync(before, plant, label);
     }
 

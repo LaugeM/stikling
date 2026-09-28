@@ -41,8 +41,14 @@ public static class PlantChanges
         if (before.InQuarantine != after.InQuarantine)
             changes.Add(after.InQuarantine ? "Put in quarantine" : "Out of quarantine");
 
+        // A plant that died or left stops being dormant, and the status change already says so
+        if (before.IsDormant != after.IsDormant && after.Status == PlantStatus.Active)
+            changes.Add(DormancyText(after.IsDormant));
+
         return changes;
     }
+
+    internal static string DormancyText(bool dormant) => dormant ? "Went dormant" : "Woke up from dormancy";
 
     private static string PotsTakenText(Plant plant) => plant.PotsTaken switch
     {
@@ -69,6 +75,10 @@ public static class PropagationChanges
         ChangeText.AddLocation(changes, before.Location, after.Location);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
         ChangeText.AddContainer(changes, before.Container, after.Container, "New setup");
+
+        // Finishing ends dormancy too, and the stage change already says so
+        if (before.IsDormant != after.IsDormant && after.IsActive)
+            changes.Add(PlantChanges.DormancyText(after.IsDormant));
 
         return changes;
     }

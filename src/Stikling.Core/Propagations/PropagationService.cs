@@ -81,6 +81,16 @@ public sealed class PropagationService(
             await AddChangeAsync(after, string.Join("\n", changes));
     }
 
+    /// <summary>Marks a propagation dormant from the given day, or woken up again with null.</summary>
+    public async Task SetDormantAsync(Propagation propagation, DateOnly? since, Func<Enum, string> label)
+    {
+        if (propagation.DormantSince == since)
+            return;
+        var before = propagation.Copy();
+        propagation.DormantSince = since;
+        await UpdateAsync(before, propagation, label);
+    }
+
     public async Task SetStageAsync(Propagation propagation, PropagationStage stage, Func<Enum, string> label)
     {
         if (propagation.Stage == stage)

@@ -84,7 +84,7 @@ public class ExperimentTests
     {
         var batch = Batch(null, GrowingMedium.Perlite, Started, Started.AddDays(-1));
 
-        Assert.Contains("It can't have rooted before it was started.", batch.Validate());
+        Assert.Contains("It can't have rooted before it was started.", batch.Validate(DateOnly.MaxValue));
     }
 
     [Fact]

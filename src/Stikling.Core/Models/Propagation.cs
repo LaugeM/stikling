@@ -52,6 +52,15 @@ public sealed class Propagation : Entity
 
     public Guid? CoverPhotoId { get; set; }
 
+    /// <summary>
+    /// The day it went dormant, e.g. a corm sitting still for the winter. Null while it's
+    /// growing. A dormant propagation doesn't come up on Today to be checked on.
+    /// </summary>
+    public DateOnly? DormantSince { get; set; }
+
+    [JsonIgnore]
+    public bool IsDormant => DormantSince is not null;
+
     /// <summary>Units still in the propagation (not potted up and not failed).</summary>
     [JsonIgnore]
     public int RemainingCount => InitialCount - PottedUpCount - FailedCount;
@@ -71,6 +80,10 @@ public sealed class Propagation : Entity
     [JsonIgnore]
     public int? DaysToRoot =>
         RootedOn is { } rooted ? Math.Max(0, rooted.DayNumber - StartedOn.DayNumber) : null;
+
+    /// <summary>Days dormant, counting the day it went dormant as day 0.</summary>
+    public int? DaysDormant(DateOnly today) =>
+        DormantSince is { } since ? Math.Max(0, today.DayNumber - since.DayNumber) : null;
 
     /// <summary>Days since it was started: 0 on the day itself.</summary>
     public int DaysSinceStart(DateOnly today) => Math.Max(0, today.DayNumber - StartedOn.DayNumber);
@@ -123,17 +136,21 @@ public sealed class Propagation : Entity
 
     /// <summary>
     /// Nothing left: it's done if anything was potted up, otherwise it failed. Units left on a
-    /// finished propagation (the count was raised when editing) open it again.
+    /// finished propagation (the count was raised when editing) open it again. A finished
+    /// propagation isn't resting any more, so it stops being dormant.
     /// </summary>
     public void SyncStageWithCounts()
     {
         if (RemainingCount <= 0)
+        {
             Stage = PottedUpCount > 0 ? PropagationStage.Done : PropagationStage.Failed;
+            DormantSince = null;
+        }
         else if (!IsActive)
             Stage = PropagationStage.Started;
     }
 
-    public IReadOnlyList<string> Validate()
+    public IReadOnlyList<string> Validate(DateOnly today)
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus))
@@ -144,6 +161,8 @@ public sealed class Propagation : Entity
             errors.Add($"The count can't be lower than the {PottedUpCount + FailedCount} already potted up or failed.");
         if (RootedOn is { } rooted && rooted < StartedOn)
             errors.Add("It can't have rooted before it was started.");
+        if (DormantSince > today)
+            errors.Add("It can't go dormant in the future.");
         return errors;
     }
 }
