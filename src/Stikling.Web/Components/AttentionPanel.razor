@@ -1,0 +1,96 @@
+@* Flagging a plant or propagation as needing something, e.g. "Repot soon". The flag keeps it
+   on Today until it's cleared, here or from Today itself. Shows nothing while there is no flag
+   and none is being written. *@
+@inject TimeProvider Time
+
+@if (Editing)
+{
+    <section class="attention-panel" aria-label="Needs attention">
+        <label class="form-label" for="@inputId">What does it need?</label>
+        <input id="@inputId" class="form-control" @bind="reason" @bind:event="oninput"
+               placeholder="e.g. @Suggestions.FirstOrDefault()?.ToLowerInvariant()" />
+        <div class="chip-row mt-2" role="group" aria-label="Suggestions">
+            @foreach (var suggestion in Suggestions)
+            {
+                <button type="button" class="chip @(reason?.Trim() == suggestion ? "picked" : null)"
+                        @onclick="() => reason = suggestion">@suggestion</button>
+            }
+        </div>
+        <p class="form-text mb-3">It stays on Today until you mark it done.</p>
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(busy || string.IsNullOrWhiteSpace(reason))"
+                    @onclick="SaveAsync">@(Current is null ? "Flag it" : "Save")</button>
+            <button type="button" class="btn btn-link" @onclick="CloseAsync">Cancel</button>
+        </div>
+    </section>
+}
+else if (Current is { } flag)
+{
+    <div class="attention-note">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4" /><path d="M5 4h12l-2.5 4.5L17 13H5" /></svg>
+        <div class="attention-text">
+            <span class="attention-reason">@flag.Reason</span>
+            <span class="attention-since">@Since(flag)</span>
+        </div>
+        <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OpenAsync">Change</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ClearAsync">Done</button>
+    </div>
+}
+
+@code {
+    /// <summary>The flag as it is now, or null when there isn't one.</summary>
+    [Parameter]
+    public Attention? Current { get; set; }
+
+    /// <summary>True while the reason is being written, which the page opens from its Flag button.</summary>
+    [Parameter]
+    public bool Editing { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> EditingChanged { get; set; }
+
+    /// <summary>Reasons to tap instead of typing. See <see cref="PlantReasons"/> and <see cref="PropagationReasons"/>.</summary>
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<string> Suggestions { get; set; }
+
+    /// <summary>Saves the reason, or clears the flag with null.</summary>
+    [Parameter]
+    public EventCallback<string?> OnSave { get; set; }
+
+    public static readonly IReadOnlyList<string> PlantReasons = ["Repot soon", "Look closer", "Ready to divide"];
+    public static readonly IReadOnlyList<string> PropagationReasons = ["Change the water", "Look closer", "Ready to pot up"];
+
+    private readonly string inputId = $"attention-{Guid.NewGuid():N}";
+    private string? reason;
+    private bool busy;
+    private bool wasEditing;
+
+    protected override void OnParametersSet()
+    {
+        // Start from the current reason each time it's opened
+        if (Editing && !wasEditing)
+            reason = Current?.Reason;
+        wasEditing = Editing;
+    }
+
+    private string Since(Attention flag) => $"flagged {Labels.DaysAgo(flag.DaysSince(Time.Today()))}";
+
+    private Task OpenAsync() => EditingChanged.InvokeAsync(true);
+
+    private Task CloseAsync() => EditingChanged.InvokeAsync(false);
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        await OnSave.InvokeAsync(reason);
+        busy = false;
+        await CloseAsync();
+    }
+
+    private async Task ClearAsync()
+    {
+        busy = true;
+        await OnSave.InvokeAsync(null);
+        busy = false;
+    }
+}

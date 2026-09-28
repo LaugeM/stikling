@@ -40,15 +40,14 @@ In the order I would build them.
 1. **Milestones, rooting aids, and on time or slow** for propagations. First root and first leaf give my corm experiment dates to compare, rooting aids let me see on the results page whether they made a difference, and a propagation still rooting can then say whether it is keeping up with my own average.
 2. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
 3. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished, and I want it in place before winter.
-4. **Needs attention, putting things off, and the photo reminder** on Today. All three are small, and together they make Today something I go through every day rather than only when a propagation is due.
-5. **Empty screens that say what to do next, and the FAQ page.** Someone new sees an empty app first, and the first person I showed the app to asked what propagation means.
-6. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-7. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-8. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-9. **Seed germination**: sown and germinated counts with their dates.
-10. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-11. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
-12. **Comparing photos side by side, and voice notes.**
+4. **Empty screens that say what to do next, and the FAQ page.** Someone new sees an empty app first, and the first person I showed the app to asked what propagation means.
+5. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+6. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+7. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+8. **Seed germination**: sown and germinated counts with their dates.
+9. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+10. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
+11. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
@@ -269,9 +268,9 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Recent activity feed | 5 | S | M5 |
 | ✅ | Pest treatments due or overdue, and checks due on cases being watched | 3 | S | v1.x |
 | ☐ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
-| ☐ | **Needs attention**: flag a plant with a reason ("repot soon", "look closer", "ready to divide") and it stays on Today until the flag is cleared | 4 | S | v1.x |
-| ☐ | Put something on Today off for 1, 3 or 7 days, or skip it this time, without logging anything | 5 | S | v1.x |
-| ☐ | **Photo reminder**: once a month, Today lists plants that haven't had a new photo in a month, so every plant's history keeps growing. Can be turned off | 5 | S | v1.x |
+| ✅ | **Needs attention**: flag a plant or propagation with a reason ("repot soon", "look closer", "change the water"), typed or picked from a few suggestions, and it stays on Today until it's marked done there or on its own page. Flags aren't written on the history, and one goes away by itself when the plant leaves or the propagation finishes | 4 | S | v1.x |
+| ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
+| ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
 | ☐ | **A daily round**: Today suggests one room or spot to go through each day, working round the home over the week instead of everything at once. Off until turned on | 6 | S | v1.x |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
 | ☐ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |

@@ -45,9 +45,12 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         after.Tags = PlantTags.Normalize(after.Tags);
         // Only a plant that left can take pots, and only the ones it has
         after.PotsTaken = after.HasLeft ? after.Fit(after.PotsTaken) : PotsTaken.None;
-        // Only a plant still in the collection can be resting
+        // Only a plant still in the collection can be resting or need something done
         if (after.Status != PlantStatus.Active)
+        {
             after.DormantSince = null;
+            after.Attention = null;
+        }
         await plants.SaveAsync(after);
 
         var changes = PlantChanges.Describe(before, after, label, potName, mixName);
@@ -93,6 +96,16 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         var before = plant.Copy();
         plant.DormantSince = since;
         await UpdateAsync(before, plant, label);
+    }
+
+    /// <summary>
+    /// Flags a plant as needing something, e.g. "Repot soon", or clears the flag with null. It's
+    /// only a reminder for Today, so nothing goes on the history.
+    /// </summary>
+    public async Task SetAttentionAsync(Plant plant, string? reason)
+    {
+        plant.Attention = Attention.Change(plant.Attention, reason, time.Today());
+        await plants.SaveAsync(plant);
     }
 
     /// <summary>

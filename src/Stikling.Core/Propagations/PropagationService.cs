@@ -91,6 +91,16 @@ public sealed class PropagationService(
         await UpdateAsync(before, propagation, label);
     }
 
+    /// <summary>
+    /// Flags a propagation as needing something, e.g. "Change the water", or clears the flag
+    /// with null. It's only a reminder for Today, so nothing goes on the history.
+    /// </summary>
+    public async Task SetAttentionAsync(Propagation propagation, string? reason)
+    {
+        propagation.Attention = Attention.Change(propagation.Attention, reason, Today);
+        await propagations.SaveAsync(propagation);
+    }
+
     public async Task SetStageAsync(Propagation propagation, PropagationStage stage, Func<Enum, string> label)
     {
         if (propagation.Stage == stage)

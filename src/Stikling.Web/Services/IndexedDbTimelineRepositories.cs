@@ -55,6 +55,12 @@ public sealed class IndexedDbPhotoRepository(IndexedDb db, TimeProvider time) : 
         return photo is { IsDeleted: false } ? photo : null;
     }
 
+    public async Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync() =>
+        (await db.GetAllAsync<Photo>(Stores.Photos))
+            .Where(p => !p.IsDeleted)
+            .GroupBy(p => p.SubjectId)
+            .ToDictionary(g => g.Key, g => g.MaxBy(p => p.TakenAt)!);
+
     public async Task AddAsync(Photo photo)
     {
         photo.CreatedAt = photo.UpdatedAt = time.GetUtcNow();

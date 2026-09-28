@@ -151,9 +151,16 @@ else
             <div class="detail-actions">
                 <button type="button" class="btn btn-primary" @onclick="OpenPotUp">Pot up</button>
                 <button type="button" class="btn btn-outline-primary" @onclick="OpenFailed">Mark failed</button>
+                @if (propagation.Attention is null && !flagging)
+                {
+                    <button type="button" class="btn btn-link" @onclick="() => flagging = true">Flag</button>
+                }
                 <a class="btn btn-link" href="propagations/@propagation.Id/edit">Edit</a>
             </div>
         }
+
+        <AttentionPanel Current="propagation.Attention" @bind-Editing="flagging" Suggestions="AttentionPanel.PropagationReasons"
+                        OnSave="SetAttentionAsync" />
     }
     else
     {
@@ -322,6 +329,7 @@ else
     private bool loaded;
     private bool busy;
     private bool confirmDelete;
+    private bool flagging;
     private string tab = "info";
     private int historyVersion;
 
@@ -353,6 +361,7 @@ else
         if (propagation?.Id != Id)
         {
             confirmDelete = false;
+            flagging = false;
             panel = Panel.None;
             message = null;
         }
@@ -388,6 +397,13 @@ else
         message = null;
         historyVersion++;
         busy = false;
+    }
+
+    private async Task SetAttentionAsync(string? reason)
+    {
+        if (propagation is null)
+            return;
+        await PropagationService.SetAttentionAsync(propagation, reason);
     }
 
     private async Task EndDormancyAsync()

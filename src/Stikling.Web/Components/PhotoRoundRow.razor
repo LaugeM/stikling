@@ -1,0 +1,93 @@
+@* One plant or propagation in the monthly photo round, with a camera button that puts the photo
+   straight on its history without leaving Today. *@
+@inject PhotoService Photos
+@inject TimelineService TimelineService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+
+<li class="today-row">
+    <div class="today-row-main">
+        <a class="item-card" href="@SubjectThumb.LinkTo(Due.Subject)">
+            <SubjectThumb Subject="Due.Subject" />
+            <div class="item-text">
+                <div class="item-name">@Due.Name</div>
+                <div class="item-meta">@Meta</div>
+            </div>
+        </a>
+        <label class="row-btn @(busy ? "disabled" : null)" for="@inputId" title="Take a photo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+            <span class="visually-hidden">Take a photo of @Due.Name</span>
+        </label>
+        <input id="@inputId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+               @ref="input" @onchange="SaveAsync" disabled="@busy" />
+    </div>
+    @if (status is not null)
+    {
+        <p class="today-row-status" role="status">@status</p>
+    }
+</li>
+
+@code {
+    [Parameter, EditorRequired]
+    public required PhotoDue Due { get; set; }
+
+    /// <summary>Raised once the photo is saved, so Today can take the row off the list.</summary>
+    [Parameter]
+    public EventCallback OnTaken { get; set; }
+
+    private readonly string inputId = $"round-{Guid.NewGuid():N}";
+    private ElementReference input;
+    private bool busy;
+    private string? status;
+
+    private string Meta
+    {
+        get
+        {
+            var last = Due.LastPhoto is { } day ? $"last photo {Labels.Date(day)}" : "no photos yet";
+            return string.IsNullOrWhiteSpace(Due.Location) ? last : $"{Due.Location} · {last}";
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        status = "Saving the photo…";
+
+        try
+        {
+            var subjectType = Due.Subject is Plant ? SubjectType.Plant : SubjectType.Propagation;
+            var result = await Photos.SaveFromInputAsync(input, subjectType, Due.Subject.Id);
+            status = result.Message(guessesMatter: false);
+
+            if (result.Saved.Count > 0)
+            {
+                await TimelineService.AddPhotosAsync(subjectType, Due.Subject.Id, result.Saved);
+                await SetCoverAsync(PhotoEntries.Cover(result.Saved).Id);
+                await OnTaken.InvokeAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            status = $"Couldn't save the photo: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    // The first photo of something becomes its cover, the same as on its own page
+    private async Task SetCoverAsync(Guid photoId)
+    {
+        switch (Due.Subject)
+        {
+            case Plant { CoverPhotoId: null } plant:
+                plant.CoverPhotoId = photoId;
+                await PlantRepository.SaveAsync(plant);
+                break;
+            case Propagation { CoverPhotoId: null } propagation:
+                propagation.CoverPhotoId = photoId;
+                await PropagationRepository.SaveAsync(propagation);
+                break;
+        }
+    }
+}

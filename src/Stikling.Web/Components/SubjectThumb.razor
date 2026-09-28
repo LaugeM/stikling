@@ -1,0 +1,30 @@
+@* The tile at the start of a row on Today that can hold either a plant or a propagation. *@
+@inject TimeProvider Time
+
+@if (Subject is Propagation propagation)
+{
+    <PropagationThumb Propagation="propagation" Days="@(propagation.IsActive ? propagation.DaysSinceStart(Time.Today()) : null)" />
+}
+else if (Subject is Plant plant)
+{
+    <div class="item-thumb potted" aria-hidden="true">
+        @if (plant.CoverPhotoId is { } coverId)
+        {
+            <PhotoImage PhotoId="coverId" />
+        }
+        else
+        {
+            <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>A <see cref="Plant"/> or a <see cref="Propagation"/>.</summary>
+    [Parameter, EditorRequired]
+    public required Entity Subject { get; set; }
+
+    /// <summary>Where the subject's own page is.</summary>
+    public static string LinkTo(Entity subject) =>
+        subject is Plant ? $"plants/{subject.Id}" : $"propagations/{subject.Id}";
+}
