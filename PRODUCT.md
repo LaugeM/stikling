@@ -71,7 +71,7 @@ Explicitly undecided:
 
 - A working v1 deployed to GitHub Pages, covering everything listed under Capabilities.
 - `docs/FEATURES.md`: a prioritised feature list with effort estimates and the milestone each item shipped in or is aimed at.
-- Real use by the developer: an ongoing experiment comparing corm mediums (perlite, sphagnum, LECA and a corm riser), and a current thrips problem that drives the next feature.
+- Real use by the developer: an ongoing experiment comparing corm mediums (perlite, sphagnum, LECA and a corm riser), and a current spider mite problem that drives the next feature.
 - One first-run observation from showing the app to someone new: they asked what propagation means.
 - There are no other users yet, no metrics, no testimonials and no press. Future work must not invent any.
 
