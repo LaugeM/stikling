@@ -36,7 +36,7 @@ else
     <div class="detail-actions">
         @if (view.Case.IsOpen)
         {
-            <button type="button" class="btn btn-primary" @onclick="() => logging = !logging">
+            <button type="button" class="btn btn-primary" @onclick="ToggleLogging">
                 @(logging ? "Close" : view.IsCheck ? "Log check" : "Log treatment")
             </button>
         }
@@ -97,8 +97,60 @@ else
         }
     </section>
 
+    @* Its own card rather than a button in the row above, since not every pest ends up on a trap *@
+    @if (view.Case.IsOpen || Trapped)
+    {
+        <section class="detail-card">
+            <div class="trap-head">
+                <h2>Sticky trap</h2>
+                @if (view.Case.IsOpen && !counting)
+                {
+                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="StartCounting">Count trap</button>
+                }
+            </div>
+
+            @if (counting)
+            {
+                <TrapCountSheet Case="view.Case" OnLogged="CountedAsync" OnCancel="() => counting = false" />
+            }
+            else if (!Trapped)
+            {
+                <p class="text-body-secondary mb-0">
+                    Thrips, fungus gnats and whitefly end up on a yellow or blue sticky trap. Count it
+                    now and then to see whether the treatment is working.
+                </p>
+            }
+            else
+            {
+                @if (catches.LastOrDefault() is { } latest)
+                {
+                    <p class="mb-0">@Caught(latest)</p>
+                }
+                else
+                {
+                    <p class="text-body-secondary mb-0">A new trap is up. Count it next time you look.</p>
+                }
+
+                @if (askTreatAgain && view.IsCheck)
+                {
+                    @* New ones on the trap while the case is only watched: offer to go back to treating *@
+                    <div class="trap-ask">
+                        <p>@(catches[^1].Caught == 1 ? "There's a new one" : "There are new ones") on the trap. Start treating again?</p>
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="FoundSomeAsync">Treat again</button>
+                        <button type="button" class="btn btn-link btn-sm" @onclick="() => askTreatAgain = false">Not now</button>
+                    </div>
+                }
+
+                @if (catches.Count(c => c.PerWeek is not null) > 1)
+                {
+                    <TrapChart Catches="catches" />
+                }
+            }
+        </section>
+    }
+
     <section class="detail-card">
-        <h2>@(treatments.Any(t => t.Kind == PestTreatmentKind.Checked) ? "Treatments and checks" : "Treatments")</h2>
+        <h2>@(treatments.Any(t => t.Kind != PestTreatmentKind.Treated) ? "Treatments and checks" : "Treatments")</h2>
         @if (treatments.Count == 0)
         {
             <p class="text-body-secondary mb-0">
@@ -186,8 +238,11 @@ else
 
     private PestCaseView? view;
     private IReadOnlyList<PestTreatment> treatments = [];
+    private IReadOnlyList<TrapCatch> catches = [];
     private bool loaded;
     private bool logging;
+    private bool counting;
+    private bool askTreatAgain;
     private bool confirmDelete;
 
     private DateOnly Today => Time.Today();
@@ -196,6 +251,8 @@ else
     {
         confirmDelete = false;
         logging = false;
+        counting = false;
+        askTreatAgain = false;
         await ReloadAsync();
         loaded = true;
     }
@@ -210,12 +267,48 @@ else
 
         var all = await Treatments.GetAllAsync();
         treatments = PestService.TreatmentsFor(all, item.Id);
+        catches = PestService.Catches(item, all);
         view = PestService.Describe(item, await PlantRepository.GetAllAsync(), all, Today);
+    }
+
+    private bool Trapped => treatments.Any(t => t.Kind == PestTreatmentKind.TrapCount);
+
+    // One sheet open at a time, so the page doesn't grow two forms
+    private void ToggleLogging()
+    {
+        logging = !logging;
+        counting = false;
+    }
+
+    private void StartCounting()
+    {
+        counting = true;
+        logging = false;
+        askTreatAgain = false;
+    }
+
+    private async Task CountedAsync()
+    {
+        counting = false;
+        var before = catches.Count;
+        await ReloadAsync();
+
+        // Only a count that added a catch can have found anything
+        askTreatAgain = catches.Count > before && catches[^1].Caught > 0;
+    }
+
+    private static string Caught(TrapCatch latest)
+    {
+        var text = $"{Labels.Count(latest.Caught, "new one", "new ones")} on the trap in {Labels.Count(latest.Days, "day")}";
+        return latest.PerWeek is { } perWeek ? $"{text}, about {Math.Round(perWeek):0} a week." : $"{text}.";
     }
 
     private static string What(PestTreatment treatment) => treatment switch
     {
         { Kind: PestTreatmentKind.Checked } => "Checked",
+        { Kind: PestTreatmentKind.TrapCount, OnTrap: { } onTrap } =>
+            $"Counted the trap: {onTrap} on it" + (treatment.NewTrap ? ", then put up a new one" : ""),
+        { Kind: PestTreatmentKind.TrapCount } => "Put up a new trap",
         { What: { } what } when !string.IsNullOrWhiteSpace(what) => what,
         _ => "Treated"
     };
@@ -228,6 +321,8 @@ else
         view.Case.Status = PestCaseStatus.Active;
         await Repository.SaveAsync(view.Case);
         await ReloadAsync();
+        askTreatAgain = false;
+        counting = false;
         logging = true;
     }
 

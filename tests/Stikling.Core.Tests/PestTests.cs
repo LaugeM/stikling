@@ -189,6 +189,126 @@ public class PestTests
         Assert.Contains("A check only has a date and notes.", check.Validate(Today));
     }
 
+    // Sticky traps
+
+    private static PestTreatment Trap(PestCase item, DateOnly on, int? onTrap, bool newTrap = false)
+    {
+        var count = PestService.StartTrapCount(item, on);
+        count.OnTrap = onTrap;
+        count.NewTrap = newTrap;
+        return count;
+    }
+
+    [Fact]
+    public void The_first_count_is_spread_over_the_days_since_the_case_started()
+    {
+        var item = Case(started: Today.AddDays(-14));
+
+        var caught = Assert.Single(PestService.Catches(item, [Trap(item, Today, 20)]));
+
+        Assert.Equal(20, caught.Caught);
+        Assert.Equal(14, caught.Days);
+        Assert.Equal(10, caught.PerWeek);
+    }
+
+    [Fact]
+    public void A_count_on_the_same_trap_only_counts_what_is_new()
+    {
+        var item = Case(started: Today.AddDays(-14));
+        var counts = new[] { Trap(item, Today.AddDays(-7), 12), Trap(item, Today, 15) };
+
+        var caught = PestService.Catches(item, counts);
+
+        Assert.Equal([12, 3], caught.Select(c => c.Caught));
+        Assert.Equal([7, 7], caught.Select(c => c.Days));
+    }
+
+    [Fact]
+    public void A_new_trap_after_counting_starts_the_next_count_from_nothing()
+    {
+        var item = Case(started: Today.AddDays(-14));
+        var counts = new[] { Trap(item, Today.AddDays(-7), 12, newTrap: true), Trap(item, Today, 5) };
+
+        Assert.Equal([12, 5], PestService.Catches(item, counts).Select(c => c.Caught));
+    }
+
+    [Fact]
+    public void Putting_up_a_trap_without_a_count_is_where_the_days_start()
+    {
+        var item = Case(started: Today.AddDays(-20));
+        var counts = new[] { Trap(item, Today.AddDays(-10), null, newTrap: true), Trap(item, Today, 4) };
+
+        var caught = Assert.Single(PestService.Catches(item, counts));
+
+        Assert.Equal(10, caught.Days);
+    }
+
+    [Fact]
+    public void A_lower_count_means_the_trap_was_swapped_and_all_of_it_is_new()
+    {
+        var item = Case(started: Today.AddDays(-14));
+        var counts = new[] { Trap(item, Today.AddDays(-7), 12), Trap(item, Today, 4) };
+
+        Assert.Equal(4, PestService.Catches(item, counts)[1].Caught);
+    }
+
+    [Fact]
+    public void A_count_on_the_day_the_case_started_has_no_weekly_rate()
+    {
+        var item = Case(started: Today);
+
+        Assert.Null(Assert.Single(PestService.Catches(item, [Trap(item, Today, 8)])).PerWeek);
+    }
+
+    [Fact]
+    public void A_trap_count_never_moves_the_next_treatment()
+    {
+        var item = Case(interval: 4, started: Today.AddDays(-10));
+        var treated = Treatment(item, Today.AddDays(-3));
+
+        var view = PestService.Describe(item, [], [treated, Trap(item, Today, 8)], Today);
+
+        Assert.Equal(Today.AddDays(1), view.NextDue);
+        Assert.Same(treated, view.Last);
+    }
+
+    [Fact]
+    public void On_a_case_being_watched_a_trap_count_is_the_weekly_check()
+    {
+        var item = Case(status: PestCaseStatus.Monitoring, started: Today.AddDays(-20));
+        var treated = Treatment(item, Today.AddDays(-9));
+
+        Assert.Equal(Today.AddDays(5), PestService.NextDue(item, [treated, Trap(item, Today.AddDays(-2), 0)]));
+    }
+
+    [Fact]
+    public void Only_putting_up_a_new_trap_is_not_a_check()
+    {
+        var item = Case(status: PestCaseStatus.Monitoring, started: Today.AddDays(-20));
+        var treated = Treatment(item, Today.AddDays(-9));
+
+        Assert.Equal(Today.AddDays(-2), PestService.NextDue(item, [treated, Trap(item, Today.AddDays(-2), null, newTrap: true)]));
+    }
+
+    [Fact]
+    public void A_trap_count_needs_a_count_or_a_new_trap()
+    {
+        var item = Case();
+
+        Assert.Contains("Fill in how many are on the trap, or that a new one went up.", Trap(item, Today, null).Validate(Today));
+        Assert.Empty(Trap(item, Today, 0).Validate(Today));
+        Assert.Empty(Trap(item, Today, null, newTrap: true).Validate(Today));
+    }
+
+    [Fact]
+    public void A_trap_count_has_nothing_from_a_treatment()
+    {
+        var count = Trap(Case(), Today, 3);
+        count.What = "Neem oil";
+
+        Assert.Contains("A trap count only has the count, a new trap, a date and notes.", count.Validate(Today));
+    }
+
     // What Today shows
 
     [Fact]

@@ -1,0 +1,47 @@
+@* The catch per week at each trap count, so a falling row of bars says the treatment is working.
+   Only the counts with days to spread over have a rate, and only the latest few are shown so
+   the bars stay wide enough to read on a phone. *@
+@using System.Globalization
+
+@if (points.Count > 0)
+{
+    <div class="trap-chart" role="img" aria-label="@Description">
+        @foreach (var point in points)
+        {
+            <div class="trap-bar">
+                <div class="trap-track">
+                    <span class="trap-fill" style="height: @Height(point)">
+                        <span class="trap-value">@Rounded(point)</span>
+                    </span>
+                </div>
+                <span class="trap-date">@point.On.ToString("d MMM", CultureInfo.InvariantCulture)</span>
+            </div>
+        }
+    </div>
+    <p class="trap-caption">Caught per week, worked out from each count.</p>
+}
+
+@code {
+    public const int Shown = 6;
+
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<TrapCatch> Catches { get; set; }
+
+    private IReadOnlyList<TrapCatch> points = [];
+    private double highest;
+
+    protected override void OnParametersSet()
+    {
+        points = Catches.Where(c => c.PerWeek is not null).TakeLast(Shown).ToList();
+        highest = points.Count == 0 ? 0 : points.Max(c => c.PerWeek!.Value);
+    }
+
+    private static int Rounded(TrapCatch point) => (int)Math.Round(point.PerWeek!.Value);
+
+    // A bar of nothing still shows a sliver, so a clean week reads as counted rather than missing
+    private string Height(TrapCatch point) =>
+        highest <= 0 ? "2%" : $"{Math.Max(2, point.PerWeek!.Value / highest * 100).ToString("0.#", CultureInfo.InvariantCulture)}%";
+
+    private string Description =>
+        "Caught per week: " + string.Join(", ", points.Select(p => $"{Rounded(p)} by {Labels.Date(p.On)}"));
+}

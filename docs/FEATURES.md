@@ -37,19 +37,18 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Sticky trap counts**, the last priority-4 row in the pest section. Spider mites don't fly, so they rarely end up on a trap, but thrips, fungus gnats and whitefly do.
-2. **Milestones, rooting aids, and on time or slow** for propagations. First root and first leaf give my corm experiment dates to compare, rooting aids let me see on the results page whether they made a difference, and a propagation still rooting can then say whether it is keeping up with my own average.
-3. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
-4. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished, and I want it in place before winter.
-5. **Needs attention, putting things off, and the photo reminder** on Today. All three are small, and together they make Today something I go through every day rather than only when a propagation is due.
-6. **Empty screens that say what to do next, and the FAQ page.** Someone new sees an empty app first, and the first person I showed the app to asked what propagation means.
-7. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-8. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-9. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-10. **Seed germination**: sown and germinated counts with their dates.
-11. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-12. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
-13. **Comparing photos side by side, and voice notes.**
+1. **Milestones, rooting aids, and on time or slow** for propagations. First root and first leaf give my corm experiment dates to compare, rooting aids let me see on the results page whether they made a difference, and a propagation still rooting can then say whether it is keeping up with my own average.
+2. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
+3. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished, and I want it in place before winter.
+4. **Needs attention, putting things off, and the photo reminder** on Today. All three are small, and together they make Today something I go through every day rather than only when a propagation is due.
+5. **Empty screens that say what to do next, and the FAQ page.** Someone new sees an empty app first, and the first person I showed the app to asked what propagation means.
+6. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+7. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+8. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+9. **Seed germination**: sown and germinated counts with their dates.
+10. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+11. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
+12. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
@@ -211,7 +210,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ☐ | A length for quarantine, e.g. two weeks. When it is up, Today says it is time to check the plant and let it out | 4 | S | v1.x |
 | ✅ | **Treatment recipes**, e.g. "Alcohol spray: isopropyl alcohol and a drop of dish soap, topped up with water". The ingredients are typed, each with an optional amount like 250 ml per 1 L, and there's a note on how to use it. "Mix a batch" works out the amounts for any size of bottle. Logging a treatment offers your recipes to pick from, and the treatment saves the recipe as it was that day, so changing the recipe doesn't rewrite history. Recipes are under Settings | 4 | M | v1.x |
 | ✅ | Pest overview: all active cases in one list | 4 | S | v1.x |
-| ☐ | **Sticky trap counts** on a pest case: count what's on a (blue/yellow) sticky trap and mark when a new one goes up, and the app works out how many were caught since last time. A small chart of the catch per week shows whether treatment is working | 4 | M | v1.x |
+| ✅ | **Sticky trap counts** on a pest case: count everything on a (blue/yellow) sticky trap and tick when a new one goes up, and the app works out how many were caught since last time. A small chart of the catch per week shows whether treatment is working. A count never moves the next treatment, but on a case being watched it counts as the weekly check, and new ones on the trap ask whether to start treating again | 4 | M | v1.x |
 | ◐ | Inspection log: "checked, no signs", so you can see how long a plant has been clean. Checks are logged on a case being watched, but not on a single plant outside a case | 5 | S | v1.x |
 | ☐ | **Check the neighbours**: opening a pest case lists other plants in the same room to inspect, with "last inspected" dates | 5 | S | v1.x |
 | ☐ | **Biological control log**: release dates for predatory mites and similar | 8 | S | v1.x |
