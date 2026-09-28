@@ -36,6 +36,10 @@ else
     [Parameter]
     public IReadOnlyList<PestCase> Pests { get; set; } = [];
 
+    /// <summary>Its room or spot, "Living room / Windowsill".</summary>
+    [Parameter]
+    public string? Location { get; set; }
+
     private string OriginText =>
         Plant.AcquiredOn is { } date
             ? $"{Labels.For(Plant.Origin)} {Labels.Date(date)}"
@@ -77,9 +81,9 @@ else
                     <span class="badge pest-badge">@Labels.For(pest.Pest)</span>
                 }
                 <span>@OriginText</span>
-                @if (!string.IsNullOrWhiteSpace(Plant.Location))
+                @if (!string.IsNullOrWhiteSpace(Location))
                 {
-                    <span>· @Plant.Location</span>
+                    <span>· @Location</span>
                 }
                 @if (Moisture is { } reading)
                 {

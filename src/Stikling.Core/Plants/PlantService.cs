@@ -35,12 +35,14 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 
     /// <summary>Saves an edited plant and records what changed (status, room, medium, pot).</summary>
     /// <param name="potName">Turns a pot id into its name, so the history can say which pot.</param>
+    /// <param name="placeName">The same for the room or spot, so the history can say where it went.</param>
     public async Task UpdateAsync(
         Plant before,
         Plant after,
         Func<Enum, string> label,
         Func<Guid, string?>? potName = null,
-        Func<Guid, string?>? mixName = null)
+        Func<Guid, string?>? mixName = null,
+        Func<Guid, string?>? placeName = null)
     {
         after.Tags = PlantTags.Normalize(after.Tags);
         // Only a plant that left can take pots, and only the ones it has
@@ -53,7 +55,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         }
         await plants.SaveAsync(after);
 
-        var changes = PlantChanges.Describe(before, after, label, potName, mixName);
+        var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName);
         if (changes.Count > 0)
             await AddChangeAsync(after.Id, string.Join("\n", changes));
     }

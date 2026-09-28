@@ -4,6 +4,7 @@
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
+@inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
@@ -252,7 +253,7 @@ else
                     }
 
                     <dt>Location</dt>
-                    <dd>@(string.IsNullOrWhiteSpace(propagation.Location) ? "Not set" : propagation.Location)</dd>
+                    <dd>@(places.NameOf(propagation.PlaceId) ?? "Not set")</dd>
 
                     @if (propagation.DormantSince is { } dormantSince)
                     {
@@ -345,6 +346,7 @@ else
     private Plant? parent;
     private IReadOnlyList<Plant> offspring = [];
     private IReadOnlyList<Room> rooms = [];
+    private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
 
@@ -423,7 +425,8 @@ else
         offspring = plants.Where(p => p.FromPropagationId == Id)
                           .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                           .ToList();
-        rooms = Room.List(plants, propagations);
+        places = await RoomService.GetPlacesAsync();
+        rooms = Room.List(places, plants, propagations);
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
     }
@@ -478,7 +481,7 @@ else
             // A propagation named only by nickname passes it on, since a plant needs a name
             Nickname = string.IsNullOrWhiteSpace(p.Genus) ? p.Nickname : null,
             Date = Today,
-            Location = p.Location,
+            Location = places.NameOf(p.PlaceId),
             Medium = p.Medium,
         };
         message = null;
@@ -503,8 +506,9 @@ else
         busy = true;
         try
         {
+            var placeId = await RoomService.PlaceIdAsync(potUp.Location);
             madePlants = await PropagationService.PotUpAsync(propagation, new PotUpRequest(
-                potUp.Count, potUp.Date, potUp.Nickname, potUp.Location, potUp.Medium, potUp.PotId, potUp.SoilMixId));
+                potUp.Count, potUp.Date, potUp.Nickname, placeId, potUp.Medium, potUp.PotId, potUp.SoilMixId));
             message = madePlants.Count == 1 ? "Potted up:" : $"Potted up {madePlants.Count}:";
             panel = Panel.None;
             await LoadAsync();

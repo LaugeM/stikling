@@ -6,6 +6,7 @@
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
 @inject PlantService PlantService
+@inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
@@ -182,7 +183,7 @@ else
                     </dd>
 
                     <dt>Location</dt>
-                    <dd>@(string.IsNullOrWhiteSpace(plant.Location) ? "Not set" : plant.Location)</dd>
+                    <dd>@(places.NameOf(plant.PlaceId) ?? "Not set")</dd>
 
                     <dt>Grows in</dt>
                     <dd>
@@ -357,6 +358,7 @@ else
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
     private MoistureReading? moisture;
     private IReadOnlyList<PestCase> pests = [];
+    private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
 
@@ -386,7 +388,8 @@ else
                 .ToList();
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
 
-            pests = PestService.CasesFor(plant, await PestCaseRepository.GetAllAsync());
+            places = await RoomService.GetPlacesAsync();
+            pests = PestService.CasesFor(plant, await PestCaseRepository.GetAllAsync(), places);
             pots = await PotRepository.GetAllAsync();
             mixes = await MixRepository.GetAllAsync();
 

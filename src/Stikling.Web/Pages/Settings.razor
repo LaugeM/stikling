@@ -74,9 +74,9 @@
             @foreach (var r in rooms)
             {
                 <li>
-                    @if (renaming == r.Name)
+                    @if (renaming == r.Id)
                     {
-                        <RoomRenameRow Name="@r.Name" Busy="busy" OnSave="name => RenameAsync(r.Name, name)" OnCancel="StopRenaming" />
+                        <RoomRenameRow Name="@r.Name" Busy="busy" OnSave="name => RenameAsync(r.Id, r.Name, name)" OnCancel="StopRenaming" />
                     }
                     else
                     {
@@ -84,17 +84,17 @@
                             <span class="room-name">@r.Name</span>
                             <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
                             <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
-                                    @onclick="() => renaming = r.Name">Rename</button>
+                                    @onclick="() => renaming = r.Id">Rename</button>
                         </div>
                     }
 
                     @foreach (var spot in r.Spots)
                     {
                         <div class="room-spot">
-                            @if (renaming == spot.Place)
+                            @if (renaming == spot.Id)
                             {
                                 <RoomRenameRow Name="@spot.Name" Busy="busy"
-                                               OnSave="name => RenameAsync(spot.Place, RoomName.Combine(r.Name, name))"
+                                               OnSave="name => RenameAsync(spot.Id, spot.Place, name)"
                                                OnCancel="StopRenaming" />
                             }
                             else
@@ -103,7 +103,7 @@
                                     <span class="room-name">@spot.Name</span>
                                     <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
                                     <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
-                                            @onclick="() => renaming = spot.Place">Rename</button>
+                                            @onclick="() => renaming = spot.Id">Rename</button>
                                 </div>
                             }
                         </div>
@@ -224,8 +224,9 @@
                 @Labels.Count(file.Data.Counts.Pots, "pot"),
                 @Labels.Count(file.Data.Counts.SoilMixes, "soil mix", "soil mixes"),
                 @Labels.Count(file.Data.Counts.Products, "product"),
-                @Labels.Count(file.Data.Counts.Feeds, "feed") and
-                @Labels.Count(file.Data.Counts.Recipes, "treatment recipe").
+                @Labels.Count(file.Data.Counts.Feeds, "feed"),
+                @Labels.Count(file.Data.Counts.Recipes, "treatment recipe") and
+                @Labels.Count(file.Data.Counts.Rooms, "room").
             </p>
             <p class="settings-hint">
                 Restoring adds what's missing here and brings back anything you've deleted since.
@@ -308,7 +309,7 @@
     private IReadOnlyList<ProductUse> products = [];
     private int feeds;
     private int recipes;
-    private string? renaming; // the whole place being renamed, e.g. "Living room / On top of the PC"
+    private Guid? renaming; // the room or spot being renamed
     private string? roomMessage;
     private DateOnly? lastBackup;
     private bool photoReminder;
@@ -382,12 +383,12 @@
         roomMessage = null;
     }
 
-    private async Task RenameAsync(string from, string? to)
+    private async Task RenameAsync(Guid id, string from, string? to)
     {
         busy = true;
         try
         {
-            var result = await RoomService.RenameAsync(from, to);
+            var result = await RoomService.RenameAsync(id, to);
             rooms = await RoomService.GetAllAsync();
             roomMessage = (result.Total, result.Merged) switch
             {

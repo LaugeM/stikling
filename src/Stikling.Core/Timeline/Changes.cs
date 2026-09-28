@@ -11,19 +11,21 @@ public static class PlantChanges
     /// <param name="label">Turns enum values into display text, e.g. Leca becomes "LECA".</param>
     /// <param name="potName">Turns a pot id into its name. Pots the caller can't name are left unsaid.</param>
     /// <param name="mixName">The same for a soil mix.</param>
+    /// <param name="placeName">The same for a room or spot, "Living room / Windowsill".</param>
     public static IReadOnlyList<string> Describe(
         Plant before,
         Plant after,
         Func<Enum, string> label,
         Func<Guid, string?>? potName = null,
-        Func<Guid, string?>? mixName = null)
+        Func<Guid, string?>? mixName = null,
+        Func<Guid, string?>? placeName = null)
     {
         var changes = new List<string>();
 
         if (before.Status != after.Status)
             changes.Add($"Status: {label(after.Status)} (was {label(before.Status)})");
 
-        ChangeText.AddLocation(changes, before.Location, after.Location);
+        ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
 
         var name = potName ?? (_ => null);
@@ -62,7 +64,11 @@ public static class PlantChanges
 /// <summary>The same kind of description for propagations ("Stage: Rooting (was Started)").</summary>
 public static class PropagationChanges
 {
-    public static IReadOnlyList<string> Describe(Propagation before, Propagation after, Func<Enum, string> label)
+    public static IReadOnlyList<string> Describe(
+        Propagation before,
+        Propagation after,
+        Func<Enum, string> label,
+        Func<Guid, string?>? placeName = null)
     {
         var changes = new List<string>();
 
@@ -72,7 +78,7 @@ public static class PropagationChanges
         if (before.InitialCount != after.InitialCount)
             changes.Add($"Count: {after.InitialCount} (was {before.InitialCount})");
 
-        ChangeText.AddLocation(changes, before.Location, after.Location);
+        ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
         ChangeText.AddContainer(changes, before.Container, after.Container, "New setup");
         AddMilestone(changes, before.FirstRootOn, after.FirstRootOn, after.DaysToFirstRoot, "First root");
@@ -101,15 +107,27 @@ public static class PropagationChanges
 
 internal static class ChangeText
 {
-    public static void AddLocation(List<string> changes, string? before, string? after)
+    /// <param name="name">Turns a place id into "Living room / Windowsill". A move to a place
+    /// it can't name is left unsaid.</param>
+    public static void AddLocation(List<string> changes, Guid? before, Guid? after, Func<Guid, string?>? name)
     {
-        if (!SameText(before, after))
-            changes.Add((Clean(before), Clean(after)) switch
-            {
-                (null, { } to) => $"Placed in {to}",
-                ({ } from, null) => $"Removed from {from}",
-                var (from, to) => $"Moved from {from} to {to}"
-            });
+        if (before == after)
+            return;
+
+        var from = before is { } b ? name?.Invoke(b) : null;
+        var to = after is { } a ? name?.Invoke(a) : null;
+
+        // Two ids with one name are a place and the one it was merged into, which is no move
+        if (after is not null && (to is null || SameText(from, to)))
+            return;
+
+        changes.Add((from, to) switch
+        {
+            (_, null) => $"Removed from {from ?? "its room"}",
+            (null, _) when before is null => $"Placed in {to}",
+            (null, _) => $"Moved to {to}",
+            _ => $"Moved from {from} to {to}"
+        });
     }
 
     public static void AddMedium(List<string> changes, GrowingMedium before, GrowingMedium after, Func<Enum, string> label)

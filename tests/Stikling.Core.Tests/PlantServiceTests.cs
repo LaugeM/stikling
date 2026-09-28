@@ -88,13 +88,14 @@ public class PlantServiceTests
     [Fact]
     public async Task Update_records_what_changed_in_one_entry()
     {
-        var plant = new Plant { Nickname = "Big alocasia", Location = "Living room" };
+        var places = new FakePlaceRepository();
+        var plant = new Plant { Nickname = "Big alocasia", PlaceId = places.IdOf("Living room") };
         await service.CreateAsync(plant);
         var before = plant.Copy();
-        plant.Location = "Bedroom";
+        plant.PlaceId = places.IdOf("Bedroom");
         plant.Medium = GrowingMedium.Leca;
 
-        await service.UpdateAsync(before, plant, Label);
+        await service.UpdateAsync(before, plant, Label, placeName: id => places.Current.NameOf(id));
 
         var change = timeline.Entries.Single(e => e.Kind == TimelineKind.Change);
         Assert.Equal("Moved from Living room to Bedroom\nNow grows in Leca (was Soil)", change.Text);

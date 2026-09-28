@@ -13,7 +13,8 @@ public sealed class Plant : Entity
     /// <summary>Named variety, e.g. "Thai Constellation".</summary>
     public string? Cultivar { get; set; }
 
-    public string? Location { get; set; }
+    /// <summary>The room or spot it stands in. See <see cref="Place"/>.</summary>
+    public Guid? PlaceId { get; set; }
 
     public PlantOrigin Origin { get; set; } = PlantOrigin.Purchased;
 

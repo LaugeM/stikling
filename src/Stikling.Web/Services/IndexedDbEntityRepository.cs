@@ -15,6 +15,9 @@ public abstract class IndexedDbEntityRepository<T>(IndexedDb db, TimeProvider ti
     public async Task<IReadOnlyList<T>> GetAllAsync() =>
         (await db.GetAllAsync<T>(store)).Where(e => !e.IsDeleted).ToList();
 
+    /// <summary>Everything in the store, deleted items too.</summary>
+    protected Task<List<T>> GetStoredAsync() => db.GetAllAsync<T>(store);
+
     public async Task<T?> GetAsync(Guid id)
     {
         var entity = await db.GetAsync<T>(store, id);

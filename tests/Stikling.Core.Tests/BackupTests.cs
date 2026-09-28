@@ -113,6 +113,7 @@ public class BackupTests
         var gone = Plant("Basil", Now);
         gone.DeletedAt = Now;
         var goneCase = new PestCase { DeletedAt = Now };
+        var living = new Place { Name = "Living room" };
 
         var data = new BackupData
         {
@@ -125,11 +126,13 @@ public class BackupTests
             SoilMixes = [new SoilMix { Name = "Chunky soil" }],
             Products = [new Product { Name = "Hydro fertiliser" }, new Product { Name = "Silica" }],
             Feeds = [new Feed { Name = "Aroid feed" }],
-            TreatmentRecipes = [new TreatmentRecipe { Name = "Alcohol spray" }, new TreatmentRecipe { DeletedAt = Now }]
+            TreatmentRecipes = [new TreatmentRecipe { Name = "Alcohol spray" }, new TreatmentRecipe { DeletedAt = Now }],
+            Places = [living, new Place { Name = "Windowsill", RoomId = living.Id }, new Place { Name = "Stue", DeletedAt = Now }]
         };
 
-        // The deleted plant is in the file, but it isn't something the restore brings back
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1), data.Counts);
+        // The deleted plant is in the file, but it isn't something the restore brings back.
+        // Spots aren't counted as rooms.
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -181,6 +184,19 @@ public class BackupTests
         Assert.Equal(6, restored.Owned);
         Assert.Equal(13, restored.TopCm);
         Assert.Equal(1, merged.Updated);
+    }
+
+    [Fact]
+    public void A_renamed_room_and_where_a_merged_one_went_survive_a_restore()
+    {
+        var living = new Place { Name = "living room", UpdatedAt = Now.AddDays(-3) };
+        var renamed = new Place { Id = living.Id, Name = "Living room", UpdatedAt = Now };
+        var stue = new Place { Name = "Stue", MergedIntoId = living.Id, DeletedAt = Now, UpdatedAt = Now };
+
+        var merged = BackupMerge.Merge([living], [renamed, stue]);
+
+        Assert.Equal("Living room", merged.ToSave.Single(p => p.Id == living.Id).Name);
+        Assert.Equal(living.Id, merged.ToSave.Single(p => p.Id == stue.Id).MergedIntoId);
     }
 
     [Fact]

@@ -5,6 +5,7 @@
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
 @inject PlantService PlantService
+@inject RoomService RoomService
 @inject PhotoService Photos
 @inject NavigationManager Navigation
 @inject TimeProvider Time
@@ -90,7 +91,7 @@ else
         <fieldset>
             <legend>Where it lives</legend>
             <div class="mb-3">
-                <RoomPicker @bind-Value="plant.Location" Rooms="rooms" />
+                <RoomPicker @bind-Value="location" Rooms="rooms" />
             </div>
             <div class="mb-3">
                 <label class="form-label" for="medium">Grows in</label>
@@ -277,6 +278,7 @@ else
     private List<string> errors = [];
     private IReadOnlyList<Plant> possibleParents = [];
     private IReadOnlyList<Room> rooms = [];
+    private string? location; // as picked, "Living room / Windowsill"; made into a room when saving
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
     private IReadOnlyList<string> tagSuggestions = [];
@@ -316,7 +318,8 @@ else
     protected override async Task OnParametersSetAsync()
     {
         var all = await Repository.GetAllAsync();
-        rooms = Room.List(all, await Propagations.GetAllAsync());
+        var places = await RoomService.GetPlacesAsync();
+        rooms = Room.List(places, all, await Propagations.GetAllAsync());
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
         tagSuggestions = PlantTags.Suggestions(all);
@@ -332,7 +335,7 @@ else
                 plant.Genus = parent.Genus;
                 plant.Species = parent.Species;
                 plant.Cultivar = parent.Cultivar;
-                plant.Location = parent.Location;
+                plant.PlaceId = parent.PlaceId;
             }
         }
         else
@@ -343,7 +346,10 @@ else
         }
 
         if (plant is not null)
+        {
+            location = places.NameOf(plant.PlaceId);
             possibleParents = PlantLineage.PossibleParents(plant, all);
+        }
     }
 
     private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
@@ -415,6 +421,7 @@ else
         saving = true;
         try
         {
+            plant.PlaceId = await RoomService.PlaceIdAsync(location);
             if (IsNew)
             {
                 await PlantService.CreateAsync(plant, photos);
@@ -422,7 +429,8 @@ else
             }
             else
             {
-                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName);
+                var places = await RoomService.GetPlacesAsync();
+                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName, id => places.NameOf(id));
             }
             Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
         }

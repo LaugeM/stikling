@@ -5,14 +5,18 @@ namespace Stikling.Core.Tests;
 
 public class PlantFilterTests
 {
-    private static readonly Plant Thai = new() { Genus = "Monstera", Species = "deliciosa", Cultivar = "Thai Constellation", Location = "Living room" };
-    private static readonly Plant Monstera = new() { Nickname = "Big Monstera", Genus = "Monstera", Species = "deliciosa", Location = "living room " };
-    private static readonly Plant Basil = new() { Nickname = "Kitchen basil", Genus = "Ocimum", Location = "Kitchen" };
+    private static readonly FakePlaceRepository Places = new();
+
+    private static readonly Plant Thai = new() { Genus = "Monstera", Species = "deliciosa", Cultivar = "Thai Constellation", PlaceId = Places.IdOf("Living room") };
+    private static readonly Plant Monstera = new() { Nickname = "Big Monstera", Genus = "Monstera", Species = "deliciosa", PlaceId = Places.IdOf("living room ") };
+    private static readonly Plant Basil = new() { Nickname = "Kitchen basil", Genus = "Ocimum", PlaceId = Places.IdOf("Kitchen") };
     private static readonly Plant DeadColeus = new() { Nickname = "Coleus", Status = PlantStatus.Died };
     private static readonly Plant GivenAway = new() { Nickname = "Pothos", Status = PlantStatus.GivenAway };
     private static readonly Plant Deleted = new() { Nickname = "Deleted", DeletedAt = DateTimeOffset.UnixEpoch };
 
     private static readonly Plant[] All = [Thai, Monstera, Basil, DeadColeus, GivenAway, Deleted];
+
+    private static IReadOnlySet<Guid> In(string place) => Places.Current.IdsIn(Places.IdOf(place));
 
     [Fact]
     public void Default_shows_active_plants_sorted_by_name()
@@ -57,9 +61,9 @@ public class PlantFilterTests
     }
 
     [Fact]
-    public void Location_filter_ignores_case_and_whitespace()
+    public void A_room_shows_the_plants_in_it()
     {
-        var result = new PlantFilter(Location: "LIVING ROOM").Apply(All).ToList();
+        var result = new PlantFilter(PlaceIds: In("Living room")).Apply(All).ToList();
 
         Assert.Equal([Monstera, Thai], result);
     }
@@ -67,9 +71,9 @@ public class PlantFilterTests
     [Fact]
     public void A_room_also_shows_what_sits_in_its_spots()
     {
-        var pc = new Plant { Nickname = "Pilea", Location = "Living room / On top of the PC" };
+        var pc = new Plant { Nickname = "Pilea", PlaceId = Places.IdOf("Living room / On top of the PC") };
 
-        var result = new PlantFilter(Location: "Living room").Apply([.. All, pc]).ToList();
+        var result = new PlantFilter(PlaceIds: In("Living room")).Apply([.. All, pc]).ToList();
 
         Assert.Equal([Monstera, Thai, pc], result);
     }
@@ -77,9 +81,9 @@ public class PlantFilterTests
     [Fact]
     public void A_spot_shows_only_what_sits_in_it()
     {
-        var pc = new Plant { Nickname = "Pilea", Location = "Living room / On top of the PC" };
+        var pc = new Plant { Nickname = "Pilea", PlaceId = Places.IdOf("Living room / On top of the PC") };
 
-        var result = new PlantFilter(Location: "Living room / On top of the PC").Apply([.. All, pc]).ToList();
+        var result = new PlantFilter(PlaceIds: In("Living room / On top of the PC")).Apply([.. All, pc]).ToList();
 
         Assert.Equal([pc], result);
     }

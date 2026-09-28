@@ -27,7 +27,8 @@ public sealed class Propagation : Entity
     /// <summary>Free text for the setup, e.g. "Humidity box" or "Glass jar".</summary>
     public string? Container { get; set; }
 
-    public string? Location { get; set; }
+    /// <summary>The room or spot it stands in. See <see cref="Place"/>.</summary>
+    public Guid? PlaceId { get; set; }
 
     /// <summary>
     /// Groups propagations started together so they can be compared, e.g. "Alocasia corm test"

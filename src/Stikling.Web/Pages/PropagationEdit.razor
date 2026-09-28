@@ -3,6 +3,7 @@
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
 @inject PropagationService PropagationService
+@inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
@@ -144,7 +145,7 @@ else
                 <div class="form-text">Give batches you started together the same name and they're compared side by side.</div>
             </div>
             <div class="mb-1">
-                <RoomPicker @bind-Value="propagation.Location" Rooms="rooms" SpotPlaceholder="e.g. Kitchen window" />
+                <RoomPicker @bind-Value="location" Rooms="rooms" SpotPlaceholder="e.g. Kitchen window" />
             </div>
         </fieldset>
 
@@ -221,6 +222,8 @@ else
     private List<string> errors = [];
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<Room> rooms = [];
+    private Places places = Places.None;
+    private string? location; // as picked, "Kitchen / Window"; made into a room when saving
     private IReadOnlyList<string> experiments = [];
 
     private bool IsNew => Id is null;
@@ -240,7 +243,8 @@ else
         var allPlants = await PlantRepository.GetAllAsync();
         var allPropagations = await Repository.GetAllAsync();
         plants = allPlants.OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
-        rooms = Room.List(allPlants, allPropagations);
+        places = await RoomService.GetPlacesAsync();
+        rooms = Room.List(places, allPlants, allPropagations);
         experiments = Experiments.Names(allPropagations);
 
         if (IsNew)
@@ -255,6 +259,8 @@ else
             original = propagation?.Copy();
             notFound = propagation is null;
         }
+
+        location = places.NameOf(propagation?.PlaceId);
     }
 
     private void ToggleAid(RootingAid aid)
@@ -279,8 +285,8 @@ else
             propagation.Species = filled.Species;
             propagation.Cultivar = filled.Cultivar;
         }
-        if (string.IsNullOrWhiteSpace(propagation.Location))
-            propagation.Location = parent.Location;
+        if (string.IsNullOrWhiteSpace(location))
+            location = places.NameOf(parent.PlaceId);
     }
 
     private async Task SaveAsync()
@@ -298,10 +304,16 @@ else
             if (propagation.ParentPlantId is not null)
                 propagation.Source = null;
 
+            propagation.PlaceId = await RoomService.PlaceIdAsync(location);
             if (IsNew)
+            {
                 await PropagationService.CreateAsync(propagation, Labels.For(propagation));
+            }
             else
-                await PropagationService.UpdateAsync(original!, propagation, Labels.For(propagation));
+            {
+                var named = await RoomService.GetPlacesAsync();
+                await PropagationService.UpdateAsync(original!, propagation, Labels.For(propagation), id => named.NameOf(id));
+            }
             Navigation.NavigateTo($"propagations/{propagation.Id}", replace: IsNew);
         }
         catch (Exception ex)

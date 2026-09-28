@@ -1,6 +1,7 @@
 @page "/plants"
 @inject IPlantRepository Repository
 @inject PlantService PlantService
+@inject RoomService RoomService
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject TimeProvider Time
@@ -63,7 +64,7 @@ else
                     <option value="">All rooms</option>
                     @foreach (var r in rooms)
                     {
-                        <option value="@r.Name">@r.Name</option>
+                        <option value="@r.Id">@r.Name</option>
                     }
                 </select>
             }
@@ -76,8 +77,8 @@ else
                         @onclick="() => PickSpot(null)">All of @picked.Name</button>
                 @foreach (var s in picked.Spots)
                 {
-                    <button type="button" class="room-chip @(RoomName.Same(s.Name, spot) ? "picked" : null)"
-                            @onclick="() => PickSpot(s.Name)">@s.Name</button>
+                    <button type="button" class="room-chip @(s.Id == spot ? "picked" : null)"
+                            @onclick="() => PickSpot(s.Id)">@s.Name</button>
                 }
             </div>
         }
@@ -142,7 +143,8 @@ else
             {
                 <li>
                     <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
-                               OnToggle="Toggle" Moisture="@MoistureFor(plant)" Pests="@PestsFor(plant)" />
+                               OnToggle="Toggle" Moisture="@MoistureFor(plant)" Pests="@PestsFor(plant)"
+                               Location="@places.NameOf(plant.PlaceId)" />
                 </li>
             }
         </ul>
@@ -236,12 +238,13 @@ else
 
     private IReadOnlyList<Plant>? all;
     private IReadOnlyList<Room> rooms = [];
+    private Places places = Places.None;
     private List<Plant> visible = [];
 
     private string? search;
     private StatusFilter status = StatusFilter.Active;
-    private string? room;
-    private string? spot;
+    private string? room; // the picked room's id, as the dropdown gives it
+    private Guid? spot;
     private IReadOnlyList<TagCount> tags = [];
     private readonly HashSet<string> pickedTags = new(StringComparer.OrdinalIgnoreCase);
     private bool quarantine;
@@ -274,7 +277,8 @@ else
     private async Task LoadAsync()
     {
         all = await Repository.GetAllAsync();
-        rooms = Room.List(all, []);
+        places = await RoomService.GetPlacesAsync();
+        rooms = Room.List(places, all, []);
         tags = PlantTags.InUse(all);
         careLogs = await CareLogRepository.GetAllAsync();
         pestCases = await PestCaseRepository.GetAllAsync();
@@ -290,7 +294,7 @@ else
     /// <summary>The room dropdown is worth showing once there's more than one place to choose.</summary>
     private bool HasRoomChoice => rooms.Count > 1 || rooms.Any(r => r.Spots.Count > 0);
 
-    private Room? PickedRoom => rooms.FirstOrDefault(r => RoomName.Same(r.Name, room));
+    private Room? PickedRoom => rooms.FirstOrDefault(r => r.Id.ToString() == room);
 
     // Spots belong to the room above them, so picking another room starts over
     private void RoomPicked()
@@ -299,9 +303,9 @@ else
         Refresh();
     }
 
-    private void PickSpot(string? name)
+    private void PickSpot(Guid? id)
     {
-        spot = name;
+        spot = id;
         Refresh();
     }
 
@@ -344,7 +348,8 @@ else
     }
 
     private void Refresh() =>
-        visible = new PlantFilter(search, status, RoomName.Combine(room, spot), pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant)
+        visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
+                pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant)
             .Apply(all ?? [])
             .ToList();
 
@@ -378,7 +383,10 @@ else
             selected.Add(plant.Id);
     }
 
-    private IReadOnlyList<PestCase> PestsFor(Plant plant) => PestService.CasesFor(plant, pestCases);
+    private IReadOnlyList<PestCase> PestsFor(Plant plant) => PestService.CasesFor(plant, pestCases, places);
+
+    /// <summary>The spot when one is picked, otherwise the room.</summary>
+    private Guid? PickedPlace => spot ?? PickedRoom?.Id;
 
     private MoistureReading? MoistureFor(Plant plant) =>
         CareSummary.LatestMoisture(careLogs, plant.Id, Time.Today());
