@@ -79,15 +79,51 @@ public class PlacesTests
         Assert.Null(Places.Find(shed.Id));
     }
 
-    [Fact]
-    public void Two_places_merged_into_each_other_dont_loop_forever()
+    private static void Merge(Place from, Place into)
     {
-        living.MergedIntoId = kitchen.Id;
-        living.DeletedAt = DateTimeOffset.UnixEpoch;
-        kitchen.MergedIntoId = living.Id;
-        kitchen.DeletedAt = DateTimeOffset.UnixEpoch;
+        from.MergedIntoId = into.Id;
+        from.DeletedAt = DateTimeOffset.UnixEpoch;
+    }
 
-        Assert.Null(Places.Find(living.Id));
+    [Fact]
+    public void Two_places_merged_into_each_other_keep_the_oldest()
+    {
+        // Each device merged the pair the other way, and the sync kept both merges
+        Merge(living, kitchen);
+        Merge(kitchen, living);
+
+        Assert.Same(living, Places.Find(living.Id));
+        Assert.Same(living, Places.Find(kitchen.Id));
+        Assert.Equal("Living room", Places.NameOf(kitchen.Id));
+        Assert.Equal([living], Places.Rooms);
+        Assert.Equal([windowsill], Places.SpotsIn(living.Id));
+    }
+
+    [Fact]
+    public void The_oldest_is_kept_whichever_place_in_a_loop_you_start_from()
+    {
+        var stue = repository.Add("Stue");
+        var hall = repository.Add("Hall");
+        Merge(hall, stue);
+        Merge(stue, kitchen);
+        Merge(kitchen, hall);
+
+        Assert.Same(kitchen, Places.Find(stue.Id));
+        Assert.Same(kitchen, Places.Find(hall.Id));
+        Assert.Same(kitchen, Places.Find(kitchen.Id));
+    }
+
+    [Fact]
+    public void A_place_merged_into_a_loop_leads_to_the_one_the_loop_keeps()
+    {
+        // Stue is older than both places in the loop, but it isn't part of it
+        var stue = repository.Add("Stue");
+        stue.CreatedAt = DateTimeOffset.UnixEpoch;
+        Merge(stue, kitchen);
+        Merge(kitchen, living);
+        Merge(living, kitchen);
+
+        Assert.Same(living, Places.Find(stue.Id));
     }
 
     [Fact]
