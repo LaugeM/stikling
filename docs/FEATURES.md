@@ -100,6 +100,7 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ☐ | Swipe through photos side by side to compare growth | 5 | M | v1.x |
 | ☐ | **Voice notes**: a microphone button on note fields using the phone's speech-to-text | 5 | S | v1.x |
 | ☐ | Measurements on an entry: number of leaves, height, root length | 6 | S | v1.x |
+| ☐ | **Growth curve**: a small chart of a plant's or propagation's measurements over time, once there are a few to draw | 7 | S | v1.x |
 | ☐ | **Share into Stikling**: the installed app appears in Android's share menu, so a photo from the gallery can go straight to a plant (Web Share Target) | 7 | M | v1.x |
 | ☐ | Time-lapse / before-and-after image from a plant's photos | 8 | L | v1.x |
 | ☐ | **Ghost overlay** when taking a photo: a faint copy of the previous photo to line up the same angle every time | 8 | L | v1.x |
@@ -123,6 +124,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **Experiments**: group propagations started together to compare mediums (the corm test: perlite vs sphagnum vs LECA vs corm riser) | 4 | M | v1.x |
 | ☐ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are enough finished propagations to compare with | 4 | S | v1.x |
 | ☐ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
+| ☐ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page can then compare with and without | 5 | S | v1.x |
 | ☐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
 | ☐ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
@@ -255,6 +257,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | Put something on Today off for 1, 3 or 7 days, or skip it this time, without logging anything | 5 | S | v1.x |
 | ☐ | **Photo reminder**: once a month, Today lists plants that haven't had a new photo in a month, so every plant's history keeps growing. Can be turned off | 5 | S | v1.x |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
+| ☐ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |
 
 ## 7. Data, backup & settings
 
