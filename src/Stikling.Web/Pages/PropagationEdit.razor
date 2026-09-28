@@ -136,6 +136,28 @@ else
             </div>
         </fieldset>
 
+        @* Only on one already going, to keep starting a propagation short *@
+        @if (!IsNew && propagation.IsActive)
+        {
+            <fieldset>
+                <legend>Dormancy</legend>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="dormant"
+                           checked="@propagation.IsDormant" @onchange="SetDormant" />
+                    <label class="form-check-label" for="dormant">Dormant</label>
+                </div>
+                @if (propagation.IsDormant)
+                {
+                    <div class="mt-2">
+                        <label class="form-label" for="dormant-since">Since</label>
+                        <InputDate id="dormant-since" class="form-control" @bind-Value="propagation.DormantSince"
+                                   max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                }
+                <div class="form-text">Resting rather than stuck, e.g. a corm waiting out the winter. It won't come up on Today to be checked on until it wakes up.</div>
+            </fieldset>
+        }
+
         <fieldset>
             <legend>Notes</legend>
             <InputTextArea class="form-control" rows="3" @bind-Value="propagation.Notes" aria-label="Notes" />
@@ -202,6 +224,9 @@ else
         }
     }
 
+    private void SetDormant(ChangeEventArgs e) =>
+        propagation!.DormantSince = (bool?)e.Value == true ? original?.DormantSince ?? Today : null;
+
     // Picking a parent fills in empty name fields from it
     private void ParentChanged()
     {
@@ -224,7 +249,7 @@ else
         if (propagation is null)
             return;
 
-        errors = propagation.Validate().ToList();
+        errors = propagation.Validate(Today).ToList();
         if (errors.Count > 0)
             return;
 

@@ -37,8 +37,7 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Dormancy status**, so a resting plant doesn't look dead or keep showing up to be checked on.
-2. **Treatment recipes and sticky trap counts**, the two priority-4 rows left in the pest section.
+1. **Treatment recipes and sticky trap counts**, the two priority-4 rows left in the pest section.
 
 ### Cheap ones to slot in whenever
 
@@ -65,7 +64,7 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ✅ | Tags (e.g. "variegated", "rare", "for swap") and a tag filter. Picking several tags narrows the list to plants that have all of them, the search finds tags too, and a tag on a plant's page opens the list filtered by it | 3 | S | v1.x |
 | ☐ | Rename or merge a tag everywhere at once, the way rooms can be in Settings | 6 | S | v1.x |
 | ◐ | Select several plants at once: change status, log care, add a note or tags to all. Moving them all to a room isn't built | 4 | M | v1.x |
-| ☐ | **Dormancy status**: e.g. alocasias dropping leaves in winter. Pauses "check on it" reminders and keeps the plant from looking dead | 4 | S | v1.x |
+| ✅ | **Dormancy status** for plants and propagations, e.g. an alocasia dropping its leaves in winter or a corm sitting still. A badge and the day it went dormant show it's resting rather than dead, the plant list has a "Dormant" filter, and going dormant and waking up are recorded on the history. A dormant propagation doesn't come up on Today to be checked on. Dormancy ends by itself when a plant dies or leaves, or a propagation finishes | 4 | S | v1.x |
 | ☐ | Sort options: name, newest, room, last activity | 5 | S | v1.x |
 | ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | 5 | S | v1.x |
 | ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | 5 | M | v1.x |

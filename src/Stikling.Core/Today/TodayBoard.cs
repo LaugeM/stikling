@@ -13,7 +13,8 @@ public static class TodayBoard
 
     /// <summary>
     /// Active propagations with nothing written down for a while, the longest wait first.
-    /// A propagation with no history yet counts from the day it was started.
+    /// A propagation with no history yet counts from the day it was started. A dormant one is
+    /// left out, since there is nothing to see until it wakes up.
     /// </summary>
     public static IReadOnlyList<PropagationCheck> NeedsChecking(
         IEnumerable<Propagation> propagations,
@@ -24,7 +25,7 @@ public static class TodayBoard
         var today = time.Today();
         var checks = new List<PropagationCheck>();
 
-        foreach (var propagation in propagations.Where(p => !p.IsDeleted && p.IsActive))
+        foreach (var propagation in propagations.Where(p => !p.IsDeleted && p.IsActive && !p.IsDormant))
         {
             var lastSeen = latestPerSubject.TryGetValue(propagation.Id, out var entry)
                 ? Later(time.LocalDay(entry.OccurredAt), propagation.StartedOn)

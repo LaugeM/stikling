@@ -101,13 +101,13 @@ public class PropagationTests
     [Fact]
     public void Validate_requires_a_name_and_a_sensible_count()
     {
-        Assert.Contains("Give the propagation a nickname or a genus.", new Propagation().Validate());
-        Assert.Contains("Start with at least 1.", new Propagation { Genus = "Coleus", InitialCount = 0 }.Validate());
+        Assert.Contains("Give the propagation a nickname or a genus.", new Propagation().Validate(DateOnly.MaxValue));
+        Assert.Contains("Start with at least 1.", new Propagation { Genus = "Coleus", InitialCount = 0 }.Validate(DateOnly.MaxValue));
 
         var corms = Batch(3);
         corms.RecordPottedUp(2);
         corms.InitialCount = 1;
-        Assert.Contains("The count can't be lower than the 2 already potted up or failed.", corms.Validate());
+        Assert.Contains("The count can't be lower than the 2 already potted up or failed.", corms.Validate(DateOnly.MaxValue));
     }
 
     [Fact]

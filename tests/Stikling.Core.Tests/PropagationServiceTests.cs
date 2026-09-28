@@ -58,7 +58,7 @@ public class PropagationServiceTests
         var cutting = service.StartFrom(new Plant { Nickname = "Kitchen basil" });
 
         Assert.Equal("Kitchen basil", cutting.Nickname);
-        Assert.Empty(cutting.Validate());
+        Assert.Empty(cutting.Validate(Today));
     }
 
     [Fact]
