@@ -29,6 +29,18 @@ A new IndexedDB store touches more places than the model and its page, and missi
 - Enums are stored as text, so backups stay readable and reordering the values can't change what old data means.
 - Restoring a backup merges instead of replacing. A newer version wins, deletions in the backup carry over, and anything deleted here comes back if the backup still has it.
 
+## Keep it ready for sync
+
+The app will move to hosting at some point, with accounts and sync between devices, so people don't have to move backups around by hand. Nothing for that is built yet, but new code should be written so it won't have to be redone:
+
+- Anything that belongs to the person is an `Entity` in its own store behind a repository. That includes settings they would expect on every device. localStorage (`DeviceFiles`) is only for things that really belong to one device, like the theme.
+- All writes go through the repositories, so `UpdatedAt` is always set. Nothing is ever hard deleted.
+- Records point at each other by id, never by name or position in a list.
+- When two devices can change the same thing, prefer adding a record (a log entry) over changing a total or a list inside another record. When the newest version of a record wins, one of the two edits is lost.
+- Expect what a merge can produce: two pots with the same name, a record whose parent was deleted on another device, records arriving in any order. Checking uniqueness when saving isn't enough.
+- Anything the app creates on its own, like defaults or starter data, needs a fixed id. Otherwise every device makes its own copy.
+- Code that only works in a browser stays behind a service like `DeviceFiles` or `PhotoService`, never in a page.
+
 ## The Help page
 
 `Pages/Help.razor` answers the questions someone new asks, and has a few answers for each part of the app. It has to describe the app as it is. When a change adds or changes a feature, update the answers it affects in the same pull request, and add one when the feature raises a question of its own. Check the empty states on the screens involved too, since they tell a new user what to do next and go stale the same way.
