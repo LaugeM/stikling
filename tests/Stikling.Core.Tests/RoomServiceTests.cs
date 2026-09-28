@@ -179,6 +179,24 @@ public class RoomServiceTests
     }
 
     [Fact]
+    public async Task A_spot_whose_room_was_deleted_can_still_be_renamed()
+    {
+        // The room was deleted on another device, without being merged into anything
+        var shed = places.Add("Shed");
+        var shelf = places.Add("Shelf", shed);
+        places.Add("Bench", shed);
+        var plant = AddPlant("Pilea", shelf);
+        await places.DeleteAsync(shed.Id);
+
+        var result = await Service.RenameAsync(shelf.Id, "Bench");
+
+        Assert.False(result.Merged);
+        Assert.Equal(1, result.Plants);
+        Assert.Equal("Bench", NameOf(plant.PlaceId));
+        Assert.Same(shelf, Places.Find(plant.PlaceId));
+    }
+
+    [Fact]
     public async Task A_spot_can_be_renamed_without_touching_the_rest_of_the_room()
     {
         var living = places.Add("Living room");

@@ -60,9 +60,11 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
         var plantCount = (await plants.GetAllAsync()).Count(p => all.IsIn(p.PlaceId, place.Id));
         var propagationCount = (await propagations.GetAllAsync()).Count(p => all.IsIn(p.PlaceId, place.Id));
 
-        var existing = place.IsSpot
-            ? all.SpotNamed(all.RoomOf(place.Id)!.Id, renamed.Name)
-            : all.RoomNamed(renamed.Name);
+        // A spot whose room was deleted on another device has no room to look for a twin in, so
+        // it's only renamed
+        var existing = !place.IsSpot ? all.RoomNamed(renamed.Name)
+            : all.RoomOf(place.Id) is { } room ? all.SpotNamed(room.Id, renamed.Name)
+            : null;
 
         if (existing is null || existing.Id == place.Id)
         {
