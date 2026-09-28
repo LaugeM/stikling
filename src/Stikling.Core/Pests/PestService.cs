@@ -75,15 +75,15 @@ public static class PestService
     /// <summary>
     /// When the next treatment is due: the last treatment's own date if one was set, otherwise
     /// the last treatment plus the case's interval, otherwise the day the case started plus the
-    /// interval. A case being watched is due a check a week after the last treatment or check
-    /// instead. A resolved case is never due.
+    /// interval. A case being watched is due a check a week after the last treatment, check or
+    /// trap count instead. A resolved case is never due.
     /// </summary>
     public static DateOnly? NextDue(PestCase item, IEnumerable<PestTreatment> treatments)
     {
         if (!item.IsOpen)
             return null;
 
-        var last = TreatmentsFor(treatments, item.Id).FirstOrDefault();
+        var last = LastFor(item, treatments);
         var since = last?.OccurredOn ?? item.StartedOn;
 
         if (item.Status == PestCaseStatus.Monitoring)
@@ -103,7 +103,7 @@ public static class PestService
         return new PestCaseView(
             item,
             PlantsIn(item, plants),
-            TreatmentsFor(treatments, item.Id).FirstOrDefault(),
+            LastFor(item, treatments),
             next,
             next is { } due ? due.DayNumber - today.DayNumber : null);
     }
@@ -169,6 +169,55 @@ public static class PestService
     /// <summary>A blank check for a case being watched, dated today.</summary>
     public static PestTreatment StartCheck(PestCase item, DateOnly today) =>
         new() { CaseId = item.Id, OccurredOn = today, Kind = PestTreatmentKind.Checked };
+
+    /// <summary>A blank trap count for a case, dated today.</summary>
+    public static PestTreatment StartTrapCount(PestCase item, DateOnly today) =>
+        new() { CaseId = item.Id, OccurredOn = today, Kind = PestTreatmentKind.TrapCount };
+
+    /// <summary>
+    /// What each trap count caught, oldest first. A count is everything on the trap, so what's
+    /// new is the count less what was on it last time, or all of it when a new trap went up in
+    /// between. The days run from the last count or new trap, or from the day the case started
+    /// when there hasn't been one. A count lower than the last one means the trap was swapped
+    /// without saying so, and the whole count is taken as new.
+    /// </summary>
+    public static IReadOnlyList<TrapCatch> Catches(PestCase item, IEnumerable<PestTreatment> treatments)
+    {
+        var catches = new List<TrapCatch>();
+        var since = item.StartedOn;
+        var onTrap = 0;
+
+        var counts = TreatmentsFor(treatments, item.Id)
+            .Where(t => t.Kind == PestTreatmentKind.TrapCount)
+            .Reverse();
+
+        foreach (var count in counts)
+        {
+            if (count.OnTrap is { } total)
+            {
+                var caught = total >= onTrap ? total - onTrap : total;
+                catches.Add(new TrapCatch(count, caught, Math.Max(0, count.OccurredOn.DayNumber - since.DayNumber)));
+                onTrap = total;
+            }
+
+            if (count.NewTrap)
+                onTrap = 0;
+
+            since = count.OccurredOn;
+        }
+
+        return catches;
+    }
+
+    /// <summary>
+    /// The latest treatment or check, which is what the next one is counted from. A trap count
+    /// never moves a treatment along, but on a case being watched a count is a look for pests
+    /// like any other, so it counts as the weekly check. Only putting a new trap up doesn't.
+    /// </summary>
+    private static PestTreatment? LastFor(PestCase item, IEnumerable<PestTreatment> treatments) =>
+        TreatmentsFor(treatments, item.Id).FirstOrDefault(t =>
+            t.Kind != PestTreatmentKind.TrapCount
+            || (item.Status == PestCaseStatus.Monitoring && t.OnTrap is not null));
 
     private static bool Covers(PestCase item, Plant plant) => item.Scope switch
     {

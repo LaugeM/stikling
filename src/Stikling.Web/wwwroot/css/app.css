@@ -996,6 +996,91 @@ a.tag-label:hover {
     color: var(--pa-alert);
 }
 
+.trap-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.trap-head h2 {
+    margin: 0;
+}
+
+/* Asking whether new ones on a trap mean treating again: a panel awaiting a decision */
+.trap-ask {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--pa-green);
+    border-radius: 0.6rem;
+}
+
+.trap-ask p {
+    margin-bottom: 0.5rem;
+}
+
+/* The catch per week. Bars are pests, so they are the pest red */
+.trap-chart {
+    margin-top: 1rem;
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+    height: 8rem;
+}
+
+.trap-bar {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* The top padding keeps room for the number over the tallest bar */
+.trap-track {
+    flex: 1;
+    width: 100%;
+    padding-top: 1.3rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.trap-fill {
+    position: relative;
+    width: 100%;
+    max-width: 2.5rem;
+    background: var(--pa-alert);
+    border-radius: 0.3rem 0.3rem 0 0;
+}
+
+.trap-value {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--pa-font-display);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.trap-date {
+    margin-top: 0.3rem;
+    color: var(--pa-muted);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.trap-caption {
+    margin: 0.5rem 0 0;
+    color: var(--pa-muted);
+    font-size: 0.875rem;
+}
+
 /* Picking the plants a case covers: a plain list of checkbox cards */
 .pick-list {
     max-height: 18rem;
