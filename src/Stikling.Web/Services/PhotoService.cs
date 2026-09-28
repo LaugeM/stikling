@@ -5,7 +5,30 @@ using Stikling.Core.Timeline;
 
 namespace Stikling.Web.Services;
 
-public sealed record PhotoSaveResult(IReadOnlyList<Photo> Saved, int Failed);
+/// <param name="Undated">Photos with no date of their own, whose day is only a guess.</param>
+public sealed record PhotoSaveResult(IReadOnlyList<Photo> Saved, int Failed, int Undated)
+{
+    /// <summary>
+    /// What to tell the user afterwards, or null when all went well. The guessed days are left out
+    /// when they don't matter: a fresh camera photo is taken now, and a day picked by hand dates them all.
+    /// </summary>
+    public string? Message(bool guessesMatter)
+    {
+        var lines = new List<string>();
+
+        if (Failed > 0)
+            lines.Add(Failed == 1
+                ? "1 file couldn't be read as an image and was skipped."
+                : $"{Failed} files couldn't be read as images and were skipped.");
+
+        if (Undated > 0 && guessesMatter)
+            lines.Add(Undated == 1
+                ? "1 photo had no date saved in it, so its day is a guess. Check that it landed on the right day."
+                : $"{Undated} photos had no date saved in them, so their days are a guess. Check that they landed on the right days.");
+
+        return lines.Count == 0 ? null : string.Join(" ", lines);
+    }
+}
 
 /// <summary>
 /// Saves and shows photos. Image data is handled by wwwroot/js/photos.js;
@@ -15,7 +38,7 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
 {
     internal const string ModulePath = "./js/photos.js";
 
-    private sealed record SavedFile(string Id, int Width, int Height, DateTimeOffset TakenAt);
+    private sealed record SavedFile(string Id, int Width, int Height, string? CameraDate, string? FileName, DateTimeOffset FileDate);
     private sealed record SaveResponse(List<SavedFile> Saved, int Failed);
 
     private Task<IJSObjectReference>? module;
@@ -27,18 +50,21 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     public async Task<PhotoSaveResult> SaveFromInputAsync(ElementReference input, SubjectType subjectType, Guid subjectId)
     {
         var response = await (await Module).InvokeAsync<SaveResponse>("saveFromInput", input);
-        var now = time.GetUtcNow();
         var saved = new List<Photo>();
+        var undated = 0;
 
         foreach (var file in response.Saved)
         {
+            var (takenAt, source) = PhotoDates.Pick(file.CameraDate, file.FileName, file.FileDate, time);
+            if (source != PhotoDateSource.Camera)
+                undated++;
+
             var photo = new Photo
             {
                 Id = Guid.Parse(file.Id),
                 SubjectType = subjectType,
                 SubjectId = subjectId,
-                // A future file date means a wrong device clock; fall back to now
-                TakenAt = file.TakenAt > now ? now : file.TakenAt,
+                TakenAt = takenAt,
                 Width = file.Width,
                 Height = file.Height
             };
@@ -46,7 +72,7 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
             saved.Add(photo);
         }
 
-        return new PhotoSaveResult(saved, response.Failed);
+        return new PhotoSaveResult(saved, response.Failed, undated);
     }
 
     /// <summary>An address usable in &lt;img src&gt;, or null if the photo is missing.</summary>

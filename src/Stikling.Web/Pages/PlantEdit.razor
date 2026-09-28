@@ -200,14 +200,14 @@ else
                         Camera
                     </label>
                     <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
-                           @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput)" disabled="@busy" />
+                           @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
 
                     <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
                         Gallery
                     </label>
                     <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
-                           @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput)" disabled="@busy" />
+                           @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
                 </div>
 
                 <div class="form-text">The first photo becomes the cover. You can add more later on the plant's page.</div>
@@ -321,7 +321,7 @@ else
             possibleParents = PlantLineage.PossibleParents(plant, all);
     }
 
-    private async Task AddPhotosAsync(ElementReference input)
+    private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
     {
         if (plant is null)
             return;
@@ -334,12 +334,7 @@ else
         {
             var result = await Photos.SaveFromInputAsync(input, SubjectType.Plant, plant.Id);
             photos.AddRange(result.Saved);
-            photoStatus = result.Failed switch
-            {
-                0 => null,
-                1 => "1 file couldn't be read as an image and was skipped.",
-                var n => $"{n} files couldn't be read as images and were skipped."
-            };
+            photoStatus = result.Message(guessesMatter: !fromCamera);
         }
         catch (Exception ex)
         {

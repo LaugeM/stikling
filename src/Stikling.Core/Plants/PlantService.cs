@@ -11,12 +11,12 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 {
     /// <summary>
     /// Saves a new plant and records "Added to collection". Photos taken while adding it start
-    /// its history, and the first one becomes the cover.
+    /// its history on the days they were taken, and the newest one becomes the cover.
     /// </summary>
     public async Task CreateAsync(Plant plant, IReadOnlyList<Photo>? photos = null)
     {
         if (photos is { Count: > 0 })
-            plant.CoverPhotoId ??= photos[0].Id;
+            plant.CoverPhotoId ??= PhotoEntries.Cover(photos).Id;
 
         plant.Tags = PlantTags.Normalize(plant.Tags);
         await plants.SaveAsync(plant);
@@ -29,17 +29,8 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             Text = FirstEntryText(plant)
         });
 
-        if (photos is { Count: > 0 })
-        {
-            await timeline.AddAsync(new TimelineEntry
-            {
-                SubjectType = SubjectType.Plant,
-                SubjectId = plant.Id,
-                Kind = TimelineKind.Photo,
-                OccurredAt = photos.Max(p => p.TakenAt),
-                PhotoIds = photos.Select(p => p.Id).ToList()
-            });
-        }
+        foreach (var entry in PhotoEntries.For(SubjectType.Plant, plant.Id, photos ?? [], time))
+            await timeline.AddAsync(entry);
     }
 
     /// <summary>Saves an edited plant and records what changed (status, room, medium, pot).</summary>

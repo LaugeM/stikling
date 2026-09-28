@@ -173,7 +173,7 @@ public class TimelineOrderTests
         var morning = At("2026-09-02T08:00:00Z", "morning");
         var earlier = At("2026-08-30T12:00:00Z", "earlier");
 
-        var days = TimelineOrder.ByDay([lateEvening, morning, earlier], TimeSpan.FromHours(2));
+        var days = TimelineOrder.ByDay([lateEvening, morning, earlier], new FixedTime(DateTimeOffset.UnixEpoch, TimeSpan.FromHours(2)));
 
         Assert.Equal([new DateOnly(2026, 9, 2), new DateOnly(2026, 8, 30)], days.Select(d => d.Day));
         Assert.Equal(["morning", "late"], days[0].Entries.Select(e => e.Text));
@@ -368,5 +368,49 @@ public class TimelineCorrectionTests
 
         Assert.False(TimelineService.CanCorrect(entry));
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.CorrectAsync(entry, "Moved", new DateOnly(2026, 9, 20)));
+    }
+}
+
+public class TimelineAddPhotosTests
+{
+    private static readonly DateTimeOffset Now = DateTimeOffset.Parse("2026-09-26T15:00:00Z");
+
+    private readonly FakeTimelineRepository timeline = new();
+    private readonly FakePhotoRepository photos = new();
+    private readonly TimelineService service;
+    private readonly Guid subject = Guid.NewGuid();
+
+    public TimelineAddPhotosTests() => service = new TimelineService(timeline, photos, new FixedTime(Now));
+
+    private Photo Saved(string takenAt)
+    {
+        var photo = new Photo { SubjectId = subject, TakenAt = DateTimeOffset.Parse(takenAt) };
+        photos.Photos[photo.Id] = photo;
+        return photo;
+    }
+
+    [Fact]
+    public async Task Old_photos_land_on_the_days_they_were_taken()
+    {
+        var added = new[] { Saved("2024-03-01T09:00:00Z"), Saved("2025-06-10T08:00:00Z") };
+
+        await service.AddPhotosAsync(SubjectType.Plant, subject, added);
+
+        Assert.Equal(2, timeline.Entries.Count);
+        Assert.Equal(
+            [DateTimeOffset.Parse("2024-03-01T09:00:00Z"), DateTimeOffset.Parse("2025-06-10T08:00:00Z")],
+            timeline.Entries.Select(e => e.OccurredAt).Order());
+    }
+
+    [Fact]
+    public async Task A_day_picked_by_hand_dates_every_photo_and_keeps_them_together()
+    {
+        var added = new[] { Saved("2024-03-01T09:00:00Z"), Saved("2025-06-10T08:00:00Z") };
+
+        await service.AddPhotosAsync(SubjectType.Plant, subject, added, day: new DateOnly(2026, 9, 1));
+
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Equal(DateTimeOffset.Parse("2026-09-01T12:00:00Z"), entry.OccurredAt);
+        Assert.All(added, p => Assert.Equal(entry.OccurredAt, photos.Photos[p.Id].TakenAt));
     }
 }

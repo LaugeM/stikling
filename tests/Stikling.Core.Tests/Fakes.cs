@@ -164,14 +164,15 @@ internal sealed class FakePhotoRepository : IPhotoRepository
 
 /// <summary>A clock that always returns the same moment.</summary>
 /// <param name="offset">The device's time zone. UTC unless a test is about time zones.</param>
-internal sealed class FixedTime(DateTimeOffset now, TimeSpan offset = default) : TimeProvider
+/// <param name="zone">A real time zone instead, for tests about summer time.</param>
+internal sealed class FixedTime(DateTimeOffset now, TimeSpan offset = default, TimeZoneInfo? zone = null) : TimeProvider
 {
     public override DateTimeOffset GetUtcNow() => now;
 
     // A fixed zone keeps "today" the same on every machine the tests run on
-    public override TimeZoneInfo LocalTimeZone { get; } = offset == TimeSpan.Zero
+    public override TimeZoneInfo LocalTimeZone { get; } = zone ?? (offset == TimeSpan.Zero
         ? TimeZoneInfo.Utc
-        : TimeZoneInfo.CreateCustomTimeZone("Test", offset, "Test", "Test");
+        : TimeZoneInfo.CreateCustomTimeZone("Test", offset, "Test", "Test"));
 }
 
 internal sealed class FakePotRepository : IPotRepository

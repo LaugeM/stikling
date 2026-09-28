@@ -2,9 +2,33 @@ using Stikling.Core.Models;
 
 namespace Stikling.Core.Timeline;
 
-/// <summary>Correcting the notes and photos on a plant's or propagation's history.</summary>
+/// <summary>Adding and correcting the notes and photos on a plant's or propagation's history.</summary>
 public sealed class TimelineService(ITimelineRepository timeline, IPhotoRepository photos, TimeProvider time)
 {
+    /// <summary>
+    /// Puts newly saved photos on the history, split by the day each was taken unless there is a
+    /// note (see <see cref="PhotoEntries.For"/>). A <paramref name="day"/> picked by hand dates
+    /// all of them, and they go on one entry.
+    /// </summary>
+    public async Task<IReadOnlyList<TimelineEntry>> AddPhotosAsync(
+        SubjectType subjectType, Guid subjectId, IReadOnlyList<Photo> added, string? note = null, DateOnly? day = null)
+    {
+        if (day is { } d)
+        {
+            var moment = time.MomentOn(d);
+            foreach (var photo in added)
+            {
+                photo.TakenAt = moment;
+                await photos.UpdateAsync(photo);
+            }
+        }
+
+        var entries = PhotoEntries.For(subjectType, subjectId, added, time, note);
+        foreach (var entry in entries)
+            await timeline.AddAsync(entry);
+        return entries;
+    }
+
     /// <summary>
     /// Only what the user wrote can be corrected. Automatic entries copy something stored
     /// elsewhere (a stage date, a care log), so they are fixed there instead.
