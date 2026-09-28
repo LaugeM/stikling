@@ -73,6 +73,7 @@ public sealed class PropagationService(
     public async Task UpdateAsync(Propagation before, Propagation after, Func<Enum, string> label)
     {
         after.SyncStageWithCounts();
+        after.NoteFirstRoot();
         after.NoteRooted(Today);
         await propagations.SaveAsync(after);
 
@@ -88,6 +89,14 @@ public sealed class PropagationService(
             return;
         var before = propagation.Copy();
         propagation.DormantSince = since;
+        await UpdateAsync(before, propagation, label);
+    }
+
+    /// <summary>Records that the first root or leaf showed today.</summary>
+    public async Task RecordMilestoneAsync(Propagation propagation, Milestone milestone, Func<Enum, string> label)
+    {
+        var before = propagation.Copy();
+        propagation.RecordMilestone(milestone, Today);
         await UpdateAsync(before, propagation, label);
     }
 

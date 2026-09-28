@@ -33,6 +33,12 @@ public sealed record PropagationResult<TKey>(
     public int? SlowestDaysToRoot => DaysToRoot.Count == 0 ? null : DaysToRoot[^1];
 }
 
+/// <summary>The batches that used a rooting aid next to all the batches that didn't.</summary>
+public sealed record RootingAidResult(
+    RootingAid Aid,
+    PropagationResult<string> With,
+    PropagationResult<string> Without);
+
 /// <summary>
 /// Success rate and days to root per medium and per type, worked out from the counts and the
 /// rooted date every propagation already keeps. Deleted propagations are left out.
@@ -46,6 +52,25 @@ public static class PropagationResults
     /// <summary>One row per type that has been used, the most used first.</summary>
     public static IReadOnlyList<PropagationResult<PropagationType>> ByType(IEnumerable<Propagation> propagations) =>
         By(propagations, p => p.Type);
+
+    /// <summary>
+    /// One row per rooting aid that has been used, the most used first, each compared with
+    /// every batch that went without it.
+    /// </summary>
+    public static IReadOnlyList<RootingAidResult> ByRootingAid(IEnumerable<Propagation> propagations)
+    {
+        var counted = Counted(propagations).ToList();
+        return Enum.GetValues<RootingAid>()
+            .Select(aid => (Aid: aid, With: counted.Where(p => p.RootingAids.Contains(aid)).ToList()))
+            .Where(group => group.With.Count > 0)
+            .OrderByDescending(group => group.With.Count)
+            .ThenBy(group => group.Aid)
+            .Select(group => new RootingAidResult(
+                group.Aid,
+                Result("With", group.With),
+                Result("Without", counted.Where(p => !p.RootingAids.Contains(group.Aid)).ToList())))
+            .ToList();
+    }
 
     /// <summary>Everything together, or null when there are no propagations.</summary>
     public static PropagationResult<string>? Overall(IEnumerable<Propagation> propagations)

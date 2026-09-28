@@ -591,6 +591,25 @@ a.item-card:active {
     font-weight: 600;
 }
 
+/* Whether a propagation that hasn't rooted is keeping up with earlier batches. Running
+   behind counts as overdue, so slow takes the alert colour. */
+.pace-on-time {
+    color: var(--pa-green-dark);
+    font-weight: 600;
+}
+
+.pace-slow {
+    color: var(--pa-alert);
+    font-weight: 600;
+}
+
+.experiment-milestones {
+    flex: 1 0 100%;
+    order: 4;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
 .experiment-outcome {
     flex: 1 0 100%;
     order: 4;

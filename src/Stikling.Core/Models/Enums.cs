@@ -76,6 +76,21 @@ public enum PropagationType
 }
 
 /// <summary>
+/// Something used to help a propagation root, so the results page can compare batches with
+/// and without it. More than one can be used at once.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<RootingAid>))]
+public enum RootingAid
+{
+    RootingPowder,
+    RootingGel,
+    Cinnamon,
+    WillowWater,
+    HumidityDome,
+    HeatMat
+}
+
+/// <summary>
 /// How far a propagation has come. Started, Rooting and Rooted are set by hand; Done and
 /// Failed are set automatically once every unit has been potted up or has failed.
 /// </summary>

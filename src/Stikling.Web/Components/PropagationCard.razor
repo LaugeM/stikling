@@ -34,6 +34,10 @@
                 {
                     <span>· @Propagation.RemainingCount left</span>
                 }
+                @if (Pace is { IsSlow: true })
+                {
+                    <span class="pace-slow">· slower than usual</span>
+                }
             }
             else
             {
@@ -55,6 +59,13 @@
     /// <summary>Shown as "from Big alocasia" when set.</summary>
     [Parameter]
     public string? ParentName { get; set; }
+
+    /// <summary>
+    /// How it's doing against earlier batches. Only a slow one says so on the card, since
+    /// "on time" on every card would be noise.
+    /// </summary>
+    [Parameter]
+    public RootingPace? Pace { get; set; }
 
     /// <summary>Show the stage as a badge (lists that aren't already grouped by stage).</summary>
     [Parameter]

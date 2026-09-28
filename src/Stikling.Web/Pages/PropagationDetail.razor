@@ -217,6 +217,22 @@ else
                     <dt>Started</dt>
                     <dd>@Labels.Date(propagation.StartedOn) · @Labels.Age(propagation, Today)</dd>
 
+                    @if (Pace is { } pace)
+                    {
+                        <dt>Timing</dt>
+                        <dd>
+                            <span class="@(pace.IsSlow ? "pace-slow" : "pace-on-time")">@(pace.IsSlow ? "Slower than usual" : "On time")</span>
+                            <div class="text-body-secondary small">
+                                @Labels.Count(pace.Compared, "earlier batch", "earlier batches") of @Labels.For(propagation.Type).ToLowerInvariant()
+                                in @Labels.For(propagation.Medium) @Labels.Stage(PropagationStage.Rooted, propagation.Type).ToLowerInvariant()
+                                in @Labels.Count(pace.UsualDays, "day") on average.
+                            </div>
+                        </dd>
+                    }
+
+                    @MilestoneRow(Milestone.FirstRoot, "First root", propagation.FirstRootOn, propagation.DaysToFirstRoot)
+                    @MilestoneRow(Milestone.FirstLeaf, "First leaf", propagation.FirstLeafOn, propagation.DaysToFirstLeaf)
+
                     <dt>Count</dt>
                     <dd>@CountText</dd>
 
@@ -228,6 +244,12 @@ else
                             <text> · @propagation.Container</text>
                         }
                     </dd>
+
+                    @if (propagation.RootingAids.Count > 0)
+                    {
+                        <dt>Rooting aids</dt>
+                        <dd>@string.Join(", ", propagation.RootingAids.Order().Select(Labels.For))</dd>
+                    }
 
                     <dt>Location</dt>
                     <dd>@(string.IsNullOrWhiteSpace(propagation.Location) ? "Not set" : propagation.Location)</dd>
@@ -319,6 +341,7 @@ else
         [PropagationStage.Started, PropagationStage.Rooting, PropagationStage.Rooted];
 
     private Propagation? propagation;
+    private IReadOnlyList<Propagation> allPropagations = [];
     private Plant? parent;
     private IReadOnlyList<Plant> offspring = [];
     private IReadOnlyList<Room> rooms = [];
@@ -341,6 +364,28 @@ else
     private IReadOnlyList<Plant> madePlants = [];
 
     private DateOnly Today => Time.Today();
+
+    private RootingPace? Pace => propagation is null ? null : RootingPace.For(propagation, allPropagations, Today);
+
+    // The date once it's happened; until then a button for today, while it's still going
+    private RenderFragment MilestoneRow(Milestone milestone, string name, DateOnly? date, int? days) => __builder =>
+    {
+        if (date is null && !propagation!.IsActive)
+            return;
+        <dt>@name</dt>
+        <dd>
+            @if (date is { } on)
+            {
+                @($"{Labels.Date(on)} · day {days}")
+            }
+            else
+            {
+                <span class="text-body-secondary">Not yet</span>
+                <button type="button" class="btn btn-link btn-sm p-0 ms-2 align-baseline" disabled="@busy"
+                        @onclick="() => RecordMilestoneAsync(milestone)">Saw it today</button>
+            }
+        </dd>
+    };
 
     private string CountText
     {
@@ -373,7 +418,7 @@ else
     {
         propagation = await Repository.GetAsync(Id);
         var plants = await PlantRepository.GetAllAsync();
-        var propagations = await Repository.GetAllAsync();
+        var propagations = allPropagations = await Repository.GetAllAsync();
         parent = propagation?.ParentPlantId is { } parentId ? plants.FirstOrDefault(p => p.Id == parentId) : null;
         offspring = plants.Where(p => p.FromPropagationId == Id)
                           .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
@@ -394,6 +439,17 @@ else
             return;
         busy = true;
         await PropagationService.SetStageAsync(propagation, stage, Labels.For(propagation));
+        message = null;
+        historyVersion++;
+        busy = false;
+    }
+
+    private async Task RecordMilestoneAsync(Milestone milestone)
+    {
+        if (propagation is null)
+            return;
+        busy = true;
+        await PropagationService.RecordMilestoneAsync(propagation, milestone, Labels.For(propagation));
         message = null;
         historyVersion++;
         busy = false;

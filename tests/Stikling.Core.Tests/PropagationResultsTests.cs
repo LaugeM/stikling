@@ -164,4 +164,32 @@ public class PropagationResultsTests
         Assert.Equal(4, overall.Growing);
         Assert.Equal([12], overall.DaysToRoot);
     }
+
+    [Fact]
+    public void Each_rooting_aid_is_compared_with_the_batches_without_it()
+    {
+        var cinnamon = Batch(GrowingMedium.Leca, count: 2, pottedUp: 2);
+        cinnamon.RootingAids = [RootingAid.Cinnamon, RootingAid.HeatMat];
+        var alsoCinnamon = Batch(GrowingMedium.Water, stage: PropagationStage.Rooted, rootedAfterDays: 8);
+        alsoCinnamon.RootingAids = [RootingAid.Cinnamon];
+        var without = Batch(GrowingMedium.Leca, count: 2, failed: 1, pottedUp: 1);
+
+        var results = PropagationResults.ByRootingAid([cinnamon, alsoCinnamon, without]);
+
+        // The most used first, and aids nobody used are left out
+        Assert.Equal([RootingAid.Cinnamon, RootingAid.HeatMat], results.Select(r => r.Aid));
+
+        var first = results[0];
+        Assert.Equal(2, first.With.Batches);
+        Assert.Equal(1.0, first.With.SuccessRate);
+        Assert.Equal([8], first.With.DaysToRoot);
+        Assert.Equal(1, first.Without.Batches);
+        Assert.Equal(0.5, first.Without.SuccessRate);
+
+        Assert.Equal(2, results[1].Without.Batches);
+    }
+
+    [Fact]
+    public void No_rooting_aid_rows_when_none_were_used() =>
+        Assert.Empty(PropagationResults.ByRootingAid([Batch(GrowingMedium.Leca)]));
 }

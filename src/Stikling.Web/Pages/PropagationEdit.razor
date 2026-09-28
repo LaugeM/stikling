@@ -120,6 +120,18 @@ else
                 </div>
             </div>
             <div class="mb-3">
+                <span class="form-label d-block" id="aids-label">Rooting aids</span>
+                <div class="chip-row" role="group" aria-labelledby="aids-label">
+                    @foreach (var aid in Enum.GetValues<RootingAid>())
+                    {
+                        var picked = propagation.RootingAids.Contains(aid);
+                        <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                @onclick="() => ToggleAid(aid)">@Labels.For(aid)</button>
+                    }
+                </div>
+                <div class="form-text">Optional. Pick what you used and the results page compares batches with and without it.</div>
+            </div>
+            <div class="mb-3">
                 <label class="form-label" for="experiment">Experiment</label>
                 <InputText id="experiment" class="form-control" @bind-Value="propagation.Experiment" list="experiment-list"
                            placeholder="e.g. Alocasia corm test" autocomplete="off" />
@@ -135,6 +147,27 @@ else
                 <RoomPicker @bind-Value="propagation.Location" Rooms="rooms" SpotPlaceholder="e.g. Kitchen window" />
             </div>
         </fieldset>
+
+        @* Not when starting one, since nothing has shown yet *@
+        @if (!IsNew)
+        {
+            <fieldset>
+                <legend>Milestones</legend>
+                <div class="row g-2 mb-1">
+                    <div class="col-6">
+                        <label class="form-label" for="first-root">First root</label>
+                        <InputDate id="first-root" class="form-control" @bind-Value="propagation.FirstRootOn"
+                                   min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="first-leaf">First leaf</label>
+                        <InputDate id="first-leaf" class="form-control" @bind-Value="propagation.FirstLeafOn"
+                                   min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+                <div class="form-text">The day you first saw a root or a new leaf. Leave them empty until it happens.</div>
+            </fieldset>
+        }
 
         @* Only on one already going, to keep starting a propagation short *@
         @if (!IsNew && propagation.IsActive)
@@ -222,6 +255,12 @@ else
             original = propagation?.Copy();
             notFound = propagation is null;
         }
+    }
+
+    private void ToggleAid(RootingAid aid)
+    {
+        if (!propagation!.RootingAids.Remove(aid))
+            propagation.RootingAids.Add(aid);
     }
 
     private void SetDormant(ChangeEventArgs e) =>

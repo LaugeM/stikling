@@ -78,7 +78,13 @@ else
                             }
                             else
                             {
-                                <span class="experiment-result">@(Labels.Stage(entry.Propagation.Stage, entry.Propagation.Type)) · day @entry.DaysRunning</span>
+                                <span class="experiment-result">
+                                    @(Labels.Stage(entry.Propagation.Stage, entry.Propagation.Type)) · day @entry.DaysRunning
+                                    @if (Pace(entry.Propagation) is { IsSlow: true })
+                                    {
+                                        <span class="pace-slow"> · slow</span>
+                                    }
+                                </span>
                             }
                             @if (BarDays(entry) is { } barDays)
                             {
@@ -86,6 +92,10 @@ else
                                 <span class="experiment-bar @(entry.DaysToRoot is null ? "running" : null)" aria-hidden="true">
                                     <span style="--share: @share"></span>
                                 </span>
+                            }
+                            @if (Milestones(entry.Propagation) is { } milestones)
+                            {
+                                <span class="experiment-milestones">@milestones</span>
                             }
                             @if (entry.Propagation.PottedUpCount > 0 || entry.Propagation.FailedCount > 0)
                             {
@@ -107,7 +117,7 @@ else
                 <ul class="item-list">
                     @foreach (var propagation in items)
                     {
-                        <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" /></li>
+                        <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" Pace="@Pace(propagation)" /></li>
                     }
                 </ul>
             </section>
@@ -118,7 +128,7 @@ else
         <ul class="item-list">
             @foreach (var propagation in ungrouped)
             {
-                <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" /></li>
+                <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" Pace="@Pace(propagation)" /></li>
             }
         </ul>
     }
@@ -175,6 +185,23 @@ else
     // rooting gets no bar, since its count of days stopped meaning anything.
     private static int? BarDays(ExperimentEntry entry) =>
         entry.DaysToRoot ?? (entry.Propagation.IsActive ? entry.DaysRunning : null);
+
+    // Compared with every propagation, not only the ones the filter shows
+    private RootingPace? Pace(Propagation propagation) => RootingPace.For(propagation, all ?? [], Time.Today());
+
+    // "First root day 8 · first leaf day 20", so the batches in an experiment compare on more than rooting
+    private static string? Milestones(Propagation propagation)
+    {
+        var parts = new List<string>(2);
+        if (propagation.DaysToFirstRoot is { } root)
+            parts.Add($"first root day {root}");
+        if (propagation.DaysToFirstLeaf is { } leaf)
+            parts.Add($"first leaf day {leaf}");
+        if (parts.Count == 0)
+            return null;
+        var text = string.Join(" · ", parts);
+        return char.ToUpperInvariant(text[0]) + text[1..];
+    }
 
     private string? ParentName(Propagation propagation) =>
         propagation.ParentPlantId is { } id && plants.TryGetValue(id, out var parent) ? parent.DisplayName : null;
