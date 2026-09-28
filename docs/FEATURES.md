@@ -70,14 +70,20 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once | 5 | S | v1.x |
 | ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | 5 | M | v1.x |
 | ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | 5 | M | v1.x |
+| ☐ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
 | ☐ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
 | ☐ | Grid view with large photos as an alternative to the list | 6 | S | v1.x |
+| ☐ | Group the plant list by genus, with an A to Z jump for long lists | 6 | S | v1.x |
+| ☐ | **Collection numbers**: an optional short number per plant, e.g. 117, to write on the pot. Its propagations get 117a, 117b and so on, so a label on a jar says where the cutting came from | 6 | M | v1.x |
+| ☐ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 6 | M | v1.x |
+| ☐ | **Why it died**: an optional note on the cause when a plant is marked as died, and a list of the plants that died and why, to look over before buying the same plant again | 6 | S | v1.x |
 | ◐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline. Built for the aroids (Araceae): every genus and species from Kew's checklist, the old names, and a starter list of cultivars. Other families, common names, family and native region, and a page to browse it aren't built. See `tools/plant-names` | 6 | L | v1.x |
 | ✅ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary and the names already on your plants and propagations, including hybrids and named varieties. An old name offers the one it goes by now, and a cultivar fills in its genus and species. Anything not on the list can still be typed | 6 | M | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
+| ☐ | **Wishlist**: plants you want, with notes on where to find them and what you liked about them. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
 | ☐ | Duplicate a plant (e.g. a second basil pot) | 7 | S | v1.x |
 | ☐ | Purchase price per plant | 7 | S | v1.x |
-| ☐ | Wishlist: plants you want, with notes on where to find them | 8 | M | v1.x |
+| ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 7 | M | v1.x |
 
 ## 2. Photos & timeline
 
@@ -116,6 +122,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | "Check on it" reminder in the app: a propagation not looked at for X days shows on Today | 2 | S | M5 |
 | ✅ | Success rate and average days-to-root per medium and per type, on a results page linked from Propagations. Success is counted in units, and a unit has made it once it's potted up or its batch has rooted | 3 | S | v1.x |
 | ✅ | **Experiments**: group propagations started together to compare mediums (the corm test: perlite vs sphagnum vs LECA vs corm riser) | 4 | M | v1.x |
+| ☐ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are enough finished propagations to compare with | 4 | S | v1.x |
 | ☐ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
 | ☐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
@@ -135,6 +142,7 @@ For people who pollinate their own plants and raise the seedlings. A cross is tw
 | ☐ | Seedlings from a cross keep both parents, so the family tree shows where a hybrid came from | 7 | M | v1.x |
 | ☐ | A working name for the cross, used on the seedlings until they earn a real one | 7 | S | v1.x |
 | ☐ | Cross log: every cross in one list with what came of it, so the ones worth repeating stand out | 8 | S | v1.x |
+| ☐ | Traits on parents and seedlings, e.g. dark new leaves or silver splash, to see which parent passes what on | 8 | S | v1.x |
 | ☐ | **Pollen store**: what is in the freezer, from which plant and when it was collected, since pollen doesn't keep forever | 8 | M | v1.x |
 | ☐ | A plant coming into flower shows on Today together with the pollen you have stored for it | 8 | M | v1.x |
 | ☐ | Compare the seedlings from one cross side by side, to pick the keepers | 8 | M | v1.x |
@@ -244,6 +252,9 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Recent activity feed | 5 | S | M5 |
 | ✅ | Pest treatments due or overdue, and checks due on cases being watched | 3 | S | v1.x |
 | ☐ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
+| ☐ | **Needs attention**: flag a plant with a reason ("repot soon", "look closer") and it stays on Today until the flag is cleared | 4 | S | v1.x |
+| ☐ | Put something on Today off for 1, 3 or 7 days, or skip it this time, without logging anything | 5 | S | v1.x |
+| ☐ | **Photo reminder**: once a month, Today lists plants that haven't had a new photo in a month, so every plant's history keeps growing. Can be turned off | 5 | S | v1.x |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
 
 ## 7. Data, backup & settings
@@ -258,6 +269,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Rooms list in Settings: rename a room or a spot everywhere at once, and merge two names for the same room | 2 | M | v1.x |
 | ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
 | ☐ | "What's new" page and app version in Settings. Entries are written by hand in plain language for the people using the app, not generated from commit or pull request titles | 5 | S | v1.x |
+| ☐ | **Import from a spreadsheet**: a CSV of plants from Excel or Google Sheets, with each column matched to a field, so a list kept somewhere else doesn't have to be typed in again | 5 | M | v1.x |
 | ☐ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
 | ☐ | Units and date format settings | 7 | M | v1.x |
 | ☐ | Danish translation | 7 | L | v1.x |
