@@ -32,6 +32,19 @@
 </section>
 
 <section class="settings-section">
+    <h2>Today</h2>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="photo-reminder"
+               checked="@photoReminder" @onchange="SetPhotoReminderAsync" />
+        <label class="form-check-label" for="photo-reminder">Monthly photo reminder</label>
+    </div>
+    <p class="settings-hint">
+        Once a month, Today lists the plants and propagations that haven't had a photo yet that month,
+        so every history keeps growing.
+    </p>
+</section>
+
+<section class="settings-section">
     <h2>Rooms</h2>
     <p class="settings-hint">
         Rooms come from where your plants and propagations are. Renaming one here changes it everywhere,
@@ -285,6 +298,7 @@
     private string? renaming; // the whole place being renamed, e.g. "Living room / On top of the PC"
     private string? roomMessage;
     private DateOnly? lastBackup;
+    private bool photoReminder;
     private StorageEstimate? storage;
     private IReadOnlyList<NameSource> nameSources = [];
     private PendingRestore? pending;
@@ -298,6 +312,7 @@
         Theme.Changed += OnThemeChanged;
         mode = await Theme.GetModeAsync();
         lastBackup = await Files.GetLastBackupAsync();
+        photoReminder = await Files.GetPhotoReminderAsync();
         storage = await Db.EstimateAsync();
         rooms = await RoomService.GetAllAsync();
         pots = await PotService.GetAllAsync();
@@ -306,6 +321,12 @@
         feeds = (await FeedRepository.GetAllAsync()).Count;
         recipes = (await RecipeRepository.GetAllAsync()).Count;
         nameSources = (await PlantNames.GetDictionaryAsync()).Sources;
+    }
+
+    private async Task SetPhotoReminderAsync(ChangeEventArgs e)
+    {
+        photoReminder = e.Value is true;
+        await Files.SetPhotoReminderAsync(photoReminder);
     }
 
     /// <summary>"6 pots, 2 free", for the line linking to the pot library.</summary>

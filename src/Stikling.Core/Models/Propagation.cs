@@ -61,6 +61,9 @@ public sealed class Propagation : Entity
     [JsonIgnore]
     public bool IsDormant => DormantSince is not null;
 
+    /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
+    public Attention? Attention { get; set; }
+
     /// <summary>Units still in the propagation (not potted up and not failed).</summary>
     [JsonIgnore]
     public int RemainingCount => InitialCount - PottedUpCount - FailedCount;
@@ -137,7 +140,7 @@ public sealed class Propagation : Entity
     /// <summary>
     /// Nothing left: it's done if anything was potted up, otherwise it failed. Units left on a
     /// finished propagation (the count was raised when editing) open it again. A finished
-    /// propagation isn't resting any more, so it stops being dormant.
+    /// propagation isn't resting any more, so it stops being dormant, and nothing is left to do for it.
     /// </summary>
     public void SyncStageWithCounts()
     {
@@ -145,6 +148,7 @@ public sealed class Propagation : Entity
         {
             Stage = PottedUpCount > 0 ? PropagationStage.Done : PropagationStage.Failed;
             DormantSince = null;
+            Attention = null;
         }
         else if (!IsActive)
             Stage = PropagationStage.Started;

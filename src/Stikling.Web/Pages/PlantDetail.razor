@@ -61,7 +61,14 @@ else
     <div class="detail-actions">
         <a class="btn btn-primary" href="plants/@plant.Id/edit">Edit</a>
         <a class="btn btn-outline-primary" href="propagations/new?parent=@plant.Id">Propagate</a>
+        @if (plant.Attention is null && plant.Status == PlantStatus.Active && !flagging)
+        {
+            <button type="button" class="btn btn-link" @onclick="() => flagging = true">Flag</button>
+        }
     </div>
+
+    <AttentionPanel Current="plant.Attention" @bind-Editing="flagging" Suggestions="AttentionPanel.PlantReasons"
+                    OnSave="SetAttentionAsync" />
 
     <div class="detail-tabs" role="tablist" aria-label="Plant sections">
         <button type="button" role="tab" id="tab-info" aria-controls="panel-info" aria-selected="@(tab == "info")"
@@ -337,6 +344,7 @@ else
     private Plant? plant;
     private bool loaded;
     private bool confirmDelete;
+    private bool flagging;
     private string tab = "info";
     private IReadOnlyList<Plant> ancestors = [];
     private IReadOnlyList<Plant> offspring = [];
@@ -359,6 +367,7 @@ else
     protected override async Task OnParametersSetAsync()
     {
         confirmDelete = false;
+        flagging = false;
         tab = Tab is "history" or "props" or "care" ? Tab : "info";
 
         var all = await Repository.GetAllAsync();
@@ -410,6 +419,13 @@ else
     }
 
     private string TagLink(string tag) => $"plants?tag={Uri.EscapeDataString(tag)}";
+
+    private async Task SetAttentionAsync(string? reason)
+    {
+        if (plant is null)
+            return;
+        await PlantService.SetAttentionAsync(plant, reason);
+    }
 
     private async Task EndQuarantineAsync()
     {

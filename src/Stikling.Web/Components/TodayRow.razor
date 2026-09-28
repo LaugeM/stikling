@@ -1,0 +1,76 @@
+@* A row on Today that can be put off for a while without logging anything, and ticked off
+   from here when it's something that can be done. The choices open under the row. *@
+
+<li class="today-row">
+    <div class="today-row-main">
+        @ChildContent
+        @if (OnDone.HasDelegate)
+        {
+            <button type="button" class="row-btn" title="Done" aria-label="Done" disabled="@busy" @onclick="DoneAsync">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+            </button>
+        }
+        <button type="button" class="row-btn @(choosing ? "open" : null)" title="Put off" aria-label="Put off"
+                aria-expanded="@(choosing ? "true" : "false")" disabled="@busy" @onclick="() => choosing = !choosing">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
+        </button>
+    </div>
+    @if (choosing)
+    {
+        <div class="put-off" role="group" aria-label="Put off until">
+            <span class="put-off-label">Put off</span>
+            @foreach (var days in PutOffs.Days)
+            {
+                <button type="button" class="chip" disabled="@busy" @onclick="() => PutOffAsync(days)">@Label(days)</button>
+            }
+            @if (SkipLabel is not null)
+            {
+                <button type="button" class="chip" disabled="@busy" @onclick="SkipAsync">@SkipLabel</button>
+            }
+        </div>
+    }
+</li>
+
+@code {
+    [Parameter, EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+
+    /// <summary>Puts it off for this many days.</summary>
+    [Parameter]
+    public EventCallback<int> OnPutOff { get; set; }
+
+    /// <summary>Marks it done. No tick is shown without it.</summary>
+    [Parameter]
+    public EventCallback OnDone { get; set; }
+
+    /// <summary>A further choice after the days, e.g. "Skip this month". Needs <see cref="OnSkip"/>.</summary>
+    [Parameter]
+    public string? SkipLabel { get; set; }
+
+    [Parameter]
+    public EventCallback OnSkip { get; set; }
+
+    private bool choosing;
+    private bool busy;
+
+    private static string Label(int days) => days switch
+    {
+        1 => "Tomorrow",
+        7 => "A week",
+        _ => $"{days} days"
+    };
+
+    private Task PutOffAsync(int days) => RunAsync(() => OnPutOff.InvokeAsync(days));
+
+    private Task SkipAsync() => RunAsync(OnSkip.InvokeAsync);
+
+    private Task DoneAsync() => RunAsync(OnDone.InvokeAsync);
+
+    private async Task RunAsync(Func<Task> action)
+    {
+        busy = true;
+        await action();
+        busy = false;
+        choosing = false;
+    }
+}

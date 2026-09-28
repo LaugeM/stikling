@@ -5,6 +5,10 @@ namespace Stikling.Core.Today;
 /// <summary>A propagation that hasn't been looked at for a while.</summary>
 public sealed record PropagationCheck(Propagation Propagation, DateOnly LastSeen, int DaysSince);
 
+/// <summary>A plant or propagation flagged as needing something.</summary>
+/// <param name="Subject">The <see cref="Plant"/> or <see cref="Propagation"/>.</param>
+public sealed record AttentionItem(Entity Subject, string Name, Attention Attention);
+
 /// <summary>What the Today screen shows.</summary>
 public static class TodayBoard
 {
@@ -41,6 +45,20 @@ public static class TodayBoard
             .ThenBy(c => c.Propagation.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
     }
+
+    /// <summary>
+    /// Plants in the collection and propagations still going that are flagged as needing
+    /// something, the longest waiting first. A dormant one stays, since it was flagged on purpose.
+    /// </summary>
+    public static IReadOnlyList<AttentionItem> NeedsAttention(
+        IEnumerable<Plant> plants, IEnumerable<Propagation> propagations) =>
+        plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.Attention is not null)
+            .Select(p => new AttentionItem(p, p.DisplayName, p.Attention!))
+            .Concat(propagations.Where(p => !p.IsDeleted && p.IsActive && p.Attention is not null)
+                .Select(p => new AttentionItem(p, p.DisplayName, p.Attention!)))
+            .OrderBy(i => i.Attention.Since)
+            .ThenBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
 
     /// <summary>
     /// The newest entries across the given plants and propagations. Anything written down about a

@@ -3,9 +3,12 @@
 @inject IPlantRepository Plants
 @inject IPropagationRepository Propagations
 @inject ITimelineRepository Entries
+@inject IPhotoRepository PhotoRepository
 @inject IPestCaseRepository PestCases
 @inject IPestTreatmentRepository PestTreatments
 @inject DeviceFiles Files
+@inject PlantService PlantService
+@inject PropagationService PropagationService
 @inject TimeProvider Time
 
 <PageTitle>Today · Stikling</PageTitle>
@@ -71,22 +74,49 @@ else
         </section>
     }
 
+    @if (FlaggedNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Needs attention</h2>
+            <ul class="item-list">
+                @foreach (var item in FlaggedNow)
+                {
+                    <TodayRow @key="item.Subject.Id" OnDone="() => ClearFlagAsync(item)"
+                              OnPutOff="days => PutOffAsync(PutOffs.Flag(item.Subject.Id, item.Attention), Today.AddDays(days))">
+                        <a class="item-card" href="@SubjectThumb.LinkTo(item.Subject)">
+                            <SubjectThumb Subject="item.Subject" />
+                            <div class="item-text">
+                                <div class="item-name">@item.Name</div>
+                                <div class="item-meta">
+                                    <span class="flag-line"><b>@item.Attention.Reason</b> · @Labels.DaysAgo(item.Attention.DaysSince(Today))</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
     <section class="today-section">
         <h2>Worth a look</h2>
-        @if (checks.Count == 0)
+        @if (ChecksNow.Count == 0)
         {
             <p class="text-body-secondary mb-0">
                 @(active.Count == 0
                     ? "No propagations on the go. Open a plant and tap Propagate to start one."
-                    : "Nothing waiting. Every propagation has been looked at in the last week.")
+                    : checks.Count > 0
+                        ? "Nothing else waiting. The ones you put off come back by themselves."
+                        : "Nothing waiting. Every propagation has been looked at in the last week.")
             </p>
         }
         else
         {
             <ul class="item-list">
-                @foreach (var check in checks)
+                @foreach (var check in ChecksNow)
                 {
-                    <li>
+                    <TodayRow @key="check.Propagation.Id"
+                              OnPutOff="days => PutOffAsync(PutOffs.Check(check.Propagation.Id), Today.AddDays(days))">
                         <a class="item-card" href="propagations/@check.Propagation.Id">
                             <PropagationThumb Propagation="check.Propagation" Days="check.Propagation.DaysSinceStart(Today)" />
                             <div class="item-text">
@@ -97,11 +127,43 @@ else
                                 </div>
                             </div>
                         </a>
-                    </li>
+                    </TodayRow>
                 }
             </ul>
         }
     </section>
+
+    @if (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today))
+    {
+        <section class="today-section">
+            <h2>Photos</h2>
+            <ul class="item-list">
+                <TodayRow OnPutOff="days => PutOffAsync(PutOffs.PhotoRound, Today.AddDays(days))"
+                          SkipLabel="Skip this month" OnSkip="() => PutOffAsync(PutOffs.PhotoRound, PhotoRound.NextRound(Today))">
+                    <button type="button" class="item-card round-toggle" aria-expanded="@(showRound ? "true" : "false")"
+                            aria-controls="photo-round" @onclick="() => showRound = !showRound">
+                        <div class="item-thumb" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        </div>
+                        <div class="item-text">
+                            <div class="item-name">@Labels.Count(photoRound.Count, "photo") to take</div>
+                            <div class="item-meta">For @Today.ToString("MMMM", CultureInfo.InvariantCulture)</div>
+                        </div>
+                        <svg class="round-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                </TodayRow>
+            </ul>
+            @if (showRound)
+            {
+                <ul class="item-list photo-round" id="photo-round">
+                    @foreach (var due in photoRound)
+                    {
+                        <PhotoRoundRow @key="due.Subject.Id" Due="due" OnTaken="LoadAsync" />
+                    }
+                </ul>
+            }
+        </section>
+    }
 
     <section class="today-section">
         <h2>Lately</h2>
@@ -134,11 +196,24 @@ else
     private IReadOnlyList<PropagationCheck> checks = [];
     private IReadOnlyList<PestCaseView> dueTreatments = [];
     private IReadOnlyList<TimelineEntry> recent = [];
+    private IReadOnlyList<AttentionItem> flagged = [];
+    private IReadOnlyList<PhotoDue> photoRound = [];
+    private PutOffs putOffs = PutOffs.Empty();
     private Dictionary<Guid, string> names = [];
     private string? backupReminder;
+    private bool showRound;
     private bool loaded;
 
     private DateOnly Today => Time.Today();
+
+    private List<AttentionItem> FlaggedNow =>
+        flagged.Where(i => !putOffs.IsPutOff(PutOffs.Flag(i.Subject.Id, i.Attention), Today)).ToList();
+
+    // A propagation already under Needs attention isn't listed a second time
+    private List<PropagationCheck> ChecksNow =>
+        checks.Where(c => !putOffs.IsPutOff(PutOffs.Check(c.Propagation.Id), Today)
+                          && FlaggedNow.All(i => i.Subject.Id != c.Propagation.Id))
+            .ToList();
 
     // Treatments first, then the cases only being watched, each under its own heading when there are any
     private IEnumerable<(string Heading, List<PestCaseView> Cases)> DuePests =>
@@ -148,7 +223,9 @@ else
             ("Check for pests", dueTreatments.Where(v => v.IsCheck).ToList())
         }.Where(group => group.Item2.Count > 0);
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
     {
         plants = await Plants.GetAllAsync();
         propagations = await Propagations.GetAllAsync();
@@ -156,6 +233,12 @@ else
 
         var latest = await Entries.GetLatestPerSubjectAsync();
         checks = TodayBoard.NeedsChecking(propagations, latest, Time);
+        flagged = TodayBoard.NeedsAttention(plants, propagations);
+        putOffs = await Files.GetPutOffsAsync(Today);
+
+        photoRound = await Files.GetPhotoReminderAsync()
+            ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), Time)
+            : [];
 
         dueTreatments = PestService.Due(
             PestService.Describe(await PestCases.GetAllAsync(), plants, await PestTreatments.GetAllAsync(), Today));
@@ -169,6 +252,21 @@ else
 
         backupReminder = await BackupReminderAsync();
         loaded = true;
+    }
+
+    private async Task PutOffAsync(string key, DateOnly until)
+    {
+        putOffs.PutOff(key, until);
+        await Files.SetPutOffsAsync(putOffs);
+    }
+
+    private async Task ClearFlagAsync(AttentionItem item)
+    {
+        if (item.Subject is Plant plant)
+            await PlantService.SetAttentionAsync(plant, null);
+        else if (item.Subject is Propagation propagation)
+            await PropagationService.SetAttentionAsync(propagation, null);
+        flagged = TodayBoard.NeedsAttention(plants, propagations);
     }
 
     // Nagging once a month is enough, and only when there's something to lose

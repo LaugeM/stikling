@@ -419,6 +419,92 @@ a.item-card:active {
     gap: 0.6rem;
 }
 
+/* A row on Today with small square buttons after the card: done, put off, take a photo */
+.today-row-main {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.today-row-main > .item-card {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.row-btn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0;
+    padding: 0;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    color: var(--pa-green-dark);
+    cursor: pointer;
+    transition: border-color 0.15s ease-out;
+}
+
+.row-btn:hover,
+.row-btn:focus-visible,
+.row-btn.open {
+    border-color: var(--pa-green);
+}
+
+.row-btn.open {
+    background: var(--pa-green-soft);
+}
+
+.row-btn:disabled,
+.row-btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.row-btn svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.put-off {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+}
+
+.put-off-label {
+    margin-right: 0.15rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.today-row-status {
+    margin: 0.3rem 0 0;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.flag-line {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.flag-line b {
+    font-weight: 600;
+    color: var(--pa-text);
+}
+
 /* Experiment rows: one line per batch, so the substrates can be compared at a glance */
 .experiment-list {
     gap: 0;

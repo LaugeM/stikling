@@ -32,6 +32,9 @@ public interface IPhotoRepository
 
     Task<Photo?> GetAsync(Guid id);
 
+    /// <summary>The newest photo of each subject, by when it was taken, for the photo reminder.</summary>
+    Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync();
+
     /// <summary>Saves photo metadata. The image data is stored separately by the photo service.</summary>
     Task AddAsync(Photo photo);
 

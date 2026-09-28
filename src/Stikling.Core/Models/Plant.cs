@@ -71,6 +71,9 @@ public sealed class Plant : Entity
     [JsonIgnore]
     public bool IsDormant => DormantSince is not null;
 
+    /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
+    public Attention? Attention { get; set; }
+
     /// <summary>Given away or sold: gone to someone else, and possibly with its pots.</summary>
     [JsonIgnore]
     public bool HasLeft => Status is PlantStatus.GivenAway or PlantStatus.Sold;
