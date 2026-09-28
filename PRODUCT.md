@@ -82,3 +82,4 @@ Explicitly undecided:
 3. **Say it without the jargon.** Someone who has never heard the word propagation has to get through anyway.
 4. **The device is the whole system.** No account, no signal and no sync. Features are designed against the data already on hand.
 5. **Sharing is the growth plan.** Making a plant's progress easy to show other people is how this reaches anyone at all.
+6. **Simple on top, deep underneath.** The app should do a lot without ever feeling cluttered. The common path is short and has sensible defaults. Extra fields, logs, reminders and settings are there for anyone who wants to go deep, but stay out of the way until they are asked for. A long feature list is fine; a crowded screen is not.
