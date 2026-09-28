@@ -37,11 +37,23 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Treatment recipes and sticky trap counts**, the two priority-4 rows left in the pest section.
+1. **Treatment recipes and sticky trap counts**, the two priority-4 rows left in the pest section. I currently have a spider mite problem, so this pays off straight away.
+2. **Milestones, rooting aids, and on time or slow** for propagations. First root and first leaf give my corm experiment dates to compare, rooting aids let me see on the results page whether they made a difference, and a propagation still rooting can then say whether it is keeping up with my own average.
+3. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
+4. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished, and I want it in place before winter.
+5. **Needs attention, putting things off, and the photo reminder** on Today. All three are small, and together they make Today something I go through every day rather than only when a propagation is due.
+6. **Empty screens that say what to do next, and the FAQ page.** Someone new sees an empty app first, and the first person I showed the app to asked what propagation means.
+7. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+8. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+9. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+10. **Seed germination**: sown and germinated counts with their dates.
+11. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+12. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
+13. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screens worth the name: counts on the Today screen, sort options and favourites on the plant list, purchase price, duplicating a plant, quick add from a pasted list of names, home screen shortcuts, an app version and a "what's new" page, an FAQ page, and empty screens that say what to do next.
+These need no new storage and no new screens worth the name: counts on the Today screen, sort options and favourites on the plant list, purchase price, duplicating a plant, quick add from a pasted list of names, a note when adding a plant you already have, renaming or merging a tag, home screen shortcuts, and an app version and a "what's new" page.
 
 The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it, and the list of plants that got a feed.
 
