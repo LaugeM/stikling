@@ -53,7 +53,7 @@ internal sealed class FakePropagationRepository : IPropagationRepository
 
     public Task SaveAsync(Propagation propagation)
     {
-        if (propagation.Validate().Count > 0)
+        if (propagation.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid propagation");
         Propagations[propagation.Id] = propagation;
         return Task.CompletedTask;

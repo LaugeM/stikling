@@ -62,6 +62,15 @@ public sealed class Plant : Entity
     [JsonIgnore]
     public bool InQuarantine => QuarantinedSince is not null;
 
+    /// <summary>
+    /// The day it went dormant, e.g. an alocasia that dropped its leaves for winter. Null while
+    /// it's growing, the same way as quarantine.
+    /// </summary>
+    public DateOnly? DormantSince { get; set; }
+
+    [JsonIgnore]
+    public bool IsDormant => DormantSince is not null;
+
     /// <summary>Given away or sold: gone to someone else, and possibly with its pots.</summary>
     [JsonIgnore]
     public bool HasLeft => Status is PlantStatus.GivenAway or PlantStatus.Sold;
@@ -121,6 +130,10 @@ public sealed class Plant : Entity
     public int? DaysInQuarantine(DateOnly today) =>
         QuarantinedSince is { } since ? Math.Max(0, today.DayNumber - since.DayNumber) : null;
 
+    /// <summary>Days dormant, counting the day it went dormant as day 0.</summary>
+    public int? DaysDormant(DateOnly today) =>
+        DormantSince is { } since ? Math.Max(0, today.DayNumber - since.DayNumber) : null;
+
     /// <summary>Validation rules shared by every place a plant can be saved from.</summary>
     public IReadOnlyList<string> Validate(DateOnly today)
     {
@@ -135,6 +148,8 @@ public sealed class Plant : Entity
             errors.Add("A plant can't have the same pot inside and outside.");
         if (QuarantinedSince > today)
             errors.Add("The quarantine can't start in the future.");
+        if (DormantSince > today)
+            errors.Add("It can't go dormant in the future.");
         if (PotsTaken != PotsTaken.None && !HasLeft)
             errors.Add("Only a plant that was given away or sold can take its pots with it.");
         return errors;

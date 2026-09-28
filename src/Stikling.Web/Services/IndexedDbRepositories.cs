@@ -43,7 +43,7 @@ public sealed class IndexedDbFeedRepository(IndexedDb db, TimeProvider time)
 public sealed class IndexedDbPropagationRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<Propagation>(db, time, Stores.Propagations), IPropagationRepository
 {
-    protected override IReadOnlyList<string> Validate(Propagation propagation) => propagation.Validate();
+    protected override IReadOnlyList<string> Validate(Propagation propagation) => propagation.Validate(Today);
 }
 
 public sealed class IndexedDbCareLogRepository(IndexedDb db, TimeProvider time)

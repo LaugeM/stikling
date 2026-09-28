@@ -47,6 +47,10 @@ else
             {
                 <span class="badge quarantine-badge">Quarantine</span>
             }
+            @if (plant.IsDormant)
+            {
+                <span class="badge dormant-badge">Dormant</span>
+            }
             @foreach (var item in pests)
             {
                 <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
@@ -202,6 +206,17 @@ else
                             @(since == Today ? "Since today" : $"Since {Labels.Date(since)} · {Labels.Count(plant.DaysInQuarantine(Today) ?? 0, "day")}")
                             <div>
                                 <button type="button" class="btn btn-link btn-sm p-0" @onclick="EndQuarantineAsync">End quarantine</button>
+                            </div>
+                        </dd>
+                    }
+
+                    @if (plant.DormantSince is { } dormantSince)
+                    {
+                        <dt>Dormant</dt>
+                        <dd>
+                            @(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(plant.DaysDormant(Today) ?? 0, "day")}")
+                            <div>
+                                <button type="button" class="btn btn-link btn-sm p-0" @onclick="EndDormancyAsync">It's woken up</button>
                             </div>
                         </dd>
                     }
@@ -401,6 +416,13 @@ else
         if (plant is null)
             return;
         await PlantService.SetQuarantineAsync(plant, null, Labels.For);
+    }
+
+    private async Task EndDormancyAsync()
+    {
+        if (plant is null)
+            return;
+        await PlantService.SetDormantAsync(plant, null, Labels.For);
     }
 
     private async Task DeleteAsync()
