@@ -42,7 +42,7 @@ Desktop is currently used for development rather than real use, but the desktop 
 Built and working:
 
 - Plants, propagations with lineage and promotion, photo timelines, the Today screen, backup and restore, a care log, and medium experiments.
-- Blazor WebAssembly standalone PWA on .NET 10, Bootstrap 5, IndexedDB through a small JavaScript interop layer. No backend.
+- Blazor WebAssembly standalone PWA on .NET 10, Bootstrap 5, IndexedDB through a small JavaScript interop layer. The sync API (ASP.NET Core, EF Core, SQL Server) is being built, and the app doesn't use it yet.
 - Photos are resized and stored entirely in JavaScript. Image data only crosses into C# for backup and restore.
 - Ids are made on the device, deletes are soft, and enums are stored as text so backups stay readable.
 - Backup and restore is a ZIP the user exports and imports. Restores merge rather than replace.
