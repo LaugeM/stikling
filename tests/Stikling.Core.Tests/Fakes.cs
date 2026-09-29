@@ -1,3 +1,4 @@
+﻿using System.Text.Json;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Models;
@@ -10,6 +11,7 @@ using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
 using Stikling.Core.Settings;
 using Stikling.Core.SoilMixes;
+using Stikling.Core.Sync;
 using Stikling.Core.Timeline;
 using Stikling.Core.Today;
 
@@ -433,5 +435,170 @@ internal sealed class FakePutOffRepository : IPutOffRepository
         putOff.UpdatedAt = clock = clock.AddSeconds(1);
         PutOffs[putOff.Id] = putOff;
         return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// The records on one device, with the change list every write there adds to, as the browser
+/// database keeps them. Records are stored as JSON the way the app writes them.
+/// </summary>
+internal sealed class FakeSyncStore : ISyncStore
+{
+    public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+
+    public Dictionary<(string Kind, Guid Id), JsonElement> Records { get; } = [];
+
+    /// <summary>The change list: the updatedAt each record had when it was changed.</summary>
+    public Dictionary<(string Kind, Guid Id), string> Pending { get; } = [];
+
+    public SyncState? State { get; set; }
+
+    /// <summary>Runs just before records from the server are saved, to change something mid-sync.</summary>
+    public Action? BeforeSavingFromServer { get; set; }
+
+    /// <summary>A change made on this device.</summary>
+    public void Save(string kind, Entity entity)
+    {
+        Keep(kind, entity);
+        Pending[(kind, entity.Id)] = entity.UpdatedAt.ToString("O");
+    }
+
+    /// <summary>A record that was on the device before it ever synced, so it isn't on the change list.</summary>
+    public void Keep(string kind, Entity entity) =>
+        Records[(kind, entity.Id)] = JsonSerializer.SerializeToElement(entity, entity.GetType(), Json);
+
+    public T? Get<T>(string kind, Guid id) where T : Entity =>
+        Records.TryGetValue((kind, id), out var data) ? data.Deserialize<T>(Json) : null;
+
+    public Task<SyncState?> GetStateAsync() => Task.FromResult(State);
+
+    public Task SaveStateAsync(SyncState state)
+    {
+        State = state;
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<PendingRecord>> GetPendingAsync(IReadOnlyCollection<string> kinds, int max) =>
+        Task.FromResult<IReadOnlyList<PendingRecord>>(Pending
+            .Where(p => kinds.Contains(p.Key.Kind))
+            .Take(max)
+            .Select(p => new PendingRecord(p.Key.Kind, p.Key.Id, Records.TryGetValue(p.Key, out var data) ? data : null, p.Value))
+            .ToList());
+
+    public Task MarkSentAsync(IReadOnlyList<PendingRecord> sent)
+    {
+        foreach (var record in sent)
+        {
+            if (Pending.TryGetValue((record.Kind, record.Id), out var mark) && mark == record.Mark)
+                Pending.Remove((record.Kind, record.Id));
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task QueueAllAsync()
+    {
+        foreach (var (key, data) in Records)
+            Pending[key] = UpdatedAt(data)!;
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<JsonElement>> GetAsync(string kind, IReadOnlyCollection<Guid> ids) =>
+        Task.FromResult<IReadOnlyList<JsonElement>>(ids
+            .Where(id => Records.ContainsKey((kind, id)))
+            .Select(id => Records[(kind, id)])
+            .ToList());
+
+    public Task SaveFromServerAsync(string kind, IReadOnlyList<ServerCopy> records)
+    {
+        BeforeSavingFromServer?.Invoke();
+        foreach (var copy in records)
+        {
+            var key = (kind, copy.Data.GetProperty("id").GetGuid());
+            var here = Records.TryGetValue(key, out var current) ? UpdatedAt(current) : null;
+            if (here != copy.Replaces)
+                continue;
+
+            Records[key] = copy.Data;
+
+            // The change here lost to a newer one, so there's nothing left to send
+            if (Pending.TryGetValue(key, out var mark) && mark == copy.Replaces)
+                Pending.Remove(key);
+        }
+        return Task.CompletedTask;
+    }
+
+    private static string? UpdatedAt(JsonElement data) => data.GetProperty("updatedAt").GetString();
+}
+
+/// <summary>The sync API for one person, following the same rules as the real one.</summary>
+internal sealed class FakeSyncServer : ISyncServer
+{
+    private long lastVersion;
+    private readonly Dictionary<(Guid Collection, string Kind, Guid Id), (long Version, JsonElement Data)> records = [];
+    private JsonElement? settings;
+
+    public int PageSize { get; set; } = SyncLimits.BatchSize;
+
+    public List<SyncRecord> Pushed { get; } = [];
+
+    /// <summary>Runs as an upload arrives, for another device's change landing mid-sync.</summary>
+    public Action? BeforePush { get; set; }
+
+    /// <summary>A record sent by some other device.</summary>
+    public void Add(Guid collectionId, string kind, JsonElement data) =>
+        records[(collectionId, kind, data.GetProperty("id").GetGuid())] = (++lastVersion, data);
+
+    public JsonElement? Find(Guid collectionId, string kind, Guid id) =>
+        records.TryGetValue((collectionId, kind, id), out var record) ? record.Data : null;
+
+    public Task<PullResponse> PullAsync(Guid collectionId, long after)
+    {
+        var page = records
+            .Where(r => r.Key.Collection == collectionId && r.Value.Version > after)
+            .OrderBy(r => r.Value.Version)
+            .Take(PageSize + 1)
+            .ToList();
+        var more = page.Count > PageSize;
+        if (more)
+            page.RemoveAt(page.Count - 1);
+
+        return Task.FromResult(new PullResponse(
+            page.Select(r => new SyncRecord(r.Key.Kind, r.Value.Data)).ToList(),
+            page.Count > 0 ? page[^1].Value.Version : after,
+            more));
+    }
+
+    public Task<PushResponse> PushAsync(Guid collectionId, IReadOnlyList<SyncRecord> sent)
+    {
+        BeforePush?.Invoke();
+        BeforePush = null;
+        Pushed.AddRange(sent);
+        var newer = new List<SyncRecord>();
+        foreach (var record in sent)
+        {
+            RecordStamp.TryRead(record.Data, out var stamp);
+            var key = (collectionId, record.Kind, stamp.Id);
+            if (!records.TryGetValue(key, out var current))
+                records[key] = (++lastVersion, record.Data);
+            else
+            {
+                RecordStamp.TryRead(current.Data, out var here);
+                if (stamp.IsNewerThan(here))
+                    records[key] = (++lastVersion, record.Data);
+                else if (here.IsNewerThan(stamp))
+                    newer.Add(new SyncRecord(record.Kind, current.Data));
+            }
+        }
+        return Task.FromResult(new PushResponse(newer));
+    }
+
+    public Task<JsonElement?> GetSettingsAsync() => Task.FromResult(settings);
+
+    public Task<JsonElement> PutSettingsAsync(JsonElement sent)
+    {
+        RecordStamp.TryRead(sent, out var stamp);
+        if (settings is not { } current || (RecordStamp.TryRead(current, out var here) && stamp.IsNewerThan(here)))
+            settings = sent;
+        return Task.FromResult(settings!.Value);
     }
 }

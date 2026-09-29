@@ -6,9 +6,11 @@ WORKDIR /src
 
 # Restore first, so the packages stay cached until the project file changes
 COPY src/Stikling.Api/Stikling.Api.csproj src/Stikling.Api/
+COPY src/Stikling.Core/Stikling.Core.csproj src/Stikling.Core/
 RUN dotnet restore src/Stikling.Api/Stikling.Api.csproj
 
 COPY src/Stikling.Api/ src/Stikling.Api/
+COPY src/Stikling.Core/ src/Stikling.Core/
 RUN dotnet publish src/Stikling.Api/Stikling.Api.csproj --configuration Release --no-restore --output /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0

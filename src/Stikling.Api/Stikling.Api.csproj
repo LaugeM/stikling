@@ -17,4 +17,8 @@
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.12" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Stikling.Core\Stikling.Core.csproj" />
+  </ItemGroup>
+
 </Project>

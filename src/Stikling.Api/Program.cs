@@ -4,6 +4,7 @@ using Stikling.Api.Auth;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
 using Stikling.Api.People;
+using Stikling.Api.Sync;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,8 @@ app.UseAuthorization();
 
 app.MapHealthChecks("/health");
 app.MapMe();
+app.MapSettings();
 app.MapCollections();
+app.MapRecords();
 
 app.Run();
