@@ -234,6 +234,18 @@ else
                     @MilestoneRow(Milestone.FirstRoot, "First root", propagation.FirstRootOn, propagation.DaysToFirstRoot)
                     @MilestoneRow(Milestone.FirstLeaf, "First leaf", propagation.FirstLeafOn, propagation.DaysToFirstLeaf)
 
+                    @if (propagation.Type == PropagationType.Seed && propagation.SeedsGerminated is { } up)
+                    {
+                        <dt>Seeds</dt>
+                        <dd>
+                            @up of @propagation.InitialCount came up@(propagation.GerminationRate is { } rate ? $" ({Math.Round(rate * 100):0}%)" : "")
+                            @if (propagation.FirstGerminatedOn is { } first)
+                            {
+                                <text> · first on @Labels.Date(first)</text>
+                            }
+                        </dd>
+                    }
+
                     <dt>Count</dt>
                     <dd>@CountText</dd>
 

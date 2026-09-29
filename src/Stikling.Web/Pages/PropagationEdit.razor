@@ -63,6 +63,21 @@ else
                     <InputNumber id="count" class="form-control" @bind-Value="propagation.InitialCount" min="@MinCount" inputmode="numeric" />
                 </div>
             </div>
+            @if (propagation.Type == PropagationType.Seed)
+            {
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" for="seeds-up">Came up</label>
+                        <InputNumber id="seeds-up" class="form-control" @bind-Value="propagation.SeedsGerminated" min="0" max="@propagation.InitialCount" inputmode="numeric" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="first-up">First on</label>
+                        <InputDate id="first-up" class="form-control" @bind-Value="propagation.FirstGerminatedOn"
+                                   min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-text">How many seeds have come up so far, out of the number sown. Leave empty until the first one does.</div>
+                </div>
+            }
             <div class="row g-2 mb-1">
                 <div class="col-6">
                     <label class="form-label" for="started">Started on</label>
@@ -293,6 +308,12 @@ else
     {
         if (propagation is null)
             return;
+
+        if (propagation.Type != PropagationType.Seed)
+        {
+            propagation.SeedsGerminated = null;
+            propagation.FirstGerminatedOn = null;
+        }
 
         errors = propagation.Validate(Today).ToList();
         if (errors.Count > 0)
