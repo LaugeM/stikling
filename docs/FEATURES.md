@@ -323,7 +323,7 @@ Questions come up that the app can't answer from your own data: how long a cutti
 | ☐ | Share your plant list or wishlist as text, e.g. to send to a friend or take to a swap | 6 | S | v1.x |
 | ☐ | Share a plant card as an image (photo + name + "propagated from…") | 7 | M | v1.x |
 | ☐ | Plant-sitter sheet: a printable/shareable care list for someone watering while you're away | 7 | M | v1.x |
-| ◐ | Accounts and sync between devices (ASP.NET Core Web API, EF Core, sign-in through Clerk). The API checks Clerk sign-ins and has people, collections and members with roles. Still missing: signing in from the app, syncing records and photos, account deletion and hosting | 9 | L | v2 |
+| ◐ | Accounts and sync between devices (ASP.NET Core Web API, EF Core, sign-in through Clerk). The API checks Clerk sign-ins and has people, collections and members with roles, and the app can sign in and out from Settings when it runs locally. Still missing: syncing records and photos, asking what to do with the data on the device when signing out, account deletion and hosting | 9 | L | v2 |
 | ☐ | Public read-only collection page | 9 | L | v2 |
 | ☐ | Plant identification from a photo via an identification API (needs a backend to keep the API key secret) | 9 | L | v2 |
 | ☐ | Push notifications, widgets and a Google Play release (MAUI Blazor Hybrid) | 10 | L | v3 |

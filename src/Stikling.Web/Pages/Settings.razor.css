@@ -79,3 +79,10 @@
 .room-spot .room-name {
     font-weight: 400;
 }
+
+/* An email address has no spaces to break at */
+.account-email {
+    min-width: 0;
+    margin-right: auto;
+    overflow-wrap: anywhere;
+}

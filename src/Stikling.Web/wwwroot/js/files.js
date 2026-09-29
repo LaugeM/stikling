@@ -1,5 +1,5 @@
 // Saving a file to the phone or computer, and reading small values that belong to this
-// device only (which theme, when the last backup was taken).
+// device only (when the last backup was taken, whether someone is signed in here).
 
 export function download(fileName, bytes, type = "application/zip") {
     const url = URL.createObjectURL(new Blob([bytes], { type }));

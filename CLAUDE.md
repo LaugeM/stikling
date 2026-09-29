@@ -15,6 +15,8 @@ Photos are resized, stored and read entirely in JavaScript. The image data only 
 
 UI work follows `DESIGN.md`. `PRODUCT.md` has who the app is for and the principles behind it.
 
+The impeccable skill is for real design work, not a check on every change, since each run reads a lot of instructions and screenshots. For a new screen or a redesign, run `/impeccable shape` before building and `/impeccable critique` or `polish` on the result. A small change that reuses existing patterns only needs `DESIGN.md`, the plugin's hook that scans each edited file, and the reviewer. Now and then, an `/impeccable audit` across several screens catches what drifts.
+
 ## Adding a new kind of record
 
 A new IndexedDB store touches more places than the model and its page, and missing one of them quietly leaves the records out of backups. Use the feeds commit (`3e255f3`) as the example:
@@ -52,6 +54,13 @@ Accounts and sync between devices are being added in steps, so people don't have
 - Anything under `/collections/{collectionId}` needs `CollectionPolicies.View` or `CollectionPolicies.Edit`. The policy checks the caller's membership on every request, so a viewer can't change data even with a modified app.
 - `docker compose up --build` runs the API on port 5180 with SQL Server. In Development it applies its migrations on start. A new migration is made with `dotnet tool restore`, then `dotnet ef migrations add <Name> --project src/Stikling.Api --output-dir Data/Migrations`.
 - Settings that differ between local and hosted (the Clerk instance, the app's origins, the connection string) are in `appsettings.Development.json` locally, and come from the host's environment when it's deployed. Secrets never go in the repo.
+
+## Signing in from the app
+
+- Clerk has no Blazor library, so it is behind `wwwroot/js/account.js`, and `AccountService` is the only class that calls that file. Calls to the API go through `StiklingApi`, which adds the session token to each request.
+- Clerk's scripts are only loaded when they are needed: on the sign-in page, or in Settings on a device where someone is signed in. Never when the app starts, so it still opens offline.
+- Signing in is only offered when `wwwroot/appsettings.{Environment}.json` has the Clerk instance and the API address. Locally that is `appsettings.Development.json`, which is kept out of the published site, so the live site doesn't offer signing in until the API is hosted.
+- The API only accepts tokens from the origins in its `AppOrigins`. The `stikling-web` dev server runs in Development on port 5170 for that reason. If it falls back to another port, the API turns the sign-in away.
 
 ## The Help page
 

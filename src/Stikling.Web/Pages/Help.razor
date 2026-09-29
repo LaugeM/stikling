@@ -2,6 +2,7 @@
 @* Short answers to what people ask. Keep this in step with the app: a feature that is added or
    changed should have its answer added or changed here in the same pull request. *@
 @inject IJSRuntime JS
+@inject AccountService Account
 
 <PageTitle>Help · Stikling</PageTitle>
 
@@ -148,6 +149,23 @@
             across with a backup and a restore whenever you switch.
         </p>
     </details>
+
+    @* Signing in is only offered where the app has somewhere to sign in to *@
+    @if (Account.IsAvailable)
+    {
+        <details class="help-item">
+            <summary>Do I need an account?</summary>
+            <p>
+                No. An account is optional, and everything in Stikling works without one. To make one, go to
+                Account in Settings and sign in with Google or another account you already have, or with your
+                email.
+            </p>
+            <p>
+                Keeping your plants the same on all your devices is still being built. Until then, signing in
+                doesn't move anything off this device, and signing out leaves your plants where they are.
+            </p>
+        </details>
+    }
 </section>
 
 <section class="help-section" id="plants">

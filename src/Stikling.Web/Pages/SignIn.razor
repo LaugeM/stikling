@@ -1,0 +1,94 @@
+@page "/sign-in"
+@* Clerk's sign-in, which also creates an account for someone new. It comes back to Settings once done. *@
+@implements IAsyncDisposable
+@inject AccountService Account
+@inject NavigationManager Nav
+
+<PageTitle>Sign in · Stikling</PageTitle>
+
+<a class="back-link" href="settings">Settings</a>
+<h1>Sign in</h1>
+
+@if (!Account.IsAvailable)
+{
+    <p class="account-note">Signing in isn't available in this version of Stikling.</p>
+}
+else if (unavailable)
+{
+    <p class="account-note">
+        The sign-in service can't be reached. Check that you're online and try again. Everything else in
+        the app works without it.
+    </p>
+    <button type="button" class="btn btn-outline-primary" @onclick="LoadAsync">Try again</button>
+}
+else
+{
+    <p class="account-note">
+        Use an account you already have, like Google, or your email. With email you get a code to type in,
+        so there's no password to remember. If you're new, this creates your Stikling account.
+    </p>
+    @if (loading)
+    {
+        <p class="account-note" role="status">Loading…</p>
+    }
+}
+
+@* Clerk draws into this, so Blazor never renders anything inside it *@
+<div class="account-sign-in" @ref="signIn" hidden="@(!Account.IsAvailable || unavailable)"></div>
+
+@code {
+    private ElementReference signIn;
+    private bool loading = true;
+    private bool unavailable;
+    private bool mounted;
+
+    private string SettingsUrl => Nav.ToAbsoluteUri("settings").ToString();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Account.IsAvailable)
+            await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        unavailable = false;
+        loading = true;
+        StateHasChanged();
+
+        try
+        {
+            var state = await Account.LoadAsync();
+            if (state.SignedIn)
+            {
+                Nav.NavigateTo(SettingsUrl, replace: true);
+                return;
+            }
+
+            await Account.MountSignInAsync(signIn, SettingsUrl);
+            mounted = true;
+        }
+        catch (AccountUnavailableException)
+        {
+            unavailable = true;
+        }
+
+        loading = false;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!mounted)
+            return;
+
+        try
+        {
+            await Account.UnmountSignInAsync(signIn);
+        }
+        catch (JSException)
+        {
+            // The page is going away either way
+        }
+    }
+}
