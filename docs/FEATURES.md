@@ -89,7 +89,7 @@ PARTLY_BUILT_PARAGRAPH
 | ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
 | ✅ | Duplicate a plant (e.g. a second basil pot): "Add another like this" opens the add form filled in from it | 7 | S | v1.x |
 | ☐ | Purchase price per plant | 7 | S | v1.x |
-| ☐ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
+| ✅ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
 | ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 7 | M | v1.x |
 | ☐ | **Home map**: a simple plan of each room with the plants placed where they stand, to see what is where and to go round them in order | 7 | L | v1.x |
 
@@ -136,7 +136,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page compares each one with the batches that went without it | 5 | S | v1.x |
 | ✅ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. First root, first leaf and corm size are built and show in experiments | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
-| ☐ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
+| ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 8 | L | v1.x |
 | ☐ | **"Available for swap" list**: mark propagations as available and share a simple list or image before a plant swap | 8 | M | v1.x |
 

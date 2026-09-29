@@ -28,6 +28,10 @@ public static class PlantChanges
         if (after.CauseOfDeath is { } cause && before.CauseOfDeath != cause)
             changes.Add($"What happened: {cause}");
 
+        if ((after.LeftTo != before.LeftTo || after.LeftFor != before.LeftFor
+                || before.Status != after.Status) && after.DescribeDeparture() is { } departure)
+            changes.Add(departure);
+
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
 

@@ -85,6 +85,10 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         after.CauseOfDeath = after.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(after.CauseOfDeath)
             ? after.CauseOfDeath.Trim()
             : null;
+        // Who got it and what it went for only belong to a plant that was given away or sold
+        var gone = after.Status is PlantStatus.GivenAway or PlantStatus.Sold;
+        after.LeftTo = gone && !string.IsNullOrWhiteSpace(after.LeftTo) ? after.LeftTo.Trim() : null;
+        after.LeftFor = gone && !string.IsNullOrWhiteSpace(after.LeftFor) ? after.LeftFor.Trim() : null;
         await plants.SaveAsync(after);
 
         var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName);

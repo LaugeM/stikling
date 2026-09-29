@@ -182,6 +182,19 @@ else
                                    placeholder="e.g. root rot after repotting" />
                     </div>
                 }
+                @if (plant.Status is PlantStatus.GivenAway or PlantStatus.Sold)
+                {
+                    var sold = plant.Status == PlantStatus.Sold;
+                    <div class="mb-3">
+                        <label class="form-label" for="left-to">@(sold ? "Who bought it?" : "Who got it?") <span class="text-muted">(optional)</span></label>
+                        <InputText id="left-to" class="form-control" @bind-Value="plant.LeftTo" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="left-for">@(sold ? "Sold for" : "Swapped for?") <span class="text-muted">(optional)</span></label>
+                        <InputText id="left-for" class="form-control" @bind-Value="plant.LeftFor"
+                                   placeholder="@(sold ? "e.g. 150 kr" : "e.g. a Hoya carnosa")" />
+                    </div>
+                }
                 @if (plant.HasLeft && Labels.PotsTakenChoices([plant]) is { Count: > 0 } choices)
                 {
                     <div class="mb-3">

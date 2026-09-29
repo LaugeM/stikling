@@ -74,6 +74,10 @@ else
             {
                 <div class="item-sub">@Plant.CauseOfDeath</div>
             }
+            @if (Plant.DescribeDeparture() is { } departure)
+            {
+                <div class="item-sub">@departure</div>
+            }
             <div class="item-meta">
                 @if (Plant.Status != PlantStatus.Active)
                 {
