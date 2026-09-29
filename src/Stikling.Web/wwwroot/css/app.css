@@ -1035,7 +1035,19 @@ a.item-card:active {
 }
 
 /* A favourite's star is Clay, the colour of a plant, so it stays away from the alert red */
+/* The name gives way to the star, so a long name is cut short before the star is */
+.item-name.has-star {
+    display: flex;
+    align-items: center;
+}
+
+.item-name.has-star .item-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .favourite-star {
+    flex: none;
     width: 0.9rem;
     height: 0.9rem;
     margin-left: 0.25rem;
