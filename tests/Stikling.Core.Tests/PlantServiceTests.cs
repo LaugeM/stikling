@@ -256,6 +256,54 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Selling_a_plant_saves_who_bought_it_and_the_price_and_adds_them_to_the_history()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Sold;
+        plant.LeftTo = "  Anna ";
+        plant.LeftFor = " 150 kr ";
+
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Equal("Anna", plants.Plants[plant.Id].LeftTo);
+        Assert.Equal("150 kr", plants.Plants[plant.Id].LeftFor);
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Equal("Status: Sold (was Active)\nSold to Anna for 150 kr", entry.Text);
+    }
+
+    [Fact]
+    public async Task Swapping_a_plant_away_says_what_came_back_in_the_history()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.GivenAway;
+        plant.LeftTo = "Anna";
+        plant.LeftFor = "a Hoya carnosa";
+
+        await service.UpdateAsync(before, plant, Label);
+
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Equal("Status: GivenAway (was Active)\nGiven to Anna · swapped for a Hoya carnosa", entry.Text);
+    }
+
+    [Fact]
+    public async Task Bringing_a_plant_back_clears_who_got_it_and_what_it_went_for()
+    {
+        var plant = new Plant { Nickname = "Basil", Status = PlantStatus.Sold, LeftTo = "Anna", LeftFor = "150 kr" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Active;
+
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Null(plants.Plants[plant.Id].LeftTo);
+        Assert.Null(plants.Plants[plant.Id].LeftFor);
+    }
+
+    [Fact]
     public async Task Giving_plants_away_with_their_pots_takes_what_each_one_has()
     {
         var both = new Plant { Nickname = "Hoya", InnerPotId = Guid.NewGuid(), OuterPotId = Guid.NewGuid() };

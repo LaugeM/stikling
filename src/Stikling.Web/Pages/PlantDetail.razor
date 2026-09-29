@@ -54,6 +54,10 @@ else
             {
                 <p class="detail-sub">@plant.CauseOfDeath</p>
             }
+            @if (plant.DescribeDeparture() is { } departure)
+            {
+                <p class="detail-sub">@departure</p>
+            }
             @if (plant.InQuarantine)
             {
                 <span class="badge quarantine-badge">Quarantine</span>
@@ -325,6 +329,10 @@ else
                                     @if (child.Status != PlantStatus.Active)
                                     {
                                         <span class="text-body-secondary small"> · @Labels.For(child.Status)</span>
+                                    }
+                                    @if (child.Status == PlantStatus.GivenAway && !string.IsNullOrWhiteSpace(child.LeftTo))
+                                    {
+                                        <span class="text-body-secondary small"> · given to @child.LeftTo</span>
                                     }
                                 </li>
                             }
