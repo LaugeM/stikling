@@ -122,6 +122,19 @@ public class PropagationTests
         Assert.Null(cuttings.GerminationRate);
     }
 
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(-3, false)]
+    [InlineData(201, false)]
+    [InlineData(0.5, true)]
+    [InlineData(200, true)]
+    public void Validate_checks_the_corm_size(double mm, bool valid)
+    {
+        var day = new DateOnly(2026, 5, 1);
+        var corm = new Propagation { Genus = "Alocasia", Type = PropagationType.Corm, StartedOn = day, CormSizeMm = (decimal)mm };
+        Assert.Equal(valid, corm.Validate(day).Count == 0);
+    }
+
     private static Propagation Seeds(int sown, int? up) =>
         new() { Genus = "Coleus", Type = PropagationType.Seed, InitialCount = sown, SeedsGerminated = up };
 

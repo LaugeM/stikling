@@ -234,6 +234,12 @@ else
                     @MilestoneRow(Milestone.FirstRoot, "First root", propagation.FirstRootOn, propagation.DaysToFirstRoot)
                     @MilestoneRow(Milestone.FirstLeaf, "First leaf", propagation.FirstLeafOn, propagation.DaysToFirstLeaf)
 
+                    @if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } cormSize)
+                    {
+                        <dt>Corm size</dt>
+                        <dd>@cormSize.ToString("0.##") mm</dd>
+                    }
+
                     @if (propagation.Type == PropagationType.Seed && propagation.SeedsGerminated is { } up)
                     {
                         <dt>Seeds</dt>

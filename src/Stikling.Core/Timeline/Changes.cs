@@ -97,6 +97,9 @@ public static class PropagationChanges
                 ? $"Seeds: {up} of {after.InitialCount} came up"
                 : "Seed count cleared");
 
+        if (before.CormSizeMm != after.CormSizeMm)
+            changes.Add(after.CormSizeMm is { } size ? $"Corm size: {size:0.##} mm" : "Corm size cleared");
+
         if (!before.RootingAids.Order().SequenceEqual(after.RootingAids.Order()))
             changes.Add(after.RootingAids.Count == 0
                 ? "No rooting aids"

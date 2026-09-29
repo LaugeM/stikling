@@ -78,6 +78,14 @@ else
                     <div class="form-text">How many seeds have come up so far, out of the number sown. Leave empty until the first one does.</div>
                 </div>
             }
+            @if (propagation.Type == PropagationType.Corm)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="corm-size">Corm size (mm)</label>
+                    <InputNumber id="corm-size" class="form-control" @bind-Value="propagation.CormSizeMm" min="0" max="200" step="any" inputmode="decimal" />
+                    <div class="form-text">Measured across when you started it. Handy for comparing bigger and smaller corms in an experiment.</div>
+                </div>
+            }
             <div class="row g-2 mb-1">
                 <div class="col-6">
                     <label class="form-label" for="started">Started on</label>
@@ -314,6 +322,8 @@ else
             propagation.SeedsGerminated = null;
             propagation.FirstGerminatedOn = null;
         }
+        if (propagation.Type != PropagationType.Corm)
+            propagation.CormSizeMm = null;
 
         errors = propagation.Validate(Today).ToList();
         if (errors.Count > 0)

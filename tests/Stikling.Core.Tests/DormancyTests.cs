@@ -137,6 +137,16 @@ public class DormancyTests
     }
 
     [Fact]
+    public void Corm_size_is_described_when_it_changes()
+    {
+        var before = new Propagation { Nickname = "Corm", StartedOn = Today, Type = PropagationType.Corm };
+        var after = before.Copy();
+        after.CormSizeMm = 8;
+        Assert.Equal(["Corm size: 8 mm"], PropagationChanges.Describe(before, after, Label));
+        Assert.Equal(["Corm size cleared"], PropagationChanges.Describe(after, before, Label));
+    }
+
+    [Fact]
     public void Seed_counts_are_described_when_they_change()
     {
         var before = new Propagation { Nickname = "Coleus", StartedOn = Today, Type = PropagationType.Seed, InitialCount = 20 };

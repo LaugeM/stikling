@@ -49,7 +49,7 @@ In the order I would build them.
 
 These need no new storage and no new screens worth the name: the success rate on the Today screen, purchase price, a "Log care" home screen shortcut, and an app version and a "what's new" page.
 
-The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it, the list of plants that got a feed, and corm size on a propagation.
+The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it and the list of plants that got a feed.
 
 ---
 
@@ -134,7 +134,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are at least 3 rooted batches to compare with, and the list cards only mention it when it's slow | 4 | S | v1.x |
 | ✅ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
 | ✅ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page compares each one with the batches that went without it | 5 | S | v1.x |
-| ◐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. First root and first leaf are built and show in experiments. Corm size is still missing | 5 | S | v1.x |
+| ✅ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. First root, first leaf and corm size are built and show in experiments | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
 | ☐ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 8 | L | v1.x |

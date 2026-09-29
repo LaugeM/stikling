@@ -53,6 +53,9 @@ public sealed class Propagation : Entity
     /// <summary>The day the first seed came up.</summary>
     public DateOnly? FirstGerminatedOn { get; set; }
 
+    /// <summary>The size of the corm when it was started, in millimetres, measured across. Only for corms.</summary>
+    public decimal? CormSizeMm { get; set; }
+
     /// <summary>What was used to help it root, e.g. cinnamon on the cut or a dome for humidity.</summary>
     public List<RootingAid> RootingAids { get; set; } = [];
 
@@ -236,6 +239,8 @@ public sealed class Propagation : Entity
             errors.Add("A seed can't come up before it was sown.");
         if (FirstGerminatedOn > today)
             errors.Add("A seed can't come up in the future.");
+        if (CormSizeMm is <= 0 or > 200)
+            errors.Add("The corm size must be more than 0 and at most 200 mm.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
         return errors;
