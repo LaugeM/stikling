@@ -10,16 +10,14 @@ public class TodayBoardTests
 
     private static Propagation Finished(int pottedUp, int failed, int daysAgo, bool deleted = false)
     {
-        var moment = new DateTimeOffset(Today.AddDays(-daysAgo).ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero);
         var propagation = new Propagation
         {
             InitialCount = pottedUp + failed,
             PottedUpCount = pottedUp,
             FailedCount = failed,
-            UpdatedAt = moment,
-            DeletedAt = deleted ? moment : null
+            DeletedAt = deleted ? Time.GetUtcNow() : null
         };
-        propagation.SyncStageWithCounts();
+        propagation.SyncStageWithCounts(Today.AddDays(-daysAgo));
         return propagation;
     }
 
@@ -35,7 +33,7 @@ public class TodayBoardTests
     [Fact]
     public void Finished_this_month_is_null_when_nothing_finished()
     {
-        var going = new Propagation { InitialCount = 3, UpdatedAt = Time.GetUtcNow() };
+        var going = new Propagation { InitialCount = 3 };
 
         Assert.Null(TodayBoard.FinishedThisMonth([going, Finished(1, 0, 40)], Time));
     }
@@ -97,7 +95,7 @@ public class TodayBoardTests
     public void Finished_and_deleted_propagations_are_left_out()
     {
         var done = Started("Done", 20);
-        done.RecordPottedUp(1);
+        done.RecordPottedUp(1, new DateOnly(2026, 9, 20));
         var deleted = Started("Deleted", 20);
         deleted.DeletedAt = DateTimeOffset.UtcNow;
 

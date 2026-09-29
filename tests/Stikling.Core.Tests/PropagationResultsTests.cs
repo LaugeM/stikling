@@ -28,7 +28,7 @@ public class PropagationResultsTests
             FailedCount = failed,
             Stage = stage
         };
-        batch.SyncStageWithCounts();
+        batch.SyncStageWithCounts(new DateOnly(2026, 9, 20));
         return batch;
     }
 

@@ -17,16 +17,14 @@ public static class TodayBoard
 {
     /// <summary>
     /// The units in propagations that finished (Done or Failed) in the current month, and how many
-    /// of them were potted up. A propagation keeps no date for when it finished, so the day it was
-    /// last saved stands in, which is the day of the last unit potted up or failed unless it was
-    /// edited afterwards. Null when nothing finished this month.
+    /// of them were potted up, going by <see cref="Propagation.FinishedOn"/>. Null when nothing
+    /// finished this month.
     /// </summary>
     public static MonthResult? FinishedThisMonth(IEnumerable<Propagation> propagations, TimeProvider time)
     {
         var today = time.Today();
         var finished = propagations
-            .Where(p => !p.IsDeleted && !p.IsActive
-                        && time.LocalDay(p.UpdatedAt) is var day && day.Year == today.Year && day.Month == today.Month)
+            .Where(p => !p.IsDeleted && p.FinishedOn is { } day && day.Year == today.Year && day.Month == today.Month)
             .ToList();
         var total = finished.Sum(p => p.PottedUpCount + p.FailedCount);
         return total == 0 ? null : new MonthResult(finished.Sum(p => p.PottedUpCount), total);

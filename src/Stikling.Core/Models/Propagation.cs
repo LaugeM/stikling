@@ -41,6 +41,9 @@ public sealed class Propagation : Entity
     /// <summary>The day it first reached Rooted, kept so batches can be compared.</summary>
     public DateOnly? RootedOn { get; set; }
 
+    /// <summary>The day the last unit was potted up or failed, so the propagation became Done or Failed. Null while it is going.</summary>
+    public DateOnly? FinishedOn { get; set; }
+
     /// <summary>The day the first root showed on any unit in the batch.</summary>
     public DateOnly? FirstRootOn { get; set; }
 
@@ -173,19 +176,19 @@ public sealed class Propagation : Entity
     }
 
     /// <summary>Records that <paramref name="count"/> units became plants.</summary>
-    public void RecordPottedUp(int count)
+    public void RecordPottedUp(int count, DateOnly today)
     {
         CheckCount(count);
         PottedUpCount += count;
-        SyncStageWithCounts();
+        SyncStageWithCounts(today);
     }
 
     /// <summary>Records that <paramref name="count"/> units didn't make it.</summary>
-    public void RecordFailed(int count)
+    public void RecordFailed(int count, DateOnly today)
     {
         CheckCount(count);
         FailedCount += count;
-        SyncStageWithCounts();
+        SyncStageWithCounts(today);
     }
 
     private void CheckCount(int count)
@@ -201,16 +204,20 @@ public sealed class Propagation : Entity
     /// finished propagation (the count was raised when editing) open it again. A finished
     /// propagation isn't resting any more, so it stops being dormant, and nothing is left to do for it.
     /// </summary>
-    public void SyncStageWithCounts()
+    public void SyncStageWithCounts(DateOnly today)
     {
         if (RemainingCount <= 0)
         {
             Stage = PottedUpCount > 0 ? PropagationStage.Done : PropagationStage.Failed;
+            FinishedOn ??= today;
             DormantSince = null;
             Attention = null;
         }
         else if (!IsActive)
+        {
             Stage = PropagationStage.Started;
+            FinishedOn = null;
+        }
     }
 
     public IReadOnlyList<string> Validate(DateOnly today)

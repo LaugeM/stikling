@@ -90,7 +90,7 @@ public class MilestoneTests
     public void Milestones_cant_be_recorded_on_a_finished_propagation()
     {
         var corms = Corms();
-        corms.RecordFailed(1);
+        corms.RecordFailed(1, new DateOnly(2026, 9, 20));
 
         Assert.Throws<InvalidOperationException>(() => corms.RecordMilestone(Milestone.FirstLeaf, Today));
     }
