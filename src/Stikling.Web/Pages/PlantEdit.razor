@@ -261,6 +261,10 @@ else
     [SupplyParameterFromQuery(Name = "parent")]
     public Guid? ParentId { get; set; }
 
+    /// <summary>Starts from a copy of another plant, from "Add another like this" on its page.</summary>
+    [SupplyParameterFromQuery(Name = "copy")]
+    public Guid? CopyOfId { get; set; }
+
     private readonly string cameraId = $"camera-{Guid.NewGuid():N}";
     private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
     private ElementReference cameraInput;
@@ -327,6 +331,9 @@ else
         if (IsNew)
         {
             // The draft keeps its id, so photos taken before saving stay with it
+            if (plant is null && CopyOfId is { } copyOfId && all.FirstOrDefault(p => p.Id == copyOfId) is { } source)
+                plant = source.Duplicate();
+                plant.AcquiredOn = LooseDate.Of(Today);
             plant ??= new Plant { AcquiredOn = LooseDate.Of(Today) };
             if (ParentId is { } parentId && all.FirstOrDefault(p => p.Id == parentId) is { } parent)
             {
