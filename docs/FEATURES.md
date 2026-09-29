@@ -38,7 +38,7 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them.
 
 1. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
-2. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished, and I want it in place before winter.
+2. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
 3. **Problem log**: what you saw on a plant, what you did, and whether it helped.
 4. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
 5. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
