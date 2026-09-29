@@ -59,6 +59,26 @@
             <WaterInput Id="care-water" Placeholder="Optional" @bind-Litres="water" />
         </div>
 
+        @if (!showReadings && ec is null && ph is null)
+        {
+            <button type="button" class="btn btn-link btn-sm p-0 mt-2" @onclick="() => showReadings = true">Add EC and pH</button>
+        }
+        else
+        {
+            <div class="row g-2 mt-1">
+                <div class="col-6">
+                    <label class="form-label" for="care-ec">EC (mS/cm)</label>
+                    <input type="number" id="care-ec" class="form-control form-control-sm"
+                           min="0" max="20" step="0.1" inputmode="decimal" placeholder="Optional" @bind="ec" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="care-ph">pH</label>
+                    <input type="number" id="care-ph" class="form-control form-control-sm"
+                           min="0" max="14" step="0.1" inputmode="decimal" placeholder="Optional" @bind="ph" />
+                </div>
+            </div>
+        }
+
         <div class="mt-2">
             <div class="form-label">What went in the water</div>
             @if (products.Count == 0)
@@ -137,6 +157,9 @@
     private decimal? water;
     // The products picked for this entry, in the order they were picked, each with its own dose
     private readonly List<ProductDose> doses = [];
+    private decimal? ec;
+    private decimal? ph;
+    private bool showReadings;
     private string? notes;
     private string? error;
     private bool busy;
@@ -175,6 +198,9 @@
             doses.Clear();
             feed = null;
             water = null;
+            ec = null;
+            ph = null;
+            showReadings = false;
         }
         error = null;
     }
@@ -225,12 +251,15 @@
         try
         {
             await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, Labels.For, moisture, doses,
-                feed, water > 0 ? water : null);
+                feed, water > 0 ? water : null, ec, ph);
             notes = null;
             moisture = null;
             doses.Clear();
             feed = null;
             water = null;
+            ec = null;
+            ph = null;
+            showReadings = false;
             occurredOn = Today;
             await OnLogged.InvokeAsync();
         }

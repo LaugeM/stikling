@@ -253,7 +253,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Batch calculator: pick a mix and a water volume, and get how much of each product to measure out. On the feeds page, and on the care entry once the water is filled in | 6 | S | v1.x |
 | ◐ | See which plants got a given feed and when, so a mix that isn't working shows up. The feeds list says how many plants have had each feed and when it was last given. A list of the plants and dates isn't built | 7 | S | v1.x |
 | ☐ | A different mix for propagations, e.g. quarter strength with a rooting stimulant | 7 | S | v1.x |
-| ☐ | EC and pH reading on a feed, for the semi-hydro reservoirs | 8 | S | v1.x |
+| ✅ | EC and pH reading on a feed, for the semi-hydro reservoirs | 8 | S | v1.x |
 | ☐ | Mixing a feed takes the products off the supplies stock | 8 | M | v1.x |
 
 ## 6. Today screen
