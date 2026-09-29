@@ -78,6 +78,10 @@ public sealed class SyncRunner(
     /// <summary>Syncs now, or once more after the sync that is running. Never throws.</summary>
     public Task SyncNowAsync()
     {
+        // Also keeps a sync from starting while signing out
+        if (!signedIn)
+            return current;
+
         if (Running)
         {
             again = true;
@@ -124,14 +128,15 @@ public sealed class SyncRunner(
         StatusChanged?.Invoke();
         try
         {
+            // Nothing is awaited between the last check of "again" and Running turning false, so
+            // a sync asked for while this one ends is never dropped
             do
             {
                 again = false;
                 await SyncOnceAsync();
+                Pending = await store.CountPendingAsync();
             }
             while (again && signedIn);
-
-            Pending = await store.CountPendingAsync();
         }
         catch (Exception e)
         {
@@ -149,6 +154,7 @@ public sealed class SyncRunner(
     {
         try
         {
+            Problem = null;
             if (!(await account.LoadAsync()).SignedIn)
             {
                 signedIn = false;
@@ -162,7 +168,6 @@ public sealed class SyncRunner(
                 return;
 
             var result = await new SyncService(store, api).SyncAsync(collection.Id, collection.Role == "Editor");
-            Problem = null;
             Refused = result.Refused;
             LastSynced = time.GetUtcNow();
             await files.SetAsync(LastSyncKey, LastSynced.Value.ToString("O"));
@@ -211,12 +216,20 @@ public sealed class SyncRunner(
 
         signedIn = state.SignedIn;
         if (signedIn)
-            await SyncNowAsync();
-        else
         {
-            // Signed out in another tab. The data stays, like choosing to keep it
-            await current;
+            await SyncNowAsync();
+            return;
+        }
+
+        // Signed out in another tab. The data stays, like choosing to keep it
+        await current;
+        try
+        {
             await ForgetAsync();
+        }
+        catch (JSException)
+        {
+            // Nothing waits for this, so it mustn't stop the app
         }
     }
 
