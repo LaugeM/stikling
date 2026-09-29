@@ -79,7 +79,16 @@ else
 
     public async ValueTask DisposeAsync()
     {
-        if (mounted)
+        if (!mounted)
+            return;
+
+        try
+        {
             await Account.UnmountSignInAsync(signIn);
+        }
+        catch (JSException)
+        {
+            // The page is going away either way
+        }
     }
 }

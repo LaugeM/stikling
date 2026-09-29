@@ -29,7 +29,11 @@
 {
     <section class="settings-section">
         <h2>Account</h2>
-        @if (account is { SignedIn: true })
+        @if (!accountHintRead)
+        {
+            @* Nothing until it's known whether to check, so a signed-in device never shows "Not signed in" *@
+        }
+        else if (account is { SignedIn: true })
         {
             <div class="room-row">
                 <span class="room-name account-email">@account.Email</span>
@@ -50,6 +54,10 @@
                     </text>
                 }
             </p>
+            @if (accountMessage is not null)
+            {
+                <p class="settings-message" role="alert">@accountMessage</p>
+            }
         }
         else if (accountChecking)
         {
@@ -429,6 +437,8 @@
     private bool accountLoadStarted;
     private bool accountUnreachable;
     private bool accountBusy;
+    private bool accountHintRead;
+    private string? accountMessage;
     private bool? serverReached;
 
     private DateOnly TodayDate => Time.Today();
@@ -439,6 +449,7 @@
         Account.Changed += OnAccountChanged;
         // Clerk is only loaded on a device where someone signed in, so it stays out of the way otherwise
         accountChecking = Account.IsAvailable && await Account.WasSignedInAsync();
+        accountHintRead = true;
         mode = await Theme.GetModeAsync();
         lastBackup = await Files.GetLastBackupAsync();
         photoReminder = (await SettingsService.GetAsync()).PhotoReminder;
@@ -600,8 +611,10 @@
             await Api.GetMeAsync();
             serverReached = true;
         }
-        catch (HttpRequestException)
+        catch (Exception)
         {
+            // No connection, an expired session Clerk couldn't renew, or the API turning us away.
+            // Nothing here is worth more than the line saying the server can't be reached.
             serverReached = false;
         }
 
@@ -610,9 +623,14 @@
 
     private async void OnAccountChanged(AccountState state)
     {
+        // Clerk also reports each renewed token, which changes nothing shown here
+        if (state == account)
+            return;
+
         account = state;
         accountUnreachable = false;
         serverReached = null;
+        accountMessage = null;
         StateHasChanged();
         await CheckServerAsync();
     }
@@ -620,10 +638,21 @@
     private async Task SignOutAsync()
     {
         accountBusy = true;
-        await Account.SignOutAsync(Nav.Uri);
-        account = new AccountState(false, null);
-        serverReached = null;
-        accountBusy = false;
+        accountMessage = null;
+        try
+        {
+            await Account.SignOutAsync(Nav.Uri);
+            account = new AccountState(false, null);
+            serverReached = null;
+        }
+        catch (JSException)
+        {
+            accountMessage = "Couldn't sign out. Check that you're online and try again.";
+        }
+        finally
+        {
+            accountBusy = false;
+        }
     }
 
     private async Task ExportPlantsCsvAsync()
