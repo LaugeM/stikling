@@ -47,10 +47,7 @@ public sealed class Propagation : Entity
     /// <summary>The day the first new leaf showed on any unit in the batch.</summary>
     public DateOnly? FirstLeafOn { get; set; }
 
-    /// <summary>How many seeds were sown. Null when it isn't grown from seed. The sown date is <see cref="StartedOn"/>.</summary>
-    public int? SeedsSown { get; set; }
-
-    /// <summary>How many of the seeds have come up so far.</summary>
+    /// <summary>How many of the seeds have come up so far. Only for seeds, where <see cref="InitialCount"/> is the number sown and <see cref="StartedOn"/> the sowing day.</summary>
     public int? SeedsGerminated { get; set; }
 
     /// <summary>The day the first seed came up.</summary>
@@ -83,10 +80,10 @@ public sealed class Propagation : Entity
     /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
     public Attention? Attention { get; set; }
 
-    /// <summary>Share of the sown seeds that came up, 0 to 1 or more. Null without a sown count.</summary>
+    /// <summary>Share of the sown seeds that came up. Null unless it's seeds with a count of how many came up.</summary>
     [JsonIgnore]
     public double? GerminationRate =>
-        SeedsSown is > 0 ? (SeedsGerminated ?? 0) / (double)SeedsSown : null;
+        Type == PropagationType.Seed && SeedsGerminated is { } up && InitialCount > 0 ? up / (double)InitialCount : null;
 
     /// <summary>Units still in the propagation (not potted up and not failed).</summary>
     [JsonIgnore]
@@ -231,9 +228,9 @@ public sealed class Propagation : Entity
             errors.Add("A root or leaf can't show before it was started.");
         if (FirstRootOn > today || FirstLeafOn > today)
             errors.Add("A root or leaf can't show in the future.");
-        if (SeedsSown < 0 || SeedsGerminated < 0)
-            errors.Add("Seed counts can't be negative.");
-        else if (SeedsGerminated > (SeedsSown ?? 0))
+        if (SeedsGerminated < 0)
+            errors.Add("The number that came up can't be negative.");
+        else if (SeedsGerminated > InitialCount)
             errors.Add("More seeds can't have come up than were sown.");
         if (FirstGerminatedOn < StartedOn)
             errors.Add("A seed can't come up before it was sown.");

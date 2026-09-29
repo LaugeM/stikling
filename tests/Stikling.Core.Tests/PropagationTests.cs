@@ -113,21 +113,28 @@ public class PropagationTests
     [Fact]
     public void Germination_rate_is_the_share_that_came_up()
     {
-        Assert.Equal(0.6, new Propagation { SeedsSown = 20, SeedsGerminated = 12 }.GerminationRate);
-        Assert.Equal(0, new Propagation { SeedsSown = 20 }.GerminationRate);
-        Assert.Null(new Propagation().GerminationRate);
-        Assert.Null(new Propagation { SeedsSown = 0, SeedsGerminated = 0 }.GerminationRate);
+        Assert.Equal(0.6, Seeds(20, 12).GerminationRate);
+        Assert.Equal(0, Seeds(20, 0).GerminationRate);
+        Assert.Null(Seeds(20, null).GerminationRate);
+
+        var cuttings = Seeds(20, 12);
+        cuttings.Type = PropagationType.Cutting;
+        Assert.Null(cuttings.GerminationRate);
     }
+
+    private static Propagation Seeds(int sown, int? up) =>
+        new() { Genus = "Coleus", Type = PropagationType.Seed, InitialCount = sown, SeedsGerminated = up };
 
     [Fact]
     public void Validate_checks_the_seed_counts_and_date()
     {
         var day = new DateOnly(2026, 5, 1);
-        var seeds = new Propagation { Genus = "Coleus", StartedOn = day, SeedsSown = 10, SeedsGerminated = 11 };
+        var seeds = Seeds(10, 11);
+        seeds.StartedOn = day;
         Assert.Contains("More seeds can't have come up than were sown.", seeds.Validate(day));
 
         seeds.SeedsGerminated = -1;
-        Assert.Contains("Seed counts can't be negative.", seeds.Validate(day));
+        Assert.Contains("The number that came up can't be negative.", seeds.Validate(day));
 
         seeds.SeedsGerminated = 10;
         seeds.FirstGerminatedOn = day.AddDays(-1);

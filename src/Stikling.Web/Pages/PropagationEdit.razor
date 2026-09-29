@@ -63,6 +63,21 @@ else
                     <InputNumber id="count" class="form-control" @bind-Value="propagation.InitialCount" min="@MinCount" inputmode="numeric" />
                 </div>
             </div>
+            @if (propagation.Type == PropagationType.Seed)
+            {
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" for="seeds-up">Came up</label>
+                        <InputNumber id="seeds-up" class="form-control" @bind-Value="propagation.SeedsGerminated" min="0" max="@propagation.InitialCount" inputmode="numeric" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="first-up">First on</label>
+                        <InputDate id="first-up" class="form-control" @bind-Value="propagation.FirstGerminatedOn"
+                                   min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-text">How many seeds have come up so far, out of the number sown. Leave empty until the first one does.</div>
+                </div>
+            }
             <div class="row g-2 mb-1">
                 <div class="col-6">
                     <label class="form-label" for="started">Started on</label>
@@ -79,29 +94,6 @@ else
                 </div>
             </div>
             <div class="form-text">Already rooting when you write it down? Say so here, the stage can be changed later.</div>
-            <div class="form-check mt-3">
-                <input class="form-check-input" type="checkbox" id="from-seed" checked="@fromSeed" @onchange="SetFromSeed" />
-                <label class="form-check-label" for="from-seed">Grown from seed</label>
-            </div>
-            @if (fromSeed)
-            {
-                <div class="row g-2 mt-1">
-                    <div class="col-4">
-                        <label class="form-label" for="seeds-sown">Sown</label>
-                        <InputNumber id="seeds-sown" class="form-control" @bind-Value="propagation.SeedsSown" min="0" inputmode="numeric" />
-                    </div>
-                    <div class="col-4">
-                        <label class="form-label" for="seeds-up">Came up</label>
-                        <InputNumber id="seeds-up" class="form-control" @bind-Value="propagation.SeedsGerminated" min="0" inputmode="numeric" />
-                    </div>
-                    <div class="col-4">
-                        <label class="form-label" for="first-up">First on</label>
-                        <InputDate id="first-up" class="form-control" @bind-Value="propagation.FirstGerminatedOn"
-                                   min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
-                    </div>
-                </div>
-                <div class="form-text">Sown is counted from the started date. Update the rest as seeds come up.</div>
-            }
             @if (propagation.Stage == PropagationStage.Rooted || propagation.RootedOn is not null)
             {
                 <div class="mt-3">
@@ -249,8 +241,6 @@ else
     private string? location; // as picked, "Kitchen / Window"; made into a room when saving
     private IReadOnlyList<string> experiments = [];
 
-    private bool fromSeed;
-
     private bool IsNew => Id is null;
 
     private DateOnly Today => Time.Today();
@@ -285,7 +275,6 @@ else
             notFound = propagation is null;
         }
 
-        fromSeed = propagation?.SeedsSown is not null;
         location = places.NameOf(propagation?.PlaceId);
     }
 
@@ -293,13 +282,6 @@ else
     {
         if (!propagation!.RootingAids.Remove(aid))
             propagation.RootingAids.Add(aid);
-    }
-
-    private void SetFromSeed(ChangeEventArgs e)
-    {
-        fromSeed = (bool?)e.Value == true;
-        if (fromSeed && propagation!.Type == PropagationType.Seed && propagation.SeedsSown is null)
-            propagation.SeedsSown = propagation.InitialCount;
     }
 
     private void SetDormant(ChangeEventArgs e) =>
@@ -327,9 +309,8 @@ else
         if (propagation is null)
             return;
 
-        if (!fromSeed)
+        if (propagation.Type != PropagationType.Seed)
         {
-            propagation.SeedsSown = null;
             propagation.SeedsGerminated = null;
             propagation.FirstGerminatedOn = null;
         }

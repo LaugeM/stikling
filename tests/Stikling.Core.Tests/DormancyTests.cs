@@ -139,7 +139,7 @@ public class DormancyTests
     [Fact]
     public void Seed_counts_are_described_when_they_change()
     {
-        var before = new Propagation { Nickname = "Coleus", StartedOn = Today, SeedsSown = 20 };
+        var before = new Propagation { Nickname = "Coleus", StartedOn = Today, Type = PropagationType.Seed, InitialCount = 20 };
         var after = before.Copy();
         after.SeedsGerminated = 12;
 
