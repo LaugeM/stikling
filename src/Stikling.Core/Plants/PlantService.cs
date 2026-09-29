@@ -114,6 +114,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 
         var before = plant.Copy();
         plant.QuarantinedSince = since;
+        plant.QuarantineDays = since is null ? null : plant.QuarantineDays ?? Plant.DefaultQuarantineDays;
         await UpdateAsync(before, plant, label);
     }
 

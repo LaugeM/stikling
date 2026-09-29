@@ -107,6 +107,30 @@ else
         </section>
     }
 
+    @if (QuarantineNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Quarantine is up</h2>
+            <ul class="item-list">
+                @foreach (var plant in QuarantineNow)
+                {
+                    <TodayRow @key="plant.Id"
+                              OnPutOff="days => PutOffAsync(PutOffs.Quarantine(plant.Id, plant.QuarantinedSince!.Value), Today.AddDays(days))">
+                        <a class="item-card" href="plants/@plant.Id">
+                            <SubjectThumb Subject="plant" />
+                            <div class="item-text">
+                                <div class="item-name">@plant.DisplayName</div>
+                                <div class="item-meta">
+                                    <span>Time to check it and let it out · in quarantine @Labels.Count(plant.DaysInQuarantine(Today) ?? 0, "day")</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
     <section class="today-section">
         <h2>Worth a look</h2>
         @if (ChecksNow.Count == 0)
@@ -217,6 +241,10 @@ else
 
     private List<AttentionItem> FlaggedNow =>
         flagged.Where(i => !putOffs.IsPutOff(PutOffs.Flag(i.Subject.Id, i.Attention), Today)).ToList();
+
+    private List<Plant> QuarantineNow =>
+        TodayBoard.QuarantineUp(plants, Today)
+            .Where(p => !putOffs.IsPutOff(PutOffs.Quarantine(p.Id, p.QuarantinedSince!.Value), Today)).ToList();
 
     // A propagation already under Needs attention isn't listed a second time
     private List<PropagationCheck> ChecksNow =>

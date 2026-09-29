@@ -66,6 +66,17 @@ public sealed class Plant : Entity
     [JsonIgnore]
     public bool InQuarantine => QuarantinedSince is not null;
 
+    /// <summary>How many days the quarantine lasts. Null when it isn't in quarantine.</summary>
+    public int? QuarantineDays { get; set; }
+
+    /// <summary>The length given to a quarantine when it starts.</summary>
+    public const int DefaultQuarantineDays = 14;
+
+    /// <summary>The day the quarantine is up, or null when it isn't in quarantine.</summary>
+    [JsonIgnore]
+    public DateOnly? QuarantineEnds =>
+        QuarantinedSince?.AddDays(QuarantineDays ?? DefaultQuarantineDays);
+
     /// <summary>
     /// The day it went dormant, e.g. an alocasia that dropped its leaves for winter. Null while
     /// it's growing, the same way as quarantine.

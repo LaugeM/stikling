@@ -37,7 +37,7 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
+1. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
 2. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
 3. **Problem log**: what you saw on a plant, what you did, and whether it helped.
 4. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
@@ -202,7 +202,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | Interval ("every 3–5 days") with "next treatment due" shown on Today | 3 | S | v1.x |
 | ✅ | A case being watched is due a check for pests once a week instead of a treatment. Checks are logged on the case, and "Found some" puts it back to treating | 3 | S | v1.x |
 | ✅ | Quarantine flag with the day it started, a "Quarantine" filter and a badge on the card. Going in and coming out are recorded on the plant's history | 3 | S | v1.x |
-| ☐ | A length for quarantine, e.g. two weeks. When it is up, Today says it is time to check the plant and let it out | 4 | S | v1.x |
+| ✅ | A length for quarantine, e.g. two weeks. When it is up, Today says it is time to check the plant and let it out | 4 | S | v1.x |
 | ✅ | **Treatment recipes**, e.g. "Alcohol spray: isopropyl alcohol and a drop of dish soap, topped up with water". The ingredients are typed, each with an optional amount like 250 ml per 1 L, and there's a note on how to use it. "Mix a batch" works out the amounts for any size of bottle. Logging a treatment offers your recipes to pick from, and the treatment saves the recipe as it was that day, so changing the recipe doesn't rewrite history. Recipes are under Settings | 4 | M | v1.x |
 | ✅ | Pest overview: all active cases in one list | 4 | S | v1.x |
 | ✅ | **Sticky trap counts** on a pest case: count everything on a (blue/yellow) sticky trap and tick when a new one goes up, and the app works out how many were caught since last time. A small chart of the catch per week shows whether treatment is working. A count never moves the next treatment, but on a case being watched it counts as the weekly check, and new ones on the trap ask whether to start treating again | 4 | M | v1.x |
