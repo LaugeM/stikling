@@ -95,7 +95,7 @@ else
                 </div>
                 <div class="mb-2">
                     <label class="form-label" for="potup-medium">Grows in</label>
-                    <select id="potup-medium" class="form-select" @bind="potUp.Medium">
+                    <select id="potup-medium" class="form-select" value="@potUp.Medium" @onchange="SetPotUpMedium">
                         @foreach (var medium in Enum.GetValues<GrowingMedium>())
                         {
                             <option value="@medium">@Labels.For(medium)</option>
@@ -106,7 +106,7 @@ else
                     <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
                 </div>
                 <div class="mb-2">
-                    <PotPicker @bind-Value="potUp.PotId" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                    <PotPicker Value="potUp.PotId" ValueChanged="SetPotUpPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
                 </div>
                 <div class="mb-2">
                     <label class="form-label" for="potup-date">Date</label>
@@ -234,6 +234,12 @@ else
                     @MilestoneRow(Milestone.FirstRoot, "First root", propagation.FirstRootOn, propagation.DaysToFirstRoot)
                     @MilestoneRow(Milestone.FirstLeaf, "First leaf", propagation.FirstLeafOn, propagation.DaysToFirstLeaf)
 
+                    @if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } cormSize)
+                    {
+                        <dt>Corm size</dt>
+                        <dd>@cormSize.ToString("0.##") mm</dd>
+                    }
+
                     @if (propagation.Type == PropagationType.Seed && propagation.SeedsGerminated is { } up)
                     {
                         <dt>Seeds</dt>
@@ -255,6 +261,14 @@ else
                         @if (!string.IsNullOrWhiteSpace(propagation.Container))
                         {
                             <text> · @propagation.Container</text>
+                        }
+                        @if (Mix is { } mix)
+                        {
+                            <div class="detail-sub">In @mix.Name@(mix.IsRetired ? " (no longer mixed)" : "")</div>
+                            @if (!string.IsNullOrWhiteSpace(mix.Recipe))
+                            {
+                                <div class="detail-sub">@mix.Recipe</div>
+                            }
                         }
                     </dd>
 
@@ -361,6 +375,8 @@ else
     private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
+
+    private SoilMix? Mix => propagation?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id && !m.IsDeleted) : null;
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
     private bool loaded;
@@ -485,8 +501,25 @@ else
         historyVersion++;
     }
 
+    // A pot that suggests a medium sets it, until the person has picked a medium in this form
+    private bool potUpMediumChosen;
+
+    private void SetPotUpMedium(ChangeEventArgs e)
+    {
+        potUp.Medium = Enum.Parse<GrowingMedium>(e.Value?.ToString() ?? nameof(GrowingMedium.Soil));
+        potUpMediumChosen = true;
+    }
+
+    private void SetPotUpPot(Guid? id)
+    {
+        potUp.PotId = id;
+        var pot = pots.FirstOrDefault(p => p.Id == id);
+        potUp.Medium = PotKinds.MediumAfterPicking(pot, potUp.Medium, potUpMediumChosen);
+    }
+
     private void OpenPotUp()
     {
+        potUpMediumChosen = false;
         var p = propagation!;
         potUp = new PotUpForm
         {
@@ -495,6 +528,7 @@ else
             Date = Today,
             Location = places.NameOf(p.PlaceId),
             Medium = p.Medium,
+            SoilMixId = p.Medium == GrowingMedium.Soil ? p.SoilMixId : null,
         };
         message = null;
         panel = Panel.PotUp;

@@ -24,6 +24,9 @@ public sealed class Propagation : Entity
     public PropagationType Type { get; set; } = PropagationType.Cutting;
     public GrowingMedium Medium { get; set; } = GrowingMedium.Water;
 
+    /// <summary>The soil mix it is in, when the medium is soil and it is one you have saved.</summary>
+    public Guid? SoilMixId { get; set; }
+
     /// <summary>Free text for the setup, e.g. "Humidity box" or "Glass jar".</summary>
     public string? Container { get; set; }
 
@@ -41,6 +44,9 @@ public sealed class Propagation : Entity
     /// <summary>The day it first reached Rooted, kept so batches can be compared.</summary>
     public DateOnly? RootedOn { get; set; }
 
+    /// <summary>The day the last unit was potted up or failed, so the propagation became Done or Failed. Null while it is going.</summary>
+    public DateOnly? FinishedOn { get; set; }
+
     /// <summary>The day the first root showed on any unit in the batch.</summary>
     public DateOnly? FirstRootOn { get; set; }
 
@@ -52,6 +58,9 @@ public sealed class Propagation : Entity
 
     /// <summary>The day the first seed came up.</summary>
     public DateOnly? FirstGerminatedOn { get; set; }
+
+    /// <summary>The size of the corm when it was started, in millimetres, measured across. Only for corms.</summary>
+    public decimal? CormSizeMm { get; set; }
 
     /// <summary>What was used to help it root, e.g. cinnamon on the cut or a dome for humidity.</summary>
     public List<RootingAid> RootingAids { get; set; } = [];
@@ -155,6 +164,13 @@ public sealed class Propagation : Entity
         NoteFirstRoot();
     }
 
+    /// <summary>A mix only makes sense in soil, so moving to another medium lets go of it.</summary>
+    public void ClearMixUnlessSoil()
+    {
+        if (Medium != GrowingMedium.Soil)
+            SoilMixId = null;
+    }
+
     public Propagation Copy()
     {
         var copy = (Propagation)MemberwiseClone();
@@ -173,19 +189,19 @@ public sealed class Propagation : Entity
     }
 
     /// <summary>Records that <paramref name="count"/> units became plants.</summary>
-    public void RecordPottedUp(int count)
+    public void RecordPottedUp(int count, DateOnly today)
     {
         CheckCount(count);
         PottedUpCount += count;
-        SyncStageWithCounts();
+        SyncStageWithCounts(today);
     }
 
     /// <summary>Records that <paramref name="count"/> units didn't make it.</summary>
-    public void RecordFailed(int count)
+    public void RecordFailed(int count, DateOnly today)
     {
         CheckCount(count);
         FailedCount += count;
-        SyncStageWithCounts();
+        SyncStageWithCounts(today);
     }
 
     private void CheckCount(int count)
@@ -201,16 +217,20 @@ public sealed class Propagation : Entity
     /// finished propagation (the count was raised when editing) open it again. A finished
     /// propagation isn't resting any more, so it stops being dormant, and nothing is left to do for it.
     /// </summary>
-    public void SyncStageWithCounts()
+    public void SyncStageWithCounts(DateOnly today)
     {
         if (RemainingCount <= 0)
         {
             Stage = PottedUpCount > 0 ? PropagationStage.Done : PropagationStage.Failed;
+            FinishedOn ??= today;
             DormantSince = null;
             Attention = null;
         }
         else if (!IsActive)
+        {
             Stage = PropagationStage.Started;
+            FinishedOn = null;
+        }
     }
 
     public IReadOnlyList<string> Validate(DateOnly today)
@@ -236,6 +256,8 @@ public sealed class Propagation : Entity
             errors.Add("A seed can't come up before it was sown.");
         if (FirstGerminatedOn > today)
             errors.Add("A seed can't come up in the future.");
+        if (CormSizeMm is <= 0 or > 200)
+            errors.Add("The corm size must be more than 0 and at most 200 mm.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
         return errors;

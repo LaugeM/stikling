@@ -162,7 +162,34 @@ else
                     {
                         var measuring = mixing == use.Feed.Id;
                         <div class="feed-title">@use.Feed.Name</div>
-                        <div class="feed-use">@Given(use)</div>
+                        <div class="feed-use">
+                            @if (use.Plants > 0)
+                            {
+                                <button type="button" class="btn btn-link btn-sm p-0" aria-expanded="@(showing == use.Feed.Id)"
+                                        @onclick="() => TogglePlantsAsync(use.Feed)">@Given(use)</button>
+                            }
+                            else
+                            {
+                                @Given(use)
+                            }
+                        </div>
+
+                        @if (showing == use.Feed.Id)
+                        {
+                            <ul class="feed-plants">
+                                @foreach (var fed in fedPlants)
+                                {
+                                    <li>
+                                        <a href="plants/@fed.Plant.Id">@fed.Plant.DisplayName</a>
+                                        @if (fed.Plant.Status != PlantStatus.Active)
+                                        {
+                                            <span class="feed-plant-status">@Labels.For(fed.Plant.Status)</span>
+                                        }
+                                        <span class="feed-plant-dates">· @DatesText(fed)</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
 
                         @if (measuring)
                         {
@@ -218,6 +245,10 @@ else
     private bool editing;
     private Guid? confirming;
 
+    // The feed whose plants are open, and the plants that got it
+    private Guid? showing;
+    private IReadOnlyList<FeedPlant> fedPlants = [];
+
     // The feed being measured out, and for how much water. The water is kept between feeds,
     // since it's usually the same watering can.
     private Guid? mixing;
@@ -249,6 +280,24 @@ else
     private static string Given(FeedUse use) => use.LastUsed is { } last
         ? $"Given to {Labels.Plants(use.Plants)}, last {Labels.Date(last)}"
         : "Not given yet";
+
+    private async Task TogglePlantsAsync(Feed feed)
+    {
+        if (showing == feed.Id)
+        {
+            showing = null;
+            return;
+        }
+
+        fedPlants = await FeedService.GetPlantsAsync(feed.Id);
+        showing = feed.Id;
+    }
+
+    private static string DatesText(FeedPlant fed)
+    {
+        var text = string.Join(", ", fed.Dates.Select(Labels.Date));
+        return fed.More > 0 ? $"{text} and {fed.More} more" : text;
+    }
 
     private static string DeleteWarning(FeedUse use) => use.Plants == 0
         ? $"Delete {use.Feed.Name}?"

@@ -41,6 +41,7 @@ public sealed class PropagationService(
     /// <summary>Saves a new propagation and records it on its own history and the parent's.</summary>
     public async Task CreateAsync(Propagation propagation, Func<Enum, string> label)
     {
+        propagation.ClearMixUnlessSoil();
         await propagations.SaveAsync(propagation);
 
         var what = Describe(propagation, label);
@@ -77,7 +78,8 @@ public sealed class PropagationService(
         Func<Enum, string> label,
         Func<Guid, string?>? placeName = null)
     {
-        after.SyncStageWithCounts();
+        after.ClearMixUnlessSoil();
+        after.SyncStageWithCounts(Today);
         after.NoteFirstRoot();
         after.NoteRooted(Today);
         await propagations.SaveAsync(after);
@@ -143,7 +145,7 @@ public sealed class PropagationService(
             PlaceId = request.PlaceId,
             Medium = request.Medium,
             InnerPotId = request.PotId,
-            SoilMixId = request.SoilMixId,
+            SoilMixId = request.Medium == GrowingMedium.Soil ? request.SoilMixId : null,
             ParentPlantId = propagation.ParentPlantId,
             FromPropagationId = propagation.Id
         }).ToList();
@@ -151,7 +153,7 @@ public sealed class PropagationService(
         // Check everything before saving anything
         if (newPlants.SelectMany(p => p.Validate(Today)).FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
-        propagation.RecordPottedUp(request.Count);
+        propagation.RecordPottedUp(request.Count, Today);
 
         var occurredAt = time.MomentOn(request.Date);
         foreach (var plant in newPlants)
@@ -181,7 +183,7 @@ public sealed class PropagationService(
     /// <summary>Records units that didn't make it, with an optional reason ("rotted").</summary>
     public async Task MarkFailedAsync(Propagation propagation, int count, string? reason = null)
     {
-        propagation.RecordFailed(count);
+        propagation.RecordFailed(count, Today);
         await propagations.SaveAsync(propagation);
 
         var text = Clean(reason) is { } r ? $"{count} failed: {r}" : $"{count} failed";

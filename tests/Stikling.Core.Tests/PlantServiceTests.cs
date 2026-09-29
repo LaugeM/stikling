@@ -184,6 +184,54 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Move_sets_the_place_and_records_it_on_each_plant()
+    {
+        var places = new FakePlaceRepository();
+        var a = new Plant { Nickname = "A", PlaceId = places.IdOf("Living room") };
+        var b = new Plant { Nickname = "B" };
+        await plants.SaveAsync(a);
+        await plants.SaveAsync(b);
+        var bedroom = places.IdOf("Bedroom");
+
+        var moved = await service.MoveAsync([a, b], bedroom, Label, id => places.Current.NameOf(id));
+
+        Assert.Equal(2, moved);
+        Assert.Equal(bedroom, a.PlaceId);
+        Assert.Equal(bedroom, b.PlaceId);
+        var texts = timeline.Entries.Where(e => e.Kind == TimelineKind.Change).ToList();
+        Assert.Equal(2, texts.Count);
+        Assert.Contains(texts, e => e.SubjectId == a.Id && e.Text == "Moved from Living room to Bedroom");
+    }
+
+    [Fact]
+    public async Task Move_leaves_plants_already_there_alone()
+    {
+        var places = new FakePlaceRepository();
+        var room = places.IdOf("Bedroom");
+        var there = new Plant { Nickname = "There", PlaceId = room };
+        await plants.SaveAsync(there);
+
+        var moved = await service.MoveAsync([there], room, Label);
+
+        Assert.Equal(0, moved);
+        Assert.Empty(timeline.Entries);
+    }
+
+    [Fact]
+    public async Task Move_skips_deleted_plants()
+    {
+        var places = new FakePlaceRepository();
+        var gone = new Plant { Nickname = "Gone", DeletedAt = Now };
+        await plants.SaveAsync(gone);
+
+        var moved = await service.MoveAsync([gone], places.IdOf("Bedroom"), Label);
+
+        Assert.Equal(0, moved);
+        Assert.Null(gone.PlaceId);
+        Assert.Empty(timeline.Entries);
+    }
+
+    [Fact]
     public async Task Update_records_a_change_of_light()
     {
         var plant = new Plant { Nickname = "Jade" };
@@ -253,6 +301,54 @@ public class PlantServiceTests
         await service.UpdateAsync(before, plant, Label);
 
         Assert.Null(plants.Plants[plant.Id].CauseOfDeath);
+    }
+
+    [Fact]
+    public async Task Selling_a_plant_saves_who_bought_it_and_the_price_and_adds_them_to_the_history()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Sold;
+        plant.LeftTo = "  Anna ";
+        plant.LeftFor = " 150 kr ";
+
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Equal("Anna", plants.Plants[plant.Id].LeftTo);
+        Assert.Equal("150 kr", plants.Plants[plant.Id].LeftFor);
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Equal("Status: Sold (was Active)\nSold to Anna for 150 kr", entry.Text);
+    }
+
+    [Fact]
+    public async Task Swapping_a_plant_away_says_what_came_back_in_the_history()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.GivenAway;
+        plant.LeftTo = "Anna";
+        plant.LeftFor = "a Hoya carnosa";
+
+        await service.UpdateAsync(before, plant, Label);
+
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Equal("Status: GivenAway (was Active)\nGiven to Anna · swapped for a Hoya carnosa", entry.Text);
+    }
+
+    [Fact]
+    public async Task Bringing_a_plant_back_clears_who_got_it_and_what_it_went_for()
+    {
+        var plant = new Plant { Nickname = "Basil", Status = PlantStatus.Sold, LeftTo = "Anna", LeftFor = "150 kr" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Active;
+
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Null(plants.Plants[plant.Id].LeftTo);
+        Assert.Null(plants.Plants[plant.Id].LeftFor);
     }
 
     [Fact]

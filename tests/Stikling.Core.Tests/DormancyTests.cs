@@ -118,10 +118,10 @@ public class DormancyTests
     {
         var corms = new Propagation { Nickname = "Corms", StartedOn = Today.AddDays(-60), InitialCount = 2, DormantSince = Today.AddDays(-30) };
 
-        corms.RecordFailed(1);
+        corms.RecordFailed(1, new DateOnly(2026, 9, 20));
         Assert.True(corms.IsDormant);
 
-        corms.RecordFailed(1);
+        corms.RecordFailed(1, new DateOnly(2026, 9, 20));
         Assert.Equal(PropagationStage.Failed, corms.Stage);
         Assert.False(corms.IsDormant);
     }
@@ -131,9 +131,19 @@ public class DormancyTests
     {
         var before = new Propagation { Nickname = "Corms", StartedOn = Today, DormantSince = Today };
         var after = before.Copy();
-        after.RecordFailed(1);
+        after.RecordFailed(1, new DateOnly(2026, 9, 20));
 
         Assert.Equal(["Stage: Failed (was Started)"], PropagationChanges.Describe(before, after, Label));
+    }
+
+    [Fact]
+    public void Corm_size_is_described_when_it_changes()
+    {
+        var before = new Propagation { Nickname = "Corm", StartedOn = Today, Type = PropagationType.Corm };
+        var after = before.Copy();
+        after.CormSizeMm = 8;
+        Assert.Equal(["Corm size: 8 mm"], PropagationChanges.Describe(before, after, Label));
+        Assert.Equal(["Corm size cleared"], PropagationChanges.Describe(after, before, Label));
     }
 
     [Fact]

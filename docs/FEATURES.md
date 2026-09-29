@@ -47,9 +47,7 @@ In the order I would build them.
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screens worth the name: the success rate on the Today screen, purchase price, a "Log care" home screen shortcut, and an app version and a "what's new" page.
-
-The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it, the list of plants that got a feed, and corm size on a propagation.
+These need no new storage and no new screens worth the name: purchase price, a "Log care" home screen shortcut, and an app version and a 
 
 ---
 
@@ -69,7 +67,7 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
 | ✅ | Tags (e.g. "variegated", "rare", "for swap") and a tag filter. Picking several tags narrows the list to plants that have all of them, the search finds tags too, and a tag on a plant's page opens the list filtered by it | 3 | S | v1.x |
 | ✅ | Rename or merge a tag everywhere at once, the way rooms can be in Settings | 6 | S | v1.x |
-| ◐ | Select several plants at once: change status, log care, add a note or tags to all. Moving them all to a room isn't built | 4 | M | v1.x |
+| ✅ | Select several plants at once: change status, log care, add a note or tags to all, or move them all to a room | 4 | M | v1.x |
 | ✅ | **Dormancy status** for plants and propagations, e.g. an alocasia dropping its leaves in winter or a corm sitting still. A badge and the day it went dormant show it's resting rather than dead, the plant list has a "Dormant" filter, and going dormant and waking up are recorded on the history. A dormant propagation doesn't come up on Today to be checked on. Dormancy ends by itself when a plant dies or leaves, or a propagation finishes | 4 | S | v1.x |
 | ☐ | **Growing season**: mark a plant as growing in summer or in winter. When its usual resting time comes round, the app asks whether it has gone dormant | 5 | S | v1.x |
 | ✅ | Sort options: name, newest, room, last activity | 5 | S | v1.x |
@@ -89,7 +87,7 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
 | ✅ | Duplicate a plant (e.g. a second basil pot): "Add another like this" opens the add form filled in from it | 7 | S | v1.x |
 | ☐ | Purchase price per plant | 7 | S | v1.x |
-| ☐ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
+| ✅ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
 | ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 7 | M | v1.x |
 | ☐ | **Home map**: a simple plan of each room with the plants placed where they stand, to see what is where and to go round them in order | 7 | L | v1.x |
 
@@ -134,9 +132,9 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are at least 3 rooted batches to compare with, and the list cards only mention it when it's slow | 4 | S | v1.x |
 | ✅ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
 | ✅ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page compares each one with the batches that went without it | 5 | S | v1.x |
-| ◐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. First root and first leaf are built and show in experiments. Corm size is still missing | 5 | S | v1.x |
+| ✅ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. First root, first leaf and corm size are built and show in experiments | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
-| ☐ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
+| ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 8 | L | v1.x |
 | ☐ | **"Available for swap" list**: mark propagations as available and share a simple list or image before a plant swap | 8 | M | v1.x |
 
@@ -220,7 +218,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | **Your pots**: the pots you own, by kind (nursery, outer, stands on its own), what they're made of, their measurements, whether they self-water, and how many you have. A plant points at a pot and, when it has one, an outer pot | 6 | M | v1.x |
 | ✅ | See which of your pots are in use and which are free, so it's clear what's available before repotting. A plant that died frees its pots, and giving a plant away or selling it asks which of its pots went with it | 7 | S | v1.x |
 | ☐ | **Does it fit?**: given a nursery pot, which of your free outer pots it would go in. Compares the tops, allows for a rim only having to clear the opening, and says when the bottom is the tighter measurement | 7 | M | v1.x |
-| ☐ | Default medium per pot kind, e.g. a net pot suggests LECA, so potting up is one tap less | 8 | S | v1.x |
+| ✅ | Default medium per pot kind: picking a self-watering pot for a new plant or when potting up suggests LECA, so potting up is one tap less | 8 | S | v1.x |
 | ☐ | Money spent on plants and supplies, per year, to see what the hobby costs | 8 | S | v1.x |
 
 ## 5c. Soil mixes
@@ -234,9 +232,9 @@ Most people mix their own soil instead of using it straight from the bag. This i
 | ✅ | Add your own ingredient if something isn't on the list | 5 | S | v1.x |
 | ✅ | Pick a mix when adding a plant or potting up, instead of typing the medium by hand. The plant page shows which mix it's in, and what's in it | 5 | M | v1.x |
 | ◐ | Editing a mix that plants are already in says so first, and offers to save the edit as a new mix instead, dated so the versions read in order. A plant still points at the mix rather than keeping its own copy of the recipe, so a mix can also be marked as no longer mixed to keep it off the picker | 5 | M | v1.x |
-| ◐ | The mixes list says how many plants are in each mix. Tapping through to those plants isn't built | 7 | S | v1.x |
-| ☐ | Use a mix on a propagation too, for the ones that go straight into soil | 7 | S | v1.x |
-| ☐ | Batch calculator: pick a mix and a volume, and get how much of each ingredient to measure out | 7 | S | v1.x |
+| ✅ | The mixes list says how many plants are in each mix, and tapping the count shows those plants | 7 | S | v1.x |
+| ✅ | Use a mix on a propagation too, for the ones that go straight into soil | 7 | S | v1.x |
+| ✅ | Batch calculator: pick a mix and a volume, and get how much of each ingredient to measure out | 7 | S | v1.x |
 | ☐ | **Batches**: mix a dated batch from a recipe and top it up as it runs low, so a plant can point at the batch it was actually potted in rather than the recipe | 8 | L | v1.x |
 | ☐ | Mixing a batch takes the ingredients off the supplies stock | 8 | M | v1.x |
 
@@ -251,9 +249,9 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | The mix keeps the order the products go in the water, since silica has to go in first and be stirred before anything else. A note says so when silica isn't first or pH isn't last, without stopping the save | 5 | S | v1.x |
 | ✅ | Log a feed by picking the mix and the amount of water. The care entry saves each product and dose as it was that day, so changing the mix doesn't rewrite history. The water is optional, and the doses can still be changed for that one time | 5 | M | v1.x |
 | ✅ | Batch calculator: pick a mix and a water volume, and get how much of each product to measure out. On the feeds page, and on the care entry once the water is filled in | 6 | S | v1.x |
-| ◐ | See which plants got a given feed and when, so a mix that isn't working shows up. The feeds list says how many plants have had each feed and when it was last given. A list of the plants and dates isn't built | 7 | S | v1.x |
+| ✅ | See which plants got a given feed and when, so a mix that isn't working shows up. The feeds list says how many plants have had each feed and when it was last given, and opens to the plants and their dates | 7 | S | v1.x |
 | ☐ | A different mix for propagations, e.g. quarter strength with a rooting stimulant | 7 | S | v1.x |
-| ☐ | EC and pH reading on a feed, for the semi-hydro reservoirs | 8 | S | v1.x |
+| ✅ | EC and pH reading on a feed, for the semi-hydro reservoirs | 8 | S | v1.x |
 | ☐ | Mixing a feed takes the products off the supplies stock | 8 | M | v1.x |
 
 ## 6. Today screen
@@ -263,7 +261,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Propagations that haven't been checked recently | 2 | M | M5 |
 | ✅ | Recent activity feed | 5 | S | M5 |
 | ✅ | Pest treatments due or overdue, and checks due on cases being watched | 3 | S | v1.x |
-| ◐ | Counts: plants, active propagations, success rate this month. Plants in the collection and propagations going are shown at the top; the success rate is missing | 4 | S | v1.x |
+| ✅ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
 | ✅ | **Needs attention**: flag a plant or propagation with a reason ("repot soon", "look closer", "change the water"), typed or picked from a few suggestions, and it stays on Today until it's marked done there or on its own page. Flags aren't written on the history, and one goes away by itself when the plant leaves or the propagation finishes | 4 | S | v1.x |
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
@@ -294,7 +292,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 |---|---|---|---|---|
 | ◐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation". Add plant, New propagation and Pest cases are there; Log care is missing since there is no page for it yet | 5 | S | v1.x |
 | ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | 6 | M | v1.x |
-| ☐ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
+| ✅ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
 
 ## 7c. Help & first visit
 

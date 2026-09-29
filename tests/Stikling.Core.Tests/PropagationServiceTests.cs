@@ -43,6 +43,62 @@ public class PropagationServiceTests
     }
 
     [Fact]
+    public async Task Moving_away_from_soil_clears_the_mix()
+    {
+        var mix = Guid.NewGuid();
+        var cuttings = service.StartFrom(parent);
+        cuttings.Medium = GrowingMedium.Soil;
+        cuttings.SoilMixId = mix;
+        await service.CreateAsync(cuttings, Label);
+        Assert.Equal(mix, propagations.Propagations[cuttings.Id].SoilMixId);
+
+        var before = cuttings.Copy();
+        cuttings.Medium = GrowingMedium.Water;
+        await service.UpdateAsync(before, cuttings, Label);
+
+        Assert.Null(propagations.Propagations[cuttings.Id].SoilMixId);
+    }
+
+    [Fact]
+    public async Task Potting_up_into_soil_uses_the_mix_picked_on_the_form()
+    {
+        var mix = Guid.NewGuid();
+        var cuttings = service.StartFrom(parent);
+        cuttings.Medium = GrowingMedium.Soil;
+        await service.CreateAsync(cuttings, Label);
+
+        var made = await service.PotUpAsync(cuttings, new PotUpRequest(1, Today, Medium: GrowingMedium.Soil, SoilMixId: mix));
+
+        Assert.Equal(mix, made[0].SoilMixId);
+    }
+
+    [Fact]
+    public async Task Potting_up_with_the_mix_cleared_leaves_the_plant_without_one()
+    {
+        var cuttings = service.StartFrom(parent);
+        cuttings.Medium = GrowingMedium.Soil;
+        cuttings.SoilMixId = Guid.NewGuid();
+        await service.CreateAsync(cuttings, Label);
+
+        var made = await service.PotUpAsync(cuttings, new PotUpRequest(1, Today, Medium: GrowingMedium.Soil));
+
+        Assert.Null(made[0].SoilMixId);
+    }
+
+    [Fact]
+    public async Task Potting_up_into_something_other_than_soil_leaves_the_mix_behind()
+    {
+        var cuttings = service.StartFrom(parent);
+        cuttings.Medium = GrowingMedium.Soil;
+        cuttings.SoilMixId = Guid.NewGuid();
+        await service.CreateAsync(cuttings, Label);
+
+        var made = await service.PotUpAsync(cuttings, new PotUpRequest(1, Today, Medium: GrowingMedium.Leca));
+
+        Assert.Null(made[0].SoilMixId);
+    }
+
+    [Fact]
     public void Start_from_copies_names_and_room_from_the_parent()
     {
         var corms = service.StartFrom(parent);

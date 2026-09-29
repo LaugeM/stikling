@@ -133,7 +133,7 @@ else
             </div>
             <div class="mb-3">
                 <label class="form-label" for="medium">Grows in</label>
-                <InputSelect id="medium" class="form-select" @bind-Value="plant.Medium">
+                <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => SetMedium(m)" ValueExpression="() => plant.Medium">
                     @foreach (var medium in Enum.GetValues<GrowingMedium>())
                     {
                         <option value="@medium">@Labels.For(medium)</option>
@@ -146,7 +146,7 @@ else
             </div>
 
             <div class="mb-3">
-                <PotPicker @bind-Value="plant.InnerPotId" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                <PotPicker Value="plant.InnerPotId" ValueChanged="SetInnerPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
             </div>
 
             <div class="mb-3">
@@ -180,6 +180,19 @@ else
                         <label class="form-label" for="cause-of-death">What happened? <span class="text-muted">(optional)</span></label>
                         <InputText id="cause-of-death" class="form-control" @bind-Value="plant.CauseOfDeath"
                                    placeholder="e.g. root rot after repotting" />
+                    </div>
+                }
+                @if (plant.Status is PlantStatus.GivenAway or PlantStatus.Sold)
+                {
+                    var sold = plant.Status == PlantStatus.Sold;
+                    <div class="mb-3">
+                        <label class="form-label" for="left-to">@(sold ? "Who bought it?" : "Who got it?") <span class="text-muted">(optional)</span></label>
+                        <InputText id="left-to" class="form-control" @bind-Value="plant.LeftTo" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="left-for">@(sold ? "Sold for" : "Swapped for?") <span class="text-muted">(optional)</span></label>
+                        <InputText id="left-for" class="form-control" @bind-Value="plant.LeftFor"
+                                   placeholder="@(sold ? "e.g. 150 kr" : "e.g. a Hoya carnosa")" />
                     </div>
                 }
                 @if (plant.HasLeft && Labels.PotsTakenChoices([plant]) is { Count: > 0 } choices)
@@ -363,6 +376,24 @@ else
 
     private void SetDormant(ChangeEventArgs e) =>
         plant!.DormantSince = (bool?)e.Value == true ? original?.DormantSince ?? Today : null;
+
+    // A pot that suggests a medium sets it on a new plant, until the person has picked a medium themselves.
+    // A saved plant's medium was already chosen, so a pot never changes it
+    private bool mediumChosen => IsNew ? mediumPicked : true;
+    private bool mediumPicked;
+
+    private void SetMedium(GrowingMedium medium)
+    {
+        plant!.Medium = medium;
+        mediumPicked = true;
+    }
+
+    private void SetInnerPot(Guid? id)
+    {
+        plant!.InnerPotId = id;
+        var pot = pots.FirstOrDefault(p => p.Id == id);
+        plant.Medium = PotKinds.MediumAfterPicking(pot, plant.Medium, mediumChosen);
+    }
 
     // Clearing the outer pot clears what would be kept in it
     private void SetOuterPot(Guid? id)

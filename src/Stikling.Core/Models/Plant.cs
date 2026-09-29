@@ -32,6 +32,12 @@ public sealed class Plant : Entity
     /// <summary>An optional note on what went wrong, kept while the status is Died and cleared if it comes back.</summary>
     public string? CauseOfDeath { get; set; }
 
+    /// <summary>Who got it, kept while the status is GivenAway or Sold and cleared if it comes back.</summary>
+    public string? LeftTo { get; set; }
+
+    /// <summary>What it was sold or swapped for, in the person's own words ("150 kr", "a Hoya carnosa"). Kept while the status is GivenAway or Sold.</summary>
+    public string? LeftFor { get; set; }
+
     public GrowingMedium Medium { get; set; } = GrowingMedium.Soil;
 
     /// <summary>The pot the roots are in.</summary>
@@ -115,6 +121,27 @@ public sealed class Plant : Entity
     [JsonIgnore]
     public string DisplayName =>
         !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? "Unnamed plant";
+
+    /// <summary>
+    /// Who a plant went to and what it went for, as one line: "Given to Anna · swapped for a Hoya carnosa"
+    /// or "Sold to Anna for 150 kr". Only says what is filled in, and is null when nothing is.
+    /// </summary>
+    public string? DescribeDeparture()
+    {
+        var to = LeftTo?.Trim();
+        var forWhat = LeftFor?.Trim();
+        var hasTo = !string.IsNullOrEmpty(to);
+        var hasFor = !string.IsNullOrEmpty(forWhat);
+        if (!hasTo && !hasFor) return null;
+        if (Status == PlantStatus.Sold)
+            return "Sold" + (hasTo ? $" to {to}" : "") + (hasFor ? $" for {forWhat}" : "");
+        if (Status == PlantStatus.GivenAway)
+        {
+            if (!hasTo) return $"Swapped for {forWhat}";
+            return $"Given to {to}" + (hasFor ? $" · swapped for {forWhat}" : "");
+        }
+        return null;
+    }
 
     /// <summary>A copy to compare with after editing. The tags get their own list.</summary>
     public Plant Copy()

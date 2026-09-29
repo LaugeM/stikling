@@ -28,6 +28,10 @@ public static class PlantChanges
         if (after.CauseOfDeath is { } cause && before.CauseOfDeath != cause)
             changes.Add($"What happened: {cause}");
 
+        if ((after.LeftTo != before.LeftTo || after.LeftFor != before.LeftFor
+                || before.Status != after.Status) && after.DescribeDeparture() is { } departure)
+            changes.Add(departure);
+
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
 
@@ -96,6 +100,9 @@ public static class PropagationChanges
             changes.Add(after.SeedsGerminated is { } up
                 ? $"Seeds: {up} of {after.InitialCount} came up"
                 : "Seed count cleared");
+
+        if (before.CormSizeMm != after.CormSizeMm)
+            changes.Add(after.CormSizeMm is { } size ? $"Corm size: {size:0.##} mm" : "Corm size cleared");
 
         if (!before.RootingAids.Order().SequenceEqual(after.RootingAids.Order()))
             changes.Add(after.RootingAids.Count == 0

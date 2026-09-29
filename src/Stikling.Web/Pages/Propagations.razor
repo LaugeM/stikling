@@ -213,10 +213,12 @@ else
     // Compared with every propagation, not only the ones the filter shows
     private RootingPace? Pace(Propagation propagation) => RootingPace.For(propagation, all ?? [], Time.Today());
 
-    // "First root day 8 · first leaf day 20", so the batches in an experiment compare on more than rooting
+    // "Corm 8 mm · first root day 8 · first leaf day 20", so the batches in an experiment compare on more than rooting
     private static string? Milestones(Propagation propagation)
     {
-        var parts = new List<string>(2);
+        var parts = new List<string>(3);
+        if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } size)
+            parts.Add($"corm {size:0.##} mm");
         if (propagation.DaysToFirstRoot is { } root)
             parts.Add($"first root day {root}");
         if (propagation.DaysToFirstLeaf is { } leaf)

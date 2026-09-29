@@ -85,6 +85,10 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         after.CauseOfDeath = after.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(after.CauseOfDeath)
             ? after.CauseOfDeath.Trim()
             : null;
+        // Who got it and what it went for only belong to a plant that was given away or sold
+        var gone = after.Status is PlantStatus.GivenAway or PlantStatus.Sold;
+        after.LeftTo = gone && !string.IsNullOrWhiteSpace(after.LeftTo) ? after.LeftTo.Trim() : null;
+        after.LeftFor = gone && !string.IsNullOrWhiteSpace(after.LeftFor) ? after.LeftFor.Trim() : null;
         await plants.SaveAsync(after);
 
         var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName);
@@ -108,6 +112,30 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             plant.PotsTaken = potsTaken;
             await UpdateAsync(before, plant, label);
         }
+    }
+
+    /// <summary>
+    /// Moves several plants to a room or spot, recording it on each like a room change on the
+    /// edit form does. Plants that are already there or are deleted are left alone. Returns how
+    /// many moved.
+    /// </summary>
+    /// <param name="placeName">Turns a place id into its name, so the history can say where from and to.</param>
+    public async Task<int> MoveAsync(
+        IEnumerable<Plant> selected,
+        Guid? placeId,
+        Func<Enum, string> label,
+        Func<Guid, string?>? placeName = null)
+    {
+        var moved = 0;
+        foreach (var plant in selected.Where(p => !p.IsDeleted && p.PlaceId != placeId))
+        {
+            var before = plant.Copy();
+            plant.PlaceId = placeId;
+            await UpdateAsync(before, plant, label, placeName: placeName);
+            moved++;
+        }
+
+        return moved;
     }
 
     /// <summary>Puts a plant in quarantine from the given day, or takes it out with null.</summary>
