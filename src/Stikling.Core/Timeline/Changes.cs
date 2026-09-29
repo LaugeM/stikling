@@ -84,6 +84,11 @@ public static class PropagationChanges
         AddMilestone(changes, before.FirstRootOn, after.FirstRootOn, after.DaysToFirstRoot, "First root");
         AddMilestone(changes, before.FirstLeafOn, after.FirstLeafOn, after.DaysToFirstLeaf, "First leaf");
 
+        if (before.SeedsSown != after.SeedsSown || before.SeedsGerminated != after.SeedsGerminated)
+            changes.Add(after.SeedsSown is { } sown
+                ? $"Seeds: {after.SeedsGerminated ?? 0} of {sown} came up"
+                : "No longer counted as seeds");
+
         if (!before.RootingAids.Order().SequenceEqual(after.RootingAids.Order()))
             changes.Add(after.RootingAids.Count == 0
                 ? "No rooting aids"

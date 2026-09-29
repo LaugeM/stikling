@@ -47,6 +47,15 @@ public sealed class Propagation : Entity
     /// <summary>The day the first new leaf showed on any unit in the batch.</summary>
     public DateOnly? FirstLeafOn { get; set; }
 
+    /// <summary>How many seeds were sown. Null when it isn't grown from seed. The sown date is <see cref="StartedOn"/>.</summary>
+    public int? SeedsSown { get; set; }
+
+    /// <summary>How many of the seeds have come up so far.</summary>
+    public int? SeedsGerminated { get; set; }
+
+    /// <summary>The day the first seed came up.</summary>
+    public DateOnly? FirstGerminatedOn { get; set; }
+
     /// <summary>What was used to help it root, e.g. cinnamon on the cut or a dome for humidity.</summary>
     public List<RootingAid> RootingAids { get; set; } = [];
 
@@ -73,6 +82,11 @@ public sealed class Propagation : Entity
 
     /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
     public Attention? Attention { get; set; }
+
+    /// <summary>Share of the sown seeds that came up, 0 to 1 or more. Null without a sown count.</summary>
+    [JsonIgnore]
+    public double? GerminationRate =>
+        SeedsSown is > 0 ? (SeedsGerminated ?? 0) / (double)SeedsSown : null;
 
     /// <summary>Units still in the propagation (not potted up and not failed).</summary>
     [JsonIgnore]
@@ -217,6 +231,14 @@ public sealed class Propagation : Entity
             errors.Add("A root or leaf can't show before it was started.");
         if (FirstRootOn > today || FirstLeafOn > today)
             errors.Add("A root or leaf can't show in the future.");
+        if (SeedsSown < 0 || SeedsGerminated < 0)
+            errors.Add("Seed counts can't be negative.");
+        else if (SeedsGerminated > (SeedsSown ?? 0))
+            errors.Add("More seeds can't have come up than were sown.");
+        if (FirstGerminatedOn < StartedOn)
+            errors.Add("A seed can't come up before it was sown.");
+        if (FirstGerminatedOn > today)
+            errors.Add("A seed can't come up in the future.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
         return errors;

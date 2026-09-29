@@ -135,4 +135,14 @@ public class DormancyTests
 
         Assert.Equal(["Stage: Failed (was Started)"], PropagationChanges.Describe(before, after, Label));
     }
+
+    [Fact]
+    public void Seed_counts_are_described_when_they_change()
+    {
+        var before = new Propagation { Nickname = "Coleus", StartedOn = Today, SeedsSown = 20 };
+        var after = before.Copy();
+        after.SeedsGerminated = 12;
+
+        Assert.Equal(["Seeds: 12 of 20 came up"], PropagationChanges.Describe(before, after, Label));
+    }
 }

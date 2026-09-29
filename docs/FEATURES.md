@@ -42,10 +42,9 @@ In the order I would build them.
 3. **Problem log**: what you saw on a plant, what you did, and whether it helped.
 4. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
 5. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-6. **Seed germination**: sown and germinated counts with their dates.
-7. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-8. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
-9. **Comparing photos side by side, and voice notes.**
+6. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+7. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
+8. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
@@ -134,7 +133,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | Success rate and average days-to-root per medium and per type, on a results page linked from Propagations. Success is counted in units, and a unit has made it once it's potted up or its batch has rooted | 3 | S | v1.x |
 | ✅ | **Experiments**: group propagations started together to compare mediums (the corm test: perlite vs sphagnum vs LECA vs corm riser) | 4 | M | v1.x |
 | ✅ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are at least 3 rooted batches to compare with, and the list cards only mention it when it's slow | 4 | S | v1.x |
-| ☐ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
+| ✅ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
 | ✅ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page compares each one with the batches that went without it | 5 | S | v1.x |
 | ◐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. First root and first leaf are built and show in experiments. Corm size is still missing | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
