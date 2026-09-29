@@ -54,6 +54,7 @@ builder.Services.AddScoped<FeedService>();
 builder.Services.AddScoped<CareService>();
 builder.Services.AddScoped<PhotoService>();
 builder.Services.AddScoped<DeviceFiles>();
+builder.Services.AddScoped<AppBadge>();
 builder.Services.AddScoped<BackupService>();
 
 await builder.Build().RunAsync();

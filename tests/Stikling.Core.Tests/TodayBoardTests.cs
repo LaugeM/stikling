@@ -8,6 +8,38 @@ public class TodayBoardTests
     private static readonly DateOnly Today = new(2026, 9, 20);
     private static readonly FixedTime Time = new(new DateTimeOffset(Today.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero));
 
+    private static Propagation Finished(int pottedUp, int failed, int daysAgo, bool deleted = false)
+    {
+        var moment = new DateTimeOffset(Today.AddDays(-daysAgo).ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero);
+        var propagation = new Propagation
+        {
+            InitialCount = pottedUp + failed,
+            PottedUpCount = pottedUp,
+            FailedCount = failed,
+            UpdatedAt = moment,
+            DeletedAt = deleted ? moment : null
+        };
+        propagation.SyncStageWithCounts();
+        return propagation;
+    }
+
+    [Fact]
+    public void Finished_this_month_counts_units_potted_up_out_of_all_that_finished()
+    {
+        var result = TodayBoard.FinishedThisMonth(
+            [Finished(2, 1, 3), Finished(1, 0, 10), Finished(5, 5, 40), Finished(0, 2, 1, deleted: true)], Time);
+
+        Assert.Equal(new MonthResult(3, 4), result);
+    }
+
+    [Fact]
+    public void Finished_this_month_is_null_when_nothing_finished()
+    {
+        var going = new Propagation { InitialCount = 3, UpdatedAt = Time.GetUtcNow() };
+
+        Assert.Null(TodayBoard.FinishedThisMonth([going, Finished(1, 0, 40)], Time));
+    }
+
     private static Propagation Started(string name, int daysAgo) => new()
     {
         Nickname = name,
