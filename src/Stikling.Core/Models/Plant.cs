@@ -72,6 +72,9 @@ public sealed class Plant : Entity
     [JsonIgnore]
     public bool IsDormant => DormantSince is not null;
 
+    /// <summary>Pinned to the top of the plant list.</summary>
+    public bool Favourite { get; set; }
+
     /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
     public Attention? Attention { get; set; }
 

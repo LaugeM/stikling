@@ -110,6 +110,15 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         await plants.SaveAsync(plant);
     }
 
+    /// <summary>Pins a plant to the top of the list, or unpins it. Nothing goes on the history.</summary>
+    public async Task SetFavouriteAsync(Plant plant, bool favourite)
+    {
+        if (plant.Favourite == favourite)
+            return;
+        plant.Favourite = favourite;
+        await plants.SaveAsync(plant);
+    }
+
     /// <summary>
     /// Adds the same tags to several plants, e.g. "For swap" before a plant swap. Tags are only
     /// labels, so nothing goes on the history. Returns how many plants got something new.

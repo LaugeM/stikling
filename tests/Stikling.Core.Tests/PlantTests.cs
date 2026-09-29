@@ -126,7 +126,7 @@ public class PlantTests
             Nickname = "Kitchen basil", AcquiredOn = LooseDate.Of(Today), InnerPotId = Guid.NewGuid(), OuterPotId = Guid.NewGuid(),
             WaterInOuterPot = true, Notes = "Bolts early", Status = PlantStatus.GivenAway,
             QuarantinedSince = Today, DormantSince = Today, Attention = new Attention("Yellow leaves", Today),
-            CoverPhotoId = Guid.NewGuid(), FromPropagationId = Guid.NewGuid()
+            CoverPhotoId = Guid.NewGuid(), FromPropagationId = Guid.NewGuid(), Favourite = true
         };
 
         var copy = plant.Duplicate();
@@ -143,5 +143,12 @@ public class PlantTests
         Assert.Null(copy.Attention);
         Assert.Null(copy.CoverPhotoId);
         Assert.Null(copy.FromPropagationId);
+        Assert.False(copy.Favourite);
+    }
+
+    [Fact]
+    public void Copy_keeps_favourite()
+    {
+        Assert.True(new Plant { Favourite = true }.Copy().Favourite);
     }
 }

@@ -115,6 +115,31 @@ public class PlantFilterTests
     }
 
     [Fact]
+    public void Favourites_come_first_with_the_default_sort()
+    {
+        Plant zinnia = new() { Nickname = "Zinnia", Favourite = true };
+        Plant aloe = new() { Nickname = "Aloe" };
+        Plant yucca = new() { Nickname = "Yucca", Favourite = true };
+
+        var result = new PlantFilter().Apply([aloe, zinnia, yucca]).ToList();
+
+        Assert.Equal([yucca, zinnia, aloe], result);
+    }
+
+    [Fact]
+    public void Favourites_come_first_and_the_chosen_sort_applies_within_each_group()
+    {
+        Plant oldFavourite = new() { Nickname = "A", Favourite = true, CreatedAt = DateTimeOffset.UnixEpoch };
+        Plant newFavourite = new() { Nickname = "B", Favourite = true, CreatedAt = DateTimeOffset.UnixEpoch.AddDays(2) };
+        Plant newest = new() { Nickname = "C", CreatedAt = DateTimeOffset.UnixEpoch.AddDays(9) };
+        Plant older = new() { Nickname = "D", CreatedAt = DateTimeOffset.UnixEpoch.AddDays(5) };
+
+        var result = new PlantFilter(Sort: PlantSort.Newest).Apply([older, oldFavourite, newest, newFavourite]).ToList();
+
+        Assert.Equal([newFavourite, oldFavourite, newest, older], result);
+    }
+
+    [Fact]
     public void Newest_puts_the_latest_added_first()
     {
         Plant old = new() { Nickname = "A", CreatedAt = DateTimeOffset.UnixEpoch };

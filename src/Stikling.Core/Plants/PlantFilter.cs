@@ -51,21 +51,23 @@ public sealed record PlantFilter(
             .Where(p => Tags is null || Tags.All(tag => PlantTags.Has(p, tag)))
             .Where(MatchesSearch));
 
-    // Every order falls back on the name, so plants that tie keep a steady place
-    private IEnumerable<Plant> Order(IEnumerable<Plant> plants)
+    // Favourites come first whatever the sort. Every order falls back on the name, so plants that
+    // tie keep a steady place
+    private IEnumerable<Plant> Order(IEnumerable<Plant> all)
     {
+        var plants = all.OrderBy(p => !p.Favourite);
         var byName = StringComparer.CurrentCultureIgnoreCase;
         return Sort switch
         {
-            PlantSort.Newest => plants.OrderByDescending(p => p.CreatedAt).ThenBy(p => p.DisplayName, byName),
+            PlantSort.Newest => plants.ThenByDescending(p => p.CreatedAt).ThenBy(p => p.DisplayName, byName),
             PlantSort.Room => plants
-                .OrderBy(p => RoomOf(p) is null)
+                .ThenBy(p => RoomOf(p) is null)
                 .ThenBy(RoomOf, byName)
                 .ThenBy(p => p.DisplayName, byName),
             PlantSort.LastActivity => plants
-                .OrderByDescending(p => LastActivity is not null && LastActivity.TryGetValue(p.Id, out var at) && at > p.CreatedAt ? at : p.CreatedAt)
+                .ThenByDescending(p => LastActivity is not null && LastActivity.TryGetValue(p.Id, out var at) && at > p.CreatedAt ? at : p.CreatedAt)
                 .ThenBy(p => p.DisplayName, byName),
-            _ => plants.OrderBy(p => p.DisplayName, byName)
+            _ => plants.ThenBy(p => p.DisplayName, byName)
         };
     }
 

@@ -31,6 +31,17 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task SetFavourite_saves_the_plant_without_a_timeline_entry()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+
+        await service.SetFavouriteAsync(plant, true);
+
+        Assert.True(plants.Plants[plant.Id].Favourite);
+        Assert.Empty(timeline.Entries);
+    }
+
+    [Fact]
     public async Task Create_without_a_date_uses_now()
     {
         await service.CreateAsync(new Plant { Nickname = "Coleus", AcquiredOn = null, Origin = PlantOrigin.Propagated });

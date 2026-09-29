@@ -1034,6 +1034,48 @@ a.item-card:active {
     font-weight: 600;
 }
 
+/* A favourite's star is Clay, the colour of a plant, so it stays away from the alert red */
+.favourite-star {
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-left: 0.25rem;
+    vertical-align: -0.1em;
+    fill: var(--pa-clay);
+    stroke: var(--pa-clay);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
+.favourite-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -0.5rem 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    vertical-align: middle;
+    color: var(--pa-muted);
+}
+
+.favourite-toggle svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linejoin: round;
+}
+
+.favourite-toggle.on {
+    color: var(--pa-clay);
+}
+
+.favourite-toggle.on svg {
+    fill: currentColor;
+}
+
 /* Quarantine is a precaution rather than a problem, so it gets the pest colour in outline only */
 .quarantine-badge {
     padding: 0.05rem 0.4rem;
