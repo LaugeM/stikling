@@ -47,7 +47,7 @@ In the order I would build them.
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screens worth the name: the success rate on the Today screen, purchase price, a "Log care" home screen shortcut, and an app version and a "what's new" page.
+These need no new storage and no new screens worth the name: purchase price, a "Log care" home screen shortcut, and an app version and a "what's new" page.
 
 
 ---
@@ -262,7 +262,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Propagations that haven't been checked recently | 2 | M | M5 |
 | ✅ | Recent activity feed | 5 | S | M5 |
 | ✅ | Pest treatments due or overdue, and checks due on cases being watched | 3 | S | v1.x |
-| ◐ | Counts: plants, active propagations, success rate this month. Plants in the collection and propagations going are shown at the top; the success rate is missing | 4 | S | v1.x |
+| ✅ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
 | ✅ | **Needs attention**: flag a plant or propagation with a reason ("repot soon", "look closer", "change the water"), typed or picked from a few suggestions, and it stays on Today until it's marked done there or on its own page. Flags aren't written on the history, and one goes away by itself when the plant leaves or the propagation finishes | 4 | S | v1.x |
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
@@ -293,7 +293,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 |---|---|---|---|---|
 | ◐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation". Add plant, New propagation and Pest cases are there; Log care is missing since there is no page for it yet | 5 | S | v1.x |
 | ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | 6 | M | v1.x |
-| ☐ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
+| ✅ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
 
 ## 7c. Help & first visit
 

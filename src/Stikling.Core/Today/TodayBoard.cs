@@ -9,9 +9,27 @@ public sealed record PropagationCheck(Propagation Propagation, DateOnly LastSeen
 /// <param name="Subject">The <see cref="Plant"/> or <see cref="Propagation"/>.</param>
 public sealed record AttentionItem(Entity Subject, string Name, Attention Attention);
 
+/// <summary>Units in the propagations that finished this month, and how many of them were potted up.</summary>
+public sealed record MonthResult(int PottedUp, int Total);
+
 /// <summary>What the Today screen shows.</summary>
 public static class TodayBoard
 {
+    /// <summary>
+    /// The units in propagations that finished (Done or Failed) in the current month, and how many
+    /// of them were potted up, going by <see cref="Propagation.FinishedOn"/>. Null when nothing
+    /// finished this month.
+    /// </summary>
+    public static MonthResult? FinishedThisMonth(IEnumerable<Propagation> propagations, TimeProvider time)
+    {
+        var today = time.Today();
+        var finished = propagations
+            .Where(p => !p.IsDeleted && p.FinishedOn is { } day && day.Year == today.Year && day.Month == today.Month)
+            .ToList();
+        var total = finished.Sum(p => p.PottedUpCount + p.FailedCount);
+        return total == 0 ? null : new MonthResult(finished.Sum(p => p.PottedUpCount), total);
+    }
+
     /// <summary>A propagation is worth a look again after this many days without an entry.</summary>
     public const int CheckAfterDays = 7;
 

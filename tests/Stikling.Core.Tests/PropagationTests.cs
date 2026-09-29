@@ -12,7 +12,7 @@ public class PropagationTests
     {
         var corms = Batch(3);
 
-        corms.RecordPottedUp(2);
+        corms.RecordPottedUp(2, new DateOnly(2026, 9, 20));
 
         Assert.Equal(2, corms.PottedUpCount);
         Assert.Equal(1, corms.RemainingCount);
@@ -24,8 +24,8 @@ public class PropagationTests
     {
         var corms = Batch(3);
 
-        corms.RecordFailed(1);
-        corms.RecordPottedUp(2);
+        corms.RecordFailed(1, new DateOnly(2026, 9, 20));
+        corms.RecordPottedUp(2, new DateOnly(2026, 9, 20));
 
         Assert.Equal(PropagationStage.Done, corms.Stage);
         Assert.False(corms.IsActive);
@@ -37,8 +37,8 @@ public class PropagationTests
     {
         var corms = Batch(3);
 
-        corms.RecordFailed(1);
-        corms.RecordFailed(2);
+        corms.RecordFailed(1, new DateOnly(2026, 9, 20));
+        corms.RecordFailed(2, new DateOnly(2026, 9, 20));
 
         Assert.Equal(PropagationStage.Failed, corms.Stage);
     }
@@ -51,8 +51,8 @@ public class PropagationTests
     {
         var corms = Batch(3);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => corms.RecordPottedUp(count));
-        Assert.Throws<ArgumentOutOfRangeException>(() => corms.RecordFailed(count));
+        Assert.Throws<ArgumentOutOfRangeException>(() => corms.RecordPottedUp(count, new DateOnly(2026, 9, 20)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => corms.RecordFailed(count, new DateOnly(2026, 9, 20)));
         Assert.Equal(3, corms.RemainingCount);
     }
 
@@ -60,10 +60,10 @@ public class PropagationTests
     public void Finished_propagations_cannot_change_stage_or_counts()
     {
         var cutting = Batch(1);
-        cutting.RecordPottedUp(1);
+        cutting.RecordPottedUp(1, new DateOnly(2026, 9, 20));
 
         Assert.Throws<InvalidOperationException>(() => cutting.SetStage(PropagationStage.Rooting));
-        Assert.Throws<InvalidOperationException>(() => cutting.RecordFailed(1));
+        Assert.Throws<InvalidOperationException>(() => cutting.RecordFailed(1, new DateOnly(2026, 9, 20)));
     }
 
     [Theory]
@@ -86,13 +86,42 @@ public class PropagationTests
     }
 
     [Fact]
+    public void The_day_the_last_unit_is_used_up_is_kept_as_the_finished_day()
+    {
+        var corms = Batch(2);
+        var first = new DateOnly(2026, 9, 1);
+        var last = new DateOnly(2026, 9, 5);
+
+        corms.RecordPottedUp(1, first);
+        Assert.Null(corms.FinishedOn);
+
+        corms.RecordFailed(1, last);
+        Assert.Equal(last, corms.FinishedOn);
+
+        corms.SyncStageWithCounts(last.AddDays(10));
+        Assert.Equal(last, corms.FinishedOn);
+    }
+
+    [Fact]
+    public void Opening_a_finished_batch_again_clears_the_finished_day()
+    {
+        var corms = Batch(2);
+        corms.RecordPottedUp(2, new DateOnly(2026, 9, 1));
+
+        corms.InitialCount = 3;
+        corms.SyncStageWithCounts(new DateOnly(2026, 9, 2));
+
+        Assert.Null(corms.FinishedOn);
+    }
+
+    [Fact]
     public void Raising_the_count_of_a_finished_batch_opens_it_again()
     {
         var corms = Batch(2);
-        corms.RecordPottedUp(2);
+        corms.RecordPottedUp(2, new DateOnly(2026, 9, 20));
 
         corms.InitialCount = 3;
-        corms.SyncStageWithCounts();
+        corms.SyncStageWithCounts(new DateOnly(2026, 9, 20));
 
         Assert.True(corms.IsActive);
         Assert.Equal(1, corms.RemainingCount);
@@ -105,7 +134,7 @@ public class PropagationTests
         Assert.Contains("Start with at least 1.", new Propagation { Genus = "Coleus", InitialCount = 0 }.Validate(DateOnly.MaxValue));
 
         var corms = Batch(3);
-        corms.RecordPottedUp(2);
+        corms.RecordPottedUp(2, new DateOnly(2026, 9, 20));
         corms.InitialCount = 1;
         Assert.Contains("The count can't be lower than the 2 already potted up or failed.", corms.Validate(DateOnly.MaxValue));
     }
@@ -184,7 +213,7 @@ public class PropagationTests
         var older = new Propagation { Genus = "Coleus", StartedOn = new DateOnly(2026, 8, 1) };
         var newer = new Propagation { Genus = "Alocasia", Species = "zebrina", StartedOn = new DateOnly(2026, 9, 1) };
         var finished = Batch(1);
-        finished.RecordFailed(1);
+        finished.RecordFailed(1, new DateOnly(2026, 9, 20));
         var all = new[] { newer, finished, older };
 
         Assert.Equal([older, newer], new PropagationFilter().Apply(all));

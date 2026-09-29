@@ -7,6 +7,7 @@
 @inject IPestCaseRepository PestCases
 @inject IPestTreatmentRepository PestTreatments
 @inject DeviceFiles Files
+@inject AppBadge Badge
 @inject PlantService PlantService
 @inject PropagationService PropagationService
 @inject RoomService RoomService
@@ -46,7 +47,7 @@ else if (plants.Count == 0 && propagations.Count == 0)
 else
 {
     <p class="today-counts">
-        @Labels.Plants(plants.Count(p => p.Status == PlantStatus.Active)) · @Labels.Count(active.Count, "propagation") going
+        @Labels.Plants(plants.Count(p => p.Status == PlantStatus.Active)) · @Labels.Count(active.Count, "propagation") going@if (monthResult is not null) { <text> · @monthResult.PottedUp of @monthResult.Total potted up this month</text> }
     </p>
 
     @if (backupReminder is { } reminder)
@@ -233,6 +234,7 @@ else
     private IReadOnlyList<PhotoDue> photoRound = [];
     private PutOffs putOffs = PutOffs.Empty();
     private Dictionary<Guid, string> names = [];
+    private MonthResult? monthResult;
     private string? backupReminder;
     private bool showRound;
     private bool loaded;
@@ -259,6 +261,11 @@ else
             ("Treatment due", dueTreatments.Where(v => !v.IsCheck).ToList()),
             ("Check for pests", dueTreatments.Where(v => v.IsCheck).ToList())
         }.Where(group => group.Item2.Count > 0);
+
+    // Everything listed as due right now, which is also the number on the app icon
+    private int DueCount =>
+        DuePests.Sum(group => group.Cases.Count) + FlaggedNow.Count + QuarantineNow.Count + ChecksNow.Count
+        + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
@@ -288,8 +295,10 @@ else
         // Only what's still here: entries left behind by a deleted plant have nowhere to go
         recent = await Entries.GetRecentAsync(8, names.Keys.ToHashSet());
 
+        monthResult = TodayBoard.FinishedThisMonth(propagations, Time);
         backupReminder = await BackupReminderAsync();
         loaded = true;
+        await Badge.SetAsync(DueCount);
     }
 
     private async Task PutOffAsync(string key, DateOnly until)

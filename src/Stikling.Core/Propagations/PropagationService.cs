@@ -79,7 +79,7 @@ public sealed class PropagationService(
         Func<Guid, string?>? placeName = null)
     {
         after.ClearMixUnlessSoil();
-        after.SyncStageWithCounts();
+        after.SyncStageWithCounts(Today);
         after.NoteFirstRoot();
         after.NoteRooted(Today);
         await propagations.SaveAsync(after);
@@ -153,7 +153,7 @@ public sealed class PropagationService(
         // Check everything before saving anything
         if (newPlants.SelectMany(p => p.Validate(Today)).FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
-        propagation.RecordPottedUp(request.Count);
+        propagation.RecordPottedUp(request.Count, Today);
 
         var occurredAt = time.MomentOn(request.Date);
         foreach (var plant in newPlants)
@@ -183,7 +183,7 @@ public sealed class PropagationService(
     /// <summary>Records units that didn't make it, with an optional reason ("rotted").</summary>
     public async Task MarkFailedAsync(Propagation propagation, int count, string? reason = null)
     {
-        propagation.RecordFailed(count);
+        propagation.RecordFailed(count, Today);
         await propagations.SaveAsync(propagation);
 
         var text = Clean(reason) is { } r ? $"{count} failed: {r}" : $"{count} failed";
