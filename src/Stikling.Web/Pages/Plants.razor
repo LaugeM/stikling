@@ -176,6 +176,15 @@ else
                 <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkTagOpen = false">Cancel</button>
             </div>
         }
+        else if (bulkMoveOpen)
+        {
+            <RoomPicker @bind-Value="bulkPlace" Rooms="rooms" Label="Move to" />
+            <div class="bulk-row">
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(bulkPlace))"
+                        @onclick="MoveBulkAsync">Move @Labels.Plants(selected.Count)</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkMoveOpen = false">Cancel</button>
+            </div>
+        }
         else if (bulkNoteOpen)
         {
             <textarea class="form-control form-control-sm" rows="2" placeholder="Note for all selected plants, e.g. Sprayed for thrips"
@@ -218,6 +227,8 @@ else
                         @onclick="() => bulkNoteOpen = true">Add note</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
                         @onclick="OpenBulkTags">Tag</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
+                        @onclick="OpenBulkMove">Move</button>
             </div>
         }
         @if (bulkMessage is not null)
@@ -276,6 +287,8 @@ else
     private bool bulkNoteOpen;
     private bool bulkCareOpen;
     private bool bulkTagOpen;
+    private bool bulkMoveOpen;
+    private string? bulkPlace; // as picked, "Living room / Windowsill"
     private List<string> bulkTags = [];
     private IReadOnlyList<CareLog> careLogs = [];
     private IReadOnlyList<PestCase> pestCases = [];
@@ -380,7 +393,34 @@ else
         bulkNoteOpen = false;
         bulkCareOpen = false;
         bulkTagOpen = false;
+        bulkMoveOpen = false;
         bulkMessage = null;
+    }
+
+    private void OpenBulkMove()
+    {
+        bulkPlace = null;
+        bulkMoveOpen = true;
+        bulkMessage = null;
+    }
+
+    private async Task MoveBulkAsync()
+    {
+        if (string.IsNullOrWhiteSpace(bulkPlace))
+            return;
+
+        busy = true;
+        var plants = SelectedPlants;
+        var placeId = await RoomService.PlaceIdAsync(bulkPlace);
+        var names = await RoomService.GetPlacesAsync();
+        var moved = await PlantService.MoveAsync(plants, placeId, Labels.For, id => names.NameOf(id));
+        bulkMessage = moved == plants.Count
+            ? $"Moved {Labels.Plants(moved)} to {bulkPlace}."
+            : $"Moved {Labels.Plants(moved)} to {bulkPlace}. {Labels.Plants(plants.Count - moved)} already there.";
+        bulkMoveOpen = false;
+        selected.Clear();
+        await LoadAsync();
+        busy = false;
     }
 
     private void OpenBulkTags()

@@ -184,6 +184,54 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Move_sets_the_place_and_records_it_on_each_plant()
+    {
+        var places = new FakePlaceRepository();
+        var a = new Plant { Nickname = "A", PlaceId = places.IdOf("Living room") };
+        var b = new Plant { Nickname = "B" };
+        await plants.SaveAsync(a);
+        await plants.SaveAsync(b);
+        var bedroom = places.IdOf("Bedroom");
+
+        var moved = await service.MoveAsync([a, b], bedroom, Label, id => places.Current.NameOf(id));
+
+        Assert.Equal(2, moved);
+        Assert.Equal(bedroom, a.PlaceId);
+        Assert.Equal(bedroom, b.PlaceId);
+        var texts = timeline.Entries.Where(e => e.Kind == TimelineKind.Change).ToList();
+        Assert.Equal(2, texts.Count);
+        Assert.Contains(texts, e => e.SubjectId == a.Id && e.Text == "Moved from Living room to Bedroom");
+    }
+
+    [Fact]
+    public async Task Move_leaves_plants_already_there_alone()
+    {
+        var places = new FakePlaceRepository();
+        var room = places.IdOf("Bedroom");
+        var there = new Plant { Nickname = "There", PlaceId = room };
+        await plants.SaveAsync(there);
+
+        var moved = await service.MoveAsync([there], room, Label);
+
+        Assert.Equal(0, moved);
+        Assert.Empty(timeline.Entries);
+    }
+
+    [Fact]
+    public async Task Move_skips_deleted_plants()
+    {
+        var places = new FakePlaceRepository();
+        var gone = new Plant { Nickname = "Gone", DeletedAt = Now };
+        await plants.SaveAsync(gone);
+
+        var moved = await service.MoveAsync([gone], places.IdOf("Bedroom"), Label);
+
+        Assert.Equal(0, moved);
+        Assert.Null(gone.PlaceId);
+        Assert.Empty(timeline.Entries);
+    }
+
+    [Fact]
     public async Task Update_records_a_change_of_light()
     {
         var plant = new Plant { Nickname = "Jade" };
