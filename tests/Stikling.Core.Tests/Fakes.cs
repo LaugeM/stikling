@@ -537,7 +537,10 @@ internal sealed class FakeSyncServer : ISyncServer
     private readonly Dictionary<(Guid Collection, string Kind, Guid Id), (long Version, JsonElement Data)> records = [];
     private JsonElement? settings;
 
-    public int PageSize { get; set; } = SyncLimits.BatchSize;
+    public int PageSize { get; set; } = SyncRules.BatchSize;
+
+    /// <summary>The server's clock, for refusing records changed in the future.</summary>
+    public DateTimeOffset Now { get; set; } = new(2026, 10, 1, 12, 0, 0, TimeSpan.Zero);
 
     public List<SyncRecord> Pushed { get; } = [];
 
@@ -551,8 +554,18 @@ internal sealed class FakeSyncServer : ISyncServer
     public JsonElement? Find(Guid collectionId, string kind, Guid id) =>
         records.TryGetValue((collectionId, kind, id), out var record) ? record.Data : null;
 
+    /// <summary>As if the server's database had been put back to an empty copy.</summary>
+    public void Forget()
+    {
+        records.Clear();
+        lastVersion = 0;
+    }
+
     public Task<PullResponse> PullAsync(Guid collectionId, long after)
     {
+        if (after > lastVersion)
+            return Task.FromResult(new PullResponse([], 0, More: false, StartOver: true));
+
         var page = records
             .Where(r => r.Key.Collection == collectionId && r.Value.Version > after)
             .OrderBy(r => r.Value.Version)
@@ -572,10 +585,19 @@ internal sealed class FakeSyncServer : ISyncServer
     {
         BeforePush?.Invoke();
         BeforePush = null;
-        Pushed.AddRange(sent);
+
         var newer = new List<SyncRecord>();
-        foreach (var record in sent)
+        var refused = new List<RefusedRecord>();
+        for (var i = 0; i < sent.Count; i++)
         {
+            var record = sent[i];
+            if (SyncRules.Problem(record.Data, Now) is { } problem)
+            {
+                refused.Add(new RefusedRecord(i, problem));
+                continue;
+            }
+
+            Pushed.Add(record);
             RecordStamp.TryRead(record.Data, out var stamp);
             var key = (collectionId, record.Kind, stamp.Id);
             if (!records.TryGetValue(key, out var current))
@@ -583,22 +605,26 @@ internal sealed class FakeSyncServer : ISyncServer
             else
             {
                 RecordStamp.TryRead(current.Data, out var here);
-                if (stamp.IsNewerThan(here))
+                if (SyncRules.Replaces(stamp, record.Data.GetRawText(), here, current.Data.GetRawText()))
                     records[key] = (++lastVersion, record.Data);
-                else if (here.IsNewerThan(stamp))
+                else if (SyncRules.Replaces(here, current.Data.GetRawText(), stamp, record.Data.GetRawText()))
                     newer.Add(new SyncRecord(record.Kind, current.Data));
             }
         }
-        return Task.FromResult(new PushResponse(newer));
+        return Task.FromResult(new PushResponse(newer, refused));
     }
 
     public Task<JsonElement?> GetSettingsAsync() => Task.FromResult(settings);
 
-    public Task<JsonElement> PutSettingsAsync(JsonElement sent)
+    public Task<JsonElement?> PutSettingsAsync(JsonElement sent)
     {
+        if (SyncRules.Problem(sent, Now) is not null)
+            return Task.FromResult<JsonElement?>(null);
+
         RecordStamp.TryRead(sent, out var stamp);
-        if (settings is not { } current || (RecordStamp.TryRead(current, out var here) && stamp.IsNewerThan(here)))
+        if (settings is not { } current
+            || (RecordStamp.TryRead(current, out var here) && SyncRules.Replaces(stamp, sent.GetRawText(), here, current.GetRawText())))
             settings = sent;
-        return Task.FromResult(settings!.Value);
+        return Task.FromResult(settings);
     }
 }

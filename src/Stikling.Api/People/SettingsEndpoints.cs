@@ -2,7 +2,6 @@ using System.Text.Json;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Data;
-using Stikling.Api.Sync;
 using Stikling.Core.Sync;
 
 namespace Stikling.Api.People;
@@ -28,9 +27,9 @@ public static class SettingsEndpoints
             return data is null ? Results.NoContent() : Results.Text(data, "application/json");
         });
 
-        settings.MapPut("", async (JsonElement data, CurrentPerson current, StiklingDbContext db) =>
+        settings.MapPut("", async (JsonElement data, CurrentPerson current, StiklingDbContext db, TimeProvider clock) =>
         {
-            if (RecordJson.Check(data) is { } problem)
+            if (SyncRules.Problem(data, clock.GetUtcNow()) is { } problem)
                 return Results.ValidationProblem(new Dictionary<string, string[]> { ["settings"] = [problem] });
 
             RecordStamp.TryRead(data, out var stamp);
@@ -57,7 +56,7 @@ public static class SettingsEndpoints
         var current = await db.PersonSettings.SingleOrDefaultAsync(s => s.PersonId == personId);
         if (current is null)
             db.PersonSettings.Add(current = new PersonSettings { PersonId = personId, UpdatedAt = stamp.UpdatedAt, Data = data });
-        else if (stamp.UpdatedAt > current.UpdatedAt)
+        else if (SyncRules.Replaces(stamp, data, new RecordStamp(personId, current.UpdatedAt, null), current.Data))
         {
             current.UpdatedAt = stamp.UpdatedAt;
             current.Data = data;

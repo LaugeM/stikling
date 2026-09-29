@@ -58,13 +58,20 @@ public interface ISyncServer
     /// <summary>The person's settings on the server, or null when none have been sent yet.</summary>
     Task<JsonElement?> GetSettingsAsync();
 
-    /// <summary>Sends the settings, and gets back whichever version the server kept.</summary>
-    Task<JsonElement> PutSettingsAsync(JsonElement settings);
+    /// <summary>
+    /// Sends the settings, and gets back whichever version the server kept, or null when the
+    /// server refused them.
+    /// </summary>
+    Task<JsonElement?> PutSettingsAsync(JsonElement settings);
 }
 
 /// <param name="Received">Records saved here from the server, so the screen can be refreshed when it's more than 0.</param>
 /// <param name="Sent">Changes from here that reached the server.</param>
-public sealed record SyncResult(int Received, int Sent);
+/// <param name="Refused">
+/// Changes the server wouldn't keep, e.g. one dated in the future by a clock that is wrong. They
+/// stay on the change list and are tried again next time.
+/// </param>
+public sealed record SyncResult(int Received, int Sent, int Refused);
 
 /// <summary>
 /// Keeps the records on this device and on the server the same. Each record is compared on its
@@ -89,11 +96,7 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
     {
         var state = await store.GetStateAsync();
         if (state is null || state.CollectionId != collectionId)
-        {
-            await store.QueueAllAsync();
-            state = new SyncState(collectionId, 0, KnownKinds);
-            await store.SaveStateAsync(state);
-        }
+            state = await StartOverAsync(collectionId);
         else if (state.Kinds != KnownKinds)
         {
             state = state with { Cursor = 0, Kinds = KnownKinds };
@@ -104,6 +107,12 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
         for (var round = 0; round < MaxRounds; round++)
         {
             var page = await server.PullAsync(collectionId, state.Cursor);
+            if (page.StartOver)
+            {
+                state = await StartOverAsync(collectionId);
+                continue;
+            }
+
             received += await SaveAsync(page.Records);
             state = state with { Cursor = page.Next };
             await store.SaveStateAsync(state);
@@ -114,46 +123,85 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
         if (await server.GetSettingsAsync() is { } settings)
             received += await SaveAsync([new SyncRecord(SyncKinds.Settings, settings)]);
 
-        var (sent, newer) = await SendAsync(collectionId, canEdit);
-        return new SyncResult(received + newer, sent);
+        var (sent, newer, refused) = await SendAsync(collectionId, canEdit);
+        return new SyncResult(received + newer, sent, refused);
     }
 
-    private async Task<(int Sent, int Newer)> SendAsync(Guid collectionId, bool canEdit)
+    /// <summary>Everything here goes on the change list, and the collection is fetched from the start.</summary>
+    private async Task<SyncState> StartOverAsync(Guid collectionId)
+    {
+        await store.QueueAllAsync();
+        var state = new SyncState(collectionId, 0, KnownKinds);
+        await store.SaveStateAsync(state);
+        return state;
+    }
+
+    private async Task<(int Sent, int Newer, int Refused)> SendAsync(Guid collectionId, bool canEdit)
     {
         // A viewer's changes to the collection stay on the list, since the server won't take them
         IReadOnlyCollection<string> kinds = canEdit ? SyncKinds.All : [SyncKinds.Settings];
         int sent = 0, newer = 0;
 
+        // Refused ones stay on the list for next time, but aren't sent again in this sync
+        var refused = new HashSet<(string Kind, Guid Id)>();
+
         for (var round = 0; round < MaxRounds; round++)
         {
-            var pending = await store.GetPendingAsync(kinds, SyncLimits.BatchSize);
+            var batch = await store.GetPendingAsync(kinds, SyncRules.BatchSize);
+            var pending = batch.Where(p => !refused.Contains((p.Kind, p.Id))).ToList();
             if (pending.Count == 0)
                 break;
 
-            // One left the device since it was changed. There's nothing to send, only the entry to clear
-            var records = pending
-                .Where(p => p.Data is not null)
-                .Select(p => new SyncRecord(p.Kind, p.Data!.Value))
-                .ToList();
+            var done = new List<PendingRecord>();
+            var forCollection = new List<PendingRecord>();
+            foreach (var record in pending)
+            {
+                // It left the device after it was changed. There's nothing to send, only the entry to clear
+                if (record.Data is not { } data)
+                    done.Add(record);
+                else if (record.Kind == SyncKinds.Settings)
+                {
+                    if (await server.PutSettingsAsync(data) is { } kept)
+                    {
+                        newer += await SaveAsync([new SyncRecord(SyncKinds.Settings, kept)]);
+                        done.Add(record);
+                        sent++;
+                    }
+                    else
+                        refused.Add((record.Kind, record.Id));
+                }
+                else
+                    forCollection.Add(record);
+            }
 
-            foreach (var settings in records.Where(r => r.Kind == SyncKinds.Settings))
-                newer += await SaveAsync([new SyncRecord(SyncKinds.Settings, await server.PutSettingsAsync(settings.Data))]);
-
-            var forCollection = records.Where(r => r.Kind != SyncKinds.Settings).ToList();
             if (forCollection.Count > 0)
-                newer += await SaveAsync((await server.PushAsync(collectionId, forCollection)).Newer);
+            {
+                var response = await server.PushAsync(collectionId, forCollection.Select(p => new SyncRecord(p.Kind, p.Data!.Value)).ToList());
+                var turnedAway = response.Refused.Select(r => r.Index).ToHashSet();
+                for (var i = 0; i < forCollection.Count; i++)
+                {
+                    if (turnedAway.Contains(i))
+                        refused.Add((forCollection[i].Kind, forCollection[i].Id));
+                    else
+                    {
+                        done.Add(forCollection[i]);
+                        sent++;
+                    }
+                }
 
-            await store.MarkSentAsync(pending);
-            sent += records.Count;
+                newer += await SaveAsync(response.Newer);
+            }
 
-            if (pending.Count < SyncLimits.BatchSize)
+            await store.MarkSentAsync(done);
+
+            if (batch.Count < SyncRules.BatchSize)
                 break;
         }
 
-        return (sent, newer);
+        return (sent, newer, refused.Count);
     }
 
-    /// <summary>Saves the records that are newer than the copies here, and says how many there were.</summary>
+    /// <summary>Saves the records that win over the copies here, and says how many there were.</summary>
     private async Task<int> SaveAsync(IReadOnlyList<SyncRecord> records)
     {
         var saved = 0;
@@ -163,25 +211,25 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
         foreach (var kind in records.Where(r => SyncKinds.IsKnown(r.Kind)).GroupBy(r => r.Kind))
         {
             var incoming = kind
-                .Select(r => (r.Data, Valid: RecordStamp.TryRead(r.Data, out var stamp), Stamp: stamp))
+                .Select(r => (Json: r.Data.GetRawText(), r.Data, Valid: RecordStamp.TryRead(r.Data, out var stamp), Stamp: stamp))
                 .Where(r => r.Valid)
                 .GroupBy(r => r.Stamp.Id)
-                .Select(g => g.MaxBy(r => r.Stamp.UpdatedAt))
+                .Select(g => g.Aggregate((a, b) => SyncRules.Replaces(b.Stamp, b.Json, a.Stamp, a.Json) ? b : a))
                 .ToList();
 
-            var here = new Dictionary<Guid, (RecordStamp Stamp, string UpdatedAt)>();
+            var here = new Dictionary<Guid, (RecordStamp Stamp, string Json, string UpdatedAt)>();
             foreach (var record in await store.GetAsync(kind.Key, incoming.Select(r => r.Stamp.Id).ToList()))
             {
                 if (RecordStamp.TryRead(record, out var stamp))
-                    here[stamp.Id] = (stamp, record.GetProperty("updatedAt").GetString()!);
+                    here[stamp.Id] = (stamp, record.GetRawText(), record.GetProperty("updatedAt").GetString()!);
             }
 
             var copies = new List<ServerCopy>();
-            foreach (var (data, _, stamp) in incoming)
+            foreach (var (json, data, _, stamp) in incoming)
             {
                 if (!here.TryGetValue(stamp.Id, out var current))
                     copies.Add(new ServerCopy(data, null));
-                else if (stamp.IsNewerThan(current.Stamp))
+                else if (SyncRules.Replaces(stamp, json, current.Stamp, current.Json))
                     copies.Add(new ServerCopy(data, current.UpdatedAt));
             }
 

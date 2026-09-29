@@ -255,13 +255,13 @@ public class SyncServiceTests
     [Fact]
     public async Task Sending_carries_on_past_one_batch()
     {
-        for (var i = 0; i < SyncLimits.BatchSize + 5; i++)
+        for (var i = 0; i < SyncRules.BatchSize + 5; i++)
             phone.Keep(Plants, Plant($"Plant {i}", Monday));
 
         var result = await Sync(phone);
 
-        Assert.Equal(SyncLimits.BatchSize + 5, result.Sent);
-        Assert.Equal(SyncLimits.BatchSize + 5, server.Pushed.Count);
+        Assert.Equal(SyncRules.BatchSize + 5, result.Sent);
+        Assert.Equal(SyncRules.BatchSize + 5, server.Pushed.Count);
         Assert.Empty(phone.Pending);
     }
 
@@ -313,5 +313,108 @@ public class SyncServiceTests
         var result = await Sync(phone);
 
         Assert.Equal(1, result.Received);
+    }
+
+    [Fact]
+    public async Task A_refused_change_stays_on_the_list_without_holding_up_the_rest()
+    {
+        var future = Plant("From a clock that is ahead", server.Now.AddDays(2));
+        var fine = Plant("Monstera", Monday);
+        phone.Save(Plants, future);
+        phone.Save(Plants, fine);
+
+        var result = await Sync(phone);
+
+        Assert.Equal(1, result.Refused);
+        Assert.Equal(1, result.Sent);
+        Assert.NotNull(server.Find(collectionId, Plants, fine.Id));
+        Assert.Null(server.Find(collectionId, Plants, future.Id));
+        Assert.Equal((Plants, future.Id), Assert.Single(phone.Pending).Key);
+    }
+
+    [Fact]
+    public async Task A_refused_change_goes_through_once_the_server_takes_it()
+    {
+        var plant = Plant("From a clock that is ahead", server.Now.AddDays(2));
+        phone.Save(Plants, plant);
+        await Sync(phone);
+
+        server.Now = server.Now.AddDays(2);
+        var result = await Sync(phone);
+
+        Assert.Equal(0, result.Refused);
+        Assert.NotNull(server.Find(collectionId, Plants, plant.Id));
+        Assert.Empty(phone.Pending);
+    }
+
+    [Fact]
+    public async Task Refused_settings_stay_on_the_list()
+    {
+        phone.Save(SyncKinds.Settings, new UserSettings { Theme = ThemeMode.Dark, UpdatedAt = server.Now.AddDays(2) });
+
+        var result = await Sync(phone);
+
+        Assert.Equal(1, result.Refused);
+        Assert.Null(await server.GetSettingsAsync());
+        Assert.Single(phone.Pending);
+    }
+
+    [Fact]
+    public async Task A_device_ahead_of_the_server_sends_everything_again()
+    {
+        var plant = Plant("Monstera", Monday);
+        phone.Save(Plants, plant);
+        await Sync(phone);
+        await Sync(phone);
+
+        server.Forget();
+        await Sync(phone);
+
+        Assert.NotNull(server.Find(collectionId, Plants, plant.Id));
+        Assert.Empty(phone.Pending);
+    }
+
+    [Fact]
+    public async Task Two_different_versions_from_the_same_moment_settle_on_the_same_one()
+    {
+        var id = Guid.NewGuid();
+        await Sync(phone);
+        await Sync(computer);
+        phone.Save(Plants, Plant("Aloe", Monday, id));
+        computer.Save(Plants, Plant("Zamioculcas", Monday, id));
+
+        await Sync(phone);
+        await Sync(computer);
+        await Sync(phone);
+
+        Assert.Equal("Zamioculcas", phone.Get<Plant>(Plants, id)?.Nickname);
+        Assert.Equal("Zamioculcas", computer.Get<Plant>(Plants, id)?.Nickname);
+        Assert.Empty(phone.Pending);
+        Assert.Empty(computer.Pending);
+    }
+
+    [Fact]
+    public async Task The_same_version_written_differently_is_left_alone()
+    {
+        var plant = Plant("Kalanchoë", Monday);
+        server.Add(collectionId, Plants, JsonSerializer.Deserialize<JsonElement>(Json(plant).GetRawText().Replace("ë", "\\u00EB")));
+        phone.Keep(Plants, plant);
+        phone.State = new SyncState(collectionId, 0, string.Join(",", SyncKinds.All));
+
+        var result = await Sync(phone);
+
+        Assert.Equal(0, result.Received);
+    }
+
+    [Fact]
+    public void Every_kind_of_record_in_a_backup_syncs()
+    {
+        // A new store goes in BackupData, so this catches one left out of SyncKinds
+        var inBackups = typeof(Backup.BackupData).GetProperties()
+            .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+            .Select(p => JsonNamingPolicy.CamelCase.ConvertName(p.Name))
+            .Order();
+
+        Assert.Equal(inBackups, SyncKinds.All.Order());
     }
 }

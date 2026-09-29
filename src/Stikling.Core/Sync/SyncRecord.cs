@@ -34,22 +34,49 @@ public readonly record struct RecordStamp(Guid Id, DateTimeOffset UpdatedAt, Dat
         stamp = new RecordStamp(guid, updatedAt, deletedAt);
         return true;
     }
-
-    /// <summary>
-    /// The newest version of a record wins, the same as when a backup is restored. A delete is a
-    /// change like any other, so it wins over an older edit.
-    /// </summary>
-    public bool IsNewerThan(RecordStamp other) => UpdatedAt > other.UpdatedAt;
 }
 
-/// <summary>The size limits the server holds uploads to.</summary>
-public static class SyncLimits
+/// <summary>The rules the server and the devices both follow, so they always agree.</summary>
+public static class SyncRules
 {
     /// <summary>The most records sent or fetched in one request.</summary>
     public const int BatchSize = 500;
 
     /// <summary>The longest one record's JSON may be, in characters. Photo images don't count, since they aren't in the record.</summary>
     public const int MaxRecordLength = 100_000;
+
+    /// <summary>
+    /// How far ahead of the server's clock a record's updatedAt may be. A device whose clock is
+    /// far ahead would otherwise write versions that no later edit could beat.
+    /// </summary>
+    public static readonly TimeSpan MaxAhead = TimeSpan.FromDays(1);
+
+    /// <summary>
+    /// Whether a version of a record takes the place of the one already there. The newest wins,
+    /// the same as when a backup is restored, and a delete is a change like any other. Two
+    /// versions from the same moment are rare, but when they differ, the one whose JSON sorts
+    /// last wins, so every device ends up with the same one.
+    /// </summary>
+    public static bool Replaces(RecordStamp incoming, string incomingJson, RecordStamp current, string currentJson) =>
+        incoming.UpdatedAt != current.UpdatedAt
+            ? incoming.UpdatedAt > current.UpdatedAt
+            : string.CompareOrdinal(Normalised(incomingJson), Normalised(currentJson)) > 0;
+
+    // The browser and the server can write the same record with different spacing or escaping
+    private static string Normalised(string json) =>
+        JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(json));
+
+    /// <summary>Why the server won't keep a record, or null when it will.</summary>
+    public static string? Problem(JsonElement data, DateTimeOffset now)
+    {
+        if (!RecordStamp.TryRead(data, out var stamp))
+            return "A record needs to be an object with an id and an updatedAt.";
+        if (data.GetRawText().Length > MaxRecordLength)
+            return $"A record can be at most {MaxRecordLength} characters of JSON.";
+        if (stamp.UpdatedAt > now + MaxAhead)
+            return "The record was changed in the future. Check the date and time on the device.";
+        return null;
+    }
 }
 
 /// <summary><c>POST /collections/{id}/records</c>: changes made on a device.</summary>
@@ -59,9 +86,18 @@ public sealed record PushRequest(List<SyncRecord> Records);
 /// Records the server already had a newer version of. They are sent back so the device can take
 /// them in place of its own.
 /// </param>
-public sealed record PushResponse(List<SyncRecord> Newer);
+/// <param name="Refused">Records the server didn't keep. The others were kept.</param>
+public sealed record PushResponse(List<SyncRecord> Newer, List<RefusedRecord> Refused);
+
+/// <param name="Index">Where the record was in the list that was sent.</param>
+public sealed record RefusedRecord(int Index, string Reason);
 
 /// <summary><c>GET /collections/{id}/records?after=N</c>: what changed on the server after change N.</summary>
 /// <param name="Next">The change number to ask after next time.</param>
 /// <param name="More">True when there is more to fetch straight away.</param>
-public sealed record PullResponse(List<SyncRecord> Records, long Next, bool More);
+/// <param name="StartOver">
+/// The device asked after a change number the server hasn't reached, which happens when the
+/// server's database was put back to an older copy. The device should fetch from the start and
+/// send everything it has again.
+/// </param>
+public sealed record PullResponse(List<SyncRecord> Records, long Next, bool More, bool StartOver = false);

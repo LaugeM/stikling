@@ -16,40 +16,52 @@ public static class RecordEndpoints
         records.MapGet("", async (Guid collectionId, long? after, StiklingDbContext db) =>
         {
             var from = Math.Max(after ?? 0, 0);
+
+            var last = await db.Collections.Where(c => c.Id == collectionId).Select(c => c.LastVersion).SingleAsync();
+            if (from > last)
+                return new PullResponse([], 0, More: false, StartOver: true);
+
             var page = await db.Records
                 .Where(r => r.CollectionId == collectionId && r.Version > from)
                 .OrderBy(r => r.Version)
-                .Take(SyncLimits.BatchSize + 1)
+                .Take(SyncRules.BatchSize + 1)
                 .Select(r => new { r.Kind, r.Version, r.Data })
                 .ToListAsync();
 
-            var more = page.Count > SyncLimits.BatchSize;
+            var more = page.Count > SyncRules.BatchSize;
             if (more)
                 page.RemoveAt(page.Count - 1);
 
             return new PullResponse(
-                page.Select(r => new SyncRecord(r.Kind, RecordJson.Parse(r.Data))).ToList(),
+                page.Select(r => new SyncRecord(r.Kind, Parse(r.Data))).ToList(),
                 page.Count > 0 ? page[^1].Version : from,
                 more);
         })
         .RequireAuthorization(CollectionPolicies.View);
 
-        // POST: changes from a device. Each record is kept if it's newer than the version here.
-        records.MapPost("", async (Guid collectionId, PushRequest request, StiklingDbContext db) =>
+        // POST: changes from a device. Each record is kept if it wins over the version here, and
+        // one that can't be kept is refused on its own, so it doesn't hold up the rest.
+        records.MapPost("", async (Guid collectionId, PushRequest request, StiklingDbContext db, TimeProvider clock) =>
         {
             var received = request.Records ?? [];
-            var errors = new Dictionary<string, string[]>();
-            if (received.Count > SyncLimits.BatchSize)
-                errors["records"] = [$"Send at most {SyncLimits.BatchSize} records at a time."];
+            if (received.Count > SyncRules.BatchSize)
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    ["records"] = [$"Send at most {SyncRules.BatchSize} records at a time."],
+                });
+            }
 
+            var now = clock.GetUtcNow();
+            var refused = new List<RefusedRecord>();
             var incoming = new List<(string Kind, RecordStamp Stamp, string Data)>();
-            for (var i = 0; i < received.Count && errors.Count == 0; i++)
+            for (var i = 0; i < received.Count; i++)
             {
                 var record = received[i];
-                if (record.Kind is null || !SyncKinds.IsCollection(record.Kind))
-                    errors[$"records[{i}].kind"] = [$"\"{record.Kind}\" isn't a kind of record a collection holds."];
-                else if (RecordJson.Check(record.Data) is { } problem)
-                    errors[$"records[{i}].data"] = [problem];
+                if (record?.Kind is null || !SyncKinds.IsCollection(record.Kind))
+                    refused.Add(new RefusedRecord(i, $"\"{record?.Kind}\" isn't a kind of record a collection holds."));
+                else if (SyncRules.Problem(record.Data, now) is { } problem)
+                    refused.Add(new RefusedRecord(i, problem));
                 else
                 {
                     RecordStamp.TryRead(record.Data, out var stamp);
@@ -57,13 +69,10 @@ public static class RecordEndpoints
                 }
             }
 
-            if (errors.Count > 0)
-                return Results.ValidationProblem(errors);
-
-            // The same record twice in one upload: only its newest version counts
-            var newest = incoming
+            // The same record twice in one upload: only the version that wins counts
+            var winners = incoming
                 .GroupBy(r => (r.Kind, r.Stamp.Id))
-                .Select(g => g.MaxBy(r => r.Stamp.UpdatedAt))
+                .Select(g => g.Aggregate((a, b) => SyncRules.Replaces(b.Stamp, b.Data, a.Stamp, a.Data) ? b : a))
                 .ToList();
 
             await using var transaction = await db.Database.BeginTransactionAsync();
@@ -76,14 +85,14 @@ public static class RecordEndpoints
                 .ExecuteUpdateAsync(set => set.SetProperty(c => c.LastVersion, c => c.LastVersion));
             var collection = await db.Collections.SingleAsync(c => c.Id == collectionId);
 
-            var ids = newest.Select(r => r.Stamp.Id).Distinct().ToList();
+            var ids = winners.Select(r => r.Stamp.Id).Distinct().ToList();
             var existing = (await db.Records
                     .Where(r => r.CollectionId == collectionId && ids.Contains(r.Id))
                     .ToListAsync())
                 .ToDictionary(r => (r.Kind, r.Id));
 
             var newer = new List<SyncRecord>();
-            foreach (var (kind, stamp, data) in newest)
+            foreach (var (kind, stamp, data) in winners)
             {
                 if (!existing.TryGetValue((kind, stamp.Id), out var current))
                 {
@@ -97,44 +106,31 @@ public static class RecordEndpoints
                         DeletedAt = stamp.DeletedAt,
                         Data = data,
                     });
+                    continue;
                 }
-                else if (stamp.IsNewerThan(new RecordStamp(current.Id, current.UpdatedAt, current.DeletedAt)))
+
+                var here = new RecordStamp(current.Id, current.UpdatedAt, current.DeletedAt);
+                if (SyncRules.Replaces(stamp, data, here, current.Data))
                 {
                     current.Version = ++collection.LastVersion;
                     current.UpdatedAt = stamp.UpdatedAt;
                     current.DeletedAt = stamp.DeletedAt;
                     current.Data = data;
                 }
-                else if (stamp.UpdatedAt < current.UpdatedAt)
-                {
-                    newer.Add(new SyncRecord(current.Kind, RecordJson.Parse(current.Data)));
-                }
+                else if (SyncRules.Replaces(here, current.Data, stamp, data))
+                    newer.Add(new SyncRecord(current.Kind, Parse(current.Data)));
 
-                // The same version again, e.g. sent twice because an answer got lost: nothing to do
+                // Neither wins when it's the same version again, e.g. sent twice because an answer got lost
             }
 
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return Results.Ok(new PushResponse(newer));
+            return Results.Ok(new PushResponse(newer, refused));
         })
         .RequireAuthorization(CollectionPolicies.Edit);
 
         return app;
-    }
-}
-
-/// <summary>Checking and reading the record JSON the app sends.</summary>
-public static class RecordJson
-{
-    /// <summary>What is wrong with a record, or null when it can be kept.</summary>
-    public static string? Check(JsonElement data)
-    {
-        if (!RecordStamp.TryRead(data, out _))
-            return "A record needs to be an object with an id and an updatedAt.";
-        if (data.GetRawText().Length > SyncLimits.MaxRecordLength)
-            return $"A record can be at most {SyncLimits.MaxRecordLength} characters of JSON.";
-        return null;
     }
 
     public static JsonElement Parse(string data) => JsonSerializer.Deserialize<JsonElement>(data);

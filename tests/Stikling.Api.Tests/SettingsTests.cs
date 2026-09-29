@@ -92,4 +92,15 @@ public class SettingsTests(ApiFactory api)
 
         Assert.Equal(HttpStatusCode.BadRequest, put.StatusCode);
     }
+
+    [Fact]
+    public async Task Settings_changed_in_the_future_are_refused()
+    {
+        var client = api.ClientFor(ApiFactory.NewClerkUserId());
+
+        var put = await client.PutAsJsonAsync("/me/settings", Settings(DateTimeOffset.UtcNow.AddDays(2), "Dark"), ApiFactory.Json);
+
+        Assert.Equal(HttpStatusCode.BadRequest, put.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await client.GetAsync("/me/settings")).StatusCode);
+    }
 }

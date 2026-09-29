@@ -24,7 +24,7 @@ A new IndexedDB store touches more places than the model and its page, and missi
 - the model in `Core/Models` and a repository interface next to its service
 - a new `if (event.oldVersion < N)` block in `wwwroot/js/db.js` with `DB_VERSION` raised. Never change an old block.
 - the store name in `Stores` in `Services/IndexedDb.cs`, the implementation in `IndexedDbRepositories.cs`, and the registration in `Program.cs`
-- the store name in `SyncKinds` in `Core/Sync`, or it won't sync. The API only takes the kinds listed there.
+- the store name in `SyncKinds` in `Core/Sync`, or it won't sync. The API only takes the kinds listed there, and a test checks the list against `BackupData`.
 - `BackupData` and its `Counts`, export and restore in `BackupService`, and the restore summary in `Pages/Settings.razor`
 - a fake in `tests/Stikling.Core.Tests/Fakes.cs`, and `BackupTests`
 
@@ -54,7 +54,7 @@ Accounts and sync between devices are being added in steps, so people don't have
 - Never take the caller's identity from the request body or the URL. `CurrentPerson` finds them from the token.
 - Anything under `/collections/{collectionId}` needs `CollectionPolicies.View` or `CollectionPolicies.Edit`. The policy checks the caller's membership on every request, so a viewer can't change data even with a modified app.
 - `docker compose up --build` runs the API on port 5180 with SQL Server. In Development it applies its migrations on start. A new migration is made with `dotnet tool restore`, then `dotnet ef migrations add <Name> --project src/Stikling.Api --output-dir Data/Migrations`.
-- Records from the app are kept as their JSON in one `Records` table, keyed by collection, kind and id. The server only reads the id, `updatedAt` and `deletedAt`, so a new field in a model needs no migration. The newest `updatedAt` wins, and each accepted change gets the collection's next change number, which is what devices fetch by. The person's `UserSettings` are kept the same way in `PersonSettings`.
+- Records from the app are kept as their JSON in one `Records` table, keyed by collection, kind and id. The server only reads the id, `updatedAt` and `deletedAt`, so a new field in a model needs no migration. The newest `updatedAt` wins, and each accepted change gets the collection's next change number, which is what devices fetch by. The person's `UserSettings` are kept the same way in `PersonSettings`. A record the server can't keep, like one dated more than a day ahead of its clock, is refused on its own, and the rest of the upload is kept.
 - The sync logic on the device side is `SyncService` in `Core/Sync`, tested against `FakeSyncStore` and `FakeSyncServer`. `SyncRecord`, `PushRequest` and the other request formats there are shared with the API.
 - Settings that differ between local and hosted (the Clerk instance, the app's origins, the connection string) are in `appsettings.Development.json` locally, and come from the host's environment when it's deployed. Secrets never go in the repo.
 

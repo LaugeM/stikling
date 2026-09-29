@@ -170,14 +170,14 @@ public class RecordTests(ApiFactory api)
     public async Task Fetching_comes_in_pages()
     {
         var me = await SignIn();
-        var plants = Enumerable.Range(0, SyncLimits.BatchSize + 3).Select(i => Plant(Guid.NewGuid(), Monday, $"Plant {i}")).ToArray();
-        await PushOk(me.Client, me.CollectionId, plants[..SyncLimits.BatchSize]);
-        await PushOk(me.Client, me.CollectionId, plants[SyncLimits.BatchSize..]);
+        var plants = Enumerable.Range(0, SyncRules.BatchSize + 3).Select(i => Plant(Guid.NewGuid(), Monday, $"Plant {i}")).ToArray();
+        await PushOk(me.Client, me.CollectionId, plants[..SyncRules.BatchSize]);
+        await PushOk(me.Client, me.CollectionId, plants[SyncRules.BatchSize..]);
 
         var first = await Pull(me.Client, me.CollectionId);
         var second = await Pull(me.Client, me.CollectionId, first.Next);
 
-        Assert.Equal(SyncLimits.BatchSize, first.Records.Count);
+        Assert.Equal(SyncRules.BatchSize, first.Records.Count);
         Assert.True(first.More);
         Assert.Equal(3, second.Records.Count);
         Assert.False(second.More);
@@ -274,22 +274,24 @@ public class RecordTests(ApiFactory api)
         var me = await SignIn();
         var settings = JsonSerializer.SerializeToElement(new { id = Guid.NewGuid(), updatedAt = Monday }, ApiFactory.Json);
 
-        var push = await Push(me.Client, me.CollectionId, new SyncRecord(SyncKinds.Settings, settings));
+        var response = await PushOk(me.Client, me.CollectionId, new SyncRecord(SyncKinds.Settings, settings));
 
-        Assert.Equal(HttpStatusCode.BadRequest, push.StatusCode);
+        Assert.Equal(0, Assert.Single(response.Refused).Index);
+        Assert.Empty((await Pull(me.Client, me.CollectionId)).Records);
     }
 
     [Theory]
     [InlineData("Plants")]
     [InlineData("people")]
     [InlineData("")]
-    public async Task Only_known_kinds_are_taken(string kind)
+    public async Task Only_known_kinds_are_kept(string kind)
     {
         var me = await SignIn();
 
-        var push = await Push(me.Client, me.CollectionId, Plant(Guid.NewGuid(), Monday) with { Kind = kind });
+        var response = await PushOk(me.Client, me.CollectionId, Plant(Guid.NewGuid(), Monday) with { Kind = kind });
 
-        Assert.Equal(HttpStatusCode.BadRequest, push.StatusCode);
+        Assert.Single(response.Refused);
+        Assert.Empty((await Pull(me.Client, me.CollectionId)).Records);
     }
 
     public static TheoryData<string> BrokenRecords => new()
@@ -310,20 +312,37 @@ public class RecordTests(ApiFactory api)
     {
         var me = await SignIn();
 
-        var push = await Push(me.Client, me.CollectionId, new SyncRecord("plants", JsonSerializer.Deserialize<JsonElement>(json)));
+        var response = await PushOk(me.Client, me.CollectionId, new SyncRecord("plants", JsonSerializer.Deserialize<JsonElement>(json)));
 
-        Assert.Equal(HttpStatusCode.BadRequest, push.StatusCode);
+        Assert.Single(response.Refused);
     }
 
     [Fact]
-    public async Task One_bad_record_turns_the_whole_upload_away()
+    public async Task A_bad_record_is_refused_and_the_rest_are_kept()
     {
         var me = await SignIn();
+        var good = Guid.NewGuid();
 
-        var push = await Push(me.Client, me.CollectionId, Plant(Guid.NewGuid(), Monday), Plant(Guid.NewGuid(), Monday) with { Kind = "people" });
+        var response = await PushOk(me.Client, me.CollectionId,
+            Plant(Guid.NewGuid(), Monday) with { Kind = "people" },
+            Plant(good, Monday),
+            Plant(Guid.NewGuid(), Monday, new string('a', SyncRules.MaxRecordLength)));
 
-        Assert.Equal(HttpStatusCode.BadRequest, push.StatusCode);
-        Assert.Empty((await Pull(me.Client, me.CollectionId)).Records);
+        Assert.Equal([0, 2], response.Refused.Select(r => r.Index));
+        var kept = Assert.Single((await Pull(me.Client, me.CollectionId)).Records);
+        Assert.Equal(good, kept.Data.GetProperty("id").GetGuid());
+    }
+
+    [Fact]
+    public async Task An_empty_entry_is_refused()
+    {
+        var me = await SignIn();
+        using var body = new StringContent("""{ "records": [null] }""", System.Text.Encoding.UTF8, "application/json");
+
+        var response = await me.Client.PostAsync($"/collections/{me.CollectionId}/records", body);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Single((await response.Content.ReadFromJsonAsync<PushResponse>(ApiFactory.Json))!.Refused);
     }
 
     [Fact]
@@ -331,19 +350,65 @@ public class RecordTests(ApiFactory api)
     {
         var me = await SignIn();
 
-        var push = await Push(me.Client, me.CollectionId, Plant(Guid.NewGuid(), Monday, new string('a', SyncLimits.MaxRecordLength)));
+        var response = await PushOk(me.Client, me.CollectionId, Plant(Guid.NewGuid(), Monday, new string('a', SyncRules.MaxRecordLength)));
 
-        Assert.Equal(HttpStatusCode.BadRequest, push.StatusCode);
+        Assert.Single(response.Refused);
+    }
+
+    [Fact]
+    public async Task A_record_changed_in_the_future_is_refused()
+    {
+        var me = await SignIn();
+        var now = DateTimeOffset.UtcNow;
+
+        var response = await PushOk(me.Client, me.CollectionId,
+            Plant(Guid.NewGuid(), now.AddDays(2), "From a clock two days ahead"),
+            Plant(Guid.NewGuid(), now.AddHours(1), "From a clock an hour ahead"));
+
+        Assert.Equal(0, Assert.Single(response.Refused).Index);
+        Assert.Equal("From a clock an hour ahead", Nickname(Assert.Single((await Pull(me.Client, me.CollectionId)).Records)));
     }
 
     [Fact]
     public async Task An_upload_can_hold_at_most_one_batch()
     {
         var me = await SignIn();
-        var plants = Enumerable.Range(0, SyncLimits.BatchSize + 1).Select(_ => Plant(Guid.NewGuid(), Monday)).ToArray();
+        var plants = Enumerable.Range(0, SyncRules.BatchSize + 1).Select(_ => Plant(Guid.NewGuid(), Monday)).ToArray();
 
         var push = await Push(me.Client, me.CollectionId, plants);
 
         Assert.Equal(HttpStatusCode.BadRequest, push.StatusCode);
+    }
+
+    [Fact]
+    public async Task Two_different_versions_from_the_same_moment_settle_on_the_same_one()
+    {
+        var first = await SignIn();
+        var second = await SignIn();
+        var id = Guid.NewGuid();
+
+        await PushOk(first.Client, first.CollectionId, Plant(id, Monday, "Aloe"));
+        var firstAnswer = await PushOk(first.Client, first.CollectionId, Plant(id, Monday, "Zamioculcas"));
+        await PushOk(second.Client, second.CollectionId, Plant(id, Monday, "Zamioculcas"));
+        var secondAnswer = await PushOk(second.Client, second.CollectionId, Plant(id, Monday, "Aloe"));
+
+        Assert.Empty(firstAnswer.Newer);
+        Assert.Equal("Zamioculcas", Nickname(Assert.Single(secondAnswer.Newer)));
+        Assert.Equal("Zamioculcas", Nickname(Assert.Single((await Pull(first.Client, first.CollectionId)).Records)));
+        Assert.Equal("Zamioculcas", Nickname(Assert.Single((await Pull(second.Client, second.CollectionId)).Records)));
+    }
+
+    [Fact]
+    public async Task A_device_ahead_of_the_server_is_told_to_start_over()
+    {
+        var me = await SignIn();
+        await PushOk(me.Client, me.CollectionId, Plant(Guid.NewGuid(), Monday));
+
+        var ahead = await Pull(me.Client, me.CollectionId, after: 1000);
+        var caughtUp = await Pull(me.Client, me.CollectionId, after: 1);
+
+        Assert.True(ahead.StartOver);
+        Assert.Empty(ahead.Records);
+        Assert.False(caughtUp.StartOver);
     }
 }
