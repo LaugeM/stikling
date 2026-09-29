@@ -227,6 +227,35 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Marking_a_plant_as_died_saves_the_cause_and_adds_it_to_the_history()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Died;
+        plant.CauseOfDeath = "  root rot after repotting ";
+
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Equal("root rot after repotting", plants.Plants[plant.Id].CauseOfDeath);
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Equal("Status: Died (was Active)\nWhat happened: root rot after repotting", entry.Text);
+    }
+
+    [Fact]
+    public async Task Bringing_a_plant_back_clears_the_cause()
+    {
+        var plant = new Plant { Nickname = "Basil", Status = PlantStatus.Died, CauseOfDeath = "Too dry" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Active;
+
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Null(plants.Plants[plant.Id].CauseOfDeath);
+    }
+
+    [Fact]
     public async Task Giving_plants_away_with_their_pots_takes_what_each_one_has()
     {
         var both = new Plant { Nickname = "Hoya", InnerPotId = Guid.NewGuid(), OuterPotId = Guid.NewGuid() };

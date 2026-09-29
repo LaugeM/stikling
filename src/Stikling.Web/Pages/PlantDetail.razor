@@ -50,6 +50,10 @@ else
             {
                 <span class="badge text-bg-secondary">@Labels.For(plant.Status)</span>
             }
+            @if (plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(plant.CauseOfDeath))
+            {
+                <p class="detail-sub">@plant.CauseOfDeath</p>
+            }
             @if (plant.InQuarantine)
             {
                 <span class="badge quarantine-badge">Quarantine</span>

@@ -25,6 +25,9 @@ public static class PlantChanges
         if (before.Status != after.Status)
             changes.Add($"Status: {label(after.Status)} (was {label(before.Status)})");
 
+        if (after.CauseOfDeath is { } cause && before.CauseOfDeath != cause)
+            changes.Add($"What happened: {cause}");
+
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
 

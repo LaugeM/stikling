@@ -29,6 +29,9 @@ public sealed class Plant : Entity
 
     public PlantStatus Status { get; set; } = PlantStatus.Active;
 
+    /// <summary>An optional note on what went wrong, kept while the status is Died and cleared if it comes back.</summary>
+    public string? CauseOfDeath { get; set; }
+
     public GrowingMedium Medium { get; set; } = GrowingMedium.Soil;
 
     /// <summary>The pot the roots are in.</summary>
