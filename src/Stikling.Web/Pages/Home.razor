@@ -6,7 +6,10 @@
 @inject IPhotoRepository PhotoRepository
 @inject IPestCaseRepository PestCases
 @inject IPestTreatmentRepository PestTreatments
+@using Stikling.Core.Settings
 @inject DeviceFiles Files
+@inject SettingsService SettingsService
+@inject PutOffService PutOffService
 @inject AppBadge Badge
 @inject PlantService PlantService
 @inject PropagationService PropagationService
@@ -278,10 +281,10 @@ else
         var latest = await Entries.GetLatestPerSubjectAsync();
         checks = TodayBoard.NeedsChecking(propagations, latest, Time);
         flagged = TodayBoard.NeedsAttention(plants, propagations);
-        putOffs = await Files.GetPutOffsAsync(Today);
+        putOffs = await PutOffService.GetAsync(Today);
 
         var places = await RoomService.GetPlacesAsync();
-        photoRound = await Files.GetPhotoReminderAsync()
+        photoRound = (await SettingsService.GetAsync()).PhotoReminder
             ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
             : [];
 
@@ -304,7 +307,7 @@ else
     private async Task PutOffAsync(string key, DateOnly until)
     {
         putOffs.PutOff(key, until);
-        await Files.SetPutOffsAsync(putOffs);
+        await PutOffService.PutOffAsync(key, until);
     }
 
     private async Task ClearFlagAsync(AttentionItem item)

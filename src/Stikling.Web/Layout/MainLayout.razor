@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
 @inject IndexedDb Db
+@inject ThemeService Theme
 
 <div class="app-shell">
     <header class="app-header">
@@ -47,6 +48,9 @@
     {
         if (!firstRender)
             return;
+
+        // The saved theme counts, the copy in localStorage is only for the first paint
+        await Theme.ApplySavedAsync();
 
         try
         {

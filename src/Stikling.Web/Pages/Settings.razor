@@ -1,5 +1,6 @@
 @page "/settings"
 @implements IDisposable
+@using Stikling.Core.Settings
 @inject ThemeService Theme
 @inject RoomService RoomService
 @inject PlantService PlantService
@@ -12,6 +13,7 @@
 @inject ITreatmentRecipeRepository RecipeRepository
 @inject BackupService Backup
 @inject DeviceFiles Files
+@inject SettingsService SettingsService
 @inject IndexedDb Db
 @inject PlantNameService PlantNames
 @inject TimeProvider Time
@@ -379,7 +381,7 @@
         Theme.Changed += OnThemeChanged;
         mode = await Theme.GetModeAsync();
         lastBackup = await Files.GetLastBackupAsync();
-        photoReminder = await Files.GetPhotoReminderAsync();
+        photoReminder = (await SettingsService.GetAsync()).PhotoReminder;
         storage = await Db.EstimateAsync();
         rooms = await RoomService.GetAllAsync();
         tags = PlantTags.InUse(await Plants.GetAllAsync());
@@ -394,7 +396,7 @@
     private async Task SetPhotoReminderAsync(ChangeEventArgs e)
     {
         photoReminder = e.Value is true;
-        await Files.SetPhotoReminderAsync(photoReminder);
+        await SettingsService.SetPhotoReminderAsync(photoReminder);
     }
 
     /// <summary>"6 pots, 2 free", for the line linking to the pot library.</summary>
@@ -579,6 +581,7 @@
         {
             file.Zip.Position = 0;
             var summary = await Backup.ImportAsync(file.Zip);
+            await Theme.ApplySavedAsync();
             message = summary switch
             {
                 { ChangedRecords: true } =>

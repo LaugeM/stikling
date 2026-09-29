@@ -22,23 +22,30 @@ public class PutOffsTests
     }
 
     [Fact]
-    public void Saved_put_offs_read_back_without_the_ones_that_have_come_back()
+    public void Put_offs_are_built_from_records_that_have_not_come_back_yet()
     {
-        var putOffs = PutOffs.Empty();
-        putOffs.PutOff("waiting", Today.AddDays(7));
-        putOffs.PutOff("back", Today.AddDays(1));
+        var records = new[]
+        {
+            new PutOff { Key = "waiting", Until = Today.AddDays(7) },
+            new PutOff { Key = "tomorrow", Until = Today.AddDays(1) },
+            new PutOff { Key = "today", Until = Today },
+            new PutOff { Key = "past", Until = Today.AddDays(-4) },
+            new PutOff { Key = "deleted", Until = Today.AddDays(7), DeletedAt = DateTimeOffset.UtcNow }
+        };
 
-        var later = PutOffs.Parse(putOffs.ToJson(), Today.AddDays(1));
+        var putOffs = PutOffs.From(records, Today);
 
-        Assert.True(later.IsPutOff("waiting", Today.AddDays(1)));
-        Assert.DoesNotContain("back", later.ToJson());
+        Assert.True(putOffs.IsPutOff("waiting", Today));
+        Assert.True(putOffs.IsPutOff("tomorrow", Today));
+        Assert.False(putOffs.IsPutOff("today", Today.AddDays(-1)));
+        Assert.False(putOffs.IsPutOff("past", Today.AddDays(-5)));
+        Assert.False(putOffs.IsPutOff("deleted", Today));
     }
 
     [Fact]
-    public void Nothing_saved_or_something_unreadable_starts_empty()
+    public void Nothing_saved_starts_empty()
     {
-        Assert.Equal("{}", PutOffs.Parse(null, Today).ToJson());
-        Assert.Equal("{}", PutOffs.Parse("not json", Today).ToJson());
+        Assert.False(PutOffs.From([], Today).IsPutOff("photos", Today));
     }
 
     [Fact]

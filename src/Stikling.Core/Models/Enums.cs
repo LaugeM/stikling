@@ -112,3 +112,11 @@ public enum PropagationStage
     Done,
     Failed
 }
+
+[JsonConverter(typeof(JsonStringEnumConverter<ThemeMode>))]
+public enum ThemeMode
+{
+    System,
+    Light,
+    Dark
+}

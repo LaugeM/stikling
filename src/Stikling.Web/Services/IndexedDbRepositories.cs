@@ -7,7 +7,9 @@ using Stikling.Core.Pots;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
+using Stikling.Core.Settings;
 using Stikling.Core.SoilMixes;
+using Stikling.Core.Today;
 
 namespace Stikling.Web.Services;
 
@@ -39,6 +41,19 @@ public sealed class IndexedDbFeedRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<Feed>(db, time, Stores.Feeds), IFeedRepository
 {
     protected override IReadOnlyList<string> Validate(Feed feed) => feed.Validate();
+}
+
+public sealed class IndexedDbSettingsRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<UserSettings>(db, time, Stores.Settings), ISettingsRepository
+{
+    protected override IReadOnlyList<string> Validate(UserSettings settings) => [];
+}
+
+public sealed class IndexedDbPutOffRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<PutOff>(db, time, Stores.PutOffs), IPutOffRepository
+{
+    protected override IReadOnlyList<string> Validate(PutOff putOff) =>
+        string.IsNullOrWhiteSpace(putOff.Key) ? ["A put-off needs a key."] : [];
 }
 
 public sealed class IndexedDbTreatmentRecipeRepository(IndexedDb db, TimeProvider time)

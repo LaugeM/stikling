@@ -1,12 +1,11 @@
-using System.Text.Json;
 using Stikling.Core.Models;
 
 namespace Stikling.Core.Today;
 
 /// <summary>
 /// Things on Today put off for a while without logging anything, each under a key with the day
-/// it comes back. They belong to the device rather than the collection, so they are kept with
-/// its own settings and not in backups.
+/// it comes back. They belong to the collection, so putting something off hides it for everyone,
+/// and each one is saved as a <see cref="PutOff"/> record that goes in backups.
 /// </summary>
 public sealed class PutOffs
 {
@@ -46,24 +45,12 @@ public sealed class PutOffs
     public void PutOff(string key, DateOnly back) => until[key] = back;
 
     /// <summary>
-    /// Reads what was saved, keeping only what hasn't come back yet so the list doesn't grow.
-    /// Anything unreadable starts over empty, since losing a put-off only brings it back early.
+    /// Builds it from the saved records, keeping only what hasn't come back yet. The records of
+    /// put-offs that have expired stay in the store and are ignored here.
     /// </summary>
-    public static PutOffs Parse(string? json, DateOnly today)
-    {
-        if (string.IsNullOrWhiteSpace(json))
-            return Empty();
-
-        try
-        {
-            var saved = JsonSerializer.Deserialize<Dictionary<string, DateOnly>>(json) ?? [];
-            return new(saved.Where(p => p.Value > today).ToDictionary(p => p.Key, p => p.Value));
-        }
-        catch (JsonException)
-        {
-            return Empty();
-        }
-    }
-
-    public string ToJson() => JsonSerializer.Serialize(until);
+    public static PutOffs From(IEnumerable<PutOff> saved, DateOnly today) =>
+        new(saved
+            .Where(p => !p.IsDeleted && p.Until > today)
+            .GroupBy(p => p.Key)
+            .ToDictionary(g => g.Key, g => g.Max(p => p.Until)));
 }

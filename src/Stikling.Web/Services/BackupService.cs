@@ -43,7 +43,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
             Products = await db.GetAllAsync<Product>(Stores.Products),
             Feeds = await db.GetAllAsync<Feed>(Stores.Feeds),
             TreatmentRecipes = await db.GetAllAsync<TreatmentRecipe>(Stores.TreatmentRecipes),
-            Places = await db.GetAllAsync<Place>(Stores.Places)
+            Places = await db.GetAllAsync<Place>(Stores.Places),
+            Settings = await db.GetAllAsync<UserSettings>(Stores.Settings),
+            PutOffs = await db.GetAllAsync<PutOff>(Stores.PutOffs)
         };
 
         using var buffer = new MemoryStream();
@@ -127,6 +129,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
         await Restore(Stores.Feeds, data.Feeds);
         await Restore(Stores.TreatmentRecipes, data.TreatmentRecipes);
         await Restore(Stores.Places, data.Places);
+        await Restore(Stores.Settings, data.Settings);
+        await Restore(Stores.PutOffs, data.PutOffs);
 
         // A delete carried over from the backup frees the image too
         foreach (var photo in photoMeta.ToSave.Where(p => p.IsDeleted))

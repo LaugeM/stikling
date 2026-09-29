@@ -17,6 +17,8 @@ public static class Stores
     public const string SoilMixes = "soilMixes";
     public const string Products = "products";
     public const string Feeds = "feeds";
+    public const string Settings = "settings";
+    public const string PutOffs = "putOffs";
     public const string TreatmentRecipes = "treatmentRecipes";
     public const string Places = "places";
 }
