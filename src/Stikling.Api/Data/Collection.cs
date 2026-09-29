@@ -12,5 +12,8 @@ public class Collection
     public required string Name { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 
+    /// <summary>The number given to the last change that arrived. See <see cref="SyncedRecord.Version"/>.</summary>
+    public long LastVersion { get; set; }
+
     public List<Membership> Members { get; set; } = [];
 }
