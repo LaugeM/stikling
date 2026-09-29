@@ -44,7 +44,7 @@
                 </button>
             </div>
             <div class="room-row">
-                <span class="room-name" role="status">@SyncLine</span>
+                <span class="room-name account-status" role="status">@SyncLine</span>
                 <button type="button" class="btn btn-link btn-sm p-0" @onclick="Sync.SyncNowAsync"
                         disabled="@(Sync.Running || accountBusy)">
                     Sync now
