@@ -78,7 +78,7 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once. Each name is matched against the plant dictionary, and anything else on the line goes into the notes | 5 | S | v1.x |
 | ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | 5 | M | v1.x |
 | ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | 5 | M | v1.x |
-| ☐ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
+| ✅ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
 | ☐ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
 | ☐ | Grid view with large photos as an alternative to the list | 6 | S | v1.x |
 | ☐ | Group the plant list by genus, with an A to Z jump for long lists | 6 | S | v1.x |

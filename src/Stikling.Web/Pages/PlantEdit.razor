@@ -41,6 +41,18 @@ else
             </div>
             <PlantNameFields @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar" />
             <div class="form-text">Give it a nickname, a genus, or both.</div>
+            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.SameName(plant, existing) is { Count: > 0 } same)
+            {
+                <p class="form-text already-have">
+                    You already have
+                    @for (var i = 0; i < same.Count; i++)
+                    {
+                        var match = same[i];
+                        @(i == 0 ? "" : i == same.Count - 1 ? " and " : ", ")<a href="plants/@match.Id">@match.DisplayName</a>
+                    }.
+                    Adding it again makes another one.
+                </p>
+            }
         </fieldset>
 
         <fieldset>
@@ -290,6 +302,7 @@ else
     private Plant? original; // the plant as it was before editing, to record what changed
     private LooseDate? copiedDate; // when the plant this one is copied from was got, to offer the same date
     private string? copiedFrom;
+    private IReadOnlyList<Plant> existing = [];
     private bool notFound;
     private bool saving;
     private List<string> errors = [];
@@ -340,6 +353,7 @@ else
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
         tagSuggestions = PlantTags.Suggestions(all);
+        existing = all;
 
         if (IsNew)
         {
