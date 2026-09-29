@@ -33,6 +33,14 @@ jobs:
         with:
           path: release/wwwroot
 
+  api-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the API's container image
+        run: docker build --file src/Stikling.Api/Dockerfile --tag stikling-api .
+
   deploy:
     needs: build
     if: github.event_name != 'pull_request'

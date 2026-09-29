@@ -1,12 +1,14 @@
 # Notes for working on Stikling
 
-Blazor WebAssembly PWA. Everything is stored on the device in IndexedDB, and there is no backend.
+Blazor WebAssembly PWA. Everything is stored on the device in IndexedDB. The sync API is being built, and the app doesn't use it yet.
 
 ## Where code goes
 
 - `src/Stikling.Core`: models, rules, and the services pages call (`PlantService`, `CareService` and so on). No browser or UI code. Anything worth testing belongs here.
 - `src/Stikling.Web`: pages, components, and the IndexedDB side. Each Core repository interface (`IPlantRepository` and so on) has its implementation in `Services/IndexedDbRepositories.cs`, which goes through the JavaScript modules in `wwwroot/js`.
+- `src/Stikling.Api`: the ASP.NET Core API for accounts and sync, with EF Core on SQL Server. See "The API" below.
 - `tests/Stikling.Core.Tests`: xUnit, run with `dotnet test Stikling.slnx`. The services are tested against the in-memory repositories in `Fakes.cs`.
+- `tests/Stikling.Api.Tests`: the API's endpoints, run against a real SQL Server that Testcontainers starts in Docker. Docker Desktop has to be running for `dotnet test Stikling.slnx`.
 - `tools/plant-names`: the script that builds `wwwroot/data/plant-names.json`, the names the genus, species and cultivar fields suggest. Its README says where the names come from and how to add more. Never edit the JSON by hand.
 
 Photos are resized, stored and read entirely in JavaScript. The image data only crosses into C# when a backup is written or restored.
@@ -42,6 +44,14 @@ Accounts and sync between devices are being added in steps, so people don't have
 - Expect what a merge can produce: two pots with the same name, a record whose parent was deleted on another device, records arriving in any order. Checking uniqueness when saving isn't enough.
 - Anything the app creates on its own, like defaults or starter data, needs a fixed id. Otherwise every device makes its own copy.
 - Code that only works in a browser stays behind a service like `DeviceFiles` or `PhotoService`, never in a page.
+
+## The API
+
+- Clerk's session tokens are checked by ASP.NET Core's JWT bearer authentication in `Auth/ClerkAuthentication.cs`. Clerk stays behind that file and the `ClerkUserId` column on `Person`. Everything else points at our own `Person.Id`, so the sign-in service can be replaced.
+- Never take the caller's identity from the request body or the URL. `CurrentPerson` finds them from the token.
+- Anything under `/collections/{collectionId}` needs `CollectionPolicies.View` or `CollectionPolicies.Edit`. The policy checks the caller's membership on every request, so a viewer can't change data even with a modified app.
+- `docker compose up --build` runs the API on port 5180 with SQL Server. In Development it applies its migrations on start. A new migration is made with `dotnet tool restore`, then `dotnet ef migrations add <Name> --project src/Stikling.Api --output-dir Data/Migrations`.
+- Settings that differ between local and hosted (the Clerk instance, the app's origins, the connection string) are in `appsettings.Development.json` locally, and come from the host's environment when it's deployed. Secrets never go in the repo.
 
 ## The Help page
 

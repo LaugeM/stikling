@@ -24,6 +24,7 @@ The longer list, with the ideas for later versions, is in [docs/FEATURES.md](doc
 - Bootstrap 5
 - IndexedDB for on-device storage (via a small JS interop module)
 - xUnit for the domain logic
+- The sync API (in progress): ASP.NET Core minimal API with EF Core on SQL Server, sign-in through Clerk, run locally with Docker Compose
 - Hosted for free on GitHub Pages and deployed with GitHub Actions
 
 ### Why Blazor WebAssembly?
@@ -35,7 +36,9 @@ The app runs entirely in the browser, so it can work offline and keep data on th
 ```
 src/Stikling.Core/          Models and domain rules (no browser dependencies, unit tested)
 src/Stikling.Web/           Blazor WebAssembly PWA
-tests/Stikling.Core.Tests/  xUnit tests
+src/Stikling.Api/           The sync API (not used by the app yet)
+tests/Stikling.Core.Tests/  xUnit tests for Core
+tests/Stikling.Api.Tests/   xUnit tests for the API, against SQL Server in Docker
 tools/plant-names/          Builds the plant names the app suggests while you type
 .github/                   Build/test/deploy workflow and GitHub Pages prep script
 ```
@@ -53,6 +56,18 @@ Run the tests:
 ```bash
 dotnet test Stikling.slnx
 ```
+
+The API tests start SQL Server in a container, so [Docker Desktop](https://www.docker.com/products/docker-desktop/) has to be running.
+
+### The sync API
+
+The API and its database run in Docker:
+
+```bash
+docker compose up --build
+```
+
+The API is then on http://localhost:5180, with `/health` to check it's up. It creates the database on the first start. To run the API from Visual Studio or with `dotnet run` instead, start only the database with `docker compose up sql`.
 
 ## Deployment
 
