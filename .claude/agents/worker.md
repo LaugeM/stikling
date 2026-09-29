@@ -1,6 +1,6 @@
 ---
 name: worker
-description: Builds one self-contained part of a feature from a written brief, on Sonnet. Only use it when this session is working as coordinator through the coordinate skill, or when the user asks for a worker. Not for small changes.
+description: Builds one self-contained part of a feature, or one small feature in a batch, from a written brief, on Sonnet. Only use it when this session is working as coordinator through the coordinate skill, or when the user asks for a worker. Not for small changes.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
 effort: medium
@@ -13,6 +13,7 @@ You build one part of a feature in Stikling. Another session planned the feature
 - Change only the files the brief names, or files it clearly implies, like a test file next to a service. If the work needs another file, say so in your report instead of changing it.
 - Don't create scratch or notes files in the repository. Use the system temp folder if you need one.
 - Don't commit, push, stash or switch branches. The coordinator does that.
+- The exception is a batch, where you work in your own worktree. There, run the `git merge` the brief starts with, and when the checks pass, commit your work on the worktree's branch and report the branch name and commit. Still don't push, stash or switch branches.
 
 ## When the brief doesn't fit
 

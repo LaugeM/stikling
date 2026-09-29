@@ -7,7 +7,7 @@ description: Build a feature, or a batch of small features, with this session as
 
 This session plans the feature, splits it into parts, writes a brief for each part and checks the result. The `worker` agent (`.claude/agents/worker.md`) builds each part on Sonnet. The design decisions stay here.
 
-If the change is small, one or two files, skip this and build it directly. A worker's start-up costs more than it saves on a small change.
+If the whole change is small, one or two files, skip this and build it directly. A worker's start-up costs more than it saves on a small change. Several small features together are a different case: see "A batch of small features".
 
 ## Which way to build it
 
@@ -76,8 +76,8 @@ In the chat, not in the pull request, tell the user:
 For features that touch different parts of the app, each worker builds one whole feature (Core, pages, Help and `docs/FEATURES.md`) in its own worktree, and several run at once.
 
 1. **Pick features that don't overlap.** Two features on the same page or the same service will conflict. Put those in different rounds. Check `docs/FEATURES.md` and the code first, since a feature can be partly built already.
-2. **Write the decisions into each brief.** A worker can't ask, so settle anything the user would notice: what a field is called, where it shows, what happens to old values. If a decision is really the user's, ask before starting that worker.
-3. **Start every worker from the current branch.** Pass `isolation: "worktree"` and begin each brief with `git merge <sha>`, the commit of this branch when the round starts, since an agent's worktree starts from `main`. Ask each worker to commit on its own branch and report the branch name.
+2. **Write the decisions into each brief.** A worker can't ask, so settle anything the user would notice: what a field is called, where it shows, what happens to old values. If a decision is really the user's, ask before starting that worker. Name `Pages/Help.razor` and `docs/FEATURES.md` in the brief along with the code, since the worker only changes the files it is given.
+3. **Start every worker from the current branch.** Commit what is in this worktree first. Then pass `isolation: "worktree"` and begin each brief with `git merge <sha>`, this branch's latest commit, since an agent's worktree starts from `main`. The worker commits on its worktree's branch and reports the branch name, as `worker.md` allows in a batch.
 4. **Merge each result as it reports.** Read the diff, merge the branch into this one, and build. Expect conflicts in `docs/FEATURES.md` and `Pages/Help.razor`, where every worker adds a line. Resolve them here.
 5. **Send design problems back.** When a worker built the wrong thing, like duplicating a field that already exists, send it back with SendMessage and say what to change. Fix small things directly.
 6. **Start the next round** from the new commit while checking the last one in the browser.
