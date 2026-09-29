@@ -29,7 +29,7 @@ namespace Stikling.Api.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ClerkUserId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ClerkUserId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false, collation: "Latin1_General_100_BIN2"),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>

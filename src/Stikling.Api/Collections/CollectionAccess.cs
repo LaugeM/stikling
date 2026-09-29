@@ -37,6 +37,11 @@ public sealed class CollectionAccessHandler(CurrentPerson current, StiklingDbCon
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context, CollectionAccessRequirement requirement, HttpContext http)
     {
+        // Handlers still run after RequireAuthenticatedUser has failed, so a request without a
+        // valid token gets here too. It gets a 401 from that failure.
+        if (context.User.Identity?.IsAuthenticated != true)
+            return;
+
         if (!Guid.TryParse(http.GetRouteValue("collectionId") as string, out var collectionId))
             return;
 

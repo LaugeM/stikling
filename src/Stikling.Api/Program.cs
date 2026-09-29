@@ -19,7 +19,7 @@ builder.Services.AddClerkAuthentication();
 builder.Services.AddCollectionAuthorization();
 
 builder.Services.AddCors(cors => cors.AddDefaultPolicy(policy => policy
-    .WithOrigins(builder.Configuration.GetSection(AppOrigins.Section).Get<string[]>() ?? [])
+    .WithOrigins(AppOrigins.From(builder.Configuration))
     .AllowAnyHeader()
     .AllowAnyMethod()));
 

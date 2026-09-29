@@ -55,6 +55,19 @@ public class CollectionTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task A_collection_needs_a_token()
+    {
+        var me = await SignIn();
+        var anonymous = api.CreateClient();
+
+        var read = await anonymous.GetAsync($"/collections/{me.CollectionId}");
+        var rename = await Rename(anonymous, me.CollectionId, "Mine now");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, read.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, rename.StatusCode);
+    }
+
+    [Fact]
     public async Task Someone_who_never_signed_in_before_cannot_read_a_collection()
     {
         var me = await SignIn();

@@ -12,7 +12,8 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     {
         model.Entity<Person>(person =>
         {
-            person.Property(p => p.ClerkUserId).HasMaxLength(100);
+            // Clerk's ids are case sensitive, and SQL Server compares text without case by default
+            person.Property(p => p.ClerkUserId).HasMaxLength(100).UseCollation("Latin1_General_100_BIN2");
             person.HasIndex(p => p.ClerkUserId).IsUnique();
         });
 

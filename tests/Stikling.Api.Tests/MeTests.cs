@@ -45,6 +45,17 @@ public class MeTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task Clerk_ids_that_differ_only_in_case_are_different_people()
+    {
+        var clerkUserId = $"user_{Guid.NewGuid():N}AbC";
+
+        var one = await GetMe(api.ClientFor(clerkUserId));
+        var other = await GetMe(api.ClientFor(clerkUserId.ToUpperInvariant()));
+
+        Assert.NotEqual(one!.PersonId, other!.PersonId);
+    }
+
+    [Fact]
     public async Task Devices_signing_in_at_the_same_moment_get_one_person_and_one_collection()
     {
         var clerkUserId = ApiFactory.NewClerkUserId();

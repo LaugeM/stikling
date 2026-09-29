@@ -25,4 +25,11 @@ public class AppOrigins
 
     [MinLength(1)]
     public string[] Origins { get; set; } = [];
+
+    /// <summary>
+    /// The list from the configuration. A trailing slash is dropped, since browsers send an
+    /// origin without one and it would otherwise never match.
+    /// </summary>
+    public static string[] From(IConfiguration config) =>
+        (config.GetSection(Section).Get<string[]>() ?? []).Select(origin => origin.TrimEnd('/')).ToArray();
 }

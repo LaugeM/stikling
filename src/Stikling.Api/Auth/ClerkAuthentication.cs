@@ -22,8 +22,7 @@ public static class ClerkAuthentication
             .ValidateOnStart();
 
         services.AddOptions<AppOrigins>()
-            .Configure<IConfiguration>((origins, config) =>
-                origins.Origins = config.GetSection(AppOrigins.Section).Get<string[]>() ?? [])
+            .Configure<IConfiguration>((origins, config) => origins.Origins = AppOrigins.From(config))
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
