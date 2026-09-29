@@ -220,7 +220,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | **Your pots**: the pots you own, by kind (nursery, outer, stands on its own), what they're made of, their measurements, whether they self-water, and how many you have. A plant points at a pot and, when it has one, an outer pot | 6 | M | v1.x |
 | ✅ | See which of your pots are in use and which are free, so it's clear what's available before repotting. A plant that died frees its pots, and giving a plant away or selling it asks which of its pots went with it | 7 | S | v1.x |
 | ☐ | **Does it fit?**: given a nursery pot, which of your free outer pots it would go in. Compares the tops, allows for a rim only having to clear the opening, and says when the bottom is the tighter measurement | 7 | M | v1.x |
-| ☐ | Default medium per pot kind, e.g. a net pot suggests LECA, so potting up is one tap less | 8 | S | v1.x |
+| ✅ | Default medium per pot kind, e.g. a net pot suggests LECA, so potting up is one tap less | 8 | S | v1.x |
 | ☐ | Money spent on plants and supplies, per year, to see what the hobby costs | 8 | S | v1.x |
 
 ## 5c. Soil mixes
