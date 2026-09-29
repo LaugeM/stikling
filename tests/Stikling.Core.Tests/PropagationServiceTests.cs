@@ -60,17 +60,29 @@ public class PropagationServiceTests
     }
 
     [Fact]
-    public async Task Potting_up_from_soil_carries_the_mix_over()
+    public async Task Potting_up_into_soil_uses_the_mix_picked_on_the_form()
     {
         var mix = Guid.NewGuid();
         var cuttings = service.StartFrom(parent);
         cuttings.Medium = GrowingMedium.Soil;
-        cuttings.SoilMixId = mix;
         await service.CreateAsync(cuttings, Label);
 
-        var made = await service.PotUpAsync(cuttings, new PotUpRequest(1, Today));
+        var made = await service.PotUpAsync(cuttings, new PotUpRequest(1, Today, Medium: GrowingMedium.Soil, SoilMixId: mix));
 
         Assert.Equal(mix, made[0].SoilMixId);
+    }
+
+    [Fact]
+    public async Task Potting_up_with_the_mix_cleared_leaves_the_plant_without_one()
+    {
+        var cuttings = service.StartFrom(parent);
+        cuttings.Medium = GrowingMedium.Soil;
+        cuttings.SoilMixId = Guid.NewGuid();
+        await service.CreateAsync(cuttings, Label);
+
+        var made = await service.PotUpAsync(cuttings, new PotUpRequest(1, Today, Medium: GrowingMedium.Soil));
+
+        Assert.Null(made[0].SoilMixId);
     }
 
     [Fact]

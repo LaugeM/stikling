@@ -145,7 +145,7 @@ public sealed class PropagationService(
             PlaceId = request.PlaceId,
             Medium = request.Medium,
             InnerPotId = request.PotId,
-            SoilMixId = request.SoilMixId ?? (request.Medium == GrowingMedium.Soil ? propagation.SoilMixId : null),
+            SoilMixId = request.Medium == GrowingMedium.Soil ? request.SoilMixId : null,
             ParentPlantId = propagation.ParentPlantId,
             FromPropagationId = propagation.Id
         }).ToList();

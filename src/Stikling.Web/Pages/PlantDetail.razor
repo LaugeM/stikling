@@ -330,9 +330,9 @@ else
                                     {
                                         <span class="text-body-secondary small"> · @Labels.For(child.Status)</span>
                                     }
-                                    @if (child.Status == PlantStatus.GivenAway && !string.IsNullOrWhiteSpace(child.LeftTo))
+                                    @if (child.HasLeft && !string.IsNullOrWhiteSpace(child.LeftTo))
                                     {
-                                        <span class="text-body-secondary small"> · given to @child.LeftTo</span>
+                                        <span class="text-body-secondary small"> · @(child.Status == PlantStatus.Sold ? "sold to" : "given to") @child.LeftTo</span>
                                     }
                                 </li>
                             }

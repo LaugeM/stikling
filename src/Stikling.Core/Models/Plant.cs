@@ -122,7 +122,6 @@ public sealed class Plant : Entity
     public string DisplayName =>
         !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? "Unnamed plant";
 
-    /// <summary>A copy to compare with after editing. The tags get their own list.</summary>
     /// <summary>
     /// Who a plant went to and what it went for, as one line: "Given to Anna · swapped for a Hoya carnosa"
     /// or "Sold to Anna for 150 kr". Only says what is filled in, and is null when nothing is.
@@ -144,6 +143,7 @@ public sealed class Plant : Entity
         return null;
     }
 
+    /// <summary>A copy to compare with after editing. The tags get their own list.</summary>
     public Plant Copy()
     {
         var copy = (Plant)MemberwiseClone();
