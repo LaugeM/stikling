@@ -152,4 +152,13 @@ public class PlantTests
     {
         Assert.True(new Plant { Favourite = true }.Copy().Favourite);
     }
+
+    [Fact]
+    public void A_quarantine_shorter_than_a_day_is_refused()
+    {
+        var today = new DateOnly(2026, 9, 29);
+        var plant = new Plant { Nickname = "A", QuarantinedSince = today, QuarantineDays = 0 };
+
+        Assert.Contains("A quarantine has to last at least a day.", plant.Validate(today));
+    }
 }

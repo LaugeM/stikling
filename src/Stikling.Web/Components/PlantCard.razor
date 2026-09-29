@@ -66,13 +66,13 @@ else
                     <span class="visually-hidden">Favourite</span>
                 }
             </div>
+            @if (!string.IsNullOrWhiteSpace(Plant.Nickname) && Plant.BotanicalName is { } botanical)
+            {
+                <div class="item-sub">@botanical</div>
+            }
             @if (Plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(Plant.CauseOfDeath))
             {
                 <div class="item-sub">@Plant.CauseOfDeath</div>
-            }
-            else if (!string.IsNullOrWhiteSpace(Plant.Nickname) && Plant.BotanicalName is { } botanical)
-            {
-                <div class="item-sub">@botanical</div>
             }
             <div class="item-meta">
                 @if (Plant.Status != PlantStatus.Active)

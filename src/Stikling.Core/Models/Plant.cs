@@ -192,6 +192,8 @@ public sealed class Plant : Entity
             errors.Add("A plant can't have the same pot inside and outside.");
         if (QuarantinedSince > today)
             errors.Add("The quarantine can't start in the future.");
+        if (QuarantineDays < 1)
+            errors.Add("A quarantine has to last at least a day.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
         if (PotsTaken != PotsTaken.None && !HasLeft)
