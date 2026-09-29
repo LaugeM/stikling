@@ -49,7 +49,7 @@ In the order I would build them.
 
 These need no new storage and no new screens worth the name: the success rate on the Today screen, purchase price, a "Log care" home screen shortcut, and an app version and a "what's new" page.
 
-The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it, the list of plants that got a feed, and corm size on a propagation.
+The partly built rows also have small pieces left: moving selected plants to a room, the list of plants that got a feed, and corm size on a propagation.
 
 ---
 
@@ -234,9 +234,9 @@ Most people mix their own soil instead of using it straight from the bag. This i
 | ✅ | Add your own ingredient if something isn't on the list | 5 | S | v1.x |
 | ✅ | Pick a mix when adding a plant or potting up, instead of typing the medium by hand. The plant page shows which mix it's in, and what's in it | 5 | M | v1.x |
 | ◐ | Editing a mix that plants are already in says so first, and offers to save the edit as a new mix instead, dated so the versions read in order. A plant still points at the mix rather than keeping its own copy of the recipe, so a mix can also be marked as no longer mixed to keep it off the picker | 5 | M | v1.x |
-| ◐ | The mixes list says how many plants are in each mix. Tapping through to those plants isn't built | 7 | S | v1.x |
+| ✅ | The mixes list says how many plants are in each mix, and tapping the count shows those plants | 7 | S | v1.x |
 | ☐ | Use a mix on a propagation too, for the ones that go straight into soil | 7 | S | v1.x |
-| ☐ | Batch calculator: pick a mix and a volume, and get how much of each ingredient to measure out | 7 | S | v1.x |
+| ✅ | Batch calculator: pick a mix and a volume, and get how much of each ingredient to measure out | 7 | S | v1.x |
 | ☐ | **Batches**: mix a dated batch from a recipe and top it up as it runs low, so a plant can point at the batch it was actually potted in rather than the recipe | 8 | L | v1.x |
 | ☐ | Mixing a batch takes the ingredients off the supplies stock | 8 | M | v1.x |
 

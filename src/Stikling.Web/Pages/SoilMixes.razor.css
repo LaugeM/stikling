@@ -82,3 +82,49 @@
 .mix-confirm p {
     margin-bottom: 0.5rem;
 }
+
+/* The count is a button when there are plants to show, but reads as the same muted text */
+.mix-count-button {
+    min-height: 44px;
+    padding: 0 0 0 0.5rem;
+    border: 0;
+    background: none;
+    text-decoration: underline;
+}
+
+.mix-plants {
+    margin: 0 0 0.35rem;
+    padding-left: 1.4rem;
+    font-size: 0.9rem;
+}
+
+.mix-batch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.mix-batch label {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.mix-batch ::deep .water-input {
+    width: 9rem;
+}
+
+.mix-shares {
+    margin: 0.25rem 0 0.35rem;
+    padding-left: 1.4rem;
+    font-size: 0.9rem;
+}
+
+/* What to measure out, set apart the same way as on the feeds page */
+.mix-measure {
+    float: right;
+    margin-left: 0.5rem;
+    font-weight: 600;
+    color: var(--pa-green-dark);
+    font-variant-numeric: tabular-nums;
+}
