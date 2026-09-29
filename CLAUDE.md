@@ -53,6 +53,10 @@ The app will move to hosting at some point, with accounts and sync between devic
 
 The .NET gitignore template ignores `Backup*/`, which hid `src/Stikling.Core/Backup` until the build failed in CI on missing types. There is an exception for that folder at the end of `.gitignore`. If a build passes locally but fails in CI, check `git status --ignored` first.
 
+## Choosing how to build
+
+For a batch of small features that touch different parts of the app, suggest `/coordinate`, which runs Sonnet workers in parallel. For one feature that needs design decisions, plan and build it in the session. The skill has the details on when workers pay off.
+
 ## Before opening a pull request
 
 Build, run the tests, and check any UI change in a browser at phone width. The dev server is `stikling-web` in `.claude/launch.json`. It runs on port 5170, or on another free port when a session running at the same time already has 5170.
