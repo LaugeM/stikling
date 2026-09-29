@@ -23,6 +23,9 @@ public sealed class MixIngredient
     public decimal? Amount { get; set; }
 }
 
+/// <summary>One ingredient and how many litres of it go into a batch.</summary>
+public sealed record MixShare(string Name, decimal Litres);
+
 /// <summary>
 /// A soil mix you make yourself, saved under a name.
 ///
@@ -72,6 +75,37 @@ public sealed class SoilMix : Entity
 
     private IEnumerable<MixIngredient> Named() =>
         Ingredients.Where(i => !string.IsNullOrWhiteSpace(i.Name));
+
+    /// <summary>
+    /// How much of each ingredient makes a batch of that many litres, in the order of the mix, or
+    /// null when it can't be worked out: no amounts counted, an ingredient without one, or
+    /// nothing to split. Parts and percent are both shares of the total, so they work the same.
+    /// </summary>
+    public IReadOnlyList<MixShare>? Batch(decimal litres)
+    {
+        var named = Named().ToList();
+
+        if (litres <= 0 || Unit == MixUnit.None || named.Count == 0 || named.Any(i => i.Amount is null))
+            return null;
+
+        var total = named.Sum(i => i.Amount!.Value);
+        if (total <= 0)
+            return null;
+
+        return [.. named.Select(i => new MixShare(i.Name.Trim(), litres * i.Amount!.Value / total))];
+    }
+
+    /// <summary>True when a batch can be worked out, which is when the calculator is worth showing.</summary>
+    [JsonIgnore]
+    public bool CanMeasureOut => Batch(1) is not null;
+
+    /// <summary>
+    /// A volume to measure by eye: "1.5 L" from a litre up, whole millilitres under it. A pot of
+    /// soil isn't measured any closer than that.
+    /// </summary>
+    public static string Volume(decimal litres) => litres < 1
+        ? $"{Math.Round(litres * 1000, MidpointRounding.AwayFromZero).ToString("0", CultureInfo.InvariantCulture)} ml"
+        : $"{Math.Round(litres, 1, MidpointRounding.AwayFromZero).ToString("0.#", CultureInfo.InvariantCulture)} L";
 
     /// <summary>A copy with its own ingredient list, so editing a draft can't change the original.</summary>
     public SoilMix Copy()

@@ -173,14 +173,63 @@ else
                         {
                             <div class="mix-head">
                                 <span class="mix-title">@use.Mix.Name</span>
-                                <span class="mix-count">@PlantCount(use)</span>
+                                @if (use.Plants == 0)
+                                {
+                                    <span class="mix-count">@PlantCount(use)</span>
+                                }
+                                else
+                                {
+                                    <button type="button" class="mix-count mix-count-button" aria-expanded="@(showing == use.Mix.Id)"
+                                            @onclick="() => TogglePlantsAsync(use)">@PlantCount(use)</button>
+                                }
                             </div>
                             <div class="mix-recipe">@use.Mix.Recipe</div>
+                            @if (showing == use.Mix.Id)
+                            {
+                                @if (showingPlants.Count == 0)
+                                {
+                                    <p class="mix-recipe">None of them are in the collection any more.</p>
+                                }
+                                else
+                                {
+                                    <ul class="mix-plants">
+                                        @foreach (var plant in showingPlants)
+                                        {
+                                            <li><a href="plants/@plant.Id">@plant.DisplayName</a></li>
+                                        }
+                                    </ul>
+                                }
+                            }
+                            @if (measuring == use.Mix.Id && use.Mix.Batch(litres ?? 0) is var shares)
+                            {
+                                var id = $"mix-batch-{use.Mix.Id}";
+                                <div class="mix-batch">
+                                    <label for="@id">Batch</label>
+                                    <WaterInput Id="@id" Placeholder="e.g. 5" @bind-Litres="litres" />
+                                </div>
+                                @if (shares is not null)
+                                {
+                                    <ol class="mix-shares">
+                                        @foreach (var share in shares)
+                                        {
+                                            <li>
+                                                <span>@share.Name</span>
+                                                <span class="mix-measure">@SoilMix.Volume(share.Litres)</span>
+                                            </li>
+                                        }
+                                    </ol>
+                                }
+                            }
                             @if (use.Mix.RetiredOn is { } retired)
                             {
                                 <div class="mix-recipe">Last mixed @Labels.Date(retired)</div>
                             }
                             <div class="care-actions">
+                                @if (use.Mix.CanMeasureOut)
+                                {
+                                    <button type="button" class="btn btn-link btn-sm p-0" aria-expanded="@(measuring == use.Mix.Id)"
+                                            @onclick="() => ToggleMeasuring(use.Mix)">Measure out</button>
+                                }
                                 <button type="button" class="btn btn-link btn-sm p-0"
                                         @onclick="() => StartEditAsync(use)">Edit</button>
                                 <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
@@ -210,6 +259,13 @@ else
     private int plantsInMix;
     private Guid? confirming;
     private int confirmingPlants;
+
+    // The mix whose plants are showing, and the one being measured out for a batch. The size is
+    // kept between mixes, since it's usually the same tub or bag.
+    private Guid? showing;
+    private IReadOnlyList<Plant> showingPlants = [];
+    private Guid? measuring;
+    private decimal? litres;
 
     private DateOnly Today => Time.Today();
 
@@ -245,6 +301,20 @@ else
     private string DeleteWarning(MixUse use) => confirmingPlants == 0
         ? $"Delete {use.Mix.Name}?"
         : $"{Labels.Plants(confirmingPlants)} in this mix. Deleting it takes the mix off them, and changes nothing else about them.";
+
+    private async Task TogglePlantsAsync(MixUse use)
+    {
+        if (showing == use.Mix.Id)
+        {
+            showing = null;
+            return;
+        }
+
+        showingPlants = await MixService.PlantsListAsync(use.Mix.Id);
+        showing = use.Mix.Id;
+    }
+
+    private void ToggleMeasuring(SoilMix mix) => measuring = measuring == mix.Id ? null : mix.Id;
 
     private void Add(string? name)
     {
