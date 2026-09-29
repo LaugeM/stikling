@@ -27,7 +27,7 @@ Success is the developer using it for a full season on his own collection, and o
 
 The propagation is a record in its own right, not a note attached to a plant. It is linked to the plant it came from, carries its own type, medium, stage, count and timeline, and can be promoted to a plant while the lineage survives. The family tree holds across generations.
 
-Everything is stored on the device. No account, no server, no sign-up. The app opens from a link, installs to the home screen and works with no signal.
+Everything works on the device, with no signal and without an account. The app opens from a link and installs to the home screen. Signing in is optional, and keeps the same plants and photos on every device.
 
 ## Operating Context
 
@@ -49,13 +49,12 @@ Built and working:
 
 Constraints that bind future work:
 
-- All data stays on the device, for the foreseeable future, including after any move to a native app.
+- The app stays fully usable on the device, offline and without an account, including after any move to a native app. An account only adds sync.
 - Free, no ads, no upsell.
 - Jargon is a real barrier. Terminology has to work for someone who does not know what propagation means.
 
 Explicitly undecided:
 
-- **Sync between devices.** It needs hosting and probably some income to cover it, and no decision has been made. Until one is, everything stays on the device.
 - **Language switching.** The interface is English today. Danish is intended and belongs on the list. Until it is built, avoid choices that make translating painful: no strings baked into fixed-width layout, and room for longer words.
 - **Native apps.** An Android app is intended later, reusing the Razor components through .NET MAUI Blazor Hybrid. iOS only if Android goes anywhere, because releasing there costs more. This record stays `web` until that work actually starts.
 - **Sharing a plant's progress outward**, for example turning a timeline into something postable, is wanted but not built. It is the intended way the app reaches people.
@@ -80,6 +79,6 @@ Explicitly undecided:
 1. **The cutting is the unit.** Plants exist so cuttings have somewhere to come from. Anything that obscures where a propagation came from is wrong.
 2. **First run decides it.** On the web nobody has invested anything. A screen that does not explain itself loses the user in seconds, so empty states and the first few taps carry real weight.
 3. **Say it without the jargon.** Someone who has never heard the word propagation has to get through anyway.
-4. **The device is the whole system.** No account, no signal and no sync. Features are designed against the data already on hand.
+4. **The device comes first.** The app is fully usable offline and without an account. An account only adds sync. No feature needs a connection to show what is already on the device.
 5. **Sharing is the growth plan.** Making a plant's progress easy to show other people is how this reaches anyone at all.
 6. **Simple on top, deep underneath.** The app should do a lot without ever feeling cluttered. The common path is short and has sensible defaults. Extra fields, logs, reminders and settings are there for anyone who wants to go deep, but stay out of the way until they are asked for. A long feature list is fine; a crowded screen is not.

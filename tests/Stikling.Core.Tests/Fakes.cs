@@ -8,6 +8,7 @@ using Stikling.Core.Pots;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
+using Stikling.Core.Settings;
 using Stikling.Core.SoilMixes;
 using Stikling.Core.Timeline;
 using Stikling.Core.Today;
@@ -392,5 +393,45 @@ internal sealed class FakePlantNameSource(PlantNameData data) : IPlantNameSource
             throw new HttpRequestException("Offline");
         Loads++;
         return Task.FromResult(data);
+    }
+}
+
+internal sealed class FakeSettingsRepository : ISettingsRepository
+{
+    public Dictionary<Guid, UserSettings> Settings { get; } = [];
+
+    /// <summary>How many times something was saved.</summary>
+    public int Saves { get; private set; }
+
+    public Task<UserSettings?> GetAsync(Guid id) =>
+        Task.FromResult(Settings.TryGetValue(id, out var settings) && !settings.IsDeleted ? settings : null);
+
+    public Task SaveAsync(UserSettings settings)
+    {
+        Settings[settings.Id] = settings;
+        Saves++;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakePutOffRepository : IPutOffRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, PutOff> PutOffs { get; } = [];
+
+    public Task<IReadOnlyList<PutOff>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<PutOff>>(PutOffs.Values.Where(p => !p.IsDeleted).ToList());
+
+    public Task<PutOff?> GetAsync(Guid id) =>
+        Task.FromResult(PutOffs.TryGetValue(id, out var putOff) && !putOff.IsDeleted ? putOff : null);
+
+    public Task SaveAsync(PutOff putOff)
+    {
+        if (putOff.CreatedAt == default)
+            putOff.CreatedAt = clock;
+        putOff.UpdatedAt = clock = clock.AddSeconds(1);
+        PutOffs[putOff.Id] = putOff;
+        return Task.CompletedTask;
     }
 }

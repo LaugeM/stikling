@@ -127,12 +127,14 @@ public class BackupTests
             Products = [new Product { Name = "Hydro fertiliser" }, new Product { Name = "Silica" }],
             Feeds = [new Feed { Name = "Aroid feed" }],
             TreatmentRecipes = [new TreatmentRecipe { Name = "Alcohol spray" }, new TreatmentRecipe { DeletedAt = Now }],
-            Places = [living, new Place { Name = "Windowsill", RoomId = living.Id }, new Place { Name = "Stue", DeletedAt = Now }]
+            Places = [living, new Place { Name = "Windowsill", RoomId = living.Id }, new Place { Name = "Stue", DeletedAt = Now }],
+            Settings = [new UserSettings()],
+            PutOffs = [new PutOff { Key = "photos" }, new PutOff { Key = "old", DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -169,6 +171,36 @@ public class BackupTests
 
         Assert.Equal("Isopropyl alcohol", Assert.Single(Assert.Single(merged.ToSave).Ingredients).Name);
         Assert.Equal(1, merged.Updated);
+    }
+
+    [Fact]
+    public void Settings_survive_a_restore_and_the_newest_wins()
+    {
+        var mine = new UserSettings { Theme = ThemeMode.Light, UpdatedAt = Now.AddDays(-3) };
+        var theirs = new UserSettings { Theme = ThemeMode.Dark, PhotoReminder = true, UpdatedAt = Now };
+
+        var merged = BackupMerge.Merge([mine], [theirs]);
+        var older = BackupMerge.Merge([theirs], [mine]);
+
+        var saved = Assert.Single(merged.ToSave);
+        Assert.Equal(ThemeMode.Dark, saved.Theme);
+        Assert.True(saved.PhotoReminder);
+        Assert.Empty(older.ToSave);
+        Assert.Equal(1, BackupMerge.Merge<UserSettings>([], [theirs]).Added);
+    }
+
+    [Fact]
+    public void Put_offs_survive_a_restore_and_the_newest_wins()
+    {
+        var mine = new PutOff { Id = PutOff.IdFor("photos"), Key = "photos", Until = new DateOnly(2026, 10, 1), UpdatedAt = Now.AddDays(-1) };
+        var theirs = new PutOff { Id = PutOff.IdFor("photos"), Key = "photos", Until = new DateOnly(2026, 10, 8), UpdatedAt = Now };
+
+        var merged = BackupMerge.Merge([mine], [theirs]);
+        var older = BackupMerge.Merge([theirs], [mine]);
+
+        Assert.Equal(new DateOnly(2026, 10, 8), Assert.Single(merged.ToSave).Until);
+        Assert.Empty(older.ToSave);
+        Assert.Equal(1, BackupMerge.Merge<PutOff>([], [theirs]).Added);
     }
 
     [Fact]

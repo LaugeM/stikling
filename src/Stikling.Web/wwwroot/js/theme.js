@@ -1,6 +1,7 @@
 // Light/dark theme handling. Loaded in <head> before Blazor starts, so the right
 // theme is applied on the first paint (no white flash in dark mode).
-// The chosen mode ("system", "light" or "dark") is remembered in localStorage.
+// The chosen mode ("system", "light" or "dark") is kept in localStorage only for that first
+// paint. The saved settings record is what counts, and the app applies it once it has started.
 (function () {
     const storageKey = "stikling-theme";
     const media = window.matchMedia("(prefers-color-scheme: dark)");

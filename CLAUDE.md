@@ -31,10 +31,12 @@ A new IndexedDB store touches more places than the model and its page, and missi
 
 ## Keep it ready for sync
 
-The app will move to hosting at some point, with accounts and sync between devices, so people don't have to move backups around by hand. Nothing for that is built yet, but new code should be written so it won't have to be redone:
+Accounts and sync between devices are being added in steps, so people don't have to move backups around by hand. Sign-in goes through Clerk, and an ASP.NET Core API does the sync. The app stays fully usable without an account. New code should be written so it won't have to be redone:
 
-- Anything that belongs to the person is an `Entity` in its own store behind a repository. That includes settings they would expect on every device. localStorage (`DeviceFiles`) is only for things that really belong to one device, like the theme.
-- All writes go through the repositories, so `UpdatedAt` is always set. Nothing is ever hard deleted.
+- Data belongs to a collection, not to a person, since people can be added to a collection. That covers plants, pots, propagations, rooms and spots, care logs, feeds, pest cases, photos, products, soil mixes, treatment recipes and what is put off on Today.
+- Settings the person expects on every device belong to the person, in `UserSettings`. The theme is one of them. `theme.js` keeps a copy on the device only so the first paint has the right colours.
+- Every one of these is an `Entity` in its own store behind a repository. localStorage (`DeviceFiles`) is only for things that really belong to one device, like when it last took a backup.
+- All writes go through the repositories, so `UpdatedAt` is always set. Records are soft deleted. The one exception is deleting an account, which really erases the person's data and photos from the server.
 - Records point at each other by id, never by name or position in a list.
 - When two devices can change the same thing, prefer adding a record (a log entry) over changing a total or a list inside another record. When the newest version of a record wins, one of the two edits is lost.
 - Expect what a merge can produce: two pots with the same name, a record whose parent was deleted on another device, records arriving in any order. Checking uniqueness when saving isn't enough.
