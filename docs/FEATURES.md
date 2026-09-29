@@ -44,8 +44,7 @@ In the order I would build them.
 5. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
 6. **Seed germination**: sown and germinated counts with their dates.
 7. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-8. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
-9. **Comparing photos side by side, and voice notes.**
+8. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
@@ -182,7 +181,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | Light level per plant: low, medium, bright indirect, some direct sun | 5 | S | v1.x |
+| ✅ | Light level per plant: low, medium, bright indirect, some direct sun | 5 | S | v1.x |
 | ☐ | **Room climate**: temperature and humidity readings for a room or spot, e.g. from a hygrometer in a cabinet, so a plant shows the conditions it lives in | 6 | M | v1.x |
 | ☐ | **Grow lights**: your lamps with a name, wattage and hours on per day, and which plants are under each one | 6 | M | v1.x |
 | ☐ | Moving a plant under or away from a grow light is recorded in its history, like a room change | 6 | S | v1.x |

@@ -122,6 +122,16 @@ else
                 <RoomPicker @bind-Value="location" Rooms="rooms" />
             </div>
             <div class="mb-3">
+                <label class="form-label" for="light">Light</label>
+                <InputSelect id="light" class="form-select" @bind-Value="plant.Light">
+                    <option value="">Not set</option>
+                    @foreach (var light in Enum.GetValues<LightLevel>())
+                    {
+                        <option value="@light">@Labels.For(light)</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="mb-3">
                 <label class="form-label" for="medium">Grows in</label>
                 <InputSelect id="medium" class="form-select" @bind-Value="plant.Medium">
                     @foreach (var medium in Enum.GetValues<GrowingMedium>())

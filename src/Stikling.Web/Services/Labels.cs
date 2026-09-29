@@ -29,6 +29,15 @@ public static class Labels
         _ => origin.ToString()
     };
 
+    public static string For(LightLevel light) => light switch
+    {
+        LightLevel.Low => "Low light",
+        LightLevel.Medium => "Medium light",
+        LightLevel.BrightIndirect => "Bright indirect",
+        LightLevel.DirectSun => "Some direct sun",
+        _ => light.ToString()
+    };
+
     public static string For(GrowingMedium medium) => medium switch
     {
         GrowingMedium.Leca => "LECA",
@@ -122,6 +131,7 @@ public static class Labels
         PlantStatus s => For(s),
         PlantOrigin o => For(o),
         GrowingMedium m => For(m),
+        LightLevel l => For(l),
         RootingAid a => For(a),
         CareKind c => For(c),
         PropagationType t => For(t),

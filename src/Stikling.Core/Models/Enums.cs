@@ -5,6 +5,15 @@ namespace Stikling.Core.Models;
 // Enums are stored as strings (not numbers) so stored data and backups stay readable
 // and don't break if the order of the values changes.
 
+[JsonConverter(typeof(JsonStringEnumConverter<LightLevel>))]
+public enum LightLevel
+{
+    Low,
+    Medium,
+    BrightIndirect,
+    DirectSun
+}
+
 [JsonConverter(typeof(JsonStringEnumConverter<PlantStatus>))]
 public enum PlantStatus
 {

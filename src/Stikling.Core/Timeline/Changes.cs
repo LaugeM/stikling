@@ -28,6 +28,11 @@ public static class PlantChanges
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
 
+        if (before.Light != after.Light)
+            changes.Add(after.Light is { } light
+                ? $"Light: {label(light)} (was {(before.Light is { } was ? label(was) : "not set")})"
+                : "Light setting cleared");
+
         var name = potName ?? (_ => null);
         ChangeText.AddPot(changes, before.InnerPotId, after.InnerPotId, name, "Potted into", "Taken out of its pot");
         ChangeText.AddPot(changes, before.OuterPotId, after.OuterPotId, name, "Now stands in", "No longer in an outer pot");

@@ -184,6 +184,20 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Update_records_a_change_of_light()
+    {
+        var plant = new Plant { Nickname = "Jade" };
+        await service.CreateAsync(plant);
+        var before = plant.Copy();
+        plant.Light = LightLevel.DirectSun;
+
+        await service.UpdateAsync(before, plant, Label);
+
+        var change = timeline.Entries.Single(e => e.Kind == TimelineKind.Change);
+        Assert.Equal("Light: DirectSun (was not set)", change.Text);
+    }
+
+    [Fact]
     public async Task Update_without_tracked_changes_adds_no_entry()
     {
         var plant = new Plant { Nickname = "Jade" };
