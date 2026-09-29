@@ -56,6 +56,12 @@ public sealed class CareLog : Entity
     /// <summary>How much water the products went into. The whole batch, when one was mixed for several plants.</summary>
     public decimal? WaterLitres { get; set; }
 
+    /// <summary>The electrical conductivity of the water in mS/cm, from a meter. Only on the kinds that take a product.</summary>
+    public decimal? Ec { get; set; }
+
+    /// <summary>The pH of the water, 0 to 14, from a meter. Only on the kinds that take a product.</summary>
+    public decimal? Ph { get; set; }
+
     public string? Notes { get; set; }
 
     public CareLog Copy()
@@ -92,6 +98,15 @@ public sealed class CareLog : Entity
 
         if ((FeedName is not null || WaterLitres is not null) && !CareKinds.TakesProducts(Kind))
             errors.Add("Only fertilising and topping up can have a feed.");
+
+        if ((Ec is not null || Ph is not null) && !CareKinds.TakesProducts(Kind))
+            errors.Add("Only fertilising and topping up can have an EC or pH reading.");
+
+        if (Ec is < 0 or > 20)
+            errors.Add("The EC goes from 0 to 20 mS/cm.");
+
+        if (Ph is < 0 or > 14)
+            errors.Add("The pH goes from 0 to 14.");
 
         if (WaterLitres <= 0)
             errors.Add("The amount of water has to be more than 0.");

@@ -1,3 +1,4 @@
+using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
 
@@ -35,7 +36,9 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
         int? moisture = null,
         IReadOnlyList<ProductDose>? products = null,
         Feed? feed = null,
-        decimal? waterLitres = null)
+        decimal? waterLitres = null,
+        decimal? ec = null,
+        decimal? ph = null)
     {
         var used = Tidy(products);
         var entries = plantIds
@@ -51,6 +54,8 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
                 FeedId = feed?.Id,
                 FeedName = Clean(feed?.Name),
                 WaterLitres = waterLitres,
+                Ec = ec,
+                Ph = ph,
                 Notes = Clean(notes)
             })
             .ToList();
@@ -85,12 +90,27 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
             what = $"{what} ({Doses.Water(litres)})";
 
         var notes = Clean(entry.Notes);
+        var readings = Readings(entry);
         if (entry.Products.Count == 0)
-            return notes is null ? what : $"{what}: {notes}";
+            return Join(notes is null ? what : $"{what}: {notes}", readings);
 
         var products = string.Join(" + ", entry.Products);
-        return notes is null ? $"{what}: {products}" : $"{what}: {products} · {notes}";
+        return Join(notes is null ? $"{what}: {products}" : $"{what}: {products} · {notes}", readings);
     }
+
+    /// <summary>"EC 1.2 · pH 6.0", or nothing when neither was measured.</summary>
+    private static string? Readings(CareLog entry)
+    {
+        var parts = new List<string>();
+        if (entry.Ec is { } ec)
+            parts.Add($"EC {ec.ToString("0.0#", CultureInfo.InvariantCulture)}");
+        if (entry.Ph is { } ph)
+            parts.Add($"pH {ph.ToString("0.0#", CultureInfo.InvariantCulture)}");
+        return parts.Count == 0 ? null : string.Join(" · ", parts);
+    }
+
+    private static string Join(string line, string? readings) =>
+        readings is null ? line : $"{line} · {readings}";
 
     private Task RecordAsync(CareLog entry, Func<Enum, string> label)
     {
