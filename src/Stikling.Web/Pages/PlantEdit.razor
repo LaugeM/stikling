@@ -133,7 +133,7 @@ else
             </div>
             <div class="mb-3">
                 <label class="form-label" for="medium">Grows in</label>
-                <InputSelect id="medium" class="form-select" @bind-Value="plant.Medium">
+                <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => SetMedium(m)" ValueExpression="() => plant.Medium">
                     @foreach (var medium in Enum.GetValues<GrowingMedium>())
                     {
                         <option value="@medium">@Labels.For(medium)</option>
@@ -146,7 +146,7 @@ else
             </div>
 
             <div class="mb-3">
-                <PotPicker @bind-Value="plant.InnerPotId" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                <PotPicker Value="plant.InnerPotId" ValueChanged="SetInnerPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
             </div>
 
             <div class="mb-3">
@@ -376,6 +376,22 @@ else
 
     private void SetDormant(ChangeEventArgs e) =>
         plant!.DormantSince = (bool?)e.Value == true ? original?.DormantSince ?? Today : null;
+
+    // A pot that suggests a medium sets it, until the person has picked a medium themselves
+    private bool mediumChosen;
+
+    private void SetMedium(GrowingMedium medium)
+    {
+        plant!.Medium = medium;
+        mediumChosen = true;
+    }
+
+    private void SetInnerPot(Guid? id)
+    {
+        plant!.InnerPotId = id;
+        var pot = pots.FirstOrDefault(p => p.Id == id);
+        plant.Medium = PotKinds.MediumAfterPicking(pot, plant.Medium, mediumChosen);
+    }
 
     // Clearing the outer pot clears what would be kept in it
     private void SetOuterPot(Guid? id)
