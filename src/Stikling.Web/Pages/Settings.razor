@@ -2,6 +2,8 @@
 @implements IDisposable
 @inject ThemeService Theme
 @inject RoomService RoomService
+@inject PlantService PlantService
+@inject IPlantRepository Plants
 @inject PotService PotService
 @inject SoilMixService MixService
 @inject ProductService ProductService
@@ -116,6 +118,47 @@
     @if (roomMessage is not null)
     {
         <p class="settings-message" role="status">@roomMessage</p>
+    }
+</section>
+
+<section class="settings-section">
+    <h2>Tags</h2>
+    <p class="settings-hint">
+        Renaming a tag here changes it on every plant that has it, and renaming it to a tag you
+        already use merges the two.
+    </p>
+
+    @if (tags.Count == 0)
+    {
+        <p class="settings-hint">No tags yet. They appear as you tag plants.</p>
+    }
+    else
+    {
+        <ul class="room-list">
+            @foreach (var t in tags)
+            {
+                <li>
+                    @if (renamingTag == t.Name)
+                    {
+                        <RoomRenameRow Name="@t.Name" Busy="busy" OnSave="name => RenameTagAsync(t.Name, name)" OnCancel="StopRenamingTag" />
+                    }
+                    else
+                    {
+                        <div class="room-row">
+                            <span class="room-name">@t.Name</span>
+                            <span class="room-count">@Labels.Plants(t.Plants)</span>
+                            <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                    @onclick="() => renamingTag = t.Name">Rename</button>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (tagMessage is not null)
+    {
+        <p class="settings-message" role="status">@tagMessage</p>
     }
 </section>
 
@@ -311,6 +354,9 @@
     private int recipes;
     private Guid? renaming; // the room or spot being renamed
     private string? roomMessage;
+    private IReadOnlyList<TagCount> tags = [];
+    private string? renamingTag;
+    private string? tagMessage;
     private DateOnly? lastBackup;
     private bool photoReminder;
     private StorageEstimate? storage;
@@ -329,6 +375,7 @@
         photoReminder = await Files.GetPhotoReminderAsync();
         storage = await Db.EstimateAsync();
         rooms = await RoomService.GetAllAsync();
+        tags = PlantTags.InUse(await Plants.GetAllAsync());
         pots = await PotService.GetAllAsync();
         mixes = await MixService.GetAllAsync();
         products = await ProductService.GetAllAsync();
@@ -401,6 +448,37 @@
         catch (Exception ex)
         {
             roomMessage = $"Couldn't rename: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private void StopRenamingTag()
+    {
+        renamingTag = null;
+        tagMessage = null;
+    }
+
+    private async Task RenameTagAsync(string from, string? to)
+    {
+        busy = true;
+        try
+        {
+            var name = PlantTags.Clean(to);
+            var merged = name is not null && tags.Any(t => PlantTags.Same(t.Name, name) && !PlantTags.Same(t.Name, from));
+            var changed = name is null ? 0 : await PlantService.RenameTagAsync(from, name);
+            tags = PlantTags.InUse(await Plants.GetAllAsync());
+            tagMessage = (changed, merged) switch
+            {
+                (0, _) => $"Nothing changed, {from} stays as it is.",
+                (_, true) => $"{Labels.Plants(changed)} now tagged {name}, which you were already using.",
+                _ => $"Renamed to {name} on {Labels.Plants(changed)}."
+            };
+            renamingTag = null;
+        }
+        catch (Exception ex)
+        {
+            tagMessage = $"Couldn't rename: {ex.Message}";
         }
 
         busy = false;

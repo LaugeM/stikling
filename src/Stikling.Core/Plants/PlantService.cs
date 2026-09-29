@@ -33,6 +33,34 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             await timeline.AddAsync(entry);
     }
 
+    /// <summary>
+    /// Renames a tag on every plant that has it, and merges it into another tag when the new
+    /// name is one already in use. Plants that are gone keep their labels, so they change too.
+    /// Returns how many plants changed. An empty new name does nothing.
+    /// </summary>
+    public async Task<int> RenameTagAsync(string from, string to)
+    {
+        if (PlantTags.Clean(to) is not { } name || PlantTags.Clean(from) is null)
+            return 0;
+
+        var changed = 0;
+        foreach (var plant in await plants.GetAllAsync())
+        {
+            if (plant.IsDeleted || !PlantTags.Has(plant, from))
+                continue;
+
+            var renamed = PlantTags.Normalize(plant.Tags.Select(t => PlantTags.Same(t, from) ? name : t));
+            if (renamed.SequenceEqual(plant.Tags))
+                continue;
+
+            plant.Tags = renamed;
+            await plants.SaveAsync(plant);
+            changed++;
+        }
+
+        return changed;
+    }
+
     /// <summary>Saves an edited plant and records what changed (status, room, medium, pot).</summary>
     /// <param name="potName">Turns a pot id into its name, so the history can say which pot.</param>
     /// <param name="placeName">The same for the room or spot, so the history can say where it went.</param>
