@@ -15,6 +15,77 @@ public class PlantServiceTests
 
     private static string Label(Enum value) => value.ToString();
 
+    private async Task<Plant> AddTagged(string name, params string[] tags)
+    {
+        var plant = new Plant { Nickname = name, Tags = [.. tags] };
+        await plants.SaveAsync(plant);
+        return plant;
+    }
+
+    [Fact]
+    public async Task RenameTag_changes_it_on_every_plant_that_has_it()
+    {
+        var a = await AddTagged("A", "Rare", "Swap");
+        var b = await AddTagged("B", "swap");
+        var c = await AddTagged("C", "Rare");
+
+        var changed = await service.RenameTagAsync("Swap", "  For   swap ");
+
+        Assert.Equal(2, changed);
+        Assert.Equal(["Rare", "For swap"], a.Tags);
+        Assert.Equal(["For swap"], b.Tags);
+        Assert.Equal(["Rare"], c.Tags);
+    }
+
+    [Fact]
+    public async Task RenameTag_into_an_existing_tag_merges_without_a_duplicate()
+    {
+        var both = await AddTagged("Both", "Rare", "Special");
+        var only = await AddTagged("Only", "special");
+        var other = await AddTagged("Other", "Rare");
+
+        var changed = await service.RenameTagAsync("Special", "rare");
+
+        Assert.Equal(2, changed);
+        Assert.Equal(["Rare"], both.Tags);
+        Assert.Equal(["rare"], only.Tags);
+        Assert.Equal(["Rare"], other.Tags);
+    }
+
+    [Fact]
+    public async Task RenameTag_can_change_only_the_case()
+    {
+        var plant = await AddTagged("A", "rare");
+
+        Assert.Equal(1, await service.RenameTagAsync("rare", "Rare"));
+        Assert.Equal(["Rare"], plant.Tags);
+        Assert.Equal(0, await service.RenameTagAsync("Rare", "Rare"));
+    }
+
+    [Fact]
+    public async Task RenameTag_with_an_empty_name_does_nothing()
+    {
+        var plant = await AddTagged("A", "Rare");
+
+        Assert.Equal(0, await service.RenameTagAsync("Rare", "   "));
+        Assert.Equal(["Rare"], plant.Tags);
+    }
+
+    [Fact]
+    public async Task RenameTag_leaves_deleted_plants_alone_and_renames_gone_ones()
+    {
+        var deleted = await AddTagged("Deleted", "Rare");
+        deleted.DeletedAt = Now;
+        var gone = await AddTagged("Gone", "Rare");
+        gone.Status = PlantStatus.Died;
+
+        var changed = await service.RenameTagAsync("Rare", "Scarce");
+
+        Assert.Equal(1, changed);
+        Assert.Equal(["Rare"], deleted.Tags);
+        Assert.Equal(["Scarce"], gone.Tags);
+    }
+
     [Fact]
     public async Task Create_saves_the_plant_and_records_it_on_the_acquired_date()
     {
