@@ -38,7 +38,7 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them.
 
 1. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
-2. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished, and I want it in place before winter.
+2. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
 3. **Problem log**: what you saw on a plant, what you did, and whether it helped.
 4. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
 5. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
@@ -49,7 +49,7 @@ In the order I would build them.
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screens worth the name: counts on the Today screen, sort options and favourites on the plant list, purchase price, duplicating a plant, quick add from a pasted list of names, a note when adding a plant you already have, renaming or merging a tag, home screen shortcuts, and an app version and a "what's new" page.
+These need no new storage and no new screens worth the name: counts on the Today screen, sort options and favourites on the plant list, purchase price, quick add from a pasted list of names, a note when adding a plant you already have, renaming or merging a tag, home screen shortcuts, and an app version and a "what's new" page.
 
 The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it, the list of plants that got a feed, and corm size on a propagation.
 
@@ -89,7 +89,7 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ✅ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary and the names already on your plants and propagations, including hybrids and named varieties. An old name offers the one it goes by now, and a cultivar fills in its genus and species. Anything not on the list can still be typed | 6 | M | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
 | ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
-| ☐ | Duplicate a plant (e.g. a second basil pot) | 7 | S | v1.x |
+| ✅ | Duplicate a plant (e.g. a second basil pot): "Add another like this" opens the add form filled in from it | 7 | S | v1.x |
 | ☐ | Purchase price per plant | 7 | S | v1.x |
 | ☐ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
 | ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 7 | M | v1.x |

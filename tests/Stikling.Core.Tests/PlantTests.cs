@@ -92,4 +92,56 @@ public class PlantTests
 
         Assert.Contains("A plant can't have the same pot inside and outside.", plant.Validate(Today));
     }
+
+    [Fact]
+    public void Duplicate_copies_names_room_and_growing_setup()
+    {
+        var plant = new Plant
+        {
+            Genus = "Ocimum", Species = "basilicum", Cultivar = "Genovese",
+            PlaceId = Guid.NewGuid(), Origin = PlantOrigin.GrownFromSeed, ParentPlantId = Guid.NewGuid(),
+            Source = "Garden centre",
+            Medium = GrowingMedium.Leca, SoilMixId = Guid.NewGuid(), Tags = ["herbs"]
+        };
+
+        var copy = plant.Duplicate();
+
+        Assert.NotEqual(plant.Id, copy.Id);
+        Assert.Equal(plant.BotanicalName, copy.BotanicalName);
+        Assert.Equal(plant.PlaceId, copy.PlaceId);
+        Assert.Equal(plant.Origin, copy.Origin);
+        Assert.Equal(plant.ParentPlantId, copy.ParentPlantId);
+        Assert.Equal(plant.Source, copy.Source);
+        Assert.Equal(plant.Medium, copy.Medium);
+        Assert.Equal(plant.SoilMixId, copy.SoilMixId);
+        Assert.Equal(["herbs"], copy.Tags);
+        Assert.NotSame(plant.Tags, copy.Tags);
+    }
+
+    [Fact]
+    public void Duplicate_leaves_what_belongs_to_the_one_plant()
+    {
+        var plant = new Plant
+        {
+            Nickname = "Kitchen basil", AcquiredOn = LooseDate.Of(Today), InnerPotId = Guid.NewGuid(), OuterPotId = Guid.NewGuid(),
+            WaterInOuterPot = true, Notes = "Bolts early", Status = PlantStatus.GivenAway,
+            QuarantinedSince = Today, DormantSince = Today, Attention = new Attention("Yellow leaves", Today),
+            CoverPhotoId = Guid.NewGuid(), FromPropagationId = Guid.NewGuid()
+        };
+
+        var copy = plant.Duplicate();
+
+        Assert.Null(copy.Nickname);
+        Assert.Null(copy.AcquiredOn);
+        Assert.Null(copy.InnerPotId);
+        Assert.Null(copy.OuterPotId);
+        Assert.False(copy.WaterInOuterPot);
+        Assert.Null(copy.Notes);
+        Assert.Equal(PlantStatus.Active, copy.Status);
+        Assert.Null(copy.QuarantinedSince);
+        Assert.Null(copy.DormantSince);
+        Assert.Null(copy.Attention);
+        Assert.Null(copy.CoverPhotoId);
+        Assert.Null(copy.FromPropagationId);
+    }
 }

@@ -105,6 +105,25 @@ public sealed class Plant : Entity
     }
 
     /// <summary>
+    /// A new plant to add alongside this one, e.g. a second basil pot. It gets the names, room,
+    /// origin, source, medium, soil mix and tags. The nickname, the date it was got, pots, notes,
+    /// photos and anything about how this plant is doing right now stay behind.
+    /// </summary>
+    public Plant Duplicate() => new()
+    {
+        Genus = Genus,
+        Species = Species,
+        Cultivar = Cultivar,
+        PlaceId = PlaceId,
+        Origin = Origin,
+        Source = Source,
+        Medium = Medium,
+        SoilMixId = SoilMixId,
+        Tags = [.. Tags],
+        ParentPlantId = ParentPlantId
+    };
+
+    /// <summary>
     /// True while the plant takes up this pot. Only a plant in the collection does: a pot whose
     /// plant died or left is either free again or went with it.
     /// </summary>

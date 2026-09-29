@@ -58,6 +58,17 @@ else
             <div class="mb-3">
                 <LooseDateInput @bind-Value="plant.AcquiredOn" Today="Today" Label="When you got it" />
                 <div class="form-text">If you only remember the month or the year, pick that rather than guessing a day.</div>
+                @if (copiedDate is { } sameDate && sameDate != LooseDate.Of(Today))
+                {
+                    @if (plant.AcquiredOn == sameDate)
+                    {
+                        <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => plant.AcquiredOn = LooseDate.Of(Today)">Use today instead</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => plant.AcquiredOn = sameDate">Same date as @copiedFrom (@sameDate.Text())</button>
+                    }
+                }
             </div>
 
             @if (ShowParent)
@@ -261,6 +272,10 @@ else
     [SupplyParameterFromQuery(Name = "parent")]
     public Guid? ParentId { get; set; }
 
+    /// <summary>Starts from a copy of another plant, from "Add another like this" on its page.</summary>
+    [SupplyParameterFromQuery(Name = "copy")]
+    public Guid? CopyOfId { get; set; }
+
     private readonly string cameraId = $"camera-{Guid.NewGuid():N}";
     private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
     private ElementReference cameraInput;
@@ -273,6 +288,8 @@ else
 
     private Plant? plant;
     private Plant? original; // the plant as it was before editing, to record what changed
+    private LooseDate? copiedDate; // when the plant this one is copied from was got, to offer the same date
+    private string? copiedFrom;
     private bool notFound;
     private bool saving;
     private List<string> errors = [];
@@ -327,6 +344,13 @@ else
         if (IsNew)
         {
             // The draft keeps its id, so photos taken before saving stay with it
+            if (plant is null && CopyOfId is { } copyOfId && all.FirstOrDefault(p => p.Id == copyOfId) is { } source)
+            {
+                plant = source.Duplicate();
+                plant.AcquiredOn = LooseDate.Of(Today);
+                copiedDate = source.AcquiredOn;
+                copiedFrom = source.DisplayName;
+            }
             plant ??= new Plant { AcquiredOn = LooseDate.Of(Today) };
             if (ParentId is { } parentId && all.FirstOrDefault(p => p.Id == parentId) is { } parent)
             {
