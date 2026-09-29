@@ -9,6 +9,7 @@
 @inject TimeProvider Time
 
 <PageTitle>@(propagation?.DisplayName ?? "Propagation") · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
 
 <a class="back-link" href="propagations">Propagations</a>
 

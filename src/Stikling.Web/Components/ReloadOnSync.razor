@@ -1,0 +1,16 @@
+@* Reloads the page's data when sync brings in changes from another device. Lists and detail
+   pages have one. Edit pages don't, so nothing changes under someone filling in a form. *@
+@implements IDisposable
+@inject SyncRunner Sync
+
+@code {
+    /// <summary>Loads the page's data again. The page is drawn again afterwards.</summary>
+    [Parameter, EditorRequired]
+    public EventCallback Reload { get; set; }
+
+    protected override void OnInitialized() => Sync.Received += OnReceived;
+
+    private void OnReceived() => _ = InvokeAsync(() => Reload.InvokeAsync());
+
+    public void Dispose() => Sync.Received -= OnReceived;
+}

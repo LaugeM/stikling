@@ -5,6 +5,7 @@
 @inject TimeProvider Time
 
 <PageTitle>Propagations · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
 
 <div class="page-heading">
     <h1>Propagations</h1>
@@ -177,7 +178,9 @@ else
     private string? search;
     private ProgressFilter progress = ProgressFilter.Active;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
     {
         plants = (await PlantRepository.GetAllAsync()).ToDictionary(p => p.Id);
         all = await Repository.GetAllAsync();

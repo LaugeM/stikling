@@ -21,6 +21,10 @@ public static class Stores
     public const string PutOffs = "putOffs";
     public const string TreatmentRecipes = "treatmentRecipes";
     public const string Places = "places";
+
+    // Kept by sync, and not synced themselves
+    public const string Changes = "changes";
+    public const string SyncState = "syncState";
 }
 
 public sealed record StorageEstimate(long Usage, long Quota, bool Persisted);
@@ -38,17 +42,26 @@ public sealed class IndexedDb(IJSRuntime js) : IAsyncDisposable
     private Task<IJSObjectReference> Module =>
         module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
+    /// <summary>Raised after something is saved or deleted here, so sync can send it.</summary>
+    public event Action? Changed;
+
     public async Task<List<T>> GetAllAsync<T>(string store) =>
         await (await Module).InvokeAsync<List<T>>("getAll", store);
 
     public async Task<T?> GetAsync<T>(string store, Guid id) where T : class =>
         await (await Module).InvokeAsync<T?>("get", store, id);
 
-    public async Task PutAsync<T>(string store, T value) =>
+    public async Task PutAsync<T>(string store, T value)
+    {
         await (await Module).InvokeVoidAsync("put", store, value);
+        Changed?.Invoke();
+    }
 
-    public async Task DeleteAsync(string store, Guid id) =>
+    public async Task DeleteAsync(string store, Guid id)
+    {
         await (await Module).InvokeVoidAsync("remove", store, id);
+        Changed?.Invoke();
+    }
 
     public async Task<bool> RequestPersistenceAsync() =>
         await (await Module).InvokeAsync<bool>("requestPersistence");

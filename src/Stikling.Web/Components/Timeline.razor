@@ -5,6 +5,8 @@
 @inject PhotoService Photos
 @inject TimeProvider Time
 
+<ReloadOnSync Reload="LoadAsync" />
+
 <section class="composer" aria-label="Add to history">
     <textarea class="form-control" rows="2" placeholder="Add a note… (new leaf, roots showing, repotted)"
               aria-label="Note" @bind="noteText" @bind:event="oninput"></textarea>

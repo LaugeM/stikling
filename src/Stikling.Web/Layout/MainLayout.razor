@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @inject IndexedDb Db
 @inject ThemeService Theme
+@inject SyncRunner Sync
 
 <div class="app-shell">
     <header class="app-header">
@@ -62,5 +63,8 @@
         {
             // Storage that can't be made persistent still works
         }
+
+        // After the app is on screen, so a slow or missing connection never holds it back
+        await Sync.StartAsync();
     }
 }

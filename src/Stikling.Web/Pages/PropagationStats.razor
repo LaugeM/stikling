@@ -2,6 +2,7 @@
 @inject IPropagationRepository Repository
 
 <PageTitle>Results · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
 
 <a class="back-link" href="propagations">Propagations</a>
 <h1>Results</h1>
@@ -94,7 +95,9 @@ else
     private IReadOnlyList<PropagationResult<PropagationType>> byType = [];
     private IReadOnlyList<RootingAidResult> byAid = [];
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
     {
         all = await Repository.GetAllAsync();
         overall = PropagationResults.Overall(all);

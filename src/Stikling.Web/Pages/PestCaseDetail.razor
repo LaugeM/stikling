@@ -7,6 +7,7 @@
 @inject TimeProvider Time
 
 <PageTitle>@(view is null ? "Pest case" : Labels.For(view.Case.Pest)) · Stikling</PageTitle>
+<ReloadOnSync Reload="ReloadAsync" />
 
 <a class="back-link" href="pests">Pests</a>
 

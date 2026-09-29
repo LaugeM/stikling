@@ -11,6 +11,7 @@
 @inject TimeProvider Time
 
 <PageTitle>@(plant?.DisplayName ?? "Plant") · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
 
 <a class="back-link" href="plants">Plants</a>
 
@@ -403,7 +404,12 @@ else
         confirmDelete = false;
         flagging = false;
         tab = Tab is "history" or "props" or "care" ? Tab : "info";
+        await LoadAsync();
+        loaded = true;
+    }
 
+    private async Task LoadAsync()
+    {
         var all = await Repository.GetAllAsync();
         plant = all.FirstOrDefault(p => p.Id == Id);
         if (plant is not null)
@@ -424,7 +430,6 @@ else
 
             await ReloadCareAsync();
         }
-        loaded = true;
     }
 
     private async Task ReloadCareAsync()
