@@ -286,7 +286,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
 | ☐ | "What's new" page and app version in Settings. Entries are written by hand in plain language for the people using the app, not generated from commit or pull request titles | 5 | S | v1.x |
 | ☐ | **Import from a spreadsheet**: a CSV of plants from Excel or Google Sheets, with each column matched to a field, so a list kept somewhere else doesn't have to be typed in again | 5 | M | v1.x |
-| ☐ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
+| ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
 | ☐ | Units and date format settings | 7 | M | v1.x |
 | ☐ | Danish translation | 7 | L | v1.x |
 
