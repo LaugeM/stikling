@@ -15,6 +15,8 @@ Photos are resized, stored and read entirely in JavaScript. The image data only 
 
 UI work follows `DESIGN.md`. `PRODUCT.md` has who the app is for and the principles behind it.
 
+The impeccable skill is for real design work, not a check on every change, since each run reads a lot of instructions and screenshots. For a new screen or a redesign, run `/impeccable shape` before building and `/impeccable critique` or `polish` on the result. A small change that reuses existing patterns only needs `DESIGN.md`, the plugin's hook that scans each edited file, and the reviewer. Now and then, an `/impeccable audit` across several screens catches what drifts.
+
 ## Adding a new kind of record
 
 A new IndexedDB store touches more places than the model and its page, and missing one of them quietly leaves the records out of backups. Use the feeds commit (`3e255f3`) as the example:
