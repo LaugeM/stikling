@@ -4,6 +4,7 @@
 @inject RoomService RoomService
 @inject PlantService PlantService
 @inject IPlantRepository Plants
+@inject IPropagationRepository PropagationRepository
 @inject PotService PotService
 @inject SoilMixService MixService
 @inject ProductService ProductService
@@ -252,6 +253,12 @@
         }
     </p>
 
+    <p class="settings-hint">For a spreadsheet. This is not a backup and can't be restored.</p>
+    <div class="settings-actions">
+        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPlantsCsvAsync">Plants as CSV</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPropagationsCsvAsync">Propagations as CSV</button>
+    </div>
+
     @if (pending is { } file)
     {
         <div class="confirm-card">
@@ -495,6 +502,19 @@
     {
         mode = await Theme.GetModeAsync();
         StateHasChanged();
+    }
+
+    private async Task ExportPlantsCsvAsync()
+    {
+        var csv = CsvExport.Plants(await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
+        await Files.DownloadAsync($"stikling-plants-{TodayDate:yyyy-MM-dd}.csv", CsvExport.Encode(csv));
+    }
+
+    private async Task ExportPropagationsCsvAsync()
+    {
+        var csv = CsvExport.Propagations(
+            await PropagationRepository.GetAllAsync(), await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
+        await Files.DownloadAsync($"stikling-propagations-{TodayDate:yyyy-MM-dd}.csv", CsvExport.Encode(csv));
     }
 
     private async Task ExportAsync()
