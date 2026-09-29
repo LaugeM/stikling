@@ -15,6 +15,77 @@ public class PlantServiceTests
 
     private static string Label(Enum value) => value.ToString();
 
+    private async Task<Plant> AddTagged(string name, params string[] tags)
+    {
+        var plant = new Plant { Nickname = name, Tags = [.. tags] };
+        await plants.SaveAsync(plant);
+        return plant;
+    }
+
+    [Fact]
+    public async Task RenameTag_changes_it_on_every_plant_that_has_it()
+    {
+        var a = await AddTagged("A", "Rare", "Swap");
+        var b = await AddTagged("B", "swap");
+        var c = await AddTagged("C", "Rare");
+
+        var changed = await service.RenameTagAsync("Swap", "  For   swap ");
+
+        Assert.Equal(2, changed);
+        Assert.Equal(["Rare", "For swap"], a.Tags);
+        Assert.Equal(["For swap"], b.Tags);
+        Assert.Equal(["Rare"], c.Tags);
+    }
+
+    [Fact]
+    public async Task RenameTag_into_an_existing_tag_merges_without_a_duplicate()
+    {
+        var both = await AddTagged("Both", "Rare", "Special");
+        var only = await AddTagged("Only", "special");
+        var other = await AddTagged("Other", "Rare");
+
+        var changed = await service.RenameTagAsync("Special", "rare");
+
+        Assert.Equal(2, changed);
+        Assert.Equal(["Rare"], both.Tags);
+        Assert.Equal(["rare"], only.Tags);
+        Assert.Equal(["Rare"], other.Tags);
+    }
+
+    [Fact]
+    public async Task RenameTag_can_change_only_the_case()
+    {
+        var plant = await AddTagged("A", "rare");
+
+        Assert.Equal(1, await service.RenameTagAsync("rare", "Rare"));
+        Assert.Equal(["Rare"], plant.Tags);
+        Assert.Equal(0, await service.RenameTagAsync("Rare", "Rare"));
+    }
+
+    [Fact]
+    public async Task RenameTag_with_an_empty_name_does_nothing()
+    {
+        var plant = await AddTagged("A", "Rare");
+
+        Assert.Equal(0, await service.RenameTagAsync("Rare", "   "));
+        Assert.Equal(["Rare"], plant.Tags);
+    }
+
+    [Fact]
+    public async Task RenameTag_leaves_deleted_plants_alone_and_renames_gone_ones()
+    {
+        var deleted = await AddTagged("Deleted", "Rare");
+        deleted.DeletedAt = Now;
+        var gone = await AddTagged("Gone", "Rare");
+        gone.Status = PlantStatus.Died;
+
+        var changed = await service.RenameTagAsync("Rare", "Scarce");
+
+        Assert.Equal(1, changed);
+        Assert.Equal(["Rare"], deleted.Tags);
+        Assert.Equal(["Scarce"], gone.Tags);
+    }
+
     [Fact]
     public async Task Create_saves_the_plant_and_records_it_on_the_acquired_date()
     {
@@ -28,6 +99,17 @@ public class PlantServiceTests
         Assert.Equal(plant.Id, entry.SubjectId);
         Assert.Equal(new DateOnly(2026, 5, 1), DateOnly.FromDateTime(entry.OccurredAt.UtcDateTime));
         Assert.Equal("Added to collection", entry.Text);
+    }
+
+    [Fact]
+    public async Task SetFavourite_saves_the_plant_without_a_timeline_entry()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+
+        await service.SetFavouriteAsync(plant, true);
+
+        Assert.True(plants.Plants[plant.Id].Favourite);
+        Assert.Empty(timeline.Entries);
     }
 
     [Fact]
@@ -102,6 +184,20 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Update_records_a_change_of_light()
+    {
+        var plant = new Plant { Nickname = "Jade" };
+        await service.CreateAsync(plant);
+        var before = plant.Copy();
+        plant.Light = LightLevel.DirectSun;
+
+        await service.UpdateAsync(before, plant, Label);
+
+        var change = timeline.Entries.Single(e => e.Kind == TimelineKind.Change);
+        Assert.Equal("Light: DirectSun (was not set)", change.Text);
+    }
+
+    [Fact]
     public async Task Update_without_tracked_changes_adds_no_entry()
     {
         var plant = new Plant { Nickname = "Jade" };
@@ -128,6 +224,35 @@ public class PlantServiceTests
         var entry = Assert.Single(timeline.Entries);
         Assert.Equal(alive.Id, entry.SubjectId);
         Assert.Equal("Status: Died (was Active)", entry.Text);
+    }
+
+    [Fact]
+    public async Task Marking_a_plant_as_died_saves_the_cause_and_adds_it_to_the_history()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Died;
+        plant.CauseOfDeath = "  root rot after repotting ";
+
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Equal("root rot after repotting", plants.Plants[plant.Id].CauseOfDeath);
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Equal("Status: Died (was Active)\nWhat happened: root rot after repotting", entry.Text);
+    }
+
+    [Fact]
+    public async Task Bringing_a_plant_back_clears_the_cause()
+    {
+        var plant = new Plant { Nickname = "Basil", Status = PlantStatus.Died, CauseOfDeath = "Too dry" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Active;
+
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Null(plants.Plants[plant.Id].CauseOfDeath);
     }
 
     [Fact]

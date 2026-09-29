@@ -25,8 +25,16 @@ public static class PlantChanges
         if (before.Status != after.Status)
             changes.Add($"Status: {label(after.Status)} (was {label(before.Status)})");
 
+        if (after.CauseOfDeath is { } cause && before.CauseOfDeath != cause)
+            changes.Add($"What happened: {cause}");
+
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
+
+        if (before.Light != after.Light)
+            changes.Add(after.Light is { } light
+                ? $"Light: {label(light)} (was {(before.Light is { } was ? label(was) : "not set")})"
+                : "Light setting cleared");
 
         var name = potName ?? (_ => null);
         ChangeText.AddPot(changes, before.InnerPotId, after.InnerPotId, name, "Potted into", "Taken out of its pot");
@@ -83,6 +91,11 @@ public static class PropagationChanges
         ChangeText.AddContainer(changes, before.Container, after.Container, "New setup");
         AddMilestone(changes, before.FirstRootOn, after.FirstRootOn, after.DaysToFirstRoot, "First root");
         AddMilestone(changes, before.FirstLeafOn, after.FirstLeafOn, after.DaysToFirstLeaf, "First leaf");
+
+        if (before.SeedsGerminated != after.SeedsGerminated)
+            changes.Add(after.SeedsGerminated is { } up
+                ? $"Seeds: {up} of {after.InitialCount} came up"
+                : "Seed count cleared");
 
         if (!before.RootingAids.Order().SequenceEqual(after.RootingAids.Order()))
             changes.Add(after.RootingAids.Count == 0

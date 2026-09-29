@@ -35,7 +35,13 @@ else
             </div>
         }
         <div class="min-w-0">
-            <h1>@plant.DisplayName</h1>
+            <h1>
+                @plant.DisplayName
+                <button type="button" class="favourite-toggle @(plant.Favourite ? "on" : null)" aria-pressed="@(plant.Favourite ? "true" : "false")"
+                        aria-label="Favourite" @onclick="ToggleFavouriteAsync">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8Z" /></svg>
+                </button>
+            </h1>
             @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is { } botanical)
             {
                 <p class="detail-sub">@botanical</p>
@@ -43,6 +49,10 @@ else
             @if (plant.Status != PlantStatus.Active)
             {
                 <span class="badge text-bg-secondary">@Labels.For(plant.Status)</span>
+            }
+            @if (plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(plant.CauseOfDeath))
+            {
+                <p class="detail-sub">@plant.CauseOfDeath</p>
             }
             @if (plant.InQuarantine)
             {
@@ -184,6 +194,12 @@ else
 
                     <dt>Location</dt>
                     <dd>@(places.NameOf(plant.PlaceId) ?? "Not set")</dd>
+
+                    @if (plant.Light is { } light)
+                    {
+                        <dt>Light</dt>
+                        <dd>@Labels.For(light)</dd>
+                    }
 
                     <dt>Grows in</dt>
                     <dd>
@@ -427,6 +443,13 @@ else
             return;
         plant.CoverPhotoId = photoId;
         await Repository.SaveAsync(plant);
+    }
+
+    private async Task ToggleFavouriteAsync()
+    {
+        if (plant is null)
+            return;
+        await PlantService.SetFavouriteAsync(plant, !plant.Favourite);
     }
 
     private string TagLink(string tag) => $"plants?tag={Uri.EscapeDataString(tag)}";

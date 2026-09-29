@@ -2,6 +2,9 @@
 @implements IDisposable
 @inject ThemeService Theme
 @inject RoomService RoomService
+@inject PlantService PlantService
+@inject IPlantRepository Plants
+@inject IPropagationRepository PropagationRepository
 @inject PotService PotService
 @inject SoilMixService MixService
 @inject ProductService ProductService
@@ -120,6 +123,47 @@
 </section>
 
 <section class="settings-section">
+    <h2>Tags</h2>
+    <p class="settings-hint">
+        Renaming a tag here changes it on every plant that has it, and renaming it to a tag you
+        already use merges the two.
+    </p>
+
+    @if (tags.Count == 0)
+    {
+        <p class="settings-hint">No tags yet. They appear as you tag plants.</p>
+    }
+    else
+    {
+        <ul class="room-list">
+            @foreach (var t in tags)
+            {
+                <li>
+                    @if (renamingTag == t.Name)
+                    {
+                        <RoomRenameRow Name="@t.Name" Busy="busy" OnSave="name => RenameTagAsync(t.Name, name)" OnCancel="StopRenamingTag" />
+                    }
+                    else
+                    {
+                        <div class="room-row">
+                            <span class="room-name">@t.Name</span>
+                            <span class="room-count">@Labels.Plants(t.Plants)</span>
+                            <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                    @onclick="() => renamingTag = t.Name">Rename</button>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (tagMessage is not null)
+    {
+        <p class="settings-message" role="status">@tagMessage</p>
+    }
+</section>
+
+<section class="settings-section">
     <h2>Pots</h2>
     <p class="settings-hint">
         The pots you own, so a plant can point at one instead of you typing it again. Nursery pots,
@@ -208,6 +252,12 @@
             <text>No backup taken on this device yet.</text>
         }
     </p>
+
+    <p class="settings-hint">For a spreadsheet. This is not a backup and can't be restored.</p>
+    <div class="settings-actions">
+        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPlantsCsvAsync">Plants as CSV</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPropagationsCsvAsync">Propagations as CSV</button>
+    </div>
 
     @if (pending is { } file)
     {
@@ -311,6 +361,9 @@
     private int recipes;
     private Guid? renaming; // the room or spot being renamed
     private string? roomMessage;
+    private IReadOnlyList<TagCount> tags = [];
+    private string? renamingTag;
+    private string? tagMessage;
     private DateOnly? lastBackup;
     private bool photoReminder;
     private StorageEstimate? storage;
@@ -329,6 +382,7 @@
         photoReminder = await Files.GetPhotoReminderAsync();
         storage = await Db.EstimateAsync();
         rooms = await RoomService.GetAllAsync();
+        tags = PlantTags.InUse(await Plants.GetAllAsync());
         pots = await PotService.GetAllAsync();
         mixes = await MixService.GetAllAsync();
         products = await ProductService.GetAllAsync();
@@ -406,6 +460,37 @@
         busy = false;
     }
 
+    private void StopRenamingTag()
+    {
+        renamingTag = null;
+        tagMessage = null;
+    }
+
+    private async Task RenameTagAsync(string from, string? to)
+    {
+        busy = true;
+        try
+        {
+            var name = PlantTags.Clean(to);
+            var merged = name is not null && tags.Any(t => PlantTags.Same(t.Name, name) && !PlantTags.Same(t.Name, from));
+            var changed = name is null ? 0 : await PlantService.RenameTagAsync(from, name);
+            tags = PlantTags.InUse(await Plants.GetAllAsync());
+            tagMessage = (changed, merged) switch
+            {
+                (0, _) => $"Nothing changed, {from} stays as it is.",
+                (_, true) => $"{Labels.Plants(changed)} now tagged {name}, which you were already using.",
+                _ => $"Renamed to {name} on {Labels.Plants(changed)}."
+            };
+            renamingTag = null;
+        }
+        catch (Exception ex)
+        {
+            tagMessage = $"Couldn't rename: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
     private async Task SetModeAsync(ThemeMode newMode)
     {
         mode = newMode;
@@ -417,6 +502,19 @@
     {
         mode = await Theme.GetModeAsync();
         StateHasChanged();
+    }
+
+    private async Task ExportPlantsCsvAsync()
+    {
+        var csv = CsvExport.Plants(await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
+        await Files.DownloadAsync($"stikling-plants-{TodayDate:yyyy-MM-dd}.csv", CsvExport.Encode(csv));
+    }
+
+    private async Task ExportPropagationsCsvAsync()
+    {
+        var csv = CsvExport.Propagations(
+            await PropagationRepository.GetAllAsync(), await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
+        await Files.DownloadAsync($"stikling-propagations-{TodayDate:yyyy-MM-dd}.csv", CsvExport.Encode(csv));
     }
 
     private async Task ExportAsync()

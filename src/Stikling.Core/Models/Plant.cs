@@ -16,6 +16,9 @@ public sealed class Plant : Entity
     /// <summary>The room or spot it stands in. See <see cref="Place"/>.</summary>
     public Guid? PlaceId { get; set; }
 
+    /// <summary>How much light it gets where it stands. Null when not set.</summary>
+    public LightLevel? Light { get; set; }
+
     public PlantOrigin Origin { get; set; } = PlantOrigin.Purchased;
 
     /// <summary>When it was got, to whatever precision is remembered: a day, a month or a year.</summary>
@@ -25,6 +28,9 @@ public sealed class Plant : Entity
     public string? Source { get; set; }
 
     public PlantStatus Status { get; set; } = PlantStatus.Active;
+
+    /// <summary>An optional note on what went wrong, kept while the status is Died and cleared if it comes back.</summary>
+    public string? CauseOfDeath { get; set; }
 
     public GrowingMedium Medium { get; set; } = GrowingMedium.Soil;
 
@@ -63,6 +69,17 @@ public sealed class Plant : Entity
     [JsonIgnore]
     public bool InQuarantine => QuarantinedSince is not null;
 
+    /// <summary>How many days the quarantine lasts. Null when it isn't in quarantine.</summary>
+    public int? QuarantineDays { get; set; }
+
+    /// <summary>The length given to a quarantine when it starts.</summary>
+    public const int DefaultQuarantineDays = 14;
+
+    /// <summary>The day the quarantine is up, or null when it isn't in quarantine.</summary>
+    [JsonIgnore]
+    public DateOnly? QuarantineEnds =>
+        QuarantinedSince?.AddDays(QuarantineDays ?? DefaultQuarantineDays);
+
     /// <summary>
     /// The day it went dormant, e.g. an alocasia that dropped its leaves for winter. Null while
     /// it's growing, the same way as quarantine.
@@ -71,6 +88,9 @@ public sealed class Plant : Entity
 
     [JsonIgnore]
     public bool IsDormant => DormantSince is not null;
+
+    /// <summary>Pinned to the top of the plant list.</summary>
+    public bool Favourite { get; set; }
 
     /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
     public Attention? Attention { get; set; }
@@ -106,7 +126,7 @@ public sealed class Plant : Entity
 
     /// <summary>
     /// A new plant to add alongside this one, e.g. a second basil pot. It gets the names, room,
-    /// origin, source, medium, soil mix and tags. The nickname, the date it was got, pots, notes,
+    /// light, origin, source, medium, soil mix and tags. The nickname, the date it was got, pots, notes,
     /// photos and anything about how this plant is doing right now stay behind.
     /// </summary>
     public Plant Duplicate() => new()
@@ -115,6 +135,7 @@ public sealed class Plant : Entity
         Species = Species,
         Cultivar = Cultivar,
         PlaceId = PlaceId,
+        Light = Light,
         Origin = Origin,
         Source = Source,
         Medium = Medium,
@@ -171,6 +192,8 @@ public sealed class Plant : Entity
             errors.Add("A plant can't have the same pot inside and outside.");
         if (QuarantinedSince > today)
             errors.Add("The quarantine can't start in the future.");
+        if (QuarantineDays < 1)
+            errors.Add("A quarantine has to last at least a day.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
         if (PotsTaken != PotsTaken.None && !HasLeft)

@@ -113,4 +113,82 @@ public class PlantFilterTests
 
         Assert.Equal([swap], new PlantFilter("swap").Apply([.. All, swap]));
     }
+
+    [Fact]
+    public void Favourites_come_first_with_the_default_sort()
+    {
+        Plant zinnia = new() { Nickname = "Zinnia", Favourite = true };
+        Plant aloe = new() { Nickname = "Aloe" };
+        Plant yucca = new() { Nickname = "Yucca", Favourite = true };
+
+        var result = new PlantFilter().Apply([aloe, zinnia, yucca]).ToList();
+
+        Assert.Equal([yucca, zinnia, aloe], result);
+    }
+
+    [Fact]
+    public void Favourites_come_first_and_the_chosen_sort_applies_within_each_group()
+    {
+        Plant oldFavourite = new() { Nickname = "A", Favourite = true, CreatedAt = DateTimeOffset.UnixEpoch };
+        Plant newFavourite = new() { Nickname = "B", Favourite = true, CreatedAt = DateTimeOffset.UnixEpoch.AddDays(2) };
+        Plant newest = new() { Nickname = "C", CreatedAt = DateTimeOffset.UnixEpoch.AddDays(9) };
+        Plant older = new() { Nickname = "D", CreatedAt = DateTimeOffset.UnixEpoch.AddDays(5) };
+
+        var result = new PlantFilter(Sort: PlantSort.Newest).Apply([older, oldFavourite, newest, newFavourite]).ToList();
+
+        Assert.Equal([newFavourite, oldFavourite, newest, older], result);
+    }
+
+    [Fact]
+    public void Newest_puts_the_latest_added_first()
+    {
+        Plant old = new() { Nickname = "A", CreatedAt = DateTimeOffset.UnixEpoch };
+        Plant recent = new() { Nickname = "B", CreatedAt = DateTimeOffset.UnixEpoch.AddDays(5) };
+
+        var result = new PlantFilter(Sort: PlantSort.Newest).Apply([old, recent]).ToList();
+
+        Assert.Equal([recent, old], result);
+    }
+
+    [Fact]
+    public void Room_sorts_by_place_name_with_plants_without_a_place_last()
+    {
+        Plant homeless = new() { Nickname = "Aloe" };
+
+        var result = new PlantFilter(Sort: PlantSort.Room, PlaceName: Places.Current.NameOf)
+            .Apply([Thai, homeless, Basil, Monstera]).ToList();
+
+        Assert.Equal([Basil, Monstera, Thai, homeless], result);
+    }
+
+    [Fact]
+    public void Last_activity_uses_the_latest_timeline_entry_or_else_when_the_plant_was_added()
+    {
+        Plant quiet = new() { Nickname = "A", CreatedAt = DateTimeOffset.UnixEpoch.AddDays(3) };
+        Plant busy = new() { Nickname = "B", CreatedAt = DateTimeOffset.UnixEpoch };
+        var activity = new Dictionary<Guid, DateTimeOffset> { [busy.Id] = DateTimeOffset.UnixEpoch.AddDays(10) };
+
+        var result = new PlantFilter(Sort: PlantSort.LastActivity, LastActivity: activity).Apply([quiet, busy]).ToList();
+
+        Assert.Equal([busy, quiet], result);
+    }
+
+    [Fact]
+    public void Activity_takes_the_newest_of_timeline_and_care()
+    {
+        var plant = Guid.NewGuid();
+        var entries = new Dictionary<Guid, TimelineEntry>
+        {
+            [plant] = new() { SubjectId = plant, OccurredAt = new DateTimeOffset(2026, 5, 1, 12, 0, 0, TimeSpan.Zero) }
+        };
+        CareLog[] care =
+        [
+            new() { PlantId = plant, OccurredOn = new DateOnly(2026, 5, 3) },
+            new() { PlantId = plant, OccurredOn = new DateOnly(2026, 6, 1), DeletedAt = DateTimeOffset.UnixEpoch }
+        ];
+
+        var latest = PlantActivity.Latest(entries, care);
+
+        Assert.Equal(new DateTimeOffset(2026, 5, 3, 0, 0, 0, TimeSpan.Zero), latest[plant]);
+    }
 }

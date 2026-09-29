@@ -99,7 +99,7 @@ public class PlantTests
         var plant = new Plant
         {
             Genus = "Ocimum", Species = "basilicum", Cultivar = "Genovese",
-            PlaceId = Guid.NewGuid(), Origin = PlantOrigin.GrownFromSeed, ParentPlantId = Guid.NewGuid(),
+            PlaceId = Guid.NewGuid(), Light = LightLevel.BrightIndirect, Origin = PlantOrigin.GrownFromSeed, ParentPlantId = Guid.NewGuid(),
             Source = "Garden centre",
             Medium = GrowingMedium.Leca, SoilMixId = Guid.NewGuid(), Tags = ["herbs"]
         };
@@ -109,6 +109,7 @@ public class PlantTests
         Assert.NotEqual(plant.Id, copy.Id);
         Assert.Equal(plant.BotanicalName, copy.BotanicalName);
         Assert.Equal(plant.PlaceId, copy.PlaceId);
+        Assert.Equal(LightLevel.BrightIndirect, copy.Light);
         Assert.Equal(plant.Origin, copy.Origin);
         Assert.Equal(plant.ParentPlantId, copy.ParentPlantId);
         Assert.Equal(plant.Source, copy.Source);
@@ -126,7 +127,7 @@ public class PlantTests
             Nickname = "Kitchen basil", AcquiredOn = LooseDate.Of(Today), InnerPotId = Guid.NewGuid(), OuterPotId = Guid.NewGuid(),
             WaterInOuterPot = true, Notes = "Bolts early", Status = PlantStatus.GivenAway,
             QuarantinedSince = Today, DormantSince = Today, Attention = new Attention("Yellow leaves", Today),
-            CoverPhotoId = Guid.NewGuid(), FromPropagationId = Guid.NewGuid()
+            CoverPhotoId = Guid.NewGuid(), FromPropagationId = Guid.NewGuid(), Favourite = true
         };
 
         var copy = plant.Duplicate();
@@ -143,5 +144,21 @@ public class PlantTests
         Assert.Null(copy.Attention);
         Assert.Null(copy.CoverPhotoId);
         Assert.Null(copy.FromPropagationId);
+        Assert.False(copy.Favourite);
+    }
+
+    [Fact]
+    public void Copy_keeps_favourite()
+    {
+        Assert.True(new Plant { Favourite = true }.Copy().Favourite);
+    }
+
+    [Fact]
+    public void A_quarantine_shorter_than_a_day_is_refused()
+    {
+        var today = new DateOnly(2026, 9, 29);
+        var plant = new Plant { Nickname = "A", QuarantinedSince = today, QuarantineDays = 0 };
+
+        Assert.Contains("A quarantine has to last at least a day.", plant.Validate(today));
     }
 }

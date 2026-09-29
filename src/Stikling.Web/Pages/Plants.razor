@@ -4,6 +4,7 @@
 @inject RoomService RoomService
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
+@inject ITimelineRepository Entries
 @inject TimeProvider Time
 
 <PageTitle>Plants · Stikling</PageTitle>
@@ -46,7 +47,7 @@ else
         <input type="search" class="form-control" placeholder="Search by name, genus, species…"
                aria-label="Search plants" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
 
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
             <div class="btn-group flex-grow-1" role="radiogroup" aria-label="Status">
                 @foreach (var (value, label) in statusOptions)
                 {
@@ -68,6 +69,14 @@ else
                     }
                 </select>
             }
+
+            <select class="form-select form-select-sm w-auto" aria-label="Sort by"
+                    @bind="sort" @bind:after="Refresh">
+                @foreach (var (value, label) in sortOptions)
+                {
+                    <option value="@value">@label</option>
+                }
+            </select>
         </div>
 
         @if (PickedRoom is { Spots.Count: > 0 } picked)
@@ -236,6 +245,14 @@ else
         (StatusFilter.All, "All")
     ];
 
+    private static readonly (PlantSort Value, string Label)[] sortOptions =
+    [
+        (PlantSort.Name, "A to Z"),
+        (PlantSort.Newest, "Newest"),
+        (PlantSort.Room, "By room"),
+        (PlantSort.LastActivity, "Last activity")
+    ];
+
     private IReadOnlyList<Plant>? all;
     private IReadOnlyList<Room> rooms = [];
     private Places places = Places.None;
@@ -249,6 +266,8 @@ else
     private readonly HashSet<string> pickedTags = new(StringComparer.OrdinalIgnoreCase);
     private bool quarantine;
     private bool dormant;
+    private PlantSort sort = PlantSort.Name;
+    private Dictionary<Guid, DateTimeOffset> lastActivity = [];
 
     private bool selecting;
     private readonly HashSet<Guid> selected = [];
@@ -282,6 +301,7 @@ else
         tags = PlantTags.InUse(all);
         careLogs = await CareLogRepository.GetAllAsync();
         pestCases = await PestCaseRepository.GetAllAsync();
+        lastActivity = PlantActivity.Latest(await Entries.GetLatestPerSubjectAsync(), careLogs);
         Refresh();
     }
 
@@ -349,7 +369,7 @@ else
 
     private void Refresh() =>
         visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
-                pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant)
+                pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity)
             .Apply(all ?? [])
             .ToList();
 

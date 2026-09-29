@@ -67,6 +67,10 @@
             It then opens like any other app, without the browser around it. It is still the same app and
             the same data, so nothing has to be moved.
         </p>
+        <p>
+            On Android, a long press on the icon gives shortcuts to add a plant, start a propagation or
+            open the pest cases.
+        </p>
     </details>
 
     <details class="help-item">
@@ -116,6 +120,15 @@
     </details>
 
     <details class="help-item">
+        <summary>Can I get my plants into a spreadsheet?</summary>
+        <p>
+            In Settings, under Backup, tap <em>Plants as CSV</em> or <em>Propagations as CSV</em>. You get a
+            file that Excel and Google Sheets can open. It is only a copy to read and sort, not a backup,
+            and it can't be restored into Stikling.
+        </p>
+    </details>
+
+    <details class="help-item">
         <summary>How do I move to a new phone?</summary>
         <p>
             Save a backup on the old phone, get the file over to the new one, open Stikling there and tap
@@ -139,6 +152,16 @@
 
 <section class="help-section" id="plants">
     <h2>Plants</h2>
+
+    <details class="help-item">
+        <summary>Can I add a lot of plants at once?</summary>
+        <p>
+            Yes. On the add plant page, tap <em>Quick add</em>, then type or paste a list of names, one per
+            line or separated by commas. Names the app knows are filled in as genus, species and cultivar,
+            and anything written after them goes into the notes. A name it doesn't know becomes the
+            nickname. Check the list, remove what you don't want, and tap the button to add them all.
+        </p>
+    </details>
 
     <details class="help-item">
         <summary>What are genus, species and cultivar?</summary>
@@ -165,7 +188,9 @@
         <p>
             Change its status when editing it, or for several at once with <em>Select</em> on the plant
             list. It leaves the list but keeps its history, and you can still find it under
-            <em>Gone</em>. Deleting a plant removes it along with its history, so the status is usually the better choice.
+            <em>Gone</em>. When you mark a plant as died, you can add a note on what happened. It shows
+            on the plant and in the <em>Gone</em> list, so you can look it over before buying the same plant again.
+            Deleting a plant removes it along with its history, so the status is usually the better choice.
         </p>
     </details>
 
@@ -176,6 +201,10 @@
             form opens with the same names, room, origin, source, medium, soil mix and tags. The nickname, pots,
             notes and photos are left empty, since those belong to each plant on its own, and the date starts at today. If you got them together, a button under the date switches it to the first plant's date.
         </p>
+        <p>
+            If you start a new plant from scratch with a name you already have, the form says so and links
+            to the one you have, in case you meant to open that instead.
+        </p>
     </details>
 
     <details class="help-item">
@@ -184,7 +213,9 @@
             Dormant is for a plant that is resting, like an alocasia dropping its leaves for the winter, so it
             doesn't look dead. Quarantine is for a new or sick plant you are keeping apart from the rest.
             Both are ticked when editing a plant, show as a badge, have a filter on the plant list, and are
-            written on the plant's history when they start and end.
+            written on the plant's history when they start and end. A quarantine lasts 14 days unless you change
+            the length when editing the plant. When it is up, the plant shows on Today so you can check it and
+            let it out.
         </p>
     </details>
 
@@ -201,7 +232,32 @@
         <summary>What are tags for?</summary>
         <p>
             Your own labels, like "variegated", "rare" or "for swap". Picking tags on the plant list shows
-            the plants that have all of them, and tapping a tag on a plant's page does the same.
+            the plants that have all of them, and tapping a tag on a plant's page does the same. A tag can be renamed, or merged into another
+            one, under Tags in Settings.
+        </p>
+    </details>
+    <details class="help-item">
+        <summary>How do I keep a plant at the top of the list?</summary>
+        <p>
+            Open the plant and tap the star next to its name. Starred plants stay at the top of the list
+            whichever way you sort it, and the sort you picked still applies within the starred plants and
+            within the rest. Tap the star again to take it off.
+        </p>
+    </details>
+    <details class="help-item">
+        <summary>Can I sort the plant list?</summary>
+        <p>
+            Yes, with the dropdown next to the filters. A to Z is the default. Newest puts the plants you
+            added last at the top, By room groups them by where they stand, and Last activity puts the
+            plants you last watered, fed or wrote something on first.
+        </p>
+    </details>
+    <details class="help-item">
+        <summary>What is the light setting for?</summary>
+        <p>
+            It notes how much light the plant gets where it stands: low, medium, bright indirect or some
+            direct sun. It is optional, and you can set it when you edit the plant. Adding another plant
+            like one you already have copies it.
         </p>
     </details>
 </section>
@@ -238,6 +294,15 @@
         <p>
             Give the propagation a count, like 3 corms in LECA. They are tracked as one batch, and you can
             pot up or mark failed one or a few at a time as each goes its own way.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>Can I track seeds?</summary>
+        <p>
+            Yes. Pick Seed as the type and put the number of seeds you sowed in <em>How many</em>. The
+            sowing date is the day you started it. As seeds sprout, edit the propagation and fill in how many
+            have come up and the day the first one did. It then shows how many came up, as a percentage.
         </p>
     </details>
 
@@ -284,7 +349,7 @@
     <details class="help-item">
         <summary>What shows up on Today?</summary>
         <p>
-            Pest treatments that are due, anything you have flagged, propagations nobody has looked at for
+            Pest treatments that are due, anything you have flagged, plants whose quarantine is up, propagations nobody has looked at for
             a week, the monthly photo reminder if it is turned on, and the notes you wrote lately. It also
             reminds you to back up.
         </p>

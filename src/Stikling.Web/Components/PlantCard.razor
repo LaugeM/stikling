@@ -58,10 +58,21 @@ else
         </div>
 
         <div class="item-text">
-            <div class="item-name">@Plant.DisplayName</div>
+            <div class="item-name @(Plant.Favourite ? "has-star" : null)">
+                <span class="item-name-text">@Plant.DisplayName</span>
+                @if (Plant.Favourite)
+                {
+                    <svg class="favourite-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8Z" /></svg>
+                    <span class="visually-hidden">Favourite</span>
+                }
+            </div>
             @if (!string.IsNullOrWhiteSpace(Plant.Nickname) && Plant.BotanicalName is { } botanical)
             {
                 <div class="item-sub">@botanical</div>
+            }
+            @if (Plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(Plant.CauseOfDeath))
+            {
+                <div class="item-sub">@Plant.CauseOfDeath</div>
             }
             <div class="item-meta">
                 @if (Plant.Status != PlantStatus.Active)

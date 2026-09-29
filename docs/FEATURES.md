@@ -37,19 +37,17 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them.
 
-1. **Checking plants outside a case**: an inspection logged on a single plant, the neighbours to check when a case opens, and a length for quarantine that ends with a check on Today. That finishes the pest section apart from the biological control log.
+1. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
 2. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
 3. **Problem log**: what you saw on a plant, what you did, and whether it helped.
 4. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
 5. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-6. **Seed germination**: sown and germinated counts with their dates.
-7. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-8. **Light level per plant**, the first row of the light section and the one the filters and grow lights build on later.
-9. **Comparing photos side by side, and voice notes.**
+6. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+7. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screens worth the name: counts on the Today screen, sort options and favourites on the plant list, purchase price, quick add from a pasted list of names, a note when adding a plant you already have, renaming or merging a tag, home screen shortcuts, and an app version and a "what's new" page.
+These need no new storage and no new screens worth the name: the success rate on the Today screen, purchase price, a "Log care" home screen shortcut, and an app version and a "what's new" page.
 
 The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it, the list of plants that got a feed, and corm size on a propagation.
 
@@ -70,21 +68,21 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ✅ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | 1 | M | M3–M4 |
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
 | ✅ | Tags (e.g. "variegated", "rare", "for swap") and a tag filter. Picking several tags narrows the list to plants that have all of them, the search finds tags too, and a tag on a plant's page opens the list filtered by it | 3 | S | v1.x |
-| ☐ | Rename or merge a tag everywhere at once, the way rooms can be in Settings | 6 | S | v1.x |
+| ✅ | Rename or merge a tag everywhere at once, the way rooms can be in Settings | 6 | S | v1.x |
 | ◐ | Select several plants at once: change status, log care, add a note or tags to all. Moving them all to a room isn't built | 4 | M | v1.x |
 | ✅ | **Dormancy status** for plants and propagations, e.g. an alocasia dropping its leaves in winter or a corm sitting still. A badge and the day it went dormant show it's resting rather than dead, the plant list has a "Dormant" filter, and going dormant and waking up are recorded on the history. A dormant propagation doesn't come up on Today to be checked on. Dormancy ends by itself when a plant dies or leaves, or a propagation finishes | 4 | S | v1.x |
 | ☐ | **Growing season**: mark a plant as growing in summer or in winter. When its usual resting time comes round, the app asks whether it has gone dormant | 5 | S | v1.x |
-| ☐ | Sort options: name, newest, room, last activity | 5 | S | v1.x |
-| ☐ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once. Each name is matched against the plant dictionary, and anything else on the line goes into the notes | 5 | S | v1.x |
+| ✅ | Sort options: name, newest, room, last activity | 5 | S | v1.x |
+| ✅ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once. Each name is matched against the plant dictionary, and anything else on the line goes into the notes | 5 | S | v1.x |
 | ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | 5 | M | v1.x |
 | ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | 5 | M | v1.x |
-| ☐ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
-| ☐ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
+| ✅ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
+| ✅ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
 | ☐ | Grid view with large photos as an alternative to the list | 6 | S | v1.x |
 | ☐ | Group the plant list by genus, with an A to Z jump for long lists | 6 | S | v1.x |
 | ☐ | **Collection numbers**: an optional short number per plant, e.g. 117, to write on the pot. Its propagations get 117a, 117b and so on, so a label on a jar says where the cutting came from | 6 | M | v1.x |
 | ☐ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 6 | M | v1.x |
-| ☐ | **Why it died**: an optional note on the cause when a plant is marked as died, and a list of the plants that died and why, to look over before buying the same plant again | 6 | S | v1.x |
+| ◐ | **Why it died**: an optional note on the cause when a plant is marked as died, and a list of the plants that died and why, to look over before buying the same plant again. The note is built and shows on the plant and on its card under Gone; a list of only the plants that died is missing | 6 | S | v1.x |
 | ◐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline. Built for the aroids (Araceae): every genus and species from Kew's checklist, the old names, and a starter list of cultivars. Other families, common names, family and native region, and a page to browse it aren't built. See `tools/plant-names` | 6 | L | v1.x |
 | ✅ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary and the names already on your plants and propagations, including hybrids and named varieties. An old name offers the one it goes by now, and a cultivar fills in its genus and species. Anything not on the list can still be typed | 6 | M | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
@@ -134,7 +132,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | Success rate and average days-to-root per medium and per type, on a results page linked from Propagations. Success is counted in units, and a unit has made it once it's potted up or its batch has rooted | 3 | S | v1.x |
 | ✅ | **Experiments**: group propagations started together to compare mediums (the corm test: perlite vs sphagnum vs LECA vs corm riser) | 4 | M | v1.x |
 | ✅ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are at least 3 rooted batches to compare with, and the list cards only mention it when it's slow | 4 | S | v1.x |
-| ☐ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
+| ✅ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
 | ✅ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page compares each one with the batches that went without it | 5 | S | v1.x |
 | ◐ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. First root and first leaf are built and show in experiments. Corm size is still missing | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
@@ -182,7 +180,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | Light level per plant: low, medium, bright indirect, some direct sun | 5 | S | v1.x |
+| ✅ | Light level per plant: low, medium, bright indirect, some direct sun | 5 | S | v1.x |
 | ☐ | **Room climate**: temperature and humidity readings for a room or spot, e.g. from a hygrometer in a cabinet, so a plant shows the conditions it lives in | 6 | M | v1.x |
 | ☐ | **Grow lights**: your lamps with a name, wattage and hours on per day, and which plants are under each one | 6 | M | v1.x |
 | ☐ | Moving a plant under or away from a grow light is recorded in its history, like a room change | 6 | S | v1.x |
@@ -204,7 +202,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | Interval ("every 3–5 days") with "next treatment due" shown on Today | 3 | S | v1.x |
 | ✅ | A case being watched is due a check for pests once a week instead of a treatment. Checks are logged on the case, and "Found some" puts it back to treating | 3 | S | v1.x |
 | ✅ | Quarantine flag with the day it started, a "Quarantine" filter and a badge on the card. Going in and coming out are recorded on the plant's history | 3 | S | v1.x |
-| ☐ | A length for quarantine, e.g. two weeks. When it is up, Today says it is time to check the plant and let it out | 4 | S | v1.x |
+| ✅ | A length for quarantine, e.g. two weeks. When it is up, Today says it is time to check the plant and let it out | 4 | S | v1.x |
 | ✅ | **Treatment recipes**, e.g. "Alcohol spray: isopropyl alcohol and a drop of dish soap, topped up with water". The ingredients are typed, each with an optional amount like 250 ml per 1 L, and there's a note on how to use it. "Mix a batch" works out the amounts for any size of bottle. Logging a treatment offers your recipes to pick from, and the treatment saves the recipe as it was that day, so changing the recipe doesn't rewrite history. Recipes are under Settings | 4 | M | v1.x |
 | ✅ | Pest overview: all active cases in one list | 4 | S | v1.x |
 | ✅ | **Sticky trap counts** on a pest case: count everything on a (blue/yellow) sticky trap and tick when a new one goes up, and the app works out how many were caught since last time. A small chart of the catch per week shows whether treatment is working. A count never moves the next treatment, but on a case being watched it counts as the weekly check, and new ones on the trap ask whether to start treating again | 4 | M | v1.x |
@@ -265,7 +263,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Propagations that haven't been checked recently | 2 | M | M5 |
 | ✅ | Recent activity feed | 5 | S | M5 |
 | ✅ | Pest treatments due or overdue, and checks due on cases being watched | 3 | S | v1.x |
-| ☐ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
+| ◐ | Counts: plants, active propagations, success rate this month. Plants in the collection and propagations going are shown at the top; the success rate is missing | 4 | S | v1.x |
 | ✅ | **Needs attention**: flag a plant or propagation with a reason ("repot soon", "look closer", "change the water"), typed or picked from a few suggestions, and it stays on Today until it's marked done there or on its own page. Flags aren't written on the history, and one goes away by itself when the plant leaves or the propagation finishes | 4 | S | v1.x |
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
@@ -286,7 +284,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
 | ☐ | "What's new" page and app version in Settings. Entries are written by hand in plain language for the people using the app, not generated from commit or pull request titles | 5 | S | v1.x |
 | ☐ | **Import from a spreadsheet**: a CSV of plants from Excel or Google Sheets, with each column matched to a field, so a list kept somewhere else doesn't have to be typed in again | 5 | M | v1.x |
-| ☐ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
+| ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
 | ☐ | Units and date format settings | 7 | M | v1.x |
 | ☐ | Danish translation | 7 | L | v1.x |
 
@@ -294,7 +292,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation" | 5 | S | v1.x |
+| ◐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation". Add plant, New propagation and Pest cases are there; Log care is missing since there is no page for it yet | 5 | S | v1.x |
 | ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | 6 | M | v1.x |
 | ☐ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
 

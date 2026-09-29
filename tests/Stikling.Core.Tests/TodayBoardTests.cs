@@ -133,4 +133,55 @@ public class TodayBoardTests
 
         Assert.Equal(expected, TodayBoard.DaysSinceBackup(last, Today));
     }
+
+    private static Plant Quarantined(string name, int daysAgo, int? length = null) => new()
+    {
+        Nickname = name,
+        QuarantinedSince = Today.AddDays(-daysAgo),
+        QuarantineDays = length
+    };
+
+    [Fact]
+    public void Quarantine_is_not_up_before_its_length_has_passed()
+    {
+        Assert.Empty(TodayBoard.QuarantineUp([Quarantined("New alocasia", 13)], Today));
+    }
+
+    [Fact]
+    public void Quarantine_is_up_on_the_day_its_length_is_reached()
+    {
+        var plant = Quarantined("New alocasia", 14);
+
+        Assert.Equal([plant], TodayBoard.QuarantineUp([plant], Today));
+    }
+
+    [Fact]
+    public void Quarantine_uses_the_length_set_on_the_plant()
+    {
+        var short_ = Quarantined("Short", 7, length: 7);
+        var long_ = Quarantined("Long", 20, length: 30);
+
+        Assert.Equal([short_], TodayBoard.QuarantineUp([short_, long_], Today));
+    }
+
+    [Fact]
+    public void An_overdue_quarantine_is_listed_and_the_longest_overdue_comes_first()
+    {
+        var recent = Quarantined("Recent", 15);
+        var old = Quarantined("Old", 30);
+
+        Assert.Equal([old, recent], TodayBoard.QuarantineUp([recent, old], Today));
+    }
+
+    [Fact]
+    public void Plants_not_in_quarantine_deleted_or_gone_are_left_out()
+    {
+        var free = new Plant { Nickname = "Free" };
+        var deleted = Quarantined("Deleted", 20);
+        deleted.DeletedAt = DateTimeOffset.UnixEpoch;
+        var gone = Quarantined("Gone", 20);
+        gone.Status = PlantStatus.Died;
+
+        Assert.Empty(TodayBoard.QuarantineUp([free, deleted, gone], Today));
+    }
 }
