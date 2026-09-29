@@ -19,14 +19,6 @@
     <span class="today-date">@Today.ToString("dddd d MMMM", CultureInfo.InvariantCulture)</span>
 </div>
 
-@if (loaded && (plants.Count > 0 || propagations.Count > 0))
-{
-    var growing = plants.Count(p => p.Status == PlantStatus.Active);
-    <p class="today-counts text-body-secondary">
-        @growing @(growing == 1 ? "plant" : "plants") · @active.Count @(active.Count == 1 ? "propagation" : "propagations") going
-    </p>
-}
-
 @if (!loaded)
 {
     <p class="text-body-secondary">Loading…</p>
@@ -54,7 +46,7 @@ else if (plants.Count == 0 && propagations.Count == 0)
 else
 {
     <p class="today-counts">
-        @Labels.Plants(plants.Count) · @Labels.Count(active.Count, "propagation") going
+        @Labels.Plants(plants.Count(p => p.Status == PlantStatus.Active)) · @Labels.Count(active.Count, "propagation") going
     </p>
 
     @if (backupReminder is { } reminder)
