@@ -256,6 +256,14 @@ else
                         {
                             <text> · @propagation.Container</text>
                         }
+                        @if (Mix is { } mix)
+                        {
+                            <div class="detail-sub">In @mix.Name@(mix.IsRetired ? " (no longer mixed)" : "")</div>
+                            @if (!string.IsNullOrWhiteSpace(mix.Recipe))
+                            {
+                                <div class="detail-sub">@mix.Recipe</div>
+                            }
+                        }
                     </dd>
 
                     @if (propagation.RootingAids.Count > 0)
@@ -361,6 +369,8 @@ else
     private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
+
+    private SoilMix? Mix => propagation?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id && !m.IsDeleted) : null;
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
     private bool loaded;
@@ -495,6 +505,7 @@ else
             Date = Today,
             Location = places.NameOf(p.PlaceId),
             Medium = p.Medium,
+            SoilMixId = p.Medium == GrowingMedium.Soil ? p.SoilMixId : null,
         };
         message = null;
         panel = Panel.PotUp;

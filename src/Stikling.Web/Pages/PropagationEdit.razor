@@ -2,6 +2,7 @@
 @page "/propagations/{Id:guid}/edit"
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
+@inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
 @inject RoomService RoomService
 @inject NavigationManager Navigation
@@ -135,6 +136,12 @@ else
                     <InputText id="container" class="form-control" @bind-Value="propagation.Container" placeholder="e.g. Humidity box" />
                 </div>
             </div>
+            @if (propagation.Medium == GrowingMedium.Soil)
+            {
+                <div class="mb-3">
+                    <MixPicker @bind-Value="propagation.SoilMixId" Mixes="mixes" />
+                </div>
+            }
             <div class="mb-3">
                 <span class="form-label d-block" id="aids-label">Rooting aids</span>
                 <div class="chip-row" role="group" aria-labelledby="aids-label">
@@ -259,6 +266,7 @@ else
         var allPropagations = await Repository.GetAllAsync();
         plants = allPlants.OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
         places = await RoomService.GetPlacesAsync();
+        mixes = await MixRepository.GetAllAsync();
         rooms = Room.List(places, allPlants, allPropagations);
         experiments = Experiments.Names(allPropagations);
 
@@ -304,6 +312,8 @@ else
             location = places.NameOf(parent.PlaceId);
     }
 
+    private IReadOnlyList<SoilMix> mixes = [];
+
     private async Task SaveAsync()
     {
         if (propagation is null)
@@ -315,6 +325,7 @@ else
             propagation.FirstGerminatedOn = null;
         }
 
+        propagation.ClearMixUnlessSoil();
         errors = propagation.Validate(Today).ToList();
         if (errors.Count > 0)
             return;

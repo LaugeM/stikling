@@ -41,6 +41,7 @@ public sealed class PropagationService(
     /// <summary>Saves a new propagation and records it on its own history and the parent's.</summary>
     public async Task CreateAsync(Propagation propagation, Func<Enum, string> label)
     {
+        propagation.ClearMixUnlessSoil();
         await propagations.SaveAsync(propagation);
 
         var what = Describe(propagation, label);
@@ -77,6 +78,7 @@ public sealed class PropagationService(
         Func<Enum, string> label,
         Func<Guid, string?>? placeName = null)
     {
+        after.ClearMixUnlessSoil();
         after.SyncStageWithCounts();
         after.NoteFirstRoot();
         after.NoteRooted(Today);
@@ -143,7 +145,7 @@ public sealed class PropagationService(
             PlaceId = request.PlaceId,
             Medium = request.Medium,
             InnerPotId = request.PotId,
-            SoilMixId = request.SoilMixId,
+            SoilMixId = request.SoilMixId ?? (request.Medium == GrowingMedium.Soil ? propagation.SoilMixId : null),
             ParentPlantId = propagation.ParentPlantId,
             FromPropagationId = propagation.Id
         }).ToList();
