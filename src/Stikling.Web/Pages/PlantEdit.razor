@@ -16,6 +16,11 @@
 <a class="back-link" href="@(IsNew ? "plants" : $"plants/{Id}")">Back</a>
 <h1>@(IsNew ? "Add plant" : "Edit plant")</h1>
 
+@if (IsNew && CopyOfId is null && ParentId is null)
+{
+    <p class="form-text">Adding several? <a href="plants/quick-add">Quick add</a></p>
+}
+
 @if (plant is null)
 {
     <p class="text-body-secondary">@(notFound ? "That plant doesn't exist." : "Loading…")</p>
