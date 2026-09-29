@@ -49,7 +49,6 @@ In the order I would build them.
 
 These need no new storage and no new screens worth the name: the success rate on the Today screen, purchase price, a "Log care" home screen shortcut, and an app version and a "what's new" page.
 
-PARTLY_BUILT_PARAGRAPH
 
 ---
 
