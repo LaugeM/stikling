@@ -16,6 +16,9 @@ public sealed class Plant : Entity
     /// <summary>The room or spot it stands in. See <see cref="Place"/>.</summary>
     public Guid? PlaceId { get; set; }
 
+    /// <summary>How much light it gets where it stands. Null when not set.</summary>
+    public LightLevel? Light { get; set; }
+
     public PlantOrigin Origin { get; set; } = PlantOrigin.Purchased;
 
     /// <summary>When it was got, to whatever precision is remembered: a day, a month or a year.</summary>
@@ -109,7 +112,7 @@ public sealed class Plant : Entity
 
     /// <summary>
     /// A new plant to add alongside this one, e.g. a second basil pot. It gets the names, room,
-    /// origin, source, medium, soil mix and tags. The nickname, the date it was got, pots, notes,
+    /// light, origin, source, medium, soil mix and tags. The nickname, the date it was got, pots, notes,
     /// photos and anything about how this plant is doing right now stay behind.
     /// </summary>
     public Plant Duplicate() => new()
@@ -118,6 +121,7 @@ public sealed class Plant : Entity
         Species = Species,
         Cultivar = Cultivar,
         PlaceId = PlaceId,
+        Light = Light,
         Origin = Origin,
         Source = Source,
         Medium = Medium,

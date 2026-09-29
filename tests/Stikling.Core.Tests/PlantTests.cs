@@ -99,7 +99,7 @@ public class PlantTests
         var plant = new Plant
         {
             Genus = "Ocimum", Species = "basilicum", Cultivar = "Genovese",
-            PlaceId = Guid.NewGuid(), Origin = PlantOrigin.GrownFromSeed, ParentPlantId = Guid.NewGuid(),
+            PlaceId = Guid.NewGuid(), Light = LightLevel.BrightIndirect, Origin = PlantOrigin.GrownFromSeed, ParentPlantId = Guid.NewGuid(),
             Source = "Garden centre",
             Medium = GrowingMedium.Leca, SoilMixId = Guid.NewGuid(), Tags = ["herbs"]
         };
@@ -109,6 +109,7 @@ public class PlantTests
         Assert.NotEqual(plant.Id, copy.Id);
         Assert.Equal(plant.BotanicalName, copy.BotanicalName);
         Assert.Equal(plant.PlaceId, copy.PlaceId);
+        Assert.Equal(LightLevel.BrightIndirect, copy.Light);
         Assert.Equal(plant.Origin, copy.Origin);
         Assert.Equal(plant.ParentPlantId, copy.ParentPlantId);
         Assert.Equal(plant.Source, copy.Source);

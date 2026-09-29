@@ -191,6 +191,12 @@ else
                     <dt>Location</dt>
                     <dd>@(places.NameOf(plant.PlaceId) ?? "Not set")</dd>
 
+                    @if (plant.Light is { } light)
+                    {
+                        <dt>Light</dt>
+                        <dd>@Labels.For(light)</dd>
+                    }
+
                     <dt>Grows in</dt>
                     <dd>
                         @Labels.For(plant.Medium)
