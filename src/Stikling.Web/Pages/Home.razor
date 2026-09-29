@@ -50,7 +50,7 @@ else if (plants.Count == 0 && propagations.Count == 0)
 else
 {
     <p class="today-counts">
-        @Labels.Plants(plants.Count(p => p.Status == PlantStatus.Active)) · @Labels.Count(active.Count, "propagation") going@if (monthResult is not null) { <text> · @monthResult.PottedUp of @monthResult.Total potted up this month</text> }
+        @Labels.Plants(plants.Count(p => p.Status == PlantStatus.Active)) · @Labels.Count(active.Count, "propagation") going@(monthResult is null ? "" : $" · {monthResult.PottedUp} of {monthResult.Total} potted up this month")
     </p>
 
     @if (backupReminder is { } reminder)
