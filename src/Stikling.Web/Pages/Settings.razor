@@ -18,10 +18,11 @@
 @inject PlantNameService PlantNames
 @inject TimeProvider Time
 @inject AccountService Account
-@inject StiklingApi Api
+@inject SyncRunner Sync
 @inject NavigationManager Nav
 
 <PageTitle>Settings · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadDataAsync" />
 
 <h1>Settings</h1>
 
@@ -37,23 +38,69 @@
         {
             <div class="room-row">
                 <span class="room-name account-email">@account.Email</span>
-                <button type="button" class="btn btn-link btn-sm p-0" @onclick="SignOutAsync" disabled="@accountBusy">
+                <button type="button" class="btn btn-link btn-sm p-0" @onclick="AskSignOutAsync"
+                        disabled="@(accountBusy || signOut is not null)">
                     Sign out
                 </button>
             </div>
-            <p class="settings-hint" role="status">
-                @if (serverReached == false)
-                {
-                    <text>You're signed in, but the Stikling server can't be reached right now.</text>
-                }
-                else
-                {
-                    <text>
-                        Keeping your plants the same on all your devices is still being built, so for now they
-                        stay on this device. Signing out leaves them here.
-                    </text>
-                }
+            <div class="room-row">
+                <span class="room-name account-status" role="status">@SyncLine</span>
+                <button type="button" class="btn btn-link btn-sm p-0" @onclick="Sync.SyncNowAsync"
+                        disabled="@(Sync.Running || accountBusy)">
+                    Sync now
+                </button>
+            </div>
+            <p class="settings-hint">
+                Your plants, care, pests and settings are kept the same on every device you sign in on.
+                Photos don't sync yet, so they stay on the device they were added on.
             </p>
+            @if (SyncProblem is { } problem)
+            {
+                <p class="settings-message" role="alert">@problem</p>
+            }
+
+            @if (signOut is { } unsent)
+            {
+                <div class="confirm-card">
+                    <p>
+                        <strong>Sign out</strong><br />
+                        What's synced stays on the Stikling server and comes back when you sign in again. You can
+                        keep a copy on this device as well, or remove it from here.
+                    </p>
+                    @if (unsent.Checking)
+                    {
+                        <p class="settings-hint" role="status">Sending your latest changes first…</p>
+                    }
+                    else
+                    {
+                        @if (unsent.Photos > 0)
+                        {
+                            <p class="settings-hint">
+                                Photos don't sync yet, so the @Labels.Count(unsent.Photos, "photo") on this device
+                                @(unsent.Photos == 1 ? "is" : "are") only here. Removing deletes
+                                @(unsent.Photos == 1 ? "it" : "them"). Save a backup first to keep
+                                @(unsent.Photos == 1 ? "it" : "them").
+                            </p>
+                        }
+                        @if (unsent.Pending > 0)
+                        {
+                            <p class="settings-hint">
+                                @Labels.Count(unsent.Pending, "change") made here @(unsent.Pending == 1 ? "hasn't" : "haven't")
+                                reached the server yet, and removing loses @(unsent.Pending == 1 ? "it" : "them").
+                            </p>
+                        }
+                    }
+                    <div class="settings-actions">
+                        <button type="button" class="btn btn-primary" disabled="@(accountBusy || unsent.Checking)"
+                                @onclick="() => SignOutAsync(keepData: true)">Keep and sign out</button>
+                        <button type="button" class="btn btn-danger" disabled="@(accountBusy || unsent.Checking)"
+                                @onclick="() => SignOutAsync(keepData: false)">Remove and sign out</button>
+                        <button type="button" class="btn btn-link" disabled="@accountBusy"
+                                @onclick="() => signOut = null">Cancel</button>
+                    </div>
+                </div>
+            }
+
             @if (accountMessage is not null)
             {
                 <p class="settings-message" role="alert">@accountMessage</p>
@@ -293,7 +340,7 @@
 <section class="settings-section">
     <h2>Backup</h2>
     <p class="settings-hint">
-        Everything you add stays on this device. A backup is a ZIP file with your plants and photos in it,
+        @(account is { SignedIn: true } ? "" : "Everything you add stays on this device. ")A backup is a ZIP file with your plants and photos in it,
         which you can keep in cloud storage or move to another phone.
     </p>
 
@@ -410,6 +457,9 @@
         (ThemeMode.Dark, "Dark")
     ];
 
+    /// <summary>What removing the data at sign-out would lose, once a last sync has had its go.</summary>
+    private sealed record SignOutCheck(bool Checking, int Pending = 0, int Photos = 0);
+
     /// <summary>A chosen file, read and described, waiting for the restore to be confirmed.</summary>
     private sealed record PendingRestore(string Name, BackupData Data, MemoryStream Zip);
 
@@ -439,7 +489,7 @@
     private bool accountBusy;
     private bool accountHintRead;
     private string? accountMessage;
-    private bool? serverReached;
+    private SignOutCheck? signOut;
 
     private DateOnly TodayDate => Time.Today();
 
@@ -447,13 +497,21 @@
     {
         Theme.Changed += OnThemeChanged;
         Account.Changed += OnAccountChanged;
+        Sync.StatusChanged += OnSyncChanged;
         // Clerk is only loaded on a device where someone signed in, so it stays out of the way otherwise
         accountChecking = Account.IsAvailable && await Account.WasSignedInAsync();
         accountHintRead = true;
-        mode = await Theme.GetModeAsync();
         lastBackup = await Files.GetLastBackupAsync();
-        photoReminder = (await SettingsService.GetAsync()).PhotoReminder;
         storage = await Db.EstimateAsync();
+        nameSources = (await PlantNames.GetDictionaryAsync()).Sources;
+        await LoadDataAsync();
+    }
+
+    /// <summary>What comes from the records, which sync can change while the page is open.</summary>
+    private async Task LoadDataAsync()
+    {
+        mode = await Theme.GetModeAsync();
+        photoReminder = (await SettingsService.GetAsync()).PhotoReminder;
         rooms = await RoomService.GetAllAsync();
         tags = PlantTags.InUse(await Plants.GetAllAsync());
         pots = await PotService.GetAllAsync();
@@ -461,7 +519,6 @@
         products = await ProductService.GetAllAsync();
         feeds = (await FeedRepository.GetAllAsync()).Count;
         recipes = (await RecipeRepository.GetAllAsync()).Count;
-        nameSources = (await PlantNames.GetDictionaryAsync()).Sources;
     }
 
     private async Task SetPhotoReminderAsync(ChangeEventArgs e)
@@ -595,31 +652,33 @@
 
         accountChecking = false;
         StateHasChanged();
-        await CheckServerAsync();
     }
 
-    /// <summary>
-    /// Asks the API who is signed in. The first time, that also sets the person up on the server.
-    /// </summary>
-    private async Task CheckServerAsync()
+    /// <summary>"Synced at 14:32", for the line under the email.</summary>
+    private string SyncLine => (Sync.Running, Sync.LastSynced) switch
     {
-        if (account is not { SignedIn: true })
-            return;
+        (true, _) => "Syncing…",
+        (_, { } at) when at.ToLocalTime().Date == Time.GetLocalNow().Date => $"Synced at {Labels.Time(at)}",
+        (_, { } at) => $"Synced on {Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))}",
+        _ => "Not synced yet"
+    };
 
-        try
+    private string? SyncProblem
+    {
+        get
         {
-            await Api.GetMeAsync();
-            serverReached = true;
+            if (Sync.Running)
+                return null;
+            if (Sync.Problem is { } problem)
+                return Sync.Pending > 0 ? $"{problem} {Labels.Count(Sync.Pending, "change")} waiting." : problem;
+            if (Sync.Refused > 0)
+                return $"The server turned down {Labels.Count(Sync.Refused, "change")}, and {(Sync.Refused == 1 ? "it" : "they")} "
+                    + "will be tried again. If this keeps happening, check the date and time on this device.";
+            return null;
         }
-        catch (Exception)
-        {
-            // No connection, an expired session Clerk couldn't renew, or the API turning us away.
-            // Nothing here is worth more than the line saying the server can't be reached.
-            serverReached = false;
-        }
-
-        StateHasChanged();
     }
+
+    private void OnSyncChanged() => _ = InvokeAsync(StateHasChanged);
 
     private async void OnAccountChanged(AccountState state)
     {
@@ -629,21 +688,40 @@
 
         account = state;
         accountUnreachable = false;
-        serverReached = null;
         accountMessage = null;
-        StateHasChanged();
-        await CheckServerAsync();
+        signOut = null;
+        await InvokeAsync(StateHasChanged);
     }
 
-    private async Task SignOutAsync()
+    /// <summary>Opens the question, after one last sync so as little as possible is left unsent.</summary>
+    private async Task AskSignOutAsync()
+    {
+        accountMessage = null;
+        signOut = new SignOutCheck(Checking: true);
+        StateHasChanged();
+
+        await Sync.SyncNowAsync();
+        var (pending, photos) = await Sync.CountUnsentAsync();
+        if (signOut is not null)
+            signOut = new SignOutCheck(Checking: false, pending, photos);
+    }
+
+    private async Task SignOutAsync(bool keepData)
     {
         accountBusy = true;
         accountMessage = null;
         try
         {
-            await Account.SignOutAsync(Nav.Uri);
+            await Sync.SignOutAsync(keepData, Nav.Uri);
+            if (!keepData)
+            {
+                // Starts the app afresh, so no page still holds what was removed
+                Nav.NavigateTo("", forceLoad: true);
+                return;
+            }
+
             account = new AccountState(false, null);
-            serverReached = null;
+            signOut = null;
         }
         catch (JSException)
         {
@@ -767,6 +845,7 @@
     {
         Theme.Changed -= OnThemeChanged;
         Account.Changed -= OnAccountChanged;
+        Sync.StatusChanged -= OnSyncChanged;
         pending?.Zip.Dispose();
     }
 }

@@ -65,5 +65,7 @@ builder.Services.AddScoped<BackupService>();
 builder.Services.AddSingleton(AccountSettings.From(builder.Configuration));
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<StiklingApi>();
+builder.Services.AddScoped<IndexedDbSyncStore>();
+builder.Services.AddScoped<SyncRunner>();
 
 await builder.Build().RunAsync();

@@ -6,6 +6,7 @@
 @inject TimeProvider Time
 
 <PageTitle>Pests · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
 
 <div class="page-heading">
     <h1>Pests</h1>
@@ -87,7 +88,9 @@ else
 
     private DateOnly Today => Time.Today();
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
     {
         views = PestService.Describe(
             await Cases.GetAllAsync(),

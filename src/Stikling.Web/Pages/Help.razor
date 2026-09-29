@@ -78,8 +78,8 @@
         <summary>Does it work without signal?</summary>
         <p>
             Yes. Once it has been opened, everything it needs is kept on the phone, including the plant
-            name suggestions. It only goes online to check for a new version, and when there is one a
-            banner at the bottom asks you to reload.
+            name suggestions. It only goes online to check for a new version@(Account.IsAvailable ? ", and to sync if you're signed in" : "").
+            When there is a new version, a banner at the bottom asks you to reload.
         </p>
     </details>
 </section>
@@ -89,10 +89,22 @@
 
     <details class="help-item">
         <summary>Where is my data kept?</summary>
-        <p>
-            On this device only, in the browser's own storage. There is no account and no server, so nothing
-            you add leaves the phone unless you save a backup and move it yourself.
-        </p>
+        @if (Account.IsAvailable)
+        {
+            <p>
+                On this device, in the browser's own storage. If you sign in, it is also kept on the Stikling
+                server, so your other devices get it too. Photos are the exception for now and stay on the
+                device they were added on. Without an account, nothing you add leaves the phone unless you
+                save a backup and move it yourself.
+            </p>
+        }
+        else
+        {
+            <p>
+                On this device only, in the browser's own storage. There is no account and no server, so nothing
+                you add leaves the phone unless you save a backup and move it yourself.
+            </p>
+        }
     </details>
 
     <details class="help-item">
@@ -144,10 +156,21 @@
 
     <details class="help-item">
         <summary>Can I use it on two devices?</summary>
-        <p>
-            Not at the same time. Each device has its own copy and they don't sync. You can move your data
-            across with a backup and a restore whenever you switch.
-        </p>
+        @if (Account.IsAvailable)
+        {
+            <p>
+                Yes. Sign in with the same account on both, and what you add or change on one shows up on the
+                other. Photos don't sync yet, so a photo added on one device shows as an empty frame on the
+                other.
+            </p>
+        }
+        else
+        {
+            <p>
+                Not at the same time. Each device has its own copy and they don't sync. You can move your data
+                across with a backup and a restore whenever you switch.
+            </p>
+        }
     </details>
 
     @* Signing in is only offered where the app has somewhere to sign in to *@
@@ -161,8 +184,36 @@
                 email.
             </p>
             <p>
-                Keeping your plants the same on all your devices is still being built. Until then, signing in
-                doesn't move anything off this device, and signing out leaves your plants where they are.
+                With an account, your plants are kept the same on every device you sign in on. If the phone
+                already has plants on it when you sign in, they are added to what your account has, so nothing
+                is lost.
+            </p>
+        </details>
+
+        <details class="help-item">
+            <summary>When does it sync?</summary>
+            <p>
+                When you open the app, a couple of seconds after you change something, when the connection
+                comes back, and every few minutes while the app is open. Under Account in Settings you can see
+                when it last synced, and tap <em>Sync now</em>.
+            </p>
+            <p>
+                Without a connection, everything works as usual and your changes wait on the phone until they
+                can be sent. If the same thing was changed on two devices, the newer change wins, the same as
+                when a backup is restored.
+            </p>
+        </details>
+
+        <details class="help-item">
+            <summary>What happens when I sign out?</summary>
+            <p>
+                You choose whether to keep a copy on this device or remove it. What has synced stays with your
+                account either way and comes back when you sign in again.
+            </p>
+            <p>
+                Photos don't sync yet, so removing the data also deletes the photos on this device. Save a
+                backup first if you want to keep them. Signing out tells you how many photos are on the device,
+                and whether any changes haven't been sent yet.
             </p>
         </details>
     }
