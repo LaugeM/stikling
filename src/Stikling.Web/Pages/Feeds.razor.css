@@ -122,3 +122,19 @@
 .feed-confirm p {
     margin-bottom: 0.5rem;
 }
+
+.feed-plants {
+    margin: 0 0 0.35rem;
+    padding-left: 1rem;
+    font-size: 0.9rem;
+}
+
+.feed-plant-status,
+.feed-plant-dates {
+    color: var(--pa-muted);
+}
+
+.feed-plant-status {
+    margin-left: 0.3rem;
+    font-size: 0.85rem;
+}

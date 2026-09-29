@@ -322,13 +322,53 @@ public class FeedTests
         // Picking the same products by hand isn't giving the feed
         await care.LogManyAsync([plant], CareKind.Fertilised, Today, null, Label, products: aroid.Doses(All));
 
-        var uses = await new FeedService(feeds, logs).GetAllAsync();
+        var uses = await new FeedService(feeds, logs, new FakePlantRepository()).GetAllAsync();
 
         Assert.Equal(["Aroid feed", "Rooting water"], uses.Select(u => u.Feed.Name));
         Assert.Equal(2, uses[0].Plants);
         Assert.Equal(Today.AddDays(-3), uses[0].LastUsed);
         Assert.Equal(0, uses[1].Plants);
         Assert.Null(uses[1].LastUsed);
+    }
+
+    [Fact]
+    public void Plants_that_got_a_feed_come_with_their_days_newest_first()
+    {
+        var feed = Guid.NewGuid();
+        var a = new Plant { Genus = "Monstera" };
+        var b = new Plant { Genus = "Hoya" };
+        var gone = new Plant { Genus = "Ficus", DeletedAt = DateTimeOffset.UtcNow };
+        var died = new Plant { Genus = "Alocasia", Status = PlantStatus.Died };
+        CareLog Log(Plant p, int daysAgo, Guid? id = null, bool deleted = false) => new()
+        {
+            PlantId = p.Id, FeedId = id ?? feed, OccurredOn = Today.AddDays(-daysAgo), DeletedAt = deleted ? DateTimeOffset.UtcNow : null
+        };
+
+        var result = FeedPlant.For(feed,
+            [Log(a, 20), Log(a, 3), Log(b, 1), Log(b, 2, deleted: true), Log(gone, 1), Log(died, 9),
+             Log(a, 1, Guid.NewGuid())],
+            [a, b, gone, died]);
+
+        Assert.Equal([b.Id, a.Id, died.Id], result.Select(r => r.Plant.Id));
+        Assert.Equal([Today.AddDays(-3), Today.AddDays(-20)], result[1].Dates);
+        Assert.Equal([Today.AddDays(-1)], result[0].Dates);
+        Assert.Equal(PlantStatus.Died, result[2].Plant.Status);
+    }
+
+    [Fact]
+    public void Only_the_last_five_days_are_kept_and_the_rest_are_counted()
+    {
+        var feed = Guid.NewGuid();
+        var a = new Plant { Genus = "Monstera" };
+        var entries = Enumerable.Range(0, 8)
+            .Select(i => new CareLog { PlantId = a.Id, FeedId = feed, OccurredOn = Today.AddDays(-i) });
+
+        var result = Assert.Single(FeedPlant.For(feed, entries, [a]));
+
+        Assert.Equal(5, result.Dates.Count);
+        Assert.Equal(Today, result.Dates[0]);
+        Assert.Equal(Today.AddDays(-4), result.Dates[4]);
+        Assert.Equal(3, result.More);
     }
 
     // Backup
