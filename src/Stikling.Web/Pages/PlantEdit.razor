@@ -174,6 +174,14 @@ else
                         }
                     </InputSelect>
                 </div>
+                @if (plant.Status == PlantStatus.Died)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="cause-of-death">What happened? <span class="text-muted">(optional)</span></label>
+                        <InputText id="cause-of-death" class="form-control" @bind-Value="plant.CauseOfDeath"
+                                   placeholder="e.g. root rot after repotting" />
+                    </div>
+                }
                 @if (plant.HasLeft && Labels.PotsTakenChoices([plant]) is { Count: > 0 } choices)
                 {
                     <div class="mb-3">

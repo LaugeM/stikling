@@ -81,6 +81,10 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             after.DormantSince = null;
             after.Attention = null;
         }
+        // The cause only belongs to a plant that died
+        after.CauseOfDeath = after.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(after.CauseOfDeath)
+            ? after.CauseOfDeath.Trim()
+            : null;
         await plants.SaveAsync(after);
 
         var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName);
