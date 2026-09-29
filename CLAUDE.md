@@ -53,6 +53,13 @@ Accounts and sync between devices are being added in steps, so people don't have
 - `docker compose up --build` runs the API on port 5180 with SQL Server. In Development it applies its migrations on start. A new migration is made with `dotnet tool restore`, then `dotnet ef migrations add <Name> --project src/Stikling.Api --output-dir Data/Migrations`.
 - Settings that differ between local and hosted (the Clerk instance, the app's origins, the connection string) are in `appsettings.Development.json` locally, and come from the host's environment when it's deployed. Secrets never go in the repo.
 
+## Signing in from the app
+
+- Clerk has no Blazor library, so it is behind `wwwroot/js/account.js`, and `AccountService` is the only class that calls that file. Calls to the API go through `StiklingApi`, which adds the session token to each request.
+- Clerk's scripts are only loaded when they are needed: on the sign-in page, or in Settings on a device where someone is signed in. Never when the app starts, so it still opens offline.
+- Signing in is only offered when `wwwroot/appsettings.{Environment}.json` has the Clerk instance and the API address. Locally that is `appsettings.Development.json`, which is kept out of the published site, so the live site doesn't offer signing in until the API is hosted.
+- The API only accepts tokens from the origins in its `AppOrigins`. The `stikling-web` dev server runs in Development on port 5170 for that reason. If it falls back to another port, the API turns the sign-in away.
+
 ## The Help page
 
 `Pages/Help.razor` answers the questions someone new asks, and has a few answers for each part of the app. It has to describe the app as it is. When a change adds or changes a feature, update the answers it affects in the same pull request, and add one when the feature raises a question of its own. Check the empty states on the screens involved too, since they tell a new user what to do next and go stale the same way.

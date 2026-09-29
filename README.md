@@ -36,7 +36,7 @@ The app runs entirely in the browser, so it can work offline and keep data on th
 ```
 src/Stikling.Core/          Models and domain rules (no browser dependencies, unit tested)
 src/Stikling.Web/           Blazor WebAssembly PWA
-src/Stikling.Api/           The sync API (not used by the app yet)
+src/Stikling.Api/           The sync API (the app only signs in to it so far)
 tests/Stikling.Core.Tests/  xUnit tests for Core
 tests/Stikling.Api.Tests/   xUnit tests for the API, against SQL Server in Docker
 tools/plant-names/          Builds the plant names the app suggests while you type
@@ -68,6 +68,16 @@ docker compose up --build
 ```
 
 The API is then on http://localhost:5180, with `/health` to check it's up. It creates the database on the first start. To run the API from Visual Studio or with `dotnet run` instead, start only the database with `docker compose up sql`.
+
+### Signing in
+
+When the app runs in Development, it reads `src/Stikling.Web/wwwroot/appsettings.Development.json`, which points at Clerk's development instance and the local API. The Account section then shows up at the top of Settings. The published site has no such file, so it doesn't offer signing in until the API is hosted.
+
+To try it, start the API as above and run the app on one of the origins the API accepts (`AppOrigins` in `src/Stikling.Api/appsettings.Development.json`), for example:
+
+```bash
+dotnet run --project src/Stikling.Web --urls http://localhost:5170
+```
 
 ## Deployment
 

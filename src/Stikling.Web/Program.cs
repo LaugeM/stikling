@@ -62,5 +62,8 @@ builder.Services.AddScoped<PhotoService>();
 builder.Services.AddScoped<DeviceFiles>();
 builder.Services.AddScoped<AppBadge>();
 builder.Services.AddScoped<BackupService>();
+builder.Services.AddSingleton(AccountSettings.From(builder.Configuration));
+builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<StiklingApi>();
 
 await builder.Build().RunAsync();

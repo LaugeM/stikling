@@ -17,10 +17,61 @@
 @inject IndexedDb Db
 @inject PlantNameService PlantNames
 @inject TimeProvider Time
+@inject AccountService Account
+@inject StiklingApi Api
+@inject NavigationManager Nav
 
 <PageTitle>Settings · Stikling</PageTitle>
 
 <h1>Settings</h1>
+
+@if (Account.IsAvailable)
+{
+    <section class="settings-section">
+        <h2>Account</h2>
+        @if (account is { SignedIn: true })
+        {
+            <div class="room-row">
+                <span class="room-name account-email">@account.Email</span>
+                <button type="button" class="btn btn-link btn-sm p-0" @onclick="SignOutAsync" disabled="@accountBusy">
+                    Sign out
+                </button>
+            </div>
+            <p class="settings-hint" role="status">
+                @if (serverReached == false)
+                {
+                    <text>You're signed in, but the Stikling server can't be reached right now.</text>
+                }
+                else
+                {
+                    <text>
+                        Keeping your plants the same on all your devices is still being built, so for now they
+                        stay on this device. Signing out leaves them here.
+                    </text>
+                }
+            </p>
+        }
+        else if (accountChecking)
+        {
+            <p class="settings-hint" role="status">Checking your account…</p>
+        }
+        else if (accountUnreachable)
+        {
+            <p class="settings-hint" role="status">
+                You're signed in on this device, but the sign-in service can't be reached right now. Everything
+                else works as usual.
+            </p>
+        }
+        else
+        {
+            <div class="room-row">
+                <span class="room-name">Not signed in</span>
+                <a class="btn btn-link btn-sm p-0" href="sign-in">Sign in</a>
+            </div>
+            <p class="settings-hint">An account is optional. Everything in the app works without one.</p>
+        }
+    </section>
+}
 
 <section class="settings-section">
     <h2>Help</h2>
@@ -373,12 +424,21 @@
     private PendingRestore? pending;
     private string? message;
     private bool busy;
+    private AccountState? account;
+    private bool accountChecking;
+    private bool accountLoadStarted;
+    private bool accountUnreachable;
+    private bool accountBusy;
+    private bool? serverReached;
 
     private DateOnly TodayDate => Time.Today();
 
     protected override async Task OnInitializedAsync()
     {
         Theme.Changed += OnThemeChanged;
+        Account.Changed += OnAccountChanged;
+        // Clerk is only loaded on a device where someone signed in, so it stays out of the way otherwise
+        accountChecking = Account.IsAvailable && await Account.WasSignedInAsync();
         mode = await Theme.GetModeAsync();
         lastBackup = await Files.GetLastBackupAsync();
         photoReminder = (await SettingsService.GetAsync()).PhotoReminder;
@@ -506,6 +566,66 @@
         StateHasChanged();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Once the page is up, so a slow connection doesn't hold the rest of Settings back
+        if (!accountChecking || accountLoadStarted)
+            return;
+
+        accountLoadStarted = true;
+        try
+        {
+            account = await Account.LoadAsync();
+        }
+        catch (AccountUnavailableException)
+        {
+            accountUnreachable = true;
+        }
+
+        accountChecking = false;
+        StateHasChanged();
+        await CheckServerAsync();
+    }
+
+    /// <summary>
+    /// Asks the API who is signed in. The first time, that also sets the person up on the server.
+    /// </summary>
+    private async Task CheckServerAsync()
+    {
+        if (account is not { SignedIn: true })
+            return;
+
+        try
+        {
+            await Api.GetMeAsync();
+            serverReached = true;
+        }
+        catch (HttpRequestException)
+        {
+            serverReached = false;
+        }
+
+        StateHasChanged();
+    }
+
+    private async void OnAccountChanged(AccountState state)
+    {
+        account = state;
+        accountUnreachable = false;
+        serverReached = null;
+        StateHasChanged();
+        await CheckServerAsync();
+    }
+
+    private async Task SignOutAsync()
+    {
+        accountBusy = true;
+        await Account.SignOutAsync(Nav.Uri);
+        account = new AccountState(false, null);
+        serverReached = null;
+        accountBusy = false;
+    }
+
     private async Task ExportPlantsCsvAsync()
     {
         var csv = CsvExport.Plants(await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
@@ -617,6 +737,7 @@
     public void Dispose()
     {
         Theme.Changed -= OnThemeChanged;
+        Account.Changed -= OnAccountChanged;
         pending?.Zip.Dispose();
     }
 }

@@ -3,8 +3,9 @@ using Microsoft.JSInterop;
 namespace Stikling.Web.Services;
 
 /// <summary>
-/// Saving a file to the device, and the one small setting that belongs to this device only:
-/// when the last backup was taken. Anything that belongs to the person is a record instead.
+/// Saving a file to the device, and the small values that belong to this device only: when the
+/// last backup was taken, and whether someone is signed in here (<see cref="AccountService"/>).
+/// Anything that belongs to the person is a record instead.
 /// </summary>
 public sealed class DeviceFiles(IJSRuntime js) : IAsyncDisposable
 {
