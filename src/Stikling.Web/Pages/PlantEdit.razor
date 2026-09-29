@@ -211,6 +211,12 @@ else
                     <InputDate id="quarantined-since" class="form-control" @bind-Value="plant.QuarantinedSince"
                                max="@Today.ToString("yyyy-MM-dd")" />
                 </div>
+                <div class="mt-2">
+                    <label class="form-label" for="quarantine-days">Length in days</label>
+                    <InputNumber id="quarantine-days" class="form-control" @bind-Value="plant.QuarantineDays"
+                                 min="1" max="365" />
+                    <div class="form-text">Today says when it is time to check the plant and let it out.</div>
+                </div>
             }
             <div class="form-text">Kept apart from your other plants, e.g. while a new plant shows it has no pests.</div>
         </fieldset>
@@ -340,8 +346,12 @@ else
     private void AddPot(Pot pot) => pots = [.. pots, pot];
 
     // Ticking it again after unticking keeps the date it had, so a slip doesn't restart the count
-    private void SetQuarantine(ChangeEventArgs e) =>
-        plant!.QuarantinedSince = (bool?)e.Value == true ? original?.QuarantinedSince ?? Today : null;
+    private void SetQuarantine(ChangeEventArgs e)
+    {
+        var on = (bool?)e.Value == true;
+        plant!.QuarantinedSince = on ? original?.QuarantinedSince ?? Today : null;
+        plant.QuarantineDays = on ? original?.QuarantineDays ?? Plant.DefaultQuarantineDays : null;
+    }
 
     private void SetDormant(ChangeEventArgs e) =>
         plant!.DormantSince = (bool?)e.Value == true ? original?.DormantSince ?? Today : null;

@@ -61,6 +61,16 @@ public static class TodayBoard
             .ToList();
 
     /// <summary>
+    /// Plants in the collection whose quarantine is up, from the day its length has passed. The
+    /// one that has waited longest comes first.
+    /// </summary>
+    public static IReadOnlyList<Plant> QuarantineUp(IEnumerable<Plant> plants, DateOnly today) =>
+        plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.QuarantineEnds <= today)
+            .OrderBy(p => p.QuarantineEnds)
+            .ThenBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+    /// <summary>
     /// The newest entries across the given plants and propagations. Anything written down about a
     /// subject that has since been deleted is left out, so the list only shows what you can open.
     /// </summary>

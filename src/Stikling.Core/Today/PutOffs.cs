@@ -32,6 +32,13 @@ public sealed class PutOffs
     public static string Flag(Guid subjectId, Attention attention) =>
         $"attention:{subjectId}:{attention.Since:yyyy-MM-dd}";
 
+    /// <summary>
+    /// The key for a quarantine that is up. The day it started is part of it, so a plant put back
+    /// in quarantine later isn't still hidden.
+    /// </summary>
+    public static string Quarantine(Guid plantId, DateOnly since) =>
+        $"quarantine:{plantId}:{since:yyyy-MM-dd}";
+
     public bool IsPutOff(string key, DateOnly today) =>
         until.TryGetValue(key, out var back) && today < back;
 
