@@ -49,7 +49,7 @@ In the order I would build them.
 
 These need no new storage and no new screens worth the name: the success rate on the Today screen, purchase price, a "Log care" home screen shortcut, and an app version and a "what's new" page.
 
-The partly built rows also have small pieces left: moving selected plants to a room, tapping through from a soil mix to the plants in it and the list of plants that got a feed.
+PARTLY_BUILT_PARAGRAPH
 
 ---
 
@@ -69,7 +69,7 @@ The partly built rows also have small pieces left: moving selected plants to a r
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
 | ✅ | Tags (e.g. "variegated", "rare", "for swap") and a tag filter. Picking several tags narrows the list to plants that have all of them, the search finds tags too, and a tag on a plant's page opens the list filtered by it | 3 | S | v1.x |
 | ✅ | Rename or merge a tag everywhere at once, the way rooms can be in Settings | 6 | S | v1.x |
-| ◐ | Select several plants at once: change status, log care, add a note or tags to all. Moving them all to a room isn't built | 4 | M | v1.x |
+| ✅ | Select several plants at once: change status, log care, add a note or tags to all, or move them all to a room | 4 | M | v1.x |
 | ✅ | **Dormancy status** for plants and propagations, e.g. an alocasia dropping its leaves in winter or a corm sitting still. A badge and the day it went dormant show it's resting rather than dead, the plant list has a "Dormant" filter, and going dormant and waking up are recorded on the history. A dormant propagation doesn't come up on Today to be checked on. Dormancy ends by itself when a plant dies or leaves, or a propagation finishes | 4 | S | v1.x |
 | ☐ | **Growing season**: mark a plant as growing in summer or in winter. When its usual resting time comes round, the app asks whether it has gone dormant | 5 | S | v1.x |
 | ✅ | Sort options: name, newest, room, last activity | 5 | S | v1.x |

@@ -110,6 +110,30 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         }
     }
 
+    /// <summary>
+    /// Moves several plants to a room or spot, recording it on each like a room change on the
+    /// edit form does. Plants that are already there or are deleted are left alone. Returns how
+    /// many moved.
+    /// </summary>
+    /// <param name="placeName">Turns a place id into its name, so the history can say where from and to.</param>
+    public async Task<int> MoveAsync(
+        IEnumerable<Plant> selected,
+        Guid? placeId,
+        Func<Enum, string> label,
+        Func<Guid, string?>? placeName = null)
+    {
+        var moved = 0;
+        foreach (var plant in selected.Where(p => !p.IsDeleted && p.PlaceId != placeId))
+        {
+            var before = plant.Copy();
+            plant.PlaceId = placeId;
+            await UpdateAsync(before, plant, label, placeName: placeName);
+            moved++;
+        }
+
+        return moved;
+    }
+
     /// <summary>Puts a plant in quarantine from the given day, or takes it out with null.</summary>
     public async Task SetQuarantineAsync(Plant plant, DateOnly? since, Func<Enum, string> label)
     {
