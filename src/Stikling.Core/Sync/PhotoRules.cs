@@ -25,10 +25,6 @@ public static class PhotoRules
     /// <summary>The name of a size in the address of its image.</summary>
     public static string PathName(this PhotoSize size) => size == PhotoSize.Full ? "full" : "thumb";
 
-    /// <summary>True when the bytes start like a JPEG, which is all the app saves.</summary>
-    public static bool LooksLikeJpeg(ReadOnlySpan<byte> bytes) =>
-        bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
-
     /// <summary>
     /// What kind of image the bytes are, from how they start, or null when it isn't one the app
     /// saves. The app saves WebP, and JPEG in a browser that can't make WebP and for photos saved
