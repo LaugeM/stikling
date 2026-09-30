@@ -3,8 +3,8 @@
 
 targetScope = 'subscription'
 
-@description('The Azure region. The Azure for Students subscription only allows a few, and Sweden Central is the closest of them.')
-param location string = 'swedencentral'
+@description('The Azure region. The Azure for Students subscription only allows a few. Poland Central is used because Sweden Central had no room for a new Container Apps environment.')
+param location string = 'polandcentral'
 
 @description('Where the app is served from. The API only accepts sign-ins from here.')
 param appDomain string
@@ -18,7 +18,7 @@ param apiCertificateIssued bool = false
 @description('The Frontend API URL of the Clerk production instance.')
 param clerkAuthority string
 
-@description('The repository whose main branch deploys the API, as owner/name.')
+@description('The repository whose main branch deploys the API, as GitHub names it in the sign-in token: owner@ownerId/name@repositoryId. The ids keep a new repository with the same name from signing in.')
 param githubRepository string
 
 @description('The API\'s container image. The deploy workflow moves it on to each new version after this.')
