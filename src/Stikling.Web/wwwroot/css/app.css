@@ -741,6 +741,18 @@ a.item-card:active {
     align-items: center;
 }
 
+/* The Save bar of a long form stays above the bottom navigation */
+.form-bar {
+    position: sticky;
+    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    z-index: 5;
+    margin: 0 -1rem;
+    padding: 0.6rem 1rem;
+    background: var(--pa-surface);
+    border-top: 1px solid var(--pa-border);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+}
+
 /* Plant and propagation pages */
 .detail-hero {
     margin: 0 -1rem 1rem;
