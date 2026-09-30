@@ -1,0 +1,336 @@
+@page "/account"
+@implements IDisposable
+@using Stikling.Core.Sync
+@inject AccountService Accounts
+@inject SyncRunner Sync
+@inject TimeProvider Time
+@inject NavigationManager Nav
+
+<PageTitle>Account · Stikling</PageTitle>
+
+<a class="back-link" href="settings">Settings</a>
+<h1>Account</h1>
+
+@if (!accountHintRead)
+{
+    @* Nothing until it's known whether to check, so a signed-in device never shows "Not signed in" *@
+}
+else if (account is { SignedIn: true })
+{
+    <p class="account-email">@account.Email</p>
+    <p class="settings-hint account-status" role="status">@SyncLine</p>
+    <div class="settings-actions">
+        <button type="button" class="btn btn-outline-primary" @onclick="Sync.SyncNowAsync"
+                disabled="@(Sync.Running || accountBusy)">
+            Sync now
+        </button>
+        <button type="button" class="btn btn-outline-primary" @onclick="AskSignOutAsync"
+                disabled="@(accountBusy || signOut is not null || deleting)">
+            Sign out
+        </button>
+    </div>
+    <p class="settings-hint">
+        Your plants, care, pests, photos and settings are kept the same on every device you sign in on.
+        Each device keeps a small copy of every photo, and fetches the full size when you open one.
+    </p>
+    @if (photoUsage is { } usage && usage.UsedBytes >= 0.8 * usage.LimitBytes)
+    {
+        <p class="settings-hint">Photos take @Labels.Bytes(usage.UsedBytes) of the @Labels.Bytes(usage.LimitBytes) they have on the server.</p>
+    }
+    @if (SyncProblem is { } problem)
+    {
+        <p class="settings-message" role="alert">@problem</p>
+    }
+
+    @if (signOut is { } unsent)
+    {
+        <div class="confirm-card">
+            <p>
+                <strong>Sign out</strong><br />
+                What's synced stays on the Stikling server and comes back when you sign in again. You can
+                keep a copy on this device as well, or remove it from here.
+            </p>
+            @if (unsent.Checking)
+            {
+                <p class="settings-hint" role="status">Sending your latest changes first…</p>
+            }
+            else
+            {
+                @if (unsent.Photos > 0)
+                {
+                    <p class="settings-hint">
+                        @Labels.Count(unsent.Photos, "photo") added here @(unsent.Photos == 1 ? "hasn't" : "haven't")
+                        reached the server yet, and removing deletes @(unsent.Photos == 1 ? "it" : "them"). Save a
+                        backup first to keep @(unsent.Photos == 1 ? "it" : "them").
+                    </p>
+                }
+                @if (unsent.Pending > 0)
+                {
+                    <p class="settings-hint">
+                        @Labels.Count(unsent.Pending, "change") made here @(unsent.Pending == 1 ? "hasn't" : "haven't")
+                        reached the server yet, and removing loses @(unsent.Pending == 1 ? "it" : "them").
+                    </p>
+                }
+            }
+            <div class="settings-actions">
+                <button type="button" class="btn btn-primary" disabled="@(accountBusy || unsent.Checking)"
+                        @onclick="() => SignOutAsync(keepData: true)">Keep and sign out</button>
+                <button type="button" class="btn btn-danger" disabled="@(accountBusy || unsent.Checking)"
+                        @onclick="() => SignOutAsync(keepData: false)">Remove and sign out</button>
+                <button type="button" class="btn btn-link" disabled="@accountBusy"
+                        @onclick="() => signOut = null">Cancel</button>
+            </div>
+        </div>
+    }
+
+    <hr class="account-divider" />
+    @if (deleting)
+    {
+        <div class="confirm-card confirm-card-danger">
+            <p>
+                <strong>Delete your account</strong><br />
+                This erases your plants, photos and settings from the Stikling server and deletes your
+                sign-in. It can't be undone.
+            </p>
+            <div class="form-check mt-2">
+                <input type="checkbox" class="form-check-input" id="delete-here-too" @bind="removeHereToo"
+                       disabled="@accountBusy" />
+                <label class="form-check-label" for="delete-here-too">Remove everything from this device too</label>
+            </div>
+            <p class="settings-hint">
+                @(removeHereToo
+                    ? "This device will be empty afterwards, as if Stikling was just installed."
+                    : "This device keeps what it has, and the app carries on without an account.")
+            </p>
+            <div class="settings-actions">
+                <button type="button" class="btn btn-danger" disabled="@accountBusy"
+                        @onclick="DeleteAccountAsync">Delete account</button>
+                <button type="button" class="btn btn-link" disabled="@accountBusy"
+                        @onclick="() => deleting = false">Cancel</button>
+            </div>
+        </div>
+    }
+    else if (signOut is null)
+    {
+        <button type="button" class="btn btn-link text-danger px-0" disabled="@accountBusy"
+                @onclick="AskDeleteAccount">Delete account</button>
+    }
+
+    @if (accountMessage is not null)
+    {
+        <p class="settings-message" role="alert">@accountMessage</p>
+    }
+}
+else if (accountChecking)
+{
+    <p class="settings-hint" role="status">Checking your account…</p>
+}
+else if (accountUnreachable)
+{
+    <p class="settings-hint" role="status">
+        You're signed in on this device, but the sign-in service can't be reached right now. Everything
+        else works as usual.
+    </p>
+}
+else
+{
+    <div class="room-row">
+        <span class="room-name">Not signed in</span>
+        <a class="btn btn-link btn-sm p-0" href="sign-in">Sign in</a>
+    </div>
+    <p class="settings-hint">An account is optional. Everything in the app works without one.</p>
+    @if (accountMessage is not null)
+    {
+        <p class="settings-message" role="status">@accountMessage</p>
+    }
+}
+
+@code {
+    /// <summary>What removing the data at sign-out would lose, once a last sync has had its go.</summary>
+    private sealed record SignOutCheck(bool Checking, int Pending = 0, int Photos = 0);
+
+    private AccountState? account;
+    private bool accountChecking;
+    private bool accountLoadStarted;
+    private bool accountUnreachable;
+    private bool accountBusy;
+    private bool accountHintRead;
+    private string? accountMessage;
+    private SignOutCheck? signOut;
+    private bool deleting; // the question about deleting the account is open
+    private bool removeHereToo;
+    private PhotoUsage? photoUsage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Accounts.IsAvailable)
+        {
+            Nav.NavigateTo("settings", replace: true);
+            return;
+        }
+
+        Accounts.Changed += OnAccountChanged;
+        Sync.StatusChanged += OnSyncChanged;
+        // Clerk is only loaded on a device where someone signed in, so it stays out of the way otherwise
+        accountChecking = await Accounts.WasSignedInAsync();
+        accountHintRead = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Once the page is up, so a slow connection doesn't hold the page back
+        if (!accountChecking || accountLoadStarted)
+            return;
+
+        accountLoadStarted = true;
+        try
+        {
+            account = await Accounts.LoadAsync();
+        }
+        catch (AccountUnavailableException)
+        {
+            accountUnreachable = true;
+        }
+
+        accountChecking = false;
+        StateHasChanged();
+
+        if (account is { SignedIn: true })
+        {
+            photoUsage = await Sync.GetPhotoUsageAsync();
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>"Synced at 14:32", for the line under the email.</summary>
+    private string SyncLine => (Sync.Running, Sync.LastSynced) switch
+    {
+        (true, _) => "Syncing…",
+        (_, { } at) when at.ToLocalTime().Date == Time.GetLocalNow().Date => $"Synced at {Labels.Time(at)}",
+        (_, { } at) => $"Synced on {Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))}",
+        _ => "Not synced yet"
+    };
+
+    private string? SyncProblem
+    {
+        get
+        {
+            if (Sync.Running)
+                return null;
+            if (Sync.Problem is { } problem)
+                return Sync.Pending > 0 ? $"{problem} {Labels.Count(Sync.Pending, "change")} waiting." : problem;
+            if (Sync.Refused > 0)
+                return $"The server turned down {Labels.Count(Sync.Refused, "change")}, and {(Sync.Refused == 1 ? "it" : "they")} "
+                    + "will be tried again. If this keeps happening, check the date and time on this device.";
+            if (Sync.PhotosFull)
+                return "Your photos have used all the space they have on the server, so new ones stay on this device "
+                    + "for now. Deleting photos you don't need makes room.";
+            return null;
+        }
+    }
+
+    private void OnSyncChanged() => _ = InvokeAsync(async () =>
+    {
+        StateHasChanged();
+        if (!Sync.Running)
+        {
+            photoUsage = await Sync.GetPhotoUsageAsync();
+            StateHasChanged();
+        }
+    });
+
+    private async void OnAccountChanged(AccountState state)
+    {
+        // Clerk also reports each renewed token, which changes nothing shown here
+        if (state == account)
+            return;
+
+        account = state;
+        accountUnreachable = false;
+        accountMessage = null;
+        signOut = null;
+        deleting = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void AskDeleteAccount()
+    {
+        accountMessage = null;
+        removeHereToo = false;
+        deleting = true;
+    }
+
+    private async Task DeleteAccountAsync()
+    {
+        accountBusy = true;
+        accountMessage = null;
+        try
+        {
+            await Sync.DeleteAccountAsync(keepData: !removeHereToo);
+            if (removeHereToo)
+            {
+                // Starts the app afresh, so no page still holds what was removed
+                Nav.NavigateTo("", forceLoad: true);
+                return;
+            }
+
+            account = new AccountState(false, null);
+            deleting = false;
+            accountMessage = "Your account is deleted. Everything on this device is still here.";
+        }
+        catch (Exception e) when (e is HttpRequestException or JSException or TaskCanceledException)
+        {
+            accountMessage = "Couldn't delete your account. Check that you're online and try again.";
+        }
+        finally
+        {
+            accountBusy = false;
+        }
+    }
+
+    /// <summary>Opens the question, after one last sync so as little as possible is left unsent.</summary>
+    private async Task AskSignOutAsync()
+    {
+        accountMessage = null;
+        signOut = new SignOutCheck(Checking: true);
+        StateHasChanged();
+
+        await Sync.SyncNowAsync();
+        var (pending, photos) = await Sync.CountUnsentAsync();
+        if (signOut is not null)
+            signOut = new SignOutCheck(Checking: false, pending, photos);
+    }
+
+    private async Task SignOutAsync(bool keepData)
+    {
+        accountBusy = true;
+        accountMessage = null;
+        try
+        {
+            await Sync.SignOutAsync(keepData, Nav.Uri);
+            if (!keepData)
+            {
+                // Starts the app afresh, so no page still holds what was removed
+                Nav.NavigateTo("", forceLoad: true);
+                return;
+            }
+
+            account = new AccountState(false, null);
+            signOut = null;
+        }
+        catch (JSException)
+        {
+            accountMessage = "Couldn't sign out. Check that you're online and try again.";
+        }
+        finally
+        {
+            accountBusy = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        Accounts.Changed -= OnAccountChanged;
+        Sync.StatusChanged -= OnSyncChanged;
+    }
+}

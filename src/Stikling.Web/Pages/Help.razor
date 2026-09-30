@@ -55,6 +55,14 @@
     </details>
 
     <details class="help-item">
+        <summary>Where are the settings?</summary>
+        <p>
+            Behind the gear at the top of the screen. That is where you @(Account.IsAvailable ? "sign in, " : "")save a backup, pick light or dark, and rename rooms and tags. The pots, soil mixes and products
+            you use are under Supplies in the bar at the bottom.
+        </p>
+    </details>
+
+    <details class="help-item">
         <summary>How do I put it on my phone's home screen?</summary>
         <p>
             On an iPhone, open Stikling in Safari, tap the Share button, and pick
@@ -116,14 +124,16 @@
         <p>
             Some browsers also clear data by themselves when the phone runs low on space, or when a site
             hasn't been opened for a while. Installing Stikling to the home screen usually stops that. Under
-            Storage in Settings you can see whether the browser has agreed to keep your data, and ask it to.
+            Backup and storage in Settings you can see whether the browser has agreed to keep your data, and
+            ask it to.
         </p>
     </details>
 
     <details class="help-item">
         <summary>How do I back up?</summary>
         <p>
-            In Settings, under Backup, tap <em>Save a backup</em>. You get a ZIP file with everything in it,
+            Tap the gear at the top, then <em>Backup and storage</em>, and tap <em>Save a backup</em>. You get
+            a ZIP file with everything in it,
             photos included. Keep it somewhere other than the phone, like cloud storage or your computer.
         </p>
         @if (Account.IsAvailable)
@@ -141,7 +151,7 @@
     <details class="help-item">
         <summary>Can I get my plants into a spreadsheet?</summary>
         <p>
-            In Settings, under Backup, tap <em>Plants as CSV</em> or <em>Propagations as CSV</em>. You get a
+            Under Backup and storage in Settings, tap <em>Plants as CSV</em> or <em>Propagations as CSV</em>. You get a
             file that Excel and Google Sheets can open. It is only a copy to read and sort, not a backup,
             and it can't be restored into Stikling.
         </p>
@@ -149,10 +159,25 @@
 
     <details class="help-item">
         <summary>How do I move to a new phone?</summary>
-        <p>
-            Save a backup on the old phone, get the file over to the new one, open Stikling there and tap
-            <em>Restore a backup</em> in Settings.
-        </p>
+        @if (Account.IsAvailable)
+        {
+            <p>
+                The easiest way is to sign in on the new phone with the same account. Everything that has synced
+                comes over by itself, photos included. Check that the old phone has finished syncing first, on
+                the Account page in Settings.
+            </p>
+            <p>
+                Without an account, save a backup on the old phone, get the file over to the new one, open
+                Stikling there and tap <em>Restore a backup</em> under Backup and storage in Settings.
+            </p>
+        }
+        else
+        {
+            <p>
+                Save a backup on the old phone, get the file over to the new one, open Stikling there and tap
+                <em>Restore a backup</em> under Backup and storage in Settings.
+            </p>
+        }
         <p>
             A restore adds to what is already there instead of replacing it. Anything missing is added,
             anything deleted since the backup comes back, and where the same thing was changed in both
@@ -184,9 +209,9 @@
         <details class="help-item">
             <summary>Do I need an account?</summary>
             <p>
-                No. An account is optional, and everything in Stikling works without one. To make one, go to
-                Account in Settings and sign in with Google or another account you already have, or with your
-                email.
+                No. An account is optional, and everything in Stikling works without one. To make one, tap the
+                gear at the top, then <em>Sign in</em>, and sign in with Google or another account you already
+                have, or with your email.
             </p>
             <p>
                 With an account, your plants are kept the same on every device you sign in on. If the phone
@@ -199,8 +224,9 @@
             <summary>When does it sync?</summary>
             <p>
                 When you open the app, a couple of seconds after you change something, when the connection
-                comes back, and every few minutes while the app is open. Under Account in Settings you can see
-                when it last synced, and tap <em>Sync now</em>.
+                comes back, and every few minutes while the app is open. The Account page in Settings shows when
+                it last synced, and has <em>Sync now</em>. If something goes wrong, a dot shows on the gear at
+                the top.
             </p>
             <p>
                 Photos go up from the device they were added on. Every device keeps a small copy of each photo,
@@ -217,8 +243,9 @@
         <details class="help-item">
             <summary>Is there a limit on photos?</summary>
             <p>
-                Each account has 1 GB for photos on the server, which is roughly 2,500 photos. Settings shows
-                how much is used. If it fills up, new photos stay on the device they were added on, and
+                Each account has 1 GB for photos on the server, which is roughly 2,500 photos. When it is
+                nearly full, the Account page in Settings says how much is used. If it fills up, new photos
+                stay on the device they were added on, and
                 deleting photos you don't need makes room. The photos on your device aren't limited by this.
             </p>
         </details>
@@ -239,7 +266,8 @@
         <details class="help-item">
             <summary>How do I delete my account?</summary>
             <p>
-                In Settings, under Account, tap <em>Delete account</em>. It erases everything your account has on
+                On the Account page in Settings, tap <em>Delete account</em> at the bottom. It erases everything
+                your account has on
                 the Stikling server, photos included, and deletes your sign-in. It can't be undone.
             </p>
             <p>
@@ -289,7 +317,7 @@
             A room is where a plant lives, and a spot is a place inside it, like "Living room / On top of
             the PC". Pick one you have used before so the same room doesn't end up with two names.
             Filtering the plant list by a room includes its spots. Rooms can be renamed or merged under
-            Rooms in Settings.
+            Rooms and tags in Settings.
         </p>
     </details>
 
@@ -348,7 +376,7 @@
         <p>
             Your own labels, like "variegated", "rare" or "for swap". Picking tags on the plant list shows
             the plants that have all of them, and tapping a tag on a plant's page does the same. A tag can be renamed, or merged into another
-            one, under Tags in Settings.
+            one, under Rooms and tags in Settings.
         </p>
     </details>
     <details class="help-item">
@@ -498,7 +526,7 @@
         <p>
             Once a month, Today lists the plants and propagations that haven't had a photo that month, room
             by room, with a camera button on each. It keeps every history growing. It is off until you turn
-            it on under Today in Settings.
+            it on in Settings.
         </p>
     </details>
 </section>
@@ -570,7 +598,7 @@
     <details class="help-item">
         <summary>Do I have to fill in pots, soil mixes and products?</summary>
         <p>
-            No. They are all under Settings for anyone who wants them. Once they are there, a plant can pick
+            No. They are all under Supplies for anyone who wants them. Once they are there, a plant can pick
             its pot and mix from a list, and logging a feed says what went in the water without typing. A
             propagation that grows in soil can pick a mix too, and it goes on to the plants when you pot up.
         </p>
@@ -610,7 +638,7 @@
         <summary>What are treatment recipes?</summary>
         <p>
             Sprays and drenches you make up yourself against pests, like an alcohol spray. Save one under
-            Settings, and logging a treatment is then a tap. <em>Mix a batch</em> works out the amounts for
+            Supplies, and logging a treatment is then a tap. <em>Mix a batch</em> works out the amounts for
             any size of bottle.
         </p>
     </details>

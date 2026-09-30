@@ -1,0 +1,33 @@
+@page "/plant-names"
+@inject PlantNameService Names
+
+<PageTitle>Plant names · Stikling</PageTitle>
+
+<a class="back-link" href="settings">Settings</a>
+<h1>Plant names</h1>
+
+<section class="settings-section">
+    <p class="settings-hint">
+        The names suggested while you type come with the app, so they work offline. They cover the aroids (Araceae)
+        in full, the genus of some other common houseplants, and a list of cultivars and trade names kept by hand.
+    </p>
+    @if (nameSources.Count > 0)
+    {
+        <ul class="settings-hint">
+            @foreach (var source in nameSources)
+            {
+                <li>
+                    <a href="@source.Url" target="_blank" rel="noopener">@source.Name</a>@(source.Version is null ? "" : $" ({source.Version})"):
+                    @source.Covers. @source.Licence.
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+@code {
+    private IReadOnlyList<NameSource> nameSources = [];
+
+    protected override async Task OnInitializedAsync() =>
+        nameSources = (await Names.GetDictionaryAsync()).Sources;
+}
