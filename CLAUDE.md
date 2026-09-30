@@ -31,6 +31,14 @@ A new IndexedDB store touches more places than the model and its page, and missi
 
 ## Data conventions
 
+People keep their real plants in the app, so their data has to survive every change:
+
+- Data already stored has to keep working after a change: records on the device, older backup files, and records already synced to the server. When a change alters how something is stored, like renaming an enum value, changing what a field means or reshaping a model, it migrates the old data (a new block in `db.js`, a converter, or a server migration) so nobody has to enter anything again.
+- Design new data so it won't need deleting later. Add fields and records rather than giving old ones a new meaning, and think a step ahead about how it might change.
+- Nothing deletes or overwrites someone's data unless they asked for it in the app.
+- A more destructive solution is sometimes the better one. Then offer it next to the safe one, say what data would be lost or changed, and let me decide. The safe one is the default.
+- A pull request that changes how data is stored says so, and says how old data is handled.
+
 - Ids are made on the device, and deletes are soft (`DeletedAt`). A restore can then tell the difference between something deleted and something never seen.
 - Enums are stored as text, so backups stay readable and reordering the values can't change what old data means.
 - Restoring a backup merges instead of replacing. A newer version wins, deletions in the backup carry over, and anything deleted here comes back if the backup still has it.
