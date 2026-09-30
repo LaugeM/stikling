@@ -172,6 +172,57 @@ public class SyncServiceTests
     }
 
     [Fact]
+    public async Task A_deletion_reaches_the_other_devices_stripped()
+    {
+        var plant = Plant("Monstera", Monday);
+        computer.Save(Plants, plant);
+        await Sync(computer);
+        await Sync(phone);
+
+        var deleted = Plant("Monstera", Monday.AddDays(1), plant.Id);
+        deleted.DeletedAt = deleted.UpdatedAt;
+        computer.Save(Plants, deleted);
+        await Sync(computer);
+        await Sync(phone);
+        var sentAgain = await Sync(computer);
+
+        var onPhone = phone.Get<Plant>(Plants, plant.Id)!;
+        Assert.True(onPhone.IsDeleted);
+        Assert.Null(onPhone.Nickname);
+        Assert.Equal(0, sentAgain.Sent);
+        Assert.Empty(computer.Pending);
+    }
+
+    [Fact]
+    public void A_deleted_record_keeps_only_its_id_and_dates()
+    {
+        var plant = Plant("Monstera", Monday);
+        plant.DeletedAt = Monday;
+
+        var stored = JsonSerializer.Deserialize<JsonElement>(SyncRules.AsStored(Json(plant)));
+
+        Assert.Equal(["id", "createdAt", "updatedAt", "deletedAt"], stored.EnumerateObject().Select(p => p.Name));
+        Assert.Equal(plant.Id, stored.GetProperty("id").GetGuid());
+    }
+
+    [Fact]
+    public void A_record_that_isnt_deleted_is_kept_as_it_is()
+    {
+        var json = Json(Plant("Monstera", Monday));
+
+        Assert.Equal(json.GetRawText(), SyncRules.AsStored(json));
+    }
+
+    [Fact]
+    public void A_merged_place_is_kept_whole_so_devices_can_follow_it()
+    {
+        var place = new Place { Id = Guid.NewGuid(), Name = "Kitchen", MergedIntoId = Guid.NewGuid(), CreatedAt = Monday, UpdatedAt = Monday, DeletedAt = Monday };
+        var json = Json(place);
+
+        Assert.Equal(json.GetRawText(), SyncRules.AsStored(json));
+    }
+
+    [Fact]
     public async Task An_edit_made_during_a_sync_is_not_overwritten()
     {
         var plant = Plant("First", Monday);

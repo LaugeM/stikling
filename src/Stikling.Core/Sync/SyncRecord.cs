@@ -66,6 +66,38 @@ public static class SyncRules
     private static string Normalised(string json) =>
         JsonSerializer.Serialize(JsonSerializer.Deserialize<JsonElement>(json));
 
+    /// <summary>What a deleted record keeps on the server. The rest, like names and notes, is dropped when the deletion arrives.</summary>
+    public static readonly IReadOnlyList<string> KeptWhenDeleted = ["id", "createdAt", "updatedAt", "deletedAt"];
+
+    /// <summary>
+    /// The record as the server keeps it: stripped to <see cref="KeptWhenDeleted"/> when it's
+    /// deleted. A room or spot merged into another is deleted too, but kept whole. Devices follow
+    /// it to where things went, and when two devices merge the same places in opposite directions,
+    /// one of the merged places is the one that stays.
+    /// </summary>
+    public static string AsStored(JsonElement data)
+    {
+        if (!RecordStamp.TryRead(data, out var stamp) || stamp.DeletedAt is null
+            || (data.TryGetProperty("mergedIntoId", out var merged) && merged.ValueKind != JsonValueKind.Null))
+            return data.GetRawText();
+
+        using var stream = new MemoryStream();
+        using (var writer = new Utf8JsonWriter(stream))
+        {
+            writer.WriteStartObject();
+            foreach (var name in KeptWhenDeleted)
+            {
+                if (data.TryGetProperty(name, out var value) && value.ValueKind != JsonValueKind.Null)
+                {
+                    writer.WritePropertyName(name);
+                    value.WriteTo(writer);
+                }
+            }
+            writer.WriteEndObject();
+        }
+        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
+    }
+
     /// <summary>Why the server won't keep a record, or null when it will.</summary>
     public static string? Problem(JsonElement data, DateTimeOffset now)
     {

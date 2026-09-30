@@ -599,15 +599,16 @@ internal sealed class FakeSyncServer : ISyncServer
 
             Pushed.Add(record);
             RecordStamp.TryRead(record.Data, out var stamp);
+            var stored = JsonSerializer.Deserialize<JsonElement>(SyncRules.AsStored(record.Data));
             var key = (collectionId, record.Kind, stamp.Id);
             if (!records.TryGetValue(key, out var current))
-                records[key] = (++lastVersion, record.Data);
+                records[key] = (++lastVersion, stored);
             else
             {
                 RecordStamp.TryRead(current.Data, out var here);
-                if (SyncRules.Replaces(stamp, record.Data.GetRawText(), here, current.Data.GetRawText()))
-                    records[key] = (++lastVersion, record.Data);
-                else if (SyncRules.Replaces(here, current.Data.GetRawText(), stamp, record.Data.GetRawText()))
+                if (SyncRules.Replaces(stamp, stored.GetRawText(), here, current.Data.GetRawText()))
+                    records[key] = (++lastVersion, stored);
+                else if (SyncRules.Replaces(here, current.Data.GetRawText(), stamp, stored.GetRawText()))
                     newer.Add(new SyncRecord(record.Kind, current.Data));
             }
         }
