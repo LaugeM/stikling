@@ -1,0 +1,269 @@
+@* Adding a photo or a note to a plant's or propagation's history, from the buttons at the bottom
+   of its page. Photo opens the device's own choice of camera or gallery straight away, then this
+   sheet asks for an optional note and the day. *@
+@inject ITimelineRepository Entries
+@inject TimelineService TimelineService
+@inject PhotoService Photos
+@inject TimeProvider Time
+@implements IAsyncDisposable
+
+@* Outside the sheet, so the Photo button on the page can open it while the sheet is closed *@
+<input id="@PhotoInputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1"
+       @ref="pageInput" @onchange="() => AddPhotosAsync(pageInput)" disabled="@busy" />
+
+<Sheet Title="@SheetTitle" Open="open" OpenChanged="value => open = value">
+    <div class="composer-sheet">
+        @if (photos.Count > 0)
+        {
+            <div class="photo-picks">
+                @foreach (var photo in photos)
+                {
+                    <div class="photo-pick">
+                        <PhotoImage PhotoId="photo.Id" Alt="Photo to add" />
+                        <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
+                                aria-label="Remove photo" title="Remove photo">✕</button>
+                    </div>
+                }
+            </div>
+        }
+
+        <textarea class="form-control" rows="3" aria-label="Note" @ref="noteBox"
+                  placeholder="@(photos.Count > 0 ? "Add a note (optional)" : "New leaf, roots showing, repotted…")"
+                  @bind="noteText" @bind:event="oninput"></textarea>
+
+        <div class="composer-date">
+            @if (pickDate)
+            {
+                <label for="@dateId">Happened on</label>
+                <input id="@dateId" type="date" class="form-control form-control-sm" @bind="occurredOn" max="@Today.ToString("yyyy-MM-dd")" />
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="ResetDate">@(photos.Count > 0 ? "Use the photos' dates" : "Use today")</button>
+            }
+            else
+            {
+                @if (PhotoDay is { } day)
+                {
+                    <span class="composer-when">Taken @DayLabel(day).ToLowerInvariant()</span>
+                }
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => pickDate = true">Happened earlier?</button>
+            }
+        </div>
+
+        @if (Status is { } status)
+        {
+            <p class="composer-status" role="status">@status</p>
+        }
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" @onclick="SaveAsync"
+                    disabled="@(busy || (photos.Count == 0 && string.IsNullOrWhiteSpace(noteText)))">
+                @(photos.Count > 0 ? "Add to history" : "Add note")
+            </button>
+            <label class="btn btn-outline-primary icon-btn" for="@sheetInputId">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                @(photos.Count > 0 ? "More" : "Photo")
+            </label>
+            <input id="@sheetInputId" type="file" accept="image/*" multiple class="visually-hidden"
+                   @ref="sheetInput" @onchange="() => AddPhotosAsync(sheetInput)" disabled="@busy" />
+            <button type="button" class="btn btn-link ms-auto" @onclick="DiscardAsync">Cancel</button>
+        </div>
+    </div>
+</Sheet>
+
+@code {
+    [Parameter, EditorRequired]
+    public SubjectType SubjectType { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    /// <summary>The id of the file input, for the page's Photo button to point at.</summary>
+    [Parameter, EditorRequired]
+    public string PhotoInputId { get; set; } = "";
+
+    [Parameter]
+    public Guid? CoverPhotoId { get; set; }
+
+    /// <summary>Raised when the first photo should become the cover.</summary>
+    [Parameter]
+    public EventCallback<Guid?> OnCoverChanged { get; set; }
+
+    /// <summary>Raised after something was added, so the page can show it.</summary>
+    [Parameter]
+    public EventCallback OnAdded { get; set; }
+
+    private readonly string sheetInputId = $"composer-photo-{Guid.NewGuid():N}";
+    private readonly string dateId = $"composer-date-{Guid.NewGuid():N}";
+    private ElementReference pageInput;
+    private ElementReference sheetInput;
+    private ElementReference noteBox;
+
+    // Photos are stored as soon as they're picked, and kept as a draft with the note until the
+    // sheet is saved. Cancel, or leaving the page, deletes them again.
+    private readonly List<Photo> photos = [];
+    private string? noteText;
+    private DateOnly? occurredOn;
+    private bool pickDate;
+    private bool open;
+    private bool busy;
+    private bool focusNote;
+    private int failed;
+    private int undated;
+    private string? error;
+
+    private DateOnly Today => Time.Today();
+
+    private string SheetTitle => photos.Count switch
+    {
+        0 => "Add a note",
+        1 => "Add a photo",
+        var n => $"Add {n} photos"
+    };
+
+    // The one day the picked photos were taken on, when it's the same for all of them
+    private DateOnly? PhotoDay =>
+        photos.Select(p => Time.LocalDay(p.TakenAt)).Distinct().ToList() is [var only] ? only : null;
+
+    private string? Status =>
+        busy ? "Saving photos…"
+        : error ?? new PhotoSaveResult([], failed, undated).Message(guessesMatter: occurredOn is null);
+
+    /// <summary>Opens the sheet for a note, from the page's Note button.</summary>
+    public void OpenNote()
+    {
+        focusNote = true;
+        open = true;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusNote && open)
+        {
+            focusNote = false;
+            try
+            {
+                await noteBox.FocusAsync();
+            }
+            catch (InvalidOperationException)
+            {
+                // Not on screen yet
+            }
+        }
+    }
+
+    private async Task AddPhotosAsync(ElementReference input)
+    {
+        busy = true;
+        error = null;
+        open = true;
+        StateHasChanged();
+
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType, SubjectId);
+            photos.AddRange(result.Saved);
+            failed += result.Failed;
+            undated += result.Undated;
+        }
+        catch (Exception ex)
+        {
+            error = $"Couldn't save the photos: {ex.Message}";
+        }
+
+        busy = false;
+        // Nothing to show for a pick that came to nothing
+        if (photos.Count == 0 && error is null && failed == 0 && string.IsNullOrWhiteSpace(noteText))
+            open = false;
+    }
+
+    private async Task RemovePhotoAsync(Photo photo)
+    {
+        await Photos.DeleteAsync(photo.Id);
+        photos.Remove(photo);
+        if (photos.Count == 0)
+            undated = 0;
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        try
+        {
+            if (photos.Count > 0)
+            {
+                var text = string.IsNullOrWhiteSpace(noteText) ? null : noteText.Trim();
+                await TimelineService.AddPhotosAsync(SubjectType, SubjectId, photos, text, occurredOn);
+                if (CoverPhotoId is null)
+                    await OnCoverChanged.InvokeAsync(PhotoEntries.Cover(photos).Id);
+            }
+            else if (!string.IsNullOrWhiteSpace(noteText))
+            {
+                await Entries.AddAsync(new TimelineEntry
+                {
+                    SubjectType = SubjectType,
+                    SubjectId = SubjectId,
+                    Kind = TimelineKind.Note,
+                    OccurredAt = occurredOn is { } d ? Time.MomentOn(d) : Time.GetUtcNow(),
+                    Text = noteText.Trim()
+                });
+            }
+
+            photos.Clear(); // they belong to the entry now
+            Reset();
+            open = false;
+            await OnAdded.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            error = $"Couldn't save: {ex.Message}";
+        }
+        busy = false;
+    }
+
+    private async Task DiscardAsync()
+    {
+        await DiscardPhotosAsync();
+        Reset();
+        open = false;
+    }
+
+    private void Reset()
+    {
+        noteText = null;
+        failed = 0;
+        undated = 0;
+        error = null;
+        ResetDate();
+    }
+
+    private void ResetDate()
+    {
+        occurredOn = null;
+        pickDate = false;
+    }
+
+    private async Task DiscardPhotosAsync()
+    {
+        foreach (var photo in photos)
+            await Photos.DeleteAsync(photo.Id);
+        photos.Clear();
+    }
+
+    private string DayLabel(DateOnly day) =>
+        day == Today ? "Today"
+        : day == Today.AddDays(-1) ? "Yesterday"
+        : $"on {Labels.Date(day)}";
+
+    /// <summary>Photos picked but never added belong to nothing, so they go when the page does.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await DiscardPhotosAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away; the photos go with it
+        }
+    }
+}
