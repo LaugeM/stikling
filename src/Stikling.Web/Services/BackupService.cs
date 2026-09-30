@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using Stikling.Core.Backup;
 using Stikling.Core.Models;
+using Stikling.Core.Sync;
 
 namespace Stikling.Web.Services;
 
@@ -18,7 +19,7 @@ public sealed record ImportSummary(int Added, int Updated, int BroughtBack, int 
 /// Backup to a ZIP file and back again. The ZIP holds data.json with everything the app
 /// stores, plus the photos as ordinary .jpg files, so the pictures are usable on their own.
 /// </summary>
-public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles files, TimeProvider time)
+public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner sync, DeviceFiles files, TimeProvider time)
 {
     internal const string DataFile = "data.json";
 
@@ -56,6 +57,10 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, DeviceFiles
 
             foreach (var photo in data.Photos.Where(p => !p.IsDeleted))
             {
+                // On a synced device, a photo from another device only has its full size here once opened
+                if (!await photos.HasBytesAsync(photo.Id))
+                    await sync.FetchPhotoAsync(photo.Id, PhotoSize.Full);
+
                 await AddPhotoAsync(zip, PhotoPath(photo.Id, thumbnail: false), photo.Id, thumbnail: false);
                 await AddPhotoAsync(zip, PhotoPath(photo.Id, thumbnail: true), photo.Id, thumbnail: true);
             }

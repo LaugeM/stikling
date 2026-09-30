@@ -1,9 +1,10 @@
-# Runs the sync API and its database on your own machine:
+# Runs the sync API, its database and the photo storage on your own machine:
 #   docker compose up --build
 # The API is then on http://localhost:5180. To run the API from Visual Studio or
-# `dotnet run` instead, start only the database with `docker compose up sql`.
+# `dotnet run` instead, start only the database and storage with `docker compose up sql azurite`.
 #
 # The password is only for this local database, which is reachable from this machine alone.
+# Azurite stands in for Azure Blob Storage, and its account key is the same published one everywhere.
 
 name: stikling
 
@@ -24,6 +25,14 @@ services:
       retries: 20
       start_period: 10s
 
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite-blob --blobHost 0.0.0.0 --location /data --skipApiVersionCheck
+    ports:
+      - "127.0.0.1:10000:10000"
+    volumes:
+      - photo-data:/data
+
   api:
     build:
       context: .
@@ -31,11 +40,15 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Stikling: Server=sql,1433;Database=Stikling;User Id=sa;Password=Stikling-dev-1;TrustServerCertificate=True
+      ConnectionStrings__Photos: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
     ports:
       - "127.0.0.1:5180:8080"
     depends_on:
       sql:
         condition: service_healthy
+      azurite:
+        condition: service_started
 
 volumes:
   sql-data:
+  photo-data:

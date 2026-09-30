@@ -15,9 +15,10 @@ public sealed record MeCollection(Guid Id, string Name, string Role);
 /// <summary>
 /// Calls the sync API as whoever is signed in. Every request carries a fresh session token from
 /// <see cref="AccountService"/>, which the API checks. A request that can't reach the API, or
-/// that it turns away, throws <see cref="HttpRequestException"/>.
+/// that it turns away, throws <see cref="HttpRequestException"/>. Photo images are sent and
+/// fetched through <see cref="PhotoService"/>, which keeps them in JavaScript.
 /// </summary>
-public sealed class StiklingApi(AccountSettings settings, AccountService account) : ISyncServer
+public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos) : ISyncServer, IPhotoServer
 {
     private readonly HttpClient http = new() { BaseAddress = settings.ApiAddress };
 
@@ -69,6 +70,56 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
         return await response.Content.ReadFromJsonAsync<JsonElement>();
     }
 
+    public async Task<IReadOnlyList<StoredPhoto>> GetStoredAsync(Guid collectionId, IReadOnlyList<Guid> ids)
+    {
+        using var request = await RequestAsync(HttpMethod.Post, $"collections/{collectionId}/photos/stored");
+        request.Content = JsonContent.Create(new StoredPhotosRequest([.. ids]));
+        return (await SendAsync<StoredPhotosResponse>(request)).Photos;
+    }
+
+    /// <summary>How much space the collection's photos take on the server, and how much they may.</summary>
+    public async Task<PhotoUsage> GetPhotoUsageAsync(Guid collectionId)
+    {
+        using var request = await RequestAsync(HttpMethod.Get, $"collections/{collectionId}/photos/usage");
+        return await SendAsync<PhotoUsage>(request);
+    }
+
+    // The images go between the device database and the API in photos.js, so they never pass through .NET
+
+    public async Task<UploadOutcome> UploadAsync(Guid collectionId, Guid photoId, PhotoSize size)
+    {
+        var status = await photos.UploadAsync(ImageAddress(collectionId, photoId, size), await TokenAsync(), photoId, size == PhotoSize.Thumbnail);
+        return status switch
+        {
+            0 => UploadOutcome.NotHere,
+            >= 200 and < 300 => UploadOutcome.Uploaded,
+            404 => UploadOutcome.NotYet,
+            410 => UploadOutcome.Gone,
+            507 => UploadOutcome.Full,
+            413 or 415 => UploadOutcome.Refused,
+            _ => throw Failed(status),
+        };
+    }
+
+    public async Task<bool> DownloadAsync(Guid collectionId, Guid photoId, PhotoSize size)
+    {
+        var status = await photos.DownloadAsync(ImageAddress(collectionId, photoId, size), await TokenAsync(), photoId, size == PhotoSize.Thumbnail);
+        return status switch
+        {
+            200 => true,
+            404 => false,
+            _ => throw Failed(status),
+        };
+    }
+
+    private Uri ImageAddress(Guid collectionId, Guid photoId, PhotoSize size) =>
+        new(http.BaseAddress!, $"collections/{collectionId}/photos/{photoId}/{size.PathName()}");
+
+    private static HttpRequestException Failed(int status) =>
+        status < 0
+            ? new HttpRequestException("The API couldn't be reached.")
+            : new HttpRequestException($"The API answered {status}.", null, (HttpStatusCode)status);
+
     private async Task<T> SendAsync<T>(HttpRequestMessage request)
     {
         using var response = await http.SendAsync(request);
@@ -79,12 +130,13 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
 
     private async Task<HttpRequestMessage> RequestAsync(HttpMethod method, string path)
     {
-        // Answered like the API would answer a request without a sign-in
-        var token = await account.GetTokenAsync()
-            ?? throw new HttpRequestException("Nobody is signed in.", null, HttpStatusCode.Unauthorized);
-
         var request = new HttpRequestMessage(method, path);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await TokenAsync());
         return request;
     }
+
+    // Answered like the API would answer a request without a sign-in
+    private async Task<string> TokenAsync() =>
+        await account.GetTokenAsync()
+            ?? throw new HttpRequestException("Nobody is signed in.", null, HttpStatusCode.Unauthorized);
 }

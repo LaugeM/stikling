@@ -3,7 +3,7 @@
 // JSON objects with an "id" property as the key.
 
 const DB_NAME = "stikling";
-const DB_VERSION = 11;
+const DB_VERSION = 12;
 
 // The stores the first version created. Later versions add theirs in their own
 // upgrade block below, so don't add to this list.
@@ -11,7 +11,7 @@ const STORES_V1 = ["plants", "propagations", "timeline", "photos", "photoBlobs"]
 
 // Stores that don't hold records. Every other store is synced, so a write to it also goes on
 // the change list, the "changes" store, in the same step.
-const NOT_RECORDS = new Set(["photoBlobs", "changes", "syncState"]);
+const NOT_RECORDS = new Set(["photoBlobs", "changes", "syncState", "photoUploads", "photoDownloads"]);
 
 let dbPromise;
 
@@ -65,6 +65,11 @@ function openDb() {
                 db.createObjectStore("changes", { keyPath: "key" });
                 // How far this device has got with syncing, under the id "state"
                 db.createObjectStore("syncState", { keyPath: "id" });
+            }
+            if (event.oldVersion < 12) {
+                // Photos whose images may not have reached the server, and photos with no thumbnail here yet
+                db.createObjectStore("photoUploads", { keyPath: "id" });
+                db.createObjectStore("photoDownloads", { keyPath: "id" });
             }
         };
 
@@ -154,11 +159,8 @@ export async function remove(storeName, key) {
     });
 }
 
-// Binary data (photos) lives in its own store with the key given explicitly
-export async function putBlob(key, blob) {
-    await run("photoBlobs", "readwrite", store => store.put(blob, key));
-}
-
+// Binary data (photos) lives in its own store with the key given explicitly. It is written
+// together with the photo lists, in putPhotoImages and putFetchedImage below.
 export async function getBlob(key) {
     return (await run("photoBlobs", "readonly", store => store.get(key))) ?? null;
 }
@@ -167,8 +169,37 @@ export async function hasBlob(key) {
     return (await run("photoBlobs", "readonly", store => store.count(key))) > 0;
 }
 
-export async function removeBlob(key) {
-    await run("photoBlobs", "readwrite", store => store.delete(key));
+// A photo's images, stored together with its place on the list to send to the server. The
+// thumbnail is under "<id>:thumb", the key photos.js keeps it by.
+export async function putPhotoImages(id, full, thumb) {
+    await transact(["photoBlobs", "photoUploads"], "readwrite", tx => {
+        tx.objectStore("photoBlobs").put(full, id);
+        if (thumb) tx.objectStore("photoBlobs").put(thumb, `${id}:thumb`);
+        tx.objectStore("photoUploads").put({ id });
+    });
+}
+
+// An image fetched from the server, kept only if its photo is still here and not deleted, since
+// it may have been deleted while the image was on its way
+export async function putFetchedImage(id, key, blob) {
+    await transact(["photos", "photoBlobs"], "readwrite", tx => {
+        const request = tx.objectStore("photos").get(id);
+        request.onsuccess = () => {
+            if (request.result && !request.result.deletedAt) tx.objectStore("photoBlobs").put(blob, key);
+        };
+    });
+}
+
+// Frees a photo's images, and takes it off both photo lists
+export async function removePhotoImages(id) {
+    await transact(["photoBlobs", "photoUploads", "photoDownloads"], "readwrite", tx => forgetPhoto(tx, id));
+}
+
+function forgetPhoto(tx, id) {
+    tx.objectStore("photoBlobs").delete(id);
+    tx.objectStore("photoBlobs").delete(`${id}:thumb`);
+    tx.objectStore("photoUploads").delete(id);
+    tx.objectStore("photoDownloads").delete(id);
 }
 
 // Asks the browser not to clear our data when the device is low on space.
@@ -242,15 +273,18 @@ export async function markSent(sent) {
     });
 }
 
-// Puts every record of these kinds on the change list
+// Puts every record of these kinds on the change list, and the photos on their lists
 export async function queueAll(kinds) {
-    await transact(["changes", ...kinds], "readwrite", tx => {
+    const photos = kinds.includes("photos");
+    const stores = photos ? ["changes", "photoBlobs", "photoUploads", "photoDownloads", ...kinds] : ["changes", ...kinds];
+    await transact(stores, "readwrite", tx => {
         for (const kind of kinds) {
             const request = tx.objectStore(kind).getAllKeys();
             request.onsuccess = () => {
                 for (const id of request.result) noteChange(tx, kind, id);
             };
         }
+        if (photos) queuePhotos(tx);
     });
 }
 
@@ -270,9 +304,10 @@ export function getMany(kind, ids) {
 // Saves records from the server, each only if the copy here still has the updatedAt it was
 // compared with (or is still missing, when replaces is null). They don't go on the change list,
 // and a change here that lost to them comes off it. A photo deleted on another device frees its
-// image here too (under the keys photos.js keeps it by).
+// images here too, and one with no thumbnail here goes on the list to fetch.
 export async function saveFromServer(kind, copies) {
-    const stores = kind === "photos" ? [kind, "changes", "photoBlobs"] : [kind, "changes"];
+    const photos = kind === "photos";
+    const stores = photos ? [kind, "changes", "photoBlobs", "photoUploads", "photoDownloads"] : [kind, "changes"];
     await transact(stores, "readwrite", tx => {
         const store = tx.objectStore(kind);
         for (const { data, replaces } of copies) {
@@ -282,19 +317,60 @@ export async function saveFromServer(kind, copies) {
 
                 store.put(data);
                 tx.objectStore("changes").delete(`${kind}/${data.id}`);
-                if (kind === "photos" && data.deletedAt) {
-                    tx.objectStore("photoBlobs").delete(data.id);
-                    tx.objectStore("photoBlobs").delete(`${data.id}:thumb`);
-                }
+                if (photos && data.deletedAt) forgetPhoto(tx, data.id);
+                else if (photos) queueDownloadIfMissing(tx, data.id);
             };
         }
     });
 }
 
-// How many photos have their image on this device
-export async function countPhotoImages() {
-    const keys = await run("photoBlobs", "readonly", store => store.getAllKeys());
-    return keys.filter(key => !String(key).endsWith(":thumb")).length;
+function queueDownloadIfMissing(tx, id) {
+    const request = tx.objectStore("photoBlobs").count(`${id}:thumb`);
+    request.onsuccess = () => {
+        if (request.result === 0) tx.objectStore("photoDownloads").put({ id });
+    };
+}
+
+// Puts every photo with images here on the list to send, and every one without a thumbnail on
+// the list to fetch, for when the device starts over with a collection
+function queuePhotos(tx) {
+    const keys = tx.objectStore("photoBlobs").getAllKeys();
+    keys.onsuccess = () => {
+        for (const key of keys.result)
+            if (!String(key).endsWith(":thumb")) tx.objectStore("photoUploads").put({ id: key });
+    };
+
+    const photos = tx.objectStore("photos").getAll();
+    photos.onsuccess = () => {
+        for (const photo of photos.result)
+            if (!photo.deletedAt) queueDownloadIfMissing(tx, photo.id);
+    };
+}
+
+// Up to max ids from one of the photo lists, in key order, after the given id
+function listPhotos(storeName, after, max) {
+    return transact(storeName, "readonly", tx => {
+        const range = after ? IDBKeyRange.lowerBound(after, true) : null;
+        const request = tx.objectStore(storeName).getAllKeys(range, max);
+        return () => request.result;
+    });
+}
+
+async function unlistPhotos(storeName, ids) {
+    if (ids.length === 0) return;
+    await transact(storeName, "readwrite", tx => {
+        for (const id of ids) tx.objectStore(storeName).delete(id);
+    });
+}
+
+export const getPhotoUploads = (after, max) => listPhotos("photoUploads", after, max);
+export const removePhotoUploads = ids => unlistPhotos("photoUploads", ids);
+export const getPhotoDownloads = (after, max) => listPhotos("photoDownloads", after, max);
+export const removePhotoDownloads = ids => unlistPhotos("photoDownloads", ids);
+
+// How many photos taken or restored here haven't reached the server yet
+export async function countPhotoUploads() {
+    return await run("photoUploads", "readonly", store => store.count());
 }
 
 // Empties every store, for signing out and removing the data from this device

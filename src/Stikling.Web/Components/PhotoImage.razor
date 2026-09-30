@@ -1,5 +1,9 @@
-@* Shows a stored photo. The image data is read from the device database via PhotoService. *@
+@* Shows a stored photo. The image data is read from the device database via PhotoService. On a
+   synced device, a full size that isn't here yet is fetched, with the thumbnail shown meanwhile. *@
+@implements IDisposable
+@using Stikling.Core.Sync
 @inject PhotoService Photos
+@inject SyncRunner Sync
 
 @if (url is not null)
 {
@@ -26,7 +30,10 @@ else
 
     private string? url;
     private bool missing;
+    private bool small;
     private (Guid, bool) loadedFor;
+
+    protected override void OnInitialized() => Sync.PhotosArrived += OnPhotosArrived;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -34,7 +41,48 @@ else
             return;
 
         loadedFor = (PhotoId, Thumbnail);
-        url = await Photos.GetUrlAsync(PhotoId, Thumbnail);
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var (id, thumbnail) = loadedFor;
+        url = await Photos.GetUrlAsync(id, thumbnail);
+        small = false;
+
+        if (url is null && !thumbnail)
+        {
+            url = await Photos.GetUrlAsync(id, true);
+            small = url is not null;
+            _ = FetchFullAsync(id);
+        }
+
         missing = url is null;
     }
+
+    private async Task FetchFullAsync(Guid id)
+    {
+        if (!await Sync.FetchPhotoAsync(id, PhotoSize.Full) || loadedFor != (id, false))
+            return;
+
+        url = await Photos.GetUrlAsync(id, false) ?? url;
+        missing = url is null;
+        small = false;
+        StateHasChanged();
+    }
+
+    private void OnPhotosArrived()
+    {
+        // Only a photo shown as missing needs another look. A full size shown small is fetched on its own
+        if (!missing || small)
+            return;
+
+        _ = InvokeAsync(async () =>
+        {
+            await LoadAsync();
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose() => Sync.PhotosArrived -= OnPhotosArrived;
 }

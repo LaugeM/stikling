@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
+using Stikling.Api.Photos;
 using Stikling.Core.Sync;
 
 namespace Stikling.Api.Sync;
@@ -41,7 +42,7 @@ public static class RecordEndpoints
 
         // POST: changes from a device. Each record is kept if it wins over the version here, and
         // one that can't be kept is refused on its own, so it doesn't hold up the rest.
-        records.MapPost("", async (Guid collectionId, PushRequest request, StiklingDbContext db, TimeProvider clock) =>
+        records.MapPost("", async (Guid collectionId, PushRequest request, StiklingDbContext db, PhotoStorage photos, TimeProvider clock) =>
         {
             var received = request.Records ?? [];
             if (received.Count > SyncRules.BatchSize)
@@ -77,12 +78,9 @@ public static class RecordEndpoints
 
             await using var transaction = await db.Database.BeginTransactionAsync();
 
-            // Locks the collection's row until the end of the transaction, so two uploads to one
-            // collection take turns. Change numbers are then committed in order, and a device
-            // fetching at the same moment can't pass a number that is yet to be committed.
-            await db.Collections
-                .Where(c => c.Id == collectionId)
-                .ExecuteUpdateAsync(set => set.SetProperty(c => c.LastVersion, c => c.LastVersion));
+            // Two uploads to one collection take turns. Change numbers are then committed in order,
+            // and a device fetching at the same moment can't pass a number that is yet to be committed.
+            await db.LockCollectionAsync(collectionId);
             var collection = await db.Collections.SingleAsync(c => c.Id == collectionId);
 
             var ids = winners.Select(r => r.Stamp.Id).Distinct().ToList();
@@ -92,8 +90,12 @@ public static class RecordEndpoints
                 .ToDictionary(r => (r.Kind, r.Id));
 
             var newer = new List<SyncRecord>();
+            var deletedPhotos = new List<Guid>();
             foreach (var (kind, stamp, data) in winners)
             {
+                if (kind == SyncKinds.Photos && stamp.DeletedAt is not null)
+                    deletedPhotos.Add(stamp.Id);
+
                 if (!existing.TryGetValue((kind, stamp.Id), out var current))
                 {
                     db.Records.Add(new SyncedRecord
@@ -118,13 +120,25 @@ public static class RecordEndpoints
                     current.Data = data;
                 }
                 else if (SyncRules.Replaces(here, current.Data, stamp, data))
+                {
                     newer.Add(new SyncRecord(current.Kind, Parse(current.Data)));
+                    deletedPhotos.Remove(stamp.Id);
+                }
 
                 // Neither wins when it's the same version again, e.g. sent twice because an answer got lost
             }
 
             await db.SaveChangesAsync();
+
+            // A deleted photo's images go too. Its record stays, so other devices hear it was deleted
+            var goneImages = await db.PhotoImages
+                .Where(i => i.CollectionId == collectionId && deletedPhotos.Contains(i.PhotoId))
+                .ToListAsync();
+            db.PhotoImages.RemoveRange(goneImages);
+            await db.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            await photos.DeleteAsync(goneImages);
 
             return Results.Ok(new PushResponse(newer, refused));
         })

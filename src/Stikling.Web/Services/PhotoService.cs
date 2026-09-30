@@ -91,6 +91,20 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     public async Task PutBytesAsync(Guid id, byte[] bytes, byte[]? thumbnail) =>
         await (await Module).InvokeVoidAsync("putBytes", id, bytes, thumbnail);
 
+    /// <summary>
+    /// Sends the image kept here to <paramref name="address"/>. Returns the HTTP status, 0 when the
+    /// image isn't on this device, or -1 when the address couldn't be reached.
+    /// </summary>
+    public async Task<int> UploadAsync(Uri address, string token, Guid id, bool thumbnail) =>
+        await (await Module).InvokeAsync<int>("upload", address.ToString(), token, id, thumbnail);
+
+    /// <summary>
+    /// Fetches the image from <paramref name="address"/> and keeps it here. Returns the HTTP status,
+    /// or -1 when the address couldn't be reached.
+    /// </summary>
+    public async Task<int> DownloadAsync(Uri address, string token, Guid id, bool thumbnail) =>
+        await (await Module).InvokeAsync<int>("download", address.ToString(), token, id, thumbnail);
+
     /// <summary>Removes the photo: its metadata is soft-deleted and the image data is freed.</summary>
     public async Task DeleteAsync(Guid id)
     {

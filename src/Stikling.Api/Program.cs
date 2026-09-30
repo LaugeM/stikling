@@ -1,9 +1,11 @@
 using System.Text.Json.Serialization;
+using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Auth;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
 using Stikling.Api.People;
+using Stikling.Api.Photos;
 using Stikling.Api.Sync;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<StiklingDbContext>((services, options) =>
     options.UseSqlServer(services.GetRequiredService<IConfiguration>().GetConnectionString("Stikling")
         ?? throw new InvalidOperationException("ConnectionStrings:Stikling is not set.")));
+
+builder.Services.AddSingleton(services => new BlobServiceClient(
+    services.GetRequiredService<IConfiguration>().GetConnectionString("Photos")
+        ?? throw new InvalidOperationException("ConnectionStrings:Photos is not set.")));
+builder.Services.AddSingleton<PhotoStorage>();
+builder.Services.Configure<PhotoOptions>(builder.Configuration.GetSection("Photos"));
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddHttpContextAccessor();
@@ -51,5 +59,6 @@ app.MapMe();
 app.MapSettings();
 app.MapCollections();
 app.MapRecords();
+app.MapPhotos();
 
 app.Run();
