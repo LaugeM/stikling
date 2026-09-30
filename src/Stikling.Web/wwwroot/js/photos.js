@@ -1,4 +1,5 @@
-// Photo handling that stays in the browser: resizing, compressing, storing, displaying,
+// Photo handling that stays in the browser: resizing, compressing (WebP, or JPEG where the
+// browser can't make WebP), storing, displaying,
 // and sending to and fetching from the sync API. Full-size camera photos (often 5-10 MB)
 // never cross into .NET.
 
@@ -6,7 +7,8 @@ import { getBlob, hasBlob, putPhotoImages, putFetchedImage, removePhotoImages } 
 
 const FULL_SIZE = 1600;   // longest side in pixels
 const THUMB_SIZE = 360;
-const QUALITY = 0.82;     // JPEG quality: small files, no visible loss on a phone
+const WEBP_QUALITY = 0.8;  // WebP quality: about the same look as JPEG at 0.82, in a smaller file
+const JPEG_QUALITY = 0.82; // JPEG quality, for browsers that can't make WebP: small files, no visible loss on a phone
 
 const urlCache = new Map();
 
@@ -24,8 +26,20 @@ async function resize(bitmap, maxSide) {
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(bitmap, 0, 0, width, height);
 
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", QUALITY));
+    const toBlob = (type, quality) => new Promise(resolve => canvas.toBlob(resolve, type, quality));
+
+    // A browser that can't make WebP quietly gives back a PNG (or null), so check what came back
+    let blob = await toBlob("image/webp", WEBP_QUALITY);
+    if (blob?.type !== "image/webp")
+        blob = await toBlob("image/jpeg", JPEG_QUALITY);
     return { blob, width, height };
+}
+
+// The type of an image from how its bytes start: WebP is "RIFF", four size bytes, then "WEBP".
+// Anything else is taken to be a JPEG, which is what photos saved before WebP are.
+function imageType(bytes) {
+    const at = (offset, text) => [...text].every((c, i) => bytes[offset + i] === c.charCodeAt(0));
+    return bytes.length >= 12 && at(0, "RIFF") && at(8, "WEBP") ? "image/webp" : "image/jpeg";
 }
 
 // The date the camera saved in a JPEG, as the text it wrote, e.g. "2023:05:14 10:22:31".
@@ -166,8 +180,8 @@ export function hasBytes(id) {
 }
 
 export async function putBytes(id, bytes, thumbBytes) {
-    const thumb = thumbBytes ? new Blob([thumbBytes], { type: "image/jpeg" }) : null;
-    await putPhotoImages(id, new Blob([bytes], { type: "image/jpeg" }), thumb);
+    const thumb = thumbBytes ? new Blob([thumbBytes], { type: imageType(thumbBytes) }) : null;
+    await putPhotoImages(id, new Blob([bytes], { type: imageType(bytes) }), thumb);
 
     // Drop any object URL made before the photo came back
     forgetUrls(id);
@@ -184,7 +198,7 @@ export async function upload(address, token, id, thumbnail) {
     try {
         const response = await fetch(address, {
             method: "PUT",
-            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "image/jpeg" },
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": imageType(new Uint8Array(await blob.slice(0, 12).arrayBuffer())) },
             body: blob
         });
         return response.status;
@@ -199,12 +213,13 @@ export async function download(address, token, id, thumbnail) {
     try {
         const response = await fetch(address, { headers: { "Authorization": `Bearer ${token}` } });
         if (!response.ok) return response.status;
-        blob = await response.blob();
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        blob = new Blob([bytes], { type: imageType(bytes) });
     } catch {
         return -1;
     }
 
-    await putFetchedImage(id, thumbnail ? thumbKey(id) : id, new Blob([blob], { type: "image/jpeg" }));
+    await putFetchedImage(id, thumbnail ? thumbKey(id) : id, blob);
     forgetUrls(id);
     return 200;
 }

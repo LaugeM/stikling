@@ -47,13 +47,22 @@ public class PhotoTests(ApiFactory api)
         return id;
     }
 
-    /// <summary>Bytes that start like a JPEG, which is all the server checks.</summary>
+    /// <summary>Bytes that start like a JPEG, which is what the server checks.</summary>
     private static byte[] Jpeg(int length, byte fill = 0x42)
     {
         var bytes = Enumerable.Repeat(fill, length).ToArray();
         bytes[0] = 0xFF;
         bytes[1] = 0xD8;
         bytes[2] = 0xFF;
+        return bytes;
+    }
+
+    /// <summary>Bytes that start like a WebP file.</summary>
+    private static byte[] WebP(int length)
+    {
+        var bytes = Enumerable.Repeat((byte)0x42, length).ToArray();
+        "RIFF"u8.CopyTo(bytes);
+        "WEBP"u8.CopyTo(bytes.AsSpan(8));
         return bytes;
     }
 
@@ -186,7 +195,46 @@ public class PhotoTests(ApiFactory api)
     }
 
     [Fact]
-    public async Task Only_jpegs_are_taken()
+    public async Task A_webp_is_taken_and_comes_back_as_a_webp()
+    {
+        var me = await SignIn();
+        var id = await AddPhoto(me);
+        var image = WebP(1000);
+
+        var response = await Upload(me, id, "full", image);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        var fetched = await me.Client.GetAsync($"/collections/{me.CollectionId}/photos/{id}/full");
+        Assert.Equal("image/webp", fetched.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(image, await fetched.Content.ReadAsByteArrayAsync());
+    }
+
+    [Fact]
+    public async Task A_jpeg_comes_back_as_a_jpeg()
+    {
+        var me = await SignIn();
+        var id = await AddPhoto(me);
+        await Upload(me, id, "thumb", Jpeg(500));
+
+        var fetched = await me.Client.GetAsync($"/collections/{me.CollectionId}/photos/{id}/thumb");
+
+        Assert.Equal("image/jpeg", fetched.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
+    public async Task A_png_is_turned_away()
+    {
+        var me = await SignIn();
+        var id = await AddPhoto(me);
+        byte[] png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0];
+
+        var response = await Upload(me, id, "full", png);
+
+        Assert.Equal(HttpStatusCode.UnsupportedMediaType, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Only_webps_and_jpegs_are_taken()
     {
         var me = await SignIn();
         var id = await AddPhoto(me);

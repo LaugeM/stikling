@@ -50,14 +50,20 @@ public static class PhotoEndpoints
                 return Results.NotFound();
 
             var there = await db.PhotoImages.AnyAsync(i => i.CollectionId == collectionId && i.PhotoId == photoId && i.Size == which);
-            if (!there || await storage.OpenAsync(collectionId, photoId, which) is not { } image)
+            if (!there || await storage.OpenAsync(collectionId, photoId, which) is not { } stream)
                 return Results.NotFound();
 
-            return Results.Stream(image, "image/jpeg");
+            // An image is at most MaxImageBytes, so it can be read whole to tell what kind it is
+            using var memory = new MemoryStream();
+            await using (stream)
+                await stream.CopyToAsync(memory);
+            var bytes = memory.ToArray();
+
+            return Results.Bytes(bytes, (PhotoRules.FormatOf(bytes) ?? ImageFormat.Jpeg).ContentType);
         })
         .RequireAuthorization(CollectionPolicies.View);
 
-        // PUT: the image as it is stored on the device, a JPEG, as the body
+        // PUT: the image as it is stored on the device, a WebP or a JPEG, as the body
         photos.MapPut("/{photoId:guid}/{size}", async (
             Guid collectionId, Guid photoId, string size, HttpRequest request,
             StiklingDbContext db, PhotoStorage storage, IOptions<PhotoOptions> options, TimeProvider clock) =>
@@ -71,8 +77,8 @@ public static class PhotoEndpoints
 
             if (await ReadImageAsync(request) is not { } image)
                 return Results.Problem($"An image can be at most {PhotoRules.MaxImageBytes} bytes.", statusCode: StatusCodes.Status413PayloadTooLarge);
-            if (!PhotoRules.LooksLikeJpeg(image))
-                return Results.Problem("The image needs to be a JPEG.", statusCode: StatusCodes.Status415UnsupportedMediaType);
+            if (PhotoRules.FormatOf(image) is null)
+                return Results.Problem("The image needs to be a WebP or a JPEG.", statusCode: StatusCodes.Status415UnsupportedMediaType);
 
             var limit = options.Value.MaxBytesPerCollection;
             if (await UsedAfterAsync(db, collectionId, photoId, which, image.Length) > limit)

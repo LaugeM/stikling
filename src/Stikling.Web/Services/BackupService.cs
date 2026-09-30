@@ -17,7 +17,7 @@ public sealed record ImportSummary(int Added, int Updated, int BroughtBack, int 
 
 /// <summary>
 /// Backup to a ZIP file and back again. The ZIP holds data.json with everything the app
-/// stores, plus the photos as ordinary .jpg files, so the pictures are usable on their own.
+/// stores, plus the photos as ordinary .webp or .jpg files, whichever each was saved as, so the pictures are usable on their own.
 /// </summary>
 public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner sync, DeviceFiles files, TimeProvider time)
 {
@@ -61,8 +61,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
                 if (!await photos.HasBytesAsync(photo.Id))
                     await sync.FetchPhotoAsync(photo.Id, PhotoSize.Full);
 
-                await AddPhotoAsync(zip, PhotoPath(photo.Id, thumbnail: false), photo.Id, thumbnail: false);
-                await AddPhotoAsync(zip, PhotoPath(photo.Id, thumbnail: true), photo.Id, thumbnail: true);
+                await AddPhotoAsync(zip, photo.Id, thumbnail: false);
+                await AddPhotoAsync(zip, photo.Id, thumbnail: true);
             }
         }
 
@@ -150,9 +150,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         {
             if (await photos.HasBytesAsync(photo.Id))
                 continue;
-            if (await ReadEntryAsync(zip, PhotoPath(photo.Id, thumbnail: false)) is not { } full)
+            if (await ReadPhotoAsync(zip, photo.Id, thumbnail: false) is not { } full)
                 continue;
-            var thumbnail = await ReadEntryAsync(zip, PhotoPath(photo.Id, thumbnail: true));
+            var thumbnail = await ReadPhotoAsync(zip, photo.Id, thumbnail: true);
             await photos.PutBytesAsync(photo.Id, full, thumbnail);
             restoredPhotos++;
         }
@@ -168,13 +168,14 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         return result;
     }
 
-    private async Task AddPhotoAsync(ZipArchive zip, string path, Guid id, bool thumbnail)
+    private async Task AddPhotoAsync(ZipArchive zip, Guid id, bool thumbnail)
     {
         if (await photos.GetBytesAsync(id, thumbnail) is not { } bytes)
             return;
 
-        // JPEG data is already compressed; packing it again only costs time
-        await using var entry = zip.CreateEntry(path, CompressionLevel.NoCompression).Open();
+        // WebP and JPEG data is already compressed; packing it again only costs time
+        var extension = (PhotoRules.FormatOf(bytes) ?? ImageFormat.Jpeg).Extension;
+        await using var entry = zip.CreateEntry(PhotoPath(id, thumbnail, extension), CompressionLevel.NoCompression).Open();
         await entry.WriteAsync(bytes);
     }
 
@@ -189,6 +190,11 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         return buffer.ToArray();
     }
 
-    private static string PhotoPath(Guid id, bool thumbnail) =>
-        thumbnail ? $"photos/{id}-small.jpg" : $"photos/{id}.jpg";
+    /// <summary>The photo's file in the backup, whichever of the two formats it was saved as. Older backups only have .jpg.</summary>
+    private static async Task<byte[]?> ReadPhotoAsync(ZipArchive zip, Guid id, bool thumbnail) =>
+        await ReadEntryAsync(zip, PhotoPath(id, thumbnail, ImageFormat.WebP.Extension))
+        ?? await ReadEntryAsync(zip, PhotoPath(id, thumbnail, ImageFormat.Jpeg.Extension));
+
+    private static string PhotoPath(Guid id, bool thumbnail, string extension) =>
+        thumbnail ? $"photos/{id}-small.{extension}" : $"photos/{id}.{extension}";
 }

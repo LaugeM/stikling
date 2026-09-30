@@ -33,7 +33,7 @@ public enum UploadOutcome
     /// <summary>The collection's photos have used all the space it has on the server.</summary>
     Full,
 
-    /// <summary>The server will never take this image, e.g. it isn't a JPEG. Sending it again wouldn't help.</summary>
+    /// <summary>The server will never take this image, e.g. it isn't a WebP or a JPEG. Sending it again wouldn't help.</summary>
     Refused,
 }
 
