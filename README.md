@@ -1,24 +1,58 @@
-# Stikling
+<p align="center">
+  <img src="src/Stikling.Web/wwwroot/icon-192.png" width="80" alt="">
+</p>
 
-**Track your plants and every cutting they give you.**
+<h1 align="center">Stikling</h1>
 
-*Stikling* is Danish for "cutting". It's a free plant and propagation tracker for houseplant hobbyists. Keep track of your plants, the cuttings and corms you take from them, and how they develop, with a photo timeline for each one.
+<p align="center">
+  <b>Track your plants and every cutting they give you.</b><br>
+  <a href="https://stikling.app">stikling.app</a>
+</p>
 
-Stikling is a Progressive Web App: it runs in the browser, can be installed on your phone's home screen, and works offline. Everything is kept on your own device, and the app works fully without an account. Signing in keeps your plants and photos the same on all your devices. Try it at [stikling.app](https://stikling.app).
+*Stikling* is Danish for "cutting". It's a free app for houseplant people: keep track of your plants, the cuttings, corms and offsets you take from them, and how they all get on, with a photo history for each one.
 
-> Status: v1 features are in place. See the [feature list](docs/FEATURES.md) for everything the app could do, and the [Roadmap](#roadmap) for where it is now.
+Open [stikling.app](https://stikling.app) on your phone and start adding plants. It works offline and without an account, and you can add it to your home screen like any other app.
 
-## Features (planned for v1)
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/plants-dark.png">
+    <img src="docs/screenshots/plants-light.png" width="260" alt="The plant list, with a photo, name, room and tags for each plant">
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/cutting-dark.png">
+    <img src="docs/screenshots/cutting-light.png" width="260" alt="A pothos cutting rooting in a jar of water, ten days after it was taken">
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/props-dark.png">
+    <img src="docs/screenshots/props-light.png" width="260" alt="The propagations list, with two batches of corms in perlite and sphagnum moss compared side by side">
+  </picture>
+</p>
 
-- **Plants**: name, genus/species/cultivar, location, where it came from, status and a cover photo.
-- **Propagations**: cuttings, corms, offsets, seeds, divisions and air layers, linked to their parent plant. Track the medium (water, perlite, sphagnum, LECA, PON, soil), stage and count. Promote rooted propagations to plants while keeping the family tree.
-- **Photo timeline**: progress photos and notes for every plant and propagation.
-- **Today**: propagations that haven't been checked in a while.
-- **Backup**: export and import everything, photos included, as a ZIP file.
+## What it does
 
-The longer list, with the ideas for later versions, is in [docs/FEATURES.md](docs/FEATURES.md).
+- **Plants**: names, rooms, where you got them, tags, and a history of notes and photos.
+- **Propagations**: cuttings, corms, offsets, seeds, divisions and air layers, each linked to the plant it came from, with what it's rooting in, how far along it is and how many you started. When one has rooted, pot it up as a new plant and the family tree stays.
+- **Experiments**: start batches side by side in different mediums and see which one roots best and fastest.
+- **Today**: what needs doing, like a propagation you haven't looked at in a while, a pest treatment that's due, or a plant you flagged.
+- **Care, pests and supplies**: log watering and feeding, follow a pest problem and its treatments, and keep track of your pots, soil mixes and fertilisers. All of it is optional. A plant with just a name is fine.
 
-## Tech stack
+Everything that's built, and what's planned next, is in the [feature list](docs/FEATURES.md).
+
+## Your data
+
+Everything is stored on your own device, so the app works offline and without an account. If you sign in, your plants, photos and settings are kept the same on all your devices. You can also export everything, photos included, as a ZIP file whenever you like.
+
+The [privacy policy](https://stikling.app/privacy) says what is kept on the server when you sign in, and how to delete it.
+
+Stikling is free, with no ads.
+
+## About
+
+I built Stikling to keep track of my own plants and the cuttings I take from them. It's a hobby project by [LaugeM](https://github.com/LaugeM), and the code is open source under the [AGPL-3.0 license](LICENSE).
+
+## Development
+
+### Tech stack
 
 - C# / .NET 10, **Blazor WebAssembly** (standalone, PWA)
 - Bootstrap 5
@@ -27,11 +61,9 @@ The longer list, with the ideas for later versions, is in [docs/FEATURES.md](doc
 - The sync API: ASP.NET Core minimal API with EF Core on SQL Server, photos in Azure Blob Storage, sign-in through Clerk, run locally with Docker Compose
 - The app on GitHub Pages, the API on Azure Container Apps with Azure SQL, described in Bicep and deployed with GitHub Actions
 
-### Why Blazor WebAssembly?
+The app runs entirely in the browser, so it can work offline and keep data on the device without a backend. It is hosted for free as static files, and the sync API is only used by people who sign in. The Razor components can later be reused in a .NET MAUI Blazor Hybrid app if a native Android/iOS version makes sense.
 
-The app runs entirely in the browser, so it can work offline and keep data on the device without a backend. The app itself is hosted for free as static files, and the sync API is only used by people who sign in. The Razor components can later be reused in a .NET MAUI Blazor Hybrid app if a native Android/iOS version makes sense.
-
-## Project structure
+### Project structure
 
 ```
 src/Stikling.Core/          Models and domain rules (no browser dependencies, unit tested)
@@ -44,7 +76,7 @@ infra/                     The Azure resources for the hosted API, in Bicep
 .github/                   Build/test/deploy workflow and GitHub Pages prep script
 ```
 
-## Running locally
+### Running locally
 
 Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
@@ -80,25 +112,10 @@ To try it, start the API as above and run the app on one of the origins the API 
 dotnet run --project src/Stikling.Web --urls http://localhost:5170
 ```
 
-## Deployment
+### Deployment
 
 Every push to `main` runs the tests, deploys the app to GitHub Pages and the API to Azure. In the repo settings under Pages, the source needs to be set to GitHub Actions, and the custom domain to stikling.app.
 
 [`prepare-pages.py`](.github/scripts/prepare-pages.py) sets the `<base href>`, updates the service worker's hash for `index.html`, and adds a `404.html` copy so deep links work.
 
 [docs/ops/hosting.md](docs/ops/hosting.md) has how the API is hosted and how to set it up again. [docs/ops/data-requests.md](docs/ops/data-requests.md) has what to do when someone asks for a copy of their data.
-
-## Roadmap
-
-1. Scaffold, layout and deployment ✅
-2. Plants ✅
-3. Photos and timeline ✅
-4. Propagations and lineage ✅
-5. Backup/restore and the Today screen ✅
-6. Later: care and fertiliser log, pest treatment tracking, your own soil mixes, success rates per medium, QR labels, optional accounts and sync
-
-The full [feature list](docs/FEATURES.md) has the details and everything else that is on the table.
-
-## About
-
-A hobby project by [LaugeM](https://github.com/LaugeM).
