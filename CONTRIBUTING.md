@@ -4,7 +4,7 @@ Thanks for taking a look. Bug reports, questions, ideas and pull requests all go
 
 ## Issues
 
-- **Bugs:** [open a bug report](https://github.com/LaugeM/stikling/issues/new?template=bug_report.yml). Say what phone and browser you used, whether the app was installed to the home screen, and whether you were signed in, since those change how the app behaves.
+- **Bugs:** [open a bug report](https://github.com/LaugeM/stikling/issues/new?template=bug_report.yml). Say what device and browser you used, whether you used the installed app or a browser tab, and whether you were signed in, since those change how the app behaves.
 - **Ideas:** check [docs/FEATURES.md](docs/FEATURES.md) first. It lists what's built and a lot that's planned, so your idea may already be on it. If it isn't, [open a feature request](https://github.com/LaugeM/stikling/issues/new?template=feature_request.yml).
 - **Your account or data:** don't put personal details in an issue. Email support@stikling.app instead.
 
@@ -29,7 +29,7 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 dotnet run --project src/Stikling.Web
 ```
 
-The app works fully like this, with everything stored in the browser. You only need the sync API to work on signing in or sync.
+The app works fully like this, with everything stored in the browser. You only need the sync API if you're working on signing in or sync.
 
 Run the tests:
 
@@ -51,7 +51,7 @@ The API is then on http://localhost:5180, with `/health` to check it's up. It cr
 
 ### Signing in
 
-When the app runs in Development, it reads `src/Stikling.Web/wwwroot/appsettings.Development.json`, which points at Clerk's development instance and the local API. Settings then has an Account row at the top.
+When the app runs in Development, it reads `src/Stikling.Web/wwwroot/appsettings.Development.json`, which points at Clerk's development instance and the local API. Settings then has an Account row at the top. The published site reads `appsettings.Production.json` instead, which points at the production instance and the hosted API.
 
 The API only accepts sign-ins from the origins in `AppOrigins` in `src/Stikling.Api/appsettings.Development.json`, so run the app on one of them:
 
@@ -84,13 +84,13 @@ A new kind of record touches more places than the model and its page, and missin
 - the model in `Core/Models` and a repository interface next to its service
 - a new `if (event.oldVersion < N)` block in `wwwroot/js/db.js` with `DB_VERSION` raised (never change an old block)
 - the store name in `Stores` in `Services/IndexedDb.cs`, the implementation in `IndexedDbRepositories.cs`, and the registration in `Program.cs`
-- the store name in `SyncKinds` in `Core/Sync`
+- the store name in `SyncKinds` in `Core/Sync` (a test checks this list against `BackupData`)
 - `BackupData` and its counts, export and restore in `BackupService`, and the restore summary in `Pages/Settings.razor`
 - a fake in `tests/Stikling.Core.Tests/Fakes.cs`, and `BackupTests`
 
 ## The interface
 
-- Stikling is used on a phone first, often with one hand. Check changes at phone width.
+- Stikling is used on a phone first, often with one hand, but it runs in any browser on a computer too. Check changes at phone width, and that they still look right on a wider screen.
 - The look is described in [DESIGN.md](DESIGN.md), and who the app is for in [PRODUCT.md](PRODUCT.md). The app should stay simple on top: the common path is short, and extra fields and settings stay out of the way until someone asks for them.
 - Write for someone who doesn't know the plant words. "Propagation" alone isn't enough without an explanation.
 - The Help page (`Pages/Help.razor`) has to describe the app as it is. If you add or change a feature, update the answers it affects.

@@ -20,17 +20,17 @@ body:
   - type: input
     id: device
     attributes:
-      label: Phone or computer, and browser
-      placeholder: e.g. Pixel 8 with Chrome, or iPhone 15 with Safari
+      label: Device and browser
+      placeholder: e.g. Pixel 8 with Chrome, iPhone 15 with Safari, or a Windows laptop with Edge
     validations:
       required: true
   - type: dropdown
     id: installed
     attributes:
-      label: Is the app installed to your home screen?
+      label: Installed app or browser tab?
       options:
-        - "Yes"
-        - "No, I use it in the browser"
+        - The installed app, from the home screen or the computer's app list
+        - A browser tab
         - Not sure
   - type: dropdown
     id: signed-in
