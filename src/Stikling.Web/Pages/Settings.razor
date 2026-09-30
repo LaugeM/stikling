@@ -23,7 +23,7 @@
         <div class="settings-rows">
             @if (account is { SignedIn: true })
             {
-                <SettingsRow Href="account" Title="@account.Email" Detail="@(SyncProblem is null ? SyncLine : "Couldn't sync. Tap to see why.")" Alert="@(SyncProblem is not null)" />
+                <SettingsRow Href="account" Title="@account.Email" Detail="@(Sync.HasProblem ? "Sync needs a look. Tap to see why." : SyncLine)" Alert="@Sync.HasProblem" />
             }
             else if (accountChecking)
             {
@@ -174,24 +174,6 @@
         (_, { } at) => $"Synced on {Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))}",
         _ => "Not synced yet"
     };
-
-    private string? SyncProblem
-    {
-        get
-        {
-            if (Sync.Running)
-                return null;
-            if (Sync.Problem is { } problem)
-                return Sync.Pending > 0 ? $"{problem} {Labels.Count(Sync.Pending, "change")} waiting." : problem;
-            if (Sync.Refused > 0)
-                return $"The server turned down {Labels.Count(Sync.Refused, "change")}, and {(Sync.Refused == 1 ? "it" : "they")} "
-                    + "will be tried again. If this keeps happening, check the date and time on this device.";
-            if (Sync.PhotosFull)
-                return "Your photos have used all the space they have on the server, so new ones stay on this device "
-                    + "for now. Deleting photos you don't need makes room.";
-            return null;
-        }
-    }
 
     private void OnSyncChanged() => _ = InvokeAsync(StateHasChanged);
 
