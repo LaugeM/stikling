@@ -18,7 +18,7 @@ public sealed record RoomRename(string Name, int Plants, int Propagations, bool 
 /// </summary>
 public sealed class RoomService(IPlaceRepository places, IPlantRepository plants, IPropagationRepository propagations)
 {
-    /// <summary>The rooms in use, with the spots inside them.</summary>
+    /// <summary>Every room, with the spots inside it, including the ones with nothing in them.</summary>
     public async Task<IReadOnlyList<Room>> GetAllAsync() =>
         Room.List(await places.GetPlacesAsync(), await plants.GetAllAsync(), await propagations.GetAllAsync());
 
@@ -85,6 +85,34 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
 
         await MergeAsync(place, existing);
         return new RoomRename(existing.Name, plantCount, propagationCount, Merged: true);
+    }
+
+    /// <summary>
+    /// Removes a room or spot with nothing in it. A room goes together with its empty spots. Anything
+    /// still in it, or in a spot of the room, makes this throw.
+    /// </summary>
+    /// <remarks>
+    /// A plant another device moves into the place at the same time can end up pointing at a
+    /// removed place. That shows as no location, the same as a place deleted on another device.
+    /// </remarks>
+    public async Task RemoveAsync(Guid id)
+    {
+        var all = await places.GetPlacesAsync();
+        if (all.Find(id) is not { } place)
+            throw new ArgumentException("That room isn't there any more.", nameof(id));
+
+        var held = (await plants.GetAllAsync()).Count(p => !p.IsDeleted && all.IsIn(p.PlaceId, place.Id))
+            + (await propagations.GetAllAsync()).Count(p => !p.IsDeleted && all.IsIn(p.PlaceId, place.Id));
+        if (held > 0)
+            throw new InvalidOperationException($"{place.Name} still has something in it.");
+
+        if (!place.IsSpot)
+        {
+            foreach (var spot in all.SpotsIn(place.Id).ToList())
+                await places.DeleteAsync(spot.Id);
+        }
+
+        await places.DeleteAsync(place.Id);
     }
 
     private async Task MergeAsync(Place from, Place into)

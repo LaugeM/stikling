@@ -1,0 +1,33 @@
+.add-form {
+    margin-top: 0.25rem;
+}
+
+.add-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.tag-plants {
+    max-height: 16rem;
+    overflow-y: auto;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.tag-plant {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    margin: 0;
+    padding-left: 0;
+}
+
+.tag-plant .form-check-input {
+    float: none;
+    margin: 0;
+    flex: none;
+}

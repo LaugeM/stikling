@@ -256,4 +256,61 @@ public class RoomServiceTests
         await Assert.ThrowsAsync<ArgumentException>(() => Service.RenameAsync(stue.Id, "   "));
         await Assert.ThrowsAsync<ArgumentException>(() => Service.RenameAsync(stue.Id, "Living room / Shelf"));
     }
+
+    [Fact]
+    public async Task An_empty_room_is_removed_together_with_its_empty_spots()
+    {
+        var office = places.Add("Office");
+        var shelf = places.Add("Shelf", office);
+        var kitchen = places.Add("Kitchen");
+
+        await Service.RemoveAsync(office.Id);
+
+        Assert.True(places.Places[office.Id].IsDeleted);
+        Assert.True(places.Places[shelf.Id].IsDeleted);
+        Assert.False(places.Places[kitchen.Id].IsDeleted);
+        Assert.Equal(["Kitchen"], (await Service.GetAllAsync()).Select(r => r.Name));
+    }
+
+    [Fact]
+    public async Task An_empty_spot_is_removed_and_its_room_stays()
+    {
+        var office = places.Add("Office");
+        var shelf = places.Add("Shelf", office);
+
+        await Service.RemoveAsync(shelf.Id);
+
+        Assert.True(places.Places[shelf.Id].IsDeleted);
+        Assert.False(places.Places[office.Id].IsDeleted);
+    }
+
+    [Fact]
+    public async Task A_room_or_spot_with_a_plant_or_propagation_is_not_removed()
+    {
+        var office = places.Add("Office");
+        var shelf = places.Add("Shelf", office);
+        var desk = places.Add("Desk", office);
+        AddPlant("Monstera", shelf);
+        AddPropagation("Coleus", desk);
+        var hall = places.Add("Hall");
+        AddPlant("Pilea", hall);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Service.RemoveAsync(shelf.Id));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Service.RemoveAsync(desk.Id));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Service.RemoveAsync(office.Id));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Service.RemoveAsync(hall.Id));
+
+        Assert.All(places.Places.Values, p => Assert.False(p.IsDeleted));
+    }
+
+    [Fact]
+    public async Task A_deleted_plant_does_not_keep_a_room_from_being_removed()
+    {
+        var office = places.Add("Office");
+        AddPlant("Gone", office).DeletedAt = DateTimeOffset.UtcNow;
+
+        await Service.RemoveAsync(office.Id);
+
+        Assert.True(places.Places[office.Id].IsDeleted);
+    }
 }

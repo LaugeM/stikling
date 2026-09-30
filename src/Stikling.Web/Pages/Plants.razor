@@ -64,7 +64,7 @@ else
                 <select class="form-select w-auto" aria-label="Room"
                         @bind="room" @bind:after="RoomPicked">
                     <option value="">All rooms</option>
-                    @foreach (var r in rooms)
+                    @foreach (var r in roomsInUse)
                     {
                         <option value="@r.Id">@r.Name</option>
                     }
@@ -267,6 +267,7 @@ else
 
     private IReadOnlyList<Plant>? all;
     private IReadOnlyList<Room> rooms = [];
+    private IReadOnlyList<Room> roomsInUse = []; // what the room filter offers: no empty rooms
     private Places places = Places.None;
     private List<Plant> visible = [];
 
@@ -312,6 +313,7 @@ else
         all = await Repository.GetAllAsync();
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, all, []);
+        roomsInUse = Room.InUse(rooms);
         tags = PlantTags.InUse(all);
         careLogs = await CareLogRepository.GetAllAsync();
         pestCases = await PestCaseRepository.GetAllAsync();
@@ -326,9 +328,9 @@ else
     }
 
     /// <summary>The room dropdown is worth showing once there's more than one place to choose.</summary>
-    private bool HasRoomChoice => rooms.Count > 1 || rooms.Any(r => r.Spots.Count > 0);
+    private bool HasRoomChoice => roomsInUse.Count > 1 || roomsInUse.Any(r => r.Spots.Count > 0);
 
-    private Room? PickedRoom => rooms.FirstOrDefault(r => r.Id.ToString() == room);
+    private Room? PickedRoom => roomsInUse.FirstOrDefault(r => r.Id.ToString() == room);
 
     // Spots belong to the room above them, so picking another room starts over
     private void RoomPicked()
