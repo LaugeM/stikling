@@ -2042,11 +2042,13 @@ main.app-content:has(.form-bar) ~ .update-banner {
     margin-bottom: 1.75rem;
 }
 
-.timeline-heading {
-    margin: 0 0 0.75rem;
-}
-
 /* A form with a pinned Save bar ends on the bar, so it lands right on the navigation */
 main.app-content:has(.form-bar) {
     padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+}
+
+/* The ticks on the Stage button in the dock: the outline button fills with green when pressed, so the ticks follow the text colour then */
+.page-dock .btn:hover .stage-steps i,
+.page-dock .btn:active .stage-steps i {
+    background: currentColor;
 }

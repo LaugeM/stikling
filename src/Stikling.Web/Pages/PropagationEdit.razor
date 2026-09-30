@@ -265,7 +265,7 @@ else
 
     private string BackUrl =>
         !IsNew ? $"propagations/{Id}"
-        : ParentId is { } parentId ? $"plants/{parentId}?tab=props"
+        : ParentId is { } parentId ? $"plants/{parentId}"
         : "propagations";
 
     // With a parent the name comes from it, so one line is enough until the person wants to change it

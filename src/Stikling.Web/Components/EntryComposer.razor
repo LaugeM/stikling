@@ -61,7 +61,7 @@
             </button>
             <label class="btn btn-outline-primary icon-btn" for="@sheetInputId">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                @(photos.Count > 0 ? "More" : "Photo")
+                @(photos.Count > 0 ? "Add more" : "Photo")
             </label>
             <input id="@sheetInputId" type="file" accept="image/*" multiple class="visually-hidden"
                    @ref="sheetInput" @onchange="() => AddPhotosAsync(sheetInput)" disabled="@busy" />
