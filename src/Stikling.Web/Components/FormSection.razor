@@ -1,0 +1,32 @@
+@* One group of optional fields that folds open. Several in a row close up into one block, like the Help page. *@
+<details class="form-section" open="@startsOpen">
+    <summary>
+        <span class="form-section-text">
+            <span class="form-section-title">@Title</span>
+            <span class="form-section-summary">@(string.IsNullOrWhiteSpace(Summary) ? "Not set" : Summary)</span>
+        </span>
+    </summary>
+    <div class="form-section-body">
+        @ChildContent
+    </div>
+</details>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>A short line on what is set now. "Not set" when empty.</summary>
+    [Parameter]
+    public string? Summary { get; set; }
+
+    /// <summary>Only the state it starts in. Later renders never open or close it.</summary>
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private bool startsOpen;
+
+    protected override void OnInitialized() => startsOpen = Open;
+}

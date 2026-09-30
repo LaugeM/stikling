@@ -116,154 +116,6 @@ else
             </div>
         </fieldset>
 
-        <fieldset>
-            <legend>Where it lives</legend>
-            <div class="mb-3">
-                <RoomPicker @bind-Value="location" Rooms="rooms" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="light">Light</label>
-                <InputSelect id="light" class="form-select" @bind-Value="plant.Light">
-                    <option value="">Not set</option>
-                    @foreach (var light in Enum.GetValues<LightLevel>())
-                    {
-                        <option value="@light">@Labels.For(light)</option>
-                    }
-                </InputSelect>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="medium">Grows in</label>
-                <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => SetMedium(m)" ValueExpression="() => plant.Medium">
-                    @foreach (var medium in Enum.GetValues<GrowingMedium>())
-                    {
-                        <option value="@medium">@Labels.For(medium)</option>
-                    }
-                </InputSelect>
-            </div>
-
-            <div class="mb-3">
-                <MixPicker @bind-Value="plant.SoilMixId" Mixes="mixes" />
-            </div>
-
-            <div class="mb-3">
-                <PotPicker Value="plant.InnerPotId" ValueChanged="SetInnerPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
-            </div>
-
-            <div class="mb-3">
-                <PotPicker Value="plant.OuterPotId" ValueChanged="SetOuterPot" Pots="pots" Groups="OuterSlot"
-                           Label="Outer pot" NoneText="No outer pot" PotAdded="AddPot" />
-                @if (plant.OuterPotId is not null)
-                {
-                    <div class="form-check mt-2">
-                        <input class="form-check-input" type="checkbox" id="water-outer"
-                               checked="@plant.WaterInOuterPot"
-                               @onchange="e => plant.WaterInOuterPot = (bool?)e.Value == true" />
-                        <label class="form-check-label" for="water-outer">Keep water in the outer pot</label>
-                    </div>
-                    <div class="form-text">For a plain outer pot you keep water in, with the medium wicking it up.</div>
-                }
-            </div>
-            @if (!IsNew)
-            {
-                <div class="mb-3">
-                    <label class="form-label" for="status">Status</label>
-                    <InputSelect id="status" class="form-select" @bind-Value="plant.Status">
-                        @foreach (var s in Enum.GetValues<PlantStatus>())
-                        {
-                            <option value="@s">@Labels.For(s)</option>
-                        }
-                    </InputSelect>
-                </div>
-                @if (plant.Status == PlantStatus.Died)
-                {
-                    <div class="mb-3">
-                        <label class="form-label" for="cause-of-death">What happened? <span class="text-muted">(optional)</span></label>
-                        <InputText id="cause-of-death" class="form-control" @bind-Value="plant.CauseOfDeath"
-                                   placeholder="e.g. root rot after repotting" />
-                    </div>
-                }
-                @if (plant.Status is PlantStatus.GivenAway or PlantStatus.Sold)
-                {
-                    var sold = plant.Status == PlantStatus.Sold;
-                    <div class="mb-3">
-                        <label class="form-label" for="left-to">@(sold ? "Who bought it?" : "Who got it?") <span class="text-muted">(optional)</span></label>
-                        <InputText id="left-to" class="form-control" @bind-Value="plant.LeftTo" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="left-for">@(sold ? "Sold for" : "Swapped for?") <span class="text-muted">(optional)</span></label>
-                        <InputText id="left-for" class="form-control" @bind-Value="plant.LeftFor"
-                                   placeholder="@(sold ? "e.g. 150 kr" : "e.g. a Hoya carnosa")" />
-                    </div>
-                }
-                @if (plant.HasLeft && Labels.PotsTakenChoices([plant]) is { Count: > 0 } choices)
-                {
-                    <div class="mb-3">
-                        <span class="form-label d-block" id="pots-taken">What went with it</span>
-                        <div class="btn-group segmented" role="radiogroup" aria-labelledby="pots-taken">
-                            @foreach (var (value, label) in choices)
-                            {
-                                var id = $"taken-{value}";
-                                <input type="radio" class="btn-check" name="pots-taken" id="@id"
-                                       checked="@(plant.Fit(plant.PotsTaken) == value)" @onchange="() => plant.PotsTaken = value" />
-                                <label class="btn btn-outline-primary" for="@id">@label</label>
-                            }
-                        </div>
-                        <div class="form-text">A pot that went with it no longer counts as yours. One left here is free again.</div>
-                    </div>
-                }
-            }
-        </fieldset>
-
-        <fieldset>
-            <legend>Tags and quarantine</legend>
-            <div class="mb-3">
-                <TagPicker @bind-Value="plant.Tags" Suggestions="tagSuggestions" />
-            </div>
-
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="quarantine"
-                       checked="@plant.InQuarantine" @onchange="SetQuarantine" />
-                <label class="form-check-label" for="quarantine">In quarantine</label>
-            </div>
-            @if (plant.InQuarantine)
-            {
-                <div class="mt-2">
-                    <label class="form-label" for="quarantined-since">Since</label>
-                    <InputDate id="quarantined-since" class="form-control" @bind-Value="plant.QuarantinedSince"
-                               max="@Today.ToString("yyyy-MM-dd")" />
-                </div>
-                <div class="mt-2">
-                    <label class="form-label" for="quarantine-days">Length in days</label>
-                    <InputNumber id="quarantine-days" class="form-control" @bind-Value="plant.QuarantineDays"
-                                 min="1" max="365" />
-                    <div class="form-text">Today says when it is time to check the plant and let it out.</div>
-                </div>
-            }
-            <div class="form-text">Kept apart from your other plants, e.g. while a new plant shows it has no pests.</div>
-        </fieldset>
-
-        @* Only on a plant already in the collection, to keep adding a plant short *@
-        @if (!IsNew && plant.Status == PlantStatus.Active)
-        {
-            <fieldset>
-                <legend>Dormancy</legend>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="dormant"
-                           checked="@plant.IsDormant" @onchange="SetDormant" />
-                    <label class="form-check-label" for="dormant">Dormant</label>
-                </div>
-                @if (plant.IsDormant)
-                {
-                    <div class="mt-2">
-                        <label class="form-label" for="dormant-since">Since</label>
-                        <InputDate id="dormant-since" class="form-control" @bind-Value="plant.DormantSince"
-                                   max="@Today.ToString("yyyy-MM-dd")" />
-                    </div>
-                }
-                <div class="form-text">Resting rather than dead, e.g. an alocasia that dropped its leaves for the winter.</div>
-            </fieldset>
-        }
-
         @if (IsNew)
         {
             <fieldset>
@@ -311,7 +163,94 @@ else
             <InputTextArea class="form-control" rows="3" @bind-Value="plant.Notes" aria-label="Notes" />
         </fieldset>
 
-        <div class="form-actions">
+        <h2 class="section-label">More details</h2>
+        <div class="more-details mb-4">
+            <FormSection Title="Where it lives" Summary="@LivesSummary" Open="openLives">
+                <div class="mb-3">
+                    <RoomPicker @bind-Value="location" Rooms="rooms" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="light">Light</label>
+                    <InputSelect id="light" class="form-select" @bind-Value="plant.Light">
+                        <option value="">Not set</option>
+                        @foreach (var light in Enum.GetValues<LightLevel>())
+                        {
+                            <option value="@light">@Labels.For(light)</option>
+                        }
+                    </InputSelect>
+                </div>
+            </FormSection>
+
+            <FormSection Title="Pot and soil" Summary="@PotSummary" Open="openPot">
+                <div class="mb-3">
+                    <label class="form-label" for="medium">Grows in</label>
+                    <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => SetMedium(m)" ValueExpression="() => plant.Medium">
+                        @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                        {
+                            <option value="@medium">@Labels.For(medium)</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <MixPicker @bind-Value="plant.SoilMixId" Mixes="mixes" />
+                </div>
+
+                <div class="mb-3">
+                    <PotPicker Value="plant.InnerPotId" ValueChanged="SetInnerPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                </div>
+
+                <div class="mb-3">
+                    <PotPicker Value="plant.OuterPotId" ValueChanged="SetOuterPot" Pots="pots" Groups="OuterSlot"
+                               Label="Outer pot" NoneText="No outer pot" PotAdded="AddPot" />
+                    @if (plant.OuterPotId is not null)
+                    {
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="water-outer"
+                                   checked="@plant.WaterInOuterPot"
+                                   @onchange="e => plant.WaterInOuterPot = (bool?)e.Value == true" />
+                            <label class="form-check-label" for="water-outer">Keep water in the outer pot</label>
+                        </div>
+                        <div class="form-text">For a plain outer pot you keep water in, with the medium wicking it up.</div>
+                    }
+                </div>
+            </FormSection>
+
+            <FormSection Title="Tags" Summary="@TagsSummary" Open="openTags">
+                <div class="mb-3">
+                    <TagPicker @bind-Value="plant.Tags" Suggestions="tagSuggestions" />
+                </div>
+            </FormSection>
+
+            @* Only when adding. A plant already in the collection is put in quarantine from its page *@
+            @if (IsNew)
+            {
+                <FormSection Title="Quarantine" Summary="@QuarantineSummary">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="quarantine"
+                               checked="@plant.InQuarantine" @onchange="SetQuarantine" />
+                        <label class="form-check-label" for="quarantine">In quarantine</label>
+                    </div>
+                    @if (plant.InQuarantine)
+                    {
+                        <div class="mt-2">
+                            <label class="form-label" for="quarantined-since">Since</label>
+                            <InputDate id="quarantined-since" class="form-control" @bind-Value="plant.QuarantinedSince"
+                                       max="@Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="mt-2">
+                            <label class="form-label" for="quarantine-days">Length in days</label>
+                            <InputNumber id="quarantine-days" class="form-control" @bind-Value="plant.QuarantineDays"
+                                         min="1" max="365" />
+                            <div class="form-text">Today says when it is time to check the plant and let it out.</div>
+                        </div>
+                    }
+                    <div class="form-text mb-3">Kept apart from your other plants, e.g. while a new plant shows it has no pests.</div>
+                </FormSection>
+            }
+        </div>
+
+        <div class="form-actions form-bar">
             <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">@(IsNew ? "Add plant" : "Save")</button>
             <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
         </div>
@@ -355,6 +294,11 @@ else
     private IReadOnlyList<SoilMix> mixes = [];
     private IReadOnlyList<string> tagSuggestions = [];
 
+    // Which sections start open, worked out when the plant loads. A section only reads this once
+    private bool openLives;
+    private bool openPot;
+    private bool openTags;
+
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
     private static readonly PotGroup[] OuterSlot = [PotGroup.Outer];
 
@@ -363,6 +307,23 @@ else
     private string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
 
     private string? MixName(Guid id) => mixes.FirstOrDefault(m => m.Id == id)?.Name;
+
+    private static string? Joined(params string?[] parts) =>
+        string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+
+    private string? LivesSummary => Joined(location, plant?.Light is { } light ? Labels.For(light) : null);
+
+    private string? PotSummary => plant is null ? null : Joined(
+        Labels.For(plant.Medium),
+        plant.InnerPotId is { } inner ? PotName(inner) : null,
+        plant.OuterPotId is { } outer ? PotName(outer) : null,
+        plant.SoilMixId is { } mix ? MixName(mix) : null);
+
+    private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
+
+    private string QuarantineSummary => plant is { InQuarantine: true }
+        ? $"In quarantine for {plant.QuarantineDays ?? Plant.DefaultQuarantineDays} days"
+        : "Not in quarantine";
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
 
@@ -373,9 +334,6 @@ else
         plant!.QuarantinedSince = on ? original?.QuarantinedSince ?? Today : null;
         plant.QuarantineDays = on ? original?.QuarantineDays ?? Plant.DefaultQuarantineDays : null;
     }
-
-    private void SetDormant(ChangeEventArgs e) =>
-        plant!.DormantSince = (bool?)e.Value == true ? original?.DormantSince ?? Today : null;
 
     // A pot that suggests a medium sets it on a new plant, until the person has picked a medium themselves.
     // A saved plant's medium was already chosen, so a pot never changes it
@@ -451,6 +409,11 @@ else
         {
             location = places.NameOf(plant.PlaceId);
             possibleParents = PlantLineage.PossibleParents(plant, all);
+
+            // All closed when adding, even from a copy, where the summaries show what was copied
+            openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
+            openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
+            openTags = !IsNew && plant.Tags.Count > 0;
         }
     }
 
