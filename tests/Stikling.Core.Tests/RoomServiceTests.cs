@@ -313,4 +313,55 @@ public class RoomServiceTests
 
         Assert.True(places.Places[office.Id].IsDeleted);
     }
+
+    [Fact]
+    public async Task Adding_a_room_or_spot_makes_it_or_finds_the_one_there()
+    {
+        var (living, existed) = await Service.AddPlaceAsync("Living room");
+        Assert.False(existed);
+
+        var (again, existedAgain) = await Service.AddPlaceAsync(" living room");
+        Assert.True(existedAgain);
+        Assert.Equal(living.Id, again.Id);
+
+        var (shelf, _) = await Service.AddPlaceAsync("Shelf", living.Id);
+        Assert.Equal("Living room / Shelf", NameOf(shelf.Id));
+    }
+
+    [Fact]
+    public async Task A_spot_goes_in_the_room_it_was_added_to_when_two_rooms_share_a_name()
+    {
+        // Two devices each made an "Office" before syncing
+        places.Add("Office");
+        var second = places.Add("Office");
+
+        var (shelf, _) = await Service.AddPlaceAsync("Shelf", second.Id);
+
+        Assert.Equal(second.Id, shelf.RoomId);
+    }
+
+    [Fact]
+    public async Task A_name_of_only_slashes_or_a_room_with_a_slash_is_turned_down()
+    {
+        var office = places.Add("Office");
+
+        await Assert.ThrowsAsync<ArgumentException>(() => Service.AddPlaceAsync("/"));
+        await Assert.ThrowsAsync<ArgumentException>(() => Service.AddPlaceAsync("//", office.Id));
+        await Assert.ThrowsAsync<ArgumentException>(() => Service.AddPlaceAsync("Office / Shelf"));
+        Assert.Single(places.Places);
+    }
+
+    [Fact]
+    public async Task A_spot_added_to_a_room_removed_on_another_device_shows_as_a_room()
+    {
+        var office = places.Add("Office");
+        var shelf = places.Add("Shelf", office);
+        await places.DeleteAsync(office.Id);
+
+        var rooms = await Service.GetAllAsync();
+
+        Assert.Equal("Shelf", Assert.Single(rooms).Name);
+        Assert.Equal("Shelf", NameOf(shelf.Id));
+        Assert.Same(shelf, Places.RoomOf(shelf.Id));
+    }
 }

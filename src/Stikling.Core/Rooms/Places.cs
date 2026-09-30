@@ -21,7 +21,12 @@ public sealed class Places
     public static Places None { get; } = new([]);
 
     /// <summary>Every room that isn't deleted, oldest first, so the first of two with the same name stays first.</summary>
-    public IEnumerable<Place> Rooms => Live.Where(p => !p.IsSpot);
+    /// <remarks>
+    /// A spot whose room was removed on another device counts as a room of its own, so it still
+    /// shows up and can be renamed or removed. A deleted room is stripped to its id on the server,
+    /// so its name can't be brought back.
+    /// </remarks>
+    public IEnumerable<Place> Rooms => Live.Where(p => !p.IsSpot || Find(p.RoomId) is null);
 
     /// <summary>The spots inside a room, including the ones that came with a room merged into it.</summary>
     public IEnumerable<Place> SpotsIn(Guid roomId) =>
@@ -61,7 +66,10 @@ public sealed class Places
     }
 
     /// <summary>The room a place is in: the place itself for a room, the room around it for a spot.</summary>
-    public Place? RoomOf(Guid? id) => Find(id) is { } place && place.IsSpot ? Find(place.RoomId) : Find(id);
+    public Place? RoomOf(Guid? id) =>
+        Find(id) is not { } place ? null
+        : place.IsSpot && Find(place.RoomId) is { } room ? room
+        : place;
 
     /// <summary>"Living room", or "Living room / On top of the PC" for a spot. Null when there's no place.</summary>
     public string? NameOf(Guid? id) =>

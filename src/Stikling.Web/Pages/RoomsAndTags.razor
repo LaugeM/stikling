@@ -79,7 +79,7 @@
                         @if (addingSpotIn == r.Id)
                         {
                             <RoomRenameRow Label="@($"New spot in {r.Name}")" Busy="busy"
-                                           OnSave="name => AddPlaceAsync(r.Name, name)" OnCancel="StopAddingRoom" />
+                                           OnSave="name => AddPlaceAsync(r.Id, name)" OnCancel="StopAddingRoom" />
                         }
                         else
                         {
@@ -278,26 +278,22 @@
         ticked.Clear();
     }
 
-    /// <summary>Adds a room, or a spot when the room it goes in is given.</summary>
-    private async Task AddPlaceAsync(string? inRoom, string? name)
+    /// <summary>Adds a room, or a spot in the room with this id.</summary>
+    private async Task AddPlaceAsync(Guid? roomId, string? name)
     {
         busy = true;
         try
         {
-            var place = RoomName.Clean(inRoom is null ? name : $"{inRoom} / {name}");
-            var (roomName, spotName) = RoomName.Split(place);
-            var before = await RoomService.GetPlacesAsync();
-            var room = roomName is null ? null : before.RoomNamed(roomName);
-            var existed = room is not null && (spotName is null || before.SpotNamed(room.Id, spotName) is not null);
-
-            await RoomService.PlaceIdAsync(place);
+            var (place, existed) = await RoomService.AddPlaceAsync(name, roomId);
+            var written = (await RoomService.GetPlacesAsync()).NameOf(place.Id);
             rooms = await RoomService.GetAllAsync();
-            roomMessage = existed ? $"{place} is already there." : $"Added {place}.";
+            roomMessage = existed ? $"{written} is already there." : $"Added {written}.";
             StopAddingRoom();
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
-            roomMessage = $"Couldn't add it: {ex.Message}";
+            // The box stays open, so the name can be fixed
+            roomMessage = ex.Message;
         }
 
         busy = false;
