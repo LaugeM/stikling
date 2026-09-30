@@ -32,7 +32,7 @@ else
         {
             // With no photo to show, the tile shows how long it has been going instead
             var days = propagation.DaysSinceStart(Today);
-            <div class="detail-icon day-tile" aria-hidden="true">
+            <div class="detail-icon day-tile">
                 <b>@days</b>
                 <small>@(days == 1 ? "day" : "days")</small>
             </div>
@@ -44,10 +44,19 @@ else
             </div>
         }
         <div class="min-w-0">
-            <h1>@propagation.DisplayName</h1>
-            @if (!string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is { } botanical)
+            <h1>
+                @if (string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
+                {
+                    <BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" />
+                }
+                else
+                {
+                    @propagation.DisplayName
+                }
+            </h1>
+            @if (!string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
             {
-                <p class="detail-sub">@botanical</p>
+                <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" /></p>
             }
             <div class="profile-badges">
                 @if (propagation.IsDormant)
@@ -64,7 +73,29 @@ else
 
     @if (!propagation.IsActive)
     {
-        <p class="profile-facts">@PropagationService.Outcome(propagation)</p>
+        <p class="profile-facts">
+            Finished
+            @if (propagation.FinishedOn is { } finishedOn)
+            {
+                <text>@Labels.Date(finishedOn) after @Labels.Count(Math.Max(0, finishedOn.DayNumber - propagation.StartedOn.DayNumber), "day")</text>
+            }
+            · @if (propagation.PottedUpCount > 0 && offspring.Count > 0)
+            {
+                <a class="link-action" href="propagations/@propagation.Id" @onclick="ShowPlants" @onclick:preventDefault>@propagation.PottedUpCount potted up</a>
+            }
+            else if (propagation.PottedUpCount > 0)
+            {
+                <text>@propagation.PottedUpCount potted up</text>
+            }
+            @if (propagation.PottedUpCount > 0 && propagation.FailedCount > 0)
+            {
+                <text>, </text>
+            }
+            @if (propagation.FailedCount > 0)
+            {
+                <text>@propagation.FailedCount failed</text>
+            }
+        </p>
     }
     else
     {
@@ -73,18 +104,22 @@ else
     }
 
     <p class="profile-facts">
-        @Labels.Summary(propagation) · @Labels.Age(propagation, Today)
+        @Labels.Summary(propagation)
+        @if (propagation.IsActive && !(TileShowsDays && propagation.DaysSinceStart(Today) > 0))
+        {
+            <text> · @Labels.Age(propagation, Today)</text>
+        }
         @if (places.NameOf(propagation.PlaceId) is { } place)
         {
             <text> · @place</text>
         }
         @if (parent is not null)
         {
-            <text> · from <a href="plants/@parent.Id">@parent.DisplayName</a></text>
+            <text> · from <a class="link-action" href="plants/@parent.Id">@parent.DisplayName</a></text>
         }
         else if (!string.IsNullOrWhiteSpace(propagation.Source))
         {
-            <text> · from @propagation.Source</text>
+            <text> · @propagation.Source</text>
         }
         @if (Pace is { IsSlow: true })
         {
@@ -92,10 +127,10 @@ else
         }
     </p>
 
-    @if (offspring.Count > 0)
+    @if (propagation.IsActive && offspring.Count > 0)
     {
         <p class="profile-facts">
-            <a href="propagations/@propagation.Id" @onclick="ShowPlants" @onclick:preventDefault>@Labels.Count(offspring.Count, "plant") potted up from it</a>
+            <a class="link-action" href="propagations/@propagation.Id" @onclick="ShowPlants" @onclick:preventDefault>@Labels.Count(offspring.Count, "plant") potted up from it</a>
         </p>
     }
 
@@ -124,7 +159,7 @@ else
         <div id="propagation-details" class="profile-details">
             <section class="detail-card">
                 <dl class="detail-list">
-                    <dt>Taken from</dt>
+                    <dt>@(parent is null ? "Came from" : "Taken from")</dt>
                     <dd>
                         @if (parent is not null)
                         {
@@ -136,8 +171,14 @@ else
                         }
                     </dd>
 
+                    @if (!string.IsNullOrWhiteSpace(propagation.Experiment))
+                    {
+                        <dt>Experiment</dt>
+                        <dd><a href="propagations/results">@propagation.Experiment</a></dd>
+                    }
+
                     <dt>Started</dt>
-                    <dd>@Labels.Date(propagation.StartedOn) · @Labels.Age(propagation, Today)</dd>
+                    <dd>@Labels.Date(propagation.StartedOn)@(propagation.IsActive ? $" · {Labels.Age(propagation, Today)}" : "")</dd>
 
                     @if (Pace is { } pace)
                     {
@@ -152,7 +193,10 @@ else
                         </dd>
                     }
 
-                    @MilestoneRow("First root", propagation.FirstRootOn, propagation.DaysToFirstRoot)
+                    @if (propagation.Type != PropagationType.Seed)
+                    {
+                        @MilestoneRow("First root", propagation.FirstRootOn, propagation.DaysToFirstRoot)
+                    }
                     @MilestoneRow("First leaf", propagation.FirstLeafOn, propagation.DaysToFirstLeaf)
 
                     @if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } cormSize)
@@ -272,7 +316,7 @@ else
         </button>
         @if (propagation.IsActive)
         {
-            <button type="button" class="btn btn-outline-primary icon-btn dock-stage" @onclick="OpenStage">
+            <button type="button" class="btn btn-outline-primary icon-btn dock-stage" aria-label="Stage: @Labels.Stage(propagation.Stage, propagation.Type). Change stage" @onclick="OpenStage">
                 <span class="stage-steps" data-step="@StageStep" aria-hidden="true"><i></i><i></i><i></i></span>
                 @Labels.Stage(propagation.Stage, propagation.Type)
             </button>
@@ -362,6 +406,10 @@ else
                     break;
 
                 case StageView.PotUp:
+                    <p class="form-text mb-3">
+                        @(propagation.RemainingCount > 1 ? "Each one you pot up becomes a plant of its own." : "It becomes a plant of its own.")
+                        This propagation keeps its history.
+                    </p>
                     @if (propagation.RemainingCount > 1)
                     {
                         <div class="mb-2">
@@ -387,9 +435,12 @@ else
                             }
                         </select>
                     </div>
-                    <div class="mb-2">
-                        <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
-                    </div>
+                    @if (potUp.Medium == GrowingMedium.Soil)
+                    {
+                        <div class="mb-2">
+                            <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
+                        </div>
+                    }
                     <div class="mb-2">
                         <PotPicker Value="potUp.PotId" ValueChanged="SetPotUpPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
                     </div>
@@ -409,6 +460,13 @@ else
                     break;
 
                 case StageView.Failed:
+                    <p class="form-text mb-3">
+                        It stays in the history and in the results. This can't be undone.
+                        @if (failedCount >= propagation.RemainingCount)
+                        {
+                            <text> This finishes the propagation.</text>
+                        }
+                    </p>
                     @if (propagation.RemainingCount > 1)
                     {
                         <div class="mb-2">
@@ -418,12 +476,12 @@ else
                         </div>
                     }
                     <div class="mb-3">
-                        <label class="form-label" for="failed-reason">What happened? (optional)</label>
+                        <label class="form-label" for="failed-reason">What happened? <span class="text-body-secondary">(optional)</span></label>
                         <input id="failed-reason" class="form-control" @bind="failedReason" @bind:event="oninput" placeholder="e.g. rotted, dried out" />
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-danger" disabled="@(busy || !CountIsValid(failedCount))" @onclick="MarkFailedAsync">
-                            Mark @failedCount as failed
+                            @(failedCount == 1 ? "Mark as failed" : $"Mark {failedCount} as failed")
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
                     </div>
@@ -537,6 +595,9 @@ else
     private IReadOnlyList<Plant> madePlants = [];
 
     private DateOnly Today => Time.Today();
+
+    // With no photo, the tile at the top shows the days, so the line under the name needn't
+    private bool TileShowsDays => propagation is { CoverPhotoId: null, IsActive: true };
 
     private RootingPace? Pace => propagation is null ? null : RootingPace.For(propagation, allPropagations, Today);
 
@@ -744,7 +805,10 @@ else
             Nickname = string.IsNullOrWhiteSpace(p.Genus) ? p.Nickname : null,
             Date = Today,
             Location = places.NameOf(p.PlaceId),
-            Medium = p.Medium,
+            // Soil is the usual place for a potted up plant. Only a default, it's a select.
+            Medium = p.Medium is GrowingMedium.Water or GrowingMedium.Perlite or GrowingMedium.Sphagnum or GrowingMedium.CormRiser
+                ? GrowingMedium.Soil
+                : p.Medium,
             SoilMixId = p.Medium == GrowingMedium.Soil ? p.SoilMixId : null,
         };
         message = null;
@@ -769,7 +833,7 @@ else
         {
             var placeId = await RoomService.PlaceIdAsync(potUp.Location);
             madePlants = await PropagationService.PotUpAsync(propagation, new PotUpRequest(
-                potUp.Count, potUp.Date, potUp.Nickname, placeId, potUp.Medium, potUp.PotId, potUp.SoilMixId));
+                potUp.Count, potUp.Date, potUp.Nickname, placeId, potUp.Medium, potUp.PotId, potUp.Medium == GrowingMedium.Soil ? potUp.SoilMixId : null));
             message = madePlants.Count == 1 ? "Potted up:" : $"Potted up {madePlants.Count}:";
             stageView = StageView.None;
             await LoadAsync();

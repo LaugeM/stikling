@@ -1,0 +1,30 @@
+@* A botanical name set the usual way: genus and species in italics, the cultivar upright in single quotes *@
+@if (Latin is { } latin)
+{
+    <i>@latin</i>
+}
+@if (PlantNames.Cultivar(Cultivar) is { } cultivar)
+{
+    @(Latin is null ? null : " ")<span class="cultivar">'@cultivar'</span>
+}
+
+@code {
+    [Parameter]
+    public string? Genus { get; set; }
+
+    [Parameter]
+    public string? Species { get; set; }
+
+    [Parameter]
+    public string? Cultivar { get; set; }
+
+    private string? Latin
+    {
+        get
+        {
+            var parts = new[] { PlantNames.Genus(Genus), PlantNames.Species(Species) }.OfType<string>();
+            var text = string.Join(' ', parts);
+            return text.Length == 0 ? null : text;
+        }
+    }
+}
