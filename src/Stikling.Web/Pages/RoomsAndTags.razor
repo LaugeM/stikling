@@ -74,6 +74,19 @@
                             }
                         </div>
                     }
+
+                    <div class="room-spot">
+                        @if (addingSpotIn == r.Id)
+                        {
+                            <RoomRenameRow Label="@($"New spot in {r.Name}")" Busy="busy"
+                                           OnSave="name => AddPlaceAsync(r.Name, name)" OnCancel="StopAddingRoom" />
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-link btn-sm link-action add-spot" disabled="@busy"
+                                    @onclick="() => StartAddingSpot(r.Id)">Add a spot</button>
+                        }
+                    </div>
                 </li>
             }
         </ul>
@@ -143,14 +156,7 @@
     {
         if (addingRoom)
         {
-            <div class="add-form">
-                <RoomPicker @bind-Value="newPlace" Rooms="rooms" Label="Room" />
-                <div class="add-actions">
-                    <button type="button" class="btn btn-primary" disabled="@(busy || RoomName.Clean(newPlace) is null)"
-                            @onclick="AddRoomAsync">Save</button>
-                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="StopAddingRoom">Cancel</button>
-                </div>
-            </div>
+            <RoomRenameRow Label="New room" Busy="busy" OnSave="name => AddPlaceAsync(null, name)" OnCancel="StopAddingRoom" />
         }
         else
         {
@@ -214,7 +220,7 @@
     };
 
     private bool addingRoom;
-    private string? newPlace;
+    private Guid? addingSpotIn; // the room a spot is being added to
     private bool addingTag;
     private string newTag = "";
     private string tagSearch = "";
@@ -241,13 +247,21 @@
     private void StartAddingRoom()
     {
         addingRoom = true;
+        addingSpotIn = null;
+        roomMessage = null;
+    }
+
+    private void StartAddingSpot(Guid roomId)
+    {
+        addingSpotIn = roomId;
+        addingRoom = false;
         roomMessage = null;
     }
 
     private void StopAddingRoom()
     {
         addingRoom = false;
-        newPlace = null;
+        addingSpotIn = null;
     }
 
     private void StartAddingTag()
@@ -264,12 +278,13 @@
         ticked.Clear();
     }
 
-    private async Task AddRoomAsync()
+    /// <summary>Adds a room, or a spot when the room it goes in is given.</summary>
+    private async Task AddPlaceAsync(string? inRoom, string? name)
     {
         busy = true;
         try
         {
-            var place = RoomName.Clean(newPlace);
+            var place = RoomName.Clean(inRoom is null ? name : $"{inRoom} / {name}");
             var (roomName, spotName) = RoomName.Split(place);
             var before = await RoomService.GetPlacesAsync();
             var room = roomName is null ? null : before.RoomNamed(roomName);

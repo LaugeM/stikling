@@ -642,6 +642,10 @@ a.item-card:active {
     align-items: center;
     justify-content: center;
     min-height: 2.75rem;
+    /* The small text size keeps "In collection" on one line in a third of a phone's width */
+    padding-inline: 0.5rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
 }
 
 /* The picked segment looks like a picked chip, so solid green stays for primary buttons.

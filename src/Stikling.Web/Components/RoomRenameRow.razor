@@ -1,7 +1,7 @@
-@* One room or spot being renamed on the Rooms and tags page. *@
+@* One room, spot or tag being renamed or added on the Rooms and tags page. *@
 
 <div class="room-rename">
-    <input class="form-control form-control-sm" aria-label="New name for @Name" autocomplete="off"
+    <input class="form-control form-control-sm" aria-label="@(Label ?? $"New name for {Name}")" placeholder="@Label" autocomplete="off"
            value="@draft" @oninput="Type" @ref="input" />
     <button type="button" class="btn btn-primary btn-sm" disabled="@(Busy || string.IsNullOrWhiteSpace(draft))"
             @onclick="() => OnSave.InvokeAsync(draft)">Save</button>
@@ -12,6 +12,10 @@
     /// <summary>The name as it stands, which is what the box starts with.</summary>
     [Parameter]
     public string Name { get; set; } = "";
+
+    /// <summary>What the box is for, read out instead of "New name for ..." when adding.</summary>
+    [Parameter]
+    public string? Label { get; set; }
 
     [Parameter]
     public bool Busy { get; set; }
