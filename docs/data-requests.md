@@ -6,7 +6,7 @@ The privacy page tells people to write to support@stikling.app about their data.
 
 *Download your data* on the Account page in Settings gives a ZIP of everything the server holds about the person who is signed in: their account, collections, every record including deleted ones, settings and photos, plus what Clerk has about them. Being signed in is what proves who they are, so this is the answer to almost every request.
 
-If they signed up with Google or Discord and lost that account, they can still sign in with the code Clerk emails to their address, as long as they can read that email.
+If they signed up with Google, Facebook or Discord and lost that account, they can still sign in with the code Clerk emails to their address, as long as they can read that email.
 
 ## If they can't sign in
 
