@@ -72,22 +72,23 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-  # Runs once the Azure resources exist and the repository has their ids as variables. See docs/hosting.md.
+  # Needs the Azure resources, and their ids as repository secrets. See docs/hosting.md.
   deploy-api:
     needs: [build, api-image]
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.AZURE_CLIENT_ID != ''
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     concurrency: deploy-api
     steps:
-      # Signs in as the deploy identity, which trusts this repository's main branch, so no secret is stored
+      # Signs in as the deploy identity, which trusts this repository's main branch, so no password
+      # is stored. The ids aren't passwords either, but as secrets they're hidden in the public logs.
       - uses: azure/login@v2
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Move the API to the new image
         run: >

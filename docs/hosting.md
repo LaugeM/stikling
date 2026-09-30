@@ -33,7 +33,7 @@ This is also the way to move it to another subscription.
    add `--parameters apiDomain='' apiImage=mcr.microsoft.com/dotnet/samples:aspnetapp` to the command above. The outputs have the values for the next two steps.
 3. At the DNS host for stikling.app, add a CNAME record `api` pointing at `apiDnsTarget`, and a TXT record `asuid.api` with `apiDomainVerificationId`.
 4. Deploy again with `apiCertificateIssued=false` and the sample image, which adds the domain and asks for its certificate. When the certificate shows as succeeded under the Container Apps environment in the portal, deploy once more with only the sample image, which uses it.
-5. In the repository settings, under Secrets and variables, then Actions, add the variables `AZURE_CLIENT_ID` (the `deployClientId` output), `AZURE_TENANT_ID` and `AZURE_SUBSCRIPTION_ID`.
+5. In the repository settings, under Secrets and variables, then Actions, add the secrets `AZURE_CLIENT_ID` (the `deployClientId` output), `AZURE_TENANT_ID` and `AZURE_SUBSCRIPTION_ID`. They aren't passwords, but as secrets they're hidden in the workflow's logs, which anyone can read. Until they're there, the API deploy fails and the rest of the workflow carries on.
 6. Run the workflow on main. The first time, the API deploy fails because the image it just pushed is private. Make the `stikling-api` package public under Packages on GitHub, so Container Apps can pull it without a password, and run the failed job again.
 
 From then on the command above works with the defaults.
