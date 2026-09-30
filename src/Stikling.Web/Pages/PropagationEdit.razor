@@ -19,7 +19,7 @@
 }
 else
 {
-    <EditForm Model="propagation" OnSubmit="SaveAsync" class="edit-form">
+    <EditForm Model="propagation" OnSubmit="SaveAsync" class="edit-form" novalidate>
         @if (errors.Count > 0)
         {
             <div class="alert alert-danger" role="alert">

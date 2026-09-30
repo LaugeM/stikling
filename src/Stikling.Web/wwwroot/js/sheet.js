@@ -25,6 +25,14 @@ export function open(dialog, owner, generation) {
     dialog.showModal();
 }
 
+// The page is going away: close without telling Blazor, which has let go of the sheet
+export function release(dialog) {
+    if (!dialog)
+        return;
+    dialog.stiklingOwner = null;
+    close(dialog);
+}
+
 export function close(dialog) {
     if (dialog?.open)
         dialog.close();

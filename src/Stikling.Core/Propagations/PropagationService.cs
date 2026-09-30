@@ -125,7 +125,8 @@ public sealed class PropagationService(
             return;
         var before = propagation.Copy();
         propagation.SetStage(stage);
-        if (seenToday)
+        // Stepping back from Rooted is a correction, not something seen today
+        if (seenToday && stage > before.Stage)
             propagation.NoteFirstSign(Today);
         await UpdateAsync(before, propagation, label);
     }

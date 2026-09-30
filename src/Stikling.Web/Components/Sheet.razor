@@ -85,7 +85,7 @@
         {
             if (module is not null)
             {
-                await module.InvokeVoidAsync("close", dialog);
+                await module.InvokeVoidAsync("release", dialog);
                 await module.DisposeAsync();
             }
         }

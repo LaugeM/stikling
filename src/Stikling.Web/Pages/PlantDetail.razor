@@ -295,7 +295,7 @@ else
               CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync"
               EmptyText="No photos or notes yet. Add the first one with Photo or Note below." />
 
-    <EntryComposer @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId"
+    <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId"
                    CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
 
     <div class="page-dock" role="group" aria-label="Add to @plant.DisplayName">

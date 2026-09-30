@@ -129,6 +129,17 @@ public class MilestoneTests
     }
 
     [Fact]
+    public async Task Stepping_back_from_rooted_to_rooting_on_the_page_records_no_first_root()
+    {
+        var corms = Corms(PropagationStage.Rooted);
+        await propagations.SaveAsync(corms);
+
+        await service.SetStageAsync(corms, PropagationStage.Rooting, Label, seenToday: true);
+
+        Assert.Null(corms.FirstRootOn);
+    }
+
+    [Fact]
     public async Task Moving_straight_to_rooted_on_the_page_records_no_first_root()
     {
         var corms = Corms();

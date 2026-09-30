@@ -5,13 +5,14 @@
 @inject TimelineService TimelineService
 @inject PhotoService Photos
 @inject TimeProvider Time
+@inject DeviceFiles Device
 @implements IAsyncDisposable
 
 @* Outside the sheet, so the Photo button on the page can open it while the sheet is closed *@
 <input id="@PhotoInputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1"
        @ref="pageInput" @onchange="() => AddPhotosAsync(pageInput)" disabled="@busy" />
 
-<Sheet Title="@SheetTitle" Open="open" OpenChanged="value => open = value">
+<Sheet Title="@SheetTitle" Open="open" OpenChanged="SheetClosedAsync">
     <div class="composer-sheet">
         @if (photos.Count > 0)
         {
@@ -97,8 +98,9 @@
     private ElementReference pageInput;
     private ElementReference sheetInput;
 
-    // Photos are stored as soon as they're picked, and kept as a draft with the note until the
-    // sheet is saved. Cancel, or leaving the page, deletes them again.
+    // Photos are stored as soon as they're picked, and kept as a draft until the sheet is saved.
+    // Closing the sheet or leaving the page deletes them again. Their ids are also kept on the
+    // device, so a draft cut short by a reload or a closed tab is cleared the next time.
     private readonly List<Photo> photos = [];
     private string? noteText;
     private DateOnly? occurredOn;
@@ -110,7 +112,29 @@
     private int undated;
     private string? error;
 
+    private const string DraftKey = "composer-draft-photos";
+
     private DateOnly Today => Time.Today();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (await Device.GetAsync(DraftKey) is { Length: > 0 } left)
+            {
+                foreach (var id in left.Split(',').Select(Guid.Parse))
+                    await Photos.DeleteAsync(id);
+                await Device.SetAsync(DraftKey, null);
+            }
+        }
+        catch (Exception ex) when (ex is FormatException or JSException)
+        {
+            // Nothing to clear up
+        }
+    }
+
+    private Task RememberDraftAsync() =>
+        Device.SetAsync(DraftKey, photos.Count == 0 ? null : string.Join(",", photos.Select(p => p.Id)));
 
     private string SheetTitle => photos.Count switch
     {
@@ -147,6 +171,7 @@
         {
             var result = await Photos.SaveFromInputAsync(input, SubjectType, SubjectId);
             photos.AddRange(result.Saved);
+            await RememberDraftAsync();
             failed += result.Failed;
             undated += result.Undated;
         }
@@ -165,6 +190,7 @@
     {
         await Photos.DeleteAsync(photo.Id);
         photos.Remove(photo);
+        await RememberDraftAsync();
         if (photos.Count == 0)
             undated = 0;
     }
@@ -194,6 +220,7 @@
             }
 
             photos.Clear(); // they belong to the entry now
+            await RememberDraftAsync();
             Reset();
             open = false;
             await OnAdded.InvokeAsync();
@@ -203,6 +230,13 @@
             error = $"Couldn't save: {ex.Message}";
         }
         busy = false;
+    }
+
+    // Closing the sheet, however it's done, drops the draft, so it can't turn up later on a note
+    private async Task SheetClosedAsync(bool value)
+    {
+        if (!value)
+            await DiscardAsync();
     }
 
     private async Task DiscardAsync()
@@ -232,6 +266,7 @@
         foreach (var photo in photos)
             await Photos.DeleteAsync(photo.Id);
         photos.Clear();
+        await RememberDraftAsync();
     }
 
     private string DayLabel(DateOnly day) =>

@@ -258,7 +258,7 @@ else
               CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync"
               EmptyText="No photos or notes yet. Add the first one with Photo or Note below." />
 
-    <EntryComposer @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId"
+    <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId"
                    CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
 
     <div class="page-dock" role="group" aria-label="Add to @propagation.DisplayName">
