@@ -155,6 +155,21 @@ public class BackupTests
     }
 
     [Fact]
+    public void A_photo_framed_since_the_backup_keeps_its_frame_and_a_newer_one_in_the_backup_wins()
+    {
+        var id = Guid.NewGuid();
+        var framedHere = new Photo { Id = id, UpdatedAt = Now, Frame = new PhotoFrame(0.3, 0.5, 2) };
+        var inOldBackup = new Photo { Id = id, UpdatedAt = Now.AddDays(-3) };
+
+        Assert.Empty(BackupMerge.Merge([framedHere], [inOldBackup]).ToSave);
+
+        var centredHere = new Photo { Id = id, UpdatedAt = Now.AddDays(-3) };
+        var framedInBackup = new Photo { Id = id, UpdatedAt = Now, Frame = new PhotoFrame(0.3, 0.5, 2) };
+
+        Assert.Equal(framedInBackup.Frame, Assert.Single(BackupMerge.Merge([centredHere], [framedInBackup]).ToSave).Frame);
+    }
+
+    [Fact]
     public void Treatment_recipes_survive_a_restore()
     {
         var id = Guid.NewGuid();

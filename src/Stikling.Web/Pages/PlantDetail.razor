@@ -25,7 +25,9 @@ else
     @if (plant.CoverPhotoId is { } coverId)
     {
         <div class="detail-hero">
-            <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {plant.DisplayName}")" />
+            <button type="button" class="detail-hero-open" aria-label="Open the cover photo" @onclick="() => timeline?.OpenPhoto(coverId)">
+                <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {plant.DisplayName}")" />
+            </button>
         </div>
     }
 
@@ -304,7 +306,7 @@ else
         </div>
     }
 
-    <Timeline @key="historyVersion" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
+    <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
               CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync"
               EmptyText="No photos or notes yet. Add the first one with Photo or Note below." />
 
@@ -427,6 +429,12 @@ else
                                     <span class="sheet-action-text"><b>Quarantine</b><small>Kept apart while you check it for pests</small></span>
                                 </button>
                             }
+                        </li>
+                        <li>
+                            <a class="sheet-action" href="pests/new?plant=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+                                <span class="sheet-action-text"><b>Found pests</b><small>Open a case to keep track of the treatments</small></span>
+                            </a>
                         </li>
                         <li>
                             <button type="button" class="sheet-action" @onclick="() => OpenStatus(PlantStatus.GivenAway)">
@@ -573,6 +581,7 @@ else
     private More more;
     private int historyVersion;
     private EntryComposer? composer;
+    private Timeline? timeline;
     private readonly string photoInputId = $"plant-photo-{Guid.NewGuid():N}";
 
     // The small forms in the More sheet

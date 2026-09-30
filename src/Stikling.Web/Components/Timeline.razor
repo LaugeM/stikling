@@ -143,7 +143,7 @@ else
 }
 
 <PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId"
-             OnSetCover="SetCoverAsync" OnDelete="DeletePhotoAsync" />
+             OnSetCover="SetCoverAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" />
 
 @code {
     [Parameter, EditorRequired]
@@ -263,6 +263,18 @@ else
     private DateOnly LocalDay(DateTimeOffset moment) => Time.LocalDay(moment);
 
     private Task SetCoverAsync(Photo photo) => OnCoverChanged.InvokeAsync(photo.Id);
+
+    private Task FrameAsync((Photo Photo, PhotoFrame? Frame) change) => Photos.SetFrameAsync(change.Photo, change.Frame);
+
+    /// <summary>Opens a photo full screen, e.g. the cover when it's tapped at the top of the page.</summary>
+    public void OpenPhoto(Guid photoId)
+    {
+        if (photoIndex.TryGetValue(photoId, out var index))
+        {
+            viewerIndex = index;
+            StateHasChanged();
+        }
+    }
 
     private string DayLabel(DateOnly day) =>
         day == Today ? "Today"

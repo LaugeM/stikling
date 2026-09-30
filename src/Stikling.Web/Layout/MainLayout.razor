@@ -3,6 +3,8 @@
 @inject IndexedDb Db
 @inject ThemeService Theme
 @inject SyncRunner Sync
+@inject IPestCaseRepository PestCases
+@inject NavigationManager Navigation
 
 <div class="app-shell">
     <header class="app-header">
@@ -38,11 +40,15 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
             <span>Props</span>
         </NavLink>
-        <NavLink class="bottom-nav-link" href="pests">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
-            <span>Pests</span>
-        </NavLink>
-        <NavLink class="bottom-nav-link" href="supplies">
+        @if (pestTab)
+        {
+            <NavLink class="bottom-nav-link" href="pests">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+                <span>Pests</span>
+            </NavLink>
+        }
+        @* Without its own tab, Pests is reached from Supplies, so that tab shows where you are *@
+        <NavLink class="@($"bottom-nav-link {(!pestTab && OnPestsPage ? "active" : null)}")" href="supplies">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5h15v3.5h-15Z" /><path d="M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8" /></svg>
             <span>Supplies</span>
         </NavLink>
@@ -52,11 +58,45 @@
 @code {
     private bool updateReady;
 
-    protected override void OnInitialized() => Sync.StatusChanged += OnSyncChanged;
+    // Pests only has a tab while a case is open, so someone who never has pests isn't shown one.
+    // It is worked out again when the page changes and when sync brings changes. Saving a case
+    // goes to its page, so that covers opening and resolving one.
+    private bool pestTab;
+
+    private bool OnPestsPage =>
+        Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0] is var path
+        && (path == "pests" || path.StartsWith("pests/", StringComparison.Ordinal));
+
+    protected override async Task OnInitializedAsync()
+    {
+        Sync.StatusChanged += OnSyncChanged;
+        Sync.Received += OnReceived;
+        Navigation.LocationChanged += OnLocationChanged;
+        await CheckPestsAsync();
+    }
 
     private void OnSyncChanged() => _ = InvokeAsync(StateHasChanged);
 
-    public void Dispose() => Sync.StatusChanged -= OnSyncChanged;
+    private void OnReceived() => _ = InvokeAsync(CheckPestsAsync);
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => _ = InvokeAsync(CheckPestsAsync);
+
+    private async Task CheckPestsAsync()
+    {
+        var open = (await PestCases.GetAllAsync()).Any(c => c.IsOpen);
+        if (open != pestTab)
+        {
+            pestTab = open;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        Sync.StatusChanged -= OnSyncChanged;
+        Sync.Received -= OnReceived;
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

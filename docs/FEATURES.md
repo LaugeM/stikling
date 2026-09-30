@@ -86,7 +86,7 @@ These need no new storage and no new screens worth the name: purchase price, a "
 | ☐ | **Collection numbers**: an optional short number per plant, e.g. 117, to write on the pot. Its propagations get 117a, 117b and so on, so a label on a jar says where the cutting came from | 6 | M | v1.x |
 | ☐ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 6 | M | v1.x |
 | ◐ | **Why it died**: an optional note on the cause when a plant is marked as died, and a list of the plants that died and why, to look over before buying the same plant again. The note is built and shows on the plant and on its card under Gone; a list of only the plants that died is missing | 6 | S | v1.x |
-| ◐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline. Built for the aroids (Araceae): every genus and species from Kew's checklist, the old names, and a starter list of cultivars. Other families, common names, family and native region, and a page to browse it aren't built. See `tools/plant-names` | 6 | L | v1.x |
+| ◐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline. Built for the aroids (Araceae): every genus and species from Kew's checklist, the old names, and a starter list of cultivars. Other families, common names (Danish ones too, so paletblad finds Coleus), family and native region, and a page to browse it aren't built. See `tools/plant-names` | 6 | L | v1.x |
 | ✅ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary and the names already on your plants and propagations, including hybrids and named varieties. An old name offers the one it goes by now, and a cultivar fills in its genus and species. Anything not on the list can still be typed | 6 | M | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
 | ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
@@ -110,6 +110,8 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ✅ | Notes on the timeline ("new leaf unfurling", "roots 2 cm") | 1 | S | M3 |
 | ✅ | Automatic timeline entries for changes: status, medium/pot ("moved to semi-hydro"), room, stage | 1 | M | M3 |
 | ✅ | Choose the cover photo | 1 | S | M3 |
+| ✅ | Tap the photo at the top of a plant or propagation page to open it full screen, where **Set as cover** is. The cover used to be chosen only from a photo opened in the history, which was easy to miss | 2 | S | v1.x |
+| ✅ | **Frame a photo**: drag and zoom a photo (pinch, the slider or the mouse wheel) so the plant sits well where it's cropped, on cards, at the top of its page and in the history. Only the position and zoom are saved, the photo itself isn't changed, and photos never framed stay centred | 3 | M | v1.x |
 | ✅ | Correct a timeline entry: fix the text or the date of a note or a photo, and its photos move with it. The earlier versions are kept and shown under "edited". Automatic entries are fixed where they come from, and any entry can be deleted | 3 | S | v1.x |
 | ✅ | **Import existing photos with their dates**: pick old photos from the gallery and each lands on the day it was taken, so a plant's history starts from day one. The date comes from the photo itself (EXIF), then from a date in the file name, then from the file. Photos from the same day share an entry, a note keeps the photos picked with it together, and the app says how many photos had no date of their own so they can be checked | 3 | M | v1.x |
 | ☐ | Swipe through photos side by side to compare growth | 5 | M | v1.x |
@@ -218,6 +220,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ◐ | Inspection log: "checked, no signs", so you can see how long a plant has been clean. Checks are logged on a case being watched, but not on a single plant outside a case | 5 | S | v1.x |
 | ☐ | **Check the neighbours**: opening a pest case lists other plants in the same room to inspect, with "last inspected" dates | 5 | S | v1.x |
 | ☐ | **Biological control log**: release dates for predatory mites and similar | 8 | S | v1.x |
+| ✅ | Pests only has a tab in the bottom bar while a case is open. The rest of the time it's under Supplies, and a plant's menu can start a case, so someone who never has pests doesn't have a tab for them | 3 | S | v1.x |
 
 ## 5b. Supplies & shopping
 
@@ -271,6 +274,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 |---|---|---|---|---|
 | ✅ | Propagations that haven't been checked recently | 2 | M | M5 |
 | ✅ | Recent activity feed | 5 | S | M5 |
+| ☐ | Lately only shows the last 30 days, so a plant added with a date a year back doesn't show up as something recent, and the list says there's nothing new instead | 2 | S | v1.x |
 | ✅ | Pest treatments due or overdue, and checks due on cases being watched | 3 | S | v1.x |
 | ✅ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
 | ✅ | **Needs attention**: flag a plant or propagation with a reason ("repot soon", "look closer", "change the water"), typed or picked from a few suggestions, and it stays on Today until it's marked done there or on its own page. Flags aren't written on the history, and one goes away by itself when the plant leaves or the propagation finishes | 4 | S | v1.x |
@@ -291,9 +295,11 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Ask the browser for persistent storage; show storage used | 1 | S | M5 |
 | ✅ | Backup reminder ("last backup 30 days ago") | 2 | S | M5 |
 | ✅ | Rooms and tags page in Settings: rename a room or a spot everywhere at once, and merge two names for the same room | 2 | M | v1.x |
-| ✅ | **Settings behind a gear** at the top, as a short list: the account, the theme and photo reminder, then pages for rooms and tags, backup and storage, and the about pages. The fifth tab is **Supplies**, with the pots, soil mixes, products, feeds and treatment recipes, each saying what it holds or what it's for | 2 | M | v2 |
+| ✅ | **Settings behind a gear** at the top, as a short list: the account, the theme and photo reminder, then pages for rooms and tags, backup and storage, and the about pages. The last tab is **Supplies**, with the pots, soil mixes, products, feeds and treatment recipes, each saying what it holds or what it's for | 2 | M | v2 |
 | ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
 | ☐ | "What's new" page and app version in Settings. Entries are written by hand in plain language for the people using the app, not generated from commit or pull request titles | 5 | S | v1.x |
+| ☐ | A link to the source code on GitHub under About in Settings | 5 | S | v1.x |
+| ☐ | A page in the app with what's built and what's coming, written for the people using it rather than copied from this list | 7 | S | v1.x |
 | ☐ | **Import from a spreadsheet**: a CSV of plants from Excel or Google Sheets, with each column matched to a field, so a list kept somewhere else doesn't have to be typed in again | 5 | M | v1.x |
 | ☐ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side and the pages use the width instead of keeping the phone's narrow column. Phones keep the tabs at the bottom | 5 | M | v1.x |
 | ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
@@ -307,6 +313,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ◐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation". Add plant, New propagation and Pest cases are there; Log care is missing since there is no page for it yet | 5 | S | v1.x |
 | ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | 6 | M | v1.x |
 | ✅ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
+| ☐ | Pick photos from Google Photos, not only the phone's own gallery. On Android, Firefox and Chrome both open the phone's own gallery app straight away, while other apps let you choose Google Photos. Needs a few ways of asking for photos tried on a phone to see which one offers it | 4 | S | v1.x |
 
 ## 7c. Help & first visit
 

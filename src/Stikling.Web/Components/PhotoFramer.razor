@@ -1,0 +1,102 @@
+@* Frames a photo inside the viewer: drag and zoom it so it sits well where it's cropped, on cards
+   and at the top of its page. Only the position and zoom are saved, the image isn't changed. The
+   dragging is done in js/frame.js, so it follows the finger without a trip through Blazor. *@
+@implements IAsyncDisposable
+@inject PhotoService Photos
+@inject IJSRuntime JS
+
+<div class="framer">
+    <p class="framer-hint">Drag it to move it, and pinch or use the slider to zoom. Cards and the top of the page show it like this.</p>
+
+    <div class="framer-box" @ref="box" tabindex="0" role="img"
+         aria-label="Photo being framed. The arrow keys move it, plus and minus zoom.">
+        @if (url is not null)
+        {
+            <img @ref="img" src="@url" alt="" draggable="false" class="framed" style="@StartStyle" />
+        }
+    </div>
+
+    <label class="framer-zoom">
+        <span>Zoom</span>
+        <input @ref="slider" type="range" min="1" max="@PhotoFrame.MaxZoom" step="0.01" value="1" />
+    </label>
+
+    <div class="framer-actions">
+        <button type="button" class="btn btn-light btn-sm" disabled="@(!attached)" @onclick="SaveAsync">Save</button>
+        <button type="button" class="btn btn-outline-light btn-sm" disabled="@(!attached)" @onclick="CentreAsync">Centre it</button>
+        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnCancel.InvokeAsync()">Cancel</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public Photo Photo { get; set; } = null!;
+
+    /// <summary>The new frame, null when it was put back in the middle.</summary>
+    [Parameter]
+    public EventCallback<PhotoFrame?> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private sealed record Numbers(double X, double Y, double Zoom);
+
+    private ElementReference box;
+    private ElementReference img;
+    private ElementReference slider;
+    private IJSObjectReference? module;
+    private string? url;
+    private bool attached;
+
+    private double Aspect => Photo is { Width: > 0, Height: > 0 } ? (double)Photo.Width / Photo.Height : 4.0 / 3;
+
+    // Where it starts, so it's drawn in place before js/frame.js takes over
+    private string StartStyle => FormattableString.Invariant(
+        $"--fx:{Photo.Frame?.X ?? 0.5};--fy:{Photo.Frame?.Y ?? 0.5};--z:{Photo.Frame?.Zoom ?? 1};--a:{Aspect}");
+
+    // The full size where it's here, so there's detail to zoom into, or else the thumbnail
+    protected override async Task OnInitializedAsync() =>
+        url = await Photos.GetUrlAsync(Photo.Id, false) ?? await Photos.GetUrlAsync(Photo.Id, true);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (attached || url is null)
+            return;
+
+        attached = true;
+        var frame = Photo.Frame;
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/frame.js");
+        await module.InvokeVoidAsync("attach", box, img, slider, frame?.X ?? 0.5, frame?.Y ?? 0.5, frame?.Zoom ?? 1, Aspect);
+        await box.FocusAsync();
+        StateHasChanged();
+    }
+
+    private async Task SaveAsync()
+    {
+        if (module is null || await module.InvokeAsync<Numbers?>("get", box) is not { } numbers)
+            return;
+
+        await OnSave.InvokeAsync(PhotoFrame.From(numbers.X, numbers.Y, numbers.Zoom));
+    }
+
+    private async Task CentreAsync()
+    {
+        if (module is not null)
+            await module.InvokeVoidAsync("set", box, 0.5, 0.5, 1);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is null)
+            return;
+
+        try
+        {
+            await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away anyway
+        }
+    }
+}

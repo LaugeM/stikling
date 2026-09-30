@@ -144,6 +144,10 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
+    /// <summary>The plant whose page the case was opened from. It starts out as the one plant picked.</summary>
+    [SupplyParameterFromQuery(Name = "plant")]
+    public Guid? PlantId { get; set; }
+
     private static readonly (PestScope Value, string Label)[] scopeOptions =
     [
         (PestScope.Everywhere, "Everywhere"),
@@ -164,7 +168,9 @@ else
 
     private DateOnly Today => Time.Today();
 
-    private string BackUrl => IsNew ? "pests" : $"pests/{Id}";
+    private string BackUrl => IsNew ? (FromPlant ? $"plants/{PlantId}" : "pests") : $"pests/{Id}";
+
+    private bool FromPlant => PlantId is { } id && plants.Any(p => p.Id == id);
 
     protected override async Task OnParametersSetAsync()
     {
@@ -179,6 +185,11 @@ else
         if (IsNew)
         {
             item = PestService.Start(Today);
+            if (FromPlant)
+            {
+                item.Scope = PestScope.PickedPlants;
+                item.PlantIds.Add(PlantId!.Value);
+            }
         }
         else
         {
