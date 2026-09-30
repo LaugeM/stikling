@@ -178,6 +178,22 @@ public class PropagationServiceTests
     }
 
     [Fact]
+    public async Task Correcting_the_counts_when_editing_is_recorded_and_opens_it_again()
+    {
+        var corms = await StartCormsAsync(count: 2);
+        await service.MarkFailedAsync(corms, 2);
+        Assert.Equal(PropagationStage.Failed, corms.Stage);
+
+        var before = corms.Copy();
+        corms.FailedCount = 1;
+        await service.UpdateAsync(before, corms, Label);
+
+        Assert.True(corms.IsActive);
+        var change = HistoryOf(corms.Id).Last(e => e.Kind == TimelineKind.Change);
+        Assert.Equal("Stage: Started (was Failed)\nFailed: 1 (was 2)", change.Text);
+    }
+
+    [Fact]
     public async Task Pot_up_creates_plants_with_the_lineage()
     {
         var corms = await StartCormsAsync();

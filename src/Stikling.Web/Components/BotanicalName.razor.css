@@ -1,3 +1,8 @@
+/* Bricolage has no italic, so genus and species take the system font's real one, even in a heading */
+i {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
 /* The detail-sub line is italic as a whole, but a cultivar name is not */
 .cultivar {
     font-style: normal;

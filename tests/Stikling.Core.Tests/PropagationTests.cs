@@ -128,6 +128,47 @@ public class PropagationTests
     }
 
     [Fact]
+    public void Correcting_a_failed_count_opens_it_again_at_the_stage_it_had_reached()
+    {
+        var corms = Batch(3);
+        corms.FirstRootOn = new DateOnly(2026, 9, 5);
+        corms.Stage = PropagationStage.Rooted;
+        corms.NoteRooted(new DateOnly(2026, 9, 10));
+        corms.RecordPottedUp(2, new DateOnly(2026, 9, 20));
+        corms.RecordFailed(1, new DateOnly(2026, 9, 21));
+        Assert.Equal(PropagationStage.Done, corms.Stage);
+
+        corms.FailedCount = 0;
+        corms.SyncStageWithCounts(new DateOnly(2026, 9, 22));
+
+        Assert.Equal(PropagationStage.Rooted, corms.Stage);
+        Assert.Null(corms.FinishedOn);
+        Assert.Equal(1, corms.RemainingCount);
+    }
+
+    [Fact]
+    public void A_batch_opened_again_goes_back_to_rooting_when_only_a_root_was_seen()
+    {
+        var corms = Batch(1);
+        corms.FirstRootOn = new DateOnly(2026, 9, 5);
+        corms.RecordFailed(1, new DateOnly(2026, 9, 20));
+
+        corms.FailedCount = 0;
+        corms.SyncStageWithCounts(new DateOnly(2026, 9, 21));
+
+        Assert.Equal(PropagationStage.Rooting, corms.Stage);
+    }
+
+    [Fact]
+    public void Validate_refuses_negative_potted_up_or_failed_counts()
+    {
+        var corms = Batch(2);
+        corms.FailedCount = -1;
+
+        Assert.Contains("The number potted up or failed can't be negative.", corms.Validate(DateOnly.MaxValue));
+    }
+
+    [Fact]
     public void Validate_requires_a_name_and_a_sensible_count()
     {
         Assert.Contains("Give the propagation a nickname or a genus.", new Propagation().Validate(DateOnly.MaxValue));

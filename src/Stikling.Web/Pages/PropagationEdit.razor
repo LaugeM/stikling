@@ -178,9 +178,39 @@ else
                         {
                             <option value="@stage">@Labels.Stage(stage, propagation.Type)</option>
                         }
+                        @* Done and Failed follow from the counts, so they are only shown, never picked *@
+                        @if (!propagation.IsActive)
+                        {
+                            <option value="@propagation.Stage">@Labels.Stage(propagation.Stage, propagation.Type)</option>
+                        }
                     </InputSelect>
-                    <div class="form-text">Already rooting when you write it down? Pick how far along it is.</div>
+                    <div class="form-text">
+                        @(propagation.IsActive
+                            ? "Already rooting when you write it down? Pick how far along it is."
+                            : "It's finished, since none are left.")
+                    </div>
                 </div>
+                @* Only once something has been potted up or failed, so there is a count to correct *@
+                @if (original is { PottedUpCount: > 0 } or { FailedCount: > 0 })
+                {
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label" for="potted-up">Potted up</label>
+                            <InputNumber id="potted-up" class="form-control" @bind-Value="propagation.PottedUpCount" min="@PlantsFromIt" inputmode="numeric" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" for="failed">Failed</label>
+                            <InputNumber id="failed" class="form-control" @bind-Value="propagation.FailedCount" min="0" inputmode="numeric" />
+                        </div>
+                        <div class="form-text">
+                            Correct these if one was potted up or marked failed by mistake. Any left over go back to growing.
+                            @if (PlantsFromIt > 0)
+                            {
+                                <text> Plants potted up from it stay in your collection.</text>
+                            }
+                        </div>
+                    </div>
+                }
                 @if (propagation.Stage == PropagationStage.Rooted || propagation.RootedOn is not null)
                 {
                     <div class="mb-3">
@@ -277,6 +307,9 @@ else
 
     private DateOnly Today => Time.Today();
 
+    // Plants potted up from it that still exist. The potted up count can't be corrected below them
+    private int PlantsFromIt => propagation is null ? 0 : plants.Count(p => p.FromPropagationId == propagation.Id);
+
     // Units already potted up or failed can't be counted away
     private int MinCount => Math.Max(1, (propagation?.PottedUpCount ?? 0) + (propagation?.FailedCount ?? 0));
 
@@ -309,7 +342,8 @@ else
     private string? ProgressSummary => propagation is null ? null : Joined(
         Labels.Stage(propagation.Stage, propagation.Type),
         propagation.FirstRootOn is { } root ? $"first root {Labels.Date(root)}" : null,
-        propagation.FirstLeafOn is { } leaf ? $"first leaf {Labels.Date(leaf)}" : null);
+        propagation.FirstLeafOn is { } leaf ? $"first leaf {Labels.Date(leaf)}" : null,
+        propagation.PottedUpCount + propagation.FailedCount > 0 ? PropagationService.Outcome(propagation) : null);
 
     private static bool HasSetup(Propagation p) =>
         !string.IsNullOrWhiteSpace(p.Container) || p.SoilMixId is not null || p.RootingAids.Count > 0
@@ -392,6 +426,8 @@ else
 
         propagation.ClearMixUnlessSoil();
         errors = propagation.Validate(Today).ToList();
+        if (!IsNew && propagation.PottedUpCount < PlantsFromIt)
+            errors.Add($"{Labels.Count(PlantsFromIt, "plant")} potted up from it {(PlantsFromIt == 1 ? "is" : "are")} still in your collection, so the potted up count can't be lower.");
         if (errors.Count > 0)
         {
             // A name error has to be visible where it can be fixed

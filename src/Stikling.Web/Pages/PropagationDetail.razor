@@ -85,7 +85,7 @@ else
             }
             else if (propagation.PottedUpCount > 0)
             {
-                <text>@propagation.PottedUpCount potted up</text>
+                <span class="text-nowrap">@propagation.PottedUpCount potted up</span>
             }
             @if (propagation.PottedUpCount > 0 && propagation.FailedCount > 0)
             {
@@ -93,7 +93,7 @@ else
             }
             @if (propagation.FailedCount > 0)
             {
-                <text>@propagation.FailedCount failed</text>
+                <span class="text-nowrap">@propagation.FailedCount failed</span>
             }
         </p>
     }
@@ -461,7 +461,7 @@ else
 
                 case StageView.Failed:
                     <p class="form-text mb-3">
-                        It stays in the history and in the results. This can't be undone.
+                        It stays in the history and in the results. If it was a mistake, correct the count under Edit.
                         @if (failedCount >= propagation.RemainingCount)
                         {
                             <text> This finishes the propagation.</text>
