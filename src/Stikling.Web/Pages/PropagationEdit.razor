@@ -7,6 +7,7 @@
 @inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
+@inject IJSRuntime JS
 
 <PageTitle>@(IsNew ? "Start propagation" : "Edit propagation") · Stikling</PageTitle>
 
@@ -22,12 +23,17 @@ else
     <EditForm Model="propagation" OnSubmit="SaveAsync" class="edit-form" novalidate>
         @if (errors.Count > 0)
         {
-            <div class="alert alert-danger" role="alert">
+            <div id="form-errors" class="alert alert-danger" role="alert" tabindex="-1">
                 @foreach (var error in errors)
                 {
                     <div>@error</div>
                 }
             </div>
+        }
+
+        @if (IsNew)
+        {
+            <p class="form-text">A cutting, corm, seeds or anything else you're growing into a new plant.</p>
         }
 
         <fieldset>
@@ -227,6 +233,17 @@ else
 }
 
 @code {
+    private bool showErrors;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!showErrors)
+            return;
+        showErrors = false;
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+        await module.InvokeVoidAsync("showAlert", "form-errors");
+    }
+
     [Parameter]
     public Guid? Id { get; set; }
 
@@ -379,6 +396,7 @@ else
         {
             // A name error has to be visible where it can be fixed
             nameExpanded = true;
+            showErrors = true;
             return;
         }
 
@@ -403,6 +421,7 @@ else
         catch (Exception ex)
         {
             errors = [$"Couldn't save: {ex.Message}"];
+            showErrors = true;
         }
         finally
         {

@@ -17,6 +17,7 @@ else if (days.Count == 0)
 }
 else
 {
+    <h2 class="visually-hidden">History</h2>
     <ol class="timeline">
         @foreach (var (day, entries) in days)
         {
@@ -47,7 +48,9 @@ else
                                             </button>
                                         }
                                         <button type="button" class="entry-action" @onclick="() => confirmDeleteId = entry.Id"
-                                                aria-label="Delete entry" title="Delete entry">✕</button>
+                                                aria-label="Delete entry" title="Delete entry">
+                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                                        </button>
                                     </span>
                                 }
                             </div>
@@ -104,7 +107,7 @@ else
 
                             @if (entry.RelatedId is { } relatedId)
                             {
-                                <a class="entry-link" href="@(entry.RelatedType == SubjectType.Plant ? "plants" : "propagations")/@relatedId">
+                                <a class="entry-link link-action" href="@(entry.RelatedType == SubjectType.Plant ? "plants" : "propagations")/@relatedId">
                                     @(entry.RelatedType == SubjectType.Plant ? "Open plant" : "Open propagation")
                                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
                                 </a>

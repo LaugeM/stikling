@@ -44,6 +44,8 @@
     --bs-primary-rgb: 47, 125, 79;
     --bs-link-color: var(--pa-green-dark);
     --bs-link-color-rgb: 31, 90, 55;
+    --bs-link-hover-color: var(--pa-green-dark);
+    --bs-link-hover-color-rgb: 31, 90, 55;
     --bs-body-bg: var(--pa-bg);
     --bs-body-color: var(--pa-text);
 }
@@ -75,6 +77,8 @@
     --bs-primary-rgb: 95, 184, 131;
     --bs-link-color: var(--pa-green-dark);
     --bs-link-color-rgb: 134, 209, 164;
+    --bs-link-hover-color: var(--pa-green-dark);
+    --bs-link-hover-color-rgb: 134, 209, 164;
     --bs-body-bg: var(--pa-bg);
     --bs-body-color: var(--pa-text);
     --bs-border-color: var(--pa-border);
@@ -160,6 +164,24 @@ h1 {
     --bs-btn-disabled-color: #2a0d0a;
 }
 
+.btn-outline-danger {
+    --bs-btn-color: var(--pa-alert);
+    --bs-btn-border-color: var(--pa-alert);
+    --bs-btn-hover-bg: var(--pa-alert);
+    --bs-btn-hover-border-color: var(--pa-alert);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: var(--pa-alert);
+    --bs-btn-active-border-color: var(--pa-alert);
+    --bs-btn-active-color: #fff;
+    --bs-btn-disabled-color: var(--pa-alert);
+    --bs-btn-disabled-border-color: var(--pa-alert);
+}
+
+:root[data-bs-theme="dark"] .btn-outline-danger {
+    --bs-btn-hover-color: #2a0d0a;
+    --bs-btn-active-color: #2a0d0a;
+}
+
 .alert-danger {
     --bs-alert-bg: var(--pa-alert-soft);
     --bs-alert-border-color: color-mix(in srgb, var(--pa-alert) 30%, transparent);
@@ -191,6 +213,11 @@ h1 {
 .form-select {
     background-color: var(--pa-surface);
     border-color: var(--pa-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--pa-surface);
 }
 
 .form-check-input:checked {
@@ -408,6 +435,18 @@ a.item-card:active {
     margin-top: 0.15rem;
     font-size: 0.8rem;
     color: var(--pa-muted);
+}
+
+/* One line in a list row, cut off with an ellipsis, so a row never changes height */
+.item-card .item-meta {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-card .item-meta > * + * {
+    margin-left: 0.3rem;
 }
 
 .item-list {
@@ -1159,6 +1198,17 @@ a.item-card:active {
     font-weight: 600;
 }
 
+/* Non-active statuses and Failed. Bootstrap's solid grey is cool and loud, so this is the same
+   quiet outline as Dormant. Needs !important to beat .text-bg-secondary, which has it. */
+.badge.text-bg-secondary {
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--pa-muted);
+    background-color: transparent !important;
+    color: var(--pa-muted) !important;
+    border-radius: 0.6rem;
+    font-weight: 600;
+}
+
 /* Your own labels. Quiet on purpose, so they don't compete with status and pests */
 .tag-label {
     display: inline-block;
@@ -1359,6 +1409,9 @@ a.tag-label:hover {
 }
 
 .photo-remove {
+    display: grid;
+    place-items: center;
+    padding: 0;
     position: absolute;
     top: 0.2rem;
     right: 0.2rem;
@@ -1866,6 +1919,15 @@ a.tag-label:hover {
 .sheet-close:focus-visible {
     background: var(--pa-green-soft);
     color: var(--pa-green-dark);
+}
+
+.photo-remove svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
 }
 
 .sheet-close svg {
