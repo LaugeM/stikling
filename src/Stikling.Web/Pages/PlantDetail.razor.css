@@ -1,0 +1,10 @@
+/* The favourite button sits beside the heading rather than inside it, so the heading's name is just the plant's */
+.title-row {
+    display: flex;
+    /* Level with the first line when a long name wraps */
+    align-items: flex-start;
+}
+
+.title-row h1 {
+    min-width: 0;
+}

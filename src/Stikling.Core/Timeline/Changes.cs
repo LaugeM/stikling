@@ -90,6 +90,13 @@ public static class PropagationChanges
         if (before.InitialCount != after.InitialCount)
             changes.Add($"Count: {after.InitialCount} (was {before.InitialCount})");
 
+        // Only a correction made when editing changes these without a pot up or failure of its own
+        if (before.PottedUpCount != after.PottedUpCount)
+            changes.Add($"Potted up: {after.PottedUpCount} (was {before.PottedUpCount})");
+
+        if (before.FailedCount != after.FailedCount)
+            changes.Add($"Failed: {after.FailedCount} (was {before.FailedCount})");
+
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
         ChangeText.AddContainer(changes, before.Container, after.Container, "New setup");

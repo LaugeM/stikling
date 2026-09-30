@@ -9,6 +9,7 @@
 @inject PhotoService Photos
 @inject NavigationManager Navigation
 @inject TimeProvider Time
+@inject IJSRuntime JS
 @implements IAsyncDisposable
 
 <PageTitle>@(IsNew ? "Add plant" : "Edit plant") · Stikling</PageTitle>
@@ -18,7 +19,7 @@
 
 @if (IsNew && CopyOfId is null && ParentId is null)
 {
-    <p class="form-text">Adding several? <a href="plants/quick-add">Quick add</a></p>
+    <p class="form-text">Adding several? <a class="link-action" href="plants/quick-add">Quick add</a></p>
 }
 
 @if (plant is null)
@@ -30,7 +31,7 @@ else
     <EditForm Model="plant" OnSubmit="SaveAsync" class="edit-form" novalidate>
         @if (errors.Count > 0)
         {
-            <div class="alert alert-danger" role="alert">
+            <div id="form-errors" class="alert alert-danger" role="alert" tabindex="-1">
                 @foreach (var error in errors)
                 {
                     <div>@error</div>
@@ -128,7 +129,7 @@ else
                             <div class="photo-pick">
                                 <PhotoImage PhotoId="photo.Id" Alt="Photo of the new plant" />
                                 <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
-                                        aria-label="Remove photo" title="Remove photo">✕</button>
+                                        aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                             </div>
                         }
                     </div>
@@ -258,6 +259,17 @@ else
 }
 
 @code {
+    private bool showErrors;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!showErrors)
+            return;
+        showErrors = false;
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+        await module.InvokeVoidAsync("showAlert", "form-errors");
+    }
+
     [Parameter]
     public Guid? Id { get; set; }
 
@@ -481,7 +493,10 @@ else
 
         errors = plant.Validate(Today).ToList();
         if (errors.Count > 0)
+        {
+            showErrors = true;
             return;
+        }
 
         saving = true;
         try
@@ -502,6 +517,7 @@ else
         catch (Exception ex)
         {
             errors = [$"Couldn't save: {ex.Message}"];
+            showErrors = true;
         }
         finally
         {

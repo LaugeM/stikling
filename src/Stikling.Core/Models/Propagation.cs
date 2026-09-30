@@ -229,8 +229,9 @@ public sealed class Propagation : Entity
 
     /// <summary>
     /// Nothing left: it's done if anything was potted up, otherwise it failed. Units left on a
-    /// finished propagation (the count was raised when editing) open it again. A finished
-    /// propagation isn't resting any more, so it stops being dormant, and nothing is left to do for it.
+    /// finished propagation (the count was raised, or a count corrected, when editing) open it
+    /// again, at the stage its dates show it had reached. A finished propagation isn't resting any
+    /// more, so it stops being dormant, and nothing is left to do for it.
     /// </summary>
     public void SyncStageWithCounts(DateOnly today)
     {
@@ -243,7 +244,9 @@ public sealed class Propagation : Entity
         }
         else if (!IsActive)
         {
-            Stage = PropagationStage.Started;
+            Stage = RootedOn is not null ? PropagationStage.Rooted
+                : FirstRootOn is not null || FirstGerminatedOn is not null ? PropagationStage.Rooting
+                : PropagationStage.Started;
             FinishedOn = null;
         }
     }
@@ -253,6 +256,8 @@ public sealed class Propagation : Entity
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus))
             errors.Add("Give the propagation a nickname or a genus.");
+        if (PottedUpCount < 0 || FailedCount < 0)
+            errors.Add("The number potted up or failed can't be negative.");
         if (InitialCount < 1)
             errors.Add("Start with at least 1.");
         else if (InitialCount < PottedUpCount + FailedCount)

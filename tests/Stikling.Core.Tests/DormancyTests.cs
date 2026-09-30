@@ -145,7 +145,7 @@ public class DormancyTests
         var after = before.Copy();
         after.RecordFailed(1, new DateOnly(2026, 9, 20));
 
-        Assert.Equal(["Stage: Failed (was Started)"], PropagationChanges.Describe(before, after, Label));
+        Assert.Equal(["Stage: Failed (was Started)", "Failed: 1 (was 0)"], PropagationChanges.Describe(before, after, Label));
     }
 
     [Fact]

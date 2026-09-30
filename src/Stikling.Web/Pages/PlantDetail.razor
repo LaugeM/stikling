@@ -37,16 +37,25 @@ else
             </div>
         }
         <div class="min-w-0">
-            <h1>
-                @plant.DisplayName
+            <div class="title-row">
+                <h1>
+                    @if (string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
+                    {
+                        <BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" />
+                    }
+                    else
+                    {
+                        @plant.DisplayName
+                    }
+                </h1>
                 <button type="button" class="favourite-toggle @(plant.Favourite ? "on" : null)" aria-pressed="@(plant.Favourite ? "true" : "false")"
                         aria-label="Favourite" @onclick="ToggleFavouriteAsync">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8Z" /></svg>
                 </button>
-            </h1>
-            @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is { } botanical)
+            </div>
+            @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
             {
-                <p class="detail-sub">@botanical</p>
+                <p class="detail-sub"><BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" /></p>
             }
             <div class="profile-badges">
                 @if (plant.Status != PlantStatus.Active)
@@ -86,21 +95,25 @@ else
     @if (HasFamily)
     {
         <p class="profile-facts">
-            @if (ancestors.Count > 0)
+            @if (ancestors.Count > 0 && fromPropagation is not null)
             {
-                <text>from <a href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a></text>
+                <text>from <a class="link-action" href="propagations/@fromPropagation.Id">a @Labels.For(fromPropagation.Type).ToLowerInvariant()</a> of <a class="link-action" href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a></text>
+            }
+            else if (ancestors.Count > 0)
+            {
+                <text>from <a class="link-action" href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a></text>
             }
             else if (fromPropagation is not null)
             {
-                <text>from <a href="propagations/@fromPropagation.Id">a @Labels.For(fromPropagation.Type).ToLowerInvariant()</a></text>
+                <text>from <a class="link-action" href="propagations/@fromPropagation.Id">a @Labels.For(fromPropagation.Type).ToLowerInvariant()</a></text>
             }
             @if (propagations.Count > 0)
             {
-                @(ancestors.Count > 0 || fromPropagation is not null ? " · " : "")<a href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Labels.Count(propagations.Count, "propagation")</a>
+                @(ancestors.Count > 0 || fromPropagation is not null ? " · " : "")<a class="link-action" href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Labels.Count(propagations.Count, "propagation")</a>
             }
             @if (offspring.Count > 0)
             {
-                @(ancestors.Count > 0 || fromPropagation is not null || propagations.Count > 0 ? " · " : "")<a href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Labels.Count(offspring.Count, "plant") grown from it</a>
+                @(ancestors.Count > 0 || fromPropagation is not null || propagations.Count > 0 ? " · " : "")<a class="link-action" href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Labels.Count(offspring.Count, "plant") grown from it</a>
             }
         </p>
     }
@@ -529,7 +542,7 @@ else
                     }
                 }
                 <div class="form-actions">
-                    <button type="button" class="btn @(status == PlantStatus.Died ? "btn-danger" : "btn-primary")" disabled="@busy" @onclick="SaveStatusAsync">Save</button>
+                    <button type="button" class="btn @(status == PlantStatus.Died ? "btn-danger" : "btn-primary")" disabled="@busy" @onclick="SaveStatusAsync">@StatusButtonText</button>
                     <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
                 </div>
                 break;
@@ -599,11 +612,22 @@ else
         {
             if (places.NameOf(plant!.PlaceId) is { } place)
                 yield return place;
-            yield return PotName(plant.InnerPotId) is { } pot ? $"{Labels.For(plant.Medium)} in {pot}" : Labels.For(plant.Medium);
+            yield return PotName(plant.InnerPotId) is { } pot ? $"{Labels.For(plant.Medium)} in {pot}" : $"in {MediumWord(plant.Medium)}";
             if (plant.Status == PlantStatus.Active && headline.FirstOrDefault(h => h.Kind == CareKind.Watered).Last is { } watered)
                 yield return $"watered {Labels.DaysAgo(watered.DaysAgo)}";
         }
     }
+
+    // "soil" in the middle of a line, but LECA and PON stay in capitals
+    private static string MediumWord(GrowingMedium medium) =>
+        Labels.For(medium) is var label && label == label.ToUpperInvariant() ? label : label.ToLowerInvariant();
+
+    private string StatusButtonText => status switch
+    {
+        PlantStatus.Died => "Mark as died",
+        PlantStatus.Sold => "Mark as sold",
+        _ => "Mark as given away",
+    };
 
     private string MoreTitle => more switch
     {
