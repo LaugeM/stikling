@@ -117,12 +117,16 @@ public sealed class PropagationService(
         await propagations.SaveAsync(propagation);
     }
 
-    public async Task SetStageAsync(Propagation propagation, PropagationStage stage, Func<Enum, string> label)
+    /// <param name="seenToday">Set when the stage was picked on the propagation's page: reaching
+    /// Rooting there also records the first root (or seedling) as today. See <see cref="Propagation.NoteFirstSign"/>.</param>
+    public async Task SetStageAsync(Propagation propagation, PropagationStage stage, Func<Enum, string> label, bool seenToday = false)
     {
         if (propagation.Stage == stage)
             return;
         var before = propagation.Copy();
         propagation.SetStage(stage);
+        if (seenToday)
+            propagation.NoteFirstSign(Today);
         await UpdateAsync(before, propagation, label);
     }
 
