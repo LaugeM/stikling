@@ -52,6 +52,15 @@ typography:
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.4
+  meta:
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+    fontSize: "0.8rem"
+    fontWeight: 400
+    lineHeight: 1.4
+  micro:
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 400
 rounded:
   control: "0.6rem"
   sm: "0.5rem"
@@ -183,7 +192,7 @@ Green carries the system, in three strengths. Clay is the second material, in tw
 
 ### Named Rules
 
-**The Two Materials Rule.** Green means growing and acting: buttons, links, selection, stages, rooted counts. Clay means a plant in a pot, and nothing else. It never fills a button and never marks a state. Red means pests and danger. A fourth hue has no job to do.
+**The Two Materials Rule.** Green means growing and acting: buttons, links, selection, stages, rooted counts. Clay means a plant in a pot, and nothing else. It never fills a button and never marks a state, with one exception: a favourite's star is filled Clay, because a favourite is about the plant itself, and green or red would read as a stage or a problem. Red means pests and danger. A fourth hue has no job to do.
 
 **The Warm Neutral Rule.** No neutral in this system is a pure grey. Every one of them carries green. A `#f5f5f5` or a `#888` anywhere in this app is a bug, because it is the fastest way to turn the bench back into a clinic.
 
@@ -204,6 +213,8 @@ Green carries the system, in three strengths. Clay is the second material, in tw
 - **Body** (400, 1rem, 1.5 line-height): everything read as prose. Notes preserve their line breaks.
 - **Label** (600, 0.85rem, uppercase, 0.03em tracking, Muted Ink): the section marker. Groupings on Today, propagation stage groups, subheadings inside a detail card, and the date heading on a timeline day. It is the most distinctive type decision in the app and it is applied consistently.
 - **Caption** (400, 0.875rem): supporting lines. The species line under a plant name is set in italic here, which is correct botanical practice and the one piece of real typographic manners in the app.
+- **Meta** (400, 0.8rem): the small line on a list row (origin, room, "day 24"), timeline entry heads, and the day on an activity line. The smallest size anything is read at.
+- **Micro** (0.75rem): only for words that sit under something bigger and are never read on their own, like the tab labels in the bottom bar and "days" under a day count.
 
 ### Named Rules
 
@@ -300,7 +311,8 @@ A propagation's stage in a Leaf Tint badge, led by three small ticks filled up t
 - **Style:** Surface background on a Border hairline. The background is deliberately the card colour rather than the page colour, so fields do not look disabled.
 - **Focus:** border shifts to Potting Green, plus the focus ring.
 - **Placeholder:** Muted Ink at 0.8 opacity.
-- Radio groups appear as a segmented control of equal-width buttons, used for filters and for propagation stage.
+- Radio groups appear as a segmented control of equal-width buttons, used for filters and for propagation stage. Each segment is at least 44px tall. The picked one looks like a picked chip: Leaf Tint with Deep Moss text and a Potting Green edge, so solid green is left for the main button on a screen. The stage picker on a propagation is the exception: it reads as a path, so the current stage is solid green and the ones already passed keep a Leaf Tint fill.
+- Text buttons and links that sit in a line of text, like "Select" or "End quarantine", keep their look but get a tap area at least 44px tall.
 
 ### Navigation
 Five fixed destinations in a bottom bar: a stroked icon over a 0.75rem Bricolage label, Muted Ink at rest, Deep Moss and weight 600 when active. The active icon also sits on a Leaf Tint pill, so where you are shows before you read the label.
@@ -345,7 +357,7 @@ Questions and answers grouped by topic, each topic under a Label heading. The qu
 - **Don't** use neon gradients over black, glow shadows or frosted glass. This is the one confirmed rejection.
 - **Don't** add a shadow to a resting surface. Use tone and a hairline.
 - **Don't** introduce a third font family or a fourth hue.
-- **Don't** fill a button or mark a state with clay.
+- **Don't** fill a button or mark a state with clay. The favourite star is the one exception.
 - **Don't** set small text in Potting Green, or fill a large area with Deep Moss.
 - **Don't** use a pure grey anywhere.
 - **Don't** let a fixed element cover the last row of a list; lists reserve 5rem at the end.
