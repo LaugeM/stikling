@@ -9,6 +9,7 @@
 @inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
+@inject IJSRuntime JS
 
 <PageTitle>@(plant?.DisplayName ?? "Plant") · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -47,141 +48,75 @@ else
             {
                 <p class="detail-sub">@botanical</p>
             }
-            @if (plant.Status != PlantStatus.Active)
-            {
-                <span class="badge text-bg-secondary">@Labels.For(plant.Status)</span>
-            }
-            @if (plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(plant.CauseOfDeath))
-            {
-                <p class="detail-sub">@plant.CauseOfDeath</p>
-            }
-            @if (plant.DescribeDeparture() is { } departure)
-            {
-                <p class="detail-sub">@departure</p>
-            }
-            @if (plant.InQuarantine)
-            {
-                <span class="badge quarantine-badge">Quarantine</span>
-            }
-            @if (plant.IsDormant)
-            {
-                <span class="badge dormant-badge">Dormant</span>
-            }
-            @foreach (var item in pests)
-            {
-                <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
-            }
+            <div class="profile-badges">
+                @if (plant.Status != PlantStatus.Active)
+                {
+                    <span class="badge text-bg-secondary">@Labels.For(plant.Status)</span>
+                }
+                @if (plant.InQuarantine)
+                {
+                    <span class="badge quarantine-badge">Quarantine</span>
+                }
+                @if (plant.IsDormant)
+                {
+                    <span class="badge dormant-badge">Dormant</span>
+                }
+                @foreach (var item in pests)
+                {
+                    <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
+                }
+            </div>
         </div>
     </header>
 
-    <div class="detail-actions">
-        <a class="btn btn-primary" href="plants/@plant.Id/edit">Edit</a>
-        <a class="btn btn-outline-primary" href="propagations/new?parent=@plant.Id">Propagate</a>
-        @if (plant.Attention is null && plant.Status == PlantStatus.Active && !flagging)
-        {
-            <button type="button" class="btn btn-link" @onclick="() => flagging = true">Flag</button>
-        }
-    </div>
+    @if (plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(plant.CauseOfDeath))
+    {
+        <p class="profile-facts">@plant.CauseOfDeath</p>
+    }
+    @if (plant.DescribeDeparture() is { } departure)
+    {
+        <p class="profile-facts">@departure</p>
+    }
 
-    <AttentionPanel Current="plant.Attention" @bind-Editing="flagging" Suggestions="AttentionPanel.PlantReasons"
-                    OnSave="SetAttentionAsync" />
+    <AttentionPanel Current="plant.Attention" Editing="false" EditingChanged="_ => OpenMore(More.Flag)"
+                    Suggestions="AttentionPanel.PlantReasons" OnSave="SetAttentionAsync" />
 
-    <div class="detail-tabs" role="tablist" aria-label="Plant sections">
-        <button type="button" role="tab" id="tab-info" aria-controls="panel-info" aria-selected="@(tab == "info")"
-                class="detail-tab @(tab == "info" ? "active" : null)" @onclick='() => SetTab("info")'>Info</button>
-        <button type="button" role="tab" id="tab-care" aria-controls="panel-care" aria-selected="@(tab == "care")"
-                class="detail-tab @(tab == "care" ? "active" : null)" @onclick='() => SetTab("care")'>Care</button>
-        <button type="button" role="tab" id="tab-props" aria-controls="panel-props" aria-selected="@(tab == "props")"
-                class="detail-tab @(tab == "props" ? "active" : null)" @onclick='() => SetTab("props")'>
-            Props@(propagations.Count > 0 ? $" ({propagations.Count})" : "")
+    <p class="profile-facts">@string.Join(" · ", Facts)</p>
+
+    @if (HasFamily)
+    {
+        <p class="profile-facts">
+            @if (ancestors.Count > 0)
+            {
+                <text>from <a href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a></text>
+            }
+            else if (fromPropagation is not null)
+            {
+                <text>from <a href="propagations/@fromPropagation.Id">a @Labels.For(fromPropagation.Type).ToLowerInvariant()</a></text>
+            }
+            @if (propagations.Count > 0)
+            {
+                @(ancestors.Count > 0 || fromPropagation is not null ? " · " : "")<a href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Labels.Count(propagations.Count, "propagation")</a>
+            }
+            @if (offspring.Count > 0)
+            {
+                @(ancestors.Count > 0 || fromPropagation is not null || propagations.Count > 0 ? " · " : "")<a href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Labels.Count(offspring.Count, "plant") grown from it</a>
+            }
+        </p>
+    }
+
+    <div class="profile-links">
+        <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(detailsOpen ? "true" : "false")"
+                aria-controls="plant-details" @onclick="() => detailsOpen = !detailsOpen">
+            Details
+            <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
         </button>
-        <button type="button" role="tab" id="tab-history" aria-controls="panel-history" aria-selected="@(tab == "history")"
-                class="detail-tab @(tab == "history" ? "active" : null)" @onclick='() => SetTab("history")'>History</button>
+        <a class="btn btn-link btn-sm link-action" href="plants/@plant.Id/edit">Edit</a>
     </div>
 
-    @if (tab == "care")
+    @if (detailsOpen)
     {
-        <div id="panel-care" role="tabpanel" aria-labelledby="tab-care">
-            <section class="detail-card">
-                <h2>Last done</h2>
-                @if (headline.Count == 0)
-                {
-                    <p class="text-body-secondary mb-0">Nothing logged yet. Log the first watering or feed below.</p>
-                }
-                else
-                {
-                    <dl class="detail-list">
-                        @foreach (var (kind, last) in headline)
-                        {
-                            <dt>@Labels.For(kind)</dt>
-                            <dd>@(last is null ? "Never" : $"{Labels.DaysAgo(last.DaysAgo)} · {Labels.Date(last.On)}")</dd>
-                        }
-                    </dl>
-                }
-                @if (moisture is { } reading)
-                {
-                    <p class="care-moisture mb-0">Moisture @reading.Value/10, @Labels.DaysAgo(reading.DaysAgo)</p>
-                }
-            </section>
-
-            <section class="detail-card">
-                <h2>Log care</h2>
-                <CareSheet PlantIds="@(new[] { plant.Id })" OnLogged="ReloadCareAsync" />
-            </section>
-
-            @if (care.Count > 0)
-            {
-                <section class="detail-card">
-                    <h2>History</h2>
-                    <ul class="care-list">
-                        @foreach (var entry in care)
-                        {
-                            <li>
-                                <div class="care-entry">
-                                    <span class="care-what">@CareService.Describe(entry, Labels.For)</span>
-                                    <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
-                                </div>
-                            </li>
-                        }
-                    </ul>
-                </section>
-            }
-        </div>
-    }
-    else if (tab == "props")
-    {
-        <div id="panel-props" role="tabpanel" aria-labelledby="tab-props">
-            @if (propagations.Count == 0)
-            {
-                <div class="empty-state">
-                    <p>No propagations taken from this plant yet.</p>
-                    <p class="text-body-secondary">
-                        Take a cutting, a pup or a leaf, and follow it here until it has rooted and can be potted up.
-                    </p>
-                    <a class="btn btn-primary mt-3" href="propagations/new?parent=@plant.Id">Propagate</a>
-                </div>
-            }
-            else
-            {
-                <ul class="item-list">
-                    @foreach (var propagation in propagations)
-                    {
-                        <li><PropagationCard Propagation="propagation" ShowStage="true" /></li>
-                    }
-                </ul>
-            }
-        </div>
-    }
-    else if (tab == "history")
-    {
-        <div id="panel-history" role="tabpanel" aria-labelledby="tab-history">
-            <Timeline SubjectType="SubjectType.Plant" SubjectId="plant.Id"
-                      CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" />
-        </div>
-    }
-    else
-    {
-        <div id="panel-info" role="tabpanel" aria-labelledby="tab-info">
+        <div id="plant-details" class="profile-details">
             <section class="detail-card">
                 <dl class="detail-list">
                     <dt>Got it</dt>
@@ -234,23 +169,13 @@ else
                     @if (plant.QuarantinedSince is { } since)
                     {
                         <dt>Quarantine</dt>
-                        <dd>
-                            @(since == Today ? "Since today" : $"Since {Labels.Date(since)} · {Labels.Count(plant.DaysInQuarantine(Today) ?? 0, "day")}")
-                            <div>
-                                <button type="button" class="btn btn-link btn-sm link-action" @onclick="EndQuarantineAsync">End quarantine</button>
-                            </div>
-                        </dd>
+                        <dd>@(since == Today ? "Since today" : $"Since {Labels.Date(since)}") · day @(plant.DaysInQuarantine(Today) ?? 0) of @(plant.QuarantineDays ?? Plant.DefaultQuarantineDays)</dd>
                     }
 
                     @if (plant.DormantSince is { } dormantSince)
                     {
                         <dt>Dormant</dt>
-                        <dd>
-                            @(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(plant.DaysDormant(Today) ?? 0, "day")}")
-                            <div>
-                                <button type="button" class="btn btn-link btn-sm link-action" @onclick="EndDormancyAsync">It's woken up</button>
-                            </div>
-                        </dd>
+                        <dd>@(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(plant.DaysDormant(Today) ?? 0, "day")}")</dd>
                     }
 
                     @if (plant.Tags.Count > 0)
@@ -291,58 +216,58 @@ else
                 </section>
             }
 
-            <section class="detail-card">
+            <section class="detail-card" id="plant-family">
                 <h2>Family</h2>
-                @if (ancestors.Count == 0 && offspring.Count == 0 && fromPropagation is null)
+                @if (ancestors.Count > 0 || fromPropagation is not null)
                 {
-                    <p class="text-body-secondary mb-0">
-                        No parent or offspring recorded. Use <em>Propagate</em> for a cutting, corm or offset that
-                        still has to root, and it shows up under Props while it does.
-                    </p>
+                    <h3>Came from</h3>
+                    <ul class="family-list">
+                        @if (fromPropagation is not null)
+                        {
+                            <li>
+                                <a href="propagations/@fromPropagation.Id">@Labels.For(fromPropagation.Type)</a>
+                                <span class="text-body-secondary small"> · started @Labels.Date(fromPropagation.StartedOn)</span>
+                            </li>
+                        }
+                        @foreach (var ancestor in ancestors)
+                        {
+                            <li><a href="plants/@ancestor.Id">@ancestor.DisplayName</a></li>
+                        }
+                    </ul>
                 }
-                else
+                @if (propagations.Count > 0)
                 {
-                    @if (ancestors.Count > 0 || fromPropagation is not null)
-                    {
-                        <h3>Came from</h3>
-                        <ul class="family-list">
-                            @if (fromPropagation is not null)
-                            {
-                                <li>
-                                    <a href="propagations/@fromPropagation.Id">@Labels.For(fromPropagation.Type)</a>
-                                    <span class="text-body-secondary small"> · started @Labels.Date(fromPropagation.StartedOn)</span>
-                                </li>
-                            }
-                            @foreach (var ancestor in ancestors)
-                            {
-                                <li><a href="plants/@ancestor.Id">@ancestor.DisplayName</a></li>
-                            }
-                        </ul>
-                    }
-                    @if (offspring.Count > 0)
-                    {
-                        <h3>Offspring (@offspring.Count)</h3>
-                        <ul class="family-list">
-                            @foreach (var child in offspring)
-                            {
-                                <li>
-                                    <a href="plants/@child.Id">@child.DisplayName</a>
-                                    @if (child.Status != PlantStatus.Active)
-                                    {
-                                        <span class="text-body-secondary small"> · @Labels.For(child.Status)</span>
-                                    }
-                                    @if (child.HasLeft && !string.IsNullOrWhiteSpace(child.LeftTo))
-                                    {
-                                        <span class="text-body-secondary small"> · @(child.Status == PlantStatus.Sold ? "sold to" : "given to") @child.LeftTo</span>
-                                    }
-                                </li>
-                            }
-                        </ul>
-                    }
+                    <h3>Propagations (@propagations.Count)</h3>
+                    <ul class="item-list">
+                        @foreach (var propagation in propagations)
+                        {
+                            <li><PropagationCard Propagation="propagation" ShowStage="true" /></li>
+                        }
+                    </ul>
+                }
+                @if (offspring.Count > 0)
+                {
+                    <h3>Plants grown from it (@offspring.Count)</h3>
+                    <ul class="family-list">
+                        @foreach (var child in offspring)
+                        {
+                            <li>
+                                <a href="plants/@child.Id">@child.DisplayName</a>
+                                @if (child.Status != PlantStatus.Active)
+                                {
+                                    <span class="text-body-secondary small"> · @Labels.For(child.Status)</span>
+                                }
+                                @if (child.HasLeft && !string.IsNullOrWhiteSpace(child.LeftTo))
+                                {
+                                    <span class="text-body-secondary small"> · @(child.Status == PlantStatus.Sold ? "sold to" : "given to") @child.LeftTo</span>
+                                }
+                            </li>
+                        }
+                    </ul>
                 }
                 <p class="family-hint">
-                    Already rooted and potted on its own?
-                    <a href="plants/new?parent=@plant.Id">Add it straight away as a plant</a>.
+                    Took a cutting? <a href="propagations/new?parent=@plant.Id">Start a propagation</a> and follow it until it has rooted.
+                    Already rooted and potted on its own? <a href="plants/new?parent=@plant.Id">Add it straight away as a plant</a>.
                 </p>
             </section>
 
@@ -354,7 +279,7 @@ else
             <section class="danger-zone">
                 @if (confirmDelete)
                 {
-                    <p class="mb-2">Delete <strong>@plant.DisplayName</strong>? If it died or you gave it away, consider changing its status instead so its history is kept.</p>
+                    <p class="mb-2">Delete <strong>@plant.DisplayName</strong>? If it died or you gave it away, use the three dots at the bottom to say so instead, so its history is kept.</p>
                     <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
                     <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
                 }
@@ -365,21 +290,287 @@ else
             </section>
         </div>
     }
+
+    <Timeline @key="historyVersion" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
+              CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync"
+              EmptyText="No photos or notes yet. Add the first one with Photo or Note below." />
+
+    <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId"
+                   CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
+
+    <div class="page-dock" role="group" aria-label="Add to @plant.DisplayName">
+        <label class="btn btn-primary icon-btn" for="@photoInputId">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+            Photo
+        </label>
+        <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+            Note
+        </button>
+        @if (plant.Status == PlantStatus.Active)
+        {
+            <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => careOpen = true">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10Z" /></svg>
+                Care
+            </button>
+        }
+        <button type="button" class="btn btn-outline-primary dock-more" aria-label="More for this plant" @onclick="() => OpenMore(More.Menu)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="19" cy="12" r="1.3" /></svg>
+        </button>
+    </div>
+
+    <Sheet Title="Care" @bind-Open="careOpen">
+        <div class="sheet-section">
+            @if (care.Count == 0)
+            {
+                <p class="text-body-secondary mb-0">Nothing logged yet. Log the first watering or feed below.</p>
+            }
+            else
+            {
+                <dl class="detail-list">
+                    @foreach (var (kind, last) in headline)
+                    {
+                        <dt>@Labels.For(kind)</dt>
+                        <dd>@(last is null ? "Never" : $"{Labels.DaysAgo(last.DaysAgo)} · {Labels.Date(last.On)}")</dd>
+                    }
+                </dl>
+            }
+            @if (moisture is { } reading)
+            {
+                <p class="care-moisture mb-0">Moisture @reading.Value/10, @Labels.DaysAgo(reading.DaysAgo)</p>
+            }
+        </div>
+
+        <div class="sheet-section">
+            <CareSheet PlantIds="@(new[] { plant.Id })" OnLogged="CareLoggedAsync" />
+        </div>
+
+        @if (care.Count > 0)
+        {
+            <div class="sheet-section">
+                <h3 class="section-label">History</h3>
+                <ul class="care-list">
+                    @foreach (var entry in care)
+                    {
+                        <li>
+                            <div class="care-entry">
+                                <span class="care-what">@CareService.Describe(entry, Labels.For)</span>
+                                <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </Sheet>
+
+    <Sheet Title="@MoreTitle" Open="more != More.None" OpenChanged="open => { if (!open) more = More.None; }">
+        @switch (more)
+        {
+            case More.Menu:
+                <ul class="sheet-actions">
+                    @if (plant.Status == PlantStatus.Active)
+                    {
+                        <li>
+                            <a class="sheet-action" href="propagations/new?parent=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6.5" r="2.5" /><circle cx="6" cy="17.5" r="2.5" /><path d="M8.2 7.8 19 17M8.2 16.2 19 7" /></svg>
+                                <span class="sheet-action-text"><b>Propagate</b><small>Took a cutting, a pup or a leaf</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <button type="button" class="sheet-action" @onclick="() => more = More.Flag">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4" /><path d="M5 4h12l-2.5 4.5L17 13H5" /></svg>
+                                <span class="sheet-action-text"><b>@(plant.Attention is null ? "Flag it" : "Change the flag")</b><small>Keeps it on Today until it's done</small></span>
+                            </button>
+                        </li>
+                        <li>
+                            @if (plant.IsDormant)
+                            {
+                                <button type="button" class="sheet-action" disabled="@busy" @onclick="EndDormancyAsync">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" /></svg>
+                                    <span class="sheet-action-text"><b>It's woken up</b><small>Dormant @DaysLabel(plant.DaysDormant(Today))</small></span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="sheet-action" @onclick="OpenDormant">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" /></svg>
+                                    <span class="sheet-action-text"><b>Dormant</b><small>Resting, like an alocasia that dropped its leaves</small></span>
+                                </button>
+                            }
+                        </li>
+                        <li>
+                            @if (plant.InQuarantine)
+                            {
+                                <button type="button" class="sheet-action" disabled="@busy" @onclick="EndQuarantineAsync">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="m8.5 12 2.5 2.5 4.5-5" /></svg>
+                                    <span class="sheet-action-text"><b>End quarantine</b><small>In quarantine @DaysLabel(plant.DaysInQuarantine(Today))</small></span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="sheet-action" @onclick="OpenQuarantine">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" stroke-dasharray="3 2.5" /></svg>
+                                    <span class="sheet-action-text"><b>Quarantine</b><small>Kept apart while you check it for pests</small></span>
+                                </button>
+                            }
+                        </li>
+                        <li>
+                            <button type="button" class="sheet-action" @onclick="() => OpenStatus(PlantStatus.GivenAway)">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h12M12 7l5 5-5 5" /><path d="M20 5v14" /></svg>
+                                <span class="sheet-action-text"><b>Gave it away or sold it</b><small>It leaves your collection, its history stays</small></span>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="sheet-action danger" @onclick="() => OpenStatus(PlantStatus.Died)">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-7" /><path d="M12 14c-1-4-4-6-8-6 0 4 3 7 8 6Z" /><path d="M12 14c2-3 4.5-4 8-3.5-.5 3.5-3.5 5-8 3.5Z" /><path d="M4 21h16" /></svg>
+                                <span class="sheet-action-text"><b>It died</b><small>Its history stays, so you can see what happened</small></span>
+                            </button>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <button type="button" class="sheet-action" @onclick="() => OpenStatus(plant.Status)">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+                                <span class="sheet-action-text"><b>Change what happened</b><small>@Labels.For(plant.Status)</small></span>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="sheet-action" disabled="@busy" @onclick="BackInCollectionAsync">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H8M12 7l-5 5 5 5" /><path d="M4 5v14" /></svg>
+                                <span class="sheet-action-text"><b>Back in the collection</b><small>It's yours again, or it wasn't gone after all</small></span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+                break;
+
+            case More.Flag:
+                <AttentionPanel Current="plant.Attention" Editing="true" EditingChanged="_ => more = More.None"
+                                Suggestions="AttentionPanel.PlantReasons" OnSave="SetAttentionAsync" />
+                break;
+
+            case More.Dormant:
+                <div class="mb-3">
+                    <label class="form-label" for="dormant-since">Dormant since</label>
+                    <input id="dormant-since" type="date" class="form-control" @bind="since" max="@Today.ToString("yyyy-MM-dd")" />
+                    <div class="form-text">Resting rather than dead. It won't come up on Today to be checked until it wakes up.</div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SetDormantAsync">Mark as dormant</button>
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
+                break;
+
+            case More.Quarantine:
+                <div class="row g-2 mb-1">
+                    <div class="col-7">
+                        <label class="form-label" for="quarantine-since">Since</label>
+                        <input id="quarantine-since" type="date" class="form-control" @bind="since" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label" for="quarantine-days">For how many days</label>
+                        <input id="quarantine-days" type="number" class="form-control" min="1" max="365" inputmode="numeric" @bind="quarantineDays" />
+                    </div>
+                </div>
+                <div class="form-text mb-3">Today says when it's time to check the plant and let it out.</div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@(busy || quarantineDays is < 1 or > 365)" @onclick="SetQuarantineAsync">Put in quarantine</button>
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
+                break;
+
+            case More.Status:
+                @if (status != PlantStatus.Died)
+                {
+                    <div class="btn-group segmented mb-3" role="radiogroup" aria-label="What happened">
+                        @foreach (var choice in new[] { PlantStatus.GivenAway, PlantStatus.Sold })
+                        {
+                            var id = $"left-{choice}";
+                            <input type="radio" class="btn-check" name="left-how" id="@id" checked="@(status == choice)" @onchange="() => status = choice" />
+                            <label class="btn btn-outline-primary" for="@id">@Labels.For(choice)</label>
+                        }
+                    </div>
+                }
+                @if (status == PlantStatus.Died)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="cause-of-death">What happened? <span class="text-body-secondary">(optional)</span></label>
+                        <input id="cause-of-death" class="form-control" @bind="causeOfDeath" placeholder="e.g. root rot after repotting" />
+                    </div>
+                }
+                else
+                {
+                    var sold = status == PlantStatus.Sold;
+                    <div class="mb-3">
+                        <label class="form-label" for="left-to">@(sold ? "Who bought it?" : "Who got it?") <span class="text-body-secondary">(optional)</span></label>
+                        <input id="left-to" class="form-control" @bind="leftTo" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="left-for">@(sold ? "Sold for" : "Swapped for?") <span class="text-body-secondary">(optional)</span></label>
+                        <input id="left-for" class="form-control" @bind="leftFor" placeholder="@(sold ? "e.g. 150 kr" : "e.g. a Hoya carnosa")" />
+                    </div>
+                    @if (Labels.PotsTakenChoices([plant]) is { Count: > 0 } choices)
+                    {
+                        <div class="mb-3">
+                            <span class="form-label d-block" id="pots-taken">What went with it</span>
+                            <div class="btn-group segmented" role="radiogroup" aria-labelledby="pots-taken">
+                                @foreach (var (value, label) in choices)
+                                {
+                                    var id = $"taken-{value}";
+                                    <input type="radio" class="btn-check" name="pots-taken" id="@id"
+                                           checked="@(plant.Fit(potsTaken) == value)" @onchange="() => potsTaken = value" />
+                                    <label class="btn btn-outline-primary" for="@id">@label</label>
+                                }
+                            </div>
+                            <div class="form-text">A pot that went with it no longer counts as yours. One left here is free again.</div>
+                        </div>
+                    }
+                }
+                <div class="form-actions">
+                    <button type="button" class="btn @(status == PlantStatus.Died ? "btn-danger" : "btn-primary")" disabled="@busy" @onclick="SaveStatusAsync">Save</button>
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
+                break;
+        }
+    </Sheet>
 }
 
 @code {
     [Parameter]
     public Guid Id { get; set; }
 
-    /// <summary>"info" (default), "props" or "history", so a tab can be linked to directly.</summary>
+    /// <summary>
+    /// Older links name a tab: "props" opens the details at its propagations and "care" opens
+    /// the care sheet. The history is the page itself now.
+    /// </summary>
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
+
+    private enum More { None, Menu, Flag, Dormant, Quarantine, Status }
 
     private Plant? plant;
     private bool loaded;
     private bool confirmDelete;
-    private bool flagging;
-    private string tab = "info";
+    private bool detailsOpen;
+    private bool careOpen;
+    private bool busy;
+    private bool scrollToFamily;
+    private More more;
+    private int historyVersion;
+    private EntryComposer? composer;
+    private readonly string photoInputId = $"plant-photo-{Guid.NewGuid():N}";
+
+    // The small forms in the More sheet
+    private DateOnly since;
+    private int? quarantineDays;
+    private PlantStatus status;
+    private string? causeOfDeath;
+    private string? leftTo;
+    private string? leftFor;
+    private PotsTaken potsTaken;
+
     private IReadOnlyList<Plant> ancestors = [];
     private IReadOnlyList<Plant> offspring = [];
     private IReadOnlyList<Propagation> propagations = [];
@@ -399,11 +590,43 @@ else
 
     private DateOnly Today => Time.Today();
 
+    private bool HasFamily => ancestors.Count > 0 || fromPropagation is not null || propagations.Count > 0 || offspring.Count > 0;
+
+    // The one line under the name: where it is, what it grows in, and when it was last watered
+    private IEnumerable<string> Facts
+    {
+        get
+        {
+            if (places.NameOf(plant!.PlaceId) is { } place)
+                yield return place;
+            yield return PotName(plant.InnerPotId) is { } pot ? $"{Labels.For(plant.Medium)} in {pot}" : Labels.For(plant.Medium);
+            if (plant.Status == PlantStatus.Active && headline.FirstOrDefault(h => h.Kind == CareKind.Watered).Last is { } watered)
+                yield return $"watered {Labels.DaysAgo(watered.DaysAgo)}";
+        }
+    }
+
+    private string MoreTitle => more switch
+    {
+        More.Flag => plant?.Attention is null ? "Flag it" : "Change the flag",
+        More.Dormant => "Dormant",
+        More.Quarantine => "Quarantine",
+        More.Status when status == PlantStatus.Died => "It died",
+        More.Status => "It left",
+        _ => plant?.DisplayName ?? "",
+    };
+
     protected override async Task OnParametersSetAsync()
     {
-        confirmDelete = false;
-        flagging = false;
-        tab = Tab is "history" or "props" or "care" ? Tab : "info";
+        if (plant?.Id != Id)
+        {
+            confirmDelete = false;
+            more = More.None;
+            careOpen = false;
+            detailsOpen = false;
+        }
+        detailsOpen |= Tab == "props";
+        scrollToFamily |= Tab == "props";
+        careOpen |= Tab == "care";
         await LoadAsync();
         loaded = true;
     }
@@ -446,9 +669,53 @@ else
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
     }
 
-    // Keeps the tab in the address so Back and reloads return to it
-    private void SetTab(string value) =>
-        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("tab", value == "info" ? null : value), replace: true);
+    private async Task CareLoggedAsync()
+    {
+        await ReloadCareAsync();
+        careOpen = false;
+    }
+
+    private void ShowCuttings()
+    {
+        detailsOpen = true;
+        scrollToFamily = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!scrollToFamily || plant is null)
+            return;
+        scrollToFamily = false;
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+        await module.InvokeVoidAsync("scrollToId", "plant-family");
+    }
+
+    private static string DaysLabel(int? days) => days is null or 0 ? "since today" : $"for {Labels.Count(days.Value, "day")}";
+
+    private void OpenMore(More what) => more = what;
+
+    private void OpenDormant()
+    {
+        since = Today;
+        more = More.Dormant;
+    }
+
+    private void OpenQuarantine()
+    {
+        since = Today;
+        quarantineDays = plant?.QuarantineDays ?? Plant.DefaultQuarantineDays;
+        more = More.Quarantine;
+    }
+
+    private void OpenStatus(PlantStatus to)
+    {
+        status = to;
+        causeOfDeath = plant!.CauseOfDeath;
+        leftTo = plant.LeftTo;
+        leftFor = plant.LeftFor;
+        potsTaken = plant.PotsTaken;
+        more = More.Status;
+    }
 
     private async Task SetCoverAsync(Guid? photoId)
     {
@@ -474,19 +741,54 @@ else
         await PlantService.SetAttentionAsync(plant, reason);
     }
 
-    private async Task EndQuarantineAsync()
+    // Each change goes on the history, like it does from the edit form
+    private async Task ChangeAsync(Func<Task> change)
     {
-        if (plant is null)
-            return;
-        await PlantService.SetQuarantineAsync(plant, null, Labels.For);
+        busy = true;
+        try
+        {
+            await change();
+            more = More.None;
+            historyVersion++;
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
-    private async Task EndDormancyAsync()
+    private Task EndQuarantineAsync() =>
+        ChangeAsync(() => PlantService.SetQuarantineAsync(plant!, null, Labels.For));
+
+    private Task EndDormancyAsync() =>
+        ChangeAsync(() => PlantService.SetDormantAsync(plant!, null, Labels.For));
+
+    private Task SetDormantAsync() =>
+        ChangeAsync(() => PlantService.SetDormantAsync(plant!, since, Labels.For));
+
+    private Task SetQuarantineAsync() => ChangeAsync(async () =>
     {
-        if (plant is null)
-            return;
-        await PlantService.SetDormantAsync(plant, null, Labels.For);
-    }
+        plant!.QuarantineDays = quarantineDays;
+        await PlantService.SetQuarantineAsync(plant, since, Labels.For);
+    });
+
+    private Task SaveStatusAsync() => ChangeAsync(async () =>
+    {
+        var before = plant!.Copy();
+        plant.Status = status;
+        plant.CauseOfDeath = causeOfDeath;
+        plant.LeftTo = leftTo;
+        plant.LeftFor = leftFor;
+        plant.PotsTaken = potsTaken;
+        await PlantService.UpdateAsync(before, plant, Labels.For);
+    });
+
+    private Task BackInCollectionAsync() => ChangeAsync(async () =>
+    {
+        var before = plant!.Copy();
+        plant.Status = PlantStatus.Active;
+        await PlantService.UpdateAsync(before, plant, Labels.For);
+    });
 
     private async Task DeleteAsync()
     {

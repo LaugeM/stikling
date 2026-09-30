@@ -19,7 +19,7 @@
 }
 else
 {
-    <EditForm Model="propagation" OnSubmit="SaveAsync" class="edit-form">
+    <EditForm Model="propagation" OnSubmit="SaveAsync" class="edit-form" novalidate>
         @if (errors.Count > 0)
         {
             <div class="alert alert-danger" role="alert">
@@ -44,11 +44,38 @@ else
             </div>
             @if (propagation.ParentPlantId is null)
             {
-                <div class="mb-3">
+                <div class="mb-1">
                     <label class="form-label" for="source">Source</label>
                     <InputText id="source" class="form-control" @bind-Value="propagation.Source" placeholder="e.g. Seed shop, a friend's plant" />
                 </div>
             }
+        </fieldset>
+
+        <fieldset>
+            <legend>Name</legend>
+            @if (NameCollapsed)
+            {
+                <div class="d-flex align-items-center justify-content-between gap-2">
+                    <span>Named <b>@propagation.DisplayName</b></span>
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => nameExpanded = true">Change name</button>
+                </div>
+            }
+            else
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="nickname">Nickname</label>
+                    <InputText id="nickname" class="form-control" @bind-Value="propagation.Nickname" placeholder="e.g. Corm test: perlite" />
+                </div>
+                <PlantNameFields @bind-Genus="propagation.Genus" @bind-Species="propagation.Species" @bind-Cultivar="propagation.Cultivar"
+                                 GenusPlaceholder="e.g. Alocasia" SpeciesPlaceholder="e.g. zebrina" CultivarPlaceholder="" />
+                <div class="form-text">
+                    @(propagation.ParentPlantId is null ? "" : "Filled in from the parent plant. ")Give it a nickname, a genus, or both.
+                </div>
+            }
+        </fieldset>
+
+        <fieldset>
+            <legend>How you started it</legend>
             <div class="row g-2 mb-3">
                 <div class="col-7">
                     <label class="form-label" for="type">Type</label>
@@ -64,35 +91,81 @@ else
                     <InputNumber id="count" class="form-control" @bind-Value="propagation.InitialCount" min="@MinCount" inputmode="numeric" />
                 </div>
             </div>
-            @if (propagation.Type == PropagationType.Seed)
-            {
-                <div class="row g-2 mb-3">
-                    <div class="col-6">
-                        <label class="form-label" for="seeds-up">Came up</label>
-                        <InputNumber id="seeds-up" class="form-control" @bind-Value="propagation.SeedsGerminated" min="0" max="@propagation.InitialCount" inputmode="numeric" />
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label" for="first-up">First on</label>
-                        <InputDate id="first-up" class="form-control" @bind-Value="propagation.FirstGerminatedOn"
-                                   min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
-                    </div>
-                    <div class="form-text">How many seeds have come up so far, out of the number sown. Leave empty until the first one does.</div>
-                </div>
-            }
-            @if (propagation.Type == PropagationType.Corm)
-            {
+            <div class="mb-3">
+                <label class="form-label" for="medium">Grows in</label>
+                <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium">
+                    @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                    {
+                        <option value="@medium">@Labels.For(medium)</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="mb-1">
+                <label class="form-label" for="started">Started on</label>
+                <InputDate id="started" class="form-control" @bind-Value="propagation.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Notes</legend>
+            <InputTextArea class="form-control" rows="3" @bind-Value="propagation.Notes" aria-label="Notes" />
+        </fieldset>
+
+        <h2 class="section-label">More details</h2>
+        <div class="more-details mb-4">
+            <FormSection Title="Where it is" Summary="@location" Open="openWhere">
                 <div class="mb-3">
-                    <label class="form-label" for="corm-size">Corm size (mm)</label>
-                    <InputNumber id="corm-size" class="form-control" @bind-Value="propagation.CormSizeMm" min="0" max="200" step="any" inputmode="decimal" />
-                    <div class="form-text">Measured across when you started it. Handy for comparing bigger and smaller corms in an experiment.</div>
+                    <RoomPicker @bind-Value="location" Rooms="rooms" SpotPlaceholder="e.g. Kitchen window" />
                 </div>
-            }
-            <div class="row g-2 mb-1">
-                <div class="col-6">
-                    <label class="form-label" for="started">Started on</label>
-                    <InputDate id="started" class="form-control" @bind-Value="propagation.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
+            </FormSection>
+
+            <FormSection Title="Setup" Summary="@SetupSummary" Open="openSetup">
+                <div class="mb-3">
+                    <label class="form-label" for="container">Container</label>
+                    <InputText id="container" class="form-control" @bind-Value="propagation.Container" placeholder="e.g. Humidity box" />
                 </div>
-                <div class="col-6">
+                @if (propagation.Medium == GrowingMedium.Soil)
+                {
+                    <div class="mb-3">
+                        <MixPicker @bind-Value="propagation.SoilMixId" Mixes="mixes" />
+                    </div>
+                }
+                <div class="mb-3">
+                    <span class="form-label d-block" id="aids-label">Rooting aids</span>
+                    <div class="chip-row" role="group" aria-labelledby="aids-label">
+                        @foreach (var aid in Enum.GetValues<RootingAid>())
+                        {
+                            var picked = propagation.RootingAids.Contains(aid);
+                            <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                    @onclick="() => ToggleAid(aid)">@Labels.For(aid)</button>
+                        }
+                    </div>
+                    <div class="form-text">Optional. Pick what you used and the results page compares batches with and without it.</div>
+                </div>
+                @if (propagation.Type == PropagationType.Corm)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="corm-size">Corm size (mm)</label>
+                        <InputNumber id="corm-size" class="form-control" @bind-Value="propagation.CormSizeMm" min="0" max="200" step="any" inputmode="decimal" />
+                        <div class="form-text">Measured across when you started it. Handy for comparing bigger and smaller corms in an experiment.</div>
+                    </div>
+                }
+                <div class="mb-3">
+                    <label class="form-label" for="experiment">Experiment</label>
+                    <InputText id="experiment" class="form-control" @bind-Value="propagation.Experiment" list="experiment-list"
+                               placeholder="e.g. Alocasia corm test" autocomplete="off" />
+                    <datalist id="experiment-list">
+                        @foreach (var name in experiments)
+                        {
+                            <option value="@name"></option>
+                        }
+                    </datalist>
+                    <div class="form-text">Give batches you started together the same name and they're compared side by side.</div>
+                </div>
+            </FormSection>
+
+            <FormSection Title="Progress" Summary="@ProgressSummary" Open="openProgress">
+                <div class="mb-3">
                     <label class="form-label" for="stage">How far along</label>
                     <InputSelect id="stage" class="form-select" @bind-Value="propagation.Stage" disabled="@(!propagation.IsActive)">
                         @foreach (var stage in ManualStages)
@@ -100,134 +173,53 @@ else
                             <option value="@stage">@Labels.Stage(stage, propagation.Type)</option>
                         }
                     </InputSelect>
+                    <div class="form-text">Already rooting when you write it down? Pick how far along it is.</div>
                 </div>
-            </div>
-            <div class="form-text">Already rooting when you write it down? Say so here, the stage can be changed later.</div>
-            @if (propagation.Stage == PropagationStage.Rooted || propagation.RootedOn is not null)
-            {
-                <div class="mt-3">
-                    <label class="form-label" for="rooted">Rooted on</label>
-                    <InputDate id="rooted" class="form-control" @bind-Value="propagation.RootedOn"
-                               min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
-                    <div class="form-text">Filled in by itself when you move it to rooted. Change it if it rooted earlier.</div>
-                </div>
-            }
-        </fieldset>
-
-        <fieldset>
-            <legend>Name</legend>
-            <div class="mb-3">
-                <label class="form-label" for="nickname">Nickname</label>
-                <InputText id="nickname" class="form-control" @bind-Value="propagation.Nickname" placeholder="e.g. Corm test: perlite" />
-            </div>
-            <PlantNameFields @bind-Genus="propagation.Genus" @bind-Species="propagation.Species" @bind-Cultivar="propagation.Cultivar"
-                             GenusPlaceholder="e.g. Alocasia" SpeciesPlaceholder="e.g. zebrina" CultivarPlaceholder="" />
-            <div class="form-text">
-                @(propagation.ParentPlantId is null ? "" : "Filled in from the parent plant. ")Give it a nickname, a genus, or both.
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>Setup</legend>
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                    <label class="form-label" for="medium">Grows in</label>
-                    <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium">
-                        @foreach (var medium in Enum.GetValues<GrowingMedium>())
-                        {
-                            <option value="@medium">@Labels.For(medium)</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div class="col-6">
-                    <label class="form-label" for="container">Container</label>
-                    <InputText id="container" class="form-control" @bind-Value="propagation.Container" placeholder="e.g. Humidity box" />
-                </div>
-            </div>
-            @if (propagation.Medium == GrowingMedium.Soil)
-            {
-                <div class="mb-3">
-                    <MixPicker @bind-Value="propagation.SoilMixId" Mixes="mixes" />
-                </div>
-            }
-            <div class="mb-3">
-                <span class="form-label d-block" id="aids-label">Rooting aids</span>
-                <div class="chip-row" role="group" aria-labelledby="aids-label">
-                    @foreach (var aid in Enum.GetValues<RootingAid>())
-                    {
-                        var picked = propagation.RootingAids.Contains(aid);
-                        <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
-                                @onclick="() => ToggleAid(aid)">@Labels.For(aid)</button>
-                    }
-                </div>
-                <div class="form-text">Optional. Pick what you used and the results page compares batches with and without it.</div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="experiment">Experiment</label>
-                <InputText id="experiment" class="form-control" @bind-Value="propagation.Experiment" list="experiment-list"
-                           placeholder="e.g. Alocasia corm test" autocomplete="off" />
-                <datalist id="experiment-list">
-                    @foreach (var name in experiments)
-                    {
-                        <option value="@name"></option>
-                    }
-                </datalist>
-                <div class="form-text">Give batches you started together the same name and they're compared side by side.</div>
-            </div>
-            <div class="mb-1">
-                <RoomPicker @bind-Value="location" Rooms="rooms" SpotPlaceholder="e.g. Kitchen window" />
-            </div>
-        </fieldset>
-
-        @* Not when starting one, since nothing has shown yet *@
-        @if (!IsNew)
-        {
-            <fieldset>
-                <legend>Milestones</legend>
-                <div class="row g-2 mb-1">
-                    <div class="col-6">
-                        <label class="form-label" for="first-root">First root</label>
-                        <InputDate id="first-root" class="form-control" @bind-Value="propagation.FirstRootOn"
-                                   min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label" for="first-leaf">First leaf</label>
-                        <InputDate id="first-leaf" class="form-control" @bind-Value="propagation.FirstLeafOn"
-                                   min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
-                    </div>
-                </div>
-                <div class="form-text">The day you first saw a root or a new leaf. Leave them empty until it happens.</div>
-            </fieldset>
-        }
-
-        @* Only on one already going, to keep starting a propagation short *@
-        @if (!IsNew && propagation.IsActive)
-        {
-            <fieldset>
-                <legend>Dormancy</legend>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="dormant"
-                           checked="@propagation.IsDormant" @onchange="SetDormant" />
-                    <label class="form-check-label" for="dormant">Dormant</label>
-                </div>
-                @if (propagation.IsDormant)
+                @if (propagation.Stage == PropagationStage.Rooted || propagation.RootedOn is not null)
                 {
-                    <div class="mt-2">
-                        <label class="form-label" for="dormant-since">Since</label>
-                        <InputDate id="dormant-since" class="form-control" @bind-Value="propagation.DormantSince"
-                                   max="@Today.ToString("yyyy-MM-dd")" />
+                    <div class="mb-3">
+                        <label class="form-label" for="rooted">Rooted on</label>
+                        <InputDate id="rooted" class="form-control" @bind-Value="propagation.RootedOn"
+                                   min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                        <div class="form-text">Filled in by itself when you move it to rooted. Change it if it rooted earlier.</div>
                     </div>
                 }
-                <div class="form-text">Resting rather than stuck, e.g. a corm waiting out the winter. It won't come up on Today to be checked on until it wakes up.</div>
-            </fieldset>
-        }
+                @if (propagation.Type == PropagationType.Seed)
+                {
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label" for="seeds-up">Came up</label>
+                            <InputNumber id="seeds-up" class="form-control" @bind-Value="propagation.SeedsGerminated" min="0" max="@propagation.InitialCount" inputmode="numeric" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" for="first-up">First on</label>
+                            <InputDate id="first-up" class="form-control" @bind-Value="propagation.FirstGerminatedOn"
+                                       min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="form-text">How many seeds have come up so far, out of the number sown. Leave empty until the first one does.</div>
+                    </div>
+                }
+                @* Not when starting one, since nothing has shown yet *@
+                @if (!IsNew)
+                {
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label" for="first-root">First root</label>
+                            <InputDate id="first-root" class="form-control" @bind-Value="propagation.FirstRootOn"
+                                       min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" for="first-leaf">First leaf</label>
+                            <InputDate id="first-leaf" class="form-control" @bind-Value="propagation.FirstLeafOn"
+                                       min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="form-text">The day you first saw a root or a new leaf. Leave them empty until it happens.</div>
+                    </div>
+                }
+            </FormSection>
+        </div>
 
-        <fieldset>
-            <legend>Notes</legend>
-            <InputTextArea class="form-control" rows="3" @bind-Value="propagation.Notes" aria-label="Notes" />
-        </fieldset>
-
-        <div class="form-actions">
+        <div class="form-actions form-bar">
             <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Start propagation" : "Save")</button>
             <a class="btn btn-link" href="@BackUrl">Cancel</a>
         </div>
@@ -256,6 +248,14 @@ else
     private string? location; // as picked, "Kitchen / Window"; made into a room when saving
     private IReadOnlyList<string> experiments = [];
 
+    // Which sections start open, worked out when the propagation loads. A section only reads this once
+    private bool openWhere;
+    private bool openSetup;
+    private bool openProgress;
+
+    // Set by "Change name", or by a name error, and kept for the rest of the visit
+    private bool nameExpanded;
+
     private bool IsNew => Id is null;
 
     private DateOnly Today => Time.Today();
@@ -265,8 +265,42 @@ else
 
     private string BackUrl =>
         !IsNew ? $"propagations/{Id}"
-        : ParentId is { } parentId ? $"plants/{parentId}?tab=props"
+        : ParentId is { } parentId ? $"plants/{parentId}"
         : "propagations";
+
+    // With a parent the name comes from it, so one line is enough until the person wants to change it
+    private bool NameCollapsed =>
+        !nameExpanded
+        && propagation?.ParentPlantId is { } parentId
+        && plants.FirstOrDefault(p => p.Id == parentId) is { } parent
+        && NameMatches(propagation, PropagationService.StartFrom(parent));
+
+    private static bool NameMatches(Propagation a, Propagation b) =>
+        Same(a.Nickname, b.Nickname) && Same(a.Genus, b.Genus) && Same(a.Species, b.Species) && Same(a.Cultivar, b.Cultivar);
+
+    private static bool Same(string? a, string? b) => string.Equals(a?.Trim() ?? "", b?.Trim() ?? "", StringComparison.Ordinal);
+
+    private static string? Joined(params string?[] parts) =>
+        string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+
+    private string? SetupSummary => propagation is null ? null : Joined(
+        propagation.Container,
+        propagation.Medium == GrowingMedium.Soil && propagation.SoilMixId is { } mix ? mixes.FirstOrDefault(m => m.Id == mix)?.Name : null,
+        propagation.RootingAids.Count > 0 ? string.Join(", ", propagation.RootingAids.Select(Labels.For)) : null,
+        propagation.Experiment);
+
+    private string? ProgressSummary => propagation is null ? null : Joined(
+        Labels.Stage(propagation.Stage, propagation.Type),
+        propagation.FirstRootOn is { } root ? $"first root {Labels.Date(root)}" : null,
+        propagation.FirstLeafOn is { } leaf ? $"first leaf {Labels.Date(leaf)}" : null);
+
+    private static bool HasSetup(Propagation p) =>
+        !string.IsNullOrWhiteSpace(p.Container) || p.SoilMixId is not null || p.RootingAids.Count > 0
+        || !string.IsNullOrWhiteSpace(p.Experiment) || p.CormSizeMm is not null;
+
+    private static bool HasProgress(Propagation p) =>
+        p.Stage != PropagationStage.Started || p.RootedOn is not null || p.FirstRootOn is not null
+        || p.FirstLeafOn is not null || p.SeedsGerminated is not null || p.FirstGerminatedOn is not null;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -292,6 +326,13 @@ else
         }
 
         location = places.NameOf(propagation?.PlaceId);
+
+        if (propagation is not null)
+        {
+            openWhere = !IsNew && !string.IsNullOrWhiteSpace(location);
+            openSetup = !IsNew && HasSetup(propagation);
+            openProgress = !IsNew && HasProgress(propagation);
+        }
     }
 
     private void ToggleAid(RootingAid aid)
@@ -299,9 +340,6 @@ else
         if (!propagation!.RootingAids.Remove(aid))
             propagation.RootingAids.Add(aid);
     }
-
-    private void SetDormant(ChangeEventArgs e) =>
-        propagation!.DormantSince = (bool?)e.Value == true ? original?.DormantSince ?? Today : null;
 
     // Picking a parent fills in empty name fields from it
     private void ParentChanged()
@@ -338,7 +376,11 @@ else
         propagation.ClearMixUnlessSoil();
         errors = propagation.Validate(Today).ToList();
         if (errors.Count > 0)
+        {
+            // A name error has to be visible where it can be fixed
+            nameExpanded = true;
             return;
+        }
 
         saving = true;
         try

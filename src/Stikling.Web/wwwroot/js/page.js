@@ -5,3 +5,8 @@ export function scrollToFragment() {
     if (id)
         document.getElementById(id)?.scrollIntoView({ behavior: "instant" });
 }
+
+// Brings a section that was just opened on the page into view
+export function scrollToId(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}

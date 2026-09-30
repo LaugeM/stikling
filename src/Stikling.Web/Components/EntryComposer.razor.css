@@ -1,0 +1,17 @@
+.composer-date {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.composer-date input {
+    width: auto;
+}
+
+.composer-sheet .form-actions {
+    margin-top: 1rem;
+}

@@ -741,6 +741,18 @@ a.item-card:active {
     align-items: center;
 }
 
+/* The Save bar of a long form stays above the bottom navigation */
+.form-bar {
+    position: sticky;
+    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    z-index: 5;
+    margin: 0 -1rem;
+    padding: 0.6rem 1rem;
+    background: var(--pa-surface);
+    border-top: 1px solid var(--pa-border);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+}
+
 /* Plant and propagation pages */
 .detail-hero {
     margin: 0 -1rem 1rem;
@@ -1771,4 +1783,284 @@ a.tag-label:hover {
     max-width: 48rem;
     margin: 0 auto;
     padding: 1rem;
+}
+
+/* Bottom sheet: one small task at a time, sliding up over the page (see Sheet.razor) */
+.sheet {
+    width: 100%;
+    max-width: 48rem;
+    max-height: 88dvh;
+    margin: auto auto 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0.9rem 0.9rem 0 0;
+    background: var(--pa-surface);
+    color: var(--pa-ink);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+    overscroll-behavior: contain;
+}
+
+.sheet::backdrop {
+    background: rgb(15 26 19 / 0.45);
+}
+
+.sheet[open] {
+    animation: sheet-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sheet[open]::backdrop {
+    animation: sheet-fade 0.28s ease-out;
+}
+
+@keyframes sheet-in {
+    from { transform: translateY(100%); }
+}
+
+@keyframes sheet-fade {
+    from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sheet[open],
+    .sheet[open]::backdrop {
+        animation: none;
+    }
+}
+
+.sheet-body {
+    padding: 0.5rem 1rem calc(1.25rem + env(safe-area-inset-bottom));
+}
+
+.sheet-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 -1rem 0.75rem;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    background: var(--pa-surface);
+}
+
+.sheet-head h2 {
+    margin: 0;
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.sheet-close {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--pa-muted);
+}
+
+.sheet-close:hover,
+.sheet-close:focus-visible {
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+}
+
+.sheet-close svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+/* Sections inside a sheet, separated by a hairline */
+.sheet-section + .sheet-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+/* A list of actions in a sheet: whole-width rows with an icon, like the settings rows */
+.sheet-actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sheet-action {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.5rem 0.25rem;
+    border: 0;
+    border-radius: 0.6rem;
+    background: transparent;
+    color: var(--pa-ink);
+    text-align: start;
+    text-decoration: none;
+}
+
+.sheet-action:hover,
+.sheet-action:focus-visible {
+    background: var(--pa-green-soft);
+    color: var(--pa-ink);
+}
+
+.sheet-action > svg {
+    flex: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    fill: none;
+    stroke: var(--pa-green-dark);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sheet-action.danger > svg {
+    stroke: var(--pa-alert);
+}
+
+.sheet-action-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sheet-action-text b {
+    font-weight: 600;
+}
+
+.sheet-action-text small {
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+/* The buttons for what you do most on a plant or propagation page, fixed above the navigation */
+.page-dock {
+    position: fixed;
+    inset: auto 0 calc(3.5rem + env(safe-area-inset-bottom)) 0;
+    z-index: 9;
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.5rem max(1rem, calc((100% - 48rem) / 2 + 1rem));
+    background: var(--pa-surface);
+    border-top: 1px solid var(--pa-border);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+}
+
+/* Each button starts from its own label and they share what is left, so a stage as long as
+   "Germinating" still fits next to Photo and Note on a phone */
+.page-dock > .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding-inline: 0.4rem;
+    justify-content: center;
+    white-space: nowrap;
+    overflow: hidden;
+    font-stretch: 88%;
+}
+
+.page-dock > .btn.dock-more {
+    flex: 0 0 2.75rem;
+    padding: 0;
+}
+
+.page-dock svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* The bar and the update banner both sit above the navigation, so the page and the banner make room */
+main.app-content:has(.page-dock) {
+    padding-bottom: calc(8.75rem + env(safe-area-inset-bottom));
+}
+
+main.app-content.with-banner:has(.page-dock) {
+    padding-bottom: calc(12.25rem + env(safe-area-inset-bottom));
+}
+
+main.app-content:has(.page-dock) ~ .update-banner {
+    bottom: calc(7.25rem + env(safe-area-inset-bottom));
+}
+
+main.app-content:has(.form-bar) ~ .update-banner {
+    bottom: calc(7.25rem + env(safe-area-inset-bottom));
+}
+
+/* The top of a plant or propagation page: who it is, and what matters about it right now */
+.profile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+
+.profile-badges:empty {
+    display: none;
+}
+
+.profile-facts {
+    margin: 0 0 0.25rem;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.profile-facts a {
+    color: var(--pa-green-dark);
+}
+
+.profile-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.25rem;
+    margin: 0.25rem 0 1.25rem;
+}
+
+.profile-links .btn-link {
+    font-weight: 600;
+}
+
+.profile-links .link-chevron {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-links [aria-expanded="true"] .link-chevron {
+    transform: rotate(90deg);
+}
+
+.profile-details {
+    margin-bottom: 1.75rem;
+}
+
+/* A form with a pinned Save bar ends on the bar, so it lands right on the navigation */
+main.app-content:has(.form-bar) {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+}
+
+/* The ticks on the Stage button in the dock: the outline button fills with green when pressed, so the ticks follow the text colour then */
+.page-dock .btn:hover .stage-steps i,
+.page-dock .btn:active .stage-steps i {
+    background: currentColor;
+}
+
+/* On the narrowest phones the stage name needs the ticks' room */
+@media (max-width: 23.25rem) {
+    .page-dock .stage-steps {
+        display: none;
+    }
 }

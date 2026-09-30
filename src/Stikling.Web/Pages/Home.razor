@@ -358,8 +358,8 @@ else
 
     private string LinkTo(TimelineEntry entry) =>
         entry.SubjectType == SubjectType.Plant
-            ? $"plants/{entry.SubjectId}?tab=history"
-            : $"propagations/{entry.SubjectId}?tab=history";
+            ? $"plants/{entry.SubjectId}"
+            : $"propagations/{entry.SubjectId}";
 
     private static string Summary(TimelineEntry entry)
     {

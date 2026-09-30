@@ -75,10 +75,12 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         after.Tags = PlantTags.Normalize(after.Tags);
         // Only a plant that left can take pots, and only the ones it has
         after.PotsTaken = after.HasLeft ? after.Fit(after.PotsTaken) : PotsTaken.None;
-        // Only a plant still in the collection can be resting or need something done
+        // Only a plant still in the collection can be resting, kept apart or need something done
         if (after.Status != PlantStatus.Active)
         {
             after.DormantSince = null;
+            after.QuarantinedSince = null;
+            after.QuarantineDays = null;
             after.Attention = null;
         }
         // The cause only belongs to a plant that died

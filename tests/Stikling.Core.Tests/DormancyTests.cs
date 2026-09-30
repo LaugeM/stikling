@@ -78,6 +78,18 @@ public class DormancyTests
     }
 
     [Fact]
+    public async Task A_plant_in_quarantine_that_leaves_comes_out_of_quarantine()
+    {
+        var service = new PlantService(plants, timeline, new FixedTime(Now));
+        var plant = new Plant { Nickname = "Hoya", QuarantinedSince = Today.AddDays(-3), QuarantineDays = 14 };
+
+        await service.SetStatusAsync([plant], PlantStatus.GivenAway, Label);
+
+        Assert.False(plant.InQuarantine);
+        Assert.Null(plant.QuarantineDays);
+    }
+
+    [Fact]
     public void The_dormant_filter_shows_only_dormant_plants()
     {
         var resting = new Plant { Nickname = "Alocasia", DormantSince = Today };

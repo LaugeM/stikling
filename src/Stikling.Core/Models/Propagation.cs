@@ -144,12 +144,27 @@ public sealed class Propagation : Entity
 
     /// <summary>
     /// A root showing means it's rooting, so a first root date on one still at Started moves it
-    /// on. The stage never fills in the date, since a stage set in passing isn't a close look.
+    /// on. A stage picked in a form never fills in the date, since it may have been rooting for a
+    /// while before it was written down. See <see cref="NoteFirstSign"/> for the one that does.
     /// </summary>
     public void NoteFirstRoot()
     {
         if (FirstRootOn is not null && Stage == PropagationStage.Started)
             Stage = PropagationStage.Rooting;
+    }
+
+    /// <summary>
+    /// Moving it to Rooting on its page means a root, or for seeds the first seedling, was just
+    /// seen, so that day is kept as the first one unless it already has a date.
+    /// </summary>
+    public void NoteFirstSign(DateOnly on)
+    {
+        if (Stage != PropagationStage.Rooting)
+            return;
+        if (Type == PropagationType.Seed)
+            FirstGerminatedOn ??= on;
+        else
+            FirstRootOn ??= on;
     }
 
     /// <summary>Sets a milestone to the given day. Only on one still going.</summary>

@@ -1,0 +1,98 @@
+@* A panel that slides up from the bottom for one small task, like logging care or potting up.
+   The page behind it stays where it was, so nothing pushes the timeline around. *@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<dialog class="sheet" @ref="dialog" aria-labelledby="@titleId">
+    <div class="sheet-body">
+        <div class="sheet-head">
+            <h2 id="@titleId">@Title</h2>
+            <button type="button" class="sheet-close" aria-label="Close" @onclick="CloseAsync">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
+        </div>
+        @if (Open)
+        {
+            @ChildContent
+        }
+    </div>
+</dialog>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private readonly string titleId = $"sheet-{Guid.NewGuid():N}";
+    private ElementReference dialog;
+    private IJSObjectReference? module;
+    private DotNetObjectReference<Sheet>? self;
+    private bool shown;
+    private int generation;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Open == shown)
+            return;
+
+        shown = Open;
+        try
+        {
+            module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/sheet.js");
+            if (Open)
+            {
+                self ??= DotNetObjectReference.Create(this);
+                await module.InvokeVoidAsync("open", dialog, self, ++generation);
+            }
+            else
+            {
+                await module.InvokeVoidAsync("close", dialog);
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+    }
+
+    /// <summary>Called by the browser when the sheet closed itself: Escape, back, or a tap outside it.</summary>
+    [JSInvokable]
+    public async Task Closed(int closedGeneration)
+    {
+        if (!shown || closedGeneration != generation)
+            return;
+        shown = false;
+        await OpenChanged.InvokeAsync(false);
+    }
+
+    private async Task CloseAsync()
+    {
+        if (module is not null)
+            await module.InvokeVoidAsync("close", dialog);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (module is not null)
+            {
+                await module.InvokeVoidAsync("release", dialog);
+                await module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+        self?.Dispose();
+    }
+}

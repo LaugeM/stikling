@@ -87,6 +87,70 @@ public class MilestoneTests
     }
 
     [Fact]
+    public async Task Moving_to_rooting_on_the_page_records_the_first_root_today()
+    {
+        var corms = Corms();
+        await propagations.SaveAsync(corms);
+
+        await service.SetStageAsync(corms, PropagationStage.Rooting, Label, seenToday: true);
+
+        Assert.Equal(Today, corms.FirstRootOn);
+        Assert.Null(corms.FirstGerminatedOn);
+    }
+
+    [Fact]
+    public async Task Moving_to_rooting_on_the_page_keeps_a_first_root_already_seen()
+    {
+        var corms = Corms();
+        corms.FirstRootOn = Today.AddDays(-3);
+        await propagations.SaveAsync(corms);
+
+        await service.SetStageAsync(corms, PropagationStage.Rooting, Label, seenToday: true);
+
+        Assert.Equal(Today.AddDays(-3), corms.FirstRootOn);
+    }
+
+    [Fact]
+    public async Task Seeds_moving_to_germinating_on_the_page_record_the_first_seedling()
+    {
+        var seeds = new Propagation
+        {
+            Nickname = "Tomatoes",
+            Type = PropagationType.Seed,
+            InitialCount = 12,
+            StartedOn = Today.AddDays(-6)
+        };
+        await propagations.SaveAsync(seeds);
+
+        await service.SetStageAsync(seeds, PropagationStage.Rooting, Label, seenToday: true);
+
+        Assert.Equal(Today, seeds.FirstGerminatedOn);
+        Assert.Null(seeds.FirstRootOn);
+    }
+
+    [Fact]
+    public async Task Stepping_back_from_rooted_to_rooting_on_the_page_records_no_first_root()
+    {
+        var corms = Corms(PropagationStage.Rooted);
+        await propagations.SaveAsync(corms);
+
+        await service.SetStageAsync(corms, PropagationStage.Rooting, Label, seenToday: true);
+
+        Assert.Null(corms.FirstRootOn);
+    }
+
+    [Fact]
+    public async Task Moving_straight_to_rooted_on_the_page_records_no_first_root()
+    {
+        var corms = Corms();
+        await propagations.SaveAsync(corms);
+
+        await service.SetStageAsync(corms, PropagationStage.Rooted, Label, seenToday: true);
+
+        Assert.Null(corms.FirstRootOn);
+    }
+
+    [Fact]
     public void Milestones_cant_be_recorded_on_a_finished_propagation()
     {
         var corms = Corms();

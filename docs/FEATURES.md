@@ -64,7 +64,10 @@ These need no new storage and no new screens worth the name: purchase price, a "
 | ✅ | Parent plant and offspring, "Add offspring" | 1 | M | M2 |
 | ✅ | Cover photo on cards and the plant page | 1 | S | M3 |
 | ✅ | Add a photo while adding the plant, not only afterwards. The newest one becomes the cover | 2 | S | M4 |
-| ✅ | Tabs on the plant page: **Info**, **History** (timeline), **Props** (propagations taken from it) | 1 | M | M3–M4 |
+| ✅ | Plant and propagation pages as a profile of the plant: they open on the photos and notes, newest first, with one line under the name for where it is, what it grows in, when it was last watered and where it came from. The rest is behind **Details**, and **Edit** is a small link | 1 | M | M3–M4 |
+| ✅ | Buttons at the bottom of a plant or propagation page within reach of a thumb: **Photo** goes straight to the camera or gallery, **Note** and **Care** open a panel from the bottom, and a propagation's stage button holds the stage, its dates, Pot up and Mark failed | 2 | M | v1.x |
+| ✅ | Say a plant died, was given away or sold, went dormant or into quarantine, or flag it, from its page instead of the edit form, and bring it back into the collection the same way | 3 | S | v1.x |
+| ✅ | Short add and edit forms: name, where it came from, the date and notes on top, and the rest under **More details** with a line saying what is set. Save stays pinned at the bottom | 2 | S | v1.x |
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
 | ✅ | Tags (e.g. "variegated", "rare", "for swap") and a tag filter. Picking several tags narrows the list to plants that have all of them, the search finds tags too, and a tag on a plant's page opens the list filtered by it | 3 | S | v1.x |
 | ✅ | Rename or merge a tag everywhere at once, the way rooms can be | 6 | S | v1.x |
@@ -137,7 +140,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are at least 3 rooted batches to compare with, and the list cards only mention it when it's slow | 4 | S | v1.x |
 | ✅ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
 | ✅ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page compares each one with the batches that went without it | 5 | S | v1.x |
-| ✅ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. First root, first leaf and corm size are built and show in experiments | 5 | S | v1.x |
+| ✅ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. Moving a propagation to rooting on its page notes the first root as that day. First root, first leaf and corm size are built and show in experiments | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
 | ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 8 | L | v1.x |

@@ -1,4 +1,4 @@
-@* History of a plant or propagation: write notes, add photos, browse by day. *@
+@* History of a plant or propagation, newest first and grouped by day. Photos and notes are added with EntryComposer. *@
 @inject ITimelineRepository Entries
 @inject TimelineService TimelineService
 @inject IPhotoRepository PhotoRepository
@@ -7,55 +7,13 @@
 
 <ReloadOnSync Reload="LoadAsync" />
 
-<section class="composer" aria-label="Add to history">
-    <textarea class="form-control" rows="2" placeholder="Add a note… (new leaf, roots showing, repotted)"
-              aria-label="Note" @bind="noteText" @bind:event="oninput"></textarea>
-
-    <div class="composer-row">
-        <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-            Camera
-        </label>
-        <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
-               @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
-
-        <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
-            Gallery
-        </label>
-        <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
-               @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
-
-        <button type="button" class="btn btn-primary btn-sm ms-auto" @onclick="SaveNoteAsync"
-                disabled="@(busy || string.IsNullOrWhiteSpace(noteText))">Add note</button>
-    </div>
-
-    <div class="composer-date">
-        @if (pickDate)
-        {
-            <label for="@dateId">Happened on</label>
-            <input id="@dateId" type="date" class="form-control form-control-sm" @bind="occurredOn" max="@Today.ToString("yyyy-MM-dd")" />
-            <button type="button" class="btn btn-link btn-sm link-action" @onclick="ResetDate">Use today</button>
-        }
-        else
-        {
-            <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => pickDate = true">Happened earlier?</button>
-        }
-    </div>
-
-    @if (status is not null)
-    {
-        <p class="composer-status" role="status">@status</p>
-    }
-</section>
-
 @if (days is null)
 {
     <p class="text-body-secondary">Loading history…</p>
 }
 else if (days.Count == 0)
 {
-    <div class="empty-state"><p>No history yet. Add a note or a photo above.</p></div>
+    <div class="empty-state"><p>@EmptyText</p></div>
 }
 else
 {
@@ -194,26 +152,20 @@ else
     [Parameter]
     public Guid? CoverPhotoId { get; set; }
 
+    /// <summary>What to say while there is nothing yet.</summary>
+    [Parameter]
+    public string EmptyText { get; set; } = "No photos or notes yet.";
+
     /// <summary>Raised when the cover photo should change (null = no cover).</summary>
     [Parameter]
     public EventCallback<Guid?> OnCoverChanged { get; set; }
 
-    private readonly string cameraId = $"camera-{Guid.NewGuid():N}";
-    private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
-    private readonly string dateId = $"date-{Guid.NewGuid():N}";
     private readonly string editDateId = $"edit-date-{Guid.NewGuid():N}";
-
-    private ElementReference cameraInput;
-    private ElementReference galleryInput;
 
     private IReadOnlyList<(DateOnly Day, IReadOnlyList<TimelineEntry> Entries)>? days;
     private IReadOnlyList<Photo> photos = [];
     private Dictionary<Guid, int> photoIndex = [];
 
-    private string? noteText;
-    private DateOnly? occurredOn;
-    private bool pickDate;
-    private string? status;
     private bool busy;
     private Guid? confirmDeleteId;
     private int? viewerIndex;
@@ -246,61 +198,6 @@ else
         photos = inTimeline.Concat(stored.Where(p => !entries.Any(e => e.PhotoIds.Contains(p.Id)))).ToList();
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
         days = TimelineOrder.ByDay(entries, Time);
-    }
-
-    private DateTimeOffset OccurredAt =>
-        occurredOn is { } d ? Time.MomentOn(d) : Time.GetUtcNow();
-
-    private async Task SaveNoteAsync()
-    {
-        if (string.IsNullOrWhiteSpace(noteText))
-            return;
-
-        busy = true;
-        await Entries.AddAsync(new TimelineEntry
-        {
-            SubjectType = SubjectType,
-            SubjectId = SubjectId,
-            Kind = TimelineKind.Note,
-            OccurredAt = OccurredAt,
-            Text = noteText.Trim()
-        });
-        noteText = null;
-        ResetDate();
-        status = null;
-        await LoadAsync();
-        busy = false;
-    }
-
-    // Choosing photos saves them straight away, together with any note typed so far
-    private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
-    {
-        busy = true;
-        status = "Saving photos…";
-        StateHasChanged();
-
-        try
-        {
-            var result = await Photos.SaveFromInputAsync(input, SubjectType, SubjectId);
-            status = result.Message(guessesMatter: !fromCamera && occurredOn is null);
-
-            if (result.Saved.Count > 0)
-            {
-                await TimelineService.AddPhotosAsync(SubjectType, SubjectId, result.Saved, noteText, occurredOn);
-                noteText = null;
-                ResetDate();
-
-                if (CoverPhotoId is null)
-                    await OnCoverChanged.InvokeAsync(PhotoEntries.Cover(result.Saved).Id);
-            }
-        }
-        catch (Exception ex)
-        {
-            status = $"Couldn't save the photos: {ex.Message}";
-        }
-
-        await LoadAsync();
-        busy = false;
     }
 
     private async Task DeleteEntryAsync(TimelineEntry entry)
@@ -361,12 +258,6 @@ else
     }
 
     private DateOnly LocalDay(DateTimeOffset moment) => Time.LocalDay(moment);
-
-    private void ResetDate()
-    {
-        occurredOn = null;
-        pickDate = false;
-    }
 
     private Task SetCoverAsync(Photo photo) => OnCoverChanged.InvokeAsync(photo.Id);
 
