@@ -1,0 +1,34 @@
+@page "/deletion"
+@* How to delete what Stikling keeps. The text is in wwwroot/pages/deletion.html, which the live site also
+   serves as plain HTML at /deletion for Meta's check (see prepare-pages.py). *@
+@inject HttpClient Http
+
+<PageTitle>Deleting your data · Stikling</PageTitle>
+
+<a class="back-link" href="privacy">Privacy</a>
+
+@if (text is not null)
+{
+    @((MarkupString)text)
+}
+else if (failed)
+{
+    <p>Couldn't load this page. Check that you're online and try again.</p>
+}
+
+@code {
+    private string? text;
+    private bool failed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            text = await Http.GetStringAsync("pages/deletion.html");
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+        {
+            failed = true;
+        }
+    }
+}
