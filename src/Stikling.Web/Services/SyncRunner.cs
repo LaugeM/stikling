@@ -55,6 +55,9 @@ public sealed class SyncRunner(
     /// <summary>True when the last sync couldn't send photos because the collection's space on the server is used up.</summary>
     public bool PhotosFull { get; private set; }
 
+    /// <summary>True when the last sync left something the person should look at, for the dot on the settings gear.</summary>
+    public bool HasProblem => !Running && (Problem is not null || Refused > 0 || PhotosFull);
+
     private Guid? CollectionId { get; set; }
 
     /// <summary>Raised when a sync starts or ends, for the status in Settings.</summary>

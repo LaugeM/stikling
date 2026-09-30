@@ -4,190 +4,47 @@
 @using Stikling.Core.Sync
 @inject ThemeService Theme
 @inject RoomService RoomService
-@inject PlantService PlantService
 @inject IPlantRepository Plants
-@inject IPropagationRepository PropagationRepository
-@inject PotService PotService
-@inject SoilMixService MixService
-@inject ProductService ProductService
-@inject IFeedRepository FeedRepository
-@inject ITreatmentRecipeRepository RecipeRepository
-@inject BackupService Backup
 @inject DeviceFiles Files
 @inject SettingsService SettingsService
-@inject IndexedDb Db
-@inject PlantNameService PlantNames
 @inject TimeProvider Time
 @inject AccountService Account
 @inject SyncRunner Sync
-@inject NavigationManager Nav
 
 <PageTitle>Settings · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
 
 <h1>Settings</h1>
 
-@if (Account.IsAvailable)
+@if (Account.IsAvailable && accountHintRead)
 {
-    <section class="settings-section">
+    <section class="settings-group">
         <h2>Account</h2>
-        @if (!accountHintRead)
-        {
-            @* Nothing until it's known whether to check, so a signed-in device never shows "Not signed in" *@
-        }
-        else if (account is { SignedIn: true })
-        {
-            <div class="room-row">
-                <span class="room-name account-email">@account.Email</span>
-                <button type="button" class="btn btn-link btn-sm p-0" @onclick="AskSignOutAsync"
-                        disabled="@(accountBusy || signOut is not null || deleting)">
-                    Sign out
-                </button>
-            </div>
-            <div class="room-row">
-                <span class="room-name account-status" role="status">@SyncLine</span>
-                <button type="button" class="btn btn-link btn-sm p-0" @onclick="Sync.SyncNowAsync"
-                        disabled="@(Sync.Running || accountBusy)">
-                    Sync now
-                </button>
-            </div>
-            <p class="settings-hint">
-                Your plants, care, pests, photos and settings are kept the same on every device you sign in on.
-                Each device keeps a small copy of every photo, and fetches the full size when you open one.
-                @if (photoUsage is { } usage)
-                {
-                    @($"Photos take {Labels.Bytes(usage.UsedBytes)} of the {Labels.Bytes(usage.LimitBytes)} they have on the server.")
-                }
-            </p>
-            @if (SyncProblem is { } problem)
+        <div class="settings-rows">
+            @if (account is { SignedIn: true })
             {
-                <p class="settings-message" role="alert">@problem</p>
+                <SettingsRow Href="account" Title="@account.Email" Detail="@(Sync.HasProblem ? "Sync needs a look. Tap to see why." : SyncLine)" Alert="@Sync.HasProblem" />
             }
-
-            @if (signOut is { } unsent)
+            else if (accountChecking)
             {
-                <div class="confirm-card">
-                    <p>
-                        <strong>Sign out</strong><br />
-                        What's synced stays on the Stikling server and comes back when you sign in again. You can
-                        keep a copy on this device as well, or remove it from here.
-                    </p>
-                    @if (unsent.Checking)
-                    {
-                        <p class="settings-hint" role="status">Sending your latest changes first…</p>
-                    }
-                    else
-                    {
-                        @if (unsent.Photos > 0)
-                        {
-                            <p class="settings-hint">
-                                @Labels.Count(unsent.Photos, "photo") added here @(unsent.Photos == 1 ? "hasn't" : "haven't")
-                                reached the server yet, and removing deletes @(unsent.Photos == 1 ? "it" : "them"). Save a
-                                backup first to keep @(unsent.Photos == 1 ? "it" : "them").
-                            </p>
-                        }
-                        @if (unsent.Pending > 0)
-                        {
-                            <p class="settings-hint">
-                                @Labels.Count(unsent.Pending, "change") made here @(unsent.Pending == 1 ? "hasn't" : "haven't")
-                                reached the server yet, and removing loses @(unsent.Pending == 1 ? "it" : "them").
-                            </p>
-                        }
-                    }
-                    <div class="settings-actions">
-                        <button type="button" class="btn btn-primary" disabled="@(accountBusy || unsent.Checking)"
-                                @onclick="() => SignOutAsync(keepData: true)">Keep and sign out</button>
-                        <button type="button" class="btn btn-danger" disabled="@(accountBusy || unsent.Checking)"
-                                @onclick="() => SignOutAsync(keepData: false)">Remove and sign out</button>
-                        <button type="button" class="btn btn-link" disabled="@accountBusy"
-                                @onclick="() => signOut = null">Cancel</button>
-                    </div>
-                </div>
+                <SettingsRow Href="account" Title="Account" Detail="Checking your account…" />
             }
-
-            @if (deleting)
+            else if (accountUnreachable)
             {
-                <div class="confirm-card confirm-card-danger">
-                    <p>
-                        <strong>Delete your account</strong><br />
-                        This erases your plants, photos and settings from the Stikling server and deletes your
-                        sign-in. It can't be undone.
-                    </p>
-                    <div class="form-check mt-2">
-                        <input type="checkbox" class="form-check-input" id="delete-here-too" @bind="removeHereToo"
-                               disabled="@accountBusy" />
-                        <label class="form-check-label" for="delete-here-too">Remove everything from this device too</label>
-                    </div>
-                    <p class="settings-hint">
-                        @(removeHereToo
-                            ? "This device will be empty afterwards, as if Stikling was just installed."
-                            : "This device keeps what it has, and the app carries on without an account.")
-                    </p>
-                    <div class="settings-actions">
-                        <button type="button" class="btn btn-danger" disabled="@accountBusy"
-                                @onclick="DeleteAccountAsync">Delete account</button>
-                        <button type="button" class="btn btn-link" disabled="@accountBusy"
-                                @onclick="() => deleting = false">Cancel</button>
-                    </div>
-                </div>
+                <SettingsRow Href="account" Title="Account" Detail="Can't reach the sign-in service right now" />
             }
-            else if (signOut is null)
+            else
             {
-                <button type="button" class="btn btn-link btn-sm text-danger p-0 mt-3" disabled="@accountBusy"
-                        @onclick="AskDeleteAccount">Delete account</button>
+                <SettingsRow Href="sign-in" Title="Sign in" Detail="Keep your plants the same on all your devices" />
             }
-
-            @if (accountMessage is not null)
-            {
-                <p class="settings-message" role="alert">@accountMessage</p>
-            }
-        }
-        else if (accountChecking)
-        {
-            <p class="settings-hint" role="status">Checking your account…</p>
-        }
-        else if (accountUnreachable)
-        {
-            <p class="settings-hint" role="status">
-                You're signed in on this device, but the sign-in service can't be reached right now. Everything
-                else works as usual.
-            </p>
-        }
-        else
-        {
-            <div class="room-row">
-                <span class="room-name">Not signed in</span>
-                <a class="btn btn-link btn-sm p-0" href="sign-in">Sign in</a>
-            </div>
-            <p class="settings-hint">An account is optional. Everything in the app works without one.</p>
-            @if (accountMessage is not null)
-            {
-                <p class="settings-message" role="status">@accountMessage</p>
-            }
-        }
+        </div>
     </section>
 }
 
-<section class="settings-section">
-    <h2>Help</h2>
-    <p class="settings-hint">
-        What a propagation is, where your data is kept, how to back up, how to put the app on your home
-        screen, and the rest of what comes up.
-    </p>
-
-    <div class="room-row">
-        <span class="room-name">Questions and answers</span>
-        <a class="btn btn-link btn-sm p-0" href="help">Open help</a>
-    </div>
-    <div class="room-row mt-2">
-        <span class="room-name">Privacy</span>
-        <a class="btn btn-link btn-sm p-0" href="privacy">Read</a>
-    </div>
-</section>
-
-<section class="settings-section">
-    <h2>Appearance</h2>
-    <div class="btn-group w-100" role="radiogroup" aria-label="Theme">
+<section class="settings-group">
+    <h2>App</h2>
+    <div class="theme-label" id="theme-label">Theme</div>
+    <div class="btn-group w-100" role="radiogroup" aria-labelledby="theme-label">
         @foreach (var option in options)
         {
             var id = $"theme-{option.Mode.ToString().ToLowerInvariant()}";
@@ -196,301 +53,31 @@
             <label class="btn btn-outline-primary" for="@id">@option.Label</label>
         }
     </div>
-    <p class="settings-hint">"Match system" follows your phone or computer's light/dark setting.</p>
-</section>
-
-<section class="settings-section">
-    <h2>Today</h2>
-    <div class="form-check form-switch">
+    <div class="form-check form-switch mt-4">
         <input class="form-check-input" type="checkbox" role="switch" id="photo-reminder"
                checked="@photoReminder" @onchange="SetPhotoReminderAsync" />
         <label class="form-check-label" for="photo-reminder">Monthly photo reminder</label>
     </div>
     <p class="settings-hint">
-        Once a month, Today lists the plants and propagations that haven't had a photo yet that month,
-        so every history keeps growing.
+        Once a month, Today lists what hasn't had a photo yet that month.
     </p>
 </section>
 
-<section class="settings-section">
-    <h2>Rooms</h2>
-    <p class="settings-hint">
-        Rooms come from where your plants and propagations are. Renaming one here changes it everywhere,
-        and renaming it to a name you already use merges the two.
-    </p>
-
-    @if (rooms.Count == 0)
-    {
-        <p class="settings-hint">No rooms yet. They appear as you place plants.</p>
-    }
-    else
-    {
-        <ul class="room-list">
-            @foreach (var r in rooms)
-            {
-                <li>
-                    @if (renaming == r.Id)
-                    {
-                        <RoomRenameRow Name="@r.Name" Busy="busy" OnSave="name => RenameAsync(r.Id, r.Name, name)" OnCancel="StopRenaming" />
-                    }
-                    else
-                    {
-                        <div class="room-row">
-                            <span class="room-name">@r.Name</span>
-                            <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
-                            <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
-                                    @onclick="() => renaming = r.Id">Rename</button>
-                        </div>
-                    }
-
-                    @foreach (var spot in r.Spots)
-                    {
-                        <div class="room-spot">
-                            @if (renaming == spot.Id)
-                            {
-                                <RoomRenameRow Name="@spot.Name" Busy="busy"
-                                               OnSave="name => RenameAsync(spot.Id, spot.Place, name)"
-                                               OnCancel="StopRenaming" />
-                            }
-                            else
-                            {
-                                <div class="room-row">
-                                    <span class="room-name">@spot.Name</span>
-                                    <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
-                                    <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
-                                            @onclick="() => renaming = spot.Id">Rename</button>
-                                </div>
-                            }
-                        </div>
-                    }
-                </li>
-            }
-        </ul>
-    }
-
-    @if (roomMessage is not null)
-    {
-        <p class="settings-message" role="status">@roomMessage</p>
-    }
-</section>
-
-<section class="settings-section">
-    <h2>Tags</h2>
-    <p class="settings-hint">
-        Renaming a tag here changes it on every plant that has it, and renaming it to a tag you
-        already use merges the two.
-    </p>
-
-    @if (tags.Count == 0)
-    {
-        <p class="settings-hint">No tags yet. They appear as you tag plants.</p>
-    }
-    else
-    {
-        <ul class="room-list">
-            @foreach (var t in tags)
-            {
-                <li>
-                    @if (renamingTag == t.Name)
-                    {
-                        <RoomRenameRow Name="@t.Name" Busy="busy" OnSave="name => RenameTagAsync(t.Name, name)" OnCancel="StopRenamingTag" />
-                    }
-                    else
-                    {
-                        <div class="room-row">
-                            <span class="room-name">@t.Name</span>
-                            <span class="room-count">@Labels.Plants(t.Plants)</span>
-                            <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
-                                    @onclick="() => renamingTag = t.Name">Rename</button>
-                        </div>
-                    }
-                </li>
-            }
-        </ul>
-    }
-
-    @if (tagMessage is not null)
-    {
-        <p class="settings-message" role="status">@tagMessage</p>
-    }
-</section>
-
-<section class="settings-section">
-    <h2>Pots</h2>
-    <p class="settings-hint">
-        The pots you own, so a plant can point at one instead of you typing it again. Nursery pots,
-        outer pots, and the ones that stand on their own.
-    </p>
-
-    <div class="room-row">
-        <span class="room-name">@PotSummary</span>
-        <a class="btn btn-link btn-sm p-0" href="pots">Manage pots</a>
+<section class="settings-group">
+    <h2>Your data</h2>
+    <div class="settings-rows">
+        <SettingsRow Href="rooms-and-tags" Title="Rooms and tags" Detail="@RoomsAndTagsLine" />
+        <SettingsRow Href="backup" Title="Backup and storage" Detail="@BackupLine" />
     </div>
 </section>
 
-<section class="settings-section">
-    <h2>Soil mixes</h2>
-    <p class="settings-hint">
-        The mixes you make yourself, saved under a name, so a plant can say what it is actually
-        potted in. Amounts are optional.
-    </p>
-
-    <div class="room-row">
-        <span class="room-name">@MixSummary</span>
-        <a class="btn btn-link btn-sm p-0" href="soil-mixes">Manage mixes</a>
+<section class="settings-group">
+    <h2>About</h2>
+    <div class="settings-rows">
+        <SettingsRow Href="help" Title="Help" Detail="How Stikling works" />
+        <SettingsRow Href="privacy" Title="Privacy" Detail="What is kept and where" />
+        <SettingsRow Href="plant-names" Title="Plant names" Detail="Where the name suggestions come from" />
     </div>
-</section>
-
-<section class="settings-section">
-    <h2>Products</h2>
-    <p class="settings-hint">
-        Your fertilisers, stimulants, silica and the rest, each with the dose you usually use, so
-        logging a feed says what went in the water without typing it.
-    </p>
-
-    <div class="room-row">
-        <span class="room-name">@ProductSummary</span>
-        <a class="btn btn-link btn-sm p-0" href="products">Manage products</a>
-    </div>
-</section>
-
-<section class="settings-section">
-    <h2>Feeds</h2>
-    <p class="settings-hint">
-        The feeds you mix from your products, in the order they go in the water, so logging one is a
-        tap and a batch can be measured out for any amount of water.
-    </p>
-
-    <div class="room-row">
-        <span class="room-name">@FeedSummary</span>
-        <a class="btn btn-link btn-sm p-0" href="feeds">Manage feeds</a>
-    </div>
-</section>
-
-<section class="settings-section">
-    <h2>Treatment recipes</h2>
-    <p class="settings-hint">
-        The sprays and drenches you make up yourself against pests, so logging a treatment is a tap
-        and a bottle can be measured out for any size.
-    </p>
-
-    <div class="room-row">
-        <span class="room-name">@RecipeSummary</span>
-        <a class="btn btn-link btn-sm p-0" href="treatment-recipes">Manage recipes</a>
-    </div>
-</section>
-
-
-<section class="settings-section">
-    <h2>Backup</h2>
-    <p class="settings-hint">
-        @(account is { SignedIn: true } ? "" : "Everything you add stays on this device. ")A backup is a ZIP file with your plants and photos in it,
-        which you can keep in cloud storage or move to another phone.
-    </p>
-
-    <div class="settings-actions">
-        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ExportAsync">Save a backup</button>
-        <label class="btn btn-outline-primary @(busy ? "disabled" : null)" for="restore-file">Restore a backup</label>
-        <InputFile id="restore-file" class="visually-hidden" accept=".zip" OnChange="ChooseFileAsync" disabled="@busy" />
-    </div>
-
-    <p class="settings-hint">
-        @if (lastBackup is { } date)
-        {
-            <text>Last backup: @Labels.Date(date) (@Labels.DaysAgo(TodayDate.DayNumber - date.DayNumber)).</text>
-        }
-        else
-        {
-            <text>No backup taken on this device yet.</text>
-        }
-    </p>
-
-    <p class="settings-hint">For a spreadsheet. This is not a backup and can't be restored.</p>
-    <div class="settings-actions">
-        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPlantsCsvAsync">Plants as CSV</button>
-        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPropagationsCsvAsync">Propagations as CSV</button>
-    </div>
-
-    @if (pending is { } file)
-    {
-        <div class="confirm-card">
-            <p>
-                <strong>@file.Name</strong><br />
-                Made @Labels.Date(DateOnly.FromDateTime(file.Data.ExportedAt.LocalDateTime)), holding
-                @Labels.Plants(file.Data.Counts.Plants), @Labels.Count(file.Data.Counts.Propagations, "propagation"),
-                @Labels.Count(file.Data.Counts.Entries, "history entry", "history entries"),
-                @Labels.Count(file.Data.Counts.Photos, "photo"),
-                @Labels.Count(file.Data.Counts.CareEntries, "care entry", "care entries"),
-                @Labels.Count(file.Data.Counts.PestCases, "pest case"),
-                @Labels.Count(file.Data.Counts.Treatments, "treatment"),
-                @Labels.Count(file.Data.Counts.Pots, "pot"),
-                @Labels.Count(file.Data.Counts.SoilMixes, "soil mix", "soil mixes"),
-                @Labels.Count(file.Data.Counts.Products, "product"),
-                @Labels.Count(file.Data.Counts.Feeds, "feed"),
-                @Labels.Count(file.Data.Counts.Recipes, "treatment recipe") and
-                @Labels.Count(file.Data.Counts.Rooms, "room").
-            </p>
-            <p class="settings-hint">
-                Restoring adds what's missing here and brings back anything you've deleted since.
-                Changes you've made on this device are kept.
-            </p>
-            <div class="settings-actions">
-                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="RestoreAsync">Restore</button>
-                <button type="button" class="btn btn-link" @onclick="() => pending = null">Cancel</button>
-            </div>
-        </div>
-    }
-
-    @if (message is not null)
-    {
-        <p class="settings-message" role="status">@message</p>
-    }
-</section>
-
-<section class="settings-section">
-    <h2>Storage</h2>
-    @if (storage is { } estimate)
-    {
-        <p class="settings-hint">
-            Stikling is using @Labels.Bytes(estimate.Usage)@(estimate.Quota > 0 ? $" of the roughly {Labels.Bytes(estimate.Quota)} this browser offers" : "").
-        </p>
-        @if (estimate.Persisted)
-        {
-            <p class="settings-hint">The browser has been asked to keep your data and agreed. It won't be cleared when space runs low.</p>
-        }
-        else
-        {
-            <p class="settings-hint">
-                The browser may clear your data if the device runs low on space. Installing Stikling to the home screen usually
-                settles this, and you can ask directly:
-            </p>
-            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="RequestPersistenceAsync">Ask to keep my data</button>
-        }
-    }
-    else
-    {
-        <p class="settings-hint">This browser doesn't say how much space is in use.</p>
-    }
-</section>
-
-<section class="settings-section">
-    <h2>Plant names</h2>
-    <p class="settings-hint">
-        The names suggested while you type come with the app, so they work offline. They cover the aroids (Araceae)
-        in full, the genus of some other common houseplants, and a list of cultivars and trade names kept by hand.
-    </p>
-    @if (nameSources.Count > 0)
-    {
-        <ul class="settings-hint">
-            @foreach (var source in nameSources)
-            {
-                <li>
-                    <a href="@source.Url" target="_blank" rel="noopener">@source.Name</a>@(source.Version is null ? "" : $" ({source.Version})"):
-                    @source.Covers. @source.Licence.
-                </li>
-            }
-        </ul>
-    }
 </section>
 
 @code {
@@ -501,56 +88,25 @@
         (ThemeMode.Dark, "Dark")
     ];
 
-    /// <summary>What removing the data at sign-out would lose, once a last sync has had its go.</summary>
-    private sealed record SignOutCheck(bool Checking, int Pending = 0, int Photos = 0);
-
-    /// <summary>A chosen file, read and described, waiting for the restore to be confirmed.</summary>
-    private sealed record PendingRestore(string Name, BackupData Data, MemoryStream Zip);
-
     private ThemeMode mode;
-    private IReadOnlyList<Room> rooms = [];
-    private IReadOnlyList<PotUse> pots = [];
-    private IReadOnlyList<MixUse> mixes = [];
-    private IReadOnlyList<ProductUse> products = [];
-    private int feeds;
-    private int recipes;
-    private Guid? renaming; // the room or spot being renamed
-    private string? roomMessage;
-    private IReadOnlyList<TagCount> tags = [];
-    private string? renamingTag;
-    private string? tagMessage;
+    private int roomCount;
+    private int tagCount;
     private DateOnly? lastBackup;
     private bool photoReminder;
-    private StorageEstimate? storage;
-    private IReadOnlyList<NameSource> nameSources = [];
-    private PendingRestore? pending;
-    private string? message;
-    private bool busy;
     private AccountState? account;
     private bool accountChecking;
     private bool accountLoadStarted;
     private bool accountUnreachable;
-    private bool accountBusy;
     private bool accountHintRead;
-    private string? accountMessage;
-    private SignOutCheck? signOut;
-    private bool deleting; // the question about deleting the account is open
-    private bool removeHereToo;
-    private PhotoUsage? photoUsage;
-
-    private DateOnly TodayDate => Time.Today();
 
     protected override async Task OnInitializedAsync()
     {
-        Theme.Changed += OnThemeChanged;
         Account.Changed += OnAccountChanged;
         Sync.StatusChanged += OnSyncChanged;
         // Clerk is only loaded on a device where someone signed in, so it stays out of the way otherwise
         accountChecking = Account.IsAvailable && await Account.WasSignedInAsync();
         accountHintRead = true;
         lastBackup = await Files.GetLastBackupAsync();
-        storage = await Db.EstimateAsync();
-        nameSources = (await PlantNames.GetDictionaryAsync()).Sources;
         await LoadDataAsync();
     }
 
@@ -559,13 +115,8 @@
     {
         mode = await Theme.GetModeAsync();
         photoReminder = (await SettingsService.GetAsync()).PhotoReminder;
-        rooms = await RoomService.GetAllAsync();
-        tags = PlantTags.InUse(await Plants.GetAllAsync());
-        pots = await PotService.GetAllAsync();
-        mixes = await MixService.GetAllAsync();
-        products = await ProductService.GetAllAsync();
-        feeds = (await FeedRepository.GetAllAsync()).Count;
-        recipes = (await RecipeRepository.GetAllAsync()).Count;
+        roomCount = (await RoomService.GetAllAsync()).Count;
+        tagCount = PlantTags.InUse(await Plants.GetAllAsync()).Count;
     }
 
     private async Task SetPhotoReminderAsync(ChangeEventArgs e)
@@ -574,111 +125,25 @@
         await SettingsService.SetPhotoReminderAsync(photoReminder);
     }
 
-    /// <summary>"6 pots, 2 free", for the line linking to the pot library.</summary>
-    private string PotSummary =>
-        pots.Count == 0
-            ? "No pots registered yet"
-            : $"{Labels.Count(pots.Sum(p => p.Here), "pot")}, {pots.Sum(p => p.Free)} free";
-
-    /// <summary>"3 mixes, 1 no longer made", for the line linking to the soil mixes.</summary>
-    private string MixSummary => mixes.Count switch
-    {
-        0 => "No mixes saved yet",
-        _ when mixes.Any(m => m.Mix.IsRetired) =>
-            $"{Labels.Count(mixes.Count, "mix", "mixes")}, {mixes.Count(m => m.Mix.IsRetired)} no longer mixed",
-        var count => Labels.Count(count, "mix", "mixes")
-    };
-
-    /// <summary>"2 products", for the line linking to the products.</summary>
-    private string ProductSummary =>
-        products.Count == 0 ? "No products saved yet" : Labels.Count(products.Count, "product");
-
-    /// <summary>"2 feeds", for the line linking to the feeds.</summary>
-    private string FeedSummary => feeds == 0 ? "No feeds saved yet" : Labels.Count(feeds, "feed");
-
-    /// <summary>"2 recipes", for the line linking to the treatment recipes.</summary>
-    private string RecipeSummary => recipes == 0 ? "No recipes saved yet" : Labels.Count(recipes, "recipe");
-
-    /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
-    private static string Held(int plants, int propagations) => (plants, propagations) switch
-    {
-        (0, 0) => "empty",
-        (_, 0) => Labels.Plants(plants),
-        (0, _) => Labels.Count(propagations, "propagation"),
-        _ => $"{Labels.Plants(plants)}, {Labels.Count(propagations, "propagation")}"
-    };
-
-    private void StopRenaming()
-    {
-        renaming = null;
-        roomMessage = null;
-    }
-
-    private async Task RenameAsync(Guid id, string from, string? to)
-    {
-        busy = true;
-        try
+    /// <summary>"3 rooms, 5 tags", for the line under the link to rooms and tags.</summary>
+    private string RoomsAndTagsLine =>
+        (roomCount, tagCount) switch
         {
-            var result = await RoomService.RenameAsync(id, to);
-            rooms = await RoomService.GetAllAsync();
-            roomMessage = (result.Total, result.Merged) switch
-            {
-                (0, _) => $"Nothing was in {from}, so there was nothing to rename.",
-                (_, true) => $"{Held(result.Plants, result.Propagations)} moved into {result.Name}, which you were already using.",
-                _ => $"Renamed to {result.Name}, with {Held(result.Plants, result.Propagations)} in it."
-            };
-            renaming = null;
-        }
-        catch (Exception ex)
-        {
-            roomMessage = $"Couldn't rename: {ex.Message}";
-        }
+            (0, 0) => "Rename or merge them everywhere at once",
+            (_, 0) => Labels.Count(roomCount, "room"),
+            (0, _) => Labels.Count(tagCount, "tag"),
+            _ => $"{Labels.Count(roomCount, "room")}, {Labels.Count(tagCount, "tag")}"
+        };
 
-        busy = false;
-    }
-
-    private void StopRenamingTag()
-    {
-        renamingTag = null;
-        tagMessage = null;
-    }
-
-    private async Task RenameTagAsync(string from, string? to)
-    {
-        busy = true;
-        try
-        {
-            var name = PlantTags.Clean(to);
-            var merged = name is not null && tags.Any(t => PlantTags.Same(t.Name, name) && !PlantTags.Same(t.Name, from));
-            var changed = name is null ? 0 : await PlantService.RenameTagAsync(from, name);
-            tags = PlantTags.InUse(await Plants.GetAllAsync());
-            tagMessage = (changed, merged) switch
-            {
-                (0, _) => $"Nothing changed, {from} stays as it is.",
-                (_, true) => $"{Labels.Plants(changed)} now tagged {name}, which you were already using.",
-                _ => $"Renamed to {name} on {Labels.Plants(changed)}."
-            };
-            renamingTag = null;
-        }
-        catch (Exception ex)
-        {
-            tagMessage = $"Couldn't rename: {ex.Message}";
-        }
-
-        busy = false;
-    }
+    private string BackupLine =>
+        lastBackup is { } date
+            ? $"Last backup {Labels.Date(date)} ({Labels.DaysAgo(Time.Today().DayNumber - date.DayNumber)})"
+            : "No backup on this device yet";
 
     private async Task SetModeAsync(ThemeMode newMode)
     {
         mode = newMode;
         await Theme.SetModeAsync(newMode);
-    }
-
-    // Keeps the selection in sync when the header toggle is used
-    private async void OnThemeChanged()
-    {
-        mode = await Theme.GetModeAsync();
-        StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -699,12 +164,6 @@
 
         accountChecking = false;
         StateHasChanged();
-
-        if (account is { SignedIn: true })
-        {
-            photoUsage = await Sync.GetPhotoUsageAsync();
-            StateHasChanged();
-        }
     }
 
     /// <summary>"Synced at 14:32", for the line under the email.</summary>
@@ -716,33 +175,7 @@
         _ => "Not synced yet"
     };
 
-    private string? SyncProblem
-    {
-        get
-        {
-            if (Sync.Running)
-                return null;
-            if (Sync.Problem is { } problem)
-                return Sync.Pending > 0 ? $"{problem} {Labels.Count(Sync.Pending, "change")} waiting." : problem;
-            if (Sync.Refused > 0)
-                return $"The server turned down {Labels.Count(Sync.Refused, "change")}, and {(Sync.Refused == 1 ? "it" : "they")} "
-                    + "will be tried again. If this keeps happening, check the date and time on this device.";
-            if (Sync.PhotosFull)
-                return "Your photos have used all the space they have on the server, so new ones stay on this device "
-                    + "for now. Deleting photos you don't need makes room.";
-            return null;
-        }
-    }
-
-    private void OnSyncChanged() => _ = InvokeAsync(async () =>
-    {
-        StateHasChanged();
-        if (!Sync.Running)
-        {
-            photoUsage = await Sync.GetPhotoUsageAsync();
-            StateHasChanged();
-        }
-    });
+    private void OnSyncChanged() => _ = InvokeAsync(StateHasChanged);
 
     private async void OnAccountChanged(AccountState state)
     {
@@ -752,200 +185,12 @@
 
         account = state;
         accountUnreachable = false;
-        accountMessage = null;
-        signOut = null;
-        deleting = false;
         await InvokeAsync(StateHasChanged);
-    }
-
-    private void AskDeleteAccount()
-    {
-        accountMessage = null;
-        removeHereToo = false;
-        deleting = true;
-    }
-
-    private async Task DeleteAccountAsync()
-    {
-        accountBusy = true;
-        accountMessage = null;
-        try
-        {
-            await Sync.DeleteAccountAsync(keepData: !removeHereToo);
-            if (removeHereToo)
-            {
-                // Starts the app afresh, so no page still holds what was removed
-                Nav.NavigateTo("", forceLoad: true);
-                return;
-            }
-
-            account = new AccountState(false, null);
-            deleting = false;
-            accountMessage = "Your account is deleted. Everything on this device is still here.";
-        }
-        catch (Exception e) when (e is HttpRequestException or JSException or TaskCanceledException)
-        {
-            accountMessage = "Couldn't delete your account. Check that you're online and try again.";
-        }
-        finally
-        {
-            accountBusy = false;
-        }
-    }
-
-    /// <summary>Opens the question, after one last sync so as little as possible is left unsent.</summary>
-    private async Task AskSignOutAsync()
-    {
-        accountMessage = null;
-        signOut = new SignOutCheck(Checking: true);
-        StateHasChanged();
-
-        await Sync.SyncNowAsync();
-        var (pending, photos) = await Sync.CountUnsentAsync();
-        if (signOut is not null)
-            signOut = new SignOutCheck(Checking: false, pending, photos);
-    }
-
-    private async Task SignOutAsync(bool keepData)
-    {
-        accountBusy = true;
-        accountMessage = null;
-        try
-        {
-            await Sync.SignOutAsync(keepData, Nav.Uri);
-            if (!keepData)
-            {
-                // Starts the app afresh, so no page still holds what was removed
-                Nav.NavigateTo("", forceLoad: true);
-                return;
-            }
-
-            account = new AccountState(false, null);
-            signOut = null;
-        }
-        catch (JSException)
-        {
-            accountMessage = "Couldn't sign out. Check that you're online and try again.";
-        }
-        finally
-        {
-            accountBusy = false;
-        }
-    }
-
-    private async Task ExportPlantsCsvAsync()
-    {
-        var csv = CsvExport.Plants(await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
-        await Files.DownloadAsync($"stikling-plants-{TodayDate:yyyy-MM-dd}.csv", CsvExport.Encode(csv));
-    }
-
-    private async Task ExportPropagationsCsvAsync()
-    {
-        var csv = CsvExport.Propagations(
-            await PropagationRepository.GetAllAsync(), await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
-        await Files.DownloadAsync($"stikling-propagations-{TodayDate:yyyy-MM-dd}.csv", CsvExport.Encode(csv));
-    }
-
-    private async Task ExportAsync()
-    {
-        busy = true;
-        message = "Packing your plants and photos…";
-        StateHasChanged();
-
-        try
-        {
-            var counts = await Backup.ExportAsync();
-            lastBackup = TodayDate;
-            message = $"Saved a backup with {Labels.Plants(counts.Plants)}, {Labels.Count(counts.Propagations, "propagation")} "
-                + $"and {Labels.Count(counts.Photos, "photo")}. Check your downloads.";
-        }
-        catch (Exception ex)
-        {
-            message = $"Couldn't save the backup: {ex.Message}";
-        }
-
-        storage = await Db.EstimateAsync();
-        busy = false;
-    }
-
-    private async Task ChooseFileAsync(InputFileChangeEventArgs e)
-    {
-        busy = true;
-        message = "Reading the backup…";
-        pending = null;
-        StateHasChanged();
-
-        try
-        {
-            var file = e.File;
-            var zip = new MemoryStream();
-            // 512 MB is far more than a phone-sized collection needs
-            await using (var stream = file.OpenReadStream(512L * 1024 * 1024))
-                await stream.CopyToAsync(zip);
-
-            zip.Position = 0;
-            pending = new PendingRestore(file.Name, await BackupService.ReadAsync(zip), zip);
-            message = null;
-        }
-        catch (Exception ex)
-        {
-            message = $"Couldn't read that file: {ex.Message}";
-        }
-
-        busy = false;
-    }
-
-    private async Task RestoreAsync()
-    {
-        if (pending is not { } file)
-            return;
-
-        busy = true;
-        message = "Restoring…";
-        StateHasChanged();
-
-        try
-        {
-            file.Zip.Position = 0;
-            var summary = await Backup.ImportAsync(file.Zip);
-            await Theme.ApplySavedAsync();
-            message = summary switch
-            {
-                { ChangedRecords: true } =>
-                    $"Restored {Labels.Count(summary.Added, "new item")} and {summary.Updated} updated, including {Labels.Count(summary.Photos, "photo")}."
-                    + (summary.BroughtBack > 0 ? $" {Labels.Count(summary.BroughtBack, "item")} deleted here came back." : "")
-                    + (summary.Kept > 0 ? $" {Labels.Count(summary.Kept, "item")} here {(summary.Kept == 1 ? "was" : "were")} already up to date." : ""),
-                { Photos: > 0 } => $"Put back the pictures for {Labels.Count(summary.Photos, "photo")} that had lost them. Everything else was already here.",
-                _ => "Everything in that backup was already here."
-            };
-        }
-        catch (Exception ex)
-        {
-            message = $"Couldn't restore: {ex.Message}";
-        }
-
-        await file.Zip.DisposeAsync();
-        pending = null;
-        storage = await Db.EstimateAsync();
-        busy = false;
-    }
-
-    private async Task RequestPersistenceAsync()
-    {
-        busy = true;
-        var granted = await Db.RequestPersistenceAsync();
-        message = granted
-            ? "The browser agreed to keep your data."
-            : "The browser said no for now. Installing Stikling to the home screen usually changes that.";
-        storage = await Db.EstimateAsync();
-        busy = false;
     }
 
     public void Dispose()
     {
-        Theme.Changed -= OnThemeChanged;
         Account.Changed -= OnAccountChanged;
         Sync.StatusChanged -= OnSyncChanged;
-        pending?.Zip.Dispose();
     }
 }

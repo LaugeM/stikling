@@ -72,7 +72,7 @@ The API is then on http://localhost:5180, with `/health` to check it's up. It cr
 
 ### Signing in
 
-When the app runs in Development, it reads `src/Stikling.Web/wwwroot/appsettings.Development.json`, which points at Clerk's development instance and the local API. The Account section then shows up at the top of Settings. The published site reads `appsettings.Production.json` instead, which points at the production instance and the hosted API.
+When the app runs in Development, it reads `src/Stikling.Web/wwwroot/appsettings.Development.json`, which points at Clerk's development instance and the local API. Settings then has an Account row at the top. The published site reads `appsettings.Production.json` instead, which points at the production instance and the hosted API.
 
 To try it, start the API as above and run the app on one of the origins the API accepts (`AppOrigins` in `src/Stikling.Api/appsettings.Development.json`), for example:
 

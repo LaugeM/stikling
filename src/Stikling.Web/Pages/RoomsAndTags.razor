@@ -1,0 +1,207 @@
+@page "/rooms-and-tags"
+@inject RoomService RoomService
+@inject PlantService PlantService
+@inject IPlantRepository Plants
+
+<PageTitle>Rooms and tags · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadDataAsync" />
+
+<a class="back-link" href="settings">Settings</a>
+<h1>Rooms and tags</h1>
+
+<section class="settings-section">
+    <h2 class="section-label">Rooms</h2>
+    <p class="settings-hint">
+        Rooms come from where your plants and propagations are. Renaming one here changes it everywhere,
+        and renaming it to a name you already use merges the two.
+    </p>
+
+    @if (rooms.Count == 0)
+    {
+        <div class="empty-state mt-3">
+            <p>No rooms yet.</p>
+            <p class="text-body-secondary">A room is where a plant lives. Pick one when you add or edit a plant, and it shows up here.</p>
+        </div>
+    }
+    else
+    {
+        <ul class="room-list">
+            @foreach (var r in rooms)
+            {
+                <li>
+                    @if (renaming == r.Id)
+                    {
+                        <RoomRenameRow Name="@r.Name" Busy="busy" OnSave="name => RenameAsync(r.Id, r.Name, name)" OnCancel="StopRenaming" />
+                    }
+                    else
+                    {
+                        <div class="room-row">
+                            <span class="room-name">@r.Name</span>
+                            <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
+                            <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                    @onclick="() => renaming = r.Id">Rename</button>
+                        </div>
+                    }
+
+                    @foreach (var spot in r.Spots)
+                    {
+                        <div class="room-spot">
+                            @if (renaming == spot.Id)
+                            {
+                                <RoomRenameRow Name="@spot.Name" Busy="busy"
+                                               OnSave="name => RenameAsync(spot.Id, spot.Place, name)"
+                                               OnCancel="StopRenaming" />
+                            }
+                            else
+                            {
+                                <div class="room-row">
+                                    <span class="room-name">@spot.Name</span>
+                                    <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
+                                    <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                            @onclick="() => renaming = spot.Id">Rename</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (roomMessage is not null)
+    {
+        <p class="settings-message" role="status">@roomMessage</p>
+    }
+</section>
+
+<section class="settings-section">
+    <h2 class="section-label">Tags</h2>
+    <p class="settings-hint">
+        Renaming a tag here changes it on every plant that has it, and renaming it to a tag you
+        already use merges the two.
+    </p>
+
+    @if (tags.Count == 0)
+    {
+        <div class="empty-state mt-3">
+            <p>No tags yet.</p>
+            <p class="text-body-secondary">Tags are your own labels, like "rare" or "for swap". Add them when you edit a plant, and they show up here.</p>
+        </div>
+    }
+    else
+    {
+        <ul class="room-list">
+            @foreach (var t in tags)
+            {
+                <li>
+                    @if (renamingTag == t.Name)
+                    {
+                        <RoomRenameRow Name="@t.Name" Busy="busy" OnSave="name => RenameTagAsync(t.Name, name)" OnCancel="StopRenamingTag" />
+                    }
+                    else
+                    {
+                        <div class="room-row">
+                            <span class="room-name">@t.Name</span>
+                            <span class="room-count">@Labels.Plants(t.Plants)</span>
+                            <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                    @onclick="() => renamingTag = t.Name">Rename</button>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (tagMessage is not null)
+    {
+        <p class="settings-message" role="status">@tagMessage</p>
+    }
+</section>
+
+@code {
+    private IReadOnlyList<Room> rooms = [];
+    private Guid? renaming; // the room or spot being renamed
+    private string? roomMessage;
+    private IReadOnlyList<TagCount> tags = [];
+    private string? renamingTag;
+    private string? tagMessage;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync() => await LoadDataAsync();
+
+    /// <summary>What comes from the records, which sync can change while the page is open.</summary>
+    private async Task LoadDataAsync()
+    {
+        rooms = await RoomService.GetAllAsync();
+        tags = PlantTags.InUse(await Plants.GetAllAsync());
+    }
+
+    /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
+    private static string Held(int plants, int propagations) => (plants, propagations) switch
+    {
+        (0, 0) => "empty",
+        (_, 0) => Labels.Plants(plants),
+        (0, _) => Labels.Count(propagations, "propagation"),
+        _ => $"{Labels.Plants(plants)}, {Labels.Count(propagations, "propagation")}"
+    };
+
+    private void StopRenaming()
+    {
+        renaming = null;
+        roomMessage = null;
+    }
+
+    private async Task RenameAsync(Guid id, string from, string? to)
+    {
+        busy = true;
+        try
+        {
+            var result = await RoomService.RenameAsync(id, to);
+            rooms = await RoomService.GetAllAsync();
+            roomMessage = (result.Total, result.Merged) switch
+            {
+                (0, _) => $"Nothing was in {from}, so there was nothing to rename.",
+                (_, true) => $"{Held(result.Plants, result.Propagations)} moved into {result.Name}, which you were already using.",
+                _ => $"Renamed to {result.Name}, with {Held(result.Plants, result.Propagations)} in it."
+            };
+            renaming = null;
+        }
+        catch (Exception ex)
+        {
+            roomMessage = $"Couldn't rename: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private void StopRenamingTag()
+    {
+        renamingTag = null;
+        tagMessage = null;
+    }
+
+    private async Task RenameTagAsync(string from, string? to)
+    {
+        busy = true;
+        try
+        {
+            var name = PlantTags.Clean(to);
+            var merged = name is not null && tags.Any(t => PlantTags.Same(t.Name, name) && !PlantTags.Same(t.Name, from));
+            var changed = name is null ? 0 : await PlantService.RenameTagAsync(from, name);
+            tags = PlantTags.InUse(await Plants.GetAllAsync());
+            tagMessage = (changed, merged) switch
+            {
+                (0, _) => $"Nothing changed, {from} stays as it is.",
+                (_, true) => $"{Labels.Plants(changed)} now tagged {name}, which you were already using.",
+                _ => $"Renamed to {name} on {Labels.Plants(changed)}."
+            };
+            renamingTag = null;
+        }
+        catch (Exception ex)
+        {
+            tagMessage = $"Couldn't rename: {ex.Message}";
+        }
+
+        busy = false;
+    }
+}
