@@ -50,6 +50,9 @@ shutil.copyfile(index, root / "404.html")
 # the other deep links get. Pages serves privacy.html for /privacy.
 shutil.copyfile(index, root / "privacy.html")
 
+# Facebook's data deletion setting links to /delete-data, and checks it the same way
+shutil.copyfile(index, root / "delete-data.html")
+
 # Stop Jekyll from hiding folders that start with an underscore (_framework)
 (root / ".nojekyll").touch()
 
