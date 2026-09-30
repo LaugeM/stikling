@@ -59,8 +59,8 @@
     private bool updateReady;
 
     // Pests only has a tab while a case is open, so someone who never has pests isn't shown one.
-    // It is worked out again when the page changes or sync brings changes, not the moment a case
-    // is saved, so the bar doesn't shift while someone is still looking at the case.
+    // It is worked out again when the page changes and when sync brings changes. Saving a case
+    // goes to its page, so that covers opening and resolving one.
     private bool pestTab;
 
     private bool OnPestsPage =>

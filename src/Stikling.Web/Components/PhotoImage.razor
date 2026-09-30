@@ -44,6 +44,7 @@ else
     protected override void OnInitialized()
     {
         Sync.PhotosArrived += OnPhotosArrived;
+        Sync.Received += OnReceived;
         Photos.FrameChanged += OnFrameChanged;
     }
 
@@ -117,6 +118,23 @@ else
         aspect = photo is { Width: > 0, Height: > 0 } ? (double)photo.Width / photo.Height : 0;
     }
 
+    // A frame set on another device comes in with the photo's record
+    private void OnReceived()
+    {
+        if (!Framed)
+            return;
+
+        _ = InvokeAsync(async () =>
+        {
+            var photo = await Photos.GetDetailsAsync(PhotoId);
+            if (photo?.Frame == frame)
+                return;
+
+            UseFrameOf(photo);
+            StateHasChanged();
+        });
+    }
+
     private void OnFrameChanged(Photo photo)
     {
         if (photo.Id != PhotoId || !Framed)
@@ -132,6 +150,7 @@ else
     public void Dispose()
     {
         Sync.PhotosArrived -= OnPhotosArrived;
+        Sync.Received -= OnReceived;
         Photos.FrameChanged -= OnFrameChanged;
     }
 }
