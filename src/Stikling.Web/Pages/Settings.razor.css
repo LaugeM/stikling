@@ -1,96 +1,18 @@
-.settings-section {
+.settings-group {
     margin-bottom: 1.75rem;
 }
 
-.settings-section h2 {
-    font-size: 1rem;
-    font-weight: 600;
+.settings-group h2 {
     margin-bottom: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
 }
 
-.settings-hint {
-    margin: 0.5rem 0 0;
+.theme-label {
+    margin-bottom: 0.35rem;
     font-size: 0.875rem;
     color: var(--pa-muted);
-}
-
-.settings-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-}
-
-.confirm-card {
-    margin-top: 0.75rem;
-    padding: 0.85rem;
-    background: var(--pa-surface);
-    border: 1px solid var(--pa-green);
-    border-radius: 0.75rem;
-}
-
-.confirm-card-danger {
-    border-color: var(--pa-alert);
-}
-
-.confirm-card p {
-    margin-bottom: 0.25rem;
-}
-
-.settings-message {
-    margin: 0.75rem 0 0;
-    font-size: 0.9rem;
-}
-
-.room-list {
-    list-style: none;
-    margin: 0.75rem 0 0;
-    padding: 0;
-}
-
-.room-list > li {
-    padding: 0.6rem 0;
-    border-top: 1px solid var(--pa-border);
-}
-
-.room-list > li:first-child {
-    border-top: 0;
-}
-
-.room-row {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-}
-
-.room-name {
-    font-weight: 600;
-}
-
-.room-count {
-    margin-right: auto;
-    font-size: 0.85rem;
-    color: var(--pa-muted);
-}
-
-/* Spots read as part of the room above them */
-.room-spot {
-    margin: 0.4rem 0 0 0.75rem;
-    padding-left: 0.75rem;
-    border-left: 2px solid var(--pa-border);
-}
-
-.room-spot .room-name {
-    font-weight: 400;
-}
-
-/* An email address has no spaces to break at */
-.account-email {
-    min-width: 0;
-    margin-right: auto;
-    overflow-wrap: anywhere;
-}
-
-.account-status {
-    margin-right: auto;
 }

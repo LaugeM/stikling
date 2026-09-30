@@ -255,7 +255,7 @@ Soft and consistent, with radius carrying the softness the palette has not yet b
 - **Large surfaces** use 0.9rem: the detail icon, and the detail hero once it is no longer edge to edge.
 - **Controls** use 0.6rem, set through Bootstrap's `--bs-border-radius`, so buttons and fields match the thumbnails.
 - **Pills** (999px) are for chips, the experiment bars and the tile behind the active navigation icon.
-- **Circles** are reserved for icon-only buttons: the add button, the theme toggle, the delete button on a timeline entry, and the remove button on a photo.
+- **Circles** are reserved for icon-only buttons: the add button, the settings gear, the delete button on a timeline entry, and the remove button on a photo.
 
 Borders are always exactly 1px and always Border, with two deliberate exceptions: a panel awaiting a decision is outlined in Potting Green, and an empty state uses a dashed border so it reads as a placeholder rather than as content.
 
@@ -305,7 +305,12 @@ A propagation's stage in a Leaf Tint badge, led by three small ticks filled up t
 ### Navigation
 Five fixed destinations in a bottom bar: a stroked icon over a 0.75rem Bricolage label, Muted Ink at rest, Deep Moss and weight 600 when active. The active icon also sits on a Leaf Tint pill, so where you are shows before you read the label.
 
-The header is sticky and holds the app icon at 28px beside the wordmark, set in Bricolage 800 at 1.375rem and 88% width in Deep Moss. The wordmark links to Today. The theme toggle sits on the right. Within a detail page, tabs are a simple underline strip in Bricolage: Muted Ink at rest, Deep Moss with a 2px Potting Green underline when active.
+The header is sticky and holds the app icon at 28px beside the wordmark, set in Bricolage 800 at 1.375rem and 88% width in Deep Moss. The wordmark links to Today. The settings gear sits on the right, and takes the Leaf Tint circle while Settings is open. When sync has a problem, a small Alert dot with a Surface ring sits on the gear, so the problem is seen without Settings taking up a tab. The five tabs are for the collection and what it uses: Today, Plants, Props, Pests and Supplies. Settings is visited rarely, so it lives at the top, out of the thumb's way. Within a detail page, tabs are a simple underline strip in Bricolage: Muted Ink at rest, Deep Moss with a 2px Potting Green underline when active.
+
+### Settings Row
+A whole-row link to a page one level down, used on Settings and Supplies. The name in Bricolage 600, a line under it in small Muted Ink that says what is there now ("6 pots, 2 free", "Last backup 3 days ago") or, when there is nothing yet, what the thing is for, and a chevron on the right. On Supplies a stroked icon on a 2.5rem Leaf Tint tile leads the row. Rows in a group close up into one bordered block divided by hairlines, like the Help page, and a row fills with Leaf Tint on hover or focus instead of taking a green border. A row whose line reports a problem, like a failed sync, sets that line in Alert.
+
+This is how depth stays out of the way: Settings and Supplies are short lists of these rows, and everything with more than one control lives on the page behind a row. A setting that is a single switch or choice, like the theme, sits on Settings itself, since a page for it would only add a tap.
 
 ### Timeline Entry
 One record on a plant or propagation history. Each entry opens with its kind set in Label, with a small stroked icon beside it: a sprout for Added, a pencil for Note, a camera for Photo, swap arrows for Updated, scissors for Propagated. Entries someone wrote take Deep Moss and entries the app recorded itself stay Muted Ink, so a long history can be scanned for the human notes without reading every line. Entries group under a date heading set in Label, and photos attach as a grid of square tiles at 0.5rem radius.
@@ -320,7 +325,7 @@ An empty state never just says there is nothing. It says why the space is empty 
 The first-run version, on Today, Plants and Propagations when there is nothing at all yet, is louder on purpose: Leaf Tint with a green dashed edge, a stroked drawing at 5.5rem (a sprout in a clay pot, or a cutting rooting in a glass), a Bricolage heading in Deep Moss, and the sentences and buttons under it, with a small link to the Help page at the bottom. The one on Today says what the app is for and that nothing leaves the device. The Propagations one says in plain words what a propagation is, because that is the first question a new person asked.
 
 ### Help Page
-Questions and answers grouped by topic, each topic under a Label heading. The questions in a topic close up into one bordered block divided by hairlines, like an experiment group, and each folds open with a stroked chevron on the right that turns over when open. Questions are set in the system font at weight 600, because they are sentences. A row of chips at the top jumps to each topic. The page is reached from the top of Settings and from the first-run empty states, not from the header, so it doesn't compete with the app itself.
+Questions and answers grouped by topic, each topic under a Label heading. The questions in a topic close up into one bordered block divided by hairlines, like an experiment group, and each folds open with a stroked chevron on the right that turns over when open. Questions are set in the system font at weight 600, because they are sentences. A row of chips at the top jumps to each topic. The page is reached from About in Settings and from the first-run empty states, not from the header, so it doesn't compete with the app itself.
 
 ## Do's and Don'ts
 

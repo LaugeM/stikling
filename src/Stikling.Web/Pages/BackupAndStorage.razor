@@ -1,0 +1,243 @@
+@page "/backup"
+@implements IDisposable
+@inject BackupService Backup
+@inject DeviceFiles Files
+@inject IPlantRepository Plants
+@inject IPropagationRepository PropagationRepository
+@inject RoomService RoomService
+@inject ThemeService Theme
+@inject IndexedDb Db
+@inject TimeProvider Time
+@inject AccountService Account
+
+<PageTitle>Backup and storage · Stikling</PageTitle>
+
+<a class="back-link" href="settings">Settings</a>
+<h1>Backup and storage</h1>
+
+<section class="settings-section">
+    <h2 class="section-label">Backup</h2>
+    <p class="settings-hint">
+        @(signedIn ? "" : "Everything you add stays on this device. ")A backup is a ZIP file with your plants and photos in it,
+        which you can keep in cloud storage or move to another phone.
+    </p>
+
+    <div class="settings-actions">
+        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ExportAsync">Save a backup</button>
+        <label class="btn btn-outline-primary @(busy ? "disabled" : null)" for="restore-file">Restore a backup</label>
+        <InputFile id="restore-file" class="visually-hidden" accept=".zip" OnChange="ChooseFileAsync" disabled="@busy" />
+    </div>
+
+    <p class="settings-hint">
+        @if (lastBackup is { } date)
+        {
+            <text>Last backup: @Labels.Date(date) (@Labels.DaysAgo(TodayDate.DayNumber - date.DayNumber)).</text>
+        }
+        else
+        {
+            <text>No backup taken on this device yet.</text>
+        }
+    </p>
+
+    @if (pending is { } file)
+    {
+        <div class="confirm-card">
+            <p>
+                <strong>@file.Name</strong><br />
+                Made @Labels.Date(DateOnly.FromDateTime(file.Data.ExportedAt.LocalDateTime)), holding
+                @Labels.Plants(file.Data.Counts.Plants), @Labels.Count(file.Data.Counts.Propagations, "propagation"),
+                @Labels.Count(file.Data.Counts.Entries, "history entry", "history entries"),
+                @Labels.Count(file.Data.Counts.Photos, "photo"),
+                @Labels.Count(file.Data.Counts.CareEntries, "care entry", "care entries"),
+                @Labels.Count(file.Data.Counts.PestCases, "pest case"),
+                @Labels.Count(file.Data.Counts.Treatments, "treatment"),
+                @Labels.Count(file.Data.Counts.Pots, "pot"),
+                @Labels.Count(file.Data.Counts.SoilMixes, "soil mix", "soil mixes"),
+                @Labels.Count(file.Data.Counts.Products, "product"),
+                @Labels.Count(file.Data.Counts.Feeds, "feed"),
+                @Labels.Count(file.Data.Counts.Recipes, "treatment recipe") and
+                @Labels.Count(file.Data.Counts.Rooms, "room").
+            </p>
+            <p class="settings-hint">
+                Restoring adds what's missing here and brings back anything you've deleted since.
+                Changes you've made on this device are kept.
+            </p>
+            <div class="settings-actions">
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="RestoreAsync">Restore</button>
+                <button type="button" class="btn btn-link" @onclick="() => pending = null">Cancel</button>
+            </div>
+        </div>
+    }
+
+    @if (message is not null)
+    {
+        <p class="settings-message" role="status">@message</p>
+    }
+</section>
+
+<section class="settings-section">
+    <h2 class="section-label">For a spreadsheet</h2>
+    <p class="settings-hint">A copy to open in Excel or Google Sheets. It isn't a backup and can't be restored into Stikling.</p>
+    <div class="settings-actions">
+        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPlantsCsvAsync">Plants as CSV</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPropagationsCsvAsync">Propagations as CSV</button>
+    </div>
+</section>
+
+<section class="settings-section">
+    <h2 class="section-label">Storage</h2>
+    @if (storage is { } estimate)
+    {
+        <p class="settings-hint">
+            Stikling is using @Labels.Bytes(estimate.Usage) on this device.
+        </p>
+        @if (estimate.Persisted)
+        {
+            <p class="settings-hint">The browser has been asked to keep your data and agreed. It won't be cleared when space runs low.</p>
+        }
+        else
+        {
+            <p class="settings-hint">
+                The browser may clear your data if the device runs low on space. Installing Stikling to the home screen usually
+                settles this, and you can ask directly:
+            </p>
+            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="RequestPersistenceAsync">Ask to keep my data</button>
+        }
+    }
+    else
+    {
+        <p class="settings-hint">This browser doesn't say how much space is in use.</p>
+    }
+</section>
+
+@code {
+    /// <summary>A chosen file, read and described, waiting for the restore to be confirmed.</summary>
+    private sealed record PendingRestore(string Name, BackupData Data, MemoryStream Zip);
+
+    private DateOnly? lastBackup;
+    private StorageEstimate? storage;
+    private PendingRestore? pending;
+    private string? message;
+    private bool busy;
+    private bool signedIn;
+
+    private DateOnly TodayDate => Time.Today();
+
+    protected override async Task OnInitializedAsync()
+    {
+        lastBackup = await Files.GetLastBackupAsync();
+        storage = await Db.EstimateAsync();
+        // Only for the wording of the hint, and read without loading Clerk
+        signedIn = Account.IsAvailable && await Account.WasSignedInAsync();
+    }
+
+    private async Task ExportPlantsCsvAsync()
+    {
+        var csv = CsvExport.Plants(await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
+        await Files.DownloadAsync($"stikling-plants-{TodayDate:yyyy-MM-dd}.csv", CsvExport.Encode(csv));
+    }
+
+    private async Task ExportPropagationsCsvAsync()
+    {
+        var csv = CsvExport.Propagations(
+            await PropagationRepository.GetAllAsync(), await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
+        await Files.DownloadAsync($"stikling-propagations-{TodayDate:yyyy-MM-dd}.csv", CsvExport.Encode(csv));
+    }
+
+    private async Task ExportAsync()
+    {
+        busy = true;
+        message = "Packing your plants and photos…";
+        StateHasChanged();
+
+        try
+        {
+            var counts = await Backup.ExportAsync();
+            lastBackup = TodayDate;
+            message = $"Saved a backup with {Labels.Plants(counts.Plants)}, {Labels.Count(counts.Propagations, "propagation")} "
+                + $"and {Labels.Count(counts.Photos, "photo")}. Check your downloads.";
+        }
+        catch (Exception ex)
+        {
+            message = $"Couldn't save the backup: {ex.Message}";
+        }
+
+        storage = await Db.EstimateAsync();
+        busy = false;
+    }
+
+    private async Task ChooseFileAsync(InputFileChangeEventArgs e)
+    {
+        busy = true;
+        message = "Reading the backup…";
+        pending = null;
+        StateHasChanged();
+
+        try
+        {
+            var file = e.File;
+            var zip = new MemoryStream();
+            // 512 MB is far more than a phone-sized collection needs
+            await using (var stream = file.OpenReadStream(512L * 1024 * 1024))
+                await stream.CopyToAsync(zip);
+
+            zip.Position = 0;
+            pending = new PendingRestore(file.Name, await BackupService.ReadAsync(zip), zip);
+            message = null;
+        }
+        catch (Exception ex)
+        {
+            message = $"Couldn't read that file: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task RestoreAsync()
+    {
+        if (pending is not { } file)
+            return;
+
+        busy = true;
+        message = "Restoring…";
+        StateHasChanged();
+
+        try
+        {
+            file.Zip.Position = 0;
+            var summary = await Backup.ImportAsync(file.Zip);
+            await Theme.ApplySavedAsync();
+            message = summary switch
+            {
+                { ChangedRecords: true } =>
+                    $"Restored {Labels.Count(summary.Added, "new item")} and {summary.Updated} updated, including {Labels.Count(summary.Photos, "photo")}."
+                    + (summary.BroughtBack > 0 ? $" {Labels.Count(summary.BroughtBack, "item")} deleted here came back." : "")
+                    + (summary.Kept > 0 ? $" {Labels.Count(summary.Kept, "item")} here {(summary.Kept == 1 ? "was" : "were")} already up to date." : ""),
+                { Photos: > 0 } => $"Put back the pictures for {Labels.Count(summary.Photos, "photo")} that had lost them. Everything else was already here.",
+                _ => "Everything in that backup was already here."
+            };
+        }
+        catch (Exception ex)
+        {
+            message = $"Couldn't restore: {ex.Message}";
+        }
+
+        await file.Zip.DisposeAsync();
+        pending = null;
+        storage = await Db.EstimateAsync();
+        busy = false;
+    }
+
+    private async Task RequestPersistenceAsync()
+    {
+        busy = true;
+        var granted = await Db.RequestPersistenceAsync();
+        message = granted
+            ? "The browser agreed to keep your data."
+            : "The browser said no for now. Installing Stikling to the home screen usually changes that.";
+        storage = await Db.EstimateAsync();
+        busy = false;
+    }
+
+    public void Dispose() => pending?.Zip.Dispose();
+}

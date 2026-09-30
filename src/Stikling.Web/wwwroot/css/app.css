@@ -1561,3 +1561,139 @@ a.tag-label:hover {
     color: var(--pa-muted);
     font-size: 0.8rem;
 }
+
+/* Shared by Settings and the pages that came out of it */
+.settings-section {
+    margin-bottom: 1.75rem;
+}
+
+.settings-section h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+}
+
+.section-label {
+    margin-bottom: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.settings-hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+/* Row links on Settings and Supplies close up into one block divided by hairlines, like the Help page */
+.settings-rows {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.settings-hint + .settings-rows {
+    margin-top: 1rem;
+}
+
+.settings-rows > a.item-card {
+    border: 0;
+    border-top: 1px solid var(--pa-border);
+    border-radius: 0;
+    transition: background-color 0.15s ease-out;
+}
+
+.settings-rows > a.item-card:first-child {
+    border-top: 0;
+}
+
+.settings-rows > a.item-card:hover,
+.settings-rows > a.item-card:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+.settings-rows > a.item-card:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+}
+
+.settings-rows > a.item-card:active {
+    transform: none;
+}
+
+.settings-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.confirm-card {
+    margin-top: 0.75rem;
+    padding: 0.85rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-green);
+    border-radius: 0.75rem;
+}
+
+.confirm-card-danger {
+    border-color: var(--pa-alert);
+}
+
+.confirm-card p {
+    margin-bottom: 0.25rem;
+}
+
+.settings-message {
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+}
+
+.room-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.room-list > li {
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.room-list > li:first-child {
+    border-top: 0;
+}
+
+.room-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.room-name {
+    font-weight: 600;
+}
+
+.room-count {
+    margin-right: auto;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+/* Spots read as part of the room above them */
+.room-spot {
+    margin: 0.4rem 0 0 0.75rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--pa-border);
+}
+
+.room-spot .room-name {
+    font-weight: 400;
+}
+

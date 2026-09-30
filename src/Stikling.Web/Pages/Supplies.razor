@@ -1,0 +1,75 @@
+@page "/supplies"
+@inject PotService PotService
+@inject SoilMixService MixService
+@inject ProductService ProductService
+@inject IFeedRepository FeedRepository
+@inject ITreatmentRecipeRepository RecipeRepository
+
+<PageTitle>Supplies · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadDataAsync" />
+
+<h1>Supplies</h1>
+
+<p class="settings-hint">
+    The pots, mixes and products you use, so a plant or a treatment can point at them instead of you typing them again.
+</p>
+
+<div class="settings-rows">
+    <SettingsRow Href="pots" Title="Pots" Detail="@PotSummary">
+        <Icon><path d="M4.5 4.5h15v3.5h-15Z" /><path d="M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8" /></Icon>
+    </SettingsRow>
+    <SettingsRow Href="soil-mixes" Title="Soil mixes" Detail="@MixSummary">
+        <Icon><path d="M7 3.5h10l1.5 3.5v12.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5V7Z" /><path d="M5.5 7h13" /><path d="M9 13.5h6M9 17h4" /></Icon>
+    </SettingsRow>
+    <SettingsRow Href="products" Title="Products" Detail="@ProductSummary">
+        <Icon><path d="M10 3h4v3l1.5 2.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1V8.5L10 6Z" /><path d="M8.5 13h7" /></Icon>
+    </SettingsRow>
+    <SettingsRow Href="feeds" Title="Feeds" Detail="@FeedSummary">
+        <Icon><path d="M4.5 10h11v8.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1Z" /><path d="M8 10V8.5a2.25 2.25 0 0 1 4.5 0V10" /><path d="M15.5 13.5 21 9.5" /><path d="M4.5 12.5H3" /></Icon>
+    </SettingsRow>
+    <SettingsRow Href="treatment-recipes" Title="Treatment recipes" Detail="@RecipeSummary">
+        <Icon><path d="M8.5 21h6a1 1 0 0 0 1-1v-7l-2-2h-4l-2 2v7a1 1 0 0 0 1 1Z" /><path d="M10.5 11V8h5.5l2.5-1.5" /><path d="M13 8V5.5" /><path d="M20.5 9.5H22M20 12h1.5" /></Icon>
+    </SettingsRow>
+</div>
+
+@code {
+    private IReadOnlyList<PotUse> pots = [];
+    private IReadOnlyList<MixUse> mixes = [];
+    private IReadOnlyList<ProductUse> products = [];
+    private int feeds;
+    private int recipes;
+
+    protected override async Task OnInitializedAsync() => await LoadDataAsync();
+
+    private async Task LoadDataAsync()
+    {
+        pots = await PotService.GetAllAsync();
+        mixes = await MixService.GetAllAsync();
+        products = await ProductService.GetAllAsync();
+        feeds = (await FeedRepository.GetAllAsync()).Count;
+        recipes = (await RecipeRepository.GetAllAsync()).Count;
+    }
+
+    /// <summary>"6 pots, 2 free", or what pots are when there are none.</summary>
+    private string PotSummary =>
+        pots.Count == 0
+            ? "The pots you own, nursery or decorative"
+            : $"{Labels.Count(pots.Sum(p => p.Here), "pot")}, {pots.Sum(p => p.Free)} free";
+
+    /// <summary>"3 mixes, 1 no longer mixed", or what mixes are when there are none.</summary>
+    private string MixSummary => mixes.Count switch
+    {
+        0 => "Your own mixes and what goes in them",
+        _ when mixes.Any(m => m.Mix.IsRetired) =>
+            $"{Labels.Count(mixes.Count, "mix", "mixes")}, {mixes.Count(m => m.Mix.IsRetired)} no longer mixed",
+        var count => Labels.Count(count, "mix", "mixes")
+    };
+
+    private string ProductSummary =>
+        products.Count == 0 ? "Fertilisers, sprays and the rest you buy" : Labels.Count(products.Count, "product");
+
+    private string FeedSummary => feeds == 0 ? "How you dilute a product to water with" : Labels.Count(feeds, "feed");
+
+    private string RecipeSummary =>
+        recipes == 0 ? "Sprays you mix the same way each time" : Labels.Count(recipes, "recipe");
+}

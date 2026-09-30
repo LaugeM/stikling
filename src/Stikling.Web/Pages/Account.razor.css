@@ -1,0 +1,20 @@
+/* Deleting the account sits alone at the bottom, away from what is used often */
+.account-divider {
+    margin: 1.75rem 0 0.75rem;
+    border: 0;
+    border-top: 1px solid var(--pa-border);
+    opacity: 1;
+}
+
+/* An email address has no spaces to break at */
+.account-email {
+    margin: 0;
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.account-status {
+    margin-top: 0.15rem;
+}
