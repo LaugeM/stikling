@@ -186,9 +186,33 @@ public class RoomListTests
     private IReadOnlyList<Room> List() => Room.List(places.Current, plants, propagations);
 
     [Fact]
-    public void Rooms_are_sorted_and_only_the_ones_something_is_in()
+    public void Rooms_are_sorted_and_the_empty_ones_are_kept()
     {
-        Assert.Equal(["Bathroom", "Kitchen", "Living room"], List().Select(r => r.Name));
+        Assert.Equal(["Bathroom", "Hallway", "Kitchen", "Living room", "Shed"], List().Select(r => r.Name));
+    }
+
+    [Fact]
+    public void An_empty_spot_is_kept_inside_its_room()
+    {
+        var living = places.Current.Rooms.Single(r => r.Name == "Living room");
+        places.Add("Windowsill", living);
+
+        var room = List().Single(r => r.Name == "Living room");
+
+        Assert.Equal(["On top of the PC", "Windowsill"], room.Spots.Select(s => s.Name));
+        Assert.Equal(0, room.Spots.Single(s => s.Name == "Windowsill").Total);
+    }
+
+    [Fact]
+    public void In_use_leaves_out_rooms_and_spots_with_nothing_in_them()
+    {
+        var living = places.Current.Rooms.Single(r => r.Name == "Living room");
+        places.Add("Windowsill", living);
+
+        var inUse = Room.InUse(List());
+
+        Assert.Equal(["Bathroom", "Kitchen", "Living room"], inUse.Select(r => r.Name));
+        Assert.Equal(["On top of the PC"], inUse.Single(r => r.Name == "Living room").Spots.Select(s => s.Name));
     }
 
     [Fact]
@@ -219,8 +243,8 @@ public class RoomListTests
 
         var rooms = Room.List(places.Current, [new Plant { Nickname = "Pilea", PlaceId = shelf.Id }], []);
 
-        Assert.Equal("Office", rooms.Single().Name);
-        Assert.Equal(0, rooms.Single().Plants);
-        Assert.Equal(1, rooms.Single().AllPlants);
+        var room = rooms.Single(r => r.Name == "Office");
+        Assert.Equal(0, room.Plants);
+        Assert.Equal(1, room.AllPlants);
     }
 }

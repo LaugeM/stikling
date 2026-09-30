@@ -183,12 +183,12 @@ else
                         <div class="care-actions">
                             @if (use.Recipe.Ingredients.Any(i => i.Amount is not null))
                             {
-                                <button type="button" class="btn btn-link btn-sm p-0"
+                                <button type="button" class="btn btn-link btn-sm link-action"
                                         @onclick="() => ToggleMixing(use.Recipe)">@(measuring ? "Done" : "Mix a batch")</button>
                             }
-                            <button type="button" class="btn btn-link btn-sm p-0"
+                            <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => StartEdit(use.Recipe)">Edit</button>
-                            <button type="button" class="btn btn-link btn-sm p-0"
+                            <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => { confirming = use.Recipe.Id; mixing = null; }">Delete</button>
                         </div>
                     }

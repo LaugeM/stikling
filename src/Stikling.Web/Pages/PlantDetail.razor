@@ -237,7 +237,7 @@ else
                         <dd>
                             @(since == Today ? "Since today" : $"Since {Labels.Date(since)} · {Labels.Count(plant.DaysInQuarantine(Today) ?? 0, "day")}")
                             <div>
-                                <button type="button" class="btn btn-link btn-sm p-0" @onclick="EndQuarantineAsync">End quarantine</button>
+                                <button type="button" class="btn btn-link btn-sm link-action" @onclick="EndQuarantineAsync">End quarantine</button>
                             </div>
                         </dd>
                     }
@@ -248,7 +248,7 @@ else
                         <dd>
                             @(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(plant.DaysDormant(Today) ?? 0, "day")}")
                             <div>
-                                <button type="button" class="btn btn-link btn-sm p-0" @onclick="EndDormancyAsync">It's woken up</button>
+                                <button type="button" class="btn btn-link btn-sm link-action" @onclick="EndDormancyAsync">It's woken up</button>
                             </div>
                         </dd>
                     }
@@ -360,7 +360,7 @@ else
                 }
                 else
                 {
-                    <button class="btn btn-link btn-sm text-danger p-0" @onclick="() => confirmDelete = true">Delete plant</button>
+                    <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">Delete plant</button>
                 }
             </section>
         </div>

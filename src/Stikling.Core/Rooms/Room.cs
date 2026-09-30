@@ -22,8 +22,9 @@ public sealed record Room(Guid Id, string Name, IReadOnlyList<RoomSpot> Spots, i
     public int Total => AllPlants + AllPropagations;
 
     /// <summary>
-    /// The rooms something is in, sorted, with the spots that have something in them. A room or
-    /// spot with nothing in it is left out, so it stops showing once the last plant leaves.
+    /// Every room, sorted, with the spots inside it, counting what is in each. A room or spot with
+    /// nothing in it is kept, since one can be made on the Rooms and tags page before anything is
+    /// placed there. Screens that only want what is in use use <see cref="InUse"/>.
     /// </summary>
     public static IReadOnlyList<Room> List(Places places, IEnumerable<Plant> plants, IEnumerable<Propagation> propagations)
     {
@@ -39,15 +40,20 @@ public sealed record Room(Guid Id, string Name, IReadOnlyList<RoomSpot> Spots, i
                 room.Name,
                 places.SpotsIn(room.Id)
                     .Select(s => new RoomSpot(s.Id, s.Name, places.NameOf(s.Id)!, PlantsIn(s), PropagationsIn(s)))
-                    .Where(s => s.Total > 0)
                     .OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase)
                     .ToList(),
                 PlantsIn(room),
                 PropagationsIn(room)))
-            .Where(r => r.Total > 0)
             .OrderBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
     }
+
+    /// <summary>The rooms and spots with something in them, for filters where an empty one is no use.</summary>
+    public static IReadOnlyList<Room> InUse(IEnumerable<Room> rooms) =>
+        rooms
+            .Select(r => r with { Spots = r.Spots.Where(s => s.Total > 0).ToList() })
+            .Where(r => r.Total > 0)
+            .ToList();
 
     // How many point at each place, counting what points at a merged place towards the one it went into
     private static Dictionary<Guid, int> Tally(Places places, IEnumerable<Guid?> placeIds) =>

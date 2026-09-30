@@ -1,4 +1,4 @@
-@* Picking where something lives. The rooms already in use are buttons rather than an
+@* Picking where something lives. The rooms you have are buttons rather than an
    autocomplete, because a datalist is invisible on a phone and you end up inventing a
    second name for a room you already have. *@
 
@@ -53,7 +53,7 @@
     [Parameter]
     public EventCallback<string?> ValueChanged { get; set; }
 
-    /// <summary>The rooms already in use, which is what you get to pick from.</summary>
+    /// <summary>The rooms to pick from, including empty ones made on the Rooms and tags page.</summary>
     [Parameter]
     public IReadOnlyList<Room> Rooms { get; set; } = [];
 

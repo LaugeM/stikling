@@ -35,11 +35,11 @@
         {
             <label for="@dateId">Happened on</label>
             <input id="@dateId" type="date" class="form-control form-control-sm" @bind="occurredOn" max="@Today.ToString("yyyy-MM-dd")" />
-            <button type="button" class="btn btn-link btn-sm p-0" @onclick="ResetDate">Use today</button>
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="ResetDate">Use today</button>
         }
         else
         {
-            <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => pickDate = true">Happened earlier?</button>
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => pickDate = true">Happened earlier?</button>
         }
     </div>
 

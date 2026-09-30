@@ -18,7 +18,7 @@ public sealed record RoomRename(string Name, int Plants, int Propagations, bool 
 /// </summary>
 public sealed class RoomService(IPlaceRepository places, IPlantRepository plants, IPropagationRepository propagations)
 {
-    /// <summary>The rooms in use, with the spots inside them.</summary>
+    /// <summary>Every room, with the spots inside it, including the ones with nothing in them.</summary>
     public async Task<IReadOnlyList<Room>> GetAllAsync() =>
         Room.List(await places.GetPlacesAsync(), await plants.GetAllAsync(), await propagations.GetAllAsync());
 
@@ -41,6 +41,33 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
 
         var spot = all.SpotNamed(room.Id, spotName) ?? await AddAsync(new Place { Name = spotName, RoomId = room.Id });
         return spot.Id;
+    }
+
+    /// <summary>
+    /// Adds a room, or a spot in the room with this id. When the name is already taken there, the
+    /// one that was there is returned instead, with <c>Existed</c> set.
+    /// </summary>
+    /// <remarks>The room is found by id, so a spot goes where it was asked for even when two rooms share a name after a sync.</remarks>
+    public async Task<(Place Place, bool Existed)> AddPlaceAsync(string? name, Guid? roomId = null)
+    {
+        // Validate turns down a room with a / in it, and a name that is nothing but slashes
+        var added = new Place { Name = RoomName.Clean(name) ?? "", RoomId = roomId };
+        if (added.Validate().FirstOrDefault() is { } error)
+            throw new ArgumentException(error, nameof(name));
+
+        var all = await places.GetPlacesAsync();
+        Place? existing;
+        if (roomId is { } id)
+        {
+            if (all.Find(id) is not { } room)
+                throw new ArgumentException("That room isn't there any more.", nameof(roomId));
+            added.RoomId = room.Id;
+            existing = all.SpotNamed(room.Id, added.Name);
+        }
+        else
+            existing = all.RoomNamed(added.Name);
+
+        return existing is not null ? (existing, true) : (await AddAsync(added), false);
     }
 
     /// <summary>
@@ -85,6 +112,36 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
 
         await MergeAsync(place, existing);
         return new RoomRename(existing.Name, plantCount, propagationCount, Merged: true);
+    }
+
+    /// <summary>
+    /// Removes a room or spot with nothing in it. A room goes together with its empty spots. Anything
+    /// still in it, or in a spot of the room, makes this throw.
+    /// </summary>
+    /// <remarks>
+    /// A plant another device moves into the place at the same time can end up pointing at a
+    /// removed place. That shows as no location, the same as a place deleted on another device.
+    /// A spot another device adds to a removed room at the same time shows as a room of its own
+    /// (see <see cref="Places.Rooms"/>).
+    /// </remarks>
+    public async Task RemoveAsync(Guid id)
+    {
+        var all = await places.GetPlacesAsync();
+        if (all.Find(id) is not { } place)
+            throw new ArgumentException("That room isn't there any more.", nameof(id));
+
+        var held = (await plants.GetAllAsync()).Count(p => !p.IsDeleted && all.IsIn(p.PlaceId, place.Id))
+            + (await propagations.GetAllAsync()).Count(p => !p.IsDeleted && all.IsIn(p.PlaceId, place.Id));
+        if (held > 0)
+            throw new InvalidOperationException($"{place.Name} still has something in it.");
+
+        if (!place.IsSpot)
+        {
+            foreach (var spot in all.SpotsIn(place.Id).ToList())
+                await places.DeleteAsync(spot.Id);
+        }
+
+        await places.DeleteAsync(place.Id);
     }
 
     private async Task MergeAsync(Place from, Place into)

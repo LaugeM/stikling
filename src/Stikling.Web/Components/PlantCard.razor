@@ -103,7 +103,8 @@ else
                 @if (Moisture is { } reading)
                 {
                     <span class="moisture-badge" title="@($"Moisture {reading.Value}/10, {Labels.DaysAgo(reading.DaysAgo)}")">
-                        @reading.Value/10
+                        <span aria-hidden="true">@reading.Value/10</span>
+                        <span class="visually-hidden">@($"Moisture {reading.Value}/10, {Labels.DaysAgo(reading.DaysAgo)}")</span>
                     </span>
                 }
             </div>

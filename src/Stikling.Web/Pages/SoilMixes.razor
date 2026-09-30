@@ -228,16 +228,16 @@ else
                             <div class="care-actions">
                                 @if (use.Mix.CanMeasureOut)
                                 {
-                                    <button type="button" class="btn btn-link btn-sm p-0" aria-expanded="@(measuring == use.Mix.Id)"
+                                    <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(measuring == use.Mix.Id)"
                                             @onclick="() => ToggleMeasuring(use.Mix)">Measure out</button>
                                 }
-                                <button type="button" class="btn btn-link btn-sm p-0"
+                                <button type="button" class="btn btn-link btn-sm link-action"
                                         @onclick="() => StartEditAsync(use)">Edit</button>
-                                <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                         @onclick="() => RetireAsync(use.Mix)">
                                     @(use.Mix.IsRetired ? "Mixing it again" : "No longer mixing it")
                                 </button>
-                                <button type="button" class="btn btn-link btn-sm p-0"
+                                <button type="button" class="btn btn-link btn-sm link-action"
                                         @onclick="() => ConfirmAsync(use)">Delete</button>
                             </div>
                         }

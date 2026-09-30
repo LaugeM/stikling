@@ -16,7 +16,7 @@
     {
         <div class="d-flex align-items-baseline gap-2">
             <span class="text-body-secondary small">@visible.Count of @all.Count</span>
-            <button type="button" class="btn btn-link btn-sm p-0" @onclick="ToggleSelectMode">
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
                 @(selecting ? "Done" : "Select")
             </button>
         </div>
@@ -49,29 +49,29 @@ else
                aria-label="Search plants" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
 
         <div class="d-flex flex-wrap gap-2">
-            <div class="btn-group flex-grow-1" role="radiogroup" aria-label="Status">
+            <div class="btn-group segmented flex-grow-1" role="radiogroup" aria-label="Status">
                 @foreach (var (value, label) in statusOptions)
                 {
                     var id = $"status-{value}";
                     <input type="radio" class="btn-check" name="status" id="@id"
                            checked="@(status == value)" @onchange="() => SetStatus(value)" />
-                    <label class="btn btn-outline-primary btn-sm" for="@id">@label</label>
+                    <label class="btn btn-outline-primary" for="@id">@label</label>
                 }
             </div>
 
             @if (HasRoomChoice)
             {
-                <select class="form-select form-select-sm w-auto" aria-label="Room"
+                <select class="form-select w-auto" aria-label="Room"
                         @bind="room" @bind:after="RoomPicked">
                     <option value="">All rooms</option>
-                    @foreach (var r in rooms)
+                    @foreach (var r in roomsInUse)
                     {
                         <option value="@r.Id">@r.Name</option>
                     }
                 </select>
             }
 
-            <select class="form-select form-select-sm w-auto" aria-label="Sort by"
+            <select class="form-select w-auto" aria-label="Sort by"
                     @bind="sort" @bind:after="Refresh">
                 @foreach (var (value, label) in sortOptions)
                 {
@@ -83,11 +83,11 @@ else
         @if (PickedRoom is { Spots.Count: > 0 } picked)
         {
             <div class="spot-filters" role="group" aria-label="Spot in @picked.Name">
-                <button type="button" class="room-chip @(spot is null ? "picked" : null)"
+                <button type="button" class="room-chip @(spot is null ? "picked" : null)" aria-pressed="@(spot is null ? "true" : "false")"
                         @onclick="() => PickSpot(null)">All of @picked.Name</button>
                 @foreach (var s in picked.Spots)
                 {
-                    <button type="button" class="room-chip @(s.Id == spot ? "picked" : null)"
+                    <button type="button" class="room-chip @(s.Id == spot ? "picked" : null)" aria-pressed="@(s.Id == spot ? "true" : "false")"
                             @onclick="() => PickSpot(s.Id)">@s.Name</button>
                 }
             </div>
@@ -119,10 +119,10 @@ else
     @if (selecting)
     {
         <div class="select-all">
-            <button type="button" class="btn btn-link btn-sm p-0" @onclick="SelectAllVisible">Select all shown</button>
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="SelectAllVisible">Select all shown</button>
             @if (selected.Count > 0)
             {
-                <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => selected.Clear()">Clear</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => selected.Clear()">Clear</button>
             }
         </div>
     }
@@ -267,6 +267,7 @@ else
 
     private IReadOnlyList<Plant>? all;
     private IReadOnlyList<Room> rooms = [];
+    private IReadOnlyList<Room> roomsInUse = []; // what the room filter offers: no empty rooms
     private Places places = Places.None;
     private List<Plant> visible = [];
 
@@ -312,6 +313,7 @@ else
         all = await Repository.GetAllAsync();
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, all, []);
+        roomsInUse = Room.InUse(rooms);
         tags = PlantTags.InUse(all);
         careLogs = await CareLogRepository.GetAllAsync();
         pestCases = await PestCaseRepository.GetAllAsync();
@@ -326,9 +328,9 @@ else
     }
 
     /// <summary>The room dropdown is worth showing once there's more than one place to choose.</summary>
-    private bool HasRoomChoice => rooms.Count > 1 || rooms.Any(r => r.Spots.Count > 0);
+    private bool HasRoomChoice => roomsInUse.Count > 1 || roomsInUse.Any(r => r.Spots.Count > 0);
 
-    private Room? PickedRoom => rooms.FirstOrDefault(r => r.Id.ToString() == room);
+    private Room? PickedRoom => roomsInUse.FirstOrDefault(r => r.Id.ToString() == room);
 
     // Spots belong to the room above them, so picking another room starts over
     private void RoomPicked()

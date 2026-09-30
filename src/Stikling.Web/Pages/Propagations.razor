@@ -53,7 +53,7 @@ else
                 var id = $"progress-{value}";
                 <input type="radio" class="btn-check" name="progress" id="@id"
                        checked="@(progress == value)" @onchange="() => SetProgress(value)" />
-                <label class="btn btn-outline-primary btn-sm" for="@id">@label</label>
+                <label class="btn btn-outline-primary" for="@id">@label</label>
             }
         </div>
     </div>
