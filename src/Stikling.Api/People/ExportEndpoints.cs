@@ -220,7 +220,8 @@ public static class ExportEndpoints
         collections.json  The collections you are in, when you joined, and your role in each.
         collections/      One folder for each collection, named by its id.
           <kind>.json     The records of one kind, such as plants or timeline, as the app stores
-                          them. Deleted records are in there too, and have a deletedAt.
+                          them. Something you deleted is in there as only its id and dates, since
+                          the rest is removed from the server when it's deleted.
           photos/         Your photos. The file name is the photo's id. A file ending in -small
                           is the thumbnail.
 

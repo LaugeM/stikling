@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Data;
 using Stikling.Core.Sync;
 using static Stikling.Api.People.MeEndpoints;
@@ -208,15 +209,17 @@ public class RecordTests(ApiFactory api)
         var live = Guid.NewGuid();
         await api.WithDbAsync(async db =>
         {
+            var version = 0;
             SyncedRecord Row(Guid id, string kind, bool isDeleted, object data) => new()
             {
-                CollectionId = me.CollectionId, Kind = kind, Id = id, Version = 1, UpdatedAt = Monday,
+                CollectionId = me.CollectionId, Kind = kind, Id = id, Version = ++version, UpdatedAt = Monday,
                 DeletedAt = isDeleted ? Monday : null, Data = JsonSerializer.Serialize(data, ApiFactory.Json),
             };
             db.Records.AddRange(
                 Row(deleted, "plants", true, new { id = deleted, createdAt = Monday, updatedAt = Monday, deletedAt = Monday, nickname = "Monstera", tags = new[] { "rare" } }),
                 Row(merged, "places", true, new { id = merged, createdAt = Monday, updatedAt = Monday, deletedAt = Monday, name = "Kitchen", mergedIntoId = Guid.NewGuid() }),
                 Row(live, "plants", false, new { id = live, createdAt = Monday, updatedAt = Monday, nickname = "Hoya" }));
+            (await db.Collections.SingleAsync(c => c.Id == me.CollectionId)).LastVersion = version;
             await db.SaveChangesAsync();
 
             await using var command = db.Database.GetDbConnection().CreateCommand();

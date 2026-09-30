@@ -1,5 +1,6 @@
 using System.Net;
 using Microsoft.JSInterop;
+using Stikling.Core.Models;
 using Stikling.Core.Sync;
 
 namespace Stikling.Web.Services;
@@ -165,6 +166,17 @@ public sealed class SyncRunner(
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Saves a ZIP of everything the server holds about the person. It syncs first, so the latest
+    /// changes from this device are in it.
+    /// </summary>
+    /// <exception cref="HttpRequestException">The server couldn't be reached or turned the request away.</exception>
+    public async Task DownloadMyDataAsync()
+    {
+        await SyncNowAsync();
+        await api.DownloadMyDataAsync($"stikling-data-{time.Today():yyyy-MM-dd}.zip");
     }
 
     /// <summary>

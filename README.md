@@ -86,7 +86,7 @@ Every push to `main` runs the tests, deploys the app to GitHub Pages and the API
 
 [`prepare-pages.py`](.github/scripts/prepare-pages.py) sets the `<base href>`, updates the service worker's hash for `index.html`, and adds a `404.html` copy so deep links work.
 
-[docs/hosting.md](docs/hosting.md) has how the API is hosted and how to set it up again.
+[docs/hosting.md](docs/hosting.md) has how the API is hosted and how to set it up again. [docs/data-requests.md](docs/data-requests.md) has what to do when someone asks for a copy of their data.
 
 ## Roadmap
 

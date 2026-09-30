@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -104,6 +105,10 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
         var state = await (await Module).InvokeAsync<AccountState>("deleteUser");
         await RememberAsync(state);
     }
+
+    /// <summary>What Clerk has about the signed-in person, for the download of their data. Null when nobody is signed in.</summary>
+    public async Task<JsonElement?> GetProfileAsync() =>
+        await (await Module).InvokeAsync<JsonElement?>("profile");
 
     /// <summary>A short-lived token that proves to the API who is signed in, or null when nobody is.</summary>
     public async Task<string?> GetTokenAsync() =>

@@ -21,6 +21,14 @@ public sealed class DeviceFiles(IJSRuntime js) : IAsyncDisposable
     public async Task DownloadAsync(string fileName, byte[] bytes) =>
         await (await Module).InvokeVoidAsync("download", fileName, bytes);
 
+    /// <summary>
+    /// POSTs the body to the address and offers what comes back as a download. The file goes
+    /// straight from the response to the download in JavaScript, so it can be large.
+    /// </summary>
+    /// <returns>The status the server answered with, or -1 when it couldn't be reached.</returns>
+    public async Task<int> DownloadFromAsync(Uri address, string token, object body, string fileName) =>
+        await (await Module).InvokeAsync<int>("downloadFrom", address.ToString(), token, body, fileName);
+
     public async Task<string?> GetAsync(string key) =>
         await (await Module).InvokeAsync<string?>("get", key);
 
