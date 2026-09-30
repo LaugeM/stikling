@@ -60,8 +60,12 @@
         As long as you have the account. When you delete it under Account in Settings, your plants, photos
         and settings are erased from the server straight away, and Clerk deletes your sign-in. The database's
         automatic backups still hold a copy for up to 7 days, after which it's gone. The server keeps a note
-        that the account was deleted, without your email or anything else about you, so a device that is still
-        signed in can't upload it all again.
+        of the id your sign-in had at Clerk, so a device that is still signed in can't upload it all again.
+        Once Clerk has deleted your sign-in, that id no longer leads to anything.
+    </p>
+    <p>
+        The server's logs of what it did and what went wrong are kept for 30 days. They don't hold your
+        plants or photos.
     </p>
 </section>
 

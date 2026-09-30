@@ -7,7 +7,7 @@ The app is static files on GitHub Pages at https://stikling.app. The sync API ru
 - **Blob Storage** for the photo images.
 - **A budget** on the subscription that emails support@stikling.app at half and all of the monthly amount.
 
-Nothing has a password. The API signs in to the database and storage as its own managed identity (`id-stikling-api`), which is also the database's admin, so the API applies its migrations when it starts. GitHub Actions deploys as another identity (`id-stikling-deploy`) that trusts the main branch of this repository and may only change the Container App.
+Nothing has a password. The API signs in to the database and storage as its own managed identity (`id-stikling-api`), which is also the database's admin, so the API applies its migrations when it starts. GitHub Actions deploys as another identity (`id-stikling-deploy`) that trusts the main branch of this repository. It can change the Container App and its environment, but not the database, the storage or who has access to them.
 
 Sign-in goes through Clerk's production instance on `clerk.stikling.app`, with Google set up with our own Google Cloud credentials.
 

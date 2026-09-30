@@ -86,6 +86,20 @@ public class AccountDeletionTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task The_app_in_a_browser_can_read_that_the_account_is_gone()
+    {
+        var me = await SignIn();
+        await me.Client.DeleteAsync("/me");
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/me");
+        request.Headers.Add("Origin", ApiFactory.AppOrigin);
+        var response = await me.Client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.Gone, response.StatusCode);
+        Assert.Equal(ApiFactory.AppOrigin, Assert.Single(response.Headers.GetValues("Access-Control-Allow-Origin")));
+    }
+
+    [Fact]
     public async Task A_device_still_signed_in_can_no_longer_reach_the_collection()
     {
         var me = await SignIn();

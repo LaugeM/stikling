@@ -18,6 +18,7 @@ var suffix = uniqueString(resourceGroup().id)
 var storageBlobDataContributor = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 var contributor = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 var reader = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+var managedIdentityOperator = 'f1a07417-d97a-45cb-824c-7a7467783830'
 
 // Identities
 
@@ -137,6 +138,14 @@ resource sql 'Microsoft.Sql/servers@2023-08-01' = {
       maxSizeBytes: 34359738368
       requestedBackupStorageRedundancy: 'Local'
     }
+
+    // The privacy page says deleted data is gone from the backups after 7 days
+    resource backups 'backupShortTermRetentionPolicies' = {
+      name: 'default'
+      properties: {
+        retentionDays: 7
+      }
+    }
   }
 }
 
@@ -149,6 +158,7 @@ resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
     sku: {
       name: 'PerGB2018'
     }
+    // The privacy page says the API's logs are kept for 30 days
     retentionInDays: 30
     workspaceCapping: {
       dailyQuotaGb: 1
@@ -268,12 +278,33 @@ resource certificate 'Microsoft.App/managedEnvironments/managedCertificates@2024
   ]
 }
 
-// The deploy workflow may change the API's container and nothing else
+// The deploy workflow may change the API's container app and nothing outside it. Updating the app
+// also means joining it to its environment and handing it its identity again, so it may do those two.
 resource deployCanUpdateApi 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(api.id, deployIdentity.id, contributor)
   scope: api
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', contributor)
+    principalId: deployIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource deployCanJoinEnvironment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(environment.id, deployIdentity.id, contributor)
+  scope: environment
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', contributor)
+    principalId: deployIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource deployCanAssignApiIdentity 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(apiIdentity.id, deployIdentity.id, managedIdentityOperator)
+  scope: apiIdentity
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', managedIdentityOperator)
     principalId: deployIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
