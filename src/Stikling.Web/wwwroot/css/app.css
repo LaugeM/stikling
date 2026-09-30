@@ -1948,19 +1948,24 @@ a.tag-label:hover {
     inset: auto 0 calc(3.5rem + env(safe-area-inset-bottom)) 0;
     z-index: 9;
     display: flex;
-    gap: 0.5rem;
+    gap: 0.4rem;
     padding: 0.5rem max(1rem, calc((100% - 48rem) / 2 + 1rem));
     background: var(--pa-surface);
     border-top: 1px solid var(--pa-border);
     box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
 }
 
+/* Each button starts from its own label and they share what is left, so a stage as long as
+   "Germinating" still fits next to Photo and Note on a phone */
 .page-dock > .btn {
-    flex: 1 1 0;
+    flex: 1 1 auto;
     min-width: 0;
     min-height: 2.75rem;
+    padding-inline: 0.4rem;
     justify-content: center;
     white-space: nowrap;
+    overflow: hidden;
+    font-stretch: 88%;
 }
 
 .page-dock > .btn.dock-more {
@@ -2051,4 +2056,11 @@ main.app-content:has(.form-bar) {
 .page-dock .btn:hover .stage-steps i,
 .page-dock .btn:active .stage-steps i {
     background: currentColor;
+}
+
+/* On the narrowest phones the stage name needs the ticks' room */
+@media (max-width: 23.25rem) {
+    .page-dock .stage-steps {
+        display: none;
+    }
 }
