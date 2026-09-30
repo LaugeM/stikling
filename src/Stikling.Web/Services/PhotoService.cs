@@ -79,6 +79,20 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     public async Task<string?> GetUrlAsync(Guid id, bool thumbnail) =>
         await (await Module).InvokeAsync<string?>("getUrl", id, thumbnail);
 
+    /// <summary>A photo's frame changed, so everywhere it's shown cropped can move it.</summary>
+    public event Action<Photo>? FrameChanged;
+
+    /// <summary>The photo's details, like its size and frame, or null when it's deleted or missing.</summary>
+    public Task<Photo?> GetDetailsAsync(Guid id) => photos.GetAsync(id);
+
+    /// <summary>Saves how the photo sits where it's cropped. The image itself isn't touched.</summary>
+    public async Task SetFrameAsync(Photo photo, PhotoFrame? frame)
+    {
+        photo.Frame = frame;
+        await photos.UpdateAsync(photo);
+        FrameChanged?.Invoke(photo);
+    }
+
     /// <summary>The stored image data, for writing into a backup. Null when it's missing.</summary>
     public async Task<byte[]?> GetBytesAsync(Guid id, bool thumbnail) =>
         await (await Module).InvokeAsync<byte[]?>("getBytes", id, thumbnail);

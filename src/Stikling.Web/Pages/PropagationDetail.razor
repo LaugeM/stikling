@@ -23,7 +23,9 @@ else
     @if (propagation.CoverPhotoId is { } coverId)
     {
         <div class="detail-hero">
-            <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {propagation.DisplayName}")" />
+            <button type="button" class="detail-hero-open" aria-label="Open the cover photo" @onclick="() => timeline?.OpenPhoto(coverId)">
+                <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {propagation.DisplayName}")" />
+            </button>
         </div>
     }
 
@@ -254,7 +256,7 @@ else
     }
 
     @* The key reloads the history after stage changes and potting up *@
-    <Timeline @key="historyVersion" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
+    <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
               CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync"
               EmptyText="No photos or notes yet. Add the first one with Photo or Note below." />
 
@@ -525,6 +527,7 @@ else
     private bool scrollToPlants;
     private int historyVersion;
     private EntryComposer? composer;
+    private Timeline? timeline;
     private readonly string photoInputId = $"propagation-photo-{Guid.NewGuid():N}";
 
     private StageView stageView;

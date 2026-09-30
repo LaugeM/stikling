@@ -1,4 +1,4 @@
-@* Full-screen photo viewer with previous/next, "set as cover" and delete. *@
+@* Full-screen photo viewer with previous/next, "set as cover", framing and delete. *@
 
 @if (Current is { } photo)
 {
@@ -8,34 +8,45 @@
             <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="Close">✕</button>
         </div>
 
-        <div class="viewer-stage">
-            <PhotoImage PhotoId="photo.Id" Thumbnail="false" Class="viewer-img" Alt="Photo" />
-            @if (PhotoList.Count > 1)
-            {
-                <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="Previous photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg></button>
-                <button type="button" class="viewer-nav next" @onclick="() => Move(1)" aria-label="Next photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg></button>
-            }
-        </div>
-
-        <div class="viewer-actions">
-            @if (confirmDelete)
-            {
-                <span>Delete this photo?</span>
-                <button type="button" class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
-                <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
-            }
-            else
-            {
-                @if (OnSetCover.HasDelegate)
+        @if (framing)
+        {
+            <PhotoFramer @key="photo.Id" Photo="photo" OnSave="frame => SaveFrameAsync(photo, frame)" OnCancel="() => framing = false" />
+        }
+        else
+        {
+            <div class="viewer-stage">
+                <PhotoImage PhotoId="photo.Id" Thumbnail="false" Framed="false" Class="viewer-img" Alt="Photo" />
+                @if (PhotoList.Count > 1)
                 {
-                    <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)"
-                            disabled="@(photo.Id == CoverPhotoId)">
-                        @(photo.Id == CoverPhotoId ? "Cover photo" : "Set as cover")
-                    </button>
+                    <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="Previous photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg></button>
+                    <button type="button" class="viewer-nav next" @onclick="() => Move(1)" aria-label="Next photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg></button>
                 }
-                <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">Delete</button>
-            }
-        </div>
+            </div>
+
+            <div class="viewer-actions">
+                @if (confirmDelete)
+                {
+                    <span>Delete this photo?</span>
+                    <button type="button" class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
+                    <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+                }
+                else
+                {
+                    @if (OnSetCover.HasDelegate)
+                    {
+                        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)"
+                                disabled="@(photo.Id == CoverPhotoId)">
+                            @(photo.Id == CoverPhotoId ? "Cover photo" : "Set as cover")
+                        </button>
+                    }
+                    @if (OnFrame.HasDelegate)
+                    {
+                        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">Frame</button>
+                    }
+                    <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">Delete</button>
+                }
+            </div>
+        }
     </div>
 }
 
@@ -59,8 +70,13 @@
     [Parameter]
     public EventCallback<Photo> OnDelete { get; set; }
 
+    /// <summary>Saves how a photo sits where it's cropped. Frame only shows when this is set.</summary>
+    [Parameter]
+    public EventCallback<(Photo Photo, PhotoFrame? Frame)> OnFrame { get; set; }
+
     private ElementReference dialog;
     private bool confirmDelete;
+    private bool framing;
     private bool focusPending;
 
     private Photo? Current => Index is { } i && i >= 0 && i < PhotoList.Count ? PhotoList[i] : null;
@@ -81,6 +97,13 @@
         }
     }
 
+    private async Task SaveFrameAsync(Photo photo, PhotoFrame? frame)
+    {
+        await OnFrame.InvokeAsync((photo, frame));
+        framing = false;
+        focusPending = true;
+    }
+
     private async Task Move(int step)
     {
         confirmDelete = false;
@@ -91,6 +114,7 @@
     private async Task CloseAsync()
     {
         confirmDelete = false;
+        framing = false;
         await IndexChanged.InvokeAsync(null);
     }
 
@@ -105,9 +129,10 @@
     {
         switch (e.Key)
         {
+            case "Escape" when framing: framing = false; break;
             case "Escape": await CloseAsync(); break;
-            case "ArrowLeft" when PhotoList.Count > 1: await Move(-1); break;
-            case "ArrowRight" when PhotoList.Count > 1: await Move(1); break;
+            case "ArrowLeft" when PhotoList.Count > 1 && !framing: await Move(-1); break;
+            case "ArrowRight" when PhotoList.Count > 1 && !framing: await Move(1); break;
         }
     }
 }

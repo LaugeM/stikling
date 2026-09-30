@@ -1,5 +1,6 @@
 @* Shows a stored photo. The image data is read from the device database via PhotoService. On a
-   synced device, a full size that isn't here yet is fetched, with the thumbnail shown meanwhile. *@
+   synced device, a full size that isn't here yet is fetched, with the thumbnail shown meanwhile.
+   Where it's cropped, it is moved and zoomed the way the photo was framed. *@
 @implements IDisposable
 @using Stikling.Core.Sync
 @inject PhotoService Photos
@@ -7,7 +8,7 @@
 
 @if (url is not null)
 {
-    <img src="@url" alt="@Alt" class="@Class" loading="lazy" decoding="async" />
+    <img src="@url" alt="@Alt" class="@ImageClass" style="@FrameStyle" loading="lazy" decoding="async" />
 }
 else
 {
@@ -28,15 +29,32 @@ else
     [Parameter]
     public string? Class { get; set; }
 
+    /// <summary>Move and zoom it the way it was framed. Off where the whole photo is shown.</summary>
+    [Parameter]
+    public bool Framed { get; set; } = true;
+
     private string? url;
     private bool missing;
     private bool small;
     private (Guid, bool) loadedFor;
+    private PhotoFrame? frame;
+    private double aspect;
+    private Guid? frameFor;
 
-    protected override void OnInitialized() => Sync.PhotosArrived += OnPhotosArrived;
+    protected override void OnInitialized()
+    {
+        Sync.PhotosArrived += OnPhotosArrived;
+        Photos.FrameChanged += OnFrameChanged;
+    }
 
     protected override async Task OnParametersSetAsync()
     {
+        if (Framed && frameFor != PhotoId)
+        {
+            frameFor = PhotoId;
+            UseFrameOf(await Photos.GetDetailsAsync(PhotoId));
+        }
+
         if (loadedFor == (PhotoId, Thumbnail) && (url is not null || missing))
             return;
 
@@ -84,5 +102,36 @@ else
         });
     }
 
-    public void Dispose() => Sync.PhotosArrived -= OnPhotosArrived;
+    private bool IsFramed => Framed && frame is not null && aspect > 0;
+
+    private string? ImageClass => IsFramed ? $"{Class} framed".Trim() : Class;
+
+    // The "framed" class in app.css does the placing, from the photo's shape and these numbers
+    private string? FrameStyle => IsFramed && frame is { } f
+        ? FormattableString.Invariant($"--fx:{f.X:0.###};--fy:{f.Y:0.###};--z:{f.Zoom:0.###};--a:{aspect:0.####}")
+        : null;
+
+    private void UseFrameOf(Photo? photo)
+    {
+        frame = photo?.Frame;
+        aspect = photo is { Width: > 0, Height: > 0 } ? (double)photo.Width / photo.Height : 0;
+    }
+
+    private void OnFrameChanged(Photo photo)
+    {
+        if (photo.Id != PhotoId || !Framed)
+            return;
+
+        _ = InvokeAsync(() =>
+        {
+            UseFrameOf(photo);
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        Sync.PhotosArrived -= OnPhotosArrived;
+        Photos.FrameChanged -= OnFrameChanged;
+    }
 }
