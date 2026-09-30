@@ -131,6 +131,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | Medium: water, perlite, sphagnum, LECA, PON, soil, corm riser, other | 1 | S | M4 |
 | ✅ | Stages: started, rooting, rooted and done (or failed). The date of each stage change is saved | 1 | M | M4 |
 | ✅ | Batches with a count ("3 corms in LECA"); mark some as failed | 1 | M | M4 |
+| ✅ | Correct how many were potted up or failed under Edit, when one was marked by mistake. What's left goes back to growing at the stage it had reached | 2 | S | v1.x |
 | ✅ | **Promote to plant**: turn 1..n units of a batch into plants and keep the lineage | 1 | M | M4 |
 | ✅ | Propagations list grouped by stage, with cards like "3× corm · LECA · day 24" | 1 | M | M4 |
 | ✅ | Propagations without a parent plant (bought seeds, e.g. the bay laurel) | 1 | S | M4 |
