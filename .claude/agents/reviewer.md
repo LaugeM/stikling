@@ -37,6 +37,12 @@ Then the rules in `CLAUDE.md`. The ones that are easy to miss:
 - A new or changed feature has its answers updated in `Pages/Help.razor`, the empty states on the screens involved still make sense, and `docs/FEATURES.md` has the right status.
 - `plant-names.json` was not edited by hand.
 
+The repository is public, so check what the change would publish:
+
+- No secrets: passwords, secret keys, tokens, connection strings with a password in them. Publishable keys and Azurite's published account key are fine, and are listed in `.gitleaks.toml`. A scanner catches the known key formats, so look for what it can't: a secret in an unusual shape, or a value that only makes sense as a secret.
+- Nothing personal about the owner beyond the GitHub name LaugeM and support@stikling.app: no full name, personal email, address or phone number.
+- Nothing meant only for the owner, like notes on merge order, to-dos or questions to him, in files, commit messages or the PR text.
+
 For UI changes, check the change against the named rules and the Do's and Don'ts in `DESIGN.md`, and that it works at phone width.
 
 Do not report style preferences, naming you would have chosen differently, or refactors unrelated to the change. If something is fine, leave it out.
