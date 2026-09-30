@@ -50,6 +50,8 @@ Stikling is free, with no ads.
 
 I built Stikling to keep track of my own plants and the cuttings I take from them. It's a hobby project by [LaugeM](https://github.com/LaugeM), and the code is open source under the [AGPL-3.0 license](LICENSE).
 
+Found a bug, or have a question or an idea? [Open an issue](https://github.com/LaugeM/stikling/issues).
+
 ## Development
 
 ### Tech stack
