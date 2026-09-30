@@ -72,6 +72,7 @@ app.UseAuthorization();
 
 app.MapHealthChecks("/health");
 app.MapMe();
+app.MapExport();
 app.MapSettings();
 app.MapCollections();
 app.MapRecords();

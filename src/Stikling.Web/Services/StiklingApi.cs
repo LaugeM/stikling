@@ -18,7 +18,7 @@ public sealed record MeCollection(Guid Id, string Name, string Role);
 /// that it turns away, throws <see cref="HttpRequestException"/>. Photo images are sent and
 /// fetched through <see cref="PhotoService"/>, which keeps them in JavaScript.
 /// </summary>
-public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos) : ISyncServer, IPhotoServer
+public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos, DeviceFiles files) : ISyncServer, IPhotoServer
 {
     private readonly HttpClient http = new() { BaseAddress = settings.ApiAddress };
 
@@ -43,6 +43,20 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
         using var request = await RequestAsync(HttpMethod.Delete, "me");
         using var response = await http.SendAsync(request);
         response.EnsureSuccessStatusCode();
+    }
+
+    /// <summary>
+    /// Saves a ZIP of everything the server holds about the signed-in person, with what Clerk has
+    /// about them added. It goes from the API to the file in JavaScript, since the photos in it
+    /// can come to a lot.
+    /// </summary>
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task DownloadMyDataAsync(string fileName)
+    {
+        var body = new { account = await account.GetProfileAsync() };
+        var status = await files.DownloadFromAsync(new Uri(http.BaseAddress!, "me/export"), await TokenAsync(), body, fileName);
+        if (status is < 200 or >= 300)
+            throw Failed(status);
     }
 
     public async Task<PullResponse> PullAsync(Guid collectionId, long after)

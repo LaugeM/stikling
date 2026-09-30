@@ -108,6 +108,52 @@ export async function deleteUser() {
     return state();
 }
 
+// What Clerk has about the signed-in person, for the download of their data. The Stikling server
+// doesn't keep it, so the app adds it to the download. The sessions say which devices are signed
+// in, and from where.
+export async function profile() {
+    const user = window.Clerk.user;
+    if (!user) return null;
+
+    const sessions = await user.getSessions().catch(() => []);
+    return {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        imageUrl: user.hasImage ? user.imageUrl : null,
+        primaryEmailAddress: user.primaryEmailAddress?.emailAddress ?? null,
+        emailAddresses: user.emailAddresses.map(e => ({
+            emailAddress: e.emailAddress,
+            verified: e.verification?.status === "verified",
+        })),
+        phoneNumbers: user.phoneNumbers.map(p => p.phoneNumber),
+        externalAccounts: user.externalAccounts.map(a => ({
+            provider: a.provider,
+            emailAddress: a.emailAddress,
+            username: a.username,
+            firstName: a.firstName,
+            lastName: a.lastName,
+            imageUrl: a.imageUrl,
+        })),
+        passwordEnabled: user.passwordEnabled,
+        twoFactorEnabled: user.twoFactorEnabled,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        lastSignInAt: user.lastSignInAt,
+        sessions: sessions.map(s => ({
+            lastActiveAt: s.lastActiveAt,
+            expireAt: s.expireAt,
+            browser: s.latestActivity?.browserName ?? null,
+            browserVersion: s.latestActivity?.browserVersion ?? null,
+            deviceType: s.latestActivity?.deviceType ?? null,
+            ipAddress: s.latestActivity?.ipAddress ?? null,
+            city: s.latestActivity?.city ?? null,
+            country: s.latestActivity?.country ?? null,
+        })),
+    };
+}
+
 // A short-lived session token for the API, or null when signed out
 export async function getToken() {
     return (await window.Clerk.session?.getToken()) ?? null;

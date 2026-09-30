@@ -65,8 +65,10 @@ public static class RecordEndpoints
                     refused.Add(new RefusedRecord(i, problem));
                 else
                 {
+                    // A deleted record is stripped before it's compared, so the same deletion sent
+                    // again, in full, is seen as the version already here
                     RecordStamp.TryRead(record.Data, out var stamp);
-                    incoming.Add((record.Kind, stamp, record.Data.GetRawText()));
+                    incoming.Add((record.Kind, stamp, SyncRules.AsStored(record.Data)));
                 }
             }
 

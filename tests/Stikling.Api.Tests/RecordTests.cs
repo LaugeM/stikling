@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Data;
 using Stikling.Core.Sync;
 using static Stikling.Api.People.MeEndpoints;
@@ -153,6 +154,85 @@ public class RecordTests(ApiFactory api)
             Assert.Equal(deletedAt, db.Records.Single(r => r.Id == id).DeletedAt);
             return Task.CompletedTask;
         });
+    }
+
+    [Fact]
+    public async Task A_deleted_record_keeps_only_its_id_and_dates()
+    {
+        var me = await SignIn();
+        var id = Guid.NewGuid();
+        await PushOk(me.Client, me.CollectionId, Plant(id, Monday));
+
+        var deletedAt = Monday.AddDays(1);
+        await PushOk(me.Client, me.CollectionId, Plant(id, deletedAt, deletedAt: deletedAt));
+        var record = Assert.Single((await Pull(me.Client, me.CollectionId)).Records);
+
+        Assert.Equal(["id", "createdAt", "updatedAt", "deletedAt"], record.Data.EnumerateObject().Select(p => p.Name));
+        Assert.Equal(id, record.Data.GetProperty("id").GetGuid());
+    }
+
+    [Fact]
+    public async Task The_same_deletion_sent_again_in_full_is_not_a_new_change()
+    {
+        var me = await SignIn();
+        var id = Guid.NewGuid();
+        var deletedAt = Monday.AddDays(1);
+        await PushOk(me.Client, me.CollectionId, Plant(id, deletedAt, deletedAt: deletedAt));
+        var next = (await Pull(me.Client, me.CollectionId)).Next;
+
+        var again = await PushOk(me.Client, me.CollectionId, Plant(id, deletedAt, deletedAt: deletedAt));
+
+        Assert.Empty(again.Newer);
+        Assert.Empty((await Pull(me.Client, me.CollectionId, next)).Records);
+    }
+
+    [Fact]
+    public async Task A_merged_room_is_kept_whole()
+    {
+        var me = await SignIn();
+        var room = JsonSerializer.SerializeToElement(
+            new { id = Guid.NewGuid(), createdAt = Monday, updatedAt = Monday, deletedAt = Monday, name = "Kitchen", mergedIntoId = Guid.NewGuid() },
+            ApiFactory.Json);
+
+        await PushOk(me.Client, me.CollectionId, new SyncRecord("places", room));
+        var record = Assert.Single((await Pull(me.Client, me.CollectionId)).Records);
+
+        Assert.Equal("Kitchen", record.Data.GetProperty("name").GetString());
+    }
+
+    [Fact]
+    public async Task The_migration_strips_what_was_deleted_before()
+    {
+        var me = await SignIn();
+        var deleted = Guid.NewGuid();
+        var merged = Guid.NewGuid();
+        var live = Guid.NewGuid();
+        await api.WithDbAsync(async db =>
+        {
+            var version = 0;
+            SyncedRecord Row(Guid id, string kind, bool isDeleted, object data) => new()
+            {
+                CollectionId = me.CollectionId, Kind = kind, Id = id, Version = ++version, UpdatedAt = Monday,
+                DeletedAt = isDeleted ? Monday : null, Data = JsonSerializer.Serialize(data, ApiFactory.Json),
+            };
+            db.Records.AddRange(
+                Row(deleted, "plants", true, new { id = deleted, createdAt = Monday, updatedAt = Monday, deletedAt = Monday, nickname = "Monstera", tags = new[] { "rare" } }),
+                Row(merged, "places", true, new { id = merged, createdAt = Monday, updatedAt = Monday, deletedAt = Monday, name = "Kitchen", mergedIntoId = Guid.NewGuid() }),
+                Row(live, "plants", false, new { id = live, createdAt = Monday, updatedAt = Monday, nickname = "Hoya" }));
+            (await db.Collections.SingleAsync(c => c.Id == me.CollectionId)).LastVersion = version;
+            await db.SaveChangesAsync();
+
+            await using var command = db.Database.GetDbConnection().CreateCommand();
+            command.CommandText = Data.Migrations.StripDeletedRecords.Strip;
+            await db.Database.OpenConnectionAsync();
+            await command.ExecuteNonQueryAsync();
+        });
+
+        var records = (await Pull(me.Client, me.CollectionId)).Records.ToDictionary(r => r.Data.GetProperty("id").GetGuid(), r => r.Data);
+        Assert.Equal(["id", "createdAt", "updatedAt", "deletedAt"], records[deleted].EnumerateObject().Select(p => p.Name));
+        Assert.Equal(Monday, records[deleted].GetProperty("updatedAt").GetDateTimeOffset());
+        Assert.Equal("Kitchen", records[merged].GetProperty("name").GetString());
+        Assert.Equal("Hoya", records[live].GetProperty("nickname").GetString());
     }
 
     [Fact]

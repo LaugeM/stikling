@@ -83,6 +83,21 @@ else if (account is { SignedIn: true })
         </div>
     }
 
+    @if (signOut is null && !deleting)
+    {
+        <div class="settings-actions">
+            <button type="button" class="btn btn-outline-primary" @onclick="DownloadDataAsync"
+                    disabled="@(accountBusy || downloading)">
+                Download your data
+            </button>
+        </div>
+        <p class="settings-hint" role="status">
+            @(downloading
+                ? "Getting your data ready. With a lot of photos this can take a while…"
+                : "A ZIP of everything the Stikling server holds about you, photos included, and what the sign-in service has.")
+        </p>
+    }
+
     <hr class="account-divider" />
     @if (deleting)
     {
@@ -159,6 +174,7 @@ else
     private SignOutCheck? signOut;
     private bool deleting; // the question about deleting the account is open
     private bool removeHereToo;
+    private bool downloading;
     private PhotoUsage? photoUsage;
 
     protected override async Task OnInitializedAsync()
@@ -251,6 +267,24 @@ else
         signOut = null;
         deleting = false;
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DownloadDataAsync()
+    {
+        downloading = true;
+        accountMessage = null;
+        try
+        {
+            await Sync.DownloadMyDataAsync();
+        }
+        catch (Exception e) when (e is HttpRequestException or JSException or TaskCanceledException)
+        {
+            accountMessage = "Couldn't download your data. Check that you're online and try again.";
+        }
+        finally
+        {
+            downloading = false;
+        }
     }
 
     private void AskDeleteAccount()

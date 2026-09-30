@@ -34,7 +34,8 @@
     <p>
         <strong>Signing in</strong> is handled by <a href="https://clerk.com/legal/privacy">Clerk</a>, a company
         in the United States. Clerk keeps your email address, and your name and profile picture if you sign in
-        with Google, Facebook or Discord, along with when you signed in. If you sign in with your email, Clerk sends the code to it.
+        with Google, Facebook or Discord, along with when you signed in and, for each device you're signed in on, its
+        browser, IP address and rough location. If you sign in with your email, Clerk sends the code to it.
     </p>
     <p>
         <strong>What you add in the app</strong>, like plants, propagations, care, pests, photos and settings, is
@@ -57,23 +58,35 @@
 <section class="privacy-section">
     <h2>How long it's kept</h2>
     <p>
-        As long as you have the account. When you delete it on the Account page in Settings, your plants, photos
+        What you delete in the app, like a plant, a care log or a photo, is removed from the server as soon as
+        the deletion syncs. Only its id and the dates it was added, changed and deleted are kept, so your other
+        devices know to delete it too. A photo's images are deleted completely. The database's automatic
+        backups still have the earlier version for up to 7 days. When you merge two rooms or spots,
+        the one merged away is kept as it was, since the app still uses it to find where things went.
+    </p>
+    <p>
+        Everything else is kept as long as you have the account. When you delete it on the Account page in Settings, your plants, photos
         and settings are erased from the server straight away, and Clerk deletes your sign-in. The database's
         automatic backups still hold a copy for up to 7 days, after which it's gone. The server keeps a note
         of the id your sign-in had at Clerk, so a device that is still signed in can't upload it all again.
         Once Clerk has deleted your sign-in, that id no longer leads to anything.
     </p>
     <p>
-        The server's logs of what it did and what went wrong are kept for 30 days. They don't hold your
-        plants or photos.
+        The server's logs are kept for 30 days. They note when the server starts and stops, the database
+        commands it runs without the values in them, and what went wrong when something fails, which can
+        include the id of a record. They don't hold your IP address, your email address, your plants or your
+        photos.
     </p>
 </section>
 
 <section class="privacy-section">
     <h2>Your rights</h2>
     <p>
-        You can get a copy of everything as a backup under Backup and storage in Settings, change anything in the app,
-        and delete your account whenever you like. For anything else, like a question about what is kept,
+        You can download everything the server holds about you with <em>Download your data</em> on the
+        Account page in Settings. It's a ZIP with your plants and everything else you added, deleted things as
+        they are kept, your photos, your settings, and what Clerk has about you. A backup, under Backup and
+        storage, has what is on the device you make it on. You can change anything in the app, and delete
+        your account whenever you like. For anything else, like a question about what is kept,
         write to <a href="mailto:support@stikling.app">support@stikling.app</a>. If you think your data is
         handled wrongly, you can complain to the Danish Data Protection Agency,
         <a href="https://www.datatilsynet.dk">Datatilsynet</a>.
