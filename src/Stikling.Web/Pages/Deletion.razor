@@ -26,7 +26,7 @@ else if (failed)
         {
             text = await Http.GetStringAsync("pages/deletion.html");
         }
-        catch (HttpRequestException)
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
         {
             failed = true;
         }
