@@ -166,10 +166,22 @@ resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   }
 }
 
-resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = {
+// A newer API version than the rest, since it's the one that takes environmentMode. Bicep has no
+// types for it yet, so it warns that it can't check the properties.
+#disable-next-line BCP081
+resource environment 'Microsoft.App/managedEnvironments@2026-07-01' = {
   name: 'cae-stikling'
   location: location
   properties: {
+    // Left out, Azure makes an "express" environment, which can't have a custom domain. The
+    // Consumption profile has the same pricing and free grant.
+    environmentMode: 'WorkloadProfiles'
+    workloadProfiles: [
+      {
+        name: 'Consumption'
+        workloadProfileType: 'Consumption'
+      }
+    ]
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
@@ -197,6 +209,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
   }
   properties: {
     managedEnvironmentId: environment.id
+    workloadProfileName: 'Consumption'
     configuration: {
       activeRevisionsMode: 'Single'
       ingress: {
