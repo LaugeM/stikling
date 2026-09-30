@@ -44,10 +44,11 @@ In the order I would build them.
 5. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
 6. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
 7. **Comparing photos side by side, and voice notes.**
+8. **A side menu on wide screens**, since on a computer the app sits in a narrow column with a lot of empty space around it.
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screens worth the name: purchase price, a "Log care" home screen shortcut, and an app version and a 
+These need no new storage and no new screens worth the name: purchase price, a "Log care" home screen shortcut, and an app version and a "What's new" page in Settings.
 
 ---
 
@@ -91,6 +92,9 @@ These need no new storage and no new screens worth the name: purchase price, a "
 | ✅ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
 | ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 7 | M | v1.x |
 | ☐ | **Home map**: a simple plan of each room with the plants placed where they stand, to see what is where and to go round them in order | 7 | L | v1.x |
+| ☐ | **Toxic to pets?** Whether a plant is harmful to cats, dogs and people, shown on the plant from the plant dictionary. Only taken from a source that can be named on the plant, and a plant with nothing known says that rather than looking safe | 7 | L | v1.x |
+| ☐ | Filter and sort the plant list by your own fields, and give a field a fixed set of choices so it can be set on several plants at once | 8 | S | v1.x |
+| ☐ | **Symptom check**: tick what you see on a plant (yellow leaves, brown tips, drooping, spots), how wet the soil is, and anything that changed lately, and get the few likely causes with what to check next and the source each one comes from. The app can't see the plant, so it only ever says what to look at, never to water or treat, and says so when the answers don't point anywhere. What you see can go straight into the problem log | 8 | L | v1.x |
 
 ## 2. Photos & timeline
 
@@ -168,6 +172,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | **Moisture meter reading** (1–10) as a log type, with the latest reading shown on the card | 3 | S | v1.x |
 | ✅ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a usual dose in ml, g or drops. The dose is typed the way the bottle puts it, e.g. 5 ml per 4 L or 1 ml per 500 ml, and is optional | 4 | M | v1.x |
 | ✅ | Which products and doses went in on a feed or a top-up, e.g. "Hydro fertiliser, 2 ml/L". The dose starts at the product's usual one and can be changed for that time, and the entry keeps its own copy, so editing or deleting a product doesn't change what was logged | 4 | S | v1.x |
+| ☐ | **Due a check with the meter**: from a plant's own readings, the app learns how many days it takes to dry out after watering and when it should be down at the reading you water at. That is 3 by default, the top of the red "dry" part on a 1 to 10 meter, and can be set higher for a plant kept moister, like a peace lily. It then asks you to check with the meter, never to water, and a reading that says it's still wet moves the next check back. Without readings it goes by the usual gap between your waterings. Plants in semi-hydro are left out. The plant page says roughly how long it usually takes to dry out, and Today lists the plants due a check, off until turned on in Settings | 5 | M | v1.x |
 | ☐ | Water type: tap, demineralised, rain | 6 | S | v1.x |
 | ☐ | Semi-hydro details: reservoir level, flush interval, last flush | 6 | M | v1.x |
 | ☐ | Optional care intervals per plant ("fertilise every 2 weeks") that show up on Today | 6 | M | v1.x |
@@ -186,6 +191,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | Window direction for each room (north, east, south, west), so plants in a room show what light they get | 7 | M | v1.x |
 | ☐ | Filter by light, e.g. "under grow light" or "low light", to find a spot for a new plant | 7 | S | v1.x |
 | ☐ | Winter note: flag plants that may need a grow light when daylight gets short | 8 | M | v1.x |
+| ☐ | **Light check**: a few questions about a spot (hours of direct sun, how far it is from the window, whether anything is in the way) that suggest one of the light levels above for a plant standing there. It says it's a rough guess from your answers, and the level can still be picked by hand | 8 | S | v1.x |
 
 ## 5. Pests & treatments
 
@@ -266,6 +272,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Needs attention**: flag a plant or propagation with a reason ("repot soon", "look closer", "change the water"), typed or picked from a few suggestions, and it stays on Today until it's marked done there or on its own page. Flags aren't written on the history, and one goes away by itself when the plant leaves or the propagation finishes | 4 | S | v1.x |
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
+| ☐ | Plants due a check with the meter today, and the ones due in the next couple of days, if turned on | 5 | S | v1.x |
 | ☐ | **A daily round**: Today suggests one room or spot to go through each day, working round the home over the week instead of everything at once. Off until turned on | 6 | S | v1.x |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
 | ☐ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |
@@ -284,6 +291,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
 | ☐ | "What's new" page and app version in Settings. Entries are written by hand in plain language for the people using the app, not generated from commit or pull request titles | 5 | S | v1.x |
 | ☐ | **Import from a spreadsheet**: a CSV of plants from Excel or Google Sheets, with each column matched to a field, so a list kept somewhere else doesn't have to be typed in again | 5 | M | v1.x |
+| ☐ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side and the pages use the width instead of keeping the phone's narrow column. Phones keep the tabs at the bottom | 5 | M | v1.x |
 | ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
 | ☐ | Units and date format settings | 7 | M | v1.x |
 | ☐ | Danish translation | 7 | L | v1.x |
@@ -327,7 +335,7 @@ Questions come up that the app can't answer from your own data: how long a cutti
 | ☐ | Plant-sitter sheet: a printable/shareable care list for someone watering while you're away | 7 | M | v1.x |
 | ✅ | Accounts and sync between devices (ASP.NET Core Web API, EF Core, sign-in through Clerk). The API checks Clerk sign-ins and has people, collections and members with roles, and the app can sign in and out from its Account page in Settings. Records, settings and photos sync between devices when signed in. Every device keeps all the thumbnails and fetches a full-size photo when it's opened, and each account has 1 GB for photos on the server. The Account page shows when it last synced and, once it's nearly full, how much photo space is used, a dot on the settings gear shows a sync problem, and signing out asks whether to keep the data on the device. Delete account, at the bottom of the Account page, erases everything on the server and the sign-in, and Download your data gives a ZIP of everything the server and Clerk hold about the person. When something is deleted, the server keeps only its id and dates. The app is at stikling.app, with the API on Azure Container Apps, Azure SQL and Blob Storage, and a privacy page | 9 | L | v2 |
 | ☐ | Public read-only collection page | 9 | L | v2 |
-| ☐ | Plant identification from a photo via an identification API (needs a backend to keep the API key secret) | 9 | L | v2 |
+| ☐ | Plant identification from a photo via an identification API (needs a backend to keep the API key secret). Pl@ntNet's API is the free one: up to 500 identifications a day for non-commercial use, and it doesn't keep the photos. plant.id only gives 100 free identifications before it charges, and iNaturalist doesn't open its full identification model to other apps | 9 | L | v2 |
 | ☐ | Push notifications, widgets and a Google Play release (MAUI Blazor Hybrid) | 10 | L | v3 |
 
 ## 9. Quality (not features, but part of each milestone)
