@@ -87,10 +87,10 @@ public static class Labels
         _ => status.ToString()
     };
 
-    /// <summary>"Everywhere", "Living room" or "4 plants", for a case's one-line summary.</summary>
+    /// <summary>"All plants", "Living room" or "4 plants", for a case's one-line summary.</summary>
     public static string Scope(PestCaseView view) => view.Case.Scope switch
     {
-        PestScope.Everywhere => "Everywhere",
+        PestScope.Everywhere => "All plants",
         PestScope.Room => view.Room ?? "A room",
         _ => Plants(view.Plants.Count)
     };

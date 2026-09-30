@@ -1,7 +1,22 @@
 .results-hint {
-    margin: 0.25rem 0 1.25rem;
+    margin: 0.25rem 0 0.25rem;
     font-size: 0.875rem;
     color: var(--pa-muted);
+}
+
+.results-how {
+    margin-bottom: 1.25rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.results-how > summary {
+    padding: 0.6rem 0;
+    cursor: pointer;
+}
+
+.results-how > p {
+    margin: 0 0 0.5rem;
 }
 
 .results-section {
