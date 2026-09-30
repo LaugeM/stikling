@@ -1,5 +1,5 @@
 // Everything the hosted sync API needs on Azure: a resource group with the API and its storage in
-// it, and a budget on the subscription. docs/hosting.md says how to deploy it and in what order.
+// it, and a budget on the subscription. docs/ops/hosting.md says how to deploy it and in what order.
 
 targetScope = 'subscription'
 

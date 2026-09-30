@@ -72,7 +72,7 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-  # Needs the Azure resources, and their ids as repository secrets. See docs/hosting.md.
+  # Needs the Azure resources, and their ids as repository secrets. See docs/ops/hosting.md.
   deploy-api:
     needs: [build, api-image]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
