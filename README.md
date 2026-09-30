@@ -50,7 +50,7 @@ Stikling is free, with no ads.
 
 I built Stikling to keep track of my own plants and the cuttings I take from them. It's a hobby project by [LaugeM](https://github.com/LaugeM), and the code is open source under the [AGPL-3.0 license](LICENSE).
 
-Found a bug, or have a question or an idea? [Open an issue](https://github.com/LaugeM/stikling/issues).
+Found a bug, or have a question or an idea? [Open an issue](https://github.com/LaugeM/stikling/issues). To help with the code, [CONTRIBUTING.md](CONTRIBUTING.md) says how.
 
 ## Development
 
@@ -86,33 +86,7 @@ Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 dotnet run --project src/Stikling.Web
 ```
 
-Run the tests:
-
-```bash
-dotnet test Stikling.slnx
-```
-
-The API tests start SQL Server and Azurite (a local stand-in for Azure Blob Storage) in containers, so [Docker Desktop](https://www.docker.com/products/docker-desktop/) has to be running.
-
-### The sync API
-
-The API, its database and Azurite for the photos run in Docker:
-
-```bash
-docker compose up --build
-```
-
-The API is then on http://localhost:5180, with `/health` to check it's up. It creates the database on the first start. To run the API from Visual Studio or with `dotnet run` instead, start only the database and Azurite with `docker compose up sql azurite`.
-
-### Signing in
-
-When the app runs in Development, it reads `src/Stikling.Web/wwwroot/appsettings.Development.json`, which points at Clerk's development instance and the local API. Settings then has an Account row at the top. The published site reads `appsettings.Production.json` instead, which points at the production instance and the hosted API.
-
-To try it, start the API as above and run the app on one of the origins the API accepts (`AppOrigins` in `src/Stikling.Api/appsettings.Development.json`), for example:
-
-```bash
-dotnet run --project src/Stikling.Web --urls http://localhost:5170
-```
+[CONTRIBUTING.md](CONTRIBUTING.md) has how to run the tests and the sync API, how the code is laid out, and what to check before opening a pull request.
 
 ### Deployment
 
