@@ -28,6 +28,23 @@ public static class PhotoRules
     /// <summary>True when the bytes start like a JPEG, which is all the app saves.</summary>
     public static bool LooksLikeJpeg(ReadOnlySpan<byte> bytes) =>
         bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
+
+    /// <summary>
+    /// What kind of image the bytes are, from how they start, or null when it isn't one the app
+    /// saves. The app saves WebP, and JPEG in a browser that can't make WebP and for photos saved
+    /// before it did.
+    /// </summary>
+    public static ImageFormat? FormatOf(ReadOnlySpan<byte> bytes) =>
+        bytes is [0xFF, 0xD8, 0xFF, ..] ? ImageFormat.Jpeg
+        : bytes.Length >= 12 && bytes[..4].SequenceEqual("RIFF"u8) && bytes[8..12].SequenceEqual("WEBP"u8) ? ImageFormat.WebP
+        : null;
+}
+
+/// <summary>A kind of image the app saves, with its media type and the file extension it gets in a download.</summary>
+public sealed record ImageFormat(string ContentType, string Extension)
+{
+    public static readonly ImageFormat Jpeg = new("image/jpeg", "jpg");
+    public static readonly ImageFormat WebP = new("image/webp", "webp");
 }
 
 /// <summary><c>POST /collections/{id}/photos/stored</c>: which of these photos have their images on the server.</summary>
