@@ -79,11 +79,11 @@ else
                 {
                     @if (plant.AcquiredOn == sameDate)
                     {
-                        <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => plant.AcquiredOn = LooseDate.Of(Today)">Use today instead</button>
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => plant.AcquiredOn = LooseDate.Of(Today)">Use today instead</button>
                     }
                     else
                     {
-                        <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => plant.AcquiredOn = sameDate">Same date as @copiedFrom (@sameDate.Text())</button>
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => plant.AcquiredOn = sameDate">Same date as @copiedFrom (@sameDate.Text())</button>
                     }
                 }
             </div>

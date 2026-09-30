@@ -39,11 +39,11 @@
                         <div class="room-row">
                             <span class="room-name">@r.Name</span>
                             <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
-                            <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                     @onclick="() => renaming = r.Id">Rename</button>
                             @if (r.Total == 0)
                             {
-                                <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                         @onclick="() => RemoveAsync(r.Id, r.Name)">Remove</button>
                             }
                         </div>
@@ -63,11 +63,11 @@
                                 <div class="room-row">
                                     <span class="room-name">@spot.Name</span>
                                     <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
-                                    <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                    <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                             @onclick="() => renaming = spot.Id">Rename</button>
                                     @if (spot.Total == 0)
                                     {
-                                        <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                                 @onclick="() => RemoveAsync(spot.Id, spot.Name)">Remove</button>
                                     }
                                 </div>
@@ -119,7 +119,7 @@
                         <div class="room-row">
                             <span class="room-name">@t.Name</span>
                             <span class="room-count">@Labels.Plants(t.Plants)</span>
-                            <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                     @onclick="() => renamingTag = t.Name">Rename</button>
                         </div>
                     }
