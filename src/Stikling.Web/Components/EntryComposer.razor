@@ -27,7 +27,8 @@
             </div>
         }
 
-        <textarea class="form-control" rows="3" aria-label="Note" @ref="noteBox"
+        @* A dialog focuses what has autofocus when it opens: the note box for a note, nothing typed for a photo *@
+        <textarea class="form-control" rows="3" aria-label="Note" autofocus="@forNote"
                   placeholder="@(photos.Count > 0 ? "Add a note (optional)" : "New leaf, roots showing, repotted…")"
                   @bind="noteText" @bind:event="oninput"></textarea>
 
@@ -95,7 +96,6 @@
     private readonly string dateId = $"composer-date-{Guid.NewGuid():N}";
     private ElementReference pageInput;
     private ElementReference sheetInput;
-    private ElementReference noteBox;
 
     // Photos are stored as soon as they're picked, and kept as a draft with the note until the
     // sheet is saved. Cancel, or leaving the page, deletes them again.
@@ -105,7 +105,7 @@
     private bool pickDate;
     private bool open;
     private bool busy;
-    private bool focusNote;
+    private bool forNote;
     private int failed;
     private int undated;
     private string? error;
@@ -130,31 +130,16 @@
     /// <summary>Opens the sheet for a note, from the page's Note button.</summary>
     public void OpenNote()
     {
-        focusNote = true;
+        forNote = photos.Count == 0;
         open = true;
         StateHasChanged();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (focusNote && open)
-        {
-            focusNote = false;
-            try
-            {
-                await noteBox.FocusAsync();
-            }
-            catch (InvalidOperationException)
-            {
-                // Not on screen yet
-            }
-        }
     }
 
     private async Task AddPhotosAsync(ElementReference input)
     {
         busy = true;
         error = null;
+        forNote = false;
         open = true;
         StateHasChanged();
 

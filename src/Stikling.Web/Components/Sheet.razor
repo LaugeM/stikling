@@ -36,6 +36,7 @@
     private IJSObjectReference? module;
     private DotNetObjectReference<Sheet>? self;
     private bool shown;
+    private int generation;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -49,7 +50,7 @@
             if (Open)
             {
                 self ??= DotNetObjectReference.Create(this);
-                await module.InvokeVoidAsync("open", dialog, self);
+                await module.InvokeVoidAsync("open", dialog, self, ++generation);
             }
             else
             {
@@ -64,9 +65,9 @@
 
     /// <summary>Called by the browser when the sheet closed itself: Escape, back, or a tap outside it.</summary>
     [JSInvokable]
-    public async Task Closed()
+    public async Task Closed(int closedGeneration)
     {
-        if (!shown)
+        if (!shown || closedGeneration != generation)
             return;
         shown = false;
         await OpenChanged.InvokeAsync(false);

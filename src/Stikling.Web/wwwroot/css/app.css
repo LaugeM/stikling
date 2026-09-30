@@ -2045,3 +2045,8 @@ main.app-content:has(.form-bar) ~ .update-banner {
 .timeline-heading {
     margin: 0 0 0.75rem;
 }
+
+/* A form with a pinned Save bar ends on the bar, so it lands right on the navigation */
+main.app-content:has(.form-bar) {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+}
