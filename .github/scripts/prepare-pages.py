@@ -46,7 +46,7 @@ for stale in ("index.html.gz", "index.html.br"):
 # GitHub Pages serves 404.html for unknown paths, which lets deep links like /plants load the app
 shutil.copyfile(index, root / "404.html")
 
-# The privacy page is linked from Google's and Discord's sign-in setup, so it answers 200 rather than the 404
+# The privacy page is linked from Google's, Facebook's and Discord's sign-in setup, so it answers 200 rather than the 404
 # the other deep links get. Pages serves privacy.html for /privacy.
 shutil.copyfile(index, root / "privacy.html")
 
