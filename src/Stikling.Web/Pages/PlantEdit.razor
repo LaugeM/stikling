@@ -205,7 +205,7 @@ else
                                 var id = $"taken-{value}";
                                 <input type="radio" class="btn-check" name="pots-taken" id="@id"
                                        checked="@(plant.Fit(plant.PotsTaken) == value)" @onchange="() => plant.PotsTaken = value" />
-                                <label class="btn btn-outline-primary btn-sm" for="@id">@label</label>
+                                <label class="btn btn-outline-primary" for="@id">@label</label>
                             }
                         </div>
                         <div class="form-text">A pot that went with it no longer counts as yours. One left here is free again.</div>

@@ -44,7 +44,7 @@
 <section class="settings-group">
     <h2>App</h2>
     <div class="theme-label" id="theme-label">Theme</div>
-    <div class="btn-group w-100" role="radiogroup" aria-labelledby="theme-label">
+    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="theme-label">
         @foreach (var option in options)
         {
             var id = $"theme-{option.Mode.ToString().ToLowerInvariant()}";

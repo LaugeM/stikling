@@ -8,6 +8,7 @@
 @inject IPestTreatmentRepository PestTreatments
 @using Stikling.Core.Settings
 @inject DeviceFiles Files
+@inject AccountService Account
 @inject SettingsService SettingsService
 @inject PutOffService PutOffService
 @inject AppBadge Badge
@@ -40,7 +41,14 @@ else if (plants.Count == 0 && propagations.Count == 0)
             Stikling keeps track of your plants and the cuttings you grow from them, with notes and photos
             as they go. Add a plant you have, and this page fills up with what needs doing.
         </p>
-        <p>Everything stays on this device. There is no account to make.</p>
+        @if (Account.IsAvailable)
+        {
+            <p>Everything stays on this device, and you don't need an account. Sign in from the gear at the top if you want your plants on your other devices too.</p>
+        }
+        else
+        {
+            <p>Everything stays on this device. There is no account to make.</p>
+        }
         <div class="first-run-actions">
             <a class="btn btn-primary" href="plants/new">Add a plant</a>
             <a class="btn btn-outline-primary" href="propagations/new">Start a propagation</a>
@@ -58,7 +66,7 @@ else
     {
         <div class="reminder">
             <span>@reminder</span>
-            <a class="btn btn-outline-primary btn-sm" href="backup">Back up</a>
+            <a class="btn btn-outline-primary" href="backup">Back up</a>
         </div>
     }
 
@@ -324,6 +332,10 @@ else
     private async Task<string?> BackupReminderAsync()
     {
         if (plants.Count == 0 && propagations.Count == 0)
+            return null;
+
+        // Sync keeps a copy on the server, so there is nothing to remind about
+        if (Account.IsAvailable && await Account.WasSignedInAsync())
             return null;
 
         var last = await Files.GetLastBackupAsync();
