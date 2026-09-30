@@ -77,7 +77,7 @@ else
                     var id = $"scope-{value}";
                     <input type="radio" class="btn-check" name="scope" id="@id"
                            checked="@(item.Scope == value)" @onchange="() => SetScope(value)" />
-                    <label class="btn btn-outline-primary btn-sm" for="@id">@label</label>
+                    <label class="btn btn-outline-primary" for="@id">@label</label>
                 }
             </div>
 

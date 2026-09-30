@@ -638,6 +638,43 @@ a.item-card:active {
 
 .segmented .btn {
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+}
+
+/* The picked segment looks like a picked chip, so solid green stays for primary buttons.
+   The stage track keeps its own solid look below. */
+.segmented:not(.stage-track) .btn {
+    --bs-btn-hover-color: var(--pa-green-dark);
+    --bs-btn-hover-bg: var(--pa-green-soft);
+    --bs-btn-hover-border-color: var(--pa-green);
+    --bs-btn-active-color: var(--pa-green-dark);
+    --bs-btn-active-bg: var(--pa-green-soft);
+    --bs-btn-active-border-color: var(--pa-green);
+}
+
+.segmented:not(.stage-track) .btn-check:checked + .btn {
+    font-weight: 600;
+}
+
+/* Selects that sit in the same row as a segmented control */
+.plant-filters .form-select {
+    min-height: 2.75rem;
+}
+
+/* A text button or link with a tap area of at least 44px. The text line is about 21px, so
+   0.75rem above and below makes it 45px, and the equal negative margin keeps the layout. */
+.link-action {
+    display: inline-block;
+    padding-block: 0.75rem;
+    margin-block: -0.75rem;
+}
+
+.btn.link-action {
+    padding-inline: 0;
+    vertical-align: baseline;
 }
 
 .stage-badge {
@@ -1328,7 +1365,10 @@ a.tag-label:hover {
     display: inline-flex;
     align-items: center;
     gap: 0.15rem;
-    margin-bottom: 0.5rem;
+    /* 0.75rem of padding each side gives a 44px tap area. The margins cancel it, and the
+       bottom one still leaves the old 0.5rem below. */
+    padding-block: 0.75rem;
+    margin-block: -0.75rem -0.25rem;
     font-size: 0.9rem;
     text-decoration: none;
 }

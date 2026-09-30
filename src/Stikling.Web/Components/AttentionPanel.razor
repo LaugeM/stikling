@@ -32,7 +32,7 @@ else if (Current is { } flag)
             <span class="attention-reason">@flag.Reason</span>
             <span class="attention-since">@Since(flag)</span>
         </div>
-        <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OpenAsync">Change</button>
+        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" @onclick="OpenAsync">Change</button>
         <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ClearAsync">Done</button>
     </div>
 }

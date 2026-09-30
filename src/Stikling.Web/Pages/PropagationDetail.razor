@@ -70,7 +70,7 @@ else
                 var id = $"stage-{stage}";
                 <input type="radio" class="btn-check" name="stage" id="@id" disabled="@busy"
                        checked="@(propagation.Stage == stage)" @onchange="() => SetStageAsync(stage)" />
-                <label class="btn btn-outline-primary btn-sm @(stage < propagation.Stage ? "passed" : null)" for="@id">@Labels.Stage(stage, propagation.Type)</label>
+                <label class="btn btn-outline-primary @(stage < propagation.Stage ? "passed" : null)" for="@id">@Labels.Stage(stage, propagation.Type)</label>
             }
         </div>
 
@@ -288,7 +288,7 @@ else
                         <dd>
                             @(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(propagation.DaysDormant(Today) ?? 0, "day")}")
                             <div>
-                                <button type="button" class="btn btn-link btn-sm p-0" @onclick="EndDormancyAsync">It's woken up</button>
+                                <button type="button" class="btn btn-link btn-sm link-action" @onclick="EndDormancyAsync">It's woken up</button>
                             </div>
                         </dd>
                     }
@@ -336,7 +336,7 @@ else
                 }
                 else
                 {
-                    <button class="btn btn-link btn-sm text-danger p-0" @onclick="() => confirmDelete = true">Delete propagation</button>
+                    <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">Delete propagation</button>
                 }
             </section>
         </div>
@@ -412,7 +412,7 @@ else
             else
             {
                 <span class="text-body-secondary">Not yet</span>
-                <button type="button" class="btn btn-link btn-sm p-0 ms-2 align-baseline" disabled="@busy"
+                <button type="button" class="btn btn-link btn-sm link-action ms-2 align-baseline" disabled="@busy"
                         @onclick="() => RecordMilestoneAsync(milestone)">Saw it today</button>
             }
         </dd>
