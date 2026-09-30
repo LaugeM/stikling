@@ -4,7 +4,7 @@ param appDomain = 'stikling.app'
 param apiDomain = 'api.stikling.app'
 param apiCertificateIssued = true
 param clerkAuthority = 'https://clerk.stikling.app'
-param githubRepository = 'LaugeM/stikling'
+param githubRepository = 'LaugeM@46719124/stikling@1377567106'
 param apiImage = 'ghcr.io/laugem/stikling-api:main'
 param apiMinReplicas = 0
 

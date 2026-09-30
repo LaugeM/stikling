@@ -18,7 +18,7 @@ param apiCertificateIssued bool = false
 @description('The Frontend API URL of the Clerk production instance.')
 param clerkAuthority string
 
-@description('The repository whose main branch deploys the API, as owner/name.')
+@description('The repository whose main branch deploys the API, as GitHub names it in the sign-in token: owner@ownerId/name@repositoryId. The ids keep a new repository with the same name from signing in.')
 param githubRepository string
 
 @description('The API\'s container image. The deploy workflow moves it on to each new version after this.')
