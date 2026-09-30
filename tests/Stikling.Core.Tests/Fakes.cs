@@ -628,3 +628,112 @@ internal sealed class FakeSyncServer : ISyncServer
         return Task.FromResult(settings);
     }
 }
+
+/// <summary>
+/// The photo images on one device and its two lists, as the browser database keeps them. Ids are
+/// listed in the order of their text, like IndexedDB keys.
+/// </summary>
+internal sealed class FakePhotoSyncStore : IPhotoSyncStore
+{
+    private static readonly IComparer<Guid> ByText = Comparer<Guid>.Create((a, b) => string.CompareOrdinal(a.ToString(), b.ToString()));
+
+    public SortedSet<Guid> Uploads { get; } = new(ByText);
+    public SortedSet<Guid> Downloads { get; } = new(ByText);
+    public HashSet<(Guid Id, PhotoSize Size)> Images { get; } = [];
+
+    /// <summary>A photo taken on this device: both images, and on the list to send.</summary>
+    public Guid Take(Guid? id = null)
+    {
+        var photo = id ?? Guid.NewGuid();
+        Images.Add((photo, PhotoSize.Full));
+        Images.Add((photo, PhotoSize.Thumbnail));
+        Uploads.Add(photo);
+        return photo;
+    }
+
+    public Task<IReadOnlyList<Guid>> GetUploadsAsync(Guid? after, int max) => Task.FromResult(Page(Uploads, after, max));
+
+    public Task RemoveUploadsAsync(IReadOnlyCollection<Guid> ids)
+    {
+        Uploads.ExceptWith(ids);
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<Guid>> GetDownloadsAsync(Guid? after, int max) => Task.FromResult(Page(Downloads, after, max));
+
+    public Task RemoveDownloadsAsync(IReadOnlyCollection<Guid> ids)
+    {
+        Downloads.ExceptWith(ids);
+        return Task.CompletedTask;
+    }
+
+    private static IReadOnlyList<Guid> Page(SortedSet<Guid> list, Guid? after, int max) =>
+        list.Where(id => after is null || ByText.Compare(id, after.Value) > 0).Take(max).ToList();
+}
+
+/// <summary>
+/// The photo images of one collection on the server, and which photo records it has. Each image
+/// counts as <see cref="ImageBytes"/> towards <see cref="Limit"/>.
+/// </summary>
+internal sealed class FakePhotoServer(FakePhotoSyncStore device) : IPhotoServer
+{
+    public const int ImageBytes = 100;
+
+    public HashSet<(Guid Id, PhotoSize Size)> Images { get; } = [];
+    public HashSet<Guid> Records { get; } = [];
+    public HashSet<Guid> Deleted { get; } = [];
+    public long Limit { get; set; } = long.MaxValue;
+    public List<(Guid Id, PhotoSize Size)> Sent { get; } = [];
+    public List<(Guid Id, PhotoSize Size)> Fetched { get; } = [];
+
+    /// <summary>A photo from another device, with its record and the images it has sent.</summary>
+    public Guid Add(bool full = true, bool thumbnail = true)
+    {
+        var id = Guid.NewGuid();
+        Records.Add(id);
+        if (full) Images.Add((id, PhotoSize.Full));
+        if (thumbnail) Images.Add((id, PhotoSize.Thumbnail));
+        return id;
+    }
+
+    public Task<IReadOnlyList<StoredPhoto>> GetStoredAsync(Guid collectionId, IReadOnlyList<Guid> ids)
+    {
+        Assert.True(ids.Count <= PhotoRules.BatchSize);
+        IReadOnlyList<StoredPhoto> stored = ids
+            .Where(id => Images.Contains((id, PhotoSize.Full)) || Images.Contains((id, PhotoSize.Thumbnail)))
+            .Select(id => new StoredPhoto(id, Images.Contains((id, PhotoSize.Full)), Images.Contains((id, PhotoSize.Thumbnail))))
+            .ToList();
+        return Task.FromResult(stored);
+    }
+
+    public Task<UploadOutcome> UploadAsync(Guid collectionId, Guid photoId, PhotoSize size)
+    {
+        UploadOutcome outcome;
+        if (!device.Images.Contains((photoId, size)))
+            outcome = UploadOutcome.NotHere;
+        else if (Deleted.Contains(photoId))
+            outcome = UploadOutcome.Gone;
+        else if (!Records.Contains(photoId))
+            outcome = UploadOutcome.NotYet;
+        else if ((long)(Images.Count + 1) * ImageBytes > Limit)
+            outcome = UploadOutcome.Full;
+        else
+        {
+            Images.Add((photoId, size));
+            Sent.Add((photoId, size));
+            outcome = UploadOutcome.Uploaded;
+        }
+
+        return Task.FromResult(outcome);
+    }
+
+    public Task<bool> DownloadAsync(Guid collectionId, Guid photoId, PhotoSize size)
+    {
+        if (!Images.Contains((photoId, size)))
+            return Task.FromResult(false);
+
+        device.Images.Add((photoId, size));
+        Fetched.Add((photoId, size));
+        return Task.FromResult(true);
+    }
+}

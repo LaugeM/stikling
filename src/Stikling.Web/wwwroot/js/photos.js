@@ -1,7 +1,8 @@
-// Photo handling that stays in the browser: resizing, compressing, storing and
-// displaying. Full-size camera photos (often 5-10 MB) never cross into .NET.
+// Photo handling that stays in the browser: resizing, compressing, storing, displaying,
+// and sending to and fetching from the sync API. Full-size camera photos (often 5-10 MB)
+// never cross into .NET.
 
-import { putBlob, getBlob, hasBlob, removeBlob } from "./db.js";
+import { putBlob, getBlob, hasBlob, putPhotoImages, removePhotoImages } from "./db.js";
 
 const FULL_SIZE = 1600;   // longest side in pixels
 const THUMB_SIZE = 360;
@@ -106,8 +107,7 @@ export async function saveFromInput(input) {
             bitmap.close();
 
             const id = crypto.randomUUID();
-            await putBlob(id, full.blob);
-            await putBlob(thumbKey(id), thumb.blob);
+            await putPhotoImages(id, full.blob, thumb.blob);
 
             // The date is picked in .NET from these three
             saved.push({
@@ -141,13 +141,17 @@ export async function getUrl(id, thumb) {
 }
 
 export async function remove(id) {
+    forgetUrls(id);
+    await removePhotoImages(id);
+}
+
+function forgetUrls(id) {
     for (const key of [id, thumbKey(id)]) {
         const url = urlCache.get(key);
         if (url) {
             URL.revokeObjectURL(url);
             urlCache.delete(key);
         }
-        await removeBlob(key);
     }
 }
 
@@ -162,15 +166,45 @@ export function hasBytes(id) {
 }
 
 export async function putBytes(id, bytes, thumbBytes) {
-    await putBlob(id, new Blob([bytes], { type: "image/jpeg" }));
-    if (thumbBytes) await putBlob(thumbKey(id), new Blob([thumbBytes], { type: "image/jpeg" }));
+    const thumb = thumbBytes ? new Blob([thumbBytes], { type: "image/jpeg" }) : null;
+    await putPhotoImages(id, new Blob([bytes], { type: "image/jpeg" }), thumb);
 
     // Drop any object URL made before the photo came back
-    for (const key of [id, thumbKey(id)]) {
-        const url = urlCache.get(key);
-        if (url) {
-            URL.revokeObjectURL(url);
-            urlCache.delete(key);
-        }
+    forgetUrls(id);
+}
+
+// Sync. SyncRunner and StiklingApi give the address and a fresh sign-in token, and the image
+// goes straight between the device database and the API. Each returns the HTTP status, 0 when
+// the image isn't on this device, or -1 when the API couldn't be reached.
+
+export async function upload(address, token, id, thumbnail) {
+    const blob = await getBlob(thumbnail ? thumbKey(id) : id);
+    if (!blob) return 0;
+
+    try {
+        const response = await fetch(address, {
+            method: "PUT",
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "image/jpeg" },
+            body: blob
+        });
+        return response.status;
+    } catch {
+        return -1;
     }
+}
+
+// Keeps the image once it has arrived, and doesn't put it on the list to send back
+export async function download(address, token, id, thumbnail) {
+    let blob;
+    try {
+        const response = await fetch(address, { headers: { "Authorization": `Bearer ${token}` } });
+        if (!response.ok) return response.status;
+        blob = await response.blob();
+    } catch {
+        return -1;
+    }
+
+    await putBlob(thumbnail ? thumbKey(id) : id, new Blob([blob], { type: "image/jpeg" }));
+    forgetUrls(id);
+    return 200;
 }

@@ -13,12 +13,13 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Stikling.Api.Data;
+using Testcontainers.Azurite;
 using Testcontainers.MsSql;
 
 namespace Stikling.Api.Tests;
 
 /// <summary>
-/// Runs the API against a real SQL Server in Docker. Tokens are signed with a key made here
+/// Runs the API against a real SQL Server and Azurite in Docker. Tokens are signed with a key made here
 /// instead of Clerk's, and everything else about checking them is the same as in production.
 /// </summary>
 public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
@@ -31,13 +32,19 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         Converters = { new JsonStringEnumConverter() },
     };
 
+    /// <summary>The photo space each collection gets in the tests, small enough to fill.</summary>
+    public const long PhotoLimit = 64 * 1024;
+
     private readonly MsSqlContainer _sql = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest").Build();
+    private readonly AzuriteContainer _storage = new AzuriteBuilder("mcr.microsoft.com/azure-storage/azurite")
+        .WithCommand("--skipApiVersionCheck")
+        .Build();
 
     public SecurityKey SigningKey { get; } = new RsaSecurityKey(RSA.Create(2048)) { KeyId = "test" };
 
     public async Task InitializeAsync()
     {
-        await _sql.StartAsync();
+        await Task.WhenAll(_sql.StartAsync(), _storage.StartAsync());
 
         await using var scope = Services.CreateAsyncScope();
         await scope.ServiceProvider.GetRequiredService<StiklingDbContext>().Database.MigrateAsync();
@@ -47,12 +54,15 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         await DisposeAsync();
         await _sql.DisposeAsync();
+        await _storage.DisposeAsync();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:Stikling", _sql.GetConnectionString());
+        builder.UseSetting("ConnectionStrings:Photos", _storage.GetConnectionString());
+        builder.UseSetting("Photos:MaxBytesPerCollection", PhotoLimit.ToString());
         builder.UseSetting("Clerk:Authority", Issuer);
         builder.UseSetting("AppOrigins:0", AppOrigin);
 

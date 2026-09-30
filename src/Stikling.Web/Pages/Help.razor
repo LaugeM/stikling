@@ -93,9 +93,8 @@
         {
             <p>
                 On this device, in the browser's own storage. If you sign in, it is also kept on the Stikling
-                server, so your other devices get it too. Photos are the exception for now and stay on the
-                device they were added on. Without an account, nothing you add leaves the phone unless you
-                save a backup and move it yourself.
+                server, photos included, so your other devices get it too. Without an account, nothing you add
+                leaves the phone unless you save a backup and move it yourself.
             </p>
         }
         else
@@ -127,6 +126,13 @@
             In Settings, under Backup, tap <em>Save a backup</em>. You get a ZIP file with everything in it,
             photos included. Keep it somewhere other than the phone, like cloud storage or your computer.
         </p>
+        @if (Account.IsAvailable)
+        {
+            <p>
+                If you're signed in, the backup fetches the full-size photos this device hasn't opened yet, so
+                it can take a while the first time.
+            </p>
+        }
         <p>
             Today reminds you when you haven't taken a backup, or when the last one is 30 days old.
         </p>
@@ -160,8 +166,7 @@
         {
             <p>
                 Yes. Sign in with the same account on both, and what you add or change on one shows up on the
-                other. Photos don't sync yet, so a photo added on one device shows as an empty frame on the
-                other.
+                other, photos too.
             </p>
         }
         else
@@ -198,9 +203,23 @@
                 when it last synced, and tap <em>Sync now</em>.
             </p>
             <p>
+                Photos go up from the device they were added on. Every device keeps a small copy of each photo,
+                so lists look complete even offline, and fetches the full size when you open one. Once
+                fetched, it stays on the device.
+            </p>
+            <p>
                 Without a connection, everything works as usual and your changes wait on the phone until they
                 can be sent. If the same thing was changed on two devices, the newer change wins, the same as
                 when a backup is restored.
+            </p>
+        </details>
+
+        <details class="help-item">
+            <summary>Is there a limit on photos?</summary>
+            <p>
+                Each account has 1 GB for photos on the server, which is roughly 2,500 photos. Settings shows
+                how much is used. If it fills up, new photos stay on the device they were added on, and
+                deleting photos you don't need makes room. The photos on your device aren't limited by this.
             </p>
         </details>
 
@@ -211,9 +230,9 @@
                 account either way and comes back when you sign in again.
             </p>
             <p>
-                Photos don't sync yet, so removing the data also deletes the photos on this device. Save a
-                backup first if you want to keep them. Signing out tells you how many photos are on the device,
-                and whether any changes haven't been sent yet.
+                Signing out sends your latest changes first, and tells you if any changes or photos haven't
+                reached the server yet. Removing the data would delete those, so save a backup first if you
+                want to keep them.
             </p>
         </details>
     }

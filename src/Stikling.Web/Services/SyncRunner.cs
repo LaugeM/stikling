@@ -50,11 +50,19 @@ public sealed class SyncRunner(
     /// <summary>Changes here that haven't reached the server yet.</summary>
     public int Pending { get; private set; }
 
+    /// <summary>True when the last sync couldn't send photos because the collection's space on the server is used up.</summary>
+    public bool PhotosFull { get; private set; }
+
+    private Guid? CollectionId { get; set; }
+
     /// <summary>Raised when a sync starts or ends, for the status in Settings.</summary>
     public event Action? StatusChanged;
 
     /// <summary>Raised when a sync saved changes from the server, so the page on screen can reload.</summary>
     public event Action? Received;
+
+    /// <summary>Raised when a sync fetched thumbnails, so photos shown as missing can look again.</summary>
+    public event Action? PhotosArrived;
 
     /// <summary>Called once the app is on screen.</summary>
     public async Task StartAsync()
@@ -93,7 +101,43 @@ public sealed class SyncRunner(
 
     /// <summary>How much would be lost by removing the data from this device right now.</summary>
     public async Task<(int Pending, int Photos)> CountUnsentAsync() =>
-        (await store.CountPendingAsync(), await store.CountPhotoImagesAsync());
+        (await store.CountPendingAsync(), await store.CountPhotoUploadsAsync());
+
+    /// <summary>
+    /// Fetches one of a photo's images from the server and keeps it here, e.g. the full size when
+    /// the photo is opened. False when nobody is signed in, the server doesn't have it, or it can't
+    /// be reached. Never throws.
+    /// </summary>
+    public async Task<bool> FetchPhotoAsync(Guid photoId, PhotoSize size)
+    {
+        try
+        {
+            if (!signedIn || await CollectionIdAsync() is not { } collectionId)
+                return false;
+
+            return await api.DownloadAsync(collectionId, photoId, size);
+        }
+        catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>How much space the collection's photos take on the server, or null when it can't be found out now.</summary>
+    public async Task<PhotoUsage?> GetPhotoUsageAsync()
+    {
+        try
+        {
+            if (!signedIn || await CollectionIdAsync() is not { } collectionId)
+                return null;
+
+            return await api.GetPhotoUsageAsync(collectionId);
+        }
+        catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
+        {
+            return null;
+        }
+    }
 
     /// <summary>
     /// Signs out after any sync that is running. The data stays on the device unless
@@ -121,6 +165,10 @@ public sealed class SyncRunner(
         if (!keepData)
             await store.ClearAllAsync();
     }
+
+    // Before the first sync since the app opened, the one this device synced with last time
+    private async Task<Guid?> CollectionIdAsync() =>
+        CollectionId ?? (await store.GetStateAsync())?.CollectionId;
 
     private async Task RunAsync()
     {
@@ -167,16 +215,25 @@ public sealed class SyncRunner(
             if (me.Collections.FirstOrDefault() is not { } collection)
                 return;
 
-            var result = await new SyncService(store, api).SyncAsync(collection.Id, collection.Role == "Editor");
+            CollectionId = collection.Id;
+            var canEdit = collection.Role == "Editor";
+            var result = await new SyncService(store, api).SyncAsync(collection.Id, canEdit);
             Refused = result.Refused;
-            LastSynced = time.GetUtcNow();
-            await files.SetAsync(LastSyncKey, LastSynced.Value.ToString("O"));
 
             if (result.Received > 0)
             {
                 await theme.ApplySavedAsync();
                 Received?.Invoke();
             }
+
+            // After the records, since the server only takes a photo's images once it has its record
+            var photos = await new PhotoSyncService(store, api).SyncAsync(collection.Id, canEdit);
+            PhotosFull = photos.CollectionFull;
+            if (photos.Downloaded > 0)
+                PhotosArrived?.Invoke();
+
+            LastSynced = time.GetUtcNow();
+            await files.SetAsync(LastSyncKey, LastSynced.Value.ToString("O"));
         }
         catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
         {
@@ -240,6 +297,8 @@ public sealed class SyncRunner(
         LastSynced = null;
         Problem = null;
         Refused = 0;
+        PhotosFull = false;
+        CollectionId = null;
         StatusChanged?.Invoke();
     }
 

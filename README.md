@@ -4,7 +4,7 @@
 
 *Stikling* is Danish for "cutting". It's a free plant and propagation tracker for houseplant hobbyists. Keep track of your plants, the cuttings and corms you take from them, and how they develop, with a photo timeline for each one.
 
-Stikling is a Progressive Web App: it runs in the browser, can be installed on your phone's home screen, and works offline. All data stays on your own device. There are no accounts and nothing is sent to a server.
+Stikling is a Progressive Web App: it runs in the browser, can be installed on your phone's home screen, and works offline. Everything is kept on your own device, and the app works fully without an account. Signing in, which keeps your plants and photos the same on all your devices, is built but won't be on the live site until the sync API is hosted.
 
 > Status: v1 features are in place. See the [feature list](docs/FEATURES.md) for everything the app could do, and the [Roadmap](#roadmap) for where it is now.
 
@@ -24,21 +24,21 @@ The longer list, with the ideas for later versions, is in [docs/FEATURES.md](doc
 - Bootstrap 5
 - IndexedDB for on-device storage (via a small JS interop module)
 - xUnit for the domain logic
-- The sync API (in progress): ASP.NET Core minimal API with EF Core on SQL Server, sign-in through Clerk, run locally with Docker Compose
+- The sync API (in progress): ASP.NET Core minimal API with EF Core on SQL Server, photos in Azure Blob Storage, sign-in through Clerk, run locally with Docker Compose
 - Hosted for free on GitHub Pages and deployed with GitHub Actions
 
 ### Why Blazor WebAssembly?
 
-The app runs entirely in the browser, so it can work offline and keep data on the device without a backend. That means free hosting as static files and no user accounts or personal data to secure. The Razor components can later be reused in a .NET MAUI Blazor Hybrid app if a native Android/iOS version makes sense.
+The app runs entirely in the browser, so it can work offline and keep data on the device without a backend. The app itself is hosted for free as static files, and the sync API is only used by people who sign in. The Razor components can later be reused in a .NET MAUI Blazor Hybrid app if a native Android/iOS version makes sense.
 
 ## Project structure
 
 ```
 src/Stikling.Core/          Models and domain rules (no browser dependencies, unit tested)
 src/Stikling.Web/           Blazor WebAssembly PWA
-src/Stikling.Api/           The sync API (the app only signs in to it so far)
+src/Stikling.Api/           The sync API for accounts, records and photos
 tests/Stikling.Core.Tests/  xUnit tests for Core
-tests/Stikling.Api.Tests/   xUnit tests for the API, against SQL Server in Docker
+tests/Stikling.Api.Tests/   xUnit tests for the API, against SQL Server and Azurite in Docker
 tools/plant-names/          Builds the plant names the app suggests while you type
 .github/                   Build/test/deploy workflow and GitHub Pages prep script
 ```
@@ -57,17 +57,17 @@ Run the tests:
 dotnet test Stikling.slnx
 ```
 
-The API tests start SQL Server in a container, so [Docker Desktop](https://www.docker.com/products/docker-desktop/) has to be running.
+The API tests start SQL Server and Azurite (a local stand-in for Azure Blob Storage) in containers, so [Docker Desktop](https://www.docker.com/products/docker-desktop/) has to be running.
 
 ### The sync API
 
-The API and its database run in Docker:
+The API, its database and Azurite for the photos run in Docker:
 
 ```bash
 docker compose up --build
 ```
 
-The API is then on http://localhost:5180, with `/health` to check it's up. It creates the database on the first start. To run the API from Visual Studio or with `dotnet run` instead, start only the database with `docker compose up sql`.
+The API is then on http://localhost:5180, with `/health` to check it's up. It creates the database on the first start. To run the API from Visual Studio or with `dotnet run` instead, start only the database and Azurite with `docker compose up sql azurite`.
 
 ### Signing in
 

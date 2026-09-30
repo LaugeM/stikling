@@ -8,12 +8,15 @@ public static class SyncKinds
 {
     public const string Settings = "settings";
 
+    /// <summary>A photo's record. Its images travel separately, see <see cref="PhotoSyncService"/>.</summary>
+    public const string Photos = "photos";
+
     public static readonly IReadOnlyList<string> Collection =
     [
         "plants",
         "propagations",
         "timeline",
-        "photos",
+        Photos,
         "careLogs",
         "pestCases",
         "pestTreatments",

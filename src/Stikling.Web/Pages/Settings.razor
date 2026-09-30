@@ -1,6 +1,7 @@
 @page "/settings"
 @implements IDisposable
 @using Stikling.Core.Settings
+@using Stikling.Core.Sync
 @inject ThemeService Theme
 @inject RoomService RoomService
 @inject PlantService PlantService
@@ -51,8 +52,12 @@
                 </button>
             </div>
             <p class="settings-hint">
-                Your plants, care, pests and settings are kept the same on every device you sign in on.
-                Photos don't sync yet, so they stay on the device they were added on.
+                Your plants, care, pests, photos and settings are kept the same on every device you sign in on.
+                Each device keeps a small copy of every photo, and fetches the full size when you open one.
+                @if (photoUsage is { } usage)
+                {
+                    @($"Photos take {Labels.Bytes(usage.UsedBytes)} of the {Labels.Bytes(usage.LimitBytes)} they have on the server.")
+                }
             </p>
             @if (SyncProblem is { } problem)
             {
@@ -76,10 +81,9 @@
                         @if (unsent.Photos > 0)
                         {
                             <p class="settings-hint">
-                                Photos don't sync yet, so the @Labels.Count(unsent.Photos, "photo") on this device
-                                @(unsent.Photos == 1 ? "is" : "are") only here. Removing deletes
-                                @(unsent.Photos == 1 ? "it" : "them"). Save a backup first to keep
-                                @(unsent.Photos == 1 ? "it" : "them").
+                                @Labels.Count(unsent.Photos, "photo") added here @(unsent.Photos == 1 ? "hasn't" : "haven't")
+                                reached the server yet, and removing deletes @(unsent.Photos == 1 ? "it" : "them"). Save a
+                                backup first to keep @(unsent.Photos == 1 ? "it" : "them").
                             </p>
                         }
                         @if (unsent.Pending > 0)
@@ -490,6 +494,7 @@
     private bool accountHintRead;
     private string? accountMessage;
     private SignOutCheck? signOut;
+    private PhotoUsage? photoUsage;
 
     private DateOnly TodayDate => Time.Today();
 
@@ -652,6 +657,12 @@
 
         accountChecking = false;
         StateHasChanged();
+
+        if (account is { SignedIn: true })
+        {
+            photoUsage = await Sync.GetPhotoUsageAsync();
+            StateHasChanged();
+        }
     }
 
     /// <summary>"Synced at 14:32", for the line under the email.</summary>
@@ -674,11 +685,22 @@
             if (Sync.Refused > 0)
                 return $"The server turned down {Labels.Count(Sync.Refused, "change")}, and {(Sync.Refused == 1 ? "it" : "they")} "
                     + "will be tried again. If this keeps happening, check the date and time on this device.";
+            if (Sync.PhotosFull)
+                return "Your photos have used all the space they have on the server, so new ones stay on this device "
+                    + "for now. Deleting photos you don't need makes room.";
             return null;
         }
     }
 
-    private void OnSyncChanged() => _ = InvokeAsync(StateHasChanged);
+    private void OnSyncChanged() => _ = InvokeAsync(async () =>
+    {
+        StateHasChanged();
+        if (!Sync.Running)
+        {
+            photoUsage = await Sync.GetPhotoUsageAsync();
+            StateHasChanged();
+        }
+    });
 
     private async void OnAccountChanged(AccountState state)
     {

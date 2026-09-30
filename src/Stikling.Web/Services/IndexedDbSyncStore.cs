@@ -7,9 +7,10 @@ namespace Stikling.Web.Services;
 /// <summary>
 /// The records on this device as sync sees them: as the JSON they are stored as, so fields this
 /// version of the app doesn't know travel too. The work is done in wwwroot/js/db.js, where the
-/// change list is kept in the same transaction as each write.
+/// change list is kept in the same transaction as each write, and the photo lists in the same
+/// transaction as the images.
 /// </summary>
-public sealed class IndexedDbSyncStore(IJSRuntime js) : ISyncStore, IAsyncDisposable
+public sealed class IndexedDbSyncStore(IJSRuntime js) : ISyncStore, IPhotoSyncStore, IAsyncDisposable
 {
     private Task<IJSObjectReference>? module;
 
@@ -48,9 +49,21 @@ public sealed class IndexedDbSyncStore(IJSRuntime js) : ISyncStore, IAsyncDispos
     public async Task SaveFromServerAsync(string kind, IReadOnlyList<ServerCopy> records) =>
         await (await Module).InvokeVoidAsync("saveFromServer", kind, records);
 
-    /// <summary>How many photos have their image on this device. Images don't sync yet.</summary>
-    public async Task<int> CountPhotoImagesAsync() =>
-        await (await Module).InvokeAsync<int>("countPhotoImages");
+    public async Task<IReadOnlyList<Guid>> GetUploadsAsync(Guid? after, int max) =>
+        await (await Module).InvokeAsync<List<Guid>>("getPhotoUploads", after, max);
+
+    public async Task RemoveUploadsAsync(IReadOnlyCollection<Guid> ids) =>
+        await (await Module).InvokeVoidAsync("removePhotoUploads", ids);
+
+    public async Task<IReadOnlyList<Guid>> GetDownloadsAsync(Guid? after, int max) =>
+        await (await Module).InvokeAsync<List<Guid>>("getPhotoDownloads", after, max);
+
+    public async Task RemoveDownloadsAsync(IReadOnlyCollection<Guid> ids) =>
+        await (await Module).InvokeVoidAsync("removePhotoDownloads", ids);
+
+    /// <summary>How many photos taken or restored here haven't reached the server yet.</summary>
+    public async Task<int> CountPhotoUploadsAsync() =>
+        await (await Module).InvokeAsync<int>("countPhotoUploads");
 
     /// <summary>Empties the database, for signing out and removing everything from this device.</summary>
     public async Task ClearAllAsync() =>

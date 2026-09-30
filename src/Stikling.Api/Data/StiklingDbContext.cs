@@ -9,6 +9,16 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     public DbSet<Membership> Memberships => Set<Membership>();
     public DbSet<SyncedRecord> Records => Set<SyncedRecord>();
     public DbSet<PersonSettings> PersonSettings => Set<PersonSettings>();
+    public DbSet<PhotoImage> PhotoImages => Set<PhotoImage>();
+
+    /// <summary>
+    /// Locks the collection's row until the end of the transaction, so changes to one collection
+    /// take turns. Call it inside a transaction.
+    /// </summary>
+    public Task LockCollectionAsync(Guid collectionId) =>
+        Collections
+            .Where(c => c.Id == collectionId)
+            .ExecuteUpdateAsync(set => set.SetProperty(c => c.LastVersion, c => c.LastVersion));
 
     protected override void OnModelCreating(ModelBuilder model)
     {
@@ -47,6 +57,13 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
         {
             settings.HasKey(s => s.PersonId);
             settings.HasOne<Person>().WithOne().HasForeignKey<PersonSettings>(s => s.PersonId);
+        });
+
+        model.Entity<PhotoImage>(image =>
+        {
+            image.HasKey(i => new { i.CollectionId, i.PhotoId, i.Size });
+            image.Property(i => i.Size).HasConversion<string>().HasMaxLength(20);
+            image.HasOne<Collection>().WithMany().HasForeignKey(i => i.CollectionId);
         });
     }
 }
