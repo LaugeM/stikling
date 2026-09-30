@@ -159,11 +159,8 @@ export async function remove(storeName, key) {
     });
 }
 
-// Binary data (photos) lives in its own store with the key given explicitly
-export async function putBlob(key, blob) {
-    await run("photoBlobs", "readwrite", store => store.put(blob, key));
-}
-
+// Binary data (photos) lives in its own store with the key given explicitly. It is written
+// together with the photo lists, in putPhotoImages and putFetchedImage below.
 export async function getBlob(key) {
     return (await run("photoBlobs", "readonly", store => store.get(key))) ?? null;
 }
@@ -179,6 +176,17 @@ export async function putPhotoImages(id, full, thumb) {
         tx.objectStore("photoBlobs").put(full, id);
         if (thumb) tx.objectStore("photoBlobs").put(thumb, `${id}:thumb`);
         tx.objectStore("photoUploads").put({ id });
+    });
+}
+
+// An image fetched from the server, kept only if its photo is still here and not deleted, since
+// it may have been deleted while the image was on its way
+export async function putFetchedImage(id, key, blob) {
+    await transact(["photos", "photoBlobs"], "readwrite", tx => {
+        const request = tx.objectStore("photos").get(id);
+        request.onsuccess = () => {
+            if (request.result && !request.result.deletedAt) tx.objectStore("photoBlobs").put(blob, key);
+        };
     });
 }
 

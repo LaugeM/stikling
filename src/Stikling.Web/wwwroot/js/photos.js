@@ -2,7 +2,7 @@
 // and sending to and fetching from the sync API. Full-size camera photos (often 5-10 MB)
 // never cross into .NET.
 
-import { putBlob, getBlob, hasBlob, putPhotoImages, removePhotoImages } from "./db.js";
+import { getBlob, hasBlob, putPhotoImages, putFetchedImage, removePhotoImages } from "./db.js";
 
 const FULL_SIZE = 1600;   // longest side in pixels
 const THUMB_SIZE = 360;
@@ -204,7 +204,7 @@ export async function download(address, token, id, thumbnail) {
         return -1;
     }
 
-    await putBlob(thumbnail ? thumbKey(id) : id, new Blob([blob], { type: "image/jpeg" }));
+    await putFetchedImage(id, thumbnail ? thumbKey(id) : id, new Blob([blob], { type: "image/jpeg" }));
     forgetUrls(id);
     return 200;
 }

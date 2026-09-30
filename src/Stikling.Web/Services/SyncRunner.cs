@@ -33,6 +33,8 @@ public sealed class SyncRunner(
     private bool again;
     private CancellationTokenSource? waiting;
     private Task current = Task.CompletedTask;
+    private readonly Dictionary<(Guid, PhotoSize), Task<bool>> fetching = [];
+    private readonly HashSet<(Guid, PhotoSize)> notOnServer = [];
 
     private Task<IJSObjectReference> Module =>
         module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
@@ -108,18 +110,41 @@ public sealed class SyncRunner(
     /// the photo is opened. False when nobody is signed in, the server doesn't have it, or it can't
     /// be reached. Never throws.
     /// </summary>
-    public async Task<bool> FetchPhotoAsync(Guid photoId, PhotoSize size)
+    public Task<bool> FetchPhotoAsync(Guid photoId, PhotoSize size)
+    {
+        // A photo on screen twice is fetched once, and one the server didn't have isn't asked for
+        // again until the next sync, when it may have arrived
+        if (notOnServer.Contains((photoId, size)))
+            return Task.FromResult(false);
+        if (fetching.TryGetValue((photoId, size), out var running))
+            return running;
+
+        // One that finished straight away, e.g. with nobody signed in, has already cleared itself
+        var fetch = FetchAsync(photoId, size);
+        if (!fetch.IsCompleted)
+            fetching[(photoId, size)] = fetch;
+        return fetch;
+    }
+
+    private async Task<bool> FetchAsync(Guid photoId, PhotoSize size)
     {
         try
         {
             if (!signedIn || await CollectionIdAsync() is not { } collectionId)
                 return false;
 
-            return await api.DownloadAsync(collectionId, photoId, size);
+            var fetched = await api.DownloadAsync(collectionId, photoId, size);
+            if (!fetched)
+                notOnServer.Add((photoId, size));
+            return fetched;
         }
         catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
         {
             return false;
+        }
+        finally
+        {
+            fetching.Remove((photoId, size));
         }
     }
 
@@ -220,20 +245,22 @@ public sealed class SyncRunner(
             var result = await new SyncService(store, api).SyncAsync(collection.Id, canEdit);
             Refused = result.Refused;
 
+            LastSynced = time.GetUtcNow();
+            await files.SetAsync(LastSyncKey, LastSynced.Value.ToString("O"));
+
             if (result.Received > 0)
             {
                 await theme.ApplySavedAsync();
                 Received?.Invoke();
             }
 
-            // After the records, since the server only takes a photo's images once it has its record
+            // After the records, since the server only takes a photo's images once it has its record.
+            // If this fails, the records have still synced, and the problem shows on its own.
             var photos = await new PhotoSyncService(store, api).SyncAsync(collection.Id, canEdit);
             PhotosFull = photos.CollectionFull;
+            notOnServer.Clear();
             if (photos.Downloaded > 0)
                 PhotosArrived?.Invoke();
-
-            LastSynced = time.GetUtcNow();
-            await files.SetAsync(LastSyncKey, LastSynced.Value.ToString("O"));
         }
         catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
         {
@@ -299,6 +326,7 @@ public sealed class SyncRunner(
         Refused = 0;
         PhotosFull = false;
         CollectionId = null;
+        notOnServer.Clear();
         StatusChanged?.Invoke();
     }
 
