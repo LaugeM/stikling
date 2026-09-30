@@ -33,6 +33,18 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
         return await SendAsync<Me>(request);
     }
 
+    /// <summary>
+    /// Erases the account on the server: the collections nobody else is in, with their records and
+    /// photos, and the person's settings. Asking again after it's done does no harm.
+    /// </summary>
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task DeleteMeAsync()
+    {
+        using var request = await RequestAsync(HttpMethod.Delete, "me");
+        using var response = await http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task<PullResponse> PullAsync(Guid collectionId, long after)
     {
         using var request = await RequestAsync(HttpMethod.Get, $"collections/{collectionId}/records?after={after}");

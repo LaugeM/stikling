@@ -1,11 +1,11 @@
 """Prepare a published Blazor WebAssembly app for GitHub Pages.
 
-GitHub Pages serves a project site from a subfolder (https://<user>.github.io/<repo>/),
-so the <base href> in index.html has to point at that subfolder. Changing index.html
+The <base href> in index.html has to match where the site is served from: "/" on its own
+domain, or the repository's subfolder on https://<user>.github.io/<repo>/. Changing index.html
 also changes its SHA-256 hash, and the PWA service worker refuses to cache files whose
 hash doesn't match service-worker-assets.js, so the hash is updated there too.
 
-Usage: python prepare-pages.py <wwwroot dir> <base path, e.g. /stikling/>
+Usage: python prepare-pages.py <wwwroot dir> <base path, e.g. / or /stikling/>
 """
 import base64
 import hashlib
@@ -45,6 +45,10 @@ for stale in ("index.html.gz", "index.html.br"):
 
 # GitHub Pages serves 404.html for unknown paths, which lets deep links like /plants load the app
 shutil.copyfile(index, root / "404.html")
+
+# The privacy page is linked from Google's sign-in screen, so it answers 200 rather than the 404
+# the other deep links get. Pages serves privacy.html for /privacy.
+shutil.copyfile(index, root / "privacy.html")
 
 # Stop Jekyll from hiding folders that start with an underscore (_framework)
 (root / ".nojekyll").touch()

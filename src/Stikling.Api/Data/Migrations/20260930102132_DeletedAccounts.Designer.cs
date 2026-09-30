@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Stikling.Api.Data;
 
@@ -11,9 +12,11 @@ using Stikling.Api.Data;
 namespace Stikling.Api.Data.Migrations
 {
     [DbContext(typeof(StiklingDbContext))]
-    partial class StiklingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260930102132_DeletedAccounts")]
+    partial class DeletedAccounts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

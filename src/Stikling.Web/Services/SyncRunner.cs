@@ -191,6 +191,36 @@ public sealed class SyncRunner(
             await store.ClearAllAsync();
     }
 
+    /// <summary>
+    /// Deletes the account after any sync that is running: first everything on the server, then
+    /// the sign-in at Clerk. The data stays on the device unless <paramref name="keepData"/> is
+    /// false, and the app carries on without an account. If it stops halfway, asking again
+    /// finishes it.
+    /// </summary>
+    /// <exception cref="HttpRequestException">The server couldn't be reached or didn't delete it.</exception>
+    /// <exception cref="JSException">Clerk couldn't delete the sign-in.</exception>
+    public async Task DeleteAccountAsync(bool keepData)
+    {
+        signedIn = false;
+        waiting?.Cancel();
+        await current;
+
+        try
+        {
+            await api.DeleteMeAsync();
+            await account.DeleteUserAsync();
+        }
+        catch (Exception e) when (e is HttpRequestException or JSException or TaskCanceledException)
+        {
+            signedIn = true;
+            throw;
+        }
+
+        await ForgetAsync();
+        if (!keepData)
+            await store.ClearAllAsync();
+    }
+
     // Before the first sync since the app opened, the one this device synced with last time
     private async Task<Guid?> CollectionIdAsync() =>
         CollectionId ?? (await store.GetStateAsync())?.CollectionId;
@@ -261,6 +291,11 @@ public sealed class SyncRunner(
             notOnServer.Clear();
             if (photos.Downloaded > 0)
                 PhotosArrived?.Invoke();
+        }
+        catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Gone)
+        {
+            // Deleted on another device, which ends this sign-in within a minute or so
+            Problem = "This account has been deleted. Sign out to carry on without it.";
         }
         catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
         {

@@ -1,5 +1,6 @@
 using Azure;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Stikling.Api.Data;
 using Stikling.Core.Sync;
 
@@ -69,6 +70,14 @@ public sealed class PhotoStorage(BlobServiceClient blobs)
             {
             }
         }
+    }
+
+    /// <summary>Deletes every image of the collection, whether or not it still has a row.</summary>
+    public async Task DeleteCollectionAsync(Guid collectionId)
+    {
+        await ReadyAsync();
+        await foreach (var blob in container.GetBlobsAsync(new GetBlobsOptions { Prefix = $"{collectionId}/" }))
+            await container.GetBlobClient(blob.Name).DeleteIfExistsAsync();
     }
 
     // The container is made the first time it's needed, so the API starts even if storage can't be reached

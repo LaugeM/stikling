@@ -1,4 +1,4 @@
-name: Build, test and deploy to GitHub Pages
+name: Build, test and deploy
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
 
 permissions:
   contents: read
+
+env:
+  API_IMAGE: ghcr.io/laugem/stikling-api
 
 jobs:
   build:
@@ -25,8 +28,9 @@ jobs:
       - name: Publish
         run: dotnet publish src/Stikling.Web --configuration Release --output release
 
+      # The site is on its own domain, set under Pages in the repository settings, so it's served from the root
       - name: Prepare for GitHub Pages
-        run: python3 .github/scripts/prepare-pages.py release/wwwroot "/${{ github.event.repository.name }}/"
+        run: python3 .github/scripts/prepare-pages.py release/wwwroot "/"
 
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
@@ -35,11 +39,24 @@ jobs:
 
   api-image:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
       - name: Build the API's container image
-        run: docker build --file src/Stikling.Api/Dockerfile --tag stikling-api .
+        run: >
+          docker build --file src/Stikling.Api/Dockerfile
+          --label org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          --tag "$API_IMAGE:${{ github.sha }}" --tag "$API_IMAGE:main" .
+
+      # Pull requests only check that it builds
+      - name: Push it to GitHub's container registry
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
+          docker push --all-tags "$API_IMAGE"
 
   deploy:
     needs: build
@@ -54,3 +71,30 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Needs the Azure resources, and their ids as repository secrets. See docs/hosting.md.
+  deploy-api:
+    needs: [build, api-image]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    concurrency: deploy-api
+    steps:
+      # Signs in as the deploy identity, which trusts this repository's main branch, so no password
+      # is stored. The ids aren't passwords either, but as secrets they're hidden in the public logs.
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Move the API to the new image
+        run: >
+          az containerapp update --resource-group rg-stikling --name stikling-api
+          --image "$API_IMAGE:${{ github.sha }}" --output none
+
+      # The first request wakes the database if it's paused, which can take a minute
+      - name: Check that it answers
+        run: curl --fail --silent --show-error --retry 10 --retry-delay 10 --retry-all-errors --max-time 60 https://api.stikling.app/health

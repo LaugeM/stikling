@@ -1,0 +1,13 @@
+# Values gitleaks flags that are public on purpose. The rest of its rules apply as usual.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Public on purpose"
+regexes = [
+  # Clerk's publishable keys, which every browser that opens the app downloads
+  '''pk_(test|live)_[A-Za-z0-9]+''',
+  # Azurite's account key, which is the same published value on every machine
+  '''Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==''',
+]

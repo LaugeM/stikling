@@ -29,6 +29,10 @@
     border-radius: 0.75rem;
 }
 
+.confirm-card-danger {
+    border-color: var(--pa-alert);
+}
+
 .confirm-card p {
     margin-bottom: 0.25rem;
 }
