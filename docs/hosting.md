@@ -25,7 +25,9 @@ az deployment sub create --location polandcentral --template-file infra/main.bic
 
 ## Setting it up from nothing
 
-This is also the way to move it to another subscription.
+This is also the way to move it to another subscription or region. For another region, change `location` in `infra/main.bicep` and delete `rg-stikling` first, since a resource group can't move and the storage and SQL names would clash with the old ones.
+
+`githubRepository` in `infra/main.bicepparam` has the ids GitHub puts in the Actions sign-in token, as `owner@ownerId/name@repositoryId`. They come from `gh api repos/LaugeM/stikling --jq '.owner.id, .id'`. A new or renamed repository has to update it, or the API deploy fails to sign in to Azure.
 
 1. Register the resource providers once:
    `az provider register --namespace Microsoft.App`, and the same for `Microsoft.Sql`, `Microsoft.Storage`, `Microsoft.OperationalInsights` and `Microsoft.ManagedIdentity`.
