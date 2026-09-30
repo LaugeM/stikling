@@ -50,8 +50,24 @@ shutil.copyfile(index, root / "404.html")
 # the other deep links get. Pages serves privacy.html for /privacy.
 shutil.copyfile(index, root / "privacy.html")
 
-# Facebook's data deletion setting links to /delete-data, and checks it the same way
-shutil.copyfile(index, root / "delete-data.html")
+# Facebook's data deletion setting links to /deletion, and Meta's check reads the page without running
+# the app, so the page's text from wwwroot/pages goes into the HTML in place of the loading spinner.
+# The app replaces it with the same text once it has started.
+def write_static_page(name, title):
+    text = (root / "pages" / f"{name}.html").read_text(encoding="utf-8")
+    page, count = re.subn(
+        r'(<div id="app">).*?(</div>\s*<div id="blazor-error-ui">)',
+        lambda m: f'{m.group(1)}\n<main class="static-page">\n{text}</main>\n{m.group(2)}',
+        html,
+        flags=re.S,
+    )
+    if count != 1:
+        sys.exit("Expected exactly one <div id=\"app\"> in index.html")
+    page = page.replace("<title>Stikling</title>", f"<title>{title} · Stikling</title>", 1)
+    (root / f"{name}.html").write_text(page, encoding="utf-8", newline="\n")
+
+
+write_static_page("deletion", "Deleting your data")
 
 # Stop Jekyll from hiding folders that start with an underscore (_framework)
 (root / ".nojekyll").touch()

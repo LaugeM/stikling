@@ -1,13 +1,9 @@
-@page "/delete-data"
-@* How to delete what Stikling keeps. Facebook's data deletion setting links here, so like the privacy page
-   it answers 200 on the live site (see prepare-pages.py) and has to match the Account page. *@
-
-<PageTitle>Deleting your data · Stikling</PageTitle>
-
-<a class="back-link" href="privacy">Privacy</a>
+<!-- The text of the /deletion page. Facebook's data deletion setting links there, and Meta's check reads
+     the page without running the app, so prepare-pages.py puts this into deletion.html for the live site,
+     and Pages/Deletion.razor shows the same file in the app. Keep it in step with the Account page. -->
 <h1>Deleting your data</h1>
 
-<section class="delete-data-section">
+<section class="deletion-section">
     <h2>With an account</h2>
     <p>
         It works the same whether you signed in with Google, Facebook, Discord or your email.
@@ -33,7 +29,7 @@
     </p>
 </section>
 
-<section class="delete-data-section">
+<section class="deletion-section">
     <h2>Without an account</h2>
     <p>
         Everything is on your device and nothing is on the server. Clearing the site data for stikling.app in
@@ -41,6 +37,6 @@
     </p>
 </section>
 
-<p class="delete-data-more">
+<p class="deletion-more">
     The <a href="privacy">privacy page</a> says what is kept and where.
 </p>
