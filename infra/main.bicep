@@ -3,8 +3,8 @@
 
 targetScope = 'subscription'
 
-@description('The Azure region. The Azure for Students subscription only allows a few, and Sweden Central is the closest of them.')
-param location string = 'swedencentral'
+@description('The Azure region. The Azure for Students subscription only allows a few. Poland Central is used because Sweden Central had no room for a new Container Apps environment.')
+param location string = 'polandcentral'
 
 @description('Where the app is served from. The API only accepts sign-ins from here.')
 param appDomain string

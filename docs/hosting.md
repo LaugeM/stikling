@@ -20,7 +20,7 @@ Merging to main does it. The workflow pushes the API's image and moves the Conta
 The Bicep isn't deployed by the workflow, since that would need the right to hand out roles. Deploy it from your own machine after `az login`:
 
 ```bash
-az deployment sub create --location swedencentral --template-file infra/main.bicep --parameters infra/main.bicepparam
+az deployment sub create --location polandcentral --template-file infra/main.bicep --parameters infra/main.bicepparam
 ```
 
 ## Setting it up from nothing
