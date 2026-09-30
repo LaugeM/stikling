@@ -12,15 +12,16 @@
 <section class="settings-section">
     <h2 class="section-label">Rooms</h2>
     <p class="settings-hint">
-        Rooms come from where your plants and propagations are. Renaming one here changes it everywhere,
-        and renaming it to a name you already use merges the two.
+        Add a room here, or let it come from where your plants and propagations are. Renaming one
+        changes it everywhere, and renaming it to a name you already use merges the two.
     </p>
 
     @if (rooms.Count == 0)
     {
         <div class="empty-state mt-3">
             <p>No rooms yet.</p>
-            <p class="text-body-secondary">A room is where a plant lives. Pick one when you add or edit a plant, and it shows up here.</p>
+            <p class="text-body-secondary">A room is where a plant lives. Add one here, or pick one when you add or edit a plant.</p>
+            @AddRoomControl
         </div>
     }
     else
@@ -40,6 +41,11 @@
                             <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
                             <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
                                     @onclick="() => renaming = r.Id">Rename</button>
+                            @if (r.Total == 0)
+                            {
+                                <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                        @onclick="() => RemoveAsync(r.Id, r.Name)">Remove</button>
+                            }
                         </div>
                     }
 
@@ -59,6 +65,11 @@
                                     <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
                                     <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
                                             @onclick="() => renaming = spot.Id">Rename</button>
+                                    @if (spot.Total == 0)
+                                    {
+                                        <button type="button" class="btn btn-link btn-sm p-0" disabled="@busy"
+                                                @onclick="() => RemoveAsync(spot.Id, spot.Name)">Remove</button>
+                                    }
                                 </div>
                             }
                         </div>
@@ -66,6 +77,10 @@
                 </li>
             }
         </ul>
+
+        <div class="mt-3">
+            @AddRoomControl
+        </div>
     }
 
     @if (roomMessage is not null)
@@ -77,15 +92,16 @@
 <section class="settings-section">
     <h2 class="section-label">Tags</h2>
     <p class="settings-hint">
-        Renaming a tag here changes it on every plant that has it, and renaming it to a tag you
-        already use merges the two.
+        Make a tag here by picking the plants it goes on, or add it when you edit a plant. Renaming a
+        tag changes it on every plant that has it, and renaming it to a tag you already use merges the two.
     </p>
 
     @if (tags.Count == 0)
     {
         <div class="empty-state mt-3">
             <p>No tags yet.</p>
-            <p class="text-body-secondary">Tags are your own labels, like "rare" or "for swap". Add them when you edit a plant, and they show up here.</p>
+            <p class="text-body-secondary">Tags are your own labels, like "rare" or "for swap". Make one here, or add it when you edit a plant.</p>
+            @AddTagControl
         </div>
     }
     else
@@ -110,6 +126,10 @@
                 </li>
             }
         </ul>
+
+        <div class="mt-3">
+            @AddTagControl
+        </div>
     }
 
     @if (tagMessage is not null)
@@ -119,6 +139,196 @@
 </section>
 
 @code {
+    private RenderFragment AddRoomControl => __builder =>
+    {
+        if (addingRoom)
+        {
+            <div class="add-form">
+                <RoomPicker @bind-Value="newPlace" Rooms="rooms" Label="Room" />
+                <div class="add-actions">
+                    <button type="button" class="btn btn-primary" disabled="@(busy || RoomName.Clean(newPlace) is null)"
+                            @onclick="AddRoomAsync">Save</button>
+                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="StopAddingRoom">Cancel</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <button type="button" class="btn btn-outline-primary" disabled="@busy"
+                    @onclick="StartAddingRoom">Add a room</button>
+        }
+    };
+
+    private RenderFragment AddTagControl => __builder =>
+    {
+        if (addingTag)
+        {
+            var shown = ShownPlants;
+            <div class="add-form">
+                <label class="form-label" for="new-tag-name">Tag</label>
+                <input id="new-tag-name" class="form-control" autocomplete="off" placeholder="e.g. rare"
+                       value="@newTag" @oninput="TypeTag" />
+
+                <div class="form-label mt-3" id="new-tag-plants">Put it on</div>
+                @if (activePlants.Count == 0)
+                {
+                    <p class="text-body-secondary">You have no plants to tag yet.</p>
+                }
+                else
+                {
+                    @if (activePlants.Count > 10)
+                    {
+                        <input type="search" class="form-control mb-2" autocomplete="off" aria-label="Search plants"
+                               placeholder="Search plants" value="@tagSearch" @oninput="TypeSearch" />
+                    }
+                    <div class="tag-plants" role="group" aria-labelledby="new-tag-plants">
+                        @foreach (var p in shown)
+                        {
+                            var id = p.Id;
+                            <label class="form-check tag-plant">
+                                <input type="checkbox" class="form-check-input" checked="@ticked.Contains(id)"
+                                       @onchange="e => Toggle(id, (bool)e.Value!)" />
+                                <span class="form-check-label">@p.DisplayName</span>
+                            </label>
+                        }
+                        @if (shown.Count == 0)
+                        {
+                            <p class="text-body-secondary mb-0">No plant matches that.</p>
+                        }
+                    </div>
+                }
+
+                <div class="add-actions">
+                    <button type="button" class="btn btn-primary"
+                            disabled="@(busy || PlantTags.Clean(newTag) is null || ticked.Count == 0)"
+                            @onclick="AddTagAsync">Save</button>
+                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="StopAddingTag">Cancel</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <button type="button" class="btn btn-outline-primary" disabled="@busy"
+                    @onclick="StartAddingTag">New tag</button>
+        }
+    };
+
+    private bool addingRoom;
+    private string? newPlace;
+    private bool addingTag;
+    private string newTag = "";
+    private string tagSearch = "";
+    private readonly HashSet<Guid> ticked = [];
+    private IReadOnlyList<Plant> activePlants = [];
+
+    private IReadOnlyList<Plant> ShownPlants =>
+        string.IsNullOrWhiteSpace(tagSearch)
+            ? activePlants
+            : activePlants.Where(p => p.DisplayName.Contains(tagSearch.Trim(), StringComparison.CurrentCultureIgnoreCase)).ToList();
+
+    private void TypeTag(ChangeEventArgs e) => newTag = e.Value?.ToString() ?? "";
+
+    private void TypeSearch(ChangeEventArgs e) => tagSearch = e.Value?.ToString() ?? "";
+
+    private void Toggle(Guid id, bool on)
+    {
+        if (on)
+            ticked.Add(id);
+        else
+            ticked.Remove(id);
+    }
+
+    private void StartAddingRoom()
+    {
+        addingRoom = true;
+        roomMessage = null;
+    }
+
+    private void StopAddingRoom()
+    {
+        addingRoom = false;
+        newPlace = null;
+    }
+
+    private void StartAddingTag()
+    {
+        addingTag = true;
+        tagMessage = null;
+    }
+
+    private void StopAddingTag()
+    {
+        addingTag = false;
+        newTag = "";
+        tagSearch = "";
+        ticked.Clear();
+    }
+
+    private async Task AddRoomAsync()
+    {
+        busy = true;
+        try
+        {
+            var place = RoomName.Clean(newPlace);
+            var (roomName, spotName) = RoomName.Split(place);
+            var before = await RoomService.GetPlacesAsync();
+            var room = roomName is null ? null : before.RoomNamed(roomName);
+            var existed = room is not null && (spotName is null || before.SpotNamed(room.Id, spotName) is not null);
+
+            await RoomService.PlaceIdAsync(place);
+            rooms = await RoomService.GetAllAsync();
+            roomMessage = existed ? $"{place} is already there." : $"Added {place}.";
+            StopAddingRoom();
+        }
+        catch (Exception ex)
+        {
+            roomMessage = $"Couldn't add it: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task RemoveAsync(Guid id, string name)
+    {
+        busy = true;
+        try
+        {
+            // A plant that another device moves in at the same time can end up pointing at a removed
+            // place, which shows as no location. See RoomService.RemoveAsync.
+            await RoomService.RemoveAsync(id);
+            rooms = await RoomService.GetAllAsync();
+            roomMessage = $"Removed {name}.";
+        }
+        catch (Exception ex)
+        {
+            roomMessage = $"Couldn't remove it: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task AddTagAsync()
+    {
+        busy = true;
+        try
+        {
+            var name = PlantTags.Clean(newTag)!;
+            var chosen = activePlants.Where(p => ticked.Contains(p.Id)).ToList();
+            var changed = await PlantService.AddTagsAsync(chosen, [name]);
+            tags = PlantTags.InUse(await Plants.GetAllAsync());
+            tagMessage = changed == 0
+                ? $"{Labels.Plants(chosen.Count)} already had {name}."
+                : $"Tagged {Labels.Plants(changed)}.";
+            StopAddingTag();
+        }
+        catch (Exception ex)
+        {
+            tagMessage = $"Couldn't add the tag: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
     private IReadOnlyList<Room> rooms = [];
     private Guid? renaming; // the room or spot being renamed
     private string? roomMessage;
@@ -133,7 +343,10 @@
     private async Task LoadDataAsync()
     {
         rooms = await RoomService.GetAllAsync();
-        tags = PlantTags.InUse(await Plants.GetAllAsync());
+        var all = await Plants.GetAllAsync();
+        tags = PlantTags.InUse(all);
+        activePlants = all.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active)
+            .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
     }
 
     /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
