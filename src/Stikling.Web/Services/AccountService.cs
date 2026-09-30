@@ -95,6 +95,16 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
         await RememberAsync(state);
     }
 
+    /// <summary>
+    /// Deletes the account at Clerk, which signs out too. The API's side of the account has to be
+    /// deleted first, since the API can't be reached once the sign-in is gone.
+    /// </summary>
+    public async Task DeleteUserAsync()
+    {
+        var state = await (await Module).InvokeAsync<AccountState>("deleteUser");
+        await RememberAsync(state);
+    }
+
     /// <summary>A short-lived token that proves to the API who is signed in, or null when nobody is.</summary>
     public async Task<string?> GetTokenAsync() =>
         await (await Module).InvokeAsync<string?>("getToken");

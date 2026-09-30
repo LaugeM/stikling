@@ -40,7 +40,7 @@
             <div class="room-row">
                 <span class="room-name account-email">@account.Email</span>
                 <button type="button" class="btn btn-link btn-sm p-0" @onclick="AskSignOutAsync"
-                        disabled="@(accountBusy || signOut is not null)">
+                        disabled="@(accountBusy || signOut is not null || deleting)">
                     Sign out
                 </button>
             </div>
@@ -105,6 +105,38 @@
                 </div>
             }
 
+            @if (deleting)
+            {
+                <div class="confirm-card confirm-card-danger">
+                    <p>
+                        <strong>Delete your account</strong><br />
+                        This erases your plants, photos and settings from the Stikling server and deletes your
+                        sign-in. It can't be undone.
+                    </p>
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" id="delete-here-too" @bind="removeHereToo"
+                               disabled="@accountBusy" />
+                        <label class="form-check-label" for="delete-here-too">Remove everything from this device too</label>
+                    </div>
+                    <p class="settings-hint">
+                        @(removeHereToo
+                            ? "This device will be empty afterwards, as if Stikling was just installed."
+                            : "This device keeps what it has, and the app carries on without an account.")
+                    </p>
+                    <div class="settings-actions">
+                        <button type="button" class="btn btn-danger" disabled="@accountBusy"
+                                @onclick="DeleteAccountAsync">Delete account</button>
+                        <button type="button" class="btn btn-link" disabled="@accountBusy"
+                                @onclick="() => deleting = false">Cancel</button>
+                    </div>
+                </div>
+            }
+            else if (signOut is null)
+            {
+                <button type="button" class="btn btn-link btn-sm text-danger p-0 mt-3" disabled="@accountBusy"
+                        @onclick="AskDeleteAccount">Delete account</button>
+            }
+
             @if (accountMessage is not null)
             {
                 <p class="settings-message" role="alert">@accountMessage</p>
@@ -128,6 +160,10 @@
                 <a class="btn btn-link btn-sm p-0" href="sign-in">Sign in</a>
             </div>
             <p class="settings-hint">An account is optional. Everything in the app works without one.</p>
+            @if (accountMessage is not null)
+            {
+                <p class="settings-message" role="status">@accountMessage</p>
+            }
         }
     </section>
 }
@@ -142,6 +178,10 @@
     <div class="room-row">
         <span class="room-name">Questions and answers</span>
         <a class="btn btn-link btn-sm p-0" href="help">Open help</a>
+    </div>
+    <div class="room-row mt-2">
+        <span class="room-name">Privacy</span>
+        <a class="btn btn-link btn-sm p-0" href="privacy">Read</a>
     </div>
 </section>
 
@@ -494,6 +534,8 @@
     private bool accountHintRead;
     private string? accountMessage;
     private SignOutCheck? signOut;
+    private bool deleting; // the question about deleting the account is open
+    private bool removeHereToo;
     private PhotoUsage? photoUsage;
 
     private DateOnly TodayDate => Time.Today();
@@ -712,7 +754,43 @@
         accountUnreachable = false;
         accountMessage = null;
         signOut = null;
+        deleting = false;
         await InvokeAsync(StateHasChanged);
+    }
+
+    private void AskDeleteAccount()
+    {
+        accountMessage = null;
+        removeHereToo = false;
+        deleting = true;
+    }
+
+    private async Task DeleteAccountAsync()
+    {
+        accountBusy = true;
+        accountMessage = null;
+        try
+        {
+            await Sync.DeleteAccountAsync(keepData: !removeHereToo);
+            if (removeHereToo)
+            {
+                // Starts the app afresh, so no page still holds what was removed
+                Nav.NavigateTo("", forceLoad: true);
+                return;
+            }
+
+            account = new AccountState(false, null);
+            deleting = false;
+            accountMessage = "Your account is deleted. Everything on this device is still here.";
+        }
+        catch (Exception e) when (e is HttpRequestException or JSException or TaskCanceledException)
+        {
+            accountMessage = "Couldn't delete your account. Check that you're online and try again.";
+        }
+        finally
+        {
+            accountBusy = false;
+        }
     }
 
     /// <summary>Opens the question, after one last sync so as little as possible is left unsent.</summary>

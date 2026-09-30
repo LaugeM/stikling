@@ -15,7 +15,7 @@ public class CurrentPerson(IHttpContextAccessor http, StiklingDbContext db, Time
 
     private Person? _person;
 
-    private string ClerkUserId =>
+    public string ClerkUserId =>
         http.HttpContext?.User.FindFirstValue("sub")
         ?? throw new InvalidOperationException("The request has no signed-in user.");
 
@@ -34,13 +34,18 @@ public class CurrentPerson(IHttpContextAccessor http, StiklingDbContext db, Time
     /// devices signing in at the same moment can both try to create them, and the unique Clerk id
     /// makes one of them fail. That one reads what the other made.
     /// </summary>
+    /// <exception cref="AccountDeletedException">The account was deleted, and isn't made again.</exception>
     public async Task<Person> FindOrCreateAsync()
     {
         if (await FindAsync() is { } existing)
             return existing;
 
+        var clerkUserId = ClerkUserId;
+        if (await db.DeletedAccounts.AnyAsync(d => d.ClerkUserId == clerkUserId))
+            throw new AccountDeletedException();
+
         var now = clock.GetUtcNow();
-        var person = new Person { ClerkUserId = ClerkUserId, CreatedAt = now };
+        var person = new Person { ClerkUserId = clerkUserId, CreatedAt = now };
         var collection = new Collection { Name = FirstCollectionName, CreatedAt = now };
         db.Memberships.Add(new Membership { Person = person, Collection = collection, Role = MemberRole.Editor, CreatedAt = now });
 
@@ -52,8 +57,10 @@ public class CurrentPerson(IHttpContextAccessor http, StiklingDbContext db, Time
         catch (DbUpdateException e) when (e.InnerException is SqlException { Number: 2601 or 2627 })
         {
             db.ChangeTracker.Clear();
-            var clerkUserId = ClerkUserId;
             return _person = await db.People.SingleAsync(p => p.ClerkUserId == clerkUserId);
         }
     }
 }
+
+/// <summary>The caller's account was deleted. The API answers 410 Gone.</summary>
+public sealed class AccountDeletedException() : Exception("This account has been deleted.");

@@ -235,7 +235,29 @@
                 want to keep them.
             </p>
         </details>
+
+        <details class="help-item">
+            <summary>How do I delete my account?</summary>
+            <p>
+                In Settings, under Account, tap <em>Delete account</em>. It erases everything your account has on
+                the Stikling server, photos included, and deletes your sign-in. It can't be undone.
+            </p>
+            <p>
+                You choose whether this device keeps what it has. If it does, the app carries on without an
+                account, like before you signed in. Your other devices stop syncing and keep what is on them.
+            </p>
+        </details>
     }
+
+    <details class="help-item">
+        <summary>Who can see my plants?</summary>
+        <p>
+            @(Account.IsAvailable
+                ? "Without an account, nobody but you, since nothing leaves the device. With one, only the people in your collection, and for now that is only you."
+                : "Nobody but you, since nothing leaves the device.")
+            There are no ads and no tracking. The <a href="privacy">privacy page</a> has the details.
+        </p>
+    </details>
 </section>
 
 <section class="help-section" id="plants">

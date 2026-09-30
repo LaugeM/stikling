@@ -10,6 +10,7 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     public DbSet<SyncedRecord> Records => Set<SyncedRecord>();
     public DbSet<PersonSettings> PersonSettings => Set<PersonSettings>();
     public DbSet<PhotoImage> PhotoImages => Set<PhotoImage>();
+    public DbSet<DeletedAccount> DeletedAccounts => Set<DeletedAccount>();
 
     /// <summary>
     /// Locks the collection's row until the end of the transaction, so changes to one collection
@@ -64,6 +65,12 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
             image.HasKey(i => new { i.CollectionId, i.PhotoId, i.Size });
             image.Property(i => i.Size).HasConversion<string>().HasMaxLength(20);
             image.HasOne<Collection>().WithMany().HasForeignKey(i => i.CollectionId);
+        });
+
+        model.Entity<DeletedAccount>(deleted =>
+        {
+            deleted.HasKey(d => d.ClerkUserId);
+            deleted.Property(d => d.ClerkUserId).HasMaxLength(100).UseCollation("Latin1_General_100_BIN2");
         });
     }
 }

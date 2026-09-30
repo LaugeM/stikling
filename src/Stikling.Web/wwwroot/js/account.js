@@ -101,6 +101,13 @@ export async function signOut(redirectUrl) {
     return state();
 }
 
+// Deletes the Clerk user, which also ends the session. The instance has to allow users to delete
+// themselves, under the user settings in Clerk's dashboard.
+export async function deleteUser() {
+    await window.Clerk.user.delete();
+    return state();
+}
+
 // A short-lived session token for the API, or null when signed out
 export async function getToken() {
     return (await window.Clerk.session?.getToken()) ?? null;

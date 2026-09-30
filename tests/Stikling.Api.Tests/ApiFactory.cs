@@ -60,6 +60,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.UseSetting("Database:MigrateOnStart", "false");
         builder.UseSetting("ConnectionStrings:Stikling", _sql.GetConnectionString());
         builder.UseSetting("ConnectionStrings:Photos", _storage.GetConnectionString());
         builder.UseSetting("Photos:MaxBytesPerCollection", PhotoLimit.ToString());

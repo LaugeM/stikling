@@ -4,7 +4,7 @@
 
 *Stikling* is Danish for "cutting". It's a free plant and propagation tracker for houseplant hobbyists. Keep track of your plants, the cuttings and corms you take from them, and how they develop, with a photo timeline for each one.
 
-Stikling is a Progressive Web App: it runs in the browser, can be installed on your phone's home screen, and works offline. Everything is kept on your own device, and the app works fully without an account. Signing in, which keeps your plants and photos the same on all your devices, is built but won't be on the live site until the sync API is hosted.
+Stikling is a Progressive Web App: it runs in the browser, can be installed on your phone's home screen, and works offline. Everything is kept on your own device, and the app works fully without an account. Signing in keeps your plants and photos the same on all your devices. Try it at [stikling.app](https://stikling.app).
 
 > Status: v1 features are in place. See the [feature list](docs/FEATURES.md) for everything the app could do, and the [Roadmap](#roadmap) for where it is now.
 
@@ -24,8 +24,8 @@ The longer list, with the ideas for later versions, is in [docs/FEATURES.md](doc
 - Bootstrap 5
 - IndexedDB for on-device storage (via a small JS interop module)
 - xUnit for the domain logic
-- The sync API (in progress): ASP.NET Core minimal API with EF Core on SQL Server, photos in Azure Blob Storage, sign-in through Clerk, run locally with Docker Compose
-- Hosted for free on GitHub Pages and deployed with GitHub Actions
+- The sync API: ASP.NET Core minimal API with EF Core on SQL Server, photos in Azure Blob Storage, sign-in through Clerk, run locally with Docker Compose
+- The app on GitHub Pages, the API on Azure Container Apps with Azure SQL, described in Bicep and deployed with GitHub Actions
 
 ### Why Blazor WebAssembly?
 
@@ -40,6 +40,7 @@ src/Stikling.Api/           The sync API for accounts, records and photos
 tests/Stikling.Core.Tests/  xUnit tests for Core
 tests/Stikling.Api.Tests/   xUnit tests for the API, against SQL Server and Azurite in Docker
 tools/plant-names/          Builds the plant names the app suggests while you type
+infra/                     The Azure resources for the hosted API, in Bicep
 .github/                   Build/test/deploy workflow and GitHub Pages prep script
 ```
 
@@ -71,7 +72,7 @@ The API is then on http://localhost:5180, with `/health` to check it's up. It cr
 
 ### Signing in
 
-When the app runs in Development, it reads `src/Stikling.Web/wwwroot/appsettings.Development.json`, which points at Clerk's development instance and the local API. The Account section then shows up at the top of Settings. The published site has no such file, so it doesn't offer signing in until the API is hosted.
+When the app runs in Development, it reads `src/Stikling.Web/wwwroot/appsettings.Development.json`, which points at Clerk's development instance and the local API. The Account section then shows up at the top of Settings. The published site reads `appsettings.Production.json` instead, which points at the production instance and the hosted API.
 
 To try it, start the API as above and run the app on one of the origins the API accepts (`AppOrigins` in `src/Stikling.Api/appsettings.Development.json`), for example:
 
@@ -81,9 +82,11 @@ dotnet run --project src/Stikling.Web --urls http://localhost:5170
 
 ## Deployment
 
-Every push to `main` runs the tests, publishes the app and deploys it to GitHub Pages. In the repo settings under Pages, the source needs to be set to GitHub Actions.
+Every push to `main` runs the tests, deploys the app to GitHub Pages and the API to Azure. In the repo settings under Pages, the source needs to be set to GitHub Actions, and the custom domain to stikling.app.
 
-Because Pages serves the site from `/<repo-name>/`, [`prepare-pages.py`](.github/scripts/prepare-pages.py) rewrites the `<base href>`, updates the service worker's hash for `index.html`, and adds a `404.html` copy so deep links work.
+[`prepare-pages.py`](.github/scripts/prepare-pages.py) sets the `<base href>`, updates the service worker's hash for `index.html`, and adds a `404.html` copy so deep links work.
+
+[docs/hosting.md](docs/hosting.md) has how the API is hosted and how to set it up again.
 
 ## Roadmap
 

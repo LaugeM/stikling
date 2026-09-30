@@ -1,6 +1,6 @@
 # Notes for working on Stikling
 
-Blazor WebAssembly PWA. Everything is stored on the device in IndexedDB. When someone signs in, the app syncs with the API, which isn't hosted yet.
+Blazor WebAssembly PWA. Everything is stored on the device in IndexedDB. When someone signs in, the app syncs with the API, which runs on Azure. The app is at https://stikling.app.
 
 ## Where code goes
 
@@ -10,6 +10,7 @@ Blazor WebAssembly PWA. Everything is stored on the device in IndexedDB. When so
 - `tests/Stikling.Core.Tests`: xUnit, run with `dotnet test Stikling.slnx`. The services are tested against the in-memory repositories in `Fakes.cs`.
 - `tests/Stikling.Api.Tests`: the API's endpoints, run against a real SQL Server and Azurite that Testcontainers starts in Docker. Docker Desktop has to be running for `dotnet test Stikling.slnx`.
 - `tools/plant-names`: the script that builds `wwwroot/data/plant-names.json`, the names the genus, species and cultivar fields suggest. Its README says where the names come from and how to add more. Never edit the JSON by hand.
+- `infra`: the Azure resources for the hosted API, in Bicep. `docs/hosting.md` says what they are and how to deploy them. The workflow only deploys new versions of the API, and changes to the Bicep are deployed by hand.
 
 Photos are resized, stored, read, and sent to and fetched from the API entirely in JavaScript. The image data only crosses into C# when a backup is written or restored.
 
@@ -53,20 +54,20 @@ Accounts and sync between devices are being added in steps, so people don't have
 - Clerk's session tokens are checked by ASP.NET Core's JWT bearer authentication in `Auth/ClerkAuthentication.cs`. Clerk stays behind that file and the `ClerkUserId` column on `Person`. Everything else points at our own `Person.Id`, so the sign-in service can be replaced.
 - Never take the caller's identity from the request body or the URL. `CurrentPerson` finds them from the token.
 - Anything under `/collections/{collectionId}` needs `CollectionPolicies.View` or `CollectionPolicies.Edit`. The policy checks the caller's membership on every request, so a viewer can't change data even with a modified app.
-- `docker compose up --build` runs the API on port 5180 with SQL Server, and Azurite in place of Blob Storage. In Development it applies its migrations on start. A new migration is made with `dotnet tool restore`, then `dotnet ef migrations add <Name> --project src/Stikling.Api --output-dir Data/Migrations`.
+- `docker compose up --build` runs the API on port 5180 with SQL Server, and Azurite in place of Blob Storage. It applies its migrations on start, locally and hosted. A new migration is made with `dotnet tool restore`, then `dotnet ef migrations add <Name> --project src/Stikling.Api --output-dir Data/Migrations`.
 - Records from the app are kept as their JSON in one `Records` table, keyed by collection, kind and id. The server only reads the id, `updatedAt` and `deletedAt`, so a new field in a model needs no migration. The newest `updatedAt` wins, and each accepted change gets the collection's next change number, which is what devices fetch by. The person's `UserSettings` are kept the same way in `PersonSettings`. A record the server can't keep, like one dated more than a day ahead of its clock, is refused on its own, and the rest of the upload is kept.
 - Photo images don't travel with the records. After the records, `PhotoSyncService` in `Core/Sync` sends the images from the `photoUploads` list in `db.js` and fetches thumbnails for the `photoDownloads` list. `db.js` keeps both lists in the same transaction as the images. Full sizes are only fetched when a photo is opened. The API keeps each image as a blob, with a `PhotoImages` row so a collection's photo space (1 GB, `Photos:MaxBytesPerCollection`) can be added up, and deletes the images when a photo's record arrives deleted.
 - The sync logic on the device side is `SyncService` in `Core/Sync`, tested against `FakeSyncStore` and `FakeSyncServer`. `SyncRecord`, `PushRequest` and the other request formats there are shared with the API.
 - In the app, `SyncRunner` decides when to sync, and `IndexedDbSyncStore` is the device side of it. Every write in `db.js` also puts the record on the change list, the `changes` store, in the same transaction. That covers every store except the ones in `NOT_RECORDS`, so a new store is on the list without anything else to add. A store that doesn't hold records, like `photoBlobs`, goes in `NOT_RECORDS`.
 - `db.js` keeps the fields of a stored record that the app didn't send when saving it, so a device on an older version can't erase a field that a newer version added. Only fields at the top of the record are kept this way.
 - Lists and detail pages have `<ReloadOnSync Reload="..." />`, which reloads their data when changes arrive from another device. Edit pages don't, so nothing changes under someone filling in a form.
-- Settings that differ between local and hosted (the Clerk instance, the app's origins, the connection string) are in `appsettings.Development.json` locally, and come from the host's environment when it's deployed. Secrets never go in the repo.
+- Settings that differ between local and hosted (the Clerk instance, the app's origins, the connection string) are in `appsettings.Development.json` locally, and in the container's environment in `infra/resources.bicep` when hosted. Secrets never go in the repo, and the hosted API has none: it reaches the database and storage with its managed identity.
 
 ## Signing in from the app
 
 - Clerk has no Blazor library, so it is behind `wwwroot/js/account.js`, and `AccountService` is the only class that calls that file. Calls to the API go through `StiklingApi`, which adds the session token to each request.
 - Clerk's scripts are only loaded when they are needed: on the sign-in page, or for syncing on a device where someone is signed in. Syncing starts once the app is on screen, never before, so it still opens offline, and a device where nobody signed in never loads Clerk.
-- Signing in is only offered when `wwwroot/appsettings.{Environment}.json` has the Clerk instance and the API address. Locally that is `appsettings.Development.json`, which is kept out of the published site, so the live site doesn't offer signing in until the API is hosted.
+- Signing in is only offered when `wwwroot/appsettings.{Environment}.json` has the Clerk instance and the API address. Locally that is `appsettings.Development.json`, which is kept out of the published site. The live site uses `appsettings.Production.json`, with Clerk's production instance and the hosted API.
 - The API only accepts tokens from the origins in its `AppOrigins`. The `stikling-web` dev server runs in Development on port 5170 for that reason. If it falls back to another port, the API turns the sign-in away.
 
 ## The Help page
