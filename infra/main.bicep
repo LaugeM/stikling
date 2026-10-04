@@ -63,8 +63,6 @@ module costStop 'cost-stop.bicep' = {
   scope: group
   params: {
     location: location
-    sqlServerName: resources.outputs.sqlServerName
-    databaseName: resources.outputs.databaseName
     apiName: resources.outputs.apiName
     emails: budgetEmails
   }
@@ -88,22 +86,11 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
         thresholdType: 'Actual'
         contactEmails: budgetEmails
       }
-      // The database moves to the free tier
+      // The API stops
       allSpent: {
         enabled: true
         operator: 'GreaterThanOrEqualTo'
         threshold: 100
-        thresholdType: 'Actual'
-        contactEmails: budgetEmails
-        contactGroups: [
-          costStop.outputs.freeDatabaseActionGroupId
-        ]
-      }
-      // The API stops, if spending carried on anyway
-      wellOver: {
-        enabled: true
-        operator: 'GreaterThanOrEqualTo'
-        threshold: 125
         thresholdType: 'Actual'
         contactEmails: budgetEmails
         contactGroups: [
