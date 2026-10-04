@@ -234,6 +234,19 @@ resource changed 'Microsoft.Insights/activityLogAlerts@2020-10-01' = {
           field: 'caller'
           equals: identity.properties.principalId
         }
+        // Azure also logs a policy check under the same identity each time, which isn't worth an email
+        {
+          anyOf: [
+            {
+              field: 'operationName'
+              equals: 'Microsoft.App/containerApps/stop/action'
+            }
+            {
+              field: 'operationName'
+              equals: 'Microsoft.App/containerApps/start/action'
+            }
+          ]
+        }
         {
           anyOf: [
             {
