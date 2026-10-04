@@ -178,6 +178,7 @@ else
     private string? editError;
     private Guid? versionsId;
     private Guid loadedFor;
+    private Guid? openWhenLoaded;
 
     private DateOnly Today => Time.Today();
 
@@ -186,6 +187,7 @@ else
         if (loadedFor != SubjectId)
         {
             loadedFor = SubjectId;
+            openWhenLoaded = null;
             await LoadAsync();
         }
     }
@@ -201,6 +203,13 @@ else
         photos = inTimeline.Concat(stored.Where(p => !entries.Any(e => e.PhotoIds.Contains(p.Id)))).ToList();
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
         days = TimelineOrder.ByDay(entries, Time);
+
+        // A photo tapped before the photos were here opens as soon as they are
+        if (openWhenLoaded is { } waiting)
+        {
+            openWhenLoaded = null;
+            OpenPhoto(waiting);
+        }
     }
 
     private async Task DeleteEntryAsync(TimelineEntry entry)
@@ -266,9 +275,18 @@ else
 
     private Task FrameAsync((Photo Photo, PhotoFrame? Frame) change) => Photos.SetFrameAsync(change.Photo, change.Frame);
 
-    /// <summary>Opens a photo full screen, e.g. the cover when it's tapped at the top of the page.</summary>
+    /// <summary>
+    /// Opens a photo full screen, e.g. the cover when it's tapped at the top of the page. Before
+    /// the photos have loaded it opens once they have.
+    /// </summary>
     public void OpenPhoto(Guid photoId)
     {
+        if (days is null)
+        {
+            openWhenLoaded = photoId;
+            return;
+        }
+
         if (photoIndex.TryGetValue(photoId, out var index))
         {
             viewerIndex = index;

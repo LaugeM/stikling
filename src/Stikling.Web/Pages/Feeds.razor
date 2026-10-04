@@ -60,7 +60,7 @@
                                         aria-label="Move @NameOf(dose) down"
                                         @onclick="() => draft.MoveDown(index)">▼</button>
                                 <button type="button" class="feed-tool remove" aria-label="Remove @NameOf(dose)"
-                                        @onclick="() => draft.Products.RemoveAt(index)">✕</button>
+                                        @onclick="() => draft.Products.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                             </div>
                             <DoseInput Id="@id" Unit="dose.Unit"
                                        @bind-Amount="dose.Amount" @bind-Per="dose.Per" @bind-PerUnit="dose.PerUnit" />

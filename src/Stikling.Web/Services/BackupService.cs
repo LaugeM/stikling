@@ -25,6 +25,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
 
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = false };
 
+    /// <summary>Raised after a restore, so what the layout shows (like the Pests tab) can look again.</summary>
+    public event Action? Restored;
+
     /// <summary>Builds the backup and hands it to the browser as a download.</summary>
     public async Task<BackupCounts> ExportAsync()
     {
@@ -157,6 +160,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             restoredPhotos++;
         }
 
+        Restored?.Invoke();
         return new ImportSummary(added, updated, broughtBack, kept, restoredPhotos);
     }
 
