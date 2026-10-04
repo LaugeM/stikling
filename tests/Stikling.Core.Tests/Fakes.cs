@@ -111,8 +111,8 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
         Task.FromResult<IReadOnlyDictionary<Guid, TimelineEntry>>(
             TimelineOrder.NewestFirst(Entries).GroupBy(e => e.SubjectId).ToDictionary(g => g.Key, g => g.First()));
 
-    public Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds) =>
-        Task.FromResult(TodayBoard.RecentActivity(Entries, subjectIds, count));
+    public Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since) =>
+        Task.FromResult(TodayBoard.RecentActivity(Entries, subjectIds, since, count));
 
     public Task AddAsync(TimelineEntry entry)
     {

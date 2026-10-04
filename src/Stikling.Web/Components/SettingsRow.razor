@@ -1,6 +1,6 @@
 @* A whole-row link with a name and a line under it, used by Settings and Supplies. *@
 
-<a class="item-card settings-row" href="@Href">
+<a class="item-card settings-row" href="@Href" target="@(External ? "_blank" : null)" rel="@(External ? "noopener" : null)">
     @if (Icon is not null)
     {
         <span class="settings-row-icon" aria-hidden="true">
@@ -11,7 +11,15 @@
         <span class="item-name">@Title</span>
         <span class="settings-row-detail @(Alert ? "alert" : null)">@(ChildContent is null ? Detail : ChildContent)</span>
     </span>
-    <svg class="settings-row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+    @if (External)
+    {
+        <svg class="settings-row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9" /></svg>
+        <span class="visually-hidden">(opens in a new tab)</span>
+    }
+    else
+    {
+        <svg class="settings-row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+    }
 </a>
 
 @code {
@@ -31,6 +39,10 @@
     /// <summary>The SVG paths of a stroked icon, drawn on a leaf-tinted tile.</summary>
     [Parameter]
     public RenderFragment? Icon { get; set; }
+
+    /// <summary>A link to another site, opened in a new tab and marked with an arrow pointing out.</summary>
+    [Parameter]
+    public bool External { get; set; }
 
     /// <summary>Colours the line under the name as a problem.</summary>
     [Parameter]

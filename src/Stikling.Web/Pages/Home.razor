@@ -215,7 +215,7 @@ else
         <h2>Lately</h2>
         @if (recent.Count == 0)
         {
-            <p class="text-body-secondary mb-0">Nothing written down yet. Notes and photos you add to a plant or propagation show up here.</p>
+            <p class="text-body-secondary mb-0">Nothing written down in the last 30 days. Notes and photos you add to a plant or propagation show up here.</p>
         }
         else
         {
@@ -305,7 +305,7 @@ else
             names[propagation.Id] = propagation.DisplayName;
 
         // Only what's still here: entries left behind by a deleted plant have nowhere to go
-        recent = await Entries.GetRecentAsync(8, names.Keys.ToHashSet());
+        recent = await Entries.GetRecentAsync(8, names.Keys.ToHashSet(), TodayBoard.LatelySince(Time));
 
         monthResult = TodayBoard.FinishedThisMonth(propagations, Time);
         backupReminder = await BackupReminderAsync();

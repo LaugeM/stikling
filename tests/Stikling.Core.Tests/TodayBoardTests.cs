@@ -44,6 +44,8 @@ public class TodayBoardTests
         StartedOn = Today.AddDays(-daysAgo)
     };
 
+    private static readonly DateTimeOffset Since = TodayBoard.LatelySince(Time);
+
     private static TimelineEntry Entry(Guid subjectId, int daysAgo) => new()
     {
         SubjectType = SubjectType.Propagation,
@@ -119,7 +121,7 @@ public class TodayBoardTests
         var entries = Enumerable.Range(1, 12).Select(i => Entry(Guid.NewGuid(), i)).ToList();
         var subjects = entries.Select(e => e.SubjectId).ToHashSet();
 
-        var recent = TodayBoard.RecentActivity(entries, subjects, 5);
+        var recent = TodayBoard.RecentActivity(entries, subjects, Since, 5);
 
         Assert.Equal(5, recent.Count);
         Assert.Equal(entries[0].Id, recent[0].Id);
@@ -132,7 +134,7 @@ public class TodayBoardTests
         var gone = Guid.NewGuid();
         var entries = new List<TimelineEntry> { Entry(gone, 1), Entry(kept, 2), Entry(gone, 3) };
 
-        var recent = TodayBoard.RecentActivity(entries, new HashSet<Guid> { kept });
+        var recent = TodayBoard.RecentActivity(entries, new HashSet<Guid> { kept }, Since);
 
         var entry = Assert.Single(recent);
         Assert.Equal(kept, entry.SubjectId);
@@ -147,10 +149,38 @@ public class TodayBoardTests
             .Select(i => Entry(i <= 4 ? gone : kept, i))
             .ToList();
 
-        var recent = TodayBoard.RecentActivity(entries, new HashSet<Guid> { kept }, 5);
+        var recent = TodayBoard.RecentActivity(entries, new HashSet<Guid> { kept }, Since, 5);
 
         Assert.Equal(5, recent.Count);
         Assert.All(recent, e => Assert.Equal(kept, e.SubjectId));
+    }
+
+    [Fact]
+    public void Recent_activity_only_goes_back_thirty_days()
+    {
+        var subject = Guid.NewGuid();
+        var entries = new List<TimelineEntry> { Entry(subject, 0), Entry(subject, 30), Entry(subject, 31), Entry(subject, 365) };
+
+        var recent = TodayBoard.RecentActivity(entries, new HashSet<Guid> { subject }, Since);
+
+        Assert.Equal([entries[0].Id, entries[1].Id], recent.Select(e => e.Id));
+    }
+
+    [Fact]
+    public void Recent_activity_is_empty_when_nothing_is_that_recent()
+    {
+        var subject = Guid.NewGuid();
+
+        Assert.Empty(TodayBoard.RecentActivity([Entry(subject, 365)], new HashSet<Guid> { subject }, Since));
+    }
+
+    [Fact]
+    public void Lately_starts_at_the_beginning_of_the_local_day_thirty_days_back()
+    {
+        // Half past one at night on the 21st where the device is
+        var time = new FixedTime(new DateTimeOffset(2026, 9, 20, 23, 30, 0, TimeSpan.Zero), TimeSpan.FromHours(2));
+
+        Assert.Equal(new DateTimeOffset(2026, 8, 22, 0, 0, 0, TimeSpan.FromHours(2)), TodayBoard.LatelySince(time));
     }
 
     [Theory]
