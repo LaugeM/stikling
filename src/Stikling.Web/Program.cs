@@ -62,7 +62,7 @@ builder.Services.AddScoped<PhotoService>();
 builder.Services.AddScoped<DeviceFiles>();
 builder.Services.AddScoped<AppBadge>();
 builder.Services.AddScoped<BackupService>();
-builder.Services.AddSingleton(AccountSettings.From(builder.Configuration));
+builder.Services.AddSingleton(AccountSettings.From(builder.Configuration, builder.HostEnvironment.IsDevelopment()));
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<StiklingApi>();
 builder.Services.AddScoped<IndexedDbSyncStore>();

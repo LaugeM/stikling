@@ -42,15 +42,20 @@ public static class ClerkAuthentication
                 {
                     OnTokenValidated = context =>
                     {
-                        var party = context.Principal?.FindFirstValue(AuthorizedPartyClaim);
-                        if (party is not null && !origins.Value.Origins.Contains(party, StringComparer.OrdinalIgnoreCase))
-                            context.Fail($"The token was issued to {party}, which is not one of the app's origins.");
-
+                        CheckAuthorizedParty(context, origins.Value);
                         return Task.CompletedTask;
                     },
                 };
             });
 
         return services;
+    }
+
+    /// <summary>Turns the token away if it was issued to a site that isn't one of the app's origins.</summary>
+    public static void CheckAuthorizedParty(TokenValidatedContext context, AppOrigins origins)
+    {
+        var party = context.Principal?.FindFirstValue(AuthorizedPartyClaim);
+        if (party is not null && !origins.Allows(party))
+            context.Fail($"The token was issued to {party}, which is not one of the app's origins.");
     }
 }

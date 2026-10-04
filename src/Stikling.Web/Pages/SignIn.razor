@@ -35,6 +35,26 @@ else
     }
 }
 
+@if (Account.IsTestSignInAvailable)
+{
+    @* Development only, so signed-in screens and syncs can be tried without Clerk *@
+    <form class="test-sign-in" @onsubmit="SignInAsTestPersonAsync">
+        <label class="form-label" for="test-person">Test person</label>
+        <input id="test-person" class="form-control" autocomplete="off" @bind="testName" />
+        <p class="settings-hint">
+            Only while developing. The local API takes this person in place of Clerk. The same name is
+            the same person on every device, and a new name is a new person.
+        </p>
+        <div class="settings-actions">
+            <button type="submit" class="btn btn-outline-primary" disabled="@signingInAsTest">Sign in as a test person</button>
+        </div>
+        @if (testProblem is not null)
+        {
+            <p class="settings-message" role="alert">Couldn't sign in as a test person: @testProblem</p>
+        }
+    </form>
+}
+
 @* Clerk draws into this, so Blazor never renders anything inside it *@
 <div class="account-sign-in" @ref="signIn" hidden="@(!Account.IsAvailable || unavailable)"></div>
 
@@ -43,6 +63,9 @@ else
     private bool loading = true;
     private bool unavailable;
     private bool mounted;
+    private string testName = "person";
+    private bool signingInAsTest;
+    private string? testProblem;
 
     private string SettingsUrl => Nav.ToAbsoluteUri("settings").ToString();
 
@@ -83,18 +106,41 @@ else
         StateHasChanged();
     }
 
-    public async ValueTask DisposeAsync()
+    private async Task SignInAsTestPersonAsync()
+    {
+        // The name goes into the token, so it keeps to letters, digits and dashes
+        var name = new string(testName.Trim().ToLowerInvariant().Where(c => char.IsAsciiLetterOrDigit(c) || c == '-').ToArray());
+        signingInAsTest = true;
+        testProblem = null;
+        await UnmountAsync();
+        try
+        {
+            await Account.SignInAsTestPersonAsync(name.Length > 0 ? name : "person");
+            Nav.NavigateTo(SettingsUrl, replace: true);
+        }
+        catch (AccountUnavailableException e)
+        {
+            // Only while developing, so the details are more use than a friendly sentence
+            testProblem = (e.InnerException?.Message ?? e.Message).Split('\n')[0];
+            signingInAsTest = false;
+        }
+    }
+
+    private async Task UnmountAsync()
     {
         if (!mounted)
             return;
 
+        mounted = false;
         try
         {
             await Account.UnmountSignInAsync(signIn);
         }
         catch (JSException)
         {
-            // The page is going away either way
+            // Clerk's sign-in is going away either way
         }
     }
+
+    public ValueTask DisposeAsync() => new(UnmountAsync());
 }

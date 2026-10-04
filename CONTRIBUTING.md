@@ -53,11 +53,13 @@ The API is then on http://localhost:5180, with `/health` to check it's up. It cr
 
 When the app runs in Development, it reads `src/Stikling.Web/wwwroot/appsettings.Development.json`, which points at Clerk's development instance and the local API. Settings then has an Account row at the top. The published site reads `appsettings.Production.json` instead, which points at the production instance and the hosted API.
 
-The API only accepts sign-ins from the origins in `AppOrigins` in `src/Stikling.Api/appsettings.Development.json`, so run the app on one of them:
+The API only accepts sign-ins from the origins in `AppOrigins` in `src/Stikling.Api/appsettings.Development.json`. Locally that is any port on localhost:
 
 ```bash
 dotnet run --project src/Stikling.Web --urls http://localhost:5170
 ```
+
+To try the signed-in screens without a Clerk account, use "Sign in as a test person" on the sign-in page. It only shows in Development, and only the local API accepts it. Each name is its own person.
 
 ## Where things go
 

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
@@ -60,12 +61,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
-        builder.UseSetting("Database:MigrateOnStart", "false");
-        builder.UseSetting("ConnectionStrings:Stikling", _sql.GetConnectionString());
-        builder.UseSetting("ConnectionStrings:Photos", _storage.GetConnectionString());
-        builder.UseSetting("Photos:MaxBytesPerCollection", PhotoLimit.ToString());
-        builder.UseSetting("Clerk:Authority", Issuer);
-        builder.UseSetting("AppOrigins:0", AppOrigin);
+        foreach (var (key, value) in Settings)
+            builder.UseSetting(key, value);
 
         builder.ConfigureTestServices(services =>
             services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, jwt =>
@@ -77,6 +74,30 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
                 jwt.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(configuration);
             }));
     }
+
+    private Dictionary<string, string?> Settings => new()
+    {
+        ["Database:MigrateOnStart"] = "false",
+        ["ConnectionStrings:Stikling"] = _sql.GetConnectionString(),
+        ["ConnectionStrings:Photos"] = _storage.GetConnectionString(),
+        ["Photos:MaxBytesPerCollection"] = PhotoLimit.ToString(),
+        ["Clerk:Authority"] = Issuer,
+        ["AppOrigins:0"] = AppOrigin,
+    };
+
+    /// <summary>
+    /// The same API in another environment, which also reads that environment's settings file,
+    /// like appsettings.Development.json. The settings above and <paramref name="settings"/> still
+    /// win over the file.
+    /// </summary>
+    public WebApplicationFactory<Program> InEnvironment(string environment, Dictionary<string, string?>? settings = null) =>
+        WithWebHostBuilder(builder =>
+        {
+            builder.UseEnvironment(environment);
+            builder.ConfigureAppConfiguration(config => config
+                .AddInMemoryCollection(Settings)
+                .AddInMemoryCollection(settings ?? []));
+        });
 
     /// <summary>A session token shaped like Clerk's, valid unless a parameter says otherwise.</summary>
     public string TokenFor(

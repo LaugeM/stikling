@@ -10,4 +10,6 @@ regexes = [
   '''pk_(test|live)_[A-Za-z0-9]+''',
   # Azurite's account key, which is the same published value on every machine
   '''Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==''',
+  # The key for signing in as a test person, which only the API in Development accepts
+  '''3kQI9o2T/\+4V83cUTMQ7rKHNhT/VWEc1xV5VwrG8jiM=''',
 ]
