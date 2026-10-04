@@ -18,9 +18,9 @@ A budget can only send emails, and when the Azure for Students credit runs out, 
 
 - When the month's budget is spent, a Logic App moves the database to the free tier. Sync is slow again but keeps working, and the data stays as it is.
 - At 125% of the budget ($10), another one stops the API. The app keeps working on each device, and changes wait there until the API is back.
-- At 02:00 UTC on the 1st of each month, a third one moves the database back to Basic and starts the API, if the stop had changed them.
+- At 02:00 UTC on the 1st of each month, a third one moves the database back to Basic and starts the API, if they aren't like that already. That also undoes a change made by hand.
 
-Every change the stop makes sends an email to the budget's addresses. Azure works out costs several hours late, so the stop comes up to a day after the line is crossed.
+Every change the stop makes sends an email to the budget's addresses, and so does one that fails. Azure works out costs several hours late, so the stop comes up to a day after the line is crossed.
 
 While the API is stopped, a new version can't be checked after it's deployed, so the workflow's last step fails. To bring things back before the 1st, run `logic-stikling-month-start` from the portal (Run trigger, on its overview page). Deploying the Bicep also moves the database back to Basic, but doesn't start the API.
 

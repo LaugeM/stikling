@@ -7,7 +7,8 @@
 // - At 125% of it, the API is stopped. The app keeps working on each device, and changes wait there
 //   until it is back.
 //
-// On the 1st of each month, both are undone. Each change the stop makes sends an email.
+// On the 1st of each month, both are undone. Each change the stop makes sends an email, and so does
+// one that fails.
 //
 // Azure works out costs several hours late, so the stop comes up to a day after the line is crossed.
 
@@ -21,8 +22,7 @@ param apiName string
 @description('Who gets an email when the cost stop changes something.')
 param emails array
 
-// Built-in roles
-var contributor = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+// Built-in role
 var sqlDbContributor = '9b7fa17d-e63e-47b0-bb0a-15c516ac86ec'
 
 resource sql 'Microsoft.Sql/servers@2023-08-01' existing = {
@@ -54,11 +54,33 @@ resource canChangeDatabase 'Microsoft.Authorization/roleAssignments@2022-04-01' 
   }
 }
 
+// Only what the stop needs, so it can't change the API's settings or read its secrets
+resource stopAndStartApi 'Microsoft.Authorization/roleDefinitions@2022-04-01' = {
+  name: guid(resourceGroup().id, 'stikling-stop-and-start-api')
+  properties: {
+    roleName: 'Stikling cost stop'
+    description: 'Can see whether the API is running, and stop or start it.'
+    type: 'CustomRole'
+    assignableScopes: [
+      resourceGroup().id
+    ]
+    permissions: [
+      {
+        actions: [
+          'Microsoft.App/containerApps/read'
+          'Microsoft.App/containerApps/stop/action'
+          'Microsoft.App/containerApps/start/action'
+        ]
+      }
+    ]
+  }
+}
+
 resource canStopApi 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(api.id, identity.id, contributor)
+  name: guid(api.id, identity.id, stopAndStartApi.id)
   scope: api
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', contributor)
+    roleDefinitionId: stopAndStartApi.id
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -147,7 +169,8 @@ resource stopApi 'Microsoft.Logic/workflows@2019-05-01' = {
   }
 }
 
-// Only changes what the stop changed, so a month without a stop sends no email
+// Only changes what isn't as it should be, so a month without a stop sends no email. It also undoes
+// a change made by hand, like a stopped API.
 resource monthStart 'Microsoft.Logic/workflows@2019-05-01' = {
   name: 'logic-stikling-month-start'
   location: location
@@ -219,13 +242,16 @@ resource monthStart 'Microsoft.Logic/workflows@2019-05-01' = {
           }
           runAfter: {}
         }
-        If_the_API_is_stopped: {
+        // Stopped shows as "Stopped", but anything other than running is worth a start
+        If_the_API_isnt_running: {
           type: 'If'
           expression: {
-            equals: [
-              '@body(\'Get_the_API\')?[\'properties\']?[\'runningStatus\']'
-              'Stopped'
-            ]
+            not: {
+              equals: [
+                '@body(\'Get_the_API\')?[\'properties\']?[\'runningStatus\']'
+                'Running'
+              ]
+            }
           }
           actions: {
             Start_the_API: {
@@ -285,7 +311,8 @@ resource stopApiGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
   }
 }
 
-// An email for each change the stop makes, found in the activity log by the identity that made it
+// An email for each change the stop makes, found in the activity log by the identity that made it.
+// One that fails sends an email too, so a stop that didn't work isn't missed.
 
 resource emailGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
   name: 'ag-stikling-cost-stop-email'
@@ -323,8 +350,16 @@ resource changed 'Microsoft.Insights/activityLogAlerts@2020-10-01' = {
           equals: identity.properties.principalId
         }
         {
-          field: 'status'
-          equals: 'Succeeded'
+          anyOf: [
+            {
+              field: 'status'
+              equals: 'Succeeded'
+            }
+            {
+              field: 'status'
+              equals: 'Failed'
+            }
+          ]
         }
       ]
     }
