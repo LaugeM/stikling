@@ -18,6 +18,8 @@ public class ClerkOptions
 /// <summary>
 /// The <c>AppOrigins</c> list in the configuration: the origins the app is served from. Browsers
 /// on those origins may call the API, and a session token has to have been issued to one of them.
+/// An origin can end in <c>:*</c> for any port, like <c>http://localhost:*</c> in Development,
+/// where the dev server runs on whichever port is free.
 /// </summary>
 public class AppOrigins
 {
@@ -32,4 +34,21 @@ public class AppOrigins
     /// </summary>
     public static string[] From(IConfiguration config) =>
         (config.GetSection(Section).Get<string[]>() ?? []).Select(origin => origin.TrimEnd('/')).ToArray();
+
+    public bool Allows(string origin) => Origins.Any(allowed => Matches(allowed, origin));
+
+    private static bool Matches(string allowed, string origin)
+    {
+        if (string.Equals(allowed, origin, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // "http://localhost:*" takes any port, and only a port
+        if (!allowed.EndsWith(":*", StringComparison.Ordinal))
+            return false;
+
+        var start = allowed[..^1];
+        return origin.Length > start.Length
+            && origin.StartsWith(start, StringComparison.OrdinalIgnoreCase)
+            && origin[start.Length..].All(char.IsAsciiDigit);
+    }
 }

@@ -7,19 +7,23 @@ namespace Stikling.Web.Services;
 /// <summary>
 /// Where signing in goes: the Clerk instance and the sync API. Both come from
 /// wwwroot/appsettings.{Environment}.json, and signing in is only offered when all of it is set.
+/// In Development there is also the key for signing in as a test person, which the local API
+/// accepts in place of Clerk.
 /// </summary>
-public sealed record AccountSettings(string? ClerkPublishableKey, string? ClerkFrontendApi, Uri? ApiAddress)
+public sealed record AccountSettings(string? ClerkPublishableKey, string? ClerkFrontendApi, Uri? ApiAddress, string? TestSignInKey = null)
 {
     public bool IsComplete => ClerkPublishableKey is not null && ClerkFrontendApi is not null && ApiAddress is not null;
 
-    public static AccountSettings From(IConfiguration config)
+    public static AccountSettings From(IConfiguration config, bool isDevelopment)
     {
         var api = config["Api:Address"];
+        var testKey = config["TestSignIn:SigningKey"];
         return new(
             config["Clerk:PublishableKey"],
             config["Clerk:FrontendApi"],
             // A trailing slash, so paths like "me" are added to it rather than replacing its last part
-            string.IsNullOrEmpty(api) ? null : new Uri(api.TrimEnd('/') + "/"));
+            string.IsNullOrEmpty(api) ? null : new Uri(api.TrimEnd('/') + "/"),
+            isDevelopment && !string.IsNullOrEmpty(testKey) ? testKey : null);
     }
 }
 
@@ -34,21 +38,37 @@ public sealed class AccountUnavailableException(Exception inner)
 /// Signing in and out. Clerk has no Blazor library, so it is behind wwwroot/js/account.js, and this
 /// is the only class that calls that file. Clerk's scripts are loaded on the first call that needs
 /// them, never when the app starts.
+/// <para>
+/// In Development someone can sign in as a test person instead. Then wwwroot/js/test-account.js
+/// takes the place of account.js until they sign out, and signs the API's tokens itself with the
+/// key from the Development settings. The hosted API never accepts those tokens.
+/// </para>
 /// </summary>
 public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceFiles files, AccountSettings settings)
     : IAsyncDisposable
 {
     internal const string ModulePath = "./js/account.js";
+    internal const string TestModulePath = "./js/test-account.js";
     internal const string SignedInKey = "signed-in";
+    internal const string TestPersonKey = "test-person";
 
     private Task<IJSObjectReference>? module;
     private DotNetObjectReference<AccountService>? self;
+    private string? testPerson; // the name of the test person signed in, when the module is test-account.js
 
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
+    private Task<IJSObjectReference> Module => module ??= ImportAsync();
+
+    private async Task<IJSObjectReference> ImportAsync()
+    {
+        testPerson = settings.TestSignInKey is null ? null : await files.GetAsync(TestPersonKey);
+        return await js.InvokeAsync<IJSObjectReference>("import", testPerson is null ? ModulePath : TestModulePath);
+    }
 
     /// <summary>False when this build of the app has nowhere to sign in to.</summary>
     public bool IsAvailable => settings.IsComplete;
+
+    /// <summary>True in Development, where the local API also accepts a test person.</summary>
+    public bool IsTestSignInAvailable => IsAvailable && settings.TestSignInKey is not null;
 
     /// <summary>Raised when someone signs in or out, on this page or in another tab.</summary>
     public event Action<AccountState>? Changed;
@@ -70,8 +90,10 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
         AccountState state;
         try
         {
-            state = await (await Module).InvokeAsync<AccountState>(
-                "load", settings.ClerkFrontendApi, settings.ClerkPublishableKey, self);
+            var account = await Module;
+            state = testPerson is null
+                ? await account.InvokeAsync<AccountState>("load", settings.ClerkFrontendApi, settings.ClerkPublishableKey, self)
+                : await account.InvokeAsync<AccountState>("load", testPerson, settings.TestSignInKey, self);
         }
         catch (JSException e)
         {
@@ -79,6 +101,22 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
         }
 
         await RememberAsync(state);
+        return state;
+    }
+
+    /// <summary>
+    /// Development only: signs in as the test person called <paramref name="name"/>, without
+    /// Clerk. The same name is the same person on every device, and a new name a new person.
+    /// </summary>
+    public async Task<AccountState> SignInAsTestPersonAsync(string name)
+    {
+        if (!IsTestSignInAvailable)
+            throw new InvalidOperationException("Signing in as a test person is only possible in Development.");
+
+        await ForgetModuleAsync();
+        await files.SetAsync(TestPersonKey, name);
+        var state = await LoadAsync();
+        Changed?.Invoke(state);
         return state;
     }
 
@@ -94,6 +132,7 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
     {
         var state = await (await Module).InvokeAsync<AccountState>("signOut", redirectUrl);
         await RememberAsync(state);
+        await EndTestSignInAsync();
     }
 
     /// <summary>
@@ -104,6 +143,7 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
     {
         var state = await (await Module).InvokeAsync<AccountState>("deleteUser");
         await RememberAsync(state);
+        await EndTestSignInAsync();
     }
 
     /// <summary>What Clerk has about the signed-in person, for the download of their data. Null when nobody is signed in.</summary>
@@ -128,7 +168,17 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
     private Task RememberAsync(AccountState state) =>
         files.SetAsync(SignedInKey, state.SignedIn ? "yes" : null);
 
-    public async ValueTask DisposeAsync()
+    /// <summary>Once a test person has signed out, the next sign-in goes through Clerk again.</summary>
+    private async Task EndTestSignInAsync()
+    {
+        if (testPerson is null)
+            return;
+
+        await files.SetAsync(TestPersonKey, null);
+        await ForgetModuleAsync();
+    }
+
+    private async Task ForgetModuleAsync()
     {
         if (module is { IsCompletedSuccessfully: true })
         {
@@ -136,6 +186,13 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
             await module.Result.DisposeAsync();
         }
 
+        module = null;
+        testPerson = null;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await ForgetModuleAsync();
         self?.Dispose();
     }
 }

@@ -16,6 +16,8 @@
   <ItemGroup>
     <!-- Points at the local API and Clerk's development instance, so it stays out of the published site -->
     <Content Update="wwwroot\appsettings.Development.json" CopyToPublishDirectory="Never" />
+    <!-- Signing in as a test person only works in Development, so it stays out of the published site too -->
+    <Content Update="wwwroot\js\test-account.js" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
   <ItemGroup>

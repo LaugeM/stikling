@@ -5,3 +5,12 @@
 .account-sign-in {
     margin-top: 1rem;
 }
+
+/* Dashed, since it isn't part of the app people use. Clerk replaces the classes of the element it
+   draws into, so the space under this card is set here. */
+.test-sign-in {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px dashed var(--pa-border);
+    border-radius: 0.75rem;
+}

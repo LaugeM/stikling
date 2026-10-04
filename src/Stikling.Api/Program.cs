@@ -34,10 +34,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentPerson>();
 
 builder.Services.AddClerkAuthentication();
+builder.Services.AddTestSignIn();
 builder.Services.AddCollectionAuthorization();
 
+var appOrigins = new AppOrigins { Origins = AppOrigins.From(builder.Configuration) };
 builder.Services.AddCors(cors => cors.AddDefaultPolicy(policy => policy
-    .WithOrigins(AppOrigins.From(builder.Configuration))
+    .SetIsOriginAllowed(appOrigins.Allows)
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
