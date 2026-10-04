@@ -351,7 +351,6 @@ Questions come up that the app can't answer from your own data: how long a cutti
 | ☐ | Public read-only collection page | 9 | L | v2 |
 | ☐ | **Plant facts card** from Trefle: a short card with what is known about the species, shown on the plant's page. The data is under the ODbL, so the app has to credit it, and the Trefle API token has to stay on the server, so the app asks the API and never Trefle directly | 9 | L | v2 |
 | ☐ | **Error tracking with Sentry**, set up once there are real users, so errors in the app and the API are seen without anyone having to report them. Needs a look at what it sends and a line about it on the privacy page | 7 | M | v1.x |
-| ☐ | **Simple Analytics**, set up once there are real users, to see how the app is used without cookies. Needs a line about it on the privacy page | 7 | S | v1.x |
 | ☐ | Plant identification from a photo via an identification API (needs a backend to keep the API key secret). Pl@ntNet's API is the free one: up to 500 identifications a day for non-commercial use, and it doesn't keep the photos. plant.id only gives 100 free identifications before it charges, and iNaturalist doesn't open its full identification model to other apps | 9 | L | v2 |
 | ☐ | Push notifications, widgets and a Google Play release (MAUI Blazor Hybrid) | 10 | L | v3 |
 | ☐ | **Android APK** released through IzzyOnDroid first, and then F-Droid, so it can be installed without a paid store account. Both take open source apps, and each has its own rules for how a release is built and signed | 10 | L | v3 |
