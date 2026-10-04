@@ -5,7 +5,7 @@
     <div class="viewer" role="dialog" aria-modal="true" aria-label="Photo viewer" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
         <div class="viewer-bar">
             <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))</span>
-            <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="Close">✕</button>
+            <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
         </div>
 
         @if (framing)

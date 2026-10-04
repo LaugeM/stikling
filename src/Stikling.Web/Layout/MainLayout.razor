@@ -3,6 +3,7 @@
 @inject IndexedDb Db
 @inject ThemeService Theme
 @inject SyncRunner Sync
+@inject BackupService Backup
 @inject IPestCaseRepository PestCases
 @inject NavigationManager Navigation
 
@@ -59,8 +60,8 @@
     private bool updateReady;
 
     // Pests only has a tab while a case is open, so someone who never has pests isn't shown one.
-    // It is worked out again when the page changes and when sync brings changes. Saving a case
-    // goes to its page, so that covers opening and resolving one.
+    // It is worked out again when the page changes, when sync brings changes and when a backup
+    // is restored. Saving a case goes to its page, so that covers opening and resolving one.
     private bool pestTab;
 
     private bool OnPestsPage =>
@@ -71,6 +72,7 @@
     {
         Sync.StatusChanged += OnSyncChanged;
         Sync.Received += OnReceived;
+        Backup.Restored += OnReceived;
         Navigation.LocationChanged += OnLocationChanged;
         await CheckPestsAsync();
     }
@@ -95,6 +97,7 @@
     {
         Sync.StatusChanged -= OnSyncChanged;
         Sync.Received -= OnReceived;
+        Backup.Restored -= OnReceived;
         Navigation.LocationChanged -= OnLocationChanged;
     }
 
