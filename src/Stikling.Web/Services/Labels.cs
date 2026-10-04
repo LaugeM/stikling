@@ -101,6 +101,13 @@ public static class Labels
             ? Plants(view.Plants.Count)
             : $"{Scope(view)} · {Plants(view.Plants.Count)}";
 
+    /// <summary>
+    /// When a case wants its next treatment or check, or "no treatment yet" when it's being treated
+    /// and nothing is logged, rather than counting days overdue since the pests were found.
+    /// </summary>
+    public static string Due(PestCaseView view) =>
+        view.Untreated && view.IsDue ? "no treatment yet" : Due(view.DaysUntilDue ?? 0, view.IsCheck);
+
     /// <summary>"due today", "2 days overdue", "next in 3 days", or "check due today" and so on for a check.</summary>
     public static string Due(int daysUntil, bool check = false)
     {

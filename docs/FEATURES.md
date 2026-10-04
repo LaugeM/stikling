@@ -275,7 +275,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Propagations that haven't been checked recently | 2 | M | M5 |
 | ✅ | Recent activity feed | 5 | S | M5 |
 | ☐ | Lately only shows the last 30 days, so a plant added with a date a year back doesn't show up as something recent, and the list says there's nothing new instead | 2 | S | v1.x |
-| ✅ | Pest treatments due or overdue, and checks due on cases being watched | 3 | S | v1.x |
+| ✅ | Pest treatments due or overdue, checks due on cases being watched, and a new case until its first treatment is logged | 3 | S | v1.x |
 | ✅ | Counts: plants, active propagations, success rate this month | 4 | S | v1.x |
 | ✅ | **Needs attention**: flag a plant or propagation with a reason ("repot soon", "look closer", "change the water"), typed or picked from a few suggestions, and it stays on Today until it's marked done there or on its own page. Flags aren't written on the history, and one goes away by itself when the plant leaves or the propagation finishes | 4 | S | v1.x |
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |

@@ -99,11 +99,48 @@ public class PestTests
     // When the next treatment is due
 
     [Fact]
-    public void With_no_treatments_the_first_one_is_due_an_interval_after_the_case_started()
+    public void With_no_treatments_the_first_one_is_due_from_the_day_the_pests_were_found()
     {
         var item = Case(interval: 4, started: Today.AddDays(-2));
 
-        Assert.Equal(Today.AddDays(2), PestService.NextDue(item, []));
+        var view = PestService.Describe(item, [], [], Places, Today);
+
+        Assert.Equal(Today.AddDays(-2), view.NextDue);
+        Assert.True(view.Untreated);
+        Assert.Single(PestService.Due([view]));
+    }
+
+    [Fact]
+    public void A_trap_count_is_not_a_first_treatment()
+    {
+        var item = Case(interval: 4, started: Today.AddDays(-2));
+
+        var view = PestService.Describe(item, [], [Trap(item, Today, 3)], Places, Today);
+
+        Assert.True(view.Untreated);
+        Assert.Equal(Today.AddDays(-2), view.NextDue);
+    }
+
+    [Fact]
+    public void Once_treated_a_case_is_no_longer_untreated()
+    {
+        var item = Case(interval: 4, started: Today.AddDays(-2));
+
+        var view = PestService.Describe(item, [], [Treatment(item, Today)], Places, Today);
+
+        Assert.False(view.Untreated);
+        Assert.Equal(Today.AddDays(4), view.NextDue);
+    }
+
+    [Fact]
+    public void A_case_being_watched_with_nothing_logged_waits_a_week_for_its_check()
+    {
+        var item = Case(status: PestCaseStatus.Monitoring, started: Today.AddDays(-2));
+
+        var view = PestService.Describe(item, [], [], Places, Today);
+
+        Assert.False(view.Untreated);
+        Assert.Equal(Today.AddDays(5), view.NextDue);
     }
 
     [Fact]
@@ -140,7 +177,7 @@ public class PestTests
         var item = Case(interval: 4, started: Today.AddDays(-1));
         var other = Treatment(Case(), Today);
 
-        Assert.Equal(Today.AddDays(3), PestService.NextDue(item, [other]));
+        Assert.Equal(Today.AddDays(-1), PestService.NextDue(item, [other]));
     }
 
     [Fact]
@@ -333,11 +370,17 @@ public class PestTests
     [Fact]
     public void Due_lists_the_most_overdue_first_and_leaves_out_what_is_not_due()
     {
-        var overdue = Case(interval: 2, started: Today.AddDays(-9));
-        var dueToday = Case(interval: 4, started: Today.AddDays(-4));
-        var later = Case(interval: 4, started: Today.AddDays(-1));
+        var overdue = Case(interval: 2, started: Today.AddDays(-20));
+        var dueToday = Case(interval: 4, started: Today.AddDays(-20));
+        var later = Case(interval: 4, started: Today.AddDays(-20));
+        var treatments = new[]
+        {
+            Treatment(overdue, Today.AddDays(-9)),
+            Treatment(dueToday, Today.AddDays(-4)),
+            Treatment(later, Today.AddDays(-1))
+        };
 
-        var views = PestService.Describe([overdue, dueToday, later], [], [], Places, Today);
+        var views = PestService.Describe([overdue, dueToday, later], [], treatments, Places, Today);
         var due = PestService.Due(views);
 
         Assert.Equal([overdue.Id, dueToday.Id], due.Select(v => v.Case.Id));

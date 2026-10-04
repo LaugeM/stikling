@@ -24,6 +24,9 @@ public sealed record PestCaseView(
 
     /// <summary>What's due is a look for pests rather than a treatment.</summary>
     public bool IsCheck => Case.Status == PestCaseStatus.Monitoring;
+
+    /// <summary>An open case being treated that has nothing logged yet, so its first treatment is due.</summary>
+    public bool Untreated => Case.IsOpen && !IsCheck && Last is null;
 }
 
 /// <summary>
@@ -76,9 +79,10 @@ public static class PestService
 
     /// <summary>
     /// When the next treatment is due: the last treatment's own date if one was set, otherwise
-    /// the last treatment plus the case's interval, otherwise the day the case started plus the
-    /// interval. A case being watched is due a check a week after the last treatment, check or
-    /// trap count instead. A resolved case is never due.
+    /// the last treatment plus the case's interval. Before anything is logged the first treatment
+    /// is due from the day the pests were found, since waiting an interval before treating at all
+    /// isn't what anyone means. A case being watched is due a check a week after the last
+    /// treatment, check or trap count instead. A resolved case is never due.
     /// </summary>
     public static DateOnly? NextDue(PestCase item, IEnumerable<PestTreatment> treatments)
     {
@@ -86,12 +90,14 @@ public static class PestService
             return null;
 
         var last = LastFor(item, treatments);
-        var since = last?.OccurredOn ?? item.StartedOn;
 
         if (item.Status == PestCaseStatus.Monitoring)
-            return since.AddDays(CheckEveryDays);
+            return (last?.OccurredOn ?? item.StartedOn).AddDays(CheckEveryDays);
 
-        return last?.NextDueOn ?? since.AddDays(item.IntervalDays);
+        if (last is null)
+            return item.StartedOn;
+
+        return last.NextDueOn ?? last.OccurredOn.AddDays(item.IntervalDays);
     }
 
     /// <summary>Everything a screen needs about one case.</summary>

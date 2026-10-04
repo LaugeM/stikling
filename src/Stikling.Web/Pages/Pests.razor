@@ -120,9 +120,9 @@ else
                 <span>@Labels.ScopeAndCount(view)</span>
             </div>
             <div class="item-meta">
-                @if (view.DaysUntilDue is { } days)
+                @if (view.DaysUntilDue is not null)
                 {
-                    <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days, view.IsCheck)</span>
+                    <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(view)</span>
                     <span>· found @Labels.Date(view.Case.StartedOn)</span>
                 }
                 else if (view.Case.ResolvedOn is { } on)
