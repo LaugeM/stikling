@@ -23,6 +23,31 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
     private readonly HttpClient http = new() { BaseAddress = settings.ApiAddress };
 
     /// <summary>
+    /// Asks the API to start, without waiting for it. When nobody has used it for a while it takes
+    /// a few seconds to start, so this is called while Clerk loads or someone signs in, and the
+    /// sync after it doesn't have to wait as long. It needs no sign-in, and never throws.
+    /// </summary>
+    public void Wake()
+    {
+        if (settings.ApiAddress is null)
+            return;
+
+        _ = WakeAsync();
+
+        async Task WakeAsync()
+        {
+            try
+            {
+                using var response = await http.GetAsync("health");
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                // Sync finds out about a server that can't be reached on its own
+            }
+        }
+    }
+
+    /// <summary>
     /// Who the API thinks is signed in. The first call after signing up also creates the person
     /// and their own collection on the server.
     /// </summary>

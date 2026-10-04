@@ -65,6 +65,9 @@ public sealed record PhotoSyncResult(int Uploaded, int Downloaded, bool Collecti
 /// </summary>
 public sealed class PhotoSyncService(IPhotoSyncStore store, IPhotoServer server)
 {
+    /// <summary>How many thumbnails are fetched at the same time.</summary>
+    internal const int DownloadsAtOnce = 6;
+
     /// <param name="canEdit">False for someone who can only view the collection. They only fetch.</param>
     public async Task<PhotoSyncResult> SyncAsync(Guid collectionId, bool canEdit)
     {
@@ -139,14 +142,21 @@ public sealed class PhotoSyncService(IPhotoSyncStore store, IPhotoServer server)
                 break;
             after = batch[^1];
 
-            // One not on the server yet stays on the list until the device it was taken on sends it
+            // One not on the server yet stays on the list until the device it was taken on sends it.
+            // A few are fetched at a time, since a device where someone just signed in has them all to get.
             var done = new List<Guid>();
-            foreach (var photo in await server.GetStoredAsync(collectionId, batch))
+            var there = (await server.GetStoredAsync(collectionId, batch)).Where(p => p.Thumbnail);
+            foreach (var group in there.Chunk(DownloadsAtOnce))
             {
-                if (photo.Thumbnail && await server.DownloadAsync(collectionId, photo.Id, PhotoSize.Thumbnail))
+                var fetched = await Task.WhenAll(group.Select(async photo =>
+                    (photo.Id, Ok: await server.DownloadAsync(collectionId, photo.Id, PhotoSize.Thumbnail))));
+                foreach (var (id, ok) in fetched)
                 {
-                    done.Add(photo.Id);
-                    downloaded++;
+                    if (ok)
+                    {
+                        done.Add(id);
+                        downloaded++;
+                    }
                 }
             }
 

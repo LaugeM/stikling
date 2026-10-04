@@ -44,6 +44,12 @@ public sealed class SyncRunner(
 
     public DateTimeOffset? LastSynced { get; private set; }
 
+    /// <summary>
+    /// True during the first sync on this device since signing in, before which the lists may be
+    /// empty although the account has plants.
+    /// </summary>
+    public bool FirstSync => Running && LastSynced is null;
+
     /// <summary>Why the last sync didn't finish, in words for the person, or null when it did.</summary>
     public string? Problem { get; private set; }
 
@@ -86,7 +92,11 @@ public sealed class SyncRunner(
 
         signedIn = await account.WasSignedInAsync();
         if (signedIn)
+        {
+            // Clerk loads before the first request, so the API starts while it does
+            api.Wake();
             _ = SyncNowAsync();
+        }
     }
 
     /// <summary>Syncs now, or once more after the sync that is running. Never throws.</summary>
@@ -292,6 +302,9 @@ public sealed class SyncRunner(
 
             LastSynced = time.GetUtcNow();
             await files.SetAsync(LastSyncKey, LastSynced.Value.ToString("O"));
+
+            // The records are in, so the first sync's notice can go while the photos carry on
+            StatusChanged?.Invoke();
 
             if (result.Received > 0)
             {

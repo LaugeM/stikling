@@ -149,6 +149,21 @@ public class PhotoSyncServiceTests
     }
 
     [Fact]
+    public async Task Every_thumbnail_is_fetched_on_a_device_that_just_signed_in()
+    {
+        // More than a batch, fetched a few at a time, with some not on the server yet
+        var there = Enumerable.Range(0, PhotoRules.BatchSize + 7).Select(_ => server.Add()).ToList();
+        var notYet = Enumerable.Range(0, 3).Select(_ => server.Add(full: false, thumbnail: false)).ToList();
+        phone.Downloads.UnionWith(there.Concat(notYet));
+
+        var result = await Sync();
+
+        Assert.Equal(there.Count, result.Downloaded);
+        Assert.Equal(there.Select(id => (id, PhotoSize.Thumbnail)).ToHashSet(), server.Fetched.ToHashSet());
+        Assert.Equal(notYet.ToHashSet(), phone.Downloads.ToHashSet());
+    }
+
+    [Fact]
     public async Task Photos_the_server_cant_take_yet_dont_hold_up_the_rest()
     {
         // Two batches of photos the server can't take yet, mixed in with some it can

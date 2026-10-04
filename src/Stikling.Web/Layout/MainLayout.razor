@@ -21,11 +21,18 @@
         </NavLink>
     </header>
 
-    <main class="app-content @(updateReady ? "with-banner" : null)">
+    <main class="app-content @(updateReady || FirstSyncNotice ? "with-banner" : null)">
         @Body
     </main>
 
     <UpdateBanner ReadyChanged="ready => updateReady = ready" />
+
+    @* On a device where someone just signed in, the lists stay empty until the first sync brings
+       their things in, which would otherwise look like the account had lost them *@
+    @if (FirstSyncNotice)
+    {
+        <div class="first-sync-banner" role="status">Fetching what's saved on your account…</div>
+    }
 
     <nav class="bottom-nav" aria-label="Main">
         <NavLink class="bottom-nav-link" href="" Match="NavLinkMatch.All">
@@ -57,6 +64,8 @@
 
 @code {
     private bool updateReady;
+
+    private bool FirstSyncNotice => Sync.FirstSync && !updateReady;
 
     // Pests only has a tab while a case is open, so someone who never has pests isn't shown one.
     // It is worked out again when the page changes and when sync brings changes. Saving a case
