@@ -88,14 +88,25 @@ public static class TodayBoard
             .ThenBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
+    /// <summary>How many days back Lately on Today looks.</summary>
+    public const int LatelyDays = 30;
+
     /// <summary>
-    /// The newest entries across the given plants and propagations. Anything written down about a
-    /// subject that has since been deleted is left out, so the list only shows what you can open.
+    /// The start of the first day Lately shows, so a plant added with a date from a year back
+    /// isn't listed as something recent.
+    /// </summary>
+    public static DateTimeOffset LatelySince(TimeProvider time) =>
+        time.MomentAt(time.Today().AddDays(-LatelyDays).ToDateTime(TimeOnly.MinValue));
+
+    /// <summary>
+    /// The newest entries across the given plants and propagations, from <paramref name="since"/>
+    /// on. Anything written down about a subject that has since been deleted is left out, so the
+    /// list only shows what you can open.
     /// </summary>
     public static IReadOnlyList<TimelineEntry> RecentActivity(
-        IEnumerable<TimelineEntry> entries, IReadOnlySet<Guid> subjectIds, int count = 8) =>
+        IEnumerable<TimelineEntry> entries, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, int count = 8) =>
         Timeline.TimelineOrder.NewestFirst(entries)
-            .Where(e => subjectIds.Contains(e.SubjectId))
+            .Where(e => subjectIds.Contains(e.SubjectId) && e.OccurredAt >= since)
             .Take(count)
             .ToList();
 

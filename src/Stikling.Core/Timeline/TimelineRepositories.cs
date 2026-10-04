@@ -11,10 +11,11 @@ public interface ITimelineRepository
     Task<IReadOnlyDictionary<Guid, TimelineEntry>> GetLatestPerSubjectAsync();
 
     /// <summary>
-    /// The newest entries for these subjects, for the activity list on Today. Deleted plants and
-    /// propagations are left out by passing only the ones that are still there.
+    /// The newest entries for these subjects from <paramref name="since"/> on, for the activity
+    /// list on Today. Deleted plants and propagations are left out by passing only the ones that
+    /// are still there.
     /// </summary>
-    Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds);
+    Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since);
 
     Task AddAsync(TimelineEntry entry);
 

@@ -15,7 +15,7 @@ using System.Text.Json.Serialization.Metadata;
 using Stikling.Core.Names;
 
 // Families or genera whose genera, species and old names are all included
-string[] include = ["Araceae"];
+string[] include = ["Araceae", "Coleus"];
 
 // Genera offered by name only, without their species, until their family is added above
 string[] genusOnly =
@@ -38,6 +38,21 @@ var colVersion = (string?)colInfo["version"];
 Console.WriteLine($"Catalogue of Life {colVersion}");
 
 var genera = new SortedDictionary<string, Genus>(StringComparer.OrdinalIgnoreCase);
+
+// First, so the old species names below are kept for these genera too, like Plectranthus scutellarioides,
+// which is Coleus scutellarioides now
+foreach (var name in genusOnly)
+{
+    var taxon = await FindAsync(name, "genus");
+    if (taxon is null)
+    {
+        Console.WriteLine($"warning: genus {name} isn't in the Catalogue of Life");
+        continue;
+    }
+    var genus = GenusFor(name, FamilyOf(taxon["usage"]!));
+    if ((string?)taxon["usage"]!["status"] == "synonym")
+        genus.Now = AcceptedName(taxon["usage"]!);
+}
 
 foreach (var name in include)
 {
@@ -78,19 +93,6 @@ foreach (var name in include)
             genus.Synonyms[species] = now;
         }
     }
-}
-
-foreach (var name in genusOnly)
-{
-    var taxon = await FindAsync(name, "genus");
-    if (taxon is null)
-    {
-        Console.WriteLine($"warning: genus {name} isn't in the Catalogue of Life");
-        continue;
-    }
-    var genus = GenusFor(name, FamilyOf(taxon["usage"]!));
-    if ((string?)taxon["usage"]!["status"] == "synonym")
-        genus.Now = AcceptedName(taxon["usage"]!);
 }
 
 var byHand = 0;

@@ -22,6 +22,6 @@ Old names are kept so that typing one offers the name it goes by now, for exampl
 
 ## Adding more
 
-- **A family or genus with all its species:** add it to `include` at the top of `build.cs`. Araceae is the only one so far. Each family adds roughly 50 to 100 KB.
+- **A family or genus with all its species:** add it to `include` at the top of `build.cs`. So far that is the family Araceae and the genus Coleus. Each family adds roughly 50 to 100 KB.
 - **A genus by name only:** add it to `genusOnly`. These are the common houseplants outside the included families. Once their family is in `include`, take them out of `genusOnly`.
 - **A cultivar:** add a line to `cultivars.txt`. The build warns about a genus that isn't included and a species that isn't an accepted name, which catches most typos. A cultivar added to Wikidata is picked up too, the next time the file is built.
