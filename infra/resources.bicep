@@ -239,8 +239,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
           }
           env: [
             {
-              // Opening a connection retries for a minute, which covers the database moving between
-              // tiers, and waking if it is ever put back on the free tier that pauses
+              // Opening a connection retries for a minute, which covers short drops like Azure's maintenance
               name: 'ConnectionStrings__Stikling'
               value: 'Server=tcp:${sql.properties.fullyQualifiedDomainName},1433;Database=${sql::database.name};Authentication=Active Directory Managed Identity;User Id=${apiIdentity.properties.clientId};Encrypt=True;Connect Retry Count=6;Connect Retry Interval=10'
             }
