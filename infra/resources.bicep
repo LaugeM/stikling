@@ -121,7 +121,8 @@ resource sql 'Microsoft.Sql/servers@2023-08-01' = {
 
   // The Basic tier, about $5 a month, which is always on. The free serverless offer paused after
   // about 20 minutes without use and took close to a minute to wake, so most syncs after a break
-  // waited that long, and the API waking for bots used up the month's free amount in about a week.
+  // waited that long. The API woke it on every start, bots included, which used most of the month's
+  // free amount in the first four days of October.
   // Basic holds up to 2 GB.
   resource database 'databases' = {
     name: 'stikling'

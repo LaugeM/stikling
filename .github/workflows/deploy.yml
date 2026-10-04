@@ -95,6 +95,6 @@ jobs:
           az containerapp update --resource-group rg-stikling --name stikling-api
           --image "$API_IMAGE:${{ github.sha }}" --output none
 
-      # The first request wakes the database if it's paused, which can take a minute
+      # The new copy of the API takes a moment to start and apply its migrations
       - name: Check that it answers
         run: curl --fail --silent --show-error --retry 10 --retry-delay 10 --retry-all-errors --max-time 60 https://api.stikling.app/health
