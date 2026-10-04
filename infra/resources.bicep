@@ -119,23 +119,22 @@ resource sql 'Microsoft.Sql/servers@2023-08-01' = {
     }
   }
 
-  // The free offer: a serverless database that pauses when it isn't used, and pauses for the rest
-  // of the month rather than costing anything if the free amount runs out
+  // The Basic tier, about $5 a month, which is always on. The free serverless offer paused after
+  // about 20 minutes without use and took close to a minute to wake, so most syncs after a break
+  // waited that long. The API woke it on every start, bots included, which used most of the month's
+  // free amount in the first four days of October.
+  // Basic holds up to 2 GB.
   resource database 'databases' = {
     name: 'stikling'
     location: location
     sku: {
-      name: 'GP_S_Gen5_2'
-      tier: 'GeneralPurpose'
-      family: 'Gen5'
-      capacity: 2
+      name: 'Basic'
+      tier: 'Basic'
+      capacity: 5
     }
     properties: {
-      useFreeLimit: true
-      freeLimitExhaustionBehavior: 'AutoPause'
-      autoPauseDelay: 60
-      minCapacity: json('0.5')
-      maxSizeBytes: 34359738368
+      useFreeLimit: false
+      maxSizeBytes: 2147483648
       requestedBackupStorageRedundancy: 'Local'
     }
 
@@ -160,8 +159,10 @@ resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
     }
     // The privacy page says the API's logs are kept for 30 days
     retentionInDays: 30
+    // The first 5 GB a month are free, and the API writes far less than that. The cap keeps a
+    // flood of requests from turning into a bill.
     workspaceCapping: {
-      dailyQuotaGb: 1
+      dailyQuotaGb: json('0.15')
     }
   }
 }
@@ -238,7 +239,8 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
           }
           env: [
             {
-              // A paused database takes up to a minute to wake, so opening a connection retries for that long
+              // Opening a connection retries for a minute, which covers the database moving between
+              // tiers, and waking if it is ever put back on the free tier that pauses
               name: 'ConnectionStrings__Stikling'
               value: 'Server=tcp:${sql.properties.fullyQualifiedDomainName},1433;Database=${sql::database.name};Authentication=Active Directory Managed Identity;User Id=${apiIdentity.properties.clientId};Encrypt=True;Connect Retry Count=6;Connect Retry Interval=10'
             }

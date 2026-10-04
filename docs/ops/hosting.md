@@ -2,8 +2,9 @@
 
 The app is static files on GitHub Pages at https://stikling.app. The sync API runs on Azure, described in Bicep in `infra/`:
 
-- **Container Apps** runs the API from the image the workflow pushes to `ghcr.io/laugem/stikling-api`. It sleeps when nobody uses it, so the first request after a quiet spell waits a few seconds. `apiMinReplicas = 1` in `infra/main.bicepparam` keeps one copy awake instead, for a few dollars a month.
-- **Azure SQL** on the free offer. The database pauses after an hour without use and takes up to a minute to wake. If the month's free amount runs out, it pauses until the next month instead of costing money.
+- **Container Apps** runs the API from the image the workflow pushes to `ghcr.io/laugem/stikling-api`. It sleeps when nobody uses it, so the first request after a quiet spell waits a few seconds. `apiMinReplicas = 1` in `infra/main.bicepparam` keeps one copy awake instead, for about $4 a month. Together with the database that comes to more than the $8 a month budget, so it stays at 0.
+- **Azure SQL** on the Basic tier, about $5 a month, which is always on and holds up to 2 GB. It used to be on the free serverless offer, but that paused after about 20 minutes without use and took close to a minute to wake, so a sync after a break waited that long. Each time the API started it woke the database too, so bots hitting the API used most of the month's free amount in the first four days of October.
+- **Log Analytics** for the API's logs, capped at 0.15 GB a day so it stays inside the free 5 GB a month.
 - **Blob Storage** for the photo images.
 - **A budget** on the subscription that emails support@stikling.app at half and all of the monthly amount.
 
