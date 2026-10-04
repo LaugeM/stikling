@@ -80,8 +80,9 @@ else
                 <dd>Every @Labels.Count(view.Case.IntervalDays, "day")</dd>
             }
 
-            @* Before the first one there's no rhythm yet, so a date for the next would only confuse *@
-            @if (view.Last is not null)
+            @* Before the first treatment there's no rhythm yet, so a date for the next would only confuse.
+               A case being watched still shows when its weekly check is due. *@
+            @if (!view.Untreated)
             {
                 <dt>Next one</dt>
                 <dd>
@@ -328,6 +329,7 @@ else
     private async Task CountedAsync()
     {
         counting = false;
+        message = null;
         var before = catches.Count;
         await ReloadAsync();
 

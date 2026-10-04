@@ -122,9 +122,13 @@ else
 
             @if (result.SuccessRate is { } rate)
             {
-                <div class="result-bar" role="img" aria-label="@Percent(rate) made it">
-                    <span style="width: @(Percent(rate))"></span>
-                </div>
+                @* A full bar for 2 of 2 says the same thing a percentage would *@
+                @if (result.Decided >= SmallSample)
+                {
+                    <div class="result-bar" role="img" aria-label="@Percent(rate) made it">
+                        <span style="width: @(Percent(rate))"></span>
+                    </div>
+                }
                 <div class="result-line">
                     @if (result.Decided < SmallSample)
                     {
