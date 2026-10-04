@@ -16,6 +16,17 @@ public enum Pest
     Other
 }
 
+public static class PestTraits
+{
+    /// <summary>
+    /// Whether the pest flies into a yellow or blue sticky trap, so counting one says something
+    /// about how the outbreak is going. Spider mites, mealybugs and scale crawl and rarely end up
+    /// on one, and most aphids indoors never grow wings.
+    /// </summary>
+    public static bool CaughtOnTrap(this Pest pest) =>
+        pest is Pest.Thrips or Pest.FungusGnats or Pest.Whitefly;
+}
+
 /// <summary>
 /// How far along a case is. Active means still treating, Monitoring means the treatments have
 /// stopped but the plants are still checked now and then, Resolved means done.

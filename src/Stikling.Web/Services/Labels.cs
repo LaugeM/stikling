@@ -87,10 +87,10 @@ public static class Labels
         _ => status.ToString()
     };
 
-    /// <summary>"Everywhere", "Living room" or "4 plants", for a case's one-line summary.</summary>
+    /// <summary>"All plants", "Living room" or "4 plants", for a case's one-line summary.</summary>
     public static string Scope(PestCaseView view) => view.Case.Scope switch
     {
-        PestScope.Everywhere => "Everywhere",
+        PestScope.Everywhere => "All plants",
         PestScope.Room => view.Room ?? "A room",
         _ => Plants(view.Plants.Count)
     };
@@ -100,6 +100,13 @@ public static class Labels
         view.Case.Scope == PestScope.PickedPlants
             ? Plants(view.Plants.Count)
             : $"{Scope(view)} · {Plants(view.Plants.Count)}";
+
+    /// <summary>
+    /// When a case wants its next treatment or check, or "no treatment yet" when it's being treated
+    /// and nothing is logged, rather than counting days overdue since the pests were found.
+    /// </summary>
+    public static string Due(PestCaseView view) =>
+        view.Untreated && view.IsDue ? "no treatment yet" : Due(view.DaysUntilDue ?? 0, view.IsCheck);
 
     /// <summary>"due today", "2 days overdue", "next in 3 days", or "check due today" and so on for a check.</summary>
     public static string Due(int daysUntil, bool check = false)

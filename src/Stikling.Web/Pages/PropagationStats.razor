@@ -7,12 +7,18 @@
 <a class="back-link" href="propagations">Propagations</a>
 <h1>Results</h1>
 
-<p class="results-hint">
-    How each medium and each type has done. The success rate counts units, so a batch of 5 corms
-    where 4 made it counts as 4 of 5. A unit has made it once it's potted up or its batch has rooted,
-    and units still on their way aren't counted either way. Days to root only uses batches that were
-    marked as rooted, so one that went straight to potted up isn't in it.
-</p>
+<p class="results-hint">How each medium and each type has done.</p>
+
+<details class="results-how">
+    <summary>How this is counted</summary>
+    <p>
+        The success rate counts units, so a batch of 5 corms where 4 made it counts as 4 of 5. A unit
+        has made it once it's potted up or its batch has rooted, and units still on their way aren't
+        counted either way. Below @SmallSample units the count is shown instead of a percentage,
+        since 2 of 2 says more than 100%. Days to root only uses batches that were marked as rooted,
+        so one that went straight to potted up isn't in it.
+    </p>
+</details>
 
 @if (all is null)
 {
@@ -116,11 +122,22 @@ else
 
             @if (result.SuccessRate is { } rate)
             {
-                <div class="result-bar" role="img" aria-label="@Percent(rate) made it">
-                    <span style="width: @(Percent(rate))"></span>
-                </div>
+                @* A full bar for 2 of 2 says the same thing a percentage would *@
+                @if (result.Decided >= SmallSample)
+                {
+                    <div class="result-bar" role="img" aria-label="@Percent(rate) made it">
+                        <span style="width: @(Percent(rate))"></span>
+                    </div>
+                }
                 <div class="result-line">
-                    <strong>@Percent(rate)</strong> made it · @result.Succeeded of @result.Decided
+                    @if (result.Decided < SmallSample)
+                    {
+                        <strong>@result.Succeeded of @result.Decided</strong> <text>made it</text>
+                    }
+                    else
+                    {
+                        <strong>@Percent(rate)</strong> <text>made it · @result.Succeeded of @result.Decided</text>
+                    }
                     @if (result.Growing > 0)
                     {
                         <span class="text-body-secondary"> · @result.Growing still going</span>
@@ -156,6 +173,9 @@ else
             </div>
         </div>
     };
+
+    // Below this many units a percentage looks more certain than it is
+    private const int SmallSample = 5;
 
     private static string Percent(double rate) =>
         $"{Math.Round(rate * 100, MidpointRounding.AwayFromZero):0}%";
