@@ -58,6 +58,19 @@ module resources 'resources.bicep' = {
   }
 }
 
+module costStop 'cost-stop.bicep' = {
+  name: 'stikling-cost-stop'
+  scope: group
+  params: {
+    location: location
+    sqlServerName: resources.outputs.sqlServerName
+    databaseName: resources.outputs.databaseName
+    apiName: resources.outputs.apiName
+    emails: budgetEmails
+  }
+}
+
+// Warns by email, and calls the cost stop in cost-stop.bicep when the month's budget is spent
 resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: 'stikling'
   properties: {
@@ -75,12 +88,27 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
         thresholdType: 'Actual'
         contactEmails: budgetEmails
       }
+      // The database moves to the free tier
       allSpent: {
         enabled: true
         operator: 'GreaterThanOrEqualTo'
         threshold: 100
         thresholdType: 'Actual'
         contactEmails: budgetEmails
+        contactGroups: [
+          costStop.outputs.freeDatabaseActionGroupId
+        ]
+      }
+      // The API stops, if spending carried on anyway
+      wellOver: {
+        enabled: true
+        operator: 'GreaterThanOrEqualTo'
+        threshold: 125
+        thresholdType: 'Actual'
+        contactEmails: budgetEmails
+        contactGroups: [
+          costStop.outputs.stopApiActionGroupId
+        ]
       }
       headingOver: {
         enabled: true
