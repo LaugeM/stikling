@@ -2,6 +2,8 @@
 // password: the API reaches the database and storage with its own managed identity, and GitHub
 // Actions deploys with another one that trusts the repository's main branch.
 
+import { basicTier } from 'database-tiers.bicep'
+
 param location string
 param appDomain string
 param apiDomain string
@@ -119,24 +121,18 @@ resource sql 'Microsoft.Sql/servers@2023-08-01' = {
     }
   }
 
-  // The Basic tier, about $5 a month, which is always on. The free serverless offer paused after
-  // about 20 minutes without use and took close to a minute to wake, so most syncs after a break
-  // waited that long. The API woke it on every start, bots included, which used most of the month's
-  // free amount in the first four days of October.
-  // Basic holds up to 2 GB.
+  // On the Basic tier, which is always on. The free serverless offer paused after about 20 minutes
+  // without use and took close to a minute to wake, so most syncs after a break waited that long.
+  // The API woke it on every start, bots included, which used most of the month's free amount in
+  // the first four days of October. The cost stop puts it back on the free tier if the month's
+  // budget is spent.
   resource database 'databases' = {
     name: 'stikling'
     location: location
-    sku: {
-      name: 'Basic'
-      tier: 'Basic'
-      capacity: 5
-    }
-    properties: {
-      useFreeLimit: false
-      maxSizeBytes: 2147483648
+    sku: basicTier.sku
+    properties: union(basicTier.properties, {
       requestedBackupStorageRedundancy: 'Local'
-    }
+    })
 
     // The privacy page says deleted data is gone from the backups after 7 days
     resource backups 'backupShortTermRetentionPolicies' = {
@@ -338,3 +334,6 @@ output apiAddress string = empty(apiDomain) ? 'https://${api.properties.configur
 output apiDnsTarget string = api.properties.configuration.ingress.fqdn
 output apiDomainVerificationId string = api.properties.customDomainVerificationId
 output deployClientId string = deployIdentity.properties.clientId
+output sqlServerName string = sql.name
+output databaseName string = sql::database.name
+output apiName string = api.name
