@@ -196,6 +196,20 @@ public class PestTests
 
     // Sticky traps
 
+    [Theory]
+    [InlineData(Pest.Thrips, true)]
+    [InlineData(Pest.FungusGnats, true)]
+    [InlineData(Pest.Whitefly, true)]
+    [InlineData(Pest.SpiderMites, false)]
+    [InlineData(Pest.Mealybugs, false)]
+    [InlineData(Pest.Scale, false)]
+    [InlineData(Pest.Aphids, false)]
+    [InlineData(Pest.Other, false)]
+    public void Only_flying_pests_are_caught_on_a_sticky_trap(Pest pest, bool caught)
+    {
+        Assert.Equal(caught, pest.CaughtOnTrap());
+    }
+
     private static PestTreatment Trap(PestCase item, DateOnly on, int? onTrap, bool newTrap = false)
     {
         var count = PestService.StartTrapCount(item, on);

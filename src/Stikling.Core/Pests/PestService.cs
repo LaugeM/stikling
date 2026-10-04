@@ -142,7 +142,8 @@ public static class PestService
             .ToList();
 
     /// <summary>A blank case starting today, for the new-case form.</summary>
-    public static PestCase Start(DateOnly today) => new() { StartedOn = today };
+    public static PestCase Start(DateOnly today) =>
+        new() { StartedOn = today, Scope = PestScope.PickedPlants, Status = PestCaseStatus.Active };
 
     /// <summary>
     /// A blank treatment for a case, dated today and carrying the last one forward, since the

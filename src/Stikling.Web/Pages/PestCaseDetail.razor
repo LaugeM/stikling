@@ -50,12 +50,17 @@ else
         <a class="btn btn-outline-primary" href="pests/@view.Case.Id/edit">Edit</a>
     </div>
 
+    @if (message is not null)
+    {
+        <p class="action-message" role="status">@message</p>
+    }
+
     @if (logging && view.Case.IsOpen)
     {
         <section class="detail-card">
             <h2>@(view.IsCheck ? "Log check" : "Log treatment")</h2>
             <TreatmentSheet @key="view.Case.Status" Case="view.Case" Existing="treatments" Check="view.IsCheck"
-                            OnLogged="ReloadAsync" OnCancel="() => logging = false" />
+                            OnLogged="LoggedAsync" OnCancel="() => logging = false" />
         </section>
     }
 
@@ -75,18 +80,22 @@ else
                 <dd>Every @Labels.Count(view.Case.IntervalDays, "day")</dd>
             }
 
-            <dt>Next one</dt>
-            <dd>
-                @if (view.NextDue is { } due && view.DaysUntilDue is { } days)
-                {
-                    <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days, view.IsCheck)</span>
-                    <text> · @Labels.Date(due)</text>
-                }
-                else
-                {
-                    <text>Nothing due, the case is closed.</text>
-                }
-            </dd>
+            @* Before the first one there's no rhythm yet, so a date for the next would only confuse *@
+            @if (view.Last is not null)
+            {
+                <dt>Next one</dt>
+                <dd>
+                    @if (view.NextDue is { } due && view.DaysUntilDue is { } days)
+                    {
+                        <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days, view.IsCheck)</span>
+                        <text> · @Labels.Date(due)</text>
+                    }
+                    else
+                    {
+                        <text>Nothing due, the case is closed.</text>
+                    }
+                </dd>
+            }
 
             <dt>Last one</dt>
             <dd>@(view.Last is { } last ? $"{Labels.Date(last.OccurredOn)} · {What(last)}" : "No treatments yet.")</dd>
@@ -97,10 +106,18 @@ else
             <h2>Notes</h2>
             <p class="detail-notes">@view.Case.Notes</p>
         }
+
+        @if (view.Case.IsOpen && !ShowTrap)
+        {
+            @* Mites and mealybugs rarely end up on a trap, but someone may have one up anyway *@
+            <p class="trap-offer">
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="StartCounting">Count a sticky trap</button>
+            </p>
+        }
     </section>
 
-    @* Its own card rather than a button in the row above, since not every pest ends up on a trap *@
-    @if (view.Case.IsOpen || Trapped)
+    @* Its own card rather than a button in the row above, so it's there to come back to *@
+    @if (ShowTrap)
     {
         <section class="detail-card">
             <div class="trap-head">
@@ -118,7 +135,7 @@ else
             else if (!Trapped)
             {
                 <p class="text-body-secondary mb-0">
-                    Thrips, fungus gnats and whitefly end up on a yellow or blue sticky trap. Count it
+                    @Labels.For(view.Case.Pest) get caught on a yellow or blue sticky trap. Count it
                     now and then to see whether the treatment is working.
                 </p>
             }
@@ -156,7 +173,7 @@ else
         @if (treatments.Count == 0)
         {
             <p class="text-body-secondary mb-0">
-                Nothing logged yet. Each treatment you log moves the next one along by the interval.
+                Nothing logged yet. Once you log the first treatment, the next one is due after the interval.
             </p>
         }
         else
@@ -247,6 +264,7 @@ else
     private bool counting;
     private bool askTreatAgain;
     private bool confirmDelete;
+    private string? message;
 
     private DateOnly Today => Time.Today();
 
@@ -256,6 +274,7 @@ else
         logging = false;
         counting = false;
         askTreatAgain = false;
+        message = null;
         await ReloadAsync();
         loaded = true;
     }
@@ -277,11 +296,17 @@ else
 
     private bool Trapped => treatments.Any(t => t.Kind == PestTreatmentKind.TrapCount);
 
+    // A pest that flies into traps gets the card from the start. Any other gets it once a trap
+    // is counted, or while the link below the details has the count open.
+    private bool ShowTrap =>
+        view is not null && (Trapped || counting || (view.Case.IsOpen && view.Case.Pest.CaughtOnTrap()));
+
     // One sheet open at a time, so the page doesn't grow two forms
     private void ToggleLogging()
     {
         logging = !logging;
         counting = false;
+        message = null;
     }
 
     private void StartCounting()
@@ -289,6 +314,15 @@ else
         counting = true;
         logging = false;
         askTreatAgain = false;
+        message = null;
+    }
+
+    private async Task LoggedAsync()
+    {
+        var check = view?.IsCheck == true;
+        logging = false;
+        await ReloadAsync();
+        message = check ? "Check logged." : "Treatment logged.";
     }
 
     private async Task CountedAsync()
@@ -328,6 +362,7 @@ else
         askTreatAgain = false;
         counting = false;
         logging = true;
+        message = null;
     }
 
     private async Task DeleteAsync()

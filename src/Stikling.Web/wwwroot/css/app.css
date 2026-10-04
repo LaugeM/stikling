@@ -954,6 +954,13 @@ img.framed {
     margin-bottom: 1rem;
 }
 
+/* A short line after an action on a detail page, like "Treatment logged." */
+.action-message {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
 .detail-card {
     margin-bottom: 1rem;
     padding: 1rem;
@@ -1308,6 +1315,10 @@ a.tag-label:hover {
 
 .trap-head h2 {
     margin: 0;
+}
+
+.trap-offer {
+    margin: 0.75rem 0 0;
 }
 
 /* Asking whether new ones on a trap mean treating again: a panel awaiting a decision */

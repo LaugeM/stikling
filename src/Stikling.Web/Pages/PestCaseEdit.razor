@@ -46,26 +46,29 @@ else
                     <InputDate id="started" class="form-control" @bind-Value="item.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
                 </div>
             </div>
-            <div class="mb-1">
-                <label class="form-label" for="status">How it stands</label>
-                <InputSelect id="status" class="form-select" @bind-Value="item.Status" @bind-Value:after="StatusChanged">
-                    @foreach (var status in Enum.GetValues<PestCaseStatus>())
-                    {
-                        <option value="@status">@Labels.For(status)</option>
-                    }
-                </InputSelect>
-            </div>
-            <div class="form-text">
-                Watching means the treatments have stopped but you are still checking. A resolved case
-                stops showing up.
-            </div>
-            @if (item.Status == PestCaseStatus.Resolved)
+            @if (!IsNew)
             {
-                <div class="mt-3">
-                    <label class="form-label" for="resolved">Resolved on</label>
-                    <InputDate id="resolved" class="form-control" @bind-Value="item.ResolvedOn"
-                               min="@item.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                <div class="mb-1">
+                    <label class="form-label" for="status">How it stands</label>
+                    <InputSelect id="status" class="form-select" @bind-Value="item.Status" @bind-Value:after="StatusChanged">
+                        @foreach (var status in Enum.GetValues<PestCaseStatus>())
+                        {
+                            <option value="@status">@Labels.For(status)</option>
+                        }
+                    </InputSelect>
                 </div>
+                <div class="form-text">
+                    Watching means the treatments have stopped but you are still checking. A resolved case
+                    stops showing up.
+                </div>
+                @if (item.Status == PestCaseStatus.Resolved)
+                {
+                    <div class="mt-3">
+                        <label class="form-label" for="resolved">Resolved on</label>
+                        <InputDate id="resolved" class="form-control" @bind-Value="item.ResolvedOn"
+                                   min="@item.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                }
             }
         </fieldset>
 
@@ -150,9 +153,9 @@ else
 
     private static readonly (PestScope Value, string Label)[] scopeOptions =
     [
-        (PestScope.Everywhere, "Everywhere"),
+        (PestScope.PickedPlants, "Pick plants"),
         (PestScope.Room, "One room"),
-        (PestScope.PickedPlants, "Pick plants")
+        (PestScope.Everywhere, "All plants")
     ];
 
     private PestCase? item;
