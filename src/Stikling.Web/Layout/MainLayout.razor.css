@@ -148,3 +148,17 @@
     background: var(--pa-alert);
     box-shadow: 0 0 0 2px var(--pa-surface);
 }
+
+/* Sits just above the bottom navigation, like the update banner */
+.first-sync-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    z-index: 12;
+    padding: 0.6rem 1rem;
+    background: var(--pa-surface);
+    border-top: 1px solid var(--pa-border);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+    font-size: 0.9rem;
+}

@@ -44,6 +44,15 @@ public sealed class SyncRunner(
 
     public DateTimeOffset? LastSynced { get; private set; }
 
+    /// <summary>
+    /// True during the first sync on this device since signing in, before which the lists may be
+    /// empty although the account has plants. Once one has failed, e.g. offline, the retries don't
+    /// count, since the problem shows in Settings instead.
+    /// </summary>
+    public bool FirstSync => Running && LastSynced is null && !firstSyncFailed;
+
+    private bool firstSyncFailed;
+
     /// <summary>Why the last sync didn't finish, in words for the person, or null when it did.</summary>
     public string? Problem { get; private set; }
 
@@ -86,7 +95,11 @@ public sealed class SyncRunner(
 
         signedIn = await account.WasSignedInAsync();
         if (signedIn)
+        {
+            // Clerk loads before the first request, so the API starts while it does
+            api.Wake();
             _ = SyncNowAsync();
+        }
     }
 
     /// <summary>Syncs now, or once more after the sync that is running. Never throws.</summary>
@@ -252,6 +265,8 @@ public sealed class SyncRunner(
             {
                 again = false;
                 await SyncOnceAsync();
+                if (LastSynced is null && Problem is not null)
+                    firstSyncFailed = true;
                 Pending = await store.CountPendingAsync();
             }
             while (again && signedIn);
@@ -260,6 +275,8 @@ public sealed class SyncRunner(
         {
             // Nothing else may stop the app, since nothing waits for a sync that runs by itself
             Problem = $"Something went wrong while syncing: {e.Message}";
+            if (LastSynced is null)
+                firstSyncFailed = true;
         }
         finally
         {
@@ -292,6 +309,9 @@ public sealed class SyncRunner(
 
             LastSynced = time.GetUtcNow();
             await files.SetAsync(LastSyncKey, LastSynced.Value.ToString("O"));
+
+            // The records are in, so the first sync's notice can go while the photos carry on
+            StatusChanged?.Invoke();
 
             if (result.Received > 0)
             {
@@ -372,6 +392,7 @@ public sealed class SyncRunner(
         await store.ForgetStateAsync();
         await files.SetAsync(LastSyncKey, null);
         LastSynced = null;
+        firstSyncFailed = false;
         Problem = null;
         Refused = 0;
         PhotosFull = false;

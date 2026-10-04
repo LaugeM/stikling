@@ -2,6 +2,7 @@
 @* Clerk's sign-in, which also creates an account for someone new. It comes back to Settings once done. *@
 @implements IAsyncDisposable
 @inject AccountService Account
+@inject StiklingApi Api
 @inject NavigationManager Nav
 
 <PageTitle>Sign in · Stikling</PageTitle>
@@ -48,7 +49,11 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && Account.IsAvailable)
+        {
+            // The API starts while Clerk loads and the person signs in, so the first sync is quicker
+            Api.Wake();
             await LoadAsync();
+        }
     }
 
     private async Task LoadAsync()

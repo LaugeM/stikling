@@ -249,7 +249,11 @@ h1 {
     margin: 0;
 }
 
-/* Round "add" button floating above the bottom navigation */
+/* Round "add" button floating above the bottom navigation, and above a banner when one shows */
+main.app-content.with-banner .fab {
+    bottom: calc(8rem + env(safe-area-inset-bottom));
+}
+
 .fab {
     position: fixed;
     right: max(1rem, calc((100% - 48rem) / 2 + 1rem));
@@ -2116,11 +2120,13 @@ main.app-content.with-banner:has(.page-dock) {
     padding-bottom: calc(12.25rem + env(safe-area-inset-bottom));
 }
 
-main.app-content:has(.page-dock) ~ .update-banner {
+main.app-content:has(.page-dock) ~ .update-banner,
+main.app-content:has(.page-dock) ~ .first-sync-banner {
     bottom: calc(7.25rem + env(safe-area-inset-bottom));
 }
 
-main.app-content:has(.form-bar) ~ .update-banner {
+main.app-content:has(.form-bar) ~ .update-banner,
+main.app-content:has(.form-bar) ~ .first-sync-banner {
     bottom: calc(7.25rem + env(safe-area-inset-bottom));
 }
 
