@@ -115,7 +115,19 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
 
         await ForgetModuleAsync();
         await files.SetAsync(TestPersonKey, name);
-        var state = await LoadAsync();
+        AccountState state;
+        try
+        {
+            state = await LoadAsync();
+        }
+        catch (AccountUnavailableException)
+        {
+            // So the next sign-in goes through Clerk again, rather than failing the same way
+            await files.SetAsync(TestPersonKey, null);
+            await ForgetModuleAsync();
+            throw;
+        }
+
         Changed?.Invoke(state);
         return state;
     }
