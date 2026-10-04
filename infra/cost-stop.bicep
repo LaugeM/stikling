@@ -1,57 +1,27 @@
 // The cost stop. A budget only sends emails, and when the Azure for Students credit runs out the
-// whole subscription is switched off, so this turns the paid parts off before that can happen. The
-// budget in main.bicep calls the two action groups here:
+// whole subscription is switched off. So when the month's budget is spent, the budget in main.bicep
+// calls the action group here, and a Logic App stops the API. The app keeps working on each device,
+// and changes wait there until the API is back. On the 1st of each month another Logic App starts
+// it again. Each stop and start sends an email, and so does one that fails.
 //
-// - When the month's budget is spent, the database moves to the free tier. Sync is slow again but
-//   keeps working.
-// - At 125% of it, the API is stopped. The app keeps working on each device, and changes wait there
-//   until it is back.
-//
-// On the 1st of each month, both are undone. Each change the stop makes sends an email, and so does
-// one that fails.
-//
-// Azure works out costs several hours late, so the stop comes up to a day after the line is crossed.
-
-import { basicTier, freeTier } from 'database-tiers.bicep'
+// The database can't be stopped: Basic is always on, and a database that has been on a paid tier
+// can't go back to the free offer. Azure works out costs several hours late, so the stop comes up
+// to a day after the line is crossed.
 
 param location string
-param sqlServerName string
-param databaseName string
 param apiName string
 
 @description('Who gets an email when the cost stop changes something.')
 param emails array
 
-// Built-in role
-var sqlDbContributor = '9b7fa17d-e63e-47b0-bb0a-15c516ac86ec'
-
-resource sql 'Microsoft.Sql/servers@2023-08-01' existing = {
-  name: sqlServerName
-
-  resource database 'databases' existing = {
-    name: databaseName
-  }
-}
-
 resource api 'Microsoft.App/containerApps@2024-03-01' existing = {
   name: apiName
 }
 
-// The Logic Apps act as this identity, which may change the database's tier and stop or start the
-// API, but can't read the data in either
+// The Logic Apps act as this identity, which may only stop and start the API
 resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: 'id-stikling-cost-stop'
   location: location
-}
-
-resource canChangeDatabase 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(sql::database.id, identity.id, sqlDbContributor)
-  scope: sql::database
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', sqlDbContributor)
-    principalId: identity.properties.principalId
-    principalType: 'ServicePrincipal'
-  }
 }
 
 // Only what the stop needs, so it can't change the API's settings or read its secrets
@@ -94,7 +64,6 @@ var authentication = {
   audience: environment().resourceManager
 }
 
-var databaseAddress = '${environment().resourceManager}${skip(sql::database.id, 1)}?api-version=2023-08-01'
 var apiAddress = '${environment().resourceManager}${skip(api.id, 1)}'
 var apiVersion = '?api-version=2024-03-01'
 
@@ -106,36 +75,6 @@ var calledByBudget = {
     kind: 'Http'
     inputs: {
       schema: {}
-    }
-  }
-}
-
-resource freeDatabase 'Microsoft.Logic/workflows@2019-05-01' = {
-  name: 'logic-stikling-free-database'
-  location: location
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${identity.id}': {}
-    }
-  }
-  properties: {
-    definition: {
-      '$schema': schema
-      contentVersion: '1.0.0.0'
-      triggers: calledByBudget
-      actions: {
-        Move_the_database_to_the_free_tier: {
-          type: 'Http'
-          inputs: {
-            method: 'PATCH'
-            uri: databaseAddress
-            body: freeTier
-            authentication: authentication
-          }
-          runAfter: {}
-        }
-      }
     }
   }
 }
@@ -169,8 +108,8 @@ resource stopApi 'Microsoft.Logic/workflows@2019-05-01' = {
   }
 }
 
-// Only changes what isn't as it should be, so a month without a stop sends no email. It also undoes
-// a change made by hand, like a stopped API.
+// Only starts the API when it isn't running, so a month without a stop sends no email. It also
+// undoes a stop made by hand.
 resource monthStart 'Microsoft.Logic/workflows@2019-05-01' = {
   name: 'logic-stikling-month-start'
   location: location
@@ -196,43 +135,6 @@ resource monthStart 'Microsoft.Logic/workflows@2019-05-01' = {
         }
       }
       actions: {
-        Get_the_database: {
-          type: 'Http'
-          inputs: {
-            method: 'GET'
-            uri: databaseAddress
-            authentication: authentication
-          }
-          runAfter: {}
-        }
-        If_the_database_isnt_on_Basic: {
-          type: 'If'
-          expression: {
-            not: {
-              equals: [
-                '@body(\'Get_the_database\')?[\'sku\']?[\'name\']'
-                basicTier.sku.name
-              ]
-            }
-          }
-          actions: {
-            Move_the_database_to_Basic: {
-              type: 'Http'
-              inputs: {
-                method: 'PATCH'
-                uri: databaseAddress
-                body: basicTier
-                authentication: authentication
-              }
-              runAfter: {}
-            }
-          }
-          runAfter: {
-            Get_the_database: [
-              'Succeeded'
-            ]
-          }
-        }
         Get_the_API: {
           type: 'Http'
           inputs: {
@@ -277,23 +179,6 @@ resource monthStart 'Microsoft.Logic/workflows@2019-05-01' = {
 
 // What the budget calls
 
-resource freeDatabaseGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
-  name: 'ag-stikling-free-database'
-  location: 'global'
-  properties: {
-    enabled: true
-    groupShortName: 'StikFreeDb'
-    logicAppReceivers: [
-      {
-        name: 'free-database'
-        resourceId: freeDatabase.id
-        callbackUrl: listCallbackUrl('${freeDatabase.id}/triggers/manual', '2019-05-01').value
-        useCommonAlertSchema: true
-      }
-    ]
-  }
-}
-
 resource stopApiGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
   name: 'ag-stikling-stop-api'
   location: 'global'
@@ -311,8 +196,8 @@ resource stopApiGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
   }
 }
 
-// An email for each change the stop makes, found in the activity log by the identity that made it.
-// One that fails sends an email too, so a stop that didn't work isn't missed.
+// An email for each stop and start, found in the activity log by the identity that made it. One that
+// fails sends an email too, so a stop that didn't work isn't missed.
 
 resource emailGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
   name: 'ag-stikling-cost-stop-email'
@@ -335,7 +220,7 @@ resource changed 'Microsoft.Insights/activityLogAlerts@2020-10-01' = {
   location: 'global'
   properties: {
     enabled: true
-    description: 'The cost stop changed the database\'s tier, or stopped or started the API.'
+    description: 'The cost stop stopped or started the API, or tried to and failed.'
     scopes: [
       resourceGroup().id
     ]
@@ -373,5 +258,4 @@ resource changed 'Microsoft.Insights/activityLogAlerts@2020-10-01' = {
   }
 }
 
-output freeDatabaseActionGroupId string = freeDatabaseGroup.id
 output stopApiActionGroupId string = stopApiGroup.id

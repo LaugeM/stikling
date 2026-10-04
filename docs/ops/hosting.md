@@ -14,15 +14,13 @@ Sign-in goes through Clerk's production instance on `clerk.stikling.app`, with G
 
 ## The cost stop
 
-A budget can only send emails, and when the Azure for Students credit runs out, the whole subscription is switched off. So `infra/cost-stop.bicep` turns the paid parts off before that can happen:
+A budget can only send emails, and when the Azure for Students credit runs out, the whole subscription is switched off. So `infra/cost-stop.bicep` stops the API when the month's budget is spent. The app keeps working on each device, and changes wait there until the API is back. At 02:00 UTC on the 1st of each month, a second Logic App starts the API again if it isn't running, which also undoes a stop made by hand.
 
-- When the month's budget is spent, a Logic App moves the database to the free tier. Sync is slow again but keeps working, and the data stays as it is.
-- At 125% of the budget ($10), another one stops the API. The app keeps working on each device, and changes wait there until the API is back.
-- At 02:00 UTC on the 1st of each month, a third one moves the database back to Basic and starts the API, if they aren't like that already. That also undoes a change made by hand.
+The database can't be stopped. Basic is always on and is already the cheapest tier, and a database that has been on a paid tier can't go back to the free offer. It costs about $0.16 a day whatever happens, so a month that reaches the budget early can still end a few dollars over it. In a normal month the API costs nothing, since Azure's free amount for Container Apps covers about 200 hours of it being awake, so the stop is there for something unusual like a bot keeping it busy or a bug that makes the app sync in a loop.
 
-Every change the stop makes sends an email to the budget's addresses, and so does one that fails. Azure works out costs several hours late, so the stop comes up to a day after the line is crossed.
+Every stop and start sends an email to the budget's addresses, and so does one that fails. Azure works out costs several hours late, so the stop comes up to a day after the line is crossed.
 
-While the API is stopped, a new version can't be checked after it's deployed, so the workflow's last step fails. To bring things back before the 1st, run `logic-stikling-month-start` from the portal (Run trigger, on its overview page). Deploying the Bicep also moves the database back to Basic, but doesn't start the API.
+While the API is stopped, a new version can't be checked after it's deployed, so the workflow's last step fails. To bring it back before the 1st, open `logic-stikling-month-start` in the portal and click Run on its overview page.
 
 ## Deploying a new version
 
