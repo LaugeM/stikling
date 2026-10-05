@@ -392,6 +392,9 @@ internal sealed class FakePlantNameSource(PlantNameData data, params EverydayNam
     /// <summary>The languages whose everyday names were read, in order.</summary>
     public List<string> EverydayLoads { get; } = [];
 
+    /// <summary>Everyday names that can't be read, as if that one file was never cached.</summary>
+    public HashSet<string> Missing { get; } = [];
+
     public Task<PlantNameData> LoadAsync()
     {
         if (Fail)
@@ -402,7 +405,7 @@ internal sealed class FakePlantNameSource(PlantNameData data, params EverydayNam
 
     public Task<EverydayNameData> LoadEverydayAsync(string language)
     {
-        if (Fail)
+        if (Fail || Missing.Contains(language))
             throw new HttpRequestException("Offline");
         EverydayLoads.Add(language);
         return Task.FromResult(everyday.FirstOrDefault(e => e.Language == language) ?? EverydayNameData.Empty);

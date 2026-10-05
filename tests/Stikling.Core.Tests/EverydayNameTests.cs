@@ -233,6 +233,38 @@ public class EverydayNameTests
     }
 
     [Fact]
+    public async Task A_missing_Danish_file_is_tried_again_without_building_the_names_again()
+    {
+        var source = new FakePlantNameSource(Data, English, Danish);
+        source.Missing.Add("da");
+        var service = Service(source, new FakeSettingsRepository(), "da");
+
+        var first = await service.GetDictionaryAsync();
+        Assert.Same(first, await service.GetDictionaryAsync());
+        Assert.Equal("Snake plant", first.EverydayNames.For("Dracaena", "trifasciata", null));
+
+        source.Missing.Clear();
+        var later = await service.GetDictionaryAsync();
+        Assert.NotSame(first, later);
+        Assert.Equal("Svigermors tunge", later.EverydayNames.For("Dracaena", "trifasciata", null));
+    }
+
+    [Fact]
+    public async Task A_language_chosen_on_another_device_is_used_once_the_settings_arrive()
+    {
+        var settings = new FakeSettingsRepository();
+        var service = Service(new FakePlantNameSource(Data, English, Danish), settings, "en");
+        Assert.Equal("Snake plant", (await service.GetEverydayNamesAsync()).For("Dracaena", "trifasciata", null));
+
+        // What sync or a restore does: the record changes underneath, and the service is told
+        settings.Settings[UserSettings.SettingsId] = new UserSettings { EverydayNames = EverydayNameLanguage.Danish };
+        service.SettingsChanged();
+
+        Assert.Equal("Svigermors tunge", (await service.GetEverydayNamesAsync()).For("Dracaena", "trifasciata", null));
+        Assert.Equal(EverydayNameLanguage.Danish, await service.GetEverydayLanguageAsync());
+    }
+
+    [Fact]
     public void Quick_add_knows_everyday_names()
     {
         var plant = Assert.Single(QuickAdd.Parse("Snake plant from the market", Dictionary()));

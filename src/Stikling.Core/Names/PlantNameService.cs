@@ -32,7 +32,7 @@ public sealed class PlantNameService(
     private readonly Dictionary<string, EverydayNameData> everyday = [];
     private Task<Languages>? languages;
     private Task<(EverydayNameBook Book, bool Complete)>? book;
-    private (Languages Languages, PlantDictionary Dictionary)? dictionary;
+    private (Languages Languages, int Files, PlantDictionary Dictionary)? dictionary;
 
     /// <summary>
     /// The names that come with the app, read once. If they can't be read, e.g. offline before the
@@ -42,7 +42,7 @@ public sealed class PlantNameService(
     public async Task<PlantDictionary> GetDictionaryAsync()
     {
         var wanted = await GetLanguagesAsync();
-        if (dictionary is { } built && built.Languages == wanted)
+        if (dictionary is { } built && built.Languages == wanted && built.Files == wanted.Loaded.Length)
             return built.Dictionary;
 
         try
@@ -54,10 +54,14 @@ public sealed class PlantNameService(
             return PlantDictionary.Empty;
         }
 
-        var (files, complete) = await LoadEverydayAsync(wanted);
+        // A file that couldn't be read is tried again next time, but the dictionary is only built
+        // again when one more of them has come in
+        var (files, _) = await LoadEverydayAsync(wanted);
+        if (dictionary is { } partial && partial.Languages == wanted && partial.Files == files.Count)
+            return partial.Dictionary;
+
         var made = new PlantDictionary(data, files, wanted.Shown);
-        if (complete)
-            dictionary = (wanted, made);
+        dictionary = (wanted, files.Count, made);
         return made;
     }
 
@@ -82,6 +86,15 @@ public sealed class PlantNameService(
     public async Task SetEverydayLanguageAsync(EverydayNameLanguage language)
     {
         await settings.SetEverydayNamesAsync(language);
+        SettingsChanged();
+    }
+
+    /// <summary>
+    /// Reads the language chosen again next time, after the settings came from somewhere else:
+    /// another device through sync, or a backup.
+    /// </summary>
+    public void SettingsChanged()
+    {
         languages = null;
         book = null;
     }

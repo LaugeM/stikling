@@ -123,7 +123,18 @@
         suggester = await Names.GetSuggesterAsync();
     }
 
-    private IReadOnlyList<NameSuggestion> Found => suggester?.Search(query) ?? [];
+    // Searched again only when the words change, not each time a field below is typed in
+    private (NameSuggester? Suggester, string? Query, IReadOnlyList<NameSuggestion> Results) found = (null, null, []);
+
+    private IReadOnlyList<NameSuggestion> Found
+    {
+        get
+        {
+            if (found.Suggester != suggester || found.Query != query)
+                found = (suggester, query, suggester?.Search(query) ?? []);
+            return found.Results;
+        }
+    }
 
     private int NameKeyLength => (query ?? "").Count(char.IsLetter);
 
