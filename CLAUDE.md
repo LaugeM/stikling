@@ -102,3 +102,5 @@ Build, run the tests, and check any UI change in a browser at phone width. The d
 Clear the test data afterwards. The app has no button for it, so delete the database from the page with `indexedDB.deleteDatabase("stikling")` and reload.
 
 Then run the `reviewer` agent (`.claude/agents/reviewer.md`) on the branch, with a sentence on what the change is for. It reads the diff with a fresh context and checks it against this file and `DESIGN.md`. Fix what it finds that holds up, and say in the chat what it found and what was left alone and why.
+
+In the pull request text, say how the change was checked (which tests ran, what was looked at in the browser) and whether reverting it would undo it. Most changes revert cleanly. Some can't, because devices or the server keep what the new version wrote: raising `DB_VERSION`, migrating stored data, a server migration, or anything that deletes. Say that near the top, along with what it affects.
