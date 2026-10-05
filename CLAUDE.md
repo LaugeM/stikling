@@ -99,7 +99,9 @@ For a batch of small features that touch different parts of the app, suggest `/c
 
 Build, run the tests, and check any UI change in a browser at phone width. The dev server is `stikling-web` in `.claude/launch.json`. It runs on port 5170, or on another free port when a session running at the same time already has 5170.
 
-Clear the test data afterwards. The app has no button for it, so delete the database from the page with `indexedDB.deleteDatabase("stikling")` and reload.
+Hand the browser check to the `browser-check` agent (`.claude/agents/browser-check.md`) instead of driving the browser in this session. Every turn in a long session re-reads its whole context, so a check done here costs several times more than one done by an agent that starts small. Tell it what changed, which screens to open and how to get to them. It checks phone, desktop and dark mode, reports in a few lines and leaves one screenshot in the pane. Check in the main session only when the judgment about how it looks is part of the design work.
+
+Clear the test data afterwards. The app has no button for it, so delete the database from the page with `indexedDB.deleteDatabase("stikling")` and reload. The `browser-check` agent does this itself for data it added.
 
 Then run the `reviewer` agent (`.claude/agents/reviewer.md`) on the branch, with a sentence on what the change is for. It reads the diff with a fresh context and checks it against this file and `DESIGN.md`. Fix what it finds that holds up, and say in the chat what it found and what was left alone and why.
 
