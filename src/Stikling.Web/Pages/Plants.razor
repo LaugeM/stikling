@@ -1,4 +1,5 @@
 @page "/plants"
+@layout WideLayout
 @inject IPlantRepository Repository
 @inject PlantService PlantService
 @inject RoomService RoomService
@@ -19,6 +20,11 @@
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
                 @(selecting ? "Done" : "Select")
             </button>
+            @* Takes over from the round add button on a wide screen *@
+            <a class="btn btn-primary btn-sm icon-btn heading-add" href="plants/new">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                Add a plant
+            </a>
         </div>
     }
 </div>
@@ -148,7 +154,7 @@ else
     }
     else
     {
-        <ul class="plant-list">
+        <ul class="plant-list list-grid">
             @foreach (var plant in visible)
             {
                 <li>

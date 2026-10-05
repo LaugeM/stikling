@@ -58,8 +58,8 @@
     <details class="help-item">
         <summary>Where are the settings?</summary>
         <p>
-            Behind the gear at the top of the screen. That is where you @(Account.IsAvailable ? "sign in, " : "")save a backup, pick light or dark, and add, rename or merge rooms and tags. The pots, soil mixes and products
-            you use are under Supplies in the bar at the bottom.
+            Behind the gear at the top of the screen, or at the bottom of the menu on a wide screen. That is where you @(Account.IsAvailable ? "sign in, " : "")save a backup, pick light or dark, and add, rename or merge rooms and tags. The pots, soil mixes and products
+            you use are under Supplies.
         </p>
     </details>
 
@@ -88,6 +88,21 @@
         <p>
             On Android, a long press on the icon gives shortcuts to add a plant, start a propagation or
             open the pest cases.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>Can I use it on a computer?</summary>
+        <p>
+            Yes, in any browser, and on a tablet too. On a wide screen the tabs move to a menu down the left
+            side, with Help and Settings at the bottom of it. A plant or propagation page shows its details
+            next to its history, and the buttons that sit at the bottom of the page on a phone are above the
+            history instead. In the lists, the round + button is a button next to the title.
+        </p>
+        <p>
+            @(Account.IsAvailable
+                ? "Each device keeps its own plants until you sign in on both, which keeps them the same."
+                : "Each device keeps its own plants. To move them, save a backup on one and restore it on the other.")
         </p>
     </details>
 

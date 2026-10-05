@@ -1,15 +1,15 @@
-/* Sits just above the bottom navigation so it can't be missed */
+/* Sits just above the navigation so it can't be missed, lined up with the page column */
 .update-banner {
     position: fixed;
-    left: 0;
+    left: var(--pa-nav-side);
     right: 0;
-    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    bottom: var(--pa-nav-bottom);
     z-index: 12;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.6rem 1rem;
+    padding: 0.6rem var(--pa-column-inset);
     background: var(--pa-surface);
     border-top: 1px solid var(--pa-border);
     box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);

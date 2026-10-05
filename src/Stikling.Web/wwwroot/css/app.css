@@ -48,6 +48,33 @@
     --bs-link-hover-color-rgb: 31, 90, 55;
     --bs-body-bg: var(--pa-bg);
     --bs-body-color: var(--pa-text);
+
+    /* Where the navigation is. On a phone it is the tab bar along the bottom, and anything fixed
+       to the bottom sits on top of it. On a wide screen it is the menu down the left side, and
+       fixed bars start where it ends. */
+    --pa-nav-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    --pa-nav-side: 0px;
+
+    /* The page column and the space inside it at each side. Lists and plant and propagation
+       pages widen the column on a wide screen. */
+    --pa-column: 48rem;
+    --pa-gutter: 1rem;
+
+    /* Side padding that lines a bar fixed across the screen up with the page column */
+    --pa-column-inset: max(var(--pa-gutter), calc((100% - var(--pa-nav-side) - var(--pa-column)) / 2 + var(--pa-gutter)));
+}
+
+/* A computer, or a tablet held sideways. The one width where the layout itself changes. */
+@media (min-width: 64rem) {
+    :root {
+        --pa-nav-bottom: env(safe-area-inset-bottom);
+        --pa-nav-side: 14rem;
+        --pa-gutter: 2rem;
+    }
+
+    :root:has(.page-wide) {
+        --pa-column: 72rem;
+    }
 }
 
 /* Dark theme: theme.js sets data-bs-theme="dark" on <html> */
@@ -251,13 +278,13 @@ h1 {
 
 /* Round "add" button floating above the bottom navigation, and above a banner when one shows */
 main.app-content.with-banner .fab {
-    bottom: calc(8rem + env(safe-area-inset-bottom));
+    bottom: calc(var(--pa-nav-bottom) + 4.5rem);
 }
 
 .fab {
     position: fixed;
-    right: max(1rem, calc((100% - 48rem) / 2 + 1rem));
-    bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    right: var(--pa-column-inset);
+    bottom: calc(var(--pa-nav-bottom) + 1rem);
     z-index: 11;
     width: 3.5rem;
     height: 3.5rem;
@@ -787,10 +814,10 @@ a.item-card:active {
 /* The Save bar of a long form stays above the bottom navigation */
 .form-bar {
     position: sticky;
-    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    bottom: var(--pa-nav-bottom);
     z-index: 5;
-    margin: 0 -1rem;
-    padding: 0.6rem 1rem;
+    margin: 0 calc(-1 * var(--pa-gutter));
+    padding: 0.6rem var(--pa-gutter);
     background: var(--pa-surface);
     border-top: 1px solid var(--pa-border);
     box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
@@ -2073,11 +2100,11 @@ a.tag-label:hover {
 /* The buttons for what you do most on a plant or propagation page, fixed above the navigation */
 .page-dock {
     position: fixed;
-    inset: auto 0 calc(3.5rem + env(safe-area-inset-bottom)) 0;
+    inset: auto 0 var(--pa-nav-bottom) var(--pa-nav-side);
     z-index: 9;
     display: flex;
     gap: 0.4rem;
-    padding: 0.5rem max(1rem, calc((100% - 48rem) / 2 + 1rem));
+    padding: 0.5rem var(--pa-column-inset);
     background: var(--pa-surface);
     border-top: 1px solid var(--pa-border);
     box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
@@ -2122,12 +2149,12 @@ main.app-content.with-banner:has(.page-dock) {
 
 main.app-content:has(.page-dock) ~ .update-banner,
 main.app-content:has(.page-dock) ~ .first-sync-banner {
-    bottom: calc(7.25rem + env(safe-area-inset-bottom));
+    bottom: calc(var(--pa-nav-bottom) + 3.75rem);
 }
 
 main.app-content:has(.form-bar) ~ .update-banner,
 main.app-content:has(.form-bar) ~ .first-sync-banner {
-    bottom: calc(7.25rem + env(safe-area-inset-bottom));
+    bottom: calc(var(--pa-nav-bottom) + 3.75rem);
 }
 
 /* The top of a plant or propagation page: who it is, and what matters about it right now */
@@ -2177,9 +2204,14 @@ main.app-content:has(.form-bar) ~ .first-sync-banner {
     margin-bottom: 1.75rem;
 }
 
+/* On a phone the details wait behind the Details link. A wide screen shows them, see below. */
+.profile-details:not(.open) {
+    display: none;
+}
+
 /* A form with a pinned Save bar ends on the bar, so it lands right on the navigation */
 main.app-content:has(.form-bar) {
-    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    padding-bottom: var(--pa-nav-bottom);
 }
 
 /* The ticks on the Stage button in the dock: the outline button fills with green when pressed, so the ticks follow the text colour then */
@@ -2192,5 +2224,120 @@ main.app-content:has(.form-bar) {
 @media (max-width: 23.25rem) {
     .page-dock .stage-steps {
         display: none;
+    }
+}
+
+/* The labelled add button next to a list's title stands in for the round one on a wide screen */
+@media (max-width: 63.98rem) {
+    .heading-add {
+        display: none;
+    }
+}
+
+/* A computer or a tablet held sideways (the menu itself is in MainLayout.razor.css). There is
+   no thumb to keep things in reach of, so what was pinned above the tabs moves into the page. */
+@media (min-width: 64rem) {
+    .fab {
+        display: none;
+    }
+
+    .heading-add {
+        align-self: center;
+        margin-left: 0.5rem;
+    }
+
+    /* Rows flow into columns, as many as fit at a comfortable width */
+    .page-wide ul.list-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        gap: 0.6rem 0.75rem;
+    }
+
+    .page-wide ul.list-grid > li {
+        display: flex;
+        min-width: 0;
+    }
+
+    .page-wide ul.list-grid > li > * {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* A plant or propagation page: who it is on the left, everything that happened on the right.
+       The profile gives up room first, so the history stays wide enough for its buttons. */
+    .profile-layout {
+        display: grid;
+        grid-template-columns: clamp(16rem, 32%, 22rem) minmax(0, 1fr);
+        gap: clamp(1.5rem, 3%, 2.5rem);
+        align-items: start;
+    }
+
+    .profile-details:not(.open) {
+        display: block;
+    }
+
+    .profile-links .details-toggle {
+        display: none;
+    }
+
+    .profile-details {
+        margin-bottom: 0;
+    }
+
+    /* Photo, Note and the rest head the history they add to */
+    .page-dock {
+        position: static;
+        z-index: auto;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        padding: 0;
+        background: none;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .page-dock > .btn {
+        flex: 0 0 auto;
+        padding-inline: 1rem;
+    }
+
+    main.app-content:has(.page-dock) {
+        padding-bottom: 3rem;
+    }
+
+    main.app-content.with-banner:has(.page-dock) {
+        padding-bottom: 6.5rem;
+    }
+
+    main.app-content:has(.page-dock) ~ .update-banner,
+    main.app-content:has(.page-dock) ~ .first-sync-banner {
+        bottom: var(--pa-nav-bottom);
+    }
+
+    /* A sheet opens in the middle as a dialog instead of sliding up from the bottom edge */
+    .sheet {
+        max-width: 32rem;
+        max-height: min(85dvh, 48rem);
+        margin: auto;
+        border-radius: 0.9rem;
+        box-shadow: 0 12px 32px rgb(0 0 0 / 0.2);
+    }
+
+    .sheet-body {
+        padding-bottom: 1.25rem;
+    }
+}
+
+@media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+    .sheet[open] {
+        animation-name: sheet-rise;
+    }
+}
+
+@keyframes sheet-rise {
+    from {
+        opacity: 0;
+        transform: translateY(1rem) scale(0.98);
     }
 }
