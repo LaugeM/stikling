@@ -14,7 +14,8 @@ self.addEventListener('message', event => {
 const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff2?$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/, /\.webmanifest$/ ];
-const offlineAssetsExclude = [ /^service-worker\.js$/ ];
+// The link preview picture is only for other sites, so the app has no use for it offline
+const offlineAssetsExclude = [ /^service-worker\.js$/, /^img\/preview\.png$/ ];
 
 // The registration scope is the folder the app is served from (e.g. /stikling/ on GitHub Pages),
 // so this works both at the domain root and in a subfolder.

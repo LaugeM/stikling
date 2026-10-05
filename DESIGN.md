@@ -350,6 +350,13 @@ The first-run version, on Today, Plants and Propagations when there is nothing a
 ### Help Page
 Questions and answers grouped by topic, each topic under a Label heading. The questions in a topic close up into one bordered block divided by hairlines, like an experiment group, and each folds open with a stroked chevron on the right that turns over when open. Questions are set in the system font at weight 600, because they are sentences. A row of chips at the top jumps to each topic. The page is reached from About in Settings and from the first-run empty states, not from the header, so it doesn't compete with the app itself.
 
+### Loading Page
+What shows inside `#app` in `index.html` while the app downloads, which on a first visit over slow mobile data is half a minute. It is also what search engines and link previews read, so it says what Stikling is in plain words: the wordmark, a Headline, two sentences, a slim Potting Green bar fed by Blazor's download percentage, and two phone screens from the app rising out of a Leaf Tint panel that cuts off their bottoms. On a wide screen the text and the screens sit side by side.
+
+It carries its own styles in a `<style>` block, with the colours from this file under its own names, and the app's stylesheets load without holding it up. Someone coming back, whose page the service worker serves, only sees the icon in the middle, faded in after a moment, since the app is usually on screen before then.
+
+The screens and the link preview picture (`img/preview.png`, 1200 by 630, in the same layout) show a demo pothos and its cutting, with photos from Wikimedia Commons under CC0. Nothing on them may suggest users, numbers or reviews the app doesn't have.
+
 ## Do's and Don'ts
 
 ### Do:
