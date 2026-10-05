@@ -16,6 +16,10 @@ const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff2?$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/, /\.webmanifest$/ ];
 // The link preview picture is only for other sites, so the app has no use for it offline
 const offlineAssetsExclude = [ /^service-worker\.js$/, /^img\/preview\.png$/ ];
+// Files only some devices use, like the Danish plant names. Each is cached the first time the device
+// fetches it, and a new version of the app caches it straight away if the old one had it.
+const onDemandAssets = [ /^data\/everyday-names\.(?!en\.)[a-z]+\.json$/ ];
+const isOnDemand = url => onDemandAssets.some(pattern => pattern.test(url));
 
 // The registration scope is the folder the app is served from (e.g. /stikling/ on GitHub Pages),
 // so this works both at the domain root and in a subfolder.
@@ -26,11 +30,26 @@ async function onInstall(event) {
     console.info('Service worker: Install');
 
     // Fetch and cache all matching items from the assets manifest
+    const used = await onDemandInUse();
     const assetsRequests = self.assetsManifest.assets
         .filter(asset => offlineAssetsInclude.some(pattern => pattern.test(asset.url)))
         .filter(asset => !offlineAssetsExclude.some(pattern => pattern.test(asset.url)))
+        .filter(asset => !isOnDemand(asset.url) || used.has(asset.url))
         .map(asset => new Request(asset.url, { integrity: asset.hash, cache: 'no-cache' }));
     await caches.open(cacheName).then(cache => cache.addAll(assetsRequests));
+}
+
+// The on-demand files an earlier version of the app has cached, as paths like "data/everyday-names.da.json"
+async function onDemandInUse() {
+    const used = new Set();
+    for (const key of (await caches.keys()).filter(key => key.startsWith(cacheNamePrefix))) {
+        for (const request of await (await caches.open(key)).keys()) {
+            const path = request.url.startsWith(baseUrl.href) ? request.url.slice(baseUrl.href.length) : null;
+            if (path && isOnDemand(path))
+                used.add(path);
+        }
+    }
+    return used;
 }
 
 async function onActivate(event) {
@@ -57,5 +76,15 @@ async function onFetch(event) {
         cachedResponse = await cache.match(request);
     }
 
-    return cachedResponse || fetch(event.request);
+    if (cachedResponse)
+        return cachedResponse;
+
+    const path = event.request.url.startsWith(baseUrl.href) ? event.request.url.slice(baseUrl.href.length) : null;
+    if (event.request.method !== 'GET' || !path || !isOnDemand(path))
+        return fetch(event.request);
+
+    const response = await fetch(event.request);
+    if (response.ok)
+        await (await caches.open(cacheName)).put(event.request, response.clone());
+    return response;
 }

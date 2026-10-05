@@ -1,8 +1,46 @@
-@* The genus, species and cultivar fields, with names to tap under the one being typed in. Chips
+@* A search box that takes everyday or botanical names and fills in the fields under it, then the
+   genus, species and cultivar fields, with names to tap under the one being typed in. Chips
    rather than a datalist, which a phone won't show. Anything can still be typed. The chips keep
-   the field focused when tapped (mousedown is cancelled), so the keyboard stays up. *@
+   the field focused when tapped (mousedown is cancelled), so the keyboard stays up. The search
+   results don't: picking one is the end of the search, so the keyboard can go away. *@
+@implements IAsyncDisposable
 @inject PlantNameService Names
+@inject IJSRuntime JS
 
+<div class="mb-3">
+    <label class="form-label" for="name-search">What plant is it?</label>
+    <input id="name-search" type="search" class="form-control" value="@query" placeholder="e.g. snake plant or Monstera deliciosa"
+           autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="name-results"
+           @oninput="e => query = e.Value?.ToString()" @ref="searchInput" />
+    @if (Found is { Count: > 0 } found)
+    {
+        <div id="name-results" class="name-results" role="group" aria-label="Plants found">
+            @foreach (var result in found)
+            {
+                <button type="button" class="name-result" @onclick="() => PickFoundAsync(result)">
+                    @if (result.Formerly is { } old)
+                    {
+                        <span class="name-result-main"><i>@old</i></span>
+                        <span class="name-result-sub">now <BotanicalName Genus="@result.Genus" Species="@result.Species" Cultivar="@result.Cultivar" /></span>
+                    }
+                    else if (result.Everyday is { } resultCalled)
+                    {
+                        <span class="name-result-main">@resultCalled</span>
+                        <span class="name-result-sub"><BotanicalName Genus="@result.Genus" Species="@result.Species" Cultivar="@result.Cultivar" /></span>
+                    }
+                    else
+                    {
+                        <span class="name-result-main"><BotanicalName Genus="@result.Genus" Species="@result.Species" Cultivar="@result.Cultivar" /></span>
+                    }
+                </button>
+            }
+        </div>
+    }
+    else if (suggester is not null && NameKeyLength >= NameSuggester.MinLettersWithoutGenus)
+    {
+        <div id="name-results" class="form-text">Nothing by that name in the app's list. You can still type it in below.</div>
+    }
+</div>
 <div class="row g-2 mb-3">
     <div class="col-6">
         <label class="form-label" for="genus">Genus</label>
@@ -32,6 +70,10 @@
     @if (active is NameField.Cultivar)
     {
         <div class="mt-2">@Chips</div>
+    }
+    @if (everyday?.For(Genus, Species, Cultivar) is { } called)
+    {
+        <div class="form-text">Everyday name: @called</div>
     }
 </div>
 
@@ -64,6 +106,10 @@
     public string CultivarPlaceholder { get; set; } = "e.g. Thai Constellation";
 
     private NameSuggester? suggester;
+    private EverydayNameBook? everyday;
+    private string? query;
+    private ElementReference searchInput;
+    private IJSObjectReference? enterPicks;
     private NameField? active;
     private ElementReference genusInput;
     private ElementReference speciesInput;
@@ -71,7 +117,24 @@
     private ElementReference? focusNext;
 
     // The fields work straight away. Suggestions turn up once the names are read.
-    protected override async Task OnInitializedAsync() => suggester = await Names.GetSuggesterAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        everyday = await Names.GetEverydayNamesAsync();
+        suggester = await Names.GetSuggesterAsync();
+    }
+
+    private IReadOnlyList<NameSuggestion> Found => suggester?.Search(query) ?? [];
+
+    private int NameKeyLength => (query ?? "").Count(char.IsLetter);
+
+    // Everything it names, and nothing left over from a name typed before
+    private async Task PickFoundAsync(NameSuggestion found)
+    {
+        query = null;
+        await SetGenusAsync(found.Genus);
+        await SetSpeciesAsync(found.Species);
+        await SetCultivarAsync(found.Cultivar);
+    }
 
     private IReadOnlyList<NameSuggestion> Suggestions =>
         suggester is not null && active is { } typing ? suggester.Suggest(typing, Genus, Species, Cultivar) : [];
@@ -161,10 +224,31 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // Enter in the search box picks the first plant found, rather than saving the form
+        if (firstRender)
+        {
+            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+            enterPicks = await module.InvokeAsync<IJSObjectReference>("enterPicksFirst", searchInput);
+        }
+
         if (focusNext is not { } input)
             return;
 
         focusNext = null;
         await input.FocusAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (enterPicks is null)
+            return;
+        try
+        {
+            await enterPicks.InvokeVoidAsync("dispose");
+            await enterPicks.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
     }
 }

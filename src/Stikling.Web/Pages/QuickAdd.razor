@@ -13,7 +13,7 @@
 <div class="mb-3">
     <label class="form-label" for="names">Names</label>
     <textarea id="names" class="form-control" rows="5" value="@text" @oninput="Typed"
-              placeholder="Alocasia zebrina, Monstera deliciosa 'Thai Constellation'"
+              placeholder="Alocasia zebrina, snake plant, Monstera deliciosa 'Thai Constellation'"
               autocapitalize="sentences" spellcheck="false"></textarea>
     <div class="form-text">One plant per line, or separated by commas. Anything after a known name goes into the notes.</div>
 </div>
@@ -37,6 +37,10 @@
             <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
                 <div>
                     <div>@current.DisplayName</div>
+                    @if (string.IsNullOrWhiteSpace(current.Nickname) && dictionary.EverydayNames.For(current.Genus, current.Species, current.Cultivar) is { } called)
+                    {
+                        <div class="form-text mt-0">@called</div>
+                    }
                     @if (!string.IsNullOrWhiteSpace(current.Notes))
                     {
                         <div class="form-text mt-0">@current.Notes</div>

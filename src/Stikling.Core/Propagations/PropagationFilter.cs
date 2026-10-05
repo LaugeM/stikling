@@ -10,7 +10,8 @@ public enum ProgressFilter
 }
 
 /// <summary>Search and filter rules for the propagations list.</summary>
-public sealed record PropagationFilter(string? Search = null, ProgressFilter Progress = ProgressFilter.Active)
+/// <param name="Everyday">The everyday name shown for a propagation, like "Snake plant", which the search looks through too.</param>
+public sealed record PropagationFilter(string? Search = null, ProgressFilter Progress = ProgressFilter.Active, Func<Propagation, string?>? Everyday = null)
 {
     /// <summary>Active ones oldest first (they've waited longest), finished ones newest first.</summary>
     public IEnumerable<Propagation> Apply(IEnumerable<Propagation> propagations) =>
@@ -42,7 +43,7 @@ public sealed record PropagationFilter(string? Search = null, ProgressFilter Pro
         if (string.IsNullOrWhiteSpace(Search))
             return true;
 
-        var haystack = string.Join(' ', p.Nickname, p.Genus, p.Species, p.Cultivar, p.Source);
+        var haystack = string.Join(' ', p.Nickname, p.Genus, p.Species, p.Cultivar, p.Source, Everyday?.Invoke(p));
         return Search
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase));

@@ -9,6 +9,7 @@
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject IJSRuntime JS
+@inject PlantNameService Names
 
 <PageTitle>@(propagation?.DisplayName ?? "Propagation") · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -63,6 +64,10 @@ else
                     @if (!string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                     {
                         <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" /></p>
+                    }
+                    else if (everyday?.For(propagation.Genus, propagation.Species, propagation.Cultivar) is { } called)
+                    {
+                        <p class="detail-sub everyday-name">@called</p>
                     }
                     <div class="profile-badges">
                         @if (propagation.IsDormant)
@@ -679,8 +684,11 @@ else
         loaded = true;
     }
 
+    private EverydayNameBook? everyday;
+
     private async Task LoadAsync()
     {
+        everyday = await Names.GetEverydayNamesAsync();
         propagation = await Repository.GetAsync(Id);
         var plants = await PlantRepository.GetAllAsync();
         var propagations = allPropagations = await Repository.GetAllAsync();

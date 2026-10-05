@@ -61,6 +61,14 @@ public class PlantFilterTests
     }
 
     [Fact]
+    public void Search_finds_the_everyday_name_shown()
+    {
+        var filter = new PlantFilter("swiss cheese", Everyday: p => p.Species == "deliciosa" ? "Swiss cheese plant" : null);
+
+        Assert.Equal([Monstera, Thai], filter.Apply(All));
+    }
+
+    [Fact]
     public void A_room_shows_the_plants_in_it()
     {
         var result = new PlantFilter(PlaceIds: In("Living room")).Apply(All).ToList();

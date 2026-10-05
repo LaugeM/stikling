@@ -4,6 +4,7 @@
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
 @inject TimeProvider Time
+@inject PlantNameService Names
 
 <PageTitle>Propagations · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -188,8 +189,11 @@ else
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
+    private EverydayNameBook? everyday;
+
     private async Task LoadAsync()
     {
+        everyday = await Names.GetEverydayNamesAsync();
         plants = (await PlantRepository.GetAllAsync()).ToDictionary(p => p.Id);
         all = await Repository.GetAllAsync();
         Refresh();
@@ -209,7 +213,7 @@ else
 
     private void Refresh()
     {
-        visible = new PropagationFilter(search, progress).Apply(all ?? []).ToList();
+        visible = new PropagationFilter(search, progress, p => everyday?.For(p.Genus, p.Species, p.Cultivar)).Apply(all ?? []).ToList();
         experiments = Experiments.Group(visible, Time.Today());
 
         var grouped = experiments.SelectMany(e => e.Entries).Select(e => e.Propagation.Id).ToHashSet();

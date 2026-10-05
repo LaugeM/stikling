@@ -979,6 +979,12 @@ img.framed {
     color: var(--pa-muted);
 }
 
+/* "Snake plant" under a botanical name is not a botanical name, so it stands upright */
+.item-sub.everyday-name,
+.detail-sub.everyday-name {
+    font-style: normal;
+}
+
 .detail-actions {
     display: flex;
     gap: 0.5rem;
@@ -1723,6 +1729,52 @@ a.tag-label:hover {
 .chip-note {
     color: var(--pa-muted);
     font-size: 0.8rem;
+}
+
+/* Plants found by the "What plant is it?" box: one block divided by hairlines, like the rows on
+   Settings, with the everyday name over the botanical one */
+.name-results {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5rem;
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.name-result {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.45rem 0.75rem;
+    border: 0;
+    border-top: 1px solid var(--pa-border);
+    background: none;
+    color: var(--pa-text);
+    text-align: left;
+    line-height: 1.3;
+    transition: background-color 0.15s ease-out;
+}
+
+.name-result:first-child {
+    border-top: 0;
+}
+
+.name-result:hover,
+.name-result:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+.name-result:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+}
+
+.name-result-sub {
+    color: var(--pa-muted);
+    font-size: 0.875rem;
 }
 
 /* Shared by Settings and the pages that came out of it */

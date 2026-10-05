@@ -20,3 +20,21 @@ export function showAlert(id) {
 export function scrollToId(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+// The languages the browser is set to, most preferred first, like ["da-DK", "da", "en"]
+export function languages() {
+    return navigator.languages?.length ? [...navigator.languages] : [navigator.language];
+}
+
+// Enter in a search box picks the first result, in the element its aria-controls names, instead of
+// submitting the form it's in. Returns something to call dispose() on when the box goes away.
+export function enterPicksFirst(input) {
+    const onKey = event => {
+        if (event.key !== "Enter")
+            return;
+        event.preventDefault();
+        document.getElementById(input.getAttribute("aria-controls"))?.querySelector("button")?.click();
+    };
+    input.addEventListener("keydown", onKey);
+    return { dispose: () => input.removeEventListener("keydown", onKey) };
+}
