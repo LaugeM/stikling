@@ -12,6 +12,19 @@
         "ext": ".razor",
         "engine": "html"
       }
+    ],
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "src/Stikling.Web/wwwroot/index.html"
+        ],
+        "createdAt": "2026-10-05T06:16:32.420Z",
+        "reason": "Claude: the return-visit icon starts at opacity 0 and fades in after 0.6 s on purpose (checked in recorded frames)"
+      }
     ]
   }
 }
