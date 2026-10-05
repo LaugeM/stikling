@@ -10,7 +10,7 @@ Blazor WebAssembly PWA. Everything is stored on the device in IndexedDB. When so
 - `tests/Stikling.Core.Tests`: xUnit, run with `dotnet test Stikling.slnx`. The services are tested against the in-memory repositories in `Fakes.cs`.
 - `tests/Stikling.Api.Tests`: the API's endpoints, run against a real SQL Server and Azurite that Testcontainers starts in Docker. Docker Desktop has to be running for `dotnet test Stikling.slnx`.
 - `tools/plant-names`: the script that builds `wwwroot/data/plant-names.json`, the names the genus, species and cultivar fields suggest. Its README says where the names come from and how to add more. Never edit the JSON by hand.
-- `infra`: the Azure resources for the hosted API, in Bicep. `docs/ops/hosting.md` says what they are and how to deploy them, which is by hand.
+- `infra`: the Azure resources for the hosted API, in Bicep. `docs/ops/hosting.md` says what they are and how to deploy them. The workflow only deploys new versions of the API, and changes to the Bicep are deployed by hand.
 
 Photos are resized, stored, read, and sent to and fetched from the API entirely in JavaScript. The image data only crosses into C# when a backup is written or restored.
 
@@ -21,7 +21,7 @@ The impeccable skill is for real design work, not a check on every change, since
 ## Docs for some tasks
 
 - **New kind of record** (a new IndexedDB store): follow every step in `docs/dev/new-record.md`. A missed step quietly leaves the records out of backups or sync.
-- **API or sync code** (`src/Stikling.Api`, `Core/Sync`, `SyncRunner`, the change list or photo lists in `db.js`): read `docs/dev/api.md` first. It has the auth rules every endpoint follows, how records and photos are stored, and how a sync runs.
+- **API or sync code** (`src/Stikling.Api`, `Core/Sync`, `SyncRunner`, how `db.js` saves records, or settings that differ between local and hosted): read `docs/dev/api.md` first. It has the auth rules every endpoint follows, how records and photos are stored, and how a sync runs.
 - **Sign-in, or testing while signed in** (Clerk, `account.js`, `AccountService`, `StiklingApi`, or checking a screen or a sync with an account): read `docs/dev/sign-in.md`.
 
 ## Data conventions
