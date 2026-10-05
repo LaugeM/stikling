@@ -18,7 +18,7 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 | **3–4** | Clearly worth building, and the payoff comes soon. |
 | **5–6** | Worth building, but nothing is waiting on it. |
 | **7–8** | Nice to have if there is time and interest. |
-| **9** | Needs accounts and a backend (v2). |
+| **9** | Needs more of the accounts and server side built first (v2). |
 | **10** | Needs a native app (v3). |
 
 **Effort** is a guess at how much work each one is on top of what is already built.
@@ -35,15 +35,23 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 ## Next up
 
-In the order I would build them.
+In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
 
-1. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
-2. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
-3. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-4. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-5. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-6. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-7. **Comparing photos side by side, and voice notes.**
+1. **A preview picture and a page that shows while the app loads**, so a link to the app shows what it is, and someone tapping it sees more than a spinner.
+2. **The quickest ways to start on the first screen**: adding a list of plants at once, and bringing in old photos with their dates.
+3. **The common houseplants in the plant dictionary**, with their everyday names, so the first plant someone new adds is found.
+4. **A share card** for a plant or propagation, together with **the result of a finished propagation**, which is what makes the card worth posting.
+5. **Before and after**, and then **a time-lapse video**, from a plant's or propagation's photos.
+6. **A share link for one plant or propagation**, which opens a page anyone can see.
+7. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
+8. **Passing a cutting on with its history**, built on the share link.
+9. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
+10. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
+11. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+12. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+13. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+14. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+15. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
@@ -81,12 +89,13 @@ These need no new storage and no new screens worth the name: purchase price, a "
 | ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | 5 | M | v1.x |
 | ✅ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
 | ✅ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
-| ☐ | Grid view with large photos as an alternative to the list | 6 | S | v1.x |
+| ☐ | Grid view with large photos as an alternative to the list | 4 | S | v1.x |
 | ☐ | Group the plant list by genus, with an A to Z jump for long lists | 6 | S | v1.x |
 | ☐ | **Collection numbers**: an optional short number per plant, e.g. 117, to write on the pot. Its propagations get 117a, 117b and so on, so a label on a jar says where the cutting came from | 6 | M | v1.x |
 | ☐ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 6 | M | v1.x |
 | ◐ | **Why it died**: an optional note on the cause when a plant is marked as died, and a list of the plants that died and why, to look over before buying the same plant again. The note is built and shows on the plant and on its card under Gone; a list of only the plants that died is missing | 6 | S | v1.x |
 | ◐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline. Built for the aroids (Araceae) and Coleus: every genus and species from Kew's checklist, the old names (Plectranthus and Solenostemon for Coleus), and a starter list of cultivars. Other families, common names (Danish ones too, so paletblad finds Coleus), family and native region, and a page to browse it aren't built. See `tools/plant-names` | 6 | L | v1.x |
+| ☐ | **The common houseplants in the dictionary**: the genera of the plants most people start with (snake plant, spider plant, rubber plant, prayer plant, moth orchid, the usual succulents) with all their species, where a whole family would make the file too big, and the names people actually call them, so typing "snake plant" finds Dracaena trifasciata. Wikidata has common names under CC0. Danish names come with the Danish translation | 2 | L | v1.x |
 | ✅ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary and the names already on your plants and propagations, including hybrids and named varieties. An old name offers the one it goes by now, and a cultivar fills in its genus and species. Anything not on the list can still be typed | 6 | M | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
 | ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
@@ -120,7 +129,8 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ☐ | Measurements on an entry: number of leaves, height, root length | 6 | S | v1.x |
 | ☐ | **Growth curve**: a small chart of a plant's or propagation's measurements over time, once there are a few to draw | 7 | S | v1.x |
 | ☐ | **Share into Stikling**: the installed app appears in Android's share menu, so a photo from the gallery can go straight to a plant (Web Share Target) | 7 | M | v1.x |
-| ☐ | Time-lapse / before-and-after image from a plant's photos | 8 | L | v1.x |
+| ☐ | **Before and after**: pick two photos of a plant or propagation, usually the first and the newest, and get one image of them side by side with the dates and how long it took, ready to post. Shared through the phone's share menu, or saved | 3 | M | v1.x |
+| ☐ | **Time-lapse video** from a plant's or propagation's photos, each one showing for a moment with its date, in a portrait shape that fits TikTok and Reels. Made on the phone. Which video formats each browser can record, and which TikTok and Instagram take, needs trying on a phone | 4 | L | v1.x |
 | ☐ | **Ghost overlay** when taking a photo: a faint copy of the previous photo to line up the same angle every time | 8 | L | v1.x |
 
 ## 3. Propagations
@@ -147,12 +157,13 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **Milestones** on a propagation: first root, first leaf, corm size. Gives the medium experiments concrete dates to compare. Moving a propagation to rooting on its page notes the first root as that day. First root, first leaf and corm size are built and show in experiments | 5 | S | v1.x |
 | ☐ | **Photo on Start propagation**: add photos while starting a propagation, like Add plant has, so its history starts with how the cutting looked on day one. The newest becomes the cover | 3 | S | v1.x |
 | ☐ | **A date on Mark failed**, today unless changed, like Pot up has. The history entry and the finished date use it, so a rotted corm found a week late is recorded on the right day | 3 | S | v1.x |
-| ☐ | **The result of a finished propagation**: in place of the "Finished … after … days" line, a short summary of how long it ran, the days to first root, how many were potted up and failed, and the plants it became with the room each one is in and whether it's still in the collection. All from data the app already has | 4 | S | v1.x |
+| ☐ | **The result of a finished propagation**: in place of the "Finished … after … days" line, a short summary of how long it ran, the days to first root, how many were potted up and failed, and the plants it became with the room each one is in and whether it's still in the collection. All from data the app already has, and the share card uses it | 3 | S | v1.x |
 | ☐ | **Say what the less obvious choices are**: a line under **Grows in** and **Type** describing the one picked, for LECA, PON, sphagnum, corm riser and air layer, on the plant and propagation forms. The same explanations go in one Help answer | 5 | S | v1.x |
-| ☐ | Lineage tree view (family tree across generations) | 6 | M | v1.x |
+| ☐ | Lineage tree view (family tree across generations) | 4 | M | v1.x |
 | ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 8 | L | v1.x |
-| ☐ | **"Available for swap" list**: mark propagations as available and share a simple list or image before a plant swap | 8 | M | v1.x |
+| ☐ | **"Available for swap" list**: mark propagations as available and share a simple list or image before a plant swap | 5 | M | v1.x |
+| ☐ | **An experiment's result as an image**: the mediums side by side with how many rooted and how long it took on average, e.g. "LECA: 4 of 4, 21 days", to post in a group | 6 | S | v1.x |
 
 ## 3b. Crossbreeding
 
@@ -305,6 +316,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | "What's new" page and app version in Settings. Entries are written by hand in plain language for the people using the app, not generated from commit or pull request titles | 5 | S | v1.x |
 | ✅ | A link to the source code on GitHub under About in Settings | 5 | S | v1.x |
 | ✅ | A title, description and picture for links to the app shared on Facebook and other sites. The picture is the app icon for now | 5 | S | v1.x |
+| ☐ | A picture of the app itself for shared links in place of the icon: a plant page with its photos, in the size Facebook, Reddit and messaging apps show | 2 | S | v1.x |
 | ☐ | A page in the app with what's built and what's coming, written for the people using it rather than copied from this list | 7 | S | v1.x |
 | ☐ | **Import from a spreadsheet**: a CSV of plants from Excel or Google Sheets, with each column matched to a field, so a list kept somewhere else doesn't have to be typed in again | 5 | M | v1.x |
 | ✅ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side, with Help and Settings at the bottom of it. Plant and propagation pages show the details next to the history, the Plants and Propagations lists flow into columns, and sheets open as a dialog in the middle. Phones keep the tabs at the bottom | 5 | M | v1.x |
@@ -327,10 +339,12 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 |---|---|---|---|---|
 | ✅ | **Help page** with short questions and answers: how the app stores everything on your device, what happens if you clear the browser, how to back up, how propagation and lineage work, how to install it on the phone, and a few answers for each part of the app. Each question folds open, and the topics at the top jump to their section. Opened from Settings and from the first screens someone new sees | 4 | S | v1.x |
 | ✅ | Empty screens that say what to do next instead of just "nothing here": the first screen on Today says what the app is for and offers a plant or a propagation, a list with nothing matching offers to clear the search and filters, and the ones that use a word like feed or propagation say what it means | 4 | S | v1.x |
+| ☐ | **The quickest ways to start on the first screen**: next to "Add a plant", a way to add a list of plants at once and a way to bring in old photos with their dates, so someone with a collection already has its history on the first day | 2 | S | v1.x |
+| ☐ | **A page that shows while the app loads**: what Stikling is, with pictures of it, in the page itself rather than the app, so the first visit shows something straight away and search engines can read it. How long the first load takes on a phone over mobile data needs measuring first | 2 | M | v1.x |
 | ☐ | **Guided tour on the first visit**: a short walk through the app (plants, propagations, photos, backup) that can be skipped | 6 | M | v1.x |
 | ☐ | Start the tour again from Settings whenever you want | 6 | S | v1.x |
 | ☐ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | 6 | S | v1.x |
-| ☐ | A demo plant and propagation that can be loaded and removed again, so the app can be tried out without adding real plants | 7 | M | v1.x |
+| ☐ | A demo plant and propagation that can be loaded and removed again, so the app can be tried out without adding real plants. They need fixed ids so a device that syncs doesn't get a second copy, and removing them removes their photos too | 3 | M | v1.x |
 
 ## 7d. Guides & references
 
@@ -348,15 +362,18 @@ Questions come up that the app can't answer from your own data: how long a cutti
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
 | ☐ | Share your plant list or wishlist as text, e.g. to send to a friend or take to a swap | 6 | S | v1.x |
-| ☐ | Share a plant card as an image (photo + name + "propagated from…") | 7 | M | v1.x |
+| ☐ | **Share card**: a plant or propagation as one image, with its photo, its name and a plain line about it, like "Cutting from my Monstera, rooted in 18 days in LECA", and stikling.app small in a corner. Square or portrait, to fit Instagram, TikTok and Reddit. Shared through the phone's share menu, or saved | 2 | M | v1.x |
 | ☐ | Plant-sitter sheet: a printable/shareable care list for someone watering while you're away | 7 | M | v1.x |
 | ✅ | Accounts and sync between devices (ASP.NET Core Web API, EF Core, sign-in through Clerk). The API checks Clerk sign-ins and has people, collections and members with roles, and the app can sign in and out from its Account page in Settings. Records, settings and photos sync between devices when signed in. Every device keeps all the thumbnails and fetches a full-size photo when it's opened, and each account has 1 GB for photos on the server. The Account page shows when it last synced and, once it's nearly full, how much photo space is used, a dot on the settings gear shows a sync problem, and signing out asks whether to keep the data on the device. Delete account, at the bottom of the Account page, erases everything on the server and the sign-in, and Download your data gives a ZIP of everything the server and Clerk hold about the person. When something is deleted, the server keeps only its id and dates. The app is at stikling.app, with the API on Azure Container Apps, Azure SQL and Blob Storage, and a privacy page | 9 | L | v2 |
 | ☐ | **Add people to a collection**: screens for inviting someone and choosing their role. The first role is "can view", so someone can look at a collection without being able to change it. The API already has members and roles and checks them on every request, so this is the app side | 9 | L | v2 |
 | ☐ | Someone leaving a shared collection, including when they are the only editor. The collection needs an editor left, so the app has to ask them to hand it over or to say what happens to it first, and nothing is deleted without them asking | 9 | M | v2 |
+| ☐ | **Share link for one plant or propagation**: turned on for that plant only, it gives a link that can't be guessed and can be turned off again. The API serves it as a plain page rather than the app, so it opens quickly and the link preview shows the plant's cover photo. It shows the photos and the history, and leaves out the room, prices, who a cutting went to and anything else private. It ends with a link to start your own. Needs the person to be signed in, since the photos come from the server, and a line on the privacy page | 3 | L | v2 |
+| ☐ | **Pass a cutting on with its history**: giving a cutting away also offers a link for the friend. Opening it in Stikling adds the cutting to their collection with its photos and history so far, and where it came from. Built on the share link | 5 | L | v2 |
 | ☐ | Public read-only collection page | 9 | L | v2 |
 | ☐ | **Plant facts card** from Trefle: a short card with what is known about the species, shown on the plant's page. The data is under the ODbL, so the app has to credit it, and the Trefle API token has to stay on the server, so the app asks the API and never Trefle directly | 9 | L | v2 |
-| ☐ | **Error tracking with Sentry**, set up once there are real users, so errors in the app and the API are seen without anyone having to report them. Needs a look at what it sends and a line about it on the privacy page | 7 | M | v1.x |
+| ☐ | **Error tracking with Sentry**, set up before the app is posted anywhere, so errors in the app and the API are seen without anyone having to report them. Needs a look at what it sends and a line about it on the privacy page | 4 | M | v1.x |
 | ☐ | Plant identification from a photo via an identification API (needs a backend to keep the API key secret). Pl@ntNet's API is the free one: up to 500 identifications a day for non-commercial use, and it doesn't keep the photos. plant.id only gives 100 free identifications before it charges, and iNaturalist doesn't open its full identification model to other apps | 9 | L | v2 |
+| ☐ | **Notifications** from the web app, now that there is a server: on Android, and on an iPhone once the app is on the home screen. Off until turned on, and only for what Today would show, like a propagation to check on or a treatment due. Never a reminder to water | 5 | L | v2 |
 | ☐ | Push notifications, widgets and a Google Play release (MAUI Blazor Hybrid) | 10 | L | v3 |
 | ☐ | **Android APK** released through IzzyOnDroid first, and then F-Droid, so it can be installed without a paid store account. Both take open source apps, and each has its own rules for how a release is built and signed | 10 | L | v3 |
 
