@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
+using Stikling.Core.Names;
 using Stikling.Core.Sync;
 
 namespace Stikling.Web.Services;
@@ -17,6 +18,7 @@ public sealed class SyncRunner(
     IndexedDbSyncStore store,
     IndexedDb db,
     ThemeService theme,
+    PlantNameService names,
     DeviceFiles files,
     IJSRuntime js,
     TimeProvider time) : IAsyncDisposable
@@ -316,6 +318,7 @@ public sealed class SyncRunner(
             if (result.Received > 0)
             {
                 await theme.ApplySavedAsync();
+                names.SettingsChanged();
                 Received?.Invoke();
             }
 

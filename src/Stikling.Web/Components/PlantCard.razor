@@ -1,5 +1,6 @@
 @* One row in the plant list: thumbnail, names, and a short status line.
    In select mode the card is a checkbox instead of a link. *@
+@inject PlantNameService Names
 
 @if (Selectable)
 {
@@ -40,6 +41,11 @@ else
     [Parameter]
     public string? Location { get; set; }
 
+    private EverydayNameBook? everyday;
+
+    // Read once for the whole app, so a long list doesn't wait on it
+    protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
+
     private string OriginText =>
         Plant.AcquiredOn is { } date
             ? $"{Labels.For(Plant.Origin)} {Labels.Date(date)}"
@@ -69,6 +75,10 @@ else
             @if (!string.IsNullOrWhiteSpace(Plant.Nickname) && Plant.BotanicalName is { } botanical)
             {
                 <div class="item-sub">@botanical</div>
+            }
+            else if (everyday?.For(Plant.Genus, Plant.Species, Plant.Cultivar) is { } called)
+            {
+                <div class="item-sub everyday-name">@called</div>
             }
             @if (Plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(Plant.CauseOfDeath))
             {

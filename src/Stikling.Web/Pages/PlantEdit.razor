@@ -47,12 +47,12 @@ else
 
         <fieldset>
             <legend>Name</legend>
-            <div class="mb-3">
+            <PlantNameFields @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar" />
+            <div class="mt-3">
                 <label class="form-label" for="nickname">Nickname</label>
                 <InputText id="nickname" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Big Monstera" />
             </div>
-            <PlantNameFields @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar" />
-            <div class="form-text">Give it a nickname, a genus, or both.</div>
+            <div class="form-text">Give it a genus, a nickname, or both.</div>
             @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.SameName(plant, existing) is { Count: > 0 } same)
             {
                 <p class="form-text already-have">

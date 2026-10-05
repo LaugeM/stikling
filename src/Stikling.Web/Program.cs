@@ -46,6 +46,7 @@ builder.Services.AddScoped<IPutOffRepository, IndexedDbPutOffRepository>();
 builder.Services.AddScoped<ITimelineRepository, IndexedDbTimelineRepository>();
 builder.Services.AddScoped<IPhotoRepository, IndexedDbPhotoRepository>();
 builder.Services.AddScoped<IPlantNameSource, BundledPlantNames>();
+builder.Services.AddScoped<IDeviceLanguages, BrowserLanguages>();
 builder.Services.AddScoped<TimelineService>();
 builder.Services.AddScoped<PlantService>();
 builder.Services.AddScoped<PropagationService>();

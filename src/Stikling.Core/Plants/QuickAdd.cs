@@ -14,7 +14,7 @@ public static class QuickAdd
     /// Splits the text on new lines, commas and semicolons. In each item the longest leading run of
     /// words the dictionary knows as a genus, species and cultivar becomes the name, spelled as the
     /// dictionary has it, and the rest goes into the notes. An item that doesn't start with a known
-    /// genus becomes the nickname.
+    /// genus is looked up as an everyday name, like "snake plant", and otherwise becomes the nickname.
     /// </summary>
     public static IReadOnlyList<Plant> Parse(string? text, PlantDictionary dictionary, LooseDate? acquiredOn = null)
     {
@@ -36,7 +36,7 @@ public static class QuickAdd
     {
         var genus = dictionary.Genera.FirstOrDefault(g => g.Key == NameKey.Of(words[0]));
         if (genus is null)
-            return new Plant { Nickname = string.Join(' ', words) };
+            return Everyday(words, dictionary) ?? new Plant { Nickname = string.Join(' ', words) };
 
         var used = 1;
         var plant = new Plant { Genus = genus.Name.Genus };
@@ -72,6 +72,32 @@ public static class QuickAdd
         if (used < words.Length)
             plant.Notes = string.Join(' ', words.Skip(used));
         return plant;
+    }
+
+    // Only an everyday name that means one plant. "Money tree" is a Crassula to some and a Pachira to
+    // others, so it stays the nickname and the person picks.
+    private static Plant? Everyday(string[] words, PlantDictionary dictionary)
+    {
+        for (var count = Math.Min(LongestName, words.Length); count > 0; count--)
+        {
+            var plants = dictionary.EverydayByKey[NameKey.Of(string.Join(' ', words.Take(count)))]
+                .Select(e => e.Name with { Everyday = null })
+                .Distinct()
+                .ToList();
+            if (plants.Count > 1)
+                return null;
+            if (plants is [var name])
+            {
+                return new Plant
+                {
+                    Genus = name.Genus,
+                    Species = name.Species,
+                    Cultivar = name.Cultivar,
+                    Notes = count < words.Length ? string.Join(' ', words.Skip(count)) : null
+                };
+            }
+        }
+        return null;
     }
 
     private sealed record Found(NameEntry Entry, int Words);

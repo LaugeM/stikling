@@ -30,6 +30,7 @@ public enum PlantSort
 /// <param name="PlaceName">The name of a plant's room or spot, for sorting by room.</param>
 /// <param name="LastActivity">When each plant last had something on its timeline, by plant id.
 /// A plant with nothing there counts from when it was added.</param>
+/// <param name="Everyday">The everyday name shown for a plant, like "Snake plant", which the search looks through too.</param>
 public sealed record PlantFilter(
     string? Search = null,
     StatusFilter Status = StatusFilter.Active,
@@ -39,7 +40,8 @@ public sealed record PlantFilter(
     bool Dormant = false,
     PlantSort Sort = PlantSort.Name,
     Func<Guid?, string?>? PlaceName = null,
-    IReadOnlyDictionary<Guid, DateTimeOffset>? LastActivity = null)
+    IReadOnlyDictionary<Guid, DateTimeOffset>? LastActivity = null,
+    Func<Plant, string?>? Everyday = null)
 {
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
         Order(plants
@@ -90,7 +92,7 @@ public sealed record PlantFilter(
         if (string.IsNullOrWhiteSpace(Search))
             return true;
 
-        var haystack = string.Join(' ', [plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, .. plant.Tags]);
+        var haystack = string.Join(' ', [plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, Everyday?.Invoke(plant), .. plant.Tags]);
         return Search
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase));

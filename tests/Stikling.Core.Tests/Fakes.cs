@@ -382,12 +382,18 @@ internal sealed class FakePestCaseRepository : IPestCaseRepository
     }
 }
 
-internal sealed class FakePlantNameSource(PlantNameData data) : IPlantNameSource
+internal sealed class FakePlantNameSource(PlantNameData data, params EverydayNameData[] everyday) : IPlantNameSource
 {
-    /// <summary>Acts like the file can't be read, e.g. offline before it was ever cached.</summary>
+    /// <summary>Acts like the files can't be read, e.g. offline before they were ever cached.</summary>
     public bool Fail { get; set; }
 
     public int Loads { get; private set; }
+
+    /// <summary>The languages whose everyday names were read, in order.</summary>
+    public List<string> EverydayLoads { get; } = [];
+
+    /// <summary>Everyday names that can't be read, as if that one file was never cached.</summary>
+    public HashSet<string> Missing { get; } = [];
 
     public Task<PlantNameData> LoadAsync()
     {
@@ -396,6 +402,19 @@ internal sealed class FakePlantNameSource(PlantNameData data) : IPlantNameSource
         Loads++;
         return Task.FromResult(data);
     }
+
+    public Task<EverydayNameData> LoadEverydayAsync(string language)
+    {
+        if (Fail || Missing.Contains(language))
+            throw new HttpRequestException("Offline");
+        EverydayLoads.Add(language);
+        return Task.FromResult(everyday.FirstOrDefault(e => e.Language == language) ?? EverydayNameData.Empty);
+    }
+}
+
+internal sealed class FakeDeviceLanguages(params string[] languages) : IDeviceLanguages
+{
+    public Task<IReadOnlyList<string>> GetAsync() => Task.FromResult<IReadOnlyList<string>>(languages);
 }
 
 internal sealed class FakeSettingsRepository : ISettingsRepository

@@ -120,3 +120,11 @@ public enum ThemeMode
     Light,
     Dark
 }
+
+/// <summary>The language of the everyday plant names the app shows, like "Snake plant" or "Svigermors tunge".</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<EverydayNameLanguage>))]
+public enum EverydayNameLanguage
+{
+    English,
+    Danish
+}

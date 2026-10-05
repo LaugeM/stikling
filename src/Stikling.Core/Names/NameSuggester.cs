@@ -90,6 +90,44 @@ public sealed class NameSuggester
             .ToList();
     }
 
+    /// <summary>
+    /// What the search box finds for what's typed: everyday names like "snake plant", and botanical
+    /// names whole, like "monstera deli". Names already on your plants come first, and old names and
+    /// cultivars without a name of their own come last. In between, the plants most people grow come
+    /// first, and names that start with what's typed before ones where a later word does.
+    /// </summary>
+    public IReadOnlyList<NameSuggestion> Search(string? text, int max = 8)
+    {
+        var typed = NameKey.Of(text);
+        if (typed.Length < MinLettersWithoutGenus)
+            return [];
+
+        var mine = yourCultivars.Concat(yourSpecies).Concat(yourGenera)
+            .Select(e => (e.Name, Score: NameKey.Match(NameKey.Of(PlantNames.Botanical(e.Name.Genus, e.Name.Species, e.Name.Cultivar)), typed)))
+            .Where(m => m.Score is not null)
+            .OrderBy(m => m.Score)
+            .Select(m => m.Name with { Everyday = dictionary.EverydayNames.For(m.Name.Genus, m.Name.Species, m.Name.Cultivar) });
+
+        var others = dictionary.SearchEntriesFor(typed[0])
+            .Select(e => (Entry: e, Score: NameKey.Match(e.Key, typed)))
+            .Where(m => m.Score is not null)
+            .OrderBy(m => m.Entry.Old)
+            .ThenBy(m => m.Entry.Name.Cultivar is not null && !m.Entry.IsEveryday)
+            .ThenByDescending(m => m.Entry.Common)
+            .ThenBy(m => m.Score)
+            .ThenBy(m => !m.Entry.Known)
+            .ThenBy(m => m.Entry.Rank)
+            .ThenBy(m => m.Entry.Key.Length)
+            .ThenBy(m => !m.Entry.IsEveryday)
+            .ThenBy(m => m.Entry.Key, StringComparer.Ordinal)
+            .Select(m => m.Entry.Name);
+
+        return mine.Concat(others)
+            .DistinctBy(s => (Key(s.Genus), Key(s.Species), Key(s.Cultivar)))
+            .Take(max)
+            .ToList();
+    }
+
     // Picking it would put in what's there already
     private static bool Unchanged(NameSuggestion s, string? genus, string? species, string? cultivar) =>
         Same(s.Genus, genus)

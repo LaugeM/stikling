@@ -7,6 +7,7 @@
 @inject IPestCaseRepository PestCaseRepository
 @inject ITimelineRepository Entries
 @inject TimeProvider Time
+@inject PlantNameService Names
 
 <PageTitle>Plants · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -314,8 +315,11 @@ else
         await LoadAsync();
     }
 
+    private EverydayNameBook? everyday;
+
     private async Task LoadAsync()
     {
+        everyday = await Names.GetEverydayNamesAsync();
         all = await Repository.GetAllAsync();
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, all, []);
@@ -391,7 +395,8 @@ else
 
     private void Refresh() =>
         visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
-                pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity)
+                pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity,
+                p => everyday?.For(p.Genus, p.Species, p.Cultivar))
             .Apply(all ?? [])
             .ToList();
 

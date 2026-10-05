@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
+using Stikling.Core.Settings;
 
 namespace Stikling.Core.Tests;
 
@@ -52,6 +53,10 @@ public class PlantNameTests
     };
 
     private static NameSuggester Suggester(params Plant[] plants) => new(new PlantDictionary(Data), plants, []);
+
+    private static PlantNameService Service(FakePlantNameSource source, FakePlantRepository? plants = null) =>
+        new(source, plants ?? new FakePlantRepository(), new FakePropagationRepository(),
+            new SettingsService(new FakeSettingsRepository()), new FakeDeviceLanguages("en-GB"));
 
     [Fact]
     public void Genera_are_suggested_from_the_first_letters()
@@ -218,7 +223,7 @@ public class PlantNameTests
     public async Task The_names_are_read_once()
     {
         var source = new FakePlantNameSource(Data);
-        var service = new PlantNameService(source, new FakePlantRepository(), new FakePropagationRepository());
+        var service = Service(source);
 
         await service.GetDictionaryAsync();
         await service.GetDictionaryAsync();
@@ -232,7 +237,7 @@ public class PlantNameTests
         var source = new FakePlantNameSource(Data) { Fail = true };
         var plants = new FakePlantRepository();
         await plants.SaveAsync(new Plant { Genus = "Hoya" });
-        var service = new PlantNameService(source, plants, new FakePropagationRepository());
+        var service = Service(source, plants);
 
         var offline = await service.GetSuggesterAsync();
         Assert.Equal(["Hoya"], offline.Suggest(NameField.Genus, "", null, null).Select(s => s.Genus));

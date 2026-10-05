@@ -68,14 +68,14 @@ else
             }
             else
             {
-                <div class="mb-3">
+                <PlantNameFields @bind-Genus="propagation.Genus" @bind-Species="propagation.Species" @bind-Cultivar="propagation.Cultivar"
+                                 GenusPlaceholder="e.g. Alocasia" SpeciesPlaceholder="e.g. zebrina" CultivarPlaceholder="" />
+                <div class="mt-3">
                     <label class="form-label" for="nickname">Nickname</label>
                     <InputText id="nickname" class="form-control" @bind-Value="propagation.Nickname" placeholder="e.g. Corm test: perlite" />
                 </div>
-                <PlantNameFields @bind-Genus="propagation.Genus" @bind-Species="propagation.Species" @bind-Cultivar="propagation.Cultivar"
-                                 GenusPlaceholder="e.g. Alocasia" SpeciesPlaceholder="e.g. zebrina" CultivarPlaceholder="" />
                 <div class="form-text">
-                    @(propagation.ParentPlantId is null ? "" : "Filled in from the parent plant. ")Give it a nickname, a genus, or both.
+                    @(propagation.ParentPlantId is null ? "" : "Filled in from the parent plant. ")Give it a genus, a nickname, or both.
                 </div>
             }
         </fieldset>

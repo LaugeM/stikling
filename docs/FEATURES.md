@@ -37,19 +37,18 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
 
-1. **The common houseplants in the plant dictionary**, with their everyday names, so the first plant someone new adds is found.
-2. **A share card** for a plant or propagation, together with **the result of a finished propagation**, which is what makes the card worth posting.
-3. **Before and after**, and then **a time-lapse video**, from a plant's or propagation's photos.
-4. **A share link for one plant or propagation**, which opens a page anyone can see.
-5. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
-6. **Passing a cutting on with its history**, built on the share link.
-7. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
-8. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
-9. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-10. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-11. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-12. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-13. **Comparing photos side by side, and voice notes.**
+1. **A share card** for a plant or propagation, together with **the result of a finished propagation**, which is what makes the card worth posting.
+2. **Before and after**, and then **a time-lapse video**, from a plant's or propagation's photos.
+3. **A share link for one plant or propagation**, which opens a page anyone can see.
+4. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
+5. **Passing a cutting on with its history**, built on the share link.
+6. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
+7. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
+8. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+9. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+10. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+11. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+12. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
@@ -92,8 +91,8 @@ These need no new storage and no new screens worth the name: purchase price, a "
 | ☐ | **Collection numbers**: an optional short number per plant, e.g. 117, to write on the pot. Its propagations get 117a, 117b and so on, so a label on a jar says where the cutting came from | 6 | M | v1.x |
 | ☐ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 6 | M | v1.x |
 | ◐ | **Why it died**: an optional note on the cause when a plant is marked as died, and a list of the plants that died and why, to look over before buying the same plant again. The note is built and shows on the plant and on its card under Gone; a list of only the plants that died is missing | 6 | S | v1.x |
-| ◐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, common names) to search and pick from when adding a plant or propagation. Works offline. Built for the aroids (Araceae) and Coleus: every genus and species from Kew's checklist, the old names (Plectranthus and Solenostemon for Coleus), and a starter list of cultivars. Other families, common names (Danish ones too, so paletblad finds Coleus), family and native region, and a page to browse it aren't built. See `tools/plant-names` | 6 | L | v1.x |
-| ☐ | **The common houseplants in the dictionary**: the genera of the plants most people start with (snake plant, spider plant, rubber plant, prayer plant, moth orchid, the usual succulents) with all their species, where a whole family would make the file too big, and the names people actually call them, so typing "snake plant" finds Dracaena trifasciata. Wikidata has common names under CC0. Danish names come with the Danish translation | 2 | L | v1.x |
+| ◐ | **Plant dictionary**: a large built-in list of plants and their varieties (genus, species, cultivars, everyday names) to search and pick from when adding a plant or propagation. Works offline. Has every genus and species from Kew's checklist for the aroids (Araceae), prayer plants, begonias, carnivorous plants and the genera of most common houseplants, the species with an everyday name from big genera like Ficus and Euphorbia, the old names (Sansevieria for Dracaena, Plectranthus for Coleus), and a starter list of cultivars. Family and native region, and a page to browse it, aren't built. See `tools/plant-names` | 6 | L | v1.x |
+| ✅ | **The common houseplants in the dictionary**, with the names people call them. A "What plant is it?" box on the plant and propagation forms finds a plant by its everyday or botanical name, so typing "snake plant" finds Dracaena trifasciata, and so does Quick add. A plant with no nickname shows its everyday name under the botanical one, and the list searches find it. Names come from Wikidata (CC0) and lists kept by hand. English and Danish names, picked in Settings or from the browser's language. The Danish file is only downloaded on a device that uses it | 2 | L | v1.x |
 | ✅ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary and the names already on your plants and propagations, including hybrids and named varieties. An old name offers the one it goes by now, and a cultivar fills in its genus and species. Anything not on the list can still be typed | 6 | M | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
 | ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |

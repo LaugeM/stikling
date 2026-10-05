@@ -32,4 +32,11 @@ public sealed class SettingsService(ISettingsRepository settings)
         current.PhotoReminder = on;
         await settings.SaveAsync(current);
     }
+
+    public async Task SetEverydayNamesAsync(EverydayNameLanguage language)
+    {
+        var current = await GetAsync();
+        current.EverydayNames = language;
+        await settings.SaveAsync(current);
+    }
 }

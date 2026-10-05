@@ -6,6 +6,7 @@
 @inject IPropagationRepository PropagationRepository
 @inject RoomService RoomService
 @inject ThemeService Theme
+@inject PlantNameService Names
 @inject IndexedDb Db
 @inject TimeProvider Time
 @inject AccountService Account
@@ -207,6 +208,7 @@
             file.Zip.Position = 0;
             var summary = await Backup.ImportAsync(file.Zip);
             await Theme.ApplySavedAsync();
+            Names.SettingsChanged();
             message = summary switch
             {
                 { ChangedRecords: true } =>

@@ -1,5 +1,6 @@
 @* One row in a propagation list: "3× corm · LECA · day 24". *@
 @inject TimeProvider Time
+@inject PlantNameService Names
 
 <a class="item-card" href="propagations/@Propagation.Id">
     <PropagationThumb Propagation="Propagation" Days="@(Propagation.IsActive ? Propagation.DaysSinceStart(Today) : null)" />
@@ -13,6 +14,10 @@
         else if (!string.IsNullOrWhiteSpace(Propagation.Nickname) && Propagation.BotanicalName is { } botanical)
         {
             <div class="item-sub">@botanical</div>
+        }
+        else if (everyday?.For(Propagation.Genus, Propagation.Species, Propagation.Cultivar) is { } called)
+        {
+            <div class="item-sub everyday-name">@called</div>
         }
         <div class="item-meta">
             @if (Propagation.IsActive)
@@ -53,6 +58,10 @@
 </a>
 
 @code {
+    private EverydayNameBook? everyday;
+
+    protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
+
     [Parameter, EditorRequired]
     public required Propagation Propagation { get; set; }
 
