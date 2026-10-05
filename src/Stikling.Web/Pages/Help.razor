@@ -48,9 +48,9 @@
     <details class="help-item">
         <summary>Where do I start?</summary>
         <p>
-            Add a plant from the Plants tab with the round + button. A name is all it needs, and the rest
-            can be filled in later. A plant's page opens on its photos and notes, with <em>Photo</em>,
-            <em>Note</em> and <em>Care</em> at the bottom. When you take a cutting from it, tap the
+            Add a plant from Plants with the + button. A name is all it needs, and the rest
+            can be filled in later. A plant's page opens on its photos and notes, with buttons for <em>Photo</em>,
+            <em>Note</em> and <em>Care</em>. When you take a cutting from it, tap the
             three dots next to them, then <em>Propagate</em>.
         </p>
     </details>
@@ -58,8 +58,8 @@
     <details class="help-item">
         <summary>Where are the settings?</summary>
         <p>
-            Behind the gear at the top of the screen. That is where you @(Account.IsAvailable ? "sign in, " : "")save a backup, pick light or dark, and add, rename or merge rooms and tags. The pots, soil mixes and products
-            you use are under Supplies in the bar at the bottom.
+            Behind the gear at the top of the screen, or at the bottom of the menu on a wide screen. That is where you @(Account.IsAvailable ? "sign in, " : "")save a backup, pick light or dark, and add, rename or merge rooms and tags. The pots, soil mixes and products
+            you use are under Supplies.
         </p>
     </details>
 
@@ -88,6 +88,21 @@
         <p>
             On Android, a long press on the icon gives shortcuts to add a plant, start a propagation or
             open the pest cases.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>Can I use it on a computer?</summary>
+        <p>
+            Yes, in any browser, and on a tablet too. On a wide screen the tabs move to a menu down the left
+            side, with Help and Settings at the bottom of it. A plant or propagation page shows its details
+            next to its history, and the buttons that sit at the bottom of the page on a phone are above the
+            history instead. In the lists, the round + button is a button next to the title.
+        </p>
+        <p>
+            @(Account.IsAvailable
+                ? "Each device keeps its own plants until you sign in on both, which keeps them the same."
+                : "Each device keeps its own plants. To move them, save a backup on one and restore it on the other.")
         </p>
     </details>
 
@@ -141,7 +156,7 @@
     <details class="help-item">
         <summary>How do I back up?</summary>
         <p>
-            Tap the gear at the top, then <em>Backup and storage</em>, and tap <em>Save a backup</em>. You get
+            Open Settings, then <em>Backup and storage</em>, and tap <em>Save a backup</em>. You get
             a ZIP file with everything in it,
             photos included. Keep it somewhere other than the phone, like cloud storage or your computer.
         </p>
@@ -219,8 +234,8 @@
         <details class="help-item">
             <summary>Do I need an account?</summary>
             <p>
-                No. An account is optional, and everything in Stikling works without one. To make one, tap the
-                gear at the top, then <em>Sign in</em>, and sign in with Google, Facebook or Discord, or with your
+                No. An account is optional, and everything in Stikling works without one. To make one, open
+                Settings, then <em>Sign in</em>, and sign in with Google, Facebook or Discord, or with your
                 email.
             </p>
             <p>
@@ -235,8 +250,8 @@
             <p>
                 When you open the app, a couple of seconds after you change something, when the connection
                 comes back, and every few minutes while the app is open. The Account page in Settings shows when
-                it last synced, and has <em>Sync now</em>. If something goes wrong, a dot shows on the gear at
-                the top.
+                it last synced, and has <em>Sync now</em>. If something goes wrong, a dot shows on the Settings
+                gear.
             </p>
             <p>
                 Photos go up from the device they were added on. Every device keeps a small copy of each photo,
@@ -348,7 +363,7 @@
     <details class="help-item">
         <summary>What happens when a plant dies or I give it away?</summary>
         <p>
-            Open the plant, tap the three dots at the bottom and pick <em>It died</em> or
+            Open the plant, tap the three dots next to <em>Photo</em> and <em>Note</em> and pick <em>It died</em> or
             <em>Gave it away or sold it</em>. For several at once, use <em>Select</em> on the plant list. It leaves the list but keeps its history, and you can still find it under
             <em>Gone</em>. When you mark a plant as died, you can add a note on what happened. It shows
             on the plant and in the <em>Gone</em> list, so you can look it over before buying the same plant again.
@@ -377,7 +392,7 @@
         <p>
             Dormant is for a plant that is resting, like an alocasia dropping its leaves for the winter, so it
             doesn't look dead. Quarantine is for a new or sick plant you are keeping apart from the rest.
-            Both are started and ended with the three dots at the bottom of the plant's page. They show
+            Both are started and ended with the three dots next to <em>Photo</em> and <em>Note</em> on the plant's page. They show
             as a badge, have a filter on the plant list, and are written on the plant's history when they
             start and end. A new plant can go straight into quarantine under <em>More details</em> when you
             add it. A quarantine lasts 14 days unless you pick another length. When it is up, the plant
@@ -388,7 +403,7 @@
     <details class="help-item">
         <summary>How do I log watering and feeding?</summary>
         <p>
-            Open the plant and tap <em>Care</em> at the bottom. It shows when it was last watered, fed and
+            Open the plant and tap <em>Care</em>, next to <em>Photo</em> and <em>Note</em>. It shows when it was last watered, fed and
             so on, and logging is a tap. When it was last watered also shows under the plant's name. To log for several plants at once, tap <em>Select</em> on the plant list, pick
             them and tap <em>Log care</em>. The same bar can also add a note or tags to all of them, and
             <em>Move</em> puts them all in a room or spot. Plants already there are left alone. If you have
@@ -439,8 +454,8 @@
         <summary>How do I start one?</summary>
         <p>
             Open the plant you took it from and tap <em>Propagate</em>, so the new plant stays linked to it.
-            For something without a parent plant, like bought seeds, use the round + button on the
-            Propagate tab.
+            For something without a parent plant, like bought seeds, use the + button on
+            Propagate.
         </p>
     </details>
 
@@ -450,7 +465,7 @@
             <strong>Started</strong> is the day you put it in water or a medium.
             <strong>Rooting</strong> is when the first roots show.
             <strong>Rooted</strong> is when it has roots enough to be potted up.
-            To move it on, tap the stage button at the bottom of the propagation's page and pick the next
+            To move it on, tap the stage button next to <em>Photo</em> and <em>Note</em> on the propagation's page and pick the next
             one. Moving it to Rooting there also notes today as the day of the first root, and the dates
             can be changed with <em>Edit</em>. For seeds the same stages are called Sown, Germinating and
             Sprouted.
@@ -487,7 +502,7 @@
         <summary>What does Pot up do?</summary>
         <p>
             It turns one or more from the propagation into plants in your collection. You find it, and
-            <em>Mark failed</em>, behind the stage button at the bottom of the propagation's page. Each new plant keeps
+            <em>Mark failed</em>, behind the stage button on the propagation's page. Each new plant keeps
             a link to the plant the propagation came from, so you can always see where it started.
         </p>
     </details>
@@ -552,7 +567,7 @@
     <details class="help-item">
         <summary>How do I flag something to do later?</summary>
         <p>
-            Tap the three dots at the bottom of a plant or propagation, then <em>Flag it</em>, and say
+            Tap the three dots next to <em>Photo</em> and <em>Note</em> on a plant or propagation, then <em>Flag it</em>, and say
             what it needs, like "Repot soon". It stays on Today under Needs attention until you tick it off
             there or on its page.
         </p>
@@ -595,7 +610,7 @@
     <details class="help-item">
         <summary>Can I add old photos from before I used the app?</summary>
         <p>
-            Yes. Tap <em>Photo</em> at the bottom of its page and choose them from your photos. Each photo lands on the day it was
+            Yes. Tap <em>Photo</em> on its page and choose them from your photos. Each photo lands on the day it was
             taken, read from the photo itself, so the history starts from the beginning. If some photos
             have no date of their own, the app says how many so you can check them.
         </p>
@@ -626,9 +641,9 @@
     <details class="help-item">
         <summary>Where is Pests when I have no case open?</summary>
         <p>
-            Pests only gets a tab at the bottom while a case is being treated or watched. The rest of the
+            Pests only gets a tab while a case is being treated or watched. The rest of the
             time it is under <em>Supplies</em>, with your old cases. To open a case for one plant, tap the
-            three dots at the bottom of its page, then <em>Found pests</em>.
+            three dots next to <em>Photo</em> and <em>Note</em> on its page, then <em>Found pests</em>.
         </p>
     </details>
 

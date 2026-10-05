@@ -44,7 +44,6 @@ In the order I would build them.
 5. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
 6. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
 7. **Comparing photos side by side, and voice notes.**
-8. **A side menu on wide screens**, since on a computer the app sits in a narrow column with a lot of empty space around it.
 
 ### Cheap ones to slot in whenever
 
@@ -308,7 +307,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | A title, description and picture for links to the app shared on Facebook and other sites. The picture is the app icon for now | 5 | S | v1.x |
 | ☐ | A page in the app with what's built and what's coming, written for the people using it rather than copied from this list | 7 | S | v1.x |
 | ☐ | **Import from a spreadsheet**: a CSV of plants from Excel or Google Sheets, with each column matched to a field, so a list kept somewhere else doesn't have to be typed in again | 5 | M | v1.x |
-| ☐ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side and the pages use the width instead of keeping the phone's narrow column. Phones keep the tabs at the bottom | 5 | M | v1.x |
+| ✅ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side, with Help and Settings at the bottom of it. Plant and propagation pages show the details next to the history, the Plants and Propagations lists flow into columns, and sheets open as a dialog in the middle. Phones keep the tabs at the bottom | 5 | M | v1.x |
 | ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
 | ☐ | Units and date format settings | 7 | M | v1.x |
 | ☐ | Danish translation | 7 | L | v1.x |

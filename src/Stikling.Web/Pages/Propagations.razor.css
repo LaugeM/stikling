@@ -10,6 +10,28 @@
     padding-bottom: 5rem;
 }
 
+/* On a wide screen the search and the choice beside it share one line, and the add button is
+   up by the title instead */
+@media (min-width: 64rem) {
+    .list-filters {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .list-filters > input[type="search"] {
+        flex: 1 1 16rem;
+    }
+
+    .list-filters > .segmented {
+        flex: 2 1 24rem;
+    }
+
+    .list-body {
+        padding-bottom: 0;
+    }
+}
+
 .results-link {
     display: inline-block;
     padding-block: 0.75rem;

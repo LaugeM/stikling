@@ -39,14 +39,14 @@
 .app-content {
     flex: 1;
     width: 100%;
-    max-width: 48rem;
+    max-width: var(--pa-column);
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1rem var(--pa-gutter);
     /* Leave room for the fixed bottom nav */
     padding-bottom: calc(5rem + env(safe-area-inset-bottom));
 }
 
-.bottom-nav {
+.app-nav {
     position: fixed;
     inset: auto 0 0 0;
     z-index: 10;
@@ -58,7 +58,13 @@
     padding-inline: max(0px, calc((100% - 48rem) / 2));
 }
 
-.bottom-nav ::deep .bottom-nav-link {
+/* The name and the links to Help and Settings are in the header on a phone */
+.app-nav-title,
+.app-nav-end {
+    display: none;
+}
+
+.app-nav ::deep .app-nav-link {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -71,28 +77,28 @@
     text-decoration: none;
 }
 
-.bottom-nav ::deep .bottom-nav-link.active {
+.app-nav ::deep .app-nav-link.active {
     color: var(--pa-green-dark);
     font-weight: 600;
 }
 
 /* The active tab's icon sits on a leaf-tinted tile, so where you are shows before you read */
-.bottom-nav ::deep .bottom-nav-link svg {
+.app-nav ::deep .app-nav-link svg {
     box-sizing: content-box;
     padding: 0.2rem 0.9rem;
     border-radius: 999px;
     transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.bottom-nav ::deep .bottom-nav-link.active svg {
+.app-nav ::deep .app-nav-link.active svg {
     background: var(--pa-green-soft);
 }
 
-.bottom-nav ::deep .bottom-nav-link span {
+.app-nav ::deep .app-nav-link span {
     font-family: var(--pa-font-display);
 }
 
-.bottom-nav ::deep svg {
+.app-nav ::deep svg {
     width: 1.5rem;
     height: 1.5rem;
     fill: none;
@@ -149,16 +155,133 @@
     box-shadow: 0 0 0 2px var(--pa-surface);
 }
 
-/* Sits just above the bottom navigation, like the update banner */
+/* Sits just above the navigation, like the update banner */
 .first-sync-banner {
     position: fixed;
-    left: 0;
+    left: var(--pa-nav-side);
     right: 0;
-    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    bottom: var(--pa-nav-bottom);
     z-index: 12;
-    padding: 0.6rem 1rem;
+    padding: 0.6rem var(--pa-column-inset);
     background: var(--pa-surface);
     border-top: 1px solid var(--pa-border);
     box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
     font-size: 0.9rem;
+}
+
+/* A computer or a tablet held sideways: the tabs become a menu down the left side, which also
+   takes over the header's name and Settings, and the page sits in the space beside it */
+@media (min-width: 64rem) {
+    .app-shell {
+        display: grid;
+        grid-template-columns: var(--pa-nav-side) minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .app-header {
+        display: none;
+    }
+
+    /* The menu comes after the page in the markup, as the tabs do on a phone, so the grid puts it first */
+    .app-nav {
+        grid-column: 1;
+        grid-row: 1;
+        position: sticky;
+        inset: 0 auto auto;
+        height: 100dvh;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 0.2rem;
+        padding: 1.1rem 0.75rem calc(1rem + env(safe-area-inset-bottom));
+        overflow-y: auto;
+        border-top: 0;
+        border-right: 1px solid var(--pa-border);
+    }
+
+    .app-nav-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin: 0 0 1.5rem;
+        padding: 0 0.75rem;
+        font-family: var(--pa-font-display);
+        font-weight: 800;
+        font-size: 1.375rem;
+        font-stretch: 88%;
+        letter-spacing: -0.02em;
+        color: var(--pa-green-dark);
+        text-decoration: none;
+    }
+
+    .app-nav-title img {
+        border-radius: 0.45rem;
+    }
+
+    .app-nav-end {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        margin-top: auto;
+        padding-top: 1rem;
+    }
+
+    /* One row per page: the icon and its name side by side, on a leaf-tinted row when you're there */
+    .app-nav ::deep .app-nav-link {
+        position: relative;
+        flex: none;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 0.75rem;
+        min-height: 2.75rem;
+        padding: 0 0.75rem;
+        border-radius: 0.6rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--pa-muted);
+        transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .app-nav ::deep .app-nav-link:hover {
+        color: var(--pa-text);
+        background: var(--pa-bg);
+    }
+
+    .app-nav ::deep .app-nav-link:focus-visible {
+        outline: 2px solid var(--pa-green);
+        outline-offset: -2px;
+    }
+
+    .app-nav ::deep .app-nav-link.active {
+        color: var(--pa-green-dark);
+        background: var(--pa-green-soft);
+        font-weight: 600;
+    }
+
+    .app-nav ::deep .app-nav-link svg,
+    .app-nav ::deep .app-nav-link.active svg {
+        padding: 0;
+        background: none;
+    }
+
+    .app-nav ::deep .settings-link-dot {
+        position: absolute;
+        top: 0.55rem;
+        left: 1.85rem;
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: var(--pa-alert);
+        box-shadow: 0 0 0 2px var(--pa-surface);
+    }
+
+    .app-content {
+        grid-column: 2;
+        grid-row: 1;
+        padding-top: 1.75rem;
+        padding-bottom: 3rem;
+    }
+
+    .app-content.with-banner {
+        padding-bottom: 6.5rem;
+    }
 }

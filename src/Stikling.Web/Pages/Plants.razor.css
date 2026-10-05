@@ -20,14 +20,14 @@
     margin: -0.25rem 0 0.6rem;
 }
 
-/* Sits above the bottom navigation while selecting */
+/* Sits above the navigation while selecting, lined up with the page column */
 .bulk-bar {
     position: fixed;
-    left: 0;
+    left: var(--pa-nav-side);
     right: 0;
-    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    bottom: var(--pa-nav-bottom);
     z-index: 11;
-    padding: 0.6rem 1rem;
+    padding: 0.6rem var(--pa-column-inset);
     background: var(--pa-surface);
     border-top: 1px solid var(--pa-border);
     box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
@@ -66,4 +66,28 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
+}
+
+/* On a wide screen the search and the choices beside it share one line */
+@media (min-width: 64rem) {
+    .plant-filters {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        column-gap: 0.75rem;
+    }
+
+    .plant-filters > input[type="search"] {
+        flex: 1 1 16rem;
+        width: auto;
+    }
+
+    .plant-filters > .d-flex {
+        flex: 2 1 30rem;
+    }
+
+    .plant-filters > .spot-filters,
+    .plant-filters > .tag-filters {
+        flex-basis: 100%;
+    }
 }

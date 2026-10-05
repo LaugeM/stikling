@@ -10,10 +10,20 @@
 
 <div class="page-heading">
     <h1>Pests</h1>
-    @if (open.Count > 0)
-    {
-        <span class="text-body-secondary small">@Labels.Count(open.Count, "open case")</span>
-    }
+    <div class="d-flex align-items-baseline gap-2">
+        @if (open.Count > 0)
+        {
+            <span class="text-body-secondary small">@Labels.Count(open.Count, "open case")</span>
+        }
+        @* Takes over from the round add button on a wide screen *@
+        @if (views.Count > 0)
+        {
+            <a class="btn btn-primary btn-sm icon-btn heading-add" href="pests/new">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                Open a pest case
+            </a>
+        }
+    </div>
 </div>
 
 @if (!loaded)

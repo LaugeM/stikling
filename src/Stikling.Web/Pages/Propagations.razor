@@ -1,4 +1,5 @@
 @page "/propagations"
+@layout WideLayout
 @using System.Globalization
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
@@ -11,7 +12,14 @@
     <h1>Propagations</h1>
     @if (all is { Count: > 0 })
     {
-        <span class="text-body-secondary small">@visible.Count of @all.Count</span>
+        <div class="d-flex align-items-baseline gap-2">
+            <span class="text-body-secondary small">@visible.Count of @all.Count</span>
+            @* Takes over from the round add button on a wide screen *@
+            <a class="btn btn-primary btn-sm icon-btn heading-add" href="propagations/new">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                Start a propagation
+            </a>
+        </div>
     }
 </div>
 
@@ -133,7 +141,7 @@ else
         {
             <section class="stage-group">
                 <h2>@Labels.Stage(stage) <span class="text-body-secondary">(@items.Count)</span></h2>
-                <ul class="item-list">
+                <ul class="item-list list-grid">
                     @foreach (var propagation in items)
                     {
                         <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" Pace="@Pace(propagation)" /></li>
@@ -144,7 +152,7 @@ else
     }
     else if (ungrouped.Count > 0)
     {
-        <ul class="item-list">
+        <ul class="item-list list-grid">
             @foreach (var propagation in ungrouped)
             {
                 <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" Pace="@Pace(propagation)" /></li>

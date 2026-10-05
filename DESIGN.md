@@ -158,7 +158,7 @@ The tension that defines this system is warm and precise at the same time. The d
 The first build was quieter than this target: white cards, thin grey borders, small muted labels, and one green used sparingly. The design refresh closed most of that gap with two changes the owner approved. Headings, names, counts and buttons now use a display typeface, Bricolage Grotesque, whose slightly handmade shapes and narrow widths recall the print on a nursery plant label. And clay, the colour of a terracotta pot, joined the green as a second material: green is what grows and what you can tap, clay is the pot a plant lives in. The one confirmed rejection still stands: no neon gradients over black, no glow shadows, no frosted glass.
 
 **Key Characteristics:**
-- Phone first, one hand, content centred in a 48rem column that never gets wider.
+- Phone first, one hand. On a wide screen the tabs become a side menu, and lists and plant pages use the width.
 - Two materials: green for growth and actions, clay for plants in pots, both against warm neutrals.
 - A display face for anything read at a glance: titles, names, day counts, buttons.
 - The days a propagation has been going are the biggest number on its row and its page.
@@ -226,17 +226,24 @@ Green carries the system, in three strengths. Clay is the second material, in tw
 
 ## Layout
 
-A single column, phone first. The content column is capped at 48rem and centred, with 1rem of side padding, so the desktop view is a comfortable reading measure rather than a stretched phone. The header, the bottom navigation and the add button pad themselves to the same column, so on a wide screen the wordmark, the tabs and the button line up with the page instead of sitting at the window edges. The app shell fills `100dvh` and splits into a sticky header, a flexible content area, and a fixed bottom navigation.
+A single column, phone first. The content column is capped at 48rem and centred, with 1rem of side padding. The app shell fills `100dvh` and splits into a sticky header, a flexible content area, and a fixed bottom navigation. Bars fixed across the screen, like the update banner and the action bars, pad themselves to the same column, so their contents line up with the page instead of sitting at the window edges.
+
+On a wide screen, from 64rem (a computer, or a tablet held sideways), the layout changes once. The bottom navigation becomes a 14rem menu down the left side and the header goes away, since the menu carries the wordmark and Settings. The side padding grows to 2rem. Forms, Settings, Today and the other reading pages keep the 48rem column, centred in the space beside the menu, because they don't read better any wider. The pages that use the room ask for it with `@layout WideLayout`, which widens the column to 72rem:
+
+- **Plant and propagation pages** split into two columns: a profile column of 16 to 22rem, which gives up room before the history does with the cover photo, name, facts and the details (shown open, with no Details link), and the history beside it. Photo, Note, Care and the three dots head the history instead of being pinned to the bottom.
+- **The Plants and Propagations lists** flow their rows into a grid of columns at least 20rem wide, so two to three across. The filters share one line. The round add button becomes a labelled button next to the title, here and on Pests.
+
+Where the navigation is lives in CSS variables on `:root`: `--pa-nav-bottom` is how far up from the bottom a fixed bar sits, and `--pa-nav-side` is how far in from the left. A new fixed element uses them, rather than the 3.5rem of the bottom bar, and then works on both.
 
 Safe-area insets are respected everywhere it matters: the header pads for the notch, and the bottom navigation and every element anchored above it pad for the home indicator. This is a real strength of the built system and should not be dropped when new fixed elements are added.
 
 Vertical rhythm runs on a rem scale of 0.3, 0.5, 0.75, 1, 1.25 and 1.75. Sections separate at 1.75rem, cards at 1rem, list rows at 0.6rem.
 
-There is exactly one breakpoint, 48rem, and it currently does one thing: the detail hero stops bleeding to the screen edges and gains a radius. Everything else is fluid. Lists reserve 5rem of trailing padding so the add button never covers the last row.
+There are two breakpoints. At 48rem the detail hero stops bleeding to the screen edges and gains a radius. At 64rem the layout goes wide, as above. Everything else is fluid. Lists reserve 5rem of trailing padding so the add button never covers the last row.
 
 ### Named Rules
 
-**The Thumb Rule.** Anything tapped often lives in the bottom third. The navigation, the add button and the action bars are all anchored there. The top of the screen is for reading, not for reaching.
+**The Thumb Rule.** On a phone, anything tapped often lives in the bottom third. The navigation, the add button and the action bars are all anchored there. The top of the screen is for reading, not for reaching. A wide screen is used with a mouse or held in two hands, so there the actions sit next to what they act on instead.
 
 **The Safe Area Rule.** Any element fixed to the bottom adds `env(safe-area-inset-bottom)` to its own padding, and anything stacked above it offsets by the height of what it sits on. Nothing is allowed to hide under a home indicator.
 
@@ -317,7 +324,11 @@ A propagation's stage in a Leaf Tint badge, led by three small ticks filled up t
 ### Navigation
 Five fixed destinations in a bottom bar: a stroked icon over a 0.75rem Bricolage label, Muted Ink at rest, Deep Moss and weight 600 when active. The active icon also sits on a Leaf Tint pill, so where you are shows before you read the label.
 
-The header is sticky and holds the app icon at 28px beside the wordmark, set in Bricolage 800 at 1.375rem and 88% width in Deep Moss. The wordmark links to Today. The settings gear sits on the right, and takes the Leaf Tint circle while Settings is open. When sync has a problem, a small Alert dot with a Surface ring sits on the gear, so the problem is seen without Settings taking up a tab. The tabs are for the collection and what it uses: Today, Plants, Props, Pests and Supplies. Pests only has a tab while a case is open, since many people never have one, and the rest of the time it is a row on Supplies, which then shows as the active tab on the pest pages. Settings is visited rarely, so it lives at the top, out of the thumb's way. Within a detail page, tabs are a simple underline strip in Bricolage: Muted Ink at rest, Deep Moss with a 2px Potting Green underline when active.
+The header is sticky and holds the app icon at 28px beside the wordmark, set in Bricolage 800 at 1.375rem and 88% width in Deep Moss. The wordmark links to Today. The settings gear sits on the right, and takes the Leaf Tint circle while Settings is open. When sync has a problem, a small Alert dot with a Surface ring sits on the gear, so the problem is seen without Settings taking up a tab. The tabs are for the collection and what it uses: Today, Plants, Props, Pests and Supplies. Pests only has a tab while a case is open, since many people never have one, and the rest of the time it is a row on Supplies, which then shows as the active tab on the pest pages. Settings is visited rarely, so it lives at the top, out of the thumb's way.
+
+On a wide screen the same destinations stand in a menu down the left side: the wordmark at the top, then one row per tab with the icon beside its label in Bricolage at 1rem, and Help and Settings at the bottom, where the sync dot moves with Settings. A row is 2.75rem tall at 0.6rem radius. The page you are on fills its row with Leaf Tint and sets the label in Deep Moss at 600, the row version of the active tab's pill. Hovering a row warms it to Paper. Sheets open there as a dialog in the middle, 32rem wide and rounded on every side, rising in slightly instead of sliding up from the bottom edge.
+
+Within a detail page, tabs are a simple underline strip in Bricolage: Muted Ink at rest, Deep Moss with a 2px Potting Green underline when active.
 
 ### Settings Row
 A whole-row link to a page one level down, used on Settings and Supplies. The name in Bricolage 600, a line under it in small Muted Ink that says what is there now ("6 pots, 2 free", "Last backup 3 days ago") or, when there is nothing yet, what the thing is for, and a chevron on the right. On Supplies a stroked icon on a 2.5rem Leaf Tint tile leads the row. Rows in a group close up into one bordered block divided by hairlines, like the Help page, and a row fills with Leaf Tint on hover or focus instead of taking a green border. A row whose line reports a problem, like a failed sync, sets that line in Alert.

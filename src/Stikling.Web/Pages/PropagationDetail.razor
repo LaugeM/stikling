@@ -1,4 +1,5 @@
 @page "/propagations/{Id:guid}"
+@layout WideLayout
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
 @inject IPotRepository PotRepository
@@ -20,313 +21,317 @@
 }
 else
 {
-    @if (propagation.CoverPhotoId is { } coverId)
-    {
-        <div class="detail-hero">
-            <button type="button" class="detail-hero-open" aria-label="Open the cover photo" @onclick="() => timeline?.OpenPhoto(coverId)">
-                <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {propagation.DisplayName}")" />
-            </button>
-        </div>
-    }
+    @* On a wide screen these are two columns: who it is on the left, its history on the right *@
+    <div class="profile-layout">
+        <div class="profile-side">
+            @if (propagation.CoverPhotoId is { } coverId)
+            {
+                <div class="detail-hero">
+                    <button type="button" class="detail-hero-open" aria-label="Open the cover photo" @onclick="() => timeline?.OpenPhoto(coverId)">
+                        <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {propagation.DisplayName}")" />
+                    </button>
+                </div>
+            }
 
-    <header class="detail-header">
-        @if (propagation.CoverPhotoId is null && propagation.IsActive)
-        {
-            // With no photo to show, the tile shows how long it has been going instead
-            var days = propagation.DaysSinceStart(Today);
-            <div class="detail-icon day-tile">
-                <b>@days</b>
-                <small>@(days == 1 ? "day" : "days")</small>
-            </div>
-        }
-        else if (propagation.CoverPhotoId is null)
-        {
-            <div class="detail-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
-            </div>
-        }
-        <div class="min-w-0">
-            <h1>
-                @if (string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
+            <header class="detail-header">
+                @if (propagation.CoverPhotoId is null && propagation.IsActive)
                 {
-                    <BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" />
+                    // With no photo to show, the tile shows how long it has been going instead
+                    var days = propagation.DaysSinceStart(Today);
+                    <div class="detail-icon day-tile">
+                        <b>@days</b>
+                        <small>@(days == 1 ? "day" : "days")</small>
+                    </div>
                 }
-                else
+                else if (propagation.CoverPhotoId is null)
                 {
-                    @propagation.DisplayName
+                    <div class="detail-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+                    </div>
                 }
-            </h1>
-            @if (!string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
-            {
-                <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" /></p>
-            }
-            <div class="profile-badges">
-                @if (propagation.IsDormant)
-                {
-                    <span class="badge dormant-badge">Dormant</span>
-                }
-                @if (!propagation.IsActive)
-                {
-                    <span class="badge @(propagation.Stage == PropagationStage.Failed ? "text-bg-secondary" : "stage-badge")">@Labels.Stage(propagation.Stage)</span>
-                }
-            </div>
-        </div>
-    </header>
-
-    @if (!propagation.IsActive)
-    {
-        <p class="profile-facts">
-            Finished
-            @if (propagation.FinishedOn is { } finishedOn)
-            {
-                <text>@Labels.Date(finishedOn) after @Labels.Count(Math.Max(0, finishedOn.DayNumber - propagation.StartedOn.DayNumber), "day")</text>
-            }
-            · @if (propagation.PottedUpCount > 0 && offspring.Count > 0)
-            {
-                <a class="link-action" href="propagations/@propagation.Id" @onclick="ShowPlants" @onclick:preventDefault>@propagation.PottedUpCount potted up</a>
-            }
-            else if (propagation.PottedUpCount > 0)
-            {
-                <span class="text-nowrap">@propagation.PottedUpCount potted up</span>
-            }
-            @if (propagation.PottedUpCount > 0 && propagation.FailedCount > 0)
-            {
-                <text>, </text>
-            }
-            @if (propagation.FailedCount > 0)
-            {
-                <span class="text-nowrap">@propagation.FailedCount failed</span>
-            }
-        </p>
-    }
-    else
-    {
-        <AttentionPanel Current="propagation.Attention" Editing="false" EditingChanged="_ => more = More.Flag"
-                        Suggestions="AttentionPanel.PropagationReasons" OnSave="SetAttentionAsync" />
-    }
-
-    <p class="profile-facts">
-        @Labels.Summary(propagation)
-        @if (propagation.IsActive && !(TileShowsDays && propagation.DaysSinceStart(Today) > 0))
-        {
-            <text> · @Labels.Age(propagation, Today)</text>
-        }
-        @if (places.NameOf(propagation.PlaceId) is { } place)
-        {
-            <text> · @place</text>
-        }
-        @if (parent is not null)
-        {
-            <text> · from <a class="link-action" href="plants/@parent.Id">@parent.DisplayName</a></text>
-        }
-        else if (!string.IsNullOrWhiteSpace(propagation.Source))
-        {
-            <text> · @propagation.Source</text>
-        }
-        @if (Pace is { IsSlow: true })
-        {
-            <text> · </text><span class="pace-slow">slower than usual</span>
-        }
-    </p>
-
-    @if (propagation.IsActive && offspring.Count > 0)
-    {
-        <p class="profile-facts">
-            <a class="link-action" href="propagations/@propagation.Id" @onclick="ShowPlants" @onclick:preventDefault>@Labels.Count(offspring.Count, "plant") potted up from it</a>
-        </p>
-    }
-
-    @if (message is not null)
-    {
-        <p class="action-message" role="status">
-            @message
-            @foreach (var plant in madePlants)
-            {
-                <a class="ms-1" href="plants/@plant.Id">@plant.DisplayName</a>
-            }
-        </p>
-    }
-
-    <div class="profile-links">
-        <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(detailsOpen ? "true" : "false")"
-                aria-controls="propagation-details" @onclick="() => detailsOpen = !detailsOpen">
-            Details
-            <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
-        </button>
-        <a class="btn btn-link btn-sm link-action" href="propagations/@propagation.Id/edit">Edit</a>
-    </div>
-
-    @if (detailsOpen)
-    {
-        <div id="propagation-details" class="profile-details">
-            <section class="detail-card">
-                <dl class="detail-list">
-                    <dt>@(parent is null ? "Came from" : "Taken from")</dt>
-                    <dd>
-                        @if (parent is not null)
+                <div class="min-w-0">
+                    <h1>
+                        @if (string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                         {
-                            <a href="plants/@parent.Id">@parent.DisplayName</a>
+                            <BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" />
                         }
                         else
                         {
-                            @(string.IsNullOrWhiteSpace(propagation.Source) ? "No parent plant" : propagation.Source)
+                            @propagation.DisplayName
                         }
-                    </dd>
-
-                    @if (!string.IsNullOrWhiteSpace(propagation.Experiment))
+                    </h1>
+                    @if (!string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                     {
-                        <dt>Experiment</dt>
-                        <dd><a href="propagations/results">@propagation.Experiment</a></dd>
+                        <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" /></p>
                     }
-
-                    <dt>Started</dt>
-                    <dd>@Labels.Date(propagation.StartedOn)@(propagation.IsActive ? $" · {Labels.Age(propagation, Today)}" : "")</dd>
-
-                    @if (Pace is { } pace)
-                    {
-                        <dt>Timing</dt>
-                        <dd>
-                            <span class="@(pace.IsSlow ? "pace-slow" : "pace-on-time")">@(pace.IsSlow ? "Slower than usual" : "On time")</span>
-                            <div class="text-body-secondary small">
-                                @Labels.Count(pace.Compared, "earlier batch", "earlier batches") of @Labels.For(propagation.Type).ToLowerInvariant()
-                                in @Labels.For(propagation.Medium) @Labels.Stage(PropagationStage.Rooted, propagation.Type).ToLowerInvariant()
-                                in @Labels.Count(pace.UsualDays, "day") on average.
-                            </div>
-                        </dd>
-                    }
-
-                    @if (propagation.Type != PropagationType.Seed)
-                    {
-                        @MilestoneRow("First root", propagation.FirstRootOn, propagation.DaysToFirstRoot)
-                    }
-                    @MilestoneRow("First leaf", propagation.FirstLeafOn, propagation.DaysToFirstLeaf)
-
-                    @if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } cormSize)
-                    {
-                        <dt>Corm size</dt>
-                        <dd>@cormSize.ToString("0.##") mm</dd>
-                    }
-
-                    @if (propagation.Type == PropagationType.Seed && propagation.SeedsGerminated is { } up)
-                    {
-                        <dt>Seeds</dt>
-                        <dd>
-                            @up of @propagation.InitialCount came up@(propagation.GerminationRate is { } rate ? $" ({Math.Round(rate * 100):0}%)" : "")
-                            @if (propagation.FirstGerminatedOn is { } first)
-                            {
-                                <text> · first on @Labels.Date(first)</text>
-                            }
-                        </dd>
-                    }
-
-                    <dt>Count</dt>
-                    <dd>@CountText</dd>
-
-                    <dt>Grows in</dt>
-                    <dd>
-                        @Labels.For(propagation.Medium)
-                        @if (!string.IsNullOrWhiteSpace(propagation.Container))
+                    <div class="profile-badges">
+                        @if (propagation.IsDormant)
                         {
-                            <text> · @propagation.Container</text>
+                            <span class="badge dormant-badge">Dormant</span>
                         }
-                        @if (Mix is { } mix)
+                        @if (!propagation.IsActive)
                         {
-                            <div class="detail-sub">In @mix.Name@(mix.IsRetired ? " (no longer mixed)" : "")</div>
-                            @if (!string.IsNullOrWhiteSpace(mix.Recipe))
-                            {
-                                <div class="detail-sub">@mix.Recipe</div>
-                            }
+                            <span class="badge @(propagation.Stage == PropagationStage.Failed ? "text-bg-secondary" : "stage-badge")">@Labels.Stage(propagation.Stage)</span>
                         }
-                    </dd>
+                    </div>
+                </div>
+            </header>
 
-                    @if (propagation.RootingAids.Count > 0)
-                    {
-                        <dt>Rooting aids</dt>
-                        <dd>@string.Join(", ", propagation.RootingAids.Order().Select(Labels.For))</dd>
-                    }
-
-                    <dt>Location</dt>
-                    <dd>@(places.NameOf(propagation.PlaceId) ?? "Not set")</dd>
-
-                    @if (propagation.DormantSince is { } dormantSince)
-                    {
-                        <dt>Dormant</dt>
-                        <dd>@(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(propagation.DaysDormant(Today) ?? 0, "day")}")</dd>
-                    }
-                </dl>
-
-                @if (!string.IsNullOrWhiteSpace(propagation.Notes))
-                {
-                    <h2>Notes</h2>
-                    <p class="detail-notes">@propagation.Notes</p>
-                }
-            </section>
-
-            @if (offspring.Count > 0)
+            @if (!propagation.IsActive)
             {
-                <section class="detail-card" id="propagation-plants">
-                    <h2>Plants from it</h2>
-                    <ul class="family-list">
-                        @foreach (var plant in offspring)
-                        {
-                            <li>
-                                <a href="plants/@plant.Id">@plant.DisplayName</a>
-                                @if (plant.Status != PlantStatus.Active)
-                                {
-                                    <span class="text-body-secondary small"> · @Labels.For(plant.Status)</span>
-                                }
-                            </li>
-                        }
-                    </ul>
-                </section>
+                <p class="profile-facts">
+                    Finished
+                    @if (propagation.FinishedOn is { } finishedOn)
+                    {
+                        <text>@Labels.Date(finishedOn) after @Labels.Count(Math.Max(0, finishedOn.DayNumber - propagation.StartedOn.DayNumber), "day")</text>
+                    }
+                    · @if (propagation.PottedUpCount > 0 && offspring.Count > 0)
+                    {
+                        <a class="link-action" href="propagations/@propagation.Id" @onclick="ShowPlants" @onclick:preventDefault>@propagation.PottedUpCount potted up</a>
+                    }
+                    else if (propagation.PottedUpCount > 0)
+                    {
+                        <span class="text-nowrap">@propagation.PottedUpCount potted up</span>
+                    }
+                    @if (propagation.PottedUpCount > 0 && propagation.FailedCount > 0)
+                    {
+                        <text>, </text>
+                    }
+                    @if (propagation.FailedCount > 0)
+                    {
+                        <span class="text-nowrap">@propagation.FailedCount failed</span>
+                    }
+                </p>
+            }
+            else
+            {
+                <AttentionPanel Current="propagation.Attention" Editing="false" EditingChanged="_ => more = More.Flag"
+                                Suggestions="AttentionPanel.PropagationReasons" OnSave="SetAttentionAsync" />
             }
 
-            <section class="danger-zone">
-                @if (confirmDelete)
+            <p class="profile-facts">
+                @Labels.Summary(propagation)
+                @if (propagation.IsActive && !(TileShowsDays && propagation.DaysSinceStart(Today) > 0))
                 {
-                    <p class="mb-2">
-                        Delete <strong>@propagation.DisplayName</strong>? Plants potted up from it are kept.
-                        If it didn't make it, <em>Mark failed</em> under the stage button keeps its history instead.
-                    </p>
-                    <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
-                    <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+                    <text> · @Labels.Age(propagation, Today)</text>
                 }
-                else
+                @if (places.NameOf(propagation.PlaceId) is { } place)
                 {
-                    <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">Delete propagation</button>
+                    <text> · @place</text>
                 }
-            </section>
-        </div>
-    }
+                @if (parent is not null)
+                {
+                    <text> · from <a class="link-action" href="plants/@parent.Id">@parent.DisplayName</a></text>
+                }
+                else if (!string.IsNullOrWhiteSpace(propagation.Source))
+                {
+                    <text> · @propagation.Source</text>
+                }
+                @if (Pace is { IsSlow: true })
+                {
+                    <text> · </text><span class="pace-slow">slower than usual</span>
+                }
+            </p>
 
-    @* The key reloads the history after stage changes and potting up *@
-    <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
-              CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync"
-              EmptyText="No photos or notes yet. Add the first one with Photo or Note below." />
+            @if (propagation.IsActive && offspring.Count > 0)
+            {
+                <p class="profile-facts">
+                    <a class="link-action" href="propagations/@propagation.Id" @onclick="ShowPlants" @onclick:preventDefault>@Labels.Count(offspring.Count, "plant") potted up from it</a>
+                </p>
+            }
+
+            @if (message is not null)
+            {
+                <p class="action-message" role="status">
+                    @message
+                    @foreach (var plant in madePlants)
+                    {
+                        <a class="ms-1" href="plants/@plant.Id">@plant.DisplayName</a>
+                    }
+                </p>
+            }
+
+            <div class="profile-links">
+                <button type="button" class="btn btn-link btn-sm link-action details-toggle" aria-expanded="@(detailsOpen ? "true" : "false")"
+                        aria-controls="propagation-details" @onclick="() => detailsOpen = !detailsOpen">
+                    Details
+                    <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+                </button>
+                <a class="btn btn-link btn-sm link-action" href="propagations/@propagation.Id/edit">Edit</a>
+            </div>
+
+            <div id="propagation-details" class="profile-details @(detailsOpen ? "open" : null)">
+                <section class="detail-card">
+                    <dl class="detail-list">
+                        <dt>@(parent is null ? "Came from" : "Taken from")</dt>
+                        <dd>
+                            @if (parent is not null)
+                            {
+                                <a href="plants/@parent.Id">@parent.DisplayName</a>
+                            }
+                            else
+                            {
+                                @(string.IsNullOrWhiteSpace(propagation.Source) ? "No parent plant" : propagation.Source)
+                            }
+                        </dd>
+
+                        @if (!string.IsNullOrWhiteSpace(propagation.Experiment))
+                        {
+                            <dt>Experiment</dt>
+                            <dd><a href="propagations/results">@propagation.Experiment</a></dd>
+                        }
+
+                        <dt>Started</dt>
+                        <dd>@Labels.Date(propagation.StartedOn)@(propagation.IsActive ? $" · {Labels.Age(propagation, Today)}" : "")</dd>
+
+                        @if (Pace is { } pace)
+                        {
+                            <dt>Timing</dt>
+                            <dd>
+                                <span class="@(pace.IsSlow ? "pace-slow" : "pace-on-time")">@(pace.IsSlow ? "Slower than usual" : "On time")</span>
+                                <div class="text-body-secondary small">
+                                    @Labels.Count(pace.Compared, "earlier batch", "earlier batches") of @Labels.For(propagation.Type).ToLowerInvariant()
+                                    in @Labels.For(propagation.Medium) @Labels.Stage(PropagationStage.Rooted, propagation.Type).ToLowerInvariant()
+                                    in @Labels.Count(pace.UsualDays, "day") on average.
+                                </div>
+                            </dd>
+                        }
+
+                        @if (propagation.Type != PropagationType.Seed)
+                        {
+                            @MilestoneRow("First root", propagation.FirstRootOn, propagation.DaysToFirstRoot)
+                        }
+                        @MilestoneRow("First leaf", propagation.FirstLeafOn, propagation.DaysToFirstLeaf)
+
+                        @if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } cormSize)
+                        {
+                            <dt>Corm size</dt>
+                            <dd>@cormSize.ToString("0.##") mm</dd>
+                        }
+
+                        @if (propagation.Type == PropagationType.Seed && propagation.SeedsGerminated is { } up)
+                        {
+                            <dt>Seeds</dt>
+                            <dd>
+                                @up of @propagation.InitialCount came up@(propagation.GerminationRate is { } rate ? $" ({Math.Round(rate * 100):0}%)" : "")
+                                @if (propagation.FirstGerminatedOn is { } first)
+                                {
+                                    <text> · first on @Labels.Date(first)</text>
+                                }
+                            </dd>
+                        }
+
+                        <dt>Count</dt>
+                        <dd>@CountText</dd>
+
+                        <dt>Grows in</dt>
+                        <dd>
+                            @Labels.For(propagation.Medium)
+                            @if (!string.IsNullOrWhiteSpace(propagation.Container))
+                            {
+                                <text> · @propagation.Container</text>
+                            }
+                            @if (Mix is { } mix)
+                            {
+                                <div class="detail-sub">In @mix.Name@(mix.IsRetired ? " (no longer mixed)" : "")</div>
+                                @if (!string.IsNullOrWhiteSpace(mix.Recipe))
+                                {
+                                    <div class="detail-sub">@mix.Recipe</div>
+                                }
+                            }
+                        </dd>
+
+                        @if (propagation.RootingAids.Count > 0)
+                        {
+                            <dt>Rooting aids</dt>
+                            <dd>@string.Join(", ", propagation.RootingAids.Order().Select(Labels.For))</dd>
+                        }
+
+                        <dt>Location</dt>
+                        <dd>@(places.NameOf(propagation.PlaceId) ?? "Not set")</dd>
+
+                        @if (propagation.DormantSince is { } dormantSince)
+                        {
+                            <dt>Dormant</dt>
+                            <dd>@(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(propagation.DaysDormant(Today) ?? 0, "day")}")</dd>
+                        }
+                    </dl>
+
+                    @if (!string.IsNullOrWhiteSpace(propagation.Notes))
+                    {
+                        <h2>Notes</h2>
+                        <p class="detail-notes">@propagation.Notes</p>
+                    }
+                </section>
+
+                @if (offspring.Count > 0)
+                {
+                    <section class="detail-card" id="propagation-plants">
+                        <h2>Plants from it</h2>
+                        <ul class="family-list">
+                            @foreach (var plant in offspring)
+                            {
+                                <li>
+                                    <a href="plants/@plant.Id">@plant.DisplayName</a>
+                                    @if (plant.Status != PlantStatus.Active)
+                                    {
+                                        <span class="text-body-secondary small"> · @Labels.For(plant.Status)</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </section>
+                }
+
+                <section class="danger-zone">
+                    @if (confirmDelete)
+                    {
+                        <p class="mb-2">
+                            Delete <strong>@propagation.DisplayName</strong>? Plants potted up from it are kept.
+                            If it didn't make it, <em>Mark failed</em> under the stage button keeps its history instead.
+                        </p>
+                        <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
+                        <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">Delete propagation</button>
+                    }
+                </section>
+            </div>
+        </div>
+
+        <div class="profile-history">
+            <div class="page-dock" role="group" aria-label="Add to @propagation.DisplayName">
+                <label class="btn btn-primary icon-btn" for="@photoInputId">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                    Photo
+                </label>
+                <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+                    Note
+                </button>
+                @if (propagation.IsActive)
+                {
+                    <button type="button" class="btn btn-outline-primary icon-btn dock-stage" aria-label="Stage: @Labels.Stage(propagation.Stage, propagation.Type). Change stage" @onclick="OpenStage">
+                        <span class="stage-steps" data-step="@StageStep" aria-hidden="true"><i></i><i></i><i></i></span>
+                        @Labels.Stage(propagation.Stage, propagation.Type)
+                    </button>
+                    <button type="button" class="btn btn-outline-primary dock-more" aria-label="More for this propagation" @onclick="() => more = More.Menu">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="19" cy="12" r="1.3" /></svg>
+                    </button>
+                }
+            </div>
+
+            @* The key reloads the history after stage changes and potting up *@
+            <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
+                      CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync"
+                      EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
+        </div>
+    </div>
 
     <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId"
                    CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
-
-    <div class="page-dock" role="group" aria-label="Add to @propagation.DisplayName">
-        <label class="btn btn-primary icon-btn" for="@photoInputId">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-            Photo
-        </label>
-        <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
-            Note
-        </button>
-        @if (propagation.IsActive)
-        {
-            <button type="button" class="btn btn-outline-primary icon-btn dock-stage" aria-label="Stage: @Labels.Stage(propagation.Stage, propagation.Type). Change stage" @onclick="OpenStage">
-                <span class="stage-steps" data-step="@StageStep" aria-hidden="true"><i></i><i></i><i></i></span>
-                @Labels.Stage(propagation.Stage, propagation.Type)
-            </button>
-            <button type="button" class="btn btn-outline-primary dock-more" aria-label="More for this propagation" @onclick="() => more = More.Menu">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="19" cy="12" r="1.3" /></svg>
-            </button>
-        }
-    </div>
 
     @if (propagation.IsActive)
     {
