@@ -25,7 +25,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             SubjectType = SubjectType.Plant,
             SubjectId = plant.Id,
             Kind = TimelineKind.Created,
-            OccurredAt = plant.AcquiredOn is { } acquired ? time.MomentOn(acquired.Start) : time.GetUtcNow(),
+            OccurredAt = AddedAt(plant, photos ?? []),
             Text = FirstEntryText(plant)
         });
 
@@ -236,6 +236,16 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 
     // A date that is only a month or a year cannot be read off the timeline's day headings,
     // so it is said in the text instead.
+    // A day without a time is recorded at noon, or now for today, so a photo from earlier that
+    // day would come before the plant was added. The plant comes in just before its first photo then
+    private DateTimeOffset AddedAt(Plant plant, IReadOnlyList<Photo> photos)
+    {
+        var added = plant.AcquiredOn is { } acquired ? time.MomentOn(acquired.Start) : time.GetUtcNow();
+        var day = time.LocalDay(added);
+        var first = photos.Where(p => time.LocalDay(p.TakenAt) == day).Select(p => p.TakenAt).DefaultIfEmpty(added).Min();
+        return first < added ? first.AddSeconds(-1) : added;
+    }
+
     private static string FirstEntryText(Plant plant)
     {
         var text = plant.Origin == PlantOrigin.Propagated ? "Added as a propagated plant" : "Added to collection";

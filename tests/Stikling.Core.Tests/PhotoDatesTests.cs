@@ -169,4 +169,11 @@ public class PhotoEntriesTests
     [Fact]
     public void The_newest_photo_is_the_cover() =>
         Assert.Same(ThreeDays[3], PhotoEntries.Cover(ThreeDays));
+
+    [Fact]
+    public void The_oldest_day_is_the_first_photo_taken()
+    {
+        Assert.Equal(new DateOnly(2024, 3, 1), PhotoEntries.OldestDay(ThreeDays, Time));
+        Assert.Null(PhotoEntries.OldestDay([], Time));
+    }
 }
