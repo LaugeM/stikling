@@ -182,7 +182,10 @@
         display: none;
     }
 
+    /* The menu comes after the page in the markup, as the tabs do on a phone, so the grid puts it first */
     .app-nav {
+        grid-column: 1;
+        grid-row: 1;
         position: sticky;
         inset: 0 auto auto;
         height: 100dvh;
@@ -273,6 +276,7 @@
 
     .app-content {
         grid-column: 2;
+        grid-row: 1;
         padding-top: 1.75rem;
         padding-bottom: 3rem;
     }

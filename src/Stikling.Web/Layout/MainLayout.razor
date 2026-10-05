@@ -22,6 +22,19 @@
         </NavLink>
     </header>
 
+    <main class="app-content @(updateReady || FirstSyncNotice ? "with-banner" : null)">
+        @Body
+    </main>
+
+    <UpdateBanner ReadyChanged="ready => updateReady = ready" />
+
+    @* On a device where someone just signed in, the lists stay empty until the first sync brings
+       their things in, which would otherwise look like the account had lost them *@
+    @if (FirstSyncNotice)
+    {
+        <div class="first-sync-banner" role="status">Fetching what's saved on your account…</div>
+    }
+
     <nav class="app-nav" aria-label="Main">
         @* On a wide screen the menu takes over from the header, so it carries the name and Settings *@
         <a class="app-nav-title" href="">
@@ -67,19 +80,6 @@
             </NavLink>
         </div>
     </nav>
-
-    <main class="app-content @(updateReady || FirstSyncNotice ? "with-banner" : null)">
-        @Body
-    </main>
-
-    <UpdateBanner ReadyChanged="ready => updateReady = ready" />
-
-    @* On a device where someone just signed in, the lists stay empty until the first sync brings
-       their things in, which would otherwise look like the account had lost them *@
-    @if (FirstSyncNotice)
-    {
-        <div class="first-sync-banner" role="status">Fetching what's saved on your account…</div>
-    }
 </div>
 
 @code {

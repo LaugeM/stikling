@@ -296,7 +296,7 @@ else
                 <section class="danger-zone">
                     @if (confirmDelete)
                     {
-                        <p class="mb-2">Delete <strong>@plant.DisplayName</strong>? If it died or you gave it away, use the three dots at the bottom to say so instead, so its history is kept.</p>
+                        <p class="mb-2">Delete <strong>@plant.DisplayName</strong>? If it died or you gave it away, use the three dots next to Photo and Note to say so instead, so its history is kept.</p>
                         <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
                         <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
                     }
