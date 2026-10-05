@@ -30,7 +30,7 @@ Plan the feature as usual and get the plan approved before any worker starts. Se
 Split the plan into two to four parts, in the order they depend on each other. Each part should be something a worker can finish and check with the build and tests on its own. For a typical feature:
 
 1. the model, repository interface, service and tests in `Stikling.Core`
-2. the IndexedDB side and the backup, following "Adding a new kind of record" in CLAUDE.md
+2. the IndexedDB side and the backup, following `docs/dev/new-record.md`
 3. the pages and components
 4. the Help page answers, empty states and `docs/FEATURES.md`
 
@@ -38,12 +38,13 @@ More, smaller parts cost more, not less. Every worker reads its own context from
 
 ## 4. Write the brief
 
-The worker only sees the brief and CLAUDE.md. Each brief says:
+The worker only sees the brief, CLAUDE.md and the docs they point to. Each brief says:
 
 - what this part is for, and where it sits in the whole feature
 - the files to change, and the existing code to follow as a pattern
 - the decisions from the plan that affect this part
 - the rules in CLAUDE.md that apply, named rather than repeated
+- the docs under "Docs for some tasks" in CLAUDE.md that the part needs
 - what is out of scope, including work that belongs to a later part
 - how to check it: which tests should exist and pass
 
