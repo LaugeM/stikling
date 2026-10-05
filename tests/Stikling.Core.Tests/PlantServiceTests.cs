@@ -173,6 +173,19 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Create_never_puts_the_plant_on_the_day_before_a_photo_from_midnight()
+    {
+        var midnight = new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero);
+        var photos = new[] { new Photo { SubjectType = SubjectType.Plant, TakenAt = midnight } };
+        var plant = new Plant { Nickname = "Coleus", AcquiredOn = LooseDate.Of(new DateOnly(2024, 3, 1)) };
+
+        await service.CreateAsync(plant, photos);
+
+        var added = Assert.Single(timeline.Entries, e => e.Kind == TimelineKind.Created);
+        Assert.Equal(midnight, added.OccurredAt);
+    }
+
+    [Fact]
     public async Task Create_keeps_noon_when_the_photos_are_from_other_days()
     {
         var photos = new[] { new Photo { SubjectType = SubjectType.Plant, TakenAt = new(2024, 3, 2, 9, 0, 0, TimeSpan.Zero) } };

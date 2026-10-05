@@ -72,10 +72,17 @@
             }
         }
 
-        body {
+        /* Ahead of app.css, which has the same colours, except without scripts in a dark system theme.
+           The static pages made from this one have no intro and keep app.css's */
+        body:has(.intro) {
             margin: 0;
             background: var(--intro-bg);
             color: var(--intro-ink);
+        }
+
+        /* app.css hides it too, but may not have arrived yet. Blazor shows it when something fails */
+        #blazor-error-ui {
+            display: none;
         }
 
         .intro {
@@ -276,6 +283,12 @@
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="css/app.css" media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="Stikling.Web.styles.css" media="print" onload="this.media='all'" />
+    <!-- Without scripts the swap above never happens, and the static pages made from this one need app.css -->
+    <noscript>
+        <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="css/app.css" />
+        <style>.intro-bar, .intro-loading-text, .intro-note { display: none; }</style>
+    </noscript>
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="manifest.webmanifest" rel="manifest" />
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
