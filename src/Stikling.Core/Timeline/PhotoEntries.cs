@@ -34,6 +34,10 @@ public static class PhotoEntries
             .ToList();
     }
 
+    /// <summary>The day the oldest photo was taken, or null without photos.</summary>
+    public static DateOnly? OldestDay(IReadOnlyList<Photo> photos, TimeProvider time) =>
+        photos.Count == 0 ? null : photos.Min(p => time.LocalDay(p.TakenAt));
+
     /// <summary>The photo to use as the cover: the newest, since it shows the plant as it is now.</summary>
     public static Photo Cover(IReadOnlyList<Photo> photos) => photos.MaxBy(p => p.TakenAt)!;
 }

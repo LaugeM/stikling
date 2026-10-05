@@ -17,7 +17,7 @@
 <a class="back-link" href="@(IsNew ? "plants" : $"plants/{Id}")">Back</a>
 <h1>@(IsNew ? "Add plant" : "Edit plant")</h1>
 
-@if (IsNew && CopyOfId is null && ParentId is null)
+@if (IsNew && CopyOfId is null && ParentId is null && !FromPhotos)
 {
     <p class="form-text">Adding several? <a class="link-action" href="plants/quick-add">Quick add</a></p>
 }
@@ -37,6 +37,12 @@ else
                     <div>@error</div>
                 }
             </div>
+        }
+
+        @* Starting from old photos, from the first screen: they come first, and the rest is the usual form *@
+        @if (FromPhotos)
+        {
+            @PhotoSection
         }
 
         <fieldset>
@@ -76,6 +82,13 @@ else
             <div class="mb-3">
                 <LooseDateInput @bind-Value="plant.AcquiredOn" Today="Today" Label="When you got it" />
                 <div class="form-text">If you only remember the month or the year, pick that rather than guessing a day.</div>
+                @if (dateFromPhotos is { } fromPhotos && plant.AcquiredOn == fromPhotos)
+                {
+                    <div class="form-text">
+                        Set to the day of the oldest photo, so the photos come after it in the history.
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="KeepToday">Use today instead</button>
+                    </div>
+                }
                 @if (copiedDate is { } sameDate && sameDate != LooseDate.Of(Today))
                 {
                     @if (plant.AcquiredOn == sameDate)
@@ -117,46 +130,9 @@ else
             </div>
         </fieldset>
 
-        @if (IsNew)
+        @if (IsNew && !FromPhotos)
         {
-            <fieldset>
-                <legend>Photo</legend>
-                @if (photos.Count > 0)
-                {
-                    <div class="photo-picks">
-                        @foreach (var photo in photos)
-                        {
-                            <div class="photo-pick">
-                                <PhotoImage PhotoId="photo.Id" Alt="Photo of the new plant" />
-                                <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
-                                        aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
-                            </div>
-                        }
-                    </div>
-                }
-
-                <div class="composer-row">
-                    <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                        Camera
-                    </label>
-                    <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
-                           @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
-
-                    <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
-                        Gallery
-                    </label>
-                    <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
-                           @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
-                </div>
-
-                <div class="form-text">The first photo becomes the cover. You can add more later on the plant's page.</div>
-                @if (photoStatus is not null)
-                {
-                    <p class="composer-status" role="status">@photoStatus</p>
-                }
-            </fieldset>
+            @PhotoSection
         }
 
         <fieldset>
@@ -281,6 +257,12 @@ else
     [SupplyParameterFromQuery(Name = "copy")]
     public Guid? CopyOfId { get; set; }
 
+    /// <summary>"photos" starts from old photos, from the first screen, with the photos first.</summary>
+    [SupplyParameterFromQuery(Name = "from")]
+    public string? From { get; set; }
+
+    private bool FromPhotos => IsNew && From == "photos";
+
     private readonly string cameraId = $"camera-{Guid.NewGuid():N}";
     private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
     private ElementReference cameraInput;
@@ -290,6 +272,8 @@ else
     private readonly List<Photo> photos = [];
     private string? photoStatus;
     private bool busy;
+    private LooseDate? dateFromPhotos; // when the day it was got was moved back to the oldest photo
+    private bool keepToday;
 
     private Plant? plant;
     private Plant? original; // the plant as it was before editing, to record what changed
@@ -443,6 +427,7 @@ else
             var result = await Photos.SaveFromInputAsync(input, SubjectType.Plant, plant.Id);
             photos.AddRange(result.Saved);
             photoStatus = result.Message(guessesMatter: !fromCamera);
+            FollowPhotoDates();
         }
         catch (Exception ex)
         {
@@ -457,7 +442,77 @@ else
         await Photos.DeleteAsync(photo.Id);
         photos.Remove(photo);
         photoStatus = null;
+        FollowPhotoDates();
     }
+
+    // Old photos would otherwise come before "Added to collection" in the history, so the day it
+    // was got moves back to the oldest one. Only while it's still the day the form started with
+    private void FollowPhotoDates()
+    {
+        if (plant is null || keepToday || (plant.AcquiredOn != LooseDate.Of(Today) && plant.AcquiredOn != dateFromPhotos))
+            return;
+
+        dateFromPhotos = PhotoEntries.OldestDay(photos, Time) is { } oldest && oldest < Today ? LooseDate.Of(oldest) : null;
+        plant.AcquiredOn = dateFromPhotos ?? LooseDate.Of(Today);
+    }
+
+    private void KeepToday()
+    {
+        keepToday = true;
+        plant!.AcquiredOn = LooseDate.Of(Today);
+    }
+
+    private RenderFragment PhotoSection => @<fieldset>
+        <legend>@(FromPhotos ? "Photos" : "Photo")</legend>
+        @if (FromPhotos)
+        {
+            <p class="form-text mt-0">
+                Pick photos of this plant from your gallery. Each one goes on its history on the day it
+                was taken, and the newest becomes the cover.
+            </p>
+        }
+        @if (photos.Count > 0)
+        {
+            <div class="photo-picks">
+                @foreach (var photo in photos)
+                {
+                    <div class="photo-pick">
+                        <PhotoImage PhotoId="photo.Id" Alt="Photo of the new plant" />
+                        <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
+                                aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="composer-row">
+            @if (!FromPhotos)
+            {
+                <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                    Camera
+                </label>
+                <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                       @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
+            }
+
+            <label class="btn btn-outline-primary icon-btn @(FromPhotos ? null : "btn-sm")" for="@galleryId">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                @(!FromPhotos ? "Gallery" : photos.Count > 0 ? "Add more" : "Pick photos")
+            </label>
+            <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
+                   @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+        </div>
+
+        @if (!FromPhotos)
+        {
+            <div class="form-text">The first photo becomes the cover. You can add more later on the plant's page.</div>
+        }
+        @if (photoStatus is not null)
+        {
+            <p class="composer-status" role="status">@photoStatus</p>
+        }
+    </fieldset>;
 
     // Leaving without saving the plant: the photos would belong to nothing
     private async Task CancelAsync()

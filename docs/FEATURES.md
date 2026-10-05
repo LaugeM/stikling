@@ -37,21 +37,19 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
 
-1. **A preview picture and a page that shows while the app loads**, so a link to the app shows what it is, and someone tapping it sees more than a spinner.
-2. **The quickest ways to start on the first screen**: links to Quick add and to importing old photos with their dates, which are both built but not offered there.
-3. **The common houseplants in the plant dictionary**, with their everyday names, so the first plant someone new adds is found.
-4. **A share card** for a plant or propagation, together with **the result of a finished propagation**, which is what makes the card worth posting.
-5. **Before and after**, and then **a time-lapse video**, from a plant's or propagation's photos.
-6. **A share link for one plant or propagation**, which opens a page anyone can see.
-7. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
-8. **Passing a cutting on with its history**, built on the share link.
-9. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
-10. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
-11. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-12. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-13. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-14. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-15. **Comparing photos side by side, and voice notes.**
+1. **The common houseplants in the plant dictionary**, with their everyday names, so the first plant someone new adds is found.
+2. **A share card** for a plant or propagation, together with **the result of a finished propagation**, which is what makes the card worth posting.
+3. **Before and after**, and then **a time-lapse video**, from a plant's or propagation's photos.
+4. **A share link for one plant or propagation**, which opens a page anyone can see.
+5. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
+6. **Passing a cutting on with its history**, built on the share link.
+7. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
+8. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
+9. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+10. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+11. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+12. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+13. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
@@ -122,7 +120,7 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ✅ | Tap the photo at the top of a plant or propagation page to open it full screen, where **Set as cover** is. The cover used to be chosen only from a photo opened in the history, which was easy to miss | 2 | S | v1.x |
 | ✅ | **Frame a photo**: drag and zoom a photo (pinch, the slider or the mouse wheel) so the plant sits well where it's cropped, on cards, at the top of its page and in the history. Only the position and zoom are saved, the photo itself isn't changed, and photos never framed stay centred | 3 | M | v1.x |
 | ✅ | Correct a timeline entry: fix the text or the date of a note or a photo, and its photos move with it. The earlier versions are kept and shown under "edited". Automatic entries are fixed where they come from, and any entry can be deleted | 3 | S | v1.x |
-| ✅ | **Import existing photos with their dates**: pick old photos from the gallery and each lands on the day it was taken, so a plant's history starts from day one. The date comes from the photo itself (EXIF), then from a date in the file name, then from the file. Photos from the same day share an entry, a note keeps the photos picked with it together, and the app says how many photos had no date of their own so they can be checked | 3 | M | v1.x |
+| ✅ | **Import existing photos with their dates**: pick old photos from the gallery and each lands on the day it was taken, so a plant's history starts from day one. The date comes from the photo itself (EXIF), then from a date in the file name, then from the file. Photos from the same day share an entry, a note keeps the photos picked with it together, and the app says how many photos had no date of their own so they can be checked. Works on a plant's page and when adding a plant, where the day it was got moves back to the oldest photo's, so the photos come after it in the history | 3 | M | v1.x |
 | ☐ | **Pot-ups and failures in the history** get their own title and icon instead of "Updated". A new optional field on the entry says what happened, and its kind stays a change, so older app versions still read the entry and show "Updated" as before. A value in the field that a version doesn't know reads as empty. Entries from before are recognised by the text the app wrote ("Potted up 2: …", "1 failed: rotted") when they are shown, so nothing stored is rewritten. A new value in `TimelineKind` would instead stop older versions from loading any history | 4 | S | v1.x |
 | ☐ | Swipe through photos side by side to compare growth | 5 | M | v1.x |
 | ☐ | **Voice notes**: a microphone button on note fields using the phone's speech-to-text | 5 | S | v1.x |
@@ -339,8 +337,8 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 |---|---|---|---|---|
 | ✅ | **Help page** with short questions and answers: how the app stores everything on your device, what happens if you clear the browser, how to back up, how propagation and lineage work, how to install it on the phone, and a few answers for each part of the app. Each question folds open, and the topics at the top jump to their section. Opened from Settings and from the first screens someone new sees | 4 | S | v1.x |
 | ✅ | Empty screens that say what to do next instead of just "nothing here": the first screen on Today says what the app is for and offers a plant or a propagation, a list with nothing matching offers to clear the search and filters, and the ones that use a word like feed or propagation say what it means | 4 | S | v1.x |
-| ☐ | **The quickest ways to start on the first screen**: next to "Add a plant", links to Quick add and to importing old photos with their dates, which are both built, so someone with a collection already has its history on the first day | 2 | S | v1.x |
-| ☐ | **A page that shows while the app loads**: what Stikling is, with pictures of it, in the page itself rather than the app, so the first visit shows something straight away and search engines can read it. How long the first load takes on a phone over mobile data needs measuring first | 2 | M | v1.x |
+| ✅ | **The quickest ways to start on the first screen**: under "Add a plant" and "Start a propagation", a line for someone who has plants already, with links to Quick add and to starting a plant from old photos. That opens the add plant form with the photos first, so the plant's history begins on the first day | 2 | S | v1.x |
+| ✅ | **A page that shows while the app loads**: what Stikling is in two sentences, two screens from the app and how far the download has got, in the page itself rather than the app, so the first visit shows something straight away and search engines can read it. The first visit takes about 26 seconds on slow mobile data and 7 on fast, and the page shows after 1.4 and 0.6. Someone coming back only sees the icon, and only if the app takes a moment to start. Links to the app show a picture of it in their preview | 2 | M | v1.x |
 | ☐ | **Guided tour on the first visit**: a short walk through the app (plants, propagations, photos, backup) that can be skipped | 6 | M | v1.x |
 | ☐ | Start the tour again from Settings whenever you want | 6 | S | v1.x |
 | ☐ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | 6 | S | v1.x |

@@ -160,6 +160,44 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Create_puts_the_plant_before_photos_taken_earlier_the_same_day()
+    {
+        var morning = new DateTimeOffset(2024, 3, 1, 9, 0, 0, TimeSpan.Zero);
+        var photos = new[] { new Photo { SubjectType = SubjectType.Plant, TakenAt = morning } };
+        var plant = new Plant { Nickname = "Coleus", AcquiredOn = LooseDate.Of(new DateOnly(2024, 3, 1)) };
+
+        await service.CreateAsync(plant, photos);
+
+        var added = Assert.Single(timeline.Entries, e => e.Kind == TimelineKind.Created);
+        Assert.Equal(morning.AddSeconds(-1), added.OccurredAt);
+    }
+
+    [Fact]
+    public async Task Create_never_puts_the_plant_on_the_day_before_a_photo_from_midnight()
+    {
+        var midnight = new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero);
+        var photos = new[] { new Photo { SubjectType = SubjectType.Plant, TakenAt = midnight } };
+        var plant = new Plant { Nickname = "Coleus", AcquiredOn = LooseDate.Of(new DateOnly(2024, 3, 1)) };
+
+        await service.CreateAsync(plant, photos);
+
+        var added = Assert.Single(timeline.Entries, e => e.Kind == TimelineKind.Created);
+        Assert.Equal(midnight, added.OccurredAt);
+    }
+
+    [Fact]
+    public async Task Create_keeps_noon_when_the_photos_are_from_other_days()
+    {
+        var photos = new[] { new Photo { SubjectType = SubjectType.Plant, TakenAt = new(2024, 3, 2, 9, 0, 0, TimeSpan.Zero) } };
+        var plant = new Plant { Nickname = "Coleus", AcquiredOn = LooseDate.Of(new DateOnly(2024, 3, 1)) };
+
+        await service.CreateAsync(plant, photos);
+
+        var added = Assert.Single(timeline.Entries, e => e.Kind == TimelineKind.Created);
+        Assert.Equal(new DateTimeOffset(2024, 3, 1, 12, 0, 0, TimeSpan.Zero), added.OccurredAt);
+    }
+
+    [Fact]
     public async Task Create_rejects_invalid_plants_without_writing_history()
     {
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateAsync(new Plant()));
