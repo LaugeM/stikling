@@ -6,11 +6,11 @@ Blazor WebAssembly PWA. Everything is stored on the device in IndexedDB. When so
 
 - `src/Stikling.Core`: models, rules, and the services pages call (`PlantService`, `CareService` and so on). No browser or UI code. Anything worth testing belongs here.
 - `src/Stikling.Web`: pages, components, and the IndexedDB side. Each Core repository interface (`IPlantRepository` and so on) has its implementation in `Services/IndexedDbRepositories.cs`, which goes through the JavaScript modules in `wwwroot/js`.
-- `src/Stikling.Api`: the ASP.NET Core API for accounts and sync, with EF Core on SQL Server. See "The API" below.
+- `src/Stikling.Api`: the ASP.NET Core API for accounts and sync, with EF Core on SQL Server.
 - `tests/Stikling.Core.Tests`: xUnit, run with `dotnet test Stikling.slnx`. The services are tested against the in-memory repositories in `Fakes.cs`.
 - `tests/Stikling.Api.Tests`: the API's endpoints, run against a real SQL Server and Azurite that Testcontainers starts in Docker. Docker Desktop has to be running for `dotnet test Stikling.slnx`.
 - `tools/plant-names`: the script that builds `wwwroot/data/plant-names.json`, the names the genus, species and cultivar fields suggest. Its README says where the names come from and how to add more. Never edit the JSON by hand.
-- `infra`: the Azure resources for the hosted API, in Bicep. `docs/ops/hosting.md` says what they are and how to deploy them. The workflow only deploys new versions of the API, and changes to the Bicep are deployed by hand.
+- `infra`: the Azure resources for the hosted API, in Bicep. `docs/ops/hosting.md` says what they are and how to deploy them, which is by hand.
 
 Photos are resized, stored, read, and sent to and fetched from the API entirely in JavaScript. The image data only crosses into C# when a backup is written or restored.
 
@@ -18,16 +18,11 @@ UI work follows `DESIGN.md`. `PRODUCT.md` has who the app is for and the princip
 
 The impeccable skill is for real design work, not a check on every change, since each run reads a lot of instructions and screenshots. For a new screen or a redesign, run `/impeccable shape` before building and `/impeccable critique` or `polish` on the result. A small change that reuses existing patterns only needs `DESIGN.md`, the plugin's hook that scans each edited file, and the reviewer. Now and then, an `/impeccable audit` across several screens catches what drifts.
 
-## Adding a new kind of record
+## Docs for some tasks
 
-A new IndexedDB store touches more places than the model and its page, and missing one of them quietly leaves the records out of backups. Use the feeds commit (`3e255f3`) as the example:
-
-- the model in `Core/Models` and a repository interface next to its service
-- a new `if (event.oldVersion < N)` block in `wwwroot/js/db.js` with `DB_VERSION` raised. Never change an old block.
-- the store name in `Stores` in `Services/IndexedDb.cs`, the implementation in `IndexedDbRepositories.cs`, and the registration in `Program.cs`
-- the store name in `SyncKinds` in `Core/Sync`, or it won't sync. The API only takes the kinds listed there, and a test checks the list against `BackupData`.
-- `BackupData` and its `Counts`, export and restore in `BackupService`, and the restore summary in `Pages/Settings.razor`
-- a fake in `tests/Stikling.Core.Tests/Fakes.cs`, and `BackupTests`
+- **New kind of record** (a new IndexedDB store): follow every step in `docs/dev/new-record.md`. A missed step quietly leaves the records out of backups or sync.
+- **API or sync code** (`src/Stikling.Api`, `Core/Sync`, `SyncRunner`, the change list or photo lists in `db.js`): read `docs/dev/api.md` first. It has the auth rules every endpoint follows, how records and photos are stored, and how a sync runs.
+- **Sign-in, or testing while signed in** (Clerk, `account.js`, `AccountService`, `StiklingApi`, or checking a screen or a sync with an account): read `docs/dev/sign-in.md`.
 
 ## Data conventions
 
@@ -56,28 +51,8 @@ Accounts and sync between devices are being added in steps, so people don't have
 - Expect what a merge can produce: two pots with the same name, a record whose parent was deleted on another device, records arriving in any order. Checking uniqueness when saving isn't enough.
 - Anything the app creates on its own, like defaults or starter data, needs a fixed id. Otherwise every device makes its own copy.
 - Code that only works in a browser stays behind a service like `DeviceFiles` or `PhotoService`, never in a page.
-
-## The API
-
-- Clerk's session tokens are checked by ASP.NET Core's JWT bearer authentication in `Auth/ClerkAuthentication.cs`. Clerk stays behind that file and the `ClerkUserId` column on `Person`. Everything else points at our own `Person.Id`, so the sign-in service can be replaced.
-- Never take the caller's identity from the request body or the URL. `CurrentPerson` finds them from the token.
-- Anything under `/collections/{collectionId}` needs `CollectionPolicies.View` or `CollectionPolicies.Edit`. The policy checks the caller's membership on every request, so a viewer can't change data even with a modified app.
-- `docker compose up --build` runs the API on port 5180 with SQL Server, and Azurite in place of Blob Storage. It applies its migrations on start, locally and hosted. A new migration is made with `dotnet tool restore`, then `dotnet ef migrations add <Name> --project src/Stikling.Api --output-dir Data/Migrations`.
-- Records from the app are kept as their JSON in one `Records` table, keyed by collection, kind and id. The server only reads the id, `updatedAt` and `deletedAt`, so a new field in a model needs no migration. The newest `updatedAt` wins, and each accepted change gets the collection's next change number, which is what devices fetch by. A record that arrives deleted is stripped to its id and dates (`SyncRules.AsStored`), so the app must never need other fields of a deleted record. Places merged into another are the one exception, and are kept whole. The person's `UserSettings` are kept the same way in `PersonSettings`. A record the server can't keep, like one dated more than a day ahead of its clock, is refused on its own, and the rest of the upload is kept.
-- Photo images don't travel with the records. After the records, `PhotoSyncService` in `Core/Sync` sends the images from the `photoUploads` list in `db.js` and fetches thumbnails for the `photoDownloads` list. `db.js` keeps both lists in the same transaction as the images. Full sizes are only fetched when a photo is opened. The API keeps each image as a blob, with a `PhotoImages` row so a collection's photo space (1 GB, `Photos:MaxBytesPerCollection`) can be added up, and deletes the images when a photo's record arrives deleted.
-- The sync logic on the device side is `SyncService` in `Core/Sync`, tested against `FakeSyncStore` and `FakeSyncServer`. `SyncRecord`, `PushRequest` and the other request formats there are shared with the API.
-- In the app, `SyncRunner` decides when to sync, and `IndexedDbSyncStore` is the device side of it. Every write in `db.js` also puts the record on the change list, the `changes` store, in the same transaction. That covers every store except the ones in `NOT_RECORDS`, so a new store is on the list without anything else to add. A store that doesn't hold records, like `photoBlobs`, goes in `NOT_RECORDS`.
-- `db.js` keeps the fields of a stored record that the app didn't send when saving it, so a device on an older version can't erase a field that a newer version added. Only fields at the top of the record are kept this way.
+- The server strips a record that arrives deleted to its id and dates (`SyncRules.AsStored`), so the app must never need other fields of a deleted record. Places merged into another are the one exception, and are kept whole.
 - Lists and detail pages have `<ReloadOnSync Reload="..." />`, which reloads their data when changes arrive from another device. Edit pages don't, so nothing changes under someone filling in a form.
-- Settings that differ between local and hosted (the Clerk instance, the app's origins, the connection string) are in `appsettings.Development.json` locally, and in the container's environment in `infra/resources.bicep` when hosted. Secrets never go in the repo, and the hosted API has none: it reaches the database and storage with its managed identity.
-
-## Signing in from the app
-
-- Clerk has no Blazor library, so it is behind `wwwroot/js/account.js`, and `AccountService` is the only class that calls that file. Calls to the API go through `StiklingApi`, which adds the session token to each request.
-- Clerk's scripts are only loaded when they are needed: on the sign-in page, or for syncing on a device where someone is signed in. Syncing starts once the app is on screen, never before, so it still opens offline, and a device where nobody signed in never loads Clerk.
-- Signing in is only offered when `wwwroot/appsettings.{Environment}.json` has the Clerk instance and the API address. Locally that is `appsettings.Development.json`, which is kept out of the published site. The live site uses `appsettings.Production.json`, with Clerk's production instance and the hosted API.
-- The API only accepts tokens from the origins in its `AppOrigins`. Locally that is `http://localhost:*`, so the dev server can run on whichever port is free.
-- To test signed-in screens and real syncs, start the local API with `docker compose up --build` and use "Sign in as a test person" on the sign-in page instead of Clerk. It only shows in Development. The app signs the tokens itself with `TestSignIn:SigningKey`, which is the same in both `appsettings.Development.json` files, and the hosted API never accepts them (`Auth/TestSignIn.cs`, and a test checks it). The same name is the same person on every port, so two dev servers can sync with each other, and a new name is a new person, e.g. after deleting the account.
 
 ## The Help page
 

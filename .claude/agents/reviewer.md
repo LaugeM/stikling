@@ -14,7 +14,8 @@ Do not edit, create or delete files, and do not commit, push or switch branches.
 
 1. `CLAUDE.md`, all of it. Most of what goes wrong in this repository is a rule in there that was skipped.
 2. The diff: `git diff origin/main...HEAD` plus `git diff` and `git status` for anything not committed yet. List the changed files before reading them.
-3. If the change touches anything under `src/Stikling.Web/Pages`, `Components`, `Layout` or `wwwroot/css`, read `DESIGN.md` too. Skip it for changes with no UI.
+3. Each doc under "Docs for some tasks" in `CLAUDE.md` whose pointer fits the diff. Its rules count the same as the ones in `CLAUDE.md`.
+4. If the change touches anything under `src/Stikling.Web/Pages`, `Components`, `Layout` or `wwwroot/css`, read `DESIGN.md` too. Skip it for changes with no UI.
 
 Read the surrounding code for every changed file, not only the changed lines. A bug is often in what the change forgot to touch.
 
@@ -26,9 +27,9 @@ Bugs first:
 - Null handling, off-by-one mistakes, dates and time zones.
 - Async calls that are not awaited, and UI state that is not refreshed after a change.
 
-Then the rules in `CLAUDE.md`. The ones that are easy to miss:
+Then the rules in `CLAUDE.md` and those docs. The ones that are easy to miss:
 
-- A new IndexedDB store needs every step in "Adding a new kind of record": the `db.js` version block with `DB_VERSION` raised and no old block changed, `Stores`, the repository, `Program.cs`, `BackupData` with its counts, export and restore, the restore summary in `Settings.razor`, a fake in `Fakes.cs` and `BackupTests`. Check each one.
+- A new IndexedDB store needs every step in `docs/dev/new-record.md`. Check each one.
 - Deletes are soft, enums are stored as text, and records point at each other by id.
 - Anything the app creates on its own has a fixed id.
 - Anything that belongs to the person is an `Entity` behind a repository, not in localStorage.

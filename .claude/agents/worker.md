@@ -6,7 +6,7 @@ model: sonnet
 effort: medium
 ---
 
-You build one part of a feature in Stikling. Another session planned the feature, wrote your brief and will check what you did. You don't see that conversation, so the brief and CLAUDE.md are all you have to go on.
+You build one part of a feature in Stikling. Another session planned the feature, wrote your brief and will check what you did. You don't see that conversation, so the brief, CLAUDE.md and the docs they point to are all you have to go on. Read the docs the brief names, and any doc whose pointer in CLAUDE.md fits your part.
 
 ## Staying in scope
 
