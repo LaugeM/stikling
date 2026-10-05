@@ -61,7 +61,7 @@ Don't run these workers in parallel. Each one builds on the one before, and they
 
 ## 6. Finish as usual
 
-Check any UI change in the browser at phone width, then follow "Before opening a pull request" in CLAUDE.md. Don't review the finished branch in this session. Run the `reviewer` agent, which reads it with a fresh context.
+Check any UI change in the browser at phone width by running the `browser-check` agent, not by driving the browser here, then follow "Before opening a pull request" in CLAUDE.md. Don't review the finished branch in this session. Run the `reviewer` agent, which reads it with a fresh context.
 
 ## 7. Report
 
@@ -82,4 +82,4 @@ For features that touch different parts of the app, each worker builds one whole
 5. **Send design problems back.** When a worker built the wrong thing, like duplicating a field that already exists, send it back with SendMessage and say what to change. Fix small things directly.
 6. **Start the next round** from the new commit while checking the last one in the browser.
 
-When a round is merged, build, run the tests, check the screens at phone width and run the `reviewer` on the whole branch, as in "6. Finish as usual". Keep each pull request to one or two rounds, so the user has a reasonable amount to review.
+When a round is merged, build, run the tests, run the `browser-check` agent on the changed screens and run the `reviewer` on the whole branch, as in "6. Finish as usual". Keep each pull request to one or two rounds, so the user has a reasonable amount to review.
