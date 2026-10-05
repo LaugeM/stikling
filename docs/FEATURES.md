@@ -38,7 +38,7 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
 
 1. **A preview picture and a page that shows while the app loads**, so a link to the app shows what it is, and someone tapping it sees more than a spinner.
-2. **The quickest ways to start on the first screen**: adding a list of plants at once, and bringing in old photos with their dates.
+2. **The quickest ways to start on the first screen**: links to Quick add and to importing old photos with their dates, which are both built but not offered there.
 3. **The common houseplants in the plant dictionary**, with their everyday names, so the first plant someone new adds is found.
 4. **A share card** for a plant or propagation, together with **the result of a finished propagation**, which is what makes the card worth posting.
 5. **Before and after**, and then **a time-lapse video**, from a plant's or propagation's photos.
@@ -339,7 +339,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 |---|---|---|---|---|
 | ✅ | **Help page** with short questions and answers: how the app stores everything on your device, what happens if you clear the browser, how to back up, how propagation and lineage work, how to install it on the phone, and a few answers for each part of the app. Each question folds open, and the topics at the top jump to their section. Opened from Settings and from the first screens someone new sees | 4 | S | v1.x |
 | ✅ | Empty screens that say what to do next instead of just "nothing here": the first screen on Today says what the app is for and offers a plant or a propagation, a list with nothing matching offers to clear the search and filters, and the ones that use a word like feed or propagation say what it means | 4 | S | v1.x |
-| ☐ | **The quickest ways to start on the first screen**: next to "Add a plant", a way to add a list of plants at once and a way to bring in old photos with their dates, so someone with a collection already has its history on the first day | 2 | S | v1.x |
+| ☐ | **The quickest ways to start on the first screen**: next to "Add a plant", links to Quick add and to importing old photos with their dates, which are both built, so someone with a collection already has its history on the first day | 2 | S | v1.x |
 | ☐ | **A page that shows while the app loads**: what Stikling is, with pictures of it, in the page itself rather than the app, so the first visit shows something straight away and search engines can read it. How long the first load takes on a phone over mobile data needs measuring first | 2 | M | v1.x |
 | ☐ | **Guided tour on the first visit**: a short walk through the app (plants, propagations, photos, backup) that can be skipped | 6 | M | v1.x |
 | ☐ | Start the tour again from Settings whenever you want | 6 | S | v1.x |
