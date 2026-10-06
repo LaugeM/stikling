@@ -3,6 +3,7 @@
 
 const SKIP_WAITING = "skipWaiting";
 const ON_UPDATE_READY = "OnUpdateReady";
+const RELOAD_AFTER_MS = 6000;
 
 async function registration() {
     return navigator.serviceWorker ? navigator.serviceWorker.getRegistration() : null;
@@ -48,4 +49,6 @@ export async function apply() {
     }
     navigator.serviceWorker.addEventListener("controllerchange", () => location.reload(), { once: true });
     reg.waiting.postMessage(SKIP_WAITING);
+    // If the new version never takes over, reload anyway rather than leave the bar saying it's updating
+    setTimeout(() => location.reload(), RELOAD_AFTER_MS);
 }

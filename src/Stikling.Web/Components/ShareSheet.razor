@@ -2,8 +2,10 @@
    and the words on it, which the app writes and the person can change. Nothing here is saved.
    The picture is drawn by ShareCardService, which keeps it in JavaScript. *@
 @using System.Text.Json
+@using Stikling.Core.Sync
 @inject ShareCardService Cards
 @inject IPhotoRepository PhotoRepository
+@inject SyncRunner Sync
 
 <Sheet Title="Share" Open="Open" OpenChanged="OpenChanged">
     @if (ready)
@@ -48,9 +50,13 @@
                 {
                     <p class="form-text">That photo isn't on this device yet, so the card uses the number instead.</p>
                 }
+                else if (photoSmall && gettingFull)
+                {
+                    <p class="form-text" role="status">Getting the full photo, so the card is sharp.</p>
+                }
                 else if (photoSmall)
                 {
-                    <p class="form-text">Only a small version of this photo is on this device so far, so it looks soft on the card. Open the photo on its page to bring the full one here, or pick another.</p>
+                    <p class="form-text">Only a small copy of this photo is on this device, and the full one couldn't be fetched, so it may look blurry on the card. Try again when you're online and signed in, or pick another photo.</p>
                 }
             </div>
         }
@@ -121,6 +127,8 @@
     private bool busy;
     private bool photoMissing;
     private bool photoSmall;
+    private bool gettingFull;
+    private readonly HashSet<Guid> triedFull = [];
     private string? message;
     private string? drawnKey;
     private bool wasOpen;
@@ -149,7 +157,8 @@
         message = null;
         photoMissing = false;
         photoSmall = false;
-        format = await Cards.GetFormatAsync();
+        triedFull.Clear();
+        format =await Cards.GetFormatAsync();
         canShare = await Cards.CanShareAsync();
 
         // The cover first, then the newest, so the picture it starts with is the one on the page
@@ -179,7 +188,28 @@
                 photoSmall = drawn.Small;
                 StateHasChanged();
             }
+
+            if (drawn.Small && spec.PhotoId is not null && Guid.TryParse(spec.PhotoId, out var small))
+                await GetFullPhotoAsync(small);
         }
+    }
+
+    // Only the small copy is here, so fetch the full one and draw again, the way opening the photo does
+    private async Task GetFullPhotoAsync(Guid id)
+    {
+        if (gettingFull || triedFull.Contains(id))
+            return;
+
+        gettingFull = true;
+        triedFull.Add(id);
+        StateHasChanged();
+        var fetched = await Sync.FetchPhotoAsync(id, PhotoSize.Full);
+        gettingFull = false;
+
+        // Draw again unless the sheet was closed meanwhile, which also clears the key
+        if (fetched && Open)
+            drawnKey = null;
+        StateHasChanged();
     }
 
     private ShareCardSpec Spec() => new(

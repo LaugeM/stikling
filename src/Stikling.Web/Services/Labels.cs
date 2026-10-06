@@ -40,6 +40,7 @@ public static class Labels
 
     public static string For(GrowingMedium medium) => medium switch
     {
+        GrowingMedium.OrchidBark => "Orchid bark",
         GrowingMedium.Leca => "LECA",
         GrowingMedium.Pon => "PON",
         GrowingMedium.Sphagnum => "Sphagnum moss",

@@ -75,6 +75,7 @@ These need no new storage and no new screens worth the name: purchase price, a "
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
 | ✅ | Tags (e.g. "variegated", "rare", "for swap") and a tag filter. Picking several tags narrows the list to plants that have all of them, the search finds tags too, and a tag on a plant's page opens the list filtered by it | 3 | S | v1.x |
 | ✅ | Rename or merge a tag everywhere at once, the way rooms can be | 6 | S | v1.x |
+| ✅ | Adding or removing a tag is written on the plant's history ("Tagged flowering", "No longer tagged flowering"), so a tag used for something a plant goes through still says when it began and ended. Renaming or merging a tag isn't written on the history | 4 | S | v1.x |
 | ✅ | Add rooms, spots and tags from the Rooms and tags page, so they can be set up before any plant uses them. An empty room or spot can be removed there again | 4 | S | v1.x |
 | ✅ | Select several plants at once: change status, log care, add a note or tags to all, or move them all to a room | 4 | M | v1.x |
 | ✅ | **Dormancy status** for plants and propagations, e.g. an alocasia dropping its leaves in winter or a corm sitting still. A badge and the day it went dormant show it's resting rather than dead, the plant list has a "Dormant" filter, and going dormant and waking up are recorded on the history. A dormant propagation doesn't come up on Today to be checked on. Dormancy ends by itself when a plant dies or leaves, or a propagation finishes | 4 | S | v1.x |
@@ -243,7 +244,9 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | 5 | S | v1.x |
 | ✅ | **Your pots**: the pots you own, by kind (nursery, outer, stands on its own), what they're made of, their measurements, whether they self-water, and how many you have. A plant points at a pot and, when it has one, an outer pot | 6 | M | v1.x |
 | ✅ | See which of your pots are in use and which are free, so it's clear what's available before repotting. A plant that died frees its pots, and giving a plant away or selling it asks which of its pots went with it | 7 | S | v1.x |
+| ☐ | **Photos of a pot**: one or more photos on a pot, shown on the Pots page and on the plant that uses it, so an outer pot can be told apart from the others. Photos belong to the pot, not the plant, so they stay when a pot moves to another plant. A new kind of photo owner, so it goes through backup and sync | 6 | M | v1.x |
 | ☐ | **Does it fit?**: given a nursery pot, which of your free outer pots it would go in. Compares the tops, allows for a rim only having to clear the opening, and says when the bottom is the tighter measurement | 7 | M | v1.x |
+| ✅ | **Orchid bark** as a medium next to soil, LECA and the others, for orchids potted in bark with little or no soil | 4 | S | v1.x |
 | ✅ | Default medium per pot kind: picking a self-watering pot for a new plant or when potting up suggests LECA, so potting up is one tap less | 8 | S | v1.x |
 | ☐ | Money spent on plants and supplies, per year, to see what the hobby costs | 8 | S | v1.x |
 

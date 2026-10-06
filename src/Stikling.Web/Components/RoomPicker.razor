@@ -22,7 +22,8 @@
                value="@draft" @oninput="TypeRoomAsync" @ref="draftInput" />
     }
 
-    @if (!typingRoom && PickedRoom is { } room1)
+    @* Shown while a new room is still being typed too, so a spot can be picked without saving the room first *@
+    @if (PickedRoom is { } room1)
     {
         <div class="room-chips spots" role="group" aria-label="Spot in @room1">
             <button type="button" class="room-chip @Picked(PickedSpot is null && !typingSpot)"
@@ -108,7 +109,8 @@
 
     private Task PickSpotAsync(string? spot)
     {
-        typingSpot = false;
+        // Moving on to the spot settles the room that was being typed, which stays as a chip
+        typingRoom = typingSpot = false;
         return SetAsync(RoomName.Combine(PickedRoom, spot));
     }
 
@@ -123,6 +125,7 @@
 
     private Task StartNewSpotAsync()
     {
+        typingRoom = false;
         typingSpot = true;
         draft = "";
         focusDraft = true;

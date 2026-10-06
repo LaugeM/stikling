@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Stikling.Core.Plants;
 
 namespace Stikling.Core.Timeline;
 
@@ -51,7 +52,8 @@ public static class PlantChanges
         if (before.WaterInOuterPot != after.WaterInOuterPot)
             changes.Add(after.WaterInOuterPot ? "Now watered in the outer pot" : "No longer watered in the outer pot");
 
-        // Tags are only labels and stay out of the history, but quarantine is something that happened
+        AddTags(changes, before.Tags, after.Tags);
+
         if (before.InQuarantine != after.InQuarantine)
             changes.Add(after.InQuarantine ? "Put in quarantine" : "Out of quarantine");
 
@@ -60,6 +62,19 @@ public static class PlantChanges
             changes.Add(DormancyText(after.IsDormant));
 
         return changes;
+    }
+
+    /// <summary>
+    /// "Tagged flowering" and "No longer tagged flowering", so a tag used for something the plant
+    /// is going through still says when it started and ended after the tag is taken off.
+    /// </summary>
+    internal static void AddTags(List<string> changes, IEnumerable<string> before, IEnumerable<string> after)
+    {
+        var was = PlantTags.Normalize(before);
+        var now = PlantTags.Normalize(after);
+
+        changes.AddRange(now.Where(tag => !was.Any(t => PlantTags.Same(t, tag))).Select(tag => $"Tagged {tag}"));
+        changes.AddRange(was.Where(tag => !now.Any(t => PlantTags.Same(t, tag))).Select(tag => $"No longer tagged {tag}"));
     }
 
     internal static string DormancyText(bool dormant) => dormant ? "Went dormant" : "Woke up from dormancy";

@@ -93,13 +93,12 @@ public class PlantTagsTests
     }
 
     [Fact]
-    public void Going_in_and_out_of_quarantine_is_described_but_tags_are_not()
+    public void Going_in_and_out_of_quarantine_is_described()
     {
         var plant = new Plant { Nickname = "A" };
 
         var quarantined = plant.Copy();
         quarantined.QuarantinedSince = Today;
-        quarantined.Tags = ["Rare"];
         Assert.Equal(["Put in quarantine"], PlantChanges.Describe(plant, quarantined, Label));
 
         var released = quarantined.Copy();
@@ -154,7 +153,37 @@ public class PlantTagsTests
         Assert.Equal(1, changed);
         Assert.Equal(["for swap"], tagged.Tags);
         Assert.Equal(["For swap"], untagged.Tags);
-        Assert.Empty(timeline.Entries);
+        Assert.Equal("Tagged For swap", Assert.Single(timeline.Entries).Text);
         Assert.Same(untagged, Assert.Single(plants.Plants.Values));
+    }
+
+    [Fact]
+    public void Adding_and_removing_tags_is_described_for_the_history()
+    {
+        var before = new Plant { Tags = ["Rare", "Flowering"] };
+        var after = new Plant { Tags = ["rare", "Variegated"] };
+
+        Assert.Equal(["Tagged Variegated", "No longer tagged Flowering"], PlantChanges.Describe(before, after, Label));
+    }
+
+    [Fact]
+    public void Retyping_a_tag_in_another_case_is_no_change()
+    {
+        Assert.Empty(PlantChanges.Describe(new Plant { Tags = ["Rare"] }, new Plant { Tags = [" rare "] }, Label));
+    }
+
+    [Fact]
+    public async Task Removing_a_tag_when_saving_a_plant_is_recorded_on_the_history()
+    {
+        var plants = new FakePlantRepository();
+        var timeline = new FakeTimelineRepository();
+        var service = new PlantService(plants, timeline, new FixedTime(Now));
+        var before = new Plant { Nickname = "Orchid", Tags = ["Flowering"] };
+        var after = before.Copy();
+        after.Tags = [];
+
+        await service.UpdateAsync(before, after, Label);
+
+        Assert.Equal("No longer tagged Flowering", Assert.Single(timeline.Entries).Text);
     }
 }

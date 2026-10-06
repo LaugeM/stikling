@@ -179,6 +179,7 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
     private static string MediumPhrase(GrowingMedium medium) => medium switch
     {
         GrowingMedium.Soil => " in soil",
+        GrowingMedium.OrchidBark => " in orchid bark",
         GrowingMedium.Leca => " in LECA",
         GrowingMedium.Pon => " in PON",
         GrowingMedium.Perlite => " in perlite",
