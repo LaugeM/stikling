@@ -136,6 +136,7 @@ else
                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
                 </button>
                 <a class="btn btn-link btn-sm link-action" href="plants/@plant.Id/edit">Edit</a>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => shareOpen = true">Share</button>
             </div>
 
             <div id="plant-details" class="profile-details @(detailsOpen ? "open" : null)">
@@ -389,6 +390,9 @@ else
         }
     </Sheet>
 
+    <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="plant.Id"
+                CoverPhotoId="plant.CoverPhotoId" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
+
     <Sheet Title="@MoreTitle" Open="more != More.None" OpenChanged="open => { if (!open) more = More.None; }">
         @switch (more)
         {
@@ -580,6 +584,7 @@ else
     public string? Tab { get; set; }
 
     private enum More { None, Menu, Flag, Dormant, Quarantine, Status }
+    private bool shareOpen;
 
     private Plant? plant;
     private bool loaded;

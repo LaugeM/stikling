@@ -1,0 +1,230 @@
+@* The sheet behind a page's Share link: the card as it will be posted, a choice of size and photo,
+   and the words on it, which the app writes and the person can change. Nothing here is saved.
+   The picture is drawn by ShareCardService, which keeps it in JavaScript. *@
+@using System.Text.Json
+@inject ShareCardService Cards
+@inject IPhotoRepository PhotoRepository
+
+<Sheet Title="Share" Open="Open" OpenChanged="OpenChanged">
+    @if (ready)
+    {
+        <div class="share-preview">
+            <canvas @ref="canvas" width="1080" height="@PreviewHeight" role="img"
+                    aria-label="@($"Preview of the card for {CardName}")"></canvas>
+        </div>
+
+        <div class="share-field">
+            <div class="share-label" id="share-format-label">Size</div>
+            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-format-label">
+                @foreach (var (value, label) in ShareCardService.Formats)
+                {
+                    var id = $"share-format-{value}";
+                    <input type="radio" class="btn-check" name="share-format" id="@id"
+                           checked="@(format == value)" @onchange="() => SetFormatAsync(value)" />
+                    <label class="btn btn-outline-primary" for="@id">@label</label>
+                }
+            </div>
+        </div>
+
+        @if (photos.Count > 0)
+        {
+            <div class="share-field">
+                <div class="share-label" id="share-photo-label">Photo</div>
+                <div class="share-photos" role="radiogroup" aria-labelledby="share-photo-label">
+                    @foreach (var (photo, number) in photos.Select((p, i) => (p, i + 1)))
+                    {
+                        <button type="button" role="radio" aria-checked="@(photoId == photo.Id ? "true" : "false")"
+                                aria-label="@($"Photo {number}")" class="share-photo @(photoId == photo.Id ? "picked" : null)"
+                                @onclick="() => photoId = photo.Id">
+                            <PhotoImage PhotoId="photo.Id" Framed="false" />
+                        </button>
+                    }
+                    <button type="button" role="radio" aria-checked="@(photoId is null ? "true" : "false")"
+                            class="share-photo share-photo-none @(photoId is null ? "picked" : null)" @onclick="() => photoId = null">
+                        No photo
+                    </button>
+                </div>
+                @if (photoMissing)
+                {
+                    <p class="form-text">That photo isn't on this device yet, so the card uses the number instead.</p>
+                }
+                else if (photoSmall)
+                {
+                    <p class="form-text">Only a small version of this photo is on this device so far, so it looks soft on the card. Open the photo on its page to bring the full one here, or pick another.</p>
+                }
+            </div>
+        }
+
+        <div class="share-field">
+            <label class="share-label" for="share-name">Name</label>
+            <input id="share-name" class="form-control" maxlength="80" @bind="name" @bind:event="oninput" />
+        </div>
+
+        <div class="share-field">
+            <label class="share-label" for="share-line">What it says</label>
+            <textarea id="share-line" class="form-control" rows="3" maxlength="200" @bind="line" @bind:event="oninput"></textarea>
+            @if (Edited)
+            {
+                <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="UseOriginalWords">Use the app's words again</button>
+            }
+        </div>
+
+        <div class="form-actions">
+            @if (canShare)
+            {
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ShareAsync">Share</button>
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="SaveAsync">Save image</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">Save image</button>
+            }
+        </div>
+
+        @if (message is not null)
+        {
+            <p class="action-message mt-2 mb-0" role="status">@message</p>
+        }
+    }
+</Sheet>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>What the app would write on the card.</summary>
+    [Parameter, EditorRequired]
+    public required ShareCardText Text { get; set; }
+
+    /// <summary>"plant" or "propagation".</summary>
+    [Parameter, EditorRequired]
+    public required string Tone { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    /// <summary>The photo the card starts with, when there is one.</summary>
+    [Parameter]
+    public Guid? CoverPhotoId { get; set; }
+
+    private ElementReference canvas;
+    private IReadOnlyList<Photo> photos = [];
+    private string format = "square";
+    private Guid? photoId;
+    private string name = "";
+    private string line = "";
+    private bool ready;
+    private bool canShare;
+    private bool busy;
+    private bool photoMissing;
+    private bool photoSmall;
+    private string? message;
+    private string? drawnKey;
+    private bool wasOpen;
+
+    // The first draw can't know the size yet, so the preview keeps the shape of the card
+    private int PreviewHeight => format switch { "portrait" => 1350, "story" => 1920, _ => 1080 };
+
+    private string CardName => string.IsNullOrWhiteSpace(name) ? Text.Name : name.Trim();
+
+    private bool Edited => CardName != Text.Name || (line ?? "").Trim() != (Text.Line ?? "");
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Open == wasOpen)
+            return;
+        wasOpen = Open;
+        if (!Open)
+        {
+            ready = false;
+            drawnKey = null;
+            return;
+        }
+
+        name = Text.Name;
+        line = Text.Line ?? "";
+        message = null;
+        photoMissing = false;
+        photoSmall = false;
+        format = await Cards.GetFormatAsync();
+        canShare = await Cards.CanShareAsync();
+
+        // The cover first, then the newest, so the picture it starts with is the one on the page
+        var all = await PhotoRepository.GetForAsync(SubjectId);
+        photos = all.OrderByDescending(p => p.Id == CoverPhotoId).Take(40).ToList();
+        photoId = photos.FirstOrDefault()?.Id;
+        ready = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!Open || !ready || canvas.Id is null)
+            return;
+
+        var spec = Spec();
+        var key = JsonSerializer.Serialize(spec);
+        if (key == drawnKey)
+            return;
+        drawnKey = key;
+
+        if (await Cards.DrawAsync(canvas, spec) is { } drawn)
+        {
+            var missing = spec.PhotoId is not null && !drawn.Photo;
+            if (missing != photoMissing || drawn.Small != photoSmall)
+            {
+                photoMissing = missing;
+                photoSmall = drawn.Small;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private ShareCardSpec Spec() => new(
+        format,
+        Tone,
+        CardName,
+        Text.Latin,
+        Text.Cultivar,
+        string.IsNullOrWhiteSpace(line) ? null : line.Trim(),
+        Text.Figure,
+        photoId?.ToString(),
+        photos.FirstOrDefault(p => p.Id == photoId)?.Frame);
+
+    private async Task SetFormatAsync(string value)
+    {
+        format = value;
+        await Cards.SetFormatAsync(value);
+    }
+
+    private void UseOriginalWords()
+    {
+        name = Text.Name;
+        line = Text.Line ?? "";
+    }
+
+    private async Task ShareAsync() => await RunAsync(() => Cards.ShareAsync(canvas, ShareCardService.FileNameFor(CardName)));
+
+    private async Task SaveAsync() => await RunAsync(() => Cards.SaveAsync(canvas, ShareCardService.FileNameFor(CardName)));
+
+    private async Task RunAsync(Func<Task<string>> action)
+    {
+        busy = true;
+        message = null;
+        try
+        {
+            message = await action() switch
+            {
+                "saved" => "Saved as a picture on this device. It's in your downloads.",
+                "failed" => "The picture couldn't be made. Try again, or pick another photo.",
+                _ => null,
+            };
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

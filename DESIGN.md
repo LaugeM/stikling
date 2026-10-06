@@ -347,6 +347,15 @@ An empty state never just says there is nothing. It says why the space is empty 
 
 The first-run version, on Today, Plants and Propagations when there is nothing at all yet, is louder on purpose: Leaf Tint with a green dashed edge, a stroked drawing at 5.5rem (a sprout in a clay pot, or a cutting rooting in a glass), a Bricolage heading in Deep Moss, and the sentences and buttons under it, with a small link to the Help page at the bottom. The one on Today says what the app is for and that nothing leaves the device. The Propagations one says in plain words what a propagation is, because that is the first question a new person asked.
 
+### Share Card
+The picture a plant or propagation turns into when someone shares it, drawn on a canvas in `wwwroot/js/sharecard.js` and handed to the phone's share menu or saved. It is the one surface that leaves the app, so it is always light whatever theme the app is in, and it uses the light colours from this file. It comes in three sizes, square, 4:5 and 9:16, 1080 wide.
+
+With a photo, the photo fills the top edge to edge, cropped around its saved frame, and nothing is drawn over it. Under it a Surface band holds the name in Bricolage 700, the genus and species in italic Muted Ink (the cultivar upright in quotes), the line in the system font, and `stikling.app` small in Bricolage 600 Muted Ink in the bottom right corner. In 9:16 the band ends at four fifths of the height, above where Stories and TikTok put their own buttons, and Paper fills the rest.
+
+Without a photo, the card is built around one number in Bricolage 800 at the condensed width, with its words under it ("days to root") and the name and line below a hairline. A propagation sits on Leaf Tint with the number in Deep Moss, and a plant sits on Clay Soft with the number in Clay, the same split as the thumbnails. A card with no number shows the stroked glass or sprout in its place. The words are written from what the app keeps and say nothing it doesn't know.
+
+The sheet that makes it is the usual one: the card as a preview, then Size, Photo, Name and What it says, which the person can change, then Share and Save image.
+
 ### Help Page
 Questions and answers grouped by topic, each topic under a Label heading. The questions in a topic close up into one bordered block divided by hairlines, like an experiment group, and each folds open with a stroked chevron on the right that turns over when open. Questions are set in the system font at weight 600, because they are sentences. A row of chips at the top jumps to each topic. The page is reached from About in Settings and from the first-run empty states, not from the header, so it doesn't compete with the app itself.
 

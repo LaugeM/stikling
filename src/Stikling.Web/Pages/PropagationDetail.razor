@@ -182,6 +182,7 @@ else
                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
                 </button>
                 <a class="btn btn-link btn-sm link-action" href="propagations/@propagation.Id/edit">Edit</a>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => shareOpen = true">Share</button>
             </div>
 
             <div id="propagation-details" class="profile-details @(detailsOpen ? "open" : null)">
@@ -353,6 +354,9 @@ else
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
         </div>
     </div>
+
+    <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id"
+                CoverPhotoId="propagation.CoverPhotoId" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
     <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId"
                    CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
@@ -578,6 +582,7 @@ else
     private enum StageView { None, Stage, PotUp, Failed }
 
     private enum More { None, Menu, Flag, Dormant }
+    private bool shareOpen;
 
     private sealed class PotUpForm
     {

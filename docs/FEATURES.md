@@ -37,18 +37,17 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
 
-1. **A share card** for a plant or propagation, together with **the result of a finished propagation**, which is what makes the card worth posting.
-2. **Before and after**, and then **a time-lapse video**, from a plant's or propagation's photos.
-3. **A share link for one plant or propagation**, which opens a page anyone can see.
-4. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
-5. **Passing a cutting on with its history**, built on the share link.
-6. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
-7. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
-8. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-9. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-10. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-11. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-12. **Comparing photos side by side, and voice notes.**
+1. **Before and after**, and then **a time-lapse video**, from a plant's or propagation's photos.
+2. **A share link for one plant or propagation**, which opens a page anyone can see.
+3. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
+4. **Passing a cutting on with its history**, built on the share link.
+5. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
+6. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
+7. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+8. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+9. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+10. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+11. **Comparing photos side by side, and voice notes.**
 
 ### Cheap ones to slot in whenever
 
@@ -362,7 +361,7 @@ Questions come up that the app can't answer from your own data: how long a cutti
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
 | ☐ | Share your plant list or wishlist as text, e.g. to send to a friend or take to a swap | 6 | S | v1.x |
-| ☐ | **Share card**: a plant or propagation as one image, with its photo, its name and a plain line about it, like "Cutting from my Monstera, rooted in 18 days in LECA", and stikling.app small in a corner. Square or portrait, to fit Instagram, TikTok and Reddit. Shared through the phone's share menu, or saved | 2 | M | v1.x |
+| ✅ | **Share card**: a plant or propagation as one image, with its photo, its name and a plain line about it, like "Cutting from my Monstera, rooted in 18 days in LECA", and stikling.app small in a corner. Square, 4:5 or 9:16, to fit Instagram, TikTok and Reddit. Shared through the phone's share menu, or saved. The line is written from what the app keeps and can be changed before sharing, and nothing is saved. With no photo it is a card built around the big number, like days to root | 2 | M | v1.x |
 | ☐ | Plant-sitter sheet: a printable/shareable care list for someone watering while you're away | 7 | M | v1.x |
 | ✅ | Accounts and sync between devices (ASP.NET Core Web API, EF Core, sign-in through Clerk). The API checks Clerk sign-ins and has people, collections and members with roles, and the app can sign in and out from its Account page in Settings. Records, settings and photos sync between devices when signed in. Every device keeps all the thumbnails and fetches a full-size photo when it's opened, and each account has 1 GB for photos on the server. The Account page shows when it last synced and, once it's nearly full, how much photo space is used, a dot on the settings gear shows a sync problem, and signing out asks whether to keep the data on the device. Delete account, at the bottom of the Account page, erases everything on the server and the sign-in, and Download your data gives a ZIP of everything the server and Clerk hold about the person. When something is deleted, the server keeps only its id and dates. The app is at stikling.app, with the API on Azure Container Apps, Azure SQL and Blob Storage, and a privacy page | 9 | L | v2 |
 | ☐ | **Add people to a collection**: screens for inviting someone and choosing their role. The first role is "can view", so someone can look at a collection without being able to change it. The API already has members and roles and checks them on every request, so this is the app side | 9 | L | v2 |
