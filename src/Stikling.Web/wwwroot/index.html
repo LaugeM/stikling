@@ -927,10 +927,13 @@
         <div class="intro-quiet"><img src="icon-192.png" alt="Stikling is starting" width="72" height="72" /></div>
     </div>
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="." class="reload">Reload</a>
-        <span class="dismiss">🗙</span>
+    <div id="blazor-error-ui" role="alert">
+        <!-- Blazor shows this when something fails that the app didn't catch, and wires up .reload and .dismiss -->
+        <div class="error-ui-body">
+            <span>Something went wrong, and Stikling needs to reload. Everything you saved is safe on this device.</span>
+            <a href="." class="reload btn btn-primary btn-sm">Reload</a>
+            <button type="button" class="dismiss btn btn-link btn-sm">Close</button>
+        </div>
     </div>
     <script>
         // On a first visit the app starts underneath the page above and opens once it has rendered. Someone

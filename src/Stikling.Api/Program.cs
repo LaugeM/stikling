@@ -36,6 +36,7 @@ builder.Services.AddScoped<CurrentPerson>();
 builder.Services.AddClerkAuthentication();
 builder.Services.AddTestSignIn();
 builder.Services.AddCollectionAuthorization();
+builder.Services.AddRequestLimits(builder.Configuration);
 
 var appOrigins = new AppOrigins { Origins = AppOrigins.From(builder.Configuration) };
 builder.Services.AddCors(cors => cors.AddDefaultPolicy(policy => policy
@@ -71,6 +72,7 @@ app.UseExceptionHandler(new ExceptionHandlerOptions
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapHealthChecks("/health");
 app.MapMe();
