@@ -1633,48 +1633,48 @@ a.tag-label:hover {
     font-size: 0.9rem;
 }
 
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
-}
-
 .invalid {
-    outline: 1px solid red;
+    outline: 1px solid var(--pa-alert);
 }
 
 .validation-message {
-    color: red;
+    color: var(--pa-alert);
 }
 
+/* Shown by Blazor when something fails that the app didn't catch. It sits where the update
+   banner does, and Blazor sets display: block on it, so the layout is on the inner element. */
 #blazor-error-ui {
-    color-scheme: light only;
-    background: lightyellow;
-    bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
     display: none;
-    left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
     position: fixed;
-    width: 100%;
+    left: var(--pa-nav-side);
+    right: 0;
+    bottom: var(--pa-nav-bottom);
     z-index: 1000;
+    background: var(--pa-surface);
+    color: var(--pa-text);
+    border-top: 2px solid var(--pa-alert);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+    font-size: 0.9rem;
 }
 
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
-    }
-
-.blazor-error-boundary {
-    background: #b32121;
-    padding: 1rem;
-    color: white;
+#blazor-error-ui .error-ui-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem var(--pa-column-inset);
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+#blazor-error-ui .error-ui-body span {
+    flex: 1;
+    min-width: 12rem;
+}
+
+#blazor-error-ui .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+}
 
 /* Chips: picked from buttons rather than a datalist, which a phone will not show. Used for
    rooms and spots, and for anything else you pick one of. */

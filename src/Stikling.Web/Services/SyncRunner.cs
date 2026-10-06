@@ -340,6 +340,11 @@ public sealed class SyncRunner(
             // Clerk had no session to give a token for, or the API didn't accept it
             Problem = "Your sign-in has run out. Sign out and in again to carry on syncing.";
         }
+        catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.TooManyRequests)
+        {
+            // More than the server takes from one account in a short time. The next sync picks up where this one stopped
+            Problem = "This account has sent a lot to the Stikling server in a short time. Syncing carries on in a few minutes.";
+        }
         catch (Exception e) when (e is AccountUnavailableException or HttpRequestException or TaskCanceledException)
         {
             Problem = "The Stikling server can't be reached right now. Your changes are kept here and sent once it can be.";

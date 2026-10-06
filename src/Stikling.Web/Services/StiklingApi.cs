@@ -139,7 +139,8 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
 
     public async Task<UploadOutcome> UploadAsync(Guid collectionId, Guid photoId, PhotoSize size)
     {
-        var status = await photos.UploadAsync(ImageAddress(collectionId, photoId, size), await TokenAsync(), photoId, size == PhotoSize.Thumbnail);
+        var status = await UntilNotTooManyAsync(async () =>
+            await photos.UploadAsync(ImageAddress(collectionId, photoId, size), await TokenAsync(), photoId, size == PhotoSize.Thumbnail));
         return status switch
         {
             0 => UploadOutcome.NotHere,
@@ -154,13 +155,33 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
 
     public async Task<bool> DownloadAsync(Guid collectionId, Guid photoId, PhotoSize size)
     {
-        var status = await photos.DownloadAsync(ImageAddress(collectionId, photoId, size), await TokenAsync(), photoId, size == PhotoSize.Thumbnail);
+        var status = await UntilNotTooManyAsync(async () =>
+            await photos.DownloadAsync(ImageAddress(collectionId, photoId, size), await TokenAsync(), photoId, size == PhotoSize.Thumbnail));
         return status switch
         {
             200 => true,
             404 => false,
             _ => throw Failed(status),
         };
+    }
+
+    /// <summary>How long a photo waits when the server says this account has sent too much at once.</summary>
+    private static readonly TimeSpan TooManyWait = TimeSpan.FromSeconds(10);
+
+    /// <summary>How many times it is sent before the sync gives up until next time.</summary>
+    private const int TooManyTries = 30;
+
+    // A first sync with a lot of photos can go past what the server takes from one account at
+    // once (RequestLimits in the API). It answers 429, and the photos carry on more slowly.
+    private static async Task<int> UntilNotTooManyAsync(Func<Task<int>> send)
+    {
+        var status = await send();
+        for (var tries = 1; status == 429 && tries < TooManyTries; tries++)
+        {
+            await Task.Delay(TooManyWait);
+            status = await send();
+        }
+        return status;
     }
 
     private Uri ImageAddress(Guid collectionId, Guid photoId, PhotoSize size) =>
