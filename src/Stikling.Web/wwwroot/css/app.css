@@ -2365,3 +2365,78 @@ main.app-content:has(.form-bar) {
         transform: translateY(1rem) scale(0.98);
     }
 }
+
+/* The result of a finished propagation */
+
+.outcome {
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem;
+    background: var(--pa-green-soft);
+    border-radius: 0.75rem;
+}
+
+.outcome-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.outcome-figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+}
+
+.outcome-figures dt {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--pa-muted);
+}
+
+.outcome-figures dd {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.outcome-figures b {
+    font-family: var(--pa-font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-green-dark);
+}
+
+.outcome-failed {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.outcome-plants {
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.outcome-plants li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.6rem;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.outcome-plants a {
+    display: inline-block;
+    padding: 0.55rem 0;
+}
+
+.outcome-plants li {
+    align-items: center;
+}

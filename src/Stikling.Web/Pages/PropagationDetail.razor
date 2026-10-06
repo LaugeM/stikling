@@ -10,6 +10,7 @@
 @inject TimeProvider Time
 @inject IJSRuntime JS
 @inject PlantNameService Names
+@using Stikling.Core.Propagations
 
 <PageTitle>@(propagation?.DisplayName ?? "Propagation") · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -82,33 +83,51 @@ else
                 </div>
             </header>
 
-            @if (!propagation.IsActive)
+            @if (outcome is { } result)
             {
-                <p class="profile-facts">
-                    Finished
-                    @if (propagation.FinishedOn is { } finishedOn)
+                <section class="outcome" aria-labelledby="outcome-title">
+                    <h2 id="outcome-title" class="outcome-title">How it turned out</h2>
+                    <dl class="outcome-figures">
+                        @if (result.DaysRan is { } ran)
+                        {
+                            <div>
+                                <dt>Ran for</dt>
+                                <dd><b>@ran</b> @(ran == 1 ? "day" : "days")</dd>
+                            </div>
+                        }
+                        @if (result.DaysToRoot is { } toRoot)
+                        {
+                            <div>
+                                <dt>@(propagation.Type == PropagationType.Seed ? "First seedling" : "First root")</dt>
+                                <dd>day <b>@toRoot</b></dd>
+                            </div>
+                        }
+                        <div>
+                            <dt>Potted up</dt>
+                            <dd><b>@result.PottedUp</b> of @result.Started</dd>
+                        </div>
+                    </dl>
+                    @if (result.Failed > 0)
                     {
-                        <text>@Labels.Date(finishedOn) after @Labels.Count(Math.Max(0, finishedOn.DayNumber - propagation.StartedOn.DayNumber), "day")</text>
+                        <p class="outcome-failed">@result.Failed didn't make it.</p>
                     }
-                    · @if (propagation.PottedUpCount > 0 && offspring.Count > 0)
+                    @if (result.Plants.Count > 0)
                     {
-                        <a class="link-action" href="propagations/@propagation.Id" @onclick="ShowPlants" @onclick:preventDefault>@propagation.PottedUpCount potted up</a>
+                        <ul class="outcome-plants">
+                            @foreach (var made in result.Plants)
+                            {
+                                <li>
+                                    <a href="plants/@made.Plant.Id">@made.Plant.DisplayName</a>
+                                    <span class="text-body-secondary small">
+                                        @(made.StillHere ? (made.Room ?? "In the collection") : Labels.For(made.Plant.Status))
+                                    </span>
+                                </li>
+                            }
+                        </ul>
                     }
-                    else if (propagation.PottedUpCount > 0)
-                    {
-                        <span class="text-nowrap">@propagation.PottedUpCount potted up</span>
-                    }
-                    @if (propagation.PottedUpCount > 0 && propagation.FailedCount > 0)
-                    {
-                        <text>, </text>
-                    }
-                    @if (propagation.FailedCount > 0)
-                    {
-                        <span class="text-nowrap">@propagation.FailedCount failed</span>
-                    }
-                </p>
+                </section>
             }
-            else
+            else if (propagation.IsActive)
             {
                 <AttentionPanel Current="propagation.Attention" Editing="false" EditingChanged="_ => more = More.Flag"
                                 Suggestions="AttentionPanel.PropagationReasons" OnSave="SetAttentionAsync" />
@@ -269,7 +288,7 @@ else
                     }
                 </section>
 
-                @if (offspring.Count > 0)
+                @if (offspring.Count > 0 && propagation.IsActive)
                 {
                     <section class="detail-card" id="propagation-plants">
                         <h2>Plants from it</h2>
@@ -582,6 +601,7 @@ else
     private IReadOnlyList<Plant> offspring = [];
     private IReadOnlyList<Room> rooms = [];
     private Places places = Places.None;
+    private PropagationOutcome? outcome;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
 
@@ -698,6 +718,7 @@ else
                           .ToList();
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, plants, propagations);
+        outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
     }
