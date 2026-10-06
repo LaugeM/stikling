@@ -5,9 +5,16 @@
 @if (ready)
 {
     <div class="update-banner" role="status">
-        <span>A new version of Stikling is ready.</span>
-        <button type="button" class="btn btn-primary btn-sm" @onclick="ReloadAsync">Reload</button>
-        <button type="button" class="btn btn-link btn-sm" @onclick="() => SetReadyAsync(false)">Later</button>
+        @if (updating)
+        {
+            <span><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Updating Stikling. The page reloads when it's done.</span>
+        }
+        else
+        {
+            <span>A new version of Stikling is ready.</span>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="ReloadAsync">Reload</button>
+            <button type="button" class="btn btn-link btn-sm" @onclick="() => SetReadyAsync(false)">Later</button>
+        }
     </div>
 }
 
@@ -23,6 +30,7 @@
     private IJSObjectReference? module;
     private DotNetObjectReference<UpdateBanner>? self;
     private bool ready;
+    private bool updating;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -58,8 +66,19 @@
 
     private async Task ReloadAsync()
     {
-        if (module is not null)
-            await module.InvokeVoidAsync(ApplyMethod);
+        // The new version takes a moment to switch on, so say it's happening
+        updating = true;
+        StateHasChanged();
+        try
+        {
+            if (module is not null)
+                await module.InvokeVoidAsync(ApplyMethod);
+        }
+        catch (JSException)
+        {
+            // Couldn't switch over, so offer the buttons again
+            updating = false;
+        }
     }
 
     public async ValueTask DisposeAsync()

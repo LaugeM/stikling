@@ -183,8 +183,8 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     }
 
     /// <summary>
-    /// Adds the same tags to several plants, e.g. "For swap" before a plant swap. Tags are only
-    /// labels, so nothing goes on the history. Returns how many plants got something new.
+    /// Adds the same tags to several plants, e.g. "For swap" before a plant swap, and records
+    /// it on each plant's history. Returns how many plants got something new.
     /// </summary>
     public async Task<int> AddTagsAsync(IEnumerable<Plant> selected, IEnumerable<string> tags)
     {
@@ -197,8 +197,11 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             if (updated.Count == PlantTags.Normalize(plant.Tags).Count)
                 continue;
 
+            var added = new List<string>();
+            PlantChanges.AddTags(added, plant.Tags, updated);
             plant.Tags = updated;
             await plants.SaveAsync(plant);
+            await AddChangeAsync(plant.Id, string.Join("\n", added));
             changed++;
         }
 

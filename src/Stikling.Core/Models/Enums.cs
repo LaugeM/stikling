@@ -58,6 +58,9 @@ public enum PlantOrigin
 public enum GrowingMedium
 {
     Soil,
+
+    /// <summary>Chunky bark with little or no soil in it, the way orchids are usually potted.</summary>
+    OrchidBark,
     Leca,
     Pon,
     Perlite,

@@ -15,6 +15,12 @@ public class ShareCardTextTests
         ShareCardText.ForPropagation(propagation, parent, Today);
 
     [Fact]
+    public void A_cutting_in_orchid_bark_says_so()
+    {
+        Assert.Contains("in orchid bark", Of(Cutting(GrowingMedium.OrchidBark)).Line);
+    }
+
+    [Fact]
     public void A_rooted_cutting_says_where_it_came_from_how_long_it_took_and_what_it_rooted_in()
     {
         var propagation = Cutting();

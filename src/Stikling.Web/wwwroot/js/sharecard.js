@@ -129,7 +129,8 @@ async function loadFonts() {
 // The full photo, or its thumbnail when the full one isn't on this device yet (small is true then).
 // Null when neither is.
 async function readPhoto(id) {
-    if (cached?.id === id)
+    // A small one is read again, since the full photo may have arrived since
+    if (cached?.id === id && !cached.small)
         return cached;
 
     const full = await getBlob(id);
