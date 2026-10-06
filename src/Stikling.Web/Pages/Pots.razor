@@ -3,6 +3,7 @@
 @inject PotService PotService
 @inject PhotoService Photos
 @inject DeviceFiles Device
+@implements IAsyncDisposable
 
 <PageTitle>Pots · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -433,6 +434,19 @@ else
         foreach (var id in addedInForm)
             await Photos.DeleteAsync(id);
         addedInForm.Clear();
+    }
+
+    /// <summary>Leaving the page with the form open is the same as Cancel for the photos taken in it.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await ThrowAwayAddedPhotosAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The app is closing, and the photos with it
+        }
     }
 
     private async Task AddFormPhotosAsync(ElementReference input)
