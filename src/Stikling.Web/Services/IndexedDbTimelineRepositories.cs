@@ -55,6 +55,12 @@ public sealed class IndexedDbPhotoRepository(IndexedDb db, TimeProvider time) : 
         return photo is { IsDeleted: false } ? photo : null;
     }
 
+    public async Task<IReadOnlyList<Photo>> GetOfKindAsync(SubjectType subjectType) =>
+        (await db.GetAllAsync<Photo>(Stores.Photos))
+            .Where(p => p.SubjectType == subjectType && !p.IsDeleted)
+            .OrderByDescending(p => p.TakenAt)
+            .ToList();
+
     public async Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync() =>
         (await db.GetAllAsync<Photo>(Stores.Photos))
             .Where(p => !p.IsDeleted)

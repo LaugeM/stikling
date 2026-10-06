@@ -1,4 +1,4 @@
-@* Full-screen photo viewer with previous/next, "set as cover", framing and delete. *@
+@* Full-screen photo viewer with previous/next, and "set as cover", framing and delete where the page allows them. *@
 
 @if (Current is { } photo)
 {
@@ -23,29 +23,35 @@
                 }
             </div>
 
-            <div class="viewer-actions">
-                @if (confirmDelete)
-                {
-                    <span>Delete this photo?</span>
-                    <button type="button" class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
-                    <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
-                }
-                else
-                {
-                    @if (OnSetCover.HasDelegate)
+            @if (HasActions)
+            {
+                <div class="viewer-actions">
+                    @if (confirmDelete)
                     {
-                        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)"
-                                disabled="@(photo.Id == CoverPhotoId)">
-                            @(photo.Id == CoverPhotoId ? "Cover photo" : "Set as cover")
-                        </button>
+                        <span>Delete this photo?</span>
+                        <button type="button" class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
+                        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
                     }
-                    @if (OnFrame.HasDelegate)
+                    else
                     {
-                        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">Frame</button>
+                        @if (OnSetCover.HasDelegate)
+                        {
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)"
+                                    disabled="@(photo.Id == CoverPhotoId)">
+                                @(photo.Id == CoverPhotoId ? "Cover photo" : "Set as cover")
+                            </button>
+                        }
+                        @if (OnFrame.HasDelegate)
+                        {
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">Frame</button>
+                        }
+                        @if (OnDelete.HasDelegate)
+                        {
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">Delete</button>
+                        }
                     }
-                    <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">Delete</button>
-                }
-            </div>
+                </div>
+            }
         }
     </div>
 }
@@ -67,6 +73,7 @@
     [Parameter]
     public EventCallback<Photo> OnSetCover { get; set; }
 
+    /// <summary>Deletes a photo. Delete only shows when this is set.</summary>
     [Parameter]
     public EventCallback<Photo> OnDelete { get; set; }
 
@@ -78,6 +85,9 @@
     private bool confirmDelete;
     private bool framing;
     private bool focusPending;
+
+    /// <summary>Without any, the viewer is for looking only, like a pot's photos opened from a plant.</summary>
+    private bool HasActions => OnSetCover.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate;
 
     private Photo? Current => Index is { } i && i >= 0 && i < PhotoList.Count ? PhotoList[i] : null;
 

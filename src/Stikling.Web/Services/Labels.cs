@@ -211,6 +211,14 @@ public static class Labels
         _ => "Stands on its own"
     };
 
+    /// <summary>The short name on the switch between kinds at the top of the pot library.</summary>
+    public static string Tab(PotGroup group) => group switch
+    {
+        PotGroup.Inner => "Nursery",
+        PotGroup.Outer => "Outer",
+        _ => "On its own"
+    };
+
     /// <summary>The heading over a group of pots in the library.</summary>
     public static string Heading(PotGroup group) => group switch
     {

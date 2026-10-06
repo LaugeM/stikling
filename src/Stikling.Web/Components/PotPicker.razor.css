@@ -1,0 +1,27 @@
+/* A pot with a photo shows it at the start of its chip, round to follow the pill's end */
+.chip.with-photo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    /* Thinner top and bottom, so the photo doesn't make the chip taller than the others */
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+    padding-left: 0.25rem;
+}
+
+.chip-photo {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--pa-clay-soft);
+}
+
+.chip-photo ::deep img,
+.chip-photo ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

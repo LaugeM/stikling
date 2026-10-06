@@ -1,0 +1,27 @@
+@* A pot's photo beside its name on a plant page, so it's clear which of several similar pots it
+   is. Tapping it opens the pot's photos to look at. They're managed on the Pots page. *@
+@inject PotService PotService
+
+<button type="button" class="pot-photo" @onclick="OpenAsync" aria-label="Photos of @Pot.DisplayName">
+    <PhotoImage PhotoId="Cover.Id" />
+</button>
+
+<PhotoViewer PhotoList="photos" @bind-Index="index" />
+
+@code {
+    [Parameter, EditorRequired]
+    public required Pot Pot { get; set; }
+
+    /// <summary>The photo that stands for the pot.</summary>
+    [Parameter, EditorRequired]
+    public required Photo Cover { get; set; }
+
+    private IReadOnlyList<Photo> photos = [];
+    private int? index;
+
+    private async Task OpenAsync()
+    {
+        photos = await PotService.GetPhotosAsync(Pot.Id);
+        index = photos.Count == 0 ? null : Math.Max(0, photos.ToList().FindIndex(p => p.Id == Cover.Id));
+    }
+}

@@ -3,6 +3,7 @@
    navigates, because leaving the plant form throws away the draft and any photos on it. *@
 
 @inject IPotRepository Repository
+@inject PotService PotService
 
 <div class="pot-picker">
     <div class="form-label">@Label</div>
@@ -12,8 +13,15 @@
                 @onclick="() => PickAsync(null)">@NoneText</button>
         @foreach (var pot in Choices)
         {
-            <button type="button" class="chip @Picked(!adding && Value == pot.Id)"
-                    @onclick="() => PickAsync(pot.Id)">@pot.DisplayName</button>
+            var cover = covers.GetValueOrDefault(pot.Id);
+            <button type="button" class="chip @Picked(!adding && Value == pot.Id) @(cover is null ? null : "with-photo")"
+                    @onclick="() => PickAsync(pot.Id)">
+                @if (cover is not null)
+                {
+                    <span class="chip-photo" aria-hidden="true"><PhotoImage PhotoId="cover.Id" /></span>
+                }
+                @pot.DisplayName
+            </button>
         }
         <button type="button" class="chip new @Picked(adding)" @onclick="StartAdding">+ New pot</button>
     </div>
@@ -81,6 +89,9 @@
     /// <summary>Raised when a pot is added here, so the page can put it in its own list.</summary>
     [Parameter]
     public EventCallback<Pot> PotAdded { get; set; }
+
+    /// <summary>The photo of each pot that has one, so similar pots can be told apart on their chips.</summary>
+    private IReadOnlyDictionary<Guid, Photo> covers = new Dictionary<Guid, Photo>();
 
     private bool adding;
     private bool busy;
@@ -162,6 +173,8 @@
             busy = false;
         }
     }
+
+    protected override async Task OnInitializedAsync() => covers = await PotService.GetCoversAsync();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

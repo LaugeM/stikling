@@ -1,6 +1,9 @@
 @page "/pots"
 @inject IPotRepository Repository
 @inject PotService PotService
+@inject PhotoService Photos
+@inject DeviceFiles Device
+@implements IAsyncDisposable
 
 <PageTitle>Pots · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -23,6 +26,21 @@
         }
     </div>
 }
+
+@if (photoStatus is not null)
+{
+    <div class="alert alert-warning" role="status">@photoStatus</div>
+}
+
+<div class="btn-group segmented pot-kinds mb-3" role="radiogroup" aria-label="Which pots to show">
+    @foreach (var group in Enum.GetValues<PotGroup>())
+    {
+        var id = $"pot-kind-{group}";
+        <input type="radio" class="btn-check" name="pot-kind" id="@id"
+               checked="@(kind == group)" @onchange="() => ShowKindAsync(group)" />
+        <label class="btn btn-outline-primary" for="@id">@Labels.Tab(group)</label>
+    }
+</div>
 
 @if (draft is not null)
 {
@@ -55,6 +73,38 @@
             <input id="pot-name" class="form-control" placeholder="e.g. Clear nursery pot" autocomplete="off"
                    value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
             <div class="form-text">Every size of the same pot shares a name, so they stay together in the list.</div>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label">Photos</div>
+            @if (formPhotos.Count > 0)
+            {
+                <div class="photo-picks">
+                    @foreach (var photo in formPhotos)
+                    {
+                        <div class="photo-pick">
+                            <PhotoImage PhotoId="photo.Id" Alt="Photo of the pot" />
+                            <button type="button" class="photo-remove" @onclick="() => RemoveFormPhoto(photo)"
+                                    aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                        </div>
+                    }
+                </div>
+            }
+            <div class="composer-row">
+                <label class="btn btn-outline-primary btn-sm icon-btn" for="pot-camera">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                    Camera
+                </label>
+                <input id="pot-camera" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                       @ref="cameraInput" @onchange="() => AddFormPhotosAsync(cameraInput)" disabled="@busy" />
+                <label class="btn btn-outline-primary btn-sm icon-btn" for="pot-gallery">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                    Gallery
+                </label>
+                <input id="pot-gallery" type="file" accept="image/*" multiple class="visually-hidden"
+                       @ref="galleryInput" @onchange="() => AddFormPhotosAsync(galleryInput)" disabled="@busy" />
+            </div>
+            <div class="form-text">A photo tells this pot apart from similar ones, here and when you pick a pot for a plant.</div>
         </div>
 
         <div class="mb-3">
@@ -144,78 +194,94 @@
                     Save and add another size
                 </button>
             }
-            <button type="button" class="btn btn-link" @onclick="Cancel">Cancel</button>
+            <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
         </div>
     </section>
 }
 else
 {
     <div class="form-actions mb-3">
-        <button type="button" class="btn btn-primary" @onclick="() => StartNew(null)">+ Add a pot</button>
+        <button type="button" class="btn btn-primary" @onclick="() => StartNewAsync(null)">@AddText</button>
     </div>
 }
+
+@* One input for the Photo link on every row, so a photo goes straight onto the pot tapped *@
+<input id="@RowInputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1"
+       @ref="rowInput" @onchange="AddRowPhotosAsync" disabled="@busy" />
 
 @if (loading)
 {
     <p class="text-body-secondary">Loading…</p>
 }
-else if (uses.Count == 0)
+else if (Shown.Count == 0)
 {
     <div class="empty-state">
-        <p>No pots yet.</p>
-        <p class="text-body-secondary">
-            Add the ones you use most first. A set of nursery pots is one entry per size, with how many
-            of that size you have.
-        </p>
+        <p>@EmptyTitle</p>
+        <p class="text-body-secondary">@EmptyHint</p>
     </div>
 }
 else
 {
-    @foreach (var group in uses.GroupBy(use => use.Pot.Group))
-    {
-        <section class="settings-section">
-            <h2>@Labels.Heading(group.Key)</h2>
+    <section class="settings-section">
+        <h2 class="visually-hidden">@Labels.Heading(kind)</h2>
 
-            @foreach (var family in group.GroupBy(use => use.Pot.Name, StringComparer.CurrentCultureIgnoreCase))
-            {
-                <h3 class="pot-family">@family.Key</h3>
-                <ul class="pot-list">
-                    @foreach (var use in family)
-                    {
-                        <li>
-                            @if (confirming == use.Pot.Id)
-                            {
-                                <div class="pot-confirm">
-                                    <p>@DeleteWarning(use.Pot)</p>
-                                    <div class="care-actions">
-                                        <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
-                                                @onclick="() => DeleteAsync(use.Pot)">Delete</button>
-                                        <button type="button" class="btn btn-link btn-sm"
-                                                @onclick="() => confirming = null">Cancel</button>
-                                    </div>
+        @foreach (var family in Shown.GroupBy(use => use.Pot.Name, StringComparer.CurrentCultureIgnoreCase))
+        {
+            <h3 class="pot-family">@family.Key</h3>
+            <ul class="pot-list">
+                @foreach (var use in family)
+                {
+                    <li>
+                        @if (confirming == use.Pot.Id)
+                        {
+                            <div class="pot-confirm">
+                                <p>@DeleteWarning(use.Pot)</p>
+                                <div class="care-actions">
+                                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
+                                            @onclick="() => DeleteAsync(use.Pot)">Delete</button>
+                                    <button type="button" class="btn btn-link btn-sm"
+                                            @onclick="() => confirming = null">Cancel</button>
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="pot-row">
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="pot-row">
+                                @if (covers.GetValueOrDefault(use.Pot.Id) is { } cover)
+                                {
+                                    <button type="button" class="pot-thumb" @onclick="() => OpenPhotosAsync(use.Pot)"
+                                            aria-label="Photos of @use.Pot.DisplayName">
+                                        <PhotoImage PhotoId="cover.Id" />
+                                    </button>
+                                }
+                                else if (AnyTiles)
+                                {
+                                    <span class="pot-thumb-space" aria-hidden="true"></span>
+                                }
+                                <div class="pot-main">
                                     <span class="pot-size">@SizeText(use.Pot)</span>
                                     <span class="pot-about">@About(use.Pot)</span>
                                     <span class="pot-use">@Labels.Use(use)</span>
                                     <span class="pot-actions">
+                                        <label class="btn btn-link btn-sm link-action" for="@RowInputId"
+                                               @onclick="() => photoTarget = use.Pot">Photo</label>
                                         <button type="button" class="btn btn-link btn-sm link-action"
-                                                @onclick="() => StartEdit(use.Pot)">Edit</button>
+                                                @onclick="() => StartEditAsync(use.Pot)">Edit</button>
                                         <button type="button" class="btn btn-link btn-sm link-action"
                                                 @onclick="() => ConfirmAsync(use.Pot)">Delete</button>
                                     </span>
                                 </div>
-                            }
-                        </li>
-                    }
-                </ul>
-            }
-        </section>
-    }
+                            </div>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </section>
 }
+
+<PhotoViewer PhotoList="viewerPhotos" @bind-Index="viewerIndex" CoverPhotoId="ViewerCoverId"
+             OnSetCover="SetCoverAsync" OnFrame="FrameAsync" OnDelete="DeleteViewerPhotoAsync" />
 
 @code {
     private IReadOnlyList<PotUse> uses = [];
@@ -229,15 +295,80 @@ else
     private bool detailsOpen;
     private Guid? confirming;
     private int inUse;
+    private int photoCount;
 
-    protected override Task OnInitializedAsync() => LoadAsync();
+    /// <summary>Which kind of pot is listed. Nursery and outer pots are used so differently that they never share a list.</summary>
+    private PotGroup kind;
+    private const string KindKey = "pots-kind";
+
+    /// <summary>The photo that stands for each pot that has one.</summary>
+    private IReadOnlyDictionary<Guid, Photo> covers = new Dictionary<Guid, Photo>();
+
+    // The photos in the form. Ones added are saved straight away and deleted again on Cancel,
+    // and ones removed are only deleted on Save, so Cancel leaves the pot as it was.
+    private List<Photo> formPhotos = [];
+    private readonly List<Guid> addedInForm = [];
+    private readonly List<Guid> removedInForm = [];
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    private const string RowInputId = "pot-row-photo";
+    private ElementReference rowInput;
+    private Pot? photoTarget;
+    private string? photoStatus;
+
+    private Pot? viewerPot;
+    private IReadOnlyList<Photo> viewerPhotos = [];
+    private int? viewerIndex;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+        kind = Enum.TryParse<PotGroup>(await Device.GetAsync(KindKey), out var stored)
+            ? stored
+            : uses.Select(use => use.Pot.Group).DefaultIfEmpty(PotGroup.Inner).Min();
+    }
 
     private async Task LoadAsync()
     {
         all = await Repository.GetAllAsync();
         uses = await PotService.GetAllAsync();
+        covers = await PotService.GetCoversAsync();
         loading = false;
     }
+
+    private IReadOnlyList<PotUse> Shown => uses.Where(use => use.Pot.Group == kind).ToList();
+
+    /// <summary>When some pots in the list have a photo, the rest keep its room, so the sizes line up.</summary>
+    private bool AnyTiles => Shown.Any(use => covers.ContainsKey(use.Pot.Id));
+
+    private async Task ShowKindAsync(PotGroup group)
+    {
+        kind = group;
+        confirming = null;
+        await Device.SetAsync(KindKey, group.ToString());
+    }
+
+    private string AddText => kind switch
+    {
+        PotGroup.Inner => "+ Add a nursery pot",
+        PotGroup.Outer => "+ Add an outer pot",
+        _ => "+ Add a pot"
+    };
+
+    private string EmptyTitle => kind switch
+    {
+        PotGroup.Inner => "No nursery pots yet.",
+        PotGroup.Outer => "No outer pots yet.",
+        _ => "No pots that stand on their own yet."
+    };
+
+    private string EmptyHint => kind switch
+    {
+        PotGroup.Inner => "Add the ones you use most first. A set of nursery pots is one entry per size, with how many of that size you have.",
+        PotGroup.Outer => "An outer pot has no hole in the bottom and holds a nursery pot. Give each one a photo, so similar ones are easy to tell apart when you pick one for a plant.",
+        _ => "A pot with a hole and a saucer, or a self-watering pot, that needs nothing around it."
+    };
 
     private IReadOnlyList<string> Names => PotUse.Names(all);
 
@@ -261,17 +392,21 @@ else
         return string.Join(" · ", parts);
     }
 
-    private void StartNew(Pot? like)
+    private async Task StartNewAsync(Pot? like)
     {
+        await ThrowAwayAddedPhotosAsync();
         editing = null;
         errors = [];
         confirming = null;
         detailsOpen = false;
-        draft = like ?? new Pot();
+        draft = like ?? new Pot { Group = kind };
+        formPhotos = [];
+        removedInForm.Clear();
     }
 
-    private void StartEdit(Pot pot)
+    private async Task StartEditAsync(Pot pot)
     {
+        await ThrowAwayAddedPhotosAsync();
         editing = pot;
         errors = [];
         confirming = null;
@@ -279,13 +414,129 @@ else
         detailsOpen = pot.BottomCm is not null || pot.HeightCm is not null || pot.RimMm is not null
             || pot.SelfWatering is not null || !string.IsNullOrWhiteSpace(pot.Notes);
         draft = pot.Copy();
+        formPhotos = (await PotService.GetPhotosAsync(pot.Id)).ToList();
+        removedInForm.Clear();
     }
 
-    private void Cancel()
+    private async Task CancelAsync()
     {
+        await ThrowAwayAddedPhotosAsync();
         draft = null;
         editing = null;
         errors = [];
+        formPhotos = [];
+        removedInForm.Clear();
+    }
+
+    /// <summary>Photos taken in a form that was never saved belong to nothing, so they go again.</summary>
+    private async Task ThrowAwayAddedPhotosAsync()
+    {
+        foreach (var id in addedInForm)
+            await Photos.DeleteAsync(id);
+        addedInForm.Clear();
+    }
+
+    /// <summary>Leaving the page with the form open is the same as Cancel for the photos taken in it.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await ThrowAwayAddedPhotosAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The app is closing, and the photos with it
+        }
+    }
+
+    private async Task AddFormPhotosAsync(ElementReference input)
+    {
+        if (draft is null)
+            return;
+
+        busy = true;
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType.Pot, draft.Id);
+            formPhotos.InsertRange(0, result.Saved);
+            addedInForm.AddRange(result.Saved.Select(p => p.Id));
+            photoStatus = result.Message(guessesMatter: false);
+        }
+        catch (Exception ex)
+        {
+            photoStatus = $"Couldn't save the photos: {ex.Message}";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task RemoveFormPhoto(Photo photo)
+    {
+        formPhotos.Remove(photo);
+        if (addedInForm.Remove(photo.Id))
+            await Photos.DeleteAsync(photo.Id);
+        else
+            removedInForm.Add(photo.Id);
+    }
+
+    /// <summary>The Photo link on a row: the photos go straight onto that pot.</summary>
+    private async Task AddRowPhotosAsync()
+    {
+        if (photoTarget is not { } pot)
+            return;
+
+        busy = true;
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(rowInput, SubjectType.Pot, pot.Id);
+            photoStatus = result.Message(guessesMatter: false);
+            if (draft?.Id == pot.Id)
+                formPhotos.InsertRange(0, result.Saved);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            photoStatus = $"Couldn't save the photos: {ex.Message}";
+        }
+        finally
+        {
+            busy = false;
+            photoTarget = null;
+        }
+    }
+
+    private async Task OpenPhotosAsync(Pot pot)
+    {
+        viewerPot = pot;
+        viewerPhotos = await PotService.GetPhotosAsync(pot.Id);
+        var shown = covers.GetValueOrDefault(pot.Id);
+        viewerIndex = viewerPhotos.Count == 0 ? null : Math.Max(0, viewerPhotos.ToList().FindIndex(p => p.Id == shown?.Id));
+    }
+
+    /// <summary>The photo the pot's tile shows, so the viewer says "Cover photo" on the one people see.</summary>
+    private Guid? ViewerCoverId => viewerPot is null ? null : covers.GetValueOrDefault(viewerPot.Id)?.Id;
+
+    private async Task SetCoverAsync(Photo photo)
+    {
+        if (viewerPot is null)
+            return;
+        await PotService.SetCoverAsync(viewerPot, photo);
+        if (draft?.Id == viewerPot.Id)
+            draft.CoverPhotoId = photo.Id;
+        covers = await PotService.GetCoversAsync();
+    }
+
+    private Task FrameAsync((Photo Photo, PhotoFrame? Frame) change) => Photos.SetFrameAsync(change.Photo, change.Frame);
+
+    private async Task DeleteViewerPhotoAsync(Photo photo)
+    {
+        await Photos.DeleteAsync(photo.Id);
+        viewerPhotos = viewerPhotos.Where(p => p.Id != photo.Id).ToList();
+        viewerIndex = viewerPhotos.Count == 0 ? null : Math.Min(viewerIndex ?? 0, viewerPhotos.Count - 1);
+        formPhotos.RemoveAll(p => p.Id == photo.Id);
+        covers = await PotService.GetCoversAsync();
     }
 
     private void SetSelfWatering(bool on) => draft!.SelfWatering = on ? PotWatering.Wick : null;
@@ -306,8 +557,22 @@ else
         busy = true;
         try
         {
+            // The cover is chosen in the viewer, never in the form, so keep the one saved meanwhile
+            if (editing is not null)
+                draft.CoverPhotoId = (await Repository.GetAsync(draft.Id))?.CoverPhotoId;
+            if (draft.CoverPhotoId is { } cover && removedInForm.Contains(cover))
+                draft.CoverPhotoId = null;
+
             await Repository.SaveAsync(draft);
+            foreach (var id in removedInForm)
+                await Photos.DeleteAsync(id);
+            addedInForm.Clear();
+            removedInForm.Clear();
             await LoadAsync();
+
+            // Show the list the pot went into, so it can be seen
+            if (draft.Group != kind)
+                await ShowKindAsync(draft.Group);
 
             if (again)
             {
@@ -315,11 +580,12 @@ else
                 next.Id = Guid.NewGuid();
                 next.CreatedAt = next.UpdatedAt = default;
                 next.TopCm = next.BottomCm = next.HeightCm = null;
-                StartNew(next);
+                next.CoverPhotoId = null;
+                await StartNewAsync(next);
             }
             else
             {
-                Cancel();
+                await CancelAsync();
             }
         }
         catch (InvalidOperationException e)
@@ -332,17 +598,33 @@ else
         }
     }
 
-    /// <summary>What deleting a pot does to the plants in it, said before it happens.</summary>
-    private string DeleteWarning(Pot pot) => inUse switch
+    /// <summary>What deleting a pot does to the plants in it and to its photos, said before it happens.</summary>
+    private string DeleteWarning(Pot pot)
     {
-        0 => $"Delete {pot.DisplayName}?",
-        1 => "1 plant is using this pot. Deleting it takes the pot off that plant, and changes nothing else about it.",
-        _ => $"{inUse} plants are using this pot. Deleting it takes the pot off them, and changes nothing else about them."
-    };
+        var photos = photoCount switch
+        {
+            0 => "",
+            1 => "its photo",
+            _ => $"its {photoCount} photos"
+        };
+
+        return inUse switch
+        {
+            0 when photos == "" => $"Delete {pot.DisplayName}?",
+            0 => $"Delete {pot.DisplayName} and {photos}?",
+            1 => "1 plant is using this pot. Deleting it takes the pot off that plant, and changes nothing else about it."
+                 + (photos == "" ? "" : $" {Capital(photos)} {(photoCount == 1 ? "is" : "are")} deleted too."),
+            _ => $"{inUse} plants are using this pot. Deleting it takes the pot off them, and changes nothing else about them."
+                 + (photos == "" ? "" : $" {Capital(photos)} {(photoCount == 1 ? "is" : "are")} deleted too.")
+        };
+    }
+
+    private static string Capital(string text) => char.ToUpperInvariant(text[0]) + text[1..];
 
     private async Task ConfirmAsync(Pot pot)
     {
         inUse = await PotService.InUseAsync(pot.Id);
+        photoCount = (await PotService.GetPhotosAsync(pot.Id)).Count;
         confirming = pot.Id;
     }
 
@@ -351,10 +633,11 @@ else
         busy = true;
         try
         {
-            await Repository.DeleteAsync(pot.Id);
+            foreach (var id in await PotService.DeleteAsync(pot.Id))
+                await Photos.RemoveBytesAsync(id);
             confirming = null;
             if (editing?.Id == pot.Id)
-                Cancel();
+                await CancelAsync();
             await LoadAsync();
         }
         finally
