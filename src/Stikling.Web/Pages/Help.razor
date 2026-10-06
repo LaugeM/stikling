@@ -1,6 +1,8 @@
 @page "/help"
 @* Short answers to what people ask. Keep this in step with the app: a feature that is added or
-   changed should have its answer added or changed here in the same pull request. *@
+   changed should have its answer added or changed here in the same pull request. The deploy renders it
+   to plain HTML for search engines and llms.txt (tools/static-pages/render.cs), without a browser, so
+   calls into JavaScript stay in OnAfterRenderAsync. *@
 @inject IJSRuntime JS
 @inject AccountService Account
 
