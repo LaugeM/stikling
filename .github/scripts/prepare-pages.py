@@ -67,7 +67,7 @@ def write_static_page(name, title, description, text):
     if count != 1:
         sys.exit("Expected exactly one <!-- intro: --> ... <!-- /intro --> block in index.html")
     page, count = re.subn(
-        r'(<div id="app">).*?(</div>\s*<div id="blazor-error-ui">)',
+        r'(<div id="app">).*?(</div>\s*<div id="blazor-error-ui"[^>]*>)',
         lambda m: f'{m.group(1)}\n<main class="static-page">\n{text}</main>\n{m.group(2)}',
         page,
         flags=re.S,
