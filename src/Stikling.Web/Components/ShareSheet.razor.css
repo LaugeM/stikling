@@ -1,0 +1,77 @@
+/* The card as it will be posted. It keeps its own shape and never grows past the screen. */
+.share-preview {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.share-preview canvas {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 42dvh;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.5rem;
+}
+
+.share-field {
+    margin-bottom: 1rem;
+}
+
+/* The same quiet label as the sections of a page */
+.share-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+/* One row to scroll sideways, so a plant with many photos doesn't push the sheet down */
+.share-photos {
+    display: flex;
+    gap: 0.5rem;
+    padding-bottom: 0.25rem;
+    overflow-x: auto;
+}
+
+.share-photo {
+    flex: none;
+    width: 4rem;
+    height: 4rem;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.5rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.share-photo.picked {
+    border-color: var(--pa-green);
+    outline: 2px solid var(--pa-green);
+    outline-offset: 1px;
+}
+
+.share-photo ::deep img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.share-photo-none {
+    padding: 0.25rem;
+}
+
+/* Fields and buttons in the sheet are tapped with a thumb */
+.share-field .form-control,
+.form-actions .btn {
+    min-height: 2.75rem;
+}

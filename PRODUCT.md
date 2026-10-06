@@ -57,7 +57,7 @@ Explicitly undecided:
 
 - **Language switching.** The interface is English today. Danish is intended and belongs on the list. Until it is built, avoid choices that make translating painful: no strings baked into fixed-width layout, and room for longer words.
 - **Native apps.** An Android app is intended later, reusing the Razor components through .NET MAUI Blazor Hybrid. iOS only if Android goes anywhere, because releasing there costs more. This record stays `web` until that work actually starts.
-- **Sharing a plant's progress outward**, for example turning a timeline into something postable, is wanted but not built. It is the intended way the app reaches people.
+- **Sharing a plant's progress outward.** A share card (one picture of a plant or propagation) is built. Before and after, a time-lapse and a link to a plant's page are wanted but not built. Sharing is the intended way the app reaches people.
 - **Accessibility.** No product-specific requirement has been established. Sensible defaults apply and nothing is committed.
 
 ## Brand Commitments

@@ -60,6 +60,7 @@ builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<PutOffService>();
 builder.Services.AddScoped<CareService>();
 builder.Services.AddScoped<PhotoService>();
+builder.Services.AddScoped<ShareCardService>();
 builder.Services.AddScoped<DeviceFiles>();
 builder.Services.AddScoped<AppBadge>();
 builder.Services.AddScoped<BackupService>();

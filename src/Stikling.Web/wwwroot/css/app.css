@@ -2211,6 +2211,7 @@ main.app-content:has(.form-bar) ~ .first-sync-banner {
 }
 
 .profile-links .btn-link {
+    min-width: 2.75rem;
     font-weight: 600;
 }
 

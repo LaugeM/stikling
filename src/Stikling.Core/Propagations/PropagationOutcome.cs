@@ -30,6 +30,18 @@ public sealed record PropagationOutcome(
     IReadOnlyList<OutcomePlant> Plants)
 {
     /// <summary>
+    /// Days to the first root, or to the first seedling for seeds. Falls back to the day it reached
+    /// Rooted when no first root was noted. Null when it never got that far.
+    /// </summary>
+    public static int? DaysToFirstSign(Propagation propagation)
+    {
+        var firstSign = propagation.Type == PropagationType.Seed ? propagation.FirstGerminatedOn : propagation.FirstRootOn;
+        return firstSign is { } sign
+            ? Math.Max(0, sign.DayNumber - propagation.StartedOn.DayNumber)
+            : propagation.DaysToRoot;
+    }
+
+    /// <summary>
     /// The outcome of a finished propagation, or null for one still going. A propagation finished
     /// before the finish date was kept has no <see cref="Propagation.FinishedOn"/>, and then
     /// <paramref name="fallbackEnd"/> stands in for it.
@@ -42,11 +54,6 @@ public sealed record PropagationOutcome(
         var end = propagation.FinishedOn ?? fallbackEnd;
         int? daysRan = end is { } e ? Math.Max(0, e.DayNumber - propagation.StartedOn.DayNumber) : null;
 
-        var firstSign = propagation.Type == PropagationType.Seed ? propagation.FirstGerminatedOn : propagation.FirstRootOn;
-        var daysToRoot = firstSign is { } sign
-            ? Math.Max(0, sign.DayNumber - propagation.StartedOn.DayNumber)
-            : propagation.DaysToRoot;
-
         var became = plants
             .Where(p => p.FromPropagationId == propagation.Id && !p.IsDeleted)
             .Select(p => new OutcomePlant(p, places.NameOf(p.PlaceId)))
@@ -56,7 +63,7 @@ public sealed record PropagationOutcome(
 
         return new PropagationOutcome(
             daysRan,
-            daysToRoot,
+            DaysToFirstSign(propagation),
             propagation.InitialCount,
             propagation.PottedUpCount,
             propagation.FailedCount,
