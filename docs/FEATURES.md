@@ -312,8 +312,11 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
 | ☐ | "What's new" page and app version in Settings. Entries are written by hand in plain language for the people using the app, not generated from commit or pull request titles | 5 | S | v1.x |
 | ✅ | A link to the source code on GitHub under About in Settings | 5 | S | v1.x |
-| ✅ | A title, description and picture for links to the app shared on Facebook and other sites. The picture is the app icon for now | 5 | S | v1.x |
-| ☐ | A picture of the app itself for shared links in place of the icon: a plant page with its photos, in the size Facebook, Reddit and messaging apps show | 2 | S | v1.x |
+| ✅ | A title, description and picture for links to the app shared on Facebook and other sites | 5 | S | v1.x |
+| ✅ | A picture of the app itself for shared links in place of the icon: a cutting and the plant it came from, in the size Facebook, Reddit and messaging apps show | 2 | S | v1.x |
+| ✅ | **The front page says what the app does**: below the first screen, the life of one cutting from the first snip to a plant of its own, what else the app keeps, and answers to the first questions people have. Search engines and AI tools read it too. When the app has downloaded, it opens straight away for someone still at the top, and waits for a tap on Open for someone reading further down | 2 | S | v1.x |
+| ✅ | **Found by search engines and AI tools**: Help and Privacy are served as plain pages they can read without running the app, rendered from the app's own pages on every deploy, with a sitemap, a robots.txt that lets every crawler in, an llms.txt made from the Help answers, a site icon Google accepts, and a description of the app as a free web app | 2 | S | v1.x |
+| ✅ | Screenshots in the web manifest, so Android and Chrome show them when offering to install the app | 4 | S | v1.x |
 | ☐ | A page in the app with what's built and what's coming, written for the people using it rather than copied from this list | 7 | S | v1.x |
 | ☐ | **Import from a spreadsheet**: a CSV of plants from Excel or Google Sheets, with each column matched to a field, so a list kept somewhere else doesn't have to be typed in again | 5 | M | v1.x |
 | ✅ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side, with Help and Settings at the bottom of it. Plant and propagation pages show the details next to the history, the Plants and Propagations lists flow into columns, and sheets open as a dialog in the middle. Phones keep the tabs at the bottom | 5 | M | v1.x |

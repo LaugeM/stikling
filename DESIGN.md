@@ -351,7 +351,18 @@ The first-run version, on Today, Plants and Propagations when there is nothing a
 Questions and answers grouped by topic, each topic under a Label heading. The questions in a topic close up into one bordered block divided by hairlines, like an experiment group, and each folds open with a stroked chevron on the right that turns over when open. Questions are set in the system font at weight 600, because they are sentences. A row of chips at the top jumps to each topic. The page is reached from About in Settings and from the first-run empty states, not from the header, so it doesn't compete with the app itself.
 
 ### Loading Page
-What shows inside `#app` in `index.html` while the app downloads, which on a first visit over slow mobile data is half a minute. It is also what search engines and link previews read, so it says what Stikling is in plain words: the wordmark, a Headline, two sentences, a slim Potting Green bar fed by Blazor's download percentage, and two phone screens from the app rising out of a Leaf Tint panel that cuts off their bottoms. On a wide screen the text and the screens sit side by side.
+What shows in `index.html` while the app downloads, which on a first visit over slow mobile data is half a minute. It is also what search engines and link previews read, so it says what Stikling is in plain words: the wordmark, a Headline, two sentences, a slim Potting Green bar fed by Blazor's download percentage, and two phone screens from the app rising out of a Leaf Tint panel that cuts off their bottoms. On a wide screen the text and the screens sit side by side.
+
+Below that first screen, for someone who arrived from a search or a post and wants to know more, the page goes on to say what the app does. On a wide screen the first screen leaves the next heading peeking out at the bottom, so it's clear there is more.
+
+- **The life of one cutting**: the demo pothos cutting in four steps, drawn like timeline entries. Each has a stroked icon on a 2.5rem tile, a Bricolage name, the day in Label type and a sentence. The two steps where it's still a cutting are green, and the two where it has become a plant are Clay, so the Two Materials Rule tells the story. On a phone the steps run down the page joined by a hairline; on a wide screen they run across in four columns.
+- **What else it keeps**: six features as rows closed up into one bordered block, like Settings rows, each with a stroked icon on a Leaf Tint tile. Two columns on a wide screen.
+- **Questions**: six answers that fold open, styled like the Help page.
+- A footer line with Help, Privacy and the source code.
+
+On a wide screen the last two sections put their heading on the left and the content on the right. The section only uses what the app already has, with no new pictures, so it adds nothing to download before the app starts.
+
+The page sits outside `#app`, so the app starts underneath it. When the app has rendered, it opens straight away for someone still near the top. For someone reading further down, a bar fixed to the bottom of the screen says it's ready and has an Open button (the Anchored bar shadow, padded for the safe area), so they aren't pulled away mid-sentence.
 
 It carries its own styles in a `<style>` block, with the colours from this file under its own names, and the app's stylesheets load without holding it up. Someone coming back, whose page the service worker serves, only sees the icon in the middle, faded in after a moment, since the app is usually on screen before then.
 

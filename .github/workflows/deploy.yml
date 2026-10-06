@@ -28,9 +28,13 @@ jobs:
       - name: Publish
         run: dotnet publish src/Stikling.Web --configuration Release --output release
 
+      # Help and Privacy as plain HTML, for search engines and AI tools that don't run the app
+      - name: Render the static pages
+        run: dotnet run tools/static-pages/render.cs -- release/static-pages
+
       # The site is on its own domain, set under Pages in the repository settings, so it's served from the root
       - name: Prepare for GitHub Pages
-        run: python3 .github/scripts/prepare-pages.py release/wwwroot "/"
+        run: python3 .github/scripts/prepare-pages.py release/wwwroot "/" release/static-pages
 
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'

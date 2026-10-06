@@ -1,7 +1,7 @@
 {
   "name": "Stikling – plant & propagation tracker",
   "short_name": "Stikling",
-  "description": "Track your plants and propagations. Free, offline, your data stays on your device.",
+  "description": "Keep track of your plants and the cuttings you grow from them, with a history of photos and notes for each one. Free, works offline, and needs no account.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
@@ -9,6 +9,23 @@
   "background_color": "#f6f7f4",
   "theme_color": "#2f7d4f",
   "prefer_related_applications": false,
+  "categories": ["lifestyle", "productivity"],
+  "screenshots": [
+    {
+      "src": "img/intro-cutting-light.webp",
+      "sizes": "520x1085",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "A pothos cutting rooting in a jar of water on day 14, with a link to the plant it was taken from"
+    },
+    {
+      "src": "img/intro-plant-light.webp",
+      "sizes": "520x1085",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "The plant the cutting came from, with its photo, its name and its history"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Add plant",
