@@ -33,6 +33,9 @@ public interface IPhotoRepository
 
     Task<Photo?> GetAsync(Guid id);
 
+    /// <summary>Every photo of one kind of subject, excluding deleted ones, e.g. all pot photos for the pot library.</summary>
+    Task<IReadOnlyList<Photo>> GetOfKindAsync(SubjectType subjectType);
+
     /// <summary>The newest photo of each subject, by when it was taken, for the photo reminder.</summary>
     Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync();
 

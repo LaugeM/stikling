@@ -1,0 +1,29 @@
+/* Small enough to sit in a line of text, and still a 44px target with its padding */
+.pot-photo {
+    display: inline-block;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: -0.3rem 0.35rem -0.3rem 0;
+    padding: 0;
+    overflow: hidden;
+    vertical-align: middle;
+    border: 0;
+    border-radius: 0.4rem;
+    background: var(--pa-clay-soft);
+    position: relative;
+}
+
+/* The tap target reaches past the tile, so a thumb doesn't have to land on 28 pixels */
+.pot-photo::after {
+    content: "";
+    position: absolute;
+    inset: -0.5rem;
+}
+
+.pot-photo ::deep img,
+.pot-photo ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

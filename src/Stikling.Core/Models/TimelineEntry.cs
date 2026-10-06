@@ -7,7 +7,10 @@ namespace Stikling.Core.Models;
 public enum SubjectType
 {
     Plant,
-    Propagation
+    Propagation,
+
+    /// <summary>A pot from the library. Only photos belong to one, never a timeline entry.</summary>
+    Pot
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter<TimelineKind>))]

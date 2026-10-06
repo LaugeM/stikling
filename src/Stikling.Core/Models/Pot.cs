@@ -73,6 +73,9 @@ public sealed class Pot : Entity
 
     public string? Notes { get; set; }
 
+    /// <summary>The photo shown for the pot. Null shows the newest, see <see cref="Pots.PotPhotos"/>.</summary>
+    public Guid? CoverPhotoId { get; set; }
+
     [JsonIgnore]
     public bool HasRim => RimMm > 0;
 

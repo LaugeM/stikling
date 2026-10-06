@@ -273,7 +273,7 @@ Soft and consistent, with radius carrying the softness the palette has not yet b
 - **Large surfaces** use 0.9rem: the detail icon, and the detail hero once it is no longer edge to edge.
 - **Controls** use 0.6rem, set through Bootstrap's `--bs-border-radius`, so buttons and fields match the thumbnails.
 - **Pills** (999px) are for chips, the experiment bars and the tile behind the active navigation icon.
-- **Circles** are reserved for icon-only buttons: the add button, the settings gear, the delete button on a timeline entry, and the remove button on a photo.
+- **Circles** are reserved for icon-only buttons: the add button, the settings gear, the delete button on a timeline entry, and the remove button on a photo. The one other circle is a pot's photo at the start of its chip in the pot picker, which follows the round end of the pill.
 
 Borders are always exactly 1px and always Border, with two deliberate exceptions: a panel awaiting a decision is outlined in Potting Green, and an empty state uses a dashed border so it reads as a placeholder rather than as content.
 
@@ -329,6 +329,15 @@ The header is sticky and holds the app icon at 28px beside the wordmark, set in 
 On a wide screen the same destinations stand in a menu down the left side: the wordmark at the top, then one row per tab with the icon beside its label in Bricolage at 1rem, and Help and Settings at the bottom, where the sync dot moves with Settings. A row is 2.75rem tall at 0.6rem radius. The page you are on fills its row with Leaf Tint and sets the label in Deep Moss at 600, the row version of the active tab's pill. Hovering a row warms it to Paper. Sheets open there as a dialog in the middle, 32rem wide and rounded on every side, rising in slightly instead of sliding up from the bottom edge.
 
 Within a detail page, tabs are a simple underline strip in Bricolage: Muted Ink at rest, Deep Moss with a 2px Potting Green underline when active.
+
+### Pot Photo
+A pot with a photo shows it wherever the pot is named, so an outer pot can be told from the ones like it. Pots stay out of the List Row: a pot has no page of its own, and most nursery pots never get a photo. A pot without one simply shows no tile, with no placeholder.
+
+- On the Pots page, a 3rem tile at 0.6rem radius starts the row, on Clay Soft while it loads, since a pot is the clay colour's own subject. Tapping it opens the pot's photos in the full-screen viewer, where the shown one is chosen, framed or deleted.
+- On a plant page, a 1.75rem tile sits in the line of text before the pot's name, with a tap area that reaches 44px. It opens the viewer to look only: the viewer drops its action bar when the page gives it no actions.
+- In the pot picker, a round photo starts the chip.
+
+The Pots page lists one kind at a time under a segmented control (Nursery, Outer, On its own) that keeps to 26rem on a wide screen, because nursery and outer pots are used for different things and are never looked through together.
 
 ### Settings Row
 A whole-row link to a page one level down, used on Settings and Supplies. The name in Bricolage 600, a line under it in small Muted Ink that says what is there now ("6 pots, 2 free", "Last backup 3 days ago") or, when there is nothing yet, what the thing is for, and a chevron on the right. On Supplies a stroked icon on a 2.5rem Leaf Tint tile leads the row. Rows in a group close up into one bordered block divided by hairlines, like the Help page, and a row fills with Leaf Tint on hover or focus instead of taking a green border. A row whose line reports a problem, like a failed sync, sets that line in Alert.

@@ -5,6 +5,7 @@
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject IPotRepository PotRepository
+@inject PotService PotService
 @inject ISoilMixRepository MixRepository
 @inject PlantService PlantService
 @inject RoomService RoomService
@@ -169,13 +170,13 @@ else
                             @Labels.For(plant.Medium)
                             @if (PotName(plant.InnerPotId) is { } inner)
                             {
-                                <text> · @inner</text>
+                                <text> · </text>@PotPhotoFor(plant.InnerPotId)@inner
                             }
 
                             @if (PotName(plant.OuterPotId) is { } outer)
                             {
                                 <div class="detail-sub">
-                                    Standing in @outer@(plant.WaterInOuterPot ? ", with water kept in it" : "")
+                                    Standing in @PotPhotoFor(plant.OuterPotId)@outer@(plant.WaterInOuterPot ? ", with water kept in it" : "")
                                 </div>
                             }
 
@@ -618,12 +619,19 @@ else
     private IReadOnlyList<PestCase> pests = [];
     private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
+    private IReadOnlyDictionary<Guid, Photo> potCovers = new Dictionary<Guid, Photo>();
     private IReadOnlyList<SoilMix> mixes = [];
 
     private SoilMix? Mix => plant?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id) : null;
 
     private string? PotName(Guid? id) =>
         id is { } potId ? pots.FirstOrDefault(p => p.Id == potId)?.DisplayName : null;
+
+    /// <summary>The pot's photo before its name, when it has one.</summary>
+    private RenderFragment? PotPhotoFor(Guid? id) =>
+        id is { } potId && pots.FirstOrDefault(p => p.Id == potId) is { } pot && potCovers.GetValueOrDefault(potId) is { } cover
+            ? @<PotPhoto Pot="pot" Cover="cover" />
+            : null;
 
     private DateOnly Today => Time.Today();
 
@@ -700,6 +708,7 @@ else
             places = await RoomService.GetPlacesAsync();
             pests = PestService.CasesFor(plant, await PestCaseRepository.GetAllAsync(), places);
             pots = await PotRepository.GetAllAsync();
+            potCovers = await PotService.GetCoversAsync();
             mixes = await MixRepository.GetAllAsync();
 
             await ReloadCareAsync();

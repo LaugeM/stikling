@@ -147,6 +147,10 @@ internal sealed class FakePhotoRepository : IPhotoRepository
     public Task<Photo?> GetAsync(Guid id) =>
         Task.FromResult(Photos.GetValueOrDefault(id) is { IsDeleted: false } photo ? photo : null);
 
+    public Task<IReadOnlyList<Photo>> GetOfKindAsync(SubjectType subjectType) =>
+        Task.FromResult<IReadOnlyList<Photo>>(
+            Photos.Values.Where(p => p.SubjectType == subjectType && !p.IsDeleted).OrderByDescending(p => p.TakenAt).ToList());
+
     public Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync() =>
         Task.FromResult<IReadOnlyDictionary<Guid, Photo>>(
             Photos.Values.Where(p => !p.IsDeleted)
