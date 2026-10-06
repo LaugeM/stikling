@@ -61,7 +61,7 @@ def strip_back_link(text):
 # A page the app also has, as plain HTML with its text in place of the front page. Pages serves name.html for
 # /name with a 200, and search engines, AI tools and Meta's check for the deletion page read it without running
 # the app. The app replaces it with the same page once it has started.
-def write_static_page(name, title, text):
+def write_static_page(name, title, description, text):
     text = strip_back_link(text)
     page, count = re.subn(r"\s*<!-- intro:.*?<!-- /intro -->", "", html, flags=re.S)
     if count != 1:
@@ -77,19 +77,31 @@ def write_static_page(name, title, text):
     page, count = re.subn(r"<title>.*?</title>", f"<title>{title} · Stikling</title>", page, count=1)
     if count != 1:
         sys.exit("Expected a <title> in index.html")
-    page = page.replace('<link rel="canonical" href="https://stikling.app/" />',
-                        f'<link rel="canonical" href="https://stikling.app/{name}" />', 1)
+    # Its own address, title and description, also for link previews, which go by og:url
+    for pattern, value in (
+        (r'<link rel="canonical" href="[^"]*" />', f'<link rel="canonical" href="https://stikling.app/{name}" />'),
+        (r'<meta property="og:url" content="[^"]*" />', f'<meta property="og:url" content="https://stikling.app/{name}" />'),
+        (r'<meta property="og:title" content="[^"]*" />', f'<meta property="og:title" content="{title} · Stikling" />'),
+        (r'<meta name="description" content="[^"]*" />', f'<meta name="description" content="{description}" />'),
+        (r'<meta property="og:description" content="[^"]*" />', f'<meta property="og:description" content="{description}" />'),
+    ):
+        page, count = re.subn(pattern, lambda m: value, page, count=1)
+        if count != 1:
+            sys.exit(f"Expected a tag matching {pattern} in index.html")
     (root / f"{name}.html").write_text(page, encoding="utf-8", newline="\n")
 
 
 # Facebook's data deletion setting links to /deletion. Its text is in wwwroot/pages, which the app shows too
-write_static_page("deletion", "Deleting your data", (root / "pages" / "deletion.html").read_text(encoding="utf-8"))
+write_static_page("deletion", "Deleting your data",
+                  "How to delete what Stikling keeps about you, with or without an account.",
+                  (root / "pages" / "deletion.html").read_text(encoding="utf-8"))
 
 # Help and Privacy are rendered from the app's own pages by tools/static-pages/render.cs. Privacy is linked from
 # Google's, Facebook's and Discord's sign-in setup.
 help_html = (rendered / "help.html").read_text(encoding="utf-8")
-write_static_page("help", "Help", help_html)
-write_static_page("privacy", "Privacy", (rendered / "privacy.html").read_text(encoding="utf-8"))
+write_static_page("help", "Help", "Short answers about Stikling: how it keeps your plants on your device, backups, accounts, and how plants, propagations, care and pests work.", help_html)
+write_static_page("privacy", "Privacy", "What happens to what you put into Stikling, with and without an account.",
+                  (rendered / "privacy.html").read_text(encoding="utf-8"))
 
 
 class Markdown(HTMLParser):
