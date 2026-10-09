@@ -98,3 +98,10 @@
 .cal-legend .cal-day {
     margin-right: 0.3rem;
 }
+
+/* DESIGN.md asks for tap areas of 44px; a mouse keeps the compact rows */
+@media (pointer: coarse) {
+    .cal-row-button {
+        min-height: 2.75rem;
+    }
+}
