@@ -215,6 +215,33 @@ else
         </section>
     }
 
+    @if (memory is not null)
+    {
+        <section class="today-section memory">
+            <h2>@memory.Heading</h2>
+            <div class="memory-photos">
+                <figure>
+                    <div class="memory-photo"><PhotoImage PhotoId="memory.Old.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Old.TakenAt))}")" /></div>
+                    <figcaption>@Labels.Date(Time.LocalDay(memory.Old.TakenAt))</figcaption>
+                </figure>
+                <figure>
+                    <div class="memory-photo"><PhotoImage PhotoId="memory.Newest.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Newest.TakenAt))}")" /></div>
+                    <figcaption>@Labels.Date(Time.LocalDay(memory.Newest.TakenAt))</figcaption>
+                </figure>
+            </div>
+            <div class="memory-footer">
+                <a class="memory-name" href="plants/@memory.Plant.Id">@memory.Plant.DisplayName</a>
+                <button type="button" class="btn btn-outline-primary" @onclick="() => shareOpen = true">Before and after</button>
+            </div>
+        </section>
+
+        <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="memory.Plant.Id"
+                    CoverPhotoId="memory.Plant.CoverPhotoId" StartBeforeId="memory.Old.Id" StartAfterId="memory.Newest.Id" DayOne="PhotoDayCount.StartOf(memory.Plant)"
+                    Text="ShareCardText.ForPlant(memory.Plant, plants.FirstOrDefault(p => p.Id == memory.Plant.ParentPlantId),
+                              propagations.FirstOrDefault(p => p.Id == memory.Plant.FromPropagationId),
+                              propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
+    }
+
     <section class="today-section">
         <h2>Lately</h2>
         @if (recent.Count == 0)
@@ -252,6 +279,8 @@ else
     private Dictionary<Guid, string> names = [];
     private MonthResult? monthResult;
     private string? backupReminder;
+    private Memory? memory;
+    private bool shareOpen;
     private bool showRound;
     private bool loaded;
 
@@ -300,6 +329,8 @@ else
         photoRound = (await SettingsService.GetAsync()).PhotoReminder
             ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
             : [];
+
+        memory = Memories.Pick(plants, await PhotoRepository.GetOfKindAsync(SubjectType.Plant), Today, Time.LocalDay);
 
         dueTreatments = PestService.Due(
             PestService.Describe(await PestCases.GetAllAsync(), plants, await PestTreatments.GetAllAsync(), places, Today));

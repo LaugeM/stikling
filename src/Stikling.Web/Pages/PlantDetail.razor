@@ -246,6 +246,28 @@ else
 
                 <section class="detail-card" id="plant-family">
                     <h2>Family</h2>
+                    @if (!given.IsEmpty)
+                    {
+                        <dl class="detail-list">
+                            @if (given.Taken > 0)
+                            {
+                                <dt>Taken from it</dt>
+                                <dd>@TakenText()</dd>
+                                <dt>Rooted</dt>
+                                <dd>@given.Rooted of @given.Taken</dd>
+                            }
+                            @if (given.GivenAway + given.Sold > 0)
+                            {
+                                <dt>Passed on</dt>
+                                <dd>@PassedOnText()</dd>
+                            }
+                            @if (given.FromThoseInTurn > 0)
+                            {
+                                <dt>From those in turn</dt>
+                                <dd>@Labels.Count(given.FromThoseInTurn, "plant")</dd>
+                            }
+                        </dl>
+                    }
                     @if (ancestors.Count > 0 || fromPropagation is not null)
                     {
                         <h3>Came from</h3>
@@ -342,7 +364,7 @@ else
             </div>
 
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
-                      CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync"
+                      CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" DayOne="PhotoDayCount.StartOf(plant)"
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
         </div>
     </div>
@@ -376,6 +398,14 @@ else
             <CareSheet PlantIds="@(new[] { plant.Id })" OnLogged="CareLoggedAsync" />
         </div>
 
+        @if (careCalendar is { IsEmpty: false })
+        {
+            <div class="sheet-section">
+                <h3 class="section-label">The last year</h3>
+                <CareYear Calendar="careCalendar" />
+            </div>
+        }
+
         @if (care.Count > 0)
         {
             <div class="sheet-section">
@@ -396,7 +426,7 @@ else
     </Sheet>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="plant.Id"
-                CoverPhotoId="plant.CoverPhotoId" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
+                CoverPhotoId="plant.CoverPhotoId" DayOne="PhotoDayCount.StartOf(plant)" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
 
     <Sheet Title="@MoreTitle" Open="more != More.None" OpenChanged="open => { if (!open) more = More.None; }">
         @switch (more)
@@ -615,11 +645,13 @@ else
 
     private IReadOnlyList<Plant> ancestors = [];
     private IReadOnlyList<Plant> offspring = [];
+    private PlantGiven given = new([], 0, 0, 0, 0);
     private IReadOnlyList<Propagation> propagations = [];
     private Propagation? fromPropagation;
     private IReadOnlyList<CareLog> care = [];
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
     private MoistureReading? moisture;
+    private CareCalendar? careCalendar;
     private IReadOnlyList<PestCase> pests = [];
     private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
@@ -693,6 +725,28 @@ else
 
     private EverydayNameBook? everyday;
 
+    private string TakenText() => JoinAnd(given.TakenByType.Select(t => t.Key switch
+    {
+        PropagationType.Offset => Labels.Count(t.Value, "pup"),
+        PropagationType.Leaf => Labels.Count(t.Value, "leaf", "leaves"),
+        PropagationType.AirLayer => Labels.Count(t.Value, "air layer"),
+        PropagationType.Other => Labels.Count(t.Value, "other", "others"),
+        _ => Labels.Count(t.Value, Labels.For(t.Key).ToLowerInvariant())
+    }));
+
+    private string PassedOnText() => JoinAnd(new[]
+    {
+        given.GivenAway > 0 ? $"{given.GivenAway} given away" : null,
+        given.Sold > 0 ? $"{given.Sold} sold" : null
+    }.OfType<string>());
+
+    /// <summary>"a", "a and b", "a, b and c".</summary>
+    private static string JoinAnd(IEnumerable<string> parts)
+    {
+        var list = parts.ToList();
+        return list.Count <= 1 ? string.Concat(list) : $"{string.Join(", ", list.SkipLast(1))} and {list[^1]}";
+    }
+
     private async Task LoadAsync()
     {
         everyday = await Names.GetEverydayNamesAsync();
@@ -704,6 +758,7 @@ else
             offspring = PlantLineage.Offspring(plant, all);
 
             var allPropagations = await PropagationRepository.GetAllAsync();
+            given = PlantLineage.Given(plant, all, allPropagations);
             propagations = new PropagationFilter(Progress: ProgressFilter.All)
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
                 .ToList();
@@ -731,6 +786,7 @@ else
             .Select(kind => (kind, CareSummary.Latest(all, plant.Id, kind, Today)))
             .ToList();
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
+        careCalendar = CareCalendar.Build(all, plant.Id, Today);
     }
 
     private async Task CareLoggedAsync()

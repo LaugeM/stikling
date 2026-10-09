@@ -222,6 +222,12 @@
             anything deleted since the backup comes back, and where the same thing was changed in both
             places, the newer change wins. Restoring the same backup twice does no harm.
         </p>
+        <p>
+            Before it restores, Stikling saves a backup of what is on the device now to your downloads, named
+            <em>stikling-before-restore</em> with the date. If the restore removed something you wanted, restore
+            that file to bring it back. It brings back what was deleted, but not edits the restore replaced with
+            newer ones.
+        </p>
     </details>
 
     <details class="help-item">
@@ -434,7 +440,8 @@
         <summary>How do I log watering and feeding?</summary>
         <p>
             Open the plant and tap <em>Care</em>, next to <em>Photo</em> and <em>Note</em>. It shows when it was last watered, fed and
-            so on, and logging is a tap. When it was last watered also shows under the plant's name. To log for several plants at once, tap <em>Select</em> on the plant list, pick
+            so on, and logging is a tap. Under that, <em>The last year</em> is a calendar with a row for each month, showing the days it was
+            watered, fed or had a meter reading, so gaps in the rhythm stand out. When it was last watered also shows under the plant's name. To log for several plants at once, tap <em>Select</em> on the plant list, pick
             them and tap <em>Log care</em>. The same bar can also add a note or tags to all of them, and
             <em>Move</em> puts them all in a room or spot. Plants already there are left alone. If you have
             a meter, tap <em>Add EC and pH</em> when logging a feed to note the readings, and they show on
@@ -465,7 +472,8 @@
         <p>
             Yes, with the dropdown next to the filters. A to Z is the default. Newest puts the plants you
             added last at the top, By room groups them by where they stand, and Last activity puts the
-            plants you last watered, fed or wrote something on first.
+            plants you last watered, fed or wrote something on first. The list keeps the sort you picked
+            the next time you open it on this device.
         </p>
     </details>
     <details class="help-item">
@@ -550,7 +558,9 @@
         <p>
             Under a plant's name you see what it came from and how many propagations and plants have come
             from it. Tap one of them, or <em>Details</em>, for the whole family. It follows the links across
-            generations, so a cutting of a cutting still leads back to the first plant.
+            generations, so a cutting of a cutting still leads back to the first plant. The family list on a plant's page also
+            adds up what it has given: how many cuttings were taken and how many rooted, how many plants were given
+            away or sold, and how many plants have come from those in turn.
         </p>
     </details>
 
@@ -592,7 +602,7 @@
         <summary>What shows up on Today?</summary>
         <p>
             Pest treatments that are due, anything you have flagged, plants whose quarantine is up, propagations nobody has looked at for
-            a week, the monthly photo reminder if it is turned on, and under Lately, what you wrote down in the last 30 days.
+            a week, the monthly photo reminder if it is turned on, an old photo of a plant from this day in an earlier year, and under Lately, what you wrote down in the last 30 days.
             It also reminds you to back up.
         </p>
         <p>
@@ -626,6 +636,17 @@
             Once a month, Today lists the plants and propagations that haven't had a photo that month, room
             by room, with a camera button on each. It keeps every history growing. It is off until you turn
             it on in Settings.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>Why is there an old photo on Today?</summary>
+        <p>
+            When a plant has a photo taken on this day a year ago (or two or three), or six months ago,
+            Today shows it next to the plant's newest photo, so you can see how much it has grown. The
+            newest photo has to be at least 30 days newer, and only one plant is shown, the one with the
+            longest gap. Tap <em>Before and after</em> to make a card of the two to share. It goes away
+            on its own tomorrow.
         </p>
     </details>
 </section>
@@ -691,6 +712,11 @@
             With two or more photos you can also make a before and after. Tap <em>Share</em>, then
             <em>Before and after</em>. It puts two photos side by side with the date on each and how long
             apart they were. It starts on the first and the newest photo, and you can change either one.
+        </p>
+        <p>
+            Photos show which day they were taken on, like <em>3 May 2026 · day 24</em>. A propagation counts
+            from the day it started, and a plant from the day you got it, so that needs a full date for when
+            you got it. Photos taken before that day get no count.
         </p>
     </details>
 

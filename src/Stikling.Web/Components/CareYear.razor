@@ -1,0 +1,52 @@
+@* A year of waterings, feeds and meter readings for one plant, one row per month. *@
+
+@if (Calendar is { IsEmpty: false } calendar)
+{
+    <div class="care-calendar" role="img" aria-label="@calendar.Summary">
+        @foreach (var month in calendar.Months)
+        {
+            <div class="cal-row" aria-hidden="true">
+                <span class="cal-month">@MonthName(month)</span>
+                <span class="cal-days">
+                    @foreach (var day in month.Days)
+                    {
+                        <span class="cal-day @ClassFor(day)" title="@TitleFor(day)"></span>
+                    }
+                </span>
+            </div>
+        }
+        <div class="cal-legend" aria-hidden="true">
+            <span><span class="cal-day cal-watered"></span> Watered</span>
+            <span><span class="cal-day cal-fed"></span> Fed</span>
+            <span><span class="cal-day cal-reading"></span> Meter reading</span>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public CareCalendar? Calendar { get; set; }
+
+    private static string MonthName(CareCalendarMonth month) =>
+        new DateOnly(month.Year, month.Month, 1).ToString("MMM", System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string ClassFor(CareCalendarDay day) => day.Mark switch
+    {
+        _ when day.Future => "cal-future",
+        CareDayMark.Fed => "cal-fed",
+        CareDayMark.Watered => "cal-watered",
+        CareDayMark.Reading => "cal-reading",
+        _ => ""
+    };
+
+    private static string TitleFor(CareCalendarDay day)
+    {
+        var date = day.Date.ToString("d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+        return day.Mark switch
+        {
+            CareDayMark.Fed => $"{date}: fed",
+            CareDayMark.Watered => $"{date}: watered",
+            CareDayMark.Reading => $"{date}: meter reading",
+            _ => date
+        };
+    }
+}

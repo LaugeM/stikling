@@ -28,8 +28,29 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
     /// <summary>Raised after a restore, so what the layout shows (like the Pests tab) can look again.</summary>
     public event Action? Restored;
 
-    /// <summary>Builds the backup and hands it to the browser as a download.</summary>
-    public async Task<BackupCounts> ExportAsync()
+    /// <summary>
+    /// True when the device has anything a restore could remove or overwrite, deleted records included.
+    /// Settings and what's put off on Today don't count, since a fresh device can have those before
+    /// anything has been added.
+    /// </summary>
+    public async Task<bool> HasAnythingToSaveAsync()
+    {
+        string[] stores =
+        [
+            Stores.Plants, Stores.Propagations, Stores.Timeline, Stores.Photos, Stores.CareLogs,
+            Stores.PestCases, Stores.PestTreatments, Stores.Pots, Stores.SoilMixes, Stores.Products,
+            Stores.Feeds, Stores.TreatmentRecipes, Stores.Places
+        ];
+        foreach (var store in stores)
+        {
+            if ((await db.GetAllAsync<JsonElement>(store)).Count > 0)
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Builds the backup and hands it to the browser as a download, named with the prefix and today's date.</summary>
+    public async Task<BackupCounts> ExportAsync(string filePrefix = "stikling-backup")
     {
         // Deleted items travel too, so a restore doesn't bring back what was deleted elsewhere
         var data = new BackupData
@@ -70,7 +91,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         }
 
         var today = time.Today();
-        await files.DownloadAsync($"stikling-backup-{today:yyyy-MM-dd}.zip", buffer.ToArray());
+        await files.DownloadAsync($"{filePrefix}-{today:yyyy-MM-dd}.zip", buffer.ToArray());
         await files.SetLastBackupAsync(today);
 
         return data.Counts;

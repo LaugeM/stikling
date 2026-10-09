@@ -8,6 +8,7 @@
 @inject ITimelineRepository Entries
 @inject TimeProvider Time
 @inject PlantNameService Names
+@inject DeviceFiles Device
 
 <PageTitle>Plants · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -92,7 +93,7 @@ else
             }
 
             <select class="form-select w-auto" aria-label="Sort by"
-                    @bind="sort" @bind:after="Refresh">
+                    @bind="sort" @bind:after="SortChangedAsync">
                 @foreach (var (value, label) in sortOptions)
                 {
                     <option value="@value">@label</option>
@@ -320,6 +321,7 @@ else
     private readonly HashSet<string> pickedTags = new(StringComparer.OrdinalIgnoreCase);
     private bool quarantine;
     private bool dormant;
+    private const string SortKey = "plants-sort";
     private PlantSort sort = PlantSort.Name;
     private Dictionary<Guid, DateTimeOffset> lastActivity = [];
 
@@ -346,6 +348,8 @@ else
             pickedTags.Add(tag);
             status = StatusFilter.All; // a tag is asked for by name, so show every plant carrying it
         }
+        if (Enum.TryParse<PlantSort>(await Device.GetAsync(SortKey), out var stored) && Enum.IsDefined(stored))
+            sort = stored;
         await LoadAsync();
     }
 
@@ -431,6 +435,12 @@ else
         quarantine = false;
         dormant = false;
         Refresh();
+    }
+
+    private async Task SortChangedAsync()
+    {
+        Refresh();
+        await Device.SetAsync(SortKey, sort.ToString());
     }
 
     private void Refresh() =>

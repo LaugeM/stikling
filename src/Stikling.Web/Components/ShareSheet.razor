@@ -160,9 +160,20 @@
     [Parameter, EditorRequired]
     public Guid SubjectId { get; set; }
 
+    /// <summary>The day photos count from (day 0). Without it, dates have no day count.</summary>
+    [Parameter]
+    public DateOnly? DayOne { get; set; }
+
     /// <summary>The photo the card starts with, when there is one.</summary>
     [Parameter]
     public Guid? CoverPhotoId { get; set; }
+
+    /// <summary>When both are set, the sheet opens on Before and after with these two photos picked.</summary>
+    [Parameter]
+    public Guid? StartBeforeId { get; set; }
+
+    [Parameter]
+    public Guid? StartAfterId { get; set; }
 
     private ElementReference canvas;
     private IReadOnlyList<Photo> photos = [];
@@ -198,7 +209,11 @@
 
     private Photo? PhotoOf(Guid? id) => id is null ? null : allPhotos.FirstOrDefault(p => p.Id == id);
 
-    private string DayText(Photo photo) => Labels.Date(Time.LocalDay(photo.TakenAt));
+    private string DayText(Photo photo)
+    {
+        var day = Time.LocalDay(photo.TakenAt);
+        return Labels.Date(day) + PhotoDayCount.Suffix(DayOne, day);
+    }
 
     private string? ApartLine(Guid? before, Guid? after)
     {
@@ -240,6 +255,16 @@
         pairPhotos = allPhotos.Count <= 60 ? allPhotos : allPhotos.Take(30).Concat(allPhotos.TakeLast(30)).ToList();
         beforeId = allPhotos.FirstOrDefault()?.Id;
         afterId = allPhotos.LastOrDefault()?.Id;
+        if (PhotoOf(StartBeforeId) is not null && PhotoOf(StartAfterId) is not null)
+        {
+            pairMode = true;
+            beforeId = StartBeforeId;
+            afterId = StartAfterId;
+            line = DefaultLine ?? "";
+            // A long history leaves out its middle, so make sure the picked photos are there to see
+            if (!pairPhotos.Any(p => p.Id == beforeId))
+                pairPhotos = pairPhotos.Append(PhotoOf(beforeId)!).OrderBy(p => p.TakenAt).ToList();
+        }
         ready = true;
     }
 

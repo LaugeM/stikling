@@ -37,12 +37,12 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
 
-1. **A time-lapse video**, from a plant's or propagation's photos, with the day count on each photo. Before and after is built, and gets the day count too.
+1. **A time-lapse video**, from a plant's or propagation's photos, with the day count on each photo, the way Before and after already shows it.
 2. **A share link for one plant or propagation**, which opens a page anyone can see.
 3. **A watering reminder that learns each plant**, from its own waterings, meter readings and the answers given to the reminder. It's what plant apps are judged on, and it gets better the longer it's used.
-4. **A demo plant, grid view and the lineage tree**, with what a plant has given, which make the app look like something on a first visit.
+4. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
 5. **Passing a cutting on with its history**, built on the share link.
-6. **A year ago today and your year with your plants**, two more things worth posting.
+6. **Your year with your plants**, another thing worth posting, next to A year ago today.
 7. **Going round a room**, one plant at a time, together with the daily round. It goes well with the watering reminder.
 8. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
 9. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
@@ -55,7 +55,7 @@ In the order I would build them. The first ones are for reaching new people: wha
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screen worth the name: a "Log care" home screen shortcut, the plant list remembering its sort, a backup before every restore, and the care calendar on a plant.
+This needs no new storage and no new screen worth the name: a "Log care" home screen shortcut.
 
 ---
 
@@ -85,7 +85,7 @@ These need no new storage and no new screen worth the name: a "Log care" home sc
 | ✅ | **Dormancy status** for plants and propagations, e.g. an alocasia dropping its leaves in winter or a corm sitting still. A badge and the day it went dormant show it's resting rather than dead, the plant list has a "Dormant" filter, and going dormant and waking up are recorded on the history. A dormant propagation doesn't come up on Today to be checked on. Dormancy ends by itself when a plant dies or leaves, or a propagation finishes | 4 | S | v1.x |
 | ☐ | **Growing season**: mark a plant as growing in summer or in winter. When its usual resting time comes round, the app asks whether it has gone dormant | 5 | S | v1.x |
 | ✅ | Sort options: name, newest, room, last activity | 5 | S | v1.x |
-| ☐ | The plant list remembers the sort you picked, on the device, the way the Pots page remembers its kind | 4 | S | v1.x |
+| ✅ | The plant list remembers the sort you picked, on the device, the way the Pots page remembers its kind | 4 | S | v1.x |
 | ☐ | **Search everything**: one search for plants, propagations, pots, mixes, feeds, products and the notes on every history, with the `/` key to start it on a computer | 5 | M | v1.x |
 | ✅ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once. Each name is matched against the plant dictionary, and anything else on the line goes into the notes | 5 | S | v1.x |
 | ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | 5 | M | v1.x |
@@ -141,7 +141,7 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ✅ | **Before and after**: in the Share sheet, pick two photos of a plant or propagation, starting on the first and the newest, and get one image of them side by side (stacked for 9:16) with the dates and how far apart they are, ready to post. Shared through the phone's share menu, or saved | 3 | M | v1.x |
 | ☐ | **Time-lapse video** from a plant's or propagation's photos, each one showing for a moment with its date, in a portrait shape that fits TikTok and Reels. Made on the phone. Which video formats each browser can record, and which TikTok and Instagram take, needs trying on a phone | 4 | L | v1.x |
 | ☐ | **Ghost overlay** when taking a photo: a faint copy of the previous photo to line up the same angle every time | 8 | L | v1.x |
-| ☐ | **Day count on photos**: each photo of a propagation shows the day it was taken on, e.g. "day 24", and so do Before and after and the time-lapse. Photos of a plant count from the day you got it | 3 | S | v1.x |
+| ✅ | **Day count on photos**: each photo of a propagation shows the day it was taken on, e.g. "day 24", in its history, the photo viewer and Before and after. Photos of a plant count from the day you got it, when that is a full date. The time-lapse gets it when it is built | 3 | S | v1.x |
 | ☐ | **Mark up a photo**: draw a circle or an arrow on a photo and add a short label, like "new node" or "mealybugs here". The marks are saved on their own, so the photo itself is never changed | 5 | M | v1.x |
 | ☐ | **Link to another plant in a note**: type @ and pick a plant, propagation or pot, and the note links to it. The other one's page shows the notes that mention it | 6 | M | v1.x |
 | ☐ | **A photo of a shelf or spot with the plants marked on it**: tap a plant in the photo to open it. The photo also shows on the history of each plant marked in it | 6 | L | v1.x |
@@ -173,7 +173,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **The result of a finished propagation**: in place of the "Finished … after … days" line, a short summary of how long it ran, the days to first root, how many were potted up and failed, and the plants it became with the room each one is in and whether it's still in the collection. All from data the app already has, and the share card uses it | 3 | S | v1.x |
 | ✅ | **Say what the less obvious choices are**: a line under **Grows in** and **Type** describing the one picked, for LECA, PON, sphagnum, corm riser and air layer, on the plant and propagation forms (not on the pot up sheet). The same explanations are in one Help answer | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations). It opens on one plant with three generations of where it came from, its siblings (other cuttings from the same mother) and what has come from it. Tapping another plant moves the tree to that one, so a big family never turns into one huge chart | 4 | M | v1.x |
-| ☐ | **What a plant has given**: on a plant's page, how many cuttings it has given, how many rooted, how many were given away, and how many plants have come from those in turn | 4 | S | v1.x |
+| ✅ | **What a plant has given**: on a plant's page, how many cuttings it has given, how many rooted, how many were given away, and how many plants have come from those in turn | 4 | S | v1.x |
 | ☐ | **Generation**: a plant or propagation says how many generations it is from the oldest ancestor you have, e.g. "3rd generation from the kitchen Monstera". Worked out from the parent links, with nothing to fill in | 8 | S | v1.x |
 | ☐ | **Why a propagation failed**: an optional reason on Mark failed (rotted, dried out, pests, mould, don't know). The results page shows what each medium loses cuttings to, and at which stage | 6 | S | v1.x |
 | ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
@@ -218,7 +218,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | **Nutrient dose calculator**: fill in the water on a feed or a top-up, in litres or millilitres, and each product shows how much to add | 7 | S | v1.x |
 | ☐ | Harvest log for herbs (basil, parsley): date and amount | 7 | S | v1.x |
 | ☐ | **Flowering log** (orchid, peace lily, hoya): spike started, blooming, done. A plant's page lists when it flowered each year, and a flowering calendar shows which plants usually flower in the coming month, from your own records | 5 | M | v1.x |
-| ☐ | **Care calendar on a plant**: a year of waterings, feeds and meter readings as a grid of days, so the plant's rhythm and any gaps show at a glance | 5 | S | v1.x |
+| ✅ | **Care calendar on a plant**: a year of waterings, feeds and meter readings as a grid of days, so the plant's rhythm and any gaps show at a glance | 5 | S | v1.x |
 
 ## 4b. Light and climate
 
@@ -320,7 +320,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | Plants due a watering or a check today, and the ones due in the next couple of days, when the watering reminder is turned on | 3 | S | v1.x |
 | ☐ | **A daily round**: Today suggests one room or spot to go through each day, working round the home over the week instead of everything at once. Off until turned on | 6 | S | v1.x |
 | ☐ | **Going round**: open a room or spot and go through its plants one card at a time: a meter reading, watered, checked, a photo, or skip. Made for walking round with a moisture meter, and the daily round opens straight into it | 4 | M | v1.x |
-| ☐ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
+| ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
 | ☐ | **Today in your calendar**: a private link to add to any calendar app, which then shows what is due. It works on every phone and in every browser without notifications, and turning it off makes the old link stop working | 8 | L | v2 |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
 | ☐ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |
@@ -332,7 +332,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Light / dark / match-system theme | 1 | S | M1 |
 | ✅ | All data on the device (IndexedDB), works offline, installable | 1 | L | M1–M2 |
 | ✅ | Export everything to a ZIP (data + photos) and import it again | 1 | L | M5 |
-| ☐ | **A backup before every restore**: restoring a backup first saves one of what is on the device now, so anything the restore removed can be brought back by restoring that one | 4 | S | v1.x |
+| ✅ | **A backup before every restore**: restoring a backup first saves one of what is on the device now, so anything the restore removed can be brought back by restoring that one | 4 | S | v1.x |
 | ☐ | **Tidy up**: a page in Settings listing what is worth a look, like plants with no genus, photo or room, a propagation whose parent was deleted on another device, two plants that may be the same, and tags, products or mixes nothing uses. Out of the way until it's needed | 7 | M | v1.x |
 | ✅ | Ask the browser for persistent storage; show storage used | 1 | S | M5 |
 | ✅ | Backup reminder ("last backup 30 days ago") | 2 | S | M5 |

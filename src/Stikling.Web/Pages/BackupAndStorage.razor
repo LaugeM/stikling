@@ -61,11 +61,19 @@
             </p>
             <p class="settings-hint">
                 Restoring adds what's missing here and brings back anything you've deleted since.
-                Changes you've made on this device are kept.
+                Changes you've made on this device are kept.@if (hasData)
+                {
+                    <text> A backup of what's here now is saved to your downloads first, so anything the restore
+                    removes can be brought back by restoring that one.</text>
+                }
             </p>
             <div class="settings-actions">
-                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="RestoreAsync">Restore</button>
-                <button type="button" class="btn btn-link" @onclick="() => pending = null">Cancel</button>
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => RestoreAsync(saveFirst: true)">Restore</button>
+                <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => pending = null">Cancel</button>
+                @if (saveFailed)
+                {
+                    <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => RestoreAsync(saveFirst: false)">Restore without saving first</button>
+                }
             </div>
         </div>
     }
@@ -121,6 +129,8 @@
     private string? message;
     private bool busy;
     private bool signedIn;
+    private bool saveFailed;
+    private bool hasData; // whether a restore saves a backup of this device first
 
     private DateOnly TodayDate => Time.Today();
 
@@ -172,6 +182,7 @@
         busy = true;
         message = "Reading the backup…";
         pending = null;
+        saveFailed = false;
         StateHasChanged();
 
         try
@@ -184,6 +195,7 @@
 
             zip.Position = 0;
             pending = new PendingRestore(file.Name, await BackupService.ReadAsync(zip), zip);
+            hasData = await Backup.HasAnythingToSaveAsync();
             message = null;
         }
         catch (Exception ex)
@@ -194,12 +206,37 @@
         busy = false;
     }
 
-    private async Task RestoreAsync()
+    private async Task RestoreAsync(bool saveFirst)
     {
         if (pending is not { } file)
             return;
 
         busy = true;
+        string? savedAs = null;
+
+        if (saveFirst)
+        {
+            message = "Saving what's here first…";
+            StateHasChanged();
+
+            try
+            {
+                if (await Backup.HasAnythingToSaveAsync())
+                {
+                    await Backup.ExportAsync("stikling-before-restore");
+                    lastBackup = TodayDate;
+                    savedAs = $"stikling-before-restore-{TodayDate:yyyy-MM-dd}.zip";
+                }
+            }
+            catch (Exception ex)
+            {
+                message = $"Couldn't save a backup of what's here, so nothing was restored: {ex.Message}";
+                saveFailed = true;
+                busy = false;
+                return;
+            }
+        }
+
         message = "Restoring…";
         StateHasChanged();
 
@@ -218,6 +255,8 @@
                 { Photos: > 0 } => $"Put back the pictures for {Labels.Count(summary.Photos, "photo")} that had lost them. Everything else was already here.",
                 _ => "Everything in that backup was already here."
             };
+            if (savedAs is not null)
+                message += $" What was here before is saved as {savedAs}. Check your downloads.";
         }
         catch (Exception ex)
         {
@@ -226,6 +265,7 @@
 
         await file.Zip.DisposeAsync();
         pending = null;
+        saveFailed = false;
         storage = await Db.EstimateAsync();
         busy = false;
     }

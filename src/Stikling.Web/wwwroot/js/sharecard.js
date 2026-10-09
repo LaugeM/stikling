@@ -137,9 +137,15 @@ async function drawPair(canvas, spec, size, token) {
 function paintDatePill(ctx, text, x, bottom, maxWidth, scale = 1) {
     if (!text)
         return;
-    setFont(ctx, `600 ${Math.round(36 * scale)}px ${BODY}`, "0", "normal");
     const padX = Math.round(22 * scale);
     const height = Math.round(62 * scale);
+    // A long label ("28 September 2026 · day 124") shrinks to fit rather than running out of the pill
+    let fontSize = Math.round(36 * scale);
+    setFont(ctx, `600 ${fontSize}px ${BODY}`, "0", "normal");
+    while (ctx.measureText(text).width + 2 * padX > maxWidth && fontSize > 18) {
+        fontSize -= 1;
+        setFont(ctx, `600 ${fontSize}px ${BODY}`, "0", "normal");
+    }
     const width = Math.min(maxWidth, ctx.measureText(text).width + 2 * padX);
     ctx.save();
     ctx.globalAlpha = 0.92;
