@@ -160,6 +160,10 @@
     [Parameter, EditorRequired]
     public Guid SubjectId { get; set; }
 
+    /// <summary>The day photos count from (day 0). Without it, dates have no day count.</summary>
+    [Parameter]
+    public DateOnly? DayOne { get; set; }
+
     /// <summary>The photo the card starts with, when there is one.</summary>
     [Parameter]
     public Guid? CoverPhotoId { get; set; }
@@ -198,7 +202,11 @@
 
     private Photo? PhotoOf(Guid? id) => id is null ? null : allPhotos.FirstOrDefault(p => p.Id == id);
 
-    private string DayText(Photo photo) => Labels.Date(Time.LocalDay(photo.TakenAt));
+    private string DayText(Photo photo)
+    {
+        var day = Time.LocalDay(photo.TakenAt);
+        return Labels.Date(day) + PhotoDayCount.Suffix(DayOne, day);
+    }
 
     private string? ApartLine(Guid? before, Guid? after)
     {

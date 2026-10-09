@@ -364,7 +364,7 @@ else
             </div>
 
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
-                      CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync"
+                      CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" DayOne="PhotoDayCount.StartOf(plant)"
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
         </div>
     </div>
@@ -418,7 +418,7 @@ else
     </Sheet>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="plant.Id"
-                CoverPhotoId="plant.CoverPhotoId" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
+                CoverPhotoId="plant.CoverPhotoId" DayOne="PhotoDayCount.StartOf(plant)" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
 
     <Sheet Title="@MoreTitle" Open="more != More.None" OpenChanged="open => { if (!open) more = More.None; }">
         @switch (more)
