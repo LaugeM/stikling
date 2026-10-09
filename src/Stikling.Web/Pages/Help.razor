@@ -222,6 +222,12 @@
             anything deleted since the backup comes back, and where the same thing was changed in both
             places, the newer change wins. Restoring the same backup twice does no harm.
         </p>
+        <p>
+            Before it restores, Stikling saves a backup of what is on the device now to your downloads, named
+            <em>stikling-before-restore</em> with the date. If the restore removed something you wanted, restore
+            that file to bring it back. It brings back what was deleted, but not edits the restore replaced with
+            newer ones.
+        </p>
     </details>
 
     <details class="help-item">

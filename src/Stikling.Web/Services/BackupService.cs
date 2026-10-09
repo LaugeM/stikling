@@ -28,8 +28,16 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
     /// <summary>Raised after a restore, so what the layout shows (like the Pests tab) can look again.</summary>
     public event Action? Restored;
 
-    /// <summary>Builds the backup and hands it to the browser as a download.</summary>
-    public async Task<BackupCounts> ExportAsync()
+    /// <summary>
+    /// True when the device has any plant or propagation, deleted ones included. A device with
+    /// none has nothing a restore could remove, so there is nothing to save first.
+    /// </summary>
+    public async Task<bool> HasAnythingToSaveAsync() =>
+        (await db.GetAllAsync<Plant>(Stores.Plants)).Count > 0
+        || (await db.GetAllAsync<Propagation>(Stores.Propagations)).Count > 0;
+
+    /// <summary>Builds the backup and hands it to the browser as a download, named with the prefix and today's date.</summary>
+    public async Task<BackupCounts> ExportAsync(string filePrefix = "stikling-backup")
     {
         // Deleted items travel too, so a restore doesn't bring back what was deleted elsewhere
         var data = new BackupData
@@ -70,7 +78,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         }
 
         var today = time.Today();
-        await files.DownloadAsync($"stikling-backup-{today:yyyy-MM-dd}.zip", buffer.ToArray());
+        await files.DownloadAsync($"{filePrefix}-{today:yyyy-MM-dd}.zip", buffer.ToArray());
         await files.SetLastBackupAsync(today);
 
         return data.Counts;
