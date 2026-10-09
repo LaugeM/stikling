@@ -139,6 +139,15 @@ else
                 <label class="form-label" for="source">Source</label>
                 <InputText id="source" class="form-control" @bind-Value="plant.Source" placeholder="Shop, friend, plant swap…" />
             </div>
+
+            @* A price already entered stays if the origin changes, it just isn't shown *@
+            @if (plant.Origin == PlantOrigin.Purchased)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="price-paid">Price paid</label>
+                    <InputNumber id="price-paid" class="form-control" @bind-Value="plant.PricePaid" min="0" step="any" inputmode="decimal" />
+                </div>
+            }
         </fieldset>
 
         @if (IsNew && !FromPhotos)
@@ -146,10 +155,13 @@ else
             @PhotoSection
         }
 
-        <fieldset>
-            <legend>Notes</legend>
-            <InputTextArea class="form-control" rows="3" @bind-Value="plant.Notes" aria-label="Notes" />
-        </fieldset>
+        @if (!IsNew)
+        {
+            <fieldset>
+                <legend>About it</legend>
+                @AboutField
+            </fieldset>
+        }
 
         <h2 class="section-label">More details</h2>
         <div class="more-details mb-4">
@@ -172,12 +184,17 @@ else
             <FormSection Title="Pot and soil" Summary="@PotSummary" Open="openPot">
                 <div class="mb-3">
                     <label class="form-label" for="medium">Grows in</label>
-                    <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => SetMedium(m)" ValueExpression="() => plant.Medium">
+                    <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => SetMedium(m)" ValueExpression="() => plant.Medium"
+                                 aria-describedby="@(Labels.Explain(plant.Medium) is null ? null : "medium-help")">
                         @foreach (var medium in Enum.GetValues<GrowingMedium>())
                         {
                             <option value="@medium">@Labels.For(medium)</option>
                         }
                     </InputSelect>
+                    @if (Labels.Explain(plant.Medium) is { } mediumHelp)
+                    {
+                        <div id="medium-help" class="form-text">@mediumHelp</div>
+                    }
                 </div>
 
                 <div class="mb-3">
@@ -203,6 +220,13 @@ else
                     }
                 </div>
             </FormSection>
+
+            @if (IsNew)
+            {
+                <FormSection Title="About it" Summary="@AboutSummary">
+                    @AboutField
+                </FormSection>
+            }
 
             <FormSection Title="Tags" Summary="@TagsSummary" Open="openTags">
                 <div class="mb-3">
@@ -325,6 +349,13 @@ else
         plant.InnerPotId is { } inner ? PotName(inner) : null,
         plant.OuterPotId is { } outer ? PotName(outer) : null,
         plant.SoilMixId is { } mix ? MixName(mix) : null);
+
+    private string? AboutSummary => string.IsNullOrWhiteSpace(plant?.Notes) ? null : Labels.Short(plant.Notes);
+
+    private RenderFragment AboutField => @<div>
+        <div id="about-help" class="form-text mt-0">For what stays true about the plant, like how it likes its water. Dated notes go on its history.</div>
+        <InputTextArea class="form-control" rows="3" @bind-Value="plant!.Notes" aria-label="About it" aria-describedby="about-help" />
+    </div>;
 
     private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
 

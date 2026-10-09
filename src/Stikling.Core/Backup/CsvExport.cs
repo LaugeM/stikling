@@ -12,7 +12,7 @@ namespace Stikling.Core.Backup;
 public static class CsvExport
 {
     private static readonly string[] PlantHeader =
-        ["Name", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Tags", "Notes", "Added"];
+        ["Name", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
 
     private static readonly string[] PropagationHeader =
         ["Name", "Parent plant", "Stage", "Medium", "Started", "Room", "Notes"];
@@ -34,6 +34,7 @@ public static class CsvExport
                 p.AcquiredOn?.ToString(),
                 p.Origin.ToString(),
                 p.Source,
+                p.PricePaid?.ToString("0.##", CultureInfo.InvariantCulture),
                 string.Join("; ", p.Tags),
                 p.Notes,
                 p.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)

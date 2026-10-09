@@ -85,7 +85,8 @@ else
             <div class="row g-2 mb-3">
                 <div class="col-7">
                     <label class="form-label" for="type">Type</label>
-                    <InputSelect id="type" class="form-select" @bind-Value="propagation.Type">
+                    <InputSelect id="type" class="form-select" @bind-Value="propagation.Type"
+                                 aria-describedby="@(Labels.Explain(propagation.Type) is null ? null : "type-help")">
                         @foreach (var type in Enum.GetValues<PropagationType>())
                         {
                             <option value="@type">@Labels.For(type)</option>
@@ -96,15 +97,24 @@ else
                     <label class="form-label" for="count">How many</label>
                     <InputNumber id="count" class="form-control" @bind-Value="propagation.InitialCount" min="@MinCount" inputmode="numeric" />
                 </div>
+                @if (Labels.Explain(propagation.Type) is { } typeHelp)
+                {
+                    <div id="type-help" class="form-text">@typeHelp</div>
+                }
             </div>
             <div class="mb-3">
                 <label class="form-label" for="medium">Grows in</label>
-                <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium">
+                <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium"
+                             aria-describedby="@(Labels.Explain(propagation.Medium) is null ? null : "medium-help")">
                     @foreach (var medium in Enum.GetValues<GrowingMedium>())
                     {
                         <option value="@medium">@Labels.For(medium)</option>
                     }
                 </InputSelect>
+                @if (Labels.Explain(propagation.Medium) is { } mediumHelp)
+                {
+                    <div id="medium-help" class="form-text">@mediumHelp</div>
+                }
             </div>
             <div class="mb-1">
                 <label class="form-label" for="started">Started on</label>
@@ -112,10 +122,13 @@ else
             </div>
         </fieldset>
 
-        <fieldset>
-            <legend>Notes</legend>
-            <InputTextArea class="form-control" rows="3" @bind-Value="propagation.Notes" aria-label="Notes" />
-        </fieldset>
+        @if (!IsNew)
+        {
+            <fieldset>
+                <legend>About it</legend>
+                @AboutField
+            </fieldset>
+        }
 
         <h2 class="section-label">More details</h2>
         <div class="more-details mb-4">
@@ -169,6 +182,13 @@ else
                     <div class="form-text">Give batches you started together the same name and they're compared side by side.</div>
                 </div>
             </FormSection>
+
+            @if (IsNew)
+            {
+                <FormSection Title="About it" Summary="@AboutSummary">
+                    @AboutField
+                </FormSection>
+            }
 
             <FormSection Title="Progress" Summary="@ProgressSummary" Open="openProgress">
                 <div class="mb-3">
@@ -338,6 +358,13 @@ else
         propagation.Medium == GrowingMedium.Soil && propagation.SoilMixId is { } mix ? mixes.FirstOrDefault(m => m.Id == mix)?.Name : null,
         propagation.RootingAids.Count > 0 ? string.Join(", ", propagation.RootingAids.Select(Labels.For)) : null,
         propagation.Experiment);
+
+    private string? AboutSummary => string.IsNullOrWhiteSpace(propagation?.Notes) ? null : Labels.Short(propagation.Notes);
+
+    private RenderFragment AboutField => @<div>
+        <div id="about-help" class="form-text mt-0">For what stays true about it. Dated notes go on its history.</div>
+        <InputTextArea class="form-control" rows="3" @bind-Value="propagation!.Notes" aria-label="About it" aria-describedby="about-help" />
+    </div>;
 
     private string? ProgressSummary => propagation is null ? null : Joined(
         Labels.Stage(propagation.Stage, propagation.Type),

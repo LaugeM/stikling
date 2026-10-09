@@ -150,7 +150,11 @@ else
                             {
                                 <text> · @Labels.Date(date)</text>
                             }
-                            @if (!string.IsNullOrWhiteSpace(plant.Source))
+                            @if (plant.DescribePurchase() is { } purchase)
+                            {
+                                <text> · @purchase</text>
+                            }
+                            else if (!string.IsNullOrWhiteSpace(plant.Source))
                             {
                                 <text> · @plant.Source</text>
                             }
@@ -216,7 +220,7 @@ else
 
                     @if (!string.IsNullOrWhiteSpace(plant.Notes))
                     {
-                        <h2>Notes</h2>
+                        <h2>About it</h2>
                         <p class="detail-notes">@plant.Notes</p>
                     }
                 </section>

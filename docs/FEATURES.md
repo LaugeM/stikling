@@ -51,7 +51,7 @@ In the order I would build them. The first ones are for reaching new people: wha
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screens worth the name: purchase price and a "Log care" home screen shortcut.
+This needs no new storage and no new screen worth the name: a "Log care" home screen shortcut.
 
 ---
 
@@ -71,7 +71,7 @@ These need no new storage and no new screens worth the name: purchase price and 
 | ✅ | Buttons at the bottom of a plant or propagation page within reach of a thumb: **Photo** goes straight to the camera or gallery, **Note** and **Care** open a panel from the bottom, and a propagation's stage button holds the stage, its dates, Pot up and Mark failed | 2 | M | v1.x |
 | ✅ | Say a plant died, was given away or sold, went dormant or into quarantine, or flag it, from its page instead of the edit form, and bring it back into the collection the same way | 3 | S | v1.x |
 | ✅ | Short add and edit forms: name, where it came from, the date and notes on top, and the rest under **More details** with a line saying what is set. Save stays pinned at the bottom | 2 | S | v1.x |
-| ☐ | **About it** in place of Notes on the plant and propagation forms, with a line saying it's for what stays true about the plant and that dated notes go on its history. It moves under **More details** on the add forms. The field and what is already stored in it stay the same | 5 | S | v1.x |
+| ✅ | **About it** in place of Notes on the plant and propagation forms and pages, with a line saying it's for what stays true about the plant and that dated notes go on its history. It sits under **More details** on the add forms. The field and what is already stored in it stay the same, and the spreadsheet export still calls the column Notes | 5 | S | v1.x |
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
 | ✅ | Tags (e.g. "variegated", "rare", "for swap") and a tag filter. Picking several tags narrows the list to plants that have all of them, the search finds tags too, and a tag on a plant's page opens the list filtered by it | 3 | S | v1.x |
 | ✅ | Rename or merge a tag everywhere at once, the way rooms can be | 6 | S | v1.x |
@@ -97,7 +97,7 @@ These need no new storage and no new screens worth the name: purchase price and 
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
 | ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
 | ✅ | Duplicate a plant (e.g. a second basil pot): "Add another like this" opens the add form filled in from it | 7 | S | v1.x |
-| ☐ | Purchase price per plant | 7 | S | v1.x |
+| ✅ | **Price paid** per plant: a number with no currency, under **Where it came from** when the plant was purchased. The plant's page says "Bought from Plantorama for 150" or "Paid 150", "Add another like this" copies it, and the spreadsheet export has a column for it | 7 | S | v1.x |
 | ✅ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
 | ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 7 | M | v1.x |
 | ☐ | **Home map**: a simple plan of each room with the plants placed where they stand, to see what is where and to go round them in order | 7 | L | v1.x |
@@ -155,7 +155,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ☐ | **Photo on Start propagation**: add photos while starting a propagation, like Add plant has, so its history starts with how the cutting looked on day one. The newest becomes the cover | 3 | S | v1.x |
 | ☐ | **A date on Mark failed**, today unless changed, like Pot up has. The history entry and the finished date use it, so a rotted corm found a week late is recorded on the right day | 3 | S | v1.x |
 | ✅ | **The result of a finished propagation**: in place of the "Finished … after … days" line, a short summary of how long it ran, the days to first root, how many were potted up and failed, and the plants it became with the room each one is in and whether it's still in the collection. All from data the app already has, and the share card uses it | 3 | S | v1.x |
-| ☐ | **Say what the less obvious choices are**: a line under **Grows in** and **Type** describing the one picked, for LECA, PON, sphagnum, corm riser and air layer, on the plant and propagation forms. The same explanations go in one Help answer | 5 | S | v1.x |
+| ✅ | **Say what the less obvious choices are**: a line under **Grows in** and **Type** describing the one picked, for LECA, PON, sphagnum, corm riser and air layer, on the plant and propagation forms (not on the pot up sheet). The same explanations are in one Help answer | 5 | S | v1.x |
 | ☐ | Lineage tree view (family tree across generations) | 4 | M | v1.x |
 | ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 8 | L | v1.x |
