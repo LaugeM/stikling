@@ -99,8 +99,8 @@ public static class PropagationResults
         batches.Sum(p => p.Stage is PropagationStage.Started or PropagationStage.Rooting ? Left(p) : 0),
         batches.Select(p => p.DaysToRoot).OfType<int>().Order().ToList());
 
-    // Units left in a rooted batch have made it even though they haven't been potted up yet
-    private static int Succeeded(Propagation p) =>
+    /// <summary>Units in one propagation that have made it: potted up, plus the ones left in a batch that has rooted.</summary>
+    public static int Succeeded(Propagation p) =>
         p.PottedUpCount + (p.Stage == PropagationStage.Rooted ? Left(p) : 0);
 
     private static int Left(Propagation p) => Math.Max(0, p.RemainingCount);
