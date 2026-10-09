@@ -116,7 +116,9 @@ async function drawPair(canvas, spec, size, token) {
                 ctx.fillStyle = PAPER;
                 ctx.fillRect(x, y, w, h);
             }
-            paintDatePill(ctx, side.label, x + PILL_INSET, y + h - PILL_INSET, w - 2 * PILL_INSET);
+            // A stacked photo is the card's full width, so its date is set larger to match
+            const scale = stacked ? 1.25 : 1;
+            paintDatePill(ctx, side.label, x + PILL_INSET * scale, y + h - PILL_INSET * scale, w - 2 * PILL_INSET * scale, scale);
         });
     });
     canvas.stiklingBlob = toBlob(canvas);
@@ -132,12 +134,12 @@ async function drawPair(canvas, spec, size, token) {
 }
 
 // The date in a small white pill in the bottom left corner of a photo
-function paintDatePill(ctx, text, x, bottom, maxWidth) {
+function paintDatePill(ctx, text, x, bottom, maxWidth, scale = 1) {
     if (!text)
         return;
-    setFont(ctx, `600 36px ${BODY}`, "0", "normal");
-    const padX = 22;
-    const height = 62;
+    setFont(ctx, `600 ${Math.round(36 * scale)}px ${BODY}`, "0", "normal");
+    const padX = Math.round(22 * scale);
+    const height = Math.round(62 * scale);
     const width = Math.min(maxWidth, ctx.measureText(text).width + 2 * padX);
     ctx.save();
     ctx.globalAlpha = 0.92;
@@ -147,7 +149,7 @@ function paintDatePill(ctx, text, x, bottom, maxWidth) {
     ctx.fill();
     ctx.restore();
     ctx.fillStyle = INK;
-    ctx.fillText(text, x + padX, bottom - 18);
+    ctx.fillText(text, x + padX, bottom - Math.round(18 * scale));
 }
 
 // Whether the browser can share a picture as a file
