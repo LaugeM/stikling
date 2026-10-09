@@ -1,3 +1,4 @@
+using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
 
@@ -64,15 +65,21 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     /// <summary>Saves an edited plant and records what changed (status, room, medium, pot).</summary>
     /// <param name="potName">Turns a pot id into its name, so the history can say which pot.</param>
     /// <param name="placeName">The same for the room or spot, so the history can say where it went.</param>
+    /// <param name="pot">Finds a pot by id, to see whether a pot waters itself.</param>
     public async Task UpdateAsync(
         Plant before,
         Plant after,
         Func<Enum, string> label,
         Func<Guid, string?>? potName = null,
         Func<Guid, string?>? mixName = null,
-        Func<Guid, string?>? placeName = null)
+        Func<Guid, string?>? placeName = null,
+        Func<Guid, Pot?>? pot = null)
     {
         after.Tags = PlantTags.Normalize(after.Tags);
+        // What it learned about watering is from the way it was watered, so a new way starts over.
+        // Without the pots only the medium and the water in the outer pot are seen.
+        if (WateringForms.Of(before, pot) != WateringForms.Of(after, pot))
+            after.WateringSince = time.Today();
         // Only a plant that left can take pots, and only the ones it has
         after.PotsTaken = after.HasLeft ? after.Fit(after.PotsTaken) : PotsTaken.None;
         // Only a plant still in the collection can be resting, kept apart or need something done

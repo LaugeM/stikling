@@ -33,6 +33,13 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    public async Task SetWateringReminderAsync(bool on)
+    {
+        var current = await GetAsync();
+        current.WateringReminder = on;
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetEverydayNamesAsync(EverydayNameLanguage language)
     {
         var current = await GetAsync();

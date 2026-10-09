@@ -27,6 +27,7 @@ public static class SyncKinds
         "treatmentRecipes",
         "places",
         "putOffs",
+        "growLights",
     ];
 
     public static readonly IReadOnlyList<string> All = [.. Collection, Settings];

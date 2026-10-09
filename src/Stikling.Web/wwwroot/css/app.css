@@ -476,6 +476,11 @@ a.item-card:active {
     white-space: nowrap;
 }
 
+/* A line that is the point of the row, like a watering reminder, wraps instead */
+.item-card .item-meta.wraps {
+    white-space: normal;
+}
+
 .item-card .item-meta > * + * {
     margin-left: 0.3rem;
 }
@@ -551,9 +556,32 @@ a.item-card:active {
     margin-top: 0.4rem;
 }
 
+.answer-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(2.75rem, 1fr));
+    gap: 0.35rem;
+    flex-basis: 100%;
+    max-width: 18rem;
+}
+
+.put-off .chip {
+    min-height: 2.75rem;
+}
+
+.answer-grid .chip {
+    padding-inline: 0;
+}
+
 .put-off-label {
     margin-right: 0.15rem;
     font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.today-subhead {
+    margin: 0.75rem 0 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
     color: var(--pa-muted);
 }
 
@@ -1898,6 +1926,12 @@ a.tag-label:hover {
 .room-count {
     margin-right: auto;
     font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.room-light {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
     color: var(--pa-muted);
 }
 

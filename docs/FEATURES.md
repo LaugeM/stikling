@@ -39,19 +39,18 @@ In the order I would build them. The first ones are for reaching new people: wha
 
 1. **A time-lapse video**, from a plant's or propagation's photos, with the day count on each photo, the way Before and after already shows it.
 2. **A share link for one plant or propagation**, which opens a page anyone can see.
-3. **A watering reminder that learns each plant**, from its own waterings, meter readings and the answers given to the reminder. It's what plant apps are judged on, and it gets better the longer it's used.
-4. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
-5. **Passing a cutting on with its history**, built on the share link.
-6. **Your year with your plants**, another thing worth posting, next to A year ago today.
-7. **Going round a room**, one plant at a time, together with the daily round. It goes well with the watering reminder.
-8. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
-9. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
-10. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-11. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-12. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-13. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-14. **Comparing photos side by side, and voice notes.**
-15. **Unsure names**, for the plants that only have a provisional name.
+3. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
+4. **Passing a cutting on with its history**, built on the share link.
+5. **Your year with your plants**, another thing worth posting, next to A year ago today.
+6. **Going round a room**, one plant at a time, together with the daily round. It goes well with the watering reminder.
+7. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
+8. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
+9. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+10. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+11. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+12. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+13. **Comparing photos side by side, and voice notes.**
+14. **Unsure names**, for the plants that only have a provisional name.
 
 ### Cheap ones to slot in whenever
 
@@ -211,7 +210,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | **Moisture meter reading** (1–10) as a log type, with the latest reading shown on the card | 3 | S | v1.x |
 | ✅ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a usual dose in ml, g or drops. The dose is typed the way the bottle puts it, e.g. 5 ml per 4 L or 1 ml per 500 ml, and is optional | 4 | M | v1.x |
 | ✅ | Which products and doses went in on a feed or a top-up, e.g. "Hydro fertiliser, 2 ml/L". The dose starts at the product's usual one and can be changed for that time, and the entry keeps its own copy, so editing or deleting a product doesn't change what was logged | 4 | S | v1.x |
-| ☐ | **A watering reminder that learns each plant**: from a plant's own history the app learns how long it usually goes between waterings, and from its meter readings how long it takes to dry out to the reading you water at. That is 3 by default, the top of the red "dry" part on a 1 to 10 meter, and can be set higher for a plant kept moister, like a peace lily. It says nothing about a plant until it has seen a few waterings, and never goes by a care guide. When a plant is due, Today says so in words that fit what it knows: "probably dry by now, check with the meter" when there are readings, or "usually watered about every 9 days, it's been 9" when there aren't. Each reminder can be answered with Watered, Still wet or Skip, and every answer makes the next guess better: still wet moves it back, and watering early brings it forward. Gaps in winter are compared with earlier winters. The plant page says roughly how long it goes and how many waterings that is learned from. Plants in semi-hydro are left out, and it's off until turned on in Settings | 3 | M | v1.x |
+| ✅ | **A watering reminder that learns each plant**: from a plant's own history the app learns how long it usually goes between waterings, and from its meter readings how long it takes to dry out to the reading you water at. That is 3 by default, the top of the red "dry" part on a 1 to 10 meter, and can be set per plant, higher for one kept moister, like a peace lily. It says nothing about a plant until it has seen a few waterings, and never goes by a care guide or a fixed interval. When a plant is due, Today asks you to check it in words that fit what it knows: "probably dry by now, check with the meter" when there are readings, or "usually watered about every 9 days, it's been 9 days" when there aren't. The tick logs the watering. "Still wet" takes a meter reading from 1 to 10, or "No meter", and the plant comes back after a while. The guess leans later when unsure. Semi-hydro, corm risers and self-watering pots count how long the reservoir lasts, and plants in water how often they are topped up. A change in how a plant gets water starts the learning over. Dormant stretches are learned apart from the rest. When the days get shorter, a plant without a grow light leans later, from earlier years or from how the other plants shift. The plant page says roughly how long it goes and how many waterings that is learned from. It can be switched off per plant, and it's off until turned on in Settings | 3 | M | v1.x |
 | ☐ | Water type: tap, demineralised, rain | 6 | S | v1.x |
 | ☐ | Semi-hydro details: reservoir level, flush interval, last flush | 6 | M | v1.x |
 | ☐ | Optional care intervals per plant ("fertilise every 2 weeks") that show up on Today. An interval can be in days, weeks, months or years, for repotting, and can be limited to part of the year, e.g. fertilise from April to October | 6 | M | v1.x |
@@ -226,7 +225,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 |---|---|---|---|---|
 | ✅ | Light level per plant: low, medium, bright indirect, some direct sun | 5 | S | v1.x |
 | ☐ | **Room climate**: temperature and humidity readings for a room or spot, e.g. from a hygrometer in a cabinet, so a plant shows the conditions it lives in | 6 | M | v1.x |
-| ☐ | **Grow lights**: your lamps with a name, wattage and hours on per day, and which plants are under each one | 6 | M | v1.x |
+| ◐ | **Grow lights**: your lamps with a name, wattage and hours on per day, and which plants are under each one. A room or spot can be marked as having a grow light, which the watering reminder uses to leave the seasons out of its guess. Names, wattage and hours on per day are still missing | 6 | M | v1.x |
 | ☐ | Moving a plant under or away from a grow light is recorded in its history, like a room change | 6 | S | v1.x |
 | ☐ | Window direction for each room (north, east, south, west), so plants in a room show what light they get | 7 | M | v1.x |
 | ☐ | Filter by light, e.g. "under grow light" or "low light", to find a spot for a new plant | 7 | S | v1.x |
@@ -317,7 +316,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Needs attention**: flag a plant or propagation with a reason ("repot soon", "look closer", "change the water"), typed or picked from a few suggestions, and it stays on Today until it's marked done there or on its own page. Flags aren't written on the history, and one goes away by itself when the plant leaves or the propagation finishes | 4 | S | v1.x |
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
-| ☐ | Plants due a watering or a check today, and the ones due in the next couple of days, when the watering reminder is turned on | 3 | S | v1.x |
+| ✅ | Plants due a watering or a check today, and the ones due in the next couple of days under Coming up, when the watering reminder is turned on | 3 | S | v1.x |
 | ☐ | **A daily round**: Today suggests one room or spot to go through each day, working round the home over the week instead of everything at once. Off until turned on | 6 | S | v1.x |
 | ☐ | **Going round**: open a room or spot and go through its plants one card at a time: a meter reading, watered, checked, a photo, or skip. Made for walking round with a moisture meter, and the daily round opens straight into it | 4 | M | v1.x |
 | ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |

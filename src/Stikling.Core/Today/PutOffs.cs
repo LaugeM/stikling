@@ -38,6 +38,13 @@ public sealed class PutOffs
     public static string Quarantine(Guid plantId, DateOnly since) =>
         $"quarantine:{plantId}:{since:yyyy-MM-dd}";
 
+    /// <summary>
+    /// The key for a plant that's due for water. The day it was last watered is part of it, so
+    /// once it has been watered the next reminder isn't still hidden.
+    /// </summary>
+    public static string Water(Guid plantId, DateOnly? lastWatered) =>
+        $"water:{plantId}:{lastWatered:yyyy-MM-dd}";
+
     public bool IsPutOff(string key, DateOnly today) =>
         until.TryGetValue(key, out var back) && today < back;
 

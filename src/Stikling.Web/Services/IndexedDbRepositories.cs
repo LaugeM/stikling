@@ -1,5 +1,6 @@
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
+using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
@@ -54,6 +55,12 @@ public sealed class IndexedDbPutOffRepository(IndexedDb db, TimeProvider time)
 {
     protected override IReadOnlyList<string> Validate(PutOff putOff) =>
         string.IsNullOrWhiteSpace(putOff.Key) ? ["A put-off needs a key."] : [];
+}
+
+public sealed class IndexedDbGrowLightRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<GrowLight>(db, time, Stores.GrowLights), IGrowLightRepository
+{
+    protected override IReadOnlyList<string> Validate(GrowLight light) => light.Validate();
 }
 
 public sealed class IndexedDbTreatmentRecipeRepository(IndexedDb db, TimeProvider time)

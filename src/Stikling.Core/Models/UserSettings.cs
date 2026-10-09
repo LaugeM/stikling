@@ -16,6 +16,9 @@ public sealed class UserSettings : Entity
     /// <summary>The monthly photo reminder on Today. Off until turned on in Settings.</summary>
     public bool PhotoReminder { get; set; }
 
+    /// <summary>The watering reminder on Today. Off until turned on in Settings.</summary>
+    public bool WateringReminder { get; set; }
+
     /// <summary>
     /// The language of the everyday names shown next to botanical names. Null until it's chosen in
     /// Settings, and then it's Danish on a device whose browser lists Danish and English elsewhere.

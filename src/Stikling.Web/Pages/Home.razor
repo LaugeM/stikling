@@ -11,6 +11,10 @@
 @inject AccountService Account
 @inject SettingsService SettingsService
 @inject PutOffService PutOffService
+@inject ICareLogRepository CareLogs
+@inject IPotRepository PotRepository
+@inject GrowLightService LightService
+@inject CareService Care
 @inject AppBadge Badge
 @inject PlantService PlantService
 @inject PropagationService PropagationService
@@ -148,6 +152,34 @@ else
         </section>
     }
 
+    @if (wateringDue.Count > 0)
+    {
+        var now = wateringDue.Where(d => d.DueNow).ToList();
+        var coming = wateringDue.Where(d => !d.DueNow).ToList();
+        <section class="today-section">
+            <h2>Water</h2>
+            @if (now.Count > 0)
+            {
+                <ul class="item-list">
+                    @foreach (var due in now)
+                    {
+                        @WaterRow(due)
+                    }
+                </ul>
+            }
+            @if (coming.Count > 0)
+            {
+                <h3 class="today-subhead">Coming up</h3>
+                <ul class="item-list">
+                    @foreach (var due in coming)
+                    {
+                        @WaterRow(due)
+                    }
+                </ul>
+            }
+        </section>
+    }
+
     <section class="today-section">
         <h2>Worth a look</h2>
         @if (ChecksNow.Count == 0)
@@ -267,6 +299,36 @@ else
 }
 
 @code {
+    private RenderFragment WaterRow(WateringDue due) => __builder =>
+    {
+        var form = due.Guess.Form;
+        <TodayRow @key="due.Plant.Id" DoneLabel="@WateringText.DoneLabel(form)" OnDone="() => WaterDoneAsync(due)"
+                  AnswerLabel="@WateringText.NotYetLabel(form)" OnAnswer="reading => NotYetAsync(due, reading)"
+                  AnswerChoices="form == WateringForm.TopWatered ? MeterReadings : null"
+                  AnswerNoneLabel="@(form == WateringForm.TopWatered ? "No meter" : null)"
+                  AnswerGroupLabel="Meter reading"
+                  OnPutOff="days => PutOffWaterAsync(due, days)">
+            <a class="item-card" href="plants/@due.Plant.Id">
+                <SubjectThumb Subject="due.Plant" />
+                <div class="item-text">
+                    <div class="item-name">@due.Plant.DisplayName</div>
+                    <div class="item-meta wraps">
+                        <span>@WateringText.Row(due, Today)</span>
+                    </div>
+                </div>
+            </a>
+        </TodayRow>;
+    };
+
+    private static readonly IReadOnlyList<int> MeterReadings = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    private IReadOnlyList<WateringDue> wateringDue = [];
+    private bool wateringOn;
+    private IReadOnlyList<CareLog> careLogs = [];
+    private IReadOnlyList<TimelineEntry> plantChanges = [];
+    private IReadOnlyList<GrowLight> lights = [];
+    private IReadOnlyDictionary<Guid, Pot> potsById = new Dictionary<Guid, Pot>();
+    private Places places = Places.None;
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<Propagation> propagations = [];
     private List<Propagation> active = [];
@@ -310,6 +372,7 @@ else
     // Everything listed as due right now, which is also the number on the app icon
     private int DueCount =>
         DuePests.Sum(group => group.Cases.Count) + FlaggedNow.Count + QuarantineNow.Count + ChecksNow.Count
+        + wateringDue.Count(d => d.DueNow)
         + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
 
     protected override Task OnInitializedAsync() => LoadAsync();
@@ -325,10 +388,20 @@ else
         flagged = TodayBoard.NeedsAttention(plants, propagations);
         putOffs = await PutOffService.GetAsync(Today);
 
-        var places = await RoomService.GetPlacesAsync();
+        places = await RoomService.GetPlacesAsync();
         photoRound = (await SettingsService.GetAsync()).PhotoReminder
             ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
             : [];
+
+        wateringOn = (await SettingsService.GetAsync()).WateringReminder;
+        if (wateringOn)
+        {
+            careLogs = await CareLogs.GetAllAsync();
+            plantChanges = await Entries.GetPlantChangesAsync();
+            lights = await LightService.GetAllAsync();
+            potsById = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
+        }
+        FindWateringDue();
 
         memory = Memories.Pick(plants, await PhotoRepository.GetOfKindAsync(SubjectType.Plant), Today, Time.LocalDay);
 
@@ -346,6 +419,54 @@ else
         backupReminder = await BackupReminderAsync();
         loaded = true;
         await Badge.SetAsync(DueCount);
+    }
+
+    private void FindWateringDue() =>
+        wateringDue = wateringOn
+            ? WateringRound.Due(plants, careLogs, plantChanges, id => potsById.GetValueOrDefault(id), lights, places,
+                Seasons.HemisphereOf(TimeZoneInfo.Local), Time, putOffs)
+            : [];
+
+    // After an answer: the new entry may have moved the guess, so read the care log again
+    private async Task WateringAnsweredAsync()
+    {
+        careLogs = await CareLogs.GetAllAsync();
+        FindWateringDue();
+        await Badge.SetAsync(DueCount);
+    }
+
+    private async Task WaterDoneAsync(WateringDue due)
+    {
+        await Care.LogAsync(Care.Start(due.Plant.Id, WateringText.DoneKind(due.Guess.Form)), Labels.For);
+        await WateringAnsweredAsync();
+    }
+
+    private async Task PutOffWaterAsync(WateringDue due, int days)
+    {
+        await PutOffAsync(PutOffs.Water(due.Plant.Id, due.Guess.LastWatered), Today.AddDays(days));
+        FindWateringDue();
+        await Badge.SetAsync(DueCount);
+    }
+
+    // "Still wet" with a meter reading, or "No meter" / "Not yet" with none
+    private async Task NotYetAsync(WateringDue due, int? reading)
+    {
+        if (reading is { } value)
+        {
+            var entry = Care.Start(due.Plant.Id, CareKind.MoistureReading);
+            entry.Moisture = value;
+            await Care.LogAsync(entry, Labels.For);
+        }
+
+        // A reading moves a guess that is made from the meter. For one made from the days between
+        // waterings it says nothing new, so it waits a while like the other answers.
+        if (reading is null || due.Guess.Mode != WateringMode.Meter)
+        {
+            var wait = WateringGuess.StillWetWait(due.Guess.UsualDays ?? 1);
+            await PutOffAsync(PutOffs.Water(due.Plant.Id, due.Guess.LastWatered), Today.AddDays(wait));
+        }
+
+        await WateringAnsweredAsync();
     }
 
     private async Task PutOffAsync(string key, DateOnly until)

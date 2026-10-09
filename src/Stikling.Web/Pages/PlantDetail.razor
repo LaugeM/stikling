@@ -1,5 +1,6 @@
 @page "/plants/{Id:guid}"
 @layout WideLayout
+@using Stikling.Core.Settings
 @inject IPlantRepository Repository
 @inject IPropagationRepository PropagationRepository
 @inject ICareLogRepository CareLogRepository
@@ -13,6 +14,9 @@
 @inject TimeProvider Time
 @inject IJSRuntime JS
 @inject PlantNameService Names
+@inject ITimelineRepository TimelineRepository
+@inject GrowLightService LightService
+@inject SettingsService SettingsService
 
 <PageTitle>@(plant?.DisplayName ?? "Plant") · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -103,6 +107,10 @@ else
                             Suggestions="AttentionPanel.PlantReasons" OnSave="SetAttentionAsync" />
 
             <p class="profile-facts">@string.Join(" · ", Facts)</p>
+            @if (wateringLine is not null)
+            {
+                <p class="profile-facts">@wateringLine</p>
+            }
 
             @if (HasFamily)
             {
@@ -658,6 +666,8 @@ else
     private IReadOnlyDictionary<Guid, Photo> potCovers = new Dictionary<Guid, Photo>();
     private IReadOnlyList<SoilMix> mixes = [];
 
+    private string? wateringLine;
+
     private SoilMix? Mix => plant?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id) : null;
 
     private string? PotName(Guid? id) =>
@@ -787,6 +797,22 @@ else
             .ToList();
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
         careCalendar = CareCalendar.Build(all, plant.Id, Today);
+        await ReloadWateringLineAsync(all);
+    }
+
+    // Only said when the reminder is on for the collection and for this plant
+    private async Task ReloadWateringLineAsync(IReadOnlyList<CareLog> allCare)
+    {
+        wateringLine = null;
+        if (plant is not { Status: PlantStatus.Active, WateringReminder: true }
+            || !(await SettingsService.GetAsync()).WateringReminder)
+            return;
+
+        var guess = WateringRound.GuessFor(
+            plant, await Repository.GetAllAsync(), allCare, await TimelineRepository.GetPlantChangesAsync(),
+            id => pots.FirstOrDefault(p => p.Id == id), await LightService.GetAllAsync(), places,
+            Seasons.HemisphereOf(TimeZoneInfo.Local), Time);
+        wateringLine = WateringText.Summary(guess);
     }
 
     private async Task CareLoggedAsync()

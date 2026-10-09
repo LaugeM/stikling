@@ -6,15 +6,39 @@
         @ChildContent
         @if (OnDone.HasDelegate)
         {
-            <button type="button" class="row-btn" title="Done" aria-label="Done" disabled="@busy" @onclick="DoneAsync">
+            <button type="button" class="row-btn" title="@DoneLabel" aria-label="@DoneLabel" disabled="@busy" @onclick="DoneAsync">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
             </button>
         }
+        @if (AnswerLabel is not null && OnAnswer.HasDelegate)
+        {
+            <button type="button" class="row-btn @(answering ? "open" : null)" title="@AnswerLabel" aria-label="@AnswerLabel"
+                    aria-expanded="@(AnswerChoices is null ? null : answering ? "true" : "false")" disabled="@busy" @onclick="AnswerClickedAsync">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4c3 3.5 5.5 6.3 5.5 9.5a5.5 5.5 0 0 1-11 0C6.5 10.3 9 7.5 12 4Z" /></svg>
+            </button>
+        }
         <button type="button" class="row-btn @(choosing ? "open" : null)" title="Put off" aria-label="Put off"
-                aria-expanded="@(choosing ? "true" : "false")" disabled="@busy" @onclick="() => choosing = !choosing">
+                aria-expanded="@(choosing ? "true" : "false")" disabled="@busy" @onclick="TogglePutOff">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
         </button>
     </div>
+    @if (answering && AnswerChoices is not null)
+    {
+        <div class="put-off" role="group" aria-label="@AnswerGroupLabel">
+            <span class="put-off-label">@AnswerLabel</span>
+            @* The numbers sit in two even rows of five, each big enough to tap *@
+            <div class="answer-grid">
+                @foreach (var choice in AnswerChoices)
+                {
+                    <button type="button" class="chip" disabled="@busy" @onclick="() => AnswerAsync(choice)">@choice</button>
+                }
+            </div>
+            @if (AnswerNoneLabel is not null)
+            {
+                <button type="button" class="chip" disabled="@busy" @onclick="() => AnswerAsync(null)">@AnswerNoneLabel</button>
+            }
+        </div>
+    }
     @if (choosing)
     {
         <div class="put-off" role="group" aria-label="Put off until">
@@ -50,8 +74,53 @@
     [Parameter]
     public EventCallback OnSkip { get; set; }
 
+    /// <summary>What the tick says it does, for its title and its label to a screen reader.</summary>
+    [Parameter]
+    public string DoneLabel { get; set; } = "Done";
+
+    /// <summary>A second button next to the tick, e.g. "Still wet". Needs <see cref="OnAnswer"/>.</summary>
+    [Parameter]
+    public string? AnswerLabel { get; set; }
+
+    /// <summary>
+    /// The answer, a number from <see cref="AnswerChoices"/>, or null for <see cref="AnswerNoneLabel"/>.
+    /// Without choices the button gives null at once.
+    /// </summary>
+    [Parameter]
+    public EventCallback<int?> OnAnswer { get; set; }
+
+    /// <summary>Numbers to pick from under the row when the answer button is tapped.</summary>
+    [Parameter]
+    public IReadOnlyList<int>? AnswerChoices { get; set; }
+
+    /// <summary>The chip after the numbers, for answering without one, e.g. "No meter".</summary>
+    [Parameter]
+    public string? AnswerNoneLabel { get; set; }
+
+    /// <summary>What the chips are for, read out as the group's name.</summary>
+    [Parameter]
+    public string? AnswerGroupLabel { get; set; }
+
     private bool choosing;
+    private bool answering;
     private bool busy;
+
+    private void TogglePutOff()
+    {
+        choosing = !choosing;
+        answering = false;
+    }
+
+    private Task AnswerClickedAsync()
+    {
+        if (AnswerChoices is null)
+            return AnswerAsync(null);
+        answering = !answering;
+        choosing = false;
+        return Task.CompletedTask;
+    }
+
+    private Task AnswerAsync(int? value) => RunAsync(() => OnAnswer.InvokeAsync(value));
 
     private static string Label(int days) => days switch
     {
@@ -72,5 +141,6 @@
         await action();
         busy = false;
         choosing = false;
+        answering = false;
     }
 }

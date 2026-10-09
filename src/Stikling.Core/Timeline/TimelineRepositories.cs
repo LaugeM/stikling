@@ -17,6 +17,9 @@ public interface ITimelineRepository
     /// </summary>
     Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since);
 
+    /// <summary>The change lines on plants' histories, for any plant. Kept apart from the rest for telling when plants were dormant.</summary>
+    Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync();
+
     Task AddAsync(TimelineEntry entry);
 
     /// <summary>Saves a corrected entry.</summary>

@@ -59,6 +59,28 @@ public sealed class Plant : Entity
     public bool WaterInOuterPot { get; set; }
 
     /// <summary>
+    /// Whether Today reminds you to water it, once the app has learned its pace from the care log.
+    /// On unless turned off, and a plant saved before this existed reads as on.
+    /// </summary>
+    public bool WateringReminder { get; set; } = true;
+
+    /// <summary>
+    /// The moisture meter reading, 1 to 10, it is watered at. Null means <see cref="DefaultWaterAt"/>.
+    /// Only used for a plant watered from the top.
+    /// </summary>
+    public int? WaterAt { get; set; }
+
+    /// <summary>The top of the dry part of a 1 to 10 meter.</summary>
+    public const int DefaultWaterAt = 3;
+
+    /// <summary>
+    /// The day its current way of getting water started, e.g. when it moved from soil to Leca.
+    /// What was logged before it says nothing about the pace now, so the reminder skips it. Null
+    /// means all of the history counts.
+    /// </summary>
+    public DateOnly? WateringSince { get; set; }
+
+    /// <summary>
     /// Which pots went with it when it was given away or sold. The pot ids stay on the plant, so
     /// its history still says what it lived in; this says whether they left the house with it.
     /// </summary>
@@ -244,6 +266,8 @@ public sealed class Plant : Entity
             errors.Add("A quarantine has to last at least a day.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
+        if (WaterAt is < 1 or > 10)
+            errors.Add("The watering level goes from 1 to 10.");
         if (PotsTaken != PotsTaken.None && !HasLeft)
             errors.Add("Only a plant that was given away or sold can take its pots with it.");
         return errors;

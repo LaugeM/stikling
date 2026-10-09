@@ -2,6 +2,7 @@
 @inject RoomService RoomService
 @inject PlantService PlantService
 @inject IPlantRepository Plants
+@inject GrowLightService LightService
 
 <PageTitle>Rooms and tags · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -13,7 +14,8 @@
     <h2 class="section-label">Rooms</h2>
     <p class="settings-hint">
         Add a room here, or let it come from where your plants and propagations are. Renaming one
-        changes it everywhere, and renaming it to a name you already use merges the two.
+        changes it everywhere, and renaming it to a name you already use merges the two. Mark a
+        room or spot as having a grow light, and plants there aren't expected to slow down in winter.
     </p>
 
     @if (rooms.Count == 0)
@@ -47,6 +49,7 @@
                                         @onclick="() => RemoveAsync(r.Id, r.Name)">Remove</button>
                             }
                         </div>
+                        @LightSwitch(r.Id, r.Name)
                     }
 
                     @foreach (var spot in r.Spots)
@@ -71,6 +74,7 @@
                                                 @onclick="() => RemoveAsync(spot.Id, spot.Name)">Remove</button>
                                     }
                                 </div>
+                                @LightSwitch(spot.Id, spot.Name)
                             }
                         </div>
                     }
@@ -152,6 +156,39 @@
 </section>
 
 @code {
+    private RenderFragment LightSwitch(Guid placeId, string name) => __builder =>
+    {
+        var id = $"light-{placeId}";
+        <div class="form-check form-switch room-light">
+            <input class="form-check-input" type="checkbox" role="switch" id="@id" disabled="@busy"
+                   aria-label="@($"Grow light in {name}")"
+                   checked="@lit.Contains(placeId)" @onchange="e => SetLitAsync(placeId, e.Value is true)" />
+            <label class="form-check-label" for="@id">Grow light</label>
+        </div>
+    };
+
+    private HashSet<Guid> lit = [];
+
+    private async Task SetLitAsync(Guid placeId, bool on)
+    {
+        busy = true;
+        try
+        {
+            await LightService.SetLitAsync(placeId, on);
+            await LoadLightsAsync();
+        }
+        catch (Exception ex)
+        {
+            roomMessage = $"Couldn't save the grow light: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task LoadLightsAsync() =>
+        lit = (await LightService.GetAllAsync()).Where(l => !l.IsDeleted && l.PlaceId is not null)
+            .Select(l => l.PlaceId!.Value).ToHashSet();
+
     private RenderFragment AddRoomControl => __builder =>
     {
         if (addingRoom)
@@ -354,6 +391,7 @@
     private async Task LoadDataAsync()
     {
         rooms = await RoomService.GetAllAsync();
+        await LoadLightsAsync();
         var all = await Plants.GetAllAsync();
         tags = PlantTags.InUse(all);
         activePlants = all.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active)
