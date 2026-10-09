@@ -258,8 +258,8 @@ else
                             }
                             @if (given.GivenAway + given.Sold > 0)
                             {
-                                <dt>Given away</dt>
-                                <dd>@given.GivenAway given away@(given.Sold > 0 ? $" · {given.Sold} sold" : "")</dd>
+                                <dt>Passed on</dt>
+                                <dd>@PassedOnText()</dd>
                             }
                             @if (given.FromThoseInTurn > 0)
                             {
@@ -716,8 +716,27 @@ else
 
     private EverydayNameBook? everyday;
 
-    private string TakenText() => string.Join(" and ", given.TakenByType.Select(t =>
-        Labels.Count(t.Value, Labels.For(t.Key).ToLowerInvariant(), t.Key == PropagationType.Offset ? "offsets / pups" : null)));
+    private string TakenText() => JoinAnd(given.TakenByType.Select(t => t.Key switch
+    {
+        PropagationType.Offset => Labels.Count(t.Value, "pup"),
+        PropagationType.Leaf => Labels.Count(t.Value, "leaf", "leaves"),
+        PropagationType.AirLayer => Labels.Count(t.Value, "air layer"),
+        PropagationType.Other => Labels.Count(t.Value, "other", "others"),
+        _ => Labels.Count(t.Value, Labels.For(t.Key).ToLowerInvariant())
+    }));
+
+    private string PassedOnText() => JoinAnd(new[]
+    {
+        given.GivenAway > 0 ? $"{given.GivenAway} given away" : null,
+        given.Sold > 0 ? $"{given.Sold} sold" : null
+    }.OfType<string>());
+
+    /// <summary>"a", "a and b", "a, b and c".</summary>
+    private static string JoinAnd(IEnumerable<string> parts)
+    {
+        var list = parts.ToList();
+        return list.Count <= 1 ? string.Concat(list) : $"{string.Join(", ", list.SkipLast(1))} and {list[^1]}";
+    }
 
     private async Task LoadAsync()
     {
