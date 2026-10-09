@@ -123,3 +123,55 @@
         transition: none;
     }
 }
+
+.memory-photos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.memory-photos figure {
+    margin: 0;
+    min-width: 0;
+}
+
+.memory-photo {
+    aspect-ratio: 1;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--pa-green-soft);
+}
+
+.memory-photo ::deep img,
+.memory-photo ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.memory-photos figcaption {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.memory-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.memory-name {
+    font-weight: 600;
+    color: inherit;
+}
+
+@media (min-width: 768px) {
+    .memory {
+        max-width: 28rem;
+    }
+}

@@ -164,6 +164,13 @@
     [Parameter]
     public Guid? CoverPhotoId { get; set; }
 
+    /// <summary>When both are set, the sheet opens on Before and after with these two photos picked.</summary>
+    [Parameter]
+    public Guid? StartBeforeId { get; set; }
+
+    [Parameter]
+    public Guid? StartAfterId { get; set; }
+
     private ElementReference canvas;
     private IReadOnlyList<Photo> photos = [];
     private IReadOnlyList<Photo> allPhotos = [];
@@ -240,6 +247,13 @@
         pairPhotos = allPhotos.Count <= 60 ? allPhotos : allPhotos.Take(30).Concat(allPhotos.TakeLast(30)).ToList();
         beforeId = allPhotos.FirstOrDefault()?.Id;
         afterId = allPhotos.LastOrDefault()?.Id;
+        if (PhotoOf(StartBeforeId) is not null && PhotoOf(StartAfterId) is not null)
+        {
+            pairMode = true;
+            beforeId = StartBeforeId;
+            afterId = StartAfterId;
+            line = DefaultLine ?? "";
+        }
         ready = true;
     }
 
