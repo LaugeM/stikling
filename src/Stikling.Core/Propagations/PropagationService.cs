@@ -146,6 +146,9 @@ public sealed class PropagationService(
     /// </summary>
     public async Task<IReadOnlyList<Plant>> PotUpAsync(Propagation propagation, PotUpRequest request)
     {
+        // The day it was potted up also finishes the propagation when nothing is left
+        if (request.Date < propagation.StartedOn)
+            throw new InvalidOperationException("The date can't be before the propagation started.");
         var names = PotUpNames(request.Nickname, request.Count, propagation.PottedUpCount);
         var newPlants = names.Select(name => new Plant
         {

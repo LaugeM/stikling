@@ -79,6 +79,17 @@ public class TimelineEventTests
         Assert.Equal(day, corms.FinishedOn);
     }
 
+    [Fact]
+    public async Task Pot_up_refuses_a_day_before_the_start()
+    {
+        var corms = await StartAsync(1, Today.AddDays(-5));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.PotUpAsync(corms, new PotUpRequest(1, Today.AddDays(-6))));
+
+        Assert.Equal(0, corms.PottedUpCount);
+        Assert.Empty(plants.Plants);
+    }
+
     [Theory]
     [InlineData("\"PottedUp\"", TimelineEvent.PottedUp)]
     [InlineData("\"Failed\"", TimelineEvent.Failed)]

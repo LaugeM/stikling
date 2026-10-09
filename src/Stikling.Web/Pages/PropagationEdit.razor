@@ -165,7 +165,7 @@ else
                            @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
                 </div>
 
-                <div class="form-text">The first photo becomes the cover. You can add more later on its page.</div>
+                <div class="form-text">The newest photo becomes the cover. You can add more later on its page.</div>
                 @if (photoStatus is not null)
                 {
                     <p class="composer-status" role="status">@photoStatus</p>
@@ -375,6 +375,8 @@ else
     private bool keepToday;
 
     private Propagation? propagation;
+    private bool isDraft; // propagation is the new one being started, not one opened for editing
+    private Guid? draftParentId; // the plant the draft was started from
     private Propagation? original; // as it was before editing, to record what changed
     private bool notFound;
     private bool saving;
@@ -462,14 +464,21 @@ else
 
         if (IsNew)
         {
-            // The draft keeps its id, so photos taken before saving stay with it
-            propagation ??= ParentId is { } parentId && allPlants.FirstOrDefault(p => p.Id == parentId) is { } parent
-                ? PropagationService.StartFrom(parent)
-                : new Propagation { StartedOn = Today };
+            // The draft keeps its id, so photos taken before saving stay with it. It starts again
+            // when the page is reused for a propagation from another plant, or came from editing one
+            if (propagation is null || !isDraft || draftParentId != ParentId)
+            {
+                propagation = ParentId is { } parentId && allPlants.FirstOrDefault(p => p.Id == parentId) is { } parent
+                    ? PropagationService.StartFrom(parent)
+                    : new Propagation { StartedOn = Today };
+                isDraft = true;
+                draftParentId = ParentId;
+            }
         }
         else
         {
             propagation = allPropagations.FirstOrDefault(p => p.Id == Id);
+            isDraft = false;
             original = propagation?.Copy();
             notFound = propagation is null;
         }
