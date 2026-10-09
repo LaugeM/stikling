@@ -376,6 +376,14 @@ else
             <CareSheet PlantIds="@(new[] { plant.Id })" OnLogged="CareLoggedAsync" />
         </div>
 
+        @if (careCalendar is { IsEmpty: false })
+        {
+            <div class="sheet-section">
+                <h3 class="section-label">The last year</h3>
+                <CareCalendar Calendar="careCalendar" />
+            </div>
+        }
+
         @if (care.Count > 0)
         {
             <div class="sheet-section">
@@ -620,6 +628,7 @@ else
     private IReadOnlyList<CareLog> care = [];
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
     private MoistureReading? moisture;
+    private Stikling.Core.Care.CareCalendar? careCalendar;
     private IReadOnlyList<PestCase> pests = [];
     private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
@@ -731,6 +740,7 @@ else
             .Select(kind => (kind, CareSummary.Latest(all, plant.Id, kind, Today)))
             .ToList();
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
+        careCalendar = Stikling.Core.Care.CareCalendar.Build(all, plant.Id, Today);
     }
 
     private async Task CareLoggedAsync()

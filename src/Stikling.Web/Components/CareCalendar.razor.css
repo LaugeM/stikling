@@ -1,0 +1,68 @@
+.care-calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.75rem;
+    color: var(--pa-muted);
+}
+
+.cal-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.cal-month {
+    flex: 0 0 1.9rem;
+}
+
+.cal-days {
+    display: flex;
+    gap: 1.5px;
+    min-width: 0;
+}
+
+.cal-day {
+    display: inline-block;
+    flex: 0 1 9px;
+    min-width: 4px;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    background: var(--pa-border);
+    opacity: 0.55;
+    vertical-align: middle;
+}
+
+.cal-watered {
+    background: color-mix(in srgb, var(--pa-green) 45%, var(--pa-surface));
+    opacity: 1;
+}
+
+.cal-fed {
+    background: var(--pa-green);
+    opacity: 1;
+}
+
+/* A ring, so a meter reading is still told apart from the fills without colour */
+.cal-reading {
+    background: transparent;
+    border: 1.5px solid var(--pa-green);
+    opacity: 1;
+}
+
+.cal-future {
+    opacity: 0.2;
+}
+
+.cal-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin-top: 0.5rem;
+    padding-left: 2.3rem;
+}
+
+.cal-legend .cal-day {
+    margin-right: 0.3rem;
+}
