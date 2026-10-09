@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
+using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Stikling.Core.Pests;
@@ -332,6 +333,32 @@ internal sealed class FakeFeedRepository : IFeedRepository
     {
         if (Feeds.TryGetValue(id, out var feed))
             feed.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeGrowLightRepository : IGrowLightRepository
+{
+    public Dictionary<Guid, GrowLight> Lights { get; } = [];
+
+    public Task<IReadOnlyList<GrowLight>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<GrowLight>>(Lights.Values.Where(l => !l.IsDeleted).ToList());
+
+    public Task<GrowLight?> GetAsync(Guid id) =>
+        Task.FromResult(Lights.TryGetValue(id, out var light) && !light.IsDeleted ? light : null);
+
+    public Task SaveAsync(GrowLight light)
+    {
+        if (light.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid grow light");
+        Lights[light.Id] = light;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Lights.TryGetValue(id, out var light))
+            light.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }
