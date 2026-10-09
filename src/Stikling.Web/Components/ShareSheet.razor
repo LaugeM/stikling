@@ -261,6 +261,9 @@
             beforeId = StartBeforeId;
             afterId = StartAfterId;
             line = DefaultLine ?? "";
+            // A long history leaves out its middle, so make sure the picked photos are there to see
+            if (!pairPhotos.Any(p => p.Id == beforeId))
+                pairPhotos = pairPhotos.Append(PhotoOf(beforeId)!).OrderBy(p => p.TakenAt).ToList();
         }
         ready = true;
     }
