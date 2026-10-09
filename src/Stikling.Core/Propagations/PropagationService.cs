@@ -158,7 +158,7 @@ public sealed class PropagationService(
         // Check everything before saving anything
         if (newPlants.SelectMany(p => p.Validate(Today)).FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
-        propagation.RecordPottedUp(request.Count, Today);
+        propagation.RecordPottedUp(request.Count, request.Date);
 
         var occurredAt = time.MomentOn(request.Date);
         foreach (var plant in newPlants)
@@ -180,19 +180,27 @@ public sealed class PropagationService(
 
         var text = $"Potted up {request.Count}: {string.Join(", ", newPlants.Select(p => p.DisplayName))}";
         await AddChangeAsync(propagation, WithOutcome(text, propagation), occurredAt,
-            newPlants.Count == 1 ? newPlants[0].Id : null);
+            newPlants.Count == 1 ? newPlants[0].Id : null, TimelineEvent.PottedUp);
 
         return newPlants;
     }
 
-    /// <summary>Records units that didn't make it, with an optional reason ("rotted").</summary>
-    public async Task MarkFailedAsync(Propagation propagation, int count, string? reason = null)
+    /// <summary>
+    /// Records units that didn't make it, with an optional reason ("rotted"). They failed on
+    /// <paramref name="date"/>, today unless given, which can't be in the future or before the start.
+    /// </summary>
+    public async Task MarkFailedAsync(Propagation propagation, int count, string? reason = null, DateOnly? date = null)
     {
-        propagation.RecordFailed(count, Today);
+        var day = date ?? Today;
+        if (day > Today)
+            throw new InvalidOperationException("The date can't be in the future.");
+        if (day < propagation.StartedOn)
+            throw new InvalidOperationException("The date can't be before the propagation started.");
+        propagation.RecordFailed(count, day);
         await propagations.SaveAsync(propagation);
 
         var text = Clean(reason) is { } r ? $"{count} failed: {r}" : $"{count} failed";
-        await AddChangeAsync(propagation, WithOutcome(text, propagation));
+        await AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.Failed);
     }
 
     public Task DeleteAsync(Guid id) => propagations.DeleteAsync(id);
@@ -228,7 +236,7 @@ public sealed class PropagationService(
     private static string WithOutcome(string text, Propagation propagation) =>
         propagation.IsActive ? text : $"{text}\nFinished: {Outcome(propagation)}";
 
-    private Task AddChangeAsync(Propagation propagation, string text, DateTimeOffset? occurredAt = null, Guid? plantId = null) =>
+    private Task AddChangeAsync(Propagation propagation, string text, DateTimeOffset? occurredAt = null, Guid? plantId = null, TimelineEvent? @event = null) =>
         timeline.AddAsync(new TimelineEntry
         {
             SubjectType = SubjectType.Propagation,
@@ -236,6 +244,7 @@ public sealed class PropagationService(
             Kind = TimelineKind.Change,
             OccurredAt = occurredAt ?? time.GetUtcNow(),
             Text = text,
+            Event = @event,
             RelatedType = plantId is null ? null : SubjectType.Plant,
             RelatedId = plantId
         });

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Stikling.Core.Models;
@@ -33,6 +34,44 @@ public enum TimelineKind
 }
 
 /// <summary>
+/// What a <see cref="TimelineKind.Change"/> entry was about, when it's more than a plain update.
+/// Kept apart from <see cref="TimelineKind"/> so older versions, which fail on a kind they don't
+/// know, still load the entry and show it as "Updated".
+/// </summary>
+public enum TimelineEvent
+{
+    /// <summary>Units of a propagation were potted up as plants.</summary>
+    PottedUp,
+
+    /// <summary>Units of a propagation didn't make it.</summary>
+    Failed
+}
+
+/// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>
+public sealed class TolerantTimelineEventConverter : JsonConverter<TimelineEvent?>
+{
+    public override bool HandleNull => true;
+
+    public override TimelineEvent? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.String
+            && Enum.TryParse<TimelineEvent>(reader.GetString(), out var value)
+            && Enum.IsDefined(value))
+            return value;
+        reader.Skip();
+        return null;
+    }
+
+    public override void Write(Utf8JsonWriter writer, TimelineEvent? value, JsonSerializerOptions options)
+    {
+        if (value is { } v)
+            writer.WriteStringValue(v.ToString());
+        else
+            writer.WriteNullValue();
+    }
+}
+
+/// <summary>
 /// One event in the history of a plant or propagation. Notes and photos can be corrected
 /// afterwards, but the version they replace is kept in <see cref="Edits"/>, so the history
 /// still shows what was written at the time.
@@ -48,6 +87,13 @@ public sealed class TimelineEntry : Entity
     public TimelineKind Kind { get; set; }
 
     public string? Text { get; set; }
+
+    /// <summary>
+    /// What a change entry was about (a pot-up or a failure). Null on entries from before this was
+    /// kept; <see cref="Timeline.TimelineEvents.Of"/> recognises those from their text.
+    /// </summary>
+    [JsonConverter(typeof(TolerantTimelineEventConverter))]
+    public TimelineEvent? Event { get; set; }
 
     public List<Guid> PhotoIds { get; set; } = [];
 

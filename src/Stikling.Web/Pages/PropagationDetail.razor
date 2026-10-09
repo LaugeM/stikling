@@ -510,9 +510,14 @@ else
                                    inputmode="numeric" @bind="failedCount" @bind:event="oninput" />
                         </div>
                     }
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label class="form-label" for="failed-reason">What happened? <span class="text-body-secondary">(optional)</span></label>
                         <input id="failed-reason" class="form-control" @bind="failedReason" @bind:event="oninput" placeholder="e.g. rotted, dried out" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="failed-date">Date</label>
+                        <input id="failed-date" type="date" class="form-control" @bind="failedDate"
+                               min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-danger" disabled="@(busy || !CountIsValid(failedCount))" @onclick="MarkFailedAsync">
@@ -629,6 +634,7 @@ else
     private PotUpForm potUp = new();
     private int failedCount = 1;
     private string? failedReason;
+    private DateOnly failedDate;
     private string? message;
     private IReadOnlyList<Plant> madePlants = [];
 
@@ -861,6 +867,7 @@ else
     {
         failedCount = 1;
         failedReason = null;
+        failedDate = Today;
         message = null;
         stageView = StageView.Failed;
     }
@@ -896,11 +903,18 @@ else
             return;
 
         busy = true;
-        await PropagationService.MarkFailedAsync(propagation, failedCount, failedReason);
+        try
+        {
+            await PropagationService.MarkFailedAsync(propagation, failedCount, failedReason, failedDate);
+            message = failedCount == 1 ? "Marked 1 as failed." : $"Marked {failedCount} as failed.";
+            historyVersion++;
+        }
+        catch (InvalidOperationException ex)
+        {
+            message = $"Couldn't mark as failed: {ex.Message}";
+        }
         madePlants = [];
-        message = failedCount == 1 ? "Marked 1 as failed." : $"Marked {failedCount} as failed.";
         stageView = StageView.None;
-        historyVersion++;
         busy = false;
     }
 
