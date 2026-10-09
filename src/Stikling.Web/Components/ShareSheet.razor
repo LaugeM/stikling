@@ -175,6 +175,10 @@
     [Parameter]
     public Guid? StartAfterId { get; set; }
 
+    /// <summary>The line for the starting pair, in place of how far apart the photos are. Picking other photos goes back to the count.</summary>
+    [Parameter]
+    public string? StartLine { get; set; }
+
     private ElementReference canvas;
     private IReadOnlyList<Photo> photos = [];
     private IReadOnlyList<Photo> allPhotos = [];
@@ -205,7 +209,9 @@
     private bool Edited => CardName != Text.Name || (line ?? "").Trim() != (DefaultLine ?? "");
 
     // What the app would write: the usual line, or how far apart the two photos are
-    private string? DefaultLine => pairMode ? ApartLine(beforeId, afterId) : Text.Line;
+    private string? DefaultLine => !pairMode ? Text.Line
+        : StartLine is not null && beforeId == StartBeforeId && afterId == StartAfterId ? StartLine
+        : ApartLine(beforeId, afterId);
 
     private Photo? PhotoOf(Guid? id) => id is null ? null : allPhotos.FirstOrDefault(p => p.Id == id);
 

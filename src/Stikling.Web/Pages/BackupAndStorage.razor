@@ -46,25 +46,15 @@
             <p>
                 <strong>@file.Name</strong><br />
                 Made @Labels.Date(DateOnly.FromDateTime(file.Data.ExportedAt.LocalDateTime)), holding
-                @Labels.Plants(file.Data.Counts.Plants), @Labels.Count(file.Data.Counts.Propagations, "propagation"),
-                @Labels.Count(file.Data.Counts.Entries, "history entry", "history entries"),
-                @Labels.Count(file.Data.Counts.Photos, "photo"),
-                @Labels.Count(file.Data.Counts.CareEntries, "care entry", "care entries"),
-                @Labels.Count(file.Data.Counts.PestCases, "pest case"),
-                @Labels.Count(file.Data.Counts.Treatments, "treatment"),
-                @Labels.Count(file.Data.Counts.Pots, "pot"),
-                @Labels.Count(file.Data.Counts.SoilMixes, "soil mix", "soil mixes"),
-                @Labels.Count(file.Data.Counts.Products, "product"),
-                @Labels.Count(file.Data.Counts.Feeds, "feed"),
-                @Labels.Count(file.Data.Counts.Recipes, "treatment recipe") and
-                @Labels.Count(file.Data.Counts.Rooms, "room").
+                @Labels.Plants(file.Data.Counts.Plants), @Labels.Count(file.Data.Counts.Propagations, "propagation")
+                and @Labels.Count(file.Data.Counts.Photos, "photo"), along with their history, care, pots and rooms.
             </p>
             <p class="settings-hint">
-                Restoring adds what's missing here and brings back anything you've deleted since.
-                Changes you've made on this device are kept.@if (hasData)
+                Restoring adds what's missing here and brings back anything you've deleted since. Where the backup has a
+                newer version of something, it replaces the one here. Anything you've changed here since the backup stays.@if (hasData)
                 {
-                    <text> A backup of what's here now is saved to your downloads first, so anything the restore
-                    removes can be brought back by restoring that one.</text>
+                    <text> A backup of what's here now is saved to your downloads first, so anything that gets
+                    replaced can be brought back by restoring that one.</text>
                 }
             </p>
             <div class="settings-actions">
@@ -72,9 +62,13 @@
                 <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => pending = null">Cancel</button>
                 @if (saveFailed)
                 {
-                    <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => RestoreAsync(saveFirst: false)">Restore without saving first</button>
+                    <button type="button" class="btn btn-outline-primary" @ref="fallbackButton" disabled="@busy" @onclick="() => RestoreAsync(saveFirst: false)">Restore without saving first</button>
                 }
             </div>
+            @if (saveFailed)
+            {
+                <p class="settings-hint">Without that backup, anything a newer version in the file replaces can't be brought back.</p>
+            }
         </div>
     }
 
@@ -130,6 +124,8 @@
     private bool busy;
     private bool signedIn;
     private bool saveFailed;
+    private ElementReference fallbackButton;
+    private bool focusFallback;
     private bool hasData; // whether a restore saves a backup of this device first
 
     private DateOnly TodayDate => Time.Today();
@@ -140,6 +136,16 @@
         storage = await Db.EstimateAsync();
         // Only for the wording of the hint, and read without loading Clerk
         signedIn = Account.IsAvailable && await Account.WasSignedInAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // The button appears after a failure, so move focus to it
+        if (focusFallback && saveFailed)
+        {
+            focusFallback = false;
+            await fallbackButton.FocusAsync();
+        }
     }
 
     private async Task ExportPlantsCsvAsync()
@@ -168,9 +174,9 @@
             message = $"Saved a backup with {Labels.Plants(counts.Plants)}, {Labels.Count(counts.Propagations, "propagation")} "
                 + $"and {Labels.Count(counts.Photos, "photo")}. Check your downloads.";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            message = $"Couldn't save the backup: {ex.Message}";
+            message = "Couldn't save the backup. Check that the device has room, then try again.";
         }
 
         storage = await Db.EstimateAsync();
@@ -198,9 +204,9 @@
             hasData = await Backup.HasAnythingToSaveAsync();
             message = null;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            message = $"Couldn't read that file: {ex.Message}";
+            message = "Couldn't read that file. It may not be a Stikling backup, or it may be damaged.";
         }
 
         busy = false;
@@ -228,10 +234,11 @@
                     savedAs = $"stikling-before-restore-{TodayDate:yyyy-MM-dd}.zip";
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                message = $"Couldn't save a backup of what's here, so nothing was restored: {ex.Message}";
+                message = "Couldn't save a backup of what's here, so nothing was restored.";
                 saveFailed = true;
+                focusFallback = true;
                 busy = false;
                 return;
             }
@@ -258,9 +265,9 @@
             if (savedAs is not null)
                 message += $" What was here before is saved as {savedAs}. Check your downloads.";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            message = $"Couldn't restore: {ex.Message}";
+            message = "Couldn't finish restoring that backup. What it did restore is kept, and restoring it again picks up the rest.";
         }
 
         await file.Zip.DisposeAsync();

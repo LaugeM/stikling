@@ -222,11 +222,11 @@ else
             <div class="memory-photos">
                 <figure>
                     <div class="memory-photo"><PhotoImage PhotoId="memory.Old.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Old.TakenAt))}")" /></div>
-                    <figcaption>@Labels.Date(Time.LocalDay(memory.Old.TakenAt))</figcaption>
+                    <figcaption>@Labels.Date(Time.LocalDay(memory.Old.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.StartOf(memory.Plant), Time.LocalDay(memory.Old.TakenAt))</figcaption>
                 </figure>
                 <figure>
                     <div class="memory-photo"><PhotoImage PhotoId="memory.Newest.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Newest.TakenAt))}")" /></div>
-                    <figcaption>@Labels.Date(Time.LocalDay(memory.Newest.TakenAt))</figcaption>
+                    <figcaption>@Labels.Date(Time.LocalDay(memory.Newest.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.StartOf(memory.Plant), Time.LocalDay(memory.Newest.TakenAt))</figcaption>
                 </figure>
             </div>
             <div class="memory-footer">
@@ -236,7 +236,7 @@ else
         </section>
 
         <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="memory.Plant.Id"
-                    CoverPhotoId="memory.Plant.CoverPhotoId" StartBeforeId="memory.Old.Id" StartAfterId="memory.Newest.Id" DayOne="PhotoDayCount.StartOf(memory.Plant)"
+                    CoverPhotoId="memory.Plant.CoverPhotoId" StartBeforeId="memory.Old.Id" StartAfterId="memory.Newest.Id" StartLine="@($"{memory.Heading}.")" DayOne="PhotoDayCount.StartOf(memory.Plant)"
                     Text="ShareCardText.ForPlant(memory.Plant, plants.FirstOrDefault(p => p.Id == memory.Plant.ParentPlantId),
                               propagations.FirstOrDefault(p => p.Id == memory.Plant.FromPropagationId),
                               propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
