@@ -1,9 +1,11 @@
 @page "/plants/new"
 @page "/plants/{Id:guid}/edit"
+@using Stikling.Core.Settings
 @inject IPlantRepository Repository
 @inject IPropagationRepository Propagations
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
+@inject SettingsService SettingsService
 @inject PlantService PlantService
 @inject RoomService RoomService
 @inject PhotoService Photos
@@ -221,6 +223,36 @@ else
                 </div>
             </FormSection>
 
+            <FormSection Title="Watering" Summary="@WateringSummary" Open="openWatering">
+                <div class="form-check form-switch mb-1">
+                    <input class="form-check-input" type="checkbox" role="switch" id="watering-reminder"
+                           checked="@plant.WateringReminder"
+                           @onchange="e => plant.WateringReminder = e.Value is true" />
+                    <label class="form-check-label" for="watering-reminder">Remind me to water</label>
+                </div>
+                <div class="form-text mb-3">
+                    Today asks you to check it when it's probably dry, once it has seen a few waterings.
+                    @if (!wateringReminderOn)
+                    {
+                        <text> The reminder is turned on in Settings, and it's off there now.</text>
+                    }
+                </div>
+
+                @if (WateringForms.Of(plant, FindPot) == WateringForm.TopWatered)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="water-at">Water at</label>
+                        <InputNumber id="water-at" class="form-control" @bind-Value="plant.WaterAt"
+                                     min="1" max="10" placeholder="@Plant.DefaultWaterAt.ToString()" inputmode="numeric"
+                                     aria-describedby="water-at-help" />
+                        <div id="water-at-help" class="form-text">
+                            The moisture meter reading you water at, from 1 to 10. 3 is the top of the red dry part on most meters.
+                            Set it higher for a plant kept moister, like a peace lily.
+                        </div>
+                    </div>
+                }
+            </FormSection>
+
             @if (IsNew)
             {
                 <FormSection Title="About it" Summary="@AboutSummary">
@@ -329,6 +361,8 @@ else
     private bool openLives;
     private bool openPot;
     private bool openTags;
+    private bool openWatering;
+    private bool wateringReminderOn;
 
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
     private static readonly PotGroup[] OuterSlot = [PotGroup.Outer];
@@ -349,6 +383,13 @@ else
         plant.InnerPotId is { } inner ? PotName(inner) : null,
         plant.OuterPotId is { } outer ? PotName(outer) : null,
         plant.SoilMixId is { } mix ? MixName(mix) : null);
+
+    private Pot? FindPot(Guid id) => pots.FirstOrDefault(p => p.Id == id);
+
+    private string? WateringSummary => plant is null ? null
+        : !plant.WateringReminder ? "No reminder"
+        : plant.WaterAt is { } at && WateringForms.Of(plant, FindPot) == WateringForm.TopWatered ? $"Water at {at}"
+        : null;
 
     private string? AboutSummary => string.IsNullOrWhiteSpace(plant?.Notes) ? null : Labels.Short(plant.Notes);
 
@@ -413,6 +454,7 @@ else
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
         tagSuggestions = PlantTags.Suggestions(all);
+        wateringReminderOn = (await SettingsService.GetAsync()).WateringReminder;
         existing = all;
 
         if (IsNew)
@@ -452,6 +494,7 @@ else
             openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
             openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
             openTags = !IsNew && plant.Tags.Count > 0;
+            openWatering = !IsNew && (!plant.WateringReminder || plant.WaterAt is not null);
         }
     }
 
@@ -607,7 +650,7 @@ else
             else
             {
                 var places = await RoomService.GetPlacesAsync();
-                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName, id => places.NameOf(id));
+                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName, id => places.NameOf(id), FindPot);
             }
             Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
         }

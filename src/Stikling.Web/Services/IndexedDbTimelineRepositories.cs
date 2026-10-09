@@ -17,6 +17,11 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
     public async Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since) =>
         TodayBoard.RecentActivity(await db.GetAllAsync<TimelineEntry>(Stores.Timeline), subjectIds, since, count);
 
+    public async Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() =>
+        (await db.GetAllAsync<TimelineEntry>(Stores.Timeline))
+            .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant)
+            .ToList();
+
     public async Task AddAsync(TimelineEntry entry)
     {
         entry.CreatedAt = entry.UpdatedAt = time.GetUtcNow();

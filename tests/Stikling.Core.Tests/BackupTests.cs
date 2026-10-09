@@ -129,12 +129,13 @@ public class BackupTests
             TreatmentRecipes = [new TreatmentRecipe { Name = "Alcohol spray" }, new TreatmentRecipe { DeletedAt = Now }],
             Places = [living, new Place { Name = "Windowsill", RoomId = living.Id }, new Place { Name = "Stue", DeletedAt = Now }],
             Settings = [new UserSettings()],
-            PutOffs = [new PutOff { Key = "photos" }, new PutOff { Key = "old", DeletedAt = Now }]
+            PutOffs = [new PutOff { Key = "photos" }, new PutOff { Key = "old", DeletedAt = Now }],
+            GrowLights = [new GrowLight { Name = "Grow light" }, new GrowLight { Name = "Old", DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 

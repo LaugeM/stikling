@@ -43,6 +43,17 @@ public class WateringRoundTests
     }
 
     [Fact]
+    public void A_plants_own_guess_is_the_one_Today_has()
+    {
+        var plant = Weekly("Late", Today.AddDays(-10));
+        Weekly("Other", Today.AddDays(-3));
+
+        var guess = WateringRound.GuessFor(plant, plants, logs, [], null, [], Places.None, Hemisphere.Northern, Time);
+
+        Assert.Equal(Due().Single(d => d.Plant.Id == plant.Id).Guess, guess);
+    }
+
+    [Fact]
     public void The_name_decides_between_two_on_the_same_day()
     {
         Weekly("Zamioculcas", Today.AddDays(-7));

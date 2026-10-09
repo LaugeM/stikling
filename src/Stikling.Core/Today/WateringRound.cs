@@ -40,11 +40,7 @@ public static class WateringRound
         var history = timeline.ToList();
         var lightList = lights.ToList();
         var lit = all.ToDictionary(p => p.Id, p => GrowLights.IsLit(p, lightList, places));
-
-        // How the other plants shift this month, from the plants without a light and while awake
-        var factor = WateringSeasonFactor.For(
-            all.Where(p => !lit[p.Id]).Select(p => (p, Gaps(p, careLogs, history, time))),
-            today.Month);
+        var factor = SeasonFactor(all, lit, careLogs, history, time);
 
         var due = new List<WateringDue>();
         foreach (var plant in all.Where(p => p.WateringReminder))
@@ -64,6 +60,40 @@ public static class WateringRound
             .ThenBy(d => d.Guess.CheckOn)
             .ThenBy(d => d.Plant.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
     }
+
+    /// <summary>
+    /// The guess for one plant, worked out the way Today does it, so the plant's page and Today
+    /// say the same. Pass every plant, since the others' pace in this month is part of it.
+    /// </summary>
+    public static WateringGuess GuessFor(
+        Plant plant,
+        IEnumerable<Plant> plants,
+        IEnumerable<CareLog> logs,
+        IEnumerable<TimelineEntry> timeline,
+        Func<Guid, Pot?>? pot,
+        IEnumerable<GrowLight> lights,
+        Places places,
+        Hemisphere hemisphere,
+        TimeProvider time)
+    {
+        var today = time.Today();
+        var all = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
+        var careLogs = logs.Where(l => !l.IsDeleted).ToList();
+        var history = timeline.ToList();
+        var lightList = lights.ToList();
+        var lit = all.ToDictionary(p => p.Id, p => GrowLights.IsLit(p, lightList, places));
+        var factor = SeasonFactor(all, lit, careLogs, history, time);
+        return WateringGuess.Of(
+            plant, careLogs, history, WateringForms.Of(plant, pot),
+            GrowLights.IsLit(plant, lightList, places), hemisphere, today, factor, time);
+    }
+
+    // How the other plants shift this month, from the plants without a light and while awake
+    private static double? SeasonFactor(
+        List<Plant> all, Dictionary<Guid, bool> lit, List<CareLog> careLogs, List<TimelineEntry> history, TimeProvider time) =>
+        WateringSeasonFactor.For(
+            all.Where(p => !lit[p.Id]).Select(p => (p, Gaps(p, careLogs, history, time))),
+            time.Today().Month);
 
     private static IReadOnlyList<(DateOnly start, int days)> Gaps(
         Plant plant, List<CareLog> logs, List<TimelineEntry> history, TimeProvider time) =>

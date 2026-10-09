@@ -33,6 +33,7 @@ public sealed class BackupData
     public List<Place> Places { get; set; } = [];
     public List<UserSettings> Settings { get; set; } = [];
     public List<PutOff> PutOffs { get; set; } = [];
+    public List<GrowLight> GrowLights { get; set; } = [];
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the
@@ -53,7 +54,8 @@ public sealed class BackupData
         TreatmentRecipes.Count(r => !r.IsDeleted),
         Places.Count(p => !p.IsDeleted && !p.IsSpot),
         Settings.Count(s => !s.IsDeleted),
-        PutOffs.Count(p => !p.IsDeleted));
+        PutOffs.Count(p => !p.IsDeleted),
+        GrowLights.Count(l => !l.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -71,4 +73,5 @@ public sealed record BackupCounts(
     int Recipes,
     int Rooms,
     int Settings,
-    int PutOffs);
+    int PutOffs,
+    int GrowLights);

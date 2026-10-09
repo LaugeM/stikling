@@ -557,6 +557,13 @@ a.item-card:active {
     color: var(--pa-muted);
 }
 
+.today-subhead {
+    margin: 0.75rem 0 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--pa-muted);
+}
+
 .today-row-status {
     margin: 0.3rem 0 0;
     font-size: 0.85rem;
@@ -1898,6 +1905,12 @@ a.tag-label:hover {
 .room-count {
     margin-right: auto;
     font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.room-light {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
     color: var(--pa-muted);
 }
 
