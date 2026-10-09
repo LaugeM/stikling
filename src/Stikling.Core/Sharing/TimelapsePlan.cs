@@ -25,6 +25,9 @@ public sealed class TimelapsePlan
     /// <summary>How much longer the last photo stays up than the others.</summary>
     public const double LastExtraSeconds = 1.5;
 
+    /// <summary>The most photos a time-lapse takes, so a long history doesn't make a video that takes minutes to make.</summary>
+    public const int MaxPhotos = 60;
+
     private const double MaxCrossfadeSeconds = 0.2;
 
     private TimelapsePlan(IReadOnlyList<TimelapseShot> shots, double crossfade, double total)
@@ -49,6 +52,21 @@ public sealed class TimelapsePlan
         TimelapseSpeed.Fast => 0.35,
         _ => 0.6,
     };
+
+    /// <summary>
+    /// The photos to start a time-lapse with: all of them up to <paramref name="max"/>, and over that, that many
+    /// spread evenly through the history by date, always including the first and the newest.
+    /// </summary>
+    public static IReadOnlyList<TimelapsePhoto> Spread(IEnumerable<TimelapsePhoto> photos, int max = MaxPhotos)
+    {
+        var ordered = photos.OrderBy(p => p.TakenAt).ThenBy(p => p.Id).ToList();
+        if (ordered.Count <= max || max < 2)
+            return max < 2 ? ordered.Take(Math.Max(max, 0)).ToList() : ordered;
+
+        return Enumerable.Range(0, max)
+            .Select(i => ordered[(int)Math.Round(i * (ordered.Count - 1) / (double)(max - 1))])
+            .ToList();
+    }
 
     /// <summary>The photos in the order they were taken. Photos from the same moment keep a steady order.</summary>
     public static TimelapsePlan Create(IEnumerable<TimelapsePhoto> photos, TimelapseSpeed speed)

@@ -32,15 +32,15 @@
                 <div class="share-label" id="share-mode-label">Card</div>
                 <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-mode-label">
                     <input type="radio" class="btn-check" name="share-mode" id="share-mode-one"
-                           checked="@(mode == ShareMode.One)" @onchange="() => SetModeAsync(ShareMode.One)" />
+                           checked="@(mode == ShareMode.One)" @onchange="() => SetModeAsync(ShareMode.One)" disabled="@Making" />
                     <label class="btn btn-outline-primary" for="share-mode-one">One photo</label>
                     <input type="radio" class="btn-check" name="share-mode" id="share-mode-pair"
-                           checked="@(mode == ShareMode.Pair)" @onchange="() => SetModeAsync(ShareMode.Pair)" />
+                           checked="@(mode == ShareMode.Pair)" @onchange="() => SetModeAsync(ShareMode.Pair)" disabled="@Making" />
                     <label class="btn btn-outline-primary" for="share-mode-pair">Before and after</label>
                     @if (allPhotos.Count >= 3)
                     {
                         <input type="radio" class="btn-check" name="share-mode" id="share-mode-timelapse"
-                               checked="@(mode == ShareMode.Timelapse)" @onchange="() => SetModeAsync(ShareMode.Timelapse)" />
+                               checked="@(mode == ShareMode.Timelapse)" @onchange="() => SetModeAsync(ShareMode.Timelapse)" disabled="@Making" />
                         <label class="btn btn-outline-primary" for="share-mode-timelapse">Time-lapse</label>
                     }
                 </div>
@@ -54,7 +54,7 @@
                 {
                     var id = $"share-format-{value}";
                     <input type="radio" class="btn-check" name="share-format" id="@id"
-                           checked="@(ActiveFormat == value)" @onchange="() => SetFormatAsync(value)" />
+                           checked="@(ActiveFormat == value)" @onchange="() => SetFormatAsync(value)" disabled="@Making" />
                     <label class="btn btn-outline-primary" for="@id">@label</label>
                 }
             </div>
@@ -69,7 +69,7 @@
                     {
                         var id = $"share-speed-{value}";
                         <input type="radio" class="btn-check" name="share-speed" id="@id"
-                               checked="@(speed == value)" @onchange="() => SetSpeedAsync(value)" />
+                               checked="@(speed == value)" @onchange="() => SetSpeedAsync(value)" disabled="@Making" />
                         <label class="btn btn-outline-primary" for="@id">@label</label>
                     }
                 </div>
@@ -78,12 +78,12 @@
             <div class="share-field">
                 <div class="share-label" id="share-ticks-label">Photos in the video</div>
                 <div class="share-photos" role="group" aria-labelledby="share-ticks-label">
-                    @foreach (var photo in allPhotos)
+                    @foreach (var photo in RowPhotos)
                     {
                         var ticked = !leftOut.Contains(photo.Id);
                         <button type="button" role="checkbox" aria-checked="@(ticked ? "true" : "false")"
                                 aria-label="@($"Photo from {DayText(photo)}")" class="share-photo @(ticked ? "ticked" : "left-out")"
-                                @onclick="() => ToggleTick(photo.Id)">
+                                @onclick="() => ToggleTick(photo.Id)" disabled="@Making">
                             <PhotoImage PhotoId="photo.Id" Framed="false" />
                             @if (ticked)
                             {
@@ -93,6 +93,12 @@
                     }
                 </div>
                 <p class="form-text mb-0">@TickedPhotos.Count of @allPhotos.Count photos are in the video. Tap one to leave it out.</p>
+                @if (TooLong)
+                {
+                    <p class="form-text mb-0">It has @allPhotos.Count photos, and a time-lapse takes up to @TimelapsePlan.MaxPhotos, so @TimelapsePlan.MaxPhotos spread over them are picked.</p>
+                    <button type="button" class="btn btn-link btn-sm link-action ps-0" aria-expanded="@(showAllPhotos ? "true" : "false")"
+                            @onclick="() => showAllPhotos = !showAllPhotos">@(showAllPhotos ? "Show only the photos in the video" : $"Show all {allPhotos.Count} photos")</button>
+                }
                 @if (tickNote is not null)
                 {
                     <p class="form-text mb-0" role="status">@tickNote</p>
@@ -174,15 +180,15 @@
 
         <div class="share-field">
             <label class="share-label" for="share-name">Name</label>
-            <input id="share-name" class="form-control" maxlength="80" @bind="name" @bind:event="oninput" />
+            <input id="share-name" class="form-control" maxlength="80" @bind="name" @bind:event="oninput" disabled="@Making" />
         </div>
 
         <div class="share-field">
             <label class="share-label" for="share-line">What it says</label>
-            <textarea id="share-line" class="form-control" rows="3" maxlength="200" @bind="line" @bind:event="oninput"></textarea>
+            <textarea id="share-line" class="form-control" rows="3" maxlength="200" @bind="line" @bind:event="oninput" disabled="@Making"></textarea>
             @if (Edited)
             {
-                <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="UseOriginalWords">Use the app's words again</button>
+                <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="UseOriginalWords" disabled="@Making">Use the app's words again</button>
             }
         </div>
 
@@ -326,6 +332,7 @@
     private string? madeKey;
     private string? previewKey;
     private bool cancelRequested;
+    private bool showAllPhotos;
     private bool canShareVideo;
     private bool reducedMotion;
     private bool previewPlaying;
@@ -350,6 +357,13 @@
     private int SmallCount => TickedPhotos.Count(p => smallIds.Contains(p.Id));
 
     private string ProgressValue => (progress ?? 0).ToString("0.###", CultureInfo.InvariantCulture);
+
+    private bool Making => videoState == VideoState.Making;
+
+    private bool TooLong => allPhotos.Count > TimelapsePlan.MaxPhotos;
+
+    // A long history shows only the photos in the video until asked for all of them, since each thumbnail is read from the device when it is shown
+    private IReadOnlyList<Photo> RowPhotos => TooLong && !showAllPhotos ? TickedPhotos : allPhotos;
 
     private bool VideoIsReady => videoState == VideoState.Done && madeKey == VideoKey(VideoSpec());
 
@@ -411,6 +425,11 @@
 
         // Oldest first, so the history reads left to right. A very long history keeps its first and last photos.
         allPhotos = all.OrderBy(p => p.TakenAt).ToList();
+        // A long history starts with 60 photos spread over it for the time-lapse; the rest are left out
+        showAllPhotos = false;
+        var starting = TimelapsePlan.Spread(allPhotos.Select(p => new TimelapsePhoto(p.Id, p.TakenAt))).Select(p => p.Id).ToHashSet();
+        foreach (var p in allPhotos.Where(p => !starting.Contains(p.Id)))
+            leftOut.Add(p.Id);
         pairPhotos = allPhotos.Count <= 60 ? allPhotos : allPhotos.Take(30).Concat(allPhotos.TakeLast(30)).ToList();
         beforeId = allPhotos.FirstOrDefault()?.Id;
         afterId = allPhotos.LastOrDefault()?.Id;
@@ -594,8 +613,14 @@
 
     private void ToggleTick(Guid id)
     {
-        if (leftOut.Remove(id))
+        if (leftOut.Contains(id))
         {
+            if (TickedPhotos.Count >= TimelapsePlan.MaxPhotos)
+            {
+                tickNote = $"A time-lapse takes up to {TimelapsePlan.MaxPhotos} photos. Leave one out to add this one.";
+                return;
+            }
+            leftOut.Remove(id);
             tickNote = null;
         }
         else if (allPhotos.Count - leftOut.Count <= 2)
@@ -707,6 +732,13 @@
                 return;
             }
 
+            // Cancel may have been tapped while the photos were being checked
+            if (cancelRequested)
+            {
+                videoState = VideoState.Idle;
+                return;
+            }
+
             var spec = VideoSpec();
             phase = "Making the video.";
             progress = 0;
@@ -729,6 +761,10 @@
                     break;
                 case "cancelled":
                     videoState = VideoState.Idle;
+                    break;
+                case "offline":
+                    videoState = VideoState.Idle;
+                    message = "The video maker couldn't be downloaded. Connect to the internet and try again. After that it works offline too.";
                     break;
                 case "unsupported":
                     videoState = VideoState.Idle;

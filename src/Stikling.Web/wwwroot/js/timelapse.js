@@ -24,6 +24,7 @@ const PAPER = "#f6f7f4";
 
 const CANCELLED = Symbol("cancelled");
 const UNSUPPORTED = Symbol("unsupported");
+const OFFLINE = Symbol("offline"); // a library could not be downloaded
 
 let preview = null; // { canvas, spec, frames, ids, playing, startedAt, raf, lastKey, dirty }
 let job = null; // the video being made: { cancelled, output }
@@ -248,7 +249,8 @@ function mixKey(spec, t) {
 // ---- Making the video ----
 
 // Makes the video from the spec and keeps it here. Reports how far it has got to the .NET object,
-// a few times a second. Resolves to "done", "cancelled", "unsupported" or "failed".
+// a few times a second. Resolves to "done", "cancelled", "unsupported" (this browser can't make
+// videos), "offline" (a library couldn't be downloaded) or "failed".
 // spec: { format, name, latin, cultivar, line, crossfade, total, shots: [{ photoId, frame, label, start, hold }] }
 export async function make(spec, progress) {
     stopPreview();
@@ -279,9 +281,13 @@ export async function make(spec, progress) {
                 console.warn("Time-lapse:", error);
             }
         }
+        if (last === OFFLINE)
+            return "offline";
         return last === UNSUPPORTED && ways.length === 1 ? "unsupported" : "failed";
     } catch (error) {
         console.warn("Time-lapse:", error);
+        if (error === OFFLINE)
+            return "offline";
         return mine.cancelled ? "cancelled" : "failed";
     } finally {
         if (job === mine)
@@ -359,11 +365,21 @@ function bitrateFor(size) {
     return Math.round(8_000_000 * (size.width * size.height) / (1080 * 1920));
 }
 
+// The library is downloaded the first time, so this fails with OFFLINE when there is no connection
+async function importMediabunny() {
+    try {
+        return await import(MEDIABUNNY);
+    } catch (error) {
+        console.warn("Time-lapse:", error);
+        throw OFFLINE;
+    }
+}
+
 async function canUseWebCodecs(size) {
     if (typeof VideoEncoder === "undefined")
         return false;
+    const { canEncodeVideo, Quality } = await importMediabunny();
     try {
-        const { canEncodeVideo, Quality } = await import(MEDIABUNNY);
         return await canEncodeVideo("avc", {
             width: size.width,
             height: size.height,
@@ -376,7 +392,7 @@ async function canUseWebCodecs(size) {
 }
 
 async function encodeWithWebCodecs(spec, size, active, report) {
-    const { Output, Mp4OutputFormat, BufferTarget, CanvasSource, Quality } = await import(MEDIABUNNY);
+    const { Output, Mp4OutputFormat, BufferTarget, CanvasSource, Quality } = await importMediabunny();
 
     const canvas = makeCanvas(size);
     const ctx = canvas.getContext("2d");
@@ -420,23 +436,26 @@ function loadH264() {
     h264Loading ??= new Promise((resolve, reject) => {
         const script = document.createElement("script");
         script.src = H264_SCRIPT;
-        script.onload = () => typeof HME !== "undefined" ? resolve(HME) : reject(UNSUPPORTED);
-        script.onerror = () => {
+        // Every way this can fail clears h264Loading, so trying again downloads it again
+        const fail = () => {
             script.remove();
             h264Loading = null;
-            reject(UNSUPPORTED);
+            reject(OFFLINE);
         };
+        script.onload = () => typeof HME !== "undefined" ? resolve(HME) : fail();
+        script.onerror = fail;
         document.head.appendChild(script);
     });
     return h264Loading;
 }
 
 async function encodeWithWasm(spec, size, active, report) {
+    const lib = await loadH264();
     let encoder;
     try {
-        encoder = await (await loadH264()).createH264MP4Encoder();
+        encoder = await lib.createH264MP4Encoder();
     } catch {
-        // The script or the WebAssembly in it wouldn't load, so this browser has no way left
+        // The script is here but the WebAssembly in it won't start, so this browser has no way left
         throw UNSUPPORTED;
     }
     try {
