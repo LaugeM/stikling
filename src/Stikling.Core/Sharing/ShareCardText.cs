@@ -145,13 +145,31 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
             var days = today.DayNumber - date.DayNumber;
             if (days < 0)
                 return null;
-            var months = (today.Year - date.Year) * 12 + today.Month - date.Month - (today.Day < date.Day ? 1 : 0);
+            var months = WholeMonths(date, today);
             return days < 60 ? Counted(days, "with me", unit: "day")
                 : months < 24 ? Counted(months, "with me", unit: "month")
                 : Counted(months / 12, "with me", unit: "year");
         }
 
         return null;
+    }
+
+    private static int WholeMonths(DateOnly from, DateOnly to) =>
+        (to.Year - from.Year) * 12 + to.Month - from.Month - (to.Day < from.Day ? 1 : 0);
+
+    /// <summary>
+    /// "46 days apart." under 60 days, "8 months apart." under 24 months, "2 years apart." after that.
+    /// Null for the same day. The caller passes the older day first; a later <paramref name="before"/>
+    /// is treated as the same day and gives null.
+    /// </summary>
+    public static string? ApartLine(DateOnly before, DateOnly after)
+    {
+        var days = after.DayNumber - before.DayNumber;
+        if (days <= 0)
+            return null;
+        var months = WholeMonths(before, after);
+        var (value, unit) = days < 60 ? (days, "day") : months < 24 ? (months, "month") : (months / 12, "year");
+        return $"{value} {unit}{(value == 1 ? "" : "s")} apart.";
     }
 
     // "18" and "days to root"

@@ -31,6 +31,8 @@ const DISPLAY = '"Bricolage Grotesque", system-ui, sans-serif';
 const BODY = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
 
 const MARGIN = 72;
+const PAIR_GAP = 8; // between the two photos of a before and after card
+const PILL_INSET = 24;
 
 // The stroked icons from the app, for a card with neither photo nor number
 const ICONS = {
@@ -38,19 +40,28 @@ const ICONS = {
     propagation: ["M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z", "M12 12v4M12 16l-2 2M12 16l2 2"],
 };
 
-let cached = null; // the last photo that was drawn, so changing the words doesn't decode it again
+// The photos that were drawn last, at most two (the two of a before and after card), so changing
+// the words doesn't decode them again
+const cache = new Map();
 
 // Draws the card on the canvas. Returns { photo, small } saying whether the photo made it onto the
 // card and whether only its small version was on this device, or null when a newer draw has taken
-// over before this one finished.
+// over before this one finished. A before and after card also gets photos and smallPhotos, the ids
+// of the photos that made it onto the card and of those that are only small.
 // spec: { format, tone, name, latin, cultivar, line, figure: { value, caption } | null,
-//         photoId: string | null, frame: { x, y, zoom } | null }
+//         photoId: string | null, frame: { x, y, zoom } | null,
+//         pair: { before, after } | null }, each side { photoId, frame, label }.
+// The before side is the older photo. The labels are the dates, formatted by the caller.
 export async function draw(canvas, spec) {
     const token = canvas.stiklingToken = (canvas.stiklingToken ?? 0) + 1;
     const size = SIZES[spec.format] ?? SIZES.square;
 
     await loadFonts();
+    if (spec.pair)
+        return await drawPair(canvas, spec, size, token);
+
     const photo = spec.photoId ? await readPhoto(spec.photoId) : null;
+    keepOnly(photo ? [photo.id] : []);
     const bitmap = photo?.bitmap ?? null;
     if (canvas.stiklingToken !== token)
         return null;
@@ -61,13 +72,80 @@ export async function draw(canvas, spec) {
     ctx.textBaseline = "alphabetic";
 
     if (bitmap)
-        paintPhotoCard(ctx, size, spec, bitmap);
+        paintPhotoCard(ctx, size, spec, bandTop => drawCover(ctx, bitmap, spec.frame, 0, 0, size.width, bandTop));
     else
         paintTextCard(ctx, size, spec);
     // The picture is made now, so sharing has nothing to wait for while the tap's permission to open
     // the share menu is still valid
     canvas.stiklingBlob = toBlob(canvas);
     return { photo: bitmap !== null, small: photo?.small ?? false };
+}
+
+async function drawPair(canvas, spec, size, token) {
+    const { before, after } = spec.pair;
+    const first = await readPhoto(before.photoId);
+    const second = await readPhoto(after.photoId);
+    keepOnly([before.photoId, after.photoId]);
+    if (canvas.stiklingToken !== token)
+        return null;
+
+    canvas.width = size.width;
+    canvas.height = size.height;
+    const ctx = canvas.getContext("2d");
+    ctx.textBaseline = "alphabetic";
+
+    paintPhotoCard(ctx, size, spec, bandTop => {
+        // Side by side, but stacked on a story, which is tall and narrow
+        const stacked = size.height > size.width * 1.5;
+        const boxW = stacked ? size.width : Math.floor((size.width - PAIR_GAP) / 2);
+        const boxH = stacked ? Math.floor((bandTop - PAIR_GAP) / 2) : bandTop;
+        const boxes = stacked
+            ? [[0, 0, boxW, boxH], [0, boxH + PAIR_GAP, boxW, bandTop - boxH - PAIR_GAP]]
+            : [[0, 0, boxW, boxH], [boxW + PAIR_GAP, 0, size.width - boxW - PAIR_GAP, boxH]];
+
+        // The gap shows the band's colour
+        ctx.fillStyle = SURFACE;
+        ctx.fillRect(0, 0, size.width, bandTop);
+        [[before, first], [after, second]].forEach(([side, photo], i) => {
+            const [x, y, w, h] = boxes[i];
+            if (photo) {
+                drawCover(ctx, photo.bitmap, side.frame, x, y, w, h);
+            } else {
+                ctx.fillStyle = PAPER;
+                ctx.fillRect(x, y, w, h);
+            }
+            paintDatePill(ctx, side.label, x + PILL_INSET, y + h - PILL_INSET, w - 2 * PILL_INSET);
+        });
+    });
+    canvas.stiklingBlob = toBlob(canvas);
+
+    const present = [[before, first], [after, second]].filter(([, photo]) => photo);
+    const small = present.filter(([, photo]) => photo.small);
+    return {
+        photo: present.length === 2,
+        small: small.length > 0,
+        photos: present.map(([side]) => side.photoId),
+        smallPhotos: small.map(([side]) => side.photoId),
+    };
+}
+
+// The date in a small white pill in the bottom left corner of a photo
+function paintDatePill(ctx, text, x, bottom, maxWidth) {
+    if (!text)
+        return;
+    setFont(ctx, `600 30px ${BODY}`, "0", "normal");
+    const padX = 18;
+    const height = 52;
+    const width = Math.min(maxWidth, ctx.measureText(text).width + 2 * padX);
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = SURFACE;
+    ctx.beginPath();
+    ctx.roundRect(x, bottom - height, width, height, height / 2);
+    ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = INK;
+    ctx.fillText(text, x + padX, bottom - 15);
 }
 
 // Whether the browser can share a picture as a file
@@ -130,8 +208,9 @@ async function loadFonts() {
 // Null when neither is.
 async function readPhoto(id) {
     // A small one is read again, since the full photo may have arrived since
-    if (cached?.id === id && !cached.small)
-        return cached;
+    const kept = cache.get(id);
+    if (kept && !kept.small)
+        return kept;
 
     const full = await getBlob(id);
     const blob = full ?? (await getBlob(`${id}:thumb`));
@@ -140,17 +219,29 @@ async function readPhoto(id) {
 
     try {
         const bitmap = await createImageBitmap(blob);
-        cached?.bitmap.close();
-        cached = { id, bitmap, small: full === null };
-        return cached;
+        kept?.bitmap.close();
+        const entry = { id, bitmap, small: full === null };
+        cache.set(id, entry);
+        return entry;
     } catch {
         return null;
     }
 }
 
+// Closes the photos that aren't on the card any more
+function keepOnly(ids) {
+    for (const [id, entry] of cache) {
+        if (!ids.includes(id)) {
+            entry.bitmap.close();
+            cache.delete(id);
+        }
+    }
+}
+
 // ---- The card with a photo: the photo above, a label under it ----
 
-function paintPhotoCard(ctx, size, spec, bitmap) {
+// paintPhotos(bandTop) paints the photo area, which is everything above the band
+function paintPhotoCard(ctx, size, spec, paintPhotos) {
     const { width, height } = size;
     const textWidth = width - 2 * MARGIN;
     const blocks = layoutText(ctx, size, spec, textWidth);
@@ -165,7 +256,7 @@ function paintPhotoCard(ctx, size, spec, bitmap) {
     ctx.fillStyle = PAPER;
     ctx.fillRect(0, 0, width, height);
 
-    drawCover(ctx, bitmap, spec.frame, 0, 0, width, bandTop);
+    paintPhotos(bandTop);
 
     ctx.fillStyle = SURFACE;
     ctx.fillRect(0, bandTop, width, bandHeight);

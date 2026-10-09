@@ -37,7 +37,7 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
 
-1. **Before and after**, and then **a time-lapse video**, from a plant's or propagation's photos.
+1. **A time-lapse video**, from a plant's or propagation's photos. Before and after is built.
 2. **A share link for one plant or propagation**, which opens a page anyone can see.
 3. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
 4. **Passing a cutting on with its history**, built on the share link.
@@ -126,7 +126,7 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ☐ | Measurements on an entry: number of leaves, height, root length | 6 | S | v1.x |
 | ☐ | **Growth curve**: a small chart of a plant's or propagation's measurements over time, once there are a few to draw | 7 | S | v1.x |
 | ☐ | **Share into Stikling**: the installed app appears in Android's share menu, so a photo from the gallery can go straight to a plant (Web Share Target) | 7 | M | v1.x |
-| ☐ | **Before and after**: pick two photos of a plant or propagation, usually the first and the newest, and get one image of them side by side with the dates and how long it took, ready to post. Shared through the phone's share menu, or saved | 3 | M | v1.x |
+| ✅ | **Before and after**: in the Share sheet, pick two photos of a plant or propagation, starting on the first and the newest, and get one image of them side by side (stacked for 9:16) with the dates and how far apart they are, ready to post. Shared through the phone's share menu, or saved | 3 | M | v1.x |
 | ☐ | **Time-lapse video** from a plant's or propagation's photos, each one showing for a moment with its date, in a portrait shape that fits TikTok and Reels. Made on the phone. Which video formats each browser can record, and which TikTok and Instagram take, needs trying on a phone | 4 | L | v1.x |
 | ☐ | **Ghost overlay** when taking a photo: a faint copy of the previous photo to line up the same angle every time | 8 | L | v1.x |
 

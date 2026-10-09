@@ -262,4 +262,46 @@ public class ShareCardTextTests
 
         Assert.Null(Of(plant).Figure);
     }
+
+    [Fact]
+    public void Photos_on_the_same_day_have_no_apart_line()
+    {
+        Assert.Null(ShareCardText.ApartLine(Started, Started));
+    }
+
+    [Fact]
+    public void Photos_in_the_wrong_order_have_no_apart_line_since_the_caller_puts_the_older_first()
+    {
+        Assert.Null(ShareCardText.ApartLine(Started.AddDays(5), Started));
+    }
+
+    [Theory]
+    [InlineData(1, "1 day apart.")]
+    [InlineData(46, "46 days apart.")]
+    [InlineData(59, "59 days apart.")]
+    public void Under_sixty_days_counts_days(int days, string expected)
+    {
+        Assert.Equal(expected, ShareCardText.ApartLine(Started, Started.AddDays(days)));
+    }
+
+    [Fact]
+    public void Sixty_days_is_counted_in_months()
+    {
+        Assert.Equal("1 month apart.", ShareCardText.ApartLine(new DateOnly(2026, 7, 1), new DateOnly(2026, 8, 30)));
+        Assert.Equal("8 months apart.", ShareCardText.ApartLine(new DateOnly(2025, 1, 15), new DateOnly(2025, 9, 20)));
+    }
+
+    [Fact]
+    public void Months_hold_up_to_twenty_four_and_then_years_count()
+    {
+        Assert.Equal("23 months apart.", ShareCardText.ApartLine(new DateOnly(2024, 1, 10), new DateOnly(2025, 12, 10)));
+        Assert.Equal("2 years apart.", ShareCardText.ApartLine(new DateOnly(2024, 1, 10), new DateOnly(2026, 1, 10)));
+        Assert.Equal("2 years apart.", ShareCardText.ApartLine(new DateOnly(2024, 1, 10), new DateOnly(2026, 12, 9)));
+    }
+
+    [Fact]
+    public void A_single_year_is_never_said_because_it_is_twelve_months()
+    {
+        Assert.Equal("12 months apart.", ShareCardText.ApartLine(new DateOnly(2025, 1, 10), new DateOnly(2026, 1, 10)));
+    }
 }
