@@ -7,7 +7,9 @@
 @inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
+@inject PhotoService Photos
 @inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <PageTitle>@(IsNew ? "Start propagation" : "Edit propagation") · Stikling</PageTitle>
 
@@ -85,7 +87,8 @@ else
             <div class="row g-2 mb-3">
                 <div class="col-7">
                     <label class="form-label" for="type">Type</label>
-                    <InputSelect id="type" class="form-select" @bind-Value="propagation.Type">
+                    <InputSelect id="type" class="form-select" @bind-Value="propagation.Type"
+                                 aria-describedby="@(Labels.Explain(propagation.Type) is null ? null : "type-help")">
                         @foreach (var type in Enum.GetValues<PropagationType>())
                         {
                             <option value="@type">@Labels.For(type)</option>
@@ -96,26 +99,87 @@ else
                     <label class="form-label" for="count">How many</label>
                     <InputNumber id="count" class="form-control" @bind-Value="propagation.InitialCount" min="@MinCount" inputmode="numeric" />
                 </div>
+                @if (Labels.Explain(propagation.Type) is { } typeHelp)
+                {
+                    <div id="type-help" class="form-text">@typeHelp</div>
+                }
             </div>
             <div class="mb-3">
                 <label class="form-label" for="medium">Grows in</label>
-                <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium">
+                <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium"
+                             aria-describedby="@(Labels.Explain(propagation.Medium) is null ? null : "medium-help")">
                     @foreach (var medium in Enum.GetValues<GrowingMedium>())
                     {
                         <option value="@medium">@Labels.For(medium)</option>
                     }
                 </InputSelect>
+                @if (Labels.Explain(propagation.Medium) is { } mediumHelp)
+                {
+                    <div id="medium-help" class="form-text">@mediumHelp</div>
+                }
             </div>
             <div class="mb-1">
                 <label class="form-label" for="started">Started on</label>
                 <InputDate id="started" class="form-control" @bind-Value="propagation.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
+                @if (dateFromPhotos is { } fromPhotos && propagation.StartedOn == fromPhotos)
+                {
+                    <div class="form-text">
+                        Set to the day of the oldest photo, so the photos come after it in the history.
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="KeepToday">Use today instead</button>
+                    </div>
+                }
             </div>
         </fieldset>
 
-        <fieldset>
-            <legend>Notes</legend>
-            <InputTextArea class="form-control" rows="3" @bind-Value="propagation.Notes" aria-label="Notes" />
-        </fieldset>
+        @if (IsNew)
+        {
+            <fieldset>
+                <legend>Photo</legend>
+                @if (photos.Count > 0)
+                {
+                    <div class="photo-picks">
+                        @foreach (var photo in photos)
+                        {
+                            <div class="photo-pick">
+                                <PhotoImage PhotoId="photo.Id" Alt="Photo of the new propagation" />
+                                <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
+                                        aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="composer-row">
+                    <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        Camera
+                    </label>
+                    <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                           @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
+
+                    <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                        Gallery
+                    </label>
+                    <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
+                           @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+                </div>
+
+                <div class="form-text">The newest photo becomes the cover. You can add more later on its page.</div>
+                @if (photoStatus is not null)
+                {
+                    <p class="composer-status" role="status">@photoStatus</p>
+                }
+            </fieldset>
+        }
+
+        @if (!IsNew)
+        {
+            <fieldset>
+                <legend>About it</legend>
+                @AboutField
+            </fieldset>
+        }
 
         <h2 class="section-label">More details</h2>
         <div class="more-details mb-4">
@@ -169,6 +233,13 @@ else
                     <div class="form-text">Give batches you started together the same name and they're compared side by side.</div>
                 </div>
             </FormSection>
+
+            @if (IsNew)
+            {
+                <FormSection Title="About it" Summary="@AboutSummary">
+                    @AboutField
+                </FormSection>
+            }
 
             <FormSection Title="Progress" Summary="@ProgressSummary" Open="openProgress">
                 <div class="mb-3">
@@ -256,8 +327,15 @@ else
         </div>
 
         <div class="form-actions form-bar">
-            <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Start propagation" : "Save")</button>
-            <a class="btn btn-link" href="@BackUrl">Cancel</a>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">@(IsNew ? "Start propagation" : "Save")</button>
+            @if (IsNew)
+            {
+                <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
+            }
+            else
+            {
+                <a class="btn btn-link" href="@BackUrl">Cancel</a>
+            }
         </div>
     </EditForm>
 }
@@ -284,7 +362,21 @@ else
     private static readonly PropagationStage[] ManualStages =
         [PropagationStage.Started, PropagationStage.Rooting, PropagationStage.Rooted];
 
+    private readonly string cameraId = $"camera-{Guid.NewGuid():N}";
+    private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    /// <summary>Photos taken while starting the propagation. They're saved with it.</summary>
+    private readonly List<Photo> photos = [];
+    private string? photoStatus;
+    private bool busy;
+    private DateOnly? dateFromPhotos; // when the start day was moved back to the oldest photo
+    private bool keepToday;
+
     private Propagation? propagation;
+    private bool isDraft; // propagation is the new one being started, not one opened for editing
+    private Guid? draftParentId; // the plant the draft was started from
     private Propagation? original; // as it was before editing, to record what changed
     private bool notFound;
     private bool saving;
@@ -339,6 +431,13 @@ else
         propagation.RootingAids.Count > 0 ? string.Join(", ", propagation.RootingAids.Select(Labels.For)) : null,
         propagation.Experiment);
 
+    private string? AboutSummary => string.IsNullOrWhiteSpace(propagation?.Notes) ? null : Labels.Short(propagation.Notes);
+
+    private RenderFragment AboutField => @<div>
+        <div id="about-help" class="form-text mt-0">For what stays true about it. Dated notes go on its history.</div>
+        <InputTextArea class="form-control" rows="3" @bind-Value="propagation!.Notes" aria-label="About it" aria-describedby="about-help" />
+    </div>;
+
     private string? ProgressSummary => propagation is null ? null : Joined(
         Labels.Stage(propagation.Stage, propagation.Type),
         propagation.FirstRootOn is { } root ? $"first root {Labels.Date(root)}" : null,
@@ -365,13 +464,21 @@ else
 
         if (IsNew)
         {
-            propagation = ParentId is { } parentId && allPlants.FirstOrDefault(p => p.Id == parentId) is { } parent
-                ? PropagationService.StartFrom(parent)
-                : new Propagation { StartedOn = Today };
+            // The draft keeps its id, so photos taken before saving stay with it. It starts again
+            // when the page is reused for a propagation from another plant, or came from editing one
+            if (propagation is null || !isDraft || draftParentId != ParentId)
+            {
+                propagation = ParentId is { } parentId && allPlants.FirstOrDefault(p => p.Id == parentId) is { } parent
+                    ? PropagationService.StartFrom(parent)
+                    : new Propagation { StartedOn = Today };
+                isDraft = true;
+                draftParentId = ParentId;
+            }
         }
         else
         {
             propagation = allPropagations.FirstOrDefault(p => p.Id == Id);
+            isDraft = false;
             original = propagation?.Copy();
             notFound = propagation is null;
         }
@@ -383,6 +490,82 @@ else
             openWhere = !IsNew && !string.IsNullOrWhiteSpace(location);
             openSetup = !IsNew && HasSetup(propagation);
             openProgress = !IsNew && HasProgress(propagation);
+        }
+    }
+
+    private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
+    {
+        if (propagation is null)
+            return;
+
+        busy = true;
+        photoStatus = "Saving photos…";
+        StateHasChanged();
+
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType.Propagation, propagation.Id);
+            photos.AddRange(result.Saved);
+            photoStatus = result.Message(guessesMatter: !fromCamera);
+            FollowPhotoDates();
+        }
+        catch (Exception ex)
+        {
+            photoStatus = $"Couldn't save the photos: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task RemovePhotoAsync(Photo photo)
+    {
+        await Photos.DeleteAsync(photo.Id);
+        photos.Remove(photo);
+        photoStatus = null;
+        FollowPhotoDates();
+    }
+
+    // Old photos would otherwise come before "Started" in the history, so the start day moves
+    // back to the oldest one. Only while it's still the day the form started with
+    private void FollowPhotoDates()
+    {
+        if (propagation is null || keepToday || (propagation.StartedOn != Today && propagation.StartedOn != dateFromPhotos))
+            return;
+
+        dateFromPhotos = PhotoEntries.OldestDay(photos, Time) is { } oldest && oldest < Today ? oldest : null;
+        propagation.StartedOn = dateFromPhotos ?? Today;
+    }
+
+    private void KeepToday()
+    {
+        keepToday = true;
+        propagation!.StartedOn = Today;
+    }
+
+    // Leaving without saving: the photos would belong to nothing
+    private async Task CancelAsync()
+    {
+        await DiscardPhotosAsync();
+        Navigation.NavigateTo(BackUrl);
+    }
+
+    private async Task DiscardPhotosAsync()
+    {
+        foreach (var photo in photos)
+            await Photos.DeleteAsync(photo.Id);
+        photos.Clear();
+    }
+
+    /// <summary>Also covers leaving by the back link or the phone's back button.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await DiscardPhotosAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away; the photos go with it
         }
     }
 
@@ -445,7 +628,8 @@ else
             propagation.PlaceId = await RoomService.PlaceIdAsync(location);
             if (IsNew)
             {
-                await PropagationService.CreateAsync(propagation, Labels.For(propagation));
+                await PropagationService.CreateAsync(propagation, Labels.For(propagation), photos);
+                photos.Clear(); // they belong to the saved propagation now
             }
             else
             {

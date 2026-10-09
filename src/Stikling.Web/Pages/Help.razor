@@ -395,7 +395,8 @@
             Open the plant, tap the three dots next to <em>Photo</em> and <em>Note</em> and pick <em>It died</em> or
             <em>Gave it away or sold it</em>. For several at once, use <em>Select</em> on the plant list. It leaves the list but keeps its history, and you can still find it under
             <em>Gone</em>. When you mark a plant as died, you can add a note on what happened. It shows
-            on the plant and in the <em>Gone</em> list, so you can look it over before buying the same plant again.
+            on the plant and in the <em>Gone</em> list, so you can look it over before buying the same plant again. Under <em>Gone</em>, pick <em>Died</em> to see only the plants that died and why.
+            When you add a plant with the same name as one that died, the form reminds you of it and what went wrong.
             For a plant you gave away or sold, you can note who got it and what it was sold or swapped for,
             for example a price or the plant you got back. An offspring that was given away or sold shows who got it in the family list.
             If it comes back, or you picked it by mistake, the same place has <em>Back in the collection</em>.
@@ -407,7 +408,7 @@
         <summary>I have two of the same plant. Do I type it all in twice?</summary>
         <p>
             No. Open the first one, tap <em>Details</em> and use <em>Add another like this</em>. The add
-            form opens with the same names, room, origin, source, medium, soil mix and tags. The nickname, pots,
+            form opens with the same names, room, origin, source, price paid, medium, soil mix and tags. The nickname, pots,
             notes and photos are left empty, since those belong to each plant on its own, and the date starts at today. If you got them together, a button under the date switches it to the first plant's date.
         </p>
         <p>
@@ -539,6 +540,8 @@
             It turns one or more from the propagation into plants in your collection. You find it, and
             <em>Mark failed</em>, behind the stage button on the propagation's page. Each new plant keeps
             a link to the plant the propagation came from, so you can always see where it started.
+            Both ask for a date, today unless you change it, so something you only found out a week later
+            is recorded on the right day.
         </p>
     </details>
 
@@ -549,6 +552,15 @@
             from it. Tap one of them, or <em>Details</em>, for the whole family. It follows the links across
             generations, so a cutting of a cutting still leads back to the first plant.
         </p>
+    </details>
+
+    <details class="help-item">
+        <summary>What do LECA, PON, sphagnum, corm riser and air layer mean?</summary>
+        <p><strong>LECA:</strong> @Labels.Explain(GrowingMedium.Leca)</p>
+        <p><strong>PON:</strong> @Labels.Explain(GrowingMedium.Pon)</p>
+        <p><strong>Sphagnum:</strong> @Labels.Explain(GrowingMedium.Sphagnum)</p>
+        <p><strong>Corm riser:</strong> @Labels.Explain(GrowingMedium.CormRiser)</p>
+        <p><strong>Air layer:</strong> @Labels.Explain(PropagationType.AirLayer)</p>
     </details>
 
     <details class="help-item">
@@ -653,6 +665,10 @@
             For a plant you haven't added yet, pick them with <em>Gallery</em> when adding it, or tap
             <em>start from old photos</em> on Today before you've added anything. <em>When you got it</em> then
             moves back to the day of the oldest photo, unless you've already changed it.
+        </p>
+        <p>
+            Starting a propagation works the same way: add its photos with <em>Camera</em> or <em>Gallery</em> on the form.
+            The newest becomes the cover, and <em>Started on</em> moves back to the day of the oldest photo.
         </p>
     </details>
 

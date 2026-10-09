@@ -94,6 +94,29 @@ public class PlantTests
     }
 
     [Fact]
+    public void DescribePurchase_says_where_and_for_how_much()
+    {
+        Assert.Equal("Bought from Plantorama for 150", new Plant { Source = "Plantorama", PricePaid = 150m }.DescribePurchase());
+        Assert.Equal("Bought from Plantorama for 79.5", new Plant { Source = "Plantorama", PricePaid = 79.50m }.DescribePurchase());
+        Assert.Equal("Paid 150", new Plant { PricePaid = 150.00m }.DescribePurchase());
+        Assert.Null(new Plant { Source = "Plantorama" }.DescribePurchase());
+        Assert.Null(new Plant { Origin = PlantOrigin.Gift, PricePaid = 150m }.DescribePurchase());
+    }
+
+    [Fact]
+    public void Validate_rejects_a_negative_price()
+    {
+        Assert.Contains("The price paid can't be negative.", new Plant { Nickname = "Basil", PricePaid = -1m }.Validate(Today));
+        Assert.Empty(new Plant { Nickname = "Basil", PricePaid = 0m }.Validate(Today));
+    }
+
+    [Fact]
+    public void Duplicate_copies_the_price_paid()
+    {
+        Assert.Equal(79.5m, new Plant { Nickname = "Basil", PricePaid = 79.5m }.Duplicate().PricePaid);
+    }
+
+    [Fact]
     public void Duplicate_copies_names_room_and_growing_setup()
     {
         var plant = new Plant

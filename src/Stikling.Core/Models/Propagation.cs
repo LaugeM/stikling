@@ -203,20 +203,20 @@ public sealed class Propagation : Entity
         Stage = stage;
     }
 
-    /// <summary>Records that <paramref name="count"/> units became plants.</summary>
-    public void RecordPottedUp(int count, DateOnly today)
+    /// <summary>Records that <paramref name="count"/> units became plants on <paramref name="on"/>.</summary>
+    public void RecordPottedUp(int count, DateOnly on)
     {
         CheckCount(count);
         PottedUpCount += count;
-        SyncStageWithCounts(today);
+        SyncStageWithCounts(on);
     }
 
-    /// <summary>Records that <paramref name="count"/> units didn't make it.</summary>
-    public void RecordFailed(int count, DateOnly today)
+    /// <summary>Records that <paramref name="count"/> units didn't make it on <paramref name="on"/>.</summary>
+    public void RecordFailed(int count, DateOnly on)
     {
         CheckCount(count);
         FailedCount += count;
-        SyncStageWithCounts(today);
+        SyncStageWithCounts(on);
     }
 
     private void CheckCount(int count)

@@ -240,16 +240,8 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     // A day without a time is recorded at noon, or now for today, so a photo from earlier that
     // day would come before the plant was added. The plant comes in just before its first photo
     // then, but never on the day before
-    private DateTimeOffset AddedAt(Plant plant, IReadOnlyList<Photo> photos)
-    {
-        var added = plant.AcquiredOn is { } acquired ? time.MomentOn(acquired.Start) : time.GetUtcNow();
-        var day = time.LocalDay(added);
-        var first = photos.Where(p => time.LocalDay(p.TakenAt) == day).Select(p => p.TakenAt).DefaultIfEmpty(added).Min();
-        if (first >= added)
-            return added;
-        var startOfDay = time.MomentAt(day.ToDateTime(TimeOnly.MinValue));
-        return first.AddSeconds(-1) < startOfDay ? first : first.AddSeconds(-1);
-    }
+    private DateTimeOffset AddedAt(Plant plant, IReadOnlyList<Photo> photos) =>
+        PhotoEntries.StartedAt(plant.AcquiredOn is { } acquired ? time.MomentOn(acquired.Start) : time.GetUtcNow(), photos, time);
 
     // A date that is only a month or a year cannot be read off the timeline's day headings,
     // so it is said in the text instead.

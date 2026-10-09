@@ -27,6 +27,12 @@ public sealed class Plant : Entity
     /// <summary>Where it came from: a shop, a friend, a swap event...</summary>
     public string? Source { get; set; }
 
+    /// <summary>
+    /// What was paid, as a number with no currency, so totals per year can be added up later.
+    /// Null when not entered.
+    /// </summary>
+    public decimal? PricePaid { get; set; }
+
     public PlantStatus Status { get; set; } = PlantStatus.Active;
 
     /// <summary>An optional note on what went wrong, kept while the status is Died and cleared if it comes back.</summary>
@@ -143,6 +149,18 @@ public sealed class Plant : Entity
         return null;
     }
 
+    /// <summary>
+    /// Where a bought plant came from and what it cost, as one line: "Bought from Plantorama for 150"
+    /// or "Paid 150". Null unless it was purchased and a price is set.
+    /// </summary>
+    public string? DescribePurchase()
+    {
+        if (Origin != PlantOrigin.Purchased || PricePaid is not { } price)
+            return null;
+        var amount = price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        return string.IsNullOrWhiteSpace(Source) ? $"Paid {amount}" : $"Bought from {Source.Trim()} for {amount}";
+    }
+
     /// <summary>A copy to compare with after editing. The tags get their own list.</summary>
     public Plant Copy()
     {
@@ -153,7 +171,7 @@ public sealed class Plant : Entity
 
     /// <summary>
     /// A new plant to add alongside this one, e.g. a second basil pot. It gets the names, room,
-    /// light, origin, source, medium, soil mix and tags. The nickname, the date it was got, pots, notes,
+    /// light, origin, source, price paid, medium, soil mix and tags. The nickname, the date it was got, pots, notes,
     /// photos and anything about how this plant is doing right now stay behind.
     /// </summary>
     public Plant Duplicate() => new()
@@ -165,6 +183,7 @@ public sealed class Plant : Entity
         Light = Light,
         Origin = Origin,
         Source = Source,
+        PricePaid = PricePaid,
         Medium = Medium,
         SoilMixId = SoilMixId,
         Tags = [.. Tags],
@@ -213,6 +232,8 @@ public sealed class Plant : Entity
             errors.Add("Give the plant a nickname or a genus.");
         if (ParentPlantId is not null && ParentPlantId == Id)
             errors.Add("A plant can't be its own parent.");
+        if (PricePaid < 0)
+            errors.Add("The price paid can't be negative.");
         if (AcquiredOn is { } acquired && acquired.Start > today)
             errors.Add("The date you got it can't be in the future.");
         if (InnerPotId is not null && InnerPotId == OuterPotId)

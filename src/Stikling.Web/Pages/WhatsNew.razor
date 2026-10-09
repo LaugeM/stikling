@@ -1,0 +1,85 @@
+@page "/settings/whats-new"
+@* What has changed in the app, written by hand for the people using it, newest first. Add a line to the top of the
+   current month when a change is worth telling someone about, and start a new month heading when the month changes.
+   Leave out what nobody would notice. No version or pull request numbers. *@
+
+<PageTitle>What's new · Stikling</PageTitle>
+
+<a class="back-link" href="settings">Settings</a>
+<h1>What's new</h1>
+
+<p class="whats-new-version">
+    @if (AppVersion.Date is { } date)
+    {
+        <text>You're on version @date.</text>
+        @if (AppVersion.Commit is { } commit)
+        {
+            <text> </text><a class="whats-new-commit" href="https://github.com/LaugeM/stikling/commit/@commit" target="_blank" rel="noopener">(@AppVersion.ShortCommit)</a>
+        }
+    }
+    else
+    {
+        <text>This is a development build, so it has no version.</text>
+    }
+</p>
+
+@foreach (var month in Months)
+{
+    <section class="whats-new-month">
+        <h2>@month.Name</h2>
+        <ul>
+            @foreach (var entry in month.Entries)
+            {
+                <li>@entry</li>
+            }
+        </ul>
+    </section>
+}
+
+@code {
+    private sealed record Month(string Name, string[] Entries);
+
+    private static readonly Month[] Months =
+    [
+        new("October 2026",
+        [
+            "Share a before and after picture of a plant or propagation: two of its photos side by side, with their dates and how far apart they are.",
+            "Add photos while starting a propagation, so its history starts with how the cutting looked on the first day.",
+            "Marking a propagation as failed asks for the day, so one found a week late goes on the right day. Pot-ups and failures have their own titles in the history.",
+            "The plant list has a Died filter under Gone, and adding a plant says when one like it died before and why.",
+            "Note what you paid for a plant. Notes is now called About it, and the forms explain LECA, PON, sphagnum, corm riser and air layer.",
+            "This page, and the app's version under About in Settings.",
+            "You can add photos to a pot, the same way you add them to a plant.",
+            "Make a share card for a plant or a propagation, a picture with its photo and name that you can send to someone.",
+            "A finished propagation now shows how it turned out, so you can look back at what worked.",
+            "On a wide screen the tabs move to a menu down the side.",
+            "The first time you open the app it says what Stikling is and offers the quickest ways to get started.",
+            "The name suggestions now know most common houseplants, with their everyday names.",
+            "When you sign in on a new device, the app tells you while it is fetching what is in your account.",
+            "When a new version is on its way, the app shows how far along the update is.",
+            "Orchid bark can be picked as what a plant grows in, and adding or removing a tag is written on the plant's history.",
+            "The Pests tab only shows when you have an open case. Tap the cover photo of a plant or propagation to open it.",
+            "Edit lets you correct the counts of how many were potted up and how many failed.",
+            "Coleus names are suggested, and Lately only shows the last 30 days."
+        ]),
+        new("September 2026",
+        [
+            "Sign in with Google, Facebook or Discord and your plants, photos and notes follow you to your other devices. You can still use the app without an account.",
+            "Delete your account from Settings when you want to, which erases what is stored for you on the server.",
+            "Download everything your account holds as a ZIP from Settings. New photos take up less room on the phone.",
+            "Plant and propagation pages now read like a profile of the plant, with photos and notes first.",
+            "Settings moved behind the gear, and Supplies has the fifth tab.",
+            "Pest cases keep a log of what you tried, with saved treatments and sticky trap counts.",
+            "Write down what you feed with, and measure out a batch for any amount of water.",
+            "Save the soil mixes you make, with or without amounts, and add the products and doses you used to a care entry.",
+            "Tag plants, and put one in quarantine when it needs to stay apart.",
+            "Rooms and spots are picked from a list, and you can add new ones as you go.",
+            "Pick old photos from your gallery and each one lands on the plant's history on the day it was taken.",
+            "Today shows what needs attention. You can put things off, and it reminds you to take photos.",
+            "Mark a plant or propagation as dormant, and see the success rate and days to root for each medium and type.",
+            "Add another plant like one you already have, and move plants between spots.",
+            "Names are suggested while you type the genus, species and cultivar.",
+            "A Help page answers the questions that come up, and empty screens say what to do next."
+        ])
+    ];
+}

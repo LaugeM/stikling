@@ -48,6 +48,30 @@ public static class Labels
         _ => medium.ToString()
     };
 
+    /// <summary>The start of a longer text on one line, for a form section's summary.</summary>
+    public static string Short(string text, int max = 50)
+    {
+        var line = string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        return line.Length <= max ? line : line[..max].TrimEnd() + "…";
+    }
+
+    /// <summary>A line on what the less obvious media are, or null for the ones that need none.</summary>
+    public static string? Explain(GrowingMedium medium) => medium switch
+    {
+        GrowingMedium.Leca => "Fired clay balls. With water in the bottom of the pot, they wick it up to the roots, with no soil. This is called semi-hydro.",
+        GrowingMedium.Pon => "A ready-made mix of mineral grains like pumice, zeolite and lava rock, used for semi-hydro in place of soil.",
+        GrowingMedium.Sphagnum => "Long-fibred moss that holds a lot of water and still lets air in. Often used to root cuttings.",
+        GrowingMedium.CormRiser => "The corm sits on a raised layer above water in a closed box, so it stays damp without sitting in water.",
+        _ => null
+    };
+
+    /// <summary>A line on what a propagation type means, or null for the ones that need none.</summary>
+    public static string? Explain(PropagationType type) => type switch
+    {
+        PropagationType.AirLayer => "Roots are grown on a stem while it's still on the plant, in damp moss wrapped round it, and it's cut off once they're there.",
+        _ => null
+    };
+
     public static string For(RootingAid aid) => aid switch
     {
         RootingAid.RootingPowder => "Rooting powder",

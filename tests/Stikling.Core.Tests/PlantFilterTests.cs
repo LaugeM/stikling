@@ -199,4 +199,24 @@ public class PlantFilterTests
 
         Assert.Equal(new DateTimeOffset(2026, 5, 3, 0, 0, 0, TimeSpan.Zero), latest[plant]);
     }
+
+    [Theory]
+    [InlineData(PlantStatus.Died, "Coleus")]
+    [InlineData(PlantStatus.GivenAway, "Pothos")]
+    [InlineData(PlantStatus.Sold, "Sold fern")]
+    public void Gone_can_be_narrowed_to_how_the_plants_left(PlantStatus how, string name)
+    {
+        Plant[] plants = [.. All, new() { Nickname = "Sold fern", Status = PlantStatus.Sold }];
+
+        var result = new PlantFilter(Status: StatusFilter.Gone, GoneAs: how).Apply(plants).ToList();
+
+        Assert.Equal([name], result.Select(p => p.DisplayName));
+    }
+
+    [Fact]
+    public void How_they_left_is_ignored_unless_the_status_is_gone()
+    {
+        Assert.Equal(3, new PlantFilter(GoneAs: PlantStatus.Died).Apply(All).Count());
+        Assert.Equal(5, new PlantFilter(Status: StatusFilter.All, GoneAs: PlantStatus.Died).Apply(All).Count());
+    }
 }

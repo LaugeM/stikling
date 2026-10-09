@@ -60,6 +60,8 @@ Accounts and sync between devices are being added in steps, so people don't have
 
 The deploy also renders the page to plain HTML for search engines, and into `llms.txt` for AI tools (`tools/static-pages/render.cs`), so it has to render without a browser: anything that calls JavaScript goes in `OnAfterRenderAsync`. The front page in `wwwroot/index.html` answers a few of the same questions, so check those too.
 
+When a change is something people using the app would notice, add a line for it at the top of the current month in `Pages/WhatsNew.razor`, in the same pull request.
+
 ## The feature list
 
 `docs/FEATURES.md` is the record of what is built, not only a roadmap. The first column on every row is the status: ✅ is shipped and in the app, ◐ is partly built with the row saying what is missing, and ☐ is not started. Check it before proposing a feature, because the list is long and a lot of it already exists.

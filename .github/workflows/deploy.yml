@@ -26,7 +26,11 @@ jobs:
         run: dotnet test Stikling.slnx --configuration Release
 
       - name: Publish
-        run: dotnet publish src/Stikling.Web --configuration Release --output release
+        # The version is the publish date. The SDK adds "+<commit>" from SourceRevisionId (AppVersion.cs reads both).
+        run: |
+          dotnet publish src/Stikling.Web --configuration Release --output release \
+            -p:InformationalVersion="$(date -u +%Y.%m.%d)" \
+            -p:SourceRevisionId="${{ github.sha }}"
 
       # Help and Privacy as plain HTML, for search engines and AI tools that don't run the app
       - name: Render the static pages
