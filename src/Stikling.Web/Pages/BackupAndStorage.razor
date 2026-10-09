@@ -61,8 +61,11 @@
             </p>
             <p class="settings-hint">
                 Restoring adds what's missing here and brings back anything you've deleted since.
-                Changes you've made on this device are kept. A backup of what's here now is saved to your
-                downloads first, so anything the restore removes can be brought back by restoring that one.
+                Changes you've made on this device are kept.@if (hasData)
+                {
+                    <text> A backup of what's here now is saved to your downloads first, so anything the restore
+                    removes can be brought back by restoring that one.</text>
+                }
             </p>
             <div class="settings-actions">
                 <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => RestoreAsync(saveFirst: true)">Restore</button>
@@ -127,6 +130,7 @@
     private bool busy;
     private bool signedIn;
     private bool saveFailed;
+    private bool hasData; // whether a restore saves a backup of this device first
 
     private DateOnly TodayDate => Time.Today();
 
@@ -191,6 +195,7 @@
 
             zip.Position = 0;
             pending = new PendingRestore(file.Name, await BackupService.ReadAsync(zip), zip);
+            hasData = await Backup.HasAnythingToSaveAsync();
             message = null;
         }
         catch (Exception ex)
