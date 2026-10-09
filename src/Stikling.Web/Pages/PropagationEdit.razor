@@ -7,7 +7,9 @@
 @inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
+@inject PhotoService Photos
 @inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <PageTitle>@(IsNew ? "Start propagation" : "Edit propagation") · Stikling</PageTitle>
 
@@ -119,8 +121,57 @@ else
             <div class="mb-1">
                 <label class="form-label" for="started">Started on</label>
                 <InputDate id="started" class="form-control" @bind-Value="propagation.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
+                @if (dateFromPhotos is { } fromPhotos && propagation.StartedOn == fromPhotos)
+                {
+                    <div class="form-text">
+                        Set to the day of the oldest photo, so the photos come after it in the history.
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="KeepToday">Use today instead</button>
+                    </div>
+                }
             </div>
         </fieldset>
+
+        @if (IsNew)
+        {
+            <fieldset>
+                <legend>Photo</legend>
+                @if (photos.Count > 0)
+                {
+                    <div class="photo-picks">
+                        @foreach (var photo in photos)
+                        {
+                            <div class="photo-pick">
+                                <PhotoImage PhotoId="photo.Id" Alt="Photo of the new propagation" />
+                                <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
+                                        aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="composer-row">
+                    <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        Camera
+                    </label>
+                    <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                           @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
+
+                    <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                        Gallery
+                    </label>
+                    <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
+                           @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+                </div>
+
+                <div class="form-text">The first photo becomes the cover. You can add more later on its page.</div>
+                @if (photoStatus is not null)
+                {
+                    <p class="composer-status" role="status">@photoStatus</p>
+                }
+            </fieldset>
+        }
 
         @if (!IsNew)
         {
@@ -276,8 +327,15 @@ else
         </div>
 
         <div class="form-actions form-bar">
-            <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Start propagation" : "Save")</button>
-            <a class="btn btn-link" href="@BackUrl">Cancel</a>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">@(IsNew ? "Start propagation" : "Save")</button>
+            @if (IsNew)
+            {
+                <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
+            }
+            else
+            {
+                <a class="btn btn-link" href="@BackUrl">Cancel</a>
+            }
         </div>
     </EditForm>
 }
@@ -303,6 +361,18 @@ else
 
     private static readonly PropagationStage[] ManualStages =
         [PropagationStage.Started, PropagationStage.Rooting, PropagationStage.Rooted];
+
+    private readonly string cameraId = $"camera-{Guid.NewGuid():N}";
+    private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    /// <summary>Photos taken while starting the propagation. They're saved with it.</summary>
+    private readonly List<Photo> photos = [];
+    private string? photoStatus;
+    private bool busy;
+    private DateOnly? dateFromPhotos; // when the start day was moved back to the oldest photo
+    private bool keepToday;
 
     private Propagation? propagation;
     private Propagation? original; // as it was before editing, to record what changed
@@ -392,7 +462,8 @@ else
 
         if (IsNew)
         {
-            propagation = ParentId is { } parentId && allPlants.FirstOrDefault(p => p.Id == parentId) is { } parent
+            // The draft keeps its id, so photos taken before saving stay with it
+            propagation ??= ParentId is { } parentId && allPlants.FirstOrDefault(p => p.Id == parentId) is { } parent
                 ? PropagationService.StartFrom(parent)
                 : new Propagation { StartedOn = Today };
         }
@@ -410,6 +481,82 @@ else
             openWhere = !IsNew && !string.IsNullOrWhiteSpace(location);
             openSetup = !IsNew && HasSetup(propagation);
             openProgress = !IsNew && HasProgress(propagation);
+        }
+    }
+
+    private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
+    {
+        if (propagation is null)
+            return;
+
+        busy = true;
+        photoStatus = "Saving photos…";
+        StateHasChanged();
+
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType.Propagation, propagation.Id);
+            photos.AddRange(result.Saved);
+            photoStatus = result.Message(guessesMatter: !fromCamera);
+            FollowPhotoDates();
+        }
+        catch (Exception ex)
+        {
+            photoStatus = $"Couldn't save the photos: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task RemovePhotoAsync(Photo photo)
+    {
+        await Photos.DeleteAsync(photo.Id);
+        photos.Remove(photo);
+        photoStatus = null;
+        FollowPhotoDates();
+    }
+
+    // Old photos would otherwise come before "Started" in the history, so the start day moves
+    // back to the oldest one. Only while it's still the day the form started with
+    private void FollowPhotoDates()
+    {
+        if (propagation is null || keepToday || (propagation.StartedOn != Today && propagation.StartedOn != dateFromPhotos))
+            return;
+
+        dateFromPhotos = PhotoEntries.OldestDay(photos, Time) is { } oldest && oldest < Today ? oldest : null;
+        propagation.StartedOn = dateFromPhotos ?? Today;
+    }
+
+    private void KeepToday()
+    {
+        keepToday = true;
+        propagation!.StartedOn = Today;
+    }
+
+    // Leaving without saving: the photos would belong to nothing
+    private async Task CancelAsync()
+    {
+        await DiscardPhotosAsync();
+        Navigation.NavigateTo(BackUrl);
+    }
+
+    private async Task DiscardPhotosAsync()
+    {
+        foreach (var photo in photos)
+            await Photos.DeleteAsync(photo.Id);
+        photos.Clear();
+    }
+
+    /// <summary>Also covers leaving by the back link or the phone's back button.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await DiscardPhotosAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away; the photos go with it
         }
     }
 
@@ -472,7 +619,8 @@ else
             propagation.PlaceId = await RoomService.PlaceIdAsync(location);
             if (IsNew)
             {
-                await PropagationService.CreateAsync(propagation, Labels.For(propagation));
+                await PropagationService.CreateAsync(propagation, Labels.For(propagation), photos);
+                photos.Clear(); // they belong to the saved propagation now
             }
             else
             {

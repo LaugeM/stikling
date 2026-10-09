@@ -40,4 +40,19 @@ public static class PhotoEntries
 
     /// <summary>The photo to use as the cover: the newest, since it shows the plant as it is now.</summary>
     public static Photo Cover(IReadOnlyList<Photo> photos) => photos.MaxBy(p => p.TakenAt)!;
+
+    /// <summary>
+    /// When the first entry of a new plant or propagation is dated. A day without a time is
+    /// recorded at noon, or now for today, so a photo from earlier that day would come before it.
+    /// The first entry comes in just before its first photo then, but never on the day before.
+    /// </summary>
+    public static DateTimeOffset StartedAt(DateTimeOffset started, IReadOnlyList<Photo> photos, TimeProvider time)
+    {
+        var day = time.LocalDay(started);
+        var first = photos.Where(p => time.LocalDay(p.TakenAt) == day).Select(p => p.TakenAt).DefaultIfEmpty(started).Min();
+        if (first >= started)
+            return started;
+        var startOfDay = time.MomentAt(day.ToDateTime(TimeOnly.MinValue));
+        return first.AddSeconds(-1) < startOfDay ? first : first.AddSeconds(-1);
+    }
 }

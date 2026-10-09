@@ -43,6 +43,50 @@ public class PropagationServiceTests
     }
 
     [Fact]
+    public async Task Create_with_photos_makes_the_newest_the_cover_and_writes_their_entries()
+    {
+        var old = new Photo { SubjectType = SubjectType.Propagation, TakenAt = new(2026, 9, 10, 9, 0, 0, TimeSpan.Zero) };
+        var recent = new Photo { SubjectType = SubjectType.Propagation, TakenAt = Now.AddHours(-1) };
+        var cuttings = service.StartFrom(parent);
+        cuttings.StartedOn = new DateOnly(2026, 9, 10);
+
+        await service.CreateAsync(cuttings, Label, [recent, old]);
+
+        Assert.Equal(recent.Id, cuttings.CoverPhotoId);
+        Assert.Equal(
+            [old.TakenAt, recent.TakenAt],
+            HistoryOf(cuttings.Id).Where(e => e.Kind == TimelineKind.Photo).Select(e => e.OccurredAt).Order());
+        Assert.Equal(1, HistoryOf(cuttings.Id).Count(e => e.Kind == TimelineKind.Created));
+    }
+
+    [Fact]
+    public async Task Create_puts_the_started_entry_before_a_photo_taken_earlier_the_same_day()
+    {
+        var morning = new DateTimeOffset(2026, 9, 10, 9, 0, 0, TimeSpan.Zero);
+        var photo = new Photo { SubjectType = SubjectType.Propagation, TakenAt = morning };
+        var cuttings = service.StartFrom(parent);
+        cuttings.StartedOn = new DateOnly(2026, 9, 10);
+
+        await service.CreateAsync(cuttings, Label, [photo]);
+
+        var started = Assert.Single(HistoryOf(cuttings.Id), e => e.Kind == TimelineKind.Created);
+        Assert.True(started.OccurredAt < morning);
+        Assert.Equal(new DateOnly(2026, 9, 10), new FixedTime(Now).LocalDay(started.OccurredAt));
+    }
+
+    [Fact]
+    public async Task Create_without_photos_has_no_cover_and_only_the_started_entry()
+    {
+        var cuttings = service.StartFrom(parent);
+
+        await service.CreateAsync(cuttings, Label);
+
+        Assert.Null(cuttings.CoverPhotoId);
+        var entry = Assert.Single(HistoryOf(cuttings.Id));
+        Assert.Equal(TimelineKind.Created, entry.Kind);
+    }
+
+    [Fact]
     public async Task Moving_away_from_soil_clears_the_mix()
     {
         var mix = Guid.NewGuid();

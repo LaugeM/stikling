@@ -38,10 +38,16 @@ public sealed class PropagationService(
         StartedOn = Today
     };
 
-    /// <summary>Saves a new propagation and records it on its own history and the parent's.</summary>
-    public async Task CreateAsync(Propagation propagation, Func<Enum, string> label)
+    /// <summary>
+    /// Saves a new propagation and records it on its own history and the parent's. Photos taken
+    /// while starting it go on its history on the days they were taken, and the newest one
+    /// becomes the cover.
+    /// </summary>
+    public async Task CreateAsync(Propagation propagation, Func<Enum, string> label, IReadOnlyList<Photo>? photos = null)
     {
         propagation.ClearMixUnlessSoil();
+        if (photos is { Count: > 0 })
+            propagation.CoverPhotoId ??= PhotoEntries.Cover(photos).Id;
         await propagations.SaveAsync(propagation);
 
         var what = Describe(propagation, label);
@@ -51,9 +57,12 @@ public sealed class PropagationService(
             SubjectType = SubjectType.Propagation,
             SubjectId = propagation.Id,
             Kind = TimelineKind.Created,
-            OccurredAt = occurredAt,
+            OccurredAt = PhotoEntries.StartedAt(occurredAt, photos ?? [], time),
             Text = $"Started {what}"
         });
+
+        foreach (var entry in PhotoEntries.For(SubjectType.Propagation, propagation.Id, photos ?? [], time))
+            await timeline.AddAsync(entry);
 
         if (propagation.ParentPlantId is { } parentId && await plants.GetAsync(parentId) is not null)
         {
