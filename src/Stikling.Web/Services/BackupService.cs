@@ -29,12 +29,25 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
     public event Action? Restored;
 
     /// <summary>
-    /// True when the device has any plant or propagation, deleted ones included. A device with
-    /// none has nothing a restore could remove, so there is nothing to save first.
+    /// True when the device has anything a restore could remove or overwrite, deleted records included.
+    /// Settings and what's put off on Today don't count, since a fresh device can have those before
+    /// anything has been added.
     /// </summary>
-    public async Task<bool> HasAnythingToSaveAsync() =>
-        (await db.GetAllAsync<Plant>(Stores.Plants)).Count > 0
-        || (await db.GetAllAsync<Propagation>(Stores.Propagations)).Count > 0;
+    public async Task<bool> HasAnythingToSaveAsync()
+    {
+        string[] stores =
+        [
+            Stores.Plants, Stores.Propagations, Stores.Timeline, Stores.Photos, Stores.CareLogs,
+            Stores.PestCases, Stores.PestTreatments, Stores.Pots, Stores.SoilMixes, Stores.Products,
+            Stores.Feeds, Stores.TreatmentRecipes, Stores.Places
+        ];
+        foreach (var store in stores)
+        {
+            if ((await db.GetAllAsync<JsonElement>(store)).Count > 0)
+                return true;
+        }
+        return false;
+    }
 
     /// <summary>Builds the backup and hands it to the browser as a download, named with the prefix and today's date.</summary>
     public async Task<BackupCounts> ExportAsync(string filePrefix = "stikling-backup")
