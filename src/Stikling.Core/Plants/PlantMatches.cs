@@ -16,6 +16,15 @@ public static class PlantMatches
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
+    /// <summary>Plants that died with the same name as the draft, by the same rules as <see cref="SameName"/>,
+    /// so someone can look at what went wrong before buying the same plant again.</summary>
+    public static IReadOnlyList<Plant> DiedBefore(Plant draft, IEnumerable<Plant> plants) =>
+        plants
+            .Where(p => p.Id != draft.Id && !p.IsDeleted && p.Status == PlantStatus.Died)
+            .Where(p => SameNickname(p, draft) || SameBotanicalName(p, draft))
+            .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
     private static bool SameNickname(Plant a, Plant b) =>
         Clean(b.Nickname) is { } nickname && nickname == Clean(a.Nickname);
 

@@ -53,6 +53,17 @@ else
                 <InputText id="nickname" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Big Monstera" />
             </div>
             <div class="form-text">Give it a genus, a nickname, or both.</div>
+            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.DiedBefore(plant, existing) is { Count: > 0 } diedBefore)
+            {
+                <p class="form-text">
+                    @(diedBefore.Count == 1 ? "One like this died before: " : "Some like this died before: ")
+                    @for (var i = 0; i < diedBefore.Count; i++)
+                    {
+                        var match = diedBefore[i];
+                        @(i == 0 ? "" : "; ")<a href="plants/@match.Id">@match.DisplayName</a>@(string.IsNullOrWhiteSpace(match.CauseOfDeath) ? "" : ", " + match.CauseOfDeath.Trim())
+                    }.
+                </p>
+            }
             @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.SameName(plant, existing) is { Count: > 0 } same)
             {
                 <p class="form-text already-have">
