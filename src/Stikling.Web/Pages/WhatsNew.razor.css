@@ -1,0 +1,30 @@
+.whats-new-version {
+    color: var(--pa-muted);
+}
+
+.whats-new-commit {
+    color: var(--pa-muted);
+    font-size: 0.875rem;
+}
+
+.whats-new-month {
+    margin-top: 1.75rem;
+}
+
+.whats-new-month h2 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+    margin-bottom: 0.5rem;
+}
+
+.whats-new-month ul {
+    padding-left: 1.1rem;
+    margin: 0;
+}
+
+.whats-new-month li {
+    margin-bottom: 0.6rem;
+}

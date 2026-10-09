@@ -51,7 +51,7 @@ In the order I would build them. The first ones are for reaching new people: wha
 
 ### Cheap ones to slot in whenever
 
-These need no new storage and no new screens worth the name: purchase price, a "Log care" home screen shortcut, and an app version and a "What's new" page in Settings.
+These need no new storage and no new screens worth the name: purchase price and a "Log care" home screen shortcut.
 
 ---
 
@@ -313,7 +313,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Rooms and tags page in Settings: rename a room or a spot everywhere at once, and merge two names for the same room | 2 | M | v1.x |
 | ✅ | **Settings behind a gear** at the top, as a short list: the account, the theme and photo reminder, then pages for rooms and tags, backup and storage, and the about pages. The last tab is **Supplies**, with the pots, soil mixes, products, feeds and treatment recipes, each saying what it holds or what it's for | 2 | M | v2 |
 | ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
-| ☐ | "What's new" page and app version in Settings. Entries are written by hand in plain language for the people using the app, not generated from commit or pull request titles | 5 | S | v1.x |
+| ✅ | "What's new" page and app version in Settings. The deploy sets the version to the publish date and the commit, and the page shows both. Entries are written by hand in plain language for the people using the app, grouped by month, not generated from commit or pull request titles | 5 | S | v1.x |
 | ✅ | A link to the source code on GitHub under About in Settings | 5 | S | v1.x |
 | ✅ | A title, description and picture for links to the app shared on Facebook and other sites | 5 | S | v1.x |
 | ✅ | A picture of the app itself for shared links in place of the icon: a cutting and the plant it came from, in the size Facebook, Reddit and messaging apps show | 2 | S | v1.x |
