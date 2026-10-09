@@ -27,7 +27,7 @@
     [Parameter] public CareCalendar? Calendar { get; set; }
 
     private static string MonthName(CareCalendarMonth month) =>
-        new DateOnly(month.Year, month.Month, 1).ToString("MMM", System.Globalization.CultureInfo.GetCultureInfo("en-GB"));
+        new DateOnly(month.Year, month.Month, 1).ToString("MMM", System.Globalization.CultureInfo.InvariantCulture);
 
     private static string ClassFor(CareCalendarDay day) => day.Mark switch
     {
@@ -40,7 +40,7 @@
 
     private static string TitleFor(CareCalendarDay day)
     {
-        var date = day.Date.ToString("d MMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-GB"));
+        var date = day.Date.ToString("d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
         return day.Mark switch
         {
             CareDayMark.Fed => $"{date}: fed",
