@@ -29,7 +29,7 @@ else
                         var entryPhotos = entry.PhotoIds.Where(photoIndex.ContainsKey).ToList();
                         <li class="timeline-entry kind-@entry.Kind.ToString().ToLowerInvariant()">
                             <div class="entry-head">
-                                <span class="entry-kind">@KindIcon(entry.Kind)@KindLabel(entry.Kind)</span>
+                                <span class="entry-kind">@KindIcon(entry)@KindLabel(entry)</span>
                                 @* "Added" is dated by the acquired date, which has no real time of day *@
                                 @if (entry.Kind != TimelineKind.Created)
                                 {
@@ -298,6 +298,20 @@ else
         day == Today ? "Today"
         : day == Today.AddDays(-1) ? "Yesterday"
         : Labels.Date(day);
+
+    private static string KindLabel(TimelineEntry entry) => TimelineEvents.Of(entry) switch
+    {
+        TimelineEvent.PottedUp => "Potted up",
+        TimelineEvent.Failed => "Didn't make it",
+        _ => KindLabel(entry.Kind)
+    };
+
+    private static MarkupString KindIcon(TimelineEntry entry) => TimelineEvents.Of(entry) switch
+    {
+        TimelineEvent.PottedUp => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 11V7" /><path d="M12 8c0-2.5 1.7-4 4.5-4 0 2.5-1.7 4-4.5 4Z" /><path d="M12 9c0-2-1.4-3-3.5-3 0 2 1.4 3 3.5 3Z" /><path d="M5 11h14l-1.6 9H6.6Z" /></svg>"""),
+        TimelineEvent.Failed => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21v-8" /><path d="M9 13c-4 0-6-2-6-5 3 0 6 1 6 5Z" /><path d="M15 4.500l5 5M20 4.500l-5 5" /></svg>"""),
+        _ => KindIcon(entry.Kind)
+    };
 
     private static string KindLabel(TimelineKind kind) => kind switch
     {
