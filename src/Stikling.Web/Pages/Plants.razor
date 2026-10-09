@@ -66,6 +66,19 @@ else
                 }
             </div>
 
+            @if (status == StatusFilter.Gone)
+            {
+                <div class="btn-group segmented w-100 gone-as" role="radiogroup" aria-label="How they left">
+                    @foreach (var (value, label) in goneOptions)
+                    {
+                        var id = $"gone-{value?.ToString() ?? "all"}";
+                        <input type="radio" class="btn-check" name="gone-as" id="@id"
+                               checked="@(goneAs == value)" @onchange="() => SetGoneAs(value)" />
+                        <label class="btn btn-outline-primary" for="@id">@label</label>
+                    }
+                </div>
+            }
+
             @if (HasRoomChoice)
             {
                 <select class="form-select w-auto" aria-label="Room"
@@ -146,6 +159,18 @@ else
             {
                 <p>None of your plants are in the collection now. The ones that died or left are under Gone.</p>
                 <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
+            }
+            else if (status == StatusFilter.Gone && goneAs == PlantStatus.Died)
+            {
+                <p>None of your plants have died.</p>
+            }
+            else if (status == StatusFilter.Gone && goneAs == PlantStatus.GivenAway)
+            {
+                <p>You haven't given any plants away.</p>
+            }
+            else if (status == StatusFilter.Gone && goneAs == PlantStatus.Sold)
+            {
+                <p>You haven't sold any plants.</p>
             }
             else
             {
@@ -264,6 +289,14 @@ else
         (StatusFilter.All, "All")
     ];
 
+    private static readonly (PlantStatus? Value, string Label)[] goneOptions =
+    [
+        (null, "All"),
+        (PlantStatus.Died, "Died"),
+        (PlantStatus.GivenAway, "Given away"),
+        (PlantStatus.Sold, "Sold")
+    ];
+
     private static readonly (PlantSort Value, string Label)[] sortOptions =
     [
         (PlantSort.Name, "A to Z"),
@@ -280,6 +313,7 @@ else
 
     private string? search;
     private StatusFilter status = StatusFilter.Active;
+    private PlantStatus? goneAs; // under Gone: how they left, null for all
     private string? room; // the picked room's id, as the dropdown gives it
     private Guid? spot;
     private IReadOnlyList<TagCount> tags = [];
@@ -334,6 +368,12 @@ else
     private void SetStatus(StatusFilter value)
     {
         status = value;
+        Refresh();
+    }
+
+    private void SetGoneAs(PlantStatus? value)
+    {
+        goneAs = value;
         Refresh();
     }
 
@@ -396,7 +436,7 @@ else
     private void Refresh() =>
         visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
                 pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity,
-                p => everyday?.For(p.Genus, p.Species, p.Cultivar))
+                p => everyday?.For(p.Genus, p.Species, p.Cultivar), goneAs)
             .Apply(all ?? [])
             .ToList();
 
