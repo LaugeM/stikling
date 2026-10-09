@@ -16,9 +16,21 @@ public class CsvExportTests
     {
         var csv = CsvExport.Plants([new Plant { Nickname = "Basil", CreatedAt = Now }], Places.None);
 
-        Assert.Equal("Name,Nickname,Genus,Species,Cultivar,Status,Room,Acquired,Origin,Source,Tags,Notes,Added", Lines(csv)[0]);
+        Assert.Equal("Name,Nickname,Genus,Species,Cultivar,Status,Room,Acquired,Origin,Source,Price paid,Tags,Notes,Added", Lines(csv)[0]);
         Assert.EndsWith("\r\n", csv);
         Assert.DoesNotContain("\n", csv.Replace("\r\n", ""));
+    }
+
+    [Fact]
+    public void Plants_have_the_price_paid_without_a_currency_or_trailing_zeros()
+    {
+        var csv = CsvExport.Plants(
+            [new Plant { Nickname = "A", PricePaid = 79.50m, CreatedAt = Now }, new Plant { Nickname = "B", CreatedAt = Now }],
+            Places.None);
+
+        var lines = Lines(csv);
+        Assert.Contains(",79.5,", lines[1]);
+        Assert.DoesNotContain("79.5,", lines[2]);
     }
 
     [Fact]
