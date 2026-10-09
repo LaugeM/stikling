@@ -77,6 +77,18 @@ public class GrowLightTests
     }
 
     [Fact]
+    public async Task Turning_a_place_on_again_brings_back_the_same_light()
+    {
+        await service.SetLitAsync(room.Id, true);
+        await service.SetLitAsync(room.Id, false);
+        await service.SetLitAsync(room.Id, true);
+
+        var light = Assert.Single(await service.GetAllAsync());
+        Assert.Equal(GrowLightService.DefaultIdFor(room.Id), light.Id);
+        Assert.Single(repository.Lights);
+    }
+
+    [Fact]
     public async Task Turning_a_place_off_removes_every_light_pointing_at_it()
     {
         await service.SaveAsync(new GrowLight { Name = "One", PlaceId = shelf.Id });

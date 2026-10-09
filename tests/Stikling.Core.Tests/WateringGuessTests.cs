@@ -147,6 +147,19 @@ public class WateringGuessTests
     }
 
     [Fact]
+    public void A_quicker_spring_last_year_never_brings_the_check_forward()
+    {
+        var plant = new Plant { Nickname = "Hoya" };
+        // Weekly round this time last year, but every two weeks lately
+        var logs = Waterings(plant, Spring.AddDays(-379), 7, 7, 7);
+        logs.AddRange(Waterings(plant, Spring.AddDays(-56), 14, 14, 14));
+
+        var guess = Guess(plant, logs, Spring);
+
+        Assert.Equal(14, guess.UsualDays);
+    }
+
+    [Fact]
     public void Fertilising_flushing_and_topping_up_count_as_watering_and_a_day_counts_once()
     {
         var plant = new Plant { Nickname = "Hoya" };

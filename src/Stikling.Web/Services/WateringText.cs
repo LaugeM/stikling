@@ -48,7 +48,7 @@ public static class WateringText
             _ =>
                 $"The water is usually topped up about {Every(guess.UsualDays ?? 1)}, it's been {Labels.Count(guess.DaysSince ?? 0, "day")}"
         };
-        return Season(guess) is { } season ? $"{text} · {season}" : text;
+        return Season(guess) is { } season ? $"{text} Â· {season}" : text;
     }
 
     private static string MeterRow(WateringDue due, DateOnly today)

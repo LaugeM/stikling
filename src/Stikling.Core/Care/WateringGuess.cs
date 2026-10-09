@@ -250,7 +250,9 @@ public sealed record WateringGuess(
 
         double value;
         if (lastYears.Count >= 2)
-            value = Percentile(Weigh(lastYears, LastYearWeight), 0.5);
+            // Last year can make it later than the recent pace but never earlier, so a quick
+            // spring last year doesn't bring a check forward before this plant has sped up
+            value = Math.Max(Percentile(Weigh(lastYears, LastYearWeight), 0.5), median);
         else if (seasonFactor is { } factor)
         {
             // Other plants can only make it later than this plant's own recent pace, never earlier.
