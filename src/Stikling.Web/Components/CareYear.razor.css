@@ -12,6 +12,33 @@
     gap: 0.4rem;
 }
 
+.cal-row-button {
+    width: 100%;
+    min-height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+}
+
+.cal-row-button[aria-expanded="true"] .cal-month {
+    color: var(--pa-text);
+    font-weight: 600;
+}
+
+.cal-entries {
+    margin: 0 0 0.25rem;
+    padding-left: 2.3rem;
+    list-style: none;
+}
+
+.cal-hint {
+    margin: 0.25rem 0 0;
+    padding-left: 2.3rem;
+}
+
 .cal-month {
     flex: 0 0 1.9rem;
 }
@@ -30,13 +57,18 @@
     height: 9px;
     border-radius: 2px;
     background: var(--pa-border);
-    opacity: 0.55;
+    opacity: 0.3;
     vertical-align: middle;
 }
 
 .cal-watered {
-    background: color-mix(in srgb, var(--pa-green) 45%, var(--pa-surface));
+    /* 3:1 against both the empty cells and the card in light and dark */
+    background: color-mix(in srgb, var(--pa-green) 78%, var(--pa-surface));
     opacity: 1;
+}
+
+:root[data-bs-theme="dark"] .cal-watered {
+    background: color-mix(in srgb, var(--pa-green) 65%, var(--pa-surface));
 }
 
 .cal-fed {
@@ -65,4 +97,11 @@
 
 .cal-legend .cal-day {
     margin-right: 0.3rem;
+}
+
+/* DESIGN.md asks for tap areas of 44px; a mouse keeps the compact rows */
+@media (pointer: coarse) {
+    .cal-row-button {
+        min-height: 2.75rem;
+    }
 }

@@ -152,7 +152,7 @@
 
 .memory-photos figcaption {
     margin-top: 0.25rem;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--pa-muted);
 }
 
@@ -166,12 +166,16 @@
 }
 
 .memory-name {
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
     font-weight: 600;
+    letter-spacing: -0.005em;
     color: inherit;
 }
 
+/* Square photos at the full width of the column would be taller than the screen */
 @media (min-width: 768px) {
-    .memory {
-        max-width: 28rem;
+    .memory-photo {
+        aspect-ratio: 4 / 3;
     }
 }

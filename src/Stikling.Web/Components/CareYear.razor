@@ -2,17 +2,49 @@
 
 @if (Calendar is { IsEmpty: false } calendar)
 {
-    <div class="care-calendar" role="img" aria-label="@calendar.Summary">
+    <div class="care-calendar">
+        <p class="visually-hidden">@calendar.Summary</p>
         @foreach (var month in calendar.Months)
         {
-            <div class="cal-row" aria-hidden="true">
-                <span class="cal-month">@MonthName(month)</span>
-                <span class="cal-days">
-                    @foreach (var day in month.Days)
+            var marked = month.Days.Where(d => d.Mark != CareDayMark.None).ToList();
+            var key = month.Year * 12 + month.Month;
+            var open = openMonth == key;
+            <div class="cal-month-block">
+                @if (marked.Count == 0)
+                {
+                    <div class="cal-row">
+                        <span class="cal-month">@MonthName(month)</span>
+                        <span class="cal-days" aria-hidden="true">
+                            @foreach (var day in month.Days)
+                            {
+                                <span class="cal-day @ClassFor(day)"></span>
+                            }
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <button type="button" class="cal-row cal-row-button" aria-expanded="@(open ? "true" : "false")"
+                            aria-label="@($"{MonthName(month)} {month.Year}: {marked.Count} {(marked.Count == 1 ? "day" : "days")} with care")"
+                            @onclick="() => openMonth = open ? null : key">
+                        <span class="cal-month">@MonthName(month)</span>
+                        <span class="cal-days" aria-hidden="true">
+                            @foreach (var day in month.Days)
+                            {
+                                <span class="cal-day @ClassFor(day)" title="@TitleFor(day)"></span>
+                            }
+                        </span>
+                    </button>
+                    @if (open)
                     {
-                        <span class="cal-day @ClassFor(day)" title="@TitleFor(day)"></span>
+                        <ul class="cal-entries">
+                            @foreach (var day in marked)
+                            {
+                                <li>@day.Date.ToString("d MMM", System.Globalization.CultureInfo.InvariantCulture): @MarkText(day.Mark)</li>
+                            }
+                        </ul>
                     }
-                </span>
+                }
             </div>
         }
         <div class="cal-legend" aria-hidden="true">
@@ -20,11 +52,14 @@
             <span><span class="cal-day cal-fed"></span> Fed</span>
             <span><span class="cal-day cal-reading"></span> Meter reading</span>
         </div>
+        <p class="cal-hint">Tap a month to see its days.</p>
     </div>
 }
 
 @code {
     [Parameter] public CareCalendar? Calendar { get; set; }
+
+    private int? openMonth;
 
     private static string MonthName(CareCalendarMonth month) =>
         new DateOnly(month.Year, month.Month, 1).ToString("MMM", System.Globalization.CultureInfo.InvariantCulture);
@@ -36,6 +71,13 @@
         CareDayMark.Watered => "cal-watered",
         CareDayMark.Reading => "cal-reading",
         _ => ""
+    };
+
+    private static string MarkText(CareDayMark mark) => mark switch
+    {
+        CareDayMark.Fed => "fed",
+        CareDayMark.Watered => "watered",
+        _ => "meter reading"
     };
 
     private static string TitleFor(CareCalendarDay day)
