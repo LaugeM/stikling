@@ -402,7 +402,7 @@ else
         {
             <div class="sheet-section">
                 <h3 class="section-label">The last year</h3>
-                <CareCalendar Calendar="careCalendar" />
+                <CareYear Calendar="careCalendar" />
             </div>
         }
 
@@ -651,7 +651,7 @@ else
     private IReadOnlyList<CareLog> care = [];
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
     private MoistureReading? moisture;
-    private Stikling.Core.Care.CareCalendar? careCalendar;
+    private CareCalendar? careCalendar;
     private IReadOnlyList<PestCase> pests = [];
     private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
@@ -786,7 +786,7 @@ else
             .Select(kind => (kind, CareSummary.Latest(all, plant.Id, kind, Today)))
             .ToList();
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
-        careCalendar = Stikling.Core.Care.CareCalendar.Build(all, plant.Id, Today);
+        careCalendar = CareCalendar.Build(all, plant.Id, Today);
     }
 
     private async Task CareLoggedAsync()

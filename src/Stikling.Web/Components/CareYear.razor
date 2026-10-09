@@ -1,4 +1,4 @@
-@using Stikling.Core.Care
+@* A year of waterings, feeds and meter readings for one plant, one row per month. *@
 
 @if (Calendar is { IsEmpty: false } calendar)
 {
@@ -24,7 +24,7 @@
 }
 
 @code {
-    [Parameter] public Stikling.Core.Care.CareCalendar? Calendar { get; set; }
+    [Parameter] public CareCalendar? Calendar { get; set; }
 
     private static string MonthName(CareCalendarMonth month) =>
         new DateOnly(month.Year, month.Month, 1).ToString("MMM", System.Globalization.CultureInfo.GetCultureInfo("en-GB"));
