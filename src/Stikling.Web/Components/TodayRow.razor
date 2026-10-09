@@ -26,10 +26,13 @@
     {
         <div class="put-off" role="group" aria-label="@AnswerGroupLabel">
             <span class="put-off-label">@AnswerLabel</span>
-            @foreach (var choice in AnswerChoices)
-            {
-                <button type="button" class="chip" disabled="@busy" @onclick="() => AnswerAsync(choice)">@choice</button>
-            }
+            @* The numbers sit in two even rows of five, each big enough to tap *@
+            <div class="answer-grid">
+                @foreach (var choice in AnswerChoices)
+                {
+                    <button type="button" class="chip" disabled="@busy" @onclick="() => AnswerAsync(choice)">@choice</button>
+                }
+            </div>
             @if (AnswerNoneLabel is not null)
             {
                 <button type="button" class="chip" disabled="@busy" @onclick="() => AnswerAsync(null)">@AnswerNoneLabel</button>
