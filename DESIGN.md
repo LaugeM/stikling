@@ -365,6 +365,8 @@ Without a photo, the card is built around one number in Bricolage 800 at the con
 
 The sheet that makes it is the usual one: the card as a preview, then Size, Photo, Name and What it says, which the person can change, then Share and Save image.
 
+With three or more photos the sheet also offers a time-lapse, an MP4 made in `wwwroot/js/timelapse.js` from the same card layout. Each photo shows with its date and day count in the pill, in the order they were taken, and fades into the next over a fifth of a second at most, the pill with it. The preview plays on a loop, and with reduced motion it shows the first frame and waits for a Play button. The row of photos becomes a row of toggles: a photo that is in the video has a Potting Green edge and a tick, and one that is left out is faded with a dashed edge. Making the video shows a slim Potting Green progress bar with a Cancel button, and Share video and Save video take the place of Make video when it is done.
+
 ### Help Page
 Questions and answers grouped by topic, each topic under a Label heading. The questions in a topic close up into one bordered block divided by hairlines, like an experiment group, and each folds open with a stroked chevron on the right that turns over when open. Questions are set in the system font at weight 600, because they are sentences. A row of chips at the top jumps to each topic. The page is reached from About in Settings and from the first-run empty states, not from the header, so it doesn't compete with the app itself.
 

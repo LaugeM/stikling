@@ -1,9 +1,13 @@
 @* The sheet behind a page's Share link: the card as it will be posted, a choice of size and photo,
    and the words on it, which the app writes and the person can change. Nothing here is saved.
-   The picture is drawn by ShareCardService, which keeps it in JavaScript. *@
+   The picture is drawn by ShareCardService, which keeps it in JavaScript. A time-lapse video is made
+   by TimelapseService, which keeps it there too. *@
+@using System.Globalization
 @using System.Text.Json
 @using Stikling.Core.Sync
+@implements IAsyncDisposable
 @inject ShareCardService Cards
+@inject TimelapseService Timelapse
 @inject IPhotoRepository PhotoRepository
 @inject SyncRunner Sync
 @inject TimeProvider Time
@@ -13,8 +17,14 @@
     {
         <div class="share-preview">
             <canvas @ref="canvas" width="1080" height="@PreviewHeight" role="img"
-                    aria-label="@($"Preview of the card for {CardName}")"></canvas>
+                    aria-label="@($"Preview of the {(mode == ShareMode.Timelapse ? "time-lapse" : "card")} for {CardName}")"></canvas>
         </div>
+        @if (mode == ShareMode.Timelapse && reducedMotion && UsablePhotos.Count >= 2 && videoState != VideoState.Making)
+        {
+            <div class="share-field">
+                <button type="button" class="btn btn-outline-primary" @onclick="TogglePlay">@(previewPlaying ? "Stop preview" : "Play preview")</button>
+            </div>
+        }
 
         @if (allPhotos.Count >= 2)
         {
@@ -22,11 +32,17 @@
                 <div class="share-label" id="share-mode-label">Card</div>
                 <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-mode-label">
                     <input type="radio" class="btn-check" name="share-mode" id="share-mode-one"
-                           checked="@(!pairMode)" @onchange="() => SetPairMode(false)" />
+                           checked="@(mode == ShareMode.One)" @onchange="() => SetModeAsync(ShareMode.One)" />
                     <label class="btn btn-outline-primary" for="share-mode-one">One photo</label>
                     <input type="radio" class="btn-check" name="share-mode" id="share-mode-pair"
-                           checked="@pairMode" @onchange="() => SetPairMode(true)" />
+                           checked="@(mode == ShareMode.Pair)" @onchange="() => SetModeAsync(ShareMode.Pair)" />
                     <label class="btn btn-outline-primary" for="share-mode-pair">Before and after</label>
+                    @if (allPhotos.Count >= 3)
+                    {
+                        <input type="radio" class="btn-check" name="share-mode" id="share-mode-timelapse"
+                               checked="@(mode == ShareMode.Timelapse)" @onchange="() => SetModeAsync(ShareMode.Timelapse)" />
+                        <label class="btn btn-outline-primary" for="share-mode-timelapse">Time-lapse</label>
+                    }
                 </div>
             </div>
         }
@@ -38,13 +54,60 @@
                 {
                     var id = $"share-format-{value}";
                     <input type="radio" class="btn-check" name="share-format" id="@id"
-                           checked="@(format == value)" @onchange="() => SetFormatAsync(value)" />
+                           checked="@(ActiveFormat == value)" @onchange="() => SetFormatAsync(value)" />
                     <label class="btn btn-outline-primary" for="@id">@label</label>
                 }
             </div>
         </div>
 
-        @if (pairMode)
+        @if (mode == ShareMode.Timelapse)
+        {
+            <div class="share-field">
+                <div class="share-label" id="share-speed-label">Speed</div>
+                <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-speed-label">
+                    @foreach (var (value, label) in Speeds)
+                    {
+                        var id = $"share-speed-{value}";
+                        <input type="radio" class="btn-check" name="share-speed" id="@id"
+                               checked="@(speed == value)" @onchange="() => SetSpeedAsync(value)" />
+                        <label class="btn btn-outline-primary" for="@id">@label</label>
+                    }
+                </div>
+            </div>
+
+            <div class="share-field">
+                <div class="share-label" id="share-ticks-label">Photos in the video</div>
+                <div class="share-photos" role="group" aria-labelledby="share-ticks-label">
+                    @foreach (var photo in allPhotos)
+                    {
+                        var ticked = !leftOut.Contains(photo.Id);
+                        <button type="button" role="checkbox" aria-checked="@(ticked ? "true" : "false")"
+                                aria-label="@($"Photo from {DayText(photo)}")" class="share-photo @(ticked ? "ticked" : "left-out")"
+                                @onclick="() => ToggleTick(photo.Id)">
+                            <PhotoImage PhotoId="photo.Id" Framed="false" />
+                            @if (ticked)
+                            {
+                                <svg class="share-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9" /></svg>
+                            }
+                        </button>
+                    }
+                </div>
+                <p class="form-text mb-0">@TickedPhotos.Count of @allPhotos.Count photos are in the video. Tap one to leave it out.</p>
+                @if (tickNote is not null)
+                {
+                    <p class="form-text mb-0" role="status">@tickNote</p>
+                }
+                @if (MissingCount > 0)
+                {
+                    <p class="form-text mb-0">@(MissingCount == 1 ? "One photo isn't" : $"{MissingCount} photos aren't") on this device yet, so @(MissingCount == 1 ? "it is" : "they are") left out of the video.@(UsablePhotos.Count < 2 ? " That leaves too few to make one." : "")</p>
+                }
+                @if (SmallCount > 0 && videoState != VideoState.Making)
+                {
+                    <p class="form-text mb-0">@(SmallCount == 1 ? "One photo is" : $"{SmallCount} photos are") only a small copy on this device. Making the video gets the full @(SmallCount == 1 ? "one" : "ones") first when it can, so the video is sharp.</p>
+                }
+            </div>
+        }
+        else if (mode == ShareMode.Pair)
         {
             @foreach (var (label, key, current) in new[] { ("Before", "before", beforeId), ("After", "after", afterId) })
             {
@@ -123,17 +186,53 @@
             }
         </div>
 
-        <div class="form-actions">
-            @if (canShare)
+        @if (mode == ShareMode.Timelapse)
+        {
+            @if (videoState == VideoState.Making)
             {
-                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ShareAsync">Share</button>
-                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="SaveAsync">Save image</button>
+                <div class="share-progress-box">
+                    <p class="form-text mb-1" role="status">@phase</p>
+                    <progress class="share-progress" max="1" value="@ProgressValue" aria-label="Making the video"></progress>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline-primary" disabled="@cancelRequested" @onclick="CancelVideoAsync">Cancel</button>
+                </div>
+            }
+            else if (VideoIsReady)
+            {
+                <div class="form-actions">
+                    @if (canShareVideo)
+                    {
+                        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ShareVideoAsync">Share video</button>
+                        <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="SaveVideoAsync">Save video</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveVideoAsync">Save video</button>
+                    }
+                </div>
             }
             else
             {
-                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">Save image</button>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@(UsablePhotos.Count < 2)" @onclick="MakeVideoAsync">Make video</button>
+                </div>
             }
-        </div>
+        }
+        else
+        {
+            <div class="form-actions">
+                @if (canShare)
+                {
+                    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ShareAsync">Share</button>
+                    <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="SaveAsync">Save image</button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">Save image</button>
+                }
+            </div>
+        }
 
         @if (message is not null)
         {
@@ -179,11 +278,24 @@
     [Parameter]
     public string? StartLine { get; set; }
 
+    private enum ShareMode { One, Pair, Timelapse }
+
+    private enum VideoState { Idle, Making, Done }
+
+    private static readonly (TimelapseSpeed Value, string Label)[] Speeds =
+    [
+        (TimelapseSpeed.Slow, "Slow"),
+        (TimelapseSpeed.Normal, "Normal"),
+        (TimelapseSpeed.Fast, "Fast"),
+    ];
+
+    private const string VideoFailed = "The video couldn't be made. Try again, or leave out some photos.";
+
     private ElementReference canvas;
     private IReadOnlyList<Photo> photos = [];
     private IReadOnlyList<Photo> allPhotos = [];
     private IReadOnlyList<Photo> pairPhotos = [];
-    private bool pairMode;
+    private ShareMode mode;
     private Guid? beforeId;
     private Guid? afterId;
     private string format = "square";
@@ -201,15 +313,50 @@
     private string? drawnKey;
     private bool wasOpen;
 
+    // The time-lapse. Its size and speed are remembered on their own, apart from the card's size.
+    private string videoFormat = "story";
+    private TimelapseSpeed speed = TimelapseSpeed.Normal;
+    private readonly HashSet<Guid> leftOut = [];
+    private HashSet<Guid> smallIds = [];
+    private HashSet<Guid> missingIds = [];
+    private VideoState videoState;
+    private double? progress;
+    private string? phase;
+    private string? tickNote;
+    private string? madeKey;
+    private string? previewKey;
+    private bool cancelRequested;
+    private bool canShareVideo;
+    private bool reducedMotion;
+    private bool previewPlaying;
+    private int makeRun;
+
+    private string ActiveFormat => mode == ShareMode.Timelapse ? videoFormat : format;
+
     // The first draw can't know the size yet, so the preview keeps the shape of the card
-    private int PreviewHeight => format switch { "portrait" => 1350, "story" => 1920, _ => 1080 };
+    private int PreviewHeight => ActiveFormat switch { "portrait" => 1350, "story" => 1920, _ => 1080 };
 
     private string CardName => string.IsNullOrWhiteSpace(name) ? Text.Name : name.Trim();
 
     private bool Edited => CardName != Text.Name || (line ?? "").Trim() != (DefaultLine ?? "");
 
+    private IReadOnlyList<Photo> TickedPhotos => allPhotos.Where(p => !leftOut.Contains(p.Id)).ToList();
+
+    // Ticked, and on this device in some size
+    private IReadOnlyList<Photo> UsablePhotos => TickedPhotos.Where(p => !missingIds.Contains(p.Id)).ToList();
+
+    private int MissingCount => TickedPhotos.Count(p => missingIds.Contains(p.Id));
+
+    private int SmallCount => TickedPhotos.Count(p => smallIds.Contains(p.Id));
+
+    private string ProgressValue => (progress ?? 0).ToString("0.###", CultureInfo.InvariantCulture);
+
+    private bool VideoIsReady => videoState == VideoState.Done && madeKey == VideoKey(VideoSpec());
+
+    private string VideoFileName => ShareCardService.FileNameFor(CardName, ShareFileKind.Timelapse);
+
     // What the app would write: the usual line, or how far apart the two photos are
-    private string? DefaultLine => !pairMode ? Text.Line
+    private string? DefaultLine => mode != ShareMode.Pair ? Text.Line
         : StartLine is not null && beforeId == StartBeforeId && afterId == StartAfterId ? StartLine
         : ApartLine(beforeId, afterId);
 
@@ -236,6 +383,8 @@
         wasOpen = Open;
         if (!Open)
         {
+            if (mode == ShareMode.Timelapse)
+                await LeaveTimelapseAsync();
             ready = false;
             drawnKey = null;
             return;
@@ -246,7 +395,11 @@
         message = null;
         photoMissing = false;
         photoSmall = false;
-        pairMode = false;
+        mode = ShareMode.One;
+        leftOut.Clear();
+        smallIds.Clear();
+        missingIds.Clear();
+        tickNote = null;
         triedFull.Clear();
         format =await Cards.GetFormatAsync();
         canShare = await Cards.CanShareAsync();
@@ -263,7 +416,7 @@
         afterId = allPhotos.LastOrDefault()?.Id;
         if (PhotoOf(StartBeforeId) is not null && PhotoOf(StartAfterId) is not null)
         {
-            pairMode = true;
+            mode = ShareMode.Pair;
             beforeId = StartBeforeId;
             afterId = StartAfterId;
             line = DefaultLine ?? "";
@@ -278,6 +431,12 @@
     {
         if (!Open || !ready || canvas.Id is null)
             return;
+
+        if (mode == ShareMode.Timelapse)
+        {
+            await SyncVideoAsync();
+            return;
+        }
 
         var spec = Spec();
         var key = JsonSerializer.Serialize(spec);
@@ -322,7 +481,7 @@
 
     private ShareCardSpec Spec()
     {
-        if (!pairMode || PhotoOf(beforeId) is not { } a || PhotoOf(afterId) is not { } b)
+        if (mode != ShareMode.Pair || PhotoOf(beforeId) is not { } a || PhotoOf(afterId) is not { } b)
             return SinglePhotoSpec();
 
         // The older photo goes first, whichever way round they were picked
@@ -348,20 +507,291 @@
         photoId?.ToString(),
         photos.FirstOrDefault(p => p.Id == photoId)?.Frame);
 
+    // The card and the video each keep their own size
     private async Task SetFormatAsync(string value)
     {
-        format = value;
-        await Cards.SetFormatAsync(value);
+        if (mode == ShareMode.Timelapse)
+        {
+            videoFormat = value;
+            await Timelapse.SetFormatAsync(value);
+        }
+        else
+        {
+            format = value;
+            await Cards.SetFormatAsync(value);
+        }
     }
 
     // The line follows the app's words until the person has changed it
-    private void SetPairMode(bool value)
+    private async Task SetModeAsync(ShareMode value)
     {
-        if (pairMode == value)
+        if (mode == value)
             return;
-        ChangeKeepingEditedLine(() => pairMode = value);
+        var leaving = mode;
+        ChangeKeepingEditedLine(() => mode = value);
         photoMissing = false;
         photoSmall = false;
+        message = null;
+
+        if (leaving == ShareMode.Timelapse)
+            await LeaveTimelapseAsync();
+        if (value == ShareMode.Timelapse)
+            await EnterTimelapseAsync();
+    }
+
+    // ---- The time-lapse ----
+
+    private async Task EnterTimelapseAsync()
+    {
+        videoFormat = await Timelapse.GetFormatAsync();
+        speed = await Timelapse.GetSpeedAsync();
+        reducedMotion = await Timelapse.PrefersReducedMotionAsync();
+        canShareVideo = await Timelapse.CanShareAsync();
+        videoState = VideoState.Idle;
+        madeKey = null;
+        previewKey = null;
+        previewPlaying = false;
+        tickNote = null;
+        await RefreshAvailabilityAsync();
+    }
+
+    // Stops the preview and anything being made, and drops the finished video. The card is drawn again if the sheet stays open.
+    private async Task LeaveTimelapseAsync()
+    {
+        makeRun++;
+        var making = videoState == VideoState.Making;
+        videoState = VideoState.Idle;
+        madeKey = null;
+        previewKey = null;
+        previewPlaying = false;
+        progress = null;
+        drawnKey = null;
+        try
+        {
+            if (making)
+                await Timelapse.CancelAsync();
+            await Timelapse.StopPreviewAsync();
+            await Timelapse.DiscardAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+    }
+
+    private async Task RefreshAvailabilityAsync()
+    {
+        var found = await Timelapse.CheckAsync(allPhotos.Select(p => p.Id));
+        smallIds = found.Small.Select(Guid.Parse).ToHashSet();
+        missingIds = found.Missing.Select(Guid.Parse).ToHashSet();
+    }
+
+    private async Task SetSpeedAsync(TimelapseSpeed value)
+    {
+        speed = value;
+        await Timelapse.SetSpeedAsync(value);
+    }
+
+    private void ToggleTick(Guid id)
+    {
+        if (leftOut.Remove(id))
+        {
+            tickNote = null;
+        }
+        else if (allPhotos.Count - leftOut.Count <= 2)
+        {
+            tickNote = "A time-lapse needs at least 2 photos, so this one stays in.";
+        }
+        else
+        {
+            leftOut.Add(id);
+            tickNote = null;
+        }
+    }
+
+    private void TogglePlay() => previewPlaying = !previewPlaying;
+
+    // What the video is made from. The photos are in the order they were taken, with the timing from TimelapsePlan.
+    private TimelapseSpec VideoSpec()
+    {
+        var usable = UsablePhotos;
+        var byId = usable.ToDictionary(p => p.Id);
+        var plan = TimelapsePlan.Create(usable.Select(p => new TimelapsePhoto(p.Id, p.TakenAt)), speed);
+        var shots = plan.Shots.Select(shot =>
+        {
+            var photo = byId[shot.PhotoId];
+            return new TimelapseShotSpec(photo.Id.ToString(), photo.Frame, DayText(photo), shot.Start, shot.Hold);
+        }).ToList();
+        return new TimelapseSpec(
+            videoFormat,
+            CardName,
+            Text.Latin,
+            Text.Cultivar,
+            string.IsNullOrWhiteSpace(line) ? null : line.Trim(),
+            plan.Crossfade,
+            plan.Total,
+            shots);
+    }
+
+    private static string VideoKey(TimelapseSpec spec) => JsonSerializer.Serialize(spec);
+
+    // Keeps the preview and the made video in step with what is on the sheet
+    private async Task SyncVideoAsync()
+    {
+        if (videoState == VideoState.Making)
+            return;
+
+        var spec = VideoSpec();
+        var inputs = VideoKey(spec);
+
+        // Something it was made from has changed, so the video is dropped and Make video comes back
+        if (videoState == VideoState.Done && madeKey != inputs)
+        {
+            videoState = VideoState.Idle;
+            madeKey = null;
+            await Timelapse.DiscardAsync();
+            StateHasChanged();
+        }
+
+        var key = spec.Shots.Count < 2 ? "none" : $"{previewPlaying}|{!reducedMotion}|{inputs}";
+        if (key == previewKey)
+            return;
+        previewKey = key;
+        if (spec.Shots.Count < 2)
+            await Timelapse.StopPreviewAsync();
+        else
+            await Timelapse.PreviewAsync(canvas, spec, !reducedMotion || previewPlaying);
+    }
+
+    private async Task MakeVideoAsync()
+    {
+        var run = ++makeRun;
+        message = null;
+        cancelRequested = false;
+        progress = null;
+        phase = "Getting ready.";
+        videoState = VideoState.Making;
+        previewKey = null;
+        StateHasChanged();
+
+        try
+        {
+            await Timelapse.StopPreviewAsync();
+
+            // Photos that are only small here are fetched in full first, the way the card does
+            var found = await Timelapse.CheckAsync(TickedPhotos.Select(p => p.Id));
+            if (found.Small.Count > 0)
+            {
+                phase = "Getting the full photos, so the video is sharp.";
+                StateHasChanged();
+                foreach (var id in found.Small.Select(Guid.Parse))
+                {
+                    if (cancelRequested || run != makeRun)
+                        break;
+                    await Sync.FetchPhotoAsync(id, PhotoSize.Full);
+                }
+            }
+            if (run != makeRun)
+                return;
+            if (cancelRequested)
+            {
+                videoState = VideoState.Idle;
+                return;
+            }
+
+            await RefreshAvailabilityAsync();
+            if (UsablePhotos.Count < 2)
+            {
+                videoState = VideoState.Idle;
+                message = "Too few of those photos are on this device to make a video.";
+                return;
+            }
+
+            var spec = VideoSpec();
+            phase = "Making the video.";
+            progress = 0;
+            StateHasChanged();
+            var result = await Timelapse.MakeAsync(spec, fraction =>
+            {
+                if (run != makeRun)
+                    return;
+                progress = fraction;
+                _ = InvokeAsync(StateHasChanged);
+            });
+            if (run != makeRun)
+                return;
+
+            switch (result)
+            {
+                case "done":
+                    videoState = VideoState.Done;
+                    madeKey = VideoKey(spec);
+                    break;
+                case "cancelled":
+                    videoState = VideoState.Idle;
+                    break;
+                case "unsupported":
+                    videoState = VideoState.Idle;
+                    message = "This browser can't make videos.";
+                    break;
+                default:
+                    videoState = VideoState.Idle;
+                    message = VideoFailed;
+                    break;
+            }
+        }
+        catch (JSException)
+        {
+            if (run == makeRun)
+            {
+                videoState = VideoState.Idle;
+                message = VideoFailed;
+            }
+        }
+        finally
+        {
+            if (run == makeRun)
+            {
+                progress = null;
+                previewKey = null;
+            }
+        }
+    }
+
+    private async Task CancelVideoAsync()
+    {
+        cancelRequested = true;
+        phase = "Cancelling.";
+        await Timelapse.CancelAsync();
+    }
+
+    private async Task ShareVideoAsync() => await RunVideoAsync(() => Timelapse.ShareAsync(VideoFileName));
+
+    private async Task SaveVideoAsync() => await RunVideoAsync(() => Timelapse.SaveAsync(VideoFileName));
+
+    private async Task RunVideoAsync(Func<Task<string>> action)
+    {
+        busy = true;
+        message = null;
+        try
+        {
+            message = await action() switch
+            {
+                "saved" => "Saved as a video on this device. It's in your downloads.",
+                "failed" => "The video couldn't be shared. Make it again.",
+                _ => null,
+            };
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (mode == ShareMode.Timelapse)
+            await LeaveTimelapseAsync();
     }
 
     private void PickPair(string side, Guid id) =>
@@ -387,9 +817,11 @@
         line = DefaultLine ?? "";
     }
 
-    private async Task ShareAsync() => await RunAsync(() => Cards.ShareAsync(canvas, ShareCardService.FileNameFor(CardName, pairMode)));
+    private ShareFileKind CardFileKind => mode == ShareMode.Pair ? ShareFileKind.BeforeAfter : ShareFileKind.Photo;
 
-    private async Task SaveAsync() => await RunAsync(() => Cards.SaveAsync(canvas, ShareCardService.FileNameFor(CardName, pairMode)));
+    private async Task ShareAsync() => await RunAsync(() => Cards.ShareAsync(canvas, ShareCardService.FileNameFor(CardName, CardFileKind)));
+
+    private async Task SaveAsync() => await RunAsync(() => Cards.SaveAsync(canvas, ShareCardService.FileNameFor(CardName, CardFileKind)));
 
     private async Task RunAsync(Func<Task<string>> action)
     {

@@ -64,6 +64,7 @@ builder.Services.AddScoped<GrowLightService>();
 builder.Services.AddScoped<CareService>();
 builder.Services.AddScoped<PhotoService>();
 builder.Services.AddScoped<ShareCardService>();
+builder.Services.AddScoped<TimelapseService>();
 builder.Services.AddScoped<DeviceFiles>();
 builder.Services.AddScoped<AppBadge>();
 builder.Services.AddScoped<BackupService>();

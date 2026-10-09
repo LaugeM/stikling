@@ -37,20 +37,19 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
 
-1. **A time-lapse video**, from a plant's or propagation's photos, with the day count on each photo, the way Before and after already shows it.
-2. **A share link for one plant or propagation**, which opens a page anyone can see.
-3. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
-4. **Passing a cutting on with its history**, built on the share link.
-5. **Your year with your plants**, another thing worth posting, next to A year ago today.
-6. **Going round a room**, one plant at a time, together with the daily round. It goes well with the watering reminder.
-7. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
-8. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
-9. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-10. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-11. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-12. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-13. **Comparing photos side by side, and voice notes.**
-14. **Unsure names**, for the plants that only have a provisional name.
+1. **A share link for one plant or propagation**, which opens a page anyone can see.
+2. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
+3. **Passing a cutting on with its history**, built on the share link.
+4. **Your year with your plants**, another thing worth posting, next to A year ago today.
+5. **Going round a room**, one plant at a time, together with the daily round. It goes well with the watering reminder.
+6. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
+7. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
+8. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+9. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+10. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+11. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+12. **Comparing photos side by side, and voice notes.**
+13. **Unsure names**, for the plants that only have a provisional name.
 
 ### Cheap ones to slot in whenever
 
@@ -138,9 +137,9 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ☐ | **Growth curve**: a small chart of a plant's or propagation's measurements over time, once there are a few to draw | 7 | S | v1.x |
 | ☐ | **Share into Stikling**: the installed app appears in Android's share menu, so a photo from the gallery can go straight to a plant (Web Share Target) | 7 | M | v1.x |
 | ✅ | **Before and after**: in the Share sheet, pick two photos of a plant or propagation, starting on the first and the newest, and get one image of them side by side (stacked for 9:16) with the dates and how far apart they are, ready to post. Shared through the phone's share menu, or saved | 3 | M | v1.x |
-| ☐ | **Time-lapse video** from a plant's or propagation's photos, each one showing for a moment with its date, in a portrait shape that fits TikTok and Reels. Made on the phone. Which video formats each browser can record, and which TikTok and Instagram take, needs trying on a phone | 4 | L | v1.x |
+| ✅ | **Time-lapse video**: in the Share sheet, with three or more photos, make an MP4 of a plant's or propagation's photos in the order they were taken. Each shows for a moment, Slow, Normal or Fast, with its date and day count in the same layout as the share card, and fades into the next. The last one stays up a little longer, and there is no sound. Square, 4:5 or 9:16, with the size and speed remembered, and a tap on a photo leaves it out (at least two stay in). The preview plays on a loop, and waits for a Play button with reduced motion. It is made on the phone with the browser's own H.264 encoder, or with a WebAssembly one at a lower frame rate where there is none, like Firefox on Android, and loaded only when someone makes a video. Shared through the phone's share menu, or saved as an MP4. Which formats TikTok and Instagram take still needs trying on a phone | 4 | L | v1.x |
 | ☐ | **Ghost overlay** when taking a photo: a faint copy of the previous photo to line up the same angle every time | 8 | L | v1.x |
-| ✅ | **Day count on photos**: each photo of a propagation shows the day it was taken on, e.g. "day 24", in its history, the photo viewer and Before and after. Photos of a plant count from the day you got it, when that is a full date. The time-lapse gets it when it is built | 3 | S | v1.x |
+| ✅ | **Day count on photos**: each photo of a propagation shows the day it was taken on, e.g. "day 24", in its history, the photo viewer and Before and after. Photos of a plant count from the day you got it, when that is a full date. The time-lapse has it too | 3 | S | v1.x |
 | ☐ | **Mark up a photo**: draw a circle or an arrow on a photo and add a short label, like "new node" or "mealybugs here". The marks are saved on their own, so the photo itself is never changed | 5 | M | v1.x |
 | ☐ | **Link to another plant in a note**: type @ and pick a plant, propagation or pot, and the note links to it. The other one's page shows the notes that mention it | 6 | M | v1.x |
 | ☐ | **A photo of a shelf or spot with the plants marked on it**: tap a plant in the photo to open it. The photo also shows on the history of each plant marked in it | 6 | L | v1.x |

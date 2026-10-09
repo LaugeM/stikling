@@ -58,6 +58,7 @@ Found a bug, or have a question or an idea? [Open an issue](https://github.com/L
 
 - C# / .NET 10, **Blazor WebAssembly** (standalone, PWA)
 - Bootstrap 5
+- Mediabunny (MPL-2.0), and h264-mp4-encoder (MIT, with libmp4v2 under MPL 1.1 inside it), to make the time-lapse video. They are only loaded when someone makes one, and their licences are in `src/Stikling.Web/wwwroot/lib`
 - IndexedDB for on-device storage (via a small JS interop module)
 - xUnit for the domain logic
 - The sync API: ASP.NET Core minimal API with EF Core on SQL Server, photos in Azure Blob Storage, sign-in through Clerk, run locally with Docker Compose

@@ -13,12 +13,13 @@ self.addEventListener('message', event => {
 
 const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
-const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff2?$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/, /\.webmanifest$/ ];
+const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.mjs$/, /\.json$/, /\.css$/, /\.woff2?$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/, /\.webmanifest$/ ];
 // The link preview picture is only for other sites, so the app has no use for it offline
 const offlineAssetsExclude = [ /^service-worker\.js$/, /^img\/preview\.png$/ ];
-// Files only some devices use, like the Danish plant names. Each is cached the first time the device
-// fetches it, and a new version of the app caches it straight away if the old one had it.
-const onDemandAssets = [ /^data\/everyday-names\.(?!en\.)[a-z]+\.json$/ ];
+// Files only some devices use, like the Danish plant names and the libraries that make a time-lapse
+// video. Each is cached the first time the device fetches it, and a new version of the app caches it
+// straight away if the old one had it.
+const onDemandAssets = [ /^data\/everyday-names\.(?!en\.)[a-z]+\.json$/, /^lib\/mediabunny\//, /^lib\/h264-mp4-encoder\// ];
 const isOnDemand = url => onDemandAssets.some(pattern => pattern.test(url));
 
 // The registration scope is the folder the app is served from (e.g. /stikling/ on GitHub Pages),
