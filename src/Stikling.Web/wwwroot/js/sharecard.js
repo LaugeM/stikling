@@ -43,6 +43,7 @@ const ICONS = {
 // The photos that were drawn last, at most two (the two of a before and after card), so changing
 // the words doesn't decode them again
 const cache = new Map();
+const retired = []; // replaced bitmaps, closed by the next keepOnly
 
 // Draws the card on the canvas. Returns { photo, small } saying whether the photo made it onto the
 // card and whether only its small version was on this device, or null when a newer draw has taken
@@ -61,10 +62,10 @@ export async function draw(canvas, spec) {
         return await drawPair(canvas, spec, size, token);
 
     const photo = spec.photoId ? await readPhoto(spec.photoId) : null;
-    keepOnly(photo ? [photo.id] : []);
     const bitmap = photo?.bitmap ?? null;
     if (canvas.stiklingToken !== token)
         return null;
+    keepOnly(photo ? [photo] : []);
 
     canvas.width = size.width;
     canvas.height = size.height;
@@ -84,10 +85,11 @@ export async function draw(canvas, spec) {
 async function drawPair(canvas, spec, size, token) {
     const { before, after } = spec.pair;
     const first = await readPhoto(before.photoId);
-    const second = await readPhoto(after.photoId);
-    keepOnly([before.photoId, after.photoId]);
+    // The same photo on both sides is read once, so a small one isn't decoded twice
+    const second = after.photoId === before.photoId ? first : await readPhoto(after.photoId);
     if (canvas.stiklingToken !== token)
         return null;
+    keepOnly([first, second].filter(Boolean));
 
     canvas.width = size.width;
     canvas.height = size.height;
@@ -133,9 +135,9 @@ async function drawPair(canvas, spec, size, token) {
 function paintDatePill(ctx, text, x, bottom, maxWidth) {
     if (!text)
         return;
-    setFont(ctx, `600 30px ${BODY}`, "0", "normal");
-    const padX = 18;
-    const height = 52;
+    setFont(ctx, `600 36px ${BODY}`, "0", "normal");
+    const padX = 22;
+    const height = 62;
     const width = Math.min(maxWidth, ctx.measureText(text).width + 2 * padX);
     ctx.save();
     ctx.globalAlpha = 0.92;
@@ -145,7 +147,7 @@ function paintDatePill(ctx, text, x, bottom, maxWidth) {
     ctx.fill();
     ctx.restore();
     ctx.fillStyle = INK;
-    ctx.fillText(text, x + padX, bottom - 15);
+    ctx.fillText(text, x + padX, bottom - 18);
 }
 
 // Whether the browser can share a picture as a file
@@ -218,8 +220,11 @@ async function readPhoto(id) {
         return null;
 
     try {
+        // The bitmap it replaces isn't closed here, since a draw still waiting may hold it.
+        // keepOnly closes it once the newest draw has finished reading
         const bitmap = await createImageBitmap(blob);
-        kept?.bitmap.close();
+        if (kept)
+            retired.push(kept.bitmap);
         const entry = { id, bitmap, small: full === null };
         cache.set(id, entry);
         return entry;
@@ -228,14 +233,21 @@ async function readPhoto(id) {
     }
 }
 
-// Closes the photos that aren't on the card any more
-function keepOnly(ids) {
+// Closes the photos that aren't on the card any more. Only the newest draw calls this, once it has
+// read its photos, and the drawing that follows doesn't wait on anything, so no other draw is
+// still using what is closed
+function keepOnly(entries) {
+    const used = new Set(entries.map(e => e.bitmap));
     for (const [id, entry] of cache) {
-        if (!ids.includes(id)) {
-            entry.bitmap.close();
+        if (!entries.includes(entry)) {
+            if (!used.has(entry.bitmap))
+                entry.bitmap.close();
             cache.delete(id);
         }
     }
+    for (const bitmap of retired.splice(0))
+        if (!used.has(bitmap))
+            bitmap.close();
 }
 
 // ---- The card with a photo: the photo above, a label under it ----
