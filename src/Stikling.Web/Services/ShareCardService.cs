@@ -9,6 +9,7 @@ namespace Stikling.Web.Services;
 /// <param name="Format">"square", "portrait" or "story".</param>
 /// <param name="Tone">"plant" or "propagation", which sets the colour of a card without a photo.</param>
 /// <param name="PhotoId">The photo to put on the card, or null for the card built around the number.</param>
+/// <param name="Pair">Two photos for the before and after card. When set, <paramref name="PhotoId"/> and <paramref name="Frame"/> are not used.</param>
 public sealed record ShareCardSpec(
     string Format,
     string Tone,
@@ -18,11 +19,20 @@ public sealed record ShareCardSpec(
     string? Line,
     ShareFigure? Figure,
     string? PhotoId,
-    PhotoFrame? Frame);
+    PhotoFrame? Frame,
+    ShareCardPair? Pair = null);
+
+/// <summary>One side of a before and after card. Label is the date, already formatted.</summary>
+public sealed record ShareCardSide(string PhotoId, PhotoFrame? Frame, string Label);
+
+/// <summary>The older photo is first and is drawn first, whatever order the person picked them in.</summary>
+public sealed record ShareCardPair(ShareCardSide Before, ShareCardSide After);
 
 /// <param name="Photo">Whether the photo made it onto the card. False when it is missing from this device.</param>
 /// <param name="Small">True when only the small version of the photo is on this device, so it looks soft on the card.</param>
-public sealed record ShareCardDrawn(bool Photo, bool Small);
+/// <param name="Photos">Before and after card only: the ids of the photos that made it onto the card.</param>
+/// <param name="SmallPhotos">Before and after card only: the ids of the photos that are only small on this device.</param>
+public sealed record ShareCardDrawn(bool Photo, bool Small, IReadOnlyList<string>? Photos = null, IReadOnlyList<string>? SmallPhotos = null);
 
 /// <summary>
 /// Draws a share card and hands it on. The picture is made and kept in wwwroot/js/sharecard.js;
@@ -70,14 +80,15 @@ public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : IAsyncD
     public async Task<string> SaveAsync(ElementReference canvas, string fileName) =>
         await (await Module).InvokeAsync<string>("save", canvas, fileName);
 
-    /// <summary>A file name made from the card's name: "stikling-monstera-cutting.jpg".</summary>
-    public static string FileNameFor(string name)
+    /// <summary>A file name made from the card's name: "stikling-monstera-cutting.jpg", or "stikling-monstera-before-after.jpg" for a before and after card.</summary>
+    public static string FileNameFor(string name, bool beforeAfter = false)
     {
         var slug = new string(name.ToLowerInvariant().Select(c => char.IsLetterOrDigit(c) ? c : '-').ToArray());
         slug = string.Join('-', slug.Split('-', StringSplitOptions.RemoveEmptyEntries));
         if (slug.Length > 40)
             slug = slug[..40].TrimEnd('-');
-        return slug.Length == 0 ? "stikling-card.jpg" : $"stikling-{slug}.jpg";
+        var tail = beforeAfter ? "-before-after" : "";
+        return slug.Length == 0 ? $"stikling-card{tail}.jpg" : $"stikling-{slug}{tail}.jpg";
     }
 
     public async ValueTask DisposeAsync()

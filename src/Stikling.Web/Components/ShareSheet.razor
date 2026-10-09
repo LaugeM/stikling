@@ -6,6 +6,7 @@
 @inject ShareCardService Cards
 @inject IPhotoRepository PhotoRepository
 @inject SyncRunner Sync
+@inject TimeProvider Time
 
 <Sheet Title="Share" Open="Open" OpenChanged="OpenChanged">
     @if (ready)
@@ -14,6 +15,21 @@
             <canvas @ref="canvas" width="1080" height="@PreviewHeight" role="img"
                     aria-label="@($"Preview of the card for {CardName}")"></canvas>
         </div>
+
+        @if (allPhotos.Count >= 2)
+        {
+            <div class="share-field">
+                <div class="share-label" id="share-mode-label">Card</div>
+                <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-mode-label">
+                    <input type="radio" class="btn-check" name="share-mode" id="share-mode-one"
+                           checked="@(!pairMode)" @onchange="() => SetPairMode(false)" />
+                    <label class="btn btn-outline-primary" for="share-mode-one">One photo</label>
+                    <input type="radio" class="btn-check" name="share-mode" id="share-mode-pair"
+                           checked="@pairMode" @onchange="() => SetPairMode(true)" />
+                    <label class="btn btn-outline-primary" for="share-mode-pair">Before and after</label>
+                </div>
+            </div>
+        }
 
         <div class="share-field">
             <div class="share-label" id="share-format-label">Size</div>
@@ -28,7 +44,39 @@
             </div>
         </div>
 
-        @if (photos.Count > 0)
+        @if (pairMode)
+        {
+            @foreach (var (label, key, current) in new[] { ("Before", "before", beforeId), ("After", "after", afterId) })
+            {
+                <div class="share-field">
+                    <div class="share-label" id="@($"share-{key}-label")">@label</div>
+                    <div class="share-photos" role="radiogroup" aria-labelledby="@($"share-{key}-label")">
+                        @foreach (var photo in pairPhotos)
+                        {
+                            var picked = current == photo.Id;
+                            <button type="button" role="radio" aria-checked="@(picked ? "true" : "false")"
+                                    aria-label="@($"{label} photo from {DayText(photo)}")" class="share-photo @(picked ? "picked" : null)"
+                                    @onclick="() => PickPair(key, photo.Id)">
+                                <PhotoImage PhotoId="photo.Id" Framed="false" />
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+            @if (photoMissing)
+            {
+                <p class="form-text">One of those photos isn't on this device yet, so its place on the card is empty.</p>
+            }
+            else if (photoSmall && gettingFull)
+            {
+                <p class="form-text" role="status">Getting the full photos, so the card is sharp.</p>
+            }
+            else if (photoSmall)
+            {
+                <p class="form-text">Only a small copy of one of these photos is on this device, and the full one couldn't be fetched, so it may look blurry on the card. Try again when you're online and signed in, or pick another photo.</p>
+            }
+        }
+        else if (photos.Count > 0)
         {
             <div class="share-field">
                 <div class="share-label" id="share-photo-label">Photo</div>
@@ -118,6 +166,11 @@
 
     private ElementReference canvas;
     private IReadOnlyList<Photo> photos = [];
+    private IReadOnlyList<Photo> allPhotos = [];
+    private IReadOnlyList<Photo> pairPhotos = [];
+    private bool pairMode;
+    private Guid? beforeId;
+    private Guid? afterId;
     private string format = "square";
     private Guid? photoId;
     private string name = "";
@@ -138,7 +191,22 @@
 
     private string CardName => string.IsNullOrWhiteSpace(name) ? Text.Name : name.Trim();
 
-    private bool Edited => CardName != Text.Name || (line ?? "").Trim() != (Text.Line ?? "");
+    private bool Edited => CardName != Text.Name || (line ?? "").Trim() != (DefaultLine ?? "");
+
+    // What the app would write: the usual line, or how far apart the two photos are
+    private string? DefaultLine => pairMode ? ApartLine(beforeId, afterId) : Text.Line;
+
+    private Photo? PhotoOf(Guid? id) => id is null ? null : allPhotos.FirstOrDefault(p => p.Id == id);
+
+    private string DayText(Photo photo) => Labels.Date(Time.LocalDay(photo.TakenAt));
+
+    private string? ApartLine(Guid? before, Guid? after)
+    {
+        if (PhotoOf(before) is not { } a || PhotoOf(after) is not { } b)
+            return null;
+        var (older, newer) = a.TakenAt <= b.TakenAt ? (a, b) : (b, a);
+        return ShareCardText.ApartLine(Time.LocalDay(older.TakenAt), Time.LocalDay(newer.TakenAt));
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -157,6 +225,7 @@
         message = null;
         photoMissing = false;
         photoSmall = false;
+        pairMode = false;
         triedFull.Clear();
         format =await Cards.GetFormatAsync();
         canShare = await Cards.CanShareAsync();
@@ -165,6 +234,12 @@
         var all = await PhotoRepository.GetForAsync(SubjectId);
         photos = all.OrderByDescending(p => p.Id == CoverPhotoId).Take(40).ToList();
         photoId = photos.FirstOrDefault()?.Id;
+
+        // Oldest first, so the history reads left to right. A very long history keeps its first and last photos.
+        allPhotos = all.OrderBy(p => p.TakenAt).ToList();
+        pairPhotos = allPhotos.Count <= 60 ? allPhotos : allPhotos.Take(30).Concat(allPhotos.TakeLast(30)).ToList();
+        beforeId = allPhotos.FirstOrDefault()?.Id;
+        afterId = allPhotos.LastOrDefault()?.Id;
         ready = true;
     }
 
@@ -181,7 +256,7 @@
 
         if (await Cards.DrawAsync(canvas, spec) is { } drawn)
         {
-            var missing = spec.PhotoId is not null && !drawn.Photo;
+            var missing = (spec.PhotoId is not null || spec.Pair is not null) && !drawn.Photo;
             if (missing != photoMissing || drawn.Small != photoSmall)
             {
                 photoMissing = missing;
@@ -189,8 +264,10 @@
                 StateHasChanged();
             }
 
-            if (drawn.Small && spec.PhotoId is not null && Guid.TryParse(spec.PhotoId, out var small))
-                await GetFullPhotoAsync(small);
+            IReadOnlyList<string> smallIds = spec.Pair is not null ? drawn.SmallPhotos ?? [] : drawn.Small && spec.PhotoId is not null ? [spec.PhotoId] : [];
+            foreach (var id in smallIds)
+                if (Guid.TryParse(id, out var small))
+                    await GetFullPhotoAsync(small);
         }
     }
 
@@ -212,7 +289,24 @@
         StateHasChanged();
     }
 
-    private ShareCardSpec Spec() => new(
+    private ShareCardSpec Spec()
+    {
+        if (!pairMode || PhotoOf(beforeId) is not { } a || PhotoOf(afterId) is not { } b)
+            return SinglePhotoSpec();
+
+        // The older photo goes first, whichever way round they were picked
+        var (older, newer) = a.TakenAt <= b.TakenAt ? (a, b) : (b, a);
+        return SinglePhotoSpec() with
+        {
+            PhotoId = null,
+            Frame = null,
+            Pair = new ShareCardPair(Side(older), Side(newer)),
+        };
+    }
+
+    private ShareCardSide Side(Photo photo) => new(photo.Id.ToString(), photo.Frame, DayText(photo));
+
+    private ShareCardSpec SinglePhotoSpec() => new(
         format,
         Tone,
         CardName,
@@ -229,15 +323,42 @@
         await Cards.SetFormatAsync(value);
     }
 
+    // The line follows the app's words until the person has changed it
+    private void SetPairMode(bool value)
+    {
+        if (pairMode == value)
+            return;
+        ChangeKeepingEditedLine(() => pairMode = value);
+        photoMissing = false;
+        photoSmall = false;
+    }
+
+    private void PickPair(string side, Guid id) =>
+        ChangeKeepingEditedLine(() =>
+        {
+            if (side == "before")
+                beforeId = id;
+            else
+                afterId = id;
+        });
+
+    private void ChangeKeepingEditedLine(Action change)
+    {
+        var wasDefault = (line ?? "").Trim() == (DefaultLine ?? "");
+        change();
+        if (wasDefault)
+            line = DefaultLine ?? "";
+    }
+
     private void UseOriginalWords()
     {
         name = Text.Name;
-        line = Text.Line ?? "";
+        line = DefaultLine ?? "";
     }
 
-    private async Task ShareAsync() => await RunAsync(() => Cards.ShareAsync(canvas, ShareCardService.FileNameFor(CardName)));
+    private async Task ShareAsync() => await RunAsync(() => Cards.ShareAsync(canvas, ShareCardService.FileNameFor(CardName, pairMode)));
 
-    private async Task SaveAsync() => await RunAsync(() => Cards.SaveAsync(canvas, ShareCardService.FileNameFor(CardName)));
+    private async Task SaveAsync() => await RunAsync(() => Cards.SaveAsync(canvas, ShareCardService.FileNameFor(CardName, pairMode)));
 
     private async Task RunAsync(Func<Task<string>> action)
     {
