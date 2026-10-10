@@ -1,0 +1,172 @@
+@using System.Globalization
+@using Stikling.Api.Sharing
+@using Stikling.Core.Models
+@using Stikling.Core.Sharing
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@Page.Name on Stikling</title>
+    <meta name="description" content="@Description">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#f6f7f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121814" media="(prefers-color-scheme: dark)">
+    <meta property="og:title" content="@Page.Name on Stikling">
+    <meta property="og:description" content="@Description">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Stikling">
+    <meta property="og:url" content="@PageUrl">
+    @if (Page.Cover is { } cover)
+    {
+        <meta property="og:image" content="@AbsoluteImage(cover, "full")">
+        @if (cover.Width > 0 && cover.Height > 0)
+        {
+            <meta property="og:image:width" content="@cover.Width">
+            <meta property="og:image:height" content="@cover.Height">
+        }
+    }
+    <meta name="twitter:card" content="summary_large_image">
+    <style>@((MarkupString)ShareStyles.Css)</style>
+</head>
+<body>
+    <main class="page">
+        @if (Page.Cover is { } top)
+        {
+            <img class="cover" src="@Image(top, "full")" alt=""
+                 width="@(top.Width > 0 ? top.Width : null)" height="@(top.Height > 0 ? top.Height : null)"
+                 style="@Position(top)" fetchpriority="high">
+        }
+        <header class="head">
+            <h1>@Page.Name</h1>
+            @if (Page.Latin is not null || Page.Cultivar is not null)
+            {
+                <p class="latin">
+                    @if (Page.Latin is not null)
+                    {
+                        <i>@Page.Latin</i>
+                    }
+                    @if (Page.Latin is not null && Page.Cultivar is not null)
+                    {
+                        @(" ")
+                    }
+                    @if (Page.Cultivar is not null)
+                    {
+                        <text>'@Page.Cultivar'</text>
+                    }
+                </p>
+            }
+            @if (Page.Line is not null)
+            {
+                <p class="line">@Page.Line</p>
+            }
+            @if (Counts is not null)
+            {
+                <p class="counts">@Counts</p>
+            }
+        </header>
+
+        @if (Page.Items.Count > 0)
+        {
+            <ol class="history">
+                @foreach (var item in Page.Items)
+                {
+                    @if (item.Kind == ShareItemKind.Milestone)
+                    {
+                        <li class="milestone">
+                            <span class="when">@When(item)</span>
+                            <span class="what">@item.Text</span>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <h2 class="when">@When(item)</h2>
+                            @if (item.Text is not null)
+                            {
+                                <p class="note">@item.Text</p>
+                            }
+                            @if (item.Photos.Count > 0)
+                            {
+                                var single = item.Photos.Count == 1;
+                                <ul class="photos @(single ? "single" : null)">
+                                    @foreach (var photo in item.Photos)
+                                    {
+                                        <li>
+                                            <a href="@Image(photo, "full")">
+                                                <img src="@Image(photo, single || !Thumbnails.Contains(photo.Id) ? "full" : "thumb")" alt=""
+                                                     loading="lazy" style="@Position(photo)">
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </li>
+                    }
+                }
+            </ol>
+        }
+
+        <footer class="foot">
+            <p>Kept in Stikling, a free app for your plants and cuttings.</p>
+            <p><a class="start" href="@ShareStyles.AppUrl">Start your own</a></p>
+            <p class="meta">
+                Last updated @Date(UpdatedDay).
+                <a href="@ReportLink">Report this page</a>
+            </p>
+        </footer>
+    </main>
+</body>
+</html>
+
+@code {
+    [Parameter, EditorRequired] public SharePageModel Page { get; set; } = null!;
+
+    /// <summary>The page's public address, with the token.</summary>
+    [Parameter, EditorRequired] public string PageUrl { get; set; } = "";
+
+    /// <summary>The start of the path images are fetched from, like /s/{token} or /{token}.</summary>
+    [Parameter, EditorRequired] public string ImagePrefix { get; set; } = "";
+
+    /// <summary>The same with the address in front, for the link preview.</summary>
+    [Parameter, EditorRequired] public string AbsoluteImagePrefix { get; set; } = "";
+
+    /// <summary>The photos that have a small image. The others show the full one.</summary>
+    [Parameter, EditorRequired] public HashSet<Guid> Thumbnails { get; set; } = [];
+
+    [Parameter, EditorRequired] public DateOnly UpdatedDay { get; set; }
+
+    private string Description => Page.Line ?? "Photos and notes from a plant kept in Stikling, a free app for your plants and cuttings.";
+
+    private string? Counts
+    {
+        get
+        {
+            var parts = new List<string>();
+            if (Page.PhotoCount > 0)
+                parts.Add(Page.PhotoCount == 1 ? "1 photo" : $"{Page.PhotoCount} photos");
+            if (Page.NoteCount > 0)
+                parts.Add(Page.NoteCount == 1 ? "1 note" : $"{Page.NoteCount} notes");
+            return parts.Count > 0 ? string.Join(" · ", parts) : null;
+        }
+    }
+
+    private string ReportLink =>
+        "mailto:support@stikling.app?subject=" + Uri.EscapeDataString("Report a shared page")
+        + "&body=" + Uri.EscapeDataString(PageUrl);
+
+    private string Image(SharePhoto photo, string size) => $"{ImagePrefix}/photos/{photo.Id}/{size}";
+
+    private string AbsoluteImage(SharePhoto photo, string size) => $"{AbsoluteImagePrefix}/photos/{photo.Id}/{size}";
+
+    // The same format as the app's own dates, like 4 Oct 2026
+    private static string Date(DateOnly date) => date.ToString("d MMM yyyy", CultureInfo.InvariantCulture);
+
+    private static string When(SharePageItem item) => Date(item.Day) + item.DayCount;
+
+    // Where the photo sits in its crop, from the frame the owner saved
+    private static string? Position(SharePhoto photo) =>
+        photo.Frame is { } frame
+            ? FormattableString.Invariant($"object-position: {frame.X * 100:0.#}% {frame.Y * 100:0.#}%")
+            : null;
+}

@@ -1,4 +1,7 @@
+using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
+using System.Text.Unicode;
+using Microsoft.AspNetCore.HttpOverrides;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +10,7 @@ using Stikling.Api.Collections;
 using Stikling.Api.Data;
 using Stikling.Api.People;
 using Stikling.Api.Photos;
+using Stikling.Api.Sharing;
 using Stikling.Api.Sync;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +41,12 @@ builder.Services.AddClerkAuthentication();
 builder.Services.AddTestSignIn();
 builder.Services.AddCollectionAuthorization();
 builder.Services.AddRequestLimits(builder.Configuration);
+builder.Services.Configure<ShareOptions>(builder.Configuration.GetSection(ShareOptions.Section));
+
+// Writes the HTML of the share pages. Text is encoded as HTML, but letters like ø and · are left as
+// they are instead of numbered references.
+builder.Services.AddRazorComponents();
+builder.Services.AddWebEncoders(encoders => encoders.TextEncoderSettings = new TextEncoderSettings(UnicodeRanges.All));
 
 var appOrigins = new AppOrigins { Origins = AppOrigins.From(builder.Configuration) };
 builder.Services.AddCors(cors => cors.AddDefaultPolicy(policy => policy
@@ -64,11 +74,25 @@ if (app.Configuration.GetValue("Database:MigrateOnStart", true))
     await scope.ServiceProvider.GetRequiredService<StiklingDbContext>().Database.MigrateAsync();
 }
 
+// The client's address is in X-Forwarded-For, added by the Container Apps ingress, which is the only
+// way in. The public pages are limited by it, so it has to be read first. With one proxy in front, only
+// the last address is taken, which is the one the ingress saw and not one a caller made up.
+var forwarded = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor, ForwardLimit = 1 };
+forwarded.KnownIPNetworks.Clear();
+forwarded.KnownProxies.Clear();
+app.UseForwardedHeaders(forwarded);
+
 // A deleted account answers 410 Gone, and anything else that goes wrong 500 with no details
 app.UseExceptionHandler(new ExceptionHandlerOptions
 {
     StatusCodeSelector = e => e is AccountDeletedException ? StatusCodes.Status410Gone : StatusCodes.Status500InternalServerError,
 });
+
+// The share host serves its pages from the root, and the routes are under /s. This has to run before
+// routing picks the endpoint, and routing is started here instead of by default to make sure it does.
+app.UseShareHost();
+app.UseRouting();
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -81,5 +105,7 @@ app.MapSettings();
 app.MapCollections();
 app.MapRecords();
 app.MapPhotos();
+app.MapShareLinks();
+app.MapSharePages();
 
 app.Run();

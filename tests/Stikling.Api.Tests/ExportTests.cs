@@ -130,6 +130,23 @@ public class ExportTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task The_zip_has_the_pages_shared_with_a_link()
+    {
+        var me = await SignIn();
+        var plant = Guid.NewGuid();
+        await Push(me, Record("plants", plant, "Monstera"));
+        var made = await me.Client.PostAsJsonAsync($"/collections/{me.CollectionId}/shares",
+            new Stikling.Core.Sharing.CreateShareLinkRequest(Stikling.Core.Models.SubjectType.Plant, plant, null), ApiFactory.Json);
+        Assert.Equal(HttpStatusCode.Created, made.StatusCode);
+
+        using var zip = await Export(me);
+
+        var link = Assert.Single(Read(zip, $"collections/{me.CollectionId}/shareLinks.json").EnumerateArray());
+        Assert.Equal(plant, link.GetProperty("subjectId").GetGuid());
+        Assert.Equal("Plant", link.GetProperty("subjectType").GetString());
+    }
+
+    [Fact]
     public async Task Settings_are_left_out_when_there_are_none()
     {
         var me = await SignIn();

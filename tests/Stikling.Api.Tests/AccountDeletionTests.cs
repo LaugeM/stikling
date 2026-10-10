@@ -72,6 +72,50 @@ public class AccountDeletionTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task Deleting_an_account_erases_the_share_links_of_its_collection()
+    {
+        var me = await SignIn();
+        await api.WithDbAsync(async db =>
+        {
+            db.ShareLinks.Add(new ShareLink
+            {
+                Token = Guid.NewGuid().ToString("N"), CollectionId = me.CollectionId, SubjectType = Stikling.Core.Models.SubjectType.Plant,
+                SubjectId = Guid.NewGuid(), CreatedBy = me.PersonId, CreatedAt = Monday, UpdatedAt = Monday,
+            });
+            await db.SaveChangesAsync();
+        });
+
+        await me.Client.DeleteAsync("/me");
+
+        await api.WithDbAsync(async db => Assert.False(await db.ShareLinks.AnyAsync(l => l.CollectionId == me.CollectionId)));
+    }
+
+    [Fact]
+    public async Task A_share_link_in_a_collection_that_lives_on_keeps_its_page_when_its_maker_is_deleted()
+    {
+        var me = await SignIn();
+        var other = await SignIn();
+        await api.WithDbAsync(async db =>
+        {
+            db.Memberships.Add(new Membership { CollectionId = me.CollectionId, PersonId = other.PersonId, Role = MemberRole.Editor });
+            db.ShareLinks.Add(new ShareLink
+            {
+                Token = Guid.NewGuid().ToString("N"), CollectionId = me.CollectionId, SubjectType = Stikling.Core.Models.SubjectType.Plant,
+                SubjectId = Guid.NewGuid(), CreatedBy = me.PersonId, CreatedAt = Monday, UpdatedAt = Monday,
+            });
+            await db.SaveChangesAsync();
+        });
+
+        await me.Client.DeleteAsync("/me");
+
+        await api.WithDbAsync(async db =>
+        {
+            var link = await db.ShareLinks.SingleAsync(l => l.CollectionId == me.CollectionId);
+            Assert.Null(link.CreatedBy);
+        });
+    }
+
+    [Fact]
     public async Task A_deleted_account_is_not_made_again_by_a_device_still_signed_in()
     {
         var me = await SignIn();

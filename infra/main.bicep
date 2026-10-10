@@ -15,6 +15,12 @@ param apiDomain string = ''
 @description('False the first time the API\'s domain is added, which asks Azure for the certificate. True from then on, which uses it.')
 param apiCertificateIssued bool = false
 
+@description('Where the public pages of share links are shown, like share.stikling.app. It points at the same container app as the API. Empty while its DNS records aren\'t set up yet.')
+param shareDomain string = ''
+
+@description('False the first time the share domain is added, which asks Azure for the certificate. True from then on, which uses it.')
+param shareCertificateIssued bool = false
+
 @description('The Frontend API URL of the Clerk production instance.')
 param clerkAuthority string
 
@@ -51,6 +57,8 @@ module resources 'resources.bicep' = {
     appDomain: appDomain
     apiDomain: apiDomain
     apiCertificateIssued: apiCertificateIssued
+    shareDomain: shareDomain
+    shareCertificateIssued: shareCertificateIssued
     clerkAuthority: clerkAuthority
     githubRepository: githubRepository
     apiImage: apiImage
@@ -111,4 +119,6 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 output apiAddress string = resources.outputs.apiAddress
 output apiDnsTarget string = resources.outputs.apiDnsTarget
 output apiDomainVerificationId string = resources.outputs.apiDomainVerificationId
+output shareDnsTarget string = resources.outputs.apiDnsTarget
+output shareDomainVerificationId string = resources.outputs.apiDomainVerificationId
 output deployClientId string = resources.outputs.deployClientId

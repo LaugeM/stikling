@@ -6,6 +6,8 @@ param location string
 param appDomain string
 param apiDomain string
 param apiCertificateIssued bool
+param shareDomain string
+param shareCertificateIssued bool
 param clerkAuthority string
 param githubRepository string
 param apiImage string
@@ -194,10 +196,33 @@ resource environment 'Microsoft.App/managedEnvironments@2026-07-01' = {
 }
 
 var certificateName = 'api-domain'
+var shareCertificateName = 'share-domain'
 
-// The certificate is asked for once the domain is on the app, so it can't be referred to by symbol
-// from the app without the two depending on each other
+// The certificates are asked for once the domains are on the app, so they can't be referred to by
+// symbol from the app without the two depending on each other
 var certificateId = '${environment.id}/managedCertificates/${certificateName}'
+var shareCertificateId = '${environment.id}/managedCertificates/${shareCertificateName}'
+
+// The app's own domains. The share domain is the same container app under another name, which is
+// where the public pages of share links are shown.
+var apiDomains = empty(apiDomain)
+  ? []
+  : [
+      {
+        name: apiDomain
+        bindingType: apiCertificateIssued ? 'SniEnabled' : 'Disabled'
+        certificateId: apiCertificateIssued ? certificateId : null
+      }
+    ]
+var shareDomains = empty(shareDomain)
+  ? []
+  : [
+      {
+        name: shareDomain
+        bindingType: shareCertificateIssued ? 'SniEnabled' : 'Disabled'
+        certificateId: shareCertificateIssued ? shareCertificateId : null
+      }
+    ]
 
 resource api 'Microsoft.App/containerApps@2024-03-01' = {
   name: 'stikling-api'
@@ -217,15 +242,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
         external: true
         targetPort: 8080
         allowInsecure: false
-        customDomains: empty(apiDomain)
-          ? []
-          : [
-              {
-                name: apiDomain
-                bindingType: apiCertificateIssued ? 'SniEnabled' : 'Disabled'
-                certificateId: apiCertificateIssued ? certificateId : null
-              }
-            ]
+        customDomains: concat(apiDomains, shareDomains)
       }
     }
     template: {
@@ -254,6 +271,15 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'AppOrigins__0'
               value: 'https://${appDomain}'
+            }
+            {
+              // The address a share link is shown as, and the host the API answers as a share page
+              name: 'Share__BaseUrl'
+              value: empty(shareDomain) ? '' : 'https://${shareDomain}'
+            }
+            {
+              name: 'Share__Host'
+              value: shareDomain
             }
             {
               // Which identity the storage client signs in as, and that it only tries that one
@@ -285,6 +311,19 @@ resource certificate 'Microsoft.App/managedEnvironments/managedCertificates@2024
   location: location
   properties: {
     subjectName: apiDomain
+    domainControlValidation: 'CNAME'
+  }
+  dependsOn: [
+    api
+  ]
+}
+
+resource shareCertificate 'Microsoft.App/managedEnvironments/managedCertificates@2024-03-01' = if (!empty(shareDomain)) {
+  parent: environment
+  name: shareCertificateName
+  location: location
+  properties: {
+    subjectName: shareDomain
     domainControlValidation: 'CNAME'
   }
   dependsOn: [

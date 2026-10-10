@@ -14,6 +14,12 @@ public sealed class RequestLimitOptions
 
     /// <summary>How many more requests they get each minute after that.</summary>
     public int PerMinute { get; set; } = 600;
+
+    /// <summary>How many requests to the public share pages one address can send at once.</summary>
+    public int PublicBurst { get; set; } = 300;
+
+    /// <summary>How many more requests to the share pages that address gets each minute after that.</summary>
+    public int PublicPerMinute { get; set; } = 300;
 }
 
 /// <summary>
@@ -21,7 +27,9 @@ public sealed class RequestLimitOptions
 /// bill until the cost stop takes it down. Each signed-in person has a bucket of requests that
 /// refills each second. A first sync with a lot of photos can go past the burst, and the app then
 /// waits and carries on. Requests without a sign-in aren't counted: they are turned away before
-/// they reach the database, and the health check has to answer whatever happens.
+/// they reach the database, and the health check has to answer whatever happens. The one exception
+/// is the public share pages under /s/, which anyone can open and which do read the database. Each
+/// address gets a bucket of its own there.
 /// </summary>
 public static class RequestLimits
 {
@@ -32,11 +40,25 @@ public static class RequestLimits
         {
             limiter.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
             {
+                var options = context.RequestServices.GetRequiredService<IOptions<RequestLimitOptions>>().Value;
+
                 // The Clerk user id, or the test person's in Development
                 if (context.User.Identity is not { IsAuthenticated: true, Name: { } person })
-                    return RateLimitPartition.GetNoLimiter("");
+                {
+                    if (!context.Request.Path.StartsWithSegments("/s"))
+                        return RateLimitPartition.GetNoLimiter("");
 
-                var options = context.RequestServices.GetRequiredService<IOptions<RequestLimitOptions>>().Value;
+                    // The address behind the ingress, read from X-Forwarded-For
+                    var address = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                    return RateLimitPartition.GetTokenBucketLimiter("ip:" + address, _ => new TokenBucketRateLimiterOptions
+                    {
+                        TokenLimit = options.PublicBurst,
+                        TokensPerPeriod = Math.Max(1, options.PublicPerMinute / 60),
+                        ReplenishmentPeriod = TimeSpan.FromSeconds(1),
+                        QueueLimit = 0,
+                    });
+                }
+
                 return RateLimitPartition.GetTokenBucketLimiter(person, _ => new TokenBucketRateLimiterOptions
                 {
                     TokenLimit = options.Burst,

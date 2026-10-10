@@ -3,8 +3,8 @@ using Stikling.Core.Timeline;
 
 namespace Stikling.Core.Sharing;
 
-/// <summary>A photo on the public page. The image is fetched by its id.</summary>
-public sealed record SharePhoto(Guid Id, PhotoFrame? Frame);
+/// <summary>A photo on the public page. The image is fetched by its id. Width and height are 0 when not known.</summary>
+public sealed record SharePhoto(Guid Id, PhotoFrame? Frame, int Width = 0, int Height = 0);
 
 /// <summary>What one item on the public page is.</summary>
 public enum ShareItemKind
@@ -177,7 +177,7 @@ public static class SharePage
                 PhotoDayCount.Suffix(start, s.Day),
                 s.Kind,
                 s.Text,
-                s.Photos.OrderBy(p => p.TakenAt).Select(p => new SharePhoto(p.Id, p.Frame)).ToList()))
+                s.Photos.OrderBy(p => p.TakenAt).Select(p => new SharePhoto(p.Id, p.Frame, p.Width, p.Height)).ToList()))
             .ToList();
 
         var shown = photos.Values.Where(p => placed.Contains(p.Id) || loose.Contains(p)).ToList();
@@ -189,7 +189,7 @@ public static class SharePage
             card.Latin,
             card.Cultivar,
             ShareLinkRules.Clean(settings.Line) ?? card.Line,
-            cover is null ? null : new SharePhoto(cover.Id, cover.Frame),
+            cover is null ? null : new SharePhoto(cover.Id, cover.Frame, cover.Width, cover.Height),
             updates.Count > 0 ? updates.Max() : subject.UpdatedAt,
             shown.Count,
             items.Count(i => i.Kind == ShareItemKind.Note),

@@ -3,6 +3,8 @@ using 'main.bicep'
 param appDomain = 'stikling.app'
 param apiDomain = 'api.stikling.app'
 param apiCertificateIssued = true
+param shareDomain = 'share.stikling.app'
+param shareCertificateIssued = false
 param clerkAuthority = 'https://clerk.stikling.app'
 param githubRepository = 'LaugeM@46719124/stikling@1377567106'
 param apiImage = 'ghcr.io/laugem/stikling-api:main'

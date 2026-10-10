@@ -80,6 +80,20 @@ public class SharePageTests
     }
 
     [Fact]
+    public void A_photo_carries_its_size_so_the_page_can_reserve_room()
+    {
+        var plant = NewPlant();
+        var photo = PhotoOf(plant, At(9, 1));
+        photo.Width = 1600;
+        photo.Height = 1200;
+
+        var page = PageOf(plant, [photo]);
+
+        Assert.Equal(1600, page.Cover!.Width);
+        Assert.Equal(1200, page.Items.Single().Photos.Single().Height);
+    }
+
+    [Fact]
     public void A_note_hides_its_text_when_notes_are_off_but_keeps_its_photos()
     {
         var plant = NewPlant();
