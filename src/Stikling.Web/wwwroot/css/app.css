@@ -2662,7 +2662,7 @@ main.app-content:has(.form-bar) {
     position: absolute;
     left: 1.25rem;
     top: 1.375rem;
-    bottom: 0;
+    bottom: -0.75rem; /* across the gap above the focus card */
     width: 1px;
     background: var(--pa-border);
 }
