@@ -1,0 +1,1 @@
+Mediabunny 1.61.3 (MPL-2.0), `dist/bundles/mediabunny.min.mjs` from the npm package `mediabunny`. It writes the time-lapse video where the browser has WebCodecs. Loaded by `js/timelapse.js` only when someone makes a video.

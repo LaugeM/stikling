@@ -8,7 +8,7 @@
 import { getBlob } from "./db.js";
 import { download } from "./files.js";
 
-const SIZES = {
+export const SIZES = {
     square: { width: 1080, height: 1080, name: 66, latin: 38, line: 40, figure: 300, nameLines: 2, lineLines: 3 },
     portrait: { width: 1080, height: 1350, name: 76, latin: 42, line: 44, figure: 360, nameLines: 2, lineLines: 4 },
     // Stories and TikTok cover the bottom of the picture with their own buttons, so everything
@@ -32,7 +32,7 @@ const BODY = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
 
 const MARGIN = 72;
 const PAIR_GAP = 8; // between the two photos of a before and after card
-const PILL_INSET = 24;
+export const PILL_INSET = 24;
 
 // The stroked icons from the app, for a card with neither photo nor number
 const ICONS = {
@@ -133,8 +133,9 @@ async function drawPair(canvas, spec, size, token) {
     };
 }
 
-// The date in a small white pill in the bottom left corner of a photo
-function paintDatePill(ctx, text, x, bottom, maxWidth, scale = 1) {
+// The date in a small white pill in the bottom left corner of a photo. The time-lapse reuses this and
+// the card drawing below, so it fades with the photo when the caller has set a globalAlpha.
+export function paintDatePill(ctx, text, x, bottom, maxWidth, scale = 1) {
     if (!text)
         return;
     const padX = Math.round(22 * scale);
@@ -148,7 +149,7 @@ function paintDatePill(ctx, text, x, bottom, maxWidth, scale = 1) {
     }
     const width = Math.min(maxWidth, ctx.measureText(text).width + 2 * padX);
     ctx.save();
-    ctx.globalAlpha = 0.92;
+    ctx.globalAlpha *= 0.92; // on top of any fade the caller has set
     ctx.fillStyle = SURFACE;
     ctx.beginPath();
     ctx.roundRect(x, bottom - height, width, height, height / 2);
@@ -202,7 +203,7 @@ function toBlob(canvas) {
     return new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.92));
 }
 
-async function loadFonts() {
+export async function loadFonts() {
     try {
         await Promise.all([
             document.fonts.load(`800 100px ${DISPLAY}`),
@@ -261,7 +262,7 @@ function keepOnly(entries) {
 // ---- The card with a photo: the photo above, a label under it ----
 
 // paintPhotos(bandTop) paints the photo area, which is everything above the band
-function paintPhotoCard(ctx, size, spec, paintPhotos) {
+export function paintPhotoCard(ctx, size, spec, paintPhotos) {
     const { width, height } = size;
     const textWidth = width - 2 * MARGIN;
     const blocks = layoutText(ctx, size, spec, textWidth);
@@ -291,7 +292,7 @@ function paintPhotoCard(ctx, size, spec, paintPhotos) {
 
 // The photo fills the box the way "framed" photos do on the page: zoomed, then moved so the
 // framed point is in the middle as far as the photo's edges allow
-function drawCover(ctx, bitmap, frame, x, y, w, h) {
+export function drawCover(ctx, bitmap, frame, x, y, w, h) {
     const aspect = bitmap.width / bitmap.height;
     const zoom = Math.min(4, Math.max(1, frame?.zoom ?? 1));
     const dw = zoom * Math.max(w, h * aspect);

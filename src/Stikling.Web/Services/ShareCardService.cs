@@ -34,6 +34,14 @@ public sealed record ShareCardPair(ShareCardSide Before, ShareCardSide After);
 /// <param name="SmallPhotos">Before and after card only: the ids of the photos that are only small on this device.</param>
 public sealed record ShareCardDrawn(bool Photo, bool Small, IReadOnlyList<string>? Photos = null, IReadOnlyList<string>? SmallPhotos = null);
 
+/// <summary>What a shared file is, which decides the end of its name.</summary>
+public enum ShareFileKind
+{
+    Photo,
+    BeforeAfter,
+    Timelapse,
+}
+
 /// <summary>
 /// Draws a share card and hands it on. The picture is made and kept in wwwroot/js/sharecard.js;
 /// only the words and a photo id cross into JavaScript, and nothing comes back but whether it worked.
@@ -80,14 +88,19 @@ public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : IAsyncD
     public async Task<string> SaveAsync(ElementReference canvas, string fileName) =>
         await (await Module).InvokeAsync<string>("save", canvas, fileName);
 
-    /// <summary>A file name made from the card's name: "stikling-monstera-cutting.jpg", or "stikling-monstera-before-after.jpg" for a before and after card.</summary>
-    public static string FileNameFor(string name, bool beforeAfter = false)
+    /// <summary>
+    /// A file name made from the card's name: "stikling-monstera-cutting.jpg", "stikling-monstera-before-after.jpg"
+    /// for a before and after card, or "stikling-monstera-timelapse.mp4" for a time-lapse.
+    /// </summary>
+    public static string FileNameFor(string name, ShareFileKind kind = ShareFileKind.Photo)
     {
         var slug = new string(name.ToLowerInvariant().Select(c => char.IsLetterOrDigit(c) ? c : '-').ToArray());
         slug = string.Join('-', slug.Split('-', StringSplitOptions.RemoveEmptyEntries));
         if (slug.Length > 40)
             slug = slug[..40].TrimEnd('-');
-        var tail = beforeAfter ? "-before-after" : "";
+        if (kind == ShareFileKind.Timelapse)
+            return slug.Length == 0 ? "stikling-timelapse.mp4" : $"stikling-{slug}-timelapse.mp4";
+        var tail = kind == ShareFileKind.BeforeAfter ? "-before-after" : "";
         return slug.Length == 0 ? $"stikling-card{tail}.jpg" : $"stikling-{slug}{tail}.jpg";
     }
 
