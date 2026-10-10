@@ -13,6 +13,7 @@ using Stikling.Core.SoilMixes;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
 using Stikling.Core.Settings;
+using Stikling.Core.Sharing;
 using Stikling.Core.Timeline;
 using Stikling.Core.Today;
 using Stikling.Web;
@@ -71,6 +72,8 @@ builder.Services.AddScoped<BackupService>();
 builder.Services.AddSingleton(AccountSettings.From(builder.Configuration, builder.HostEnvironment.IsDevelopment()));
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<StiklingApi>();
+builder.Services.AddScoped<IShareLinkServer>(services => services.GetRequiredService<StiklingApi>());
+builder.Services.AddScoped<ShareLinkService>();
 builder.Services.AddScoped<IndexedDbSyncStore>();
 builder.Services.AddScoped<SyncRunner>();
 

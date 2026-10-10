@@ -141,3 +141,89 @@
     background: var(--pa-green);
     border-radius: 999px;
 }
+
+/* A small picture of the public page: the cover, then the name, the line and how many photos */
+.share-page-preview {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.7rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.share-page-cover {
+    flex: none;
+    width: 5rem;
+    height: 5rem;
+    overflow: hidden;
+    border-radius: 0.6rem;
+    background: var(--pa-green-soft);
+}
+
+.share-page-cover ::deep img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.share-page-words {
+    min-width: 0;
+}
+
+.share-page-name {
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.share-page-latin,
+.share-page-line,
+.share-page-count {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--pa-muted);
+    overflow-wrap: anywhere;
+}
+
+.share-link-note {
+    margin-bottom: 1rem;
+}
+
+/* The address is plain text, so it can be selected and copied by hand */
+.share-link-url {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    overflow-wrap: anywhere;
+    user-select: all;
+}
+
+.share-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    margin-bottom: 1rem;
+    padding-left: 0;
+}
+
+.share-switch .form-check-input {
+    float: none;
+    flex: none;
+    margin: 0;
+}
+
+.share-link-error {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    color: var(--pa-alert);
+}
+
+.form-actions .btn.link-action {
+    margin-block: 0;
+}

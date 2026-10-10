@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.JSInterop;
+using Stikling.Core.Sharing;
 using Stikling.Core.Sync;
 
 namespace Stikling.Web.Services;
@@ -18,7 +20,7 @@ public sealed record MeCollection(Guid Id, string Name, string Role);
 /// that it turns away, throws <see cref="HttpRequestException"/>. Photo images are sent and
 /// fetched through <see cref="PhotoService"/>, which keeps them in JavaScript.
 /// </summary>
-public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos, DeviceFiles files) : ISyncServer, IPhotoServer
+public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos, DeviceFiles files) : ISyncServer, IPhotoServer, IShareLinkServer
 {
     private readonly HttpClient http = new() { BaseAddress = settings.ApiAddress };
 
@@ -133,6 +135,77 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
     {
         using var request = await RequestAsync(HttpMethod.Get, $"collections/{collectionId}/photos/usage");
         return await SendAsync<PhotoUsage>(request);
+    }
+
+    // The share links. A call that fails comes back with the problem's own words instead of throwing,
+    // since they are shown on the Share sheet as they are.
+
+    public async Task<ShareOutcome<IReadOnlyList<ShareLinkInfo>>> ListAsync(Guid collectionId) =>
+        await ShareCallAsync<List<ShareLinkInfo>, IReadOnlyList<ShareLinkInfo>>(HttpMethod.Get, $"collections/{collectionId}/shares", null, list => list);
+
+    public async Task<ShareOutcome<ShareLinkInfo>> CreateAsync(Guid collectionId, CreateShareLinkRequest request) =>
+        await ShareCallAsync<ShareLinkInfo, ShareLinkInfo>(HttpMethod.Post, $"collections/{collectionId}/shares", request, link => link);
+
+    public async Task<ShareOutcome<ShareLinkInfo>> UpdateAsync(Guid collectionId, Guid id, UpdateShareLinkRequest request) =>
+        await ShareCallAsync<ShareLinkInfo, ShareLinkInfo>(HttpMethod.Put, $"collections/{collectionId}/shares/{id}", request, link => link);
+
+    public async Task<ShareOutcome<bool>> TurnOffAsync(Guid collectionId, Guid id) =>
+        await ShareCallAsync<object, bool>(HttpMethod.Delete, $"collections/{collectionId}/shares/{id}", null, _ => true, hasBody: false);
+
+    private async Task<ShareOutcome<TResult>> ShareCallAsync<TBody, TResult>(
+        HttpMethod method, string path, object? body, Func<TBody, TResult> result, bool hasBody = true)
+    {
+        try
+        {
+            using var request = await RequestAsync(method, path);
+            if (body is not null)
+                request.Content = JsonContent.Create(body, body.GetType());
+            using var response = await http.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+                return ShareOutcome<TResult>.Failure(await ProblemOfAsync(response));
+
+            if (!hasBody)
+                return ShareOutcome<TResult>.Success(result(default!));
+            return await response.Content.ReadFromJsonAsync<TBody>() is { } value
+                ? ShareOutcome<TResult>.Success(result(value))
+                : ShareOutcome<TResult>.Failure("The server sent an empty answer.");
+        }
+        catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return ShareOutcome<TResult>.Failure("Your sign-in has run out. Sign out and in again to carry on.");
+        }
+        catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
+        {
+            return ShareOutcome<TResult>.Failure("The Stikling server can't be reached right now.", offline: true);
+        }
+    }
+
+    // The API explains a refusal in "detail", or for a field that is too long in "errors"
+    private static async Task<string> ProblemOfAsync(HttpResponseMessage response)
+    {
+        try
+        {
+            using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            var root = document.RootElement;
+            if (root.TryGetProperty("detail", out var detail) && detail.ValueKind == JsonValueKind.String && detail.GetString() is { Length: > 0 } text)
+                return text;
+            if (root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var field in errors.EnumerateObject())
+                {
+                    if (field.Value.ValueKind == JsonValueKind.Array && field.Value.EnumerateArray().FirstOrDefault() is { ValueKind: JsonValueKind.String } first)
+                        return first.GetString()!;
+                }
+            }
+        }
+        catch (Exception e) when (e is JsonException or HttpRequestException)
+        {
+            // Falls through to the plain words
+        }
+
+        return response.StatusCode == HttpStatusCode.NotFound
+            ? "That link isn't there any more. Close this and open Share again."
+            : "The server turned that down. Try again in a moment.";
     }
 
     // The images go between the device database and the API in photos.js, so they never pass through .NET

@@ -43,7 +43,7 @@ public enum ShareFileKind
 }
 
 /// <summary>
-/// Draws a share card and hands it on. The picture is made and kept in wwwroot/js/sharecard.js;
+/// Draws a share card and hands it on, and shares or copies the address of a page. The picture is made and kept in wwwroot/js/sharecard.js;
 /// only the words and a photo id cross into JavaScript, and nothing comes back but whether it worked.
 /// </summary>
 public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : IAsyncDisposable
@@ -75,6 +75,18 @@ public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : IAsyncD
     /// <summary>True when the browser can share a picture through the phone's share menu.</summary>
     public async Task<bool> CanShareAsync() =>
         await (await Module).InvokeAsync<bool>("canShare");
+
+    /// <summary>True when the browser has a share menu for a link.</summary>
+    public async Task<bool> CanShareLinkAsync() =>
+        await (await Module).InvokeAsync<bool>("canShareLink");
+
+    /// <summary>"shared", "cancelled" or "failed".</summary>
+    public async Task<string> ShareLinkAsync(string title, string url) =>
+        await (await Module).InvokeAsync<string>("shareLink", title, url);
+
+    /// <summary>True when the text was copied.</summary>
+    public async Task<bool> CopyTextAsync(string text) =>
+        await (await Module).InvokeAsync<bool>("copyText", text);
 
     /// <summary>Draws the card on the canvas. Null when a newer drawing took over before this one finished.</summary>
     public async Task<ShareCardDrawn?> DrawAsync(ElementReference canvas, ShareCardSpec spec) =>

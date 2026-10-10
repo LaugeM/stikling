@@ -1,7 +1,9 @@
 @* The sheet behind a page's Share link: the card as it will be posted, a choice of size and photo,
-   and the words on it, which the app writes and the person can change. Nothing here is saved.
+   and the words on it, which the app writes and the person can change. Nothing about a card is saved.
    The picture is drawn by ShareCardService, which keeps it in JavaScript. A time-lapse video is made
-   by TimelapseService, which keeps it there too. *@
+   by TimelapseService, which keeps it there too. Link mode is the exception: it turns on a public page
+   for the plant, and the settings of that page (the notes switch, the photos left off, the words) are
+   saved to the link on the server through ShareLinkService, never on the device. *@
 @using System.Globalization
 @using System.Text.Json
 @using Stikling.Core.Sync
@@ -10,15 +12,53 @@
 @inject TimelapseService Timelapse
 @inject IPhotoRepository PhotoRepository
 @inject SyncRunner Sync
+@inject ShareLinkService Links
+@inject AccountService Account
+@inject NavigationManager Navigation
 @inject TimeProvider Time
 
 <Sheet Title="Share" Open="Open" OpenChanged="OpenChanged">
     @if (ready)
     {
-        <div class="share-preview">
-            <canvas @ref="canvas" width="1080" height="@PreviewHeight" role="img"
-                    aria-label="@($"Preview of the {(mode == ShareMode.Timelapse ? "time-lapse" : "card")} for {CardName}")"></canvas>
-        </div>
+        @if (mode == ShareMode.Link)
+        {
+            <div class="share-page-preview">
+                <div class="share-page-cover">
+                    @if (PreviewPhoto is { } cover)
+                    {
+                        <PhotoImage PhotoId="cover.Id" Framed="false" />
+                    }
+                </div>
+                <div class="share-page-words">
+                    <div class="share-page-name">@PreviewName</div>
+                    @if (Text.Latin is not null || Text.Cultivar is not null)
+                    {
+                        <div class="share-page-latin">
+                            @if (Text.Latin is not null)
+                            {
+                                <i>@Text.Latin</i>
+                            }
+                            @if (Text.Cultivar is not null)
+                            {
+                                <span>@(Text.Latin is null ? null : " ")'@Text.Cultivar'</span>
+                            }
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(PreviewLine))
+                    {
+                        <div class="share-page-line">@PreviewLine</div>
+                    }
+                    <div class="share-page-count">@Labels.Count(PhotosOnPage, "photo")</div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="share-preview">
+                <canvas @ref="canvas" width="1080" height="@PreviewHeight" role="img"
+                        aria-label="@($"Preview of the {(mode == ShareMode.Timelapse ? "time-lapse" : "card")} for {CardName}")"></canvas>
+            </div>
+        }
         @if (mode == ShareMode.Timelapse && reducedMotion && UsablePhotos.Count >= 2 && videoState != VideoState.Making)
         {
             <div class="share-field">
@@ -26,7 +66,7 @@
             </div>
         }
 
-        @if (allPhotos.Count >= 2)
+        @if (allPhotos.Count >= 2 || LinkAvailable)
         {
             <div class="share-field">
                 <div class="share-label" id="share-mode-label">Card</div>
@@ -34,33 +74,49 @@
                     <input type="radio" class="btn-check" name="share-mode" id="share-mode-one"
                            checked="@(mode == ShareMode.One)" @onchange="() => SetModeAsync(ShareMode.One)" disabled="@Making" />
                     <label class="btn btn-outline-primary" for="share-mode-one">One photo</label>
-                    <input type="radio" class="btn-check" name="share-mode" id="share-mode-pair"
-                           checked="@(mode == ShareMode.Pair)" @onchange="() => SetModeAsync(ShareMode.Pair)" disabled="@Making" />
-                    <label class="btn btn-outline-primary" for="share-mode-pair">Before and after</label>
+                    @if (allPhotos.Count >= 2)
+                    {
+                        <input type="radio" class="btn-check" name="share-mode" id="share-mode-pair"
+                               checked="@(mode == ShareMode.Pair)" @onchange="() => SetModeAsync(ShareMode.Pair)" disabled="@Making" />
+                        <label class="btn btn-outline-primary" for="share-mode-pair">Before and after</label>
+                    }
                     @if (allPhotos.Count >= 3)
                     {
                         <input type="radio" class="btn-check" name="share-mode" id="share-mode-timelapse"
                                checked="@(mode == ShareMode.Timelapse)" @onchange="() => SetModeAsync(ShareMode.Timelapse)" disabled="@Making" />
                         <label class="btn btn-outline-primary" for="share-mode-timelapse">Time-lapse</label>
                     }
+                    @if (LinkAvailable)
+                    {
+                        <input type="radio" class="btn-check" name="share-mode" id="share-mode-link"
+                               checked="@(mode == ShareMode.Link)" @onchange="() => SetModeAsync(ShareMode.Link)" disabled="@Making" />
+                        <label class="btn btn-outline-primary" for="share-mode-link">Link</label>
+                    }
                 </div>
             </div>
         }
 
-        <div class="share-field">
-            <div class="share-label" id="share-format-label">Size</div>
-            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-format-label">
-                @foreach (var (value, label) in ShareCardService.Formats)
-                {
-                    var id = $"share-format-{value}";
-                    <input type="radio" class="btn-check" name="share-format" id="@id"
-                           checked="@(ActiveFormat == value)" @onchange="() => SetFormatAsync(value)" disabled="@Making" />
-                    <label class="btn btn-outline-primary" for="@id">@label</label>
-                }
+        @if (mode != ShareMode.Link)
+        {
+            <div class="share-field">
+                <div class="share-label" id="share-format-label">Size</div>
+                <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-format-label">
+                    @foreach (var (value, label) in ShareCardService.Formats)
+                    {
+                        var id = $"share-format-{value}";
+                        <input type="radio" class="btn-check" name="share-format" id="@id"
+                               checked="@(ActiveFormat == value)" @onchange="() => SetFormatAsync(value)" disabled="@Making" />
+                        <label class="btn btn-outline-primary" for="@id">@label</label>
+                    }
+                </div>
             </div>
-        </div>
+        }
 
-        @if (mode == ShareMode.Timelapse)
+        @if (mode == ShareMode.Link)
+        {
+            @LinkPanel
+        }
+        else if (mode == ShareMode.Timelapse)
         {
             <div class="share-field">
                 <div class="share-label" id="share-speed-label">Speed</div>
@@ -178,21 +234,16 @@
             </div>
         }
 
-        <div class="share-field">
-            <label class="share-label" for="share-name">Name</label>
-            <input id="share-name" class="form-control" maxlength="80" @bind="name" @bind:event="oninput" disabled="@Making" />
-        </div>
+        @if (mode != ShareMode.Link)
+        {
+            @WordsFields
+        }
 
-        <div class="share-field">
-            <label class="share-label" for="share-line">What it says</label>
-            <textarea id="share-line" class="form-control" rows="3" maxlength="200" @bind="line" @bind:event="oninput" disabled="@Making"></textarea>
-            @if (Edited)
-            {
-                <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="UseOriginalWords" disabled="@Making">Use the app's words again</button>
-            }
-        </div>
-
-        @if (mode == ShareMode.Timelapse)
+        @if (mode == ShareMode.Link)
+        {
+            @* Everything for the link is in the panel above *@
+        }
+        else if (mode == ShareMode.Timelapse)
         {
             @if (videoState == VideoState.Making)
             {
@@ -284,7 +335,7 @@
     [Parameter]
     public string? StartLine { get; set; }
 
-    private enum ShareMode { One, Pair, Timelapse }
+    private enum ShareMode { One, Pair, Timelapse, Link }
 
     private enum VideoState { Idle, Making, Done }
 
@@ -338,6 +389,44 @@
     private bool previewPlaying;
     private int makeRun;
 
+    // The link. Its settings are kept on the server; these are the sheet's working copy of them.
+    private bool canShareLink;
+    private bool showNotes = true;
+    private readonly HashSet<Guid> linkLeftOut = [];
+    private Guid? linkLoadedFor;
+    private string? cardName;
+    private string? cardLine;
+    private bool makingLink;
+    private bool confirmingOff;
+    private bool copied;
+    private bool linkSaved;
+    private string? linkError;
+    private int waitingPhotos;
+
+    // Links need an account, so they are only offered where signing in is
+    private bool LinkAvailable => Account.IsAvailable;
+
+    private ShareLinkInfo? Link => Links.For(SubjectId);
+
+    private SubjectType LinkSubject => Tone == "propagation" ? SubjectType.Propagation : SubjectType.Plant;
+
+    private int PhotosOnPage => allPhotos.Count(p => !linkLeftOut.Contains(p.Id));
+
+    // The cover when it is on the page, otherwise the newest photo that is
+    private Photo? PreviewPhoto
+    {
+        get
+        {
+            var shown = allPhotos.Where(p => !linkLeftOut.Contains(p.Id)).ToList();
+            return shown.FirstOrDefault(p => p.Id == CoverPhotoId) ?? shown.LastOrDefault();
+        }
+    }
+
+    // Before there is a link, the page would say what the app says
+    private string PreviewName => Link is null ? Text.Name : CardName;
+
+    private string? PreviewLine => Link is null ? Text.Line : line;
+
     private string ActiveFormat => mode == ShareMode.Timelapse ? videoFormat : format;
 
     // The first draw can't know the size yet, so the preview keeps the shape of the card
@@ -390,6 +479,12 @@
         return ShareCardText.ApartLine(Time.LocalDay(older.TakenAt), Time.LocalDay(newer.TakenAt));
     }
 
+    protected override void OnInitialized()
+    {
+        Links.Changed += OnLinksChanged;
+        Sync.StatusChanged += OnSyncStatusChanged;
+    }
+
     protected override async Task OnParametersSetAsync()
     {
         if (Open == wasOpen)
@@ -403,6 +498,16 @@
             drawnKey = null;
             return;
         }
+
+        confirmingOff = false;
+        copied = false;
+        linkSaved = false;
+        linkError = null;
+        linkLoadedFor = null;
+        linkLeftOut.Clear();
+        showNotes = true;
+        waitingPhotos = 0;
+        canShareLink = LinkAvailable && await Cards.CanShareLinkAsync();
 
         name = Text.Name;
         line = Text.Line ?? "";
@@ -448,7 +553,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!Open || !ready || canvas.Id is null)
+        if (!Open || !ready || mode == ShareMode.Link || canvas.Id is null)
             return;
 
         if (mode == ShareMode.Timelapse)
@@ -547,16 +652,345 @@
         if (mode == value)
             return;
         var leaving = mode;
+
+        // The link edits the name and line in place, so the card's own are kept for coming back
+        if (leaving == ShareMode.Link)
+        {
+            name = cardName ?? name;
+            line = cardLine ?? line;
+        }
+        else if (value == ShareMode.Link)
+        {
+            cardName = name;
+            cardLine = line;
+        }
+
         ChangeKeepingEditedLine(() => mode = value);
         photoMissing = false;
         photoSmall = false;
         message = null;
 
+        if (leaving == ShareMode.Link)
+            drawnKey = null;
         if (leaving == ShareMode.Timelapse)
             await LeaveTimelapseAsync();
         if (value == ShareMode.Timelapse)
             await EnterTimelapseAsync();
+        if (value == ShareMode.Link)
+            await EnterLinkAsync();
     }
+
+    // ---- The link ----
+
+    private async Task EnterLinkAsync()
+    {
+        confirmingOff = false;
+        copied = false;
+        linkSaved = false;
+        linkError = null;
+        linkLoadedFor = null;
+        LoadLinkSettings();
+        await RefreshWaitingAsync();
+    }
+
+    // The working copy comes from the link when the sheet first sees it. Later changes from other devices don't replace what is being edited.
+    private void LoadLinkSettings()
+    {
+        if (Link is not { } link)
+        {
+            linkLoadedFor = null;
+            return;
+        }
+
+        if (linkLoadedFor == link.Id)
+            return;
+        linkLoadedFor = link.Id;
+        showNotes = link.ShowNotes;
+        linkLeftOut.Clear();
+        foreach (var id in link.LeftOutPhotoIds)
+            linkLeftOut.Add(id);
+        name = link.Name ?? Text.Name;
+        line = link.Line ?? Text.Line ?? "";
+    }
+
+    private void OnLinksChanged()
+    {
+        if (!Open || mode != ShareMode.Link)
+            return;
+
+        _ = InvokeAsync(() =>
+        {
+            LoadLinkSettings();
+            StateHasChanged();
+        });
+    }
+
+    private void OnSyncStatusChanged()
+    {
+        if (!Open || mode != ShareMode.Link || Sync.Running)
+            return;
+
+        _ = InvokeAsync(async () =>
+        {
+            await RefreshWaitingAsync();
+            StateHasChanged();
+        });
+    }
+
+    // Photos that haven't reached the server show on the page once they have
+    private async Task RefreshWaitingAsync()
+    {
+        try
+        {
+            waitingPhotos = await Sync.CountPhotosWaitingAsync(allPhotos.Select(p => p.Id).ToList());
+        }
+        catch (JSException)
+        {
+            waitingPhotos = 0;
+        }
+    }
+
+    // The page has to be on the server before it can be shown from there, so the plant is synced first
+    private async Task MakeLinkAsync()
+    {
+        makingLink = true;
+        linkError = null;
+        copied = false;
+        StateHasChanged();
+        try
+        {
+            await Sync.SyncNowAsync();
+            var result = await Links.CreateAsync(LinkSubject, SubjectId, TimeZoneInfo.Local.Id);
+            if (result.Ok)
+            {
+                linkLoadedFor = null;
+                LoadLinkSettings();
+            }
+            else
+            {
+                linkError = result.Offline ? "Connect to the internet to make a link." : result.Problem;
+            }
+        }
+        finally
+        {
+            makingLink = false;
+        }
+
+        await RefreshWaitingAsync();
+    }
+
+    private async Task SaveLinkAsync()
+    {
+        if (Link is not { } link)
+            return;
+
+        linkError = null;
+        linkSaved = false;
+        copied = false;
+        var result = await Links.UpdateAsync(link, showNotes, OwnWords(name, Text.Name), OwnWords(line, Text.Line), linkLeftOut.ToList(), TimeZoneInfo.Local.Id);
+        if (result.Ok)
+            linkSaved = true;
+        else
+            linkError = result.Offline ? "Couldn't save. Connect to the internet and try again." : result.Problem;
+    }
+
+    // The words are only saved to the link when they differ from the app's, so the page keeps following the app's as the plant changes
+    private static string? OwnWords(string? written, string? appsWords)
+    {
+        var clean = ShareLinkRules.Clean(written);
+        return clean is null || clean == appsWords ? null : clean;
+    }
+
+    private async Task WordsChangedAsync()
+    {
+        if (mode == ShareMode.Link)
+            await SaveLinkAsync();
+    }
+
+    private async Task SetShowNotesAsync(ChangeEventArgs e)
+    {
+        showNotes = e.Value is true;
+        await SaveLinkAsync();
+    }
+
+    private async Task ToggleLinkTickAsync(Guid id)
+    {
+        if (!linkLeftOut.Remove(id))
+            linkLeftOut.Add(id);
+        await SaveLinkAsync();
+    }
+
+    private async Task ShareLinkAsync()
+    {
+        if (Link is not { } link)
+            return;
+
+        copied = false;
+        linkError = null;
+        if (await Cards.ShareLinkAsync(PreviewName, link.Url) == "failed")
+            linkError = "The share menu couldn't be opened. Copy the link instead.";
+    }
+
+    private async Task CopyLinkAsync()
+    {
+        if (Link is not { } link)
+            return;
+
+        linkError = null;
+        copied = await Cards.CopyTextAsync(link.Url);
+        if (!copied)
+            linkError = "The link couldn't be copied. Select it and copy it by hand.";
+    }
+
+    private async Task TurnOffLinkAsync()
+    {
+        if (Link is not { } link)
+            return;
+
+        var result = await Links.TurnOffAsync(link);
+        if (!result.Ok)
+        {
+            linkError = result.Offline ? "Connect to the internet to turn off the link." : result.Problem;
+            return;
+        }
+
+        confirmingOff = false;
+        linkError = null;
+        linkSaved = false;
+        copied = false;
+        linkLoadedFor = null;
+        linkLeftOut.Clear();
+        showNotes = true;
+        name = cardName ?? Text.Name;
+        line = cardLine ?? Text.Line ?? "";
+    }
+
+    private async Task SignInAsync()
+    {
+        await OpenChanged.InvokeAsync(false);
+        Navigation.NavigateTo("sign-in");
+    }
+
+    private RenderFragment LinkPanel => @<text>
+        @if (!Sync.SignedIn)
+        {
+            <p class="share-link-note">A link opens a page that anyone can see, with this @Tone's photos. It needs an account, because the page is shown from the server.</p>
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" @onclick="SignInAsync">Sign in</button>
+            </div>
+        }
+        else if (Link is not { } link)
+        {
+            <p class="share-link-note">The page shows this @Tone's photos and, if you leave it on, its notes. It never shows the room, prices or where it came from.</p>
+            @UploadingNote
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" disabled="@makingLink" @onclick="MakeLinkAsync">@(makingLink ? "Making the link…" : "Make link")</button>
+            </div>
+            @LinkMessages
+        }
+        else
+        {
+            <div class="share-field">
+                <div class="share-label" id="share-link-label">The link</div>
+                <p class="share-link-url" aria-labelledby="share-link-label">@link.Url</p>
+                <div class="form-actions">
+                    @if (canShareLink)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="ShareLinkAsync">Share link</button>
+                        <button type="button" class="btn btn-outline-primary" @onclick="CopyLinkAsync">Copy link</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="CopyLinkAsync">Copy link</button>
+                    }
+                    <a class="btn btn-link link-action" href="@link.Url" target="_blank" rel="noopener">Open the page</a>
+                </div>
+                @if (copied)
+                {
+                    <p class="form-text mb-0" role="status">Copied</p>
+                }
+            </div>
+
+            <div class="form-check form-switch share-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="share-notes" checked="@showNotes" @onchange="SetShowNotesAsync" />
+                <label class="form-check-label" for="share-notes">Show my notes</label>
+            </div>
+
+            <div class="share-field">
+                <div class="share-label" id="share-link-ticks-label">Photos on the page</div>
+                <div class="share-photos" role="group" aria-labelledby="share-link-ticks-label">
+                    @foreach (var photo in allPhotos)
+                    {
+                        var ticked = !linkLeftOut.Contains(photo.Id);
+                        <button type="button" role="checkbox" aria-checked="@(ticked ? "true" : "false")"
+                                aria-label="@($"Photo from {DayText(photo)}")" class="share-photo @(ticked ? "ticked" : "left-out")"
+                                @onclick="() => ToggleLinkTickAsync(photo.Id)">
+                            <PhotoImage PhotoId="photo.Id" Framed="false" />
+                            @if (ticked)
+                            {
+                                <svg class="share-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9" /></svg>
+                            }
+                        </button>
+                    }
+                </div>
+                <p class="form-text mb-0">@PhotosOnPage of @allPhotos.Count photos are on the page. Tap one to leave it off.</p>
+                @UploadingNote
+            </div>
+
+            @WordsFields
+
+            @LinkMessages
+
+            @if (confirmingOff)
+            {
+                <div class="confirm-card confirm-card-danger">
+                    <p>Turn off the link? Anyone who opens it will see that the page is gone. Turning sharing on again makes a new link.</p>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-danger" @onclick="TurnOffLinkAsync">Turn off</button>
+                        <button type="button" class="btn btn-link" @onclick="() => confirmingOff = false">Cancel</button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <button type="button" class="btn btn-link btn-sm text-danger link-action ps-0" @onclick="() => confirmingOff = true">Turn off the link</button>
+            }
+        }
+    </text>;
+
+    private RenderFragment UploadingNote => @<text>
+        @if (waitingPhotos > 0)
+        {
+            <p class="form-text">@(waitingPhotos == 1 ? "1 photo is" : $"{waitingPhotos} photos are") still uploading. @(waitingPhotos == 1 ? "It shows" : "They show") on the page once @(waitingPhotos == 1 ? "it's" : "they're") up.</p>
+        }
+    </text>;
+
+    private RenderFragment LinkMessages => @<text>
+        @if (linkError is not null)
+        {
+            <p class="share-link-error" role="alert">@linkError</p>
+        }
+        else if (linkSaved)
+        {
+            <p class="action-message mb-0" role="status">Saved</p>
+        }
+    </text>;
+
+    private RenderFragment WordsFields => @<text>
+        <div class="share-field">
+            <label class="share-label" for="share-name">Name</label>
+            <input id="share-name" class="form-control" maxlength="80" @bind="name" @bind:event="oninput" @onchange="WordsChangedAsync" disabled="@Making" />
+        </div>
+
+        <div class="share-field">
+            <label class="share-label" for="share-line">What it says</label>
+            <textarea id="share-line" class="form-control" rows="3" maxlength="200" @bind="line" @bind:event="oninput" @onchange="WordsChangedAsync" disabled="@Making"></textarea>
+            @if (Edited)
+            {
+                <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="UseOriginalWords" disabled="@Making">Use the app's words again</button>
+            }
+        </div>
+    </text>;
 
     // ---- The time-lapse ----
 
@@ -826,6 +1260,8 @@
 
     public async ValueTask DisposeAsync()
     {
+        Links.Changed -= OnLinksChanged;
+        Sync.StatusChanged -= OnSyncStatusChanged;
         if (mode == ShareMode.Timelapse)
             await LeaveTimelapseAsync();
     }
@@ -847,10 +1283,12 @@
             line = DefaultLine ?? "";
     }
 
-    private void UseOriginalWords()
+    private async Task UseOriginalWords()
     {
         name = Text.Name;
         line = DefaultLine ?? "";
+        if (mode == ShareMode.Link)
+            await SaveLinkAsync();
     }
 
     private ShareFileKind CardFileKind => mode == ShareMode.Pair ? ShareFileKind.BeforeAfter : ShareFileKind.Photo;
