@@ -2631,3 +2631,182 @@ main.app-content:has(.form-bar) {
 .family-tree-link {
     margin: -0.25rem 0 0.75rem;
 }
+
+/* The family tree page: ancestors above, the plant in the middle, siblings and offspring below */
+.plant-tile.faded,
+.family-ancestor.faded {
+    opacity: 0.6;
+}
+
+.family-came-from {
+    margin-top: 1rem;
+}
+
+.family-earlier {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.9rem;
+}
+
+.family-chain {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* The hairline runs through the centres of the photos and on down to the focus card */
+.family-chain::before {
+    content: "";
+    position: absolute;
+    left: 1.25rem;
+    top: 1.375rem;
+    bottom: 0;
+    width: 1px;
+    background: var(--pa-border);
+}
+
+.family-ancestor {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding-block: 0.1875rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.family-ancestor:hover .item-name,
+.family-ancestor:focus-visible .item-name {
+    text-decoration: underline;
+}
+
+.family-ancestor-photo {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--pa-green-soft);
+    color: var(--pa-green);
+}
+
+.family-ancestor-photo.potted {
+    background: var(--pa-clay-soft);
+    color: var(--pa-clay);
+}
+
+.family-ancestor-photo svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.family-ancestor-photo img,
+.family-ancestor-photo .photo-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.family-focus {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background: var(--pa-green-soft);
+    border-radius: 0.75rem;
+}
+
+.family-focus-photo {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    max-width: 20rem;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+    background: var(--pa-surface);
+    color: var(--pa-green);
+}
+
+.family-focus-photo.potted {
+    background: var(--pa-clay-soft);
+    color: var(--pa-clay);
+}
+
+.family-focus-photo svg {
+    width: 3rem;
+    height: 3rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.family-focus-photo img,
+.family-focus-photo .photo-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.family-focus h1 {
+    margin-bottom: 0.15rem;
+    overflow-wrap: anywhere;
+}
+
+.family-focus .btn {
+    margin-top: 0.5rem;
+}
+
+.family-empty {
+    margin-top: 1.75rem;
+}
+
+.family-empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.family-section {
+    margin-top: 1.75rem;
+}
+
+.family-section .plant-grid {
+    padding-bottom: 0;
+}
+
+.family-section:last-child {
+    padding-bottom: 5rem;
+}
+
+/* On a phone the siblings are one row that scrolls sideways, bleeding to the screen edges */
+@media (max-width: 63.99rem) {
+    .family-siblings {
+        display: flex;
+        gap: 0.75rem;
+        margin-inline: -1rem;
+        padding: 0 1rem 0.25rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: 1rem;
+    }
+
+    .family-siblings > li {
+        flex: none;
+        width: 9.5rem;
+        scroll-snap-align: start;
+    }
+}
