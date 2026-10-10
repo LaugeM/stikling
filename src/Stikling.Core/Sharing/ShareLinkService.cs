@@ -100,12 +100,12 @@ public sealed class ShareLinkService(IShareLinkServer server)
 
     /// <summary>Turns sharing on for a plant or propagation that has been synced.</summary>
     /// <param name="timeZone">The device's IANA time zone id.</param>
-    public async Task<ShareOutcome<ShareLinkInfo>> CreateAsync(SubjectType type, Guid subjectId, string? timeZone)
+    public async Task<ShareOutcome<ShareLinkInfo>> CreateAsync(SubjectType type, Guid subjectId, string? timeZone, bool showNotes = true)
     {
         if (collectionId is not { } collection)
             return ShareOutcome<ShareLinkInfo>.Failure("It isn't on the server yet. Sync and try again.");
 
-        var result = await server.CreateAsync(collection, new CreateShareLinkRequest(type, subjectId, timeZone));
+        var result = await server.CreateAsync(collection, new CreateShareLinkRequest(type, subjectId, timeZone, showNotes));
         if (result.Ok && result.Value is { } link)
             Keep(link);
         return result;

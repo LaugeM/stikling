@@ -25,7 +25,8 @@ public sealed record ShareLinkInfo(
 
 /// <summary>Turns on sharing for one plant or propagation.</summary>
 /// <param name="TimeZone">The device's IANA time zone id, so the page counts days the way the device does.</param>
-public sealed record CreateShareLinkRequest(SubjectType SubjectType, Guid SubjectId, string? TimeZone);
+/// <param name="ShowNotes">Whether the text of notes is on the page from the start. Ignored when the subject already has a link.</param>
+public sealed record CreateShareLinkRequest(SubjectType SubjectType, Guid SubjectId, string? TimeZone, bool ShowNotes = true);
 
 /// <summary>Replaces the settings of a link whole, so anything left out here goes back to its default.</summary>
 public sealed record UpdateShareLinkRequest(

@@ -760,7 +760,7 @@
         try
         {
             await Sync.SyncNowAsync();
-            var result = await Links.CreateAsync(LinkSubject, SubjectId, TimeZoneInfo.Local.Id);
+            var result = await Links.CreateAsync(LinkSubject, SubjectId, TimeZoneInfo.Local.Id, showNotes: true);
             if (result.Ok)
             {
                 linkLoadedFor = null;

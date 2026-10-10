@@ -99,6 +99,7 @@ public static class ShareLinkEndpoints
                 CreatedBy = person.Id,
                 CreatedAt = now,
                 UpdatedAt = now,
+                ShowNotes = request.ShowNotes,
                 TimeZone = KnownZone(request.TimeZone),
             };
             db.ShareLinks.Add(link);

@@ -41,7 +41,7 @@ public static class SharePageEndpoints
 
         pages.MapGet("/{token}", async (string token, HttpContext http, StiklingDbContext db, IOptions<ShareOptions> options, TimeProvider clock) =>
         {
-            http.Response.Headers.CacheControl = "public, max-age=60";
+            http.Response.Headers.CacheControl = "no-cache";
 
             var link = await FindAsync(db, token);
             if (link is null)
@@ -110,7 +110,7 @@ public static class SharePageEndpoints
 
             var image = await PhotoEndpoints.ImageAsync(db, storage, link.CollectionId, photoId, which);
             if (image is not IStatusCodeHttpResult { StatusCode: StatusCodes.Status404NotFound })
-                http.Response.Headers.CacheControl = "public, max-age=3600";
+                http.Response.Headers.CacheControl = "public, max-age=300";
             return image;
         });
 

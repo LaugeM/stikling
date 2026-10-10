@@ -428,12 +428,53 @@ public class ShareLinkTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task Deleting_the_plant_turns_its_link_off_for_good()
+    {
+        var me = await SignIn();
+        var plant = await AddPlant(me);
+        var link = await Share(me, plant);
+
+        await Push(me, "plants", new { id = plant, createdAt = Monday, updatedAt = Monday.AddHours(1), deletedAt = Monday.AddHours(1) });
+
+        Assert.Empty((await me.Client.GetFromJsonAsync<List<ShareLinkInfo>>($"/collections/{me.CollectionId}/shares", ApiFactory.Json))!);
+        Assert.Equal(HttpStatusCode.Gone, (await Page(link)).Status);
+
+        // Restored later: the old address stays off, and a new link can be made
+        await Push(me, "plants", new { id = plant, createdAt = Monday, updatedAt = Monday.AddHours(2), nickname = "Mona" });
+        Assert.Equal(HttpStatusCode.Gone, (await Page(link)).Status);
+        var again = await Share(me, plant);
+        Assert.NotEqual(link.Url, again.Url);
+        Assert.Equal(HttpStatusCode.OK, (await Page(again)).Status);
+    }
+
+    [Fact]
+    public async Task A_link_can_be_made_with_notes_off_and_an_existing_link_is_returned_unchanged()
+    {
+        var me = await SignIn();
+        var plant = await AddPlant(me);
+
+        var made = await me.Client.PostAsJsonAsync($"/collections/{me.CollectionId}/shares",
+            new CreateShareLinkRequest(SubjectType.Plant, plant, null, ShowNotes: false), ApiFactory.Json);
+        var link = await made.Content.ReadFromJsonAsync<ShareLinkInfo>(ApiFactory.Json);
+        var again = await me.Client.PostAsJsonAsync($"/collections/{me.CollectionId}/shares",
+            new CreateShareLinkRequest(SubjectType.Plant, plant, null, ShowNotes: true), ApiFactory.Json);
+
+        Assert.Equal(HttpStatusCode.Created, made.StatusCode);
+        Assert.False(link!.ShowNotes);
+        Assert.False((await again.Content.ReadFromJsonAsync<ShareLinkInfo>(ApiFactory.Json))!.ShowNotes);
+    }
+
+    [Fact]
     public async Task A_deleted_subject_gives_404()
     {
         var me = await SignIn();
         var plant = await AddPlant(me);
         var link = await Share(me, plant);
         await Push(me, "plants", new { id = plant, createdAt = Monday, updatedAt = Monday.AddHours(1), deletedAt = Monday.AddHours(1) });
+
+        // Deleting turns the link off, so put it back on to reach the check for the record itself
+        await api.WithDbAsync(async db =>
+            await db.ShareLinks.Where(l => l.Id == link.Id).ExecuteUpdateAsync(set => set.SetProperty(l => l.TurnedOffAt, (DateTimeOffset?)null)));
 
         var (status, _, _) = await Page(link);
 
@@ -466,7 +507,7 @@ public class ShareLinkTests(ApiFactory api)
         Assert.Contains("Start your own", html);
         Assert.Contains("mailto:support@stikling.app?subject=Report%20a%20shared%20page&amp;body=", html);
         Assert.Contains(Uri.EscapeDataString(link.Url), html);
-        Assert.Contains("public, max-age=60", response.Headers.CacheControl!.ToString());
+        Assert.True(response.Headers.CacheControl!.NoCache);
 
         // A later photo and note appear after the owner syncs them
         var second = await AddPhoto(me, plant, hour: 15, daysAgo: 1);
@@ -613,7 +654,7 @@ public class ShareLinkTests(ApiFactory api)
         Assert.Equal(HttpStatusCode.OK, image.StatusCode);
         Assert.Equal("image/jpeg", image.Content.Headers.ContentType?.MediaType);
         Assert.Equal(200, (await image.Content.ReadAsByteArrayAsync()).Length);
-        Assert.Equal("public, max-age=3600", image.Headers.CacheControl!.ToString());
+        Assert.Equal("public, max-age=300", image.Headers.CacheControl!.ToString());
     }
 
     [Fact]
