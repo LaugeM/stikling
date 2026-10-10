@@ -89,7 +89,7 @@ This needs no new storage and no new screen worth the name: a "Log care" home sc
 | ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | 5 | M | v1.x |
 | ✅ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
 | ✅ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
-| ☐ | Grid view with large photos as an alternative to the list | 4 | S | v1.x |
+| ✅ | Grid view with large photos as an alternative to the list | 4 | S | v1.x |
 | ☐ | Group the plant list by genus, with an A to Z jump for long lists | 6 | S | v1.x |
 | ☐ | **Collection numbers**: an optional short number per plant, e.g. 117, to write on the pot. Its propagations get 117a, 117b and so on, so a label on a jar says where the cutting came from | 6 | M | v1.x |
 | ☐ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 6 | M | v1.x |
