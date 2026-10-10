@@ -413,12 +413,14 @@ else
         try
         {
             await Example.LoadAsync();
-            await LoadAsync();
         }
         catch
         {
             exampleFailed = true;
         }
+
+        // Also after a failure, so an example only partly written shows its Remove row
+        await LoadAsync();
         exampleBusy = false;
     }
 
