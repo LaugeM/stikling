@@ -135,6 +135,7 @@ else
                     {
                         @(ancestors.Count > 0 || fromPropagation is not null || propagations.Count > 0 ? " · " : "")<a class="link-action" href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Labels.Count(offspring.Count, "plant") grown from it</a>
                     }
+                    · <a class="link-action" href="plants/@plant.Id/family">family tree</a>
                 </p>
             }
 
@@ -256,6 +257,10 @@ else
 
                 <section class="detail-card" id="plant-family">
                     <h2>Family</h2>
+                    @if (HasFamily)
+                    {
+                        <p class="family-tree-link"><a class="link-action" href="plants/@plant.Id/family">See the family tree</a></p>
+                    }
                     @if (!given.IsEmpty)
                     {
                         <dl class="detail-list">

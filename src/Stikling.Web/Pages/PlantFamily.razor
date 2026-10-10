@@ -1,0 +1,168 @@
+@page "/plants/{Id:guid}/family"
+@layout WideLayout
+@inject IPlantRepository Repository
+@inject IPropagationRepository PropagationRepository
+
+<PageTitle>@(plant is null ? "Family" : $"{plant.DisplayName}'s family") · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="plants/@Id">@(plant?.DisplayName ?? "Plant")</a>
+
+@if (plant is null || tree is null)
+{
+    <p class="text-body-secondary">@(loaded ? "That plant doesn't exist or was deleted." : "Loading…")</p>
+}
+else
+{
+    @if (tree.Ancestors.Count > 0)
+    {
+        <section class="family-came-from" aria-label="Where it came from">
+            @if (tree.MoreAbove)
+            {
+                <a class="link-action family-earlier" href="plants/@tree.Ancestors[0].Id/family">Earlier generations</a>
+            }
+            <ul class="family-chain">
+                @foreach (var ancestor in tree.Ancestors)
+                {
+                    <li>
+                        <a class="family-ancestor @(Left(ancestor) ? "faded" : null)" href="plants/@ancestor.Id/family">
+                            <span class="family-ancestor-photo potted" aria-hidden="true">
+                                @if (ancestor.CoverPhotoId is { } coverId)
+                                {
+                                    <PhotoImage PhotoId="coverId" />
+                                }
+                                else
+                                {
+                                    <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+                                }
+                            </span>
+                            <span class="item-name">@ancestor.DisplayName</span>
+                            @if (ancestor.Status != PlantStatus.Active)
+                            {
+                                <span class="badge text-bg-secondary">@Labels.For(ancestor.Status)</span>
+                            }
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    <section class="family-focus">
+        <div class="family-focus-photo potted">
+            @if (plant.CoverPhotoId is { } focusCover)
+            {
+                <PhotoImage PhotoId="focusCover" Thumbnail="false" Alt="@($"Photo of {plant.DisplayName}")" />
+            }
+            else
+            {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+            }
+        </div>
+        <h1>
+            @if (string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
+            {
+                <BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" />
+            }
+            else
+            {
+                @plant.DisplayName
+            }
+        </h1>
+        @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
+        {
+            <p class="detail-sub"><BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" /></p>
+        }
+        @if (plant.Status != PlantStatus.Active)
+        {
+            <p class="profile-facts">@Labels.For(plant.Status)</p>
+        }
+        <a class="btn btn-outline-primary" href="plants/@plant.Id">Open plant</a>
+    </section>
+
+    @if (tree.IsEmpty)
+    {
+        <div class="empty-state family-empty">
+            <p>No family yet. When you take a cutting from @plant.DisplayName, or say which plant it came from, it shows here.</p>
+            <div class="family-empty-actions">
+                <a class="btn btn-primary" href="propagations/new?parent=@plant.Id">Start a propagation</a>
+                <a class="btn btn-outline-primary" href="plants/@plant.Id/edit">Set where it came from</a>
+            </div>
+        </div>
+    }
+
+    @if (tree.Siblings.Count > 0)
+    {
+        <section class="family-section">
+            <h2 class="section-label">Siblings (@tree.Siblings.Count)</h2>
+            <ul class="plant-grid family-siblings">
+                @foreach (var sibling in tree.Siblings)
+                {
+                    <li>
+                        <PlantTile Plant="sibling" Href="@($"plants/{sibling.Id}/family")" Faded="Left(sibling)" />
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (tree.Children.Count > 0)
+    {
+        <section class="family-section">
+            <h2 class="section-label">Grown from it (@tree.Children.Count)</h2>
+            <ul class="plant-grid">
+                @foreach (var child in tree.Children)
+                {
+                    <li>
+                        <PlantTile Plant="child.Plant" Href="@($"plants/{child.Plant.Id}/family")" Faded="Left(child.Plant)">
+                            @if (child.Below > 0)
+                            {
+                                <text>@Labels.Count(child.Below, "plant") below</text>
+                            }
+                        </PlantTile>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (tree.Growing.Count > 0)
+    {
+        <section class="family-section">
+            <h2 class="section-label">On the way (@tree.Growing.Count)</h2>
+            <ul class="item-list">
+                @foreach (var propagation in tree.Growing)
+                {
+                    <li><PropagationCard Propagation="propagation" ShowStage="true" /></li>
+                }
+            </ul>
+        </section>
+    }
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private Plant? plant;
+    private FamilyTree? tree;
+    private bool loaded;
+
+    // Moving the tree is a navigation to this page with another id
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+        loaded = true;
+    }
+
+    private static bool Left(Plant p) => p.Status != PlantStatus.Active;
+
+    private async Task LoadAsync()
+    {
+        var all = await Repository.GetAllAsync();
+        plant = all.FirstOrDefault(p => p.Id == Id);
+        tree = plant is null
+            ? null
+            : PlantLineage.Tree(plant, all, await PropagationRepository.GetAllAsync());
+    }
+}
