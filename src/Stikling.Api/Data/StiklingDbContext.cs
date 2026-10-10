@@ -1,4 +1,7 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Stikling.Core.Sharing;
 
 namespace Stikling.Api.Data;
 
@@ -11,6 +14,7 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     public DbSet<PersonSettings> PersonSettings => Set<PersonSettings>();
     public DbSet<PhotoImage> PhotoImages => Set<PhotoImage>();
     public DbSet<DeletedAccount> DeletedAccounts => Set<DeletedAccount>();
+    public DbSet<ShareLink> ShareLinks => Set<ShareLink>();
 
     /// <summary>
     /// Locks the collection's row until the end of the transaction, so changes to one collection
@@ -65,6 +69,33 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
             image.HasKey(i => new { i.CollectionId, i.PhotoId, i.Size });
             image.Property(i => i.Size).HasConversion<string>().HasMaxLength(20);
             image.HasOne<Collection>().WithMany().HasForeignKey(i => i.CollectionId);
+        });
+
+        model.Entity<ShareLink>(link =>
+        {
+            // The token is case sensitive
+            link.Property(l => l.Token).HasMaxLength(40).UseCollation("Latin1_General_100_BIN2");
+            link.HasIndex(l => l.Token).IsUnique();
+            link.Property(l => l.SubjectType).HasConversion<string>().HasMaxLength(20);
+            link.Property(l => l.Name).HasMaxLength(ShareLinkRules.MaxNameLength);
+            link.Property(l => l.Line).HasMaxLength(ShareLinkRules.MaxLineLength);
+            link.Property(l => l.TimeZone).HasMaxLength(100);
+            link.Property(l => l.ShowNotes).HasDefaultValue(true);
+            link.Property(l => l.LeftOutPhotoIds)
+                .HasConversion(
+                    ids => JsonSerializer.Serialize(ids, (JsonSerializerOptions?)null),
+                    json => JsonSerializer.Deserialize<List<Guid>>(json, (JsonSerializerOptions?)null) ?? new List<Guid>(),
+                    new ValueComparer<List<Guid>>(
+                        (a, b) => a!.SequenceEqual(b!),
+                        ids => ids.Aggregate(0, (hash, id) => HashCode.Combine(hash, id)),
+                        ids => ids.ToList()));
+
+            // A plant has at most one link that is on. Two devices asking at once get the same one.
+            link.HasIndex(l => new { l.CollectionId, l.SubjectId }).IsUnique().HasFilter("[TurnedOffAt] IS NULL");
+            link.HasIndex(l => new { l.CreatedBy, l.CreatedAt });
+
+            link.HasOne<Collection>().WithMany().HasForeignKey(l => l.CollectionId).OnDelete(DeleteBehavior.Cascade);
+            link.HasOne<Person>().WithMany().HasForeignKey(l => l.CreatedBy).OnDelete(DeleteBehavior.SetNull);
         });
 
         model.Entity<DeletedAccount>(deleted =>

@@ -189,6 +189,49 @@ export async function share(canvas, fileName) {
     return await keep(blob, fileName);
 }
 
+// Whether the browser can share a link through the phone's share menu
+export function canShareLink() {
+    return typeof navigator.share === "function";
+}
+
+// "shared", "cancelled" (closed the share menu) or "failed"
+export async function shareLink(title, url) {
+    try {
+        await navigator.share({ title, url });
+        return "shared";
+    } catch (error) {
+        return error?.name === "AbortError" ? "cancelled" : "failed";
+    }
+}
+
+// True when the text is on the clipboard
+export async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch {
+        return copyWithSelection(text);
+    }
+}
+
+// For a browser that won't give the page the clipboard directly
+function copyWithSelection(text) {
+    const field = document.createElement("textarea");
+    field.value = text;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
+    try {
+        return document.execCommand("copy");
+    } catch {
+        return false;
+    } finally {
+        field.remove();
+    }
+}
+
 export async function save(canvas, fileName) {
     const blob = await (canvas.stiklingBlob ?? toBlob(canvas));
     return blob ? await keep(blob, fileName) : "failed";

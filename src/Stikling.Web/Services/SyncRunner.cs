@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
+using Stikling.Core.Sharing;
 using Stikling.Core.Sync;
 
 namespace Stikling.Web.Services;
@@ -19,6 +20,7 @@ public sealed class SyncRunner(
     IndexedDb db,
     ThemeService theme,
     PlantNameService names,
+    ShareLinkService shares,
     DeviceFiles files,
     IJSRuntime js,
     TimeProvider time) : IAsyncDisposable
@@ -43,6 +45,9 @@ public sealed class SyncRunner(
         module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     public bool Running { get; private set; }
+
+    /// <summary>True when someone is signed in on this device, as far as the last check knows.</summary>
+    public bool SignedIn => signedIn;
 
     public DateTimeOffset? LastSynced { get; private set; }
 
@@ -123,6 +128,10 @@ public sealed class SyncRunner(
     /// <summary>How much would be lost by removing the data from this device right now.</summary>
     public async Task<(int Pending, int Photos)> CountUnsentAsync() =>
         (await store.CountPendingAsync(), await store.CountPhotoUploadsAsync());
+
+    /// <summary>How many of these photos haven't been sent to the server yet. Nothing is waiting when nobody is signed in.</summary>
+    public async Task<int> CountPhotosWaitingAsync(IReadOnlyCollection<Guid> ids) =>
+        signedIn ? await store.CountUploadsAmongAsync(ids) : 0;
 
     /// <summary>
     /// Fetches one of a photo's images from the server and keeps it here, e.g. the full size when
@@ -295,6 +304,7 @@ public sealed class SyncRunner(
             if (!(await account.LoadAsync()).SignedIn)
             {
                 signedIn = false;
+                shares.Clear();
                 return;
             }
 
@@ -311,6 +321,9 @@ public sealed class SyncRunner(
 
             LastSynced = time.GetUtcNow();
             await files.SetAsync(LastSyncKey, LastSynced.Value.ToString("O"));
+
+            // Never throws, so a problem with the links can't stop the photos
+            await shares.RefreshAsync(collection.Id);
 
             // The records are in, so the first sync's notice can go while the photos carry on
             StatusChanged?.Invoke();
@@ -406,6 +419,7 @@ public sealed class SyncRunner(
         PhotosFull = false;
         CollectionId = null;
         notOnServer.Clear();
+        shares.Clear();
         StatusChanged?.Invoke();
     }
 

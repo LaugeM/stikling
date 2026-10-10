@@ -280,6 +280,8 @@ else
                             <dt>Dormant</dt>
                             <dd>@(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(propagation.DaysDormant(Today) ?? 0, "day")}")</dd>
                         }
+
+                        <PublicPageRow SubjectId="propagation.Id" />
                     </dl>
 
                     @if (!string.IsNullOrWhiteSpace(propagation.Notes))

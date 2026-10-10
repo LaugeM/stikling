@@ -2,7 +2,7 @@
 
 The app is static files on GitHub Pages at https://stikling.app. The sync API runs on Azure, described in Bicep in `infra/`:
 
-- **Container Apps** runs the API from the image the workflow pushes to `ghcr.io/laugem/stikling-api`. It sleeps when nobody uses it, so the first request after a quiet spell waits a few seconds. `apiMinReplicas = 1` in `infra/main.bicepparam` keeps one copy awake instead, for about $4 a month. Together with the database that comes to more than the $8 a month budget, so it stays at 0.
+- **Container Apps** runs the API from the image the workflow pushes to `ghcr.io/laugem/stikling-api`. It answers on two names, `api.stikling.app` for the app and `share.stikling.app` for the public pages of share links. They are the same container app, and `Share__Host` and `Share__BaseUrl` tell the API which is which. It sleeps when nobody uses it, so the first request after a quiet spell waits a few seconds. `apiMinReplicas = 1` in `infra/main.bicepparam` keeps one copy awake instead, for about $4 a month. Together with the database that comes to more than the $8 a month budget, so it stays at 0.
 - **Azure SQL** on the Basic tier, about $5 a month, which is always on and holds up to 2 GB. It used to be on the free serverless offer, but that paused after about 20 minutes without use and took close to a minute to wake, so a sync after a break waited that long. Each time the API started it woke the database too, so bots hitting the API used most of the month's free amount in the first four days of October.
 - **Log Analytics** for the API's logs, capped at 0.15 GB a day so it stays inside the free 5 GB a month.
 - **Blob Storage** for the photo images.
@@ -43,9 +43,11 @@ This is also the way to move it to another subscription or region. For another r
 1. Register the resource providers once:
    `az provider register --namespace Microsoft.App`, and the same for `Microsoft.Sql`, `Microsoft.Storage`, `Microsoft.OperationalInsights`, `Microsoft.ManagedIdentity`, `Microsoft.Logic` and `Microsoft.Insights`.
 2. Deploy without the API's domain, and with a sample image, since the workflow hasn't pushed one yet:
-   add `--parameters apiDomain='' apiImage=mcr.microsoft.com/dotnet/samples:aspnetapp` to the command above. The outputs have the values for the next two steps.
-3. At the DNS host for stikling.app, add a CNAME record `api` pointing at `apiDnsTarget`, and a TXT record `asuid.api` with `apiDomainVerificationId`.
-4. Deploy again with `apiCertificateIssued=false` and the sample image, which adds the domain and asks for its certificate. When the certificate shows as succeeded under the Container Apps environment in the portal, deploy once more with only the sample image, which uses it.
+   add `--parameters apiDomain='' shareDomain='' apiImage=mcr.microsoft.com/dotnet/samples:aspnetapp` to the command above. The outputs have the values for the next two steps.
+3. At the DNS host for stikling.app, add a CNAME record `api` pointing at `apiDnsTarget`, and a TXT record `asuid.api` with `apiDomainVerificationId`. For the share domain, add a CNAME record `share` pointing at the same target, and a TXT record `asuid.share` with the same verification id (`shareDnsTarget` and `shareDomainVerificationId` are the same values as the API's, since it is the same container app).
+4. Deploy again with `apiCertificateIssued=false shareCertificateIssued=false` and the sample image, which adds the domains and asks for their certificates. When both certificates show as succeeded under the Container Apps environment in the portal, deploy once more with only the sample image, which uses them. Set `shareCertificateIssued` to `true` in `infra/main.bicepparam` as well, as it is `false` there until then.
+
+   On an API that is already running, only the share domain is new. Add its two DNS records first, since the deploy fails without them, then deploy with `shareCertificateIssued=false` (the default in `infra/main.bicepparam`), wait for the certificate, and deploy again with `shareCertificateIssued=true`. The `Share__Host` and `Share__BaseUrl` settings come with the same deploy.
 5. In the repository settings, under Secrets and variables, then Actions, add the secrets `AZURE_CLIENT_ID` (the `deployClientId` output), `AZURE_TENANT_ID` and `AZURE_SUBSCRIPTION_ID`. They aren't passwords, but as secrets they're hidden in the workflow's logs, which anyone can read. Until they're there, the API deploy fails and the rest of the workflow carries on.
 6. Run the workflow on main. The first time, the API deploy fails because the image it just pushed is private. Make the `stikling-api` package public under Packages on GitHub, so Container Apps can pull it without a password, and run the failed job again.
 

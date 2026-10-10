@@ -37,19 +37,18 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
 
-1. **A share link for one plant or propagation**, which opens a page anyone can see.
-2. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
-3. **Passing a cutting on with its history**, built on the share link.
-4. **Your year with your plants**, another thing worth posting, next to A year ago today.
-5. **Going round a room**, one plant at a time, together with the daily round. It goes well with the watering reminder.
-6. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
-7. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
-8. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-9. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-10. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-11. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-12. **Comparing photos side by side, and voice notes.**
-13. **Unsure names**, for the plants that only have a provisional name.
+1. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
+2. **Passing a cutting on with its history**, built on the share link.
+3. **Your year with your plants**, another thing worth posting, next to A year ago today.
+4. **Going round a room**, one plant at a time, together with the daily round. It goes well with the watering reminder.
+5. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
+6. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
+7. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+8. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+9. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+10. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+11. **Comparing photos side by side, and voice notes.**
+12. **Unsure names**, for the plants that only have a provisional name.
 
 ### Cheap ones to slot in whenever
 
@@ -400,7 +399,7 @@ Questions come up that the app can't answer from your own data: how long a cutti
 | ✅ | Accounts and sync between devices (ASP.NET Core Web API, EF Core, sign-in through Clerk). The API checks Clerk sign-ins and has people, collections and members with roles, and the app can sign in and out from its Account page in Settings. Records, settings and photos sync between devices when signed in. Every device keeps all the thumbnails and fetches a full-size photo when it's opened, and each account has 1 GB for photos on the server. The Account page shows when it last synced and, once it's nearly full, how much photo space is used, a dot on the settings gear shows a sync problem, and signing out asks whether to keep the data on the device. Delete account, at the bottom of the Account page, erases everything on the server and the sign-in, and Download your data gives a ZIP of everything the server and Clerk hold about the person. When something is deleted, the server keeps only its id and dates. The app is at stikling.app, with the API on Azure Container Apps, Azure SQL and Blob Storage, and a privacy page | 9 | L | v2 |
 | ☐ | **Add people to a collection**: screens for inviting someone and choosing their role. The first role is "can view", so someone can look at a collection without being able to change it. The API already has members and roles and checks them on every request, so this is the app side | 9 | L | v2 |
 | ☐ | Someone leaving a shared collection, including when they are the only editor. The collection needs an editor left, so the app has to ask them to hand it over or to say what happens to it first, and nothing is deleted without them asking | 9 | M | v2 |
-| ☐ | **Share link for one plant or propagation**: turned on for that plant only, it gives a link that can't be guessed and can be turned off again. The API serves it as a plain page rather than the app, so it opens quickly and the link preview shows the plant's cover photo. It shows the photos and the history, and leaves out the room, prices, who a cutting went to and anything else private. It ends with a link to start your own. Needs the person to be signed in, since the photos come from the server, and a line on the privacy page. So that links can't be misused, only someone signed in can make one, there is a limit on how many, the page asks search engines not to list it, and it has a way to report it | 3 | L | v2 |
+| ✅ | **Share link for one plant or propagation**: in the Share sheet, **Link** turns on a page for that plant only, at a link on share.stikling.app that can't be guessed. Anyone can open it without an account. The API serves it as a plain page rather than the app, so it opens quickly, works in the in-app browsers of TikTok and Instagram, and the link preview shows the cover photo. It tells the story oldest first: photos with their dates and day counts, milestones like first root and potted up, and the notes unless **Show my notes** is off. Photos can be left out with a tap, and the name and the line can be changed for the page. It follows the plant as it grows and never shows the room, prices, the shop or person it came from, who it went to, tags, pots or care. Turning it off stops the page for good, and turning it on again makes a new link. Only an editor who is signed in can make one, a collection can have 50 at a time and a person can make 20 a day, the page asks search engines not to list it, and it ends with a link to start your own and a way to report it. The note box says when a note will be public, and Details on the plant's page links to the page | 3 | L | v2 |
 | ☐ | **Pass a cutting on with its history**: giving a cutting away also offers a link for the friend. Opening it in Stikling adds the cutting to their collection with its photos and history so far, and where it came from. Built on the share link | 5 | L | v2 |
 | ☐ | Public read-only collection page | 9 | L | v2 |
 | ☐ | **Plant facts card** from Trefle: a short card with what is known about the species, shown on the plant's page. The data is under the ODbL, so the app has to credit it, and the Trefle API token has to stay on the server, so the app asks the API and never Trefle directly. It is never pushed on anyone: a small "About this species" link on the plant page opens it | 9 | L | v2 |

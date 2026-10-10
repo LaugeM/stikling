@@ -11,6 +11,7 @@ using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
 using Stikling.Core.Settings;
+using Stikling.Core.Sharing;
 using Stikling.Core.SoilMixes;
 using Stikling.Core.Sync;
 using Stikling.Core.Timeline;
@@ -790,5 +791,65 @@ internal sealed class FakePhotoServer(FakePhotoSyncStore device) : IPhotoServer
         device.Images.Add((photoId, size));
         Fetched.Add((photoId, size));
         return Task.FromResult(true);
+    }
+}
+
+/// <summary>The share link endpoints for one collection, keeping its links in memory.</summary>
+internal sealed class FakeShareLinkServer : IShareLinkServer
+{
+    private readonly List<ShareLinkInfo> links = [];
+
+    /// <summary>When set, every call fails with this problem.</summary>
+    public string? Problem { get; set; }
+
+    /// <summary>Makes a failure look like the server couldn't be reached.</summary>
+    public bool Offline { get; set; }
+
+    public List<UpdateShareLinkRequest> Updates { get; } = [];
+
+    public List<CreateShareLinkRequest> Creates { get; } = [];
+
+    /// <summary>A link made on another device.</summary>
+    public ShareLinkInfo Add(SubjectType type, Guid subjectId)
+    {
+        var link = new ShareLinkInfo(Guid.NewGuid(), type, subjectId, $"https://share.example/{links.Count}", true, null, null, [], DateTimeOffset.UnixEpoch);
+        links.Add(link);
+        return link;
+    }
+
+    private ShareOutcome<T>? Failed<T>() =>
+        Problem is null ? null : ShareOutcome<T>.Failure(Problem, Offline);
+
+    public Task<ShareOutcome<IReadOnlyList<ShareLinkInfo>>> ListAsync(Guid collectionId) =>
+        Task.FromResult(Failed<IReadOnlyList<ShareLinkInfo>>() ?? ShareOutcome<IReadOnlyList<ShareLinkInfo>>.Success(links.ToList()));
+
+    public Task<ShareOutcome<ShareLinkInfo>> CreateAsync(Guid collectionId, CreateShareLinkRequest request)
+    {
+        if (Failed<ShareLinkInfo>() is { } failed)
+            return Task.FromResult(failed);
+
+        Creates.Add(request);
+        var link = links.FirstOrDefault(l => l.SubjectId == request.SubjectId) ?? Add(request.SubjectType, request.SubjectId);
+        return Task.FromResult(ShareOutcome<ShareLinkInfo>.Success(link));
+    }
+
+    public Task<ShareOutcome<ShareLinkInfo>> UpdateAsync(Guid collectionId, Guid id, UpdateShareLinkRequest request)
+    {
+        if (Failed<ShareLinkInfo>() is { } failed)
+            return Task.FromResult(failed);
+
+        Updates.Add(request);
+        var index = links.FindIndex(l => l.Id == id);
+        links[index] = links[index] with { ShowNotes = request.ShowNotes, Name = request.Name, Line = request.Line, LeftOutPhotoIds = request.LeftOutPhotoIds };
+        return Task.FromResult(ShareOutcome<ShareLinkInfo>.Success(links[index]));
+    }
+
+    public Task<ShareOutcome<bool>> TurnOffAsync(Guid collectionId, Guid id)
+    {
+        if (Failed<bool>() is { } failed)
+            return Task.FromResult(failed);
+
+        links.RemoveAll(l => l.Id == id);
+        return Task.FromResult(ShareOutcome<bool>.Success(true));
     }
 }

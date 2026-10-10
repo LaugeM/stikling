@@ -24,6 +24,15 @@
         ],
         "createdAt": "2026-10-05T06:16:32.420Z",
         "reason": "Claude: the return-visit icon starts at opacity 0 and fades in after 0.6 s on purpose (checked in recorded frames)"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "src/Stikling.Api/Sharing/SharePageView.razor"
+        ],
+        "createdAt": "2026-10-10T11:04:35.437Z",
+        "reason": "Claude triage: the page's CSS lives in ShareStyles.cs, where h1 is 1.75rem over a 1rem body, and the h2 is a deliberate small uppercase date label, so the hierarchy isn't flat"
       }
     ]
   }

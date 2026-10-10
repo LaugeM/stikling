@@ -65,6 +65,25 @@ public sealed class IndexedDbSyncStore(IJSRuntime js) : ISyncStore, IPhotoSyncSt
     public async Task<int> CountPhotoUploadsAsync() =>
         await (await Module).InvokeAsync<int>("countPhotoUploads");
 
+    /// <summary>How many of these photos are still waiting to be sent to the server.</summary>
+    public async Task<int> CountUploadsAmongAsync(IReadOnlyCollection<Guid> ids)
+    {
+        if (ids.Count == 0)
+            return 0;
+
+        var wanted = ids.ToHashSet();
+        var waiting = 0;
+        Guid? after = null;
+        while (true)
+        {
+            var batch = await GetUploadsAsync(after, 500);
+            if (batch.Count == 0)
+                return waiting;
+            waiting += batch.Count(wanted.Contains);
+            after = batch[^1];
+        }
+    }
+
     /// <summary>Empties the database, for signing out and removing everything from this device.</summary>
     public async Task ClearAllAsync() =>
         await (await Module).InvokeVoidAsync("clearAll");

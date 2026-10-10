@@ -49,17 +49,7 @@ public static class PhotoEndpoints
             if (ParseSize(size) is not { } which)
                 return Results.NotFound();
 
-            var there = await db.PhotoImages.AnyAsync(i => i.CollectionId == collectionId && i.PhotoId == photoId && i.Size == which);
-            if (!there || await storage.OpenAsync(collectionId, photoId, which) is not { } stream)
-                return Results.NotFound();
-
-            // An image is at most MaxImageBytes, so it can be read whole to tell what kind it is
-            using var memory = new MemoryStream();
-            await using (stream)
-                await stream.CopyToAsync(memory);
-            var bytes = memory.ToArray();
-
-            return Results.Bytes(bytes, (PhotoRules.FormatOf(bytes) ?? ImageFormat.Jpeg).ContentType);
+            return await ImageAsync(db, storage, collectionId, photoId, which);
         })
         .RequireAuthorization(CollectionPolicies.View);
 
@@ -128,12 +118,31 @@ public static class PhotoEndpoints
         return app;
     }
 
-    private static PhotoSize? ParseSize(string size) => size switch
+    internal static PhotoSize? ParseSize(string size) => size switch
     {
         "full" => PhotoSize.Full,
         "thumb" => PhotoSize.Thumbnail,
         _ => null,
     };
+
+    /// <summary>
+    /// The image with the content type it was saved as, or 404 when it isn't there. The share page
+    /// serves its images through this too, after it has decided the photo may be seen.
+    /// </summary>
+    internal static async Task<IResult> ImageAsync(StiklingDbContext db, PhotoStorage storage, Guid collectionId, Guid photoId, PhotoSize which)
+    {
+        var there = await db.PhotoImages.AnyAsync(i => i.CollectionId == collectionId && i.PhotoId == photoId && i.Size == which);
+        if (!there || await storage.OpenAsync(collectionId, photoId, which) is not { } stream)
+            return Results.NotFound();
+
+        // An image is at most MaxImageBytes, so it can be read whole to tell what kind it is
+        using var memory = new MemoryStream();
+        await using (stream)
+            await stream.CopyToAsync(memory);
+        var bytes = memory.ToArray();
+
+        return Results.Bytes(bytes, (PhotoRules.FormatOf(bytes) ?? ImageFormat.Jpeg).ContentType);
+    }
 
     private static Task<long> UsedAsync(StiklingDbContext db, Guid collectionId) =>
         db.PhotoImages.Where(i => i.CollectionId == collectionId).SumAsync(i => i.Bytes);

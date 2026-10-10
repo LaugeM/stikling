@@ -27,6 +27,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     public const string Issuer = "https://clerk.stikling.test";
     public const string AppOrigin = "http://localhost:5170";
+    public const string ShareBaseUrl = "https://share.stikling.test";
 
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     {
@@ -83,6 +84,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         ["Photos:MaxBytesPerCollection"] = PhotoLimit.ToString(),
         ["Clerk:Authority"] = Issuer,
         ["AppOrigins:0"] = AppOrigin,
+        ["Share:BaseUrl"] = ShareBaseUrl,
     };
 
     /// <summary>

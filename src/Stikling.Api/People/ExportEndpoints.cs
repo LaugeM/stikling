@@ -143,6 +143,28 @@ public static class ExportEndpoints
 
             foreach (var image in images)
                 await WriteImageAsync(zip, photos, image, cancel);
+
+            // Whether the plant's or propagation's page is shared, and with what settings
+            var shares = await db.ShareLinks.AsNoTracking()
+                .Where(l => l.CollectionId == collectionId)
+                .OrderBy(l => l.CreatedAt)
+                .ToListAsync(cancel);
+            if (shares.Count > 0)
+                await WriteJsonAsync(zip, $"collections/{collectionId}/shareLinks.json", shares.Select(l => new
+                {
+                    l.Id,
+                    l.Token,
+                    SubjectType = l.SubjectType.ToString(),
+                    l.SubjectId,
+                    l.CreatedAt,
+                    l.UpdatedAt,
+                    l.TurnedOffAt,
+                    l.ShowNotes,
+                    l.Name,
+                    l.Line,
+                    l.LeftOutPhotoIds,
+                    l.TimeZone,
+                }), cancel);
         }
     }
 
@@ -222,6 +244,8 @@ public static class ExportEndpoints
           <kind>.json     The records of one kind, such as plants or timeline, as the app stores
                           them. Something you deleted is in there as only its id and dates, since
                           the rest is removed from the server when it's deleted.
+          shareLinks.json The pages you shared with a link, and their settings. Left out if you
+                          have none.
           photos/         Your photos. The file name is the photo's id. A file ending in -small
                           is the thumbnail.
 

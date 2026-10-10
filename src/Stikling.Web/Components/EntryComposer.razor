@@ -32,6 +32,7 @@
         <textarea class="form-control" rows="3" aria-label="Note" autofocus="@forNote"
                   placeholder="@(photos.Count > 0 ? "Add a note (optional)" : "New leaf, roots showing, repotted…")"
                   @bind="noteText" @bind:event="oninput"></textarea>
+        <PublicNoteHint SubjectId="SubjectId" />
 
         <div class="composer-date">
             @if (pickDate)

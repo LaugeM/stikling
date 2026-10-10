@@ -93,10 +93,13 @@ public static class RecordEndpoints
 
             var newer = new List<SyncRecord>();
             var deletedPhotos = new List<Guid>();
+            var deletedSubjects = new List<Guid>();
             foreach (var (kind, stamp, data) in winners)
             {
                 if (kind == SyncKinds.Photos && stamp.DeletedAt is not null)
                     deletedPhotos.Add(stamp.Id);
+                if (kind is "plants" or "propagations" && stamp.DeletedAt is not null)
+                    deletedSubjects.Add(stamp.Id);
 
                 if (!existing.TryGetValue((kind, stamp.Id), out var current))
                 {
@@ -125,12 +128,23 @@ public static class RecordEndpoints
                 {
                     newer.Add(new SyncRecord(current.Kind, Parse(current.Data)));
                     deletedPhotos.Remove(stamp.Id);
+                    deletedSubjects.Remove(stamp.Id);
                 }
 
                 // Neither wins when it's the same version again, e.g. sent twice because an answer got lost
             }
 
             await db.SaveChangesAsync();
+
+            // A page for a deleted plant or propagation is turned off for good, so it stays off if the
+            // record is brought back. Sharing can be turned on again then, with a new address.
+            if (deletedSubjects.Count > 0)
+            {
+                var turnedOff = now;
+                await db.ShareLinks
+                    .Where(l => l.CollectionId == collectionId && l.TurnedOffAt == null && deletedSubjects.Contains(l.SubjectId))
+                    .ExecuteUpdateAsync(set => set.SetProperty(l => l.TurnedOffAt, turnedOff).SetProperty(l => l.UpdatedAt, turnedOff));
+            }
 
             // A deleted photo's images go too. Its record stays, so other devices hear it was deleted
             var goneImages = await db.PhotoImages

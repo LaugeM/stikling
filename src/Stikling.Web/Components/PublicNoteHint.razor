@@ -1,0 +1,19 @@
+@* Under the note box, when the plant or propagation has a share link that shows notes. *@
+@implements IDisposable
+@inject ShareLinkService Links
+
+@if (Links.For(SubjectId) is { ShowNotes: true })
+{
+    <p class="form-text mb-0">This note will show on the public page.</p>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    protected override void OnInitialized() => Links.Changed += OnChanged;
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Links.Changed -= OnChanged;
+}

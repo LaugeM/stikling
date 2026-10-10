@@ -194,7 +194,7 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
     };
 
     // " in water", with a leading space so a medium the app can't name leaves nothing behind
-    private static string MediumPhrase(GrowingMedium medium) => medium switch
+    internal static string MediumPhrase(GrowingMedium medium) => medium switch
     {
         GrowingMedium.Soil => " in soil",
         GrowingMedium.OrchidBark => " in orchid bark",

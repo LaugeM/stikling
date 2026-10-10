@@ -1,0 +1,21 @@
+@* The "Public page" row in a plant's or propagation's Details, when it has a share link turned on.
+   It follows the link list itself, so a link made or turned off in the Share sheet shows at once. *@
+@implements IDisposable
+@inject ShareLinkService Links
+
+@if (Links.For(SubjectId) is { } link)
+{
+    <dt>Public page</dt>
+    <dd><a class="link-action" href="@link.Url" target="_blank" rel="noopener">Open</a></dd>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    protected override void OnInitialized() => Links.Changed += OnChanged;
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Links.Changed -= OnChanged;
+}
