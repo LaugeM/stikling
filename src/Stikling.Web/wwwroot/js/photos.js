@@ -141,6 +141,24 @@ export async function saveFromInput(input) {
     return { saved, failed };
 }
 
+// Fetches an image the app ships with (the example family's), stores it under this id the same
+// way a chosen file is, and returns its size. Throws when it can't be fetched or read, e.g. offline.
+export async function saveFromUrl(url, id) {
+    const response = await fetch(url);
+    if (!response.ok)
+        throw new Error(`Couldn't fetch ${url}: ${response.status}`);
+
+    const bitmap = await createImageBitmap(await response.blob(), { imageOrientation: "from-image" });
+    try {
+        const full = await resize(bitmap, FULL_SIZE);
+        const thumb = await resize(bitmap, THUMB_SIZE);
+        await putPhotoImages(id, full.blob, thumb.blob);
+        return { width: full.width, height: full.height };
+    } finally {
+        bitmap.close();
+    }
+}
+
 // Returns an object URL for <img src>, or null if the photo is missing.
 export async function getUrl(id, thumb) {
     const key = thumb ? thumbKey(id) : id;

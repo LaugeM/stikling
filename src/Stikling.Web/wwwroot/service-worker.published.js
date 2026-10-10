@@ -15,7 +15,7 @@ const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.mjs$/, /\.json$/, /\.css$/, /\.woff2?$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/, /\.webmanifest$/ ];
 // The link preview picture is only for other sites, so the app has no use for it offline
-const offlineAssetsExclude = [ /^service-worker\.js$/, /^img\/preview\.png$/ ];
+const offlineAssetsExclude = [ /^service-worker\.js$/, /^img\/preview\.png$/, /^example\// ];
 // Files only some devices use, like the Danish plant names and the libraries that make a time-lapse
 // video. Each is cached the first time the device fetches it, and a new version of the app caches it
 // straight away if the old one had it.
