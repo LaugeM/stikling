@@ -4,14 +4,14 @@
 
 @if (Selectable)
 {
-    <label class="plant-tile selectable @(Selected ? "selected" : null)">
+    <label class="plant-tile selectable @(Selected ? "selected" : null) @(Faded ? "faded" : null)">
         <input type="checkbox" class="form-check-input tile-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Plant)" />
         @Content
     </label>
 }
 else
 {
-    <a class="plant-tile" href="@(Href ?? $"plants/{Plant.Id}")">
+    <a class="plant-tile @(Faded ? "faded" : null)" href="@(Href ?? $"plants/{Plant.Id}")">
         @Content
     </a>
 }
@@ -36,6 +36,10 @@ else
     /// <summary>Where the tile links to. Defaults to the plant's page.</summary>
     [Parameter]
     public string? Href { get; set; }
+
+    /// <summary>Shown at 60% opacity, for plants that died or left.</summary>
+    [Parameter]
+    public bool Faded { get; set; }
 
     /// <summary>An extra last line, in meta style.</summary>
     [Parameter]
