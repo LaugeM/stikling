@@ -1,64 +1,78 @@
 ---
 name: coordinate
-description: Build a feature, or a batch of small features, with this session as coordinator and worker agents on Sonnet doing the implementation. Use when the user runs /coordinate or asks to work as coordinator with workers.
+description: Build an approved plan with worker agents on Sonnet, with this session as coordinator. Use it whenever a plan is approved in an Opus session and the build is more than one or two files, instead of asking the user to switch models. Also use it when the user runs /coordinate for a batch of small features.
 ---
 
-# Coordinating a feature with workers
+# Coordinating a build with workers
 
-This session plans the feature, splits it into parts, writes a brief for each part and checks the result. The `worker` agent (`.claude/agents/worker.md`) builds each part on Sonnet. The design decisions stay here.
+This session plans the feature, writes a brief for the worker and checks the result. The `worker` agent (`.claude/agents/worker.md`) builds it on Sonnet. The design decisions stay here.
+
+This is the default way to build an approved plan. Don't ask the user to switch models. Switching writes the whole planning conversation to the cache again, and every build turn re-reads it. A worker starts with only the brief.
 
 If the whole change is small, one or two files, skip this and build it directly. A worker's start-up costs more than it saves on a small change. Several small features together are a different case: see "A batch of small features".
 
 ## Which way to build it
 
-- **One feature that splits into parts** (Core, then storage, then screens): the steps below, one worker at a time in this worktree.
+- **One feature from an approved plan**: the steps below, in this worktree.
 - **A batch of small, separate features**, like several rows from the feature list: one worker per feature, run in parallel. See "A batch of small features" at the end.
-- **Work that is mostly judgment or writing**, like a design question, a data model change or the Help page: build it in this session. Workers are good at a clear brief with a build and tests to check it, and weaker at deciding what the feature should be.
+- **Work that is mostly judgment**, like a design question or a data migration whose shape isn't settled: build it in this session. Workers are good at a clear brief with a build and tests to check it, and weaker at deciding what the feature should be. Once a migration is designed (the `DB_VERSION` bump, the `db.js` block, how old records are converted), a worker can write it from the brief.
 
 A batch of 21 small features built with parallel workers came to about a third to a quarter of the cost of building the same kind of features on Opus alone. Most of the saving came from this session's conversation staying short, since every step re-reads the whole conversation, rather than from Sonnet's lower price.
 
 ## 1. Note the usage
 
-Before anything else, note the plan usage (weekly and 5-hour percentage). It's reported at the end.
+When the user ran `/coordinate`, note the plan usage (weekly and 5-hour percentage) before anything else. It's reported at the end.
 
 ## 2. Plan
 
-Plan the feature as usual and get the plan approved before any worker starts. Settle the design questions in the plan, since the workers can't ask.
+Plan the feature as usual and get the plan approved before any worker starts. An approved plan in plan mode is the go-ahead. Outside plan mode, show the plan and wait for the user's go.
 
-## 3. Split into a few large parts
+Settle the design questions in the plan, not in the brief. Anything the worker would have to ask about is a question to settle now, and if it's a product decision, ask the user now, before the worker starts.
 
-Split the plan into two to four parts, in the order they depend on each other. Each part should be something a worker can finish and check with the build and tests on its own. For a typical feature:
+## 3. One worker, or a few parts
+
+Give the whole plan to one worker when it fits: a feature that one focused session could build without its context getting long. Every worker reads its own context from scratch, so more workers cost more.
+
+Split it into two or three parts only when it is large, or when a check between parts catches problems early. Split in the order the parts depend on each other, so each part can be finished and checked with the build and tests on its own. For a large feature:
 
 1. the model, repository interface, service and tests in `Stikling.Core`
 2. the IndexedDB side and the backup, following `docs/dev/new-record.md`
-3. the pages and components
-4. the Help page answers, empty states and `docs/FEATURES.md`
+3. the pages, components, Help answers, empty states and `docs/FEATURES.md`
 
-More, smaller parts cost more, not less. Every worker reads its own context from scratch.
+## 4. Write a brief the worker can finish
 
-## 4. Write the brief
+The worker only sees the brief, CLAUDE.md and the docs they point to. Every question it sends back costs a round trip in this session, which is the expensive one, so the brief leaves nothing open that the worker can't settle from the code.
 
-The worker only sees the brief, CLAUDE.md and the docs they point to. Each brief says:
+Before writing it, check every premise. Open the files the brief will name and confirm that the methods, fields, components and docs it mentions exist and work the way the plan assumes. A premise that turns out false is the most common reason a worker stops. While you're there, find the existing code each piece should copy.
 
-- what this part is for, and where it sits in the whole feature
-- the files to change, and the existing code to follow as a pattern
-- the decisions from the plan that affect this part
-- the rules in CLAUDE.md that apply, named rather than repeated
-- the docs under "Docs for some tasks" in CLAUDE.md that the part needs
+The brief says:
+
+- what the change is for and how someone uses it, in a few sentences
+- the files to change, and for each the existing file to follow as a pattern
+- every decision from the plan, written as decided, not as options. That includes names of fields, enum values and public methods, the text people see and where it shows, what happens when a list is empty or something fails, and how existing data is handled.
+- the rules in CLAUDE.md that apply, named rather than repeated, and the docs under "Docs for some tasks" that the part needs
+- the Help answers, What's new line and feature list rows the change needs, with what each should say
 - what is out of scope, including work that belongs to a later part
-- how to check it: which tests should exist and pass
+- which tests should exist and pass
+- that the browser check, the reviewer, commits and the pull request stay with this session
+- what the worker may decide itself: anything the code has a pattern for, names nobody sees, the layout of tests, small layout details `DESIGN.md` settles
 
-## 5. Run the workers one at a time
+Give the conclusions, not the discussion. The options you weighed while planning only add things to read.
 
-Start one worker, wait for its report, then check it before the next one starts:
+Then read the brief once as the worker will, without this conversation. Anything you would have to ask about, decide and write in.
+
+## 5. Check each worker's result
+
+When the build is split into parts, start one worker, wait for its report, and check it before the next one starts:
 
 - `git status` and `git diff`: every changed file should be one the brief allowed
 - the report should show the build and tests passing. If it doesn't, run them.
+- read the decisions the worker made on its own, and change any you disagree with
 - fix small problems directly
 - for a real problem, send it back to the same worker with SendMessage instead of starting a new one, so it keeps what it already read
-- if the worker stopped on a question, decide it here, or ask the user when it's a product decision
+- if the worker stopped on a question, answer it with SendMessage, or ask the user first when it's a product decision. Then note what the brief was missing, so the next brief covers it.
 
-Don't run these workers in parallel. Each one builds on the one before, and they share this worktree. Parallel workers are only for separate features, each in its own worktree (see the last section).
+Don't run the parts in parallel. Each one builds on the one before, and they share this worktree. Parallel workers are only for separate features, each in its own worktree (see the last section).
 
 ## 6. Finish as usual
 
@@ -68,8 +82,8 @@ Check any UI change in the browser at phone width by running the `browser-check`
 
 In the chat, not in the pull request, tell the user:
 
-- the plan usage before and after
-- how many workers ran, and how many were sent back for fixes
+- the plan usage before and after, when it was noted
+- how many workers ran, how many came back with questions and how many were sent back for fixes
 - what the reviewer found
 
 ## A batch of small features

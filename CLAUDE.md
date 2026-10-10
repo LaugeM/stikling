@@ -72,7 +72,9 @@ The .NET gitignore template ignores `Backup*/`, which hid `src/Stikling.Core/Bac
 
 ## Choosing how to build
 
-For a batch of small features that touch different parts of the app, suggest `/coordinate`, which runs Sonnet workers in parallel. For one feature that needs design decisions, plan it on Opus and build it on Sonnet 5.5 once the design is settled: switch the session's model, or hand off to a new Sonnet session when the planning conversation is long. A part that needs judgment, like a data migration, stays on Opus. The skill has the details on when workers pay off.
+Plan on Opus. Once I approve a plan, don't ask me to switch models. Write a brief and hand the build to the `worker` agent (`.claude/agents/worker.md`), which runs on Sonnet 5.5, then check what it did. The `coordinate` skill has the steps, including how to write a brief the worker can finish without coming back with questions. A worker is cheaper than switching this session's model: a switch writes the whole planning conversation to the cache again, and every build turn re-reads it.
+
+Build in this session instead when the change is one or two files, or when the work is mostly judgment, like a data migration or tuning a screen together with me. For a batch of small features that touch different parts of the app, suggest `/coordinate`, which runs workers in parallel.
 
 ## Before opening a pull request
 
