@@ -760,7 +760,7 @@
         try
         {
             await Sync.SyncNowAsync();
-            var result = await Links.CreateAsync(LinkSubject, SubjectId, TimeZoneInfo.Local.Id, showNotes: true);
+            var result = await Links.CreateAsync(LinkSubject, SubjectId, TimeZoneInfo.Local.Id, showNotes);
             if (result.Ok)
             {
                 linkLoadedFor = null;
@@ -882,6 +882,10 @@
         else if (Link is not { } link)
         {
             <p class="share-link-note">The page shows this @Tone's photos and, if you leave it on, its notes. It never shows the room, prices or where it came from.</p>
+            <div class="form-check form-switch share-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="share-notes" checked="@showNotes" @onchange="e => showNotes = e.Value is true" disabled="@makingLink" />
+                <label class="form-check-label" for="share-notes">Show my notes</label>
+            </div>
             @UploadingNote
             <div class="form-actions">
                 <button type="button" class="btn btn-primary" disabled="@makingLink" @onclick="MakeLinkAsync">@(makingLink ? "Making the link…" : "Make link")</button>

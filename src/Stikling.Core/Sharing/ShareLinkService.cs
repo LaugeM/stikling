@@ -49,9 +49,11 @@ public sealed class ShareLinkService(IShareLinkServer server)
     /// <summary>The link that is on for a plant or propagation, or null.</summary>
     public ShareLinkInfo? For(Guid subjectId) => links.GetValueOrDefault(subjectId);
 
-    /// <summary>Fetches the collection's links. When that fails the list is emptied. Never throws.</summary>
+    /// <summary>Fetches the collection's links. When that fails the last known list is kept. A different collection starts empty. Never throws.</summary>
     public async Task RefreshAsync(Guid forCollection)
     {
+        if (collectionId != forCollection)
+            Empty();
         collectionId = forCollection;
         ShareOutcome<IReadOnlyList<ShareLinkInfo>> found;
         try
@@ -60,16 +62,12 @@ public sealed class ShareLinkService(IShareLinkServer server)
         }
         catch (Exception)
         {
-            // A refresh must never stop a sync
-            Empty();
+            // A refresh must never stop a sync, and a brief outage keeps what was known
             return;
         }
 
         if (!found.Ok || found.Value is null)
-        {
-            Empty();
             return;
-        }
 
         var fetched = found.Value.GroupBy(l => l.SubjectId).ToDictionary(g => g.Key, g => g.First());
         if (links.Count == fetched.Count && links.All(l => fetched.TryGetValue(l.Key, out var other) && Same(other, l.Value)))

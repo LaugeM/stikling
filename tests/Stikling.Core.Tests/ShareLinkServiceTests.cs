@@ -49,15 +49,40 @@ public class ShareLinkServiceTests
     }
 
     [Fact]
-    public async Task A_refresh_that_fails_leaves_the_list_empty_without_throwing()
+    public async Task A_refresh_that_fails_keeps_the_last_known_links_without_throwing()
+    {
+        server.Add(SubjectType.Plant, Plant);
+        await service.RefreshAsync(Collection);
+        var raised = 0;
+        service.Changed += () => raised++;
+
+        server.Problem = "Nope";
+        await service.RefreshAsync(Collection);
+
+        Assert.NotNull(service.For(Plant));
+        Assert.Equal(0, raised);
+    }
+
+    [Fact]
+    public async Task A_refresh_for_another_collection_starts_empty()
     {
         server.Add(SubjectType.Plant, Plant);
         await service.RefreshAsync(Collection);
 
         server.Problem = "Nope";
-        await service.RefreshAsync(Collection);
+        await service.RefreshAsync(Guid.NewGuid());
 
         Assert.Null(service.For(Plant));
+    }
+
+    [Fact]
+    public async Task Making_a_link_sends_the_choice_about_notes()
+    {
+        await service.RefreshAsync(Collection);
+
+        await service.CreateAsync(SubjectType.Plant, Plant, null, showNotes: false);
+
+        Assert.False(Assert.Single(server.Creates).ShowNotes);
     }
 
     [Fact]

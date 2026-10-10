@@ -57,9 +57,9 @@ public static class ShareStyles
         .photos.single img { aspect-ratio: 4 / 3; }
         .foot { margin: 2rem 1rem 0; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; font-size: 0.875rem; line-height: 1.4; }
         .foot p { margin: 0 0 0.5rem; }
-        .start { display: inline-block; padding: 0.5rem 0.9rem; background: var(--green); color: var(--on-green); font: 600 0.95rem var(--display); text-decoration: none; border-radius: 0.6rem; }
+        .start { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 1rem; background: var(--green); color: var(--on-green); font: 600 0.95rem var(--display); text-decoration: none; border-radius: 0.6rem; }
         .meta { margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted); }
-        .meta a { color: var(--muted); }
+        .meta a { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--muted); }
         .gone { max-width: 28rem; margin: 0 auto; padding: 3rem 1rem; }
         @media (min-width: 40rem) {
           .page { padding-top: 1.5rem; }
