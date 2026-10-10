@@ -122,7 +122,12 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
 
     public Task AddAsync(TimelineEntry entry)
     {
-        Entries.Add(entry);
+        // Like the real store, an entry with an id that is already there replaces it
+        var index = Entries.FindIndex(e => e.Id == entry.Id);
+        if (index >= 0)
+            Entries[index] = entry;
+        else
+            Entries.Add(entry);
         return Task.CompletedTask;
     }
 

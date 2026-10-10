@@ -75,6 +75,18 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
         return new PhotoSaveResult(saved, response.Failed, undated);
     }
 
+    /// <summary>
+    /// Fetches an image from this app's own files and stores it under the given id. Returns its
+    /// size. Throws when it can't be fetched or read.
+    /// </summary>
+    public async Task<(int Width, int Height)> SaveFromUrlAsync(string url, Guid id)
+    {
+        var size = await (await Module).InvokeAsync<ImageSize>("saveFromUrl", url, id);
+        return (size.Width, size.Height);
+    }
+
+    private sealed record ImageSize(int Width, int Height);
+
     /// <summary>An address usable in &lt;img src&gt;, or null if the photo is missing.</summary>
     public async Task<string?> GetUrlAsync(Guid id, bool thumbnail) =>
         await (await Module).InvokeAsync<string?>("getUrl", id, thumbnail);

@@ -374,7 +374,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | **Guided tour on the first visit**: a short walk through the app (plants, propagations, photos, backup) that can be skipped | 6 | M | v1.x |
 | ☐ | Start the tour again from Settings whenever you want | 6 | S | v1.x |
 | ☐ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | 6 | S | v1.x |
-| ☐ | A demo plant and propagation that can be loaded and removed again, so the app can be tried out without adding real plants. They need fixed ids so a device that syncs doesn't get a second copy, and removing them removes their photos too | 3 | M | v1.x |
+| ✅ | A demo plant and propagation that can be loaded and removed again, so the app can be tried out without adding real plants. They need fixed ids so a device that syncs doesn't get a second copy, and removing them removes their photos too | 3 | M | v1.x |
 
 ## 7d. Guides & references
 
