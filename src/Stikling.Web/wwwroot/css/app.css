@@ -485,6 +485,158 @@ a.item-card:active {
     margin-left: 0.3rem;
 }
 
+/* The plant list as a grid of photos. PlantTile is also used on other pages. */
+.plant-grid {
+    list-style: none;
+    padding: 0 0 5rem;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.plant-grid > li {
+    display: flex;
+    min-width: 0;
+}
+
+.plant-grid > li > * {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (min-width: 40rem) {
+    .plant-grid {
+        grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    }
+}
+
+.plant-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s ease-out, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.plant-tile:hover,
+.plant-tile:focus-visible,
+.plant-tile:focus-within {
+    border-color: var(--pa-green);
+}
+
+.plant-tile:active {
+    transform: scale(0.985);
+}
+
+.plant-tile.selected {
+    background: var(--pa-green-soft);
+    border-color: var(--pa-green);
+}
+
+.tile-photo {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-green);
+}
+
+.tile-photo.potted {
+    background: var(--pa-clay-soft);
+    color: var(--pa-clay);
+}
+
+.tile-photo svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tile-photo img,
+.tile-photo .photo-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tile-text {
+    min-width: 0;
+    padding-inline: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.tile-badges,
+.tile-meta {
+    margin-top: 0.15rem;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tile-badges > * + * {
+    margin-left: 0.3rem;
+}
+
+/* In select mode the checkbox sits in the photo's corner on a small patch, with a 44px tap area */
+.tile-check {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 1;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0;
+    padding: 0;
+    background-color: var(--pa-surface);
+    border-radius: 0.5rem;
+}
+
+/* The view switch in the filter row: two icon buttons that look like picked segments */
+.view-toggle .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    --bs-btn-hover-color: var(--pa-green-dark);
+    --bs-btn-hover-bg: var(--pa-green-soft);
+    --bs-btn-hover-border-color: var(--pa-green);
+    --bs-btn-active-color: var(--pa-green-dark);
+    --bs-btn-active-bg: var(--pa-green-soft);
+    --bs-btn-active-border-color: var(--pa-green);
+}
+
+.view-toggle .btn.picked {
+    color: var(--pa-green-dark);
+    background: var(--pa-green-soft);
+    border-color: var(--pa-green);
+}
+
+.view-toggle svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .item-list {
     list-style: none;
     padding: 0;

@@ -99,6 +99,17 @@ else
                     <option value="@value">@label</option>
                 }
             </select>
+
+            <div class="btn-group view-toggle" role="group" aria-label="View">
+                <button type="button" class="btn btn-outline-primary @(grid ? null : "picked")" aria-pressed="@(grid ? "false" : "true")"
+                        aria-label="List view" title="List view" @onclick="() => SetViewAsync(false)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>
+                </button>
+                <button type="button" class="btn btn-outline-primary @(grid ? "picked" : null)" aria-pressed="@(grid ? "true" : "false")"
+                        aria-label="Grid view" title="Grid view" @onclick="() => SetViewAsync(true)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></svg>
+                </button>
+            </div>
         </div>
 
         @if (PickedRoom is { Spots.Count: > 0 } picked)
@@ -178,6 +189,18 @@ else
                 <p>No plants here. A plant ends up under Gone when you mark it as died, given away or sold.</p>
             }
         </div>
+    }
+    else if (grid)
+    {
+        <ul class="plant-grid">
+            @foreach (var plant in visible)
+            {
+                <li>
+                    <PlantTile Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
+                               OnToggle="Toggle" Pests="@PestsFor(plant)" />
+                </li>
+            }
+        </ul>
     }
     else
     {
@@ -323,6 +346,8 @@ else
     private bool dormant;
     private const string SortKey = "plants-sort";
     private PlantSort sort = PlantSort.Name;
+    private const string ViewKey = "plants-view";
+    private bool grid; // "Grid" is stored per device, anything else reads as the list
     private Dictionary<Guid, DateTimeOffset> lastActivity = [];
 
     private bool selecting;
@@ -350,7 +375,14 @@ else
         }
         if (Enum.TryParse<PlantSort>(await Device.GetAsync(SortKey), out var stored) && Enum.IsDefined(stored))
             sort = stored;
+        grid = await Device.GetAsync(ViewKey) == "Grid";
         await LoadAsync();
+    }
+
+    private async Task SetViewAsync(bool value)
+    {
+        grid = value;
+        await Device.SetAsync(ViewKey, value ? "Grid" : "List");
     }
 
     private EverydayNameBook? everyday;
