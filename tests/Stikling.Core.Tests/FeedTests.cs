@@ -24,7 +24,7 @@ public class FeedTests
 
     public FeedTests()
     {
-        care = new CareService(logs, new FakeTimelineRepository(), new FixedTime(Now));
+        care = new CareService(logs, new FakeTimelineRepository(), new FakePlantRepository(), new FakeFeedRepository(), new FakeProductRepository(), new FixedTime(Now));
     }
 
     private static string Label(Enum value) => value.ToString();

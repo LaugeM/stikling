@@ -1,5 +1,8 @@
 using System.Globalization;
+using Stikling.Core.Feeds;
 using Stikling.Core.Models;
+using Stikling.Core.Plants;
+using Stikling.Core.Products;
 using Stikling.Core.Timeline;
 
 namespace Stikling.Core.Care;
@@ -8,7 +11,13 @@ namespace Stikling.Core.Care;
 /// Writing to the care log. The entry is always saved; the plant's history only gets a line
 /// for the notable kinds, so a weekly watering doesn't bury the photos and notes.
 /// </summary>
-public sealed class CareService(ICareLogRepository logs, ITimelineRepository timeline, TimeProvider time)
+public sealed class CareService(
+    ICareLogRepository logs,
+    ITimelineRepository timeline,
+    IPlantRepository plants,
+    IFeedRepository feeds,
+    IProductRepository products,
+    TimeProvider time)
 {
     private DateOnly Today => time.Today();
 
@@ -16,11 +25,24 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
     public CareLog Start(Guid plantId, CareKind kind = CareKind.Watered) =>
         new() { PlantId = plantId, Kind = kind, OccurredOn = Today };
 
-    /// <summary>Saves one care entry and, for the notable kinds, records it on the plant's history.</summary>
+    /// <summary>
+    /// Saves one care entry and, for the notable kinds, records it on the plant's history. A
+    /// watering of a plant set to get a feed with the water also logs the feed, when it is due.
+    /// </summary>
     public async Task LogAsync(CareLog entry, Func<Enum, string> label)
     {
+        // The watering is what was done, so a feed entry that doesn't pass is left out rather than stopping it
+        var extra = await PlanFeedAsync(entry, null);
+        if (extra is not null && extra.Validate(Today).Count > 0)
+            extra = null;
+
         await logs.SaveAsync(entry);
         await RecordAsync(entry, label);
+        if (extra is not null)
+        {
+            await logs.SaveAsync(extra);
+            await RecordAsync(extra, label);
+        }
     }
 
     /// <summary>
@@ -60,20 +82,77 @@ public sealed class CareService(ICareLogRepository logs, ITimelineRepository tim
             })
             .ToList();
 
+        // A plant set to get a feed with the watering gets it as well, by its own setting
+        var all = IsWatering(kind) ? await logs.GetAllAsync() : null;
+        var extras = new List<CareLog>();
+        foreach (var entry in entries)
+            if (await PlanFeedAsync(entry, all) is { } extra && extra.Validate(Today).Count == 0)
+                extras.Add(extra);
+
         // Check everything before saving anything, the way potting up does
-        if (entries.SelectMany(e => e.Validate(Today)).FirstOrDefault() is { } error)
+        if (entries.Concat(extras).SelectMany(e => e.Validate(Today)).FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
 
         foreach (var entry in entries)
         {
             await logs.SaveAsync(entry);
             await RecordAsync(entry, label);
+            foreach (var extra in extras.Where(x => x.PlantId == entry.PlantId))
+            {
+                await logs.SaveAsync(extra);
+                await RecordAsync(extra, label);
+            }
         }
 
         return entries.Count;
     }
 
     public Task DeleteAsync(Guid id) => logs.DeleteAsync(id);
+
+    private static bool IsWatering(CareKind kind) => kind is CareKind.Watered or CareKind.ToppedUp;
+
+    /// <summary>
+    /// For a new watering or topping up of a plant that gets a feed with the water, when the feed
+    /// is due. A ToppedUp entry without products of its own gets the feed's products itself and
+    /// null is returned. For Watered the separate Fertilised entry to save is returned.
+    /// </summary>
+    private async Task<CareLog?> PlanFeedAsync(CareLog entry, IReadOnlyList<CareLog>? all)
+    {
+        if (!IsWatering(entry.Kind))
+            return null;
+        if (await plants.GetAsync(entry.PlantId) is not { WateringFeedId: { } feedId } plant)
+            return null;
+        if (await feeds.GetAsync(feedId) is not { IsDeleted: false } feed || feed.Products.Count == 0)
+            return null;
+
+        all ??= await logs.GetAllAsync();
+        // Saving an entry that was already logged isn't a new watering
+        if (all.Any(l => l.Id == entry.Id))
+            return null;
+        if (!FeedWithWatering.IsDue(all.Where(l => l.PlantId == entry.PlantId), entry, plant.WateringFeedEvery))
+            return null;
+
+        if (entry.Kind == CareKind.ToppedUp)
+        {
+            if (entry.Products.Count == 0)
+            {
+                entry.Products = feed.Doses(await products.GetAllAsync());
+                entry.FeedId = feed.Id;
+                entry.FeedName = Clean(feed.Name);
+            }
+            return null;
+        }
+
+        return new CareLog
+        {
+            PlantId = entry.PlantId,
+            Kind = CareKind.Fertilised,
+            OccurredOn = entry.OccurredOn,
+            Products = feed.Doses(await products.GetAllAsync()),
+            FeedId = feed.Id,
+            FeedName = Clean(feed.Name)
+        };
+    }
 
     /// <summary>
     /// "Repotted", "Watered: rainwater", "Fertilised: Hydro fertiliser, 2 ml/L · half strength"

@@ -332,6 +332,19 @@ public class SharePageTests
     }
 
     [Fact]
+    public void A_plant_photo_says_how_long_you_had_the_plant_and_a_propagation_says_the_day()
+    {
+        var plant = NewPlant();
+        plant.AcquiredOn = LooseDate.Of(new DateOnly(2025, 7, 1));
+        var plantItems = PageOf(plant, [PhotoOf(plant, At(9, 11))]).Items;
+        Assert.Equal(" · 1 yr 2 mo", plantItems.Last().DayCount);
+
+        var p = NewCutting();
+        p.FirstRootOn = new DateOnly(2026, 8, 19);
+        Assert.Equal(" · day 18", PageOf(p).Items[1].DayCount);
+    }
+
+    [Fact]
     public void A_plant_acquired_on_a_whole_day_has_a_got_it_milestone_and_counts_from_it()
     {
         var plant = NewPlant();
@@ -341,7 +354,7 @@ public class SharePageTests
         var items = PageOf(plant, [photo]).Items;
 
         Assert.Equal("Got it", items[0].Text);
-        Assert.Equal(" · day 10", items[1].DayCount);
+        Assert.Equal(" · 10 days", items[1].DayCount);
     }
 
     [Fact]

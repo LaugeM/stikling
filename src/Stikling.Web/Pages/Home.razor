@@ -191,6 +191,18 @@ else
                     </a>
                 }
             </div>
+            @if (now.Any(d => d.Guess.Form == WateringForm.TopWatered && d.Guess.Mode != WateringMode.Meter))
+            {
+                <details class="today-hint">
+                    <summary>How to tell if it needs water</summary>
+                    <ul>
+                        <li>Push a finger 2 to 3 cm into the soil and feel whether it's dry. Plants that like to dry out may want it drier further down.</li>
+                        <li>For a deep pot, push in a wooden skewer and pull it out. Soil sticking to it means it's still wet.</li>
+                        <li>Lift the pot. A dry one feels much lighter than right after watering.</li>
+                        <li>A moisture meter gives a number. Log the reading with Still wet, and the reminder learns from it.</li>
+                    </ul>
+                </details>
+            }
             @if (now.Count > 0)
             {
                 <ul class="item-list">
@@ -211,6 +223,33 @@ else
                 </ul>
             }
         </section>
+    }
+
+    @if (memory is not null)
+    {
+        <section class="today-section memory">
+            <h2>@memory.Heading</h2>
+            <div class="memory-photos">
+                <figure>
+                    <div class="memory-photo"><PhotoImage PhotoId="memory.Old.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Old.TakenAt))}")" /></div>
+                    <figcaption>@Labels.Date(Time.LocalDay(memory.Old.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.PlantAge(memory.Plant, Time.LocalDay(memory.Old.TakenAt)))</figcaption>
+                </figure>
+                <figure>
+                    <div class="memory-photo"><PhotoImage PhotoId="memory.Newest.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Newest.TakenAt))}")" /></div>
+                    <figcaption>@Labels.Date(Time.LocalDay(memory.Newest.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.PlantAge(memory.Plant, Time.LocalDay(memory.Newest.TakenAt)))</figcaption>
+                </figure>
+            </div>
+            <div class="memory-footer">
+                <a class="memory-name" href="plants/@memory.Plant.Id">@memory.Plant.DisplayName</a>
+                <button type="button" class="btn btn-outline-primary" @onclick="() => shareOpen = true">Before and after</button>
+            </div>
+        </section>
+
+        <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="memory.Plant.Id"
+                    CoverPhotoId="memory.Plant.CoverPhotoId" StartBeforeId="memory.Old.Id" StartAfterId="memory.Newest.Id" StartLine="@($"{memory.Heading}.")" PhotoAge="day => PhotoDayCount.PlantAge(memory.Plant, day)"
+                    Text="ShareCardText.ForPlant(memory.Plant, plants.FirstOrDefault(p => p.Id == memory.Plant.ParentPlantId),
+                              propagations.FirstOrDefault(p => p.Id == memory.Plant.FromPropagationId),
+                              propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
     }
 
     <section class="today-section">
@@ -278,33 +317,6 @@ else
                 </ul>
             }
         </section>
-    }
-
-    @if (memory is not null)
-    {
-        <section class="today-section memory">
-            <h2>@memory.Heading</h2>
-            <div class="memory-photos">
-                <figure>
-                    <div class="memory-photo"><PhotoImage PhotoId="memory.Old.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Old.TakenAt))}")" /></div>
-                    <figcaption>@Labels.Date(Time.LocalDay(memory.Old.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.StartOf(memory.Plant), Time.LocalDay(memory.Old.TakenAt))</figcaption>
-                </figure>
-                <figure>
-                    <div class="memory-photo"><PhotoImage PhotoId="memory.Newest.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Newest.TakenAt))}")" /></div>
-                    <figcaption>@Labels.Date(Time.LocalDay(memory.Newest.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.StartOf(memory.Plant), Time.LocalDay(memory.Newest.TakenAt))</figcaption>
-                </figure>
-            </div>
-            <div class="memory-footer">
-                <a class="memory-name" href="plants/@memory.Plant.Id">@memory.Plant.DisplayName</a>
-                <button type="button" class="btn btn-outline-primary" @onclick="() => shareOpen = true">Before and after</button>
-            </div>
-        </section>
-
-        <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="memory.Plant.Id"
-                    CoverPhotoId="memory.Plant.CoverPhotoId" StartBeforeId="memory.Old.Id" StartAfterId="memory.Newest.Id" StartLine="@($"{memory.Heading}.")" DayOne="PhotoDayCount.StartOf(memory.Plant)"
-                    Text="ShareCardText.ForPlant(memory.Plant, plants.FirstOrDefault(p => p.Id == memory.Plant.ParentPlantId),
-                              propagations.FirstOrDefault(p => p.Id == memory.Plant.FromPropagationId),
-                              propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
     }
 
     <section class="today-section">

@@ -104,6 +104,19 @@
     <p class="settings-hint">
         Today suggests one room a day to go round.
     </p>
+    <div class="theme-label mt-4" id="recent-changes-label">Recent changes on a plant</div>
+    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="recent-changes-label">
+        @foreach (var option in recentChangesOptions)
+        {
+            var id = $"recent-changes-{option.Days}";
+            <input type="radio" class="btn-check" name="recent-changes" id="@id"
+                   checked="@(recentChangesDays == option.Days)" @onchange="() => SetRecentChangesDaysAsync(option.Days)" />
+            <label class="btn btn-outline-primary" for="@id">@option.Label</label>
+        }
+    </div>
+    <p class="settings-hint">
+        Under a plant's name, what happened lately: when it arrived, was repotted or moved.
+    </p>
 </section>
 
 <section class="settings-group">
@@ -147,6 +160,15 @@
         (EverydayNameLanguage.Danish, "Danish")
     ];
 
+    private static readonly (int Days, string Label)[] recentChangesOptions =
+    [
+        (0, "Off"),
+        (7, "1 week"),
+        (14, "2 weeks"),
+        (28, "4 weeks")
+    ];
+
+    private int recentChangesDays;
     private ThemeMode mode;
     private EverydayNameLanguage everydayLanguage;
     private int roomCount;
@@ -184,6 +206,7 @@
         errorReportsOff = settings.ErrorReportsOff;
         wateringReminder = settings.WateringReminder;
         dailyRound = settings.DailyRound;
+        recentChangesDays = RecentChanges.DaysOf(settings.RecentChangesDays);
         everydayLanguage = await Names.GetEverydayLanguageAsync();
         roomCount = (await RoomService.GetAllAsync()).Count;
         tagCount = PlantTags.InUse(await Plants.GetAllAsync()).Count;
@@ -223,6 +246,12 @@
     {
         dailyRound = e.Value is true;
         await SettingsService.SetDailyRoundAsync(dailyRound);
+    }
+
+    private async Task SetRecentChangesDaysAsync(int days)
+    {
+        recentChangesDays = days;
+        await SettingsService.SetRecentChangesDaysAsync(days);
     }
 
     /// <summary>"3 rooms, 5 tags", for the line under the link to rooms and tags.</summary>

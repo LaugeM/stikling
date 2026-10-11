@@ -72,6 +72,36 @@
     stroke-linejoin: round;
 }
 
+/* A short note under Water on how to tell whether a plant is dry */
+.today-hint {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.today-hint summary {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 0.5rem;
+}
+
+.today-hint summary:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.today-hint ul {
+    margin: 0 0 0.5rem;
+    padding-left: 1.25rem;
+}
+
+.today-hint li + li {
+    margin-top: 0.35rem;
+}
+
 .activity-list {
     list-style: none;
     margin: 0;

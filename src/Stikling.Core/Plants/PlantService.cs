@@ -66,6 +66,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     /// <param name="potName">Turns a pot id into its name, so the history can say which pot.</param>
     /// <param name="placeName">The same for the room or spot, so the history can say where it went.</param>
     /// <param name="pot">Finds a pot by id, to see whether a pot waters itself.</param>
+    /// <param name="feedName">Turns a feed id into its name, for the feed given with the watering.</param>
     public async Task UpdateAsync(
         Plant before,
         Plant after,
@@ -73,7 +74,8 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Func<Guid, string?>? potName = null,
         Func<Guid, string?>? mixName = null,
         Func<Guid, string?>? placeName = null,
-        Func<Guid, Pot?>? pot = null)
+        Func<Guid, Pot?>? pot = null,
+        Func<Guid, string?>? feedName = null)
     {
         after.Tags = PlantTags.Normalize(after.Tags);
         // What it learned about watering is from the way it was watered, so a new way starts over.
@@ -100,7 +102,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         after.LeftFor = gone && !string.IsNullOrWhiteSpace(after.LeftFor) ? after.LeftFor.Trim() : null;
         await plants.SaveAsync(after);
 
-        var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName);
+        var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName, feedName);
         if (changes.Count > 0)
             await AddChangeAsync(after.Id, string.Join("\n", changes));
     }

@@ -38,27 +38,23 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **Small changes that put the shareable parts first**: A year ago today above Worth a look, What a plant has given under the plant's name, and "1 yr 2 mo" in place of "day 430" on a plant's photos.
-3. **Passing a cutting on with its history**, built on the share link.
-4. **Your year with your plants**, another thing worth posting, next to A year ago today. It has to be in by December.
-5. **Away or quiet time, and the plant-sitter sheet**, since the sheet is what you hand over when you go away. Worth having before the Christmas holidays.
-6. **Round days and Do it later**, which both decide which day something comes up on Today.
-7. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
-8. **Flowering log**, with the flowering calendar.
-9. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-10. **Table view and Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-11. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
-12. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
-13. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
+2. **Passing a cutting on with its history**, built on the share link.
+3. **Your year with your plants**, another thing worth posting, next to A year ago today. It has to be in by December.
+4. **Away or quiet time, and the plant-sitter sheet**, since the sheet is what you hand over when you go away. Worth having before the Christmas holidays.
+5. **Round days and Do it later**, which both decide which day something comes up on Today.
+6. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
+7. **Flowering log**, with the flowering calendar.
+8. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+9. **Table view and Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+10. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
+11. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
+12. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
 
 ### Cheap ones to slot in whenever
 
 Small ones with no new screen worth the name:
 
 - A "Log care" home screen shortcut.
-- **How to check**, the line on Today about telling whether a plant needs water.
-- **Recent changes line** under a plant's name.
-- **Feed with the watering**.
 - **Voice notes** on note fields.
 - Small info buttons next to the less obvious things.
 
@@ -79,7 +75,7 @@ Small ones with no new screen worth the name:
 | ✅ | Plant and propagation pages as a profile of the plant: they open on the photos and notes, newest first, with one line under the name for where it is, what it grows in, when it was last watered and where it came from. The rest is behind **Details**, and **Edit** is a small link | 1 | M | M3–M4 |
 | ✅ | Buttons at the bottom of a plant or propagation page within reach of a thumb: **Photo** goes straight to the camera or gallery, **Note** and **Care** open a panel from the bottom, and a propagation's stage button holds the stage, its dates, Pot up and Mark failed | 2 | M | v1.x |
 | ✅ | Say a plant died, was given away or sold, went dormant or into quarantine, or flag it, from its page instead of the edit form, and bring it back into the collection the same way | 3 | S | v1.x |
-| ☐ | **Recent changes line**: under the plant's name, "Repotted 6 days ago, moved to the hall 3 days ago" for a while after a pot up, a room change or arriving. How many days is a setting. It only states what happened and never says what it means | 4 | S | v1.x |
+| ✅ | **Recent changes line**: under the plant's name, "Repotted 6 days ago, moved to the hall 3 days ago" for a while after a pot up, a room change or arriving. How many days is a setting. It only states what happened and never says what it means | 4 | S | v1.x |
 | ✅ | Short add and edit forms: name, where it came from, the date and notes on top, and the rest under **More details** with a line saying what is set. Save stays pinned at the bottom | 2 | S | v1.x |
 | ✅ | **About it** in place of Notes on the plant and propagation forms and pages, with a line saying it's for what stays true about the plant and that dated notes go on its history. It sits under **More details** on the add forms. The field and what is already stored in it stay the same, and the spreadsheet export still calls the column Notes | 5 | S | v1.x |
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
@@ -237,7 +233,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | Which products and doses went in on a feed or a top-up, e.g. "Hydro fertiliser, 2 ml/L". The dose starts at the product's usual one and can be changed for that time, and the entry keeps its own copy, so editing or deleting a product doesn't change what was logged | 4 | S | v1.x |
 | ✅ | **A watering reminder that learns each plant**: from a plant's own history the app learns how long it usually goes between waterings, and from its meter readings how long it takes to dry out to the reading you water at. That is 3 by default, the top of the red "dry" part on a 1 to 10 meter, and can be set per plant, higher for one kept moister, like a peace lily. It says nothing about a plant until it has seen a few waterings, and never goes by a care guide or a fixed interval. When a plant is due, Today asks you to check it in words that fit what it knows: "probably dry by now, check with the meter" when there are readings, or "usually watered about every 9 days, it's been 9 days" when there aren't. The tick logs the watering. "Still wet" takes a meter reading from 1 to 10, or "No meter", and the plant comes back after a while. The guess leans later when unsure. Semi-hydro, corm risers and self-watering pots count how long the reservoir lasts, and plants in water how often they are topped up. A change in how a plant gets water starts the learning over. Dormant stretches are learned apart from the rest. When the days get shorter, a plant without a grow light leans later, from earlier years or from how the other plants shift. The plant page says roughly how long it goes and how many waterings that is learned from. It can be switched off per plant, and it's off until turned on in Settings | 3 | M | v1.x |
 | ☐ | **How long it goes, by season**: next to how long a plant usually goes between waterings, the range in the brighter and the darker half of the year, from its own history, e.g. "9 to 12 days in summer, 15 to 24 in winter". Only once there are a few waterings in each | 6 | S | v1.x |
-| ☐ | **Feed with the watering**: a plant can be set to get its feed with every watering, or every second or third, so ticking Watered logs the feed and its dose as well. Off unless set | 4 | S | v1.x |
+| ✅ | **Feed with the watering**: a plant can be set to get its feed with every watering, or every second or third, so ticking Watered logs the feed and its dose as well. Off unless set | 4 | S | v1.x |
 | ☐ | **Your own kinds of care**: add a kind of care the app doesn't have, e.g. misted, bottom watered, wired or refilled the humidifier. It is logged like the others, also on several plants at once, and can go on the history. Stored in a field of its own rather than as a new kind in the list, so older versions still read the entry | 5 | M | v1.x |
 | ☐ | Water type: tap, demineralised, rain | 6 | S | v1.x |
 | ☐ | Semi-hydro details: reservoir level, flush interval, last flush | 6 | M | v1.x |
@@ -352,7 +348,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
 | ✅ | Plants due a watering or a check today, and the ones due in the next couple of days under Coming up, when the watering reminder is turned on | 3 | S | v1.x |
-| ☐ | **How to check**: where Today says a plant is due a check, one line on how to tell whether it needs water: a finger in the soil, a wooden skewer, lifting the pot, or the meter | 4 | S | v1.x |
+| ✅ | **How to check**: where Today says a plant is due a check, one line on how to tell whether it needs water: a finger in the soil, a wooden skewer, lifting the pot, or the meter | 4 | S | v1.x |
 | ✅ | **A daily round**: Today suggests the room that has gone longest without anything logged, working round the home a room a day. It can be put off to show another room or skipped for the day. Off until turned on in Settings | 6 | S | v1.x |
 | ✅ | **Going round**: open a room or spot and go through its plants one card at a time, then its propagations: a meter reading, watered, looked over, a photo, or skip. Opening it again the same day starts at the first one with nothing logged. Looked over goes on the history. Started from Today's round, Go round these in Water, the Plants list filtered to a room, or Rooms and tags | 4 | M | v1.x |
 | ☐ | **Your own walking order** for a round, set per room by dragging the cards | 6 | S | v1.x |
@@ -362,9 +358,9 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | **Round days**: pick the days you go round your plants, e.g. Saturday, or Wednesday and Sunday. Plants due a check before the next round day are gathered onto it instead of each coming up on its own day | 3 | M | v1.x |
 | ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
 | ☐ | **Anniversaries and small celebrations**: Today says when you have had a plant for a year, and rooting, a first new leaf or a cutting promoted to a plant gets a short moment of its own | 6 | S | v1.x |
-| ☐ | **How long you've had a plant** instead of "day 430" on its photos: "1 yr 2 mo", counted from when you got it | 3 | S | v1.x |
-| ☐ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |
-| ☐ | **Move What a plant has given under the plant's name** instead of behind Details, so cuttings taken, rooted and passed on show first | 3 | S | v1.x |
+| ✅ | **How long you've had a plant** instead of "day 430" on its photos: "1 yr 2 mo", counted from when you got it | 3 | S | v1.x |
+| ✅ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |
+| ✅ | **Move What a plant has given under the plant's name** instead of behind Details, so cuttings taken, rooted and passed on show first | 3 | S | v1.x |
 | ☐ | **Today in your calendar**: a private link to add to any calendar app, which then shows what is due. It works on every phone and in every browser without notifications, and turning it off makes the old link stop working | 8 | L | v2 |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
 | ☐ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |

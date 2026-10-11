@@ -8,6 +8,7 @@
 @inject IPotRepository PotRepository
 @inject PotService PotService
 @inject ISoilMixRepository MixRepository
+@inject IFeedRepository FeedRepository
 @inject PlantService PlantService
 @inject RoomService RoomService
 @inject NavigationManager Navigation
@@ -92,6 +93,10 @@ else
                             <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
                         }
                     </div>
+                    @if (recentChanges.Count > 0)
+                    {
+                        <p class="profile-facts">@RecentChangesText</p>
+                    }
                 </div>
             </header>
 
@@ -111,6 +116,11 @@ else
             @if (wateringLine is not null)
             {
                 <p class="profile-facts">@wateringLine</p>
+            }
+
+            @if (!given.IsEmpty)
+            {
+                <p class="profile-facts">@string.Join(" · ", GivenParts)</p>
             }
 
             @if (HasFamily)
@@ -204,6 +214,12 @@ else
                             }
                         </dd>
 
+                        @if (WateringFeed is { } wateringFeed)
+                        {
+                            <dt>Feed with the watering</dt>
+                            <dd>@wateringFeed.Name, @(plant.WateringFeedEvery switch { 2 => "every second watering", 3 => "every third watering", _ => "every watering" })</dd>
+                        }
+
                         @if (plant.QuarantinedSince is { } quarantinedSince)
                         {
                             <dt>Quarantine</dt>
@@ -261,28 +277,6 @@ else
                     @if (HasFamily)
                     {
                         <p class="family-tree-link"><a class="link-action" href="plants/@plant.Id/family">See the family tree</a></p>
-                    }
-                    @if (!given.IsEmpty)
-                    {
-                        <dl class="detail-list">
-                            @if (given.Taken > 0)
-                            {
-                                <dt>Taken from it</dt>
-                                <dd>@TakenText()</dd>
-                                <dt>Rooted</dt>
-                                <dd>@given.Rooted of @given.Taken</dd>
-                            }
-                            @if (given.GivenAway + given.Sold > 0)
-                            {
-                                <dt>Passed on</dt>
-                                <dd>@PassedOnText()</dd>
-                            }
-                            @if (given.FromThoseInTurn > 0)
-                            {
-                                <dt>From those in turn</dt>
-                                <dd>@Labels.Count(given.FromThoseInTurn, "plant")</dd>
-                            }
-                        </dl>
                     }
                     @if (ancestors.Count > 0 || fromPropagation is not null)
                     {
@@ -390,7 +384,7 @@ else
             </div>
 
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
-                      CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" DayOne="PhotoDayCount.StartOf(plant)"
+                      CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)"
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
         </div>
     </div>
@@ -472,7 +466,7 @@ else
     </Sheet>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="plant.Id"
-                CoverPhotoId="plant.CoverPhotoId" DayOne="PhotoDayCount.StartOf(plant)" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
+                CoverPhotoId="plant.CoverPhotoId" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
 
     <Sheet Title="@MoreTitle" Open="more != More.None" OpenChanged="open => { if (!open) more = More.None; }">
         @switch (more)
@@ -708,6 +702,11 @@ else
 
     private string? wateringLine;
 
+    private IReadOnlyList<Feed> feeds = [];
+
+    /// <summary>The feed given with the water, or null when it is off or the feed is gone.</summary>
+    private Feed? WateringFeed => plant?.WateringFeedId is { } id ? feeds.FirstOrDefault(f => f.Id == id) : null;
+
     private SoilMix? Mix => plant?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id) : null;
 
     private string? PotName(Guid? id) =>
@@ -783,6 +782,36 @@ else
 
     private EverydayNameBook? everyday;
 
+    private IReadOnlyList<RecentChange> recentChanges = [];
+
+    // "Repotted 6 days ago, moved to Hall 3 days ago": only what happened, never what it means
+    private string RecentChangesText =>
+        string.Join(", ", recentChanges.Select((change, i) =>
+        {
+            var when = Labels.DaysAgo(Today.DayNumber - change.Day.DayNumber);
+            var text = change.Kind switch
+            {
+                RecentChangeKind.Arrived => $"arrived {when}",
+                RecentChangeKind.Repotted => $"repotted {when}",
+                _ => places.NameOf(plant!.PlaceId) is { } place ? $"moved to {place} {when}" : $"moved {when}"
+            };
+            return i == 0 ? char.ToUpperInvariant(text[0]) + text[1..] : text;
+        }));
+
+    // "6 cuttings and 2 leaves taken, 5 rooted · 2 given away and 1 sold"
+    private IEnumerable<string> GivenParts
+    {
+        get
+        {
+            if (given.Taken > 0)
+                yield return $"{TakenText()} taken, {given.Rooted} rooted";
+            if (given.GivenAway + given.Sold > 0)
+                yield return PassedOnText();
+            if (given.FromThoseInTurn > 0)
+                yield return $"{Labels.Count(given.FromThoseInTurn, "plant")} grown from those in turn";
+        }
+    }
+
     private string TakenText() => JoinAnd(given.TakenByType.Select(t => t.Key switch
     {
         PropagationType.Offset => Labels.Count(t.Value, "pup"),
@@ -827,6 +856,7 @@ else
             pots = await PotRepository.GetAllAsync();
             potCovers = await PotService.GetCoversAsync();
             mixes = await MixRepository.GetAllAsync();
+            feeds = await FeedRepository.GetAllAsync();
 
             await ReloadCareAsync();
         }
@@ -846,6 +876,9 @@ else
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
         careCalendar = CareCalendar.Build(all, plant.Id, Today);
         await ReloadWateringLineAsync(all);
+        recentChanges = RecentChanges.Of(
+            plant, all, await TimelineRepository.GetPlantChangesAsync(), Today,
+            RecentChanges.DaysOf((await SettingsService.GetAsync()).RecentChangesDays), Time.LocalDay);
     }
 
     // Only said when the reminder is on for the collection and for this plant
