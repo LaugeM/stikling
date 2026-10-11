@@ -45,6 +45,15 @@ public sealed class PutOffs
     public static string Water(Guid plantId, DateOnly? lastWatered) =>
         $"water:{plantId}:{lastWatered:yyyy-MM-dd}";
 
+    /// <summary>
+    /// The key for the daily round as a whole. Put off until tomorrow when it's finished or
+    /// skipped for the day.
+    /// </summary>
+    public const string DailyRound = "round";
+
+    /// <summary>The key for one room put off, so the daily round suggests the next one.</summary>
+    public static string Round(Guid roomId) => $"round:{roomId}";
+
     public bool IsPutOff(string key, DateOnly today) =>
         until.TryGetValue(key, out var back) && today < back;
 

@@ -17,8 +17,17 @@ public interface ITimelineRepository
     /// </summary>
     Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since);
 
-    /// <summary>The change lines on plants' histories, for any plant. Kept apart from the rest for telling when plants were dormant.</summary>
+    /// <summary>The change lines on plants' histories, for any plant, leaving out looking over. Kept apart from the rest for telling when plants were dormant.</summary>
     Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync();
+
+    /// <summary>
+    /// For each subject, the newest moment before <paramref name="before"/> of an entry that
+    /// counts as activity (see <see cref="TimelineActivity.Counts"/>), for the daily round.
+    /// </summary>
+    Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetLastActivityBeforeAsync(DateTimeOffset before);
+
+    /// <summary>The entries that aren't deleted and happened at or after <paramref name="since"/>.</summary>
+    Task<IReadOnlyList<TimelineEntry>> GetSinceAsync(DateTimeOffset since);
 
     Task AddAsync(TimelineEntry entry);
 

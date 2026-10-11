@@ -15,6 +15,7 @@
 @inject IPotRepository PotRepository
 @inject GrowLightService LightService
 @inject CareService Care
+@inject WateringAnswers Answers
 @inject AppBadge Badge
 @inject PlantService PlantService
 @inject PropagationService PropagationService
@@ -76,6 +77,29 @@ else
             <span>@reminder</span>
             <a class="btn btn-outline-primary" href="backup">Back up</a>
         </div>
+    }
+
+    @if (roundSuggestion is { } suggested)
+    {
+        <section class="today-section">
+            <h2>Today's round</h2>
+            <ul class="item-list">
+                <TodayRow OnPutOff="days => PutOffAsync(PutOffs.Round(suggested.Room.Id), Today.AddDays(days))"
+                          SkipLabel="Skip today" OnSkip="() => PutOffAsync(PutOffs.DailyRound, Today.AddDays(1))">
+                    <a class="item-card" href="round/@suggested.Room.Id?daily=true">
+                        <div class="item-thumb" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5" /><path d="M6 10.5V19h12v-8.5" /><path d="M10 19v-5h4v5" /></svg>
+                        </div>
+                        <div class="item-text">
+                            <div class="item-name">@suggested.Room.Name</div>
+                            <div class="item-meta wraps">
+                                <span>@RoundMeta(suggested)</span>
+                            </div>
+                        </div>
+                    </a>
+                </TodayRow>
+            </ul>
+        </section>
     }
 
     @foreach (var (heading, cases) in DuePests)
@@ -157,7 +181,16 @@ else
         var now = wateringDue.Where(d => d.DueNow).ToList();
         var coming = wateringDue.Where(d => !d.DueNow).ToList();
         <section class="today-section">
-            <h2>Water</h2>
+            <div class="today-section-head">
+                <h2>Water</h2>
+                @if (now.Count >= 2)
+                {
+                    <a class="today-go-round" href="round/due">
+                        Go round these
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                    </a>
+                }
+            </div>
             @if (now.Count > 0)
             {
                 <ul class="item-list">
@@ -320,6 +353,18 @@ else
         </TodayRow>;
     };
 
+    private string RoundMeta(DailyRoundSuggestion suggested)
+    {
+        var parts = new List<string>();
+        if (suggested.Plants > 0)
+            parts.Add(Labels.Count(suggested.Plants, "plant"));
+        if (suggested.Propagations > 0)
+            parts.Add(Labels.Count(suggested.Propagations, "propagation"));
+        if (wateringOn && DailyRound.DueIn(suggested.Room.Id, wateringDue, places) is > 0 and var due)
+            parts.Add($"{due} due for water");
+        return string.Join(" · ", parts);
+    }
+
     private static readonly IReadOnlyList<int> MeterReadings = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     private IReadOnlyList<WateringDue> wateringDue = [];
@@ -338,6 +383,9 @@ else
     private IReadOnlyList<AttentionItem> flagged = [];
     private IReadOnlyList<PhotoDue> photoRound = [];
     private PutOffs putOffs = PutOffs.Empty();
+    private bool dailyRoundOn;
+    private IReadOnlyDictionary<Guid, DateTimeOffset> lastActivity = new Dictionary<Guid, DateTimeOffset>();
+    private DailyRoundSuggestion? roundSuggestion;
     private Dictionary<Guid, string> names = [];
     private MonthResult? monthResult;
     private string? backupReminder;
@@ -373,6 +421,7 @@ else
     private int DueCount =>
         DuePests.Sum(group => group.Cases.Count) + FlaggedNow.Count + QuarantineNow.Count + ChecksNow.Count
         + wateringDue.Count(d => d.DueNow)
+        + (roundSuggestion is not null ? 1 : 0)
         + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
 
     protected override Task OnInitializedAsync() => LoadAsync();
@@ -393,10 +442,16 @@ else
             ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
             : [];
 
-        wateringOn = (await SettingsService.GetAsync()).WateringReminder;
+        var settings = await SettingsService.GetAsync();
+        wateringOn = settings.WateringReminder;
+        dailyRoundOn = settings.DailyRound;
+        if (wateringOn || dailyRoundOn)
+            careLogs = await CareLogs.GetAllAsync();
+        if (dailyRoundOn)
+            lastActivity = await Entries.GetLastActivityBeforeAsync(Time.MomentAt(Today.ToDateTime(TimeOnly.MinValue)));
+        FindRound();
         if (wateringOn)
         {
-            careLogs = await CareLogs.GetAllAsync();
             plantChanges = await Entries.GetPlantChangesAsync();
             lights = await LightService.GetAllAsync();
             potsById = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
@@ -421,6 +476,11 @@ else
         await Badge.SetAsync(DueCount);
     }
 
+    private void FindRound() =>
+        roundSuggestion = dailyRoundOn
+            ? DailyRound.Suggest(places, plants, propagations, careLogs, lastActivity, putOffs, Time)
+            : null;
+
     private void FindWateringDue() =>
         wateringDue = wateringOn
             ? WateringRound.Due(plants, careLogs, plantChanges, id => potsById.GetValueOrDefault(id), lights, places,
@@ -437,7 +497,7 @@ else
 
     private async Task WaterDoneAsync(WateringDue due)
     {
-        await Care.LogAsync(Care.Start(due.Plant.Id, WateringText.DoneKind(due.Guess.Form)), Labels.For);
+        await Answers.WaterAsync(due.Plant.Id, due.Guess.Form, Labels.For);
         await WateringAnsweredAsync();
     }
 
@@ -451,20 +511,8 @@ else
     // "Still wet" with a meter reading, or "No meter" / "Not yet" with none
     private async Task NotYetAsync(WateringDue due, int? reading)
     {
-        if (reading is { } value)
-        {
-            var entry = Care.Start(due.Plant.Id, CareKind.MoistureReading);
-            entry.Moisture = value;
-            await Care.LogAsync(entry, Labels.For);
-        }
-
-        // A reading moves a guess that is made from the meter. For one made from the days between
-        // waterings it says nothing new, so it waits a while like the other answers.
-        if (reading is null || due.Guess.Mode != WateringMode.Meter)
-        {
-            var wait = WateringGuess.StillWetWait(due.Guess.UsualDays ?? 1);
-            await PutOffAsync(PutOffs.Water(due.Plant.Id, due.Guess.LastWatered), Today.AddDays(wait));
-        }
+        if (await Answers.NotYetAsync(due.Plant, due.Guess, reading, logReading: true, Labels.For) is { } putOff)
+            putOffs.PutOff(putOff.Key, putOff.Until);
 
         await WateringAnsweredAsync();
     }
@@ -473,6 +521,9 @@ else
     {
         putOffs.PutOff(key, until);
         await PutOffService.PutOffAsync(key, until);
+        // Putting off a room, or the round, moves it on to the next room or takes it away
+        FindRound();
+        await Badge.SetAsync(DueCount);
     }
 
     private async Task ClearFlagAsync(AttentionItem item)

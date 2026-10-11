@@ -30,6 +30,28 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
     }
 
     /// <summary>
+    /// Writes that a plant or propagation was looked over, with nothing else to log. It's a
+    /// change entry with an event rather than a new kind, so older versions still load it.
+    /// </summary>
+    public async Task<TimelineEntry> LookedOverAsync(SubjectType type, Guid subjectId)
+    {
+        var entry = new TimelineEntry
+        {
+            SubjectType = type,
+            SubjectId = subjectId,
+            Kind = TimelineKind.Change,
+            Event = TimelineEvent.LookedOver,
+            Text = "Looked over",
+            OccurredAt = time.GetLocalNow()
+        };
+        await timeline.AddAsync(entry);
+        return entry;
+    }
+
+    /// <summary>Takes an entry off the history again (soft delete), e.g. a look over tapped by mistake.</summary>
+    public Task RemoveAsync(Guid entryId) => timeline.DeleteAsync(entryId);
+
+    /// <summary>
     /// Only what the user wrote can be corrected. Automatic entries copy something stored
     /// elsewhere (a stage date, a care log), so they are fixed there instead.
     /// </summary>

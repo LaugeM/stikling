@@ -35,18 +35,12 @@ public static class WateringRound
         PutOffs putOffs)
     {
         var today = time.Today();
-        var all = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
-        var careLogs = logs.Where(l => !l.IsDeleted).ToList();
-        var history = timeline.ToList();
-        var lightList = lights.ToList();
-        var lit = all.ToDictionary(p => p.Id, p => GrowLights.IsLit(p, lightList, places));
-        var factor = SeasonFactor(all, lit, careLogs, history, time);
+        var setup = new Setup(plants, logs, timeline, lights, places, time);
 
         var due = new List<WateringDue>();
-        foreach (var plant in all.Where(p => p.WateringReminder))
+        foreach (var plant in setup.Active.Where(p => p.WateringReminder))
         {
-            var guess = WateringGuess.Of(
-                plant, careLogs, history, WateringForms.Of(plant, pot), lit[plant.Id], hemisphere, today, factor, time);
+            var guess = setup.GuessOf(plant, pot, hemisphere);
             if (guess.Mode == WateringMode.Learning || guess.CheckOn is not { } checkOn)
                 continue;
             if (checkOn > today.AddDays(ComingUpDays) || putOffs.IsPutOff(PutOffs.Water(plant.Id, guess.LastWatered), today))
@@ -76,27 +70,73 @@ public static class WateringRound
         Hemisphere hemisphere,
         TimeProvider time)
     {
-        var today = time.Today();
-        var all = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
-        var careLogs = logs.Where(l => !l.IsDeleted).ToList();
-        var history = timeline.ToList();
-        var lightList = lights.ToList();
-        var lit = all.ToDictionary(p => p.Id, p => GrowLights.IsLit(p, lightList, places));
-        var factor = SeasonFactor(all, lit, careLogs, history, time);
-        return WateringGuess.Of(
-            plant, careLogs, history, WateringForms.Of(plant, pot),
-            GrowLights.IsLit(plant, lightList, places), hemisphere, today, factor, time);
+        return new Setup(plants, logs, timeline, lights, places, time).GuessOf(plant, pot, hemisphere);
     }
 
-    // How the other plants shift this month, from the plants without a light and while awake
-    private static double? SeasonFactor(
-        List<Plant> all, Dictionary<Guid, bool> lit, List<CareLog> careLogs, List<TimelineEntry> history, TimeProvider time) =>
-        WateringSeasonFactor.For(
-            all.Where(p => !lit[p.Id]).Select(p => (p, Gaps(p, careLogs, history, time))),
-            time.Today().Month);
+    /// <summary>
+    /// The guess for each active plant with the reminder on, worked out the way Today does it.
+    /// A plant still learning, or with nothing to check on, has none.
+    /// </summary>
+    internal static IReadOnlyDictionary<Guid, WateringGuess> GuessesFor(
+        IEnumerable<Plant> plants,
+        IEnumerable<CareLog> logs,
+        IEnumerable<TimelineEntry> timeline,
+        Func<Guid, Pot?>? pot,
+        IEnumerable<GrowLight> lights,
+        Places places,
+        Hemisphere hemisphere,
+        TimeProvider time)
+    {
+        var setup = new Setup(plants, logs, timeline, lights, places, time);
+        var guesses = new Dictionary<Guid, WateringGuess>();
+        foreach (var plant in setup.Active.Where(p => p.WateringReminder))
+        {
+            var guess = setup.GuessOf(plant, pot, hemisphere);
+            if (guess.Mode != WateringMode.Learning && guess.CheckOn is not null)
+                guesses[plant.Id] = guess;
+        }
+        return guesses;
+    }
 
-    private static IReadOnlyList<(DateOnly start, int days)> Gaps(
-        Plant plant, List<CareLog> logs, List<TimelineEntry> history, TimeProvider time) =>
-        [.. WateringGuess.Gaps(plant, logs, DormantPeriods.Of(plant, history, time), dormant: false)
-            .Select(g => (g.Start, g.Days))];
+    // What every guess is made from, worked out once: the other plants shift this month's pace
+    private sealed class Setup
+    {
+        private readonly List<CareLog> logs;
+        private readonly List<TimelineEntry> history;
+        private readonly List<GrowLight> lights;
+        private readonly Dictionary<Guid, bool> lit;
+        private readonly Places places;
+        private readonly TimeProvider time;
+        private readonly double? factor;
+
+        public Setup(
+            IEnumerable<Plant> plants, IEnumerable<CareLog> logs, IEnumerable<TimelineEntry> timeline,
+            IEnumerable<GrowLight> lights, Places places, TimeProvider time)
+        {
+            Active = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
+            this.logs = logs.Where(l => !l.IsDeleted).ToList();
+            history = timeline.ToList();
+            this.lights = lights.ToList();
+            this.places = places;
+            this.time = time;
+            lit = Active.ToDictionary(p => p.Id, p => GrowLights.IsLit(p, this.lights, places));
+
+            // The plants without a light, while awake
+            factor = WateringSeasonFactor.For(
+                Active.Where(p => !lit[p.Id]).Select(p => (p, Gaps(p))),
+                time.Today().Month);
+        }
+
+        public List<Plant> Active { get; }
+
+        public WateringGuess GuessOf(Plant plant, Func<Guid, Pot?>? pot, Hemisphere hemisphere) =>
+            WateringGuess.Of(
+                plant, logs, history, WateringForms.Of(plant, pot),
+                lit.TryGetValue(plant.Id, out var isLit) ? isLit : GrowLights.IsLit(plant, lights, places),
+                hemisphere, time.Today(), factor, time);
+
+        private IReadOnlyList<(DateOnly start, int days)> Gaps(Plant plant) =>
+            [.. WateringGuess.Gaps(plant, logs, DormantPeriods.Of(plant, history, time), dormant: false)
+                .Select(g => (g.Start, g.Days))];
+    }
 }

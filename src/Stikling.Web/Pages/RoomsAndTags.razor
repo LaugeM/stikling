@@ -41,6 +41,10 @@
                         <div class="room-row">
                             <span class="room-name">@r.Name</span>
                             <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
+                            @if (r.Total > 0)
+                            {
+                                <a class="btn btn-link btn-sm link-action" href="round/@r.Id?from=rooms">Go round</a>
+                            }
                             <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                     @onclick="() => renaming = r.Id">Rename</button>
                             @if (r.Total == 0)

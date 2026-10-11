@@ -118,7 +118,14 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
 
     public Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() =>
         Task.FromResult<IReadOnlyList<TimelineEntry>>(Entries
-            .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant).ToList());
+            .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant
+                && TimelineEvents.Of(e) != TimelineEvent.LookedOver).ToList());
+
+    public Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetLastActivityBeforeAsync(DateTimeOffset before) =>
+        Task.FromResult(TimelineActivity.LastBefore(Entries, before));
+
+    public Task<IReadOnlyList<TimelineEntry>> GetSinceAsync(DateTimeOffset since) =>
+        Task.FromResult<IReadOnlyList<TimelineEntry>>(Entries.Where(e => !e.IsDeleted && e.OccurredAt >= since).ToList());
 
     public Task AddAsync(TimelineEntry entry)
     {

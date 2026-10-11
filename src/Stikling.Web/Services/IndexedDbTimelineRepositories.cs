@@ -19,7 +19,16 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
 
     public async Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() =>
         (await db.GetAllAsync<TimelineEntry>(Stores.Timeline))
-            .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant)
+            .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant
+                && TimelineEvents.Of(e) != TimelineEvent.LookedOver)
+            .ToList();
+
+    public async Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetLastActivityBeforeAsync(DateTimeOffset before) =>
+        TimelineActivity.LastBefore(await db.GetAllAsync<TimelineEntry>(Stores.Timeline), before);
+
+    public async Task<IReadOnlyList<TimelineEntry>> GetSinceAsync(DateTimeOffset since) =>
+        (await db.GetAllAsync<TimelineEntry>(Stores.Timeline))
+            .Where(e => !e.IsDeleted && e.OccurredAt >= since)
             .ToList();
 
     public async Task AddAsync(TimelineEntry entry)
