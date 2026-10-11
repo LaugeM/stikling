@@ -1,0 +1,331 @@
+/* Going round: one plant or propagation at a time, with the controls in the lower part of the card */
+
+.round {
+    padding-bottom: 1rem;
+    outline: none;
+}
+
+.round-head h1 {
+    margin-bottom: 0.15rem;
+}
+
+.round-counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.round-position {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.round-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    min-height: 2.75rem;
+    padding: 0 0.5rem;
+    border: 0;
+    background: transparent;
+    color: var(--pa-green-dark);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.round-back:disabled {
+    color: var(--pa-muted);
+    opacity: 0.5;
+}
+
+.round-back svg,
+.round-action svg,
+.round-text-btn svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Styled like the progress bar in the share sheet */
+.round-progress {
+    display: block;
+    width: 100%;
+    height: 0.4rem;
+    margin-bottom: 1rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--pa-green-soft);
+    color: var(--pa-green);
+    appearance: none;
+    overflow: hidden;
+}
+
+.round-progress::-webkit-progress-bar {
+    background: var(--pa-green-soft);
+}
+
+.round-progress::-webkit-progress-value {
+    background: var(--pa-green);
+    border-radius: 999px;
+}
+
+.round-progress::-moz-progress-bar {
+    background: var(--pa-green);
+    border-radius: 999px;
+}
+
+.round-heading {
+    margin: 0 0 0.5rem;
+}
+
+.round-card {
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    animation: round-in-right 180ms ease-out;
+}
+
+.round-card.from-left {
+    animation-name: round-in-left;
+}
+
+@keyframes round-in-right {
+    from {
+        opacity: 0;
+        transform: translateX(1.5rem);
+    }
+}
+
+@keyframes round-in-left {
+    from {
+        opacity: 0;
+        transform: translateX(-1.5rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .round-card {
+        animation: none;
+    }
+}
+
+.round-photo {
+    aspect-ratio: 4 / 3;
+    max-height: 34vh;
+    width: 100%;
+    overflow: hidden;
+    background: var(--pa-green-soft);
+}
+
+.round-photo ::deep img,
+.round-photo ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* No photo yet: a short band with the same icon the list uses, in the plant or propagation colour */
+.round-photo:has(.round-photo-empty) {
+    aspect-ratio: auto;
+    height: 5rem;
+}
+
+.round-photo-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: var(--pa-clay-soft);
+    color: var(--pa-clay);
+}
+
+.round-photo-empty.propagation {
+    background: var(--pa-green-soft);
+    color: var(--pa-green);
+}
+
+.round-photo-empty svg {
+    width: 2.25rem;
+    height: 2.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.round-body {
+    padding: 0.85rem;
+}
+
+.round-name {
+    margin: 0;
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.round-species {
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.round-meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.round-facts .badge {
+    margin-top: 0.4rem;
+}
+
+.round-controls {
+    margin-top: 0.85rem;
+}
+
+.round-readings .section-label {
+    display: block;
+    margin-bottom: 0.35rem;
+}
+
+.round-readings .chip {
+    min-height: 2.75rem;
+    padding-inline: 0;
+}
+
+.round-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.round-actions:has(.round-action:only-child) {
+    grid-template-columns: 1fr;
+}
+
+.round-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 2.75rem;
+}
+
+.round-more {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.35rem;
+}
+
+.round-text-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 2.75rem;
+    padding: 0 0.5rem;
+    border: 0;
+    background: transparent;
+    color: var(--pa-green-dark);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.round-text-btn:disabled,
+.round-text-btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.round-text-btn:focus-visible,
+.round-back:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+}
+
+.round-keys {
+    display: none;
+    margin: 0.75rem 0 0;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+/* The end of the round */
+.round-end {
+    padding-bottom: 1rem;
+}
+
+.round-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0 0.5rem;
+}
+
+.round-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 6rem;
+    padding: 0.75rem 1rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.round-count {
+    font-family: var(--pa-font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--pa-green-dark);
+    font-variant-numeric: tabular-nums;
+}
+
+.round-end-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+@media (min-width: 64rem) {
+    .round-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: stretch;
+    }
+
+    .round-photo,
+    .round-photo:has(.round-photo-empty) {
+        aspect-ratio: auto;
+        height: 100%;
+        max-height: none;
+        min-height: 20rem;
+    }
+
+    .round-body {
+        padding: 1.25rem;
+    }
+
+    .round-keys {
+        display: block;
+    }
+}

@@ -40,15 +40,14 @@ In the order I would build them. The first ones are for reaching new people: wha
 1. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
 2. **Passing a cutting on with its history**, built on the share link.
 3. **Your year with your plants**, another thing worth posting, next to A year ago today.
-4. **Going round a room**, one plant at a time, together with the daily round. It goes well with the watering reminder.
-5. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
-6. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
-7. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-8. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-9. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-10. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-11. **Comparing photos side by side, and voice notes.**
-12. **Unsure names**, for the plants that only have a provisional name.
+4. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
+5. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
+6. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+7. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+8. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
+9. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
+10. **Comparing photos side by side, and voice notes.**
+11. **Unsure names**, for the plants that only have a provisional name.
 
 ### Cheap ones to slot in whenever
 
@@ -315,8 +314,9 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
 | ✅ | Plants due a watering or a check today, and the ones due in the next couple of days under Coming up, when the watering reminder is turned on | 3 | S | v1.x |
-| ☐ | **A daily round**: Today suggests one room or spot to go through each day, working round the home over the week instead of everything at once. Off until turned on | 6 | S | v1.x |
-| ☐ | **Going round**: open a room or spot and go through its plants one card at a time: a meter reading, watered, checked, a photo, or skip. Made for walking round with a moisture meter, and the daily round opens straight into it | 4 | M | v1.x |
+| ✅ | **A daily round**: Today suggests the room that has gone longest without anything logged, working round the home a room a day. It can be put off to show another room or skipped for the day. Off until turned on in Settings | 6 | S | v1.x |
+| ✅ | **Going round**: open a room or spot and go through its plants one card at a time, then its propagations: a meter reading, watered, looked over, a photo, or skip. Opening it again the same day starts at the first one with nothing logged. Looked over goes on the history. Started from Today's round, Go round these in Water, the Plants list filtered to a room, or Rooms and tags | 4 | M | v1.x |
+| ☐ | **Your own walking order** for a round, set per room by dragging the cards | 6 | S | v1.x |
 | ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
 | ☐ | **How long you've had a plant** instead of "day 430" on its photos: "1 yr 2 mo", counted from when you got it | 3 | S | v1.x |
 | ☐ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |

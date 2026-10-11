@@ -90,6 +90,10 @@ else
                         <option value="@r.Id">@r.Name</option>
                     }
                 </select>
+                @if (PickedRoom is { Spots.Count: 0 } && PickedPlace is { } roomPlace)
+                {
+                    <a class="btn btn-outline-primary" href="round/@roomPlace?from=plants">Go round</a>
+                }
             }
 
             <select class="form-select w-auto" aria-label="Sort by"
@@ -121,6 +125,10 @@ else
                 {
                     <button type="button" class="room-chip @(s.Id == spot ? "picked" : null)" aria-pressed="@(s.Id == spot ? "true" : "false")"
                             @onclick="() => PickSpot(s.Id)">@s.Name</button>
+                }
+                @if (PickedPlace is { } spotPlace)
+                {
+                    <a class="btn btn-outline-primary btn-sm" href="round/@spotPlace?from=plants">Go round</a>
                 }
             </div>
         }

@@ -79,6 +79,29 @@ else
         </div>
     }
 
+    @if (roundSuggestion is { } suggested)
+    {
+        <section class="today-section">
+            <h2>Today's round</h2>
+            <ul class="item-list">
+                <TodayRow OnPutOff="days => PutOffAsync(PutOffs.Round(suggested.Room.Id), Today.AddDays(days))"
+                          SkipLabel="Skip today" OnSkip="() => PutOffAsync(PutOffs.DailyRound, Today.AddDays(1))">
+                    <a class="item-card" href="round/@suggested.Room.Id?daily=true">
+                        <div class="item-thumb" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5" /><path d="M6 10.5V19h12v-8.5" /><path d="M10 19v-5h4v5" /></svg>
+                        </div>
+                        <div class="item-text">
+                            <div class="item-name">@suggested.Room.Name</div>
+                            <div class="item-meta wraps">
+                                <span>@RoundMeta(suggested)</span>
+                            </div>
+                        </div>
+                    </a>
+                </TodayRow>
+            </ul>
+        </section>
+    }
+
     @foreach (var (heading, cases) in DuePests)
     {
         <section class="today-section">
@@ -158,7 +181,16 @@ else
         var now = wateringDue.Where(d => d.DueNow).ToList();
         var coming = wateringDue.Where(d => !d.DueNow).ToList();
         <section class="today-section">
-            <h2>Water</h2>
+            <div class="today-section-head">
+                <h2>Water</h2>
+                @if (now.Count >= 2)
+                {
+                    <a class="today-go-round" href="round/due">
+                        Go round these
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                    </a>
+                }
+            </div>
             @if (now.Count > 0)
             {
                 <ul class="item-list">
@@ -321,6 +353,18 @@ else
         </TodayRow>;
     };
 
+    private string RoundMeta(DailyRoundSuggestion suggested)
+    {
+        var parts = new List<string>();
+        if (suggested.Plants > 0)
+            parts.Add(Labels.Count(suggested.Plants, "plant"));
+        if (suggested.Propagations > 0)
+            parts.Add(Labels.Count(suggested.Propagations, "propagation"));
+        if (wateringOn && DailyRound.DueIn(suggested.Room.Id, wateringDue, places) is > 0 and var due)
+            parts.Add($"{due} due for water");
+        return string.Join(" · ", parts);
+    }
+
     private static readonly IReadOnlyList<int> MeterReadings = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     private IReadOnlyList<WateringDue> wateringDue = [];
@@ -339,6 +383,9 @@ else
     private IReadOnlyList<AttentionItem> flagged = [];
     private IReadOnlyList<PhotoDue> photoRound = [];
     private PutOffs putOffs = PutOffs.Empty();
+    private bool dailyRoundOn;
+    private IReadOnlyDictionary<Guid, DateTimeOffset> lastActivity = new Dictionary<Guid, DateTimeOffset>();
+    private DailyRoundSuggestion? roundSuggestion;
     private Dictionary<Guid, string> names = [];
     private MonthResult? monthResult;
     private string? backupReminder;
@@ -374,6 +421,7 @@ else
     private int DueCount =>
         DuePests.Sum(group => group.Cases.Count) + FlaggedNow.Count + QuarantineNow.Count + ChecksNow.Count
         + wateringDue.Count(d => d.DueNow)
+        + (roundSuggestion is not null ? 1 : 0)
         + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
 
     protected override Task OnInitializedAsync() => LoadAsync();
@@ -394,10 +442,16 @@ else
             ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
             : [];
 
-        wateringOn = (await SettingsService.GetAsync()).WateringReminder;
+        var settings = await SettingsService.GetAsync();
+        wateringOn = settings.WateringReminder;
+        dailyRoundOn = settings.DailyRound;
+        if (wateringOn || dailyRoundOn)
+            careLogs = await CareLogs.GetAllAsync();
+        if (dailyRoundOn)
+            lastActivity = await Entries.GetLastActivityBeforeAsync(Time.MomentAt(Today.ToDateTime(TimeOnly.MinValue)));
+        FindRound();
         if (wateringOn)
         {
-            careLogs = await CareLogs.GetAllAsync();
             plantChanges = await Entries.GetPlantChangesAsync();
             lights = await LightService.GetAllAsync();
             potsById = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
@@ -421,6 +475,11 @@ else
         loaded = true;
         await Badge.SetAsync(DueCount);
     }
+
+    private void FindRound() =>
+        roundSuggestion = dailyRoundOn
+            ? DailyRound.Suggest(places, plants, propagations, careLogs, lastActivity, putOffs, Time)
+            : null;
 
     private void FindWateringDue() =>
         wateringDue = wateringOn
@@ -462,6 +521,9 @@ else
     {
         putOffs.PutOff(key, until);
         await PutOffService.PutOffAsync(key, until);
+        // Putting off a room, or the round, moves it on to the next room or takes it away
+        FindRound();
+        await Badge.SetAsync(DueCount);
     }
 
     private async Task ClearFlagAsync(AttentionItem item)
