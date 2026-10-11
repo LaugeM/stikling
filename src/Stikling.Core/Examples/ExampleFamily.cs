@@ -10,8 +10,9 @@ public sealed record ExampleRecords(
     IReadOnlyList<TimelineEntry> Entries);
 
 /// <summary>
-/// An example family for someone who opens the app with nothing in it: a mother plant, a young
-/// plant potted up from an earlier cutting, and a cutting rooting in water now. Every record has
+/// An example family for someone who opens the app with nothing in it: a coleus, a young plant
+/// potted up from an earlier cutting, and a tip cutting rooting in water now. Coleus roots in about
+/// a week, so the whole story fits in the last couple of months. Every record has
 /// a fixed id, so devices that load it never end up with two copies, and the dates count back from
 /// the day it is loaded.
 /// </summary>
@@ -52,6 +53,9 @@ public static class ExampleFamily
         (YoungPlantPhotoId, "young-plant.jpg")
     ];
 
+    /// <summary>The mother plant's nickname, which Today uses while the example is loaded.</summary>
+    public const string MotherNickname = "Big Coleus";
+
     public static readonly IReadOnlyList<Guid> PlantIds = [MotherId, YoungPlantId];
     public static readonly IReadOnlyList<Guid> PropagationIds = [FirstCuttingId, CurrentCuttingId];
 
@@ -76,17 +80,16 @@ public static class ExampleFamily
         DateTimeOffset NoonOn(DateOnly day) => time.MomentAt(day.ToDateTime(new TimeOnly(12, 0)));
 
         const string batch = "1× cutting in Water";
-        var acquired = today.AddMonths(-14);
+        var acquired = today.AddMonths(-5);
         var acquiredOn = LooseDate.Of(acquired.Year, acquired.Month);
         var acquiredAt = NoonOn(acquiredOn.Start);
 
         var mother = new Plant
         {
             Id = MotherId,
-            Nickname = "Big Thai",
-            Genus = "Monstera",
-            Species = "deliciosa",
-            Cultivar = "Thai Constellation",
+            Nickname = MotherNickname,
+            Genus = "Coleus",
+            Species = "scutellarioides",
             Origin = PlantOrigin.Purchased,
             AcquiredOn = acquiredOn,
             Medium = GrowingMedium.Soil,
@@ -98,28 +101,26 @@ public static class ExampleFamily
         var young = new Plant
         {
             Id = YoungPlantId,
-            Nickname = "Little Thai",
-            Genus = "Monstera",
-            Species = "deliciosa",
-            Cultivar = "Thai Constellation",
+            Nickname = "Little Coleus",
+            Genus = "Coleus",
+            Species = "scutellarioides",
             Origin = PlantOrigin.Propagated,
-            AcquiredOn = LooseDate.Of(Ago(90)),
+            AcquiredOn = LooseDate.Of(Ago(28)),
             Medium = GrowingMedium.Soil,
             Tags = ["example"],
             ParentPlantId = MotherId,
             FromPropagationId = FirstCuttingId,
             CoverPhotoId = YoungPlantPhotoId,
-            CreatedAt = NoonOn(Ago(90)),
-            Notes = "Potted up from the first cutting of Big Thai. An example plant, like the others."
+            CreatedAt = NoonOn(Ago(28)),
+            Notes = $"Potted up from the first cutting of {MotherNickname}. An example plant, like the others."
         };
 
         Propagation Cutting(Guid id, string nickname, int startedAgo) => new()
         {
             Id = id,
             Nickname = nickname,
-            Genus = "Monstera",
-            Species = "deliciosa",
-            Cultivar = "Thai Constellation",
+            Genus = "Coleus",
+            Species = "scutellarioides",
             ParentPlantId = MotherId,
             Type = PropagationType.Cutting,
             Medium = GrowingMedium.Water,
@@ -128,18 +129,18 @@ public static class ExampleFamily
             StartedOn = Ago(startedAgo),
             CreatedAt = NoonOn(Ago(startedAgo))
         };
-        var first = Cutting(FirstCuttingId, "First Thai cutting", 120);
-        first.FirstRootOn = Ago(108);
-        first.RootedOn = Ago(100);
-        first.FirstLeafOn = Ago(95);
+        var first = Cutting(FirstCuttingId, "First coleus cutting", 45);
+        first.FirstRootOn = Ago(39);
+        first.RootedOn = Ago(35);
+        first.FirstLeafOn = Ago(33);
         first.PottedUpCount = 1;
         first.Stage = PropagationStage.Done;
-        first.FinishedOn = Ago(90);
-        var current = Cutting(CurrentCuttingId, "Thai node cutting", 30);
-        current.FirstRootOn = Ago(16);
+        first.FinishedOn = Ago(28);
+        var current = Cutting(CurrentCuttingId, "Coleus tip cutting", 12);
+        current.FirstRootOn = Ago(6);
         current.Stage = PropagationStage.Rooting;
         current.CoverPhotoId = FirstRootsPhotoId;
-        current.Notes = "One node with an aerial root, in water on a bright windowsill.";
+        current.Notes = "A tip pinched off the mother plant, with the lowest leaves taken off, in water on a bright windowsill.";
 
         Photo ShotOf(Guid id, SubjectType type, Guid subject, int daysAgo)
         {
@@ -152,11 +153,11 @@ public static class ExampleFamily
         }
         var photos = new List<Photo>
         {
-            ShotOf(MotherPhotoId, SubjectType.Plant, MotherId, 40),
-            ShotOf(DayOnePhotoId, SubjectType.Propagation, CurrentCuttingId, 30),
-            ShotOf(FirstRootsPhotoId, SubjectType.Propagation, CurrentCuttingId, 16),
-            ShotOf(PottedUpPhotoId, SubjectType.Plant, YoungPlantId, 90),
-            ShotOf(YoungPlantPhotoId, SubjectType.Plant, YoungPlantId, 3)
+            ShotOf(MotherPhotoId, SubjectType.Plant, MotherId, 14),
+            ShotOf(DayOnePhotoId, SubjectType.Propagation, CurrentCuttingId, 12),
+            ShotOf(FirstRootsPhotoId, SubjectType.Propagation, CurrentCuttingId, 6),
+            ShotOf(PottedUpPhotoId, SubjectType.Plant, YoungPlantId, 28),
+            ShotOf(YoungPlantPhotoId, SubjectType.Plant, YoungPlantId, 2)
         };
 
         TimelineEntry Entry(Guid id, SubjectType type, Guid subject, DateTimeOffset at, TimelineKind kind, string? text,
@@ -171,27 +172,27 @@ public static class ExampleFamily
         var entries = new List<TimelineEntry>
         {
             Entry(MotherCreatedId, plant, MotherId, acquiredAt, TimelineKind.Created, $"Added to collection, {acquiredOn.Text()}"),
-            Entry(MotherFirstCuttingId, plant, MotherId, NoonOn(Ago(120)), TimelineKind.Propagated, batch, null, propagation, FirstCuttingId),
-            Entry(MotherNoteId, plant, MotherId, NoonOn(Ago(40)), TimelineKind.Note,
-                "New leaf unfurling, with more cream on it than the last one.", MotherPhotoId),
-            Entry(MotherCurrentCuttingId, plant, MotherId, NoonOn(Ago(30)), TimelineKind.Propagated, batch, null, propagation, CurrentCuttingId),
+            Entry(MotherFirstCuttingId, plant, MotherId, NoonOn(Ago(45)), TimelineKind.Propagated, batch, null, propagation, FirstCuttingId),
+            Entry(MotherNoteId, plant, MotherId, NoonOn(Ago(14)), TimelineKind.Note,
+                "Pinched out the tips to keep it bushy. One of them went into water.", MotherPhotoId),
+            Entry(MotherCurrentCuttingId, plant, MotherId, NoonOn(Ago(12)), TimelineKind.Propagated, batch, null, propagation, CurrentCuttingId),
 
-            Entry(FirstCuttingCreatedId, propagation, FirstCuttingId, NoonOn(Ago(120)), TimelineKind.Created, $"Started {batch}"),
-            Entry(FirstCuttingPottedUpId, propagation, FirstCuttingId, NoonOn(Ago(90)), TimelineKind.Change,
-                "Potted up 1: Little Thai\nFinished: 1 potted up", null, plant, YoungPlantId, TimelineEvent.PottedUp),
+            Entry(FirstCuttingCreatedId, propagation, FirstCuttingId, NoonOn(Ago(45)), TimelineKind.Created, $"Started {batch}"),
+            Entry(FirstCuttingPottedUpId, propagation, FirstCuttingId, NoonOn(Ago(28)), TimelineKind.Change,
+                "Potted up 1: Little Coleus\nFinished: 1 potted up", null, plant, YoungPlantId, TimelineEvent.PottedUp),
 
-            Entry(YoungCreatedId, plant, YoungPlantId, NoonOn(Ago(90)), TimelineKind.Created, "Potted up from a propagation",
+            Entry(YoungCreatedId, plant, YoungPlantId, NoonOn(Ago(28)), TimelineKind.Created, "Potted up from a propagation",
                 null, propagation, FirstCuttingId),
-            Entry(YoungPhotoEntryId, plant, YoungPlantId, NoonOn(Ago(90)), TimelineKind.Photo, null, PottedUpPhotoId),
-            Entry(YoungNoteId, plant, YoungPlantId, NoonOn(Ago(3)), TimelineKind.Note,
-                "Third leaf, and the first one with cream speckles.", YoungPlantPhotoId),
+            Entry(YoungPhotoEntryId, plant, YoungPlantId, NoonOn(Ago(28)), TimelineKind.Photo, null, PottedUpPhotoId),
+            Entry(YoungNoteId, plant, YoungPlantId, NoonOn(Ago(2)), TimelineKind.Note,
+                "Pinched the top for the first time, and it's branching out below.", YoungPlantPhotoId),
 
-            Entry(CurrentCreatedId, propagation, CurrentCuttingId, NoonOn(Ago(30)), TimelineKind.Created, $"Started {batch}"),
-            Entry(CurrentDayOneId, propagation, CurrentCuttingId, NoonOn(Ago(30)), TimelineKind.Note,
-                "Day 1. Cut just below the node and put it in water.", DayOnePhotoId),
-            Entry(CurrentFirstRootId, propagation, CurrentCuttingId, NoonOn(Ago(16)), TimelineKind.Note,
-                "First root showing.", FirstRootsPhotoId),
-            Entry(CurrentRootsNoteId, propagation, CurrentCuttingId, NoonOn(Ago(9)), TimelineKind.Note,
+            Entry(CurrentCreatedId, propagation, CurrentCuttingId, NoonOn(Ago(12)), TimelineKind.Created, $"Started {batch}"),
+            Entry(CurrentDayOneId, propagation, CurrentCuttingId, NoonOn(Ago(12)), TimelineKind.Note,
+                "Day 1. Cut just below a pair of leaves and took the lowest ones off.", DayOnePhotoId),
+            Entry(CurrentFirstRootId, propagation, CurrentCuttingId, NoonOn(Ago(6)), TimelineKind.Note,
+                "First roots showing, a week in.", FirstRootsPhotoId),
+            Entry(CurrentRootsNoteId, propagation, CurrentCuttingId, NoonOn(Ago(2)), TimelineKind.Note,
                 "Roots about 2 cm now. Changed the water.")
         };
 

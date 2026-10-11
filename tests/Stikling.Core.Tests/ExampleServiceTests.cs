@@ -48,23 +48,23 @@ public class ExampleServiceTests
         var young = records.Plants.Single(p => p.Id == ExampleFamily.YoungPlantId);
         var mother = records.Plants.Single(p => p.Id == ExampleFamily.MotherId);
 
-        Assert.Equal(Today.AddDays(-30), current.StartedOn);
-        Assert.Equal(Today.AddDays(-16), current.FirstRootOn);
-        Assert.Equal(Today.AddDays(-120), first.StartedOn);
-        Assert.Equal(Today.AddDays(-90), first.FinishedOn);
-        Assert.Equal(Today.AddDays(-90), young.AcquiredOn!.Start);
+        Assert.Equal(Today.AddDays(-12), current.StartedOn);
+        Assert.Equal(Today.AddDays(-6), current.FirstRootOn);
+        Assert.Equal(Today.AddDays(-45), first.StartedOn);
+        Assert.Equal(Today.AddDays(-28), first.FinishedOn);
+        Assert.Equal(Today.AddDays(-28), young.AcquiredOn!.Start);
         Assert.Equal(DatePrecision.Month, mother.AcquiredOn!.Precision);
-        Assert.Equal(new DateOnly(2025, 8, 1), mother.AcquiredOn.Start);
+        Assert.Equal(new DateOnly(2026, 5, 1), mother.AcquiredOn.Start);
 
         var rootsNote = records.Photos.Single(p => p.Id == ExampleFamily.FirstRootsPhotoId);
-        Assert.Equal(Today.AddDays(-16), DayOf(rootsNote.TakenAt));
+        Assert.Equal(Today.AddDays(-6), DayOf(rootsNote.TakenAt));
         Assert.Equal(12, rootsNote.TakenAt.Hour);
         var youngNote = records.Photos.Single(p => p.Id == ExampleFamily.YoungPlantPhotoId);
-        Assert.Equal(Today.AddDays(-3), DayOf(youngNote.TakenAt));
+        Assert.Equal(Today.AddDays(-2), DayOf(youngNote.TakenAt));
 
-        // The same day a month later moves everything with it
+        // Loading ten days later moves everything with it
         var later = new FixedTime(Now.AddDays(10), TimeSpan.FromHours(2));
-        Assert.Equal(Today.AddDays(-20), ExampleFamily.Build(later).Propagations.Single(p => p.Id == ExampleFamily.CurrentCuttingId).StartedOn);
+        Assert.Equal(Today.AddDays(-2), ExampleFamily.Build(later).Propagations.Single(p => p.Id == ExampleFamily.CurrentCuttingId).StartedOn);
     }
 
     [Fact]
