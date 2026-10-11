@@ -120,4 +120,85 @@ public class PlantLineageTests
 
         Assert.Equal(5, options.Count);
     }
+
+    private static Plant Named(string name, Plant? parent = null) =>
+        new() { Nickname = name, ParentPlantId = parent?.Id };
+
+    [Fact]
+    public void Tree_caps_ancestors_at_three_oldest_first()
+    {
+        var a = Named("A");
+        var b = Named("B", a);
+        var c = Named("C", b);
+        var d = Named("D", c);
+        var e = Named("E", d);
+        var tree = PlantLineage.Tree(e, [a, b, c, d, e], []);
+        Assert.Equal([b, c, d], tree.Ancestors);
+        Assert.True(tree.MoreAbove);
+
+        var shorter = PlantLineage.Tree(d, [a, b, c, d, e], []);
+        Assert.Equal([a, b, c], shorter.Ancestors);
+        Assert.False(shorter.MoreAbove);
+    }
+
+    [Fact]
+    public void Tree_siblings_exclude_the_plant_and_deleted_ones()
+    {
+        childB.DeletedAt = DateTimeOffset.UnixEpoch;
+        var other = Named("Coleus C", mother);
+        var tree = PlantLineage.Tree(childA, [.. all, other], []);
+        Assert.Equal([other], tree.Siblings);
+    }
+
+    [Fact]
+    public void Tree_has_no_siblings_without_a_parent()
+    {
+        Assert.Empty(PlantLineage.Tree(mother, all, []).Siblings);
+        Assert.Empty(PlantLineage.Tree(stranger, all, []).Siblings);
+    }
+
+    [Fact]
+    public void Tree_below_counts_every_generation_once()
+    {
+        var great = Named("Coleus A1x", grandchild);
+        var tree = PlantLineage.Tree(mother, [.. all, great], []);
+        Assert.Equal([childA, childB], tree.Children.Select(c => c.Plant));
+        Assert.Equal(2, tree.Children[0].Below);
+        Assert.Equal(0, tree.Children[1].Below);
+    }
+
+    [Fact]
+    public void Tree_growing_leaves_out_done_failed_and_deleted()
+    {
+        Propagation Prop(PropagationStage stage, int day) =>
+            new() { ParentPlantId = mother.Id, Stage = stage, StartedOn = new DateOnly(2026, 1, day) };
+        var late = Prop(PropagationStage.Rooting, 9);
+        var early = Prop(PropagationStage.Rooting, 2);
+        var gone = Prop(PropagationStage.Rooting, 5);
+        gone.DeletedAt = DateTimeOffset.UnixEpoch;
+        var tree = PlantLineage.Tree(mother, all, [late, Prop(PropagationStage.Done, 1), Prop(PropagationStage.Failed, 1), gone, early]);
+        Assert.Equal([early, late], tree.Growing);
+    }
+
+    [Fact]
+    public void Tree_survives_a_cycle()
+    {
+        mother.ParentPlantId = grandchild.Id;
+        var tree = PlantLineage.Tree(childA, all, []);
+        Assert.Equal([grandchild, mother], tree.Ancestors);
+        Assert.Single(tree.Children);
+        Assert.All(tree.Children, c => Assert.True(c.Below >= 0));
+    }
+
+    [Fact]
+    public void Tree_with_a_missing_parent_has_no_ancestors_or_siblings()
+    {
+        var orphan = Named("Orphan");
+        orphan.ParentPlantId = Guid.NewGuid();
+        var sibling = new Plant { Nickname = "Sibling", ParentPlantId = orphan.ParentPlantId };
+        var tree = PlantLineage.Tree(orphan, [orphan, sibling], []);
+        Assert.Empty(tree.Ancestors);
+        Assert.Empty(tree.Siblings);
+        Assert.True(tree.IsEmpty);
+    }
 }
