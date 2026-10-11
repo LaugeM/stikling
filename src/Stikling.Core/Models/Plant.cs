@@ -89,6 +89,15 @@ public sealed class Plant : Entity
     /// <summary>The soil mix it was potted in, when it is one you have saved.</summary>
     public Guid? SoilMixId { get; set; }
 
+    /// <summary>
+    /// The saved feed given with the water, so ticking Watered logs it too. Null means off, which
+    /// is what every plant from before this existed reads as. A feed that is deleted counts as off.
+    /// </summary>
+    public Guid? WateringFeedId { get; set; }
+
+    /// <summary>Feed on every 1st, 2nd or 3rd watering. Null reads as every watering.</summary>
+    public int? WateringFeedEvery { get; set; }
+
     public string? Notes { get; set; }
 
     /// <summary>Your own labels, e.g. "variegated", "rare" or "for swap". See <see cref="Plants.PlantTags"/>.</summary>
@@ -193,7 +202,7 @@ public sealed class Plant : Entity
 
     /// <summary>
     /// A new plant to add alongside this one, e.g. a second basil pot. It gets the names, room,
-    /// light, origin, source, price paid, medium, soil mix and tags. The nickname, the date it was got, pots, notes,
+    /// light, origin, source, price paid, medium, soil mix, feed with the watering and tags. The nickname, the date it was got, pots, notes,
     /// photos and anything about how this plant is doing right now stay behind.
     /// </summary>
     public Plant Duplicate() => new()
@@ -208,6 +217,8 @@ public sealed class Plant : Entity
         PricePaid = PricePaid,
         Medium = Medium,
         SoilMixId = SoilMixId,
+        WateringFeedId = WateringFeedId,
+        WateringFeedEvery = WateringFeedEvery,
         Tags = [.. Tags],
         ParentPlantId = ParentPlantId
     };
