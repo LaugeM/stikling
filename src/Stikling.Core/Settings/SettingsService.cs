@@ -61,6 +61,13 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    public async Task SetRecentChangesDaysAsync(int days)
+    {
+        var current = await GetAsync();
+        current.RecentChangesDays = Math.Max(0, days);
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetEverydayNamesAsync(EverydayNameLanguage language)
     {
         var current = await GetAsync();

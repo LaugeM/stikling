@@ -79,7 +79,7 @@ Small ones with no new screen worth the name:
 | ✅ | Plant and propagation pages as a profile of the plant: they open on the photos and notes, newest first, with one line under the name for where it is, what it grows in, when it was last watered and where it came from. The rest is behind **Details**, and **Edit** is a small link | 1 | M | M3–M4 |
 | ✅ | Buttons at the bottom of a plant or propagation page within reach of a thumb: **Photo** goes straight to the camera or gallery, **Note** and **Care** open a panel from the bottom, and a propagation's stage button holds the stage, its dates, Pot up and Mark failed | 2 | M | v1.x |
 | ✅ | Say a plant died, was given away or sold, went dormant or into quarantine, or flag it, from its page instead of the edit form, and bring it back into the collection the same way | 3 | S | v1.x |
-| ☐ | **Recent changes line**: under the plant's name, "Repotted 6 days ago, moved to the hall 3 days ago" for a while after a pot up, a room change or arriving. How many days is a setting. It only states what happened and never says what it means | 4 | S | v1.x |
+| ✅ | **Recent changes line**: under the plant's name, "Repotted 6 days ago, moved to the hall 3 days ago" for a while after a pot up, a room change or arriving. How many days is a setting. It only states what happened and never says what it means | 4 | S | v1.x |
 | ✅ | Short add and edit forms: name, where it came from, the date and notes on top, and the rest under **More details** with a line saying what is set. Save stays pinned at the bottom | 2 | S | v1.x |
 | ✅ | **About it** in place of Notes on the plant and propagation forms and pages, with a line saying it's for what stays true about the plant and that dated notes go on its history. It sits under **More details** on the add forms. The field and what is already stored in it stay the same, and the spreadsheet export still calls the column Notes | 5 | S | v1.x |
 | ✅ | A loose date for when you got a plant: a whole day, just the month, or just the year, so a date you only half remember doesn't have to be guessed at | 3 | S | v1.x |
@@ -364,7 +364,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | **Anniversaries and small celebrations**: Today says when you have had a plant for a year, and rooting, a first new leaf or a cutting promoted to a plant gets a short moment of its own | 6 | S | v1.x |
 | ☐ | **How long you've had a plant** instead of "day 430" on its photos: "1 yr 2 mo", counted from when you got it | 3 | S | v1.x |
 | ☐ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |
-| ☐ | **Move What a plant has given under the plant's name** instead of behind Details, so cuttings taken, rooted and passed on show first | 3 | S | v1.x |
+| ✅ | **Move What a plant has given under the plant's name** instead of behind Details, so cuttings taken, rooted and passed on show first | 3 | S | v1.x |
 | ☐ | **Today in your calendar**: a private link to add to any calendar app, which then shows what is due. It works on every phone and in every browser without notifications, and turning it off makes the old link stop working | 8 | L | v2 |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
 | ☐ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |
