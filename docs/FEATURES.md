@@ -352,7 +352,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
 | ✅ | Plants due a watering or a check today, and the ones due in the next couple of days under Coming up, when the watering reminder is turned on | 3 | S | v1.x |
-| ☐ | **How to check**: where Today says a plant is due a check, one line on how to tell whether it needs water: a finger in the soil, a wooden skewer, lifting the pot, or the meter | 4 | S | v1.x |
+| ✅ | **How to check**: where Today says a plant is due a check, one line on how to tell whether it needs water: a finger in the soil, a wooden skewer, lifting the pot, or the meter | 4 | S | v1.x |
 | ✅ | **A daily round**: Today suggests the room that has gone longest without anything logged, working round the home a room a day. It can be put off to show another room or skipped for the day. Off until turned on in Settings | 6 | S | v1.x |
 | ✅ | **Going round**: open a room or spot and go through its plants one card at a time, then its propagations: a meter reading, watered, looked over, a photo, or skip. Opening it again the same day starts at the first one with nothing logged. Looked over goes on the history. Started from Today's round, Go round these in Water, the Plants list filtered to a room, or Rooms and tags | 4 | M | v1.x |
 | ☐ | **Your own walking order** for a round, set per room by dragging the cards | 6 | S | v1.x |
@@ -363,7 +363,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
 | ☐ | **Anniversaries and small celebrations**: Today says when you have had a plant for a year, and rooting, a first new leaf or a cutting promoted to a plant gets a short moment of its own | 6 | S | v1.x |
 | ☐ | **How long you've had a plant** instead of "day 430" on its photos: "1 yr 2 mo", counted from when you got it | 3 | S | v1.x |
-| ☐ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |
+| ✅ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |
 | ☐ | **Move What a plant has given under the plant's name** instead of behind Details, so cuttings taken, rooted and passed on show first | 3 | S | v1.x |
 | ☐ | **Today in your calendar**: a private link to add to any calendar app, which then shows what is due. It works on every phone and in every browser without notifications, and turning it off makes the old link stop working | 8 | L | v2 |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
