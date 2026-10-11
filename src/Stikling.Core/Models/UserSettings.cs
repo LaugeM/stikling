@@ -36,4 +36,10 @@ public sealed class UserSettings : Entity
     /// Settings, and then it's Danish on a device whose browser lists Danish and English elsewhere.
     /// </summary>
     public EverydayNameLanguage? EverydayNames { get; set; }
+
+    /// <summary>
+    /// How many days a plant's page keeps saying what happened to it lately, like a repot or a move.
+    /// Null means the default of 14 days, and 0 means off. Older settings without it read as null.
+    /// </summary>
+    public int? RecentChangesDays { get; set; }
 }
