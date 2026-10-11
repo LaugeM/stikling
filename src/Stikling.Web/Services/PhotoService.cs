@@ -38,8 +38,11 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
 {
     internal const string ModulePath = "./js/photos.js";
 
-    private sealed record SavedFile(string Id, int Width, int Height, string? CameraDate, string? FileName, DateTimeOffset FileDate);
-    private sealed record SaveResponse(List<SavedFile> Saved, int Failed);
+    /// <summary>What photos.js returns for one stored image.</summary>
+    public sealed record SavedFile(string Id, int Width, int Height, string? CameraDate, string? FileName, DateTimeOffset FileDate);
+
+    /// <summary>What photos.js and googlephotos.js return after storing images.</summary>
+    public sealed record SaveResponse(List<SavedFile> Saved, int Failed);
 
     private Task<IJSObjectReference>? module;
 
@@ -50,6 +53,15 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     public async Task<PhotoSaveResult> SaveFromInputAsync(ElementReference input, SubjectType subjectType, Guid subjectId)
     {
         var response = await (await Module).InvokeAsync<SaveResponse>("saveFromInput", input);
+        return await RecordAsync(response, subjectType, subjectId);
+    }
+
+    /// <summary>
+    /// Makes photo records for images already stored by photos.js, whether they came from a file
+    /// input or from Google Photos. Dates are picked from the camera, the file name and the file date.
+    /// </summary>
+    public async Task<PhotoSaveResult> RecordAsync(SaveResponse response, SubjectType subjectType, Guid subjectId)
+    {
         var saved = new List<Photo>();
         var undated = 0;
 

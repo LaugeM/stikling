@@ -66,6 +66,8 @@ builder.Services.AddScoped<SubjectPhotos>();
 builder.Services.AddScoped<GrowLightService>();
 builder.Services.AddScoped<CareService>();
 builder.Services.AddScoped<PhotoService>();
+builder.Services.AddSingleton(GoogleSettings.From(builder.Configuration));
+builder.Services.AddScoped<GooglePhotosService>();
 builder.Services.AddScoped<ShareCardService>();
 builder.Services.AddScoped<TimelapseService>();
 builder.Services.AddScoped<DeviceFiles>();

@@ -193,7 +193,7 @@ public class BackupTests
     public void Settings_survive_a_restore_and_the_newest_wins()
     {
         var mine = new UserSettings { Theme = ThemeMode.Light, UpdatedAt = Now.AddDays(-3) };
-        var theirs = new UserSettings { Theme = ThemeMode.Dark, PhotoReminder = true, UpdatedAt = Now };
+        var theirs = new UserSettings { Theme = ThemeMode.Dark, PhotoReminder = true, GooglePhotos = true, UpdatedAt = Now };
 
         var merged = BackupMerge.Merge([mine], [theirs]);
         var older = BackupMerge.Merge([theirs], [mine]);
@@ -201,6 +201,7 @@ public class BackupTests
         var saved = Assert.Single(merged.ToSave);
         Assert.Equal(ThemeMode.Dark, saved.Theme);
         Assert.True(saved.PhotoReminder);
+        Assert.True(saved.GooglePhotos);
         Assert.Empty(older.ToSave);
         Assert.Equal(1, BackupMerge.Merge<UserSettings>([], [theirs]).Added);
     }

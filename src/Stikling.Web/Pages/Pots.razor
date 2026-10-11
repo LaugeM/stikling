@@ -2,6 +2,7 @@
 @inject IPotRepository Repository
 @inject PotService PotService
 @inject PhotoService Photos
+@inject GooglePhotosService Google
 @inject DeviceFiles Device
 @implements IAsyncDisposable
 
@@ -103,7 +104,19 @@
                 </label>
                 <input id="pot-gallery" type="file" accept="image/*" multiple class="visually-hidden"
                        @ref="galleryInput" @onchange="() => AddFormPhotosAsync(galleryInput)" disabled="@busy" />
+                @if (googleOn)
+                {
+                    <button type="button" class="btn btn-outline-primary btn-sm icon-btn" @onclick="StartGoogleAsync"
+                            disabled="@(busy || googleBusy)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                        Google Photos
+                    </button>
+                }
             </div>
+            @if (googleOn)
+            {
+                <GooglePhotosPick @ref="googlePick" SubjectType="SubjectType.Pot" SubjectId="draft!.Id" OnSaved="GoogleFormSavedAsync" BusyChanged="busy => googleBusy = busy" />
+            }
             <div class="form-text">A photo tells this pot apart from similar ones, here and when you pick a pot for a plant.</div>
         </div>
 
@@ -185,12 +198,12 @@
         </details>
 
         <div class="form-actions">
-            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => SaveAsync(again: false)">
+            <button type="button" class="btn btn-primary" disabled="@(busy || googleBusy)" @onclick="() => SaveAsync(again: false)">
                 @(editing is null ? "Add pot" : "Save")
             </button>
             @if (editing is null)
             {
-                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => SaveAsync(again: true)">
+                <button type="button" class="btn btn-outline-primary" disabled="@(busy || googleBusy)" @onclick="() => SaveAsync(again: true)">
                     Save and add another size
                 </button>
             }
@@ -316,6 +329,16 @@ else
     private ElementReference rowInput;
     private Pot? photoTarget;
     private string? photoStatus;
+    private GooglePhotosPick? googlePick;
+    private bool googleBusy;
+
+    private async Task StartGoogleAsync()
+    {
+        if (googlePick is not null)
+            await googlePick.Start();
+    }
+
+    private bool googleOn;
 
     private Pot? viewerPot;
     private IReadOnlyList<Photo> viewerPhotos = [];
@@ -323,6 +346,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        googleOn = await Google.IsEnabledAsync();
         await LoadAsync();
         kind = Enum.TryParse<PotGroup>(await Device.GetAsync(KindKey), out var stored)
             ? stored
@@ -470,6 +494,14 @@ else
         {
             busy = false;
         }
+    }
+
+    private Task GoogleFormSavedAsync(PhotoSaveResult result)
+    {
+        formPhotos.InsertRange(0, result.Saved);
+        addedInForm.AddRange(result.Saved.Select(p => p.Id));
+        photoStatus = result.Message(guessesMatter: false);
+        return Task.CompletedTask;
     }
 
     private async Task RemoveFormPhoto(Photo photo)

@@ -369,7 +369,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ◐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation". Add plant, New propagation and Pest cases are there; Log care is missing since there is no page for it yet | 5 | S | v1.x |
 | ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | 6 | M | v1.x |
 | ✅ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
-| ☐ | Pick photos from Google Photos, not only the phone's own gallery. On Android, Firefox and Chrome both open the phone's own gallery app straight away, while other apps let you choose Google Photos. Needs a few ways of asking for photos tried on a phone to see which one offers it | 4 | S | v1.x |
+| ✅ | Pick photos from Google Photos, including ones only in the cloud, through Google's Photos Picker. Turned on in Settings. Photo on a plant or propagation page then asks phone or Google Photos, and the add and edit pages get a Google Photos button. The photos go straight from Google to the device. The phone's own chooser only reaches photos stored on the phone, which is why it needs Google's picker | 4 | S | v1.x |
 | ☐ | **Copy a plant's link** for an NFC sticker or a label. Write it to a sticker with any NFC app, and tapping the phone on the pot opens the plant | 8 | S | v1.x |
 
 ## 7c. Help & first visit

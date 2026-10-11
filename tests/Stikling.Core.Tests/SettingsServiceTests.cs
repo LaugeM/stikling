@@ -46,6 +46,21 @@ public class SettingsServiceTests
     }
 
     [Fact]
+    public async Task Turning_on_google_photos_saves_it_and_keeps_the_rest()
+    {
+        Assert.False((await service.GetAsync()).GooglePhotos);
+
+        await service.SetThemeAsync(ThemeMode.Dark);
+        await service.SetGooglePhotosAsync(true);
+
+        var saved = Assert.Single(repository.Settings.Values);
+        Assert.True(saved.GooglePhotos);
+        Assert.Equal(ThemeMode.Dark, saved.Theme);
+        Assert.False(saved.PhotoReminder);
+        Assert.True((await service.GetAsync()).GooglePhotos);
+    }
+
+    [Fact]
     public async Task Turning_on_the_daily_round_saves_it_and_keeps_the_rest()
     {
         await service.SetThemeAsync(ThemeMode.Dark);

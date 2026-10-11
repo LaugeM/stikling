@@ -16,6 +16,9 @@ public sealed class UserSettings : Entity
     /// <summary>The monthly photo reminder on Today. Off until turned on in Settings.</summary>
     public bool PhotoReminder { get; set; }
 
+    /// <summary>Picking photos from Google Photos. Off until turned on in Settings.</summary>
+    public bool GooglePhotos { get; set; }
+
     /// <summary>The daily round on Today. Off until turned on in Settings.</summary>
     public bool DailyRound { get; set; }
 

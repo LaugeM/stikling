@@ -9,6 +9,7 @@
 @inject PlantService PlantService
 @inject RoomService RoomService
 @inject PhotoService Photos
+@inject GooglePhotosService Google
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject IJSRuntime JS
@@ -295,7 +296,7 @@ else
         </div>
 
         <div class="form-actions form-bar">
-            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">@(IsNew ? "Add plant" : "Save")</button>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || busy || googleBusy)">@(IsNew ? "Add plant" : "Save")</button>
             <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
         </div>
     </EditForm>
@@ -334,6 +335,16 @@ else
     private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
     private ElementReference cameraInput;
     private ElementReference galleryInput;
+    private GooglePhotosPick? googlePick;
+    private bool googleBusy;
+
+    private async Task StartGoogleAsync()
+    {
+        if (googlePick is not null)
+            await googlePick.Start();
+    }
+
+    private bool googleOn;
 
     /// <summary>Photos taken while adding the plant. They're saved with the plant.</summary>
     private readonly List<Photo> photos = [];
@@ -448,6 +459,7 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        googleOn = await Google.IsEnabledAsync();
         var all = await Repository.GetAllAsync();
         var places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, all, await Propagations.GetAllAsync());
@@ -522,6 +534,14 @@ else
         busy = false;
     }
 
+    private Task GoogleSavedAsync(PhotoSaveResult result)
+    {
+        photos.AddRange(result.Saved);
+        photoStatus = result.Message(guessesMatter: true);
+        FollowPhotoDates();
+        return Task.CompletedTask;
+    }
+
     private async Task RemovePhotoAsync(Photo photo)
     {
         await Photos.DeleteAsync(photo.Id);
@@ -587,7 +607,19 @@ else
             </label>
             <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
                    @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+            @if (googleOn)
+            {
+                <button type="button" class="btn btn-outline-primary icon-btn @(FromPhotos ? null : "btn-sm")" @onclick="StartGoogleAsync"
+                        disabled="@(busy || googleBusy)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                    Google Photos
+                </button>
+            }
         </div>
+        @if (googleOn && plant is not null)
+        {
+            <GooglePhotosPick @ref="googlePick" SubjectType="SubjectType.Plant" SubjectId="plant.Id" OnSaved="GoogleSavedAsync" BusyChanged="busy => googleBusy = busy" />
+        }
 
         @if (!FromPhotos)
         {

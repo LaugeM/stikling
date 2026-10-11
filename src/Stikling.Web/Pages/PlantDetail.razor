@@ -17,6 +17,7 @@
 @inject ITimelineRepository TimelineRepository
 @inject GrowLightService LightService
 @inject SettingsService SettingsService
+@inject GooglePhotosService Google
 
 <PageTitle>@(plant?.DisplayName ?? "Plant") · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -358,10 +359,20 @@ else
 
         <div class="profile-history">
             <div class="page-dock" role="group" aria-label="Add to @plant.DisplayName">
-                <label class="btn btn-primary icon-btn" for="@photoInputId">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                    Photo
-                </label>
+                @if (googleOn)
+                {
+                    <button type="button" class="btn btn-primary icon-btn" @onclick="() => photoChoice = true">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        Photo
+                    </button>
+                }
+                else
+                {
+                    <label class="btn btn-primary icon-btn" for="@photoInputId">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        Photo
+                    </label>
+                }
                 <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
                     Note
@@ -386,6 +397,26 @@ else
 
     <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId"
                    CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
+
+    @if (googleOn)
+    {
+        <Sheet Title="Add a photo" Open="photoChoice" OpenChanged="open => photoChoice = open">
+            <ul class="sheet-actions">
+                <li>
+                    <label class="sheet-action" for="@photoInputId" @onclick="() => photoChoice = false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        <span class="sheet-action-text"><b>From this phone</b><small>Camera or gallery</small></span>
+                    </label>
+                </li>
+                <li>
+                    <button type="button" class="sheet-action" @onclick="PickFromGoogleAsync">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                        <span class="sheet-action-text"><b>From Google Photos</b><small>Including photos only in the cloud</small></span>
+                    </button>
+                </li>
+            </ul>
+        </Sheet>
+    }
 
     <Sheet Title="Care" @bind-Open="careOpen">
         <div class="sheet-section">
@@ -646,6 +677,8 @@ else
     private More more;
     private int historyVersion;
     private EntryComposer? composer;
+    private bool googleOn;
+    private bool photoChoice;
     private Timeline? timeline;
     private readonly string photoInputId = $"plant-photo-{Guid.NewGuid():N}";
 
@@ -724,8 +757,16 @@ else
         _ => plant?.DisplayName ?? "",
     };
 
+    private async Task PickFromGoogleAsync()
+    {
+        photoChoice = false;
+        if (composer is not null)
+            await composer.PickFromGooglePhotos();
+    }
+
     protected override async Task OnParametersSetAsync()
     {
+        googleOn = await Google.IsEnabledAsync();
         if (plant?.Id != Id)
         {
             confirmDelete = false;
