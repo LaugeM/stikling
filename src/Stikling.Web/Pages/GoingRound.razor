@@ -340,10 +340,10 @@ else
 
         var parts = new List<string>();
         var kind = WateringForms.DoneKind(form);
-        var verb = kind == CareKind.Watered ? "watered" : "topped up";
+        var verb = WateringText.DoneLabel(form).ToLowerInvariant();
         parts.Add(CareSummary.Latest(careLogs, card.Subject.Id, kind, Today) is { } last
             ? $"{verb} {Labels.DaysAgo(last.DaysAgo)}"
-            : $"no {verb} logged");
+            : $"not {verb} yet");
 
         if (day.Reading is { } reading)
             parts.Add($"reads {reading.Value}");
