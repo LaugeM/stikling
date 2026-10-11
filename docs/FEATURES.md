@@ -35,23 +35,33 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 ## Next up
 
-In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in.
+In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
 
-1. **A demo plant, grid view and the lineage tree**, which make the app look like something on a first visit.
-2. **Passing a cutting on with its history**, built on the share link.
-3. **Your year with your plants**, another thing worth posting, next to A year ago today.
-4. **Checking plants outside a case**: an inspection logged on a single plant and the neighbours to check when a case opens. That finishes the pest section apart from the biological control log.
-5. **Growing season**, so the app asks about dormancy when a plant's resting time comes round. It builds on dormancy, which I just finished.
-6. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-7. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-8. **Soil to semi-hydro transition tracker**, with its checklist and the warning when nothing happens.
-9. **Supplies stock and the shopping list**, built together since the list comes from marking a supply as running low.
-10. **Comparing photos side by side, and voice notes.**
-11. **Unsure names**, for the plants that only have a provisional name.
+1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
+2. **Error tracking with Sentry**, before the app is posted anywhere.
+3. **Small changes that put the shareable parts first**: A year ago today above Worth a look, What a plant has given under the plant's name, and "1 yr 2 mo" in place of "day 430" on a plant's photos.
+4. **Passing a cutting on with its history**, built on the share link.
+5. **Your year with your plants**, another thing worth posting, next to A year ago today. It has to be in by December.
+6. **Away or quiet time, and the plant-sitter sheet**, since the sheet is what you hand over when you go away. Worth having before the Christmas holidays.
+7. **Round days and Do it later**, which both decide which day something comes up on Today.
+8. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
+9. **Flowering log**, with the flowering calendar.
+10. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+11. **Table view and Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+12. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
+13. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
+14. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
 
 ### Cheap ones to slot in whenever
 
-This needs no new storage and no new screen worth the name: a "Log care" home screen shortcut.
+Small ones with no new screen worth the name:
+
+- A "Log care" home screen shortcut.
+- **How to check**, the line on Today about telling whether a plant needs water.
+- **Recent changes line** under a plant's name.
+- **Feed with the watering**.
+- **Voice notes** on note fields.
+- Small info buttons next to the less obvious things.
 
 ---
 
