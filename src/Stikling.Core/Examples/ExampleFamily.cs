@@ -12,9 +12,9 @@ public sealed record ExampleRecords(
 /// <summary>
 /// An example family for someone who opens the app with nothing in it: a coleus, a young plant
 /// potted up from an earlier cutting, and a tip cutting rooting in water now. Coleus roots in about
-/// a week, so the whole story fits in the last couple of months. Every record has
-/// a fixed id, so devices that load it never end up with two copies, and the dates count back from
-/// the day it is loaded.
+/// a week, so the whole story fits in the last couple of months. Every record has a fixed id, so
+/// devices that load it never end up with two copies, and the dates count back from the day it is
+/// loaded.
 /// </summary>
 public static class ExampleFamily
 {
@@ -153,7 +153,7 @@ public static class ExampleFamily
         }
         var photos = new List<Photo>
         {
-            ShotOf(MotherPhotoId, SubjectType.Plant, MotherId, 14),
+            ShotOf(MotherPhotoId, SubjectType.Plant, MotherId, 12),
             ShotOf(DayOnePhotoId, SubjectType.Propagation, CurrentCuttingId, 12),
             ShotOf(FirstRootsPhotoId, SubjectType.Propagation, CurrentCuttingId, 6),
             ShotOf(PottedUpPhotoId, SubjectType.Plant, YoungPlantId, 28),
@@ -173,7 +173,7 @@ public static class ExampleFamily
         {
             Entry(MotherCreatedId, plant, MotherId, acquiredAt, TimelineKind.Created, $"Added to collection, {acquiredOn.Text()}"),
             Entry(MotherFirstCuttingId, plant, MotherId, NoonOn(Ago(45)), TimelineKind.Propagated, batch, null, propagation, FirstCuttingId),
-            Entry(MotherNoteId, plant, MotherId, NoonOn(Ago(14)), TimelineKind.Note,
+            Entry(MotherNoteId, plant, MotherId, NoonOn(Ago(12)), TimelineKind.Note,
                 "Pinched out the tips to keep it bushy. One of them went into water.", MotherPhotoId),
             Entry(MotherCurrentCuttingId, plant, MotherId, NoonOn(Ago(12)), TimelineKind.Propagated, batch, null, propagation, CurrentCuttingId),
 
