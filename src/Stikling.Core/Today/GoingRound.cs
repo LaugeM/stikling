@@ -48,6 +48,7 @@ public static class GoingRound
     /// </summary>
     /// <param name="timeline">The change lines on plants' histories, for telling when plants were dormant.</param>
     /// <param name="wateringOn">The watering reminder in Settings. Without it no card has a guess.</param>
+    /// <param name="putOffs">What is put off on Today. A plant answered "not yet" there isn't due here either.</param>
     public static IReadOnlyList<RoundCard> ForPlace(
         Guid placeId,
         IEnumerable<Plant> plants,
@@ -59,7 +60,8 @@ public static class GoingRound
         Places places,
         Hemisphere hemisphere,
         TimeProvider time,
-        bool wateringOn)
+        bool wateringOn,
+        PutOffs? putOffs = null)
     {
         var scope = places.Find(placeId);
         if (scope is null)
@@ -80,7 +82,9 @@ public static class GoingRound
                 var guess = guesses.GetValueOrDefault(plant.Id);
                 return new RoundCard(
                     plant, plant.DisplayName, x.Heading, WateringForms.Of(plant, pot), guess,
-                    guess?.CheckOn <= today, plant.IsDormant);
+                    guess is { CheckOn: { } checkOn } && checkOn <= today
+                        && putOffs?.IsPutOff(PutOffs.Water(plant.Id, guess.LastWatered), today) != true,
+                    plant.IsDormant);
             });
 
         var propagationCards = Ordered(

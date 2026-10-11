@@ -329,3 +329,12 @@
         display: block;
     }
 }
+
+/* Buttons on the end screen and the empty states, tall enough to tap */
+.round-end-actions .btn,
+.empty-state .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+}

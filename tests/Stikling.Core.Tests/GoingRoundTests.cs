@@ -214,6 +214,19 @@ public class GoingRoundTests
         Assert.Empty(ForDue(putOffs));
     }
 
+    [Fact]
+    public void A_plant_answered_not_yet_on_Today_is_not_due_on_a_room_round()
+    {
+        var plant = Weekly("Late", Today.AddDays(-10), living);
+        var putOffs = PutOffs.Empty();
+        putOffs.PutOff(PutOffs.Water(plant.Id, Today.AddDays(-10)), Today.AddDays(2));
+
+        var card = GoingRound.ForPlace(living.Id, plants, propagations, logs, [], null, [], Places, Hemisphere.Northern, Time, true, putOffs).Single();
+
+        Assert.False(card.DueNow);
+        Assert.NotNull(card.Guess);
+    }
+
     private static RoundCard CardOf(Entity subject, WateringForm? form = WateringForm.TopWatered) =>
         new(subject, "x", null, form, null, false, false);
 

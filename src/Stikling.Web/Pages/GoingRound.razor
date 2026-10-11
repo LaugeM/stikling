@@ -294,7 +294,7 @@ else
         {
             cards = GoingRoundLogic.ForPlace(
                 PlaceId, plants, propagations, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places,
-                hemisphere, Time, wateringOn);
+                hemisphere, Time, wateringOn, await PutOffService.GetAsync(Today));
         }
 
         days = GoingRoundLogic.Days(cards, careLogs, todayEntries, Time);
@@ -411,19 +411,31 @@ else
         return RunAsync(() => Answers.WaterAsync(card.Subject.Id, form, Labels.For), advance: true);
     }
 
+    // The reminder waits started by Looked over in this visit, by the entry's id, so taking one back can end its wait
+    private readonly Dictionary<Guid, string> lookedOverWaits = [];
+
     private Task LookedOverAsync()
     {
         var (card, day) = Current;
         if (day.LookedOverId is { } looked)
-            return RunAsync(() => TimelineService.RemoveAsync(looked), advance: false);
+        {
+            return RunAsync(async () =>
+            {
+                await TimelineService.RemoveAsync(looked);
+                // Taking it back also takes back the wait it started, so the plant is due on Today again
+                if (lookedOverWaits.Remove(looked, out var key))
+                    await PutOffService.PutOffAsync(key, Today);
+            }, advance: false);
+        }
 
         return RunAsync(async () =>
         {
             var type = card.Subject is Plant ? SubjectType.Plant : SubjectType.Propagation;
-            await TimelineService.LookedOverAsync(type, card.Subject.Id);
+            var entry = await TimelineService.LookedOverAsync(type, card.Subject.Id);
             // A plant that is due and looked at but not watered isn't ready yet, so the reminder waits
-            if (card.Subject is Plant plant && card.DueNow && card.Guess is { } guess && day.WateredId is null)
-                await Answers.NotYetAsync(plant, guess, day.Reading?.Value, logReading: false, Labels.For);
+            if (card.Subject is Plant plant && card.DueNow && card.Guess is { } guess && day.WateredId is null
+                && await Answers.NotYetAsync(plant, guess, day.Reading?.Value, logReading: false, Labels.For) is { } wait)
+                lookedOverWaits[entry.Id] = wait.Key;
         }, advance: true);
     }
 

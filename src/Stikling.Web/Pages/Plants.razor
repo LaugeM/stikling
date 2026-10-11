@@ -92,7 +92,7 @@ else
                 </select>
                 @if (PickedRoom is { Spots.Count: 0 } && PickedPlace is { } roomPlace)
                 {
-                    <a class="btn btn-outline-primary" href="round/@roomPlace?from=plants">Go round</a>
+                    <a class="btn btn-outline-primary go-round" href="round/@roomPlace?from=plants">Go round</a>
                 }
             }
 
@@ -128,7 +128,7 @@ else
                 }
                 @if (PickedPlace is { } spotPlace)
                 {
-                    <a class="btn btn-outline-primary btn-sm" href="round/@spotPlace?from=plants">Go round</a>
+                    <a class="btn btn-outline-primary btn-sm go-round" href="round/@spotPlace?from=plants">Go round</a>
                 }
             </div>
         }

@@ -91,3 +91,10 @@
         flex-basis: 100%;
     }
 }
+
+/* The way into a round of the picked room or spot, tall enough to tap */
+.go-round {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+}
