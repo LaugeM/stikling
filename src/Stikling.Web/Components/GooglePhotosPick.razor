@@ -1,0 +1,189 @@
+@* Picking photos from Google Photos, inline under a page's photo buttons. It shows nothing while
+   idle. The host's Google Photos button calls Start() from its click, so Google's popup is allowed. *@
+@inject GooglePhotosService Google
+@inject PhotoService Photos
+@implements IAsyncDisposable
+
+@if (state != PickState.Idle || message is not null)
+{
+    <div class="google-pick">
+        @if (state == PickState.Asking)
+        {
+            <p class="composer-status" role="status">Waiting for Google…</p>
+        }
+        else if (state == PickState.Ready)
+        {
+            <p class="composer-status" role="status">@(opened ? "Waiting for you to pick in Google Photos…" : "Pick your photos in Google Photos, then come back here.")</p>
+            <div class="google-pick-actions">
+                <a class="btn btn-primary btn-sm" href="@pickerUri" target="_blank" rel="noopener"
+                   @onclick="() => opened = true">@(opened ? "Open Google Photos again" : "Open Google Photos")</a>
+                <button type="button" class="btn btn-link btn-sm" @onclick="CancelAsync">Cancel</button>
+            </div>
+        }
+        else if (state == PickState.Fetching)
+        {
+            <p class="composer-status" role="status">Fetching photo @fetching of @total…</p>
+        }
+        else
+        {
+            <p class="composer-status" role="status">@message</p>
+        }
+    </div>
+}
+
+@code {
+    private enum PickState { Idle, Asking, Ready, Fetching }
+
+    [Parameter, EditorRequired]
+    public SubjectType SubjectType { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    [Parameter]
+    public EventCallback<PhotoSaveResult> OnSaved { get; set; }
+
+    /// <summary>Told when Busy changes, so the host can disable its own buttons and Save.</summary>
+    [Parameter]
+    public EventCallback<bool> BusyChanged { get; set; }
+
+    private PickState state;
+    private string? pickerUri;
+    private string? message;
+    private bool opened;
+    private bool disposed;
+    private int fetching;
+    private int total;
+    private bool reportedBusy;
+
+    /// <summary>True while asking, waiting or fetching, so the host can disable its own buttons.</summary>
+    public bool Busy => state != PickState.Idle;
+
+    // A host whose earlier picker went away busy (a sheet or form closed while picking) would
+    // otherwise keep its buttons disabled
+    protected override Task OnInitializedAsync() => BusyChanged.InvokeAsync(false);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Loads Google's script before the first tap, so the tap can open the popup at once
+        if (firstRender && Google.IsConfigured)
+            await Google.PrepareAsync();
+    }
+
+    /// <summary>Asks Google for access and starts a picking session. Call it straight from a click.</summary>
+    public async Task Start()
+    {
+        if (Busy)
+            return;
+
+        state = PickState.Asking;
+        message = null;
+        opened = false;
+        StateHasChanged();
+        await ReportBusyAsync();
+
+        var started = await Google.StartAsync();
+        if (disposed)
+            return;
+
+        if (started.Status != "ready" || started.PickerUri is null)
+        {
+            await FinishAsync(started.Status == "denied"
+                ? "Stikling didn't get access to Google Photos, so nothing was added."
+                : "Couldn't reach Google Photos. Check the connection and try again.");
+            return;
+        }
+
+        pickerUri = started.PickerUri;
+        state = PickState.Ready;
+        StateHasChanged();
+        _ = WaitAsync();
+    }
+
+    private async Task WaitAsync()
+    {
+        try
+        {
+            var result = await Google.WaitAsync(async (number, count) =>
+            {
+                fetching = number;
+                total = count;
+                state = PickState.Fetching;
+                await InvokeAsync(StateHasChanged);
+            });
+
+            // Images already stored by the picker need a record, or nothing would ever point at them.
+            // When the host is gone (its sheet closed, the page left) they're dropped instead.
+            if (result.Status == "done" && disposed)
+            {
+                await DropAsync(result);
+                return;
+            }
+            if (disposed)
+                return;
+
+            switch (result.Status)
+            {
+                case "done":
+                    PhotoSaveResult saved;
+                    try
+                    {
+                        saved = await Photos.RecordAsync(result.ToSaveResponse(), SubjectType, SubjectId);
+                    }
+                    catch
+                    {
+                        await DropAsync(result);
+                        throw;
+                    }
+                    await FinishAsync(null);
+                    await OnSaved.InvokeAsync(saved);
+                    break;
+                case "timedOut":
+                    await FinishAsync("Google Photos stopped waiting. Pick again to try once more.");
+                    break;
+                case "cancelled":
+                    await FinishAsync(null);
+                    break;
+                default:
+                    await FinishAsync("Couldn't reach Google Photos. Check the connection and try again.");
+                    break;
+            }
+        }
+        catch (Exception ex) when (!disposed)
+        {
+            await FinishAsync($"Couldn't save the photos: {ex.Message}");
+        }
+    }
+
+    private async Task DropAsync(GooglePhotosResult result)
+    {
+        foreach (var file in result.Saved ?? [])
+            if (Guid.TryParse(file.Id, out var id))
+                await Photos.RemoveBytesAsync(id);
+    }
+
+    private async Task CancelAsync() => await Google.CancelAsync();
+
+    private async Task FinishAsync(string? text)
+    {
+        state = PickState.Idle;
+        message = text;
+        StateHasChanged();
+        await ReportBusyAsync();
+    }
+
+    private async Task ReportBusyAsync()
+    {
+        if (Busy == reportedBusy || disposed)
+            return;
+        reportedBusy = Busy;
+        await BusyChanged.InvokeAsync(Busy);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        if (state != PickState.Idle)
+            await Google.CancelAsync();
+    }
+}

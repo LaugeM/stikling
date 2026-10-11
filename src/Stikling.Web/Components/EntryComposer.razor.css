@@ -14,4 +14,11 @@
 
 .composer-sheet .form-actions {
     margin-top: 1rem;
+    /* With the Google Photos button the row is too wide for a phone, so it wraps instead of
+       squeezing each label onto two lines */
+    flex-wrap: wrap;
+}
+
+.composer-sheet .form-actions .btn {
+    white-space: nowrap;
 }

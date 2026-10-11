@@ -27,6 +27,17 @@ public sealed record AccountSettings(string? ClerkPublishableKey, string? ClerkF
     }
 }
 
+/// <summary>
+/// The Google client ID for picking photos from Google Photos, from the same appsettings files.
+/// It is public, not a secret. Without it the feature is hidden.
+/// </summary>
+public sealed record GoogleSettings(string? ClientId)
+{
+    public bool IsConfigured => !string.IsNullOrEmpty(ClientId);
+
+    public static GoogleSettings From(IConfiguration config) => new(config["Google:ClientId"]);
+}
+
 /// <summary>Who is signed in on this device, as Clerk reports it.</summary>
 public sealed record AccountState(bool SignedIn, string? Email);
 

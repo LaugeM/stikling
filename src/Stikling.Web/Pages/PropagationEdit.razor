@@ -8,6 +8,7 @@
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject PhotoService Photos
+@inject GooglePhotosService Google
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
@@ -163,7 +164,19 @@ else
                     </label>
                     <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
                            @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+                    @if (googleOn)
+                    {
+                        <button type="button" class="btn btn-outline-primary btn-sm icon-btn" @onclick="StartGoogleAsync"
+                                disabled="@(busy || googleBusy)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                            Google Photos
+                        </button>
+                    }
                 </div>
+                @if (googleOn)
+                {
+                    <GooglePhotosPick @ref="googlePick" SubjectType="SubjectType.Propagation" SubjectId="propagation!.Id" OnSaved="GoogleSavedAsync" BusyChanged="busy => googleBusy = busy" />
+                }
 
                 <div class="form-text">The newest photo becomes the cover. You can add more later on its page.</div>
                 @if (photoStatus is not null)
@@ -327,7 +340,7 @@ else
         </div>
 
         <div class="form-actions form-bar">
-            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">@(IsNew ? "Start propagation" : "Save")</button>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || busy || googleBusy)">@(IsNew ? "Start propagation" : "Save")</button>
             @if (IsNew)
             {
                 <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
@@ -370,6 +383,16 @@ else
     /// <summary>Photos taken while starting the propagation. They're saved with it.</summary>
     private readonly List<Photo> photos = [];
     private string? photoStatus;
+    private GooglePhotosPick? googlePick;
+    private bool googleBusy;
+
+    private async Task StartGoogleAsync()
+    {
+        if (googlePick is not null)
+            await googlePick.Start();
+    }
+
+    private bool googleOn;
     private bool busy;
     private DateOnly? dateFromPhotos; // when the start day was moved back to the oldest photo
     private bool keepToday;
@@ -454,6 +477,7 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        googleOn = await Google.IsEnabledAsync();
         var allPlants = await PlantRepository.GetAllAsync();
         var allPropagations = await Repository.GetAllAsync();
         plants = allPlants.OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
@@ -515,6 +539,14 @@ else
         }
 
         busy = false;
+    }
+
+    private Task GoogleSavedAsync(PhotoSaveResult result)
+    {
+        photos.AddRange(result.Saved);
+        photoStatus = result.Message(guessesMatter: true);
+        FollowPhotoDates();
+        return Task.CompletedTask;
     }
 
     private async Task RemovePhotoAsync(Photo photo)

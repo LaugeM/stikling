@@ -6,6 +6,7 @@
 @inject PhotoService Photos
 @inject TimeProvider Time
 @inject DeviceFiles Device
+@inject GooglePhotosService Google
 @implements IAsyncDisposable
 
 @* Outside the sheet, so the Photo button on the page can open it while the sheet is closed *@
@@ -56,9 +57,14 @@
             <p class="composer-status" role="status">@status</p>
         }
 
+        @if (googleOn)
+        {
+            <GooglePhotosPick @ref="googlePick" SubjectType="SubjectType" SubjectId="SubjectId" OnSaved="GoogleSavedAsync" BusyChanged="busy => googleBusy = busy" />
+        }
+
         <div class="form-actions">
             <button type="button" class="btn btn-primary" @onclick="SaveAsync"
-                    disabled="@(busy || (photos.Count == 0 && string.IsNullOrWhiteSpace(noteText)))">
+                    disabled="@(busy || googleBusy || (photos.Count == 0 && string.IsNullOrWhiteSpace(noteText)))">
                 @(photos.Count > 0 ? "Add to history" : "Add note")
             </button>
             <label class="btn btn-outline-primary icon-btn" for="@sheetInputId">
@@ -67,6 +73,14 @@
             </label>
             <input id="@sheetInputId" type="file" accept="image/*" multiple class="visually-hidden"
                    @ref="sheetInput" @onchange="() => AddPhotosAsync(sheetInput)" disabled="@busy" />
+            @if (googleOn)
+            {
+                <button type="button" class="btn btn-outline-primary icon-btn" @onclick="StartGoogleAsync"
+                        disabled="@(busy || googleBusy)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                    Google Photos
+                </button>
+            }
             <button type="button" class="btn btn-link ms-auto" @onclick="DiscardAsync">Cancel</button>
         </div>
     </div>
@@ -98,6 +112,16 @@
     private readonly string dateId = $"composer-date-{Guid.NewGuid():N}";
     private ElementReference pageInput;
     private ElementReference sheetInput;
+    private GooglePhotosPick? googlePick;
+    private bool googleBusy;
+
+    private async Task StartGoogleAsync()
+    {
+        if (googlePick is not null)
+            await googlePick.Start();
+    }
+
+    private bool googleOn;
 
     // Photos are stored as soon as they're picked, and kept as a draft until the sheet is saved.
     // Closing the sheet or leaving the page deletes them again. Their ids are also kept on the
@@ -119,6 +143,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        googleOn = await Google.IsEnabledAsync();
+
         try
         {
             if (await Device.GetAsync(DraftKey) is { Length: > 0 } left)
@@ -132,6 +158,13 @@
         {
             // Nothing to clear up
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Loads Google's script before the first tap, so the tap can open Google's popup at once
+        if (firstRender && googleOn)
+            await Google.PrepareAsync();
     }
 
     private Task RememberDraftAsync() =>
@@ -170,11 +203,7 @@
 
         try
         {
-            var result = await Photos.SaveFromInputAsync(input, SubjectType, SubjectId);
-            photos.AddRange(result.Saved);
-            await RememberDraftAsync();
-            failed += result.Failed;
-            undated += result.Undated;
+            await AddedAsync(await Photos.SaveFromInputAsync(input, SubjectType, SubjectId));
         }
         catch (Exception ex)
         {
@@ -182,7 +211,52 @@
         }
 
         busy = false;
-        // Nothing to show for a pick that came to nothing
+        CloseIfEmpty();
+    }
+
+    /// <summary>
+    /// Opens the sheet for photos and starts picking from Google Photos, from the page's Photo
+    /// choice. It is still part of the same tap, so Google's popup is allowed.
+    /// </summary>
+    public async Task PickFromGooglePhotos()
+    {
+        error = null;
+        forNote = false;
+        open = true;
+        StateHasChanged();
+
+        // Lets the sheet render, so the picker inside it exists
+        await Task.Yield();
+        if (googlePick is not null)
+            await googlePick.Start();
+    }
+
+    private async Task GoogleSavedAsync(PhotoSaveResult result)
+    {
+        error = null;
+        try
+        {
+            await AddedAsync(result);
+        }
+        catch (Exception ex)
+        {
+            error = $"Couldn't save the photos: {ex.Message}";
+        }
+        CloseIfEmpty();
+    }
+
+    // What follows picking photos, from the phone or from Google Photos
+    private async Task AddedAsync(PhotoSaveResult result)
+    {
+        photos.AddRange(result.Saved);
+        await RememberDraftAsync();
+        failed += result.Failed;
+        undated += result.Undated;
+    }
+
+    // Nothing to show for a pick that came to nothing
+    private void CloseIfEmpty()
+    {
         if (photos.Count == 0 && error is null && failed == 0 && string.IsNullOrWhiteSpace(noteText))
             open = false;
     }
@@ -224,6 +298,7 @@
             await RememberDraftAsync();
             Reset();
             open = false;
+            googleBusy = false; // the picker goes with the sheet
             await OnAdded.InvokeAsync();
         }
         catch (Exception ex)
@@ -245,6 +320,7 @@
         await DiscardPhotosAsync();
         Reset();
         open = false;
+        googleBusy = false; // the picker goes with the sheet
     }
 
     private void Reset()
