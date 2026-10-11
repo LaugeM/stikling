@@ -76,10 +76,6 @@ public static class WateringText
         _ => "Topped up"
     };
 
-    /// <summary>The care entry the tick logs.</summary>
-    public static CareKind DoneKind(WateringForm form) =>
-        form == WateringForm.TopWatered ? CareKind.Watered : CareKind.ToppedUp;
-
     /// <summary>The second button: the plant is still wet, or the water isn't due yet.</summary>
     public static string NotYetLabel(WateringForm form) =>
         form == WateringForm.TopWatered ? "Still wet" : "Not yet";

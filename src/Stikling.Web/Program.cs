@@ -61,6 +61,7 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<FeedService>();
 builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<PutOffService>();
+builder.Services.AddScoped<WateringAnswers>();
 builder.Services.AddScoped<GrowLightService>();
 builder.Services.AddScoped<CareService>();
 builder.Services.AddScoped<PhotoService>();

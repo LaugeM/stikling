@@ -15,6 +15,7 @@
 @inject IPotRepository PotRepository
 @inject GrowLightService LightService
 @inject CareService Care
+@inject WateringAnswers Answers
 @inject AppBadge Badge
 @inject PlantService PlantService
 @inject PropagationService PropagationService
@@ -437,7 +438,7 @@ else
 
     private async Task WaterDoneAsync(WateringDue due)
     {
-        await Care.LogAsync(Care.Start(due.Plant.Id, WateringText.DoneKind(due.Guess.Form)), Labels.For);
+        await Answers.WaterAsync(due.Plant.Id, due.Guess.Form, Labels.For);
         await WateringAnsweredAsync();
     }
 
@@ -451,20 +452,8 @@ else
     // "Still wet" with a meter reading, or "No meter" / "Not yet" with none
     private async Task NotYetAsync(WateringDue due, int? reading)
     {
-        if (reading is { } value)
-        {
-            var entry = Care.Start(due.Plant.Id, CareKind.MoistureReading);
-            entry.Moisture = value;
-            await Care.LogAsync(entry, Labels.For);
-        }
-
-        // A reading moves a guess that is made from the meter. For one made from the days between
-        // waterings it says nothing new, so it waits a while like the other answers.
-        if (reading is null || due.Guess.Mode != WateringMode.Meter)
-        {
-            var wait = WateringGuess.StillWetWait(due.Guess.UsualDays ?? 1);
-            await PutOffAsync(PutOffs.Water(due.Plant.Id, due.Guess.LastWatered), Today.AddDays(wait));
-        }
+        if (await Answers.NotYetAsync(due.Plant, due.Guess, reading, logReading: true, Labels.For) is { } putOff)
+            putOffs.PutOff(putOff.Key, putOff.Until);
 
         await WateringAnsweredAsync();
     }

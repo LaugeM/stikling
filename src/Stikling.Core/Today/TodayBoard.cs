@@ -101,12 +101,13 @@ public static class TodayBoard
     /// <summary>
     /// The newest entries across the given plants and propagations, from <paramref name="since"/>
     /// on. Anything written down about a subject that has since been deleted is left out, so the
-    /// list only shows what you can open.
+    /// list only shows what you can open. A look over is left out too, since it isn't news.
     /// </summary>
     public static IReadOnlyList<TimelineEntry> RecentActivity(
         IEnumerable<TimelineEntry> entries, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, int count = 8) =>
         Timeline.TimelineOrder.NewestFirst(entries)
-            .Where(e => subjectIds.Contains(e.SubjectId) && e.OccurredAt >= since)
+            .Where(e => subjectIds.Contains(e.SubjectId) && e.OccurredAt >= since
+                && Timeline.TimelineEvents.Of(e) != TimelineEvent.LookedOver)
             .Take(count)
             .ToList();
 

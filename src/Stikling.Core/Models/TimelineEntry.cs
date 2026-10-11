@@ -44,7 +44,10 @@ public enum TimelineEvent
     PottedUp,
 
     /// <summary>Units of a propagation didn't make it.</summary>
-    Failed
+    Failed,
+
+    /// <summary>Looked at during a round, or on its own, with nothing else to log.</summary>
+    LookedOver
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>
@@ -89,7 +92,7 @@ public sealed class TimelineEntry : Entity
     public string? Text { get; set; }
 
     /// <summary>
-    /// What a change entry was about (a pot-up or a failure). Null on entries from before this was
+    /// What a change entry was about (a pot-up, a failure or a look over). Null on entries from before this was
     /// kept; <see cref="Timeline.TimelineEvents.Of"/> recognises those from their text.
     /// </summary>
     [JsonConverter(typeof(TolerantTimelineEventConverter))]

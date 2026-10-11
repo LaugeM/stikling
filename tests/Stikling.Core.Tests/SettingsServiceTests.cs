@@ -18,6 +18,7 @@ public class SettingsServiceTests
         Assert.Equal(UserSettings.SettingsId, settings.Id);
         Assert.Equal(ThemeMode.System, settings.Theme);
         Assert.False(settings.PhotoReminder);
+        Assert.False(settings.DailyRound);
         Assert.Null(await service.GetSavedAsync());
         Assert.Equal(0, repository.Saves);
     }
@@ -42,5 +43,18 @@ public class SettingsServiceTests
         var saved = Assert.Single(repository.Settings.Values);
         Assert.True(saved.PhotoReminder);
         Assert.Equal(ThemeMode.Light, saved.Theme);
+    }
+
+    [Fact]
+    public async Task Turning_on_the_daily_round_saves_it_and_keeps_the_rest()
+    {
+        await service.SetThemeAsync(ThemeMode.Dark);
+        await service.SetDailyRoundAsync(true);
+
+        var saved = Assert.Single(repository.Settings.Values);
+        Assert.True(saved.DailyRound);
+        Assert.Equal(ThemeMode.Dark, saved.Theme);
+        Assert.False(saved.PhotoReminder);
+        Assert.True((await service.GetAsync()).DailyRound);
     }
 }

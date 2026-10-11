@@ -3,7 +3,7 @@ using Stikling.Core.Models;
 
 namespace Stikling.Core.Timeline;
 
-/// <summary>Tells what a change entry on a propagation was about.</summary>
+/// <summary>Tells what a change entry was about.</summary>
 public static partial class TimelineEvents
 {
     /// <summary>
