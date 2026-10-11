@@ -364,13 +364,13 @@ else
 
             @* The key reloads the history after stage changes and potting up *@
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
-                      CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" DayOne="PhotoDayCount.StartOf(propagation)"
+                      CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)"
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
         </div>
     </div>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id"
-                CoverPhotoId="propagation.CoverPhotoId" DayOne="PhotoDayCount.StartOf(propagation)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
+                CoverPhotoId="propagation.CoverPhotoId" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
     <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId"
                    CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />

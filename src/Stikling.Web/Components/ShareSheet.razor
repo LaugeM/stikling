@@ -318,7 +318,7 @@
 
     /// <summary>The day photos count from (day 0). Without it, dates have no day count.</summary>
     [Parameter]
-    public DateOnly? DayOne { get; set; }
+    public Func<DateOnly, string?>? PhotoAge { get; set; }
 
     /// <summary>The photo the card starts with, when there is one.</summary>
     [Parameter]
@@ -468,7 +468,7 @@
     private string DayText(Photo photo)
     {
         var day = Time.LocalDay(photo.TakenAt);
-        return Labels.Date(day) + PhotoDayCount.Suffix(DayOne, day);
+        return Labels.Date(day) + PhotoDayCount.Suffix(PhotoAge?.Invoke(day));
     }
 
     private string? ApartLine(Guid? before, Guid? after)

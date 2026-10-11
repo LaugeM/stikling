@@ -34,9 +34,9 @@ else
                                 @if (entry.Kind != TimelineKind.Created)
                                 {
                                     <time datetime="@entry.OccurredAt.ToString("o")">@Labels.Time(entry.OccurredAt)</time>
-                                    @if (entry.Kind == TimelineKind.Photo && PhotoDayCount.Day(DayOne, LocalDay(entry.OccurredAt)) is { } photoDay)
+                                    @if (entry.Kind == TimelineKind.Photo && PhotoAge?.Invoke(LocalDay(entry.OccurredAt)) is { } photoAge)
                                     {
-                                        <span class="entry-day">day @photoDay</span>
+                                        <span class="entry-day">@photoAge</span>
                                     }
                                     @if (entry.Edits.Count > 0)
                                     {
@@ -146,7 +146,7 @@ else
     </ol>
 }
 
-<PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" DayOne="DayOne"
+<PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" PhotoAge="PhotoAge"
              OnSetCover="SetCoverAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" />
 
 @code {
@@ -161,7 +161,7 @@ else
 
     /// <summary>The day photos count from (day 0). Without it, no day count is shown.</summary>
     [Parameter]
-    public DateOnly? DayOne { get; set; }
+    public Func<DateOnly, string?>? PhotoAge { get; set; }
 
     /// <summary>What to say while there is nothing yet.</summary>
     [Parameter]
