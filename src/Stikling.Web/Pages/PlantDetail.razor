@@ -8,6 +8,7 @@
 @inject IPotRepository PotRepository
 @inject PotService PotService
 @inject ISoilMixRepository MixRepository
+@inject IFeedRepository FeedRepository
 @inject PlantService PlantService
 @inject RoomService RoomService
 @inject NavigationManager Navigation
@@ -203,6 +204,12 @@ else
                                 }
                             }
                         </dd>
+
+                        @if (WateringFeed is { } wateringFeed)
+                        {
+                            <dt>Feed with the watering</dt>
+                            <dd>@wateringFeed.Name, @(plant.WateringFeedEvery switch { 2 => "every second watering", 3 => "every third watering", _ => "every watering" })</dd>
+                        }
 
                         @if (plant.QuarantinedSince is { } quarantinedSince)
                         {
@@ -708,6 +715,11 @@ else
 
     private string? wateringLine;
 
+    private IReadOnlyList<Feed> feeds = [];
+
+    /// <summary>The feed given with the water, or null when it is off or the feed is gone.</summary>
+    private Feed? WateringFeed => plant?.WateringFeedId is { } id ? feeds.FirstOrDefault(f => f.Id == id) : null;
+
     private SoilMix? Mix => plant?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id) : null;
 
     private string? PotName(Guid? id) =>
@@ -827,6 +839,7 @@ else
             pots = await PotRepository.GetAllAsync();
             potCovers = await PotService.GetCoversAsync();
             mixes = await MixRepository.GetAllAsync();
+            feeds = await FeedRepository.GetAllAsync();
 
             await ReloadCareAsync();
         }

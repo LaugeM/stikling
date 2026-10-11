@@ -6,6 +6,7 @@
 @inject IPropagationRepository Propagations
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
+@inject IFeedRepository FeedRepository
 @inject SettingsService SettingsService
 @inject PlantService PlantService
 @inject RoomService RoomService
@@ -253,6 +254,43 @@ else
                         </div>
                     </div>
                 }
+
+                <div class="mb-3">
+                    @if (feeds.Count == 0)
+                    {
+                        <div class="form-label">Feed with the watering</div>
+                        <div class="form-text">
+                            Save a feed under Feeds first, then it can be given with the water here.
+                            @if (!IsNew)
+                            {
+                                <a href="feeds">Feeds</a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <label class="form-label" for="watering-feed">Feed with the watering</label>
+                        <select id="watering-feed" class="form-select" aria-describedby="watering-feed-help"
+                                @onchange="e => SetWateringFeed(e.Value?.ToString())">
+                            <option value="" selected="@(FeedChoice is null)">Off</option>
+                            @foreach (var feed in feeds)
+                            {
+                                <option value="@feed.Id" selected="@(FeedChoice == feed.Id)">@feed.Name</option>
+                            }
+                        </select>
+                        @if (FeedChoice is not null)
+                        {
+                            <label class="form-label mt-3" for="watering-feed-every">How often</label>
+                            <select id="watering-feed-every" class="form-select"
+                                    @onchange="e => plant.WateringFeedEvery = int.TryParse(e.Value?.ToString(), out var n) ? n : 1">
+                                <option value="1" selected="@((plant.WateringFeedEvery ?? 1) == 1)">Every watering</option>
+                                <option value="2" selected="@(plant.WateringFeedEvery == 2)">Every second watering</option>
+                                <option value="3" selected="@(plant.WateringFeedEvery == 3)">Every third watering</option>
+                            </select>
+                        }
+                        <div id="watering-feed-help" class="form-text">Ticking Watered or Topped up also logs this feed and its doses.</div>
+                    }
+                </div>
             </FormSection>
 
             @if (IsNew)
@@ -367,6 +405,7 @@ else
     private string? location; // as picked, "Living room / Windowsill"; made into a room when saving
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
+    private IReadOnlyList<Feed> feeds = [];
     private IReadOnlyList<string> tagSuggestions = [];
 
     // Which sections start open, worked out when the plant loads. A section only reads this once
@@ -384,6 +423,25 @@ else
     private string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
 
     private string? MixName(Guid id) => mixes.FirstOrDefault(m => m.Id == id)?.Name;
+
+    private string? FeedName(Guid id) => feeds.FirstOrDefault(f => f.Id == id)?.Name;
+
+    /// <summary>The feed given with the water, or null when it is off or the feed is gone.</summary>
+    private Guid? FeedChoice => plant?.WateringFeedId is { } id && feeds.Any(f => f.Id == id) ? id : null;
+
+    private void SetWateringFeed(string? value)
+    {
+        if (Guid.TryParse(value, out var id))
+        {
+            plant!.WateringFeedId = id;
+            plant.WateringFeedEvery ??= 1;
+        }
+        else
+        {
+            plant!.WateringFeedId = null;
+            plant.WateringFeedEvery = null;
+        }
+    }
 
     private static string? Joined(params string?[] parts) =>
         string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
@@ -466,6 +524,7 @@ else
         rooms = Room.List(places, all, await Propagations.GetAllAsync());
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
+        feeds = [.. (await FeedRepository.GetAllAsync()).OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)];
         tagSuggestions = PlantTags.Suggestions(all);
         wateringReminderOn = (await SettingsService.GetAsync()).WateringReminder;
         existing = all;
@@ -507,7 +566,7 @@ else
             openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
             openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
             openTags = !IsNew && plant.Tags.Count > 0;
-            openWatering = !IsNew && (!plant.WateringReminder || plant.WaterAt is not null);
+            openWatering = !IsNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WateringFeedId is not null);
         }
     }
 
@@ -684,7 +743,7 @@ else
             else
             {
                 var places = await RoomService.GetPlacesAsync();
-                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName, id => places.NameOf(id), FindPot);
+                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName, id => places.NameOf(id), FindPot, FeedName);
             }
             Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
         }

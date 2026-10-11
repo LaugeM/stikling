@@ -13,13 +13,15 @@ public static class PlantChanges
     /// <param name="potName">Turns a pot id into its name. Pots the caller can't name are left unsaid.</param>
     /// <param name="mixName">The same for a soil mix.</param>
     /// <param name="placeName">The same for a room or spot, "Living room / Windowsill".</param>
+    /// <param name="feedName">The same for a feed. A feed the caller can't name is left unsaid.</param>
     public static IReadOnlyList<string> Describe(
         Plant before,
         Plant after,
         Func<Enum, string> label,
         Func<Guid, string?>? potName = null,
         Func<Guid, string?>? mixName = null,
-        Func<Guid, string?>? placeName = null)
+        Func<Guid, string?>? placeName = null,
+        Func<Guid, string?>? feedName = null)
     {
         var changes = new List<string>();
 
@@ -45,6 +47,8 @@ public static class PlantChanges
         ChangeText.AddPot(changes, before.InnerPotId, after.InnerPotId, name, "Potted into", "Taken out of its pot");
         ChangeText.AddPot(changes, before.OuterPotId, after.OuterPotId, name, "Now stands in", "No longer in an outer pot");
         ChangeText.AddPot(changes, before.SoilMixId, after.SoilMixId, mixName ?? (_ => null), "Now in", "No longer in a saved mix");
+
+        ChangeText.AddWateringFeed(changes, before, after, feedName ?? (_ => null));
 
         if (before.PotsTaken != after.PotsTaken && after.HasLeft)
             changes.Add(PotsTakenText(after));
@@ -199,6 +203,25 @@ internal static class ChangeText
             changes.Add(outOf);
         else if (name(after.Value) is { } pot)
             changes.Add($"{into} {pot}");
+    }
+
+    /// <summary>"Fed with the watering: Aroid feed, every second watering", or that it stopped.</summary>
+    public static void AddWateringFeed(List<string> changes, Plant before, Plant after, Func<Guid, string?> feedName)
+    {
+        int? every = after.WateringFeedId is null ? null : Math.Clamp(after.WateringFeedEvery ?? 1, 1, 3);
+        int? wasEvery = before.WateringFeedId is null ? null : Math.Clamp(before.WateringFeedEvery ?? 1, 1, 3);
+        if (before.WateringFeedId == after.WateringFeedId && wasEvery == every)
+            return;
+
+        if (after.WateringFeedId is not { } feed)
+            changes.Add("No longer fed with the watering");
+        else if (feedName(feed) is { } name)
+            changes.Add($"Fed with the watering: {name}, " + every switch
+            {
+                2 => "every second watering",
+                3 => "every third watering",
+                _ => "every watering"
+            });
     }
 
     private static bool SameText(string? a, string? b) =>
