@@ -38,27 +38,23 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **Small changes that put the shareable parts first**: A year ago today above Worth a look, What a plant has given under the plant's name, and "1 yr 2 mo" in place of "day 430" on a plant's photos.
-3. **Passing a cutting on with its history**, built on the share link.
-4. **Your year with your plants**, another thing worth posting, next to A year ago today. It has to be in by December.
-5. **Away or quiet time, and the plant-sitter sheet**, since the sheet is what you hand over when you go away. Worth having before the Christmas holidays.
-6. **Round days and Do it later**, which both decide which day something comes up on Today.
-7. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
-8. **Flowering log**, with the flowering calendar.
-9. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-10. **Table view and Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-11. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
-12. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
-13. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
+2. **Passing a cutting on with its history**, built on the share link.
+3. **Your year with your plants**, another thing worth posting, next to A year ago today. It has to be in by December.
+4. **Away or quiet time, and the plant-sitter sheet**, since the sheet is what you hand over when you go away. Worth having before the Christmas holidays.
+5. **Round days and Do it later**, which both decide which day something comes up on Today.
+6. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
+7. **Flowering log**, with the flowering calendar.
+8. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+9. **Table view and Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+10. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
+11. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
+12. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
 
 ### Cheap ones to slot in whenever
 
 Small ones with no new screen worth the name:
 
 - A "Log care" home screen shortcut.
-- **How to check**, the line on Today about telling whether a plant needs water.
-- **Recent changes line** under a plant's name.
-- **Feed with the watering**.
 - **Voice notes** on note fields.
 - Small info buttons next to the less obvious things.
 
