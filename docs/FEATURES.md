@@ -89,6 +89,7 @@ This needs no new storage and no new screen worth the name: a "Log care" home sc
 | ✅ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
 | ✅ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
 | ✅ | Grid view with large photos as an alternative to the list | 4 | S | v1.x |
+| ☐ | **Table view**: the plant list as a table with a column per field (name, cultivar, room, when and where you got it, price, last watered, fed and repotted, medium), sorted by tapping a column, with the columns you pick. Made for a computer screen and scrolls sideways on a phone. For someone used to keeping their plants in a spreadsheet, and goes well with importing one | 4 | M | v1.x |
 | ☐ | Group the plant list by genus, with an A to Z jump for long lists | 6 | S | v1.x |
 | ☐ | **Collection numbers**: an optional short number per plant, e.g. 117, to write on the pot. Its propagations get 117a, 117b and so on, so a label on a jar says where the cutting came from | 6 | M | v1.x |
 | ☐ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 6 | M | v1.x |
@@ -103,15 +104,18 @@ This needs no new storage and no new screen worth the name: a "Log care" home sc
 | ✅ | **The common houseplants in the dictionary**, with the names people call them. A "What plant is it?" box on the plant and propagation forms finds a plant by its everyday or botanical name, so typing "snake plant" finds Dracaena trifasciata, and so does Quick add. A plant with no nickname shows its everyday name under the botanical one, and the list searches find it. Names come from Wikidata (CC0) and lists kept by hand. English and Danish names, picked in Settings or from the browser's language. The Danish file is only downloaded on a device that uses it | 2 | L | v1.x |
 | ✅ | **Name autocomplete**: suggestions as you type in the genus, species and cultivar fields, from the dictionary and the names already on your plants and propagations, including hybrids and named varieties. An old name offers the one it goes by now, and a cultivar fills in its genus and species. Anything not on the list can still be typed | 6 | M | v1.x |
 | ☐ | **Leaf log for variegated plants**: each new leaf with a photo and a variegation rating (low / medium / high / reverted), so reverting plants are spotted early | 6 | M | v1.x |
-| ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 6 | M | v1.x |
+| ☐ | **Wishlist**: plants you want, with notes on where to find them what you liked about them, and the most you would pay. One search covers both the wishlist and your plants, so in a shop or at a swap it's quick to see whether you already have something or have been looking for it | 4 | M | v1.x |
 | ✅ | Duplicate a plant (e.g. a second basil pot): "Add another like this" opens the add form filled in from it | 7 | S | v1.x |
+| ☐ | **More than one plant in a pot**: a count on a plant, e.g. five aloe pups in one pot, and **Pot together** for two plants or rooted cuttings that end up in the same pot. The one potted in with the other is marked as potted with it rather than deleted, and both keep their history and lineage | 5 | M | v1.x |
 | ✅ | **Price paid** per plant: a number with no currency, under **Where it came from** when the plant was purchased. The plant's page says "Bought from Plantorama for 150" or "Paid 150", "Add another like this" copies it, and the spreadsheet export has a column for it | 7 | S | v1.x |
 | ✅ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
 | ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 7 | M | v1.x |
 | ☐ | **Home map**: a simple plan of each room with the plants placed where they stand, to see what is where and to go round them in order | 7 | L | v1.x |
-| ☐ | **Toxic to pets?** Whether a plant is harmful to cats, dogs and people, shown on the plant from the plant dictionary. Only taken from a source that can be named on the plant, and a plant with nothing known says that rather than looking safe | 7 | L | v1.x |
+| ☐ | **Toxic to pets?** Whether a plant is harmful to cats, dogs and people, shown on the plant from the plant dictionary. Only taken from a source that can be named on the plant, and a plant with nothing known says that rather than looking safe | 5 | L | v1.x |
+| ☐ | **What it likes**: whether a plant likes to dry out or stay moist, how much humidity it wants and how it rests in winter (cooler, drier, both or not at all), next to its light level. Filter by them to find the plants that belong by the humidifier, or to put plants with the same needs together. The winter rest goes with **Growing season** | 4 | S | v1.x |
+| ☐ | **Care for common plants filled in**: picking a common houseplant from the dictionary fills in its light, what it likes and whether it's safe for pets, as a suggestion that can be changed, so a new plant owner doesn't need to know any of it first. Only from a source that can be named, and nothing is filled in for a plant without one | 4 | L | v1.x |
 | ☐ | Filter and sort the plant list by your own fields, and give a field a fixed set of choices so it can be set on several plants at once | 8 | S | v1.x |
-| ☐ | **Symptom check**: tick what you see on a plant (yellow leaves, brown tips, drooping, spots), how wet the soil is, and anything that changed lately, and get the few likely causes with what to check next and the source each one comes from. The app can't see the plant, so it only ever says what to look at, never to water or treat, and says so when the answers don't point anywhere. What you see can go straight into the problem log | 8 | L | v1.x |
+| ☐ | **Symptom check**: tick what you see on a plant (yellow leaves, brown tips, drooping, spots), how wet the soil is, and anything that changed lately, and get the few likely causes with what to check next and the source each one comes from. The app can't see the plant, so it only ever says what to look at, never to water or treat, and says so when the answers don't point anywhere. What you see can go straight into the problem log | 6 | L | v1.x |
 
 ## 2. Photos & timeline
 
@@ -130,6 +134,7 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ✅ | **Import existing photos with their dates**: pick old photos from the gallery and each lands on the day it was taken, so a plant's history starts from day one. The date comes from the photo itself (EXIF), then from a date in the file name, then from the file. Photos from the same day share an entry, a note keeps the photos picked with it together, and the app says how many photos had no date of their own so they can be checked. Works on a plant's page and when adding a plant, where the day it was got moves back to the oldest photo's, so the photos come after it in the history | 3 | M | v1.x |
 | ✅ | **Pot-ups and failures in the history** get their own title and icon instead of "Updated". A new optional field on the entry says what happened, and its kind stays a change, so older app versions still read the entry and show "Updated" as before. A value in the field that a version doesn't know reads as empty. Entries from before are recognised by the text the app wrote ("Potted up 2: …", "1 failed: rotted") when they are shown, so nothing stored is rewritten. A new value in `TimelineKind` would instead stop older versions from loading any history | 4 | S | v1.x |
 | ☐ | Swipe through photos side by side to compare growth | 5 | M | v1.x |
+| ☐ | **Reference photo**: a photo that isn't of your own plant, like the seller's listing, the parents of a hybrid or the plant fully grown. It sits apart from the history and never becomes the cover or day one, and it is a record of what was bought if a label goes missing | 5 | S | v1.x |
 | ☐ | **Voice notes**: a microphone button on note fields using the phone's speech-to-text | 5 | S | v1.x |
 | ☐ | Measurements on an entry: number of leaves, height, root length | 6 | S | v1.x |
 | ☐ | **Growth curve**: a small chart of a plant's or propagation's measurements over time, once there are a few to draw | 7 | S | v1.x |
@@ -173,8 +178,8 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ☐ | **Generation**: a plant or propagation says how many generations it is from the oldest ancestor you have, e.g. "3rd generation from the kitchen Monstera". Worked out from the parent links, with nothing to fill in | 8 | S | v1.x |
 | ☐ | **Why a propagation failed**: an optional reason on Mark failed (rotted, dried out, pests, mould, don't know). The results page shows what each medium loses cuttings to, and at which stage | 6 | S | v1.x |
 | ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
-| ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 8 | L | v1.x |
-| ☐ | **"Available for swap" list**: mark propagations as available and share a simple list or image before a plant swap | 5 | M | v1.x |
+| ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 6 | L | v1.x |
+| ☐ | **"Available for swap" list**: mark propagations as available and share a simple list or image before a plant swap | 4 | M | v1.x |
 | ☐ | **An experiment's result as an image**: the mediums side by side with how many rooted and how long it took on average, e.g. "LECA: 4 of 4, 21 days", to post in a group | 6 | S | v1.x |
 
 ## 3b. Crossbreeding
@@ -204,6 +209,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | Quick-log care: watered, fertilised, reservoir topped up, flushed, repotted, pruned, rotated, cleaned leaves, harvested | 1 | L | v1.x |
 | ✅ | Log several plants at once ("fertilised all semi-hydro plants") | 2 | M | v1.x |
 | ✅ | "Last watered / fertilised / flushed" summary on each plant | 2 | S | v1.x |
+| ☐ | **Empty the outer pot**: after watering a plant that stands in an outer pot, Today reminds you to tip out the water left in it, since a pot left standing in water for days is a common cause of root rot. How long to wait is set in Settings, an hour unless changed, and the reminder can be turned off. Plants watered together share one reminder. A notification for it waits for **Notifications** | 5 | S | v1.x |
 | ✅ | **Moisture meter reading** (1–10) as a log type, with the latest reading shown on the card | 3 | S | v1.x |
 | ✅ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a usual dose in ml, g or drops. The dose is typed the way the bottle puts it, e.g. 5 ml per 4 L or 1 ml per 500 ml, and is optional | 4 | M | v1.x |
 | ✅ | Which products and doses went in on a feed or a top-up, e.g. "Hydro fertiliser, 2 ml/L". The dose starts at the product's usual one and can be changed for that time, and the entry keeps its own copy, so editing or deleting a product doesn't change what was logged | 4 | S | v1.x |
@@ -213,7 +219,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | Optional care intervals per plant ("fertilise every 2 weeks") that show up on Today. An interval can be in days, weeks, months or years, for repotting, and can be limited to part of the year, e.g. fertilise from April to October | 6 | M | v1.x |
 | ✅ | **Nutrient dose calculator**: fill in the water on a feed or a top-up, in litres or millilitres, and each product shows how much to add | 7 | S | v1.x |
 | ☐ | Harvest log for herbs (basil, parsley): date and amount | 7 | S | v1.x |
-| ☐ | **Flowering log** (orchid, peace lily, hoya): spike started, blooming, done. A plant's page lists when it flowered each year, and a flowering calendar shows which plants usually flower in the coming month, from your own records | 5 | M | v1.x |
+| ☐ | **Flowering log** (orchid, peace lily, hoya): spike started, blooming, done. A plant's page lists when it flowered each year, and a flowering calendar shows which plants usually flower in the coming month, from your own records | 4 | M | v1.x |
 | ✅ | **Care calendar on a plant**: a year of waterings, feeds and meter readings as a grid of days, so the plant's rhythm and any gaps show at a glance | 5 | S | v1.x |
 
 ## 4b. Light and climate
@@ -266,7 +272,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ☐ | **Does it fit?**: given a nursery pot, which of your free outer pots it would go in. Compares the tops, allows for a rim only having to clear the opening, and says when the bottom is the tighter measurement | 7 | M | v1.x |
 | ✅ | **Orchid bark** as a medium next to soil, LECA and the others, for orchids potted in bark with little or no soil | 4 | S | v1.x |
 | ✅ | Default medium per pot kind: picking a self-watering pot for a new plant or when potting up suggests LECA, so potting up is one tap less | 8 | S | v1.x |
-| ☐ | Money spent on plants and supplies, per year, to see what the hobby costs | 8 | S | v1.x |
+| ☐ | Money spent on plants and supplies, per year, to see what the hobby costs. On a plant's page, **What a plant has given** also shows what the plant cost and what its cuttings have brought in when any were sold. It only shows when there is a price on either side | 6 | S | v1.x |
 
 ## 5c. Soil mixes
 
@@ -314,10 +320,13 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Put something on Today off until tomorrow, for 3 days or for a week, without logging anything: a propagation waiting to be looked at, a flag, or the photo reminder, which can also be skipped for the rest of the month. What's put off is remembered on the device, not in backups. Pest treatments stay until they're logged | 5 | S | v1.x |
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
 | ✅ | Plants due a watering or a check today, and the ones due in the next couple of days under Coming up, when the watering reminder is turned on | 3 | S | v1.x |
+| ☐ | **How to check**: where Today says a plant is due a check, one line on how to tell whether it needs water: a finger in the soil, a wooden skewer, lifting the pot, or the meter | 4 | S | v1.x |
 | ✅ | **A daily round**: Today suggests the room that has gone longest without anything logged, working round the home a room a day. It can be put off to show another room or skipped for the day. Off until turned on in Settings | 6 | S | v1.x |
 | ✅ | **Going round**: open a room or spot and go through its plants one card at a time, then its propagations: a meter reading, watered, looked over, a photo, or skip. Opening it again the same day starts at the first one with nothing logged. Looked over goes on the history. Started from Today's round, Go round these in Water, the Plants list filtered to a room, or Rooms and tags | 4 | M | v1.x |
 | ☐ | **Your own walking order** for a round, set per room by dragging the cards | 6 | S | v1.x |
+| ☐ | **Round days**: pick the days you go round your plants, e.g. Saturday, or Wednesday and Sunday. Plants due a check before the next round day are gathered onto it instead of each coming up on its own day | 4 | M | v1.x |
 | ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
+| ☐ | **Anniversaries and small celebrations**: Today says when you have had a plant for a year, and rooting, a first new leaf or a cutting promoted to a plant gets a short moment of its own | 6 | S | v1.x |
 | ☐ | **How long you've had a plant** instead of "day 430" on its photos: "1 yr 2 mo", counted from when you got it | 3 | S | v1.x |
 | ☐ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |
 | ☐ | **Move What a plant has given under the plant's name** instead of behind Details, so cuttings taken, rooted and passed on show first | 3 | S | v1.x |
@@ -391,9 +400,9 @@ Questions come up that the app can't answer from your own data: how long a cutti
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | Share your plant list or wishlist as text, e.g. to send to a friend or take to a swap | 6 | S | v1.x |
+| ☐ | Share your plant list or wishlist as text, e.g. to send to a friend or take to a swap | 5 | S | v1.x |
 | ✅ | **Share card**: a plant or propagation as one image, with its photo, its name and a plain line about it, like "Cutting from my Monstera, rooted in 18 days in LECA", and stikling.app small in a corner. Square, 4:5 or 9:16, to fit Instagram, TikTok and Reddit. Shared through the phone's share menu, or saved. The line is written from what the app keeps and can be changed before sharing, and nothing is saved. With no photo it is a card built around the big number, like days to root | 2 | M | v1.x |
-| ☐ | Plant-sitter sheet: a printable/shareable care list for someone watering while you're away. You pick the plants and what goes on it, and it is a printed or saved sheet rather than a link, so nothing is left online | 7 | M | v1.x |
+| ☐ | Plant-sitter sheet: a printable/shareable care list for someone watering while you're away. You pick the plants and what goes on it, and it is a printed or saved sheet rather than a link, so nothing is left online | 5 | M | v1.x |
 | ☐ | **A plant's story to print**: one page with a plant's photos by date, its notes, where it came from and what has come from it, printed or saved as a PDF from the browser. For giving a plant away with its story, or for keeping. You choose what goes on it | 6 | M | v1.x |
 | ☐ | **Your year with your plants**: in December, and whenever asked, a few images sized for stories: plants added, cuttings rooted and how many made it, the quickest one to root, the medium that worked best, the plant photographed most, and what was lost and why | 4 | M | v1.x |
 | ✅ | Accounts and sync between devices (ASP.NET Core Web API, EF Core, sign-in through Clerk). The API checks Clerk sign-ins and has people, collections and members with roles, and the app can sign in and out from its Account page in Settings. Records, settings and photos sync between devices when signed in. Every device keeps all the thumbnails and fetches a full-size photo when it's opened, and each account has 1 GB for photos on the server. The Account page shows when it last synced and, once it's nearly full, how much photo space is used, a dot on the settings gear shows a sync problem, and signing out asks whether to keep the data on the device. Delete account, at the bottom of the Account page, erases everything on the server and the sign-in, and Download your data gives a ZIP of everything the server and Clerk hold about the person. When something is deleted, the server keeps only its id and dates. The app is at stikling.app, with the API on Azure Container Apps, Azure SQL and Blob Storage, and a privacy page | 9 | L | v2 |
