@@ -562,6 +562,10 @@ else
             location = places.NameOf(plant.PlaceId);
             possibleParents = PlantLineage.PossibleParents(plant, all);
 
+            // A feed deleted since it was picked reads as off, so saving the plant clears it the same way
+            if (plant.WateringFeedId is { } feedId && !feeds.Any(f => f.Id == feedId))
+                SetWateringFeed(null);
+
             // All closed when adding, even from a copy, where the summaries show what was copied
             openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
             openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);

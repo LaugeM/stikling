@@ -13,12 +13,13 @@ public class FeedWithWateringTests
     private readonly FakePlantRepository plants = new();
     private readonly FakeFeedRepository feeds = new();
     private readonly FakeTimelineRepository timeline = new();
+    private readonly FakeProductRepository products = new();
     private readonly CareService care;
     private readonly Feed feed;
 
     public FeedWithWateringTests()
     {
-        care = new CareService(logs, timeline, plants, feeds, new FixedTime(Now));
+        care = new CareService(logs, timeline, plants, feeds, products, new FixedTime(Now));
         feed = new Feed
         {
             Name = " Aroid feed ",
@@ -45,6 +46,19 @@ public class FeedWithWateringTests
 
     private List<CareLog> For(Plant plant, CareKind kind) =>
         [.. logs.Logs.Where(l => l.PlantId == plant.Id && l.Kind == kind && !l.IsDeleted)];
+
+    [Fact]
+    public async Task A_renamed_bottle_is_logged_by_its_new_name_like_a_feed_picked_by_hand()
+    {
+        var bottle = new Product { Name = "Grow 2.0" };
+        products.Products[bottle.Id] = bottle;
+        feed.Products = [new ProductDose { ProductId = bottle.Id, Name = "Grow", Amount = 2, Per = 1 }];
+        var plant = PlantWith(1);
+
+        await Water(plant);
+
+        Assert.Equal("Grow 2.0", Assert.Single(Assert.Single(For(plant, CareKind.Fertilised)).Products).Name);
+    }
 
     [Fact]
     public async Task Every_watering_logs_the_feed_with_each_one()

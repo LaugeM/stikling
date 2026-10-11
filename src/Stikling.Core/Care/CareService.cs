@@ -2,6 +2,7 @@ using System.Globalization;
 using Stikling.Core.Feeds;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
+using Stikling.Core.Products;
 using Stikling.Core.Timeline;
 
 namespace Stikling.Core.Care;
@@ -15,6 +16,7 @@ public sealed class CareService(
     ITimelineRepository timeline,
     IPlantRepository plants,
     IFeedRepository feeds,
+    IProductRepository products,
     TimeProvider time)
 {
     private DateOnly Today => time.Today();
@@ -29,9 +31,10 @@ public sealed class CareService(
     /// </summary>
     public async Task LogAsync(CareLog entry, Func<Enum, string> label)
     {
+        // The watering is what was done, so a feed entry that doesn't pass is left out rather than stopping it
         var extra = await PlanFeedAsync(entry, null);
-        if (extra is not null && extra.Validate(Today).FirstOrDefault() is { } error)
-            throw new InvalidOperationException(error);
+        if (extra is not null && extra.Validate(Today).Count > 0)
+            extra = null;
 
         await logs.SaveAsync(entry);
         await RecordAsync(entry, label);
@@ -83,7 +86,7 @@ public sealed class CareService(
         var all = IsWatering(kind) ? await logs.GetAllAsync() : null;
         var extras = new List<CareLog>();
         foreach (var entry in entries)
-            if (await PlanFeedAsync(entry, all) is { } extra)
+            if (await PlanFeedAsync(entry, all) is { } extra && extra.Validate(Today).Count == 0)
                 extras.Add(extra);
 
         // Check everything before saving anything, the way potting up does
@@ -133,7 +136,7 @@ public sealed class CareService(
         {
             if (entry.Products.Count == 0)
             {
-                entry.Products = [.. feed.Products.Select(p => p.Copy())];
+                entry.Products = feed.Doses(await products.GetAllAsync());
                 entry.FeedId = feed.Id;
                 entry.FeedName = Clean(feed.Name);
             }
@@ -145,7 +148,7 @@ public sealed class CareService(
             PlantId = entry.PlantId,
             Kind = CareKind.Fertilised,
             OccurredOn = entry.OccurredOn,
-            Products = [.. feed.Products.Select(p => p.Copy())],
+            Products = feed.Doses(await products.GetAllAsync()),
             FeedId = feed.Id,
             FeedName = Clean(feed.Name)
         };
