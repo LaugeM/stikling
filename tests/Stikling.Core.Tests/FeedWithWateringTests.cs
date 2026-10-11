@@ -177,7 +177,7 @@ public class FeedWithWateringTests
         await Water(plant);
         await Water(missing);
 
-        Assert.Empty(logs.Logs.Where(l => l.Kind == CareKind.Fertilised));
+        Assert.DoesNotContain(logs.Logs, l => l.Kind == CareKind.Fertilised);
         Assert.Equal(2, logs.Logs.Count);
     }
 
