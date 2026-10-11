@@ -1,5 +1,6 @@
 @page "/rooms-and-tags"
 @inject RoomService RoomService
+@inject ILogger<RoomsAndTags> Logger
 @inject PlantService PlantService
 @inject IPlantRepository Plants
 @inject GrowLightService LightService
@@ -183,6 +184,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Changing whether a spot has a grow light failed");
             roomMessage = $"Couldn't save the grow light: {ex.Message}";
         }
 
@@ -353,6 +355,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Removing a room or spot failed");
             roomMessage = $"Couldn't remove it: {ex.Message}";
         }
 
@@ -375,6 +378,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding a tag failed");
             tagMessage = $"Couldn't add the tag: {ex.Message}";
         }
 
@@ -434,6 +438,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Renaming a room or spot failed");
             roomMessage = $"Couldn't rename: {ex.Message}";
         }
 
@@ -465,6 +470,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Renaming a tag failed");
             tagMessage = $"Couldn't rename: {ex.Message}";
         }
 

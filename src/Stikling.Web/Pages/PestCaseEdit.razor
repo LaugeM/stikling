@@ -1,6 +1,7 @@
 @page "/pests/new"
 @page "/pests/{Id:guid}/edit"
 @inject IPestCaseRepository Repository
+@inject ILogger<PestCaseEdit> Logger
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
 @inject RoomService RoomService
@@ -251,6 +252,7 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the pest case failed");
             errors = [$"Couldn't save: {ex.Message}"];
         }
         finally

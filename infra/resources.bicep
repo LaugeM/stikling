@@ -12,6 +12,7 @@ param clerkAuthority string
 param githubRepository string
 param apiImage string
 param apiMinReplicas int
+param sentryDsn string
 
 // Storage account and SQL server names are global, so they get a part that is fixed per resource group
 var suffix = uniqueString(resourceGroup().id)
@@ -267,6 +268,11 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'Clerk__Authority'
               value: clerkAuthority
+            }
+            {
+              // Where the API sends its error reports. Empty sends none
+              name: 'Sentry__Dsn'
+              value: sentryDsn
             }
             {
               name: 'AppOrigins__0'

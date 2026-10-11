@@ -2,6 +2,7 @@
 @page "/plants/{Id:guid}/edit"
 @using Stikling.Core.Settings
 @inject IPlantRepository Repository
+@inject ILogger<PlantEdit> Logger
 @inject IPropagationRepository Propagations
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
@@ -528,6 +529,7 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding photos to a plant failed");
             photoStatus = $"Couldn't save the photos: {ex.Message}";
         }
 
@@ -688,6 +690,7 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the plant failed");
             errors = [$"Couldn't save: {ex.Message}"];
             showErrors = true;
         }

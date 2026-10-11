@@ -55,6 +55,16 @@ From then on the command above works with the defaults.
 
 For the app itself, the domain is set under Pages in the repository settings, with the four A records GitHub lists for an apex domain.
 
+## Error reports
+
+Errors in the app and the API go to Sentry, so problems are seen without anyone writing in. The organization is on the free Developer plan, which has 5,000 errors a month and keeps 30 days of history. Its data is stored in the EU, which can only be chosen when the organization is created.
+
+There are two projects, one for the app and one for the API. In each project's settings, turn on "Prevent storing of IP addresses" and keep the data scrubber on.
+
+The app's DSN goes in `src/Stikling.Web/wwwroot/appsettings.Production.json` under `Sentry:Dsn`. The API's goes in `infra/main.bicepparam` as `sentryDsn`, which is deployed by hand like any Bicep change. With a DSN left empty, that side sends nothing. DSNs are public by design, like Clerk's publishable key, so they can be in the repository.
+
+Session tracking, tracing and replays are turned off in code on purpose. What the app leaves out of a report, and the switch for it in Settings, are on the privacy page.
+
 ## Looking at the database
 
 Only the API's identity can sign in to the database. To look at it yourself, make your own account the admin for a while under Microsoft Entra ID on the SQL server in the portal, and set it back to `id-stikling-api` afterwards. The API can't reach the database while you are the admin.

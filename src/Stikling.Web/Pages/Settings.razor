@@ -3,6 +3,7 @@
 @using Stikling.Core.Settings
 @using Stikling.Core.Sync
 @inject ThemeService Theme
+@inject ErrorReports ErrorReports
 @inject RoomService RoomService
 @inject IPlantRepository Plants
 @inject DeviceFiles Files
@@ -111,6 +112,14 @@
         <SettingsRow Href="rooms-and-tags" Title="Rooms and tags" Detail="@RoomsAndTagsLine" />
         <SettingsRow Href="backup" Title="Backup and storage" Detail="@BackupLine" />
     </div>
+    <div class="form-check form-switch mt-4">
+        <input class="form-check-input" type="checkbox" role="switch" id="error-reports"
+               checked="@(!errorReportsOff)" @onchange="SetErrorReportsAsync" />
+        <label class="form-check-label" for="error-reports">Send error reports</label>
+    </div>
+    <p class="settings-hint">
+        When something goes wrong, the app sends a report of what failed so it can be fixed. It never has your plants, notes or photos. <a href="privacy#error-reports">What's in a report</a>
+    </p>
 </section>
 
 <section class="settings-group">
@@ -150,6 +159,7 @@
     private bool accountChecking;
     private bool accountLoadStarted;
     private bool googlePhotos;
+    private bool errorReportsOff;
     private bool accountUnreachable;
     private bool accountHintRead;
 
@@ -171,6 +181,7 @@
         var settings = await SettingsService.GetAsync();
         photoReminder = settings.PhotoReminder;
         googlePhotos = settings.GooglePhotos;
+        errorReportsOff = settings.ErrorReportsOff;
         wateringReminder = settings.WateringReminder;
         dailyRound = settings.DailyRound;
         everydayLanguage = await Names.GetEverydayLanguageAsync();
@@ -194,6 +205,12 @@
     {
         googlePhotos = e.Value is true;
         await SettingsService.SetGooglePhotosAsync(googlePhotos);
+    }
+
+    private async Task SetErrorReportsAsync(ChangeEventArgs e)
+    {
+        errorReportsOff = e.Value is not true;
+        await ErrorReports.SetOffAsync(errorReportsOff);
     }
 
     private async Task SetWateringReminderAsync(ChangeEventArgs e)

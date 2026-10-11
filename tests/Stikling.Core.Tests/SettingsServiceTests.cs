@@ -61,6 +61,22 @@ public class SettingsServiceTests
     }
 
     [Fact]
+    public async Task Error_reports_are_on_until_turned_off()
+    {
+        Assert.False((await service.GetAsync()).ErrorReportsOff);
+
+        await service.SetThemeAsync(ThemeMode.Dark);
+        await service.SetErrorReportsOffAsync(true);
+
+        var saved = Assert.Single(repository.Settings.Values);
+        Assert.True(saved.ErrorReportsOff);
+        Assert.Equal(ThemeMode.Dark, saved.Theme);
+
+        await service.SetErrorReportsOffAsync(false);
+        Assert.False((await service.GetAsync()).ErrorReportsOff);
+    }
+
+    [Fact]
     public async Task Turning_on_the_daily_round_saves_it_and_keeps_the_rest()
     {
         await service.SetThemeAsync(ThemeMode.Dark);

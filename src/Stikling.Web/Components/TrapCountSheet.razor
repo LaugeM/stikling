@@ -2,6 +2,7 @@
    than telling old from new, and the case works out what's new since last time. A new trap
    can be put up after counting, or on its own with the count left empty. *@
 @inject IPestTreatmentRepository Repository
+@inject ILogger<TrapCountSheet> Logger
 @inject TimeProvider Time
 
 <div class="care-sheet">
@@ -92,6 +93,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the trap count failed");
             error = $"Couldn't log that: {ex.Message}";
         }
         finally

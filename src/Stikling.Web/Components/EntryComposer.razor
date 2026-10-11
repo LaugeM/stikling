@@ -2,6 +2,7 @@
    of its page. Photo opens the device's own choice of camera or gallery straight away, then this
    sheet asks for an optional note and the day. *@
 @inject ITimelineRepository Entries
+@inject ILogger<EntryComposer> Logger
 @inject TimelineService TimelineService
 @inject PhotoService Photos
 @inject TimeProvider Time
@@ -207,6 +208,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding photos to an entry failed");
             error = $"Couldn't save the photos: {ex.Message}";
         }
 
@@ -240,6 +242,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving photos picked from Google Photos failed");
             error = $"Couldn't save the photos: {ex.Message}";
         }
         CloseIfEmpty();
@@ -303,6 +306,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the entry failed");
             error = $"Couldn't save: {ex.Message}";
         }
         busy = false;

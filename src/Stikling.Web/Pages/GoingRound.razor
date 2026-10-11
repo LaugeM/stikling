@@ -3,6 +3,7 @@
 @using GoingRoundLogic = Stikling.Core.Today.GoingRound
 @using Stikling.Core.Settings
 @inject IPlantRepository Plants
+@inject ILogger<GoingRound> Logger
 @inject IPropagationRepository Propagations
 @inject ICareLogRepository CareLogs
 @inject ITimelineRepository Entries
@@ -386,6 +387,7 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "A step in the daily round failed");
             status = $"Couldn't save that: {ex.Message}";
         }
         busy = false;
@@ -454,6 +456,7 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding a photo in the daily round failed");
             status = $"Couldn't save the photo: {ex.Message}";
         }
         busy = false;

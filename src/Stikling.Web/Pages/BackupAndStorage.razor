@@ -1,11 +1,13 @@
 @page "/backup"
 @implements IDisposable
 @inject BackupService Backup
+@inject ILogger<BackupAndStorage> Logger
 @inject DeviceFiles Files
 @inject IPlantRepository Plants
 @inject IPropagationRepository PropagationRepository
 @inject RoomService RoomService
 @inject ThemeService Theme
+@inject ErrorReports ErrorReports
 @inject PlantNameService Names
 @inject IndexedDb Db
 @inject TimeProvider Time
@@ -174,8 +176,9 @@
             message = $"Saved a backup with {Labels.Plants(counts.Plants)}, {Labels.Count(counts.Propagations, "propagation")} "
                 + $"and {Labels.Count(counts.Photos, "photo")}. Check your downloads.";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the backup failed");
             message = "Couldn't save the backup. Check that the device has room, then try again.";
         }
 
@@ -204,8 +207,9 @@
             hasData = await Backup.HasAnythingToSaveAsync();
             message = null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "Reading the backup file failed");
             message = "Couldn't read that file. It may not be a Stikling backup, or it may be damaged.";
         }
 
@@ -234,8 +238,9 @@
                     savedAs = $"stikling-before-restore-{TodayDate:yyyy-MM-dd}.zip";
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.LogError(ex, "Saving a backup before restoring failed");
                 message = "Couldn't save a backup of what's here, so nothing was restored.";
                 saveFailed = true;
                 focusFallback = true;
@@ -252,6 +257,7 @@
             file.Zip.Position = 0;
             var summary = await Backup.ImportAsync(file.Zip);
             await Theme.ApplySavedAsync();
+            await ErrorReports.ApplySavedAsync();
             Names.SettingsChanged();
             message = summary switch
             {
@@ -265,8 +271,9 @@
             if (savedAs is not null)
                 message += $" What was here before is saved as {savedAs}. Check your downloads.";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "Restoring the backup failed");
             message = "Couldn't finish restoring that backup. What it did restore is kept, and restoring it again picks up the rest.";
         }
 

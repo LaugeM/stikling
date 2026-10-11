@@ -30,6 +30,9 @@ param githubRepository string
 @description('The API\'s container image. The deploy workflow moves it on to each new version after this.')
 param apiImage string
 
+@description('The API\'s Sentry address for error reports. Empty sends none. It isn\'t a secret.')
+param sentryDsn string = ''
+
 @description('The number of copies of the API kept running when nobody uses it. 0 lets it sleep, which is free.')
 @minValue(0)
 @maxValue(1)
@@ -63,6 +66,7 @@ module resources 'resources.bicep' = {
     githubRepository: githubRepository
     apiImage: apiImage
     apiMinReplicas: apiMinReplicas
+    sentryDsn: sentryDsn
   }
 }
 

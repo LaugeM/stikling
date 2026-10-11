@@ -1,6 +1,9 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
+using Sentry;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Lights;
@@ -28,9 +31,20 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+// Error reports. With no address in appsettings.Production.json the SDK is off. SentrySetup has the
+// rest: anonymous, no query strings, and nothing sent once the person has turned reports off.
+builder.UseSentry(options => SentrySetup.Configure(options, builder.Configuration["Sentry:Dsn"]));
+builder.Logging.AddSentry(options =>
+{
+    options.InitializeSdk = false;
+    options.MinimumEventLevel = LogLevel.Error;
+    options.MinimumBreadcrumbLevel = LogLevel.Warning;
+});
+
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped<ThemeService>();
+builder.Services.AddScoped<ErrorReports>();
 builder.Services.AddScoped<IndexedDb>();
 builder.Services.AddScoped<IPlantRepository, IndexedDbPlantRepository>();
 builder.Services.AddScoped<IPropagationRepository, IndexedDbPropagationRepository>();
@@ -81,4 +95,6 @@ builder.Services.AddScoped<ShareLinkService>();
 builder.Services.AddScoped<IndexedDbSyncStore>();
 builder.Services.AddScoped<SyncRunner>();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+SentrySetup.Runtime = (IJSInProcessRuntime)host.Services.GetRequiredService<IJSRuntime>();
+await host.RunAsync();

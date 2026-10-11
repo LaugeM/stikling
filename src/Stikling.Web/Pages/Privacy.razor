@@ -2,6 +2,7 @@
 @* The privacy policy for the live site. Google's, Facebook's and Discord's sign-in and the Help page link here, so it has to
    describe the app and the hosting as they are. Change the date at the top when the content changes. The deploy renders it
    to plain HTML (tools/static-pages/render.cs), so it can be read without running the app. *@
+@inject IJSRuntime JS
 
 <PageTitle>Privacy · Stikling</PageTitle>
 
@@ -20,7 +21,7 @@
 <section class="privacy-section">
     <h2>Without an account</h2>
     <p>
-        Everything you add stays on your device, in the browser's own storage. None of it is sent anywhere.
+        Everything you add stays on your device, in the browser's own storage. None of it is sent anywhere, apart from error reports when something goes wrong.
         The app is served by GitHub Pages, which sees each visit the way any website host does, including
         your IP address. <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>
         covers that.
@@ -87,12 +88,30 @@
     </p>
 </section>
 
+<section class="privacy-section" id="error-reports">
+    <h2>Error reports</h2>
+    <p>
+        When something goes wrong in the app or on the server, a report of what failed is sent to
+        <a href="https://sentry.io/privacy/">Sentry</a>, a company in the United States, which stores it in
+        Germany. It's how problems get found and fixed when nobody has written in about them. A report has the
+        kind of error and where in the code it happened, but not the error's own message. It also has the app's
+        version, your browser and system, the address of the screen you were on, which only holds ids, and the
+        screens you opened just before. It doesn't have your account or email address, or your plants, notes or
+        photos. Sentry sees your IP address when a report arrives, the way any website does, and is set not to
+        keep it. Reports are kept for 30 days.
+    </p>
+    <p>
+        You can turn off reports from the app with Send error reports, under Your data in Settings. The server's
+        reports don't depend on that switch, since they're about the server and hold the same kind of information.
+    </p>
+</section>
+
 <section class="privacy-section">
     <h2>What Stikling doesn't do</h2>
     <p>
         There are no ads, no analytics and no tracking. Your data isn't sold or shared with anyone other than
-        the services named on this page, and it's only used to run the app. The app doesn't use cookies of its
-        own. Clerk sets the cookies it needs to keep you signed in, and Google may set its own if you use
+        the services named on this page, and it's only used to run the app. Error reports are only used to fix
+        problems. The app doesn't use cookies of its own. Clerk sets the cookies it needs to keep you signed in, and Google may set its own if you use
         Pick from Google Photos.
     </p>
 </section>
@@ -135,3 +154,15 @@
         <a href="https://www.datatilsynet.dk">Datatilsynet</a>.
     </p>
 </section>
+
+@code {
+    // Settings and Help link to a section, like privacy#error-reports
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+        await module.InvokeVoidAsync("scrollToFragment");
+    }
+}
