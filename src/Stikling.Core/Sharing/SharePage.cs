@@ -77,7 +77,7 @@ public static class SharePage
         if (plant.AcquiredOn is { Precision: DatePrecision.Day } acquired)
             milestones.Add(new Mark(acquired.Start, 0, "Got it"));
 
-        return Build(plant, SubjectType.Plant, plant.CoverPhotoId, card, PhotoDayCount.StartOf(plant), milestones,
+        return Build(plant, SubjectType.Plant, plant.CoverPhotoId, card, taken => PhotoDayCount.PlantAge(plant, taken), milestones,
             photos, entries, propagations, settings, zone);
     }
 
@@ -107,7 +107,7 @@ public static class SharePage
         if (p.FinishedOn is { } finished && p.Stage is PropagationStage.Done or PropagationStage.Failed)
             milestones.Add(new Mark(finished, 5, p.Stage == PropagationStage.Done ? "Potted up" : "Didn't make it"));
 
-        return Build(propagation, SubjectType.Propagation, propagation.CoverPhotoId, card, PhotoDayCount.StartOf(propagation), milestones,
+        return Build(propagation, SubjectType.Propagation, propagation.CoverPhotoId, card, taken => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), taken), milestones,
             photos, entries, new Dictionary<Guid, Propagation>(), settings, zone);
     }
 
@@ -118,7 +118,7 @@ public static class SharePage
     private sealed record Slot(DateOnly Day, int Order, DateTimeOffset At, ShareItemKind Kind, string? Text, List<Photo> Photos);
 
     private static SharePageModel Build(
-        Entity subject, SubjectType type, Guid? coverId, ShareCardText card, DateOnly? start, List<Mark> marks,
+        Entity subject, SubjectType type, Guid? coverId, ShareCardText card, Func<DateOnly, string?> age, List<Mark> marks,
         IEnumerable<Photo> allPhotos, IEnumerable<TimelineEntry> allEntries, IReadOnlyDictionary<Guid, Propagation> propagations,
         ShareLinkSettings settings, TimeZoneInfo zone)
     {
@@ -174,7 +174,7 @@ public static class SharePage
             .OrderBy(s => s.Day).ThenBy(s => s.Order).ThenBy(s => s.At)
             .Select(s => new SharePageItem(
                 s.Day,
-                PhotoDayCount.Suffix(start, s.Day),
+                PhotoDayCount.Suffix(age(s.Day)),
                 s.Kind,
                 s.Text,
                 s.Photos.OrderBy(p => p.TakenAt).Select(p => new SharePhoto(p.Id, p.Frame, p.Width, p.Height)).ToList()))

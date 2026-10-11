@@ -362,8 +362,13 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | **Round days**: pick the days you go round your plants, e.g. Saturday, or Wednesday and Sunday. Plants due a check before the next round day are gathered onto it instead of each coming up on its own day | 3 | M | v1.x |
 | ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
 | ☐ | **Anniversaries and small celebrations**: Today says when you have had a plant for a year, and rooting, a first new leaf or a cutting promoted to a plant gets a short moment of its own | 6 | S | v1.x |
+<<<<<<< HEAD
 | ☐ | **How long you've had a plant** instead of "day 430" on its photos: "1 yr 2 mo", counted from when you got it | 3 | S | v1.x |
 | ✅ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |
+=======
+| ✅ | **How long you've had a plant** instead of "day 430" on its photos: "1 yr 2 mo", counted from when you got it | 3 | S | v1.x |
+| ☐ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |
+>>>>>>> worktree-agent-a41cb3082c6d8f753
 | ☐ | **Move What a plant has given under the plant's name** instead of behind Details, so cuttings taken, rooted and passed on show first | 3 | S | v1.x |
 | ☐ | **Today in your calendar**: a private link to add to any calendar app, which then shows what is due. It works on every phone and in every browser without notifications, and turning it off makes the old link stop working | 8 | L | v2 |
 | ☐ | Care intervals due (if set) | 6 | S | v1.x |
