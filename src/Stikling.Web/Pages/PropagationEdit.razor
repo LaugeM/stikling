@@ -1,6 +1,7 @@
 @page "/propagations/new"
 @page "/propagations/{Id:guid}/edit"
 @inject IPropagationRepository Repository
+@inject ILogger<PropagationEdit> Logger
 @inject IPlantRepository PlantRepository
 @inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
@@ -535,6 +536,7 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding photos to a propagation failed");
             photoStatus = $"Couldn't save the photos: {ex.Message}";
         }
 
@@ -672,6 +674,7 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the propagation failed");
             errors = [$"Couldn't save: {ex.Message}"];
             showErrors = true;
         }

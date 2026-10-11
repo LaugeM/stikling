@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
@@ -19,6 +20,8 @@ public sealed class SyncRunner(
     IndexedDbSyncStore store,
     IndexedDb db,
     ThemeService theme,
+    ErrorReports errorReports,
+    ILogger<SyncRunner> logger,
     PlantNameService names,
     ShareLinkService shares,
     DeviceFiles files,
@@ -285,6 +288,7 @@ public sealed class SyncRunner(
         catch (Exception e)
         {
             // Nothing else may stop the app, since nothing waits for a sync that runs by itself
+            logger.LogError(e, "Syncing failed");
             Problem = $"Something went wrong while syncing: {e.Message}";
             if (LastSynced is null)
                 firstSyncFailed = true;
@@ -331,6 +335,7 @@ public sealed class SyncRunner(
             if (result.Received > 0)
             {
                 await theme.ApplySavedAsync();
+                await errorReports.ApplySavedAsync();
                 names.SettingsChanged();
                 Received?.Invoke();
             }
@@ -360,6 +365,9 @@ public sealed class SyncRunner(
         }
         catch (Exception e) when (e is AccountUnavailableException or HttpRequestException or TaskCanceledException)
         {
+            // Not being able to reach the server is expected. The server answering with an error is not.
+            if (e is HttpRequestException { StatusCode: >= HttpStatusCode.InternalServerError })
+                logger.LogError(e, "The server answered a sync with an error");
             Problem = "The Stikling server can't be reached right now. Your changes are kept here and sent once it can be.";
         }
     }

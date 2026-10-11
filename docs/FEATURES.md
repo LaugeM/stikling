@@ -38,19 +38,18 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **Error tracking with Sentry**, before the app is posted anywhere.
-3. **Small changes that put the shareable parts first**: A year ago today above Worth a look, What a plant has given under the plant's name, and "1 yr 2 mo" in place of "day 430" on a plant's photos.
-4. **Passing a cutting on with its history**, built on the share link.
-5. **Your year with your plants**, another thing worth posting, next to A year ago today. It has to be in by December.
-6. **Away or quiet time, and the plant-sitter sheet**, since the sheet is what you hand over when you go away. Worth having before the Christmas holidays.
-7. **Round days and Do it later**, which both decide which day something comes up on Today.
-8. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
-9. **Flowering log**, with the flowering calendar.
-10. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-11. **Table view and Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
-12. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
-13. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
-14. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
+2. **Small changes that put the shareable parts first**: A year ago today above Worth a look, What a plant has given under the plant's name, and "1 yr 2 mo" in place of "day 430" on a plant's photos.
+3. **Passing a cutting on with its history**, built on the share link.
+4. **Your year with your plants**, another thing worth posting, next to A year ago today. It has to be in by December.
+5. **Away or quiet time, and the plant-sitter sheet**, since the sheet is what you hand over when you go away. Worth having before the Christmas holidays.
+6. **Round days and Do it later**, which both decide which day something comes up on Today.
+7. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
+8. **Flowering log**, with the flowering calendar.
+9. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+10. **Table view and Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+11. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
+12. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
+13. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
 
 ### Cheap ones to slot in whenever
 
@@ -451,7 +450,7 @@ Questions come up that the app can't answer from your own data: how long a cutti
 | ☐ | **Compare lists with a friend**: open a friend's shared list and see which of their plants are on your wishlist, and which of yours are on theirs | 8 | M | v2 |
 | ☐ | Public read-only collection page | 9 | L | v2 |
 | ☐ | **Plant facts card** from Trefle: a short card with what is known about the species, shown on the plant's page. The data is under the ODbL, so the app has to credit it, and the Trefle API token has to stay on the server, so the app asks the API and never Trefle directly. It is never pushed on anyone: a small "About this species" link on the plant page opens it | 9 | L | v2 |
-| ☐ | **Error tracking with Sentry**, set up before the app is posted anywhere, so errors in the app and the API are seen without anyone having to report them. Needs a look at what it sends and a line about it on the privacy page | 4 | M | v1.x |
+| ✅ | **Error tracking with Sentry**: errors in the app and the API are sent to Sentry, so they are seen without anyone having to report them. Reports are anonymous (no account id, IP address or anything typed in), the app's can be turned off with Send error reports in Settings, and the privacy page says what a report holds | 4 | M | v1.x |
 | ☐ | Plant identification from a photo via an identification API, only with a free one. Pl@ntNet's API is the free one: up to 500 identifications a day for non-commercial use, and it doesn't keep the photos. plant.id only gives 100 free identifications before it charges, and iNaturalist doesn't open its full identification model to other apps. Two ways in: through Stikling's own API, which keeps the key secret and shares the daily allowance between everyone signed in, or with a free key of your own added in Settings, kept on the device and used without an account, if Pl@ntNet allows calls straight from the browser. The result is a suggestion for the name fields, never filled in on its own | 9 | L | v2 |
 | ☐ | **Notifications** from the web app, now that there is a server: on Android, and on an iPhone once the app is on the home screen. Off until turned on, and only for what Today would show, like a propagation to check on or a treatment due. Everything due comes as one list a day, at a time you choose, never one notification per plant. Never a reminder to water | 5 | L | v2 |
 | ☐ | Push notifications, widgets and a Google Play release (MAUI Blazor Hybrid) | 10 | L | v3 |

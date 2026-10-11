@@ -1,5 +1,6 @@
 @* Logging care. Used on one plant from its page, and on several at once from the plants list. *@
 @inject CareService CareService
+@inject ILogger<CareSheet> Logger
 @inject IProductRepository ProductRepository
 @inject IFeedRepository FeedRepository
 @inject TimeProvider Time
@@ -265,6 +266,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the care log failed");
             error = ex.Message;
         }
         finally

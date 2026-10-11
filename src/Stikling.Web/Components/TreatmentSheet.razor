@@ -3,6 +3,7 @@
    With Check set it logs a look for pests on a case being watched: only a date and notes.
    A saved recipe is picked from chips and copied onto the treatment. Anything else is typed. *@
 @inject IPestTreatmentRepository Repository
+@inject ILogger<TreatmentSheet> Logger
 @inject ITreatmentRecipeRepository Recipes
 @inject TimeProvider Time
 
@@ -192,6 +193,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the treatment failed");
             error = $"Couldn't log that: {ex.Message}";
         }
         finally

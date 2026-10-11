@@ -19,6 +19,12 @@ public sealed class UserSettings : Entity
     /// <summary>Picking photos from Google Photos. Off until turned on in Settings.</summary>
     public bool GooglePhotos { get; set; }
 
+    /// <summary>
+    /// Error reports from the app. On unless turned off in Settings, so the field is named for turning
+    /// them off and older settings without it read as on.
+    /// </summary>
+    public bool ErrorReportsOff { get; set; }
+
     /// <summary>The daily round on Today. Off until turned on in Settings.</summary>
     public bool DailyRound { get; set; }
 

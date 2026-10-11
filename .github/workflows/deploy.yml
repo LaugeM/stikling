@@ -57,6 +57,7 @@ jobs:
         run: >
           docker build --file src/Stikling.Api/Dockerfile
           --label org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          --build-arg SOURCE_REVISION_ID=${{ github.sha }}
           --tag "$API_IMAGE:${{ github.sha }}" --tag "$API_IMAGE:main" .
 
       # Pull requests only check that it builds

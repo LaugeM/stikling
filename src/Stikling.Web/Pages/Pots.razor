@@ -1,5 +1,6 @@
 @page "/pots"
 @inject IPotRepository Repository
+@inject ILogger<Pots> Logger
 @inject PotService PotService
 @inject PhotoService Photos
 @inject GooglePhotosService Google
@@ -488,6 +489,7 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding photos to a new pot failed");
             photoStatus = $"Couldn't save the photos: {ex.Message}";
         }
         finally
@@ -530,6 +532,7 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding photos to a pot failed");
             photoStatus = $"Couldn't save the photos: {ex.Message}";
         }
         finally

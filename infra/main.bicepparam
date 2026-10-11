@@ -9,6 +9,7 @@ param clerkAuthority = 'https://clerk.stikling.app'
 param githubRepository = 'LaugeM@46719124/stikling@1377567106'
 param apiImage = 'ghcr.io/laugem/stikling-api:main'
 param apiMinReplicas = 0
+param sentryDsn = ''
 
 // About $100 a year, which is what the student credit covers
 param monthlyBudget = 8

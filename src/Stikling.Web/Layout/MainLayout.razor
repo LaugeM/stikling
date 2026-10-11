@@ -2,6 +2,7 @@
 @implements IDisposable
 @inject IndexedDb Db
 @inject ThemeService Theme
+@inject ErrorReports ErrorReports
 @inject SyncRunner Sync
 @inject BackupService Backup
 @inject IPestCaseRepository PestCases
@@ -136,6 +137,8 @@
 
         // The saved theme counts, the copy in localStorage is only for the first paint
         await Theme.ApplySavedAsync();
+        await ErrorReports.ApplySavedAsync();
+        await ErrorReports.SetReleaseAsync();
 
         try
         {

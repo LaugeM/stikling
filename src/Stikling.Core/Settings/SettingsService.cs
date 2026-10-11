@@ -40,6 +40,13 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    public async Task SetErrorReportsOffAsync(bool off)
+    {
+        var current = await GetAsync();
+        current.ErrorReportsOff = off;
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetDailyRoundAsync(bool on)
     {
         var current = await GetAsync();

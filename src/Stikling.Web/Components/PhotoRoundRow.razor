@@ -1,6 +1,7 @@
 @* One plant or propagation in the monthly photo round, with a camera button that puts the photo
    straight on its history without leaving Today. *@
 @inject SubjectPhotos Photos
+@inject ILogger<PhotoRoundRow> Logger
 
 <li class="today-row">
     <div class="today-row-main">
@@ -60,6 +61,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the monthly photo failed");
             status = $"Couldn't save the photo: {ex.Message}";
         }
 

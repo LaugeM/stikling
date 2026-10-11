@@ -10,10 +10,14 @@ using Stikling.Api.Collections;
 using Stikling.Api.Data;
 using Stikling.Api.People;
 using Stikling.Api.Photos;
+using Stikling.Api.Reports;
 using Stikling.Api.Sharing;
 using Stikling.Api.Sync;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Error reports. Off while Sentry:Dsn is empty, as it is locally and in the tests.
+builder.WebHost.UseSentry(options => ErrorReporting.Configure(options, builder.Configuration["Sentry:Dsn"]));
 
 builder.Services.AddDbContext<StiklingDbContext>((services, options) =>
     options.UseSqlServer(services.GetRequiredService<IConfiguration>().GetConnectionString("Stikling")
