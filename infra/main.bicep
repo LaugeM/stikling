@@ -35,7 +35,7 @@ param apiImage string
 @maxValue(1)
 param apiMinReplicas int = 0
 
-@description('The monthly spending, in the subscription\'s currency, that the budget warns about.')
+@description('The monthly spending that the budget warns about, in the subscription\'s currency, which is Danish kroner and not dollars.')
 param monthlyBudget int
 
 @description('The first day of the month the budget starts in, as yyyy-MM-dd. It can\'t be moved once the budget exists.')
