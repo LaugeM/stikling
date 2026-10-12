@@ -308,6 +308,21 @@ public class PlantYearTests
     }
 
     [Fact]
+    public void Cuttings_rooted_looks_at_the_ones_that_rooted_not_the_ones_started()
+    {
+        // Nothing started this year, so AllCuttings is true of an empty list, but a seed rooted
+        var seeds = Prop("Seeds", 11, year: 2025);
+        seeds.Type = PropagationType.Seed;
+        seeds.RootedOn = new DateOnly(2026, 1, 20);
+        var cutting = Prop("Cutting", 12, year: 2025);
+        cutting.RootedOn = new DateOnly(2026, 1, 10);
+
+        Assert.False(Year(2026, props: [seeds, cutting]).Propagations.RootedAllCuttings);
+        Assert.True(Year(2026, props: [cutting]).Propagations.RootedAllCuttings);
+        Assert.False(Year(2026).Propagations.RootedAllCuttings);
+    }
+
+    [Fact]
     public void Quickest_is_the_fewest_days_then_the_earlier_rooting_then_the_name()
     {
         var slow = Decided("Slow", GrowingMedium.Water, 1, 0, 30);

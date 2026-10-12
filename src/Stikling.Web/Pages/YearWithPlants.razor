@@ -253,6 +253,11 @@ else
             index = 0;
             leftOut.Clear();
             message = null;
+            // The cards have the same ids every year, so the last year's pictures go before the
+            // new year's are drawn, or the front card would show and share the old one meanwhile
+            drawRun++;
+            drawn.Clear();
+            await Cards.ReleaseAsync(cards.Select(c => c.Id));
         }
         else
         {
@@ -449,26 +454,37 @@ else
             drawn.Clear();
         var shown = YearCardService.CollageShown(format);
         var collage = cards.FirstOrDefault(c => c.Kind == YearCardKind.Collage);
-        collageShown = collage is null ? [] : collage.Collage.Take(shown).ToList();
+        // A redraw after a sync keeps the photos swapped in, as long as they are all still there
+        var keepSwaps = keepDrawn && collage is not null
+            && collageShown.Count == Math.Min(shown, collage.Collage.Count)
+            && collageShown.All(p => collage.Collage.Any(c => c.PhotoId == p.PhotoId));
+        if (!keepSwaps)
+            collageShown = collage is null ? [] : collage.Collage.Take(shown).ToList();
         StateHasChanged();
         _ = DrawAllAsync(run);
     }
 
-    // The card in front first, then the rest one by one
+    // The card in front first, then the rest one by one. Which card is next is decided each time
+    // from the one in front, so moving through the deck while it draws never skips a card.
     private async Task DrawAllAsync(int run)
     {
-        try
+        var tried = new HashSet<string>();
+        while (run == drawRun && !disposed)
         {
-            for (var step = 0; step < cards.Count; step++)
+            var next = Enumerable.Range(0, cards.Count)
+                .Select(step => cards[(index + step) % cards.Count])
+                .FirstOrDefault(c => !tried.Contains(c.Id));
+            if (next is null)
+                return;
+            tried.Add(next.Id);
+            try
             {
-                if (run != drawRun || disposed)
-                    return;
-                await DrawOneAsync(cards[(index + step) % cards.Count], run);
+                await DrawOneAsync(next, run);
             }
-        }
-        catch (JSException)
-        {
-            // What was drawn stays, and the rest shows as not drawn
+            catch (JSException)
+            {
+                // That card shows as not drawn, and the rest carry on
+            }
         }
     }
 

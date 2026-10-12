@@ -15,7 +15,8 @@ public sealed record PlantsAdded(int Count, IReadOnlyList<OriginCount> ByOrigin)
 /// <param name="Decided">Units that have gone one way or the other, among those started in the year.</param>
 /// <param name="Rooted">Propagations that rooted in the year, whenever they were started.</param>
 /// <param name="AllCuttings">Every one started in the year is a cutting, so the page can say "cuttings".</param>
-public sealed record PropagationsYear(int Started, int Succeeded, int Decided, int Rooted, bool AllCuttings);
+/// <param name="RootedAllCuttings">Every one that rooted in the year is a cutting, for "cuttings rooted". A different set from <paramref name="AllCuttings"/>, since one can root in a later year than it was started.</param>
+public sealed record PropagationsYear(int Started, int Succeeded, int Decided, int Rooted, bool AllCuttings, bool RootedAllCuttings);
 
 /// <summary>The propagation that rooted fastest, with a photo to show it by.</summary>
 public sealed record QuickestRoot(Propagation Propagation, int DaysToRoot, Guid? PhotoId);
@@ -130,7 +131,8 @@ public static class PlantYear
             overall?.Succeeded ?? 0,
             overall?.Decided ?? 0,
             rooted.Count,
-            started.All(p => p.Type == PropagationType.Cutting));
+            started.All(p => p.Type == PropagationType.Cutting),
+            rooted.Count > 0 && rooted.All(p => p.Type == PropagationType.Cutting));
 
         // A plant that died stays off every photo card
         var subjects = inYear

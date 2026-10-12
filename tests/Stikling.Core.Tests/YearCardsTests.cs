@@ -32,7 +32,7 @@ public class YearCardsTests
         IReadOnlyList<CollageItem>? collage = null,
         int photos = 0) =>
         new(year, soFar, new PlantsAdded(added, origins ?? []),
-            propagations ?? new PropagationsYear(0, 0, 0, 0, true),
+            propagations ?? new PropagationsYear(0, 0, 0, 0, true, true),
             quickest, medium, most, grown, collage ?? [], photos, []);
 
     private static IReadOnlyList<YearCard> Cards(PlantYearSummary summary, IEnumerable<Photo>? photos = null) =>
@@ -55,7 +55,7 @@ public class YearCardsTests
         return Summary(
             added: 24,
             origins: [new(PlantOrigin.Purchased, 9), new(PlantOrigin.Propagated, 6), new(PlantOrigin.Gift, 5)],
-            propagations: new PropagationsYear(10, 8, 10, 7, true),
+            propagations: new PropagationsYear(10, 8, 10, 7, true, true),
             quickest: new QuickestRoot(prop, 9, Guid.NewGuid()),
             medium: new BestMedium(GrowingMedium.Leca, 5, 5, 17.4, true, 3),
             most: new MostPhotographed(plant, 31, first.Id),
@@ -104,7 +104,7 @@ public class YearCardsTests
     [Fact]
     public void The_title_leaves_out_figures_that_are_zero()
     {
-        var title = Card(Cards(Summary(added: 0, propagations: new PropagationsYear(2, 0, 0, 0, true), photos: 12)), "title");
+        var title = Card(Cards(Summary(added: 0, propagations: new PropagationsYear(2, 0, 0, 0, true, true), photos: 12)), "title");
 
         Assert.Equal("My 2025 with my plants", title.Title);
         var figure = Assert.Single(title.Figures);
@@ -139,7 +139,7 @@ public class YearCardsTests
         var cuttings = Card(Cards(Everything()), "title");
         Assert.Equal(["24 plants added", "7 cuttings rooted", "412 photos"], cuttings.Figures.Select(f => $"{f.Value} {f.Caption}"));
 
-        var mixed = Card(Cards(Everything() with { Propagations = new PropagationsYear(10, 8, 10, 7, false) }), "title");
+        var mixed = Card(Cards(Everything() with { Propagations = new PropagationsYear(10, 8, 10, 7, false, false) }), "title");
         Assert.Equal("propagations rooted", mixed.Figures[1].Caption);
     }
 
@@ -149,7 +149,7 @@ public class YearCardsTests
         var cards = Cards(Summary(
             added: 1,
             origins: [new(PlantOrigin.Gift, 1)],
-            propagations: new PropagationsYear(1, 1, 1, 1, true),
+            propagations: new PropagationsYear(1, 1, 1, 1, true, true),
             photos: 1));
 
         Assert.Equal(["1 plant added", "1 cutting rooted", "1 photo"], Card(cards, "title").Figures.Select(f => $"{f.Value} {f.Caption}"));
@@ -189,14 +189,14 @@ public class YearCardsTests
         Assert.Equal(new YearFigure("8", "of 10 made it"), all.Figures[0]);
         Assert.Equal("10 started · 7 rooted", all.Line);
 
-        var mixed = Card(Cards(Everything() with { Propagations = new PropagationsYear(10, 8, 10, 7, false) }), "propagations");
+        var mixed = Card(Cards(Everything() with { Propagations = new PropagationsYear(10, 8, 10, 7, false, false) }), "propagations");
         Assert.Equal("Propagations in 2025", mixed.Kicker);
     }
 
     [Fact]
     public void The_propagations_card_shows_how_many_started_when_nothing_is_decided()
     {
-        var card = Card(Cards(Summary(propagations: new PropagationsYear(4, 0, 0, 0, true))), "propagations");
+        var card = Card(Cards(Summary(propagations: new PropagationsYear(4, 0, 0, 0, true, true))), "propagations");
 
         Assert.Equal(new YearFigure("4", "started"), card.Figures[0]);
     }

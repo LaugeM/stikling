@@ -110,7 +110,7 @@ public static class YearCards
         if (summary.Added.Count > 0)
             figures.Add(Figure(summary.Added.Count, "plant added", "plants added"));
         if (summary.Propagations.Rooted > 0)
-            figures.Add(summary.Propagations.AllCuttings
+            figures.Add(summary.Propagations.RootedAllCuttings
                 ? Figure(summary.Propagations.Rooted, "cutting rooted", "cuttings rooted")
                 : Figure(summary.Propagations.Rooted, "propagation rooted", "propagations rooted"));
         if (summary.PhotosTaken > 0)
