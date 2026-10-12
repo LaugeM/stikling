@@ -9,6 +9,19 @@ public sealed record AwaySpan(DateOnly From, DateOnly Until, AwayKind Kind, IRea
 {
     /// <summary>True on the days from <see cref="From"/> up to, but not including, <see cref="Until"/>.</summary>
     public bool IsOn(DateOnly day) => From <= day && day < Until;
+
+    /// <summary>
+    /// The days actually away: from the first Away stretch's start to the last one's end, without
+    /// quiet time that touches the trip. The span itself when there is no Away stretch in it.
+    /// </summary>
+    public AwaySpan Trip
+    {
+        get
+        {
+            var away = Stretches.Where(s => s.Kind == AwayKind.Away).ToList();
+            return away.Count == 0 ? this : new(away.Min(s => s.From), away.Max(s => s.Until), AwayKind.Away, away);
+        }
+    }
 }
 
 /// <summary>Working out where today is among the stretches that have been set aside.</summary>

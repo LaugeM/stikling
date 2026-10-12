@@ -38,7 +38,7 @@ public static class SitterSheetBuilder
         TimeProvider time)
     {
         var today = time.Today();
-        var span = AwayTime.Spans(stretches).FirstOrDefault(s => s.Kind == AwayKind.Away && s.Until > today);
+        var span = AwayTime.Spans(stretches).FirstOrDefault(s => s.Kind == AwayKind.Away && s.Until > today)?.Trip;
         var visits = span is null ? [] : SitterVisits.Dates(sheet.Visits, span.From, span.Until);
 
         var activePlants = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();

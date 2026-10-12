@@ -117,6 +117,17 @@ public class AwayTests
     }
 
     [Fact]
+    public void A_trip_leaves_out_quiet_time_that_touches_it()
+    {
+        // A quiet week, then away from day 7 to day 20
+        var span = AwayTime.Spans([Stretch(0, 7, AwayKind.Quiet), Stretch(7, 20)]).Single();
+
+        Assert.Equal(D, span.From);
+        Assert.Equal(D.AddDays(7), span.Trip.From);
+        Assert.Equal(D.AddDays(20), span.Trip.Until);
+    }
+
+    [Fact]
     public void There_is_no_day_back_while_a_later_stretch_is_on()
     {
         // Back on day 10, away again from day 12 after a day at home

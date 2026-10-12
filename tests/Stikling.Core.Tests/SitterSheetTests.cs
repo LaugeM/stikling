@@ -222,7 +222,8 @@ public class SitterSheetTests
         Assert.Equal(Today.AddDays(40), view.Until);
 
         stretches.Add(new AwayStretch { From = Today.AddDays(-1), Until = Today.AddDays(3), Kind = AwayKind.Away });
-        Assert.Equal(Today.AddDays(-2), Build().From);
+        // The quiet days that touch the trip are left off the sheet
+        Assert.Equal(Today.AddDays(-1), Build().From);
     }
 
     [Fact]

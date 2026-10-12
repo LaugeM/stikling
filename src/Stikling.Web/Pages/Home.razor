@@ -613,7 +613,7 @@ else
         backSpan = backDay is { } day ? AwayTime.Spans(stretches).LastOrDefault(s => s.Until == day) : null;
         visitDates = [];
         if (awayNow is { Kind: AwayKind.Away } now)
-            visitDates = SitterVisits.Dates((await SitterSheets.GetAsync()).Visits, now.From, now.Until);
+            visitDates = SitterVisits.Dates((await SitterSheets.GetAsync()).Visits, now.Trip.From, now.Trip.Until);
 
         // The list on the day back reads the same things the watering reminder does
         var needsCare = wateringOn || backDay is not null;
@@ -794,7 +794,7 @@ else
                 <span>In water · @Labels.Count(row.DaysSinceLogged ?? 0, "day") since you looked</span>
                 break;
             case BackReason.PastPace:
-                <span>Usually every @Labels.Count(row.UsualDays ?? 0, "day") · it's been @row.DaysSince</span>
+                <span>Usually every @Labels.Count(row.UsualDays ?? 0, "day") · it's been @Labels.Count(row.DaysSince ?? 0, "day")</span>
                 break;
             default:
                 <span>Flagged: @row.FlagReason · @Labels.DaysAgo(Today.DayNumber - (row.FlagSince ?? Today).DayNumber)</span>
