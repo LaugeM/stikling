@@ -558,16 +558,21 @@ public class SharePageTests
     }
 
     [Fact]
-    public void Without_a_pot_up_day_the_cut_off_is_the_day_the_propagation_finished()
+    public void Without_a_pot_up_day_the_cut_off_is_the_day_the_plant_was_added()
     {
+        // A batch still going has no finish date, so its later photos must not show
         var (cutting, plant) = PottedUp();
+        cutting.FinishedOn = null;
         plant.AcquiredOn = LooseDate.Of(2026, 9);
+        plant.CreatedAt = At(9, 1, 12);
         var before = PhotoOf(cutting, At(9, 1), SubjectType.Propagation);
         var after = PhotoOf(cutting, At(9, 2), SubjectType.Propagation);
 
         var page = PageFrom(plant, cutting, [before, after]);
+        var served = SharePage.RootingPhotos(plant, cutting, [before, after], Utc);
 
         Assert.Equal([before.Id], page.Items.SelectMany(i => i.Photos).Select(p => p.Id));
+        Assert.Equal([before.Id], served.Select(p => p.Id));
     }
 
     [Fact]

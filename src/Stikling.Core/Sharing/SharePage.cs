@@ -84,7 +84,7 @@ public static class SharePage
         if (rooting is not null)
         {
             sections.Add(new Section(rooting, SubjectType.Propagation, day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(rooting), day),
-                PropagationMarks(rooting, includeFinish: false), CutOff(plant, rooting)));
+                PropagationMarks(rooting, includeFinish: false), CutOff(plant, zone)));
         }
         sections.Add(new Section(plant, SubjectType.Plant, day => PhotoDayCount.PlantAge(plant, day), milestones, null));
 
@@ -101,18 +101,19 @@ public static class SharePage
     {
         if (from is not { IsDeleted: false })
             return [];
-        var cutOff = CutOff(plant, from);
+        var cutOff = CutOff(plant, zone);
         return photos
             .Where(p => !p.IsDeleted && p.SubjectType == SubjectType.Propagation && p.SubjectId == from.Id
-                && (cutOff is not { } last || Day(p.TakenAt, zone) <= last))
+                && Day(p.TakenAt, zone) <= cutOff)
             .GroupBy(p => p.Id).Select(g => g.First())
             .OrderBy(p => p.TakenAt)
             .ToList();
     }
 
-    // The day it was potted up, or failing that the day the propagation finished
-    private static DateOnly? CutOff(Plant plant, Propagation from) =>
-        plant.AcquiredOn is { Precision: DatePrecision.Day } acquired ? acquired.Start : from.FinishedOn;
+    // The day it was potted up. When its date was changed to a month or a year, the day the plant was
+    // added stands in, since the propagation's finish can be later and a batch may still be going
+    private static DateOnly CutOff(Plant plant, TimeZoneInfo zone) =>
+        plant.AcquiredOn is { Precision: DatePrecision.Day } acquired ? acquired.Start : Day(plant.CreatedAt, zone);
 
     /// <summary>The page for a propagation.</summary>
     /// <param name="parent">The plant it was taken from.</param>
