@@ -73,13 +73,46 @@ public static class SharePage
             taken.Where(p => !p.IsDeleted).ToList(),
             today);
 
+        // A plant potted up from a propagation starts its page with the rooting it came from
+        var rooting = from is { IsDeleted: false } ? from : null;
+
         var milestones = new List<Mark>();
         if (plant.AcquiredOn is { Precision: DatePrecision.Day } acquired)
-            milestones.Add(new Mark(acquired.Start, 0, "Got it"));
+            milestones.Add(new Mark(acquired.Start, 0, rooting is null ? "Got it" : "Potted up"));
 
-        return Build(plant, SubjectType.Plant, plant.CoverPhotoId, card, taken => PhotoDayCount.PlantAge(plant, taken), milestones,
-            photos, entries, propagations, settings, zone);
+        var sections = new List<Section>();
+        if (rooting is not null)
+        {
+            sections.Add(new Section(rooting, SubjectType.Propagation, day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(rooting), day),
+                PropagationMarks(rooting, includeFinish: false), CutOff(plant, rooting)));
+        }
+        sections.Add(new Section(plant, SubjectType.Plant, day => PhotoDayCount.PlantAge(plant, day), milestones, null));
+
+        return Build(sections, plant, plant.CoverPhotoId, card, photos, entries, propagations, settings, zone);
     }
+
+    /// <summary>
+    /// The photos of the propagation a plant was potted up from that its page shows: not deleted,
+    /// and taken on or before the day it was potted up, oldest first. Empty when there is no
+    /// propagation or it is deleted. Photos of the units left in a batch afterwards aren't its story.
+    /// </summary>
+    /// <param name="photos">Photos of any subject, deleted or not.</param>
+    public static IReadOnlyList<Photo> RootingPhotos(Plant plant, Propagation? from, IEnumerable<Photo> photos, TimeZoneInfo zone)
+    {
+        if (from is not { IsDeleted: false })
+            return [];
+        var cutOff = CutOff(plant, from);
+        return photos
+            .Where(p => !p.IsDeleted && p.SubjectType == SubjectType.Propagation && p.SubjectId == from.Id
+                && (cutOff is not { } last || Day(p.TakenAt, zone) <= last))
+            .GroupBy(p => p.Id).Select(g => g.First())
+            .OrderBy(p => p.TakenAt)
+            .ToList();
+    }
+
+    // The day it was potted up, or failing that the day the propagation finished
+    private static DateOnly? CutOff(Plant plant, Propagation from) =>
+        plant.AcquiredOn is { Precision: DatePrecision.Day } acquired ? acquired.Start : from.FinishedOn;
 
     /// <summary>The page for a propagation.</summary>
     /// <param name="parent">The plant it was taken from.</param>
@@ -89,9 +122,18 @@ public static class SharePage
         ShareLinkSettings settings, TimeZoneInfo zone, DateOnly today)
     {
         var card = ShareCardText.ForPropagation(propagation, parent is { IsDeleted: false } ? parent : null, today);
-        var p = propagation;
-        var seed = p.Type == PropagationType.Seed;
+        var sections = new List<Section>
+        {
+            new(propagation, SubjectType.Propagation, day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day),
+                PropagationMarks(propagation, includeFinish: true), null)
+        };
+        return Build(sections, propagation, propagation.CoverPhotoId, card, photos, entries, new Dictionary<Guid, Propagation>(), settings, zone);
+    }
 
+    // The milestones a propagation's dates give. Its finishing one is left out of the plant's page, where the plant is it.
+    private static List<Mark> PropagationMarks(Propagation p, bool includeFinish)
+    {
+        var seed = p.Type == PropagationType.Seed;
         var milestones = new List<Mark>
         {
             new(p.StartedOn, 0, $"{(seed ? "Sown" : "Started")}{ShareCardText.MediumPhrase(p.Medium)}")
@@ -104,84 +146,106 @@ public static class SharePage
             milestones.Add(new Mark(up, 3, "First seed germinated"));
         if (p.RootedOn is { } rooted)
             milestones.Add(new Mark(rooted, 4, "Rooted"));
-        if (p.FinishedOn is { } finished && p.Stage is PropagationStage.Done or PropagationStage.Failed)
+        if (includeFinish && p.FinishedOn is { } finished && p.Stage is PropagationStage.Done or PropagationStage.Failed)
             milestones.Add(new Mark(finished, 5, p.Stage == PropagationStage.Done ? "Potted up" : "Didn't make it"));
-
-        return Build(propagation, SubjectType.Propagation, propagation.CoverPhotoId, card, taken => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), taken), milestones,
-            photos, entries, new Dictionary<Guid, Propagation>(), settings, zone);
+        return milestones;
     }
 
     // A milestone from the subject's own dates, in the order they come within one day
     private sealed record Mark(DateOnly Day, int Rank, string Text);
 
-    // One thing to place on the page, before it is sorted
-    private sealed record Slot(DateOnly Day, int Order, DateTimeOffset At, ShareItemKind Kind, string? Text, List<Photo> Photos);
+    // One thing to place on the page, before it is sorted. The section keeps the rooting a plant came from ahead of the plant's own.
+    private sealed record Slot(DateOnly Day, int Section, int Order, DateTimeOffset At, ShareItemKind Kind, string? Text, List<Photo> Photos);
+
+    // The records of one subject that go on the page, with its own day counts and milestones.
+    // Nothing after the cut-off day is shown.
+    private sealed record Section(Entity Subject, SubjectType Type, Func<DateOnly, string?> Age, List<Mark> Marks, DateOnly? CutOff);
 
     private static SharePageModel Build(
-        Entity subject, SubjectType type, Guid? coverId, ShareCardText card, Func<DateOnly, string?> age, List<Mark> marks,
+        IReadOnlyList<Section> sections, Entity subject, Guid? coverId, ShareCardText card,
         IEnumerable<Photo> allPhotos, IEnumerable<TimelineEntry> allEntries, IReadOnlyDictionary<Guid, Propagation> propagations,
         ShareLinkSettings settings, TimeZoneInfo zone)
     {
         var leftOut = settings.LeftOutPhotoIds.ToHashSet();
-        var photos = allPhotos
-            .Where(p => !p.IsDeleted && p.SubjectType == type && p.SubjectId == subject.Id && !leftOut.Contains(p.Id))
-            .GroupBy(p => p.Id).Select(g => g.First())
-            .ToDictionary(p => p.Id);
-        var entries = allEntries
-            .Where(e => !e.IsDeleted && e.SubjectType == type && e.SubjectId == subject.Id)
-            .OrderBy(e => e.OccurredAt).ThenBy(e => e.CreatedAt)
-            .ToList();
+        var photoList = allPhotos.ToList();
+        var entryList = allEntries.ToList();
 
         var slots = new List<Slot>();
+        var ages = new List<Func<DateOnly, string?>>();
+        var photos = new Dictionary<Guid, Photo>();
         var placed = new HashSet<Guid>();
         var shownEntries = new List<TimelineEntry>();
 
-        foreach (var entry in entries)
+        for (var rank = 0; rank < sections.Count; rank++)
         {
-            switch (entry.Kind)
+            var section = sections[rank];
+            ages.Add(section.Age);
+            var type = section.Type;
+            bool Within(DateOnly day) => section.CutOff is not { } last || day <= last;
+
+            var own = photoList
+                .Where(p => !p.IsDeleted && p.SubjectType == type && p.SubjectId == section.Subject.Id && !leftOut.Contains(p.Id)
+                    && Within(Day(p.TakenAt, zone)))
+                .GroupBy(p => p.Id).Select(g => g.First())
+                .ToDictionary(p => p.Id);
+            var entries = entryList
+                .Where(e => !e.IsDeleted && e.SubjectType == type && e.SubjectId == section.Subject.Id && Within(Day(e.OccurredAt, zone)))
+                .OrderBy(e => e.OccurredAt).ThenBy(e => e.CreatedAt)
+                .ToList();
+
+            foreach (var photo in own.Values)
+                photos[photo.Id] = photo;
+
+            foreach (var entry in entries)
             {
-                case TimelineKind.Photo or TimelineKind.Note:
-                    var own = entry.PhotoIds.Where(id => photos.ContainsKey(id) && placed.Add(id)).Select(id => photos[id]).ToList();
-                    var text = entry.Kind == TimelineKind.Note && settings.ShowNotes ? ShareLinkRules.Clean(entry.Text) : null;
-                    if (own.Count == 0 && text is null)
+                switch (entry.Kind)
+                {
+                    case TimelineKind.Photo or TimelineKind.Note:
+                        var entryPhotos = entry.PhotoIds.Where(id => own.ContainsKey(id) && placed.Add(id)).Select(id => own[id]).ToList();
+                        var text = entry.Kind == TimelineKind.Note && settings.ShowNotes ? ShareLinkRules.Clean(entry.Text) : null;
+                        if (entryPhotos.Count == 0 && text is null)
+                            break;
+                        shownEntries.Add(entry);
+                        // A note whose text is not shown is only its photos
+                        slots.Add(new Slot(Day(entry.OccurredAt, zone), rank, 1, entry.OccurredAt,
+                            text is null ? ShareItemKind.Photos : ShareItemKind.Note, text, entryPhotos));
                         break;
-                    shownEntries.Add(entry);
-                    // A note whose text is not shown is only its photos
-                    slots.Add(new Slot(Day(entry.OccurredAt, zone), 1, entry.OccurredAt,
-                        text is null ? ShareItemKind.Photos : ShareItemKind.Note, text, own));
-                    break;
 
-                case TimelineKind.Propagated when type == SubjectType.Plant:
-                    shownEntries.Add(entry);
-                    slots.Add(new Slot(Day(entry.OccurredAt, zone), 0, entry.OccurredAt, ShareItemKind.Milestone,
-                        PropagatedText(entry, propagations), []));
-                    break;
+                    case TimelineKind.Propagated when type == SubjectType.Plant:
+                        shownEntries.Add(entry);
+                        slots.Add(new Slot(Day(entry.OccurredAt, zone), rank, 0, entry.OccurredAt, ShareItemKind.Milestone,
+                            PropagatedText(entry, propagations), []));
+                        break;
 
-                // Created is covered by the milestones, and a Change names rooms, people, prices and the like
+                    // Created is covered by the milestones, and a Change names rooms, people, prices and the like
+                }
             }
+
+            // Photos that no shown entry points at still belong on the day they were taken
+            var loose = own.Values.Where(p => !placed.Contains(p.Id)).ToList();
+            foreach (var day in loose.GroupBy(p => Day(p.TakenAt, zone)))
+                slots.Add(new Slot(day.Key, rank, 1, day.Max(p => p.TakenAt), ShareItemKind.Photos, null, [.. day]));
+            foreach (var photo in loose)
+                placed.Add(photo.Id);
+
+            // Milestones from dates come before everything else of the subject on their day, in a fixed order
+            foreach (var mark in section.Marks.Where(m => Within(m.Day)))
+                slots.Add(new Slot(mark.Day, rank, -1, DateTimeOffset.MinValue.AddTicks(mark.Rank), ShareItemKind.Milestone, mark.Text, []));
         }
 
-        // Photos that no shown entry points at still belong on the day they were taken
-        var loose = photos.Values.Where(p => !placed.Contains(p.Id)).ToList();
-        foreach (var day in loose.GroupBy(p => Day(p.TakenAt, zone)))
-            slots.Add(new Slot(day.Key, 1, day.Max(p => p.TakenAt), ShareItemKind.Photos, null, [.. day]));
-
-        // Milestones from dates come before everything else on their day, in a fixed order
-        foreach (var mark in marks)
-            slots.Add(new Slot(mark.Day, -1, DateTimeOffset.MinValue.AddTicks(mark.Rank), ShareItemKind.Milestone, mark.Text, []));
-
         var items = slots
-            .OrderBy(s => s.Day).ThenBy(s => s.Order).ThenBy(s => s.At)
+            .OrderBy(s => s.Day).ThenBy(s => s.Section).ThenBy(s => s.Order).ThenBy(s => s.At)
             .Select(s => new SharePageItem(
                 s.Day,
-                PhotoDayCount.Suffix(age(s.Day)),
+                PhotoDayCount.Suffix(ages[s.Section](s.Day)),
                 s.Kind,
                 s.Text,
                 s.Photos.OrderBy(p => p.TakenAt).Select(p => new SharePhoto(p.Id, p.Frame, p.Width, p.Height)).ToList()))
             .ToList();
 
-        var shown = photos.Values.Where(p => placed.Contains(p.Id) || loose.Contains(p)).ToList();
-        var cover = coverId is { } id && photos.TryGetValue(id, out var chosen) ? chosen : shown.MaxBy(p => p.TakenAt);
+        var shown = photos.Values.Where(p => placed.Contains(p.Id)).ToList();
+        // An explicit cover is only ever the subject's own photo, never one of the rooting it came from
+        var cover = coverId is { } id && photos.TryGetValue(id, out var chosen) && chosen.SubjectId == subject.Id ? chosen : shown.MaxBy(p => p.TakenAt);
         var updates = shown.Select(p => p.UpdatedAt).Concat(shownEntries.Select(e => e.UpdatedAt)).ToList();
 
         return new SharePageModel(

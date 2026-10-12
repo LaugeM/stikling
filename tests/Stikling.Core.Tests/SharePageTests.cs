@@ -492,6 +492,181 @@ public class SharePageTests
         Assert.DoesNotContain("Gone plant", page.Line);
     }
 
+    // ---- A plant potted up from a propagation ----
+
+    // A cutting started on 1 Aug, potted up on 1 Sep as a plant that came from it
+    private static (Propagation Cutting, Plant Plant) PottedUp()
+    {
+        var cutting = NewCutting();
+        cutting.FirstRootOn = new DateOnly(2026, 8, 19);
+        cutting.FinishedOn = new DateOnly(2026, 9, 1);
+        var plant = NewPlant();
+        plant.FromPropagationId = cutting.Id;
+        plant.AcquiredOn = LooseDate.Of(new DateOnly(2026, 9, 1));
+        return (cutting, plant);
+    }
+
+    private static SharePageModel PageFrom(Plant plant, Propagation? from, IEnumerable<Photo>? photos = null,
+        IEnumerable<TimelineEntry>? entries = null, ShareLinkSettings? settings = null) =>
+        SharePage.ForPlant(plant, null, from, [], photos ?? [], entries ?? [], new Dictionary<Guid, Propagation>(),
+            settings ?? Settings(), Utc, Today);
+
+    [Fact]
+    public void A_plant_potted_up_starts_its_page_with_the_rooting_it_came_from()
+    {
+        var (cutting, plant) = PottedUp();
+        var rootPhoto = PhotoOf(cutting, At(8, 10), SubjectType.Propagation);
+
+        var page = PageFrom(plant, cutting, [rootPhoto]);
+
+        Assert.Equal("Started in water", page.Items[0].Text);
+        Assert.Equal(rootPhoto.Id, page.Items[1].Photos.Single().Id);
+        Assert.Equal("First root", page.Items[2].Text);
+        Assert.Equal("Potted up", page.Items[3].Text);
+        Assert.Equal(1, page.PhotoCount);
+    }
+
+    [Fact]
+    public void On_the_pot_up_day_the_rooting_comes_first_then_potted_up_then_the_plants_own()
+    {
+        var (cutting, plant) = PottedUp();
+        var rootPhoto = PhotoOf(cutting, At(9, 1, 20), SubjectType.Propagation);
+        var plantPhoto = PhotoOf(plant, At(9, 1, 8));
+
+        var items = PageFrom(plant, cutting, [plantPhoto, rootPhoto]).Items.Where(i => i.Day == new DateOnly(2026, 9, 1)).ToList();
+
+        Assert.Equal(rootPhoto.Id, items[0].Photos.Single().Id);
+        Assert.Equal("Potted up", items[1].Text);
+        Assert.Equal(plantPhoto.Id, items[2].Photos.Single().Id);
+    }
+
+    [Fact]
+    public void Only_the_rooting_up_to_the_pot_up_day_is_shown()
+    {
+        var (cutting, plant) = PottedUp();
+        var before = PhotoOf(cutting, At(9, 1, 23), SubjectType.Propagation);
+        var after = PhotoOf(cutting, At(9, 2), SubjectType.Propagation);
+        var lateNote = EntryOf(cutting, TimelineKind.Note, At(9, 5), "Another one rooted", SubjectType.Propagation);
+        cutting.RootedOn = new DateOnly(2026, 9, 3);
+
+        var page = PageFrom(plant, cutting, [before, after], [lateNote]);
+
+        var ids = page.Items.SelectMany(i => i.Photos).Select(p => p.Id).ToList();
+        Assert.Contains(before.Id, ids);
+        Assert.DoesNotContain(after.Id, ids);
+        Assert.DoesNotContain(page.Items, i => i.Text == "Another one rooted" || i.Text == "Rooted");
+    }
+
+    [Fact]
+    public void Without_a_pot_up_day_the_cut_off_is_the_day_the_propagation_finished()
+    {
+        var (cutting, plant) = PottedUp();
+        plant.AcquiredOn = LooseDate.Of(2026, 9);
+        var before = PhotoOf(cutting, At(9, 1), SubjectType.Propagation);
+        var after = PhotoOf(cutting, At(9, 2), SubjectType.Propagation);
+
+        var page = PageFrom(plant, cutting, [before, after]);
+
+        Assert.Equal([before.Id], page.Items.SelectMany(i => i.Photos).Select(p => p.Id));
+    }
+
+    [Fact]
+    public void The_acquired_milestone_says_potted_up_instead_of_got_it()
+    {
+        var (cutting, plant) = PottedUp();
+
+        Assert.Contains(PageFrom(plant, cutting).Items, i => i.Text == "Potted up");
+        Assert.DoesNotContain(PageFrom(plant, cutting).Items, i => i.Text == "Got it");
+        Assert.Contains(PageOf(plant).Items, i => i.Text == "Got it");
+    }
+
+    [Fact]
+    public void The_propagations_finishing_milestone_is_left_out()
+    {
+        var (cutting, plant) = PottedUp();
+        cutting.Stage = PropagationStage.Done;
+
+        var page = PageFrom(plant, cutting);
+
+        Assert.Single(page.Items, i => i.Text == "Potted up");
+    }
+
+    [Fact]
+    public void The_propagations_notes_follow_the_notes_switch()
+    {
+        var (cutting, plant) = PottedUp();
+        var photo = PhotoOf(cutting, At(8, 5), SubjectType.Propagation);
+        var note = EntryOf(cutting, TimelineKind.Note, At(8, 5), "Cut below a node", SubjectType.Propagation, photo);
+
+        var on = PageFrom(plant, cutting, [photo], [note]);
+        var off = PageFrom(plant, cutting, [photo], [note], Settings(notes: false));
+
+        Assert.Contains(on.Items, i => i.Text == "Cut below a node");
+        Assert.Equal(1, on.NoteCount);
+        Assert.DoesNotContain(off.Items, i => i.Text == "Cut below a node");
+        Assert.Equal(0, off.NoteCount);
+        Assert.Single(off.Items.SelectMany(i => i.Photos));
+    }
+
+    [Fact]
+    public void Each_section_counts_days_its_own_way()
+    {
+        var (cutting, plant) = PottedUp();
+        var rootPhoto = PhotoOf(cutting, At(8, 11), SubjectType.Propagation);
+        var plantPhoto = PhotoOf(plant, At(9, 11));
+
+        var items = PageFrom(plant, cutting, [rootPhoto, plantPhoto]).Items;
+
+        Assert.Equal(" · day 10", items.Single(i => i.Photos.Any(p => p.Id == rootPhoto.Id)).DayCount);
+        Assert.Equal(" · 10 days", items.Single(i => i.Photos.Any(p => p.Id == plantPhoto.Id)).DayCount);
+    }
+
+    [Fact]
+    public void The_cover_is_the_newest_shown_photo_including_the_rooting_and_never_an_explicit_propagation_photo()
+    {
+        var (cutting, plant) = PottedUp();
+        var rootPhoto = PhotoOf(cutting, At(8, 11), SubjectType.Propagation);
+        var plantPhoto = PhotoOf(plant, At(9, 11));
+
+        Assert.Equal(plantPhoto.Id, PageFrom(plant, cutting, [rootPhoto, plantPhoto]).Cover!.Id);
+        Assert.Equal(rootPhoto.Id, PageFrom(plant, cutting, [rootPhoto]).Cover!.Id);
+
+        plant.CoverPhotoId = rootPhoto.Id;
+        Assert.Equal(plantPhoto.Id, PageFrom(plant, cutting, [rootPhoto, plantPhoto]).Cover!.Id);
+    }
+
+    [Fact]
+    public void A_deleted_propagation_leaves_the_page_as_before()
+    {
+        var (cutting, plant) = PottedUp();
+        cutting.DeletedAt = At(9, 3);
+        var rootPhoto = PhotoOf(cutting, At(8, 10), SubjectType.Propagation);
+
+        var page = PageFrom(plant, cutting, [rootPhoto]);
+
+        Assert.Equal(PageOf(plant).Items.Select(i => i.Text), page.Items.Select(i => i.Text));
+        Assert.Empty(page.Items.SelectMany(i => i.Photos));
+        Assert.Empty(SharePage.RootingPhotos(plant, cutting, [rootPhoto], Utc));
+    }
+
+    [Fact]
+    public void Rooting_photos_are_the_propagations_up_to_the_pot_up_day_oldest_first()
+    {
+        var (cutting, plant) = PottedUp();
+        var later = PhotoOf(cutting, At(8, 20), SubjectType.Propagation);
+        var earlier = PhotoOf(cutting, At(8, 5), SubjectType.Propagation);
+        var tooLate = PhotoOf(cutting, At(9, 2), SubjectType.Propagation);
+        var deleted = PhotoOf(cutting, At(8, 6), SubjectType.Propagation);
+        deleted.DeletedAt = At(8, 7);
+        var plants = PhotoOf(plant, At(8, 8));
+        var other = PhotoOf(NewCutting(), At(8, 9), SubjectType.Propagation);
+
+        var found = SharePage.RootingPhotos(plant, cutting, [later, tooLate, deleted, plants, other, earlier], Utc);
+
+        Assert.Equal([earlier.Id, later.Id], found.Select(p => p.Id));
+        Assert.Empty(SharePage.RootingPhotos(plant, null, [earlier], Utc));
+    }
+
     [Fact]
     public void Status_is_not_part_of_the_page()
     {

@@ -215,6 +215,24 @@ public sealed class PropagationService(
         await AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.Failed);
     }
 
+    /// <summary>
+    /// Records units given to someone, with an optional name for who got them. They went on
+    /// <paramref name="date"/>, today unless given, which can't be in the future or before the start.
+    /// </summary>
+    public async Task GiveAwayAsync(Propagation propagation, int count, string? to = null, DateOnly? date = null)
+    {
+        var day = date ?? Today;
+        if (day > Today)
+            throw new InvalidOperationException("The date can't be in the future.");
+        if (day < propagation.StartedOn)
+            throw new InvalidOperationException("The date can't be before the propagation started.");
+        propagation.RecordGivenAway(count, day);
+        await propagations.SaveAsync(propagation);
+
+        var text = Clean(to) is { } who ? $"Gave {count} to {who}" : $"Gave {count} away";
+        await AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway);
+    }
+
     public Task DeleteAsync(Guid id) => propagations.DeleteAsync(id);
 
     /// <summary>
@@ -234,12 +252,14 @@ public sealed class PropagationService(
     public static string Describe(Propagation propagation, Func<Enum, string> label) =>
         $"{propagation.InitialCount}× {label(propagation.Type).ToLowerInvariant()} in {label(propagation.Medium)}";
 
-    /// <summary>"2 potted up, 1 failed".</summary>
+    /// <summary>"2 potted up, 1 given away, 1 failed".</summary>
     public static string Outcome(Propagation propagation)
     {
         var parts = new List<string>(2);
         if (propagation.PottedUpCount > 0)
             parts.Add($"{propagation.PottedUpCount} potted up");
+        if (propagation.GivenAwayCount > 0)
+            parts.Add($"{propagation.GivenAwayCount} given away");
         if (propagation.FailedCount > 0)
             parts.Add($"{propagation.FailedCount} failed");
         return parts.Count == 0 ? "nothing yet" : string.Join(", ", parts);

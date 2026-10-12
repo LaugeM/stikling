@@ -19,6 +19,7 @@
 @inject GrowLightService LightService
 @inject SettingsService SettingsService
 @inject GooglePhotosService Google
+@inject AccountService Account
 
 <PageTitle>@(plant?.DisplayName ?? "Plant") · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -108,6 +109,10 @@ else
             {
                 <p class="profile-facts">@departure</p>
             }
+            @if (plant.HasLeft && Account.IsAvailable)
+            {
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => OpenMore(More.PassOn)">Send them its history</button>
+            }
 
             <AttentionPanel Current="plant.Attention" Editing="false" EditingChanged="_ => OpenMore(More.Flag)"
                             Suggestions="AttentionPanel.PlantReasons" OnSave="SetAttentionAsync" />
@@ -157,7 +162,7 @@ else
                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
                 </button>
                 <a class="btn btn-link btn-sm link-action" href="plants/@plant.Id/edit">Edit</a>
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => shareOpen = true">Share</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenShare">Share</button>
             </div>
 
             <div id="plant-details" class="profile-details @(detailsOpen ? "open" : null)">
@@ -466,6 +471,7 @@ else
     </Sheet>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="plant.Id"
+                Plant="plant" FromPropagation="fromPropagation" StartOnLink="shareOnLink"
                 CoverPhotoId="plant.CoverPhotoId" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
 
     <Sheet Title="@MoreTitle" Open="more != More.None" OpenChanged="open => { if (!open) more = More.None; }">
@@ -554,6 +560,11 @@ else
                         </li>
                     }
                 </ul>
+                break;
+
+            case More.PassOn:
+                <PassOnPanel SubjectType="SubjectType.Plant" SubjectId="plant.Id" Name="@plant.DisplayName"
+                             OnDone="() => more = More.None" OnChangePage="ChangePassOnPage" />
                 break;
 
             case More.Flag:
@@ -658,8 +669,9 @@ else
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
 
-    private enum More { None, Menu, Flag, Dormant, Quarantine, Status }
+    private enum More { None, Menu, Flag, Dormant, Quarantine, Status, PassOn }
     private bool shareOpen;
+    private bool shareOnLink;
 
     private Plant? plant;
     private bool loaded;
@@ -753,6 +765,7 @@ else
         More.Quarantine => "Quarantine",
         More.Status when status == PlantStatus.Died => "It died",
         More.Status => "It left",
+        More.PassOn => "Send its history",
         _ => plant?.DisplayName ?? "",
     };
 
@@ -999,7 +1012,29 @@ else
         await PlantService.SetQuarantineAsync(plant, since, Labels.For);
     });
 
-    private Task SaveStatusAsync() => ChangeAsync(async () =>
+    private void OpenShare()
+    {
+        shareOnLink = false;
+        shareOpen = true;
+    }
+
+    // From the offer to send its history: the Share sheet opens on the link, to change what the page shows
+    private void ChangePassOnPage()
+    {
+        more = More.None;
+        shareOnLink = true;
+        shareOpen = true;
+    }
+
+    // Giving it away or selling it offers to send its history right away, where links are available
+    private async Task SaveStatusAsync()
+    {
+        await SaveStatusChangesAsync();
+        if (plant is { HasLeft: true } && Account.IsAvailable)
+            more = More.PassOn;
+    }
+
+    private Task SaveStatusChangesAsync() => ChangeAsync(async () =>
     {
         var before = plant!.Copy();
         plant.Status = status;

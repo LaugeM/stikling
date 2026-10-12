@@ -275,20 +275,27 @@ else
                             : "It's finished, since none are left.")
                     </div>
                 </div>
-                @* Only once something has been potted up or failed, so there is a count to correct *@
-                @if (original is { PottedUpCount: > 0 } or { FailedCount: > 0 })
+                @* Only once something has been potted up, given away or failed, so there is a count to correct *@
+                @if (original is { PottedUpCount: > 0 } or { FailedCount: > 0 } or { GivenAwayCount: > 0 })
                 {
                     <div class="row g-2 mb-3">
-                        <div class="col-6">
+                        <div class="@(ShowGivenAway ? "col-4" : "col-6")">
                             <label class="form-label" for="potted-up">Potted up</label>
                             <InputNumber id="potted-up" class="form-control" @bind-Value="propagation.PottedUpCount" min="@PlantsFromIt" inputmode="numeric" />
                         </div>
-                        <div class="col-6">
+                        @if (ShowGivenAway)
+                        {
+                            <div class="col-4">
+                                <label class="form-label" for="given-away">Given away</label>
+                                <InputNumber id="given-away" class="form-control" @bind-Value="propagation.GivenAwayCount" min="0" inputmode="numeric" />
+                            </div>
+                        }
+                        <div class="@(ShowGivenAway ? "col-4" : "col-6")">
                             <label class="form-label" for="failed">Failed</label>
                             <InputNumber id="failed" class="form-control" @bind-Value="propagation.FailedCount" min="0" inputmode="numeric" />
                         </div>
                         <div class="form-text">
-                            Correct these if one was potted up or marked failed by mistake. Any left over go back to growing.
+                            Correct these if one was potted up, given away or marked failed by mistake. Any left over go back to growing.
                             @if (PlantsFromIt > 0)
                             {
                                 <text> Plants potted up from it stay in your collection.</text>
@@ -426,8 +433,11 @@ else
     // Plants potted up from it that still exist. The potted up count can't be corrected below them
     private int PlantsFromIt => propagation is null ? 0 : plants.Count(p => p.FromPropagationId == propagation.Id);
 
-    // Units already potted up or failed can't be counted away
-    private int MinCount => Math.Max(1, (propagation?.PottedUpCount ?? 0) + (propagation?.FailedCount ?? 0));
+    // Units already potted up, given away or failed can't be counted away
+    private int MinCount => Math.Max(1, (propagation?.PottedUpCount ?? 0) + (propagation?.FailedCount ?? 0) + (propagation?.GivenAwayCount ?? 0));
+
+    // Only shown once something was given away, so it stays out of the way for everyone else
+    private bool ShowGivenAway => original is { GivenAwayCount: > 0 };
 
     private string BackUrl =>
         !IsNew ? $"propagations/{Id}"
@@ -466,7 +476,7 @@ else
         Labels.Stage(propagation.Stage, propagation.Type),
         propagation.FirstRootOn is { } root ? $"first root {Labels.Date(root)}" : null,
         propagation.FirstLeafOn is { } leaf ? $"first leaf {Labels.Date(leaf)}" : null,
-        propagation.PottedUpCount + propagation.FailedCount > 0 ? PropagationService.Outcome(propagation) : null);
+        propagation.PottedUpCount + propagation.FailedCount + propagation.GivenAwayCount > 0 ? PropagationService.Outcome(propagation) : null);
 
     private static bool HasSetup(Propagation p) =>
         !string.IsNullOrWhiteSpace(p.Container) || p.SoilMixId is not null || p.RootingAids.Count > 0

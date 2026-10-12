@@ -165,7 +165,7 @@ public class PropagationTests
         var corms = Batch(2);
         corms.FailedCount = -1;
 
-        Assert.Contains("The number potted up or failed can't be negative.", corms.Validate(DateOnly.MaxValue));
+        Assert.Contains("The number potted up, given away or failed can't be negative.", corms.Validate(DateOnly.MaxValue));
     }
 
     [Fact]
@@ -177,7 +177,7 @@ public class PropagationTests
         var corms = Batch(3);
         corms.RecordPottedUp(2, new DateOnly(2026, 9, 20));
         corms.InitialCount = 1;
-        Assert.Contains("The count can't be lower than the 2 already potted up or failed.", corms.Validate(DateOnly.MaxValue));
+        Assert.Contains("The count can't be lower than the 2 already potted up, given away or failed.", corms.Validate(DateOnly.MaxValue));
     }
 
     [Fact]

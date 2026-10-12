@@ -71,6 +71,9 @@ public sealed class Propagation : Entity
     public int PottedUpCount { get; set; }
     public int FailedCount { get; set; }
 
+    /// <summary>Units given away to someone else before or without being potted up. Records from before read as 0.</summary>
+    public int GivenAwayCount { get; set; }
+
     public PropagationStage Stage { get; set; } = PropagationStage.Started;
 
     public string? Notes { get; set; }
@@ -94,9 +97,9 @@ public sealed class Propagation : Entity
     public double? GerminationRate =>
         Type == PropagationType.Seed && SeedsGerminated is { } up && InitialCount > 0 ? up / (double)InitialCount : null;
 
-    /// <summary>Units still in the propagation (not potted up and not failed).</summary>
+    /// <summary>Units still in the propagation (not potted up, given away or failed).</summary>
     [JsonIgnore]
-    public int RemainingCount => InitialCount - PottedUpCount - FailedCount;
+    public int RemainingCount => InitialCount - PottedUpCount - FailedCount - GivenAwayCount;
 
     /// <summary>Still in progress (not done and not failed).</summary>
     [JsonIgnore]
@@ -219,6 +222,14 @@ public sealed class Propagation : Entity
         SyncStageWithCounts(on);
     }
 
+    /// <summary>Records that <paramref name="count"/> units were given away on <paramref name="on"/>.</summary>
+    public void RecordGivenAway(int count, DateOnly on)
+    {
+        CheckCount(count);
+        GivenAwayCount += count;
+        SyncStageWithCounts(on);
+    }
+
     private void CheckCount(int count)
     {
         if (!IsActive)
@@ -237,7 +248,7 @@ public sealed class Propagation : Entity
     {
         if (RemainingCount <= 0)
         {
-            Stage = PottedUpCount > 0 ? PropagationStage.Done : PropagationStage.Failed;
+            Stage = PottedUpCount + GivenAwayCount > 0 ? PropagationStage.Done : PropagationStage.Failed;
             FinishedOn ??= today;
             DormantSince = null;
             Attention = null;
@@ -256,12 +267,12 @@ public sealed class Propagation : Entity
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus))
             errors.Add("Give the propagation a nickname or a genus.");
-        if (PottedUpCount < 0 || FailedCount < 0)
-            errors.Add("The number potted up or failed can't be negative.");
+        if (PottedUpCount < 0 || FailedCount < 0 || GivenAwayCount < 0)
+            errors.Add("The number potted up, given away or failed can't be negative.");
         if (InitialCount < 1)
             errors.Add("Start with at least 1.");
-        else if (InitialCount < PottedUpCount + FailedCount)
-            errors.Add($"The count can't be lower than the {PottedUpCount + FailedCount} already potted up or failed.");
+        else if (InitialCount < PottedUpCount + FailedCount + GivenAwayCount)
+            errors.Add($"The count can't be lower than the {PottedUpCount + FailedCount + GivenAwayCount} already potted up, given away or failed.");
         if (RootedOn is { } rooted && rooted < StartedOn)
             errors.Add("It can't have rooted before it was started.");
         if (FirstRootOn < StartedOn || FirstLeafOn < StartedOn)

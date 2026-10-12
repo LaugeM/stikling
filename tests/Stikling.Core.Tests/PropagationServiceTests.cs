@@ -339,6 +339,86 @@ public class PropagationServiceTests
         Assert.Equal("2 failed\nFinished: 2 failed", HistoryOf(corms.Id).Last().Text);
     }
 
+    [Fact]
+    public async Task Giving_some_away_is_neither_potted_up_nor_failed()
+    {
+        var corms = await StartCormsAsync(3);
+
+        await service.GiveAwayAsync(corms, 1, "  Anna ");
+
+        Assert.Equal(1, corms.GivenAwayCount);
+        Assert.Equal(2, corms.RemainingCount);
+        Assert.True(corms.IsActive);
+        var entry = HistoryOf(corms.Id).Last();
+        Assert.Equal("Gave 1 to Anna", entry.Text);
+        Assert.Equal(TimelineEvent.GaveAway, entry.Event);
+    }
+
+    [Fact]
+    public async Task Giving_away_without_a_name_says_so_and_the_last_ones_finish_the_propagation()
+    {
+        var corms = await StartCormsAsync(3);
+        await service.MarkFailedAsync(corms, 1);
+
+        await service.GiveAwayAsync(corms, 2, " ");
+
+        Assert.Equal(PropagationStage.Done, corms.Stage);
+        Assert.Equal(Today, corms.FinishedOn);
+        Assert.Equal("Gave 2 away\nFinished: 2 given away, 1 failed", HistoryOf(corms.Id).Last().Text);
+    }
+
+    [Fact]
+    public async Task Giving_everything_away_finishes_it_as_done_and_failing_everything_does_not()
+    {
+        var given = await StartCormsAsync(1);
+        await service.GiveAwayAsync(given, 1);
+        var failed = await StartCormsAsync(1);
+        await service.MarkFailedAsync(failed, 1);
+
+        Assert.Equal(PropagationStage.Done, given.Stage);
+        Assert.Equal(PropagationStage.Failed, failed.Stage);
+    }
+
+    [Fact]
+    public async Task Giving_away_checks_the_count_and_the_date()
+    {
+        var corms = await StartCormsAsync(2);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GiveAwayAsync(corms, 3));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.GiveAwayAsync(corms, 1, null, Today.AddDays(1)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.GiveAwayAsync(corms, 1, null, corms.StartedOn.AddDays(-1)));
+        Assert.Equal(0, corms.GivenAwayCount);
+    }
+
+    [Fact]
+    public async Task Given_away_units_are_in_the_outcome_and_the_edit_note_but_not_the_success_rate()
+    {
+        var corms = await StartCormsAsync(4);
+        await service.PotUpAsync(corms, new PotUpRequest(1, Today));
+        await service.GiveAwayAsync(corms, 1);
+        await service.MarkFailedAsync(corms, 1);
+
+        Assert.Equal("1 potted up, 1 given away, 1 failed", PropagationService.Outcome(corms));
+        var result = PropagationResults.Overall([corms])!;
+        Assert.Equal(1, result.Succeeded);
+        Assert.Equal(1, result.Failed);
+        Assert.Equal(0.5, result.SuccessRate);
+
+        var before = corms.Copy();
+        corms.GivenAwayCount = 0;
+        await service.UpdateAsync(before, corms, Label);
+        Assert.Contains("Given away: 0 (was 1)", HistoryOf(corms.Id).Last().Text);
+    }
+
+    [Fact]
+    public void Given_away_counts_are_validated()
+    {
+        var p = new Propagation { Nickname = "x", InitialCount = 2, GivenAwayCount = 3, StartedOn = Today };
+        Assert.Contains(p.Validate(Today), e => e.Contains("potted up, given away or failed"));
+        p.GivenAwayCount = -1;
+        Assert.Contains("The number potted up, given away or failed can't be negative.", p.Validate(Today));
+    }
+
     [Theory]
     [InlineData(null, 2, 0, new string?[] { null, null })]
     [InlineData("Coleus", 1, 0, new string?[] { "Coleus" })]

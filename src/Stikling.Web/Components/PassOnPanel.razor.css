@@ -1,0 +1,28 @@
+.pass-on-note {
+    margin-bottom: 1rem;
+}
+
+.pass-on-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    margin-bottom: 1rem;
+    padding-left: 0;
+}
+
+.pass-on-switch .form-check-input {
+    float: none;
+    flex: none;
+    margin: 0;
+}
+
+.pass-on-error {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    color: var(--pa-alert);
+}
+
+.form-actions {
+    flex-wrap: wrap;
+}
