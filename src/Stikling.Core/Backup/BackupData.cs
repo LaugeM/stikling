@@ -34,6 +34,7 @@ public sealed class BackupData
     public List<UserSettings> Settings { get; set; } = [];
     public List<PutOff> PutOffs { get; set; } = [];
     public List<GrowLight> GrowLights { get; set; } = [];
+    public List<ReceivedHistory> ReceivedHistories { get; set; } = [];
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the
@@ -55,7 +56,8 @@ public sealed class BackupData
         Places.Count(p => !p.IsDeleted && !p.IsSpot),
         Settings.Count(s => !s.IsDeleted),
         PutOffs.Count(p => !p.IsDeleted),
-        GrowLights.Count(l => !l.IsDeleted));
+        GrowLights.Count(l => !l.IsDeleted),
+        ReceivedHistories.Count(h => !h.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -74,4 +76,5 @@ public sealed record BackupCounts(
     int Rooms,
     int Settings,
     int PutOffs,
-    int GrowLights);
+    int GrowLights,
+    int ReceivedHistories);

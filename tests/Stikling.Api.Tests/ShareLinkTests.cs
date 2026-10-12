@@ -907,4 +907,204 @@ public class ShareLinkTests(ApiFactory api)
         for (var i = 0; i < 10; i++)
             Assert.NotEqual(HttpStatusCode.TooManyRequests, (await From(client, "203.0.113.20", "/health")).StatusCode);
     }
+
+    // Keeping a plant's history: the copy a friend fetches, and the page of a plant that was received
+
+    private static async Task<Guid> AddGivenAwayPlant(SignedIn me)
+    {
+        var id = Guid.NewGuid();
+        await Push(me, "plants", new
+        {
+            id, createdAt = Monday, updatedAt = Monday, nickname = "Mona", genus = "monstera", species = "deliciosa",
+            cultivar = "Thai Constellation", acquiredOn = "2026-08-29", status = "GivenAway", leftTo = "Anna", source = "Secret shop",
+        });
+        return id;
+    }
+
+    private async Task<HttpResponseMessage> Copy(ShareLinkInfo link, string? origin = null)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"/s/{TokenOf(link)}/copy");
+        if (origin is not null)
+            request.Headers.Add("Origin", origin);
+        return await api.CreateClient().SendAsync(request);
+    }
+
+    [Fact]
+    public async Task The_copy_of_a_given_away_plant_is_json_with_text_enums_and_noon_photo_times()
+    {
+        var me = await SignIn();
+        var plant = await AddGivenAwayPlant(me);
+        var photo = await AddPhoto(me, plant, hour: 9);
+        await AddNote(me, plant, "Roots showing", photo);
+        var link = await Share(me, plant);
+
+        var response = await Copy(link);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(response.Headers.CacheControl!.NoCache);
+        Assert.Equal("application/json", response.Content.Headers.ContentType!.MediaType);
+        var copy = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(1, copy.GetProperty("version").GetInt32());
+        Assert.Equal("Plant", copy.GetProperty("subjectType").GetString());
+        Assert.Equal(plant, copy.GetProperty("subjectId").GetGuid());
+        Assert.Equal("Mona", copy.GetProperty("name").GetString());
+        Assert.Equal("monstera", copy.GetProperty("genus").GetString());
+        Assert.Equal("Thai Constellation", copy.GetProperty("cultivar").GetString());
+        Assert.Equal(JsonValueKind.Null, copy.GetProperty("propagation").ValueKind);
+        Assert.Equal(photo, copy.GetProperty("coverPhotoId").GetGuid());
+
+        var items = copy.GetProperty("items").EnumerateArray().ToList();
+        Assert.Equal("Milestone", items[0].GetProperty("kind").GetString());
+        Assert.Equal("Got it", items[0].GetProperty("text").GetString());
+        var note = items[1];
+        Assert.Equal("Note", note.GetProperty("kind").GetString());
+        Assert.Equal("Roots showing", note.GetProperty("text").GetString());
+        var shown = note.GetProperty("photos")[0];
+        Assert.Equal(photo, shown.GetProperty("id").GetGuid());
+        Assert.Equal(1600, shown.GetProperty("width").GetInt32());
+        Assert.StartsWith("2026-09-25T12:00:00+02:00", shown.GetProperty("takenAt").GetString());
+
+        // Nothing the page doesn't say
+        var text = copy.ToString();
+        Assert.DoesNotContain("Anna", text);
+        Assert.DoesNotContain("Secret shop", text);
+    }
+
+    [Fact]
+    public async Task The_copy_of_a_propagation_with_units_given_away_has_its_dates()
+    {
+        var me = await SignIn();
+        var id = Guid.NewGuid();
+        await Push(me, "propagations", new
+        {
+            id, createdAt = Monday, updatedAt = Monday, nickname = "Mona cutting", type = "Cutting", medium = "Water",
+            startedOn = "2026-08-01", firstRootOn = "2026-08-19", stage = "Rooting", initialCount = 3, givenAwayCount = 1,
+        });
+        var link = await Share(me, id, SubjectType.Propagation);
+
+        var response = await Copy(link);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var copy = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("Propagation", copy.GetProperty("subjectType").GetString());
+        var dates = copy.GetProperty("propagation");
+        Assert.Equal("Cutting", dates.GetProperty("type").GetString());
+        Assert.Equal("Water", dates.GetProperty("medium").GetString());
+        Assert.Equal("2026-08-01", dates.GetProperty("startedOn").GetString());
+        Assert.Equal("2026-08-19", dates.GetProperty("firstRootOn").GetString());
+        Assert.Equal("day 18", copy.GetProperty("items")[1].GetProperty("dayCount").GetString());
+    }
+
+    [Fact]
+    public async Task There_is_no_copy_of_a_plant_that_is_still_in_the_collection()
+    {
+        var me = await SignIn();
+        var plant = await AddPlant(me);
+        var link = await Share(me, plant);
+
+        Assert.Equal(HttpStatusCode.NotFound, (await Copy(link)).StatusCode);
+    }
+
+    [Fact]
+    public async Task There_is_no_copy_of_a_propagation_without_units_given_away()
+    {
+        var me = await SignIn();
+        var id = Guid.NewGuid();
+        await Push(me, "propagations", new
+        {
+            id, createdAt = Monday, updatedAt = Monday, nickname = "Mona cutting", type = "Cutting", medium = "Water",
+            startedOn = "2026-08-01", stage = "Started",
+        });
+        var link = await Share(me, id, SubjectType.Propagation);
+
+        Assert.Equal(HttpStatusCode.NotFound, (await Copy(link)).StatusCode);
+    }
+
+    [Fact]
+    public async Task The_copy_of_a_link_turned_off_is_410_and_of_an_unknown_token_404()
+    {
+        var me = await SignIn();
+        var plant = await AddGivenAwayPlant(me);
+        var link = await Share(me, plant);
+        await me.Client.DeleteAsync($"/collections/{me.CollectionId}/shares/{link.Id}");
+
+        Assert.Equal(HttpStatusCode.Gone, (await Copy(link)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await api.CreateClient().GetAsync("/s/not-a-real-token/copy")).StatusCode);
+    }
+
+    [Fact]
+    public async Task The_app_in_a_browser_can_read_the_copy()
+    {
+        var me = await SignIn();
+        var plant = await AddGivenAwayPlant(me);
+        var link = await Share(me, plant);
+
+        var response = await Copy(link, ApiFactory.AppOrigin);
+
+        Assert.Equal(ApiFactory.AppOrigin, Assert.Single(response.Headers.GetValues("Access-Control-Allow-Origin")));
+    }
+
+    [Fact]
+    public async Task The_page_offers_to_keep_the_history_only_when_it_can_be_kept()
+    {
+        var me = await SignIn();
+        var kept = await AddGivenAwayPlant(me);
+        var home = await AddPlant(me);
+        var gone = await Share(me, kept);
+        var staying = await Share(me, home);
+
+        var (_, given, _) = await Page(gone);
+        var (_, active, _) = await Page(staying);
+
+        Assert.Contains("Were you given this one?", given);
+        Assert.Contains("Keep its history in Stikling", given);
+        Assert.Contains($"href=\"https://stikling.app/received/{TokenOf(gone)}\"", given);
+        Assert.DoesNotContain("Keep its history", active);
+        Assert.DoesNotContain("/received/", active);
+    }
+
+    [Fact]
+    public async Task A_plant_that_was_received_shows_its_history_first_with_the_copied_photos()
+    {
+        var me = await SignIn();
+        var plant = Guid.NewGuid();
+        var history = Guid.NewGuid();
+        var photo = Guid.NewGuid();
+        await Push(me, "plants", new
+        {
+            id = plant, createdAt = Monday, updatedAt = Monday, nickname = "Mona", origin = "Gift", acquiredOn = "2026-09-25",
+        });
+        var taken = new DateTimeOffset(2026, 9, 1, 12, 0, 0, TimeSpan.FromHours(2));
+        await Push(me, "photos", new
+        {
+            id = photo, createdAt = Monday, updatedAt = Monday, subjectType = SubjectType.Plant, subjectId = plant, takenAt = taken,
+            width = 1600, height = 1200, receivedHistoryId = history,
+        });
+        await Upload(me, photo, "full");
+        await Upload(me, photo, "thumb");
+        await Push(me, "receivedHistories", new
+        {
+            id = history, createdAt = Monday, updatedAt = Monday, subjectType = "Plant", subjectId = plant, name = "Mona", arrivedOn = "2026-09-25",
+            items = new object[]
+            {
+                new { day = "2026-09-01", dayCount = "day 3", kind = "Photos", text = (string?)null, photoIds = new[] { photo } },
+                new { day = "2026-09-02", dayCount = "day 4", kind = "Note", text = "Roots from before", photoIds = Array.Empty<Guid>() },
+            },
+        });
+        var link = await Share(me, plant);
+
+        var (status, html, _) = await Page(link);
+        var image = await Image(link, photo);
+
+        Assert.Equal(HttpStatusCode.OK, status);
+        Assert.Equal(HttpStatusCode.OK, image.StatusCode);
+        Assert.Contains("1 Sep 2026 · day 3", html);
+        Assert.Contains("Roots from before", html);
+        Assert.Contains($"/s/{TokenOf(link)}/photos/{photo}/full", html);
+        Assert.Contains("1 photo · 1 note", html);
+        var history1 = html.IndexOf("1 Sep 2026", StringComparison.Ordinal);
+        Assert.True(history1 > 0 && history1 < html.IndexOf("Got it", StringComparison.Ordinal));
+        // Nothing to keep until the plant has left
+        Assert.DoesNotContain("/received/", html);
+    }
 }

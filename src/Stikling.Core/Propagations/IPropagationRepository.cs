@@ -9,6 +9,9 @@ public interface IPropagationRepository
 
     Task<Propagation?> GetAsync(Guid id);
 
+    /// <summary>True when a propagation with this id is stored and soft-deleted.</summary>
+    Task<bool> IsDeletedAsync(Guid id);
+
     /// <summary>Adds or updates a propagation. Throws if it isn't valid.</summary>
     Task SaveAsync(Propagation propagation);
 

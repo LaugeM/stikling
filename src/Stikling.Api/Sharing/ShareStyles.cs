@@ -42,6 +42,10 @@ public static class ShareStyles
         .latin i { font-style: italic; }
         .line { margin: 0.75rem 0 0; }
         .counts { margin: 0.5rem 0 0; font-size: 0.8rem; line-height: 1.4; color: var(--muted); }
+        .keep { margin: 1rem 1rem 0; padding: 0.75rem 1rem; background: var(--tint); border-radius: 0.75rem; }
+        .keep p { margin: 0 0 0.5rem; }
+        .keep p:last-child { margin: 0; }
+        .keep-link { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 1rem; background: var(--green); color: var(--on-green); font: 600 0.95rem var(--display); text-decoration: none; border-radius: 0.6rem; }
         .history { list-style: none; margin: 1.5rem 0 0; padding: 0 1rem; }
         .history > li { margin: 0 0 1.25rem; }
         .when { margin: 0 0 0.3rem; font: 600 0.85rem/1.4 var(--body); letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); }

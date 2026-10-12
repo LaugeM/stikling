@@ -29,13 +29,14 @@ public class SharePageTests
         };
 
     private static SharePageModel PageOf(Plant plant, IEnumerable<Photo>? photos = null, IEnumerable<TimelineEntry>? entries = null,
-        ShareLinkSettings? settings = null, TimeZoneInfo? zone = null, IReadOnlyDictionary<Guid, Propagation>? propagations = null) =>
-        SharePage.ForPlant(plant, null, null, [], photos ?? [], entries ?? [], propagations ?? new Dictionary<Guid, Propagation>(),
+        ShareLinkSettings? settings = null, TimeZoneInfo? zone = null, IReadOnlyDictionary<Guid, Propagation>? propagations = null,
+        IEnumerable<ReceivedHistory>? received = null) =>
+        SharePage.ForPlant(plant, null, null, [], photos ?? [], entries ?? [], received ?? [], propagations ?? new Dictionary<Guid, Propagation>(),
             settings ?? Settings(), zone ?? Utc, Today);
 
     private static SharePageModel PageOf(Propagation propagation, IEnumerable<Photo>? photos = null, IEnumerable<TimelineEntry>? entries = null,
-        ShareLinkSettings? settings = null, TimeZoneInfo? zone = null) =>
-        SharePage.ForPropagation(propagation, null, photos ?? [], entries ?? [], settings ?? Settings(), zone ?? Utc, Today);
+        ShareLinkSettings? settings = null, TimeZoneInfo? zone = null, IEnumerable<ReceivedHistory>? received = null) =>
+        SharePage.ForPropagation(propagation, null, photos ?? [], entries ?? [], received ?? [], settings ?? Settings(), zone ?? Utc, Today);
 
     private static Propagation NewCutting() =>
         new() { Nickname = "Mona cutting", Type = PropagationType.Cutting, Medium = GrowingMedium.Water, StartedOn = new DateOnly(2026, 8, 1) };
@@ -487,7 +488,7 @@ public class SharePageTests
         var parent = new Plant { Nickname = "Gone plant", DeletedAt = At(9, 1) };
         var p = NewCutting();
 
-        var page = SharePage.ForPropagation(p, parent, [], [], Settings(), Utc, Today);
+        var page = SharePage.ForPropagation(p, parent, [], [], [], Settings(), Utc, Today);
 
         Assert.DoesNotContain("Gone plant", page.Line);
     }
@@ -507,8 +508,8 @@ public class SharePageTests
     }
 
     private static SharePageModel PageFrom(Plant plant, Propagation? from, IEnumerable<Photo>? photos = null,
-        IEnumerable<TimelineEntry>? entries = null, ShareLinkSettings? settings = null) =>
-        SharePage.ForPlant(plant, null, from, [], photos ?? [], entries ?? [], new Dictionary<Guid, Propagation>(),
+        IEnumerable<TimelineEntry>? entries = null, ShareLinkSettings? settings = null, IEnumerable<ReceivedHistory>? received = null) =>
+        SharePage.ForPlant(plant, null, from, [], photos ?? [], entries ?? [], received ?? [], new Dictionary<Guid, Propagation>(),
             settings ?? Settings(), Utc, Today);
 
     [Fact]

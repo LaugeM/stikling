@@ -50,7 +50,10 @@ public enum TimelineEvent
     LookedOver,
 
     /// <summary>Units of a propagation were given to someone.</summary>
-    GaveAway
+    GaveAway,
+
+    /// <summary>The plant or propagation was given to you. On the Created entry that starts its history.</summary>
+    Arrived
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>
