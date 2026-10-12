@@ -17,6 +17,7 @@
 @inject PlantNameService Names
 @inject ITimelineRepository TimelineRepository
 @inject GrowLightService LightService
+@inject AwayService AwayService
 @inject SettingsService SettingsService
 @inject GooglePhotosService Google
 @inject AccountService Account
@@ -914,7 +915,7 @@ else
         var guess = WateringRound.GuessFor(
             plant, await Repository.GetAllAsync(), allCare, await TimelineRepository.GetPlantChangesAsync(),
             id => pots.FirstOrDefault(p => p.Id == id), await LightService.GetAllAsync(), places,
-            Seasons.HemisphereOf(TimeZoneInfo.Local), Time);
+            await AwayService.GetAllAsync(), Seasons.HemisphereOf(TimeZoneInfo.Local), Time);
         wateringLine = WateringText.Summary(guess);
     }
 

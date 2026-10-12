@@ -78,6 +78,9 @@ public sealed class Propagation : Entity
 
     public string? Notes { get; set; }
 
+    /// <summary>A note for whoever looks after it while you are away. Not shared. Older propagations read as null.</summary>
+    public string? SitterNote { get; set; }
+
     public Guid? CoverPhotoId { get; set; }
 
     /// <summary>

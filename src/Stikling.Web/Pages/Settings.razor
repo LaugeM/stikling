@@ -96,6 +96,9 @@
     <p class="settings-hint">
         Learns how often each plant gets water and asks you to check it when it's probably dry. It says nothing about a plant until it has seen a few waterings.
     </p>
+    <div class="settings-rows mt-4">
+        <SettingsRow Href="away" Title="Away and quiet time" Detail="Today stops asking while you're away or taking a break" />
+    </div>
     <div class="form-check form-switch mt-4">
         <input class="form-check-input" type="checkbox" role="switch" id="daily-round"
                checked="@dailyRound" @onchange="SetDailyRoundAsync" />

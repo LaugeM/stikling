@@ -1,3 +1,4 @@
+using Stikling.Core.Away;
 using Stikling.Core.Models;
 
 namespace Stikling.Core.Care;
@@ -73,21 +74,27 @@ public sealed record WateringGuess(
 
     /// <summary>
     /// The days between each watering and the next, with the day each started on, oldest first.
-    /// Nothing is left out, so it holds the dormant stretches too.
+    /// Nothing is left out but the gaps across a stretch away, so it holds the dormant stretches too.
     /// </summary>
-    public static IReadOnlyList<(DateOnly Start, int Days)> Gaps(Plant plant, IEnumerable<CareLog> logs) =>
-        GapsBetween(Waterings(plant, logs));
+    public static IReadOnlyList<(DateOnly Start, int Days)> Gaps(
+        Plant plant, IEnumerable<CareLog> logs, IReadOnlyList<AwayStretch> stretches) =>
+        GapsBetween(Waterings(plant, logs), stretches);
 
     /// <summary>The gaps that started while the plant was dormant, or the ones that didn't.</summary>
     public static IReadOnlyList<(DateOnly Start, int Days)> Gaps(
-        Plant plant, IEnumerable<CareLog> logs, DormantPeriods periods, bool dormant) =>
-        Gaps(plant, logs).Where(g => periods.Contains(g.Start) == dormant).ToList();
+        Plant plant, IEnumerable<CareLog> logs, DormantPeriods periods, bool dormant, IReadOnlyList<AwayStretch> stretches) =>
+        Gaps(plant, logs, stretches).Where(g => periods.Contains(g.Start) == dormant).ToList();
 
-    private static List<(DateOnly Start, int Days)> GapsBetween(IReadOnlyList<DateOnly> days)
+    // A gap across a stretch the plant wasn't watered in says nothing about its pace, see AwayTime.LeavesOut
+    private static List<(DateOnly Start, int Days)> GapsBetween(
+        IReadOnlyList<DateOnly> days, IReadOnlyList<AwayStretch> stretches)
     {
         var gaps = new List<(DateOnly, int)>();
         for (var i = 0; i + 1 < days.Count; i++)
-            gaps.Add((days[i], days[i + 1].DayNumber - days[i].DayNumber));
+        {
+            if (!AwayTime.LeavesOut(stretches, days, days[i], days[i + 1]))
+                gaps.Add((days[i], days[i + 1].DayNumber - days[i].DayNumber));
+        }
         return gaps;
     }
 
@@ -96,6 +103,7 @@ public sealed record WateringGuess(
     /// <param name="timeline">Timeline entries for any subject. Only this plant's changes count, for telling when it was dormant.</param>
     /// <param name="lit">The plant is under a grow light, so the time of year says nothing about it.</param>
     /// <param name="seasonFactor">How much the collection's plants shift their pace this month, from <see cref="WateringSeasonFactor"/>.</param>
+    /// <param name="stretches">The stretches set aside. A gap or a dry-down across one the plant wasn't watered in is left out.</param>
     public static WateringGuess Of(
         Plant plant,
         IEnumerable<CareLog> logs,
@@ -105,6 +113,7 @@ public sealed record WateringGuess(
         Hemisphere hemisphere,
         DateOnly today,
         double? seasonFactor,
+        IReadOnlyList<AwayStretch> stretches,
         TimeProvider time)
     {
         var own = OwnLogs(plant, logs).ToList();
@@ -141,7 +150,7 @@ public sealed record WateringGuess(
         if (form == WateringForm.TopWatered && waterings.Count >= 2)
         {
             var waterAt = plant.WaterAt ?? Plant.DefaultWaterAt;
-            var dry = DryDowns(waterings, readings, periods, dormant, waterAt);
+            var dry = DryDowns(waterings, readings, periods, dormant, waterAt, stretches);
             if (dry.Count > 0)
             {
                 var (dryDays, adjusted) = Estimate(dry, today, lit, hemisphere, seasonFactor);
@@ -150,7 +159,7 @@ public sealed record WateringGuess(
             }
         }
 
-        var gaps = GapsBetween(waterings).Where(g => periods.Contains(g.Start) == dormant).ToList();
+        var gaps = GapsBetween(waterings, stretches).Where(g => periods.Contains(g.Start) == dormant).ToList();
         if (gaps.Count >= GapsNeeded && last is { } lastWatered)
         {
             var (days, adjusted) = Estimate(gaps, today, lit, hemisphere, seasonFactor);
@@ -168,7 +177,8 @@ public sealed record WateringGuess(
         IReadOnlyList<(DateOnly On, int Value)> readings,
         DormantPeriods periods,
         bool dormant,
-        int waterAt)
+        int waterAt,
+        IReadOnlyList<AwayStretch> stretches)
     {
         var samples = new List<(DateOnly, int)>();
         for (var i = 0; i + 1 < waterings.Count; i++)
@@ -178,7 +188,7 @@ public sealed record WateringGuess(
                 continue;
 
             var dry = readings.FirstOrDefault(r => r.On > start && r.On <= next && r.Value <= waterAt);
-            if (dry != default)
+            if (dry != default && !AwayTime.LeavesOut(stretches, waterings, start, dry.On))
                 samples.Add((start, dry.On.DayNumber - start.DayNumber));
         }
         return samples;

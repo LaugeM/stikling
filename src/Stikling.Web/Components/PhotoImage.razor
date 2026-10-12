@@ -8,7 +8,7 @@
 
 @if (url is not null)
 {
-    <img src="@url" alt="@Alt" class="@ImageClass" style="@FrameStyle" loading="lazy" decoding="async" />
+    <img src="@url" alt="@Alt" class="@ImageClass" style="@FrameStyle" loading="@(Eager ? "eager" : "lazy")" decoding="async" />
 }
 else
 {
@@ -28,6 +28,10 @@ else
 
     [Parameter]
     public string? Class { get; set; }
+
+    /// <summary>Load it at once instead of when it scrolls into view, where it has to be there for a print.</summary>
+    [Parameter]
+    public bool Eager { get; set; }
 
     /// <summary>Move and zoom it the way it was framed. Off where the whole photo is shown.</summary>
     [Parameter]

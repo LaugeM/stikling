@@ -48,4 +48,10 @@ public sealed class UserSettings : Entity
     /// stays hidden on every device. Null when none was. Older settings without it read as null.
     /// </summary>
     public int? YearHiddenFor { get; set; }
+
+    /// <summary>
+    /// How many rows "Look at these first" shows on the day back. Null means 5, 0 means all of
+    /// them, and 3 and 10 are the other choices. Older settings without it read as null.
+    /// </summary>
+    public int? BackListLength { get; set; }
 }

@@ -1,0 +1,570 @@
+@page "/sitter-sheet"
+@implements IDisposable
+@using System.Globalization
+@* The page has the model's name, so the model is called by another *@
+@using SheetChoices = Stikling.Core.Models.SitterSheet
+@inject SitterSheetService SheetService
+@inject AwayService AwayService
+@inject IPlantRepository Plants
+@inject IPropagationRepository Propagations
+@inject ICareLogRepository CareLogs
+@inject ITimelineRepository Entries
+@inject IPotRepository PotRepository
+@inject GrowLightService LightService
+@inject RoomService RoomService
+@inject PlantService PlantService
+@inject SitterSheetActions SheetActions
+@inject TimeProvider Time
+
+<PageTitle>Sheet for a plant-sitter · Stikling</PageTitle>
+
+@* No ReloadOnSync: like an edit page, nothing should change under someone choosing what goes on it *@
+
+<div class="sitter-page">
+    <div class="sitter-screen">
+        <a class="back-link" href="away">Away and quiet time</a>
+        <div class="page-heading">
+            <h1>Sheet for a plant-sitter</h1>
+            @* On a wide screen the actions sit here, on a phone they are in the bar at the bottom *@
+            @if (view is not null)
+            {
+                <div class="sitter-heading-actions">
+                    @ActionButtons
+                </div>
+            }
+        </div>
+
+        @if (view is null || sheet is null)
+        {
+            <p class="text-body-secondary">Loading…</p>
+        }
+        else
+        {
+            <p class="text-body-secondary">
+                A page to print, save as a PDF or share as text for whoever looks after your plants. It says when to check a plant, never when to water it.
+            </p>
+
+            <section class="sitter-options" aria-label="Sheet options">
+                <div class="sitter-stretch">
+                    @if (view.From is not null && view.Until is not null)
+                    {
+                        <span>Away @SitterSheetText.Day(view.From.Value) to @SitterSheetText.Day(view.Until.Value)</span>
+                        <a class="link-action" href="@ChangeLink">Change</a>
+                    }
+                    else
+                    {
+                        <span>Add when you're away to put visit dates on it.</span>
+                        <a class="link-action" href="away/new">Add</a>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-label" id="layout-label">Layout</div>
+                    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="layout-label">
+                        @foreach (var (value, label) in layoutOptions)
+                        {
+                            var id = $"layout-{value}";
+                            <input type="radio" class="btn-check" name="layout" id="@id"
+                                   checked="@(sheet.Layout == value)" @onchange="() => ChangeAsync(() => sheet.Layout = value)" />
+                            <label class="btn btn-outline-primary" for="@id">@label</label>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="visits">Visits</label>
+                    <select id="visits" class="form-select" @onchange="e => ChangeAsync(() => sheet.Visits = ParseVisits(e.Value))">
+                        @foreach (var (value, label) in visitOptions)
+                        {
+                            <option value="@value" selected="@(sheet.Visits == value)">@label</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-label" id="usual-label">Usual way to water</div>
+                    <div class="chip-row" role="radiogroup" aria-labelledby="usual-label">
+                        @foreach (var method in Enum.GetValues<WaterMethod>())
+                        {
+                            var picked = !sheet.UseOwnWords && sheet.DefaultMethod == method;
+                            <button type="button" role="radio" class="chip @(picked ? "picked" : null)"
+                                    aria-checked="@(picked ? "true" : "false")"
+                                    @onclick="() => ChangeAsync(() => { sheet.UseOwnWords = false; sheet.DefaultMethod = method; })">@SitterSheetText.MethodName(method)</button>
+                        }
+                        <button type="button" role="radio" class="chip @(sheet.UseOwnWords ? "picked" : null)"
+                                aria-checked="@(sheet.UseOwnWords ? "true" : "false")"
+                                @onclick="() => ChangeAsync(() => sheet.UseOwnWords = true)">In your own words</button>
+                    </div>
+                    @if (sheet.UseOwnWords)
+                    {
+                        <label class="form-label mt-3" for="own-words">How to water a plant that needs it</label>
+                        <textarea id="own-words" class="form-control" rows="3" value="@sheet.OwnWords"
+                                  @onchange="e => ChangeAsync(() => sheet.OwnWords = e.Value?.ToString())"></textarea>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="has-meter"
+                               checked="@sheet.HasMeter" @onchange="e => ChangeAsync(() => sheet.HasMeter = e.Value is true)" />
+                        <label class="form-check-label" for="has-meter">There's a moisture meter</label>
+                    </div>
+                    @if (sheet.HasMeter)
+                    {
+                        <label class="form-label mt-2" for="meter-where">Where is it?</label>
+                        <input id="meter-where" class="form-control" value="@sheet.MeterWhere"
+                               @onchange="e => ChangeAsync(() => sheet.MeterWhere = e.Value?.ToString())" />
+                    }
+                </div>
+
+                <fieldset class="mb-3">
+                    <legend class="form-label">Show</legend>
+                    @Show("show-photos", "Photos", !sheet.HidePhotos, on => sheet.HidePhotos = !on)
+                    @Show("show-places", "Where it is", !sheet.HidePlaces, on => sheet.HidePlaces = !on)
+                    @Show("show-how", "How it's watered", !sheet.HideHowWatered, on => sheet.HideHowWatered = !on)
+                    @Show("show-pace", "How often", !sheet.HidePace, on => sheet.HidePace = !on)
+                    @Show("show-notes", "Notes", !sheet.HideNotes, on => sheet.HideNotes = !on)
+                </fieldset>
+
+                <div class="mb-3">
+                    <label class="form-label" for="general-note">A note for whoever looks after them</label>
+                    <textarea id="general-note" class="form-control" rows="3" value="@sheet.GeneralNote"
+                              @onchange="e => ChangeAsync(() => sheet.GeneralNote = e.Value?.ToString())"></textarea>
+                </div>
+
+                <FormSection Title="Plants on the sheet" Summary="@ListSummary">
+                    @if (view.Candidates.Count == 0)
+                    {
+                        <p class="form-text mb-0">No plants or propagations yet.</p>
+                    }
+                    else
+                    {
+                        <ul class="sitter-list">
+                            @foreach (var candidate in view.Candidates)
+                            {
+                                <li>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="on-@candidate.Id"
+                                               checked="@candidate.OnSheet" @onchange="e => SetOnSheetAsync(candidate.Id, e.Value is true)" />
+                                        <label class="form-check-label" for="on-@candidate.Id">
+                                            @candidate.Name
+                                            @if (candidate.Place is { } place)
+                                            {
+                                                <span class="sitter-list-place">@place</span>
+                                            }
+                                        </label>
+                                    </div>
+                                    @if (candidate.TopWatered)
+                                    {
+                                        <select class="form-select form-select-sm" aria-label="How @candidate.Name is watered"
+                                                @onchange="e => SetWaterByAsync(candidate.Id, e.Value?.ToString())">
+                                            <option value="" selected="@(candidate.WaterBy is null)">Not said</option>
+                                            @foreach (var method in Enum.GetValues<WaterMethod>())
+                                            {
+                                                <option value="@method" selected="@(candidate.WaterBy == method)">@SitterSheetText.MethodName(method)</option>
+                                            }
+                                        </select>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                </FormSection>
+            </section>
+
+            @if (view.DueBeforeYouGo.Count > 0 && view.From > Today)
+            {
+                <p class="sitter-note">Look at these before you go: @string.Join(", ", view.DueBeforeYouGo).</p>
+            }
+            @if (!view.AnyPace && view.Subjects.Any(s => s.IsPlant))
+            {
+                <p class="sitter-note">None of these have a watering pace yet, so they're on every visit. Logging waterings in the app teaches it.</p>
+            }
+
+            <p class="visually-hidden" role="status">@status</p>
+
+            @Paper(view)
+        }
+    </div>
+
+    @if (view is not null)
+    {
+        <div class="form-actions form-bar sitter-bar">
+            @ActionButtons
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly (SheetLayout Value, string Label)[] layoutOptions =
+    [
+        (SheetLayout.Labels, "Plant labels"),
+        (SheetLayout.Visits, "Visits first"),
+        (SheetLayout.Chart, "Chart")
+    ];
+
+    private static readonly (VisitPattern Value, string Label)[] visitOptions =
+    [
+        (VisitPattern.EveryDay, "Every day"),
+        (VisitPattern.EveryTwoDays, "Every 2 days"),
+        (VisitPattern.EveryThreeDays, "Every 3 days"),
+        (VisitPattern.TwiceAWeek, "Twice a week"),
+        (VisitPattern.Weekly, "Once a week"),
+        (VisitPattern.None, "No visits")
+    ];
+
+    private SheetChoices? sheet;
+    private SitterSheetView? view;
+    private IReadOnlyList<AwayStretch> stretches = [];
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Propagation> propagations = [];
+    private IReadOnlyList<CareLog> logs = [];
+    private IReadOnlyList<TimelineEntry> changes = [];
+    private IReadOnlyList<GrowLight> lights = [];
+    private Dictionary<Guid, Pot> pots = [];
+    private Places places = Places.None;
+    private AwaySpan? span;
+    private string status = "";
+    private bool disposed;
+
+    private DateOnly Today => Time.Today();
+
+    private string ChangeLink => span is { Stretches.Count: 1 } one ? $"away/{one.Stretches[0].Id}" : "away";
+
+    private string ListSummary => view is null ? "" : $"{view.Candidates.Count(c => c.OnSheet)} of {view.Candidates.Count} on the sheet";
+
+    protected override async Task OnInitializedAsync()
+    {
+        sheet = await SheetService.GetAsync();
+        stretches = await AwayService.GetAllAsync();
+        plants = await Plants.GetAllAsync();
+        propagations = await Propagations.GetAllAsync();
+        logs = await CareLogs.GetAllAsync();
+        changes = await Entries.GetPlantChangesAsync();
+        lights = await LightService.GetAllAsync();
+        pots = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
+        places = await RoomService.GetPlacesAsync();
+        Rebuild();
+    }
+
+    private void Rebuild()
+    {
+        span = AwayTime.Spans(stretches).FirstOrDefault(s => s.Kind == AwayKind.Away && s.Until > Today);
+        view = SitterSheetBuilder.Build(
+            sheet!, stretches, plants, propagations, logs, changes, id => pots.GetValueOrDefault(id), lights, places,
+            Seasons.HemisphereOf(TimeZoneInfo.Local), Time);
+    }
+
+    // Every choice is saved as it is made, and the sheet below follows
+    private async Task ChangeAsync(Action change)
+    {
+        change();
+        await SheetService.SaveAsync(sheet!);
+        Rebuild();
+    }
+
+    private static VisitPattern ParseVisits(object? value) =>
+        Enum.TryParse<VisitPattern>(value?.ToString(), out var pattern) ? pattern : VisitPattern.None;
+
+    private Task SetOnSheetAsync(Guid id, bool on) =>
+        ChangeAsync(() =>
+        {
+            sheet!.LeftOff.Remove(id);
+            if (!on)
+                sheet.LeftOff.Add(id);
+        });
+
+    private async Task SetWaterByAsync(Guid id, string? value)
+    {
+        if (plants.FirstOrDefault(p => p.Id == id) is not { } plant)
+            return;
+
+        var before = plant.Copy();
+        plant.WaterBy = Enum.TryParse<WaterMethod>(value, out var method) ? method : null;
+        await PlantService.UpdateAsync(before, plant, Labels.For);
+        Rebuild();
+    }
+
+    private async Task PrintAsync()
+    {
+        status = "";
+        await SheetActions.PrintAsync();
+    }
+
+    private async Task ShareAsync()
+    {
+        if (view is null)
+            return;
+
+        status = await SheetActions.ShareTextAsync(SitterSheetText.Write(view)) switch
+        {
+            "copied" => "Copied",
+            "failed" => "Couldn't share it",
+            _ => ""
+        };
+        if (status.Length == 0)
+            return;
+
+        StateHasChanged();
+        await Task.Delay(3000);
+        if (!disposed)
+        {
+            status = "";
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose() => disposed = true;
+
+    private RenderFragment ActionButtons => @<text>
+        <button type="button" class="btn btn-primary" @onclick="PrintAsync">Print or save as PDF</button>
+        <button type="button" class="btn btn-outline-primary" @onclick="ShareAsync">Share as text</button>
+        @if (status.Length > 0)
+        {
+            <span class="sitter-status" aria-hidden="true">@status</span>
+        }
+    </text>;
+
+    private RenderFragment Show(string id, string label, bool on, Action<bool> set) => @<div class="form-check">
+        <input class="form-check-input" type="checkbox" id="@id" checked="@on"
+               @onchange="e => ChangeAsync(() => set(e.Value is true))" />
+        <label class="form-check-label" for="@id">@label</label>
+    </div>;
+
+    // The sheet itself, which looks the same on screen and on paper and in either theme
+
+    private RenderFragment Paper(SitterSheetView sheetView) => @<article class="sitter-paper" aria-label="The sheet">
+        <header class="sheet-top">
+            <div>
+                <h2 class="sheet-title">@sheetView.Title</h2>
+                @if (sheetView.Header.Length > 0)
+                {
+                    <p class="sheet-line">@sheetView.Header</p>
+                }
+            </div>
+            @if (sheetView.Layout == SheetLayout.Labels && sheetView.HasDates)
+            {
+                <div class="sheet-dates">Visits<b>@string.Join(" · ", sheetView.Visits.Select(SitterSheetText.ShortDay))</b></div>
+            }
+        </header>
+
+        <div class="sheet-intro">
+            @if (sheetView.GeneralNote is { } note)
+            {
+                <p class="sheet-note">@note</p>
+            }
+            <div class="sheet-box">
+                <h3>@SitterBox.Heading</h3>
+                @foreach (var paragraph in sheetView.Box.Check)
+                {
+                    <p>@paragraph</p>
+                }
+                @if (sheetView.Box.Steps.Count > 0)
+                {
+                    <h4>@SitterBox.StepsHeading</h4>
+                    @foreach (var step in sheetView.Box.Steps)
+                    {
+                        <p>
+                            @if (step.Name is not null)
+                            {
+                                <b>@(step.Name).</b>
+                            }
+                            @step.Text
+                        </p>
+                    }
+                    @if (sheetView.Box.TopUp is { } topUp)
+                    {
+                        <p>@topUp</p>
+                    }
+                }
+            </div>
+        </div>
+
+        @if (sheetView.HasDates && sheetView.Layout == SheetLayout.Visits)
+        {
+            @VisitsFirst(sheetView)
+        }
+        else if (sheetView.HasDates && sheetView.Layout == SheetLayout.Chart)
+        {
+            @ChartOf(sheetView)
+        }
+
+        <div class="@(sheetView.HasDates && sheetView.Layout != SheetLayout.Labels ? "sheet-cards new-page" : "sheet-cards")">
+            @foreach (var group in sheetView.Groups)
+            {
+                <div class="sheet-room">@group.Heading</div>
+                <div class="sheet-grid">
+                    @foreach (var subject in group.Subjects)
+                    {
+                        @Card(sheetView, subject)
+                    }
+                </div>
+            }
+        </div>
+    </article>;
+
+    private RenderFragment Card(SitterSheetView sheetView, SitterSubject subject) => @<div class="sheet-card @(sheetView.ShowPhotos ? null : "no-photo")">
+        @if (sheetView.ShowPhotos)
+        {
+            @Thumb(subject, "sheet-photo")
+        }
+        <div class="sheet-card-text">
+            <h3>@subject.Name</h3>
+            @if (subject.Species is { } species)
+            {
+                <div class="sheet-species">@species</div>
+            }
+            @if (subject.Place is { } place)
+            {
+                <p>@place</p>
+            }
+            @if (subject.How is { } how)
+            {
+                <p>@how</p>
+            }
+            @if (subject.Meter is { } meter)
+            {
+                <p>@meter</p>
+            }
+            @if (subject.Pace is { } pace)
+            {
+                <p class="sheet-pace">@pace</p>
+            }
+            @if (subject.Note is { } note)
+            {
+                <p>@note</p>
+            }
+        </div>
+        @if (sheetView.Layout == SheetLayout.Labels && sheetView.HasDates && subject.CheckNote is null)
+        {
+            <div class="sheet-days">
+                @foreach (var date in sheetView.Visits)
+                {
+                    var on = subject.Visits.Contains(date);
+                    <span class="@(on ? null : "off")"><span class="sheet-box-tick"></span> @SitterSheetText.ShortDay(date)@if (!on){<span class="visually-hidden"> (no check needed)</span>}</span>
+                }
+            </div>
+        }
+        else if (subject.CheckNote is { } checkNote)
+        {
+            <div class="sheet-days"><span>@checkNote</span></div>
+        }
+    </div>;
+
+    private RenderFragment Thumb(SitterSubject subject, string cssClass) => @<div class="item-thumb @cssClass @(subject.IsPlant ? "potted" : null)" aria-hidden="true">
+        @if (subject.PhotoId is { } photoId)
+        {
+            <PhotoImage PhotoId="photoId" Eager="true" />
+        }
+        else if (subject.IsPlant)
+        {
+            <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+        }
+        else
+        {
+            <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+        }
+    </div>;
+
+    private RenderFragment VisitsFirst(SitterSheetView sheetView) => @<div class="sheet-visits">
+        @foreach (var visit in sheetView.ByVisit)
+        {
+            <section class="sheet-visit">
+                <h3>@SitterSheetText.LongDay(visit.Date) <small>@visit.Count to check</small></h3>
+                @if (visit.Count == 0)
+                {
+                    <p class="sheet-none">Nothing to check. Everything should be fine.</p>
+                }
+                @foreach (var group in visit.Groups)
+                {
+                    <div class="sheet-room small">@group.Heading</div>
+                    <ul>
+                        @foreach (var subject in group.Subjects)
+                        {
+                            <li>
+                                <span class="sheet-box-tick"></span>
+                                @if (sheetView.ShowPhotos)
+                                {
+                                    @Thumb(subject, "sheet-mini")
+                                }
+                                <div>
+                                    <b>@subject.Name</b>
+                                    @if (RowLine(subject) is { } line)
+                                    {
+                                        <span>@line</span>
+                                    }
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+        }
+    </div>;
+
+    private RenderFragment ChartOf(SitterSheetView sheetView) => @<div>
+        <div class="sheet-chart-scroll">
+        <table class="sheet-chart">
+            <thead>
+                <tr>
+                    <th class="plant" scope="col">Plant, in the order you walk past</th>
+                    @foreach (var date in sheetView.Visits)
+                    {
+                        <th scope="col">@date.ToString("ddd", CultureInfo.InvariantCulture)<small>@date.ToString("d MMM", CultureInfo.InvariantCulture)</small></th>
+                    }
+                    <th class="how" scope="col">How</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var group in sheetView.Groups)
+                {
+                    <tr class="room"><td colspan="@(sheetView.Visits.Count + 2)">@group.Heading</td></tr>
+                    @foreach (var subject in group.Subjects)
+                    {
+                        <tr>
+                            <td class="plant">
+                                <div class="who">
+                                    @if (sheetView.ShowPhotos)
+                                    {
+                                        @Thumb(subject, "sheet-mini")
+                                    }
+                                    <div>
+                                        <b>@subject.Name</b>
+                                        @if (subject.Spot is { } spot)
+                                        {
+                                            <span>@spot</span>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            @foreach (var date in sheetView.Visits)
+                            {
+                                @if (subject.Visits.Contains(date))
+                                {
+                                    <td><span class="sheet-box-tick"></span><span class="visually-hidden">Check it</span></td>
+                                }
+                                else
+                                {
+                                    <td class="no"><span aria-hidden="true">·</span><span class="visually-hidden">No check needed</span></td>
+                                }
+                            }
+                            <td class="how">@ChartHow(subject)</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        </div>
+        <p class="sheet-key">A box means check it that day, and tick it once you have, watered or not. A dot means there's no need to check it that day.</p>
+    </div>;
+
+    private static string? ChartHow(SitterSubject subject) =>
+        string.Join(" ", new[] { subject.How is { } how ? how + "." : null, subject.Meter }.Where(s => s is not null));
+
+    // The line under a name on a visit: the spot, then how to water if it isn't the usual way
+    private static string? RowLine(SitterSubject subject)
+    {
+        var line = string.Join(" · ", new[] { subject.Spot, subject.How }.Where(s => !string.IsNullOrWhiteSpace(s)));
+        return line.Length == 0 ? null : line;
+    }
+}

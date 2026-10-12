@@ -35,8 +35,9 @@ public class WateringGuessTests
         double? factor = null,
         IEnumerable<TimelineEntry>? timeline = null,
         WateringForm form = WateringForm.TopWatered,
-        Hemisphere hemisphere = Hemisphere.Northern) =>
-        WateringGuess.Of(plant, logs, timeline ?? [], form, lit, hemisphere, today, factor, TimeOn(today));
+        Hemisphere hemisphere = Hemisphere.Northern,
+        IReadOnlyList<AwayStretch>? stretches = null) =>
+        WateringGuess.Of(plant, logs, timeline ?? [], form, lit, hemisphere, today, factor, stretches ?? [], TimeOn(today));
 
     [Fact]
     public void It_says_nothing_until_there_are_four_waterings()

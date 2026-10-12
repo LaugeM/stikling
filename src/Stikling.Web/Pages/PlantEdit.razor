@@ -253,6 +253,18 @@ else
                             Set it higher for a plant kept moister, like a peace lily.
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="water-by">How you water it</label>
+                        <select id="water-by" class="form-select" aria-describedby="water-by-help"
+                                @onchange="e => plant.WaterBy = Enum.TryParse<WaterMethod>(e.Value?.ToString(), out var method) ? method : null">
+                            <option value="" selected="@(plant.WaterBy is null)">Not said</option>
+                            @foreach (var method in Enum.GetValues<WaterMethod>())
+                            {
+                                <option value="@method" selected="@(plant.WaterBy == method)">@SitterSheetText.MethodName(method)</option>
+                            }
+                        </select>
+                        <div id="water-by-help" class="form-text">Goes on the sheet for a plant-sitter. Not said means the way you pick for the sheet.</div>
+                    </div>
                 }
 
                 <div class="mb-3">
@@ -299,6 +311,14 @@ else
                     @AboutField
                 </FormSection>
             }
+
+            <FormSection Title="For a plant-sitter" Summary="@SitterSummary" Open="openSitter">
+                <div class="mb-3">
+                    <label class="form-label" for="sitter-note">Note for a plant-sitter</label>
+                    <InputTextArea id="sitter-note" class="form-control" rows="3" @bind-Value="plant.SitterNote" aria-describedby="sitter-note-help" />
+                    <div id="sitter-note-help" class="form-text">Goes on the sheet for whoever looks after your plants while you're away.</div>
+                </div>
+            </FormSection>
 
             <FormSection Title="Tags" Summary="@TagsSummary" Open="openTags">
                 <div class="mb-3">
@@ -412,6 +432,7 @@ else
     private bool openLives;
     private bool openPot;
     private bool openTags;
+    private bool openSitter;
     private bool openWatering;
     private bool wateringReminderOn;
 
@@ -467,6 +488,8 @@ else
         <div id="about-help" class="form-text mt-0">For what stays true about the plant, like how it likes its water. Dated notes go on its history.</div>
         <InputTextArea class="form-control" rows="3" @bind-Value="plant!.Notes" aria-label="About it" aria-describedby="about-help" />
     </div>;
+
+    private string? SitterSummary => string.IsNullOrWhiteSpace(plant?.SitterNote) ? null : Labels.Short(plant.SitterNote);
 
     private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
 
@@ -570,7 +593,8 @@ else
             openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
             openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
             openTags = !IsNew && plant.Tags.Count > 0;
-            openWatering = !IsNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WateringFeedId is not null);
+            openSitter = !IsNew && !string.IsNullOrWhiteSpace(plant.SitterNote);
+            openWatering = !IsNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WaterBy is not null || plant.WateringFeedId is not null);
         }
     }
 

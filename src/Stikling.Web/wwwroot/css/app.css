@@ -2811,3 +2811,36 @@ main.app-content:has(.form-bar) {
         scroll-snap-align: start;
     }
 }
+
+/* Printing the plant-sitter sheet: only the sheet goes on the paper, on A4, in the light colours.
+   The sheet's own rules are in Pages/SitterSheet.razor.css. */
+@media print {
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    :root:has(.sitter-page),
+    body:has(.sitter-page) {
+        background: #ffffff !important;
+        color: #1d2520;
+    }
+
+    body:has(.sitter-page) .app-header,
+    body:has(.sitter-page) .app-nav,
+    body:has(.sitter-page) .update-banner,
+    body:has(.sitter-page) .first-sync-banner {
+        display: none !important;
+    }
+
+    body:has(.sitter-page) .app-shell {
+        display: block !important;
+        min-height: 0 !important;
+    }
+
+    body:has(.sitter-page) .app-content {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}

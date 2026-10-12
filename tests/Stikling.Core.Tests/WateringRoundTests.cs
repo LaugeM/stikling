@@ -25,7 +25,7 @@ public class WateringRoundTests
 
     private IReadOnlyList<WateringDue> Due(PutOffs? putOffs = null, IEnumerable<GrowLight>? lights = null, Places? places = null) =>
         WateringRound.Due(plants, logs, [], null, lights ?? [], places ?? Places.None,
-            Hemisphere.Northern, Time, putOffs ?? PutOffs.Empty());
+            [], Hemisphere.Northern, Time, putOffs ?? PutOffs.Empty());
 
     [Fact]
     public void Plants_that_are_due_come_first_the_longest_overdue_at_the_top_then_those_coming_up()
@@ -48,7 +48,7 @@ public class WateringRoundTests
         var plant = Weekly("Late", Today.AddDays(-10));
         Weekly("Other", Today.AddDays(-3));
 
-        var guess = WateringRound.GuessFor(plant, plants, logs, [], null, [], Places.None, Hemisphere.Northern, Time);
+        var guess = WateringRound.GuessFor(plant, plants, logs, [], null, [], Places.None, [], Hemisphere.Northern, Time);
 
         Assert.Equal(Due().Single(d => d.Plant.Id == plant.Id).Guess, guess);
     }

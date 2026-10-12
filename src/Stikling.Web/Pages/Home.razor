@@ -14,6 +14,9 @@
 @inject ICareLogRepository CareLogs
 @inject IPotRepository PotRepository
 @inject GrowLightService LightService
+@inject AwayService AwayService
+@inject SitterSheetService SitterSheets
+@inject TimelineService TimelineService
 @inject CareService Care
 @inject WateringAnswers Answers
 @inject AppBadge Badge
@@ -74,7 +77,90 @@ else
         @Labels.Plants(plants.Count(p => p.Status == PlantStatus.Active)) · @Labels.Count(active.Count, "propagation") going@(monthResult is null ? "" : $" · {monthResult.PottedUp} of {monthResult.Total} potted up this month")
     </p>
 
-    @if (backupReminder is { } reminder)
+    @if (upcoming is not null)
+    {
+        <div class="reminder">
+            <span><b>Away from @upcoming.From.ToString("dddd d MMMM", CultureInfo.InvariantCulture).</b> Leave whoever looks after them a sheet of what to check and when.</span>
+            <a class="btn btn-outline-primary" href="sitter-sheet">Sitter sheet</a>
+        </div>
+    }
+
+    @if (awayNow is { } span)
+    {
+        var total = span.Until.DayNumber - span.From.DayNumber;
+        var dayNumber = Today.DayNumber - span.From.DayNumber + 1;
+        var toGo = span.Until.DayNumber - Today.DayNumber;
+        var isAway = span.Kind == AwayKind.Away;
+        <section class="away-block" aria-label="@(isAway ? "You're away" : "Quiet time")">
+            <h2 class="away-title"><span>@(isAway ? "You're away" : "Quiet time")</span>@Labels.Count(toGo, "day") to go</h2>
+            <div class="away-bar" role="img" aria-label="@BarLabel(span, dayNumber, total)">
+                <div class="away-bar-done" style="width: @Percent(dayNumber - 0.5, total)"></div>
+                @foreach (var visit in visitDates)
+                {
+                    <span class="away-visit" style="left: @Percent(visit.DayNumber - span.From.DayNumber + 0.5, total)"></span>
+                }
+                <span class="away-bar-now" style="left: @Percent(dayNumber - 0.5, total)"></span>
+            </div>
+            <div class="away-ends">
+                <span>@span.From.ToString("ddd d MMM", CultureInfo.InvariantCulture)</span>
+                @if (visitDates.Count > 0)
+                {
+                    <span class="away-key">Dots are the sitter's visits</span>
+                }
+                <span>@(isAway ? "back" : "until") <b>@span.Until.ToString("ddd d MMM", CultureInfo.InvariantCulture)</b></span>
+            </div>
+            <p class="away-note">
+                @(isAway
+                    ? "Nothing here asks for anything until you're back."
+                    : $"Nothing here asks for anything until {span.Until.ToString("dddd d MMMM", CultureInfo.InvariantCulture)}.")
+            </p>
+            <div class="away-actions">
+                <button type="button" class="btn btn-primary" disabled="@awayBusy" @onclick="ImBackAsync">I'm back</button>
+                <a class="btn btn-outline-primary" href="@(span.Stretches.Count == 1 ? $"away/{span.Stretches[0].Id}" : "away")">Change</a>
+                @if (isAway)
+                {
+                    <a class="away-link" href="sitter-sheet">Sitter sheet</a>
+                }
+            </div>
+        </section>
+    }
+
+    @if (Holding && backSpan is { } back)
+    {
+        var backDays = back.Until.DayNumber - back.From.DayNumber;
+        <section class="back-panel" aria-labelledby="back-title">
+            <h2 id="back-title">Welcome back</h2>
+            <p class="back-lead">
+                @(back.Kind == AwayKind.Away ? $"{Labels.Count(backDays, "day")} away." : $"{Labels.Count(backDays, "day")} of quiet time.")
+                These first, in this order. The rest of Today comes back once you're through.
+            </p>
+            <ol class="back-rows">
+                @foreach (var (row, index) in backRows.Select((r, i) => (r, i)))
+                {
+                    <li @key="row.Subject.Id" class="back-row">
+                        <span class="back-num" aria-hidden="true">@(index + 1)</span>
+                        <a class="back-main" href="@SubjectThumb.LinkTo(row.Subject)">
+                            <SubjectThumb Subject="row.Subject" />
+                            <div class="item-text">
+                                <div class="item-name">@row.Name</div>
+                                <div class="item-meta">@BackMeta(row)</div>
+                            </div>
+                        </a>
+                        <button type="button" class="row-btn" title="Looked at it" aria-label="Looked at it" disabled="@awayBusy"
+                                @onclick="() => LookedAtAsync(row)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                        </button>
+                    </li>
+                }
+            </ol>
+            <div class="back-foot">
+                <a class="btn btn-primary" href="round/back">Go round these</a>
+                <button type="button" class="back-done" disabled="@awayBusy" @onclick="DoneWithListAsync">Done with this list</button>
+            </div>
+        </section>
+    }
+
+    @if (!Away && backupReminder is { } reminder)
     {
         <div class="reminder">
             <span>@reminder</span>
@@ -82,7 +168,7 @@ else
         </div>
     }
 
-    @if (roundSuggestion is { } suggested)
+    @if (!Away && roundSuggestion is { } suggested)
     {
         <section class="today-section">
             <h2>Today's round</h2>
@@ -105,7 +191,7 @@ else
         </section>
     }
 
-    @foreach (var (heading, cases) in DuePests)
+    @foreach (var (heading, cases) in AwayHides(DuePests))
     {
         <section class="today-section">
             <h2>@heading</h2>
@@ -131,7 +217,7 @@ else
         </section>
     }
 
-    @if (FlaggedNow.Count > 0)
+    @if (!Away && FlaggedNow.Count > 0)
     {
         <section class="today-section">
             <h2>Needs attention</h2>
@@ -155,7 +241,7 @@ else
         </section>
     }
 
-    @if (QuarantineNow.Count > 0)
+    @if (!Away && QuarantineNow.Count > 0)
     {
         <section class="today-section">
             <h2>Quarantine is up</h2>
@@ -179,7 +265,7 @@ else
         </section>
     }
 
-    @if (wateringDue.Count > 0)
+    @if (!Away && !Holding && wateringDue.Count > 0)
     {
         var now = wateringDue.Where(d => d.DueNow).ToList();
         var coming = wateringDue.Where(d => !d.DueNow).ToList();
@@ -276,6 +362,8 @@ else
         </section>
     }
 
+    @if (!Away && !Holding)
+    {
     <section class="today-section">
         <h2>Worth a look</h2>
         @if (ChecksNow.Count == 0)
@@ -310,8 +398,9 @@ else
             </ul>
         }
     </section>
+    }
 
-    @if (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today))
+    @if (!Away && photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today))
     {
         <section class="today-section">
             <h2>Photos</h2>
@@ -413,6 +502,7 @@ else
     private IReadOnlyList<CareLog> careLogs = [];
     private IReadOnlyList<TimelineEntry> plantChanges = [];
     private IReadOnlyList<GrowLight> lights = [];
+    private IReadOnlyList<AwayStretch> stretches = [];
     private IReadOnlyDictionary<Guid, Pot> potsById = new Dictionary<Guid, Pot>();
     private Places places = Places.None;
     private IReadOnlyList<Plant> plants = [];
@@ -435,6 +525,15 @@ else
     private bool showRound;
     private bool loaded;
 
+    // Away and quiet time: the span on today, one coming up, and the list for the days after
+    private AwaySpan? awayNow;
+    private AwaySpan? upcoming;
+    private AwaySpan? backSpan;
+    private DateOnly? backDay;
+    private IReadOnlyList<BackRow> backRows = [];
+    private IReadOnlyList<DateOnly> visitDates = [];
+    private bool awayBusy;
+
     // Your year with your plants, shown from 1 December to 15 January
     private YearCard? yearTitle;
 
@@ -447,6 +546,14 @@ else
     private ElementReference yearCanvas;
 
     private DateOnly Today => Time.Today();
+
+    private bool Away => awayNow is not null;
+
+    // The list of what to look at first holds back Water and Worth a look until it's done with
+    private bool Holding => backDay is { } day && BackList.IsHolding(day, backRows, putOffs, Today);
+
+    private IEnumerable<(string Heading, List<PestCaseView> Cases)> AwayHides(IEnumerable<(string Heading, List<PestCaseView> Cases)> groups) =>
+        Away ? [] : groups;
 
     private List<AttentionItem> FlaggedNow =>
         flagged.Where(i => !putOffs.IsPutOff(PutOffs.Flag(i.Subject.Id, i.Attention), Today)).ToList();
@@ -470,9 +577,11 @@ else
         }.Where(group => group.Item2.Count > 0);
 
     // Everything listed as due right now, which is also the number on the app icon
+    // While away nothing is asked for, and while the list on the day back is up it stands for Water and Worth a look
     private int DueCount =>
-        DuePests.Sum(group => group.Cases.Count) + FlaggedNow.Count + QuarantineNow.Count + ChecksNow.Count
-        + wateringDue.Count(d => d.DueNow)
+        Away ? 0
+        : DuePests.Sum(group => group.Cases.Count) + FlaggedNow.Count + QuarantineNow.Count
+        + (Holding ? backRows.Count : ChecksNow.Count + wateringDue.Count(d => d.DueNow))
         + (roundSuggestion is not null ? 1 : 0)
         + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
 
@@ -497,12 +606,23 @@ else
         var settings = await SettingsService.GetAsync();
         wateringOn = settings.WateringReminder;
         dailyRoundOn = settings.DailyRound;
-        if (wateringOn || dailyRoundOn)
+        stretches = await AwayService.GetAllAsync();
+        awayNow = AwayTime.Current(stretches, Today);
+        upcoming = awayNow is null ? AwayTime.Upcoming(stretches, Today) : null;
+        backDay = AwayTime.BackDay(stretches, Today);
+        backSpan = backDay is { } day ? AwayTime.Spans(stretches).LastOrDefault(s => s.Until == day) : null;
+        visitDates = [];
+        if (awayNow is { Kind: AwayKind.Away } now)
+            visitDates = SitterVisits.Dates((await SitterSheets.GetAsync()).Visits, now.Trip.From, now.Trip.Until);
+
+        // The list on the day back reads the same things the watering reminder does
+        var needsCare = wateringOn || backDay is not null;
+        if (wateringOn || dailyRoundOn || backDay is not null)
             careLogs = await CareLogs.GetAllAsync();
         if (dailyRoundOn)
             lastActivity = await Entries.GetLastActivityBeforeAsync(Time.MomentAt(Today.ToDateTime(TimeOnly.MinValue)));
         FindRound();
-        if (wateringOn)
+        if (needsCare)
         {
             plantChanges = await Entries.GetPlantChangesAsync();
             lights = await LightService.GetAllAsync();
@@ -514,8 +634,15 @@ else
         memory = Memories.Pick(plants, plantPhotos, Today, Time.LocalDay);
         await FindYearAsync(settings, plantPhotos);
 
+        var pestCases = await PestCases.GetAllAsync();
         dueTreatments = PestService.Due(
-            PestService.Describe(await PestCases.GetAllAsync(), plants, await PestTreatments.GetAllAsync(), places, Today));
+            PestService.Describe(pestCases, plants, await PestTreatments.GetAllAsync(), places, Today));
+
+        backRows = backDay is { } backOn && awayNow is null
+            ? BackList.Of(backOn, plants, propagations, careLogs, await BackTimeline.LoadAsync(Entries, backOn, Time), pestCases,
+                id => potsById.GetValueOrDefault(id), lights, places, stretches, Seasons.HemisphereOf(TimeZoneInfo.Local), Time,
+                settings.BackListLength)
+            : [];
 
         names = plants.ToDictionary(p => p.Id, p => p.DisplayName);
         foreach (var propagation in propagations)
@@ -601,6 +728,80 @@ else
         }
     }
 
+    private static string Percent(double part, int total) =>
+        (Math.Clamp(part / total, 0, 1) * 100).ToString("0.##", CultureInfo.InvariantCulture) + "%";
+
+    private string BarLabel(AwaySpan span, int dayNumber, int total)
+    {
+        var label = $"{span.From.ToString("d MMMM", CultureInfo.InvariantCulture)} to {span.Until.ToString("d MMMM", CultureInfo.InvariantCulture)}, today is day {dayNumber} of {total}";
+        return visitDates.Count > 0 ? $"{label}, {Labels.Count(visitDates.Count, "visit")}" : label;
+    }
+
+    private async Task ImBackAsync()
+    {
+        awayBusy = true;
+        try
+        {
+            await AwayService.ImBackAsync(Today);
+            await LoadAsync();
+        }
+        finally
+        {
+            awayBusy = false;
+        }
+    }
+
+    private async Task LookedAtAsync(BackRow row)
+    {
+        awayBusy = true;
+        try
+        {
+            await TimelineService.LookedOverAsync(row.Subject is Plant ? SubjectType.Plant : SubjectType.Propagation, row.Subject.Id);
+            await LoadAsync();
+        }
+        finally
+        {
+            awayBusy = false;
+        }
+    }
+
+    private async Task DoneWithListAsync()
+    {
+        if (backDay is not { } day)
+            return;
+
+        awayBusy = true;
+        try
+        {
+            await PutOffAsync(PutOffs.BackList(day), day.AddDays(AwayTime.BackDays));
+        }
+        finally
+        {
+            awayBusy = false;
+        }
+    }
+
+    // What the row says it's there for. Never "overdue", and only "water" in "In water".
+    private RenderFragment BackMeta(BackRow row) => __builder =>
+    {
+        switch (row.Reason)
+        {
+            case BackReason.Pest:
+                <span class="pest-due now">@Labels.For(row.Pest!.Value)</span>
+                <span> · case open since @row.CaseStart!.Value.ToString("d MMMM", CultureInfo.InvariantCulture)</span>
+                break;
+            case BackReason.InWater:
+                <span>In water · @Labels.Count(row.DaysSinceLogged ?? 0, "day") since you looked</span>
+                break;
+            case BackReason.PastPace:
+                <span>Usually every @Labels.Count(row.UsualDays ?? 0, "day") · it's been @Labels.Count(row.DaysSince ?? 0, "day")</span>
+                break;
+            default:
+                <span>Flagged: @row.FlagReason · @Labels.DaysAgo(Today.DayNumber - (row.FlagSince ?? Today).DayNumber)</span>
+                break;
+        }
+    };
+
     private void FindRound() =>
         roundSuggestion = dailyRoundOn
             ? DailyRound.Suggest(places, plants, propagations, careLogs, lastActivity, putOffs, Time)
@@ -608,7 +809,7 @@ else
 
     private void FindWateringDue() =>
         wateringDue = wateringOn
-            ? WateringRound.Due(plants, careLogs, plantChanges, id => potsById.GetValueOrDefault(id), lights, places,
+            ? WateringRound.Due(plants, careLogs, plantChanges, id => potsById.GetValueOrDefault(id), lights, places, stretches,
                 Seasons.HemisphereOf(TimeZoneInfo.Local), Time, putOffs)
             : [];
 

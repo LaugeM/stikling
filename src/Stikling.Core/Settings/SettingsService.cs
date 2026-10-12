@@ -68,6 +68,17 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    /// <summary>Sets how many rows the list on the day back shows: 3, 5, 10, or 0 for all of them.</summary>
+    public async Task SetBackListLengthAsync(int length)
+    {
+        if (length is not (0 or 3 or 5 or 10))
+            throw new ArgumentOutOfRangeException(nameof(length), "The list shows 3, 5, 10 or all of them.");
+
+        var current = await GetAsync();
+        current.BackListLength = length;
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetEverydayNamesAsync(EverydayNameLanguage language)
     {
         var current = await GetAsync();

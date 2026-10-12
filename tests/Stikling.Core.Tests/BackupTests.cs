@@ -132,12 +132,14 @@ public class BackupTests
             Settings = [new UserSettings()],
             PutOffs = [new PutOff { Key = "photos" }, new PutOff { Key = "old", DeletedAt = Now }],
             GrowLights = [new GrowLight { Name = "Grow light" }, new GrowLight { Name = "Old", DeletedAt = Now }],
-            ReceivedHistories = [new ReceivedHistory { Name = "Mona" }, new ReceivedHistory { Name = "Old", DeletedAt = Now }]
+            ReceivedHistories = [new ReceivedHistory { Name = "Mona" }, new ReceivedHistory { Name = "Old", DeletedAt = Now }],
+            AwayStretches = [new AwayStretch(), new AwayStretch { DeletedAt = Now }],
+            SitterSheets = [new SitterSheet()]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -149,6 +151,71 @@ public class BackupTests
         Assert.NotNull(data);
         Assert.Empty(data.ReceivedHistories);
         Assert.Empty(data.GrowLights);
+        Assert.Empty(data.AwayStretches);
+        Assert.Empty(data.SitterSheets);
+    }
+
+    [Fact]
+    public void Away_stretches_and_the_sitter_sheet_survive_a_backup_and_a_restore()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var stretch = new AwayStretch
+        {
+            From = new DateOnly(2026, 12, 20), Until = new DateOnly(2027, 1, 4), Kind = AwayKind.Quiet, UpdatedAt = Now
+        };
+        var sheet = new SitterSheet
+        {
+            Layout = SheetLayout.Chart, Visits = VisitPattern.Weekly, DefaultMethod = WaterMethod.Soak,
+            UseOwnWords = true, OwnWords = "A glass each", HasMeter = true, MeterWhere = "In the drawer",
+            GeneralNote = "Spare key under the pot", HideNotes = true, LeftOff = [Guid.NewGuid()], UpdatedAt = Now
+        };
+        var plant = Plant("Coleus", Now);
+        plant.WaterBy = WaterMethod.Top;
+        plant.SitterNote = "Turn it a quarter";
+        var cutting = new Propagation { Nickname = "Pilea", SitterNote = "Change the water", UpdatedAt = Now };
+
+        var json = JsonSerializer.Serialize(
+            new BackupData { Plants = [plant], Propagations = [cutting], AwayStretches = [stretch], SitterSheets = [sheet] }, options);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        Assert.Contains("\"kind\":\"Quiet\"", json);
+        Assert.Contains("\"waterBy\":\"Top\"", json);
+        Assert.Equal(stretch.Until, Assert.Single(back.AwayStretches).Until);
+        Assert.Equal(AwayKind.Quiet, back.AwayStretches[0].Kind);
+        var restored = Assert.Single(back.SitterSheets);
+        Assert.Equal(SitterSheet.SheetId, restored.Id);
+        Assert.Equal(SheetLayout.Chart, restored.Layout);
+        Assert.Equal(sheet.LeftOff, restored.LeftOff);
+        Assert.Equal("A glass each", restored.OwnWords);
+        Assert.Equal(WaterMethod.Top, back.Plants[0].WaterBy);
+        Assert.Equal("Turn it a quarter", back.Plants[0].SitterNote);
+        Assert.Equal("Change the water", back.Propagations[0].SitterNote);
+
+        // A restore merges them like any record: the newest wins
+        var older = new SitterSheet { Layout = SheetLayout.Visits, UpdatedAt = Now.AddDays(-2) };
+        Assert.Equal(SheetLayout.Chart, Assert.Single(BackupMerge.Merge([older], back.SitterSheets).ToSave).Layout);
+        Assert.Equal(1, BackupMerge.Merge<AwayStretch>([], back.AwayStretches).Added);
+    }
+
+    [Fact]
+    public void Older_plants_and_sheets_read_with_the_new_fields_unset()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        var plant = JsonSerializer.Deserialize<Plant>("""{"nickname":"Coleus"}""", options)!;
+        var cutting = JsonSerializer.Deserialize<Propagation>("""{"nickname":"Pilea"}""", options)!;
+        var sheet = JsonSerializer.Deserialize<SitterSheet>("""{"id":"b3c8d1e6-7a42-4f09-8e15-2d6a9c4f7b30"}""", options)!;
+        var settings = JsonSerializer.Deserialize<UserSettings>("""{"theme":"Dark"}""", options)!;
+
+        Assert.Null(plant.WaterBy);
+        Assert.Null(plant.SitterNote);
+        Assert.Null(cutting.SitterNote);
+        Assert.Equal(SheetLayout.Labels, sheet.Layout);
+        Assert.Equal(VisitPattern.TwiceAWeek, sheet.Visits);
+        Assert.Equal(WaterMethod.Bottom, sheet.DefaultMethod);
+        Assert.False(sheet.HidePhotos || sheet.HidePlaces || sheet.HideHowWatered || sheet.HidePace || sheet.HideNotes);
+        Assert.Empty(sheet.LeftOff);
+        Assert.Null(settings.BackListLength);
     }
 
     [Fact]

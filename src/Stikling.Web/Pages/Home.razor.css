@@ -24,6 +24,11 @@
 
 .reminder span {
     flex: 1;
+    min-width: 12rem;
+}
+
+.reminder b {
+    font-family: var(--pa-font-display);
 }
 
 .today-section {
@@ -294,4 +299,220 @@
     padding-block: 0.75rem;
     margin-block: -0.75rem;
     color: inherit;
+}
+
+/* Away or quiet time: what Today shows in place of everything that asks for something */
+.away-block {
+    padding: 0.25rem 0 1.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.away-title {
+    margin: 0;
+    font-family: var(--pa-font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    font-stretch: 88%;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--pa-green-dark);
+}
+
+.away-title span {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    font-stretch: 100%;
+    letter-spacing: 0;
+    color: var(--pa-muted);
+}
+
+/* The stretch as a pill: filled up to today, a thin marker on today, a dot for each visit */
+.away-bar {
+    position: relative;
+    height: 0.6rem;
+    margin: 1.1rem 0 0.4rem;
+    border-radius: 999px;
+    background: var(--pa-green-soft);
+}
+
+.away-bar-done {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 999px;
+    background: var(--pa-green);
+}
+
+.away-visit {
+    position: absolute;
+    top: 50%;
+    width: 0.7rem;
+    height: 0.7rem;
+    margin: -0.35rem 0 0 -0.35rem;
+    border: 2px solid var(--pa-green);
+    border-radius: 50%;
+    background: var(--pa-surface);
+}
+
+.away-bar-now {
+    position: absolute;
+    top: -0.35rem;
+    bottom: -0.35rem;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--pa-text);
+}
+
+.away-ends {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.away-ends b {
+    font-weight: 600;
+    color: var(--pa-text);
+}
+
+.away-key {
+    text-align: center;
+}
+
+.away-note {
+    margin: 0.8rem 0 0.9rem;
+    font-size: 0.95rem;
+}
+
+.away-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.away-actions .btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.away-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    margin-left: auto;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* The list on the day back: a panel waiting to be gone through, so its edge is Potting Green */
+.back-panel {
+    margin-bottom: 1.75rem;
+    padding: 1rem 1rem 0.5rem;
+    border: 1px solid var(--pa-green);
+    border-radius: 0.75rem;
+    background: var(--pa-surface);
+}
+
+.back-panel h2 {
+    margin: 0;
+    font-family: var(--pa-font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-stretch: 92%;
+    line-height: 1.15;
+}
+
+.back-lead {
+    margin: 0.3rem 0 0.6rem;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.back-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.back-row {
+    display: grid;
+    grid-template-columns: 1.6rem minmax(0, 1fr) 2.75rem;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.back-num {
+    text-align: center;
+    font-family: var(--pa-font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-stretch: 80%;
+    color: var(--pa-green-dark);
+}
+
+.back-main {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.back-main ::deep .item-thumb {
+    width: 2.75rem;
+    height: 2.75rem;
+}
+
+.back-main ::deep .item-thumb svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.back-main .item-meta {
+    display: block;
+}
+
+.back-row .row-btn {
+    color: var(--pa-green-dark);
+    border-color: var(--pa-green);
+}
+
+.back-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.1rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.back-foot .btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.back-done {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pa-green-dark);
+    text-decoration: underline;
+    cursor: pointer;
 }

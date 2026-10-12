@@ -107,6 +107,12 @@ public sealed class Plant : Entity
 
     public string? Notes { get; set; }
 
+    /// <summary>How it is watered, for the plant-sitter sheet. Null when not said, and older plants read as null.</summary>
+    public WaterMethod? WaterBy { get; set; }
+
+    /// <summary>A note for whoever looks after it while you are away. Not shared. Older plants read as null.</summary>
+    public string? SitterNote { get; set; }
+
     /// <summary>Your own labels, e.g. "variegated", "rare" or "for swap". See <see cref="Plants.PlantTags"/>.</summary>
     public List<string> Tags { get; set; } = [];
 
@@ -209,7 +215,7 @@ public sealed class Plant : Entity
 
     /// <summary>
     /// A new plant to add alongside this one, e.g. a second basil pot. It gets the names, room,
-    /// light, origin, source, price paid, medium, soil mix, feed with the watering and tags. The nickname, the date it was got, pots, notes,
+    /// light, origin, source, price paid, medium, soil mix, feed with the watering, how it is watered and tags. The nickname, the date it was got, pots, notes,
     /// photos and anything about how this plant is doing right now stay behind.
     /// </summary>
     public Plant Duplicate() => new()
@@ -226,6 +232,7 @@ public sealed class Plant : Entity
         SoilMixId = SoilMixId,
         WateringFeedId = WateringFeedId,
         WateringFeedEvery = WateringFeedEvery,
+        WaterBy = WaterBy,
         Tags = [.. Tags],
         ParentPlantId = ParentPlantId
     };
