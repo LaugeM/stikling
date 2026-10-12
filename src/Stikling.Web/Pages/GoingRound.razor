@@ -9,6 +9,7 @@
 @inject ITimelineRepository Entries
 @inject IPotRepository PotRepository
 @inject GrowLightService LightService
+@inject AwayService AwayService
 @inject RoomService RoomService
 @inject SettingsService SettingsService
 @inject PutOffService PutOffService
@@ -279,6 +280,7 @@ else
         careLogs = await CareLogs.GetAllAsync();
         var plantChanges = await Entries.GetPlantChangesAsync();
         var lights = await LightService.GetAllAsync();
+        var stretches = await AwayService.GetAllAsync();
         var pots = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
         var wateringOn = (await SettingsService.GetAsync()).WateringReminder;
         todayEntries = await Entries.GetSinceAsync(StartOfToday);
@@ -288,14 +290,14 @@ else
         {
             var putOffs = await PutOffService.GetAsync(Today);
             cards = wateringOn
-                ? GoingRoundLogic.ForDue(plants, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places, hemisphere, Time, putOffs)
+                ? GoingRoundLogic.ForDue(plants, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places, stretches, hemisphere, Time, putOffs)
                 : [];
         }
         else
         {
             cards = GoingRoundLogic.ForPlace(
                 PlaceId, plants, propagations, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places,
-                hemisphere, Time, wateringOn, await PutOffService.GetAsync(Today));
+                stretches, hemisphere, Time, wateringOn, await PutOffService.GetAsync(Today));
         }
 
         days = GoingRoundLogic.Days(cards, careLogs, todayEntries, Time);

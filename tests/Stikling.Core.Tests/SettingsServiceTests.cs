@@ -101,4 +101,18 @@ public class SettingsServiceTests
         Assert.Equal(2026, settings.YearHiddenFor);
         Assert.Equal(ThemeMode.Dark, settings.Theme);
     }
+
+    [Fact]
+    public async Task The_back_list_length_is_saved_and_only_takes_the_offered_choices()
+    {
+        Assert.Null((await service.GetAsync()).BackListLength);
+
+        await service.SetBackListLengthAsync(10);
+        Assert.Equal(10, (await service.GetAsync()).BackListLength);
+
+        await service.SetBackListLengthAsync(0);
+        Assert.Equal(0, (await service.GetAsync()).BackListLength);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.SetBackListLengthAsync(4));
+    }
 }

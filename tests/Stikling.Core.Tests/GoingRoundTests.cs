@@ -54,10 +54,10 @@ public class GoingRoundTests
     }
 
     private IReadOnlyList<RoundCard> ForPlace(Place place, bool wateringOn = false) =>
-        GoingRound.ForPlace(place.Id, plants, propagations, logs, [], null, [], Places, Hemisphere.Northern, Time, wateringOn);
+        GoingRound.ForPlace(place.Id, plants, propagations, logs, [], null, [], Places, [], Hemisphere.Northern, Time, wateringOn);
 
     private IReadOnlyList<RoundCard> ForDue(PutOffs? putOffs = null) =>
-        GoingRound.ForDue(plants, logs, [], null, [], Places, Hemisphere.Northern, Time, putOffs ?? PutOffs.Empty());
+        GoingRound.ForDue(plants, logs, [], null, [], Places, [], Hemisphere.Northern, Time, putOffs ?? PutOffs.Empty());
 
     [Fact]
     public void A_room_includes_its_spots_with_the_room_first_then_spots_by_name_then_names()
@@ -221,7 +221,7 @@ public class GoingRoundTests
         var putOffs = PutOffs.Empty();
         putOffs.PutOff(PutOffs.Water(plant.Id, Today.AddDays(-10)), Today.AddDays(2));
 
-        var card = GoingRound.ForPlace(living.Id, plants, propagations, logs, [], null, [], Places, Hemisphere.Northern, Time, true, putOffs).Single();
+        var card = GoingRound.ForPlace(living.Id, plants, propagations, logs, [], null, [], Places, [], Hemisphere.Northern, Time, true, putOffs).Single();
 
         Assert.False(card.DueNow);
         Assert.NotNull(card.Guess);

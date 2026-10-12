@@ -46,6 +46,12 @@ public sealed class PutOffs
         $"water:{plantId}:{lastWatered:yyyy-MM-dd}";
 
     /// <summary>
+    /// The key for the list of what to look at first on the day back ("Done with this list"). The
+    /// day back is part of it, so a later trip gets a list of its own.
+    /// </summary>
+    public static string BackList(DateOnly backDay) => $"back:{backDay:yyyy-MM-dd}";
+
+    /// <summary>
     /// The key for the daily round as a whole. Put off until tomorrow when it's finished or
     /// skipped for the day.
     /// </summary>

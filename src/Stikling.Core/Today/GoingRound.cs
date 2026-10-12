@@ -1,3 +1,4 @@
+using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
@@ -58,6 +59,7 @@ public static class GoingRound
         Func<Guid, Pot?>? pot,
         IEnumerable<GrowLight> lights,
         Places places,
+        IReadOnlyList<AwayStretch> stretches,
         Hemisphere hemisphere,
         TimeProvider time,
         bool wateringOn,
@@ -69,7 +71,7 @@ public static class GoingRound
 
         var plantList = plants.ToList();
         var guesses = wateringOn
-            ? WateringRound.GuessesFor(plantList, logs, timeline, pot, lights, places, hemisphere, time)
+            ? WateringRound.GuessesFor(plantList, logs, timeline, pot, lights, places, stretches, hemisphere, time)
             : new Dictionary<Guid, WateringGuess>();
         var today = time.Today();
 
@@ -107,10 +109,11 @@ public static class GoingRound
         Func<Guid, Pot?>? pot,
         IEnumerable<GrowLight> lights,
         Places places,
+        IReadOnlyList<AwayStretch> stretches,
         Hemisphere hemisphere,
         TimeProvider time,
         PutOffs putOffs) =>
-        [.. WateringRound.Due(plants, logs, timeline, pot, lights, places, hemisphere, time, putOffs)
+        [.. WateringRound.Due(plants, logs, timeline, pot, lights, places, stretches, hemisphere, time, putOffs)
             .Where(d => d.DueNow)
             .Select(d => (Due: d, Place: places.Find(d.Plant.PlaceId), Room: places.RoomOf(d.Plant.PlaceId)))
             .OrderBy(x => x.Room is null)
@@ -122,6 +125,48 @@ public static class GoingRound
             .Select(x => new RoundCard(
                 x.Due.Plant, x.Due.Plant.DisplayName, places.NameOf(x.Due.Plant.PlaceId), x.Due.Guess.Form,
                 x.Due.Guess, true, x.Due.Plant.IsDormant))];
+
+    /// <summary>
+    /// The cards for the list on the day back, in the order of the list. The heading is the plant's
+    /// place. A plant has a guess when the reminder is on in Settings and for the plant, and
+    /// a propagation has none.
+    /// </summary>
+    /// <param name="plants">Every plant, since the others' pace in this month is part of a guess.</param>
+    public static IReadOnlyList<RoundCard> ForBack(
+        IReadOnlyList<BackRow> rows,
+        IEnumerable<Plant> plants,
+        IEnumerable<CareLog> logs,
+        IEnumerable<TimelineEntry> timeline,
+        Func<Guid, Pot?>? pot,
+        IEnumerable<GrowLight> lights,
+        Places places,
+        IReadOnlyList<AwayStretch> stretches,
+        Hemisphere hemisphere,
+        TimeProvider time,
+        bool wateringOn,
+        PutOffs? putOffs = null)
+    {
+        var guesses = wateringOn
+            ? WateringRound.GuessesFor(plants, logs, timeline, pot, lights, places, stretches, hemisphere, time)
+            : new Dictionary<Guid, WateringGuess>();
+        var today = time.Today();
+
+        return [.. rows.Select(row =>
+        {
+            if (row.Subject is not Plant plant)
+            {
+                var propagation = (Propagation)row.Subject;
+                return new RoundCard(propagation, row.Name, places.NameOf(propagation.PlaceId), null, null, false, propagation.IsDormant);
+            }
+
+            var guess = guesses.GetValueOrDefault(plant.Id);
+            return new RoundCard(
+                plant, row.Name, places.NameOf(plant.PlaceId), WateringForms.Of(plant, pot), guess,
+                guess is { CheckOn: { } checkOn } && checkOn <= today
+                    && putOffs?.IsPutOff(PutOffs.Water(plant.Id, guess.LastWatered), today) != true,
+                plant.IsDormant);
+        })];
+    }
 
     /// <summary>What was logged today on each card, in the order of the cards.</summary>
     public static IReadOnlyList<RoundDay> Days(

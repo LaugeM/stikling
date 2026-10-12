@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Lights;
@@ -353,6 +354,51 @@ internal sealed class FakeFeedRepository : IFeedRepository
     {
         if (Feeds.TryGetValue(id, out var feed))
             feed.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeAwayStretchRepository : IAwayStretchRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, AwayStretch> Stretches { get; } = [];
+
+    public Task<IReadOnlyList<AwayStretch>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<AwayStretch>>(Stretches.Values.Where(s => !s.IsDeleted).ToList());
+
+    public Task<AwayStretch?> GetAsync(Guid id) =>
+        Task.FromResult(Stretches.TryGetValue(id, out var stretch) && !stretch.IsDeleted ? stretch : null);
+
+    public Task SaveAsync(AwayStretch stretch)
+    {
+        if (stretch.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid stretch");
+        if (stretch.CreatedAt == default)
+            stretch.CreatedAt = clock;
+        stretch.UpdatedAt = clock = clock.AddSeconds(1);
+        Stretches[stretch.Id] = stretch;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Stretches.TryGetValue(id, out var stretch))
+            stretch.DeletedAt = stretch.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeSitterSheetRepository : ISitterSheetRepository
+{
+    public Dictionary<Guid, SitterSheet> Sheets { get; } = [];
+
+    public Task<SitterSheet?> GetAsync(Guid id) =>
+        Task.FromResult(Sheets.TryGetValue(id, out var sheet) && !sheet.IsDeleted ? sheet : null);
+
+    public Task SaveAsync(SitterSheet sheet)
+    {
+        Sheets[sheet.Id] = sheet;
         return Task.CompletedTask;
     }
 }

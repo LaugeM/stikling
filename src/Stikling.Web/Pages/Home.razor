@@ -14,6 +14,7 @@
 @inject ICareLogRepository CareLogs
 @inject IPotRepository PotRepository
 @inject GrowLightService LightService
+@inject AwayService AwayService
 @inject CareService Care
 @inject WateringAnswers Answers
 @inject AppBadge Badge
@@ -413,6 +414,7 @@ else
     private IReadOnlyList<CareLog> careLogs = [];
     private IReadOnlyList<TimelineEntry> plantChanges = [];
     private IReadOnlyList<GrowLight> lights = [];
+    private IReadOnlyList<AwayStretch> stretches = [];
     private IReadOnlyDictionary<Guid, Pot> potsById = new Dictionary<Guid, Pot>();
     private Places places = Places.None;
     private IReadOnlyList<Plant> plants = [];
@@ -506,6 +508,7 @@ else
         {
             plantChanges = await Entries.GetPlantChangesAsync();
             lights = await LightService.GetAllAsync();
+            stretches = await AwayService.GetAllAsync();
             potsById = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
         }
         FindWateringDue();
@@ -608,7 +611,7 @@ else
 
     private void FindWateringDue() =>
         wateringDue = wateringOn
-            ? WateringRound.Due(plants, careLogs, plantChanges, id => potsById.GetValueOrDefault(id), lights, places,
+            ? WateringRound.Due(plants, careLogs, plantChanges, id => potsById.GetValueOrDefault(id), lights, places, stretches,
                 Seasons.HemisphereOf(TimeZoneInfo.Local), Time, putOffs)
             : [];
 

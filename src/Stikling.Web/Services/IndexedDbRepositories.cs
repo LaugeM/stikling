@@ -1,3 +1,4 @@
+using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Lights;
@@ -62,6 +63,18 @@ public sealed class IndexedDbGrowLightRepository(IndexedDb db, TimeProvider time
     : IndexedDbEntityRepository<GrowLight>(db, time, Stores.GrowLights), IGrowLightRepository
 {
     protected override IReadOnlyList<string> Validate(GrowLight light) => light.Validate();
+}
+
+public sealed class IndexedDbAwayStretchRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<AwayStretch>(db, time, Stores.AwayStretches), IAwayStretchRepository
+{
+    protected override IReadOnlyList<string> Validate(AwayStretch stretch) => stretch.Validate();
+}
+
+public sealed class IndexedDbSitterSheetRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<SitterSheet>(db, time, Stores.SitterSheets), ISitterSheetRepository
+{
+    protected override IReadOnlyList<string> Validate(SitterSheet sheet) => [];
 }
 
 public sealed class IndexedDbReceivedHistoryRepository(IndexedDb db, TimeProvider time)

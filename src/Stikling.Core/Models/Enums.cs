@@ -131,3 +131,49 @@ public enum EverydayNameLanguage
     English,
     Danish
 }
+
+/// <summary>Why a stretch of days is set aside: away from home, or a break from the app.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<AwayKind>))]
+public enum AwayKind
+{
+    /// <summary>Gone from home, with someone looking after the plants or not.</summary>
+    Away,
+
+    /// <summary>Home, but Today shouldn't ask for anything.</summary>
+    Quiet
+}
+
+/// <summary>How a plant is watered, for whoever looks after it while its owner is away.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<WaterMethod>))]
+public enum WaterMethod
+{
+    /// <summary>Water in the saucer or outer pot, taken up from below.</summary>
+    Bottom,
+
+    /// <summary>Poured onto the soil.</summary>
+    Top,
+
+    /// <summary>The pot stands in water for a while.</summary>
+    Soak
+}
+
+/// <summary>How the plant-sitter sheet is laid out.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<SheetLayout>))]
+public enum SheetLayout
+{
+    Labels,
+    Visits,
+    Chart
+}
+
+/// <summary>How often the plant-sitter comes by.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<VisitPattern>))]
+public enum VisitPattern
+{
+    None,
+    EveryDay,
+    EveryTwoDays,
+    EveryThreeDays,
+    TwiceAWeek,
+    Weekly
+}

@@ -19,6 +19,8 @@ public static class Stores
     public const string Feeds = "feeds";
     public const string GrowLights = "growLights";
     public const string ReceivedHistories = "receivedHistories";
+    public const string AwayStretches = "awayStretches";
+    public const string SitterSheets = "sitterSheets";
     public const string Settings = "settings";
     public const string PutOffs = "putOffs";
     public const string TreatmentRecipes = "treatmentRecipes";

@@ -1,3 +1,4 @@
+using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
@@ -30,12 +31,13 @@ public static class WateringRound
         Func<Guid, Pot?>? pot,
         IEnumerable<GrowLight> lights,
         Places places,
+        IReadOnlyList<AwayStretch> stretches,
         Hemisphere hemisphere,
         TimeProvider time,
         PutOffs putOffs)
     {
         var today = time.Today();
-        var setup = new Setup(plants, logs, timeline, lights, places, time);
+        var setup = new Setup(plants, logs, timeline, lights, places, stretches, time);
 
         var due = new List<WateringDue>();
         foreach (var plant in setup.Active.Where(p => p.WateringReminder))
@@ -67,10 +69,30 @@ public static class WateringRound
         Func<Guid, Pot?>? pot,
         IEnumerable<GrowLight> lights,
         Places places,
+        IReadOnlyList<AwayStretch> stretches,
         Hemisphere hemisphere,
         TimeProvider time)
     {
-        return new Setup(plants, logs, timeline, lights, places, time).GuessOf(plant, pot, hemisphere);
+        return new Setup(plants, logs, timeline, lights, places, stretches, time).GuessOf(plant, pot, hemisphere);
+    }
+
+    /// <summary>
+    /// The guess for each active plant, whether or not it has a reminder, worked out the way
+    /// Today does it. For the list on the day back, which looks at pace without reminding.
+    /// </summary>
+    internal static IReadOnlyDictionary<Guid, WateringGuess> GuessesForAll(
+        IEnumerable<Plant> plants,
+        IEnumerable<CareLog> logs,
+        IEnumerable<TimelineEntry> timeline,
+        Func<Guid, Pot?>? pot,
+        IEnumerable<GrowLight> lights,
+        Places places,
+        IReadOnlyList<AwayStretch> stretches,
+        Hemisphere hemisphere,
+        TimeProvider time)
+    {
+        var setup = new Setup(plants, logs, timeline, lights, places, stretches, time);
+        return setup.Active.ToDictionary(p => p.Id, p => setup.GuessOf(p, pot, hemisphere));
     }
 
     /// <summary>
@@ -84,10 +106,11 @@ public static class WateringRound
         Func<Guid, Pot?>? pot,
         IEnumerable<GrowLight> lights,
         Places places,
+        IReadOnlyList<AwayStretch> stretches,
         Hemisphere hemisphere,
         TimeProvider time)
     {
-        var setup = new Setup(plants, logs, timeline, lights, places, time);
+        var setup = new Setup(plants, logs, timeline, lights, places, stretches, time);
         var guesses = new Dictionary<Guid, WateringGuess>();
         foreach (var plant in setup.Active.Where(p => p.WateringReminder))
         {
@@ -106,18 +129,20 @@ public static class WateringRound
         private readonly List<GrowLight> lights;
         private readonly Dictionary<Guid, bool> lit;
         private readonly Places places;
+        private readonly IReadOnlyList<AwayStretch> stretches;
         private readonly TimeProvider time;
         private readonly double? factor;
 
         public Setup(
             IEnumerable<Plant> plants, IEnumerable<CareLog> logs, IEnumerable<TimelineEntry> timeline,
-            IEnumerable<GrowLight> lights, Places places, TimeProvider time)
+            IEnumerable<GrowLight> lights, Places places, IReadOnlyList<AwayStretch> stretches, TimeProvider time)
         {
             Active = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
             this.logs = logs.Where(l => !l.IsDeleted).ToList();
             history = timeline.ToList();
             this.lights = lights.ToList();
             this.places = places;
+            this.stretches = stretches;
             this.time = time;
             lit = Active.ToDictionary(p => p.Id, p => GrowLights.IsLit(p, this.lights, places));
 
@@ -133,10 +158,10 @@ public static class WateringRound
             WateringGuess.Of(
                 plant, logs, history, WateringForms.Of(plant, pot),
                 lit.TryGetValue(plant.Id, out var isLit) ? isLit : GrowLights.IsLit(plant, lights, places),
-                hemisphere, time.Today(), factor, time);
+                hemisphere, time.Today(), factor, stretches, time);
 
         private IReadOnlyList<(DateOnly start, int days)> Gaps(Plant plant) =>
-            [.. WateringGuess.Gaps(plant, logs, DormantPeriods.Of(plant, history, time), dormant: false)
+            [.. WateringGuess.Gaps(plant, logs, DormantPeriods.Of(plant, history, time), dormant: false, stretches)
                 .Select(g => (g.Start, g.Days))];
     }
 }
