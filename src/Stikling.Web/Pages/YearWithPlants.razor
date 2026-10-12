@@ -296,13 +296,25 @@ else
         }
     }
 
+    private bool attaching;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         var hasDeck = loaded && cards.Count > 0;
-        if (hasDeck && deck is null)
+        // A render that comes while the deck is being attached must not attach it a second time,
+        // or every swipe would move two cards
+        if (hasDeck && deck is null && !attaching)
         {
-            self ??= DotNetObjectReference.Create(this);
-            deck = await Cards.AttachDeckAsync(stage, self);
+            attaching = true;
+            try
+            {
+                self ??= DotNetObjectReference.Create(this);
+                deck = await Cards.AttachDeckAsync(stage, self);
+            }
+            finally
+            {
+                attaching = false;
+            }
         }
         else if (!hasDeck && deck is not null)
         {
