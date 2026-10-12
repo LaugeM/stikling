@@ -35,6 +35,13 @@ public sealed class Plant : Entity
 
     public PlantStatus Status { get; set; } = PlantStatus.Active;
 
+    /// <summary>
+    /// The day the status last changed: when it died, was given away or sold, or came back into the
+    /// collection. Null for a plant whose status hasn't changed since this field was added; for those,
+    /// <see cref="Year.PlantYear"/> reads the day from the plant's history instead.
+    /// </summary>
+    public DateOnly? StatusSince { get; set; }
+
     /// <summary>An optional note on what went wrong, kept while the status is Died and cleared if it comes back.</summary>
     public string? CauseOfDeath { get; set; }
 

@@ -88,4 +88,17 @@ public class SettingsServiceTests
         Assert.False(saved.PhotoReminder);
         Assert.True((await service.GetAsync()).DailyRound);
     }
+
+    [Fact]
+    public async Task Hiding_the_year_saves_it_and_keeps_the_rest()
+    {
+        await service.SetThemeAsync(ThemeMode.Dark);
+        Assert.Null((await service.GetAsync()).YearHiddenFor);
+
+        await service.HideYearAsync(2026);
+
+        var settings = await service.GetAsync();
+        Assert.Equal(2026, settings.YearHiddenFor);
+        Assert.Equal(ThemeMode.Dark, settings.Theme);
+    }
 }

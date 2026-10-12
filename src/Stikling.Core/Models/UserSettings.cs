@@ -42,4 +42,10 @@ public sealed class UserSettings : Entity
     /// Null means the default of 14 days, and 0 means off. Older settings without it read as null.
     /// </summary>
     public int? RecentChangesDays { get; set; }
+
+    /// <summary>
+    /// The year whose section on Today was hidden for its season ("Hide for this season"), so it
+    /// stays hidden on every device. Null when none was. Older settings without it read as null.
+    /// </summary>
+    public int? YearHiddenFor { get; set; }
 }
