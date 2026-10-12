@@ -1,0 +1,124 @@
+@page "/away"
+@using System.Globalization
+@using Stikling.Core.Settings
+@inject AwayService AwayService
+@inject SettingsService SettingsService
+@inject TimeProvider Time
+
+<PageTitle>Away and quiet time · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="settings">Settings</a>
+
+<div class="page-heading">
+    <h1>Away and quiet time</h1>
+    @* Takes over from the round add button on a wide screen *@
+    <a class="btn btn-primary btn-sm icon-btn heading-add" href="away/new">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        Add
+    </a>
+</div>
+
+<p class="text-body-secondary">
+    While you're away or taking a break, Today stops asking for anything, and the watering reminder doesn't learn from the gap.
+</p>
+
+@if (stretches is null)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else
+{
+    @if (stretches.Count == 0)
+    {
+        <div class="empty-state">
+            <p>Nothing planned. Add a trip, and Today goes quiet while you're gone and makes a sheet for whoever looks after your plants.</p>
+        </div>
+    }
+    else
+    {
+        <ul class="item-list">
+            @foreach (var stretch in stretches)
+            {
+                <li>
+                    <a class="item-card" href="away/@stretch.Id">
+                        <div class="item-thumb" aria-hidden="true">
+                            @if (stretch.Kind == AwayKind.Away)
+                            {
+                                <svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="2" /><path d="M9 8V6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5 13h14" /></svg>
+                            }
+                            else
+                            {
+                                <svg viewBox="0 0 24 24"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5Z" /></svg>
+                            }
+                        </div>
+                        <div class="item-text">
+                            <div class="item-name">@(stretch.Kind == AwayKind.Away ? "Away" : "Quiet time")</div>
+                            <div class="item-meta">
+                                <span>@stretch.From.ToString("d MMMM", CultureInfo.InvariantCulture) to @stretch.Until.ToString("d MMMM yyyy", CultureInfo.InvariantCulture)</span>
+                                @if (stretch.IsOn(Today))
+                                {
+                                    <span>· on now</span>
+                                }
+                                else if (stretch.From > Today)
+                                {
+                                    <span>· coming up</span>
+                                }
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+
+    <section class="settings-group mt-4">
+        <h2>After a break</h2>
+        <div class="theme-label" id="back-length-label">Look at these first</div>
+        <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="back-length-label">
+            @foreach (var (length, label) in lengthOptions)
+            {
+                var id = $"back-length-{length}";
+                <input type="radio" class="btn-check" name="back-length" id="@id"
+                       checked="@(backLength == length)" @onchange="() => SetBackLengthAsync(length)" />
+                <label class="btn btn-outline-primary" for="@id">@label</label>
+            }
+        </div>
+        <p class="settings-hint">
+            On the day you're back, Today lists this many plants and cuttings to look at before anything else.
+        </p>
+    </section>
+
+    <a class="fab" href="away/new" aria-label="Add away or quiet time" title="Add away or quiet time">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+    </a>
+}
+
+@code {
+    private static readonly (int Length, string Label)[] lengthOptions =
+    [
+        (3, "3"),
+        (5, "5"),
+        (10, "10"),
+        (0, "All")
+    ];
+
+    private IReadOnlyList<AwayStretch>? stretches;
+    private int backLength = BackList.DefaultLength;
+
+    private DateOnly Today => Time.Today();
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        stretches = [.. (await AwayService.GetAllAsync()).OrderByDescending(s => s.From).ThenByDescending(s => s.Until)];
+        backLength = (await SettingsService.GetAsync()).BackListLength ?? BackList.DefaultLength;
+    }
+
+    private async Task SetBackLengthAsync(int length)
+    {
+        backLength = length;
+        await SettingsService.SetBackListLengthAsync(length);
+    }
+}
