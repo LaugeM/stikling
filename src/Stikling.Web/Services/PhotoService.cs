@@ -131,6 +131,13 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     public async Task<int> DownloadAsync(Uri address, string token, Guid id, bool thumbnail) =>
         await (await Module).InvokeAsync<int>("download", address.ToString(), token, id, thumbnail);
 
+    /// <summary>
+    /// Fetches the image of a photo on a public share link from <paramref name="address"/>, makes its
+    /// thumbnail and keeps both as <paramref name="storeAs"/>. Returns false when it couldn't.
+    /// </summary>
+    public async Task<bool> FetchSharedAsync(Uri address, Guid storeAs) =>
+        await (await Module).InvokeAsync<bool>("fetchShared", address.ToString(), storeAs);
+
     /// <summary>Removes the photo: its metadata is soft-deleted and the image data is freed.</summary>
     public async Task DeleteAsync(Guid id)
     {

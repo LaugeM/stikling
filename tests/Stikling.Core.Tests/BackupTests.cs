@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Stikling.Core.Backup;
 using Stikling.Core.Models;
 
@@ -138,6 +139,16 @@ public class BackupTests
         // Spots aren't counted as rooms.
         Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
+    }
+
+    [Fact]
+    public void A_backup_from_before_received_histories_reads_with_none()
+    {
+        var data = JsonSerializer.Deserialize<BackupData>("""{"version":1,"app":"Stikling","plants":[]}""", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+        Assert.NotNull(data);
+        Assert.Empty(data.ReceivedHistories);
+        Assert.Empty(data.GrowLights);
     }
 
     [Fact]

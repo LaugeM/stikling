@@ -9,6 +9,7 @@ using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
 using Stikling.Core.Settings;
+using Stikling.Core.Sharing;
 using Stikling.Core.SoilMixes;
 using Stikling.Core.Today;
 
@@ -61,6 +62,15 @@ public sealed class IndexedDbGrowLightRepository(IndexedDb db, TimeProvider time
     : IndexedDbEntityRepository<GrowLight>(db, time, Stores.GrowLights), IGrowLightRepository
 {
     protected override IReadOnlyList<string> Validate(GrowLight light) => light.Validate();
+}
+
+public sealed class IndexedDbReceivedHistoryRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<ReceivedHistory>(db, time, Stores.ReceivedHistories), IReceivedHistoryRepository
+{
+    protected override IReadOnlyList<string> Validate(ReceivedHistory history) => [];
+
+    public async Task<ReceivedHistory?> GetForAsync(Guid subjectId) =>
+        (await GetAllAsync()).Where(h => h.SubjectId == subjectId).OrderByDescending(h => h.UpdatedAt).FirstOrDefault();
 }
 
 public sealed class IndexedDbTreatmentRecipeRepository(IndexedDb db, TimeProvider time)
