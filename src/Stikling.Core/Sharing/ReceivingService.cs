@@ -241,11 +241,11 @@ public sealed class ReceivingService(
         return propagation;
     }
 
-    // Every photo of the copy once, oldest first
+    // Every photo of the copy once, oldest first, and by id when two were taken at the same moment
     private static List<ShareCopyPhoto> Distinct(ShareCopy copy) =>
         copy.Items.SelectMany(i => i.Photos)
             .GroupBy(p => p.Id).Select(g => g.First())
-            .OrderBy(p => p.TakenAt)
+            .OrderBy(p => p.TakenAt).ThenBy(p => p.Id)
             .ToList();
 
     private async Task<List<ShareCopyPhoto>> MissingAsync(ShareCopy copy)
@@ -259,7 +259,7 @@ public sealed class ReceivingService(
         return missing;
     }
 
-    // Fetches at most three at a time and stores a record for each one that came
+    // Fetches at most three at a time, starting them oldest first, and stores a record for each one that came
     private async Task<(int Copied, int Failed, HashSet<Guid> Done)> CopyPhotosAsync(
         string token, ShareCopy copy, List<ShareCopyPhoto> wanted, IProgress<ReceiveProgress>? progress)
     {
@@ -269,13 +269,37 @@ public sealed class ReceivingService(
         var failed = 0;
         var finished = 0;
         var gate = new SemaphoreSlim(1);
+        var slots = new SemaphoreSlim(PhotosAtATime);
 
         progress?.Report(new ReceiveProgress(0, wanted.Count));
-        await Parallel.ForEachAsync(wanted, new ParallelOptions { MaxDegreeOfParallelism = PhotosAtATime }, async (photo, _) =>
+        // Each fetch is started from this loop, so they begin in the order of the list.
+        // Parallel.ForEachAsync takes them in order too, but its workers race to start them.
+        var running = new List<Task>();
+        foreach (var photo in wanted)
         {
-            var storeAs = PhotoIdOf(copy, photo.Id);
-            var fetched = await receivedPhotos.FetchAsync(token, photo.Id, storeAs);
+            await slots.WaitAsync();
+            running.Add(CopyOneAsync(photo));
+        }
+        await Task.WhenAll(running);
 
+        return (done.Count, failed, done);
+
+        async Task CopyOneAsync(ShareCopyPhoto photo)
+        {
+            try
+            {
+                var storeAs = PhotoIdOf(copy, photo.Id);
+                var fetched = await receivedPhotos.FetchAsync(token, photo.Id, storeAs);
+                await StoreAsync(photo, storeAs, fetched);
+            }
+            finally
+            {
+                slots.Release();
+            }
+        }
+
+        async Task StoreAsync(ShareCopyPhoto photo, Guid storeAs, bool fetched)
+        {
             await gate.WaitAsync();
             try
             {
@@ -304,9 +328,7 @@ public sealed class ReceivingService(
             {
                 gate.Release();
             }
-        });
-
-        return (done.Count, failed, done);
+        }
     }
 
     private static string? Clean(string? text) => ShareLinkRules.Clean(text);
