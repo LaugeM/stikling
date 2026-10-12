@@ -46,6 +46,16 @@ public class AwayTests
     }
 
     [Fact]
+    public void Quiet_time_starting_the_day_a_trip_ends_is_its_own_span()
+    {
+        var stretches = new[] { Stretch(0, 10), Stretch(10, 17, AwayKind.Quiet) };
+        var spans = AwayTime.Spans(stretches);
+
+        Assert.Equal(2, spans.Count);
+        Assert.Equal(AwayKind.Quiet, AwayTime.Current(stretches, D.AddDays(10))!.Kind);
+    }
+
+    [Fact]
     public void A_stretch_inside_another_does_not_shorten_the_span()
     {
         var span = Assert.Single(AwayTime.Spans([Stretch(0, 10), Stretch(2, 4)]));
@@ -56,7 +66,7 @@ public class AwayTests
     [Fact]
     public void A_span_is_away_when_any_stretch_in_it_is_away()
     {
-        Assert.Equal(AwayKind.Away, Assert.Single(AwayTime.Spans([Stretch(0, 5, AwayKind.Quiet), Stretch(5, 8)])).Kind);
+        Assert.Equal(AwayKind.Away, Assert.Single(AwayTime.Spans([Stretch(0, 6, AwayKind.Quiet), Stretch(5, 8)])).Kind);
         Assert.Equal(AwayKind.Quiet, Assert.Single(AwayTime.Spans([Stretch(0, 5, AwayKind.Quiet), Stretch(5, 8, AwayKind.Quiet)])).Kind);
     }
 
@@ -119,8 +129,8 @@ public class AwayTests
     [Fact]
     public void A_trip_leaves_out_quiet_time_that_touches_it()
     {
-        // A quiet week, then away from day 7 to day 20
-        var span = AwayTime.Spans([Stretch(0, 7, AwayKind.Quiet), Stretch(7, 20)]).Single();
+        // A quiet week that runs a day into a trip from day 7 to day 20
+        var span = AwayTime.Spans([Stretch(0, 8, AwayKind.Quiet), Stretch(7, 20)]).Single();
 
         Assert.Equal(D, span.From);
         Assert.Equal(D.AddDays(7), span.Trip.From);
@@ -178,7 +188,9 @@ public class AwayTests
 
         Assert.Equal(D.AddDays(3), first.Until);
         Assert.True(second.IsDeleted);
-        Assert.True(later.IsDeleted);
+        // Quiet time planned straight after the trip is its own stretch and stays
+        Assert.False(later.IsDeleted);
+        Assert.Equal(D.AddDays(20), later.Until);
         Assert.False(apart.IsDeleted);
         Assert.Equal(D.AddDays(45), apart.Until);
     }

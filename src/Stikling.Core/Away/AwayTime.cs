@@ -34,8 +34,8 @@ public static class AwayTime
     public const int UpcomingDays = 7;
 
     /// <summary>
-    /// The stretches as spans, oldest first. Ones that overlap or touch are one span, deleted ones
-    /// are ignored.
+    /// The stretches as spans, oldest first. Ones that overlap are one span, and so are ones of the
+    /// same kind that touch. Deleted ones are ignored.
     /// </summary>
     public static IReadOnlyList<AwaySpan> Spans(IEnumerable<AwayStretch> stretches)
     {
@@ -45,7 +45,10 @@ public static class AwayTime
 
         foreach (var stretch in stretches.Where(s => !s.IsDeleted && s.Until > s.From).OrderBy(s => s.From).ThenBy(s => s.Until))
         {
-            if (group.Count > 0 && stretch.From > until)
+            // Touching only joins two stretches of the same kind: quiet time right after a trip is its own span
+            var touchesOtherKind = stretch.From == until
+                && !group.Any(s => s.Until == until && s.Kind == stretch.Kind);
+            if (group.Count > 0 && (stretch.From > until || touchesOtherKind))
             {
                 spans.Add(Close(group, until));
                 group = [];

@@ -10,6 +10,40 @@
     border-bottom: 1px solid var(--pa-border);
 }
 
+.sitter-options .chip {
+    min-height: 2.75rem;
+    padding-inline: 0.9rem;
+}
+
+.sitter-options .form-select {
+    min-height: 2.75rem;
+}
+
+/* Checkboxes and the switch: the whole row is the tap area, 44px tall */
+.sitter-options .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    margin: 0;
+    padding-left: 0;
+}
+
+.sitter-options .form-check-input {
+    float: none;
+    flex: none;
+    margin: 0;
+}
+
+.sitter-options .form-check-label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: stretch;
+    min-height: 2.75rem;
+}
+
 .sitter-options fieldset {
     border: 0;
     padding: 0;
@@ -28,6 +62,7 @@
 }
 
 .sitter-list li {
+    min-height: 2.75rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -421,7 +456,17 @@
     border-top: 1px dashed var(--pa-border);
 }
 
-/* Chart */
+/* Chart. On a narrow screen it scrolls sideways inside the paper so the How column keeps its
+   width, as on the printed page. */
+
+.sheet-chart-scroll {
+    overflow-x: auto;
+}
+
+.sheet-chart {
+    min-width: 34rem;
+}
+
 
 .sheet-chart {
     width: 100%;
@@ -470,7 +515,8 @@
 }
 
 .sheet-chart td.how {
-    max-width: 10rem;
+    min-width: 10rem;
+    max-width: 12rem;
     font-size: 0.72rem;
     line-height: 1.35;
 }
@@ -523,6 +569,14 @@
 }
 
 @media print {
+    .sheet-chart-scroll {
+        overflow: visible;
+    }
+
+    .sheet-chart {
+        min-width: 0;
+    }
+
     .sitter-screen > :not(.sitter-paper),
     .sitter-bar {
         display: none !important;
