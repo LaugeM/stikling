@@ -158,6 +158,25 @@ public class ReceivingServiceTests
     }
 
     [Fact]
+    public async Task Photos_taken_at_the_same_moment_are_fetched_in_id_order_whatever_order_the_copy_lists_them()
+    {
+        Guid low = Guid.Parse("00000000-0000-0000-0000-000000000001"), high = Guid.Parse("00000000-0000-0000-0000-000000000002");
+        var copy = PlantCopy() with
+        {
+            Items =
+            [
+                new ShareCopyItem(new DateOnly(2026, 9, 5), "3 days", ShareItemKind.Photos, null, [CopyPhoto(high, 9, 5)]),
+                new ShareCopyItem(new DateOnly(2026, 9, 5), "3 days", ShareItemKind.Photos, null, [CopyPhoto(low, 9, 5)]),
+                new ShareCopyItem(new DateOnly(2026, 9, 1), "first day", ShareItemKind.Photos, null, [CopyPhoto(PhotoA, 9, 1)])
+            ]
+        };
+
+        await service.AddAsync("tok", copy, new ReceiveRequest(null, null, null));
+
+        Assert.Equal([PhotoA, low, high], fetcher.Fetched.Select(f => f.GiverId).ToArray());
+    }
+
+    [Fact]
     public async Task A_photo_that_fails_gets_no_record_and_is_counted_and_a_failed_cover_is_not_set()
     {
         var copy = PlantCopy(cover: PhotoB);
