@@ -1,0 +1,530 @@
+@page "/year"
+@page "/year/{Year:int}"
+@* Your year with your plants: the cards of a year as a deck to flick through, leave out and share.
+   The words come from YearCards in Core and the pictures are drawn and kept in wwwroot/js/yearcards.js
+   by YearCardService. Nothing on this page is saved, except the size, which stays on this device. *@
+@using Stikling.Core.Sync
+@using Stikling.Core.Year
+@implements IAsyncDisposable
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject IPhotoRepository PhotoRepository
+@inject ITimelineRepository TimelineRepository
+@inject YearCardService Cards
+@inject SyncRunner Sync
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+
+<PageTitle>Your year · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="">Today</a>
+<div class="page-heading year-heading">
+    <h1>Your @year</h1>
+    @if (loaded && years.Count > 1)
+    {
+        <select class="form-select year-picker" aria-label="Year" @onchange="PickYear">
+            @foreach (var option in years)
+            {
+                <option value="@option" selected="@(option == year)">@(option == Time.Today().Year ? $"{option} so far" : option.ToString())</option>
+            }
+        </select>
+    }
+</div>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (summary is null || summary.IsEmpty)
+{
+    <div class="empty-state">
+        <p>Nothing to show for @year yet.</p>
+        <p class="text-body-secondary">
+            Your year fills up as you add plants, take photos and start propagations, which are cuttings
+            and other ways of growing new plants.
+        </p>
+        <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
+    </div>
+}
+else
+{
+    <div class="year-size">
+        <div class="year-label" id="year-format-label">Size</div>
+        <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="year-format-label">
+            @foreach (var (value, label) in ShareCardService.Formats)
+            {
+                var id = $"year-format-{value}";
+                <input type="radio" class="btn-check" name="year-format" id="@id"
+                       checked="@(format == value)" @onchange="() => SetFormatAsync(value)" />
+                <label class="btn btn-outline-primary" for="@id">@label</label>
+            }
+        </div>
+    </div>
+
+    var front = Front;
+    var frontDrawn = drawn.GetValueOrDefault(front.Id);
+    var remaining = Math.Min(2, cards.Count - 1 - index);
+
+    <div class="year-stage" tabindex="0" role="region" aria-label="Your @year cards" @ref="stage" @onkeydown="OnKeyAsync"
+         style="@AspectStyle">
+        <div class="year-row">
+            <div class="year-slot">
+                @if (index > 0)
+                {
+                    <button type="button" class="year-arrow" aria-label="Previous card" @onclick="() => MoveAsync(-1)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
+                    </button>
+                }
+            </div>
+            <div class="year-deck">
+                @if (remaining >= 2)
+                {
+                    <div class="year-pile year-pile-2" aria-hidden="true"></div>
+                }
+                @if (remaining >= 1)
+                {
+                    <div class="year-pile year-pile-1" aria-hidden="true"></div>
+                }
+                @if (leaving is { } gone)
+                {
+                    <div class="year-card year-leaving @(leaveDirection > 0 ? "to-left" : "to-right")" aria-hidden="true"
+                         style="--from: @leaveFrom.ToString("0", System.Globalization.CultureInfo.InvariantCulture)px">
+                        @if (drawn.TryGetValue(gone.Id, out var goneDrawn))
+                        {
+                            <img src="@goneDrawn.Url" alt="" draggable="false" />
+                        }
+                    </div>
+                }
+                <div class="year-card year-front @(enter) @(leftOut.Contains(front.Id) ? "is-out" : "")" data-deck-front
+                     @key="front.Id" aria-busy="@(frontDrawn is null ? "true" : null)">
+                    @if (frontDrawn is not null)
+                    {
+                        <img src="@frontDrawn.Url" alt="@front.AltText" draggable="false" />
+                        @if (leftOut.Contains(front.Id))
+                        {
+                            <span class="year-out-label">Left out</span>
+                        }
+                        @if (CanSwap(front) && frontDrawn.Cells is { } cells)
+                        {
+                            @for (var i = 0; i < cells.Count; i++)
+                            {
+                                var cell = i;
+                                <button type="button" class="year-swap" aria-label="Swap this photo" style="@CellStyle(cells[cell])"
+                                        @onclick="() => SwapAsync(cell)"></button>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+            <div class="year-slot">
+                @if (index < cards.Count - 1)
+                {
+                    <button type="button" class="year-arrow" aria-label="Next card" @onclick="() => MoveAsync(1)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="year-dots" aria-hidden="true">
+        @for (var i = 0; i < cards.Count; i++)
+        {
+            <span class="year-dot @(i == index ? "current" : "")"></span>
+        }
+    </div>
+    <p class="year-count" aria-live="polite">@(index + 1) of @cards.Count</p>
+    @if (CanSwap(front))
+    {
+        <p class="year-hint">Tap a photo to swap it.</p>
+    }
+    @if (frontDrawn is { Missing: > 0 })
+    {
+        <p class="year-hint">Some photos on this card aren't on this device yet.</p>
+    }
+
+    <div class="year-actions">
+        <button type="button" class="btn btn-outline-primary" @onclick="ToggleLeftOut">@(leftOut.Contains(front.Id) ? "Put back" : "Leave out")</button>
+        <button type="button" class="btn btn-primary" disabled="@(busy || frontDrawn is null)" @onclick="ShareAsync">Share</button>
+    </div>
+
+    @if (Included.Count > 0)
+    {
+        <div class="year-all">
+            <button type="button" class="btn btn-link" disabled="@(busy || !AllDrawn)" @onclick="ShareAllAsync">
+                @(canShareAll ? "Share all" : "Save all") @Included.Count
+            </button>
+        </div>
+    }
+
+    @if (message is not null)
+    {
+        <p class="action-message year-message" role="status">@message</p>
+    }
+}
+
+@if (summary is { Lost.Count: > 0 })
+{
+    <section class="year-lost">
+        <h2>Lost this year</h2>
+        <p class="year-lost-note">Only shown here, never on the cards.</p>
+        <ul class="year-lost-list">
+            @foreach (var lost in summary.Lost)
+            {
+                <li>
+                    <div class="year-lost-head">
+                        <a class="year-lost-name" href="plants/@lost.Plant.Id">@lost.Plant.DisplayName</a>
+                        <span class="year-lost-day">@Labels.Date(lost.Died)</span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(lost.Cause))
+                    {
+                        <div class="year-lost-cause">@lost.Cause</div>
+                    }
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+<canvas @ref="canvas" hidden aria-hidden="true"></canvas>
+
+@code {
+    [Parameter] public int? Year { get; set; }
+
+    private ElementReference canvas;
+    private ElementReference stage;
+    private readonly SemaphoreSlim gate = new(1, 1);
+    private readonly Dictionary<string, YearCardDrawn> drawn = [];
+    private readonly HashSet<string> leftOut = [];
+    private readonly HashSet<Guid> triedFull = [];
+    private IReadOnlyList<YearCard> cards = [];
+    private IReadOnlyList<int> years = [];
+    private PlantYearSummary? summary;
+    private List<YearCardPhoto> collageShown = [];
+    private string format = "story";
+    private string? message;
+    private string enter = "";
+    private YearCard? leaving;
+    private int leaveDirection;
+    private double leaveFrom;
+    private int year;
+    private int loadedFor;
+    private int index;
+    private int drawRun;
+    private int moveRun;
+    private bool loaded;
+    private bool busy;
+    private bool canShareAll;
+    private bool disposed;
+    private DotNetObjectReference<YearWithPlants>? self;
+    private IJSObjectReference? deck;
+
+    private YearCard Front => cards[index];
+
+    private List<YearCard> Included => cards.Where(c => !leftOut.Contains(c.Id)).ToList();
+
+    private bool AllDrawn => Included.All(c => drawn.ContainsKey(c.Id));
+
+    private string AspectStyle => format switch
+    {
+        "square" => "--ratio: 1; --aspect: 1 / 1;",
+        "portrait" => "--ratio: 0.8; --aspect: 4 / 5;",
+        _ => "--ratio: 0.5625; --aspect: 9 / 16;",
+    };
+
+    private static string CellStyle(YearCardCell cell)
+    {
+        string Percent(double value) => (value * 100).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) + "%";
+        return $"left: {Percent(cell.X)}; top: {Percent(cell.Y)}; width: {Percent(cell.W)}; height: {Percent(cell.H)};";
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var wanted = Year ?? Time.Today().Year;
+        if (loaded && wanted == loadedFor)
+            return;
+
+        var changed = loaded;
+        year = wanted;
+        loadedFor = wanted;
+        if (changed)
+        {
+            index = 0;
+            leftOut.Clear();
+            message = null;
+        }
+        else
+        {
+            format = await Cards.GetFormatAsync();
+        }
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var today = Time.Today();
+        var plants = await PlantRepository.GetAllAsync();
+        var propagations = await PropagationRepository.GetAllAsync();
+        var photos = (await PhotoRepository.GetOfKindAsync(SubjectType.Plant))
+            .Concat(await PhotoRepository.GetOfKindAsync(SubjectType.Propagation)).ToList();
+        var changes = await TimelineRepository.GetPlantChangesAsync();
+
+        summary = PlantYear.For(year, plants, propagations, photos, changes, today, Time.LocalDay, Labels.For(PlantStatus.Died));
+        var found = PlantYear.Years(plants, propagations, photos, today, Time.LocalDay).ToList();
+        if (!found.Contains(year))
+        {
+            found.Add(year);
+            found.Sort((a, b) => b.CompareTo(a));
+        }
+        years = found;
+        cards = YearCards.For(summary, Labels.For, photos, Time.LocalDay);
+        index = Math.Clamp(index, 0, Math.Max(0, cards.Count - 1));
+        leftOut.RemoveWhere(id => cards.All(c => c.Id != id));
+        loaded = true;
+        StateHasChanged();
+
+        if (cards.Count > 0)
+        {
+            canShareAll = await Cards.CanShareAllAsync(Included.Count);
+            StartDrawing(keepDrawn: drawn.Count > 0);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var hasDeck = loaded && cards.Count > 0;
+        if (hasDeck && deck is null)
+        {
+            self ??= DotNetObjectReference.Create(this);
+            deck = await Cards.AttachDeckAsync(stage, self);
+        }
+        else if (!hasDeck && deck is not null)
+        {
+            await DetachDeckAsync();
+        }
+    }
+
+    private async Task DetachDeckAsync()
+    {
+        var handle = deck;
+        deck = null;
+        if (handle is null)
+            return;
+        try
+        {
+            await handle.InvokeVoidAsync("dispose");
+            await handle.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+
+    // ---- Moving through the deck ----
+
+    [JSInvokable]
+    public Task Swipe(int direction, double moved) => InvokeAsync(() => MoveAsync(direction, moved));
+
+    private Task OnKeyAsync(KeyboardEventArgs e) => e.Key switch
+    {
+        "ArrowLeft" => MoveAsync(-1),
+        "ArrowRight" => MoveAsync(1),
+        _ => Task.CompletedTask,
+    };
+
+    private async Task MoveAsync(int direction, double moved = 0)
+    {
+        var next = Math.Clamp(index + direction, 0, cards.Count - 1);
+        if (next == index)
+            return;
+
+        var run = ++moveRun;
+        leaving = cards[index];
+        leaveDirection = direction;
+        leaveFrom = moved;
+        enter = direction > 0 ? "enter-next" : "enter-prev";
+        index = next;
+        message = null;
+        StateHasChanged();
+
+        // The old card is kept for as long as it takes to slide out
+        await Task.Delay(220);
+        if (run == moveRun)
+        {
+            leaving = null;
+            StateHasChanged();
+        }
+    }
+
+    // ---- Leaving cards out and sharing ----
+
+    private async Task ToggleLeftOut()
+    {
+        if (!leftOut.Remove(Front.Id))
+            leftOut.Add(Front.Id);
+        message = null;
+        canShareAll = await Cards.CanShareAllAsync(Included.Count);
+    }
+
+    private Task ShareAsync() =>
+        RunAsync(() => Cards.ShareAsync(Front.Id, YearCardService.FileNameFor(year, Front.Id)), all: false);
+
+    private Task ShareAllAsync()
+    {
+        var included = Included;
+        return RunAsync(
+            () => Cards.ShareAllAsync(included.Select(c => c.Id).ToList(), included.Select(c => YearCardService.FileNameFor(year, c.Id)).ToList()),
+            all: true);
+    }
+
+    private async Task RunAsync(Func<Task<string>> action, bool all)
+    {
+        busy = true;
+        message = null;
+        try
+        {
+            message = await action() switch
+            {
+                "saved" when all => "Saved as pictures on this device. They're in your downloads.",
+                "saved" => "Saved as a picture on this device. It's in your downloads.",
+                "failed" => all ? "The pictures couldn't be made. Try again." : "The picture couldn't be made. Try again.",
+                _ => null,
+            };
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // ---- Size and year ----
+
+    private async Task SetFormatAsync(string value)
+    {
+        if (value == format)
+            return;
+        format = value;
+        message = null;
+        await Cards.SetFormatAsync(value);
+        StartDrawing(keepDrawn: false);
+    }
+
+    private void PickYear(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var picked) && picked != year)
+            Navigation.NavigateTo($"year/{picked}");
+    }
+
+    // ---- The collage ----
+
+    // Only when there are more photos than the card shows
+    private bool CanSwap(YearCard card) => card.Kind == YearCardKind.Collage && card.Collage.Count > collageShown.Count;
+
+    // A tap swaps the photo for the next one that isn't shown, in the collage's order
+    private async Task SwapAsync(int cell)
+    {
+        var card = Front;
+        if (card.Kind != YearCardKind.Collage || cell >= collageShown.Count)
+            return;
+
+        var from = card.Collage.ToList().FindIndex(p => p.PhotoId == collageShown[cell].PhotoId);
+        for (var step = 1; step <= card.Collage.Count; step++)
+        {
+            var candidate = card.Collage[(from + step) % card.Collage.Count];
+            if (collageShown.Any(p => p.PhotoId == candidate.PhotoId))
+                continue;
+            collageShown[cell] = candidate;
+            await DrawOneAsync(card, drawRun);
+            return;
+        }
+    }
+
+    // ---- Drawing ----
+
+    private void StartDrawing(bool keepDrawn)
+    {
+        var run = ++drawRun;
+        if (!keepDrawn)
+            drawn.Clear();
+        var shown = YearCardService.CollageShown(format);
+        var collage = cards.FirstOrDefault(c => c.Kind == YearCardKind.Collage);
+        collageShown = collage is null ? [] : collage.Collage.Take(shown).ToList();
+        StateHasChanged();
+        _ = DrawAllAsync(run);
+    }
+
+    // The card in front first, then the rest one by one
+    private async Task DrawAllAsync(int run)
+    {
+        try
+        {
+            for (var step = 0; step < cards.Count; step++)
+            {
+                if (run != drawRun || disposed)
+                    return;
+                await DrawOneAsync(cards[(index + step) % cards.Count], run);
+            }
+        }
+        catch (JSException)
+        {
+            // What was drawn stays, and the rest shows as not drawn
+        }
+    }
+
+    private async Task DrawOneAsync(YearCard card, int run)
+    {
+        var spec = YearCardSpec.From(card, format, card.Kind == YearCardKind.Collage ? collageShown.ToList() : null);
+        await GetFullPhotosAsync(spec);
+
+        await gate.WaitAsync();
+        try
+        {
+            if (run != drawRun || disposed)
+                return;
+            if (await Cards.DrawAsync(canvas, spec) is { } result)
+                drawn[card.Id] = result;
+        }
+        finally
+        {
+            gate.Release();
+        }
+        if (!disposed)
+            await InvokeAsync(StateHasChanged);
+    }
+
+    // Photos that are only small, or not here at all, are fetched in full when signed in, the way
+    // opening a photo does. Whatever can't be fetched is drawn as it is.
+    private async Task GetFullPhotosAsync(YearCardSpec spec)
+    {
+        if (!Sync.SignedIn)
+            return;
+
+        var ids = new[] { spec.Photo, spec.Before, spec.After }.Concat(spec.Collage)
+            .OfType<YearCardPhoto>().Select(p => p.PhotoId).Distinct().Where(id => !triedFull.Contains(id)).ToList();
+        if (ids.Count == 0)
+            return;
+
+        var found = await Cards.CheckAsync(ids);
+        foreach (var id in found.Small.Concat(found.Missing).Select(Guid.Parse))
+        {
+            triedFull.Add(id);
+            await Sync.FetchPhotoAsync(id, PhotoSize.Full);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        drawRun++;
+        await DetachDeckAsync();
+        self?.Dispose();
+        try
+        {
+            await Cards.ReleaseAsync(cards.Select(c => c.Id));
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+}
