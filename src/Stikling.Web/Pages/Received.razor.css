@@ -134,3 +134,11 @@
         transition: none;
     }
 }
+
+/* On a wide screen the cover would push the form far down, so it is a wide strip */
+@media (min-width: 48rem) {
+    .detail-hero {
+        aspect-ratio: 2 / 1;
+        max-height: 20rem;
+    }
+}

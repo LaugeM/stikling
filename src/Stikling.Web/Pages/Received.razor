@@ -45,7 +45,7 @@ else if (copy is not null && check is not null)
     {
         <div class="detail-hero">
             <div class="received-cover">
-                <img src="@Copies.PhotoAddress(Token, coverId)" alt="@($"Photo of {copy.Name}")" class="@(CoverFrame is null ? null : "framed")" style="@CoverFrame" />
+                <img src="@Copies.PhotoAddress(Token, coverId)" crossorigin="anonymous" alt="@($"Photo of {copy.Name}")" class="@(CoverFrame is null ? null : "framed")" style="@CoverFrame" />
             </div>
         </div>
     }
@@ -67,7 +67,7 @@ else if (copy is not null && check is not null)
             {
                 var more = i == StripTiles - 1 && allPhotos.Count > StripTiles ? allPhotos.Count - (StripTiles - 1) : 0;
                 <li class="received-tile">
-                    <img src="@Copies.PhotoAddress(Token, strip[i])" alt="" loading="lazy" decoding="async" />
+                    <img src="@Copies.PhotoAddress(Token, strip[i])" crossorigin="anonymous" alt="" loading="lazy" decoding="async" />
                     @if (more > 0)
                     {
                         <span class="received-more">+@more</span>

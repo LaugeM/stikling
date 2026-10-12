@@ -313,4 +313,33 @@ public class ReceivingServiceTests
         Assert.Equal(3, photos.Photos.Count);
         Assert.Equal(0, (await service.CheckAsync(copy)).MissingPhotos);
     }
+
+    [Fact]
+    public async Task A_cover_that_failed_becomes_the_cover_once_it_is_fetched()
+    {
+        var copy = PlantCopy(cover: PhotoB);
+        fetcher.Failing.Add(PhotoB);
+        var first = await service.AddAsync("tok", copy, new ReceiveRequest(null, null, null));
+        Assert.Null(plants.Plants[first.SubjectId].CoverPhotoId);
+        fetcher.Failing.Clear();
+
+        await service.FetchMissingAsync("tok", copy);
+
+        Assert.Equal(ReceivingService.PhotoIdOf(copy, PhotoB), plants.Plants[first.SubjectId].CoverPhotoId);
+    }
+
+    [Fact]
+    public async Task Fetching_what_is_missing_keeps_a_cover_picked_meanwhile()
+    {
+        var copy = PlantCopy(cover: PhotoB);
+        fetcher.Failing.Add(PhotoB);
+        var first = await service.AddAsync("tok", copy, new ReceiveRequest(null, null, null));
+        var picked = ReceivingService.PhotoIdOf(copy, PhotoA);
+        plants.Plants[first.SubjectId].CoverPhotoId = picked;
+        fetcher.Failing.Clear();
+
+        await service.FetchMissingAsync("tok", copy);
+
+        Assert.Equal(picked, plants.Plants[first.SubjectId].CoverPhotoId);
+    }
 }

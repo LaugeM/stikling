@@ -173,32 +173,38 @@ public sealed class ReceivingService(
         var everything = Distinct(copy);
         var (copied, failed, done) = await CopyPhotosAsync(token, copy, everything, progress);
 
-        if (copy.CoverPhotoId is { } cover && done.Contains(cover))
-        {
-            var coverId = PhotoIdOf(copy, cover);
-            if (copy.SubjectType == SubjectType.Plant)
-            {
-                if (await plants.GetAsync(subjectId) is { } plant)
-                {
-                    plant.CoverPhotoId = coverId;
-                    await plants.SaveAsync(plant);
-                }
-            }
-            else if (await propagations.GetAsync(subjectId) is { } propagation)
-            {
-                propagation.CoverPhotoId = coverId;
-                await propagations.SaveAsync(propagation);
-            }
-        }
-
+        await SetCoverAsync(copy, subjectId, done, onlyWhenNone: false);
         return new ReceiveResult(subjectId, copied, failed);
     }
 
     /// <summary>Fetches the photos of the copy that aren't stored here, for when some failed the first time.</summary>
     public async Task<ReceiveResult> FetchMissingAsync(string token, ShareCopy copy, IProgress<ReceiveProgress>? progress = null)
     {
-        var (copied, failed, _) = await CopyPhotosAsync(token, copy, await MissingAsync(copy), progress);
+        var (copied, failed, done) = await CopyPhotosAsync(token, copy, await MissingAsync(copy), progress);
+        // A cover that failed the first time becomes the cover now, unless one was picked meanwhile
+        await SetCoverAsync(copy, SubjectIdOf(copy), done, onlyWhenNone: true);
         return new ReceiveResult(SubjectIdOf(copy), copied, failed);
+    }
+
+    // The giver's cover becomes the cover here once its photo has been copied
+    private async Task SetCoverAsync(ShareCopy copy, Guid subjectId, IReadOnlySet<Guid> done, bool onlyWhenNone)
+    {
+        if (copy.CoverPhotoId is not { } cover || !done.Contains(cover))
+            return;
+        var coverId = PhotoIdOf(copy, cover);
+        if (copy.SubjectType == SubjectType.Plant)
+        {
+            if (await plants.GetAsync(subjectId) is { } plant && !(onlyWhenNone && plant.CoverPhotoId is not null))
+            {
+                plant.CoverPhotoId = coverId;
+                await plants.SaveAsync(plant);
+            }
+        }
+        else if (await propagations.GetAsync(subjectId) is { } propagation && !(onlyWhenNone && propagation.CoverPhotoId is not null))
+        {
+            propagation.CoverPhotoId = coverId;
+            await propagations.SaveAsync(propagation);
+        }
     }
 
     private static Propagation PropagationOf(ShareCopy copy, Guid subjectId, string? nickname, string? givenBy, ReceiveRequest request, DateOnly today)

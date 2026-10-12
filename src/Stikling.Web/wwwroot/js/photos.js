@@ -238,7 +238,7 @@ export async function fetchShared(address, id) {
     try {
         let response;
         for (let attempt = 1; attempt <= 4; attempt++) {
-            response = await fetch(address);
+            response = await fetchUncached(address);
             if (response.status !== 429 || attempt === 4) break;
 
             // The API asks for a pause when many photos are fetched at once
@@ -263,5 +263,15 @@ export async function fetchShared(address, id) {
         return true;
     } catch {
         return false;
+    }
+}
+
+// The preview loads the same images with crossorigin, so the cached copy can be used. A copy cached
+// without CORS headers, say from opening the share page, fails here, so then it is fetched again.
+async function fetchUncached(address) {
+    try {
+        return await fetch(address);
+    } catch {
+        return await fetch(address, { cache: "reload" });
     }
 }

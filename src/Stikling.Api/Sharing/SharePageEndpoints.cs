@@ -117,7 +117,11 @@ public static class SharePageEndpoints
 
             var image = await PhotoEndpoints.ImageAsync(db, storage, link.CollectionId, photoId, which);
             if (image is not IStatusCodeHttpResult { StatusCode: StatusCodes.Status404NotFound })
+            {
                 http.Response.Headers.CacheControl = "public, max-age=300";
+                // The app fetches these with CORS when someone keeps a copy, so a copy cached from the page itself mustn't be reused for it
+                http.Response.Headers.Append("Vary", "Origin");
+            }
             return image;
         });
 
