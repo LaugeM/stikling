@@ -125,7 +125,7 @@ else
                             {
                                 <span class="experiment-milestones">@milestones</span>
                             }
-                            @if (entry.Propagation.PottedUpCount > 0 || entry.Propagation.FailedCount > 0)
+                            @if (entry.Propagation.PottedUpCount > 0 || entry.Propagation.FailedCount > 0 || entry.Propagation.GivenAwayCount > 0)
                             {
                                 <span class="experiment-outcome">@PropagationService.Outcome(entry.Propagation)</span>
                             }

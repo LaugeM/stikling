@@ -113,6 +113,9 @@ public static class PropagationChanges
         if (before.PottedUpCount != after.PottedUpCount)
             changes.Add($"Potted up: {after.PottedUpCount} (was {before.PottedUpCount})");
 
+        if (before.GivenAwayCount != after.GivenAwayCount)
+            changes.Add($"Given away: {after.GivenAwayCount} (was {before.GivenAwayCount})");
+
         if (before.FailedCount != after.FailedCount)
             changes.Add($"Failed: {after.FailedCount} (was {before.FailedCount})");
 

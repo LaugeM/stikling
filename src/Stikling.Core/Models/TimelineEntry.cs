@@ -47,7 +47,10 @@ public enum TimelineEvent
     Failed,
 
     /// <summary>Looked at during a round, or on its own, with nothing else to log.</summary>
-    LookedOver
+    LookedOver,
+
+    /// <summary>Units of a propagation were given to someone.</summary>
+    GaveAway
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>

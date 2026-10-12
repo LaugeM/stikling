@@ -588,6 +588,57 @@ public class ShareLinkTests(ApiFactory api)
         Assert.Contains("1 Aug 2026 · day 0", html);
     }
 
+    // A plant potted up on 20 Sep from a cutting started on 1 Aug
+    private static async Task<(Guid Plant, Guid Cutting)> AddPottedUpPlant(SignedIn me)
+    {
+        var cutting = Guid.NewGuid();
+        await Push(me, "propagations", new
+        {
+            id = cutting, createdAt = Monday, updatedAt = Monday, nickname = "Mona cutting", type = "Cutting", medium = "Water",
+            startedOn = "2026-08-01", stage = "Done",
+        });
+        var plant = Guid.NewGuid();
+        await Push(me, "plants", new
+        {
+            id = plant, createdAt = Monday, updatedAt = Monday, nickname = "Mona", genus = "monstera", species = "deliciosa",
+            fromPropagationId = cutting, acquiredOn = "2026-09-20",
+        });
+        return (plant, cutting);
+    }
+
+    [Fact]
+    public async Task A_plant_potted_up_from_a_propagation_shows_and_serves_the_propagations_photo()
+    {
+        var me = await SignIn();
+        var (plant, cutting) = await AddPottedUpPlant(me);
+        var rooting = await AddPhoto(me, cutting, type: SubjectType.Propagation, daysAgo: 40);
+        var link = await Share(me, plant);
+
+        var (status, html, _) = await Page(link);
+        var image = await Image(link, rooting);
+
+        Assert.Equal(HttpStatusCode.OK, status);
+        Assert.Contains($"/s/{TokenOf(link)}/photos/{rooting}/full", html);
+        Assert.Contains("Started in water", html);
+        Assert.Contains("Potted up", html);
+        Assert.Equal(HttpStatusCode.OK, image.StatusCode);
+    }
+
+    [Fact]
+    public async Task A_propagation_photo_taken_after_the_pot_up_day_is_neither_shown_nor_served()
+    {
+        var me = await SignIn();
+        var (plant, cutting) = await AddPottedUpPlant(me);
+        var late = await AddPhoto(me, cutting, type: SubjectType.Propagation, daysAgo: 2);
+        var link = await Share(me, plant);
+
+        var (_, html, _) = await Page(link);
+        var image = await Image(link, late);
+
+        Assert.DoesNotContain(late.ToString(), html);
+        Assert.Equal(HttpStatusCode.NotFound, image.StatusCode);
+    }
+
     [Fact]
     public async Task Nothing_private_is_on_the_page()
     {

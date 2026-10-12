@@ -12,6 +12,7 @@
 @inject IJSRuntime JS
 @inject PlantNameService Names
 @inject GooglePhotosService Google
+@inject AccountService Account
 @using Stikling.Core.Propagations
 
 <PageTitle>@(propagation?.DisplayName ?? "Propagation") · Stikling</PageTitle>
@@ -109,6 +110,10 @@ else
                             <dd><b>@result.PottedUp</b> of @result.Started</dd>
                         </div>
                     </dl>
+                    @if (result.GivenAway > 0)
+                    {
+                        <p class="outcome-given">@result.GivenAway given away.</p>
+                    }
                     @if (result.Failed > 0)
                     {
                         <p class="outcome-failed">@result.Failed didn't make it.</p>
@@ -159,6 +164,11 @@ else
                 }
             </p>
 
+            @if (propagation.GivenAwayCount > 0 && Account.IsAvailable)
+            {
+                <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="OpenPassOn">Send them its history</button>
+            }
+
             @if (propagation.IsActive && offspring.Count > 0)
             {
                 <p class="profile-facts">
@@ -184,7 +194,7 @@ else
                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
                 </button>
                 <a class="btn btn-link btn-sm link-action" href="propagations/@propagation.Id/edit">Edit</a>
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => shareOpen = true">Share</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenShare">Share</button>
             </div>
 
             <div id="propagation-details" class="profile-details @(detailsOpen ? "open" : null)">
@@ -369,7 +379,7 @@ else
         </div>
     </div>
 
-    <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id"
+    <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id" StartOnLink="shareOnLink"
                 CoverPhotoId="propagation.CoverPhotoId" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
     <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId"
@@ -471,6 +481,9 @@ else
                             <button type="button" class="btn btn-primary flex-fill" @onclick="OpenPotUp">Pot up</button>
                             <button type="button" class="btn btn-outline-danger flex-fill" @onclick="OpenFailed">Mark failed</button>
                         </div>
+                        <button type="button" class="btn btn-outline-primary w-100 mt-2" @onclick="OpenGaveAway">
+                            @(propagation.RemainingCount == 1 ? "Gave it away" : "Gave some away")
+                        </button>
                     </div>
                     break;
 
@@ -560,6 +573,44 @@ else
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
                     </div>
                     break;
+
+                case StageView.GaveAway:
+                    <p class="form-text mb-3">
+                        It stays in the history and in the results.
+                        @if (gaveCount >= propagation.RemainingCount)
+                        {
+                            <text> This finishes the propagation.</text>
+                        }
+                    </p>
+                    @if (propagation.RemainingCount > 1)
+                    {
+                        <div class="mb-2">
+                            <label class="form-label" for="gave-count">How many (@propagation.RemainingCount left)</label>
+                            <input id="gave-count" type="number" class="form-control" min="1" max="@propagation.RemainingCount"
+                                   inputmode="numeric" @bind="gaveCount" @bind:event="oninput" />
+                        </div>
+                    }
+                    <div class="mb-2">
+                        <label class="form-label" for="gave-to">Who got it? <span class="text-body-secondary">(optional)</span></label>
+                        <input id="gave-to" class="form-control" @bind="gaveTo" @bind:event="oninput" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="gave-date">Date</label>
+                        <input id="gave-date" type="date" class="form-control" @bind="gaveDate"
+                               min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" disabled="@(busy || !CountIsValid(gaveCount))" @onclick="GiveAwayAsync">
+                            @(gaveCount == 1 ? "Mark as given away" : $"Mark {gaveCount} as given away")
+                        </button>
+                        <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
+                    </div>
+                    break;
+
+                case StageView.PassOn:
+                    <PassOnPanel SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" Name="@propagation.DisplayName"
+                                 OnDone="() => stageView = StageView.None" OnChangePage="ChangePassOnPage" />
+                    break;
             }
         </Sheet>
 
@@ -618,10 +669,11 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    private enum StageView { None, Stage, PotUp, Failed }
+    private enum StageView { None, Stage, PotUp, Failed, GaveAway, PassOn }
 
     private enum More { None, Menu, Flag, Dormant }
     private bool shareOpen;
+    private bool shareOnLink;
 
     private sealed class PotUpForm
     {
@@ -670,6 +722,9 @@ else
     private PotUpForm potUp = new();
     private int failedCount = 1;
     private string? failedReason;
+    private int gaveCount = 1;
+    private string? gaveTo;
+    private DateOnly gaveDate;
     private DateOnly failedDate;
     private string? message;
     private IReadOnlyList<Plant> madePlants = [];
@@ -694,6 +749,8 @@ else
     {
         StageView.PotUp => "Pot up",
         StageView.Failed => "Mark as failed",
+        StageView.GaveAway => "Gave some away",
+        StageView.PassOn => "Send its history",
         _ => "How far along",
     };
 
@@ -731,6 +788,7 @@ else
             var p = propagation!;
             var parts = new List<string> { $"{p.InitialCount} started" };
             if (p.PottedUpCount > 0) parts.Add($"{p.PottedUpCount} potted up");
+            if (p.GivenAwayCount > 0) parts.Add($"{p.GivenAwayCount} given away");
             if (p.FailedCount > 0) parts.Add($"{p.FailedCount} failed");
             if (p.IsActive && p.RemainingCount != p.InitialCount) parts.Add($"{p.RemainingCount} left");
             return string.Join(" · ", parts);
@@ -916,6 +974,31 @@ else
         stageView = StageView.Failed;
     }
 
+    private void OpenGaveAway()
+    {
+        gaveCount = 1;
+        gaveTo = null;
+        gaveDate = Today;
+        message = null;
+        stageView = StageView.GaveAway;
+    }
+
+    private void OpenPassOn() => stageView = StageView.PassOn;
+
+    private void OpenShare()
+    {
+        shareOnLink = false;
+        shareOpen = true;
+    }
+
+    // From the offer to send its history: the Share sheet opens on the link, to change what the page shows
+    private void ChangePassOnPage()
+    {
+        stageView = StageView.None;
+        shareOnLink = true;
+        shareOpen = true;
+    }
+
     private async Task PotUpAsync()
     {
         if (propagation is null || !CountIsValid(potUp.Count))
@@ -960,6 +1043,30 @@ else
         }
         madePlants = [];
         stageView = StageView.None;
+        busy = false;
+    }
+
+    private async Task GiveAwayAsync()
+    {
+        if (propagation is null || !CountIsValid(gaveCount))
+            return;
+
+        busy = true;
+        try
+        {
+            await PropagationService.GiveAwayAsync(propagation, gaveCount, gaveTo, gaveDate);
+            message = gaveCount == 1 ? "Marked 1 as given away." : $"Marked {gaveCount} as given away.";
+            historyVersion++;
+            madePlants = [];
+            // Offers to send whoever got it the story, where links are available
+            stageView = Account.IsAvailable ? StageView.PassOn : StageView.None;
+        }
+        catch (InvalidOperationException ex)
+        {
+            message = $"Couldn't mark as given away: {ex.Message}";
+            madePlants = [];
+            stageView = StageView.None;
+        }
         busy = false;
     }
 

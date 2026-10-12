@@ -103,9 +103,10 @@ public static class SharePageEndpoints
                 .SingleOrDefaultAsync();
 
             // The same rules the page follows: the subject's own photos, and not one that is left out
-            if (!subject || data is null || Read<Photo>(data) is not { } photo
-                || photo.IsDeleted || photo.SubjectType != link.SubjectType || photo.SubjectId != link.SubjectId
-                || link.LeftOutPhotoIds.Contains(photoId))
+            if (!subject || data is null || Read<Photo>(data) is not { } photo || photo.IsDeleted || link.LeftOutPhotoIds.Contains(photoId))
+                return Results.NotFound();
+            var own = photo.SubjectType == link.SubjectType && photo.SubjectId == link.SubjectId;
+            if (!own && !(link.SubjectType == SubjectType.Plant && await IsRootingPhotoAsync(db, link, photo)))
                 return Results.NotFound();
 
             var image = await PhotoEndpoints.ImageAsync(db, storage, link.CollectionId, photoId, which);
@@ -115,6 +116,19 @@ public static class SharePageEndpoints
         });
 
         return app;
+    }
+
+    // A plant's page also shows the rooting it came from, so those photos of the propagation are served too
+    private static async Task<bool> IsRootingPhotoAsync(StiklingDbContext db, ShareLink link, Photo photo)
+    {
+        if (photo.SubjectType != SubjectType.Propagation)
+            return false;
+        var plant = await OneAsync<Plant>(db, link.CollectionId, "plants", link.SubjectId);
+        if (plant?.FromPropagationId != photo.SubjectId)
+            return false;
+        var from = await OneAsync<Propagation>(db, link.CollectionId, "propagations", photo.SubjectId);
+        var zone = link.TimeZone is not null && TimeZoneInfo.TryFindSystemTimeZoneById(link.TimeZone, out var found) ? found : TimeZoneInfo.Utc;
+        return SharePage.RootingPhotos(plant, from, [photo], zone).Count > 0;
     }
 
     /// <summary>The small page for a link that isn't there (404) or was turned off (410).</summary>
@@ -145,6 +159,13 @@ public static class SharePageEndpoints
         var propagations = taken.ToDictionary(p => p.Id);
         if (from is not null)
             propagations[from.Id] = from;
+
+        // The rooting it came from: the propagation's photos and entries, which ForPlant cuts off at the day it was potted up
+        if (from is not null)
+        {
+            photos.AddRange(await ByPropertyAsync<Photo>(db, link.CollectionId, SyncKinds.Photos, "subjectId", from.Id));
+            entries.AddRange(await ByPropertyAsync<TimelineEntry>(db, link.CollectionId, "timeline", "subjectId", from.Id));
+        }
 
         photos = await WithImagesAsync(db, link.CollectionId, photos);
         return SharePage.ForPlant(plant, parent, from, taken, photos, entries, propagations, settings, zone, today);
