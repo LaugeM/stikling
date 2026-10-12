@@ -372,6 +372,11 @@ else
                 }
             </div>
 
+            @if (Arrived)
+            {
+                <ArrivedNote SubjectId="propagation.Id" />
+            }
+
             @* The key reloads the history after stage changes and potting up *@
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
                       CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)"
@@ -668,6 +673,10 @@ else
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    /// <summary>Set by the page that keeps a received history, so the first visit says where it went.</summary>
+    [SupplyParameterFromQuery(Name = "arrived")]
+    public bool Arrived { get; set; }
 
     private enum StageView { None, Stage, PotUp, Failed, GaveAway, PassOn }
 

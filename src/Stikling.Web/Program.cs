@@ -60,6 +60,7 @@ builder.Services.AddScoped<IFeedRepository, IndexedDbFeedRepository>();
 builder.Services.AddScoped<ISettingsRepository, IndexedDbSettingsRepository>();
 builder.Services.AddScoped<IPutOffRepository, IndexedDbPutOffRepository>();
 builder.Services.AddScoped<IGrowLightRepository, IndexedDbGrowLightRepository>();
+builder.Services.AddScoped<IReceivedHistoryRepository, IndexedDbReceivedHistoryRepository>();
 builder.Services.AddScoped<ITimelineRepository, IndexedDbTimelineRepository>();
 builder.Services.AddScoped<IPhotoRepository, IndexedDbPhotoRepository>();
 builder.Services.AddScoped<IPlantNameSource, BundledPlantNames>();
@@ -92,6 +93,10 @@ builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<StiklingApi>();
 builder.Services.AddScoped<IShareLinkServer>(services => services.GetRequiredService<StiklingApi>());
 builder.Services.AddScoped<ShareLinkService>();
+builder.Services.AddScoped<SharedCopies>();
+builder.Services.AddScoped<IShareCopySource>(services => services.GetRequiredService<SharedCopies>());
+builder.Services.AddScoped<IReceivedPhotos>(services => services.GetRequiredService<SharedCopies>());
+builder.Services.AddScoped<ReceivingService>();
 builder.Services.AddScoped<IndexedDbSyncStore>();
 builder.Services.AddScoped<SyncRunner>();
 

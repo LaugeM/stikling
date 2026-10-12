@@ -30,6 +30,9 @@ internal sealed class FakePlantRepository : IPlantRepository
     public Task<Plant?> GetAsync(Guid id) =>
         Task.FromResult(Plants.TryGetValue(id, out var p) && !p.IsDeleted ? p : null);
 
+    public Task<bool> IsDeletedAsync(Guid id) =>
+        Task.FromResult(Plants.TryGetValue(id, out var p) && p.IsDeleted);
+
     public Task SaveAsync(Plant plant)
     {
         // DateOnly.MaxValue: the fake has no clock, and the future-date rule is tested on the model itself
@@ -56,6 +59,9 @@ internal sealed class FakePropagationRepository : IPropagationRepository
 
     public Task<Propagation?> GetAsync(Guid id) =>
         Task.FromResult(Propagations.TryGetValue(id, out var p) && !p.IsDeleted ? p : null);
+
+    public Task<bool> IsDeletedAsync(Guid id) =>
+        Task.FromResult(Propagations.TryGetValue(id, out var p) && p.IsDeleted);
 
     public Task SaveAsync(Propagation propagation)
     {
@@ -129,6 +135,8 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
 
     public Task AddAsync(TimelineEntry entry)
     {
+        // An entry added again with an id that is stored replaces it, like the device's store does
+        Entries.RemoveAll(e => e.Id == entry.Id);
         Entries.Add(entry);
         return Task.CompletedTask;
     }
@@ -371,6 +379,30 @@ internal sealed class FakeGrowLightRepository : IGrowLightRepository
     {
         if (Lights.TryGetValue(id, out var light))
             light.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeReceivedHistoryRepository : IReceivedHistoryRepository
+{
+    public Dictionary<Guid, ReceivedHistory> Histories { get; } = [];
+
+    public Task<ReceivedHistory?> GetForAsync(Guid subjectId) =>
+        Task.FromResult(Histories.Values.Where(h => h.SubjectId == subjectId && !h.IsDeleted).OrderByDescending(h => h.UpdatedAt).FirstOrDefault());
+
+    public Task<ReceivedHistory?> GetAsync(Guid id) =>
+        Task.FromResult(Histories.TryGetValue(id, out var history) && !history.IsDeleted ? history : null);
+
+    public Task SaveAsync(ReceivedHistory history)
+    {
+        Histories[history.Id] = history;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Histories.TryGetValue(id, out var history))
+            history.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }

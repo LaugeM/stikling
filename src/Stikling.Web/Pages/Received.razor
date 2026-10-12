@@ -1,0 +1,353 @@
+@page "/received/{Token}"
+@using Stikling.Core.Sharing
+@inject SharedCopies Copies
+@inject ReceivingService Receiving
+@inject RoomService RoomService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject NavigationManager Navigation
+@inject ILogger<Received> Logger
+
+<PageTitle>Keep its history · Stikling</PageTitle>
+
+@if (status is null)
+{
+    <p class="text-body-secondary">Getting its history…</p>
+}
+else if (status == ShareCopyStatus.Unreachable)
+{
+    <div class="empty-state">
+        <h1>Couldn't reach Stikling's server</h1>
+        <p>Keeping its history needs a connection once, to fetch it. After that it's kept on your device.</p>
+        <button type="button" class="btn btn-primary mt-3" @onclick="LoadAsync">Try again</button>
+    </div>
+}
+else if (status == ShareCopyStatus.NotFound)
+{
+    <div class="empty-state">
+        <h1>There's nothing to keep at this link</h1>
+        <p>It may be mistyped, or the plant hasn't been passed on yet. Ask whoever sent it to check.</p>
+        <a class="btn btn-primary mt-3" href="">Go to Today</a>
+    </div>
+}
+else if (status == ShareCopyStatus.Gone)
+{
+    <div class="empty-state">
+        <h1>This link has been turned off</h1>
+        <p>Its owner turned it off, so its history can't be copied any more.</p>
+        <a class="btn btn-primary mt-3" href="">Go to Today</a>
+    </div>
+}
+else if (copy is not null && check is not null)
+{
+    @* The preview comes first and stays compact: what will be copied, then what to fill in *@
+    @if (copy.CoverPhotoId is { } coverId)
+    {
+        <div class="detail-hero">
+            <div class="received-cover">
+                <img src="@Copies.PhotoAddress(Token, coverId)" crossorigin="anonymous" alt="@($"Photo of {copy.Name}")" class="@(CoverFrame is null ? null : "framed")" style="@CoverFrame" />
+            </div>
+        </div>
+    }
+
+    <h1 class="received-title">@copy.Name</h1>
+    @if (!string.IsNullOrWhiteSpace(copy.Genus))
+    {
+        <p class="received-sub"><BotanicalName Genus="@copy.Genus" Species="@copy.Species" Cultivar="@copy.Cultivar" /></p>
+    }
+    @if (CountsText is { } counts)
+    {
+        <p class="received-counts">@counts</p>
+    }
+
+    @if (strip.Count > 0)
+    {
+        <ul class="received-strip" aria-label="Photos">
+            @for (var i = 0; i < strip.Count; i++)
+            {
+                var more = i == StripTiles - 1 && allPhotos.Count > StripTiles ? allPhotos.Count - (StripTiles - 1) : 0;
+                <li class="received-tile">
+                    <img src="@Copies.PhotoAddress(Token, strip[i])" crossorigin="anonymous" alt="" loading="lazy" decoding="async" />
+                    @if (more > 0)
+                    {
+                        <span class="received-more">+@more</span>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (milestones.Count > 0)
+    {
+        <ul class="received-milestones">
+            @foreach (var item in milestones)
+            {
+                <li>
+                    <span>@item.Text</span>
+                    <span class="received-meta">@Labels.Date(item.Day)@(string.IsNullOrWhiteSpace(item.DayCount) ? null : $" · {item.DayCount}")</span>
+                </li>
+            }
+        </ul>
+    }
+
+    @if (check.State == ReceivedState.Here)
+    {
+        <h2 class="received-heading">@(IsPlant ? "It's already in your plants" : "It's already in your propagations")</h2>
+        @if (!busy)
+        {
+            <div class="form-actions">
+                <a class="btn btn-primary" href="@SubjectPath">Open it</a>
+            </div>
+        }
+        @if (check.MissingPhotos > 0)
+        {
+            <p class="received-line received-missing">@(check.MissingPhotos == 1 ? "1 of its photos hasn't" : $"{check.MissingPhotos} of its photos haven't") been copied yet.</p>
+            @if (busy)
+            {
+                @Progress
+            }
+            else
+            {
+                <button type="button" class="btn btn-outline-primary" @onclick="FetchMissingOnlyAsync">Fetch the missing photos</button>
+            }
+        }
+        @if (error is not null)
+        {
+            <div class="alert alert-danger mt-3" role="alert">@error</div>
+        }
+    }
+    else if (failed > 0)
+    {
+        <p class="received-line" role="alert">@(allPhotos.Count - failed) of @allPhotos.Count photos copied. @failed couldn't be fetched.</p>
+        @if (busy)
+        {
+            @Progress
+        }
+        else
+        {
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" @onclick="TryAgainAsync">Try again</button>
+                <button type="button" class="btn btn-link" @onclick="Arrive">Open it anyway</button>
+            </div>
+        }
+        @if (error is not null)
+        {
+            <div class="alert alert-danger mt-3" role="alert">@error</div>
+        }
+    }
+    else
+    {
+        <h2 class="received-heading">Add it to Stikling</h2>
+        <p class="received-line">@(check.State == ReceivedState.Deleted
+            ? "You added this before and deleted it. Bringing it back copies its history again."
+            : "Its photos and history so far are copied to this device once. They won't change if the page does later.")</p>
+
+        <form class="edit-form" @onsubmit="AddAsync">
+            <fieldset disabled="@busy">
+                <legend>Make it yours</legend>
+                <div class="mb-3">
+                    <label class="form-label" for="received-nickname">Nickname</label>
+                    <input id="received-nickname" class="form-control" @bind="nickname"
+                           placeholder="@(string.IsNullOrWhiteSpace(copy.Genus) ? copy.Name : "e.g. Kitchen coleus")" />
+                    <div class="form-text">Optional. Leave it empty to call it by its name.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="received-given-by">Who gave it to you?</label>
+                    <input id="received-given-by" class="form-control" @bind="givenBy" placeholder="e.g. Anna" />
+                    <div class="form-text">Kept with it. Never shown on a share link.</div>
+                </div>
+                @if (!IsPlant)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="received-count">How many did you get?</label>
+                        <input id="received-count" type="number" min="1" class="form-control received-count" @bind="count" />
+                    </div>
+                }
+                <RoomPicker @bind-Value="location" Rooms="rooms" />
+            </fieldset>
+
+            @if (busy)
+            {
+                @Progress
+            }
+            else
+            {
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">@(check.State == ReceivedState.Deleted ? "Bring it back" : "Add it to Stikling")</button>
+                </div>
+            }
+            @if (error is not null)
+            {
+                <div class="alert alert-danger mt-3" role="alert">@error</div>
+            }
+        </form>
+    }
+}
+
+@code {
+    private const int StripTiles = 6;
+
+    [Parameter]
+    public string Token { get; set; } = "";
+
+    private ShareCopyStatus? status;
+    private ShareCopy? copy;
+    private ReceivedCheck? check;
+    private IReadOnlyList<Room> rooms = [];
+    private List<Guid> allPhotos = [];
+    private List<Guid> strip = [];
+    private List<ShareCopyItem> milestones = [];
+
+    private string? nickname;
+    private string? givenBy;
+    private string? location;
+    private int count = 1;
+
+    private bool busy;
+    private string waitingText = "Adding it…";
+    private ReceiveProgress? progress;
+    private int failed;
+    private string? error;
+    private string loadedFor = "";
+
+    private bool IsPlant => copy?.SubjectType == SubjectType.Plant;
+
+    private string SubjectPath => $"{(IsPlant ? "plants" : "propagations")}/{check?.SubjectId}";
+
+    // Placed with the "framed" class in app.css, the way PhotoImage places a stored photo
+    private string? CoverFrame
+    {
+        get
+        {
+            var cover = copy?.Items.SelectMany(i => i.Photos).FirstOrDefault(p => p.Id == copy.CoverPhotoId);
+            return cover is { Frame: { } f, Width: > 0, Height: > 0 }
+                ? FormattableString.Invariant($"--fx:{f.X:0.###};--fy:{f.Y:0.###};--z:{f.Zoom:0.###};--a:{(double)cover.Width / cover.Height:0.####}")
+                : null;
+        }
+    }
+
+    private string? CountsText
+    {
+        get
+        {
+            var notes = copy?.Items.Count(i => i.Kind == ShareItemKind.Note) ?? 0;
+            var parts = new List<string>();
+            if (allPhotos.Count > 0)
+                parts.Add(Labels.Count(allPhotos.Count, "photo"));
+            if (notes > 0)
+                parts.Add(Labels.Count(notes, "note"));
+            return parts.Count == 0 ? null : string.Join(" · ", parts);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor != Token)
+        {
+            loadedFor = Token;
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        status = null;
+        error = null;
+        failed = 0;
+
+        var outcome = await Copies.GetAsync(Token);
+        if (outcome is { Status: ShareCopyStatus.Ok, Copy: { } loaded })
+        {
+            copy = loaded;
+            allPhotos = loaded.Items.SelectMany(i => i.Photos).Select(p => p.Id).Distinct().ToList();
+            strip = allPhotos.Take(StripTiles).ToList();
+            milestones = loaded.Items.Where(i => i.Kind == ShareItemKind.Milestone).ToList();
+            check = await Receiving.CheckAsync(loaded);
+            rooms = Room.List(await RoomService.GetPlacesAsync(), await PlantRepository.GetAllAsync(), await PropagationRepository.GetAllAsync());
+        }
+
+        status = outcome.Status;
+    }
+
+    private void Report(ReceiveProgress report)
+    {
+        progress = report;
+        StateHasChanged();
+    }
+
+    private async Task AddAsync()
+    {
+        if (copy is null || busy)
+            return;
+
+        await RunAsync("Adding it…", async () =>
+        {
+            var request = new ReceiveRequest(nickname, givenBy, await RoomService.PlaceIdAsync(location), IsPlant ? 1 : Math.Max(1, count));
+            var result = await Receiving.AddAsync(Token, copy, request, new Progress<ReceiveProgress>(Report));
+            failed = result.Failed;
+            if (failed == 0)
+                Arrive();
+        });
+    }
+
+    private async Task TryAgainAsync()
+    {
+        if (copy is null || busy)
+            return;
+
+        await RunAsync("Fetching photos…", async () =>
+        {
+            var result = await Receiving.FetchMissingAsync(Token, copy, new Progress<ReceiveProgress>(Report));
+            failed = result.Failed;
+            if (failed == 0)
+                Arrive();
+        });
+    }
+
+    private async Task FetchMissingOnlyAsync()
+    {
+        if (copy is null || busy)
+            return;
+
+        await RunAsync("Fetching photos…", async () =>
+        {
+            await Receiving.FetchMissingAsync(Token, copy, new Progress<ReceiveProgress>(Report));
+            check = await Receiving.CheckAsync(copy);
+        });
+    }
+
+    private async Task RunAsync(string startText, Func<Task> work)
+    {
+        busy = true;
+        error = null;
+        progress = null;
+        waitingText = startText;
+        try
+        {
+            await work();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Keeping a received history failed");
+            error = $"Couldn't add it: {ex.Message}";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void Arrive() => Navigation.NavigateTo($"{SubjectPath}?arrived=true", replace: true);
+
+    private RenderFragment Progress => @<div class="received-progress">
+        <div class="received-bar" role="progressbar" aria-label="Copying"
+             aria-valuemin="0" aria-valuemax="@(progress?.Total ?? 0)" aria-valuenow="@(progress?.Done ?? 0)">
+            <span style="@BarStyle"></span>
+        </div>
+        <p class="received-progress-text" aria-live="polite">@(progress is { Total: > 0 } p ? $"Copying photos, {p.Done} of {p.Total}" : waitingText)</p>
+    </div>;
+
+    private string? BarStyle => progress is { Total: > 0 } p
+        ? FormattableString.Invariant($"--done:{100.0 * p.Done / p.Total:0.#}%")
+        : null;
+}

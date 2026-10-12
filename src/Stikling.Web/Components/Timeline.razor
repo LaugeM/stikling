@@ -2,8 +2,10 @@
 @inject ITimelineRepository Entries
 @inject TimelineService TimelineService
 @inject IPhotoRepository PhotoRepository
+@inject IReceivedHistoryRepository ReceivedHistories
 @inject PhotoService Photos
 @inject TimeProvider Time
+@using Stikling.Core.Sharing
 
 <ReloadOnSync Reload="LoadAsync" />
 
@@ -146,6 +148,54 @@ else
     </ol>
 }
 
+@if (received is not null)
+{
+    @* What it had before it came here, frozen as the giver's page showed it. Nothing on it can be changed. *@
+    <section class="before-history" aria-labelledby="@beforeId">
+        <div class="before-divider"><span id="@beforeId">Before you got it</span></div>
+        <h3 class="before-name">@received.Name</h3>
+        <ol class="timeline">
+            @foreach (var (day, items) in beforeDays)
+            {
+                <li class="timeline-day">
+                    <h4>@DayLabel(day)</h4>
+                    <ol>
+                        @foreach (var item in items)
+                        {
+                            var itemPhotos = item.PhotoIds.Where(photoIndex.ContainsKey).ToList();
+                            <li class="timeline-entry kind-@BeforeClass(item)">
+                                <div class="entry-head">
+                                    <span class="entry-kind">@BeforeIcon(item.Kind)@(item.Kind == ShareItemKind.Milestone ? item.Text : item.Kind == ShareItemKind.Note ? "Note" : "Photo")</span>
+                                    @if (!string.IsNullOrWhiteSpace(item.DayCount))
+                                    {
+                                        <span class="entry-day">@item.DayCount</span>
+                                    }
+                                </div>
+                                @if (item.Kind == ShareItemKind.Note && !string.IsNullOrWhiteSpace(item.Text))
+                                {
+                                    <p class="entry-text">@item.Text</p>
+                                }
+                                @if (itemPhotos.Count > 0)
+                                {
+                                    <div class="entry-photos">
+                                        @foreach (var photoId in itemPhotos)
+                                        {
+                                            <button type="button" class="entry-photo" @onclick="() => viewerIndex = photoIndex[photoId]"
+                                                    aria-label="Open photo">
+                                                <PhotoImage PhotoId="photoId" />
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                            </li>
+                        }
+                    </ol>
+                </li>
+            }
+        </ol>
+    </section>
+}
+
 <PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" PhotoAge="PhotoAge"
              OnSetCover="SetCoverAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" />
 
@@ -171,9 +221,12 @@ else
     [Parameter]
     public EventCallback<Guid?> OnCoverChanged { get; set; }
 
+    private readonly string beforeId = $"before-{Guid.NewGuid():N}";
     private readonly string editDateId = $"edit-date-{Guid.NewGuid():N}";
 
     private IReadOnlyList<(DateOnly Day, IReadOnlyList<TimelineEntry> Entries)>? days;
+    private ReceivedHistory? received;
+    private IReadOnlyList<(DateOnly Day, IReadOnlyList<ReceivedItem> Items)> beforeDays = [];
     private IReadOnlyList<Photo> photos = [];
     private Dictionary<Guid, int> photoIndex = [];
 
@@ -204,11 +257,28 @@ else
     {
         var entries = await Entries.GetForAsync(SubjectId);
         var stored = await PhotoRepository.GetForAsync(SubjectId);
+        received = await ReceivedHistories.GetForAsync(SubjectId);
 
-        // The viewer pages through photos in the same order as the timeline shows them
+        // Newest first like the own history, and the same way round inside a day
+        beforeDays = received is null
+            ? []
+            : received.Items
+                .Select((item, index) => (item, index))
+                .GroupBy(x => x.item.Day)
+                .OrderByDescending(g => g.Key)
+                .Select(g => (g.Key, (IReadOnlyList<ReceivedItem>)g.OrderByDescending(x => x.index).Select(x => x.item).ToList()))
+                .ToList();
+
+        // The viewer pages through photos in the same order as the page shows them: the own entries,
+        // the own photos in no entry, then the copied ones as the history before reads
         var byId = stored.ToDictionary(p => p.Id);
         var inTimeline = entries.SelectMany(e => e.PhotoIds).Where(byId.ContainsKey).Distinct().Select(id => byId[id]);
-        photos = inTimeline.Concat(stored.Where(p => !entries.Any(e => e.PhotoIds.Contains(p.Id)))).ToList();
+        var inEntries = entries.SelectMany(e => e.PhotoIds).ToHashSet();
+        var copied = beforeDays.SelectMany(d => d.Items).SelectMany(i => i.PhotoIds).Where(byId.ContainsKey).Distinct().Select(id => byId[id]);
+        photos = inTimeline
+            .Concat(stored.Where(p => p.ReceivedHistoryId is null && !inEntries.Contains(p.Id)))
+            .Concat(copied)
+            .ToList();
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
         days = TimelineOrder.ByDay(entries, Time);
 
@@ -313,6 +383,7 @@ else
         TimelineEvent.Failed => "Didn't make it",
         TimelineEvent.GaveAway => "Given away",
         TimelineEvent.LookedOver => "Looked over",
+        TimelineEvent.Arrived => "Arrived",
         _ => KindLabel(entry.Kind)
     };
 
@@ -322,8 +393,23 @@ else
         TimelineEvent.Failed => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21v-8" /><path d="M9 13c-4 0-6-2-6-5 3 0 6 1 6 5Z" /><path d="M15 4.500l5 5M20 4.500l-5 5" /></svg>"""),
         TimelineEvent.GaveAway => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h12M12 7l5 5-5 5" /><path d="M20 5v14" /></svg>"""),
         TimelineEvent.LookedOver => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" /></svg>"""),
+        TimelineEvent.Arrived => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v9H4Z" /><path d="M3 7.5h18V11H3Z" /><path d="M12 7.5V20" /><path d="M12 7.5C10 7.5 7.5 7 7.5 5.25 7.5 4 8.500 3.5 9.500 3.5 11 3.5 12 5 12 7.5Z" /><path d="M12 7.5c2 0 4.500-.5 4.500-2.250 0-1.250-1-1.750-2-1.750C13 3.5 12 5 12 7.5Z" /></svg>"""),
         _ => KindIcon(entry.Kind)
     };
+
+    private static string BeforeClass(ReceivedItem item) => item.Kind switch
+    {
+        ShareItemKind.Note => "note",
+        ShareItemKind.Photos => "photo",
+        _ => "created"
+    };
+
+    private static MarkupString BeforeIcon(ShareItemKind kind) => KindIcon(kind switch
+    {
+        ShareItemKind.Note => TimelineKind.Note,
+        ShareItemKind.Photos => TimelineKind.Photo,
+        _ => TimelineKind.Created
+    });
 
     private static string KindLabel(TimelineKind kind) => kind switch
     {

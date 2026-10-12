@@ -18,6 +18,7 @@ public static class Stores
     public const string Products = "products";
     public const string Feeds = "feeds";
     public const string GrowLights = "growLights";
+    public const string ReceivedHistories = "receivedHistories";
     public const string Settings = "settings";
     public const string PutOffs = "putOffs";
     public const string TreatmentRecipes = "treatmentRecipes";

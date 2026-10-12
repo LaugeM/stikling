@@ -1,0 +1,144 @@
+/* The cover is a size container like the other crops, which the "framed" class in app.css places the photo in */
+.received-cover {
+    position: relative;
+    container-type: size;
+    width: 100%;
+    height: 100%;
+}
+
+.received-cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.received-title {
+    margin-bottom: 0.25rem;
+}
+
+.received-sub {
+    margin: 0 0 0.25rem;
+}
+
+.received-counts {
+    margin: 0 0 0.75rem;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.received-strip {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.35rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+}
+
+.received-tile {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: var(--pa-green-soft);
+}
+
+.received-tile img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* The last tile stands for the rest. The dark layer and white number are the same in both themes, so they read on any photo. */
+.received-more {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgb(0 0 0 / 0.55);
+    color: #fff;
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.received-milestones {
+    margin: 0 0 1.25rem;
+    padding: 0;
+    list-style: none;
+}
+
+.received-milestones li {
+    padding: 0.4rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.received-milestones li:last-child {
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.received-milestones span {
+    display: block;
+}
+
+.received-milestones .received-meta {
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.received-heading {
+    margin: 0 0 0.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.received-line {
+    margin: 0 0 1rem;
+}
+
+.received-count {
+    max-width: 8rem;
+}
+
+.received-progress {
+    margin-bottom: 1rem;
+}
+
+.received-bar {
+    height: 0.4rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--pa-green-soft);
+}
+
+.received-bar span {
+    display: block;
+    width: max(0.75rem, var(--done, 0%));
+    height: 100%;
+    border-radius: inherit;
+    background: var(--pa-green);
+    transition: width 0.2s ease-out;
+}
+
+.received-progress-text {
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .received-bar span {
+        transition: none;
+    }
+}
+
+/* On a wide screen the cover would push the form far down, so it is a wide strip */
+@media (min-width: 48rem) {
+    .detail-hero {
+        aspect-ratio: 2 / 1;
+        max-height: 20rem;
+    }
+}

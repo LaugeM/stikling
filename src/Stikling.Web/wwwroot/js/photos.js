@@ -230,3 +230,48 @@ export async function download(address, token, id, thumbnail) {
     forgetUrls(id);
     return 200;
 }
+
+// An image fetched from a public share link, when someone keeps a copy of a plant's history. The
+// giver's device already resized it to the full size, so it is kept as it arrived and only the
+// thumbnail is made here. No sign-in is sent. Returns false when it couldn't be fetched or read.
+export async function fetchShared(address, id) {
+    try {
+        let response;
+        for (let attempt = 1; attempt <= 4; attempt++) {
+            response = await fetchUncached(address);
+            if (response.status !== 429 || attempt === 4) break;
+
+            // The API asks for a pause when many photos are fetched at once
+            const asked = Number(response.headers.get("Retry-After"));
+            const seconds = Math.min(Number.isFinite(asked) && asked > 0 ? asked : 2, 10);
+            await new Promise(resolve => setTimeout(resolve, seconds * 1000));
+        }
+        if (!response.ok) return false;
+
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        const full = new Blob([bytes], { type: imageType(bytes) });
+        const bitmap = await createImageBitmap(full);
+        let thumb;
+        try {
+            thumb = await resize(bitmap, THUMB_SIZE);
+        } finally {
+            bitmap.close();
+        }
+
+        await putPhotoImages(id, full, thumb.blob);
+        forgetUrls(id);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+// The preview loads the same images with crossorigin, so the cached copy can be used. A copy cached
+// without CORS headers, say from opening the share page, fails here, so then it is fetched again.
+async function fetchUncached(address) {
+    try {
+        return await fetch(address);
+    } catch {
+        return await fetch(address, { cache: "reload" });
+    }
+}

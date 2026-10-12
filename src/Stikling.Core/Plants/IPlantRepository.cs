@@ -14,6 +14,9 @@ public interface IPlantRepository
     /// <summary>The plant with this id, or null if it doesn't exist or was deleted.</summary>
     Task<Plant?> GetAsync(Guid id);
 
+    /// <summary>True when a plant with this id is stored and soft-deleted.</summary>
+    Task<bool> IsDeletedAsync(Guid id);
+
     /// <summary>Creates or updates the plant and sets its timestamps.</summary>
     Task SaveAsync(Plant plant);
 
