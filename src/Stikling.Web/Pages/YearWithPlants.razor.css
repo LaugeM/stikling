@@ -1,0 +1,363 @@
+.year-heading {
+    align-items: center;
+}
+
+/* The year, as a chip beside the title */
+.year-picker {
+    width: auto;
+    min-height: 2.75rem;
+    padding-left: 1rem;
+    border-color: transparent;
+    border-radius: 999px;
+    background-color: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+}
+
+.year-size {
+    margin-bottom: 0.75rem;
+}
+
+.year-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+/* The stage runs to the screen edges on a phone, like the detail hero, and takes a radius inside the column */
+.year-stage {
+    container-type: inline-size;
+    margin: 0 -1rem 0.75rem;
+    padding: 1.25rem 0;
+    background: var(--pa-green-soft);
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.year-stage:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -4px;
+}
+
+@media (min-width: 48rem) {
+    .year-stage {
+        margin-inline: 0;
+        border-radius: 0.9rem;
+    }
+}
+
+.year-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.year-slot {
+    flex: none;
+    width: 2.75rem;
+}
+
+/* As large as fits: the width left beside the arrows and the pile, and about 60% of the screen's height */
+.year-deck {
+    --w: min(calc((100cqw - 6rem) / 1.16), calc(60svh * var(--ratio)));
+    position: relative;
+    flex: none;
+    width: var(--w);
+    aspect-ratio: var(--aspect);
+    /* Room for the pile peeking out to the right */
+    margin-right: calc(var(--w) * 0.16);
+}
+
+.year-pile,
+.year-card {
+    position: absolute;
+    inset: 0;
+    border-radius: 0.4rem;
+}
+
+.year-pile {
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+}
+
+.year-pile-1 {
+    transform: translateX(8%);
+}
+
+.year-pile-2 {
+    transform: translateX(16%);
+}
+
+.year-card {
+    z-index: 2;
+    overflow: hidden;
+    border: 1px solid transparent;
+}
+
+.year-card img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    -webkit-user-drag: none;
+}
+
+/* While a card is being drawn */
+.year-front[aria-busy="true"] {
+    background: var(--pa-green-soft);
+    border-color: var(--pa-border);
+}
+
+/* A card left out keeps its place, faded */
+.year-front.is-out {
+    border: 1px dashed var(--pa-muted);
+}
+
+.year-front.is-out img {
+    opacity: 0.45;
+}
+
+.year-out-label {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 999px;
+    background: var(--pa-surface);
+    color: var(--pa-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.year-leaving {
+    z-index: 3;
+    pointer-events: none;
+}
+
+.year-leaving.to-left {
+    animation: year-out-left 200ms ease-out forwards;
+}
+
+.year-leaving.to-right {
+    animation: year-out-right 200ms ease-out forwards;
+}
+
+.year-front.enter-next {
+    animation: year-in-next 200ms ease-out;
+}
+
+.year-front.enter-prev {
+    animation: year-in-prev 200ms ease-out;
+}
+
+@keyframes year-out-left {
+    from { transform: translateX(var(--from, 0px)); opacity: 1; }
+    to { transform: translateX(-30%); opacity: 0; }
+}
+
+@keyframes year-out-right {
+    from { transform: translateX(var(--from, 0px)); opacity: 1; }
+    to { transform: translateX(30%); opacity: 0; }
+}
+
+@keyframes year-in-next {
+    from { transform: translateX(8%) scale(0.97); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+
+@keyframes year-in-prev {
+    from { transform: translateX(-8%) scale(0.97); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+
+/* With reduced motion the card just switches */
+@media (prefers-reduced-motion: reduce) {
+    .year-leaving {
+        display: none;
+    }
+
+    .year-front.enter-next,
+    .year-front.enter-prev {
+        animation: none;
+    }
+}
+
+.year-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--pa-border);
+    border-radius: 50%;
+    background: var(--pa-surface);
+    color: var(--pa-green-dark);
+}
+
+.year-arrow svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.year-arrow:hover {
+    border-color: var(--pa-green);
+}
+
+.year-arrow:focus-visible {
+    outline: none;
+    border-color: var(--pa-green);
+    box-shadow: 0 0 0 0.2rem rgb(var(--bs-primary-rgb) / 0.25);
+}
+
+/* Transparent buttons over each photo of the collage */
+.year-swap {
+    position: absolute;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.year-swap:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -3px;
+}
+
+.year-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+}
+
+.year-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--pa-border);
+}
+
+.year-dot.current {
+    width: 1.25rem;
+    background: var(--pa-green);
+}
+
+.year-count {
+    margin: 0.4rem 0 0.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.year-hint {
+    margin: -0.25rem 0 0.5rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.year-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.year-actions .btn {
+    min-height: 2.75rem;
+}
+
+.year-all {
+    margin-top: 0.25rem;
+    text-align: center;
+}
+
+.year-all .btn-link {
+    --bs-btn-color: var(--pa-green-dark);
+    --bs-btn-hover-color: var(--pa-green-dark);
+    --bs-btn-active-color: var(--pa-green-dark);
+    min-height: 2.75rem;
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
+
+.year-message {
+    margin: 0.25rem 0 0;
+    text-align: center;
+}
+
+/* Plants that died that year: only listed here, never put on a card */
+.year-lost {
+    margin-top: 1.75rem;
+}
+
+.year-lost h2 {
+    margin: 0 0 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.year-lost-note {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.year-lost-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.year-lost-list > li {
+    padding: 0.75rem 0.9rem;
+}
+
+.year-lost-list > li + li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.year-lost-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.year-lost-name {
+    min-width: 0;
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
+
+.year-lost-day {
+    flex: none;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.year-lost-cause {
+    margin-top: 0.15rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}

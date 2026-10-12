@@ -21,6 +21,9 @@
 @inject PropagationService PropagationService
 @inject RoomService RoomService
 @inject TimeProvider Time
+@inject YearCardService YearCardsService
+@using Stikling.Core.Year
+@implements IAsyncDisposable
 
 <PageTitle>Today · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -252,6 +255,27 @@ else
                               propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
     }
 
+    @if (yearTitle is not null)
+    {
+        <section class="today-section year-section">
+            <h2>Your @yearSeason with your plants</h2>
+            <div class="year-promo">
+                <div class="year-thumb" aria-hidden="true">
+                    @if (yearUrl is not null)
+                    {
+                        <img src="@yearUrl" alt="" />
+                    }
+                </div>
+                <div class="year-promo-text">
+                    <p>@yearFigures</p>
+                    <a class="btn btn-primary" href="year/@yearSeason">See your year</a>
+                </div>
+            </div>
+            <button type="button" class="btn btn-link btn-sm link-action year-hide" @onclick="HideYearAsync">Hide for this season</button>
+            <canvas @ref="yearCanvas" hidden aria-hidden="true"></canvas>
+        </section>
+    }
+
     <section class="today-section">
         <h2>Worth a look</h2>
         @if (ChecksNow.Count == 0)
@@ -341,6 +365,11 @@ else
             </ul>
         }
     </section>
+
+    @if (yearTitle is null)
+    {
+        <p class="year-link"><a href="year">Your year so far</a></p>
+    }
 }
 
 @code {
@@ -406,6 +435,17 @@ else
     private bool showRound;
     private bool loaded;
 
+    // Your year with your plants, shown from 1 December to 15 January
+    private YearCard? yearTitle;
+
+    // Its own id, so the year page's title card and this one never release each other's picture
+    private const string TodayCardId = "today-title";
+    private int yearSeason;
+    private string yearFigures = "";
+    private string? yearUrl;
+    private string? yearDrawnKey;
+    private ElementReference yearCanvas;
+
     private DateOnly Today => Time.Today();
 
     private List<AttentionItem> FlaggedNow =>
@@ -470,7 +510,9 @@ else
         }
         FindWateringDue();
 
-        memory = Memories.Pick(plants, await PhotoRepository.GetOfKindAsync(SubjectType.Plant), Today, Time.LocalDay);
+        var plantPhotos = await PhotoRepository.GetOfKindAsync(SubjectType.Plant);
+        memory = Memories.Pick(plants, plantPhotos, Today, Time.LocalDay);
+        await FindYearAsync(settings, plantPhotos);
 
         dueTreatments = PestService.Due(
             PestService.Describe(await PestCases.GetAllAsync(), plants, await PestTreatments.GetAllAsync(), places, Today));
@@ -486,6 +528,77 @@ else
         backupReminder = await BackupReminderAsync();
         loaded = true;
         await Badge.SetAsync(DueCount);
+    }
+
+    // From 1 December the year is this one, and until 15 January it is the one just gone
+    private static int? SeasonYear(DateOnly today) =>
+        today.Month == 12 ? today.Year
+        : today is { Month: 1, Day: <= 15 } ? today.Year - 1
+        : null;
+
+    // The photos of propagations and the plant changes are only read when there is a season to show
+    private async Task FindYearAsync(UserSettings settings, IReadOnlyList<Photo> plantPhotos)
+    {
+        yearTitle = null;
+        if (SeasonYear(Today) is not { } season || settings.YearHiddenFor == season)
+            return;
+
+        var photos = plantPhotos.Concat(await PhotoRepository.GetOfKindAsync(SubjectType.Propagation)).ToList();
+        var summary = PlantYear.For(season, plants, propagations, photos, await Entries.GetPlantChangesAsync(),
+            Today, Time.LocalDay, Labels.For(PlantStatus.Died));
+        if (summary.CardCount < 2)
+            return;
+
+        var title = YearCards.For(summary, Labels.For, photos, Time.LocalDay)[0];
+        yearSeason = season;
+        yearFigures = string.Join(", ", title.Figures.Select(f => $"{f.Value} {f.Caption}"));
+        yearTitle = title;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (yearTitle is not { } title)
+            return;
+
+        // The small card is drawn once for what it says, and again when that changes
+        var key = $"{yearSeason}|{title.AltText}|{title.Photo?.PhotoId}";
+        if (key == yearDrawnKey)
+            return;
+
+        yearDrawnKey = key;
+        try
+        {
+            var drawn = await YearCardsService.DrawAsync(yearCanvas, YearCardSpec.From(title, "story") with { Id = TodayCardId });
+            if (drawn is not null)
+            {
+                yearUrl = drawn.Url;
+                StateHasChanged();
+            }
+        }
+        catch (JSException)
+        {
+            // The line beside it says the same without the picture
+        }
+    }
+
+    private async Task HideYearAsync()
+    {
+        await SettingsService.HideYearAsync(yearSeason);
+        yearTitle = null;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (yearUrl is not null)
+        {
+            try
+            {
+                await YearCardsService.ReleaseAsync([TodayCardId]);
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+        }
     }
 
     private void FindRound() =>

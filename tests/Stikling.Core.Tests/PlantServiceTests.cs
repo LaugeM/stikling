@@ -459,4 +459,28 @@ public class PlantServiceTests
         Assert.Equal("Added to collection, 2024", entry.Text);
         Assert.Equal(new DateOnly(2024, 1, 1), DateOnly.FromDateTime(entry.OccurredAt.UtcDateTime));
     }
+
+    [Fact]
+    public async Task UpdateAsync_sets_StatusSince_to_today_when_the_status_changes_and_leaves_it_otherwise()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+        await plants.SaveAsync(plant);
+
+        var before = plant.Copy();
+        plant.Notes = "Still fine";
+        await service.UpdateAsync(before, plant, Label);
+        Assert.Null(plant.StatusSince);
+
+        before = plant.Copy();
+        plant.Status = PlantStatus.Died;
+        await service.UpdateAsync(before, plant, Label);
+        Assert.Equal(new DateOnly(2026, 9, 19), plant.StatusSince);
+
+        var kept = new DateOnly(2026, 1, 2);
+        plant.StatusSince = kept;
+        before = plant.Copy();
+        plant.Notes = "Gone";
+        await service.UpdateAsync(before, plant, Label);
+        Assert.Equal(kept, plant.StatusSince);
+    }
 }

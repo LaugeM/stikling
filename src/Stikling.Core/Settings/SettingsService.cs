@@ -74,4 +74,12 @@ public sealed class SettingsService(ISettingsRepository settings)
         current.EverydayNames = language;
         await settings.SaveAsync(current);
     }
+
+    /// <summary>Hides the year section on Today for the rest of that year's season.</summary>
+    public async Task HideYearAsync(int year)
+    {
+        var current = await GetAsync();
+        current.YearHiddenFor = year;
+        await settings.SaveAsync(current);
+    }
 }

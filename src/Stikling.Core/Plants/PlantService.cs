@@ -78,6 +78,9 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Func<Guid, string?>? feedName = null)
     {
         after.Tags = PlantTags.Normalize(after.Tags);
+        // The day it died, left or came back is what the year in review reads
+        if (before.Status != after.Status)
+            after.StatusSince = time.Today();
         // What it learned about watering is from the way it was watered, so a new way starts over.
         // Without the pots only the medium and the water in the outer pot are seen.
         if (WateringForms.Of(before, pot) != WateringForms.Of(after, pot))
