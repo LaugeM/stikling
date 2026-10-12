@@ -255,6 +255,14 @@ else
                 </FormSection>
             }
 
+            <FormSection Title="For a plant-sitter" Summary="@SitterSummary" Open="openSitter">
+                <div class="mb-3">
+                    <label class="form-label" for="sitter-note">Note for a plant-sitter</label>
+                    <InputTextArea id="sitter-note" class="form-control" rows="3" @bind-Value="propagation.SitterNote" aria-describedby="sitter-note-help" />
+                    <div id="sitter-note-help" class="form-text">Goes on the sheet for whoever looks after your plants while you're away.</div>
+                </div>
+            </FormSection>
+
             <FormSection Title="Progress" Summary="@ProgressSummary" Open="openProgress">
                 <div class="mb-3">
                     <label class="form-label" for="stage">How far along</label>
@@ -422,6 +430,7 @@ else
     private bool openWhere;
     private bool openSetup;
     private bool openProgress;
+    private bool openSitter;
 
     // Set by "Change name", or by a name error, and kept for the rest of the visit
     private bool nameExpanded;
@@ -471,6 +480,8 @@ else
         <div id="about-help" class="form-text mt-0">For what stays true about it. Dated notes go on its history.</div>
         <InputTextArea class="form-control" rows="3" @bind-Value="propagation!.Notes" aria-label="About it" aria-describedby="about-help" />
     </div>;
+
+    private string? SitterSummary => string.IsNullOrWhiteSpace(propagation?.SitterNote) ? null : Labels.Short(propagation.SitterNote);
 
     private string? ProgressSummary => propagation is null ? null : Joined(
         Labels.Stage(propagation.Stage, propagation.Type),
@@ -525,6 +536,7 @@ else
             openWhere = !IsNew && !string.IsNullOrWhiteSpace(location);
             openSetup = !IsNew && HasSetup(propagation);
             openProgress = !IsNew && HasProgress(propagation);
+            openSitter = !IsNew && !string.IsNullOrWhiteSpace(propagation.SitterNote);
         }
     }
 

@@ -1,0 +1,554 @@
+/* The options above the sheet, which are left out of a print */
+
+.sitter-stretch {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.sitter-options fieldset {
+    border: 0;
+    padding: 0;
+}
+
+.sitter-options legend {
+    float: none;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.sitter-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sitter-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-block: 0.4rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.sitter-list li:first-child {
+    border-top: 0;
+}
+
+.sitter-list .form-check {
+    min-width: 0;
+}
+
+.sitter-list-place {
+    display: block;
+    color: var(--pa-muted);
+    font-size: 0.8rem;
+}
+
+.sitter-list .form-select {
+    flex: none;
+    width: auto;
+    min-height: 2.75rem;
+}
+
+.sitter-note {
+    margin: 0 0 0.75rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.6rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+    font-size: 0.9rem;
+}
+
+.sitter-status {
+    align-self: center;
+    color: var(--pa-muted);
+    font-size: 0.9rem;
+}
+
+/* Actions: in the bar at the bottom on a phone, next to the title on a wide screen */
+.sitter-heading-actions {
+    display: none;
+}
+
+.sitter-bar {
+    gap: 0.5rem;
+}
+
+.sitter-bar .btn {
+    flex: 1 1 auto;
+    min-height: 2.75rem;
+}
+
+@media (min-width: 64rem) {
+    .sitter-heading-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .sitter-bar {
+        display: none;
+    }
+}
+
+/* The sheet. It is paper, so it keeps the light colours in either theme and on the printer. */
+
+.sitter-paper {
+    --pa-green: #2f7d4f;
+    --pa-green-dark: #1f5a37;
+    --pa-green-soft: #e6f2ea;
+    --pa-clay: #b85c38;
+    --pa-clay-soft: #f6e6dc;
+    --pa-surface: #ffffff;
+    --pa-border: #dde3dc;
+    --pa-text: #1d2520;
+    --pa-muted: #5f6b63;
+
+    color-scheme: light;
+    margin-top: 1rem;
+    padding: 1.25rem;
+    border: 1px solid #dde3dc;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    color: #1d2520;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.sitter-paper h2,
+.sitter-paper h3,
+.sitter-paper h4,
+.sitter-paper p,
+.sitter-paper ul,
+.sitter-paper table {
+    color: #1d2520;
+}
+
+.sitter-paper h2,
+.sitter-paper h3,
+.sitter-paper h4,
+.sitter-paper b,
+.sitter-paper th {
+    font-family: var(--pa-font-display);
+}
+
+.sitter-paper p {
+    margin: 0.2rem 0 0;
+}
+
+.sheet-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid #1d2520;
+}
+
+.sheet-title {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-stretch: 92%;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+}
+
+.sheet-line {
+    margin: 0.25rem 0 0;
+    color: var(--pa-muted);
+    font-size: 0.85rem;
+}
+
+.sitter-paper .sheet-line {
+    color: var(--pa-muted);
+}
+
+.sheet-dates {
+    text-align: right;
+    color: var(--pa-muted);
+    font-size: 0.8rem;
+}
+
+.sheet-dates b {
+    display: block;
+    font-size: 0.9rem;
+    color: #1d2520;
+}
+
+.sheet-intro {
+    display: grid;
+    gap: 0.9rem;
+    margin-bottom: 1.1rem;
+    font-size: 0.85rem;
+}
+
+.sheet-note {
+    margin: 0;
+    font-style: italic;
+    white-space: pre-line;
+}
+
+.sheet-box {
+    padding: 0.65rem 0.8rem;
+    border-radius: 0.6rem;
+    background: var(--pa-green-soft);
+}
+
+.sheet-box h3 {
+    margin: 0 0 0.2rem;
+    font-size: 0.9rem;
+}
+
+.sheet-box h4 {
+    margin: 0.55rem 0 0;
+    font-size: 0.85rem;
+}
+
+.sheet-box p {
+    margin-top: 0.3rem;
+}
+
+.sheet-room {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.3rem 0 0.5rem;
+    color: var(--pa-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    break-after: avoid;
+}
+
+.sheet-room::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--pa-border);
+}
+
+.sheet-room.small {
+    margin: 0.5rem 0 0.1rem;
+    font-size: 0.7rem;
+}
+
+.sheet-room.small::after {
+    display: none;
+}
+
+.sheet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.sheet-card {
+    display: grid;
+    grid-template-columns: 5.4rem 1fr;
+    gap: 0.6rem;
+    padding: 0.6rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    break-inside: avoid;
+}
+
+.sheet-card.no-photo {
+    grid-template-columns: 1fr;
+}
+
+.sheet-card h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.sheet-species {
+    color: var(--pa-muted);
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+.sheet-card-text {
+    min-width: 0;
+}
+
+.sheet-card p {
+    margin: 0.2rem 0 0;
+}
+
+.sheet-card .sheet-pace {
+    color: var(--pa-green-dark);
+}
+
+.sheet-photo.item-thumb {
+    width: 5.4rem;
+    height: 5.4rem;
+    border-radius: 0.55rem;
+}
+
+.sheet-photo.item-thumb svg {
+    width: 2.2rem;
+    height: 2.2rem;
+}
+
+.sheet-mini.item-thumb {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 0.4rem;
+}
+
+.sheet-mini.item-thumb svg {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.sheet-days {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.8rem;
+    padding-top: 0.45rem;
+    border-top: 1px dashed var(--pa-border);
+    font-family: var(--pa-font-display);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.sheet-days .off {
+    color: var(--pa-muted);
+    font-weight: 400;
+}
+
+.sheet-box-tick {
+    display: inline-block;
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    border: 1.5px solid #1d2520;
+    border-radius: 0.25rem;
+    background: #ffffff;
+    vertical-align: -0.2em;
+}
+
+.sheet-days .off .sheet-box-tick {
+    border-style: dotted;
+    border-color: var(--pa-muted);
+}
+
+/* Visits first */
+
+.sheet-visits {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.8rem;
+}
+
+.sheet-visit {
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    break-inside: avoid;
+}
+
+.sheet-visit h3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-stretch: 92%;
+}
+
+.sheet-visit h3 small {
+    color: var(--pa-muted);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 400;
+}
+
+.sheet-visit ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sheet-visit li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    border-top: 1px solid var(--pa-border);
+    font-size: 0.78rem;
+    line-height: 1.3;
+}
+
+.sheet-visit li b {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.sheet-visit li span {
+    color: var(--pa-muted);
+    font-size: 0.72rem;
+}
+
+.sheet-none {
+    color: var(--pa-muted);
+}
+
+/* The cards of Visits first and Chart start on a page of their own, with the room to be big */
+
+.new-page {
+    margin-top: 1.4rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--pa-border);
+}
+
+/* Chart */
+
+.sheet-chart {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+}
+
+.sheet-chart th {
+    padding: 0.3rem 0.2rem;
+    border-bottom: 2px solid #1d2520;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.15;
+    text-align: center;
+    vertical-align: bottom;
+}
+
+.sheet-chart th small {
+    display: block;
+    color: var(--pa-muted);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 400;
+}
+
+.sheet-chart th.plant,
+.sheet-chart th.how,
+.sheet-chart td.plant,
+.sheet-chart td.how {
+    text-align: left;
+}
+
+.sheet-chart td {
+    padding: 0.35rem 0.2rem;
+    border-bottom: 1px solid var(--pa-border);
+    text-align: center;
+    vertical-align: middle;
+}
+
+.sheet-chart tr {
+    break-inside: avoid;
+}
+
+.sheet-chart td.no {
+    color: var(--pa-muted);
+}
+
+.sheet-chart td.how {
+    max-width: 10rem;
+    font-size: 0.72rem;
+    line-height: 1.35;
+}
+
+.sheet-chart tr.room td {
+    padding: 0.7rem 0 0.15rem;
+    border-bottom: 0;
+    color: var(--pa-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.sheet-chart .who {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sheet-chart .who b {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.sheet-chart .who span {
+    color: var(--pa-muted);
+    font-size: 0.72rem;
+}
+
+.sheet-chart td > .sheet-box-tick {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.sheet-key {
+    margin-top: 0.6rem;
+    color: var(--pa-muted);
+    font-size: 0.75rem;
+}
+
+@media (min-width: 36rem) {
+    .sheet-intro:has(.sheet-note) {
+        grid-template-columns: 1.3fr 1fr;
+    }
+
+}
+
+@media print {
+    .sitter-screen > :not(.sitter-paper),
+    .sitter-bar {
+        display: none !important;
+    }
+
+    .sitter-paper {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        font-size: 10pt;
+    }
+
+    .sheet-card,
+    .sheet-visit {
+        break-inside: avoid;
+    }
+
+    .new-page {
+        break-before: page;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+    }
+
+    .sheet-box {
+        break-inside: avoid;
+    }
+}
