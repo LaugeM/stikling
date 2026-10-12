@@ -388,6 +388,11 @@ else
                 </button>
             </div>
 
+            @if (Arrived)
+            {
+                <ArrivedNote SubjectId="plant.Id" />
+            }
+
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
                       CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)"
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
@@ -661,6 +666,10 @@ else
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    /// <summary>Set by the page that keeps a received history, so the first visit says where it went.</summary>
+    [SupplyParameterFromQuery(Name = "arrived")]
+    public bool Arrived { get; set; }
 
     /// <summary>
     /// Older links name a tab: "props" opens the details at its propagations and "care" opens

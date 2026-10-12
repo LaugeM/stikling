@@ -349,12 +349,18 @@ One record on a plant or propagation history. Each entry opens with its kind set
 
 This replaced a 3px coloured bar down the left edge. The bar was flagged as a generic interface tell, and it was also redundant: the label already named the entry in words, and the bar had two colours for five kinds. The icon carries the same at-a-glance signal at a fraction of the visual weight, and it uses the icon system the rest of the app already follows.
 
+### Before You Got It
+The history a plant or cutting had before it was given away, shown under its own history on the page of the friend who kept it. A divider starts it: "Before you got it" in Label type with a 1px Border hairline filling the rest of the line. Under it the giver's name for the plant is a heading in Title type, and then the items group by day, newest first, in the same entries as the own history. A milestone reads like an entry the app recorded, in Muted Ink with the sprout, a note takes the pencil and Deep Moss, and photos take the camera. Nothing in it can be changed: no time, no edit and no delete, and its photos can be framed or made the cover but not deleted in the viewer. Their own history starts above it with an Arrived entry, a stroked gift, so the two never run together.
+
 ### Empty State
 Centred Muted Ink text on Surface inside a dashed Border at 0.75rem radius, with 2.5rem of vertical padding. Used for "nothing matches" and for empty sections.
 
 An empty state never just says there is nothing. It says why the space is empty and what to do next, with a button when there is one thing to do: add the first one, clear the search and filters, or go and add what this depends on first. When the screen is about something with a name a newcomer may not know, like a feed or a propagation, it says what that is in half a sentence.
 
 The first-run version, on Today, Plants and Propagations when there is nothing at all yet, is louder on purpose: Leaf Tint with a green dashed edge, a stroked drawing at 5.5rem (a sprout in a clay pot, or a cutting rooting in a glass), a Bricolage heading in Deep Moss, and the sentences and buttons under it, with a small link to the Help page at the bottom. The one on Today says what the app is for and that nothing leaves the device. The Propagations one says in plain words what a propagation is, because that is the first question a new person asked.
+
+### Received Page
+What opens from a share link to keep a plant's history, at `/received/{token}`. A compact preview comes first: the cover as the page hero, the name, a meta line of counts ("14 photos · 3 notes"), a strip of up to six square tiles at 0.5rem radius whose last tile is darkened with "+N" in Bricolage 600 when there are more, and the milestones as plain rows divided by hairlines. The tiles are for looking, so they do nothing when tapped. Under it comes a short form in the usual fieldset card, and one primary button. While the photos copy the button is replaced by a slim Potting Green bar on a Leaf Tint track, 0.4rem tall, with the progress in small Muted Ink under it. A link that can't be used is an Empty State with the reason and one next step. The front page's intro is skipped for this link: the app icon shows at once with "Opening Stikling" and the same bar as the intro's.
 
 ### Share Card
 The picture a plant or propagation turns into when someone shares it, drawn on a canvas in `wwwroot/js/sharecard.js` and handed to the phone's share menu or saved. It is the one surface that leaves the app, so it is always light whatever theme the app is in, and it uses the light colours from this file. It comes in three sizes, square, 4:5 and 9:16, 1080 wide.

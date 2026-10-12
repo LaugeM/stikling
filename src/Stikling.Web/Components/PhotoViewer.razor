@@ -1,4 +1,4 @@
-@* Full-screen photo viewer with previous/next, and "set as cover", framing and delete where the page allows them. *@
+@* Full-screen photo viewer with previous/next, and "set as cover", framing and delete where the page allows them. Photos copied from a received history can't be deleted. *@
 
 @if (Current is { } photo)
 {
@@ -45,7 +45,8 @@
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">Frame</button>
                         }
-                        @if (OnDelete.HasDelegate)
+                        @* A photo copied from the history it had before stays as it was given *@
+                        @if (OnDelete.HasDelegate && photo.ReceivedHistoryId is null)
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">Delete</button>
                         }

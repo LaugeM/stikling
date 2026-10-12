@@ -1,0 +1,33 @@
+@* Said once, above the history of a plant or cutting that was just kept from a share link. Closing it
+   goes to the same page without the query, so reloading doesn't bring it back. *@
+@using Stikling.Core.Sharing
+@inject IReceivedHistoryRepository Histories
+@inject NavigationManager Navigation
+
+@if (show)
+{
+    <div class="arrived-note">
+        <p>Its history from before you got it is kept under Before you got it. Add your own photos and notes as it grows, and they go above it. Everything is kept on this device, and you don't need an account.</p>
+        <button type="button" class="arrived-close" aria-label="Close" @onclick="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </button>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    private bool show;
+    private bool closed;
+
+    protected override async Task OnParametersSetAsync() =>
+        show = !closed && await Histories.GetForAsync(SubjectId) is not null;
+
+    private void Close()
+    {
+        closed = true;
+        show = false;
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("arrived", (string?)null), replace: true);
+    }
+}

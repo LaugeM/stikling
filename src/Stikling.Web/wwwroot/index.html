@@ -25,6 +25,9 @@
         // Someone who has been here before gets the app from the service worker in a moment, so the
         // page below only shows the icon, and only if starting takes a while
         if (navigator.serviceWorker && navigator.serviceWorker.controller) document.documentElement.classList.add("returning");
+        // Someone opening a link to keep a plant's history comes for that, not for the intro, and may
+        // be starting the app for the first time, so the page says it is opening and shows the progress
+        if (location.pathname.indexOf("/received/") !== -1) document.documentElement.classList.add("returning", "receiving");
     </script>
     <style>
         /* The page that shows while the app downloads, which is also what search engines and link
@@ -661,6 +664,37 @@
                 animation-duration: 1ms;
             }
         }
+
+        /* Opening a link to keep a plant's history: the first download takes a while, so the icon shows
+           at once with a line and the same progress bar as the intro's */
+        .intro-quiet-text,
+        .intro-quiet .intro-bar {
+            display: none;
+        }
+
+        .receiving .intro-quiet {
+            align-content: center;
+            justify-items: center;
+            row-gap: 0.75rem;
+        }
+
+        .receiving .intro-quiet img {
+            opacity: 1;
+            animation: none;
+        }
+
+        .receiving .intro-quiet-text {
+            display: block;
+            margin: 0;
+            font-family: var(--intro-display);
+            font-size: 1rem;
+            color: var(--intro-ink);
+        }
+
+        .receiving .intro-quiet .intro-bar {
+            display: block;
+            width: min(16rem, 70vw);
+        }
     </style>
     <link rel="preload" id="webassembly" />
     <link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin />
@@ -926,7 +960,10 @@
     <!-- /intro -->
 
     <div id="app">
-        <div class="intro-quiet"><img src="icon-192.png" alt="Stikling is starting" width="72" height="72" /></div>
+        <div class="intro-quiet"><img src="icon-192.png" alt="Stikling is starting" width="72" height="72" />
+            <p class="intro-quiet-text">Opening Stikling</p>
+            <div class="intro-bar" aria-hidden="true"><span></span></div>
+        </div>
     </div>
 
     <div id="blazor-error-ui" role="alert">

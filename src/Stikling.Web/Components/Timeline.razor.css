@@ -9,7 +9,8 @@
     margin-top: 1rem;
 }
 
-.timeline-day h3 {
+.timeline-day h3,
+.timeline-day h4 {
     margin: 0 0 0.4rem;
     font-size: 0.8rem;
     font-weight: 600;
@@ -209,4 +210,35 @@
     gap: 0.4rem;
     margin-top: 0.5rem;
     font-size: 0.9rem;
+}
+
+/* What it had before it came here, under the history that starts at Arrived. The entries inside are the
+   timeline's own, so only the divider and the name are new. */
+.before-history {
+    margin-top: 1.75rem;
+}
+
+.before-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.before-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--pa-border);
+}
+
+.before-name {
+    margin: 0.5rem 0 0.75rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
 }

@@ -1,0 +1,45 @@
+.arrived-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--pa-green-soft);
+    border-radius: 0.75rem;
+    color: var(--pa-text);
+}
+
+.arrived-note p {
+    flex: 1;
+    margin: 0;
+}
+
+/* A round close button with a 44px tap area, pulled into the corner so it doesn't add height */
+.arrived-close {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -0.75rem -0.75rem -0.75rem 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--pa-muted);
+}
+
+.arrived-close:hover,
+.arrived-close:focus-visible {
+    background: color-mix(in srgb, var(--pa-green) 18%, transparent);
+}
+
+.arrived-close svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}

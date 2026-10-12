@@ -56,8 +56,11 @@ public sealed class SharedCopies(AccountSettings settings, PhotoService photos) 
         if (settings.ApiAddress is null)
             return false;
 
-        var address = new Uri(settings.ApiAddress,
-            $"s/{Uri.EscapeDataString(token)}/photos/{giverPhotoId}/{PhotoSize.Full.PathName()}");
-        return await photos.FetchSharedAsync(address, storeAs);
+        return await photos.FetchSharedAsync(PhotoAddress(token, giverPhotoId), storeAs);
     }
+
+    /// <summary>The address of a photo's full size on the link, for showing it before it is kept. Only used once the copy was fetched, so the server is known.</summary>
+    public Uri PhotoAddress(string token, Guid photoId) =>
+        new(settings.ApiAddress ?? throw new InvalidOperationException("No server to fetch from."),
+            $"s/{Uri.EscapeDataString(token)}/photos/{photoId}/{PhotoSize.Full.PathName()}");
 }
