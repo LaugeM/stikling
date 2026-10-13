@@ -2,6 +2,7 @@
 @page "/products"
 @inject IProductRepository Repository
 @inject ProductService ProductService
+@inject IJSRuntime JS
 
 <PageTitle>Products · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -18,7 +19,7 @@
 
 @if (errors.Count > 0)
 {
-    <div class="alert alert-danger" role="alert">
+    <div id="form-errors" class="alert alert-danger" role="alert" tabindex="-1">
         @foreach (var error in errors)
         {
             <div>@error</div>
@@ -208,6 +209,18 @@ else
     private bool busy;
     private List<string> errors = [];
 
+    /// <summary>Set when errors were just found, so the next render brings them into view above a long form.</summary>
+    private bool showErrors;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!showErrors)
+            return;
+        showErrors = false;
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+        await module.InvokeVoidAsync("showAlert", "form-errors");
+    }
+
     private Product? draft;
     private bool editing;
     private Guid? confirming;
@@ -287,6 +300,7 @@ else
             if (!decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var percent))
             {
                 errors = [$"{Labels.For(nutrient)} has to be a number."];
+                showErrors = true;
                 return false;
             }
             read.Add(new NutrientAmount { Nutrient = nutrient, Percent = percent });
@@ -342,7 +356,10 @@ else
 
         errors = draft.Validate().ToList();
         if (errors.Count > 0)
+        {
+            showErrors = true;
             return;
+        }
 
         busy = true;
         try
@@ -354,6 +371,7 @@ else
         catch (InvalidOperationException e)
         {
             errors = [e.Message];
+            showErrors = true;
         }
         finally
         {
