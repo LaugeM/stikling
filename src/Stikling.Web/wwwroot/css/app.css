@@ -1039,12 +1039,22 @@ a.item-card:active {
 /* A framed photo. The point of the photo in --fx and --fy goes in the middle of the crop, as far
    as the photo's edges allow, zoomed in by --z. --a is the photo's width over its height. The crop
    is a size container, so one frame suits a square card and the wide top of a page alike. The
-   sizes win over each crop's own width and height of 100%, which the photo would fill otherwise. */
+   sizes win over each crop's own width and height of 100%, which the photo would fill otherwise.
+   Every box a framed PhotoImage sits in has to be listed here. One that isn't sizes the photo to
+   the whole screen and lays it over the page. */
 .item-thumb,
 .entry-photo,
 .detail-hero-open,
 .photo-pick,
-.framer-box {
+.framer-box,
+.tile-photo,
+.round-photo,
+.memory-photo,
+.family-ancestor-photo,
+.family-focus-photo,
+.pot-photo,
+.pot-thumb,
+.chip-photo {
     position: relative;
     container-type: size;
 }
