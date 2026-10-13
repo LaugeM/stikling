@@ -75,6 +75,11 @@
     :root:has(.page-wide) {
         --pa-column: 72rem;
     }
+
+    /* The plant table is read across, so it takes the whole width beside the menu */
+    :root:has(.page-full) {
+        --pa-column: 100vw;
+    }
 }
 
 /* Dark theme: theme.js sets data-bs-theme="dark" on <html> */
