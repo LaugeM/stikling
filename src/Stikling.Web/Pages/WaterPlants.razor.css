@@ -1,4 +1,4 @@
-/* Water plants: pick rooms, read every plant, then tick what was watered */
+/* Water plants: one pass over the plants, answer how dry each is, and water the dry ones */
 
 .pass-lead {
     margin: 0.25rem 0 1rem;
@@ -11,6 +11,11 @@
     align-items: center;
     gap: 0.4rem;
     min-height: 2.75rem;
+}
+
+/* Picked or not, a room chip is the same width: the badge's place is kept and no weight is added */
+.pass-room.picked {
+    font-weight: 400;
 }
 
 /* The place in the order the rooms were picked */
@@ -29,6 +34,10 @@
     line-height: 1;
 }
 
+.pass-order.unpicked {
+    visibility: hidden;
+}
+
 .pass-bar {
     display: flex;
     flex-wrap: wrap;
@@ -36,9 +45,14 @@
     margin-bottom: 0.25rem;
 }
 
-.pass-title {
-    margin: 0.5rem 0 1rem;
-    font-size: 1.125rem;
+.pass-mode {
+    margin-bottom: 0.75rem;
+}
+
+.pass-mode .chip,
+.pass-soil .chip {
+    min-height: 2.75rem;
+    padding-inline: 1rem;
 }
 
 .pass-group {
@@ -67,7 +81,8 @@
     border-radius: 0.75rem;
 }
 
-.pass-item.ticked {
+/* A plant watered today folds down to one line, with Undo */
+.pass-item.done {
     border-color: var(--pa-green);
     background: var(--pa-green-soft);
 }
@@ -93,41 +108,51 @@ a.pass-name {
     line-height: 1.4;
 }
 
-.pass-text .pass-meta {
-    margin-bottom: 0;
+.pass-doneline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.4rem;
+    color: var(--pa-green-dark);
+    font-size: 0.85rem;
+}
+
+.pass-doneline .btn {
+    padding-inline: 0.25rem;
+}
+
+/* The meter's 0 to 10: all eleven on one row when there is room, wrapping on a phone */
+.pass-item .answer-grid {
+    grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
+    max-width: 36rem;
 }
 
 .pass-item .answer-grid .chip {
     min-height: 2.75rem;
 }
 
-.pass-check {
+.pass-act {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.85rem;
+    gap: 0.25rem 1rem;
+    margin-top: 0.6rem;
+}
+
+.pass-water {
     min-height: 2.75rem;
-    margin: 0;
-    cursor: pointer;
 }
 
-.pass-box {
-    flex: none;
-    width: 1.5rem;
-    height: 1.5rem;
-    margin: 0;
-}
-
-.pass-text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
+.pass-anyway {
+    padding-inline: 0;
+    font-size: 0.9rem;
 }
 
 .pass-feed {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin: 0.5rem 0 0 2.35rem;
+    margin-top: 0.5rem;
 }
 
 .pass-feed-label {
@@ -144,29 +169,89 @@ a.pass-name {
 }
 
 .pass-actions {
-    margin-top: 1rem;
-    padding-bottom: 5rem;
+    margin: 0 0 1.25rem;
 }
 
 .pass-actions .btn {
     min-height: 2.75rem;
 }
 
-.pass-done {
-    margin-top: 1rem;
+/* Room at the end of the list for the bar */
+.pass-end {
+    height: 6rem;
 }
 
-.pass-done p {
-    font-family: var(--pa-font-display);
-    font-size: 1.125rem;
+/* Sits above the navigation, lined up with the page column */
+.pass-progress {
+    position: fixed;
+    left: var(--pa-nav-side);
+    right: 0;
+    bottom: var(--pa-nav-bottom);
+    z-index: 11;
+    padding: 0.6rem var(--pa-column-inset);
+    background: var(--pa-surface);
+    border-top: 1px solid var(--pa-border);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+}
+
+.pass-progress .alert {
+    margin: 0 0 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.pass-progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.pass-progress-text {
     font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.pass-progress .btn {
+    min-height: 2.75rem;
+}
+
+/* What the pass came to: a solid Leaf Tint panel */
+.pass-summary {
+    margin-top: 1rem;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    background: var(--pa-green-soft);
     color: var(--pa-text);
 }
 
-.pass-done-actions {
+.pass-summary h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.25rem;
+    color: var(--pa-green-dark);
+}
+
+.pass-summary h2:focus {
+    outline: none;
+}
+
+.pass-summary p {
+    margin: 0;
+}
+
+.pass-summary ul {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.pass-summary-actions {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin-top: 1.25rem;
+}
+
+.pass-summary-actions .btn-primary {
+    min-height: 2.75rem;
 }

@@ -165,24 +165,22 @@ public class WateringPassTests
         var row = RowOf(plant, living);
 
         Assert.Equal(dry, row.Dry);
-        Assert.Equal(dry, row.Ticked);
         Assert.Equal(waterAt ?? 3, row.WaterAt);
     }
 
     [Fact]
-    public void A_plant_with_no_reading_is_not_dry_or_ticked()
+    public void A_plant_with_no_reading_is_not_dry()
     {
         var row = RowOf(Plant("P", living), living);
 
         Assert.Null(row.Reading);
         Assert.False(row.Dry);
-        Assert.False(row.Ticked);
     }
 
     [Theory]
     [InlineData(GrowingMedium.Leca)]
     [InlineData(GrowingMedium.Water)]
-    public void Reservoir_and_in_water_plants_are_never_dry_or_ticked(GrowingMedium medium)
+    public void Reservoir_and_in_water_plants_are_never_dry(GrowingMedium medium)
     {
         var plant = Plant("P", living);
         plant.Medium = medium;
@@ -192,11 +190,10 @@ public class WateringPassTests
 
         Assert.NotEqual(WateringForm.TopWatered, row.Form);
         Assert.False(row.Dry);
-        Assert.False(row.Ticked);
     }
 
     [Fact]
-    public void A_plant_watered_today_has_the_entry_and_is_not_ticked_again()
+    public void A_plant_watered_today_has_the_entry()
     {
         var plant = Plant("P", living);
         Log(plant, CareKind.MoistureReading, moisture: 1);
@@ -206,7 +203,6 @@ public class WateringPassTests
 
         Assert.Equal(watered.Id, row.DoneTodayId);
         Assert.True(row.Dry);
-        Assert.False(row.Ticked);
     }
 
     [Fact]
@@ -220,6 +216,89 @@ public class WateringPassTests
 
         Assert.Equal(topped.Id, RowOf(reservoir, living).DoneTodayId);
         Assert.Null(RowOf(soil, living).DoneTodayId);
+    }
+
+    // Still damp
+
+    private PassRow RowWith(PutOffs putOffs, Plant plant) =>
+        WateringPass.Rows([living.Id], plants, logs, feeds, null, Places, Time, putOffs)
+            .SelectMany(g => g.Rows).Single(r => r.Plant.Id == plant.Id);
+
+    [Fact]
+    public void A_plant_put_off_since_its_last_watering_is_still_damp()
+    {
+        var plant = Plant("P", living);
+        Log(plant, CareKind.Watered, daysAgo: 5);
+        var putOffs = PutOffs.Empty();
+        putOffs.PutOff(PutOffs.Water(plant.Id, Today.AddDays(-5)), Today.AddDays(2));
+
+        Assert.True(RowWith(putOffs, plant).StillDamp);
+        Assert.False(RowOf(plant, living).StillDamp);
+    }
+
+    [Fact]
+    public void A_plant_without_any_watering_can_be_still_damp()
+    {
+        var plant = Plant("P", living);
+        var putOffs = PutOffs.Empty();
+        putOffs.PutOff(PutOffs.Water(plant.Id, null), Today.AddDays(1));
+
+        Assert.True(RowWith(putOffs, plant).StillDamp);
+    }
+
+    [Fact]
+    public void A_put_off_that_has_come_back_or_is_for_an_older_watering_is_not_still_damp()
+    {
+        var plant = Plant("P", living);
+        Log(plant, CareKind.Watered, daysAgo: 5);
+        var back = PutOffs.Empty();
+        back.PutOff(PutOffs.Water(plant.Id, Today.AddDays(-5)), Today);
+        var older = PutOffs.Empty();
+        older.PutOff(PutOffs.Water(plant.Id, Today.AddDays(-9)), Today.AddDays(2));
+
+        Assert.False(RowWith(back, plant).StillDamp);
+        Assert.False(RowWith(older, plant).StillDamp);
+    }
+
+    [Fact]
+    public void A_plant_watered_today_or_not_top_watered_is_not_still_damp()
+    {
+        var watered = Plant("W", living);
+        Log(watered, CareKind.Watered);
+        var reservoir = Plant("R", living);
+        reservoir.Medium = GrowingMedium.Pon;
+        var putOffs = PutOffs.Empty();
+        putOffs.PutOff(PutOffs.Water(watered.Id, Today), Today.AddDays(2));
+        putOffs.PutOff(PutOffs.Water(reservoir.Id, null), Today.AddDays(2));
+
+        Assert.False(RowWith(putOffs, watered).StillDamp);
+        Assert.False(RowWith(putOffs, reservoir).StillDamp);
+    }
+
+    // How the screen asks
+
+    [Fact]
+    public void A_chosen_way_of_checking_is_used_whatever_is_logged()
+    {
+        var plant = Plant("P", living);
+        Log(plant, CareKind.MoistureReading, moisture: 4);
+
+        Assert.Equal(WaterCheck.Soil, WaterChecks.Effective(WaterCheck.Soil, logs));
+        Assert.Equal(WaterCheck.Meter, WaterChecks.Effective(WaterCheck.Meter, []));
+    }
+
+    [Fact]
+    public void Without_a_choice_the_meter_is_used_once_a_reading_is_logged_and_the_soil_before()
+    {
+        var plant = Plant("P", living);
+        Log(plant, CareKind.Watered);
+        Assert.Equal(WaterCheck.Soil, WaterChecks.Effective(null, logs));
+
+        var reading = Log(plant, CareKind.MoistureReading, moisture: 0);
+        Assert.Equal(WaterCheck.Meter, WaterChecks.Effective(null, logs));
+
+        reading.DeletedAt = Now;
+        Assert.Equal(WaterCheck.Soil, WaterChecks.Effective(null, logs));
     }
 
     // Feed
@@ -376,5 +455,82 @@ public class WateringPassTests
             [new PassWatering(Guid.NewGuid(), CareKind.Watered, null), new PassWatering(Guid.NewGuid(), CareKind.Pruned, null)], Label));
 
         Assert.Empty(saving.Logs.Logs);
+    }
+
+    // Undo
+
+    [Fact]
+    public async Task Undoing_a_watering_deletes_it_and_the_feeding_logged_with_it()
+    {
+        var saving = new Saving();
+        var feed = Feed();
+        var plant = Guid.NewGuid();
+        await saving.Care.LogWateringsAsync([new PassWatering(plant, CareKind.Watered, feed)], Label);
+        var watering = saving.Logs.Logs.Single(l => l.Kind == CareKind.Watered);
+
+        await saving.Care.UndoWateringAsync(watering.Id);
+
+        Assert.All(saving.Logs.Logs, l => Assert.True(l.IsDeleted));
+        Assert.Equal(2, saving.Logs.Logs.Count);
+    }
+
+    [Fact]
+    public async Task Undoing_a_watering_keeps_a_feeding_logged_earlier_the_same_day_by_hand()
+    {
+        var saving = new Saving();
+        var feed = Feed();
+        var plant = Guid.NewGuid();
+        var earlier = new CareLog
+        {
+            PlantId = plant, Kind = CareKind.Fertilised, OccurredOn = Today, FeedId = feed.Id,
+            CreatedAt = Now.AddHours(-3)
+        };
+        saving.Logs.Logs.Add(earlier);
+        await saving.Care.LogWateringsAsync([new PassWatering(plant, CareKind.Watered, null)], Label);
+        var watering = saving.Logs.Logs.Single(l => l.Kind == CareKind.Watered);
+        watering.CreatedAt = Now;
+
+        await saving.Care.UndoWateringAsync(watering.Id);
+
+        Assert.False(earlier.IsDeleted);
+        Assert.True(watering.IsDeleted);
+    }
+
+    [Fact]
+    public async Task Undoing_keeps_another_plants_feeding_and_another_days()
+    {
+        var saving = new Saving();
+        var feed = Feed();
+        var (plant, other) = (Guid.NewGuid(), Guid.NewGuid());
+        await saving.Care.LogWateringsAsync(
+            [new PassWatering(plant, CareKind.Watered, null), new PassWatering(other, CareKind.Watered, feed)], Label);
+        var yesterday = new CareLog { PlantId = plant, Kind = CareKind.Fertilised, OccurredOn = Today.AddDays(-1), FeedId = feed.Id };
+        saving.Logs.Logs.Add(yesterday);
+        var watering = saving.Logs.Logs.First(l => l.Kind == CareKind.Watered && l.PlantId == plant);
+
+        await saving.Care.UndoWateringAsync(watering.Id);
+
+        Assert.Equal(3, saving.Logs.Logs.Count(l => !l.IsDeleted));
+        Assert.False(yesterday.IsDeleted);
+        Assert.Contains(saving.Logs.Logs, l => l.PlantId == other && l.Kind == CareKind.Fertilised && !l.IsDeleted);
+    }
+
+    [Fact]
+    public async Task Undoing_a_topping_up_deletes_that_entry_and_nothing_but_a_watering_can_be_undone()
+    {
+        var saving = new Saving();
+        var feed = Feed();
+        var plant = Guid.NewGuid();
+        await saving.Care.LogWateringsAsync([new PassWatering(plant, CareKind.ToppedUp, feed)], Label);
+        var reading = new CareLog { PlantId = plant, Kind = CareKind.MoistureReading, OccurredOn = Today, Moisture = 3 };
+        saving.Logs.Logs.Add(reading);
+
+        await saving.Care.UndoWateringAsync(reading.Id);
+        Assert.False(reading.IsDeleted);
+
+        var topped = saving.Logs.Logs.Single(l => l.Kind == CareKind.ToppedUp);
+        await saving.Care.UndoWateringAsync(topped.Id);
+        Assert.True(topped.IsDeleted);
+        Assert.False(reading.IsDeleted);
     }
 }

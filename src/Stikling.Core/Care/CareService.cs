@@ -177,6 +177,31 @@ public sealed class CareService(
 
     public Task DeleteAsync(Guid id) => logs.DeleteAsync(id);
 
+    /// <summary>
+    /// Takes back a watering or topping up from the watering screen: deletes that entry and the
+    /// Fertilised entry logged with it, the one for the same plant and day with a feed that was
+    /// saved with it or after it. A feeding logged earlier the same day is kept.
+    /// </summary>
+    public async Task UndoWateringAsync(Guid wateringId)
+    {
+        if (await logs.GetAsync(wateringId) is not { IsDeleted: false } watering || !IsWatering(watering.Kind))
+            return;
+
+        var withIt = watering.Kind == CareKind.Watered
+            ? (await logs.GetAllAsync())
+                .Where(l => l.PlantId == watering.PlantId
+                    && l.Kind == CareKind.Fertilised
+                    && l.FeedId is not null
+                    && l.OccurredOn == watering.OccurredOn
+                    && l.CreatedAt >= watering.CreatedAt)
+                .ToList()
+            : [];
+
+        await logs.DeleteAsync(wateringId);
+        foreach (var fed in withIt)
+            await logs.DeleteAsync(fed.Id);
+    }
+
     private static bool IsWatering(CareKind kind) => kind is CareKind.Watered or CareKind.ToppedUp;
 
     /// <summary>

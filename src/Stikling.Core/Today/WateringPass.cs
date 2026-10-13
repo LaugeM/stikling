@@ -14,18 +14,18 @@ public sealed record PassRoom(Guid Id, string Name);
 /// <param name="WaterAt">The reading it is watered at: the plant's own, or the usual 3.</param>
 /// <param name="DoneTodayId">The watering, or topping up, logged today.</param>
 /// <param name="Dry">Top watered, read today, and the reading is at or below <paramref name="WaterAt"/>.</param>
-/// <param name="Ticked">Whether it starts ticked on the second step: dry by its reading and not done today.</param>
+/// <param name="StillDamp">Top watered, not done today, and its water reminder is put off, which is how "Still damp" is remembered.</param>
 /// <param name="DefaultFeed">The feed the plant gets with its watering, when it is due on this one. Null when not due or already done today.</param>
 public sealed record PassRow(
     Plant Plant, WateringForm Form, RoundReading? Reading, int WaterAt, Guid? DoneTodayId,
-    bool Dry, bool Ticked, Feed? DefaultFeed);
+    bool Dry, bool StillDamp, Feed? DefaultFeed);
 
 /// <summary>The plants of one room on the watering screen, in the order they are walked.</summary>
 public sealed record PassGroup(Guid RoomId, string Name, IReadOnlyList<PassRow> Rows);
 
 /// <summary>
-/// Watering many plants in one pass: pick rooms, read every plant with the meter, then tick what
-/// was watered. Everything here is worked out from what is logged, so leaving and coming back the
+/// Watering many plants in one pass: pick rooms, answer how dry each plant is, and water the dry
+/// ones. Everything here is worked out from what is logged, so leaving and coming back the
 /// same day picks up where it was.
 /// </summary>
 public static class WateringPass
@@ -61,6 +61,7 @@ public static class WateringPass
     /// </summary>
     /// <param name="feeds">Every feed, for the one a plant gets with its watering.</param>
     /// <param name="pot">Finds a pot by id, to see whether it waters itself.</param>
+    /// <param name="putOffs">What is put off on Today, to tell a plant answered "Still damp" earlier today.</param>
     public static IReadOnlyList<PassGroup> Rows(
         IReadOnlyList<Guid> roomIds,
         IEnumerable<Plant> plants,
@@ -68,7 +69,8 @@ public static class WateringPass
         IEnumerable<Feed> feeds,
         Func<Guid, Pot?>? pot,
         Places places,
-        TimeProvider time)
+        TimeProvider time,
+        PutOffs? putOffs = null)
     {
         var today = time.Today();
         var active = Active(plants).ToList();
@@ -100,14 +102,14 @@ public static class WateringPass
                 continue;
             }
 
-            var rows = inRoom.Select(p => RowOf(p, careByPlant[p.Id].ToList(), feedById, pot, today)).ToList();
+            var rows = inRoom.Select(p => RowOf(p, careByPlant[p.Id].ToList(), feedById, pot, putOffs, today)).ToList();
             groups.Add(new PassGroup(roomId, name, rows));
         }
         return groups;
     }
 
     private static PassRow RowOf(
-        Plant plant, List<CareLog> care, Dictionary<Guid, Feed> feeds, Func<Guid, Pot?>? pot, DateOnly today)
+        Plant plant, List<CareLog> care, Dictionary<Guid, Feed> feeds, Func<Guid, Pot?>? pot, PutOffs? putOffs, DateOnly today)
     {
         var form = WateringForms.Of(plant, pot);
         var waterAt = plant.WaterAt ?? Plant.DefaultWaterAt;
@@ -136,7 +138,11 @@ public static class WateringPass
                 care, new CareLog { PlantId = plant.Id, Kind = doneKind, OccurredOn = today }, plant.WateringFeedEvery))
             feed = found;
 
-        return new PassRow(plant, form, shown, waterAt, done?.Id, dry, dry && done is null, feed);
+        var lastWatered = WateringGuess.Waterings(plant, care).Cast<DateOnly?>().LastOrDefault();
+        var stillDamp = form == WateringForm.TopWatered && done is null
+            && putOffs?.IsPutOff(PutOffs.Water(plant.Id, lastWatered), today) == true;
+
+        return new PassRow(plant, form, shown, waterAt, done?.Id, dry, stillDamp, feed);
     }
 
     private static IEnumerable<Plant> Active(IEnumerable<Plant> plants) =>

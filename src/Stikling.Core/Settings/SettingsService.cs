@@ -79,6 +79,14 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    /// <summary>Sets how the Water plants screen asks about each plant.</summary>
+    public async Task SetWaterCheckAsync(WaterCheck check)
+    {
+        var current = await GetAsync();
+        current.WaterCheck = check;
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetEverydayNamesAsync(EverydayNameLanguage language)
     {
         var current = await GetAsync();

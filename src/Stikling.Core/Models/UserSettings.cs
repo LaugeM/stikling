@@ -54,4 +54,11 @@ public sealed class UserSettings : Entity
     /// them, and 3 and 10 are the other choices. Older settings without it read as null.
     /// </summary>
     public int? BackListLength { get; set; }
+
+    /// <summary>
+    /// How the Water plants screen asks about each plant: with the meter or by feeling the soil. Null
+    /// until it's chosen there, and then it follows whether any meter reading has been logged.
+    /// Older settings without it read as null.
+    /// </summary>
+    public WaterCheck? WaterCheck { get; set; }
 }
