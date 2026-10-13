@@ -159,13 +159,24 @@ public class PotUseTests
     }
 
     [Fact]
-    public void The_names_are_the_ones_already_in_use_without_repeats()
+    public void The_names_are_the_ones_already_in_use_for_the_same_kind_without_repeats()
     {
         var big = Nursery(); big.TopCm = 13;
         var small = Nursery(); small.TopCm = 8;
+        var black = new Pot { Name = "Black nursery pot", Group = PotGroup.Inner };
+        var ceramic = new Pot { Name = "Grey ceramic", Group = PotGroup.Outer };
+        var terracotta = new Pot { Name = "Terracotta", Group = PotGroup.Standalone };
+
+        Assert.Equal(["Black nursery pot", "Clear nursery pot"], PotUse.Names([big, small, black, ceramic, terracotta], PotGroup.Inner));
+        Assert.Equal(["Terracotta"], PotUse.Names([big, ceramic, terracotta], PotGroup.Standalone));
+    }
+
+    [Fact]
+    public void An_outer_pot_gets_no_names_to_pick_from()
+    {
         var ceramic = new Pot { Name = "Grey ceramic", Group = PotGroup.Outer };
 
-        Assert.Equal(["Clear nursery pot", "Grey ceramic"], PotUse.Names([big, small, ceramic]));
+        Assert.Empty(PotUse.Names([Nursery(), ceramic], PotGroup.Outer));
     }
 
     private static Pot Nursery(int owned = 1) =>
