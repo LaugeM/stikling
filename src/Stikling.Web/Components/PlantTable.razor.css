@@ -1,0 +1,191 @@
+/* The panel that scrolls sideways when the columns are wider than the screen. Room at the end keeps the
+   add button and the action bar off the last row. */
+.plant-table-scroll {
+    overflow-x: auto;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    margin-bottom: 5rem;
+}
+
+.plant-table {
+    --row-bg: var(--pa-surface);
+    --check-width: 2.75rem;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.plant-table th,
+.plant-table td {
+    padding: 0.55rem 0.9rem;
+    background: var(--row-bg);
+    border-bottom: 1px solid var(--pa-border);
+    white-space: nowrap;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.plant-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.plant-table thead th {
+    --row-bg: var(--pa-surface);
+    padding: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.sort-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 2.75rem;
+    width: 100%;
+    padding: 0 0.9rem;
+    border: 0;
+    background: none;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.sort-button:hover,
+th[aria-sort] .sort-button {
+    color: var(--pa-green-dark);
+}
+
+.sort-button:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+}
+
+.sort-chevron {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* The name (and the checkbox before it) stays put while the rest scrolls */
+.check-col,
+.name-col {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+}
+
+/* Exactly as wide as the name column's offset, so the two don't overlap when scrolled */
+.plant-table .check-col {
+    box-sizing: border-box;
+    width: var(--check-width);
+    min-width: var(--check-width);
+    max-width: var(--check-width);
+    padding: 0 0 0 0.9rem;
+}
+
+.selecting .name-col {
+    left: var(--check-width);
+}
+
+.name-col {
+    border-right: 1px solid var(--pa-border);
+}
+
+.plant-table tbody tr {
+    cursor: default;
+}
+
+.selecting tbody tr {
+    cursor: pointer;
+}
+
+.plant-table tbody tr.selected {
+    --row-bg: var(--pa-green-soft);
+}
+
+@media (hover: hover) {
+    .plant-table tbody tr:hover {
+        --row-bg: var(--pa-green-soft);
+    }
+}
+
+.name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 10rem;
+}
+
+.plant-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    color: var(--pa-text);
+    text-decoration: none;
+}
+
+a.plant-name:hover {
+    color: var(--pa-green-dark);
+    text-decoration: underline;
+}
+
+.name-cell .favourite-star {
+    margin-left: -0.25rem;
+}
+
+/* The shared thumbnail, made small. Keeping its class keeps a framed photo inside its box. */
+.table-thumb.item-thumb {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+}
+
+.table-thumb.item-thumb svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.italic-col {
+    font-style: italic;
+}
+
+.number-col {
+    font-variant-numeric: tabular-nums;
+}
+
+.price-col,
+.plant-table th.price-col .sort-button {
+    text-align: right;
+    justify-content: flex-end;
+}
+
+.plant-table td.tags-col {
+    white-space: normal;
+    min-width: 10rem;
+}
+
+.tags-col .tag-label {
+    margin: 0.1rem 0.25rem 0.1rem 0;
+}
+
+@media (min-width: 48rem) {
+    .name-cell {
+        max-width: 16rem;
+    }
+}

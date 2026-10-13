@@ -9,6 +9,7 @@
 @inject TimeProvider Time
 @inject PlantNameService Names
 @inject DeviceFiles Device
+@using CoreTable = Stikling.Core.Plants.PlantTable
 
 <PageTitle>Plants · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -96,22 +97,33 @@ else
                 }
             }
 
-            <select class="form-select w-auto" aria-label="Sort by"
-                    @bind="sort" @bind:after="SortChangedAsync">
-                @foreach (var (value, label) in sortOptions)
-                {
-                    <option value="@value">@label</option>
-                }
-            </select>
+            @if (view != PlantView.Table)
+            {
+                <select class="form-select w-auto" aria-label="Sort by"
+                        @bind="sort" @bind:after="SortChangedAsync">
+                    @foreach (var (value, label) in sortOptions)
+                    {
+                        <option value="@value">@label</option>
+                    }
+                </select>
+            }
+            else
+            {
+                <button type="button" class="btn btn-outline-primary columns-button" @onclick="() => columnsOpen = true">Columns</button>
+            }
 
             <div class="btn-group view-toggle" role="group" aria-label="View">
-                <button type="button" class="btn btn-outline-primary @(grid ? null : "picked")" aria-pressed="@(grid ? "false" : "true")"
-                        aria-label="List view" title="List view" @onclick="() => SetViewAsync(false)">
+                <button type="button" class="btn btn-outline-primary @(view == PlantView.List ? "picked" : null)" aria-pressed="@(view == PlantView.List ? "true" : "false")"
+                        aria-label="List view" title="List view" @onclick="() => SetViewAsync(PlantView.List)">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>
                 </button>
-                <button type="button" class="btn btn-outline-primary @(grid ? "picked" : null)" aria-pressed="@(grid ? "true" : "false")"
-                        aria-label="Grid view" title="Grid view" @onclick="() => SetViewAsync(true)">
+                <button type="button" class="btn btn-outline-primary @(view == PlantView.Grid ? "picked" : null)" aria-pressed="@(view == PlantView.Grid ? "true" : "false")"
+                        aria-label="Grid view" title="Grid view" @onclick="() => SetViewAsync(PlantView.Grid)">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></svg>
+                </button>
+                <button type="button" class="btn btn-outline-primary @(view == PlantView.Table ? "picked" : null)" aria-pressed="@(view == PlantView.Table ? "true" : "false")"
+                        aria-label="Table view" title="Table view" @onclick="() => SetViewAsync(PlantView.Table)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2" /><path d="M3.5 10h17M9.5 10v9" /></svg>
                 </button>
             </div>
         </div>
@@ -198,7 +210,12 @@ else
             }
         </div>
     }
-    else if (grid)
+    else if (view == PlantView.Table)
+    {
+        <PlantTable Rows="tableRows" Columns="columns" Sort="tableSort" SortChanged="TableSortChangedAsync"
+                    Selectable="selecting" Selected="selected" OnToggle="Toggle" />
+    }
+    else if (view == PlantView.Grid)
     {
         <ul class="plant-grid">
             @foreach (var plant in visible)
@@ -224,6 +241,25 @@ else
         </ul>
     }
 }
+
+<Sheet Title="Columns" @bind-Open="columnsOpen">
+    <p class="text-body-secondary small">Pick what to show. This device remembers it.</p>
+    @foreach (var column in Enum.GetValues<PlantColumn>())
+    {
+        var id = $"column-{column}";
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="@id" checked="@columns.Contains(column)"
+                   disabled="@(column == PlantColumn.Name)" @onchange="() => ToggleColumnAsync(column)" />
+            <label class="form-check-label" for="@id">
+                @CoreTable.Header(column)
+                @if (column == PlantColumn.Name)
+                {
+                    <span class="text-body-secondary small">Always shown</span>
+                }
+            </label>
+        </div>
+    }
+</Sheet>
 
 @if (selecting)
 {
@@ -355,7 +391,15 @@ else
     private const string SortKey = "plants-sort";
     private PlantSort sort = PlantSort.Name;
     private const string ViewKey = "plants-view";
-    private bool grid; // "Grid" is stored per device, anything else reads as the list
+    private enum PlantView { List, Grid, Table }
+    private PlantView view; // "Grid" and "Table" are stored per device, anything else reads as the list
+    private const string ColumnsKey = "plants-columns";
+    private const string TableSortKey = "plants-table-sort";
+    private IReadOnlyList<PlantColumn> columns = CoreTable.Defaults;
+    private PlantTableSort tableSort = new();
+    private bool columnsOpen;
+    private Dictionary<Guid, PlantRow> tableValues = [];
+    private List<PlantRow> tableRows = [];
     private Dictionary<Guid, DateTimeOffset> lastActivity = [];
 
     private bool selecting;
@@ -383,15 +427,45 @@ else
         }
         if (Enum.TryParse<PlantSort>(await Device.GetAsync(SortKey), out var stored) && Enum.IsDefined(stored))
             sort = stored;
-        grid = await Device.GetAsync(ViewKey) == "Grid";
+        view = await Device.GetAsync(ViewKey) switch { "Grid" => PlantView.Grid, "Table" => PlantView.Table, _ => PlantView.List };
+        columns = CoreTable.Parse(await Device.GetAsync(ColumnsKey));
+        tableSort = CoreTable.ParseSort(await Device.GetAsync(TableSortKey));
         await LoadAsync();
     }
 
-    private async Task SetViewAsync(bool value)
+    private async Task SetViewAsync(PlantView value)
     {
-        grid = value;
-        await Device.SetAsync(ViewKey, value ? "Grid" : "List");
+        view = value;
+        await Device.SetAsync(ViewKey, value.ToString());
     }
+
+    private async Task ToggleColumnAsync(PlantColumn column)
+    {
+        var picked = columns.ToHashSet();
+        if (!picked.Remove(column))
+            picked.Add(column);
+        columns = CoreTable.Parse(CoreTable.Write(picked));
+        // A hidden column can't show it's the sort, so the table goes back to A to Z
+        if (!columns.Contains(tableSort.Column))
+        {
+            tableSort = new();
+            await Device.SetAsync(TableSortKey, CoreTable.WriteSort(tableSort));
+        }
+        SortTable();
+        await Device.SetAsync(ColumnsKey, CoreTable.Write(columns));
+    }
+
+    private async Task TableSortChangedAsync(PlantTableSort value)
+    {
+        tableSort = value;
+        SortTable();
+        await Device.SetAsync(TableSortKey, CoreTable.WriteSort(value));
+    }
+
+    // The table shows what the filters let through, in the order of its own sort
+    private void SortTable() =>
+        tableRows = CoreTable.Sort(visible.Select(p => tableValues[p.Id]), tableSort,
+            columns.Contains(PlantColumn.Cultivar), e => Labels.For(e));
 
     private EverydayNameBook? everyday;
 
@@ -405,6 +479,9 @@ else
         tags = PlantTags.InUse(all);
         careLogs = await CareLogRepository.GetAllAsync();
         pestCases = await PestCaseRepository.GetAllAsync();
+        tableValues = CoreTable.Rows(all, careLogs, Time.Today(), places.NameOf,
+                p => everyday?.For(p.Genus, p.Species, p.Cultivar))
+            .ToDictionary(r => r.Plant.Id);
         lastActivity = PlantActivity.Latest(await Entries.GetLatestPerSubjectAsync(), careLogs);
         Refresh();
     }
@@ -483,12 +560,15 @@ else
         await Device.SetAsync(SortKey, sort.ToString());
     }
 
-    private void Refresh() =>
+    private void Refresh()
+    {
         visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
                 pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity,
                 p => everyday?.For(p.Genus, p.Species, p.Cultivar), goneAs)
             .Apply(all ?? [])
             .ToList();
+        SortTable();
+    }
 
     private void ToggleSelectMode()
     {
