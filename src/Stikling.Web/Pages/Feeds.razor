@@ -91,6 +91,10 @@
                     {
                         <button type="button" class="chip" @onclick="() => draft.Products.Add(ProductDose.From(product))">
                             + @product.Name
+                            @if (product.NpkText is { } npk)
+                            {
+                                <span class="chip-note">@npk</span>
+                            }
                         </button>
                     }
                 </div>

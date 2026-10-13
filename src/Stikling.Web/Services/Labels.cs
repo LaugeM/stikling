@@ -331,6 +331,8 @@ public static class Labels
         _ => kind.ToString()
     };
 
+    public static string For(Nutrient nutrient) => nutrient.ToString();
+
     /// <summary>Said under the ingredients when the percentages do not reach 100. Never blocks a save.</summary>
     public static string PercentTotal(decimal total) =>
         $"That adds up to {SoilMix.Number(total)}%, not 100%. You can still save it.";
