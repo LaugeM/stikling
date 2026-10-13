@@ -36,10 +36,14 @@
                     {
                         @if (OnSetCover.HasDelegate)
                         {
-                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)"
-                                    disabled="@(photo.Id == CoverPhotoId)">
-                                @(photo.Id == CoverPhotoId ? "Cover photo" : "Set as cover")
-                            </button>
+                            @if (photo.Id == CoverPhotoId)
+                            {
+                                <span class="viewer-cover"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" /></svg>Cover photo</span>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)">Set as cover</button>
+                            }
                         }
                         @if (OnFrame.HasDelegate)
                         {
