@@ -47,17 +47,23 @@ public class CareTests
         Assert.Contains("That date is in the future.", Entry(CareKind.Watered, Today.AddDays(1)).Validate(Today));
 
     [Theory]
-    [InlineData(0)]
+    [InlineData(-1)]
     [InlineData(11)]
-    public void A_moisture_reading_goes_from_1_to_10(int value) =>
+    public void A_moisture_reading_goes_from_0_to_10(int value) =>
         Assert.Contains(
-            "The moisture reading goes from 1 to 10.",
+            "The moisture reading goes from 0 to 10.",
             Entry(CareKind.MoistureReading, Today, moisture: value).Validate(Today));
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(10)]
+    public void A_moisture_reading_of_0_or_10_is_valid(int value) =>
+        Assert.Empty(Entry(CareKind.MoistureReading, Today, moisture: value).Validate(Today));
 
     [Fact]
     public void A_moisture_reading_needs_a_number() =>
         Assert.Contains(
-            "Give the moisture reading a number from 1 to 10.",
+            "Give the moisture reading a number from 0 to 10.",
             Entry(CareKind.MoistureReading, Today).Validate(Today));
 
     [Fact]

@@ -56,6 +56,14 @@
     margin-bottom: 0;
 }
 
+/* Water plants and Go round these side by side, wrapping under each other on a narrow screen */
+.today-head-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    column-gap: 0.75rem;
+}
+
 .today-go-round {
     display: inline-flex;
     align-items: center;

@@ -17,8 +17,9 @@
     <h1>Plants</h1>
     @if (all is { Count: > 0 })
     {
-        <div class="d-flex align-items-baseline gap-2">
+        <div class="d-flex align-items-baseline justify-content-end flex-wrap gap-2">
             <span class="text-body-secondary small">@visible.Count of @all.Count</span>
+            <a class="btn btn-outline-primary btn-sm" href="water">Water plants</a>
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
                 @(selecting ? "Done" : "Select")
             </button>

@@ -273,13 +273,19 @@ else
         <section class="today-section">
             <div class="today-section-head">
                 <h2>Water</h2>
-                @if (now.Count >= 2)
-                {
-                    <a class="today-go-round" href="round/due">
-                        Go round these
+                <div class="today-head-links">
+                    <a class="today-go-round" href="water">
+                        Water plants
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
                     </a>
-                }
+                    @if (now.Count >= 2)
+                    {
+                        <a class="today-go-round" href="round/due">
+                            Go round these
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                        </a>
+                    }
+                </div>
             </div>
             @if (now.Any(d => d.Guess.Form == WateringForm.TopWatered && d.Guess.Mode != WateringMode.Meter))
             {
@@ -496,7 +502,7 @@ else
         return string.Join(" · ", parts);
     }
 
-    private static readonly IReadOnlyList<int> MeterReadings = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    private static readonly IReadOnlyList<int> MeterReadings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     private IReadOnlyList<WateringDue> wateringDue = [];
     private bool wateringOn;

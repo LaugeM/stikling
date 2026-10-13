@@ -241,7 +241,7 @@ public static class GoingRound
             days.Count(d => !d.Any));
 
     // In the order of a round: the room itself, then each spot by name, then by name
-    private static IEnumerable<(T Item, string? Heading)> Ordered<T>(
+    internal static IEnumerable<(T Item, string? Heading)> Ordered<T>(
         IEnumerable<T> items, Func<T, Guid?> placeOf, Func<T, string> nameOf, Place scope, Places places) =>
         items
             .Select(item => (Item: item, Place: places.Find(placeOf(item))))

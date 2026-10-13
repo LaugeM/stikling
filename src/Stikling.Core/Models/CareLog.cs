@@ -21,7 +21,7 @@ public enum CareKind
     LeavesCleaned,
     Harvested,
 
-    /// <summary>A reading off the moisture meter, 1 to 10.</summary>
+    /// <summary>A reading off the moisture meter, 0 to 10.</summary>
     MoistureReading
 }
 
@@ -38,7 +38,7 @@ public sealed class CareLog : Entity
 
     public CareKind Kind { get; set; }
 
-    /// <summary>The moisture meter reading, 1 to 10. Only on <see cref="CareKind.MoistureReading"/>.</summary>
+    /// <summary>The moisture meter reading, 0 to 10. Only on <see cref="CareKind.MoistureReading"/>.</summary>
     public int? Moisture { get; set; }
 
     /// <summary>
@@ -84,9 +84,9 @@ public sealed class CareLog : Entity
         if (Kind == CareKind.MoistureReading)
         {
             if (Moisture is null)
-                errors.Add("Give the moisture reading a number from 1 to 10.");
-            else if (Moisture is < 1 or > 10)
-                errors.Add("The moisture reading goes from 1 to 10.");
+                errors.Add("Give the moisture reading a number from 0 to 10.");
+            else if (Moisture is < 0 or > 10)
+                errors.Add("The moisture reading goes from 0 to 10.");
         }
         else if (Moisture is not null)
         {
