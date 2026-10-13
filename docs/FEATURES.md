@@ -43,7 +43,7 @@ In the order I would build them. The first ones are for reaching new people: wha
 4. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
 5. **Flowering log**, with the flowering calendar.
 6. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-7. **Table view and Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else.
+7. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
 8. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
 9. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
 10. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
@@ -93,7 +93,7 @@ Small ones with no new screen worth the name:
 | ✅ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
 | ✅ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
 | ✅ | Grid view with large photos as an alternative to the list | 4 | S | v1.x |
-| ☐ | **Table view**: the plant list as a table with a column per field (name, cultivar, room, when and where you got it, price, last watered, fed and repotted, medium), sorted by tapping a column, with the columns you pick. Made for a computer screen and scrolls sideways on a phone. For someone used to keeping their plants in a spreadsheet, and goes well with importing one | 4 | M | v1.x |
+| ✅ | **Table view**: a third view on the plant list next to List and Grid, with a column per detail (name, cultivar, last watered, fed and repotted, genus, species, everyday name, room, when and where you got it, origin, price, medium, moisture, status, tags, when it was added). Tap a heading to sort by it and again to reverse it. The Columns picker chooses what shows and each device remembers it, along with the view and the sort. The name column stays pinned when the table scrolls sideways on a phone. For someone used to keeping their plants in a spreadsheet | 4 | M | v1.x |
 | ☐ | Group the plant list by genus, with an A to Z jump for long lists | 6 | S | v1.x |
 | ☐ | **The collection at a glance**: how many plants there are of each genus and in each room, how many species, and the plant you have had longest. Worked out from what is stored | 6 | S | v1.x |
 | ☐ | **Collection numbers**: an optional short number per plant, e.g. 117, to write on the pot. Its propagations get 117a, 117b and so on, so a label on a jar says where the cutting came from | 4 | M | v1.x |
