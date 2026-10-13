@@ -39,3 +39,39 @@
 .product-confirm p {
     margin-bottom: 0.5rem;
 }
+
+.nutrient-npk {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.nutrient-npk .form-label {
+    margin-bottom: 0.15rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.nutrient-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.nutrient-name {
+    flex: 0 0 6.5rem;
+}
+
+.nutrient-row .input-group {
+    flex: 1 1 auto;
+}
+
+.nutrient-remove {
+    flex: 0 0 auto;
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    background: none;
+    color: var(--pa-muted);
+}

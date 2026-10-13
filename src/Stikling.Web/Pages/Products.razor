@@ -1,6 +1,8 @@
+@using System.Globalization
 @page "/products"
 @inject IProductRepository Repository
 @inject ProductService ProductService
+@inject IJSRuntime JS
 
 <PageTitle>Products · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -17,7 +19,7 @@
 
 @if (errors.Count > 0)
 {
-    <div class="alert alert-danger" role="alert">
+    <div id="form-errors" class="alert alert-danger" role="alert" tabindex="-1">
         @foreach (var error in errors)
         {
             <div>@error</div>
@@ -64,6 +66,57 @@
             <div class="form-text">
                 The way the bottle puts it, e.g. 5 ml per 4 L. Leave the dose empty if you don't know it yet.
             </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label">What's in it</div>
+            @if (draft.Kind == ProductKind.Fertiliser)
+            {
+                <div class="nutrient-npk">
+                    @foreach (var nutrient in Npk)
+                    {
+                        var id = $"product-{nutrient}";
+                        <div>
+                            <label class="form-label" for="@id">@NutrientInfo.Symbol(nutrient)</label>
+                            <div class="input-group">
+                                <input id="@id" class="form-control" type="text" inputmode="decimal" autocomplete="off"
+                                       value="@TextOf(nutrient)" @oninput="e => SetNpk(nutrient, e.Value?.ToString())" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            @foreach (var nutrient in Rows)
+            {
+                var id = $"product-{nutrient}";
+                <div class="nutrient-row">
+                    <label class="nutrient-name" for="@id">@Labels.For(nutrient)</label>
+                    <div class="input-group">
+                        <input id="@id" class="form-control" type="text" inputmode="decimal" autocomplete="off"
+                               value="@TextOf(nutrient)" @oninput="e => texts[nutrient] = e.Value?.ToString() ?? string.Empty" />
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <button type="button" class="nutrient-remove" aria-label="Remove @Labels.For(nutrient)"
+                            @onclick="() => RemoveNutrient(nutrient)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                </div>
+            }
+            @if (adding)
+            {
+                <div class="chip-row mt-2" role="group" aria-label="Nutrients to add">
+                    @foreach (var nutrient in Addable)
+                    {
+                        <button type="button" class="chip" @onclick="() => AddNutrient(nutrient)">
+                            @Labels.For(nutrient)
+                        </button>
+                    }
+                </div>
+            }
+            else if (Addable.Count > 0)
+            {
+                <button type="button" class="btn btn-link px-0" @onclick="() => adding = true">+ Add a nutrient</button>
+            }
+            <div class="form-text">As printed on the label, in %.</div>
         </div>
 
         <div class="mb-3">
@@ -129,6 +182,10 @@ else
                             <span class="product-dose-text">@(use.Product.DoseText ?? "no usual dose")</span>
                         </div>
                         <div class="product-use">@Labels.For(use.Product.Kind) · @Used(use)</div>
+                        @if (use.Product.NutrientText is { } nutrientText)
+                        {
+                            <div class="product-use">@nutrientText</div>
+                        }
                         @if (!string.IsNullOrWhiteSpace(use.Product.Notes))
                         {
                             <div class="product-use">@use.Product.Notes</div>
@@ -152,6 +209,18 @@ else
     private bool busy;
     private List<string> errors = [];
 
+    /// <summary>Set when errors were just found, so the next render brings them into view above a long form.</summary>
+    private bool showErrors;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!showErrors)
+            return;
+        showErrors = false;
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+        await module.InvokeVoidAsync("showAlert", "form-errors");
+    }
+
     private Product? draft;
     private bool editing;
     private Guid? confirming;
@@ -165,6 +234,80 @@ else
     }
 
     private static string? Picked(bool picked) => picked ? "picked" : null;
+
+    private static readonly Nutrient[] Npk = [Nutrient.Nitrogen, Nutrient.Phosphorus, Nutrient.Potassium];
+
+    // What was typed for each nutrient, and which nutrients have a box or a row, in the order added.
+    private readonly Dictionary<Nutrient, string> texts = [];
+    private readonly List<Nutrient> listed = [];
+    private bool adding;
+
+    private bool NpkBoxes => draft?.Kind == ProductKind.Fertiliser;
+
+    /// <summary>The rows under the N, P and K boxes. For anything but a fertiliser, N, P and K are rows too.</summary>
+    private IEnumerable<Nutrient> Rows => listed.Where(n => !(NpkBoxes && Npk.Contains(n)));
+
+    private List<Nutrient> Addable => Enum.GetValues<Nutrient>()
+        .Where(n => !listed.Contains(n) && !(NpkBoxes && Npk.Contains(n)))
+        .ToList();
+
+    private string TextOf(Nutrient nutrient) => texts.GetValueOrDefault(nutrient, "");
+
+    private void SetNpk(Nutrient nutrient, string? text)
+    {
+        texts[nutrient] = text ?? "";
+        if (string.IsNullOrWhiteSpace(text))
+            listed.Remove(nutrient);
+        else if (!listed.Contains(nutrient))
+            listed.Add(nutrient);
+    }
+
+    private void AddNutrient(Nutrient nutrient)
+    {
+        if (!listed.Contains(nutrient))
+            listed.Add(nutrient);
+        texts.TryAdd(nutrient, "");
+        adding = false;
+    }
+
+    private void RemoveNutrient(Nutrient nutrient)
+    {
+        listed.Remove(nutrient);
+        texts.Remove(nutrient);
+    }
+
+    private void LoadNutrients(Product product)
+    {
+        texts.Clear();
+        listed.Clear();
+        adding = false;
+        foreach (var amount in product.Nutrients)
+        {
+            listed.Add(amount.Nutrient);
+            texts[amount.Nutrient] = Doses.Number(amount.Percent);
+        }
+    }
+
+    /// <summary>Builds the list from what was typed. A box or row left empty is dropped.</summary>
+    private bool TryReadNutrients(Product product)
+    {
+        var read = new List<NutrientAmount>();
+        foreach (var nutrient in listed)
+        {
+            var text = TextOf(nutrient).Trim().Replace(',', '.');
+            if (text.Length == 0)
+                continue;
+            if (!decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var percent))
+            {
+                errors = [$"{Labels.For(nutrient)} has to be a number."];
+                showErrors = true;
+                return false;
+            }
+            read.Add(new NutrientAmount { Nutrient = nutrient, Percent = percent });
+        }
+        product.Nutrients = read;
+        return true;
+    }
 
     /// <summary>"used on 4 plants, last 12 Sep 2026".</summary>
     private static string Used(ProductUse use) => use.LastUsed is { } last
@@ -181,6 +324,7 @@ else
         errors = [];
         confirming = null;
         draft = new Product();
+        LoadNutrients(draft);
     }
 
     private void StartEdit(Product product)
@@ -189,6 +333,7 @@ else
         errors = [];
         confirming = null;
         draft = product.Copy();
+        LoadNutrients(draft);
     }
 
     private void Cancel()
@@ -206,9 +351,15 @@ else
         draft.Name = draft.Name?.Trim();
         draft.Notes = string.IsNullOrWhiteSpace(draft.Notes) ? null : draft.Notes.Trim();
 
+        if (!TryReadNutrients(draft))
+            return;
+
         errors = draft.Validate().ToList();
         if (errors.Count > 0)
+        {
+            showErrors = true;
             return;
+        }
 
         busy = true;
         try
@@ -220,6 +371,7 @@ else
         catch (InvalidOperationException e)
         {
             errors = [e.Message];
+            showErrors = true;
         }
         finally
         {
