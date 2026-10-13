@@ -41,6 +41,33 @@ public enum ProductKind
     Other
 }
 
+/// <summary>A nutrient a product can say it contains. Stored as text, so the order here can change.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<Nutrient>))]
+public enum Nutrient
+{
+    Nitrogen,
+    Phosphorus,
+    Potassium,
+    Calcium,
+    Magnesium,
+    Sulphur,
+    Silicon,
+    Iron,
+    Manganese,
+    Zinc,
+    Boron,
+    Copper,
+    Molybdenum
+}
+
+/// <summary>How much of one nutrient a product says it has, in percent, as printed on the label.</summary>
+public sealed class NutrientAmount
+{
+    public Nutrient Nutrient { get; set; }
+
+    public decimal Percent { get; set; }
+}
+
 /// <summary>
 /// Something that goes in the water: a fertiliser, a stimulant, silica and the rest of what
 /// makes up a feed. Saved once with the dose you usually use, so logging a feed is a tap.
@@ -66,11 +93,53 @@ public sealed class Product : Entity
 
     public string? Notes { get; set; }
 
+    private List<NutrientAmount> nutrients = [];
+
+    /// <summary>
+    /// What the label says the product contains, in percent. The numbers are copied as printed:
+    /// labels give phosphorus and potassium as oxides (P2O5 and K2O), and the app doesn't convert.
+    /// Old data and a null in JSON both read as an empty list.
+    /// </summary>
+    public List<NutrientAmount> Nutrients
+    {
+        get => nutrients;
+        set => nutrients = value ?? [];
+    }
+
+    /// <summary>"3-1-2" when the product has nitrogen, phosphorus or potassium (a missing one is 0), otherwise null.</summary>
+    [JsonIgnore]
+    public string? NpkText => Nutrients.Any(n => n.Nutrient <= Nutrient.Potassium)
+        ? string.Join("-", new[] { Nutrient.Nitrogen, Nutrient.Phosphorus, Nutrient.Potassium }
+            .Select(nutrient => Doses.Number(Nutrients.FirstOrDefault(n => n.Nutrient == nutrient)?.Percent ?? 0)))
+        : null;
+
+    /// <summary>"NPK 3-1-2 · Ca 2 · Mg 1", or null when the product lists no nutrients.</summary>
+    [JsonIgnore]
+    public string? NutrientText
+    {
+        get
+        {
+            var parts = new List<string>();
+            if (NpkText is { } npk)
+                parts.Add($"NPK {npk}");
+            parts.AddRange(Nutrients
+                .Where(n => n.Nutrient > Nutrient.Potassium)
+                .OrderBy(n => n.Nutrient)
+                .Select(n => $"{NutrientInfo.Symbol(n.Nutrient)} {Doses.Number(n.Percent)}"));
+            return parts.Count == 0 ? null : string.Join(" · ", parts);
+        }
+    }
+
     /// <summary>"2 ml/L" or "5 ml per 4 L", or null when there's no default dose.</summary>
     [JsonIgnore]
     public string? DoseText => DefaultDose is { } dose ? Doses.Text(dose, Unit, Per, PerUnit) : null;
 
-    public Product Copy() => (Product)MemberwiseClone();
+    public Product Copy()
+    {
+        var copy = (Product)MemberwiseClone();
+        copy.nutrients = [.. Nutrients.Select(n => new NutrientAmount { Nutrient = n.Nutrient, Percent = n.Percent })];
+        return copy;
+    }
 
     public IReadOnlyList<string> Validate()
     {
@@ -84,6 +153,12 @@ public sealed class Product : Entity
 
         if (Per <= 0)
             errors.Add(Doses.NoWater);
+
+        if (Nutrients.Any(n => n.Percent is < 0 or > 100))
+            errors.Add("A nutrient can't be less than 0 or more than 100 %.");
+
+        if (Nutrients.GroupBy(n => n.Nutrient).Any(g => g.Count() > 1))
+            errors.Add("Each nutrient can only be listed once.");
 
         return errors;
     }
@@ -132,6 +207,27 @@ public sealed class ProductDose
     /// <summary>"Hydro fertiliser, 2 ml/L", or just the name when no dose was given.</summary>
     public override string ToString() =>
         Amount is { } amount ? $"{Name.Trim()}, {Doses.Text(amount, Unit, Per, PerUnit)}" : Name.Trim();
+}
+
+public static class NutrientInfo
+{
+    /// <summary>"N", "Ca", "Si": the chemical symbols, as a label prints them.</summary>
+    public static string Symbol(Nutrient nutrient) => nutrient switch
+    {
+        Nutrient.Nitrogen => "N",
+        Nutrient.Phosphorus => "P",
+        Nutrient.Potassium => "K",
+        Nutrient.Calcium => "Ca",
+        Nutrient.Magnesium => "Mg",
+        Nutrient.Sulphur => "S",
+        Nutrient.Silicon => "Si",
+        Nutrient.Iron => "Fe",
+        Nutrient.Manganese => "Mn",
+        Nutrient.Zinc => "Zn",
+        Nutrient.Boron => "B",
+        Nutrient.Copper => "Cu",
+        _ => "Mo"
+    };
 }
 
 public static class Doses
