@@ -41,7 +41,10 @@ public enum ProductKind
     Other
 }
 
-/// <summary>A nutrient a product can say it contains. Stored as text, so the order here can change.</summary>
+/// <summary>
+/// A nutrient a product can say it contains. Stored as text, so old data doesn't depend on the order, but
+/// the order here is the order they are shown in after N-P-K.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<Nutrient>))]
 public enum Nutrient
 {
@@ -106,10 +109,12 @@ public sealed class Product : Entity
         set => nutrients = value ?? [];
     }
 
+    private static readonly Nutrient[] Npk = [Nutrient.Nitrogen, Nutrient.Phosphorus, Nutrient.Potassium];
+
     /// <summary>"3-1-2" when the product has nitrogen, phosphorus or potassium (a missing one is 0), otherwise null.</summary>
     [JsonIgnore]
-    public string? NpkText => Nutrients.Any(n => n.Nutrient <= Nutrient.Potassium)
-        ? string.Join("-", new[] { Nutrient.Nitrogen, Nutrient.Phosphorus, Nutrient.Potassium }
+    public string? NpkText => Nutrients.Any(n => Npk.Contains(n.Nutrient))
+        ? string.Join("-", Npk
             .Select(nutrient => Doses.Number(Nutrients.FirstOrDefault(n => n.Nutrient == nutrient)?.Percent ?? 0)))
         : null;
 
@@ -123,7 +128,7 @@ public sealed class Product : Entity
             if (NpkText is { } npk)
                 parts.Add($"NPK {npk}");
             parts.AddRange(Nutrients
-                .Where(n => n.Nutrient > Nutrient.Potassium)
+                .Where(n => !Npk.Contains(n.Nutrient))
                 .OrderBy(n => n.Nutrient)
                 .Select(n => $"{NutrientInfo.Symbol(n.Nutrient)} {Doses.Number(n.Percent)}"));
             return parts.Count == 0 ? null : string.Join(" · ", parts);
