@@ -475,7 +475,7 @@ public class WateringPassTests
     }
 
     [Fact]
-    public async Task Undoing_a_watering_keeps_a_feeding_logged_earlier_the_same_day_by_hand()
+    public async Task Undoing_a_watering_keeps_a_feeding_logged_by_hand_earlier_or_later_the_same_day()
     {
         var saving = new Saving();
         var feed = Feed();
@@ -485,7 +485,13 @@ public class WateringPassTests
             PlantId = plant, Kind = CareKind.Fertilised, OccurredOn = Today, FeedId = feed.Id,
             CreatedAt = Now.AddHours(-3)
         };
+        var later = new CareLog
+        {
+            PlantId = plant, Kind = CareKind.Fertilised, OccurredOn = Today, FeedId = feed.Id,
+            CreatedAt = Now.AddMinutes(1)
+        };
         saving.Logs.Logs.Add(earlier);
+        saving.Logs.Logs.Add(later);
         await saving.Care.LogWateringsAsync([new PassWatering(plant, CareKind.Watered, null)], Label);
         var watering = saving.Logs.Logs.Single(l => l.Kind == CareKind.Watered);
         watering.CreatedAt = Now;
@@ -493,6 +499,7 @@ public class WateringPassTests
         await saving.Care.UndoWateringAsync(watering.Id);
 
         Assert.False(earlier.IsDeleted);
+        Assert.False(later.IsDeleted);
         Assert.True(watering.IsDeleted);
     }
 

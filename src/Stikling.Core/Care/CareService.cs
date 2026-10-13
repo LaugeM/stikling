@@ -180,7 +180,8 @@ public sealed class CareService(
     /// <summary>
     /// Takes back a watering or topping up from the watering screen: deletes that entry and the
     /// Fertilised entry logged with it, the one for the same plant and day with a feed that was
-    /// saved with it or after it. A feeding logged earlier the same day is kept.
+    /// saved within 5 seconds of the watering, either side. A feeding logged by hand at another
+    /// time the same day is kept.
     /// </summary>
     public async Task UndoWateringAsync(Guid wateringId)
     {
@@ -193,7 +194,7 @@ public sealed class CareService(
                     && l.Kind == CareKind.Fertilised
                     && l.FeedId is not null
                     && l.OccurredOn == watering.OccurredOn
-                    && l.CreatedAt >= watering.CreatedAt)
+                    && (l.CreatedAt - watering.CreatedAt).Duration() <= TimeSpan.FromSeconds(5))
                 .ToList()
             : [];
 

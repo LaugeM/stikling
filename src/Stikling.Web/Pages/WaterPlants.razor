@@ -370,6 +370,13 @@ else
         return RowAsync(row, async () =>
         {
             await Answers.ReadingAsync(row.Plant.Id, value, row.Reading?.Id, Labels.For);
+            // A dry reading takes back an earlier "still damp", the way Dry does
+            if (row.Form == WateringForm.TopWatered && value <= row.WaterAt && WaterKey(row.Plant) is var key
+                && putOffs.IsPutOff(key, Today))
+            {
+                await PutOffService.PutOffAsync(key, Today);
+                putOffs.PutOff(key, Today);
+            }
             return $"{row.Plant.DisplayName}: reads {value}";
         }, "Saving a meter reading failed");
     }

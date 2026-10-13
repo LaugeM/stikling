@@ -94,9 +94,11 @@
     line-height: 1.4;
 }
 
+/* A hit area of 2.75rem without making the row taller: the padding is taken back as margin */
 a.pass-name {
     display: inline-block;
-    padding-block: 0.15rem;
+    padding-block: 0.65rem;
+    margin-block: -0.5rem;
     text-decoration: none;
 }
 
@@ -121,6 +123,16 @@ a.pass-name {
     padding-inline: 0.25rem;
 }
 
+/* Text actions on a row: 2.75rem tall to tap, with the extra taken back as margin */
+.pass-doneline .btn-link,
+.pass-act .btn-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-block: 0;
+    margin-block: -0.7rem;
+}
+
 /* The meter's 0 to 10: all eleven on one row when there is room, wrapping on a phone */
 .pass-item .answer-grid {
     grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
@@ -143,7 +155,7 @@ a.pass-name {
     min-height: 2.75rem;
 }
 
-.pass-anyway {
+.pass-act .pass-anyway {
     padding-inline: 0;
     font-size: 0.9rem;
 }
