@@ -244,4 +244,28 @@ public class TodayBoardTests
 
         Assert.Empty(TodayBoard.QuarantineUp([free, deleted, gone], Today));
     }
+
+    [Fact]
+    public void Logging_care_counts_as_looking_at_it()
+    {
+        var watered = Started("Pup", 30);
+        var untouched = Started("Corms", 30);
+        var care = new Dictionary<Guid, DateOnly> { [watered.Id] = Today.AddDays(-2) };
+
+        var checks = TodayBoard.NeedsChecking([watered, untouched], new Dictionary<Guid, TimelineEntry>(), Time, careDays: care);
+
+        Assert.Same(untouched, Assert.Single(checks).Propagation);
+    }
+
+    [Fact]
+    public void The_later_of_the_note_and_the_care_day_is_when_it_was_last_seen()
+    {
+        var propagation = Started("Pup", 30);
+        var latest = new Dictionary<Guid, TimelineEntry> { [propagation.Id] = Entry(propagation.Id, 12) };
+        var older = new Dictionary<Guid, DateOnly> { [propagation.Id] = Today.AddDays(-20) };
+        var newer = new Dictionary<Guid, DateOnly> { [propagation.Id] = Today.AddDays(-9) };
+
+        Assert.Equal(Today.AddDays(-12), Assert.Single(TodayBoard.NeedsChecking([propagation], latest, Time, careDays: older)).LastSeen);
+        Assert.Equal(Today.AddDays(-9), Assert.Single(TodayBoard.NeedsChecking([propagation], latest, Time, careDays: newer)).LastSeen);
+    }
 }

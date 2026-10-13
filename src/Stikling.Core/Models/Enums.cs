@@ -73,6 +73,20 @@ public enum GrowingMedium
     Other
 }
 
+/// <summary>
+/// Something done to a propagation. Its own enum rather than <see cref="CareKind"/>, which isn't
+/// tolerant of values it doesn't know, and a propagation in water needs ChangedWater.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<PropagationCareKind>))]
+public enum PropagationCareKind
+{
+    Watered,
+    ChangedWater,
+
+    /// <summary>A reading off the moisture meter, 0 to 10.</summary>
+    MoistureReading
+}
+
 /// <summary>What was taken from the parent (or sown) to start a propagation.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<PropagationType>))]
 public enum PropagationType

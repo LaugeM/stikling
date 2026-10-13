@@ -105,6 +105,13 @@ else
                 {
                     <div id="type-help" class="form-text">@typeHelp</div>
                 }
+                @if (IsNew && propagation.Type is PropagationType.Offset or PropagationType.Division)
+                {
+                    <div class="form-text">
+                        Has it got its own roots already? Then it's a plant.
+                        <a href="@(propagation.ParentPlantId is { } parent ? $"plants/new?parent={parent}" : "plants/new")">Add it as a plant</a> instead.
+                    </div>
+                }
             </div>
             <div class="mb-3">
                 <label class="form-label" for="medium">Grows in</label>

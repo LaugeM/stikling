@@ -36,13 +36,16 @@ public static class TodayBoard
     /// <summary>
     /// Active propagations with nothing written down for a while, the longest wait first.
     /// A propagation with no history yet counts from the day it was started. A dormant one is
-    /// left out, since there is nothing to see until it wakes up.
+    /// left out, since there is nothing to see until it wakes up. Logging care counts as looking
+    /// at it, so the later of the newest history entry and the newest care day is used.
     /// </summary>
+    /// <param name="careDays">The newest care day per propagation, if any has been logged.</param>
     public static IReadOnlyList<PropagationCheck> NeedsChecking(
         IEnumerable<Propagation> propagations,
         IReadOnlyDictionary<Guid, TimelineEntry> latestPerSubject,
         TimeProvider time,
-        int afterDays = CheckAfterDays)
+        int afterDays = CheckAfterDays,
+        IReadOnlyDictionary<Guid, DateOnly>? careDays = null)
     {
         var today = time.Today();
         var checks = new List<PropagationCheck>();
@@ -52,6 +55,8 @@ public static class TodayBoard
             var lastSeen = latestPerSubject.TryGetValue(propagation.Id, out var entry)
                 ? Later(time.LocalDay(entry.OccurredAt), propagation.StartedOn)
                 : propagation.StartedOn;
+            if (careDays is not null && careDays.TryGetValue(propagation.Id, out var careDay))
+                lastSeen = Later(lastSeen, careDay);
 
             var days = today.DayNumber - lastSeen.DayNumber;
             if (days >= afterDays)

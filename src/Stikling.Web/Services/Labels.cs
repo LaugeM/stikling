@@ -204,6 +204,10 @@ public static class Labels
         _ => $"{bytes / (1024d * 1024 * 1024):0.##} GB"
     };
 
+    /// <summary>"soil" in the middle of a line, but LECA and PON stay in capitals.</summary>
+    public static string MediumWord(GrowingMedium medium) =>
+        For(medium) is var label && label == label.ToUpperInvariant() ? label : label.ToLowerInvariant();
+
     /// <summary>"today", "yesterday", "12 days ago".</summary>
     public static string DaysAgo(int days) => days switch
     {

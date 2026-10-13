@@ -12,6 +12,8 @@ public class PropagationServiceTests
     private readonly FakePlantRepository plants = new();
     private readonly FakePropagationRepository propagations = new();
     private readonly FakeTimelineRepository timeline = new();
+    private readonly FakePropagationCareLogRepository propagationCare = new();
+    private readonly FakeCareLogRepository plantCare = new();
     private readonly PropagationService service;
 
     private static readonly FakePlaceRepository Places = new();
@@ -20,7 +22,7 @@ public class PropagationServiceTests
 
     public PropagationServiceTests()
     {
-        service = new PropagationService(propagations, plants, timeline, new FixedTime(Now));
+        service = new PropagationService(propagations, plants, timeline, propagationCare, plantCare, new FixedTime(Now));
         plants.Plants[parent.Id] = parent;
     }
 
@@ -427,5 +429,105 @@ public class PropagationServiceTests
     public void Pot_up_names_are_numbered_within_a_batch(string? nickname, int count, int already, string?[] expected)
     {
         Assert.Equal(expected, PropagationService.PotUpNames(nickname, count, already));
+    }
+
+    private async Task<Propagation> StartInSoilAsync()
+    {
+        var pup = service.StartFrom(parent);
+        pup.Type = PropagationType.Offset;
+        pup.Medium = GrowingMedium.Soil;
+        pup.InitialCount = 2;
+        pup.StartedOn = Today.AddDays(-10);
+        await service.CreateAsync(pup, Label);
+        return pup;
+    }
+
+    private static PropagationCareLog CareLog(Propagation pup, PropagationCareKind kind, int daysAgo, bool deleted = false) => new()
+    {
+        PropagationId = pup.Id,
+        Kind = kind,
+        OccurredOn = Today.AddDays(-daysAgo),
+        DeletedAt = deleted ? Now : null
+    };
+
+    [Fact]
+    public async Task Potting_up_carries_the_last_watering_over_to_each_new_plant()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 6));
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 2));
+
+        var made = await service.PotUpAsync(pup, new PotUpRequest(2, Today));
+
+        Assert.Equal(2, plantCare.Logs.Count);
+        Assert.All(plantCare.Logs, l =>
+        {
+            Assert.Equal(CareKind.Watered, l.Kind);
+            Assert.Equal(Today.AddDays(-2), l.OccurredOn);
+        });
+        Assert.Equal(made.Select(p => p.Id).Order(), plantCare.Logs.Select(l => l.PlantId).Order());
+    }
+
+    [Fact]
+    public async Task Potting_up_carries_nothing_over_without_a_watering()
+    {
+        var pup = await StartInSoilAsync();
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Empty(plantCare.Logs);
+    }
+
+    [Fact]
+    public async Task A_water_change_or_moisture_reading_alone_is_not_carried_over()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.ChangedWater, 1));
+        await propagationCare.SaveAsync(new PropagationCareLog
+        {
+            PropagationId = pup.Id, Kind = PropagationCareKind.MoistureReading, Moisture = 5, OccurredOn = Today
+        });
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Empty(plantCare.Logs);
+    }
+
+    [Fact]
+    public async Task A_water_change_newer_than_the_watering_means_nothing_is_carried_over()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 5));
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.ChangedWater, 1));
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Empty(plantCare.Logs);
+    }
+
+    [Fact]
+    public async Task A_deleted_watering_is_not_carried_over()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 4));
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 1, deleted: true));
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Equal(Today.AddDays(-4), Assert.Single(plantCare.Logs).OccurredOn);
+    }
+
+    [Fact]
+    public async Task Another_propagations_watering_is_not_carried_over()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(new PropagationCareLog
+        {
+            PropagationId = Guid.NewGuid(), Kind = PropagationCareKind.Watered, OccurredOn = Today
+        });
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Empty(plantCare.Logs);
     }
 }

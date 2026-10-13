@@ -1,3 +1,4 @@
+using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Timeline;
@@ -21,6 +22,8 @@ public sealed class PropagationService(
     IPropagationRepository propagations,
     IPlantRepository plants,
     ITimelineRepository timeline,
+    IPropagationCareLogRepository propagationCare,
+    ICareLogRepository plantCare,
     TimeProvider time)
 {
     private DateOnly Today => time.Today();
@@ -189,12 +192,36 @@ public sealed class PropagationService(
         }
 
         await propagations.SaveAsync(propagation);
+        await CarryWateringOverAsync(propagation, newPlants);
 
         var text = $"Potted up {request.Count}: {string.Join(", ", newPlants.Select(p => p.DisplayName))}";
         await AddChangeAsync(propagation, WithOutcome(text, propagation), occurredAt,
             newPlants.Count == 1 ? newPlants[0].Id : null, TimelineEvent.PottedUp);
 
         return newPlants;
+    }
+
+    /// <summary>
+    /// The newest watering or water change on the propagation goes with the new plants, so they
+    /// don't start with no watering at all. Only a watering counts: a plant in soil wasn't watered
+    /// by a change of water.
+    /// </summary>
+    private async Task CarryWateringOverAsync(Propagation propagation, IReadOnlyList<Plant> newPlants)
+    {
+        var newest = PropagationCareService.For(await propagationCare.GetAllAsync(), propagation.Id)
+            .FirstOrDefault(l => l.Kind is PropagationCareKind.Watered or PropagationCareKind.ChangedWater);
+        if (newest is not { Kind: PropagationCareKind.Watered })
+            return;
+
+        foreach (var plant in newPlants)
+        {
+            await plantCare.SaveAsync(new CareLog
+            {
+                PlantId = plant.Id,
+                Kind = CareKind.Watered,
+                OccurredOn = newest.OccurredOn
+            });
+        }
     }
 
     /// <summary>

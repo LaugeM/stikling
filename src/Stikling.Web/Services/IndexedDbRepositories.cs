@@ -108,6 +108,12 @@ public sealed class IndexedDbPlaceRepository(IndexedDb db, TimeProvider time)
     protected override IReadOnlyList<string> Validate(Place place) => place.Validate();
 }
 
+public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<PropagationCareLog>(db, time, Stores.PropagationCareLogs), IPropagationCareLogRepository
+{
+    protected override IReadOnlyList<string> Validate(PropagationCareLog entry) => entry.Validate();
+}
+
 public sealed class IndexedDbCareLogRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<CareLog>(db, time, Stores.CareLogs), ICareLogRepository
 {

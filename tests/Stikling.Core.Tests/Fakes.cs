@@ -109,6 +109,36 @@ internal sealed class FakeCareLogRepository : ICareLogRepository
     }
 }
 
+internal sealed class FakePropagationCareLogRepository : IPropagationCareLogRepository
+{
+    public List<PropagationCareLog> Logs { get; } = [];
+
+    public Task<IReadOnlyList<PropagationCareLog>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<PropagationCareLog>>(Logs.Where(l => !l.IsDeleted).ToList());
+
+    public Task<PropagationCareLog?> GetAsync(Guid id) =>
+        Task.FromResult(Logs.FirstOrDefault(l => l.Id == id && !l.IsDeleted));
+
+    public Task SaveAsync(PropagationCareLog entry)
+    {
+        if (entry.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid care entry");
+        var index = Logs.FindIndex(l => l.Id == entry.Id);
+        if (index >= 0)
+            Logs[index] = entry;
+        else
+            Logs.Add(entry);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Logs.FirstOrDefault(l => l.Id == id) is { } entry)
+            entry.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakeTimelineRepository : ITimelineRepository
 {
     public List<TimelineEntry> Entries { get; } = [];

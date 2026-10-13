@@ -758,8 +758,7 @@ else
     }
 
     // "soil" in the middle of a line, but LECA and PON stay in capitals
-    private static string MediumWord(GrowingMedium medium) =>
-        Labels.For(medium) is var label && label == label.ToUpperInvariant() ? label : label.ToLowerInvariant();
+    private static string MediumWord(GrowingMedium medium) => Labels.MediumWord(medium);
 
     private string StatusButtonText => status switch
     {

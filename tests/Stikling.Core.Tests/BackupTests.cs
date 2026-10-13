@@ -134,12 +134,13 @@ public class BackupTests
             GrowLights = [new GrowLight { Name = "Grow light" }, new GrowLight { Name = "Old", DeletedAt = Now }],
             ReceivedHistories = [new ReceivedHistory { Name = "Mona" }, new ReceivedHistory { Name = "Old", DeletedAt = Now }],
             AwayStretches = [new AwayStretch(), new AwayStretch { DeletedAt = Now }],
-            SitterSheets = [new SitterSheet()]
+            SitterSheets = [new SitterSheet()],
+            PropagationCareLogs = [new PropagationCareLog(), new PropagationCareLog { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -153,6 +154,32 @@ public class BackupTests
         Assert.Empty(data.GrowLights);
         Assert.Empty(data.AwayStretches);
         Assert.Empty(data.SitterSheets);
+        Assert.Empty(data.PropagationCareLogs);
+    }
+
+    [Fact]
+    public void Propagation_care_survives_a_backup_and_merges_like_the_rest()
+    {
+        var watered = new PropagationCareLog
+        {
+            PropagationId = Guid.NewGuid(),
+            Kind = PropagationCareKind.MoistureReading,
+            Moisture = 4,
+            OccurredOn = new DateOnly(2026, 10, 1),
+            UpdatedAt = Now
+        };
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        var json = JsonSerializer.Serialize(new BackupData { PropagationCareLogs = [watered] }, options);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        var restored = Assert.Single(back.PropagationCareLogs);
+        Assert.Equal(PropagationCareKind.MoistureReading, restored.Kind);
+        Assert.Equal(4, restored.Moisture);
+        // Stored as text, so reordering the kinds can't change what old data means
+        Assert.Contains("\"MoistureReading\"", json);
+        Assert.Equal(1, back.Counts.PropagationCareEntries);
+        Assert.Equal(1, BackupMerge.Merge<PropagationCareLog>([], back.PropagationCareLogs).Added);
     }
 
     [Fact]

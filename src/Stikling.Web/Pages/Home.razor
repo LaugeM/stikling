@@ -12,6 +12,7 @@
 @inject SettingsService SettingsService
 @inject PutOffService PutOffService
 @inject ICareLogRepository CareLogs
+@inject IPropagationCareLogRepository PropagationCareLogs
 @inject IPotRepository PotRepository
 @inject GrowLightService LightService
 @inject AwayService AwayService
@@ -594,7 +595,9 @@ else
         active = propagations.Where(p => p.IsActive).ToList();
 
         var latest = await Entries.GetLatestPerSubjectAsync();
-        checks = TodayBoard.NeedsChecking(propagations, latest, Time);
+        // Logging care on a propagation is looking at it too
+        var careDays = PropagationCareService.NewestDays(await PropagationCareLogs.GetAllAsync());
+        checks = TodayBoard.NeedsChecking(propagations, latest, Time, careDays: careDays);
         flagged = TodayBoard.NeedsAttention(plants, propagations);
         putOffs = await PutOffService.GetAsync(Today);
 

@@ -15,6 +15,7 @@ public static class SyncKinds
     [
         "plants",
         "propagations",
+        "propagationCareLogs",
         "timeline",
         Photos,
         "careLogs",
