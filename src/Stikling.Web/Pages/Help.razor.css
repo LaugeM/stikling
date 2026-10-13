@@ -2,6 +2,15 @@
     color: var(--pa-muted);
 }
 
+.help-search {
+    margin-bottom: 1rem;
+}
+
+.help-no-match {
+    margin-top: 0.75rem;
+    color: var(--pa-muted);
+}
+
 .help-toc {
     display: flex;
     flex-wrap: wrap;
@@ -54,6 +63,23 @@
 
 .help-item:only-of-type {
     border-radius: 0.75rem;
+}
+
+/* While searching, the questions left in a topic close up into one block the same way */
+.help-searching .help-item {
+    border-top: 0;
+    border-radius: 0;
+}
+
+.help-searching .help-item.help-first {
+    border-top: 1px solid var(--pa-border);
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+}
+
+.help-searching .help-item.help-last {
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
 }
 
 .help-item summary {

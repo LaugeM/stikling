@@ -119,7 +119,7 @@
         }
     }
 
-    private IReadOnlyList<string> Names => PotUse.Names(Pots);
+    private IReadOnlyList<string> Names => PotUse.Names(Pots, Groups[0]);
 
     private Task PickAsync(Guid? id)
     {

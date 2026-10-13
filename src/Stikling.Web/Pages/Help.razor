@@ -3,6 +3,7 @@
    changed should have its answer added or changed here in the same pull request. The deploy renders it
    to plain HTML for search engines and llms.txt (tools/static-pages/render.cs), without a browser, so
    calls into JavaScript stay in OnAfterRenderAsync. *@
+@implements IAsyncDisposable
 @inject IJSRuntime JS
 @inject AccountService Account
 
@@ -14,6 +15,19 @@
 <p class="help-intro">
     Short answers to the questions that come up most. Tap a question to open it.
 </p>
+
+@* Only after the first render, since the search needs JavaScript and the plain HTML copy has none *@
+@if (searchReady)
+{
+    <div class="help-search">
+        <input type="search" class="form-control" placeholder="Search the answers" aria-label="Search Help"
+               autocomplete="off" @ref="searchInput" />
+        <div class="help-no-match" @ref="noMatch" hidden>
+            No answers match that. Try another word, or
+            <button type="button" class="btn btn-link p-0 align-baseline" @onclick="ClearSearchAsync">clear the search</button>.
+        </div>
+    </div>
+}
 
 <nav class="help-toc" aria-label="Topics">
     @foreach (var (id, title) in topics)
@@ -1141,13 +1155,51 @@
 </section>
 
 @code {
+    private bool searchReady;
+    private ElementReference searchInput;
+    private ElementReference noMatch;
+    private IJSObjectReference? searchModule;
+    private IJSObjectReference? search;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
+        if (firstRender)
+        {
+            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+            await module.InvokeVoidAsync("scrollToFragment");
+            searchReady = true;
+            StateHasChanged();
             return;
+        }
 
-        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-        await module.InvokeVoidAsync("scrollToFragment");
+        if (searchReady && search is null)
+        {
+            searchModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/help.js");
+            search = await searchModule.InvokeAsync<IJSObjectReference>("attachSearch", searchInput, noMatch);
+        }
+    }
+
+    private async Task ClearSearchAsync()
+    {
+        if (search is not null)
+            await search.InvokeVoidAsync("clear");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (search is not null)
+            {
+                await search.InvokeVoidAsync("dispose");
+                await search.DisposeAsync();
+            }
+            if (searchModule is not null)
+                await searchModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
     }
 
     private static readonly (string Id, string Title)[] topics =
