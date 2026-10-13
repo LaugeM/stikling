@@ -1,0 +1,154 @@
+@* The plant list as a table, one column per detail. Tapping a heading sorts by it. The name column stays in
+   place when the rest scrolls sideways. In select mode a row is a checkbox instead of a link. *@
+@using System.Globalization
+@using CoreTable = Stikling.Core.Plants.PlantTable
+
+<div class="plant-table-scroll">
+    <table class="plant-table @(Selectable ? "selecting" : null)">
+        <thead>
+            <tr>
+                @if (Selectable)
+                {
+                    <th scope="col" class="check-col"><span class="visually-hidden">Selected</span></th>
+                }
+                @foreach (var column in Columns)
+                {
+                    var sorted = Sort.Column == column;
+                    <th scope="col" class="@CellClass(column)" aria-sort="@(sorted ? (Sort.Descending ? "descending" : "ascending") : null)">
+                        <button type="button" class="sort-button" @onclick="() => SortBy(column)">
+                            @CoreTable.Header(column)
+                            @if (sorted)
+                            {
+                                <svg class="sort-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="@(Sort.Descending ? "M6 9l6 6 6-6" : "M6 15l6-6 6 6")" />
+                                </svg>
+                            }
+                        </button>
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Rows)
+            {
+                var plant = row.Plant;
+                var selected = Selected.Contains(plant.Id);
+                <tr class="@(selected ? "selected" : null)" @onclick="() => Clicked(plant)">
+                    @if (Selectable)
+                    {
+                        <td class="check-col">
+                            <input type="checkbox" class="form-check-input" checked="@selected"
+                                   aria-label="@CoreTable.NameFor(plant, cultivarShown)"
+                                   @onclick="() => OnToggle.InvokeAsync(plant)" @onclick:stopPropagation="true" />
+                        </td>
+                    }
+                    @foreach (var column in Columns)
+                    {
+                        <td class="@CellClass(column)">@Cell(row, column)</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    /// <summary>The plants to show, in the order to show them.</summary>
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<PlantRow> Rows { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<PlantColumn> Columns { get; set; }
+
+    [Parameter, EditorRequired]
+    public required PlantTableSort Sort { get; set; }
+
+    [Parameter]
+    public EventCallback<PlantTableSort> SortChanged { get; set; }
+
+    [Parameter]
+    public bool Selectable { get; set; }
+
+    [Parameter]
+    public IReadOnlySet<Guid> Selected { get; set; } = new HashSet<Guid>();
+
+    [Parameter]
+    public EventCallback<Plant> OnToggle { get; set; }
+
+    private bool cultivarShown => Columns.Contains(PlantColumn.Cultivar);
+
+    private Task SortBy(PlantColumn column) => SortChanged.InvokeAsync(CoreTable.Tap(Sort, column));
+
+    private Task Clicked(Plant plant) => Selectable ? OnToggle.InvokeAsync(plant) : Task.CompletedTask;
+
+    private static string? CellClass(PlantColumn column) => column switch
+    {
+        PlantColumn.Name => "name-col",
+        PlantColumn.Genus or PlantColumn.Species => "italic-col",
+        PlantColumn.Watered or PlantColumn.Fed or PlantColumn.Repotted or PlantColumn.Got
+            or PlantColumn.Moisture or PlantColumn.Added => "number-col",
+        PlantColumn.Price => "number-col price-col",
+        PlantColumn.Tags => "tags-col",
+        _ => null
+    };
+
+    private static RenderFragment Care(LastCare? care) => @<text>
+        @if (care is not null)
+        {
+            <span title="@Labels.Date(care.On)">@Labels.DaysAgo(care.DaysAgo)</span>
+        }
+    </text>;
+
+    private RenderFragment Cell(PlantRow row, PlantColumn column)
+    {
+        var plant = row.Plant;
+        return column switch
+        {
+            PlantColumn.Name => NameCell(plant),
+            PlantColumn.Cultivar => @<text>@PlantNames.Cultivar(plant.Cultivar)</text>,
+            PlantColumn.Watered => Care(row.Watered),
+            PlantColumn.Fed => Care(row.Fed),
+            PlantColumn.Repotted => Care(row.Repotted),
+            PlantColumn.Genus => @<text>@plant.Genus</text>,
+            PlantColumn.Species => @<text>@plant.Species</text>,
+            PlantColumn.EverydayName => @<text>@row.EverydayName</text>,
+            PlantColumn.Room => @<text>@row.Room</text>,
+            PlantColumn.Got => @<text>@(plant.AcquiredOn is { } got ? Labels.Date(got) : null)</text>,
+            PlantColumn.Origin => @<text>@Labels.For(plant.Origin)</text>,
+            PlantColumn.Source => @<text>@plant.Source</text>,
+            PlantColumn.Price => @<text>@plant.PricePaid?.ToString("0.##", CultureInfo.InvariantCulture)</text>,
+            PlantColumn.Medium => @<text>@Labels.For(plant.Medium)</text>,
+            PlantColumn.Moisture => @<text>@(row.Moisture is { } reading ? $"{reading.Value}/10" : null)</text>,
+            PlantColumn.Status => @<text>@Labels.For(plant.Status)</text>,
+            PlantColumn.Tags => @<text>@foreach (var tag in plant.Tags){<span class="tag-label">@tag</span> }</text>,
+            PlantColumn.Added => @<text>@Labels.Date(DateOnly.FromDateTime(plant.CreatedAt.LocalDateTime))</text>,
+            _ => @<text></text>
+        };
+    }
+
+    private RenderFragment NameCell(Plant plant) => @<div class="name-cell">
+        <span class="item-thumb potted table-thumb" aria-hidden="true">
+            @if (plant.CoverPhotoId is { } coverId)
+            {
+                <PhotoImage PhotoId="coverId" />
+            }
+            else
+            {
+                <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+            }
+        </span>
+        @if (Selectable)
+        {
+            <span class="plant-name">@CoreTable.NameFor(plant, cultivarShown)</span>
+        }
+        else
+        {
+            <a class="plant-name" href="plants/@plant.Id">@CoreTable.NameFor(plant, cultivarShown)</a>
+        }
+        @if (plant.Favourite)
+        {
+            <svg class="favourite-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8Z" /></svg>
+            <span class="visually-hidden">Favourite</span>
+        }
+    </div>;
+}
