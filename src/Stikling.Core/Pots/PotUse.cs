@@ -37,9 +37,13 @@ public sealed record PotUse(Pot Pot, int InUse, int Gone)
             .ToList();
     }
 
-    /// <summary>The names already used, for the chips on the pot form.</summary>
-    public static IReadOnlyList<string> Names(IEnumerable<Pot> pots) =>
-        pots.Where(pot => !pot.IsDeleted && !string.IsNullOrWhiteSpace(pot.Name))
+    /// <summary>
+    /// The names already used for this kind of pot, for the chips on the pot form. None for an outer pot,
+    /// since those are mostly one of a kind and a new one rarely shares a name with another.
+    /// </summary>
+    public static IReadOnlyList<string> Names(IEnumerable<Pot> pots, PotGroup group) =>
+        group == PotGroup.Outer ? [] :
+        pots.Where(pot => !pot.IsDeleted && pot.Group == group && !string.IsNullOrWhiteSpace(pot.Name))
             .Select(pot => pot.Name!.Trim())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(name => name, StringComparer.CurrentCultureIgnoreCase)

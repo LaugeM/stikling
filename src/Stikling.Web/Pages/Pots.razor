@@ -395,7 +395,7 @@ else
         _ => "A pot with a hole and a saucer, or a self-watering pot, that needs nothing around it."
     };
 
-    private IReadOnlyList<string> Names => PotUse.Names(all);
+    private IReadOnlyList<string> Names => draft is null ? [] : PotUse.Names(all, draft.Group);
 
     private static string? Picked(bool picked) => picked ? "picked" : null;
 
