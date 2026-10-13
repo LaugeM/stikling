@@ -24,6 +24,16 @@ public class SettingsServiceTests
     }
 
     [Fact]
+    public async Task The_way_of_checking_water_is_not_chosen_until_it_is_set_and_then_saved()
+    {
+        Assert.Null((await service.GetAsync()).WaterCheck);
+
+        await service.SetWaterCheckAsync(WaterCheck.Soil);
+
+        Assert.Equal(WaterCheck.Soil, (await service.GetAsync()).WaterCheck);
+    }
+
+    [Fact]
     public async Task Changing_the_theme_saves_it()
     {
         await service.SetThemeAsync(ThemeMode.Dark);

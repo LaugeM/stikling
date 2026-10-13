@@ -146,6 +146,17 @@ public enum EverydayNameLanguage
     Danish
 }
 
+/// <summary>How someone checks whether a plant needs water on the Water plants screen.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<WaterCheck>))]
+public enum WaterCheck
+{
+    /// <summary>With a moisture meter, reading 0 to 10.</summary>
+    Meter,
+
+    /// <summary>By pushing a finger into the soil: dry, or still damp.</summary>
+    Soil
+}
+
 /// <summary>Why a stretch of days is set aside: away from home, or a break from the app.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<AwayKind>))]
 public enum AwayKind

@@ -32,9 +32,9 @@
     @if (kind == CareKind.MoistureReading)
     {
         <div class="mt-2">
-            <label class="form-label" for="care-moisture">Reading (1 to 10)</label>
+            <label class="form-label" for="care-moisture">Reading (0 to 10)</label>
             <input type="number" id="care-moisture" class="form-control form-control-sm"
-                   min="1" max="10" inputmode="numeric" @bind="moisture" />
+                   min="0" max="10" inputmode="numeric" @bind="moisture" />
         </div>
     }
 

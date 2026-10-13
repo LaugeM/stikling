@@ -710,10 +710,10 @@ a.item-card:active {
 
 .answer-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(2.75rem, 1fr));
+    grid-template-columns: repeat(6, minmax(2.75rem, 1fr));
     gap: 0.35rem;
     flex-basis: 100%;
-    max-width: 18rem;
+    max-width: 20rem;
 }
 
 .put-off .chip {

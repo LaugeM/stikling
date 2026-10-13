@@ -165,7 +165,7 @@ else
                         <div class="round-readings" role="group" aria-label="Meter reading">
                             <span class="section-label">Meter reading</span>
                             <div class="answer-grid">
-                                @for (var n = 1; n <= 10; n++)
+                                @for (var n = 0; n <= 10; n++)
                                 {
                                     var reading = n;
                                     var picked = day.Reading?.Value == n;

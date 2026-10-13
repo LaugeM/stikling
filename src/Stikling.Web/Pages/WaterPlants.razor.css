@@ -1,0 +1,269 @@
+/* Water plants: one pass over the plants, answer how dry each is, and water the dry ones */
+
+.pass-lead {
+    margin: 0.25rem 0 1rem;
+    color: var(--pa-muted);
+    font-size: 0.9rem;
+}
+
+.pass-room {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+}
+
+/* Picked or not, a room chip is the same width: the badge's place is kept and no weight is added */
+.pass-room.picked {
+    font-weight: 400;
+}
+
+/* The place in the order the rooms were picked */
+.pass-order {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    padding-inline: 0.2rem;
+    border: 1px solid var(--pa-green);
+    border-radius: 999px;
+    background: var(--pa-surface);
+    color: var(--pa-green-dark);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.pass-order.unpicked {
+    visibility: hidden;
+}
+
+.pass-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.pass-mode {
+    margin-bottom: 0.75rem;
+}
+
+.pass-mode .chip,
+.pass-soil .chip {
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+}
+
+.pass-group {
+    margin-bottom: 1.75rem;
+}
+
+.pass-sub {
+    margin: 1rem 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.pass-none {
+    margin: 0;
+    color: var(--pa-muted);
+    font-size: 0.9rem;
+}
+
+.pass-item {
+    padding: 0.7rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+/* A plant watered today folds down to one line, with Undo */
+.pass-item.done {
+    border-color: var(--pa-green);
+    background: var(--pa-green-soft);
+}
+
+.pass-name {
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* A hit area of 2.75rem without making the row taller: the padding is taken back as margin */
+a.pass-name {
+    display: inline-block;
+    padding-block: 0.65rem;
+    margin-block: -0.5rem;
+    text-decoration: none;
+}
+
+.pass-meta {
+    display: block;
+    margin: 0 0 0.5rem;
+    color: var(--pa-muted);
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.pass-doneline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.4rem;
+    color: var(--pa-green-dark);
+    font-size: 0.85rem;
+}
+
+.pass-doneline .btn {
+    padding-inline: 0.25rem;
+}
+
+/* Text actions on a row: 2.75rem tall to tap, with the extra taken back as margin */
+.pass-doneline .btn-link,
+.pass-act .btn-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-block: 0;
+    margin-block: -0.7rem;
+}
+
+/* The meter's 0 to 10: all eleven on one row when there is room, wrapping on a phone */
+.pass-item .answer-grid {
+    grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
+    max-width: 36rem;
+}
+
+.pass-item .answer-grid .chip {
+    min-height: 2.75rem;
+}
+
+.pass-act {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    margin-top: 0.6rem;
+}
+
+.pass-water {
+    min-height: 2.75rem;
+}
+
+.pass-act .pass-anyway {
+    padding-inline: 0;
+    font-size: 0.9rem;
+}
+
+.pass-feed {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.pass-feed-label {
+    margin: 0;
+    color: var(--pa-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.pass-feed .form-select {
+    flex: 1 1 auto;
+    min-height: 2.75rem;
+    max-width: 18rem;
+}
+
+.pass-actions {
+    margin: 0 0 1.25rem;
+}
+
+.pass-actions .btn {
+    min-height: 2.75rem;
+}
+
+/* Room at the end of the list for the bar */
+.pass-end {
+    height: 6rem;
+}
+
+/* Sits above the navigation, lined up with the page column */
+.pass-progress {
+    position: fixed;
+    left: var(--pa-nav-side);
+    right: 0;
+    bottom: var(--pa-nav-bottom);
+    z-index: 11;
+    padding: 0.6rem var(--pa-column-inset);
+    background: var(--pa-surface);
+    border-top: 1px solid var(--pa-border);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+}
+
+.pass-progress .alert {
+    margin: 0 0 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.pass-progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.pass-progress-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.pass-progress .btn {
+    min-height: 2.75rem;
+}
+
+/* What the pass came to: a solid Leaf Tint panel */
+.pass-summary {
+    margin-top: 1rem;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-text);
+}
+
+.pass-summary h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.25rem;
+    color: var(--pa-green-dark);
+}
+
+.pass-summary h2:focus {
+    outline: none;
+}
+
+.pass-summary p {
+    margin: 0;
+}
+
+.pass-summary ul {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.pass-summary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin-top: 1.25rem;
+}
+
+.pass-summary-actions .btn-primary {
+    min-height: 2.75rem;
+}

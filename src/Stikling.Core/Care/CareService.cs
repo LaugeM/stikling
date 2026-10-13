@@ -7,6 +7,9 @@ using Stikling.Core.Timeline;
 
 namespace Stikling.Core.Care;
 
+/// <summary>One plant watered, or topped up, on the watering screen, with the feed picked for it (or none).</summary>
+public sealed record PassWatering(Guid PlantId, CareKind Kind, Feed? Feed);
+
 /// <summary>
 /// Writing to the care log. The entry is always saved; the plant's history only gets a line
 /// for the notable kinds, so a weekly watering doesn't bury the photos and notes.
@@ -107,7 +110,98 @@ public sealed class CareService(
         return entries.Count;
     }
 
+    /// <summary>
+    /// The waterings from the watering screen, one entry per plant dated today. The feed is the
+    /// one picked on the screen, and no feed means none, even for a plant set to get its feed with
+    /// the watering, so this doesn't plan a feed of its own. With a feed, a watering gets a separate
+    /// Fertilised entry and a topping up takes the products itself. Everything is checked before
+    /// anything is saved. Returns how many plants were logged.
+    /// </summary>
+    public async Task<int> LogWateringsAsync(IReadOnlyList<PassWatering> items, Func<Enum, string> label)
+    {
+        var allProducts = items.Any(i => i.Feed is { Products.Count: > 0 }) ? await products.GetAllAsync() : [];
+
+        var planned = new List<(CareLog Entry, CareLog? Extra)>();
+        foreach (var item in items)
+        {
+            var entry = Start(item.PlantId, item.Kind);
+            CareLog? extra = null;
+
+            if (item.Feed is { Products.Count: > 0 } feed)
+            {
+                var doses = feed.Doses(allProducts);
+                if (item.Kind == CareKind.ToppedUp)
+                {
+                    entry.Products = doses;
+                    entry.FeedId = feed.Id;
+                    entry.FeedName = Clean(feed.Name);
+                }
+                else if (item.Kind == CareKind.Watered)
+                {
+                    extra = new CareLog
+                    {
+                        PlantId = item.PlantId,
+                        Kind = CareKind.Fertilised,
+                        OccurredOn = entry.OccurredOn,
+                        Products = doses,
+                        FeedId = feed.Id,
+                        FeedName = Clean(feed.Name)
+                    };
+                }
+            }
+
+            planned.Add((entry, extra));
+        }
+
+        var errors = planned
+            .SelectMany(p => p.Entry.Validate(Today).Concat(p.Extra?.Validate(Today) ?? []))
+            .ToList();
+        if (items.Any(i => !IsWatering(i.Kind)))
+            errors.Insert(0, "Only a watering or a topping up can be logged here.");
+        if (errors.FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+
+        foreach (var (entry, extra) in planned)
+        {
+            await logs.SaveAsync(entry);
+            await RecordAsync(entry, label);
+            if (extra is not null)
+            {
+                await logs.SaveAsync(extra);
+                await RecordAsync(extra, label);
+            }
+        }
+
+        return planned.Count;
+    }
+
     public Task DeleteAsync(Guid id) => logs.DeleteAsync(id);
+
+    /// <summary>
+    /// Takes back a watering or topping up from the watering screen: deletes that entry and the
+    /// Fertilised entry logged with it, the one for the same plant and day with a feed that was
+    /// saved within 5 seconds of the watering, either side. A feeding logged by hand at another
+    /// time the same day is kept.
+    /// </summary>
+    public async Task UndoWateringAsync(Guid wateringId)
+    {
+        if (await logs.GetAsync(wateringId) is not { IsDeleted: false } watering || !IsWatering(watering.Kind))
+            return;
+
+        var withIt = watering.Kind == CareKind.Watered
+            ? (await logs.GetAllAsync())
+                .Where(l => l.PlantId == watering.PlantId
+                    && l.Kind == CareKind.Fertilised
+                    && l.FeedId is not null
+                    && l.OccurredOn == watering.OccurredOn
+                    && (l.CreatedAt - watering.CreatedAt).Duration() <= TimeSpan.FromSeconds(5))
+                .ToList()
+            : [];
+
+        await logs.DeleteAsync(wateringId);
+        foreach (var fed in withIt)
+            await logs.DeleteAsync(fed.Id);
+    }
 
     private static bool IsWatering(CareKind kind) => kind is CareKind.Watered or CareKind.ToppedUp;
 
