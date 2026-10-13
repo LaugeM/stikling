@@ -20,6 +20,7 @@ public sealed class BackupData
 
     public List<Plant> Plants { get; set; } = [];
     public List<Propagation> Propagations { get; set; } = [];
+    public List<PropagationCareLog> PropagationCareLogs { get; set; } = [];
     public List<TimelineEntry> Timeline { get; set; } = [];
     public List<Photo> Photos { get; set; } = [];
     public List<CareLog> CareLogs { get; set; } = [];
@@ -61,7 +62,8 @@ public sealed class BackupData
         GrowLights.Count(l => !l.IsDeleted),
         ReceivedHistories.Count(h => !h.IsDeleted),
         AwayStretches.Count(s => !s.IsDeleted),
-        SitterSheets.Count(s => !s.IsDeleted));
+        SitterSheets.Count(s => !s.IsDeleted),
+        PropagationCareLogs.Count(l => !l.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -83,4 +85,5 @@ public sealed record BackupCounts(
     int GrowLights,
     int ReceivedHistories,
     int AwayStretches,
-    int SitterSheets);
+    int SitterSheets,
+    int PropagationCareEntries);

@@ -1,6 +1,7 @@
 @page "/propagations/{Id:guid}"
 @layout WideLayout
 @inject IPropagationRepository Repository
+@inject PropagationCareService CareService
 @inject ILogger<PropagationDetail> Logger
 @inject IPlantRepository PlantRepository
 @inject IPotRepository PotRepository
@@ -150,6 +151,10 @@ else
                 {
                     <text> · @place</text>
                 }
+                @if (propagation.IsActive && LastCare is { } lastCare)
+                {
+                    <text> · @lastCare</text>
+                }
                 @if (parent is not null)
                 {
                     <text> · from <a class="link-action" href="plants/@parent.Id">@parent.DisplayName</a></text>
@@ -278,6 +283,17 @@ else
                             }
                         </dd>
 
+                        @if (lastWatered is { } watered)
+                        {
+                            <dt>Last watered</dt>
+                            <dd>@Labels.Date(watered.Day)</dd>
+                        }
+                        @if (lastWaterChange is { } changed)
+                        {
+                            <dt>Water changed</dt>
+                            <dd>@Labels.Date(changed.Day)</dd>
+                        }
+
                         @if (propagation.RootingAids.Count > 0)
                         {
                             <dt>Rooting aids</dt>
@@ -362,6 +378,10 @@ else
                 </button>
                 @if (propagation.IsActive)
                 {
+                    <button type="button" class="btn btn-outline-primary icon-btn dock-care" aria-label="Care" @onclick="() => careOpen = true">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10Z" /></svg>
+                        <span class="dock-label">Care</span>
+                    </button>
                     <button type="button" class="btn btn-outline-primary icon-btn dock-stage" aria-label="Stage: @Labels.Stage(propagation.Stage, propagation.Type). Change stage" @onclick="OpenStage">
                         <span class="stage-steps" data-step="@StageStep" aria-hidden="true"><i></i><i></i><i></i></span>
                         @Labels.Stage(propagation.Stage, propagation.Type)
@@ -412,6 +432,10 @@ else
 
     @if (propagation.IsActive)
     {
+        <Sheet Title="Care" Open="careOpen" OpenChanged="open => careOpen = open">
+            <PropagationCareSheet Propagation="propagation" Logs="careLogs" OnLogged="CareLoggedAsync" OnRemoved="LoadAsync" />
+        </Sheet>
+
         <Sheet Title="@StageTitle" Open="stageView != StageView.None" OpenChanged="open => { if (!open) stageView = StageView.None; }">
             @switch (stageView)
             {
@@ -483,7 +507,7 @@ else
 
                     <div class="sheet-section">
                         <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-primary flex-fill" @onclick="OpenPotUp">Pot up</button>
+                            <button type="button" class="btn btn-primary flex-fill" @onclick="OpenPotUp">@PotUpWord</button>
                             <button type="button" class="btn btn-outline-danger flex-fill" @onclick="OpenFailed">Mark failed</button>
                         </div>
                         <button type="button" class="btn btn-outline-primary w-100 mt-2" @onclick="OpenGaveAway">
@@ -493,10 +517,22 @@ else
                     break;
 
                 case StageView.PotUp:
-                    <p class="form-text mb-3">
-                        @(propagation.RemainingCount > 1 ? "Each one you pot up becomes a plant of its own." : "It becomes a plant of its own.")
-                        This propagation keeps its history.
-                    </p>
+                    @if (InPlantMedium)
+                    {
+                        <p class="form-text mb-3">
+                            @(propagation.RemainingCount > 1
+                                ? $"Each one becomes a plant of its own, in the {Labels.MediumWord(propagation.Medium)} they're in now."
+                                : $"It becomes a plant of its own, in the {Labels.MediumWord(propagation.Medium)} it's in now.")
+                            This propagation keeps its history.
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="form-text mb-3">
+                            @(propagation.RemainingCount > 1 ? "Each one you pot up becomes a plant of its own." : "It becomes a plant of its own.")
+                            This propagation keeps its history.
+                        </p>
+                    }
                     @if (propagation.RemainingCount > 1)
                     {
                         <div class="mb-2">
@@ -513,20 +549,27 @@ else
                             <div class="form-text">Numbered when there are several, e.g. "@(string.IsNullOrWhiteSpace(potUp.Nickname) ? "Coleus" : potUp.Nickname.Trim()) @(propagation.PottedUpCount + 1)".</div>
                         }
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label" for="potup-medium">Grows in</label>
-                        <select id="potup-medium" class="form-select" value="@potUp.Medium" @onchange="SetPotUpMedium">
-                            @foreach (var medium in Enum.GetValues<GrowingMedium>())
-                            {
-                                <option value="@medium">@Labels.For(medium)</option>
-                            }
-                        </select>
-                    </div>
-                    @if (potUp.Medium == GrowingMedium.Soil)
+                    @if (InPlantMedium && !potUp.ChangeMedium)
+                    {
+                        <button type="button" class="btn btn-link btn-sm link-action p-0 mb-2" @onclick="() => potUp.ChangeMedium = true">Moved it to something else?</button>
+                    }
+                    else
                     {
                         <div class="mb-2">
-                            <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
+                            <label class="form-label" for="potup-medium">Grows in</label>
+                            <select id="potup-medium" class="form-select" value="@potUp.Medium" @onchange="SetPotUpMedium">
+                                @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                                {
+                                    <option value="@medium">@Labels.For(medium)</option>
+                                }
+                            </select>
                         </div>
+                        @if (potUp.Medium == GrowingMedium.Soil)
+                        {
+                            <div class="mb-2">
+                                <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
+                            </div>
+                        }
                     }
                     <div class="mb-2">
                         <PotPicker Value="potUp.PotId" ValueChanged="SetPotUpPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
@@ -540,7 +583,9 @@ else
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-primary" disabled="@(busy || !CountIsValid(potUp.Count))" @onclick="PotUpAsync">
-                            @(potUp.Count == 1 ? "Pot up" : $"Pot up {potUp.Count}")
+                            @(InPlantMedium
+                                ? (potUp.Count == 1 ? "It's a plant now" : $"Make {potUp.Count} plants")
+                                : (potUp.Count == 1 ? "Pot up" : $"Pot up {potUp.Count}"))
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
                     </div>
@@ -693,6 +738,9 @@ else
         public GrowingMedium Medium { get; set; }
         public Guid? PotId { get; set; }
         public Guid? SoilMixId { get; set; }
+
+        /// <summary>Shows Grows in and the mix for a propagation already in a plant medium, which hides them.</summary>
+        public bool ChangeMedium { get; set; }
     }
 
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
@@ -725,6 +773,11 @@ else
     private Timeline? timeline;
     private readonly string photoInputId = $"propagation-photo-{Guid.NewGuid():N}";
 
+    private bool careOpen;
+    private IReadOnlyList<PropagationCareLog> careLogs = [];
+    private PropagationCareLatest? lastWatered;
+    private PropagationCareLatest? lastWaterChange;
+
     private StageView stageView;
     private More more;
     private DateOnly since;
@@ -756,12 +809,17 @@ else
 
     private string StageTitle => stageView switch
     {
-        StageView.PotUp => "Pot up",
+        StageView.PotUp => PotUpWord,
         StageView.Failed => "Mark as failed",
         StageView.GaveAway => "Gave some away",
         StageView.PassOn => "Send its history",
         _ => "How far along",
     };
+
+    // A propagation already in soil, bark, LECA or PON is a plant in all but name, so there is nothing to pot up
+    private bool InPlantMedium => propagation?.InPlantMedium == true;
+
+    private string PotUpWord => InPlantMedium ? "It's a plant now" : "Pot up";
 
     private string MoreTitle => more switch
     {
@@ -843,6 +901,26 @@ else
         outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
+        careLogs = PropagationCareService.For(await CareService.GetAllAsync(), Id);
+        lastWatered = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.Watered, Today);
+        lastWaterChange = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.ChangedWater, Today);
+    }
+
+    // "watered 2 days ago" or "water changed yesterday", whichever happened last
+    private string? LastCare => (lastWatered, lastWaterChange) switch
+    {
+        (null, null) => null,
+        ({ } w, null) => $"watered {Labels.DaysAgo(w.DaysAgo)}",
+        (null, { } c) => $"water changed {Labels.DaysAgo(c.DaysAgo)}",
+        ({ } w, { } c) => c.DaysAgo < w.DaysAgo
+            ? $"water changed {Labels.DaysAgo(c.DaysAgo)}"
+            : $"watered {Labels.DaysAgo(w.DaysAgo)}"
+    };
+
+    private async Task CareLoggedAsync()
+    {
+        careOpen = false;
+        await LoadAsync();
     }
 
     private void ShowPlants()
@@ -956,8 +1034,9 @@ else
 
     private void OpenPotUp()
     {
-        potUpMediumChosen = false;
         var p = propagation!;
+        // Already in a plant medium, it stays there whatever pot is picked, unless the person says otherwise
+        potUpMediumChosen = p.InPlantMedium;
         potUp = new PotUpForm
         {
             // A propagation named only by nickname passes it on, since a plant needs a name
@@ -965,9 +1044,7 @@ else
             Date = Today,
             Location = places.NameOf(p.PlaceId),
             // Soil is the usual place for a potted up plant. Only a default, it's a select.
-            Medium = p.Medium is GrowingMedium.Water or GrowingMedium.Perlite or GrowingMedium.Sphagnum or GrowingMedium.CormRiser
-                ? GrowingMedium.Soil
-                : p.Medium,
+            Medium = p.InPlantMedium ? p.Medium : GrowingMedium.Soil,
             SoilMixId = p.Medium == GrowingMedium.Soil ? p.SoilMixId : null,
         };
         message = null;

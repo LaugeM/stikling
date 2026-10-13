@@ -193,7 +193,7 @@ public class ExperimentTests
     {
         var plants = new FakePlantRepository();
         var propagations = new FakePropagationRepository();
-        var service = new PropagationService(propagations, plants, new FakeTimelineRepository(), new FixedTime(Now));
+        var service = new PropagationService(propagations, plants, new FakeTimelineRepository(), new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
 
         var batch = Batch("Alocasia corm test", GrowingMedium.Leca, Started);
         batch.Stage = PropagationStage.Started;

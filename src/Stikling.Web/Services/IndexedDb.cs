@@ -21,6 +21,7 @@ public static class Stores
     public const string ReceivedHistories = "receivedHistories";
     public const string AwayStretches = "awayStretches";
     public const string SitterSheets = "sitterSheets";
+    public const string PropagationCareLogs = "propagationCareLogs";
     public const string Settings = "settings";
     public const string PutOffs = "putOffs";
     public const string TreatmentRecipes = "treatmentRecipes";

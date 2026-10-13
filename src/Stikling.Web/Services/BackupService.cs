@@ -40,7 +40,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             Stores.Plants, Stores.Propagations, Stores.Timeline, Stores.Photos, Stores.CareLogs,
             Stores.PestCases, Stores.PestTreatments, Stores.Pots, Stores.SoilMixes, Stores.Products,
             Stores.Feeds, Stores.TreatmentRecipes, Stores.Places, Stores.GrowLights,
-            Stores.ReceivedHistories, Stores.AwayStretches
+            Stores.ReceivedHistories, Stores.AwayStretches, Stores.PropagationCareLogs
         ];
         foreach (var store in stores)
         {
@@ -59,6 +59,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             ExportedAt = time.GetUtcNow(),
             Plants = await db.GetAllAsync<Plant>(Stores.Plants),
             Propagations = await db.GetAllAsync<Propagation>(Stores.Propagations),
+            PropagationCareLogs = await db.GetAllAsync<PropagationCareLog>(Stores.PropagationCareLogs),
             Timeline = await db.GetAllAsync<TimelineEntry>(Stores.Timeline),
             Photos = await db.GetAllAsync<Photo>(Stores.Photos),
             CareLogs = await db.GetAllAsync<CareLog>(Stores.CareLogs),
@@ -152,6 +153,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
 
         await Restore(Stores.Plants, data.Plants);
         await Restore(Stores.Propagations, data.Propagations);
+        await Restore(Stores.PropagationCareLogs, data.PropagationCareLogs);
         await Restore(Stores.Timeline, data.Timeline);
         var photoMeta = await Restore(Stores.Photos, data.Photos);
         await Restore(Stores.CareLogs, data.CareLogs);

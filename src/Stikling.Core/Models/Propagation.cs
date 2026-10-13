@@ -185,6 +185,16 @@ public sealed class Propagation : Entity
         NoteFirstRoot();
     }
 
+    /// <summary>Soil, bark, LECA and PON are mediums plants live in. The rest (water, perlite and so on) are for rooting.</summary>
+    public static bool IsPlantMedium(GrowingMedium medium) =>
+        medium is GrowingMedium.Soil or GrowingMedium.OrchidBark or GrowingMedium.Leca or GrowingMedium.Pon;
+
+    /// <summary>
+    /// True when it is already in a medium plants live in, like a rooted pup in soil. It can become
+    /// a plant as it is, without being potted up into something else.
+    /// </summary>
+    public bool InPlantMedium => IsPlantMedium(Medium);
+
     /// <summary>A mix only makes sense in soil, so moving to another medium lets go of it.</summary>
     public void ClearMixUnlessSoil()
     {

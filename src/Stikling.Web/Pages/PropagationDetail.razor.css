@@ -1,0 +1,11 @@
+/* On a phone the dock has no room for a fourth label, so Care is just its drop */
+@media (max-width: 35.98rem) {
+    .page-dock > .btn.dock-care {
+        flex: 0 0 2.75rem;
+        padding: 0;
+    }
+
+    .dock-care .dock-label {
+        display: none;
+    }
+}

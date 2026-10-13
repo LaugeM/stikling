@@ -272,4 +272,20 @@ public class PropagationTests
 
         Assert.Equal([PropagationStage.Started, PropagationStage.Rooted], groups.Select(g => g.Stage));
     }
+
+    [Theory]
+    [InlineData(GrowingMedium.Soil, true)]
+    [InlineData(GrowingMedium.OrchidBark, true)]
+    [InlineData(GrowingMedium.Leca, true)]
+    [InlineData(GrowingMedium.Pon, true)]
+    [InlineData(GrowingMedium.Water, false)]
+    [InlineData(GrowingMedium.Perlite, false)]
+    [InlineData(GrowingMedium.Sphagnum, false)]
+    [InlineData(GrowingMedium.CormRiser, false)]
+    [InlineData(GrowingMedium.Other, false)]
+    public void Only_soil_bark_leca_and_pon_are_a_medium_plants_live_in(GrowingMedium medium, bool expected)
+    {
+        Assert.Equal(expected, Propagation.IsPlantMedium(medium));
+        Assert.Equal(expected, new Propagation { Medium = medium }.InPlantMedium);
+    }
 }

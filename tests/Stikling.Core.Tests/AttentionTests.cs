@@ -82,7 +82,7 @@ public class AttentionTests
     {
         var propagation = new Propagation { Nickname = "Corms", StartedOn = Today, Attention = new("Ready to pot up", Today) };
         await propagations.SaveAsync(propagation);
-        var service = new PropagationService(propagations, plants, timeline, new FixedTime(Now));
+        var service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
 
         await service.MarkFailedAsync(propagation, 1);
 

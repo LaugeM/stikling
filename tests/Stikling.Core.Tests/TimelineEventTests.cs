@@ -20,7 +20,7 @@ public class TimelineEventTests
 
     public TimelineEventTests()
     {
-        service = new PropagationService(propagations, plants, timeline, time);
+        service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), time);
     }
 
     private async Task<Propagation> StartAsync(int count, DateOnly startedOn)

@@ -134,7 +134,7 @@ else
                 <p class="profile-facts">
                     @if (ancestors.Count > 0 && fromPropagation is not null)
                     {
-                        <text>from <a class="link-action" href="propagations/@fromPropagation.Id">a @Labels.For(fromPropagation.Type).ToLowerInvariant()</a> of <a class="link-action" href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a></text>
+                        <text>from <a class="link-action" href="propagations/@fromPropagation.Id">@TypeWithArticle(fromPropagation.Type)</a> of <a class="link-action" href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a></text>
                     }
                     else if (ancestors.Count > 0)
                     {
@@ -142,7 +142,7 @@ else
                     }
                     else if (fromPropagation is not null)
                     {
-                        <text>from <a class="link-action" href="propagations/@fromPropagation.Id">a @Labels.For(fromPropagation.Type).ToLowerInvariant()</a></text>
+                        <text>from <a class="link-action" href="propagations/@fromPropagation.Id">@TypeWithArticle(fromPropagation.Type)</a></text>
                     }
                     @if (propagations.Count > 0)
                     {
@@ -758,8 +758,11 @@ else
     }
 
     // "soil" in the middle of a line, but LECA and PON stay in capitals
-    private static string MediumWord(GrowingMedium medium) =>
-        Labels.For(medium) is var label && label == label.ToUpperInvariant() ? label : label.ToLowerInvariant();
+    private static string MediumWord(GrowingMedium medium) => Labels.MediumWord(medium);
+
+    // "a cutting", but "an offset / pup" and "an air layer"
+    private static string TypeWithArticle(PropagationType type) =>
+        Labels.For(type).ToLowerInvariant() is var word && "aeiou".Contains(word[0]) ? $"an {word}" : $"a {word}";
 
     private string StatusButtonText => status switch
     {
