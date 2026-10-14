@@ -145,6 +145,16 @@ public sealed class Plant : Entity
     [JsonIgnore]
     public bool IsDormant => DormantSince is not null;
 
+    /// <summary>
+    /// What it is offered for, shown on the Available for swap page. Null when it isn't. Only
+    /// counts while the plant is still here, and is left as it is when the plant leaves.
+    /// </summary>
+    public SpareMark? Spare { get; set; }
+
+    /// <summary>Marked as something to swap, and still here to swap.</summary>
+    [JsonIgnore]
+    public bool IsOffered => Spare is not null && !IsDeleted && Status == PlantStatus.Active;
+
     /// <summary>Pinned to the top of the plant list.</summary>
     public bool Favourite { get; set; }
 

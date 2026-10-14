@@ -336,6 +336,21 @@ else
                 </div>
             </FormSection>
 
+            <FormSection Title="For swap" Summary="@SwapSummary" Open="openSwap">
+                <div class="mb-3">
+                    <label class="form-label" for="spare">Offered for swap</label>
+                    <select id="spare" class="form-select" aria-describedby="spare-help"
+                            @onchange="e => plant.Spare = Enum.TryParse<SpareMark>(e.Value?.ToString(), out var mark) ? mark : null">
+                        <option value="" selected="@(plant.Spare is null)">Not offered</option>
+                        @foreach (var mark in Enum.GetValues<SpareMark>())
+                        {
+                            <option value="@mark" selected="@(plant.Spare == mark)">@SwapLists.MarkText(mark)</option>
+                        }
+                    </select>
+                    <div id="spare-help" class="form-text">Shows on the Available for swap page, which you can share as text.</div>
+                </div>
+            </FormSection>
+
             <FormSection Title="Tags" Summary="@TagsSummary" Open="openTags">
                 <div class="mb-3">
                     <TagPicker @bind-Value="plant.Tags" Suggestions="tagSuggestions" />
@@ -449,6 +464,7 @@ else
     private bool openPot;
     private bool openTags;
     private bool openSitter;
+    private bool openSwap;
     private bool openWatering;
     private bool wateringReminderOn;
 
@@ -506,6 +522,8 @@ else
     </div>;
 
     private string? SitterSummary => string.IsNullOrWhiteSpace(plant?.SitterNote) ? null : Labels.Short(plant.SitterNote);
+
+    private string? SwapSummary => plant?.Spare is { } mark ? SwapLists.MarkText(mark) : null;
 
     private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
 
@@ -654,6 +672,7 @@ else
             openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
             openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
             openTags = !IsNew && plant.Tags.Count > 0;
+            openSwap = !IsNew && plant.Spare is not null;
             openSitter = !IsNew && !string.IsNullOrWhiteSpace(plant.SitterNote);
             openWatering = !IsNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WaterBy is not null || plant.WateringFeedId is not null);
         }

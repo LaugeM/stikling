@@ -59,7 +59,7 @@ else
     protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
 
     private bool HasBadges =>
-        Plant.Status != PlantStatus.Active || Plant.InQuarantine || Plant.IsDormant || Pests.Count > 0 || (OpenProblem && Plant.Status == PlantStatus.Active) || ShowsFlowering(out _);
+        Plant.Status != PlantStatus.Active || Plant.InQuarantine || Plant.IsDormant || Plant.IsOffered || Pests.Count > 0 || (OpenProblem && Plant.Status == PlantStatus.Active) || ShowsFlowering(out _);
 
     private bool ShowsFlowering(out FloweringNow now)
     {
@@ -114,6 +114,10 @@ else
                     @if (ShowsFlowering(out var flowering))
                     {
                         <span class="badge flowering-badge">@FloweringText.Badge(flowering.Stage)</span>
+                    }
+                    @if (Plant.IsOffered && Plant.Spare is { } spare)
+                    {
+                        <span class="badge swap-badge">@SwapLists.MarkText(spare)</span>
                     }
                     @foreach (var pest in Pests)
                     {

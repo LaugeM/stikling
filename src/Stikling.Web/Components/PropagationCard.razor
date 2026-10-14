@@ -30,6 +30,10 @@
                 {
                     <span class="badge dormant-badge">Dormant</span>
                 }
+                @if (Propagation.SpareAvailable > 0)
+                {
+                    <span class="badge swap-badge">@Propagation.SpareAvailable to swap</span>
+                }
                 <span>@Labels.Summary(Propagation)</span>
                 @if (Propagation.DaysToRoot is { } days)
                 {

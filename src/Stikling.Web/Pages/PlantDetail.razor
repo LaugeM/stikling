@@ -97,6 +97,10 @@ else
                         {
                             <span class="badge flowering-badge">@FloweringText.Badge(floweringNow.Stage)</span>
                         }
+                        @if (plant.IsOffered && plant.Spare is { } spare)
+                        {
+                            <a class="badge swap-badge" href="swap">@SwapLists.MarkText(spare)</a>
+                        }
                         @foreach (var item in pests)
                         {
                             <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
@@ -640,6 +644,12 @@ else
                             }
                         </li>
                         <li>
+                            <button type="button" class="sheet-action" @onclick="() => more = More.Swap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3" /></svg>
+                                <span class="sheet-action-text"><b>For swap</b><small>@(plant.Spare is { } offered ? SwapLists.MarkText(offered) : "Offer cuttings or the plant itself")</small></span>
+                            </button>
+                        </li>
+                        <li>
                             <button type="button" class="sheet-action" @onclick="OpenFlowering">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.2" /><path d="M12 9.800C10.600 7.500 10.600 5 12 3.500c1.400 1.500 1.400 4 0 6.300Z" /><path d="M12 14.200c1.400 2.300 1.400 4.800 0 6.300-1.400-1.500-1.400-4 0-6.300Z" /><path d="M9.800 12C7.500 10.600 5 10.600 3.500 12c1.500 1.400 4 1.400 6.300 0Z" /><path d="M14.200 12c2.300 1.400 4.800 1.400 6.300 0-1.500-1.400-4-1.400-6.300 0Z" /></svg>
                                 <span class="sheet-action-text"><b>Flowering</b><small>@FloweringText.MenuHint(floweringNow, Today.Year)</small></span>
@@ -708,6 +718,24 @@ else
                         </li>
                     }
                 </ul>
+                break;
+
+            case More.Swap:
+                <div class="mb-3">
+                    <div class="btn-group segmented w-100 swap-choices" role="radiogroup" aria-label="Offered for swap">
+                        @foreach (var (value, label) in SwapChoices)
+                        {
+                            var id = $"swap-{value?.ToString() ?? "none"}";
+                            <input type="radio" class="btn-check" name="swap-mark" id="@id"
+                                   checked="@(plant.Spare == value)" disabled="@busy" @onchange="() => SetSpareAsync(value)" />
+                            <label class="btn btn-outline-primary" for="@id">@label</label>
+                        }
+                    </div>
+                    <div class="form-text">Shows on <a href="swap">Available for swap</a>. A plant that has left isn't listed there, and its mark is kept in case it comes back.</div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
                 break;
 
             case More.PassOn:
@@ -912,7 +940,7 @@ else
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
 
-    private enum More { None, Menu, Flag, Dormant, Quarantine, PestCheck, Status, PassOn, Flowering, ThisFlowering, Problem, ProblemUpdate }
+    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, PestCheck, Status, PassOn, Flowering, ThisFlowering, Problem, ProblemUpdate }
     private bool shareOpen;
     private bool shareOnLink;
 
@@ -1039,6 +1067,7 @@ else
     {
         More.Flag => plant?.Attention is null ? "Flag it" : "Change the flag",
         More.Dormant => "Dormant",
+        More.Swap => "For swap",
         More.Flowering when floweringPast && floweringSaved is null => "Add a past flowering",
         More.Flowering => "Flowering",
         More.ThisFlowering => "This flowering",
@@ -1444,6 +1473,28 @@ else
             return;
         plant.CoverPhotoId = photoId;
         await Repository.SaveAsync(plant);
+    }
+
+    private static readonly (SpareMark? Value, string Label)[] SwapChoices =
+    [
+        (null, "Not offered"),
+        (SpareMark.CuttingsToSpare, "Cuttings"),
+        (SpareMark.UpForSwap, "The plant")
+    ];
+
+    private async Task SetSpareAsync(SpareMark? mark)
+    {
+        if (plant is null)
+            return;
+        busy = true;
+        try
+        {
+            await PlantService.SetSpareAsync([plant], mark);
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     private async Task ToggleFavouriteAsync()

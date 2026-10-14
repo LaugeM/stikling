@@ -101,6 +101,17 @@ public sealed class Propagation : Entity
     /// </summary>
     public AttentionLater? AttentionLater { get; set; }
 
+    /// <summary>
+    /// How many of its units are offered for swap. Null or 0 when none is. What shows is never more
+    /// than what is left, see <see cref="SpareAvailable"/>.
+    /// </summary>
+    public int? SpareCount { get; set; }
+
+    /// <summary>Units offered for swap that are still here: nothing once it is finished, and never more than what is left.</summary>
+    [JsonIgnore]
+    public int SpareAvailable =>
+        IsDeleted || !IsActive || SpareCount is not > 0 ? 0 : Math.Min(SpareCount.Value, Math.Max(0, RemainingCount));
+
     /// <summary>Share of the sown seeds that came up. Null unless it's seeds with a count of how many came up.</summary>
     [JsonIgnore]
     public double? GerminationRate =>
@@ -246,6 +257,9 @@ public sealed class Propagation : Entity
     {
         CheckCount(count);
         GivenAwayCount += count;
+        // What was given away was the spare ones first, in the same save
+        if (SpareCount is > 0)
+            SpareCount = Math.Max(0, SpareCount.Value - count);
         SyncStageWithCounts(on);
     }
 
@@ -311,6 +325,8 @@ public sealed class Propagation : Entity
             errors.Add("The corm size must be more than 0 and at most 200 mm.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
+        if (SpareCount < 0)
+            errors.Add("The number for swap can't be negative.");
         return errors;
     }
 }

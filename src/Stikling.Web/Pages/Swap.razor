@@ -1,0 +1,205 @@
+@page "/swap"
+@layout WideLayout
+@implements IDisposable
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject PlantService PlantService
+@inject PlantNameService Names
+@inject SitterSheetActions Sharer
+
+<PageTitle>Available for swap · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="propagations">Propagations</a>
+
+<div class="page-heading">
+    <h1>Available for swap</h1>
+    @if (list is { IsEmpty: false })
+    {
+        <button type="button" class="btn btn-outline-primary swap-share" @onclick="OpenShare">Share as text</button>
+    }
+</div>
+
+@if (list is null)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (list.IsEmpty)
+{
+    @ConvertPanel
+    <div class="empty-state">
+        <p>Nothing is marked for swap yet.</p>
+        <p>On a plant's or propagation's page, tap More and choose For swap.</p>
+        <a class="btn btn-outline-primary mt-3" href="plants">Go to Plants</a>
+    </div>
+}
+else
+{
+    @if (list.Cuttings.Count > 0)
+    {
+        <h2 class="section-label">Cuttings</h2>
+        <ul class="item-list list-grid swap-list">
+            @foreach (var line in list.Cuttings)
+            {
+                var propagation = propagationsById[line.SubjectId!.Value];
+                <li>
+                    <a class="item-card" href="propagations/@propagation.Id">
+                        <div class="item-thumb day-thumb" aria-hidden="true">
+                            <b>@line.Count</b>
+                            <small>to swap</small>
+                        </div>
+                        <div class="item-text">
+                            <div class="item-name">@propagation.DisplayName</div>
+                            <div class="item-meta">
+                                <span class="visually-hidden">@line.Count @(line.Count == 1 ? "cutting" : "cuttings"),</span>
+                                <StageBadge Stage="propagation.Stage" Type="propagation.Type" />
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+
+    @if (list.OnRequest.Count > 0)
+    {
+        <h2 class="section-label">Cuttings on request</h2>
+        <ul class="item-list list-grid swap-list">
+            @foreach (var line in list.OnRequest)
+            {
+                <li>@PlantRow(plantsById[line.SubjectId!.Value])</li>
+            }
+        </ul>
+    }
+
+    @if (list.Plants.Count > 0)
+    {
+        <h2 class="section-label">Plants</h2>
+        <ul class="item-list list-grid swap-list">
+            @foreach (var line in list.Plants)
+            {
+                <li>@PlantRow(plantsById[line.SubjectId!.Value])</li>
+            }
+        </ul>
+    }
+
+    @ConvertPanel
+}
+
+<Sheet Title="Share as text" @bind-Open="shareOpen">
+    <div class="swap-options">
+        <div class="form-check form-switch">
+            <input id="swap-nicknames" type="checkbox" class="form-check-input" role="switch" @bind="nicknames" />
+            <label class="form-check-label" for="swap-nicknames">Include your nicknames</label>
+        </div>
+        <div class="form-check form-switch">
+            <input id="swap-footer" type="checkbox" class="form-check-input" role="switch" @bind="footer" />
+            <label class="form-check-label" for="swap-footer">Add a Stikling line at the end</label>
+        </div>
+    </div>
+    <pre class="swap-preview" aria-label="What will be shared">@ShareText</pre>
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" @onclick="ShareAsync">Share</button>
+        @if (status.Length > 0)
+        {
+            <span class="swap-status" role="status">@status</span>
+        }
+    </div>
+</Sheet>
+
+@code {
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Propagation> propagations = [];
+    private Dictionary<Guid, Plant> plantsById = [];
+    private Dictionary<Guid, Propagation> propagationsById = [];
+    private IReadOnlyList<Plant> tagged = [];
+    private EverydayNameBook? everyday;
+    private SwapList? list;
+    private bool nicknames;
+    private bool footer = true;
+    private bool shareOpen;
+    private bool busy;
+    private bool disposed;
+    private string status = "";
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        everyday = await Names.GetEverydayNamesAsync();
+        plants = await PlantRepository.GetAllAsync();
+        propagations = await PropagationRepository.GetAllAsync();
+        plantsById = plants.ToDictionary(p => p.Id);
+        propagationsById = propagations.ToDictionary(p => p.Id);
+        tagged = PlantService.TaggedForSwap(plants);
+        list = SwapLists.Build(plants, propagations);
+    }
+
+    private async Task ConvertAsync(SpareMark mark)
+    {
+        busy = true;
+        await PlantService.SetSpareAsync(tagged, mark);
+        await LoadAsync();
+        busy = false;
+    }
+
+    // Plants tagged For swap before marks existed. The tag is left on
+    private RenderFragment ConvertPanel => @<text>
+        @if (tagged.Count > 0)
+        {
+            <section class="swap-convert" aria-labelledby="swap-convert-title">
+                <h2 id="swap-convert-title" class="swap-convert-title">@Labels.Plants(tagged.Count) tagged For swap</h2>
+                <p>@(tagged.Count == 1 ? "It isn't" : "They aren't") on this list yet. Say what you're offering. The tag stays.</p>
+                <div class="swap-convert-actions">
+                    <button type="button" class="btn btn-primary swap-choice" disabled="@busy" @onclick="() => ConvertAsync(SpareMark.CuttingsToSpare)">Cuttings to spare</button>
+                    <button type="button" class="btn btn-outline-primary swap-choice" disabled="@busy" @onclick="() => ConvertAsync(SpareMark.UpForSwap)">The @(tagged.Count == 1 ? "plant itself" : "plants themselves")</button>
+                </div>
+            </section>
+        }
+    </text>;
+
+    private RenderFragment PlantRow(Plant plant) => @<a class="item-card" href="plants/@plant.Id">
+        <SubjectThumb Subject="plant" />
+        <div class="item-text">
+            <div class="item-name">@plant.DisplayName</div>
+            @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is { } botanical)
+            {
+                <div class="item-sub">@botanical</div>
+            }
+            else if (everyday?.For(plant.Genus, plant.Species, plant.Cultivar) is { } called)
+            {
+                <div class="item-sub everyday-name">@called</div>
+            }
+        </div>
+    </a>;
+
+    private string ShareText => SwapLists.WriteSwap(plants, propagations, (g, s, c) => everyday?.For(g, s, c), nicknames, footer);
+
+    private void OpenShare()
+    {
+        status = "";
+        shareOpen = true;
+    }
+
+    private async Task ShareAsync()
+    {
+        status = await Sharer.ShareTextAsync(ShareText) switch
+        {
+            "copied" => "Copied",
+            "failed" => "Couldn't share it",
+            _ => ""
+        };
+        if (status.Length == 0)
+            return;
+
+        StateHasChanged();
+        await Task.Delay(3000);
+        if (!disposed)
+        {
+            status = "";
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose() => disposed = true;
+}

@@ -11,8 +11,11 @@ public sealed record TagCount(string Name, int Plants);
 /// </summary>
 public static class PlantTags
 {
+    /// <summary>The tag people used before spare marks existed. Left on plants, and offered for conversion.</summary>
+    public const string ForSwap = "For swap";
+
     /// <summary>Offered before you have made any of your own.</summary>
-    public static readonly IReadOnlyList<string> Common = ["Variegated", "Rare", "For swap"];
+    public static readonly IReadOnlyList<string> Common = ["Variegated", "Rare"];
 
     /// <summary>Tidies a typed tag, or null when nothing worth keeping was typed.</summary>
     public static string? Clean(string? tag) =>

@@ -61,7 +61,7 @@ public class PlantTagsTests
     {
         Plant[] plants = [new() { Nickname = "A", Tags = ["Hoya cuttings", "rare"] }];
 
-        Assert.Equal(["Hoya cuttings", "rare", "Variegated", "For swap"], PlantTags.Suggestions(plants));
+        Assert.Equal(["Hoya cuttings", "rare", "Variegated"], PlantTags.Suggestions(plants));
     }
 
     [Fact]
