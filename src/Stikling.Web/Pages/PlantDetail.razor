@@ -570,7 +570,7 @@ else
         </div>
 
         <div class="sheet-section">
-            <CareSheet PlantIds="@(new[] { plant.Id })" OnLogged="CareLoggedAsync" />
+            <CareSheet PlantIds="@(new[] { plant.Id })" Form="WateringForms.Of(plant, id => pots.FirstOrDefault(p => p.Id == id))" OnLogged="CareLoggedAsync" />
         </div>
 
         @if (careCalendar is { IsEmpty: false })
