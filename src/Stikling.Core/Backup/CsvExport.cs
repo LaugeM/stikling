@@ -11,7 +11,7 @@ namespace Stikling.Core.Backup;
 /// </summary>
 public static class CsvExport
 {
-    private static readonly string[] PlantHeader =
+    internal static readonly string[] PlantHeader =
         ["Name", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
 
     private static readonly string[] PropagationHeader =
