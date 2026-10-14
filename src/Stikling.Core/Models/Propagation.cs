@@ -132,6 +132,33 @@ public sealed class Propagation : Entity
     public string DisplayName =>
         !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? "Unnamed propagation";
 
+    /// <summary>
+    /// The name where plants and propagations are listed together, so a propagation isn't
+    /// mistaken for its parent: "Cutting of Monstera deliciosa". A nickname is used as it is.
+    /// </summary>
+    [JsonIgnore]
+    public string ListName
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(Nickname))
+                return Nickname.Trim();
+
+            var noun = Type switch
+            {
+                PropagationType.Cutting => "Cutting",
+                PropagationType.Corm => "Corm",
+                PropagationType.Offset => "Offset",
+                PropagationType.Seed => "Seeds",
+                PropagationType.Division => "Division",
+                PropagationType.AirLayer => "Air layer",
+                PropagationType.Leaf => "Leaf cutting",
+                _ => "Propagation"
+            };
+            return BotanicalName is { } botanical ? $"{noun} of {botanical}" : $"Unnamed {noun.ToLowerInvariant()}";
+        }
+    }
+
     /// <summary>How long it took to root, or null while it hasn't.</summary>
     [JsonIgnore]
     public int? DaysToRoot =>

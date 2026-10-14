@@ -122,20 +122,6 @@ else
                     </div>
                 }
             </div>
-            <div class="mb-3">
-                <label class="form-label" for="medium">Grows in</label>
-                <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium"
-                             aria-describedby="@(Labels.Explain(propagation.Medium) is null ? null : "medium-help")">
-                    @foreach (var medium in Enum.GetValues<GrowingMedium>())
-                    {
-                        <option value="@medium">@Labels.For(medium)</option>
-                    }
-                </InputSelect>
-                @if (Labels.Explain(propagation.Medium) is { } mediumHelp)
-                {
-                    <div id="medium-help" class="form-text">@mediumHelp</div>
-                }
-            </div>
             <div class="mb-1">
                 <label class="form-label" for="started">Started on</label>
                 <InputDate id="started" class="form-control" @bind-Value="propagation.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
@@ -221,8 +207,18 @@ else
 
             <FormSection Title="Setup" Summary="@SetupSummary" Open="openSetup">
                 <div class="mb-3">
-                    <label class="form-label" for="container">Container</label>
-                    <InputText id="container" class="form-control" @bind-Value="propagation.Container" placeholder="e.g. Humidity box" />
+                    <label class="form-label" for="medium">Grows in</label>
+                    <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium"
+                                 aria-describedby="@(Labels.Explain(propagation.Medium) is null ? null : "medium-help")">
+                        @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                        {
+                            <option value="@medium">@Labels.For(medium)</option>
+                        }
+                    </InputSelect>
+                    @if (Labels.Explain(propagation.Medium) is { } mediumHelp)
+                    {
+                        <div id="medium-help" class="form-text">@mediumHelp</div>
+                    }
                 </div>
                 @if (propagation.Medium == GrowingMedium.Soil)
                 {
@@ -230,6 +226,17 @@ else
                         <MixPicker @bind-Value="propagation.SoilMixId" Mixes="mixes" />
                     </div>
                 }
+                <div class="mb-3">
+                    <label class="form-label" for="container">Container</label>
+                    <InputText id="container" class="form-control" @bind-Value="propagation.Container" list="container-list"
+                               placeholder="e.g. Plastic box with lid" autocomplete="off" />
+                    <datalist id="container-list">
+                        @foreach (var name in containers)
+                        {
+                            <option value="@name"></option>
+                        }
+                    </datalist>
+                </div>
                 <div class="mb-3">
                     <span class="form-label d-block" id="aids-label">Rooting aids</span>
                     <div class="chip-row" role="group" aria-labelledby="aids-label">
@@ -463,6 +470,7 @@ else
     private Places places = Places.None;
     private string? location; // as picked, "Kitchen / Window"; made into a room when saving
     private IReadOnlyList<string> experiments = [];
+    private IReadOnlyList<string> containers = [];
 
     // Which sections start open, worked out when the propagation loads. A section only reads this once
     private bool openWhere;
@@ -508,6 +516,7 @@ else
         string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
 
     private string? SetupSummary => propagation is null ? null : Joined(
+        Labels.For(propagation.Medium),
         propagation.Container,
         propagation.Medium == GrowingMedium.Soil && propagation.SoilMixId is { } mix ? mixes.FirstOrDefault(m => m.Id == mix)?.Name : null,
         propagation.RootingAids.Count > 0 ? string.Join(", ", propagation.RootingAids.Select(Labels.For)) : null,
@@ -548,6 +557,7 @@ else
         mixes = await MixRepository.GetAllAsync();
         rooms = Room.List(places, allPlants, allPropagations);
         experiments = Experiments.Names(allPropagations);
+        containers = Containers.Names(allPropagations);
         wishes = IsNew ? await WishService.GetAllAsync() : [];
         dictionary = IsNew ? await Names.GetDictionaryAsync() : null;
 
@@ -577,7 +587,7 @@ else
         if (propagation is not null)
         {
             openWhere = !IsNew && !string.IsNullOrWhiteSpace(location);
-            openSetup = !IsNew && HasSetup(propagation);
+            openSetup = IsNew || HasSetup(propagation);
             openProgress = !IsNew && HasProgress(propagation);
             openSitter = !IsNew && !string.IsNullOrWhiteSpace(propagation.SitterNote);
             openSwap = !IsNew && propagation.SpareCount is > 0;

@@ -4,6 +4,7 @@
 @inject PlantService PlantService
 @inject RoomService RoomService
 @inject ICareLogRepository CareLogRepository
+@inject IPotRepository PotRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject ProblemService ProblemService
 @inject IFloweringMarkRepository FloweringRepository
@@ -254,7 +255,7 @@ else
             {
                 <li>
                     <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
-                               OnToggle="Toggle" Moisture="@MoistureFor(plant)" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)"
+                               OnToggle="Toggle" Moisture="@MoistureFor(plant)" LastWater="@LastWaterFor(plant)" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)"
                                OpenProblem="@problemPlants.Contains(plant.Id)" Location="@places.NameOf(plant.PlaceId)" />
                 </li>
             }
@@ -516,6 +517,7 @@ else
     private string? bulkPlace; // as picked, "Living room / Windowsill"
     private List<string> bulkTags = [];
     private IReadOnlyList<CareLog> careLogs = [];
+    private IReadOnlyDictionary<Guid, Pot> pots = new Dictionary<Guid, Pot>();
     private IReadOnlyList<PestCase> pestCases = [];
     private string? bulkNote;
     private string? bulkMessage;
@@ -586,6 +588,7 @@ else
         roomsInUse = Room.InUse(rooms);
         tags = PlantTags.InUse(all);
         careLogs = await CareLogRepository.GetAllAsync();
+        pots = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
         pestCases = await PestCaseRepository.GetAllAsync();
         problemPlants = (await ProblemService.AllAsync()).Where(p => p.IsOpen).Select(p => p.SubjectId).ToHashSet();
         var today = Time.Today();
@@ -850,6 +853,11 @@ else
 
     private MoistureReading? MoistureFor(Plant plant) =>
         CareSummary.LatestMoisture(careLogs, plant.Id, Time.Today());
+
+    private string? LastWaterFor(Plant plant) =>
+        plant.Status == PlantStatus.Active && CareSummary.LastWater(careLogs, plant.Id, Time.Today()) is { } last
+            ? WateringText.LastWater(last, WateringForms.Of(plant, id => pots.GetValueOrDefault(id)))
+            : null;
 
     private async Task AfterBulkCareAsync()
     {

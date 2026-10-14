@@ -63,6 +63,15 @@ public static class WateringText
         return line;
     }
 
+    /// <summary>When the plant last had water, e.g. "watered 3 days ago" or "refilled 3 days ago".</summary>
+    public static string LastWater(LastCare last, WateringForm form)
+    {
+        var verb = last.Kind == CareKind.ToppedUp
+            ? form == WateringForm.Reservoir ? "refilled" : "topped up"
+            : "watered";
+        return $"{verb} {Labels.DaysAgo(last.DaysAgo)}";
+    }
+
     private static string Every(int days) => days == 1 ? "every day" : $"every {days} days";
 
     private static string? Season(WateringGuess guess) =>

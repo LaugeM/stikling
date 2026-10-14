@@ -160,7 +160,7 @@ else
                     <li>
                         <a class="item-card" href="propagations/@propagation.Id">
                             <div class="item-text">
-                                <div class="item-name">@propagation.DisplayName</div>
+                                <div class="item-name">@propagation.ListName</div>
                                 <div class="item-meta">Cutting or seedling in progress</div>
                             </div>
                         </a>
@@ -289,7 +289,7 @@ else
         if (wish.PlantId is { } plantId && plants.FirstOrDefault(p => p.Id == plantId) is { } plant)
             return ($"plants/{plant.Id}", plant.DisplayName, "plant");
         if (wish.PropagationId is { } propagationId && propagations.FirstOrDefault(p => p.Id == propagationId) is { } propagation)
-            return ($"propagations/{propagation.Id}", propagation.DisplayName, "cutting");
+            return ($"propagations/{propagation.Id}", propagation.ListName, "cutting");
         return null;
     }
 

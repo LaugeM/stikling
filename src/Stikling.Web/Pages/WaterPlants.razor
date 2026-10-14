@@ -551,6 +551,7 @@ else
         var answer = AnswerOf(row);
         var feed = FeedOf(row);
         var open = pickerOpen.Contains(plantId);
+        var lastWater = done ? null : CareSummary.LastWater(careLogs, plantId, Today);
 
         <li class="pass-item @(done ? "done" : null)">
             <div role="group" aria-labelledby="@nameId">
@@ -567,7 +568,7 @@ else
                 }
                 else if (row.Form != WateringForm.TopWatered)
                 {
-                    <span class="pass-meta">@(row.Form == WateringForm.InWater ? "Check the water" : "Check the reservoir")</span>
+                    <span class="pass-meta">@(row.Form == WateringForm.InWater ? "Check the water" : "Check the reservoir")@(lastWater is { } topped ? $" · {WateringText.LastWater(topped, row.Form)}" : null)</span>
                     @FeedAndButton(row, WateringText.DoneLabel(row.Form), primary: true, busy, feed, open)
                 }
                 else
@@ -578,7 +579,11 @@ else
                     }
                     else if (check == WaterCheck.Meter && CareSummary.LatestMoisture(careLogs, plantId, Today) is { } latest)
                     {
-                        <span class="pass-meta">last reading @latest.Value, @Labels.DaysAgo(latest.DaysAgo)</span>
+                        <span class="pass-meta">last reading @latest.Value, @Labels.DaysAgo(latest.DaysAgo)@(lastWater is { } was ? $" · {WateringText.LastWater(was, row.Form)}" : null)</span>
+                    }
+                    else if (lastWater is { } watered)
+                    {
+                        <span class="pass-meta">@WateringText.LastWater(watered, row.Form)</span>
                     }
 
                     @if (check == WaterCheck.Meter)
