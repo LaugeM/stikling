@@ -282,6 +282,21 @@ public class SpreadsheetImportTests
     }
 
     [Fact]
+    public void A_plant_that_died_or_left_also_counts_as_one_you_have()
+    {
+        List<Plant> existing =
+        [
+            new() { Nickname = "Basil", Status = PlantStatus.Died },
+            new() { Nickname = "Pilea", Status = PlantStatus.GivenAway },
+            new() { Nickname = "Fern", DeletedAt = DateTimeOffset.UnixEpoch }
+        ];
+
+        Assert.True(One("Basil", ImportField.Name, existing).LooksLikeYours);
+        Assert.True(One("Pilea", ImportField.Name, existing).LooksLikeYours);
+        Assert.False(One("Fern", ImportField.Name, existing).LooksLikeYours);
+    }
+
+    [Fact]
     public void A_plant_you_already_have_with_the_same_name_and_date_is_not_ticked()
     {
         List<Plant> existing = [new() { Nickname = "Basil", AcquiredOn = LooseDate.Of(new DateOnly(2024, 4, 3)) }];

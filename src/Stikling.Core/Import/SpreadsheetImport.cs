@@ -184,7 +184,7 @@ public static class SpreadsheetImport
             var cantAdd = string.IsNullOrWhiteSpace(draft.Nickname) && string.IsNullOrWhiteSpace(draft.Genus)
                 ? "No name"
                 : draft.Validate(today).FirstOrDefault();
-            var looksLikeYours = PlantMatches.SameName(draft, existing).Any(p => p.AcquiredOn == draft.AcquiredOn);
+            var looksLikeYours = PlantMatches.SameNameEver(draft, existing).Any(p => p.AcquiredOn == draft.AcquiredOn);
 
             rows.Add(new ImportRow(
                 sheet.RowNumber(index),
