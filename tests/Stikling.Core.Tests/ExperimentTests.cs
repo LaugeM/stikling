@@ -209,3 +209,40 @@ public class ExperimentTests
         static string Labels(Enum value) => value.ToString();
     }
 }
+
+public class ContainerTests
+{
+    private static readonly DateTimeOffset Now = new(2026, 9, 20, 18, 0, 0, TimeSpan.Zero);
+
+    private static Propagation With(string? container, int daysAgo, bool deleted = false) =>
+        new()
+        {
+            Container = container,
+            UpdatedAt = Now.AddDays(-daysAgo),
+            DeletedAt = deleted ? Now : null
+        };
+
+    [Fact]
+    public void Names_are_trimmed_and_newest_used_first()
+    {
+        var names = Containers.Names([With("Glass jar", 5), With(" Plastic box with lid ", 1), With("Tray", 3)]);
+
+        Assert.Equal(["Plastic box with lid", "Tray", "Glass jar"], names);
+    }
+
+    [Fact]
+    public void One_entry_per_name_ignoring_case_with_the_newest_spelling()
+    {
+        var names = Containers.Names([With("glass jar", 4), With("Glass Jar", 1), With("GLASS JAR", 9)]);
+
+        Assert.Equal(["Glass Jar"], names);
+    }
+
+    [Fact]
+    public void Empty_and_deleted_ones_are_left_out()
+    {
+        var names = Containers.Names([With(null, 1), With("  ", 1), With("Old box", 1, deleted: true), With("Tray", 2)]);
+
+        Assert.Equal(["Tray"], names);
+    }
+}

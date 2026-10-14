@@ -470,7 +470,7 @@ else
                         <a class="item-card" href="propagations/@check.Propagation.Id">
                             <PropagationThumb Propagation="check.Propagation" Days="check.Propagation.DaysSinceStart(Today)" />
                             <div class="item-text">
-                                <div class="item-name">@check.Propagation.DisplayName</div>
+                                <div class="item-name">@check.Propagation.ListName</div>
                                 <div class="item-meta">
                                     <StageBadge Stage="check.Propagation.Stage" Type="check.Propagation.Type" />
                                     <span>@Labels.Summary(check.Propagation) · @LastSeen(check)</span>
@@ -797,7 +797,7 @@ else
 
         names = plants.ToDictionary(p => p.Id, p => p.DisplayName);
         foreach (var propagation in propagations)
-            names[propagation.Id] = propagation.DisplayName;
+            names[propagation.Id] = propagation.ListName;
 
         // Only what's still here: entries left behind by a deleted plant have nowhere to go
         recent = await Entries.GetRecentAsync(8, names.Keys.ToHashSet(), TodayBoard.LatelySince(Time));

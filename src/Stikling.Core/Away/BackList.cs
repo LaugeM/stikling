@@ -118,7 +118,7 @@ public static class BackList
             .OrderByDescending(x => x.Since)
             .ThenBy(x => x.Cutting.DisplayName, StringComparer.CurrentCultureIgnoreCase);
         foreach (var (cutting, since) in inWater)
-            Add(new BackRow(cutting, cutting.DisplayName, BackReason.InWater, DaysSinceLogged: since));
+            Add(new BackRow(cutting, cutting.ListName, BackReason.InWater, DaysSinceLogged: since));
 
         // 3. Past the usual pace, whether or not the reminder is on
         var guesses = WateringRound.GuessesForAll(activePlants, liveLogs, liveTimeline, pot, lights, places, stretches, hemisphere, time);
@@ -134,7 +134,7 @@ public static class BackList
 
         // 4. Flagged, the longest ago first
         var flagged = activePlants.Select(p => (Subject: (Entity)p, p.DisplayName, p.Attention, p.AttentionLater))
-            .Concat(activeCuttings.Select(p => (Subject: (Entity)p, p.DisplayName, p.Attention, p.AttentionLater)))
+            .Concat(activeCuttings.Select(p => (Subject: (Entity)p, DisplayName: p.ListName, p.Attention, p.AttentionLater)))
             .Where(x => x.Attention is not null && !AttentionLater.IsWaiting(x.Attention, x.AttentionLater, today))
             .OrderBy(x => x.Attention!.Since)
             .ThenBy(x => x.DisplayName, StringComparer.CurrentCultureIgnoreCase);
