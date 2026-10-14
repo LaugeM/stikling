@@ -135,6 +135,23 @@
 </section>
 
 <section class="settings-group">
+    <h2>Pests</h2>
+    <div class="theme-label" id="clean-weeks-label">Clean before a case can be resolved</div>
+    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="clean-weeks-label">
+        @foreach (var weeks in cleanWeeksOptions)
+        {
+            var id = $"clean-weeks-{weeks}";
+            <input type="radio" class="btn-check" name="clean-weeks" id="@id"
+                   checked="@(cleanWeeks == weeks)" @onchange="() => SetCleanWeeksAsync(weeks)" />
+            <label class="btn btn-outline-primary" for="@id">@Labels.Count(weeks, "week")</label>
+        }
+    </div>
+    <p class="settings-hint">
+        A case being watched counts the days since its last treatment. Finding pests again starts the count over.
+    </p>
+</section>
+
+<section class="settings-group">
     <h2>Your data</h2>
     <div class="settings-rows">
         <SettingsRow Href="rooms-and-tags" Title="Rooms and tags" Detail="@RoomsAndTagsLine" />
@@ -184,6 +201,8 @@
     ];
 
     private int recentChangesDays;
+    private static readonly int[] cleanWeeksOptions = [2, 4, 6, 8];
+    private int cleanWeeks = PestService.DefaultCleanWeeks;
     private ThemeMode mode;
     private EverydayNameLanguage everydayLanguage;
     private int roomCount;
@@ -223,6 +242,7 @@
         dailyRound = settings.DailyRound;
         roundDays = [.. settings.RoundDays ?? []];
         recentChangesDays = RecentChanges.DaysOf(settings.RecentChangesDays);
+        cleanWeeks = settings.CleanWeeks ?? PestService.DefaultCleanWeeks;
         everydayLanguage = await Names.GetEverydayLanguageAsync();
         roomCount = (await RoomService.GetAllAsync()).Count;
         tagCount = PlantTags.InUse(await Plants.GetAllAsync()).Count;
@@ -273,6 +293,12 @@
         if (!roundDays.Remove(day))
             roundDays.Add(day);
         await SettingsService.SetRoundDaysAsync(roundDays);
+    }
+
+    private async Task SetCleanWeeksAsync(int weeks)
+    {
+        cleanWeeks = weeks;
+        await SettingsService.SetCleanWeeksAsync(weeks);
     }
 
     private async Task SetRecentChangesDaysAsync(int days)

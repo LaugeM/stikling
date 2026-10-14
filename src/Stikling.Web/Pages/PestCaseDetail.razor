@@ -2,6 +2,9 @@
 @inject IPestCaseRepository Repository
 @inject IPestTreatmentRepository Treatments
 @inject IPlantRepository PlantRepository
+@inject IPestCaseRepository CaseRepository
+@inject SettingsService SettingsService
+@using Stikling.Core.Settings
 @inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
@@ -32,6 +35,10 @@ else
             {
                 <span class="badge text-bg-secondary">@Labels.For(view.Case.Status)</span>
             }
+            @if (view.CleanDays is { } cleanDays)
+            {
+                <p class="detail-sub mt-2 mb-0">Clean @cleanDays of @view.CleanTarget days</p>
+            }
         </div>
     </header>
 
@@ -53,6 +60,21 @@ else
     @if (message is not null)
     {
         <p class="action-message" role="status">@message</p>
+    }
+
+    @if (view.Case.IsOpen && view.CleanDays >= view.CleanTarget)
+    {
+        <section class="detail-card">
+            @if (view.ReadyToResolve)
+            {
+                <p>Clean for @Labels.Count(view.CleanWeeks, "week"). Ready to resolve.</p>
+                <button type="button" class="btn btn-primary" disabled="@resolving" @onclick="ResolveAsync">Resolve</button>
+            }
+            else
+            {
+                <p class="mb-0">Clean for @Labels.Count(view.CleanWeeks, "week"). Log a check to resolve it.</p>
+            }
+        </section>
     }
 
     @if (logging && view.Case.IsOpen)
@@ -238,6 +260,27 @@ else
         }
     </section>
 
+    @if (neighbours.Count > 0)
+    {
+        <section class="detail-card">
+            <h2>Check the neighbours</h2>
+            <p class="text-body-secondary">Other plants in the same room. Pests spread to plants that stand close.</p>
+            <ul class="neighbour-list">
+                @foreach (var neighbour in neighbours)
+                {
+                    <li @key="neighbour.Plant.Id">
+                        <div class="neighbour-text">
+                            <a href="plants/@neighbour.Plant.Id">@neighbour.Plant.DisplayName</a>
+                            <div class="text-body-secondary small">@(neighbour.LastChecked is { } day ? $"Checked {Labels.DaysAgo(Math.Max(0, Today.DayNumber - day.DayNumber))}" : "Never checked")</div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => CleanAsync(neighbour.Plant)">Clean</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => AddToCaseAsync(neighbour.Plant)">Add to case</button>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
     <section class="danger-zone">
         @if (confirmDelete)
         {
@@ -266,6 +309,9 @@ else
     private bool askTreatAgain;
     private bool confirmDelete;
     private string? message;
+    private bool busy;
+    private bool resolving;
+    private IReadOnlyList<Neighbour> neighbours = [];
 
     private DateOnly Today => Time.Today();
 
@@ -292,7 +338,66 @@ else
         treatments = PestService.TreatmentsFor(all, item.Id);
         catches = PestService.Catches(item, all);
         places = await RoomService.GetPlacesAsync();
-        view = PestService.Describe(item, await PlantRepository.GetAllAsync(), all, places, Today);
+        var plants = await PlantRepository.GetAllAsync();
+        var settings = await SettingsService.GetAsync();
+        view = PestService.Describe(item, plants, all, places, Today, settings.CleanWeeks ?? PestService.DefaultCleanWeeks);
+        neighbours = PestService.Neighbours(item, plants, await CaseRepository.GetAllAsync(), all, places);
+    }
+
+    private async Task CleanAsync(Plant plant)
+    {
+        busy = true;
+        try
+        {
+            await Treatments.SaveAsync(PestService.StartPlantCheck(plant, Today));
+            await ReloadAsync();
+            message = $"{plant.DisplayName} checked, no signs.";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task AddToCaseAsync(Plant plant)
+    {
+        if (view is null)
+            return;
+
+        busy = true;
+        try
+        {
+            if (!view.Case.PlantIds.Contains(plant.Id))
+                view.Case.PlantIds.Add(plant.Id);
+            await Repository.SaveAsync(view.Case);
+            await ReloadAsync();
+            message = $"{plant.DisplayName} added to the case.";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // Never done on its own: only when someone taps Resolve
+    private async Task ResolveAsync()
+    {
+        if (view is null)
+            return;
+
+        resolving = true;
+        try
+        {
+            view.Case.Status = PestCaseStatus.Resolved;
+            view.Case.ResolvedOn = Today;
+            await Repository.SaveAsync(view.Case);
+            await ReloadAsync();
+            message = "Case resolved.";
+        }
+        finally
+        {
+            resolving = false;
+        }
     }
 
     private bool Trapped => treatments.Any(t => t.Kind == PestTreatmentKind.TrapCount);

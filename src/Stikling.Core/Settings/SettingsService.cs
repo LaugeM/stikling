@@ -76,6 +76,14 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    /// <summary>Sets the clean weeks a case being watched needs before it can be resolved.</summary>
+    public async Task SetCleanWeeksAsync(int weeks)
+    {
+        var current = await GetAsync();
+        current.CleanWeeks = Math.Clamp(weeks, 1, 52);
+        await settings.SaveAsync(current);
+    }
+
     /// <summary>Sets how many rows the list on the day back shows: 3, 5, 10, or 0 for all of them.</summary>
     public async Task SetBackListLengthAsync(int length)
     {

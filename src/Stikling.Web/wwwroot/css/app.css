@@ -1392,6 +1392,35 @@ img.framed {
 
 /* Pests */
 
+/* Plants next to a case: a name over when it was checked, then two buttons with full-size tap areas */
+.neighbour-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.neighbour-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.neighbour-list li:first-child {
+    border-top: 0;
+}
+
+.neighbour-text {
+    flex: 1 1 8rem;
+    min-width: 0;
+}
+
+.neighbour-list .btn {
+    min-height: 2.75rem;
+}
+
 .pest-badge {
     padding: 0.05rem 0.4rem;
     background: var(--pa-alert-soft);

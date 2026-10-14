@@ -27,6 +27,14 @@ public sealed class PestTreatment : Entity
 {
     public Guid CaseId { get; set; }
 
+    /// <summary>
+    /// The plant a check outside a case was for, and then <see cref="CaseId"/> is empty. It's a
+    /// check on a single plant ("checked, no signs"). It is not a new care kind, because an
+    /// unknown enum value would stop older versions on other devices from loading care logs,
+    /// while older versions simply never match an empty case id.
+    /// </summary>
+    public Guid? PlantId { get; set; }
+
     public PestTreatmentKind Kind { get; set; } = PestTreatmentKind.Treated;
 
     /// <summary>The day it was done, which can be earlier than when it was written down.</summary>
@@ -90,8 +98,12 @@ public sealed class PestTreatment : Entity
     {
         var errors = new List<string>();
 
-        if (CaseId == Guid.Empty)
+        if (CaseId == Guid.Empty && PlantId is null)
             errors.Add("A treatment has to belong to a case.");
+        else if (CaseId != Guid.Empty && PlantId is not null)
+            errors.Add("A check belongs to a case or a plant, not both.");
+        else if (PlantId is not null && Kind != PestTreatmentKind.Checked)
+            errors.Add("Only a check can be logged on a single plant.");
 
         if (OccurredOn > today)
             errors.Add("That date is in the future.");

@@ -67,4 +67,10 @@ public sealed class UserSettings : Entity
     /// they're due. Null or empty means off. Older settings without it read as null.
     /// </summary>
     public List<Weekday>? RoundDays { get; set; }
+
+    /// <summary>
+    /// How many clean weeks a case being watched needs before it's ready to be resolved. Null
+    /// means 4. Older settings without it read as null.
+    /// </summary>
+    public int? CleanWeeks { get; set; }
 }
