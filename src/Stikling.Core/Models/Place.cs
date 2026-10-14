@@ -20,6 +20,12 @@ public sealed class Place : Entity
     /// </summary>
     public Guid? MergedIntoId { get; set; }
 
+    /// <summary>
+    /// Outside, like a balcony or a garden. A spot in an outdoor room counts as outdoors too.
+    /// Moving a plant from outdoors to indoors offers a quarantine.
+    /// </summary>
+    public bool Outdoors { get; set; }
+
     [JsonIgnore]
     public bool IsSpot => RoomId is not null;
 

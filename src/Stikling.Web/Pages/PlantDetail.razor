@@ -993,10 +993,11 @@ else
         more = More.Dormant;
     }
 
-    private void OpenQuarantine()
+    private async Task OpenQuarantine()
     {
         since = Today;
-        quarantineDays = plant?.QuarantineDays ?? Plant.DefaultQuarantineDays;
+        quarantineDays = plant?.QuarantineDays
+            ?? (await SettingsService.GetAsync()).QuarantineDays ?? Plant.DefaultQuarantineDays;
         more = More.Quarantine;
     }
 

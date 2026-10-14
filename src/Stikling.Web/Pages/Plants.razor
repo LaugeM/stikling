@@ -5,6 +5,9 @@
 @inject RoomService RoomService
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
+@inject IPestTreatmentRepository PestTreatmentRepository
+@using Stikling.Core.Settings
+@inject SettingsService SettingsService
 @inject ITimelineRepository Entries
 @inject TimeProvider Time
 @inject PlantNameService Names
@@ -337,6 +340,18 @@ else
         {
             <p class="bulk-message" role="status">@bulkMessage</p>
         }
+        @if (cameInIds.Count > 0)
+        {
+            <div class="bulk-message" role="group" aria-label="Plants that came in from outside">
+                <p class="mb-2">@Labels.Plants(cameInIds.Count) came in from outside.</p>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
+                        @onclick="QuarantineCameInAsync">Put in quarantine</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
+                        @onclick="CheckCameInAsync">Checked, no signs</button>
+                <button type="button" class="btn btn-link btn-sm" disabled="@busy"
+                        @onclick="() => cameInIds = []">Not now</button>
+            </div>
+        }
     </div>
 }
 else
@@ -580,6 +595,7 @@ else
         bulkTagOpen = false;
         bulkMoveOpen = false;
         bulkMessage = null;
+        cameInIds = [];
     }
 
     private void OpenBulkMove()
@@ -598,6 +614,11 @@ else
         var plants = SelectedPlants;
         var placeId = await RoomService.PlaceIdAsync(bulkPlace);
         var names = await RoomService.GetPlacesAsync();
+
+        // Worked out before the move changes where they are. Only a move asks, never a date.
+        cameInIds = [.. plants
+            .Where(p => !p.IsDeleted && !p.InQuarantine && p.PlaceId != placeId && PlantService.CameInside(p.PlaceId, placeId, names))
+            .Select(p => p.Id)];
         var moved = await PlantService.MoveAsync(plants, placeId, Labels.For, id => names.NameOf(id));
         bulkMessage = moved == plants.Count
             ? $"Moved {Labels.Plants(moved)} to {bulkPlace}."
@@ -605,6 +626,32 @@ else
         bulkMoveOpen = false;
         selected.Clear();
         await LoadAsync();
+        busy = false;
+    }
+
+    private List<Guid> cameInIds = []; // moved in from outdoors, until the person picks what to do
+
+    private async Task QuarantineCameInAsync()
+    {
+        busy = true;
+        var days = (await SettingsService.GetAsync()).QuarantineDays;
+        var plants = (all ?? []).Where(p => cameInIds.Contains(p.Id) && !p.IsDeleted && !p.InQuarantine).ToList();
+        foreach (var plant in plants)
+            await PlantService.SetQuarantineAsync(plant, Time.Today(), Labels.For, days);
+        bulkMessage = $"Put {Labels.Plants(plants.Count)} in quarantine.";
+        cameInIds = [];
+        await LoadAsync();
+        busy = false;
+    }
+
+    private async Task CheckCameInAsync()
+    {
+        busy = true;
+        var plants = (all ?? []).Where(p => cameInIds.Contains(p.Id) && !p.IsDeleted).ToList();
+        foreach (var plant in plants)
+            await PestTreatmentRepository.SaveAsync(PestService.StartPlantCheck(plant, Time.Today()));
+        bulkMessage = $"Checked {Labels.Plants(plants.Count)} for pests.";
+        cameInIds = [];
         busy = false;
     }
 

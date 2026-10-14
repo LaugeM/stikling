@@ -2125,6 +2125,13 @@ a.tag-label:hover {
     color: var(--pa-muted);
 }
 
+/* The note under the place field when a plant moves in from outdoors */
+.back-from-outside {
+    padding: 0.75rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.6rem;
+}
+
 .room-light {
     margin: 0.25rem 0 0;
     font-size: 0.9rem;

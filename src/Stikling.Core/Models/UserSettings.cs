@@ -73,4 +73,16 @@ public sealed class UserSettings : Entity
     /// means 4. Older settings without it read as null.
     /// </summary>
     public int? CleanWeeks { get; set; }
+
+    /// <summary>
+    /// How many days a plant is kept apart when it goes into quarantine. Null means
+    /// <see cref="Plant.DefaultQuarantineDays"/>. Older settings without it read as null.
+    /// </summary>
+    public int? QuarantineDays { get; set; }
+
+    /// <summary>
+    /// Whether a plant that is added as bought, swapped or a gift starts in quarantine. Off unless
+    /// it's turned on. Older settings without it read as off.
+    /// </summary>
+    public bool QuarantineNewPlants { get; set; }
 }
