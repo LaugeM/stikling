@@ -215,6 +215,31 @@ public class BackupTests
     }
 
     [Fact]
+    public async Task A_large_backup_read_from_a_stream_keeps_values_this_version_reads_as_null()
+    {
+        // The app reads data.json from the zip as a stream, in parts. A real collection is bigger
+        // than one part, and most history entries are notes without an event.
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web) { DefaultBufferSize = 256 };
+        var problem = new Problem { SubjectId = Guid.NewGuid(), StartedOn = new DateOnly(2026, 10, 1), UpdatedAt = Now };
+        var data = new BackupData
+        {
+            Timeline = [.. Enumerable.Range(0, 200).Select(i => new TimelineEntry { SubjectId = Guid.NewGuid(), Text = $"note {i}", UpdatedAt = Now })],
+            FloweringMarks = [new FloweringMark { PlantId = Guid.NewGuid(), On = LooseDate.Of(2025, 5), UpdatedAt = Now }],
+            Problems = [problem],
+            ProblemUpdates = [new ProblemUpdate { ProblemId = problem.Id, OccurredOn = new DateOnly(2026, 10, 3), UpdatedAt = Now }]
+        };
+        using var stream = new MemoryStream(JsonSerializer.SerializeToUtf8Bytes(data, options));
+
+        var back = await JsonSerializer.DeserializeAsync<BackupData>(stream, options);
+
+        Assert.Equal(200, back!.Timeline.Count);
+        Assert.All(back.Timeline, e => Assert.Null(e.Event));
+        Assert.Null(Assert.Single(back.FloweringMarks).Stage);
+        Assert.Null(Assert.Single(back.Problems).Outcome);
+        Assert.Null(Assert.Single(back.ProblemUpdates).Trend);
+    }
+
+    [Fact]
     public void Wishes_survive_a_backup_and_a_restore_merges_them()
     {
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
