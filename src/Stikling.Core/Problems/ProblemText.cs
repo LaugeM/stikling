@@ -112,10 +112,14 @@ public static class ProblemText
     public static int DaysLasted(Problem problem, DateOnly today) =>
         Math.Max(0, (problem.ClosedOn ?? today).DayNumber - problem.StartedOn.DayNumber);
 
-    /// <summary>"Over after 23 days: got better".</summary>
+    /// <summary>"Over after 23 days: got better", or without the outcome when a newer version wrote one this version doesn't know.</summary>
     public static string OverAfter(Problem problem) =>
-        $"Over after {Duration(DaysLasted(problem, problem.StartedOn))}: "
-        + LowerFirst(Outcome(problem.Outcome ?? ProblemOutcome.GotBetter));
+        $"Over after {Duration(DaysLasted(problem, problem.StartedOn))}"
+        + (problem.Outcome is { } outcome ? ": " + LowerFirst(Outcome(outcome)) : "");
+
+    /// <summary>What the problem page calls it: the signs, or "A problem" when none are known to this version.</summary>
+    public static string Title(Problem problem) =>
+        problem.KnownSigns.Count > 0 ? Signs(problem.KnownSigns) : "A problem";
 
     /// <summary>"Mar 2026 · 3 weeks · got better", for a problem that is over.</summary>
     public static string PastLine(Problem problem) =>

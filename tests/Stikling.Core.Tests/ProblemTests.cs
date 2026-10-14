@@ -126,7 +126,8 @@ public class ProblemTests
 
         Assert.Contains("That date is in the future.", future.Validate(Today));
         Assert.Contains("A problem can't end before it started.", before.Validate(Today));
-        Assert.Contains("Say how it ended.", noOutcome.Validate(Today));
+        // A newer version's outcome reads as null, and the problem still saves
+        Assert.DoesNotContain("Say how it ended.", noOutcome.Validate(Today));
         Assert.Contains("Say how it ended.", noDay.Validate(Today));
         Assert.Contains("Look again after it started.", AProblem(plant, started, started.AddDays(-1)).Validate(Today));
         Assert.Contains("A problem belongs to a plant.", AProblem(Guid.Empty, started).Validate(Today));
@@ -297,6 +298,39 @@ public class ProblemTests
         Assert.Contains(closing, s.Lines);
         Assert.Contains(s.Lines, l => l.Text == "The problem came back" && l.Event == TimelineEvent.Problem);
         Assert.Equal(3, s.Lines.Count());
+    }
+
+    [Fact]
+    public async Task Reopening_does_not_bring_back_a_look_again_day_from_before_it_closed()
+    {
+        var s = new Setup();
+        var problem = await s.Open(started: Today.AddDays(-20));
+        var update = await s.Service.AddUpdateAsync(problem,
+            new ProblemUpdate { OccurredOn = Today.AddDays(-10), Trend = ProblemTrend.Same, LookAgainOn = Today.AddDays(-7) }, []);
+        await s.Service.CloseAsync(problem, ProblemOutcome.GotBetter, Today.AddDays(-5));
+
+        await s.Service.ReopenAsync(problem);
+
+        Assert.Equal(Today, problem.ReopenedOn);
+        Assert.Null(ProblemService.LookAgainOn(problem, [update]));
+
+        var later = await s.Service.AddUpdateAsync(problem,
+            new ProblemUpdate
+            {
+                OccurredOn = Today, Trend = ProblemTrend.Worse, LookAgainOn = Today.AddDays(3),
+                // The fake keeps its own clock, while the real repositories use the app's
+                CreatedAt = problem.ReopenedAt!.Value.AddSeconds(1)
+            }, []);
+        Assert.Equal(Today.AddDays(3), ProblemService.LookAgainOn(problem, [update, later]));
+    }
+
+    [Fact]
+    public void A_problem_with_an_outcome_or_signs_this_version_does_not_know_still_reads()
+    {
+        var problem = new Problem { SubjectId = Guid.NewGuid(), StartedOn = Today.AddDays(-23), ClosedOn = Today, Signs = ["Mould"] };
+
+        Assert.Equal("Over after 3 weeks", ProblemText.OverAfter(problem));
+        Assert.Equal("A problem", ProblemText.Title(problem));
     }
 
     [Fact]

@@ -143,6 +143,9 @@ public sealed class ProblemService(
         problem.ClosedOn = null;
         problem.Outcome = null;
         problem.ClosedTimelineEntryId = null;
+        problem.ReopenedOn = Today;
+        problem.ReopenedAt = time.GetUtcNow();
+        problem.LookAgainOn = null;
         await problems.SaveAsync(problem);
     }
 
@@ -224,7 +227,10 @@ public sealed class ProblemService(
 
     private static (DateOnly On, DateTimeOffset At, DateOnly? Again) Newest(Problem problem, IEnumerable<ProblemUpdate> updates)
     {
-        var newest = (On: problem.StartedOn, At: problem.CreatedAt, Again: problem.LookAgainOn);
+        // Opened again, the problem counts from then, so updates from before it closed lose to it
+        var newest = problem.ReopenedOn is { } reopened
+            ? (On: reopened, At: problem.ReopenedAt ?? problem.CreatedAt, Again: problem.LookAgainOn)
+            : (On: problem.StartedOn, At: problem.CreatedAt, Again: problem.LookAgainOn);
         foreach (var update in updates.Where(u => !u.IsDeleted))
         {
             var isNewer = update.OccurredOn > newest.On

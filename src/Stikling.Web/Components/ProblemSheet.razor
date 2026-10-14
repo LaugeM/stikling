@@ -245,6 +245,7 @@
                 day = problem.StartedOn;
                 note = problem.Note;
                 lookAgain = problem.LookAgainOn is { } again ? ProblemService.Closest(again.DayNumber - problem.StartedOn.DayNumber) : 0;
+                Keep(problem.LookAgainOn);
             }
             else
             {
@@ -265,6 +266,7 @@
             day = existing.OccurredOn;
             note = existing.Note;
             lookAgain = existing.LookAgainOn is { } again ? ProblemService.Closest(again.DayNumber - existing.OccurredOn.DayNumber) : 0;
+            Keep(existing.LookAgainOn);
         }
         else
         {
@@ -314,7 +316,15 @@
     private Task RememberDraftAsync() =>
         Device.SetAsync(DraftKey, photos.Count == 0 ? null : string.Join(",", photos.Select(p => p.Id)));
 
-    private DateOnly? LookAgainDay => lookAgain > 0 ? day.AddDays(lookAgain) : null;
+    // A record being changed keeps its own look again day unless the choice or the date is changed,
+    // since the choices only round it to 3, 7 or 14 days and it may have been set some other way
+    private (DateOnly? Again, int Choice, DateOnly Day)? kept;
+
+    private void Keep(DateOnly? again) => kept = (again, lookAgain, day);
+
+    private DateOnly? LookAgainDay =>
+        kept is { } k && k.Choice == lookAgain && k.Day == day ? k.Again
+        : lookAgain > 0 ? day.AddDays(lookAgain) : null;
 
     // Names this version doesn't know stay on the record, since a newer version wrote them
     private static List<string> Names<T>(IEnumerable<string>? stored, IEnumerable<T> picked) where T : struct, Enum =>

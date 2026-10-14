@@ -140,6 +140,14 @@ public sealed class Problem : Entity
     /// <summary>The history line written when it was closed.</summary>
     public Guid? ClosedTimelineEntryId { get; set; }
 
+    /// <summary>
+    /// The day it was last opened again after being closed, and the moment, so a look again day
+    /// set on an update before it closed doesn't come back with it. Null when it never was.
+    /// </summary>
+    public DateOnly? ReopenedOn { get; set; }
+
+    public DateTimeOffset? ReopenedAt { get; set; }
+
     [JsonIgnore]
     public bool IsOpen => ClosedOn is null;
 
@@ -172,7 +180,9 @@ public sealed class Problem : Entity
             if (closed < StartedOn)
                 errors.Add("A problem can't end before it started.");
         }
-        if ((ClosedOn is null) != (Outcome is null))
+        // A closed problem can have no outcome here when a newer version wrote one this version
+        // doesn't know, so only an outcome on an open problem is refused
+        if (ClosedOn is null && Outcome is not null)
             errors.Add("Say how it ended.");
         if (LookAgainOn is { } again && again < StartedOn)
             errors.Add("Look again after it started.");

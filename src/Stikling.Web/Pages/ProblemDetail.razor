@@ -22,7 +22,7 @@ else
     <a class="back-link" href="plants/@plant.Id">@plant.DisplayName</a>
 
     <header class="problem-lead">
-        <h1>@ProblemText.Signs(problem.KnownSigns)</h1>
+        <h1>@ProblemText.Title(problem)</h1>
         @if (problem.IsOpen)
         {
             var days = ProblemText.DaysLasted(problem, Today);
@@ -145,7 +145,7 @@ else
                                     <p class="log-text">@item.Entry!.Text</p>
                                     break;
                                 default:
-                                    <p class="log-text">@ProblemText.Outcome(problem.Outcome ?? ProblemOutcome.GotBetter)</p>
+                                    <p class="log-text">@(problem.Outcome is { } outcome ? ProblemText.Outcome(outcome) : "Over")</p>
                                     break;
                             }
 
