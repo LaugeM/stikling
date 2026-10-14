@@ -38,10 +38,9 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
-3. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
-4. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
-5. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
+2. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
+3. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
+4. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
 
 ### Cheap ones to slot in whenever
 
@@ -385,7 +384,8 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Found by search engines and AI tools**: Help and Privacy are served as plain pages they can read without running the app, rendered from the app's own pages on every deploy, with a sitemap, a robots.txt that lets every crawler in, an llms.txt made from the Help answers, a site icon Google accepts, and a description of the app as a free web app | 2 | S | v1.x |
 | ✅ | Screenshots in the web manifest, so Android and Chrome show them when offering to install the app | 4 | S | v1.x |
 | ☐ | A page in the app with what's built and what's coming, written for the people using it rather than copied from this list | 7 | S | v1.x |
-| ☐ | **Import from a spreadsheet**: a CSV of plants from Excel or Google Sheets, with each column matched to a field, so a list kept somewhere else doesn't have to be typed in again | 5 | M | v1.x |
+| ✅ | **Import from a spreadsheet**: a CSV file, or cells pasted from Excel or Google Sheets. Each column is matched to a field from its heading, in English or Danish, and every match can be changed. Columns that fit no field go into About it, missing rooms are made, and last watered, fed and repotted dates go into the care log. Rows that look like a plant you have are left unticked, the app's own CSV export reads back in, and the result screen can undo the whole import | 5 | M | v1.x |
+| ☐ | Import propagations from a spreadsheet, with the parent plant found by name | 7 | S | v1.x |
 | ✅ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side, with Help and Settings at the bottom of it. Plant and propagation pages show the details next to the history, the Plants and Propagations lists flow into columns, and sheets open as a dialog in the middle. Phones keep the tabs at the bottom | 5 | M | v1.x |
 | ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
 | ☐ | **Your photos in folders**: a download of every photo with one folder per plant and propagation, each file named by the date it was taken, so the photos are useful without the app. Separate from the backup, which is made for the app to read back | 5 | S | v1.x |
