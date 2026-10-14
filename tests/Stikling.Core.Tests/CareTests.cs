@@ -151,6 +151,40 @@ public class CareTests
     }
 
     [Fact]
+    public void Last_water_counts_a_top_up_as_well_as_a_watering()
+    {
+        var all = new List<CareLog>
+        {
+            Entry(CareKind.Watered, Today.AddDays(-5)),
+            Entry(CareKind.ToppedUp, Today.AddDays(-2)),
+            Entry(CareKind.Fertilised, Today.AddDays(-1))
+        };
+
+        var last = CareSummary.LastWater(all, plant, Today);
+
+        Assert.Equal(CareKind.ToppedUp, last!.Kind);
+        Assert.Equal(2, last.DaysAgo);
+    }
+
+    [Fact]
+    public void Last_water_is_the_watering_when_that_is_newer()
+    {
+        var all = new List<CareLog> { Entry(CareKind.ToppedUp, Today.AddDays(-4)), Entry(CareKind.Watered, Today.AddDays(-1)) };
+
+        Assert.Equal(CareKind.Watered, CareSummary.LastWater(all, plant, Today)!.Kind);
+    }
+
+    [Fact]
+    public void Last_water_ignores_deleted_entries_and_other_plants()
+    {
+        var deleted = Entry(CareKind.ToppedUp, Today);
+        deleted.DeletedAt = Now;
+        var all = new List<CareLog> { deleted, Entry(CareKind.Watered, Today, otherPlant), Entry(CareKind.Fertilised, Today) };
+
+        Assert.Null(CareSummary.LastWater(all, plant, Today));
+    }
+
+    [Fact]
     public void Deleted_entries_are_left_out()
     {
         var all = AWeekOfCare();

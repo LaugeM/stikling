@@ -58,7 +58,7 @@ public static class SitterSheetBuilder
         foreach (var cutting in activeCuttings)
         {
             var form = cutting.Medium == GrowingMedium.Water ? WateringForm.InWater : WateringForm.TopWatered;
-            items.Add(new Item(cutting, false, cutting.DisplayName, cutting.Nickname, cutting.BotanicalName, cutting.PlaceId,
+            items.Add(new Item(cutting, false, cutting.ListName, cutting.Nickname, cutting.BotanicalName, cutting.PlaceId,
                 cutting.CoverPhotoId, form, null, null));
         }
 

@@ -33,6 +33,10 @@ else
     [Parameter]
     public MoistureReading? Moisture { get; set; }
 
+    /// <summary>When it last had water, "watered 3 days ago". Nothing when it never has.</summary>
+    [Parameter]
+    public string? LastWater { get; set; }
+
     /// <summary>Open pest cases covering this plant, so an outbreak is visible from the list.</summary>
     [Parameter]
     public IReadOnlyList<PestCase> Pests { get; set; } = [];
@@ -130,6 +134,10 @@ else
                 @if (!string.IsNullOrWhiteSpace(Location))
                 {
                     <span>· @Location</span>
+                }
+                @if (Plant.Status == PlantStatus.Active && !string.IsNullOrWhiteSpace(LastWater))
+                {
+                    <span>· @LastWater</span>
                 }
                 @if (Moisture is { } reading)
                 {

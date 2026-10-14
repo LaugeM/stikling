@@ -128,7 +128,7 @@ public static class TodayBoard
         plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.Attention is not null)
             .Select(p => new AttentionItem(p, p.DisplayName, p.Attention!, AttentionLater.FromOf(p.Attention, p.AttentionLater)))
             .Concat(propagations.Where(p => !p.IsDeleted && p.IsActive && p.Attention is not null)
-                .Select(p => new AttentionItem(p, p.DisplayName, p.Attention!, AttentionLater.FromOf(p.Attention, p.AttentionLater))))
+                .Select(p => new AttentionItem(p, p.ListName, p.Attention!, AttentionLater.FromOf(p.Attention, p.AttentionLater))))
             .Where(i => i.StartsOn is not { } start || start <= today)
             .OrderBy(i => i.StartsOn is { } start && start > i.Attention.Since ? start : i.Attention.Since)
             .ThenBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase)

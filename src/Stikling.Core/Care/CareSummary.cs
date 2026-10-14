@@ -38,6 +38,12 @@ public static class CareSummary
     public static LastCare? Latest(IEnumerable<CareLog> logs, Guid plantId, CareKind kind, DateOnly today) =>
         For(logs, plantId).FirstOrDefault(l => l.Kind == kind) is { } entry ? Describe(entry, today) : null;
 
+    /// <summary>The last time the plant had water: watered, or refilled and topped up. Null if it never has.</summary>
+    public static LastCare? LastWater(IEnumerable<CareLog> logs, Guid plantId, DateOnly today) =>
+        For(logs, plantId).FirstOrDefault(l => l.Kind is CareKind.Watered or CareKind.ToppedUp) is { } entry
+            ? Describe(entry, today)
+            : null;
+
     /// <summary>The newest moisture reading for a plant, or null if there isn't one.</summary>
     public static MoistureReading? LatestMoisture(IEnumerable<CareLog> logs, Guid plantId, DateOnly today) =>
         For(logs, plantId).FirstOrDefault(l => l.Kind == CareKind.MoistureReading && l.Moisture is not null)

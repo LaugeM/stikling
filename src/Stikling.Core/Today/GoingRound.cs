@@ -92,7 +92,7 @@ public static class GoingRound
         var propagationCards = Ordered(
             propagations.Where(p => !p.IsDeleted && p.IsActive && places.IsIn(p.PlaceId, scope.Id)),
             p => p.PlaceId, p => p.DisplayName, scope, places)
-            .Select(x => new RoundCard(x.Item, x.Item.DisplayName, x.Heading, null, null, false, x.Item.IsDormant));
+            .Select(x => new RoundCard(x.Item, x.Item.ListName, x.Heading, null, null, false, x.Item.IsDormant));
 
         return [.. cards, .. propagationCards];
     }
