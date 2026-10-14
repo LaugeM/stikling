@@ -1,3 +1,4 @@
+using System.Globalization;
 using Stikling.Core.Models;
 
 namespace Stikling.Core.Problems;
@@ -79,6 +80,59 @@ public static class ProblemText
     public static string ClosedLine(ProblemOutcome outcome) => "Problem over: " + LowerFirst(Outcome(outcome));
 
     public const string ReopenedLine = "The problem came back";
+
+    /// <summary>"better", "the same", "worse", for reading a row of trends aloud.</summary>
+    public static string TrendWord(ProblemTrend trend) => trend switch
+    {
+        ProblemTrend.Better => "better",
+        ProblemTrend.Same => "the same",
+        _ => "worse"
+    };
+
+    /// <summary>"Updates: worse, the same, better", or null when none has a trend.</summary>
+    public static string? TrendsLabel(IEnumerable<ProblemTrend> trends) =>
+        trends.Select(TrendWord).ToList() is { Count: > 0 } words ? "Updates: " + string.Join(", ", words) : null;
+
+    /// <summary>"12 Oct".</summary>
+    public static string ShortDay(DateOnly day) => day.ToString("d MMM", CultureInfo.InvariantCulture);
+
+    /// <summary>"Mar 2026".</summary>
+    public static string MonthYear(DateOnly day) => day.ToString("MMM yyyy", CultureInfo.InvariantCulture);
+
+    /// <summary>"1 day", "9 days", "3 weeks", "2 months", "1 year".</summary>
+    public static string Duration(int days) => days switch
+    {
+        < 14 => Count(Math.Max(days, 0), "day"),
+        < 60 => Count(days / 7, "week"),
+        < 730 => Count(days / 30, "month"),
+        _ => Count(days / 365, "year")
+    };
+
+    /// <summary>The days a problem has lasted: since it started, or until it was closed.</summary>
+    public static int DaysLasted(Problem problem, DateOnly today) =>
+        Math.Max(0, (problem.ClosedOn ?? today).DayNumber - problem.StartedOn.DayNumber);
+
+    /// <summary>"Over after 23 days: got better".</summary>
+    public static string OverAfter(Problem problem) =>
+        $"Over after {Duration(DaysLasted(problem, problem.StartedOn))}: "
+        + LowerFirst(Outcome(problem.Outcome ?? ProblemOutcome.GotBetter));
+
+    /// <summary>"Mar 2026 · 3 weeks · got better", for a problem that is over.</summary>
+    public static string PastLine(Problem problem) =>
+        $"{MonthYear(problem.ClosedOn ?? problem.StartedOn)} · {Duration(DaysLasted(problem, problem.StartedOn))}"
+        + (problem.Outcome is { } outcome ? " · " + LowerFirst(Outcome(outcome)) : "");
+
+    /// <summary>"Mar 2026 · Moved it, watered less · got better": when, what was done then and how it ended.</summary>
+    public static string PastOfSameKindLine(PastProblem past)
+    {
+        var parts = new List<string> { MonthYear(past.Problem.ClosedOn ?? past.Problem.StartedOn) };
+        if (past.Did.Count > 0)
+            parts.Add(Actions(past.Did));
+        parts.Add(LowerFirst(Outcome(past.Outcome)));
+        return string.Join(" · ", parts);
+    }
+
+    private static string Count(int count, string unit) => count == 1 ? $"1 {unit}" : $"{count} {unit}s";
 
     private static string Join(IEnumerable<string> labels) =>
         string.Join(", ", labels.Select((label, i) => i == 0 ? label : LowerFirst(label)));

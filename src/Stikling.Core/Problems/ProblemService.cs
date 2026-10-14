@@ -10,6 +10,22 @@ public sealed record LookAgain(Problem Problem, Plant Plant, DateOnly Since);
 public sealed record PastProblem(
     Problem Problem, Plant Plant, IReadOnlyList<ProblemSign> Shared, IReadOnlyList<ProblemAction> Did, ProblemOutcome Outcome);
 
+/// <summary>What a line in the problem's log is.</summary>
+public enum ProblemLogKind
+{
+    Started,
+    Update,
+    Change,
+    Closed
+}
+
+/// <summary>
+/// One line of a problem's log. The update is set for <see cref="ProblemLogKind.Update"/> and the
+/// history line for a plain change. The photos are the ones on the history line it wrote.
+/// </summary>
+public sealed record ProblemLogItem(
+    ProblemLogKind Kind, DateOnly Day, ProblemUpdate? Update, TimelineEntry? Entry, IReadOnlyList<Guid> PhotoIds);
+
 /// <summary>
 /// Problems on plants. A problem and each update are records of their own, and each writes a
 /// line on the plant's history, so removing one takes its line off again.
@@ -88,12 +104,15 @@ public sealed class ProblemService(
         await updates.SaveAsync(update);
     }
 
-    /// <summary>Takes an update off, and the history line it wrote.</summary>
+    /// <summary>
+    /// Takes an update off, and the history line it wrote. Photos on the line are never deleted:
+    /// a line that has some stays on the history as a plain photo entry.
+    /// </summary>
     public async Task RemoveUpdateAsync(ProblemUpdate update)
     {
         await updates.DeleteAsync(update.Id);
-        if (update.TimelineEntryId is { } entryId)
-            await timeline.DeleteAsync(entryId);
+        var subject = (await problems.GetAsync(update.ProblemId))?.SubjectId;
+        await TakeOffLine(update.TimelineEntryId, subject);
     }
 
     /// <summary>Closes a problem on a day and writes how it ended on the history.</summary>
@@ -127,7 +146,10 @@ public sealed class ProblemService(
         await problems.SaveAsync(problem);
     }
 
-    /// <summary>Deletes a problem, its updates and the history lines they wrote.</summary>
+    /// <summary>
+    /// Deletes a problem, its updates and the history lines they wrote. A line with photos stays
+    /// as a plain photo entry, so the photos stay on the plant's history.
+    /// </summary>
     public async Task RemoveAsync(Problem problem)
     {
         foreach (var update in await UpdatesForAsync(problem.Id))
@@ -135,8 +157,45 @@ public sealed class ProblemService(
 
         await problems.DeleteAsync(problem.Id);
         foreach (var entryId in new[] { problem.TimelineEntryId, problem.ClosedTimelineEntryId })
-            if (entryId is { } id)
-                await timeline.DeleteAsync(id);
+            await TakeOffLine(entryId, problem.SubjectId);
+    }
+
+    /// <summary>How many photos are on the history lines of an update, or of the whole problem.</summary>
+    public async Task<int> PhotoCountAsync(Problem problem, ProblemUpdate? update = null)
+    {
+        var lineIds = new List<Guid?>();
+        if (update is not null)
+        {
+            lineIds.Add(update.TimelineEntryId);
+        }
+        else
+        {
+            lineIds.Add(problem.TimelineEntryId);
+            lineIds.Add(problem.ClosedTimelineEntryId);
+            lineIds.AddRange((await UpdatesForAsync(problem.Id)).Select(u => u.TimelineEntryId));
+        }
+
+        var wanted = lineIds.OfType<Guid>().ToHashSet();
+        return (await timeline.GetForAsync(problem.SubjectId))
+            .Where(e => wanted.Contains(e.Id)).SelectMany(e => e.PhotoIds).Distinct().Count();
+    }
+
+    private async Task TakeOffLine(Guid? entryId, Guid? subjectId)
+    {
+        if (entryId is not { } id)
+            return;
+        var entry = subjectId is { } subject ? (await timeline.GetForAsync(subject)).FirstOrDefault(e => e.Id == id) : null;
+        if (entry is { PhotoIds.Count: > 0 })
+        {
+            entry.Kind = TimelineKind.Photo;
+            entry.Event = null;
+            entry.Text = null;
+            await timeline.UpdateAsync(entry);
+        }
+        else
+        {
+            await timeline.DeleteAsync(id);
+        }
     }
 
     /// <summary>
@@ -144,11 +203,27 @@ public sealed class ProblemService(
     /// It comes from the newest record, the problem itself or one of its updates, even when that
     /// record has no day. So an update that leaves Look again empty ends the reminders.
     /// </summary>
-    public static DateOnly? LookAgainOn(Problem problem, IEnumerable<ProblemUpdate> updates)
-    {
-        if (!problem.IsOpen)
-            return null;
+    public static DateOnly? LookAgainOn(Problem problem, IEnumerable<ProblemUpdate> updates) =>
+        problem.IsOpen ? Newest(problem, updates).Again : null;
 
+    /// <summary>The choices for Look again, in days from the day of the problem or update. No is left out.</summary>
+    public static readonly IReadOnlyList<int> LookAgainChoices = [3, 7, 14];
+
+    /// <summary>
+    /// The gap the current look again day is from the newest record, as the closest of
+    /// <see cref="LookAgainChoices"/>, so the next update can start on the same gap. Null when
+    /// nothing is planned.
+    /// </summary>
+    public static int? LookAgainGap(Problem problem, IEnumerable<ProblemUpdate> updates) =>
+        problem.IsOpen && Newest(problem, updates) is { Again: { } again } newest
+            ? Closest(again.DayNumber - newest.On.DayNumber)
+            : null;
+
+    /// <summary>The closest of <see cref="LookAgainChoices"/> to a number of days.</summary>
+    public static int Closest(int days) => LookAgainChoices.MinBy(c => Math.Abs(c - days));
+
+    private static (DateOnly On, DateTimeOffset At, DateOnly? Again) Newest(Problem problem, IEnumerable<ProblemUpdate> updates)
+    {
         var newest = (On: problem.StartedOn, At: problem.CreatedAt, Again: problem.LookAgainOn);
         foreach (var update in updates.Where(u => !u.IsDeleted))
         {
@@ -157,7 +232,7 @@ public sealed class ProblemService(
             if (isNewer)
                 newest = (update.OccurredOn, update.CreatedAt, update.LookAgainOn);
         }
-        return newest.Again;
+        return newest;
     }
 
     /// <summary>
@@ -226,6 +301,30 @@ public sealed class ProblemService(
             found.Add(new PastProblem(other, plant, shared, did, other.Outcome!.Value));
         }
         return found.OrderByDescending(p => p.Problem.ClosedOn).ToList();
+    }
+
+    /// <summary>
+    /// What happened with the problem, oldest first: how it started, each update, the plain
+    /// changes made meanwhile (see <see cref="DuringProblem"/>) and how it ended.
+    /// </summary>
+    public IReadOnlyList<ProblemLogItem> Log(
+        Problem problem, IEnumerable<ProblemUpdate> problemUpdates, IReadOnlyList<TimelineEntry> plantEntries)
+    {
+        IReadOnlyList<Guid> PhotosOf(Guid? lineId) =>
+            plantEntries.FirstOrDefault(e => e.Id == lineId && !e.IsDeleted)?.PhotoIds ?? [];
+
+        var items = new List<(ProblemLogItem Item, int Rank, DateTimeOffset At)>
+        {
+            (new(ProblemLogKind.Started, problem.StartedOn, null, null, PhotosOf(problem.TimelineEntryId)), 0, problem.CreatedAt)
+        };
+        foreach (var update in problemUpdates.Where(u => !u.IsDeleted && u.ProblemId == problem.Id))
+            items.Add((new(ProblemLogKind.Update, update.OccurredOn, update, null, PhotosOf(update.TimelineEntryId)), 1, update.CreatedAt));
+        foreach (var entry in DuringProblem(problem, plantEntries))
+            items.Add((new(ProblemLogKind.Change, time.LocalDay(entry.OccurredAt), null, entry, []), 1, entry.OccurredAt));
+        if (problem.ClosedOn is { } closed)
+            items.Add((new(ProblemLogKind.Closed, closed, null, null, PhotosOf(problem.ClosedTimelineEntryId)), 2, DateTimeOffset.MaxValue));
+
+        return items.OrderBy(i => i.Item.Day).ThenBy(i => i.Rank).ThenBy(i => i.At).Select(i => i.Item).ToList();
     }
 
     private void Prepare(Problem problem, ProblemUpdate update, int photoCount)

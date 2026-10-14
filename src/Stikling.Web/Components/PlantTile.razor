@@ -37,6 +37,10 @@ else
     [Parameter]
     public FloweringNow? Flowering { get; set; }
 
+    /// <summary>The plant has a problem that isn't over, for the badge.</summary>
+    [Parameter]
+    public bool OpenProblem { get; set; }
+
     /// <summary>Where the tile links to. Defaults to the plant's page.</summary>
     [Parameter]
     public string? Href { get; set; }
@@ -55,7 +59,7 @@ else
     protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
 
     private bool HasBadges =>
-        Plant.Status != PlantStatus.Active || Plant.InQuarantine || Plant.IsDormant || Pests.Count > 0 || ShowsFlowering(out _);
+        Plant.Status != PlantStatus.Active || Plant.InQuarantine || Plant.IsDormant || Pests.Count > 0 || (OpenProblem && Plant.Status == PlantStatus.Active) || ShowsFlowering(out _);
 
     private bool ShowsFlowering(out FloweringNow now)
     {
@@ -114,6 +118,10 @@ else
                     @foreach (var pest in Pests)
                     {
                         <span class="badge pest-badge">@Labels.For(pest.Pest)</span>
+                    }
+                    @if (OpenProblem && Plant.Status == PlantStatus.Active)
+                    {
+                        <span class="badge problem-badge"><svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.WiltingLeaf</svg>Problem</span>
                     }
                 </div>
             }

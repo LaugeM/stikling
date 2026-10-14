@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Stikling.Core.Models;
+using Stikling.Core.Plants;
 using Stikling.Core.Problems;
+using Stikling.Core.Today;
 
 namespace Stikling.Core.Tests;
 
@@ -556,5 +558,165 @@ public class ProblemTests
         Assert.Equal("Problem over: went away by itself", ProblemText.ClosedLine(ProblemOutcome.WentAway));
         Assert.Equal("Problem over: nothing helped", ProblemText.ClosedLine(ProblemOutcome.DidntHelp));
         Assert.Equal("The problem came back", ProblemText.ReopenedLine);
+    }
+
+    // The pieces the screens use
+
+    [Fact]
+    public void Look_again_gap_is_the_closest_choice_and_follows_the_newest_record()
+    {
+        var plant = Guid.NewGuid();
+        var problem = AProblem(plant, Today.AddDays(-10), lookAgain: Today.AddDays(-4));
+        Assert.Equal(7, ProblemService.LookAgainGap(problem, []));
+
+        var update = AnUpdate(problem.Id, Today.AddDays(-2), lookAgain: Today.AddDays(1));
+        Assert.Equal(3, ProblemService.LookAgainGap(problem, [update]));
+
+        var endsIt = AnUpdate(problem.Id, Today.AddDays(-1));
+        Assert.Null(ProblemService.LookAgainGap(problem, [update, endsIt]));
+
+        var wide = AnUpdate(problem.Id, Today.AddDays(-1), lookAgain: Today.AddDays(20));
+        Assert.Equal(14, ProblemService.LookAgainGap(problem, [wide]));
+        Assert.Null(ProblemService.LookAgainGap(Closed(plant, ProblemOutcome.GotBetter, Today), []));
+    }
+
+    [Fact]
+    public async Task Photo_counts_come_from_the_lines_of_the_update_or_the_whole_problem()
+    {
+        var s = new Setup();
+        var problem = await s.Service.OpenAsync(s.Plant, new Problem
+        {
+            StartedOn = Today.AddDays(-3), Signs = [nameof(ProblemSign.Spots)]
+        }, [Guid.NewGuid()]);
+        var update = await s.Service.AddUpdateAsync(problem, new ProblemUpdate { OccurredOn = Today.AddDays(-1) }, [Guid.NewGuid(), Guid.NewGuid()]);
+
+        Assert.Equal(2, await s.Service.PhotoCountAsync(problem, update));
+        Assert.Equal(3, await s.Service.PhotoCountAsync(problem));
+    }
+
+    [Fact]
+    public async Task Removing_an_update_keeps_the_photos_on_its_line_as_a_plain_photo_entry()
+    {
+        var s = new Setup();
+        var problem = await s.Open();
+        var photo = Guid.NewGuid();
+        var update = await s.Service.AddUpdateAsync(problem, new ProblemUpdate { OccurredOn = Today, Trend = ProblemTrend.Worse }, [photo]);
+
+        await s.Service.RemoveUpdateAsync(update);
+
+        Assert.Empty(await s.Service.UpdatesForAsync(problem.Id));
+        var kept = s.Lines.Single(l => l.Id == update.TimelineEntryId);
+        Assert.Equal(TimelineKind.Photo, kept.Kind);
+        Assert.Null(kept.Event);
+        Assert.Null(kept.Text);
+        Assert.Equal([photo], kept.PhotoIds);
+    }
+
+    [Fact]
+    public async Task Removing_a_problem_keeps_lines_with_photos_and_deletes_the_rest()
+    {
+        var s = new Setup();
+        var photo = Guid.NewGuid();
+        var problem = await s.Service.OpenAsync(s.Plant, new Problem
+        {
+            StartedOn = Today.AddDays(-3), Signs = [nameof(ProblemSign.Spots)]
+        }, [photo]);
+        await s.Service.AddUpdateAsync(problem, new ProblemUpdate { OccurredOn = Today, Trend = ProblemTrend.Better }, []);
+
+        await s.Service.RemoveAsync(problem);
+
+        Assert.Empty(await s.Service.AllAsync());
+        var kept = Assert.Single(s.Lines);
+        Assert.Equal(problem.TimelineEntryId, kept.Id);
+        Assert.Equal(TimelineKind.Photo, kept.Kind);
+        Assert.Equal([photo], kept.PhotoIds);
+    }
+
+    [Fact]
+    public async Task The_log_is_oldest_first_with_the_changes_made_meanwhile_and_the_close()
+    {
+        var s = new Setup();
+        var photo = Guid.NewGuid();
+        var problem = await s.Open(Today.AddDays(-6), note: "Lower leaves");
+        var update = await s.Service.AddUpdateAsync(problem,
+            new ProblemUpdate { OccurredOn = Today.AddDays(-4), Trend = ProblemTrend.Worse }, [photo]);
+        s.Timeline.Entries.Add(new TimelineEntry
+        {
+            SubjectId = s.Plant.Id, Kind = TimelineKind.Change, Text = "Repotted", OccurredAt = Now.AddDays(-5)
+        });
+        s.Timeline.Entries.Add(new TimelineEntry
+        {
+            SubjectId = s.Plant.Id, Kind = TimelineKind.Change, Text = "Repotted long before", OccurredAt = Now.AddDays(-30)
+        });
+        await s.Service.CloseAsync(problem, ProblemOutcome.GotBetter, Today.AddDays(-1));
+
+        var entries = await s.Timeline.GetForAsync(s.Plant.Id);
+        var log = s.Service.Log(problem, await s.Service.UpdatesForAsync(problem.Id), entries);
+
+        Assert.Equal(
+            [ProblemLogKind.Started, ProblemLogKind.Change, ProblemLogKind.Update, ProblemLogKind.Closed],
+            log.Select(i => i.Kind));
+        Assert.Equal("Repotted", log[1].Entry!.Text);
+        Assert.Equal(update.Id, log[2].Update!.Id);
+        Assert.Equal([photo], log[2].PhotoIds);
+        Assert.Equal(Today.AddDays(-1), log[3].Day);
+    }
+
+    [Fact]
+    public void Dates_and_spans_read_the_way_the_screens_show_them()
+    {
+        Assert.Equal("12 Oct", ProblemText.ShortDay(new DateOnly(2026, 10, 12)));
+        Assert.Equal("Mar 2026", ProblemText.MonthYear(new DateOnly(2026, 3, 30)));
+        Assert.Equal("1 day", ProblemText.Duration(1));
+        Assert.Equal("13 days", ProblemText.Duration(13));
+        Assert.Equal("3 weeks", ProblemText.Duration(21));
+        Assert.Equal("2 months", ProblemText.Duration(70));
+        Assert.Equal("2 years", ProblemText.Duration(800));
+
+        var problem = Closed(Guid.NewGuid(), ProblemOutcome.GotBetter, new DateOnly(2026, 3, 30), ProblemSign.RootRot);
+        Assert.Equal("Mar 2026 · 10 days · got better", ProblemText.PastLine(problem));
+        Assert.Equal("Over after 10 days: got better", ProblemText.OverAfter(problem));
+        Assert.Equal(9, ProblemText.DaysLasted(AProblem(Guid.NewGuid(), Today.AddDays(-9)), Today));
+    }
+
+    [Fact]
+    public void The_trend_row_is_read_aloud_and_empty_without_trends()
+    {
+        Assert.Equal("Updates: worse, the same, better",
+            ProblemText.TrendsLabel([ProblemTrend.Worse, ProblemTrend.Same, ProblemTrend.Better]));
+        Assert.Null(ProblemText.TrendsLabel([]));
+    }
+
+    [Fact]
+    public void An_earlier_problem_reads_with_what_was_done_and_how_it_ended()
+    {
+        var plant = APlant();
+        var old = Closed(plant.Id, ProblemOutcome.DidntHelp, new DateOnly(2026, 3, 5), ProblemSign.YellowLeaves);
+        var past = new PastProblem(old, plant, [ProblemSign.YellowLeaves], [ProblemAction.MovedIt, ProblemAction.WateredLess], ProblemOutcome.DidntHelp);
+
+        Assert.Equal("Mar 2026 · Moved it, watered less · nothing helped", ProblemText.PastOfSameKindLine(past));
+        Assert.Equal("Mar 2026 · got better",
+            ProblemText.PastOfSameKindLine(past with { Did = [], Outcome = ProblemOutcome.GotBetter }));
+    }
+
+    [Fact]
+    public void A_look_again_put_off_ends_when_a_new_day_is_picked()
+    {
+        var id = Guid.NewGuid();
+        var putOffs = PutOffs.Empty();
+        putOffs.PutOff(PutOffs.Problem(id, Today), Today.AddDays(3));
+
+        Assert.True(putOffs.IsPutOff(PutOffs.Problem(id, Today), Today));
+        Assert.False(putOffs.IsPutOff(PutOffs.Problem(id, Today.AddDays(7)), Today));
+    }
+
+    [Fact]
+    public void The_plant_filter_can_be_limited_to_some_plants()
+    {
+        var a = new Plant { Nickname = "A" };
+        var b = new Plant { Nickname = "B" };
+
+        Assert.Equal([b], new PlantFilter(OnlyIds: new HashSet<Guid> { b.Id }).Apply([a, b]));
+        Assert.Equal([a, b], new PlantFilter().Apply([a, b]));
     }
 }

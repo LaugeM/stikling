@@ -2,16 +2,17 @@
 @inject IPestCaseRepository Cases
 @inject IPestTreatmentRepository Treatments
 @inject IPlantRepository PlantRepository
+@inject ProblemService ProblemService
 @inject SettingsService SettingsService
 @using Stikling.Core.Settings
 @inject RoomService RoomService
 @inject TimeProvider Time
 
-<PageTitle>Pests · Stikling</PageTitle>
+<PageTitle>Pests and problems · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 <div class="page-heading">
-    <h1>Pests</h1>
+    <h1>Pests and problems</h1>
     <div class="d-flex align-items-baseline gap-2">
         @if (open.Count > 0)
         {
@@ -32,12 +33,12 @@
 {
     <p class="text-body-secondary">Loading…</p>
 }
-else if (views.Count == 0)
+else if (views.Count == 0 && problems.Count == 0)
 {
     <div class="empty-state">
         <p>
-            No pest cases. When you find pests, open a case for the plants they're on, and the
-            treatments you log keep track of when the next round is due.
+            Nothing wrong right now. When you find pests, open a case for the plants they're on.
+            For anything else, like yellow leaves or rot, use Something's wrong on the plant's page.
         </p>
         <a class="btn btn-primary mt-3" href="pests/new">Open a case</a>
     </div>
@@ -71,6 +72,27 @@ else
             </section>
         }
 
+        @if (problems.Count > 0)
+        {
+            <section class="stage-group">
+                <h2>Problems <span class="text-body-secondary">(@problems.Count)</span></h2>
+                <ul class="item-list">
+                    @foreach (var item in problems)
+                    {
+                        <li>
+                            <a class="item-card" href="problems/@item.Problem.Id">
+                                <SubjectThumb Subject="item.Plant" />
+                                <div class="item-text">
+                                    <div class="item-name">@item.Plant.DisplayName</div>
+                                    <div class="item-meta">@ProblemMeta(item)</div>
+                                </div>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+
         @if (resolved.Count > 0)
         {
             <section class="stage-group">
@@ -96,7 +118,10 @@ else
     private List<PestCaseView> due = [];
     private List<PestCaseView> waiting = [];
     private List<PestCaseView> resolved = [];
+    private List<OpenProblem> problems = [];
     private bool loaded;
+
+    private sealed record OpenProblem(Problem Problem, Plant Plant, ProblemTrend? Trend);
 
     private DateOnly Today => Time.Today();
 
@@ -104,9 +129,19 @@ else
 
     private async Task LoadAsync()
     {
+        var plants = await PlantRepository.GetAllAsync();
+        var allUpdates = await ProblemService.AllUpdatesAsync();
+        problems = (await ProblemService.AllAsync())
+            .Where(p => p.IsOpen)
+            .Select(p => (Problem: p, Plant: plants.FirstOrDefault(x => x.Id == p.SubjectId)))
+            .Where(x => x.Plant is { Status: PlantStatus.Active })
+            .OrderByDescending(x => x.Problem.StartedOn)
+            .Select(x => new OpenProblem(x.Problem, x.Plant!, ProblemService.LatestTrend(allUpdates.Where(u => u.ProblemId == x.Problem.Id))))
+            .ToList();
+
         views = PestService.Describe(
             await Cases.GetAllAsync(),
-            await PlantRepository.GetAllAsync(),
+            plants,
             await Treatments.GetAllAsync(),
             await RoomService.GetPlacesAsync(),
             Today,
@@ -118,6 +153,11 @@ else
         resolved = views.Where(v => !v.Case.IsOpen).ToList();
         loaded = true;
     }
+
+    // "Yellow leaves · 9 days · worse": only what happened, never what to do
+    private string ProblemMeta(OpenProblem item) =>
+        $"{ProblemText.Signs(item.Problem.KnownSigns)} · {ProblemText.Duration(ProblemText.DaysLasted(item.Problem, Today))}"
+        + (item.Trend is { } trend ? $" · {ProblemText.Trend(trend).ToLowerInvariant()}" : "");
 
     private RenderFragment Card(PestCaseView view) => @<a class="item-card" href="pests/@view.Case.Id">
         <div class="item-thumb @(view.Case.IsOpen ? "alert" : null)" aria-hidden="true">

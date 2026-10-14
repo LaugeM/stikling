@@ -1,0 +1,21 @@
+@* A trend as a small stroked arrow, with its word when Word is set. Only Worse is red. *@
+
+<span class="trend-mark @ProblemIcons.TrendClass(Trend) @(Word ? null : "bare")" @attributes="Extra">
+    <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.Trend(Trend)</svg>
+    @if (Word)
+    {
+        <span>@ProblemText.Trend(Trend)</span>
+    }
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public ProblemTrend Trend { get; set; }
+
+    /// <summary>Writes the trend out next to the arrow. Without it the arrow stands alone and is hidden from a screen reader.</summary>
+    [Parameter]
+    public bool Word { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? Extra { get; set; }
+}

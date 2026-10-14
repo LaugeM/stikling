@@ -1434,6 +1434,31 @@ img.framed {
     font-weight: 600;
 }
 
+/* A problem is something wrong that is still being watched, not an alarm, so it stays neutral:
+   Ink on Surface with the Border edge. Red is for pests and overdue. */
+.problem-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.05rem 0.4rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    color: var(--pa-text);
+    border-radius: 0.6rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.problem-badge svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 /* A favourite's star is Clay, the colour of a plant, so it stays away from the alert red */
 /* The name gives way to the star, so a long name is cut short before the star is */
 .item-name.has-star {
@@ -3074,4 +3099,187 @@ main.app-content:has(.form-bar) {
 /* The offer after moving plants in from outside: full-size taps like the rest */
 .came-in .btn-outline-primary {
     min-height: 2.75rem;
+}
+
+/* Problems: the trend arrows, the open-problem card and the rows that lead to a problem */
+.trend-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.trend-mark svg {
+    width: 1em;
+    height: 1em;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.trend-better {
+    color: var(--pa-green-dark);
+}
+
+.trend-same {
+    color: var(--pa-muted);
+}
+
+.trend-worse {
+    color: var(--pa-alert);
+}
+
+/* One mark per update with a trend, oldest to newest, wrapping on a narrow screen */
+.trend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+}
+
+.trend-row .trend-mark svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.problem-card {
+    margin: 0.75rem 0;
+    padding: 0.75rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.problem-card-name {
+    margin: 0;
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+.problem-card-meta {
+    margin: 0.15rem 0 0;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.problem-card-meta .look-due {
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
+
+.problem-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.problem-card-actions .btn {
+    min-height: 2.75rem;
+}
+
+.problem-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.problem-rows li + li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.problem-rows a {
+    display: block;
+    min-height: 2.75rem;
+    padding: 0.5rem 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.problem-rows a:hover b,
+.problem-rows a:focus-visible b {
+    color: var(--pa-green-dark);
+}
+
+.problem-rows b {
+    display: block;
+    font-weight: 600;
+}
+
+.problem-rows span {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+/* The form for a problem inside a sheet */
+.problem-sheet .segmented .btn.active {
+    font-weight: 600;
+}
+
+.problem-sheet .chip {
+    min-height: 2.75rem;
+}
+
+.problem-confirm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+}
+
+/* Better, Same and Worse under a row on Today */
+.look-again-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+}
+
+.look-again-buttons .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 2.75rem;
+    padding-inline: 0.75rem;
+}
+
+.look-again-buttons .btn svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* A row on Today with the three ways to answer under its text */
+.look-again-row {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.7rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.look-again-link.item-card,
+.look-again-link.item-card:hover,
+.look-again-link.item-card:focus-visible {
+    padding: 0;
+    border: 0;
+    background: none;
+}
+
+.today-row-main:has(.look-again-row) {
+    align-items: flex-start;
 }

@@ -37,6 +37,10 @@ else
     [Parameter]
     public IReadOnlyList<PestCase> Pests { get; set; } = [];
 
+    /// <summary>The plant has a problem that isn't over, for the badge.</summary>
+    [Parameter]
+    public bool OpenProblem { get; set; }
+
     /// <summary>In flower or in bud now, for the badge.</summary>
     [Parameter]
     public FloweringNow? Flowering { get; set; }
@@ -112,6 +116,10 @@ else
                 @foreach (var pest in Pests)
                 {
                     <span class="badge pest-badge">@Labels.For(pest.Pest)</span>
+                }
+                @if (OpenProblem && Plant.Status == PlantStatus.Active)
+                {
+                    <span class="badge problem-badge"><svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.WiltingLeaf</svg>Problem</span>
                 }
                 <span>@OriginText</span>
                 @if (!string.IsNullOrWhiteSpace(Location))
