@@ -1506,6 +1506,159 @@ img.framed {
     font-weight: 600;
 }
 
+/* Flowering is a good thing happening, so it takes the tinted green surface */
+.flowering-badge {
+    padding: 0.05rem 0.4rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+    border-radius: 0.6rem;
+    font-weight: 600;
+}
+
+/* "Still in flower?" under the name: a quiet question with two full-size buttons */
+.still-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.still-card p {
+    flex: 1 1 12rem;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.still-card .btn {
+    min-height: 2.75rem;
+}
+
+/* The flowering section on a plant's page: a year in bold, then what is known */
+.flowering-usually {
+    margin: 0 0 0.5rem;
+}
+
+.flowering-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.flowering-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0;
+    border: 0;
+    border-top: 1px solid var(--pa-border);
+    background: none;
+    color: inherit;
+    text-align: left;
+}
+
+.flowering-rows li:first-child .flowering-row {
+    border-top: 0;
+}
+
+.flowering-row b {
+    flex: none;
+}
+
+.flowering-marks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.flowering-marks li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.flowering-marks li:first-child {
+    border-top: 0;
+}
+
+/* The flowering calendar page */
+.flowering-section {
+    margin-bottom: 1.5rem;
+}
+
+.flowering-section h2 {
+    margin: 0 0 0.5rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+.flowering-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.flowering-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.5rem;
+}
+
+.flowering-plant {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-weight: 600;
+}
+
+.flowering-when {
+    color: var(--pa-muted);
+    font-size: 0.875rem;
+}
+
+.flowering-year {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+}
+
+.flowering-month {
+    padding: 0.5rem 0.75rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.flowering-month.current {
+    background: var(--pa-green-soft);
+    border-color: var(--pa-green);
+}
+
+.flowering-month h3 {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--pa-muted);
+}
+
+.flowering-month .flowering-plant {
+    min-height: 2.75rem;
+}
+
 /* Non-active statuses and Failed. Bootstrap's solid grey is cool and loud, so this is the same
    quiet outline as Dormant. Needs !important to beat .text-bg-secondary, which has it. */
 .badge.text-bg-secondary {

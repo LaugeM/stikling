@@ -383,6 +383,7 @@ else
         TimelineEvent.Failed => "Didn't make it",
         TimelineEvent.GaveAway => "Given away",
         TimelineEvent.LookedOver => "Looked over",
+        TimelineEvent.Flowering => "Flowering",
         TimelineEvent.Arrived => "Arrived",
         _ => KindLabel(entry.Kind)
     };
@@ -393,6 +394,7 @@ else
         TimelineEvent.Failed => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21v-8" /><path d="M9 13c-4 0-6-2-6-5 3 0 6 1 6 5Z" /><path d="M15 4.500l5 5M20 4.500l-5 5" /></svg>"""),
         TimelineEvent.GaveAway => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h12M12 7l5 5-5 5" /><path d="M20 5v14" /></svg>"""),
         TimelineEvent.LookedOver => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" /></svg>"""),
+        TimelineEvent.Flowering => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.5" /><path d="M12 9.500C10.500 7 10.500 4.500 12 3c1.500 1.500 1.500 4 0 6.500Z" /><path d="M12 14.500c1.500 2.500 1.500 5 0 6.500-1.500-1.500-1.500-4 0-6.500Z" /><path d="M9.500 12C7 10.500 4.500 10.500 3 12c1.500 1.500 4 1.500 6.500 0Z" /><path d="M14.500 12c2.500 1.500 5 1.500 6.500 0-1.500-1.500-4-1.500-6.500 0Z" /></svg>"""),
         TimelineEvent.Arrived => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v9H4Z" /><path d="M3 7.5h18V11H3Z" /><path d="M12 7.5V20" /><path d="M12 7.5C10 7.5 7.5 7 7.5 5.25 7.5 4 8.500 3.5 9.500 3.5 11 3.5 12 5 12 7.5Z" /><path d="M12 7.5c2 0 4.500-.5 4.500-2.250 0-1.250-1-1.750-2-1.750C13 3.5 12 5 12 7.5Z" /></svg>"""),
         _ => KindIcon(entry.Kind)
     };

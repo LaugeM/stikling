@@ -6,6 +6,7 @@
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject IPestTreatmentRepository PestTreatmentRepository
+@inject FloweringService FloweringService
 @inject IPotRepository PotRepository
 @inject PotService PotService
 @inject ISoilMixRepository MixRepository
@@ -91,11 +92,23 @@ else
                         {
                             <span class="badge dormant-badge">Dormant</span>
                         }
+                        @if (floweringNow is { Stale: false } && plant.Status == PlantStatus.Active)
+                        {
+                            <span class="badge flowering-badge">@FloweringText.Badge(floweringNow.Stage)</span>
+                        }
                         @foreach (var item in pests)
                         {
                             <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
                         }
                     </div>
+                    @if (floweringNow is { Stale: true } stale && plant.Status == PlantStatus.Active)
+                    {
+                        <div class="still-card">
+                            <p>Still @(stale.Stage == FloweringStage.Buds ? "in bud" : "in flower")? Last marked on @Labels.Date(stale.Period.LastMarked).</p>
+                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="OpenFlowering">Done</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="StillFloweringAsync">Yes</button>
+                        </div>
+                    }
                     @if (actionNote is not null)
                     {
                         <p class="profile-facts" role="status">@actionNote</p>
@@ -286,6 +299,36 @@ else
                             }
                         </ul>
                         <p class="family-hint">Treatments are logged on the case, because a case is treated as a whole.</p>
+                    </section>
+                }
+
+                @if (flowerings.Count > 0)
+                {
+                    <section class="detail-card">
+                        <h2>Flowering</h2>
+                        @if (usualStart is { } usual)
+                        {
+                            <p class="flowering-usually">
+                                Usually starts by @(FloweringText.MonthName(usual.Month)).@(usual.LateThisYear ? " Nothing yet this year." : "")
+                                <span class="text-body-secondary small">From @Labels.Count(usual.Years, "year")</span>
+                            </p>
+                        }
+                        <ul class="flowering-rows">
+                            @foreach (var period in flowerings.Reverse())
+                            {
+                                var shown = period;
+                                <li>
+                                    <button type="button" class="flowering-row" @onclick="() => OpenPeriod(shown)">
+                                        <b>@shown.Start.Year</b>
+                                        <span>@FloweringText.Describe(shown)</span>
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                        <p class="family-hint">
+                            <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenPastFlowering">Add a past flowering</button>
+                            <a class="btn btn-link btn-sm link-action" href="plants/flowering">See the flowering calendar</a>
+                        </p>
                     </section>
                 }
 
@@ -527,6 +570,12 @@ else
                             }
                         </li>
                         <li>
+                            <button type="button" class="sheet-action" @onclick="OpenFlowering">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.2" /><path d="M12 9.800C10.600 7.500 10.600 5 12 3.500c1.400 1.500 1.400 4 0 6.300Z" /><path d="M12 14.200c1.400 2.300 1.400 4.800 0 6.300-1.400-1.500-1.400-4 0-6.300Z" /><path d="M9.800 12C7.500 10.600 5 10.600 3.500 12c1.500 1.400 4 1.400 6.300 0Z" /><path d="M14.200 12c2.300 1.400 4.800 1.400 6.300 0-1.500-1.400-4-1.400-6.300 0Z" /></svg>
+                                <span class="sheet-action-text"><b>Flowering</b><small>@FloweringText.MenuHint(floweringNow, Today.Year)</small></span>
+                            </button>
+                        </li>
+                        <li>
                             @if (plant.InQuarantine)
                             {
                                 <button type="button" class="sheet-action" disabled="@busy" @onclick="EndQuarantineAsync">
@@ -604,6 +653,73 @@ else
                 <div class="form-actions">
                     <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SetDormantAsync">Mark as dormant</button>
                     <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
+                break;
+
+            case More.Flowering when floweringSaved is not null:
+                <p class="mb-3" role="status">@floweringSaved</p>
+                <div class="form-actions">
+                    @if (googleOn)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="AddFloweringPhoto">Add a photo</button>
+                    }
+                    else
+                    {
+                        <label class="btn btn-primary" for="@photoInputId" @onclick="() => more = More.None">Add a photo</label>
+                    }
+                    <button type="button" class="btn btn-outline-primary" @onclick="() => more = More.None">Close</button>
+                </div>
+                break;
+
+            case More.Flowering when floweringPast:
+                @if (PastErrors.Count > 0)
+                {
+                    <div class="alert alert-danger py-2 px-3 mb-3" role="alert">
+                        @foreach (var error in PastErrors)
+                        {
+                            <div>@error</div>
+                        }
+                    </div>
+                }
+                <div class="mb-3"><LooseDateInput @bind-Value="pastFlower" Today="Today" Label="In flower from" /></div>
+                <div class="mb-3"><LooseDateInput @bind-Value="pastUntil" Today="Today" Label="Until (optional)" /></div>
+                <div class="mb-1"><LooseDateInput @bind-Value="pastBuds" Today="Today" Label="Spike or buds from (optional)" /></div>
+                <div class="form-text mb-3">A month is enough. Leave out what you don't remember.</div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@(busy || pastFlower is null || PastErrors.Count > 0)" @onclick="SavePastFloweringAsync">Add</button>
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
+                break;
+
+            case More.Flowering:
+                <div class="mb-3">
+                    <label class="form-label" for="flowering-on">When</label>
+                    <input id="flowering-on" type="date" class="form-control" @bind="since" max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="form-actions mb-2">
+                    @foreach (var (stage, index) in NextStages.Select((stage, index) => (stage, index)))
+                    {
+                        var chosen = stage;
+                        <button type="button" class="btn @(index == 0 ? "btn-primary" : "btn-outline-primary")" disabled="@(busy || since > Today)"
+                                @onclick="() => MarkFloweringAsync(chosen)">@FloweringText.StageLabel(stage)</button>
+                    }
+                </div>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="ShowPastForm">Add a past flowering</button>
+                break;
+
+            case More.ThisFlowering when viewing is not null:
+                <ul class="flowering-marks">
+                    @foreach (var mark in viewing.Marks.OrderBy(m => m.On.Start).ThenBy(m => m.CreatedAt))
+                    {
+                        var removing = mark;
+                        <li>
+                            <span>@FloweringText.StageLabel(mark.Stage!.Value) · @mark.On.Text()</span>
+                            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" @onclick="() => RemoveMarkAsync(removing)">Remove</button>
+                        </li>
+                    }
+                </ul>
+                <div class="form-actions mt-2">
+                    <button type="button" class="btn btn-outline-primary" @onclick="() => more = More.None">Close</button>
                 </div>
                 break;
 
@@ -712,7 +828,7 @@ else
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
 
-    private enum More { None, Menu, Flag, Dormant, Quarantine, PestCheck, Status, PassOn }
+    private enum More { None, Menu, Flag, Dormant, Quarantine, PestCheck, Status, PassOn, Flowering, ThisFlowering }
     private bool shareOpen;
     private bool shareOnLink;
 
@@ -755,6 +871,27 @@ else
     private string? actionNote;
     private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
+
+    // Flowering
+    private IReadOnlyList<FloweringPeriod> flowerings = [];
+    private FloweringNow? floweringNow;
+    private UsualStart? usualStart;
+    private string? floweringSaved;
+    private bool floweringPast;
+    private LooseDate? pastBuds;
+    private LooseDate? pastFlower;
+    private LooseDate? pastUntil;
+    private FloweringPeriod? viewing;
+
+    private IReadOnlyList<string> PastErrors =>
+        pastFlower is null ? [] : FloweringService.PastErrors(pastBuds, pastFlower, pastUntil);
+
+    private IReadOnlyList<FloweringStage> NextStages => floweringNow?.Stage switch
+    {
+        FloweringStage.Buds => [FloweringStage.InFlower, FloweringStage.Done],
+        FloweringStage.InFlower => [FloweringStage.Done],
+        _ => [FloweringStage.Buds, FloweringStage.InFlower]
+    };
     private IReadOnlyDictionary<Guid, Photo> potCovers = new Dictionary<Guid, Photo>();
     private IReadOnlyList<SoilMix> mixes = [];
 
@@ -811,6 +948,9 @@ else
     {
         More.Flag => plant?.Attention is null ? "Flag it" : "Change the flag",
         More.Dormant => "Dormant",
+        More.Flowering when floweringPast && floweringSaved is null => "Add a past flowering",
+        More.Flowering => "Flowering",
+        More.ThisFlowering => "This flowering",
         More.Quarantine => "Quarantine",
         More.PestCheck => "Check for pests",
         More.Status when status == PlantStatus.Died => "It died",
@@ -924,7 +1064,129 @@ else
             feeds = await FeedRepository.GetAllAsync();
 
             await ReloadCareAsync();
+            await ReloadFloweringAsync();
         }
+    }
+
+    private async Task ReloadFloweringAsync()
+    {
+        if (plant is null)
+            return;
+
+        var marks = await FloweringService.ForPlantAsync(plant.Id);
+        flowerings = Flowerings.Of(marks, plant.Id);
+        floweringNow = FloweringNow.Of(flowerings, Today);
+        usualStart = UsualStart.Of(flowerings, Today);
+
+        // The sheet listing one flowering's marks follows it as marks are removed
+        if (viewing is not null)
+        {
+            var ids = viewing.Marks.Select(m => m.Id).ToHashSet();
+            viewing = flowerings.FirstOrDefault(f => f.Marks.Any(m => ids.Contains(m.Id)));
+            if (viewing is null && more == More.ThisFlowering)
+                more = More.None;
+        }
+    }
+
+    private void OpenFlowering()
+    {
+        since = Today;
+        floweringSaved = null;
+        floweringPast = false;
+        more = More.Flowering;
+    }
+
+    private void OpenPastFlowering()
+    {
+        OpenFlowering();
+        ShowPastForm();
+    }
+
+    private void ShowPastForm()
+    {
+        pastBuds = pastFlower = pastUntil = null;
+        floweringPast = true;
+        more = More.Flowering;
+    }
+
+    private void OpenPeriod(FloweringPeriod period)
+    {
+        viewing = period;
+        more = More.ThisFlowering;
+    }
+
+    private async Task MarkFloweringAsync(FloweringStage stage)
+    {
+        busy = true;
+        try
+        {
+            await FloweringService.MarkAsync(plant!, stage, since);
+            floweringSaved = FloweringText.Marked(stage);
+            historyVersion++;
+            await ReloadFloweringAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task SavePastFloweringAsync()
+    {
+        if (pastFlower is null || PastErrors.Count > 0)
+            return;
+
+        busy = true;
+        try
+        {
+            await FloweringService.AddPastAsync(plant!, pastBuds, pastFlower, pastUntil);
+            more = More.None;
+            floweringPast = false;
+            await ReloadFloweringAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task StillFloweringAsync()
+    {
+        if (floweringNow is null)
+            return;
+
+        busy = true;
+        try
+        {
+            await FloweringService.StillAsync(plant!, floweringNow.Stage);
+            await ReloadFloweringAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // A removed mark can be marked again, so there is nothing to confirm
+    private async Task RemoveMarkAsync(FloweringMark mark)
+    {
+        busy = true;
+        try
+        {
+            await FloweringService.RemoveAsync(mark);
+            historyVersion++;
+            await ReloadFloweringAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void AddFloweringPhoto()
+    {
+        more = More.None;
+        photoChoice = true;
     }
 
     private async Task ReloadCareAsync()

@@ -38,12 +38,11 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **Flowering log**, with the flowering calendar.
-3. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-4. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
-5. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
-6. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
-7. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
+2. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+3. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
+4. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
+5. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
+6. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
 
 ### Cheap ones to slot in whenever
 
@@ -240,7 +239,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ☐ | Optional care intervals per plant ("fertilise every 2 weeks") that show up on Today. An interval can be in days, weeks, months or years, for repotting, and can be limited to part of the year, e.g. fertilise from April to October. The same can set up a recurring pest prevention, like a systemic treatment every eight weeks | 5 | M | v1.x |
 | ✅ | **Nutrient dose calculator**: fill in the water on a feed or a top-up, in litres or millilitres, and each product shows how much to add | 7 | S | v1.x |
 | ☐ | Harvest log for herbs (basil, parsley): date and amount | 7 | S | v1.x |
-| ☐ | **Flowering log** (orchid, peace lily, hoya): spike started, blooming, done. A plant's page lists when it flowered each year, and a flowering calendar shows which plants usually flower in the coming month, from your own records. After a couple of years a plant's page also says when it usually starts, e.g. a spike by April, so a late one gets noticed. It shows on the plant's page, not on Today, and only says when, never what to do about it | 3 | M | v1.x |
+| ✅ | **Flowering log** (orchid, peace lily, hoya): under More on a plant's page, mark spike or buds, in flower and done, on any day up to today. Each goes on the history, with the chance to add a photo. A flowering from the past can be added with a month or a year. A badge shows in the lists while a plant is in bud or in flower, and drops after four months without a mark, when the page asks "Still in flower?". The page lists the flowerings by year and, after two years, says when the plant usually starts, e.g. by April, and says so if nothing has started yet this year. A flowering calendar, from a link on the Plants page, shows what is in flower now, what usually flowers next month and the whole year by month, from your own records. It stays off Today and only says when, never what to do about it | 3 | M | v1.x |
 | ✅ | **Care calendar on a plant**: a year of waterings, feeds and meter readings as a grid of days, so the plant's rhythm and any gaps show at a glance | 5 | S | v1.x |
 
 ## 4b. Light and climate
