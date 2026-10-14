@@ -36,7 +36,7 @@ public static class ImportFields
     public static string Label(ImportField field) => field switch
     {
         ImportField.Skip => "Leave out",
-        ImportField.AboutLine => "Add to About it",
+        ImportField.AboutLine => "A line in About it",
         ImportField.Name => "Name",
         ImportField.Nickname => "Nickname",
         ImportField.Genus => "Genus",
@@ -50,12 +50,22 @@ public static class ImportFields
         ImportField.Medium => "Grows in",
         ImportField.Status => "Status",
         ImportField.Tags => "Tags",
-        ImportField.AboutIt => "About it",
+        ImportField.AboutIt => "About it, the notes",
         ImportField.LastWatered => "Last watered",
         ImportField.LastFed => "Last fed",
         ImportField.LastRepotted => "Last repotted",
         _ => field.ToString()
     };
+
+    /// <summary>The fields in the picker, grouped so the list reads in a few short parts. Every field is in one group.</summary>
+    public static IReadOnlyList<(string Group, ImportField[] Fields)> Groups { get; } =
+    [
+        ("Keep or leave out", [ImportField.AboutLine, ImportField.Skip]),
+        ("Name", [ImportField.Name, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar]),
+        ("Where and when", [ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source, ImportField.Price]),
+        ("Care", [ImportField.LastWatered, ImportField.LastFed, ImportField.LastRepotted]),
+        ("More about it", [ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt])
+    ];
 
     // Our own export, column by column. Name is the display name made from the others, and Added is when
     // the plant was added here, so neither says anything the other columns don't.
@@ -83,7 +93,7 @@ public static class ImportFields
         Add(ImportField.Genus, "genus", "slægt");
         Add(ImportField.Species, "species", "art");
         Add(ImportField.Cultivar, "cultivar", "variety", "variant", "sort", "kultivar");
-        Add(ImportField.Place, "room", "location", "place", "spot", "rum", "værelse", "placering", "sted");
+        Add(ImportField.Place, "room", "location", "place", "spot", "where", "rum", "hvor", "værelse", "placering", "sted");
         Add(ImportField.GotOn, "acquired", "date acquired", "got", "date got", "bought", "purchased", "purchase date",
             "købt", "købsdato", "anskaffet", "dato");
         Add(ImportField.Origin, "origin", "how got", "oprindelse");

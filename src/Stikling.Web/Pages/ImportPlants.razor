@@ -36,7 +36,7 @@
             <textarea id="import-paste" class="form-control" rows="5" spellcheck="false"
                       @bind="pasted" @bind:event="oninput"></textarea>
         </div>
-        <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="UsePasted">Use these cells</button>
+        <button type="button" class="btn btn-outline-primary" disabled="@(busy || string.IsNullOrWhiteSpace(pasted))" @onclick="UsePasted">Use these cells</button>
     </div>
 }
 else if (step == Step.Result && result is not null)
@@ -44,15 +44,15 @@ else if (step == Step.Result && result is not null)
     <div class="import-narrow">
         @if (undone)
         {
-            <h2 class="import-title" role="status">Removed @(result.Added == 1 ? "the plant" : $"the {result.Added} plants") again.</h2>
+            <h2 class="import-title" role="status" tabindex="-1" @ref="resultHeading">Removed @(result.Added == 1 ? "the plant" : $"the {result.Added} plants") again.</h2>
             <div class="import-buttons">
                 <a class="btn btn-primary" href="plants">Go to Plants</a>
-                <button type="button" class="btn btn-outline-primary" @onclick="StartAgain">Import another file</button>
+                <button type="button" class="btn btn-outline-primary" @onclick="StartAgain">Import more plants</button>
             </div>
         }
         else
         {
-            <h2 class="import-title" role="status">@(result.Added == 0 ? "No plants added" : $"{Labels.Plants(result.Added)} added")</h2>
+            <h2 class="import-title" role="status" tabindex="-1" @ref="resultHeading">@(result.Added == 0 ? "No plants added" : $"{Labels.Plants(result.Added)} added")</h2>
             @if (MadeText is { } made)
             {
                 <p class="import-muted">@made</p>
@@ -60,6 +60,21 @@ else if (step == Step.Result && result is not null)
             @if (addError is not null)
             {
                 <div class="alert alert-danger" role="alert">@addError</div>
+            }
+            else if (added.Count > 0)
+            {
+                <div class="import-block mt-3">
+                    @foreach (var row in added)
+                    {
+                        <div class="import-row">
+                            <div class="import-name">@row.Draft.DisplayName</div>
+                            @if (!string.IsNullOrWhiteSpace(row.Place))
+                            {
+                                <div class="import-meta">@row.Place</div>
+                            }
+                        </div>
+                    }
+                </div>
             }
             @if (result.Skipped.Count > 0)
             {
@@ -103,7 +118,7 @@ else if (sheet is not null)
                 <label class="form-check-label" for="import-headings">The first row is the headings</label>
             </div>
 
-            <h2 class="section-label">Your columns</h2>
+            <h2 class="section-label" tabindex="-1" @ref="columnsHeading">Your columns</h2>
             <div class="import-block">
                 @for (var column = 0; column < sheet.Headings.Count; column++)
                 {
@@ -114,9 +129,14 @@ else if (sheet is not null)
                             <div class="import-meta">@Samples(c)</div>
                         </div>
                         <select class="form-select" aria-label="@sheet.Headings[c]" @onchange="e => MatchChanged(c, e)">
-                            @foreach (var field in Enum.GetValues<ImportField>())
+                            @foreach (var (group, fields) in ImportFields.Groups)
                             {
-                                <option value="@field" selected="@(matches[c] == field)">@ImportFields.Label(field)</option>
+                                <optgroup label="@group">
+                                    @foreach (var field in fields)
+                                    {
+                                        <option value="@field" selected="@(matches[c] == field)">@ImportFields.Label(field)</option>
+                                    }
+                                </optgroup>
                             }
                         </select>
                     </div>
@@ -148,7 +168,7 @@ else if (sheet is not null)
             }
 
             <div class="form-bar import-next">
-                <button type="button" class="btn btn-primary" disabled="@(rows.Count == 0)" @onclick="() => step = Step.Plants">
+                <button type="button" class="btn btn-primary" disabled="@(rows.Count == 0)" @onclick="() => GoTo(Step.Plants)">
                     Next: check @Labels.Plants(rows.Count)
                 </button>
             </div>
@@ -162,9 +182,9 @@ else if (sheet is not null)
             }
             else
             {
-                <h2 class="section-label">Plants</h2>
+                <h2 class="section-label" tabindex="-1" @ref="plantsHeading">Plants</h2>
                 <p class="import-muted" aria-live="polite">
-                    @ticked.Count of @rows.Count ticked@(LooksLikeCount > 0 ? $" · {LooksLikeCount} looks like one you have" : null)@(CantAddCount > 0 ? $" · {CantAddCount} can't be added" : null)
+                    @ticked.Count of @rows.Count ticked@(LooksLikeCount switch { 0 => null, 1 => " · 1 looks like one you have", var n => $" · {n} look like ones you have" })@(CantAddCount > 0 ? $" · {CantAddCount} can't be added" : null)
                 </p>
                 <div class="mb-2">
                     <button type="button" class="btn btn-link link-action me-3" @onclick="TickAll">Tick all</button>
@@ -176,7 +196,7 @@ else if (sheet is not null)
                     {
                         var index = i;
                         var row = rows[i];
-                        <label class="import-row import-plant">
+                        <label class="import-row import-plant @(ticked.Contains(index) ? null : "unticked")">
                             <input type="checkbox" class="form-check-input" checked="@ticked.Contains(index)"
                                    disabled="@(row.CantAdd is not null || adding)" @onchange="() => Toggle(index)" />
                             <span class="import-plant-text">
@@ -185,7 +205,15 @@ else if (sheet is not null)
                                 {
                                     <span class="import-botanical"><BotanicalName Genus="@row.Draft.Genus" Species="@row.Draft.Species" Cultivar="@row.Draft.Cultivar" /></span>
                                 }
+                                @if (TypedName(index) is { } typed)
+                                {
+                                    <span class="import-meta">From “@typed”</span>
+                                }
                                 <span class="import-meta">@MetaLine(row)</span>
+                                @if (!string.IsNullOrWhiteSpace(row.Draft.Notes))
+                                {
+                                    <span class="import-meta import-about">About it: @row.Draft.Notes.ReplaceLineEndings(" · ")</span>
+                                }
                                 @if (row.LooksLikeYours)
                                 {
                                     <span class="import-yours">Looks like one you have</span>
@@ -220,10 +248,10 @@ else if (sheet is not null)
                         {
                             <div class="alert alert-danger" role="alert">@error</div>
                         }
-                        <button type="button" class="btn btn-primary" @onclick="AddAsync">
+                        <button type="button" class="btn btn-primary" disabled="@(ticked.Count == 0)" @onclick="AddAsync">
                             @(ticked.Count == 0 ? "Tick the plants to add" : $"Add {Labels.Plants(ticked.Count)}")
                         </button>
-                        <button type="button" class="btn btn-link import-back" @onclick="() => step = Step.Columns">Back to columns</button>
+                        <button type="button" class="btn btn-link import-back" @onclick="() => GoTo(Step.Columns)">Back to columns</button>
                     }
                 </div>
             }
@@ -268,6 +296,12 @@ else if (sheet is not null)
     private string? addError;
     private string? undoError;
     private bool undone;
+    private List<ImportRow> added = [];
+
+    private ElementReference columnsHeading;
+    private ElementReference plantsHeading;
+    private ElementReference resultHeading;
+    private Step? focusStep;
 
     private DateOnly Today => Time.Today();
 
@@ -297,6 +331,28 @@ else if (sheet is not null)
                 parts.Add($"{Labels.Count(result.CareDates, "care date")} logged");
             return parts.Count == 0 ? null : string.Join(" · ", parts);
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // The step that takes the screen takes the focus too, so it isn't left on a button that is now hidden
+        if (focusStep is not { } next)
+            return;
+        focusStep = null;
+        var heading = next switch
+        {
+            Step.Columns => columnsHeading,
+            Step.Plants => plantsHeading,
+            _ => resultHeading
+        };
+        if (heading.Context is not null)
+            await heading.FocusAsync();
+    }
+
+    private void GoTo(Step next)
+    {
+        step = next;
+        focusStep = next;
     }
 
     protected override async Task OnInitializedAsync()
@@ -357,7 +413,7 @@ else if (sheet is not null)
         sheet = read;
         matches = [.. ImportFields.Guess(read.Headings)];
         chosenOrder = languageOrder;
-        step = Step.Columns;
+        GoTo(Step.Columns);
         Recompute();
     }
 
@@ -369,6 +425,7 @@ else if (sheet is not null)
         ticked = [];
         result = null;
         undone = false;
+        added = [];
         undoError = null;
         addError = null;
         error = null;
@@ -440,6 +497,25 @@ else if (sheet is not null)
         return values.Count == 0 ? "Empty" : string.Join(" · ", values);
     }
 
+    /// <summary>
+    /// The name as the file has it, when the plant is shown by another one, like a common name read as
+    /// its genus and species. Null when they are the same.
+    /// </summary>
+    private string? TypedName(int index)
+    {
+        var column = matches.IndexOf(ImportField.Name);
+        if (column < 0 || sheet is null || index >= sheet.Rows.Count || column >= sheet.Rows[index].Count)
+            return null;
+        var typed = sheet.Rows[index][column].Trim();
+        var draft = rows[index].Draft;
+        // Not when it is shown already, as the name or kept in About it because a Nickname column took its place
+        return typed.Length == 0
+            || string.Equals(typed, draft.DisplayName, StringComparison.CurrentCultureIgnoreCase)
+            || draft.Notes?.Contains($"{sheet.Headings[column]}: {typed}") == true
+            ? null
+            : typed;
+    }
+
     private static string MetaLine(ImportRow row)
     {
         var parts = new List<string> { $"Row {row.Line}" };
@@ -498,13 +574,22 @@ else if (sheet is not null)
             Logger.LogError(ex, "Importing the spreadsheet failed");
             // What was added before it failed can still be undone
             result = Importer.Last;
-            addError = $"Couldn't add all of them: {ex.Message}";
+            addError = "Couldn't add the rest of them on this device. Undo takes out the ones added so far.";
         }
         adding = false;
-        if (result is not null)
-            step = Step.Result;
+        if (result is { Added: > 0 } || (result is not null && addError is null))
+        {
+            var skippedLines = result!.Skipped.Select(s => s.Line).ToHashSet();
+            added = addError is null ? [.. chosen.Where(r => !skippedLines.Contains(r.Line))] : [];
+            GoTo(Step.Result);
+        }
         else
-            error = addError;
+        {
+            // Nothing was added, so it stays here with the columns and ticks as they were, ready to try again
+            result = null;
+            addError = null;
+            error = "Couldn't add the plants on this device. Nothing was added, so you can try again.";
+        }
     }
 
     private async Task UndoAsync()
@@ -522,7 +607,7 @@ else if (sheet is not null)
         catch (Exception ex)
         {
             Logger.LogError(ex, "Undoing the spreadsheet import failed");
-            undoError = $"Couldn't undo it: {ex.Message}";
+            undoError = "Couldn't undo it on this device. Try again, or remove the plants on Plants.";
         }
         busy = false;
     }
