@@ -5,6 +5,8 @@
 @inject IFeedRepository FeedRepository
 @inject ITreatmentRecipeRepository RecipeRepository
 @inject IPestCaseRepository PestCaseRepository
+@inject IPlantRepository PlantRepository
+@inject ProblemService ProblemService
 
 <PageTitle>Supplies · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -33,10 +35,10 @@
     </SettingsRow>
 </div>
 
-@* Pests has its own tab only while a case is open, so this is the way in the rest of the time *@
-<h2 class="section-label mt-4">Pests</h2>
+@* Pests has its own tab only while a case or a problem is open, so this is the way in the rest of the time *@
+<h2 class="section-label mt-4">Pests and problems</h2>
 <div class="settings-rows">
-    <SettingsRow Href="pests" Title="Pest cases" Detail="@PestSummary">
+    <SettingsRow Href="pests" Title="Pest cases and problems" Detail="@PestSummary">
         <Icon><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></Icon>
     </SettingsRow>
 </div>
@@ -48,6 +50,7 @@
     private int feeds;
     private int recipes;
     private IReadOnlyList<PestCase> pestCases = [];
+    private int openProblems;
 
     protected override async Task OnInitializedAsync() => await LoadDataAsync();
 
@@ -59,6 +62,9 @@
         feeds = (await FeedRepository.GetAllAsync()).Count;
         recipes = (await RecipeRepository.GetAllAsync()).Count;
         pestCases = await PestCaseRepository.GetAllAsync();
+        var plants = await PlantRepository.GetAllAsync();
+        openProblems = (await ProblemService.AllAsync())
+            .Count(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.Status == PlantStatus.Active));
     }
 
     /// <summary>"6 pots, 2 free", or what pots are when there are none.</summary>
@@ -81,13 +87,17 @@
 
     private string FeedSummary => feeds == 0 ? "How you dilute a product to water with" : Labels.Count(feeds, "feed");
 
-    /// <summary>"2 open", or what a case is for when none are open.</summary>
+    /// <summary>"2 open", or what a case is for when none are open, and "1 problem" for the open problems.</summary>
     private string PestSummary => pestCases.Count(c => c.IsOpen) switch
     {
+        0 when openProblems > 0 && pestCases.Count > 0 => $"None open, {pestCases.Count} resolved{ProblemsPart}",
+        0 when openProblems > 0 => $"No pest cases{ProblemsPart}",
         0 when pestCases.Count > 0 => $"None open, {pestCases.Count} resolved",
         0 => "Open one when you find pests, to keep track of the treatments",
-        var open => $"{open} open"
+        var open => $"{open} open{ProblemsPart}"
     };
+
+    private string ProblemsPart => openProblems == 0 ? "" : $", {Labels.Count(openProblems, "problem")}";
 
     private string RecipeSummary =>
         recipes == 0 ? "Sprays you mix the same way each time" : Labels.Count(recipes, "recipe");

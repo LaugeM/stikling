@@ -37,6 +37,13 @@ public sealed class PutOffs
         $"attention:{subjectId}:{attention.Since:yyyy-MM-dd}";
 
     /// <summary>
+    /// The key for a problem to look at again. The look again day is part of it, so a new day
+    /// picked later isn't still hidden by an old put-off.
+    /// </summary>
+    public static string Problem(Guid problemId, DateOnly lookAgainOn) =>
+        $"problem:{problemId}:{lookAgainOn:yyyy-MM-dd}";
+
+    /// <summary>
     /// The key for a quarantine that is up. The day it started is part of it, so a plant put back
     /// in quarantine later isn't still hidden.
     /// </summary>

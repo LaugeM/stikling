@@ -318,6 +318,13 @@ Batches in an experiment close up into one bordered block divided by hairlines, 
 ### Stage Badge
 A propagation's stage in a Leaf Tint badge, led by three small ticks filled up to the stage: one for Started, two for Rooting, three for Rooted, and none for Failed. On a propagation page the stage picker reads as a path the same way: stages already passed keep a Leaf Tint fill, the current one is filled green. When a propagation has no photo, its page tile shows the day count instead of an icon.
 
+### Problem
+Something wrong with a plant that is still being watched. Its badge is neutral: Ink on Surface with a 1px Border edge, the same shape as the other badges, led by a small stroked wilting leaf, a leaf on a stem that bends over. It is never red, because red is for pests and overdue, and it is not Clay or Leaf Tint either. The word is "Problem".
+
+A trend is a small stroked arrow with its word: Better is an arrow up in Deep Moss, About the same is a flat line in Muted Ink, and Worse is an arrow down in Alert. Worse is the only red.
+
+A problem's page leads with what was seen as the title in Title type. Under it the days since it started are a big number in Count type and Deep Moss with "days" under it in small Muted Ink, the way a propagation shows them. A closed problem shows "Over after 23 days: got better" in its place. Under that is a row of trend marks, one per update that has a trend, oldest to newest from the left at 1.5rem each, wrapping on a narrow screen. The app never says what to do: the earlier problems of the same kind show what the person did and how it ended, and nothing else.
+
 ### Inputs and Fields
 - **Style:** Surface background on a Border hairline. The background is deliberately the card colour rather than the page colour, so fields do not look disabled.
 - **Focus:** border shifts to Potting Green, plus the focus ring.
@@ -328,7 +335,7 @@ A propagation's stage in a Leaf Tint badge, led by three small ticks filled up t
 ### Navigation
 Five fixed destinations in a bottom bar: a stroked icon over a 0.75rem Bricolage label, Muted Ink at rest, Deep Moss and weight 600 when active. The active icon also sits on a Leaf Tint pill, so where you are shows before you read the label.
 
-The header is sticky and holds the app icon at 28px beside the wordmark, set in Bricolage 800 at 1.375rem and 88% width in Deep Moss. The wordmark links to Today. The settings gear sits on the right, and takes the Leaf Tint circle while Settings is open. When sync has a problem, a small Alert dot with a Surface ring sits on the gear, so the problem is seen without Settings taking up a tab. The tabs are for the collection and what it uses: Today, Plants, Props, Pests and Supplies. Pests only has a tab while a case is open, since many people never have one, and the rest of the time it is a row on Supplies, which then shows as the active tab on the pest pages. Settings is visited rarely, so it lives at the top, out of the thumb's way.
+The header is sticky and holds the app icon at 28px beside the wordmark, set in Bricolage 800 at 1.375rem and 88% width in Deep Moss. The wordmark links to Today. The settings gear sits on the right, and takes the Leaf Tint circle while Settings is open. When sync has a problem, a small Alert dot with a Surface ring sits on the gear, so the problem is seen without Settings taking up a tab. The tabs are for the collection and what it uses: Today, Plants, Props, Pests and Supplies. Pests only has a tab while a pest case or a problem is open, since many people never have either, and the rest of the time the page, called Pests and problems, is a row on Supplies, which then shows as the active tab on the pest pages. Settings is visited rarely, so it lives at the top, out of the thumb's way.
 
 On a wide screen the same destinations stand in a menu down the left side: the wordmark at the top, then one row per tab with the icon beside its label in Bricolage at 1rem, and Help and Settings at the bottom, where the sync dot moves with Settings. A row is 2.75rem tall at 0.6rem radius. The page you are on fills its row with Leaf Tint and sets the label in Deep Moss at 600, the row version of the active tab's pill. Hovering a row warms it to Paper. Sheets open there as a dialog in the middle, 32rem wide and rounded on every side, rising in slightly instead of sliding up from the bottom edge.
 

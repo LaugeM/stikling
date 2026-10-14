@@ -7,6 +7,7 @@
 @inject IPestCaseRepository PestCaseRepository
 @inject IPestTreatmentRepository PestTreatmentRepository
 @inject FloweringService FloweringService
+@inject ProblemService ProblemService
 @inject IPotRepository PotRepository
 @inject PotService PotService
 @inject ISoilMixRepository MixRepository
@@ -100,6 +101,13 @@ else
                         {
                             <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
                         }
+                        @if (openProblems.Count > 0)
+                        {
+                            <a class="badge problem-badge" href="problems/@openProblems[0].Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.WiltingLeaf</svg>
+                                Problem
+                            </a>
+                        }
                     </div>
                     @if (actionNote is not null)
                     {
@@ -122,6 +130,41 @@ else
                         </div>
                     </div>
                 }
+
+            @foreach (var problem in openProblems)
+            {
+                var own = UpdatesOf(problem);
+                var again = ProblemService.LookAgainOn(problem, own);
+                <section class="problem-card" aria-label="@ProblemText.Signs(problem.KnownSigns)">
+                    <p class="problem-card-name">@ProblemText.Signs(problem.KnownSigns)</p>
+                    <p class="problem-card-meta">
+                        Since @ProblemText.ShortDay(problem.StartedOn) · @ProblemText.Duration(ProblemText.DaysLasted(problem, Today))
+                        @if (ProblemService.LatestTrend(own) is { } latest)
+                        {
+                            <text> · </text><TrendMark Trend="latest" Word="true" />
+                        }
+                        @if (again is { } lookAgain)
+                        {
+                            <text> · </text>
+                            @if (lookAgain <= Today)
+                            {
+                                <span class="look-due">Look again today</span>
+                            }
+                            else
+                            {
+                                <text>Look again on @ProblemText.ShortDay(lookAgain)</text>
+                            }
+                        }
+                    </p>
+                    <div class="problem-card-actions">
+                        @if (plant.Status == PlantStatus.Active)
+                        {
+                            <button type="button" class="btn btn-outline-primary" @onclick="() => OpenProblemUpdate(problem)">How does it look?</button>
+                        }
+                        <a class="btn btn-link link-action" href="problems/@problem.Id">Open</a>
+                    </div>
+                </section>
+            }
 
             @if (plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(plant.CauseOfDeath))
             {
@@ -332,6 +375,30 @@ else
                             <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenPastFlowering">Add a past flowering</button>
                             <a class="btn btn-link btn-sm link-action" href="plants/flowering">See the flowering calendar</a>
                         </p>
+                    </section>
+                }
+
+                @if (closedProblems.Count > 0)
+                {
+                    <section class="detail-card">
+                        <h2>Problems</h2>
+                        <ul class="problem-rows">
+                            @foreach (var problem in (showAllProblems ? closedProblems : closedProblems.Take(5)))
+                            {
+                                <li>
+                                    <a href="problems/@problem.Id">
+                                        <b>@ProblemText.Signs(problem.KnownSigns)</b>
+                                        <span>@ProblemText.PastLine(problem)</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                        @if (closedProblems.Count > 5 && !showAllProblems)
+                        {
+                            <p class="family-hint">
+                                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => showAllProblems = true">Show all @closedProblems.Count</button>
+                            </p>
+                        }
                     </section>
                 }
 
@@ -601,6 +668,12 @@ else
                             </button>
                         </li>
                         <li>
+                            <button type="button" class="sheet-action" @onclick="OpenProblem">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.WiltingLeaf</svg>
+                                <span class="sheet-action-text"><b>Something's wrong</b><small>Yellow leaves, rot, sunburn…</small></span>
+                            </button>
+                        </li>
+                        <li>
                             <a class="sheet-action" href="pests/new?plant=@plant.Id">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
                                 <span class="sheet-action-text"><b>Found pests</b><small>Open a case to keep track of the treatments</small></span>
@@ -726,6 +799,14 @@ else
                 </div>
                 break;
 
+            case More.Problem:
+                <ProblemSheet Plant="plant" Mode="ProblemSheetMode.Open" BackLabel="Back" OnBack="() => more = More.Menu" OnSaved="ProblemSavedAsync" />
+                break;
+
+            case More.ProblemUpdate when updating is not null:
+                <ProblemSheet @key="updating.Id" Plant="plant" Mode="ProblemSheetMode.Update" Problem="updating" OnSaved="ProblemSavedAsync" />
+                break;
+
             case More.Quarantine:
                 <div class="row g-2 mb-1">
                     <div class="col-7">
@@ -831,7 +912,7 @@ else
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
 
-    private enum More { None, Menu, Flag, Dormant, Quarantine, PestCheck, Status, PassOn, Flowering, ThisFlowering }
+    private enum More { None, Menu, Flag, Dormant, Quarantine, PestCheck, Status, PassOn, Flowering, ThisFlowering, Problem, ProblemUpdate }
     private bool shareOpen;
     private bool shareOnLink;
 
@@ -874,6 +955,13 @@ else
     private string? actionNote;
     private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
+
+    // Problems
+    private IReadOnlyList<Problem> openProblems = [];
+    private IReadOnlyList<Problem> closedProblems = [];
+    private ILookup<Guid, ProblemUpdate> problemUpdates = Enumerable.Empty<ProblemUpdate>().ToLookup(u => u.ProblemId);
+    private Problem? updating;
+    private bool showAllProblems;
 
     // Flowering
     private IReadOnlyList<FloweringPeriod> flowerings = [];
@@ -956,6 +1044,8 @@ else
         More.ThisFlowering => "This flowering",
         More.Quarantine => "Quarantine",
         More.PestCheck => "Check for pests",
+        More.Problem => "Something's wrong",
+        More.ProblemUpdate => "How does it look?",
         More.Status when status == PlantStatus.Died => "It died",
         More.Status => "It left",
         More.PassOn => "Send its history",
@@ -1068,7 +1158,45 @@ else
 
             await ReloadCareAsync();
             await ReloadFloweringAsync();
+            await ReloadProblemsAsync();
         }
+    }
+
+    private IEnumerable<ProblemUpdate> UpdatesOf(Problem problem) => problemUpdates[problem.Id];
+
+    private async Task ReloadProblemsAsync()
+    {
+        if (plant is null)
+            return;
+
+        var mine = await ProblemService.ForPlantAsync(plant.Id);
+        var ids = mine.Select(p => p.Id).ToHashSet();
+        problemUpdates = (await ProblemService.AllUpdatesAsync()).Where(u => ids.Contains(u.ProblemId)).ToLookup(u => u.ProblemId);
+        openProblems = mine.Where(p => p.IsOpen).ToList();
+        closedProblems = mine.Where(p => !p.IsOpen).OrderByDescending(p => p.ClosedOn).ThenByDescending(p => p.StartedOn).ToList();
+
+        // The sheet for an update follows the problem, and goes if it is closed or gone
+        if (updating is not null)
+        {
+            updating = openProblems.FirstOrDefault(p => p.Id == updating.Id);
+            if (updating is null && more == More.ProblemUpdate)
+                more = More.None;
+        }
+    }
+
+    private void OpenProblem() => more = More.Problem;
+
+    private void OpenProblemUpdate(Problem problem)
+    {
+        updating = problem;
+        more = More.ProblemUpdate;
+    }
+
+    private async Task ProblemSavedAsync()
+    {
+        more = More.None;
+        historyVersion++;
+        await LoadAsync();
     }
 
     private async Task ReloadFloweringAsync()

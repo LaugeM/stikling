@@ -5,6 +5,7 @@ using Stikling.Core.Flowering;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
+using Stikling.Core.Problems;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
 using Stikling.Core.Products;
@@ -76,6 +77,18 @@ public sealed class IndexedDbFloweringMarkRepository(IndexedDb db, TimeProvider 
     : IndexedDbEntityRepository<FloweringMark>(db, time, Stores.FloweringMarks), IFloweringMarkRepository
 {
     protected override IReadOnlyList<string> Validate(FloweringMark mark) => mark.Validate(Today);
+}
+
+public sealed class IndexedDbProblemRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Problem>(db, time, Stores.Problems), IProblemRepository
+{
+    protected override IReadOnlyList<string> Validate(Problem problem) => problem.Validate(Today);
+}
+
+public sealed class IndexedDbProblemUpdateRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<ProblemUpdate>(db, time, Stores.ProblemUpdates), IProblemUpdateRepository
+{
+    protected override IReadOnlyList<string> Validate(ProblemUpdate update) => update.Validate(Today);
 }
 
 public sealed class IndexedDbSitterSheetRepository(IndexedDb db, TimeProvider time)

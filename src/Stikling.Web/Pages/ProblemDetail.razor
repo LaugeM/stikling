@@ -1,0 +1,478 @@
+@page "/problems/{Id:guid}"
+@inject ProblemService ProblemService
+@inject IPlantRepository PlantRepository
+@inject ITimelineRepository TimelineRepository
+@inject IPhotoRepository PhotoRepository
+@inject PhotoService Photos
+@inject PlantService PlantService
+@inject RoomService RoomService
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+
+<PageTitle>@(problem is null ? "Problem" : ProblemText.Signs(problem.KnownSigns)) · Stikling</PageTitle>
+<ReloadOnSync Reload="ReloadAsync" />
+
+@if (problem is null || plant is null)
+{
+    <a class="back-link" href="plants">Plants</a>
+    <p class="text-body-secondary">@(loaded ? "That problem doesn't exist or was deleted." : "Loading…")</p>
+}
+else
+{
+    <a class="back-link" href="plants/@plant.Id">@plant.DisplayName</a>
+
+    <header class="problem-lead">
+        <h1>@ProblemText.Title(problem)</h1>
+        @if (problem.IsOpen)
+        {
+            var days = ProblemText.DaysLasted(problem, Today);
+            <div class="day-tile problem-days">
+                <b>@days</b>
+                <small>@(days == 1 ? "day" : "days")</small>
+            </div>
+        }
+        else
+        {
+            <p class="problem-over">@ProblemText.OverAfter(problem)</p>
+        }
+        @if (ProblemText.TrendsLabel(trends) is { } trendsLabel)
+        {
+            <div class="trend-row" role="img" aria-label="@trendsLabel">
+                @foreach (var trend in trends)
+                {
+                    <TrendMark Trend="trend" />
+                }
+            </div>
+        }
+        <p class="problem-plant">
+            <a href="plants/@plant.Id">@plant.DisplayName</a>@(places.NameOf(plant.PlaceId) is { } room ? $" · {room}" : "")
+        </p>
+        @if (!string.IsNullOrWhiteSpace(problem.Note))
+        {
+            <p class="problem-note">@problem.Note</p>
+        }
+    </header>
+
+    @if (status is not null)
+    {
+        <p class="action-message" role="status">@status</p>
+    }
+
+    @if (Here)
+    {
+        <div class="detail-actions">
+            @if (problem.IsOpen)
+            {
+                <button type="button" class="btn btn-primary" @onclick="() => OpenUpdate(null)">How does it look?</button>
+                <button type="button" class="btn btn-outline-primary" @onclick="OpenClose">It's over</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="ReopenAsync">It came back</button>
+            }
+        </div>
+    }
+
+    <section class="problem-log" aria-labelledby="problem-log-title">
+        <h2 id="problem-log-title">What happened</h2>
+        @foreach (var (day, items) in LogDays)
+        {
+            <div class="log-day">
+                <h3>@DayLabel(day)</h3>
+                <ol>
+                    @foreach (var item in items)
+                    {
+                        var shown = item;
+                        <li class="log-entry @(item.Kind is ProblemLogKind.Change ? "by-app" : "by-person")">
+                            <div class="log-head">
+                                <span class="log-kind">
+                                    @switch (item.Kind)
+                                    {
+                                        case ProblemLogKind.Started:
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.WiltingLeaf</svg>
+                                            <text>Started</text>
+                                            break;
+                                        case ProblemLogKind.Update:
+                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" /></svg>
+                                            <text>How it looked</text>
+                                            break;
+                                        case ProblemLogKind.Change:
+                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h14l-3.5-3.5" /><path d="M20 15H6l3.5 3.5" /></svg>
+                                            <text>Updated</text>
+                                            break;
+                                        default:
+                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                                            <text>Over</text>
+                                            break;
+                                    }
+                                </span>
+                                @if (item.Kind == ProblemLogKind.Update && Here)
+                                {
+                                    <span class="log-actions">
+                                        <button type="button" class="log-action" aria-label="Change this update" title="Change this update"
+                                                @onclick="() => OpenUpdate(shown.Update)">
+                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+                                        </button>
+                                    </span>
+                                }
+                            </div>
+
+                            @switch (item.Kind)
+                            {
+                                case ProblemLogKind.Started:
+                                    <p class="log-text">@ProblemText.Signs(problem.KnownSigns)</p>
+                                    @if (!string.IsNullOrWhiteSpace(problem.Note))
+                                    {
+                                        <p class="log-text">@problem.Note</p>
+                                    }
+                                    break;
+                                case ProblemLogKind.Update:
+                                    var update = item.Update!;
+                                    @if (update.Trend is { } trend)
+                                    {
+                                        <p class="log-trend"><TrendMark Trend="trend" Word="true" /></p>
+                                    }
+                                    @if (update.KnownDid.Count > 0)
+                                    {
+                                        <p class="log-text">@ProblemText.Actions(update.KnownDid)</p>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(update.Note))
+                                    {
+                                        <p class="log-text">@update.Note</p>
+                                    }
+                                    break;
+                                case ProblemLogKind.Change:
+                                    <p class="log-text">@item.Entry!.Text</p>
+                                    break;
+                                default:
+                                    <p class="log-text">@(problem.Outcome is { } outcome ? ProblemText.Outcome(outcome) : "Over")</p>
+                                    break;
+                            }
+
+                            @if (item.PhotoIds.Where(photoIndex.ContainsKey).ToList() is { Count: > 0 } itemPhotos)
+                            {
+                                <div class="log-photos">
+                                    @foreach (var photoId in itemPhotos)
+                                    {
+                                        <button type="button" class="log-photo" @onclick="() => viewerIndex = photoIndex[photoId]" aria-label="Open photo">
+                                            <PhotoImage PhotoId="photoId" />
+                                        </button>
+                                    }
+                                </div>
+                            }
+                        </li>
+                    }
+                </ol>
+            </div>
+        }
+    </section>
+
+    @if (past.Count > 0)
+    {
+        <section class="problem-before" aria-labelledby="problem-before-title">
+            <h2 id="problem-before-title">Before, with @BeforeSign</h2>
+            <p class="problem-before-hint">What you did then, and how it ended.</p>
+            <ul class="item-list">
+                @foreach (var earlier in past.Take(5))
+                {
+                    <li>
+                        <a class="item-card" href="problems/@earlier.Problem.Id">
+                            <SubjectThumb Subject="earlier.Plant" />
+                            <div class="item-text">
+                                <div class="item-name">@earlier.Plant.DisplayName</div>
+                                @if (earlier.Shared.Count > 1)
+                                {
+                                    <div class="item-sub">@ProblemText.Signs(earlier.Shared)</div>
+                                }
+                                <div class="item-meta">@ProblemText.PastOfSameKindLine(earlier)</div>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    <section class="danger-zone problem-foot">
+        @if (confirmDelete)
+        {
+            <p class="mb-2">Delete this problem and its updates? The lines on the plant's history go too@(deletePhotos > 0 ? ", and any photos stay on it." : ".")</p>
+            <button class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">Delete</button>
+            <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+        }
+        else
+        {
+            @if (Here)
+            {
+                <button class="btn btn-link btn-sm link-action" @onclick="OpenEdit">Change what you saw</button>
+            }
+            <button class="btn btn-link btn-sm text-danger link-action" @onclick="AskDeleteAsync">Delete problem</button>
+        }
+    </section>
+
+    <Sheet Title="@SheetTitle" Open="sheet != Shown.None" OpenChanged="open => { if (!open) sheet = Shown.None; }">
+        @switch (sheet)
+        {
+            case Shown.Update:
+                <ProblemSheet @key="@(editing?.Id ?? Guid.Empty)" Plant="plant" Mode="ProblemSheetMode.Update" Problem="problem"
+                              Existing="editing" BackLabel="Cancel" OnBack="CloseSheet" OnSaved="SavedAsync" />
+                break;
+
+            case Shown.Edit:
+                <ProblemSheet Plant="plant" Mode="ProblemSheetMode.Open" Problem="problem" BackLabel="Cancel" OnBack="CloseSheet" OnSaved="SavedAsync" />
+                break;
+
+            case Shown.Close:
+                @if (closeError is not null)
+                {
+                    <div class="alert alert-danger py-2 px-3 mb-3" role="alert">@closeError</div>
+                }
+                <div class="mb-3">
+                    <label class="form-label" for="problem-closed-on">On</label>
+                    <input id="problem-closed-on" type="date" class="form-control" @bind="closeOn"
+                           min="@problem.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <ul class="sheet-actions">
+                    <li>
+                        <button type="button" class="sheet-action" disabled="@busy" @onclick="() => CloseAsync(ProblemOutcome.GotBetter)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.Trend(ProblemTrend.Better)</svg>
+                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.GotBetter)</b><small>It looks healthy again</small></span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="sheet-action" disabled="@busy" @onclick="() => CloseAsync(ProblemOutcome.WentAway)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="m8.5 12.5 2.5 2.5 4.5-5" /></svg>
+                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.WentAway)</b><small>It cleared up without doing much</small></span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="sheet-action" disabled="@busy" @onclick="() => CloseAsync(ProblemOutcome.DidntHelp)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.Trend(ProblemTrend.Same)</svg>
+                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.DidntHelp)</b><small>You're leaving it as it is</small></span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="sheet-action danger" disabled="@busy" @onclick="() => CloseAsync(ProblemOutcome.Died)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-7" /><path d="M12 14c-1-4-4-6-8-6 0 4 3 7 8 6Z" /><path d="M12 14c2-3 4.5-4 8-3.5-.5 3.5-3.5 5-8 3.5Z" /><path d="M4 21h16" /></svg>
+                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.Died)</b><small>The plant didn't make it</small></span>
+                        </button>
+                    </li>
+                </ul>
+                break;
+
+            case Shown.Died:
+                <p class="mb-3">Mark the plant as died?</p>
+                <div class="mb-3">
+                    <label class="form-label" for="problem-cause">What happened? <span class="text-body-secondary">(optional)</span></label>
+                    <input id="problem-cause" class="form-control" @bind="cause" />
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" disabled="@busy" @onclick="MarkDiedAsync">Mark as died</button>
+                    <button type="button" class="btn btn-link" @onclick="CloseSheetAndReloadAsync">Not now</button>
+                </div>
+                break;
+        }
+    </Sheet>
+
+    <PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="plant.CoverPhotoId" />
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private enum Shown { None, Update, Edit, Close, Died }
+
+    private Problem? problem;
+    private Plant? plant;
+    private IReadOnlyList<ProblemUpdate> updates = [];
+    private IReadOnlyList<ProblemLogItem> log = [];
+    private IReadOnlyList<PastProblem> past = [];
+    private IReadOnlyList<Photo> photos = [];
+    private Dictionary<Guid, int> photoIndex = [];
+    private Places places = Places.None;
+    private bool loaded;
+    private bool busy;
+    private bool confirmDelete;
+    private int deletePhotos;
+    private int? viewerIndex;
+    private string? status;
+
+    private Shown sheet;
+    private ProblemUpdate? editing;
+    private DateOnly closeOn;
+    private string? closeError;
+    private string? cause;
+
+    private DateOnly Today => Time.Today();
+
+    /// <summary>A plant that is gone only has its problem to read, or delete.</summary>
+    private bool Here => plant is { Status: PlantStatus.Active };
+
+    private IReadOnlyList<ProblemTrend> trends =>
+        updates.Where(u => u.Trend is not null).Select(u => u.Trend!.Value).ToList();
+
+    private string SheetTitle => sheet switch
+    {
+        Shown.Update => "How does it look?",
+        Shown.Edit => "Something's wrong",
+        Shown.Close => "How did it end?",
+        Shown.Died => "It died",
+        _ => ""
+    };
+
+    // "Before, with yellow leaves": the first sign the first earlier problem had in common
+    private string BeforeSign => past.Count > 0 && past[0].Shared.Count > 0
+        ? ProblemText.Sign(past[0].Shared[0]).ToLowerInvariant()
+        : "this";
+
+    private IEnumerable<(DateOnly Day, List<ProblemLogItem> Items)> LogDays =>
+        log.GroupBy(i => i.Day).Select(g => (g.Key, g.ToList()));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        confirmDelete = false;
+        sheet = Shown.None;
+        status = null;
+        await ReloadAsync();
+        loaded = true;
+    }
+
+    private async Task ReloadAsync()
+    {
+        problem = (await ProblemService.AllAsync()).FirstOrDefault(p => p.Id == Id);
+        var plants = await PlantRepository.GetAllAsync();
+        plant = problem is null ? null : plants.FirstOrDefault(p => p.Id == problem.SubjectId);
+        if (problem is null || plant is null)
+            return;
+
+        updates = await ProblemService.UpdatesForAsync(problem.Id);
+        var entries = await TimelineRepository.GetForAsync(plant.Id);
+        log = ProblemService.Log(problem, updates, entries);
+        places = await RoomService.GetPlacesAsync();
+        past = ProblemService.PastOfSameKind(problem, await ProblemService.AllAsync(), await ProblemService.AllUpdatesAsync(), plants);
+
+        // The viewer pages through the photos in the order the log shows them
+        var wanted = log.SelectMany(i => i.PhotoIds).Distinct().ToList();
+        var stored = (await PhotoRepository.GetForAsync(plant.Id)).ToDictionary(p => p.Id);
+        photos = wanted.Where(stored.ContainsKey).Select(id => stored[id]).ToList();
+        photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
+    }
+
+    private string DayLabel(DateOnly day) =>
+        day == Today ? "Today"
+        : day == Today.AddDays(-1) ? "Yesterday"
+        : Labels.Date(day);
+
+    private void OpenUpdate(ProblemUpdate? existing)
+    {
+        editing = existing;
+        sheet = Shown.Update;
+    }
+
+    private void OpenEdit() => sheet = Shown.Edit;
+
+    private void OpenClose()
+    {
+        closeOn = Today;
+        closeError = null;
+        sheet = Shown.Close;
+    }
+
+    private void CloseSheet() => sheet = Shown.None;
+
+    private async Task CloseSheetAndReloadAsync()
+    {
+        sheet = Shown.None;
+        await ReloadAsync();
+    }
+
+    private async Task SavedAsync()
+    {
+        sheet = Shown.None;
+        await ReloadAsync();
+    }
+
+    private async Task CloseAsync(ProblemOutcome outcome)
+    {
+        busy = true;
+        closeError = null;
+        try
+        {
+            await ProblemService.CloseAsync(problem!, outcome, closeOn);
+            if (outcome == ProblemOutcome.Died)
+            {
+                cause = ProblemText.CauseOfDeath(problem!);
+                sheet = Shown.Died;
+            }
+            else
+            {
+                sheet = Shown.None;
+            }
+            await ReloadAsync();
+        }
+        catch (ArgumentException ex)
+        {
+            closeError = ex.Message.Split(" (Parameter")[0];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // The same change the plant page makes from its It died sheet
+    private async Task MarkDiedAsync()
+    {
+        busy = true;
+        try
+        {
+            var before = plant!.Copy();
+            plant.Status = PlantStatus.Died;
+            plant.CauseOfDeath = string.IsNullOrWhiteSpace(cause) ? null : cause.Trim();
+            await PlantService.UpdateAsync(before, plant, Labels.For);
+            sheet = Shown.None;
+            status = "Marked as died.";
+            await ReloadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task ReopenAsync()
+    {
+        busy = true;
+        try
+        {
+            await ProblemService.ReopenAsync(problem!);
+            await ReloadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task AskDeleteAsync()
+    {
+        deletePhotos = await ProblemService.PhotoCountAsync(problem!);
+        confirmDelete = true;
+    }
+
+    private async Task DeleteAsync()
+    {
+        busy = true;
+        try
+        {
+            var plantId = plant!.Id;
+            await ProblemService.RemoveAsync(problem!);
+            Navigation.NavigateTo($"plants/{plantId}", replace: true);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

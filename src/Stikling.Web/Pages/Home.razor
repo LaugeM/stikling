@@ -22,6 +22,7 @@
 @inject WateringAnswers Answers
 @inject AppBadge Badge
 @inject PlantService PlantService
+@inject ProblemService ProblemService
 @inject PropagationService PropagationService
 @inject RoomService RoomService
 @inject TimeProvider Time
@@ -268,6 +269,42 @@ else
         </section>
     }
 
+    @if (!Away && LookAgainNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Look again</h2>
+            <ul class="item-list">
+                @foreach (var item in LookAgainNow)
+                {
+                    var due = item;
+                    <TodayRow @key="item.Problem.Id" OnPutOff="days => PutOffAsync(PutOffs.Problem(due.Problem.Id, due.Since), Today.AddDays(days))">
+                        <div class="look-again-row">
+                            <a class="item-card look-again-link" href="problems/@item.Problem.Id">
+                                <SubjectThumb Subject="item.Plant" />
+                                <div class="item-text">
+                                    <div class="item-name">@item.Plant.DisplayName</div>
+                                    <div class="item-meta">
+                                        <span>@ProblemText.Signs(item.Problem.KnownSigns) · @Labels.Count(ProblemText.DaysLasted(item.Problem, Today), "day")</span>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="look-again-buttons" role="group" aria-label="How does @item.Plant.DisplayName look?">
+                                @foreach (var trend in Enum.GetValues<ProblemTrend>())
+                                {
+                                    var picked = trend;
+                                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => LookAt(due, picked)">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.Trend(trend)</svg>
+                                        @(trend == ProblemTrend.Same ? "Same" : ProblemText.Trend(trend))
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
     @if (!Away && QuarantineNow.Count > 0)
     {
         <section class="today-section">
@@ -506,6 +543,14 @@ else
     {
         <p class="year-link"><a href="year">Your year so far</a></p>
     }
+
+    <Sheet Title="How does it look?" Open="looking is not null" OpenChanged="open => { if (!open) looking = null; }">
+        @if (looking is not null)
+        {
+            <ProblemSheet @key="looking.Problem.Id" Plant="looking.Plant" Mode="ProblemSheetMode.Update" Problem="looking.Problem"
+                          StartTrend="lookingTrend" BackLabel="Cancel" OnBack="() => looking = null" OnSaved="LookedAsync" />
+        }
+    </Sheet>
 }
 
 @code {
@@ -563,6 +608,9 @@ else
     private int cleanWeeks = PestService.DefaultCleanWeeks;
     private IReadOnlyList<TimelineEntry> recent = [];
     private IReadOnlyList<AttentionItem> flagged = [];
+    private IReadOnlyList<LookAgain> lookAgain = [];
+    private LookAgain? looking;
+    private ProblemTrend? lookingTrend;
     private IReadOnlyList<PhotoDue> photoRound = [];
     private PutOffs putOffs = PutOffs.Empty();
     private bool dailyRoundOn;
@@ -605,6 +653,9 @@ else
 
     private IEnumerable<(string Heading, List<PestCaseView> Cases)> AwayHides(IEnumerable<(string Heading, List<PestCaseView> Cases)> groups) =>
         Away ? [] : groups;
+
+    private List<LookAgain> LookAgainNow =>
+        lookAgain.Where(i => !putOffs.IsPutOff(PutOffs.Problem(i.Problem.Id, i.Since), Today)).ToList();
 
     private List<AttentionItem> FlaggedNow =>
         flagged.Where(i => !putOffs.IsPutOff(PutOffs.Flag(i.Subject.Id, i.Attention), Today)).ToList();
@@ -671,7 +722,7 @@ else
     // While away nothing is asked for, and while the list on the day back is up it stands for Water and Worth a look
     private int DueCount =>
         Away ? 0
-        : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + FlaggedNow.Count + QuarantineNow.Count
+        : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + FlaggedNow.Count + LookAgainNow.Count + QuarantineNow.Count
         + (Holding ? backRows.Count : ChecksNow.Count + wateringDue.Count(d => d.DueNow))
         + (roundSuggestion is not null ? 1 : 0)
         + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
@@ -695,6 +746,8 @@ else
         checks = TodayBoard.NeedsChecking(propagations, latest, Time, careDays: careDays, roundDays: roundDays, putOffs: putOffs);
         nextRoundChecks = TodayBoard.NeedsCheckingNextRound(propagations, latest, Time, roundDays, putOffs, careDays: careDays);
         flagged = TodayBoard.NeedsAttention(plants, propagations, Today);
+        lookAgain = ProblemService.LookAgainDue(
+            await ProblemService.AllAsync(), await ProblemService.AllUpdatesAsync(), plants, Today);
 
         places = await RoomService.GetPlacesAsync();
         photoRound = settings.PhotoReminder
@@ -947,6 +1000,19 @@ else
         await PutOffService.PutOffAsync(key, until);
         // Putting off a room, or the round, moves it on to the next room or takes it away
         FindRound();
+        await Badge.SetAsync(DueCount);
+    }
+
+    private void LookAt(LookAgain item, ProblemTrend trend)
+    {
+        looking = item;
+        lookingTrend = trend;
+    }
+
+    private async Task LookedAsync()
+    {
+        looking = null;
+        await LoadAsync();
         await Badge.SetAsync(DueCount);
     }
 

@@ -56,7 +56,10 @@ public enum TimelineEvent
     Arrived,
 
     /// <summary>A plant got buds, came into flower or finished flowering.</summary>
-    Flowering
+    Flowering,
+
+    /// <summary>A problem on a plant was opened, updated, closed or came back.</summary>
+    Problem
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>

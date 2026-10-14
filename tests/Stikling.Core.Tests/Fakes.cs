@@ -9,6 +9,7 @@ using Stikling.Core.Names;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
+using Stikling.Core.Problems;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
@@ -997,6 +998,68 @@ internal sealed class FakeFloweringMarkRepository : IFloweringMarkRepository
     {
         if (Marks.TryGetValue(id, out var mark))
             mark.DeletedAt = mark.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeProblemRepository : IProblemRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Problem> Problems { get; } = [];
+
+    public Task<IReadOnlyList<Problem>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Problem>>(Problems.Values.Where(p => !p.IsDeleted).ToList());
+
+    public Task<Problem?> GetAsync(Guid id) =>
+        Task.FromResult(Problems.TryGetValue(id, out var problem) && !problem.IsDeleted ? problem : null);
+
+    public Task SaveAsync(Problem problem)
+    {
+        if (problem.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid problem");
+        if (problem.CreatedAt == default)
+            problem.CreatedAt = clock;
+        problem.UpdatedAt = clock = clock.AddSeconds(1);
+        Problems[problem.Id] = problem;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Problems.TryGetValue(id, out var problem))
+            problem.DeletedAt = problem.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeProblemUpdateRepository : IProblemUpdateRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, ProblemUpdate> Updates { get; } = [];
+
+    public Task<IReadOnlyList<ProblemUpdate>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<ProblemUpdate>>(Updates.Values.Where(u => !u.IsDeleted).ToList());
+
+    public Task<ProblemUpdate?> GetAsync(Guid id) =>
+        Task.FromResult(Updates.TryGetValue(id, out var update) && !update.IsDeleted ? update : null);
+
+    public Task SaveAsync(ProblemUpdate update)
+    {
+        if (update.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid update");
+        if (update.CreatedAt == default)
+            update.CreatedAt = clock;
+        update.UpdatedAt = clock = clock.AddSeconds(1);
+        Updates[update.Id] = update;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Updates.TryGetValue(id, out var update))
+            update.DeletedAt = update.UpdatedAt = clock = clock.AddSeconds(1);
         return Task.CompletedTask;
     }
 }

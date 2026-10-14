@@ -1,0 +1,435 @@
+@* The form for a problem, for the inside of a Sheet. Open mode is for what you see on a plant
+   (a new problem, or changing one), Update mode for how it looks now and what was done. The page
+   that shows it owns the Sheet and its title: "Something's wrong" for Open and "How does it look?"
+   for Update. Photos are stored when they're picked and deleted again if the form goes away
+   without saving, so closing the Sheet by any means clears them. *@
+@inject ProblemService Problems
+@inject IPlantRepository PlantRepository
+@inject PhotoService Photos
+@inject DeviceFiles Device
+@inject ILogger<ProblemSheet> Logger
+@inject TimeProvider Time
+@implements IAsyncDisposable
+
+<div class="problem-sheet">
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-3" role="alert">@error</div>
+    }
+
+    @if (Mode == ProblemSheetMode.Open)
+    {
+        <div class="mb-3" role="group" aria-labelledby="@signsLabelId">
+            <span class="form-label d-block" id="@signsLabelId">What do you see?</span>
+            <div class="chip-row">
+                @foreach (var sign in Enum.GetValues<ProblemSign>())
+                {
+                    var chosen = sign;
+                    var on = signs.Contains(sign);
+                    <button type="button" class="chip @(on ? "picked" : null)" aria-pressed="@(on ? "true" : "false")"
+                            @onclick="() => Toggle(signs, chosen)">@ProblemText.Sign(sign)</button>
+                }
+            </div>
+            @if (Problem is null)
+            {
+                <p class="form-text mb-0">Bugs or webbing? <a href="pests/new?plant=@Plant.Id">Open a pest case instead</a></p>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="@dateId">Since</label>
+            <input id="@dateId" type="date" class="form-control" @bind="day" max="@Today.ToString("yyyy-MM-dd")" />
+        </div>
+    }
+    else
+    {
+        <div class="mb-3">
+            <span class="form-label d-block" id="@trendLabelId">How does it look?</span>
+            <div class="btn-group segmented" role="group" aria-labelledby="@trendLabelId">
+                @foreach (var choice in Enum.GetValues<ProblemTrend>())
+                {
+                    var option = choice;
+                    <button type="button" class="btn btn-outline-primary @(trend == option ? "active" : null)"
+                            aria-pressed="@(trend == option ? "true" : "false")"
+                            @onclick="() => trend = trend == option ? null : option">@ProblemText.Trend(option)</button>
+                }
+            </div>
+        </div>
+
+        <div class="mb-3" role="group" aria-labelledby="@didLabelId">
+            <span class="form-label d-block" id="@didLabelId">What did you do? <span class="text-body-secondary">(optional)</span></span>
+            <div class="chip-row">
+                @foreach (var action in Enum.GetValues<ProblemAction>())
+                {
+                    var chosen = action;
+                    var on = did.Contains(action);
+                    <button type="button" class="chip @(on ? "picked" : null)" aria-pressed="@(on ? "true" : "false")"
+                            @onclick="() => Toggle(did, chosen)">@ProblemText.Action(action)</button>
+                }
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="@dateId">On</label>
+            <input id="@dateId" type="date" class="form-control" @bind="day"
+                   min="@Problem!.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+        </div>
+    }
+
+    <div class="mb-3">
+        <label class="form-label" for="@noteId">Note <span class="text-body-secondary">(optional)</span></label>
+        <textarea id="@noteId" class="form-control" rows="2" @bind="note" @bind:event="oninput"></textarea>
+    </div>
+
+    @if (!Editing)
+    {
+        <div class="mb-3">
+            @if (photos.Count > 0)
+            {
+                <div class="photo-picks">
+                    @foreach (var photo in photos)
+                    {
+                        <div class="photo-pick">
+                            <PhotoImage PhotoId="photo.Id" Alt="Photo to add" />
+                            <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
+                                    aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                        </div>
+                    }
+                </div>
+            }
+            <div class="composer-row">
+                <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                    Camera
+                </label>
+                <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                       @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
+                <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                    Gallery
+                </label>
+                <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
+                       @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+            </div>
+            @if (photoStatus is not null)
+            {
+                <p class="form-text mb-0" role="status">@photoStatus</p>
+            }
+        </div>
+    }
+
+    <div class="mb-3">
+        <span class="form-label d-block" id="@againLabelId">Look again</span>
+        <div class="btn-group segmented" role="radiogroup" aria-labelledby="@againLabelId">
+            @foreach (var (value, label) in AgainChoices)
+            {
+                var id = $"{againName}-{value}";
+                <input type="radio" class="btn-check" name="@againName" id="@id" checked="@(lookAgain == value)" @onchange="() => lookAgain = value" />
+                <label class="btn btn-outline-primary" for="@id">@label</label>
+            }
+        </div>
+    </div>
+
+    @if (confirmDelete)
+    {
+        <div class="problem-confirm mb-3">
+            <span>@(deletePhotos > 0 ? "Delete this update? Its photos stay on the plant's history." : "Delete this update?")</span>
+            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">Delete</button>
+            <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+        </div>
+    }
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" disabled="@(busy || (Mode == ProblemSheetMode.Open && signs.Count == 0))" @onclick="SaveAsync">Save</button>
+        @if (BackLabel is not null)
+        {
+            <button type="button" class="btn btn-link" @onclick="() => OnBack.InvokeAsync()">@BackLabel</button>
+        }
+        @if (Existing is not null && !confirmDelete)
+        {
+            <button type="button" class="btn btn-link text-danger ms-auto" disabled="@busy" @onclick="AskDeleteAsync">Delete update</button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required Plant Plant { get; set; }
+
+    [Parameter]
+    public ProblemSheetMode Mode { get; set; }
+
+    /// <summary>
+    /// The problem. Not set in Open mode when a new one is made, set when changing what was seen,
+    /// and always set in Update mode.
+    /// </summary>
+    [Parameter]
+    public Problem? Problem { get; set; }
+
+    /// <summary>An update being corrected, in Update mode. Without it a new one is added.</summary>
+    [Parameter]
+    public ProblemUpdate? Existing { get; set; }
+
+    /// <summary>Update mode starts with this one picked, from the buttons on Today.</summary>
+    [Parameter]
+    public ProblemTrend? StartTrend { get; set; }
+
+    /// <summary>The text of the link back, e.g. to the plant's menu. None is shown without it.</summary>
+    [Parameter]
+    public string? BackLabel { get; set; }
+
+    [Parameter]
+    public EventCallback OnBack { get; set; }
+
+    /// <summary>Raised after something was saved or deleted, so the page can close the Sheet and show it.</summary>
+    [Parameter]
+    public EventCallback OnSaved { get; set; }
+
+    private static readonly (int Value, string Label)[] AgainChoices =
+        [(0, "No"), (3, "In 3 days"), (7, "In a week"), (14, "In 2 weeks")];
+
+    private readonly string dateId = $"problem-date-{Guid.NewGuid():N}";
+    private readonly string noteId = $"problem-note-{Guid.NewGuid():N}";
+    private readonly string signsLabelId = $"problem-signs-{Guid.NewGuid():N}";
+    private readonly string didLabelId = $"problem-did-{Guid.NewGuid():N}";
+    private readonly string trendLabelId = $"problem-trend-{Guid.NewGuid():N}";
+    private readonly string againLabelId = $"problem-again-{Guid.NewGuid():N}";
+    private readonly string againName = $"problem-again-{Guid.NewGuid():N}";
+    private readonly string cameraId = $"problem-camera-{Guid.NewGuid():N}";
+    private readonly string galleryId = $"problem-gallery-{Guid.NewGuid():N}";
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    private const string DraftKey = "problem-draft-photos";
+
+    private readonly HashSet<ProblemSign> signs = [];
+    private readonly HashSet<ProblemAction> did = [];
+    private ProblemTrend? trend;
+    private DateOnly day;
+    private string? note;
+    private int lookAgain;
+    private readonly List<Photo> photos = [];
+    private string? photoStatus;
+    private string? error;
+    private bool busy;
+    private bool confirmDelete;
+    private int deletePhotos;
+
+    private DateOnly Today => Time.Today();
+
+    // Changing what was seen, or correcting an update: the photos stay where they are
+    private bool Editing => Mode == ProblemSheetMode.Open ? Problem is not null : Existing is not null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (await Device.GetAsync(DraftKey) is { Length: > 0 } left)
+            {
+                foreach (var id in left.Split(',').Select(Guid.Parse))
+                    await Photos.DeleteAsync(id);
+                await Device.SetAsync(DraftKey, null);
+            }
+        }
+        catch (Exception ex) when (ex is FormatException or JSException)
+        {
+            // Nothing to clear up
+        }
+
+        if (Mode == ProblemSheetMode.Open)
+        {
+            if (Problem is { } problem)
+            {
+                foreach (var sign in problem.KnownSigns)
+                    signs.Add(sign);
+                day = problem.StartedOn;
+                note = problem.Note;
+                lookAgain = problem.LookAgainOn is { } again ? ProblemService.Closest(again.DayNumber - problem.StartedOn.DayNumber) : 0;
+                Keep(problem.LookAgainOn);
+            }
+            else
+            {
+                day = Today;
+                lookAgain = 7;
+            }
+            return;
+        }
+
+        if (Problem is null)
+            throw new InvalidOperationException("Update mode needs the problem.");
+
+        if (Existing is { } existing)
+        {
+            trend = existing.Trend;
+            foreach (var action in existing.KnownDid)
+                did.Add(action);
+            day = existing.OccurredOn;
+            note = existing.Note;
+            lookAgain = existing.LookAgainOn is { } again ? ProblemService.Closest(again.DayNumber - existing.OccurredOn.DayNumber) : 0;
+            Keep(existing.LookAgainOn);
+        }
+        else
+        {
+            trend = StartTrend;
+            day = Today;
+            lookAgain = ProblemService.LookAgainGap(Problem, await Problems.UpdatesForAsync(Problem.Id)) ?? 0;
+        }
+    }
+
+    private static void Toggle<T>(HashSet<T> set, T value)
+    {
+        if (!set.Remove(value))
+            set.Add(value);
+    }
+
+    private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
+    {
+        busy = true;
+        photoStatus = "Saving photos…";
+        StateHasChanged();
+
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType.Plant, Plant.Id);
+            photos.AddRange(result.Saved);
+            await RememberDraftAsync();
+            photoStatus = result.Message(guessesMatter: !fromCamera);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding photos to a problem failed");
+            photoStatus = $"Couldn't save the photos: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task RemovePhotoAsync(Photo photo)
+    {
+        await Photos.DeleteAsync(photo.Id);
+        photos.Remove(photo);
+        photoStatus = null;
+        await RememberDraftAsync();
+    }
+
+    // Kept on the device too, so photos left by a reload or a closed tab are cleared next time
+    private Task RememberDraftAsync() =>
+        Device.SetAsync(DraftKey, photos.Count == 0 ? null : string.Join(",", photos.Select(p => p.Id)));
+
+    // A record being changed keeps its own look again day unless the choice or the date is changed,
+    // since the choices only round it to 3, 7 or 14 days and it may have been set some other way
+    private (DateOnly? Again, int Choice, DateOnly Day)? kept;
+
+    private void Keep(DateOnly? again) => kept = (again, lookAgain, day);
+
+    private DateOnly? LookAgainDay =>
+        kept is { } k && k.Choice == lookAgain && k.Day == day ? k.Again
+        : lookAgain > 0 ? day.AddDays(lookAgain) : null;
+
+    // Names this version doesn't know stay on the record, since a newer version wrote them
+    private static List<string> Names<T>(IEnumerable<string>? stored, IEnumerable<T> picked) where T : struct, Enum =>
+    [
+        .. (stored ?? []).Where(s => !Enum.TryParse<T>(s, out var known) || !Enum.IsDefined(known)),
+        .. Enum.GetValues<T>().Where(v => picked.Contains(v)).Select(v => v.ToString())
+    ];
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            var ids = photos.Select(p => p.Id).ToList();
+            if (Mode == ProblemSheetMode.Open)
+            {
+                var draft = Problem?.Copy() ?? new Problem();
+                draft.StartedOn = day;
+                draft.Signs = Names(Problem?.Signs, signs);
+                draft.Note = note;
+                draft.LookAgainOn = LookAgainDay;
+                if (Problem is null)
+                    await Problems.OpenAsync(Plant, draft, ids);
+                else
+                    await Problems.EditAsync(draft);
+            }
+            else
+            {
+                var draft = Existing?.Copy() ?? new ProblemUpdate();
+                draft.OccurredOn = day;
+                draft.Trend = trend;
+                draft.Did = Names(Existing?.Did, did);
+                draft.Note = note;
+                draft.LookAgainOn = LookAgainDay;
+                if (Existing is null)
+                    await Problems.AddUpdateAsync(Problem!, draft, ids);
+                else
+                    await Problems.EditUpdateAsync(Problem!, draft);
+            }
+
+            if (photos.Count > 0 && Plant.CoverPhotoId is null)
+            {
+                Plant.CoverPhotoId = PhotoEntries.Cover(photos).Id;
+                await PlantRepository.SaveAsync(Plant);
+            }
+
+            photos.Clear(); // they belong to the history line now
+            await RememberDraftAsync();
+            await OnSaved.InvokeAsync();
+        }
+        catch (ArgumentException ex)
+        {
+            // The rule's own message, without " (Parameter 'x')"
+            error = ex.Message.Split(" (Parameter")[0];
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving a problem failed");
+            error = $"Couldn't save: {ex.Message}";
+        }
+        busy = false;
+    }
+
+    private async Task AskDeleteAsync()
+    {
+        deletePhotos = Existing is null ? 0 : await Problems.PhotoCountAsync(Problem!, Existing);
+        confirmDelete = true;
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (Existing is null)
+            return;
+
+        busy = true;
+        try
+        {
+            await Problems.RemoveUpdateAsync(Existing);
+            await OnSaved.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Deleting a problem update failed");
+            error = $"Couldn't delete: {ex.Message}";
+        }
+        busy = false;
+    }
+
+    /// <summary>Photos picked but never saved belong to nothing, so they go when the form does.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        if (photos.Count == 0)
+            return;
+
+        try
+        {
+            foreach (var photo in photos)
+                await Photos.DeleteAsync(photo.Id);
+            photos.Clear();
+            await RememberDraftAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away; the photos go with it
+        }
+    }
+}

@@ -38,11 +38,10 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-3. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
-4. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
-5. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
-6. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
+2. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
+3. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
+4. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
+5. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
 
 ### Cheap ones to slot in whenever
 
@@ -85,7 +84,7 @@ Small ones with no new screen worth the name:
 | ☐ | **Search everything**: one search for plants, propagations, pots, mixes, feeds, products and the notes on every history, with the `/` key to start it on a computer | 5 | M | v1.x |
 | ✅ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once. Each name is matched against the plant dictionary, and anything else on the line goes into the notes | 5 | S | v1.x |
 | ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | 5 | M | v1.x |
-| ☐ | **Problem log**: yellow leaves, root rot, sunburn, crispy edges. What you saw, what you did, and whether it helped | 4 | M | v1.x |
+| ✅ | **Problem log**: Something's wrong on a plant's More menu, for yellow leaves, root rot, sunburn, brown tips and the rest. Pick what you see, then add updates with what you did and whether it looks better, the same or worse, with photos, and close it with how it ended. Each step goes on the history, and the problem page lists the repots and moves made meanwhile. Opening one shows what you did the last times a plant of yours had the same and how it ended, never advice. Look again puts it on Today on a day you pick. Open problems have a badge, a filter on Plants, and a list on the Pests and problems page. Only plants for now | 4 | M | v1.x |
 | ✅ | **Already have it?** Adding a plant with the same name as one you have says so and links to it, so a second one is added on purpose | 5 | S | v1.x |
 | ✅ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
 | ✅ | Grid view with large photos as an alternative to the list | 4 | S | v1.x |

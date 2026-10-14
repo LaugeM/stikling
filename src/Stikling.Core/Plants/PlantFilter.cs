@@ -25,6 +25,7 @@ public enum PlantSort
 /// <param name="Tags">Picking several tags narrows the list: a plant has to carry all of them.</param>
 /// <param name="Quarantine">Only the plants in quarantine.</param>
 /// <param name="Dormant">Only the dormant plants.</param>
+/// <param name="OnlyIds">Only these plants, like the ones with an open problem. Null for no limit.</param>
 /// <param name="Sort">Name sorts A to Z. Room sorts by the room or spot's name, with the plants that
 /// have no place last. Newest and last activity put the most recent first.</param>
 /// <param name="PlaceName">The name of a plant's room or spot, for sorting by room.</param>
@@ -43,7 +44,8 @@ public sealed record PlantFilter(
     Func<Guid?, string?>? PlaceName = null,
     IReadOnlyDictionary<Guid, DateTimeOffset>? LastActivity = null,
     Func<Plant, string?>? Everyday = null,
-    PlantStatus? GoneAs = null)
+    PlantStatus? GoneAs = null,
+    IReadOnlySet<Guid>? OnlyIds = null)
 {
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
         Order(plants
@@ -52,6 +54,7 @@ public sealed record PlantFilter(
             .Where(MatchesLocation)
             .Where(p => !Quarantine || p.InQuarantine)
             .Where(p => !Dormant || p.IsDormant)
+            .Where(p => OnlyIds is null || OnlyIds.Contains(p.Id))
             .Where(p => Tags is null || Tags.All(tag => PlantTags.Has(p, tag)))
             .Where(MatchesSearch));
 
