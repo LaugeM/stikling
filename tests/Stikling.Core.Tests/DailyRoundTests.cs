@@ -34,8 +34,19 @@ public class DailyRoundTests
         return plant;
     }
 
-    private DailyRoundSuggestion? Suggest(PutOffs? putOffs = null) =>
-        DailyRound.Suggest(Places, plants, propagations, logs, timeline, putOffs ?? PutOffs.Empty(), Time);
+    private DailyRoundSuggestion? Suggest(PutOffs? putOffs = null, IReadOnlyList<Weekday>? roundDays = null) =>
+        DailyRound.Suggest(Places, plants, propagations, logs, timeline, putOffs ?? PutOffs.Empty(), Time, roundDays);
+
+    [Fact]
+    public void With_round_days_the_round_is_only_suggested_on_those_days()
+    {
+        PlantIn(living, Today.AddDays(-2));
+
+        // Today is a Monday
+        Assert.Null(Suggest(roundDays: [Weekday.Sunday]));
+        Assert.Equal(living.Id, Suggest(roundDays: [Weekday.Sunday, Weekday.Monday])!.Room.Id);
+        Assert.Equal(living.Id, Suggest(roundDays: [])!.Room.Id);
+    }
 
     [Fact]
     public void The_room_that_has_gone_longest_without_anything_logged_wins()
@@ -177,7 +188,8 @@ public class DailyRoundTests
         var guess = new WateringGuess(WateringForm.TopWatered, WateringMode.Interval, null, null, 7, 4, 0, Today, null, false, false);
         WateringDue[] due =
         [
-            new(inLiving, guess, true), new(inSpot, guess, true), new(inKitchen, guess, true), new(notYet, guess, false)
+            new(inLiving, guess, true, Today, false), new(inSpot, guess, true, Today, false),
+            new(inKitchen, guess, true, Today, false), new(notYet, guess, false, Today, false)
         ];
 
         Assert.Equal(2, DailyRound.DueIn(living.Id, due, Places));

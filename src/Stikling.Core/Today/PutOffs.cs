@@ -16,8 +16,13 @@ public sealed class PutOffs
     public const string PhotoRound = "photos";
 
     private readonly Dictionary<string, DateOnly> until;
+    private readonly Dictionary<string, DateOnly> ended;
 
-    private PutOffs(Dictionary<string, DateOnly> until) => this.until = until;
+    private PutOffs(Dictionary<string, DateOnly> until, Dictionary<string, DateOnly>? ended = null)
+    {
+        this.until = until;
+        this.ended = ended ?? new(until);
+    }
 
     public static PutOffs Empty() => new([]);
 
@@ -64,15 +69,24 @@ public sealed class PutOffs
         until.TryGetValue(key, out var back) && today < back;
 
     /// <summary>Hides it until the given day, when it shows again.</summary>
-    public void PutOff(string key, DateOnly back) => until[key] = back;
+    public void PutOff(string key, DateOnly back) => until[key] = ended[key] = back;
 
     /// <summary>
-    /// Builds it from the saved records, keeping only what hasn't come back yet. The records of
-    /// put-offs that have expired stay in the store and are ignored here.
+    /// The day the latest put-off under the key comes back, also when it has expired, or null when
+    /// there never was one. It's the only trace of a check answered with "Still wet" when no meter
+    /// reading is logged.
     /// </summary>
-    public static PutOffs From(IEnumerable<PutOff> saved, DateOnly today) =>
-        new(saved
-            .Where(p => !p.IsDeleted && p.Until > today)
-            .GroupBy(p => p.Key)
-            .ToDictionary(g => g.Key, g => g.Max(p => p.Until)));
+    public DateOnly? EndedOn(string key) => ended.TryGetValue(key, out var day) ? day : null;
+
+    /// <summary>
+    /// Builds it from the saved records, keeping only what hasn't come back yet as put off. The
+    /// records of put-offs that have expired stay in the store, and only <see cref="EndedOn"/> sees them.
+    /// </summary>
+    public static PutOffs From(IEnumerable<PutOff> saved, DateOnly today)
+    {
+        var live = saved.Where(p => !p.IsDeleted).ToList();
+        return new(
+            live.Where(p => p.Until > today).GroupBy(p => p.Key).ToDictionary(g => g.Key, g => g.Max(p => p.Until)),
+            live.GroupBy(p => p.Key).ToDictionary(g => g.Key, g => g.Max(p => p.Until)));
+    }
 }

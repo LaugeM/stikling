@@ -115,7 +115,7 @@ else
                 <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => OpenMore(More.PassOn)">Send them its history</button>
             }
 
-            <AttentionPanel Current="plant.Attention" Editing="false" EditingChanged="_ => OpenMore(More.Flag)"
+            <AttentionPanel Current="plant.Attention" Later="plant.AttentionLater" NextRoundDay="nextRoundDay" Editing="false" EditingChanged="_ => OpenMore(More.Flag)"
                             Suggestions="AttentionPanel.PlantReasons" OnSave="SetAttentionAsync" />
 
             <p class="profile-facts">@string.Join(" · ", Facts)</p>
@@ -574,7 +574,7 @@ else
                 break;
 
             case More.Flag:
-                <AttentionPanel Current="plant.Attention" Editing="true" EditingChanged="_ => more = More.None"
+                <AttentionPanel Current="plant.Attention" Later="plant.AttentionLater" NextRoundDay="nextRoundDay" Editing="true" EditingChanged="_ => more = More.None"
                                 Suggestions="AttentionPanel.PlantReasons" OnSave="SetAttentionAsync" />
                 break;
 
@@ -905,6 +905,7 @@ else
         recentChanges = RecentChanges.Of(
             plant, all, await TimelineRepository.GetPlantChangesAsync(), Today,
             RecentChanges.DaysOf((await SettingsService.GetAsync()).RecentChangesDays), Time.LocalDay);
+        nextRoundDay = RoundSchedule.Next((await SettingsService.GetAsync()).RoundDays, Today);
     }
 
     // Only said when the reminder is on for the collection and for this plant
@@ -987,11 +988,13 @@ else
 
     private string TagLink(string tag) => $"plants?tag={Uri.EscapeDataString(tag)}";
 
-    private async Task SetAttentionAsync(string? reason)
+    private DateOnly? nextRoundDay;
+
+    private async Task SetAttentionAsync((string? Reason, LooseDate? From) change)
     {
         if (plant is null)
             return;
-        await PlantService.SetAttentionAsync(plant, reason);
+        await PlantService.SetAttentionAsync(plant, change.Reason, change.From);
     }
 
     // Each change goes on the history, like it does from the edit form

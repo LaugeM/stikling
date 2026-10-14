@@ -85,6 +85,18 @@
     stroke-linejoin: round;
 }
 
+/* On a day that isn't a round day: how many plants wait for the next one, and a link to go round them now */
+.today-next-round {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
 /* A short note under Water on how to tell whether a plant is dry */
 .today-hint {
     margin-bottom: 0.5rem;

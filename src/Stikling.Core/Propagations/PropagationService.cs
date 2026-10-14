@@ -121,11 +121,13 @@ public sealed class PropagationService(
 
     /// <summary>
     /// Flags a propagation as needing something, e.g. "Change the water", or clears the flag
-    /// with null. It's only a reminder for Today, so nothing goes on the history.
+    /// with null. It's only a reminder for Today, so nothing goes on the history. With
+    /// <paramref name="from"/> (a month or a day) it stays off Today until then.
     /// </summary>
-    public async Task SetAttentionAsync(Propagation propagation, string? reason)
+    public async Task SetAttentionAsync(Propagation propagation, string? reason, LooseDate? from = null)
     {
         propagation.Attention = Attention.Change(propagation.Attention, reason, Today);
+        propagation.AttentionLater = AttentionLater.For(propagation.Attention, from);
         await propagations.SaveAsync(propagation);
     }
 

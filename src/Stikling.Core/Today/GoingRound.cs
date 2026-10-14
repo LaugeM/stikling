@@ -112,9 +112,39 @@ public static class GoingRound
         IReadOnlyList<AwayStretch> stretches,
         Hemisphere hemisphere,
         TimeProvider time,
-        PutOffs putOffs) =>
-        [.. WateringRound.Due(plants, logs, timeline, pot, lights, places, stretches, hemisphere, time, putOffs)
-            .Where(d => d.DueNow)
+        PutOffs putOffs,
+        IReadOnlyList<Weekday>? roundDays = null) =>
+        InRoomOrder(
+            WateringRound.Due(plants, logs, timeline, pot, lights, places, stretches, hemisphere, time, putOffs, roundDays)
+                .Where(d => d.DueNow),
+            places);
+
+    /// <summary>
+    /// The plants gathered onto the next round day, which aren't due yet, in the same order as
+    /// <see cref="ForDue"/>. Empty when round days are off, or today is a round day.
+    /// </summary>
+    public static IReadOnlyList<RoundCard> ForNext(
+        IEnumerable<Plant> plants,
+        IEnumerable<CareLog> logs,
+        IEnumerable<TimelineEntry> timeline,
+        Func<Guid, Pot?>? pot,
+        IEnumerable<GrowLight> lights,
+        Places places,
+        IReadOnlyList<AwayStretch> stretches,
+        Hemisphere hemisphere,
+        TimeProvider time,
+        PutOffs putOffs,
+        IReadOnlyList<Weekday>? roundDays)
+    {
+        var next = RoundSchedule.Next(roundDays, time.Today());
+        return InRoomOrder(
+            WateringRound.Due(plants, logs, timeline, pot, lights, places, stretches, hemisphere, time, putOffs, roundDays)
+                .Where(d => d.Gathered && !d.DueNow && d.ShowOn == next),
+            places);
+    }
+
+    private static IReadOnlyList<RoundCard> InRoomOrder(IEnumerable<WateringDue> due, Places places) =>
+        [.. due
             .Select(d => (Due: d, Place: places.Find(d.Plant.PlaceId), Room: places.RoomOf(d.Plant.PlaceId)))
             .OrderBy(x => x.Room is null)
             .ThenBy(x => x.Room?.Name ?? "", StringComparer.CurrentCultureIgnoreCase)

@@ -151,6 +151,12 @@ public sealed class Plant : Entity
     /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
     public Attention? Attention { get; set; }
 
+    /// <summary>
+    /// When the flag starts to show on Today, if it was set for later. Only counts while it was set
+    /// for the current flag. At the top of the record, so an older version saving it keeps it.
+    /// </summary>
+    public AttentionLater? AttentionLater { get; set; }
+
     /// <summary>Given away or sold: gone to someone else, and possibly with its pots.</summary>
     [JsonIgnore]
     public bool HasLeft => Status is PlantStatus.GivenAway or PlantStatus.Sold;

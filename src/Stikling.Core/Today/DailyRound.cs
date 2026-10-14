@@ -14,7 +14,7 @@ public static class DailyRound
 {
     /// <summary>
     /// The room to suggest today, or null when the round is put off for the day, or no room has
-    /// anything in it. Only days before today count as activity, so the suggestion stays the same
+    /// anything in it, or when round days are set and today isn't one. Only days before today count as activity, so the suggestion stays the same
     /// all day, also while the plants in the room are being gone over. A room nobody has logged
     /// anything in counts as the longest waiting, and the room's name decides between two equals.
     /// </summary>
@@ -29,10 +29,14 @@ public static class DailyRound
         IEnumerable<CareLog> logs,
         IReadOnlyDictionary<Guid, DateTimeOffset> lastTimelineActivity,
         PutOffs putOffs,
-        TimeProvider time)
+        TimeProvider time,
+        IReadOnlyList<Weekday>? roundDays = null)
     {
         var today = time.Today();
         if (putOffs.IsPutOff(PutOffs.DailyRound, today))
+            return null;
+        // With round days set, the round is only on those days
+        if (roundDays is { Count: > 0 } && !RoundSchedule.IsRoundDay(roundDays, today))
             return null;
 
         var activePlants = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
