@@ -17,7 +17,7 @@
             <select id="care-kind" class="form-select form-select-sm" @bind="kind" @bind:after="KindChanged">
                 @foreach (var value in Enum.GetValues<CareKind>())
                 {
-                    <option value="@value">@Labels.For(value)</option>
+                    <option value="@value">@KindLabel(value)</option>
                 }
             </select>
         </div>
@@ -147,6 +147,10 @@
     [Parameter]
     public EventCallback OnCancel { get; set; }
 
+    /// <summary>How the plant is watered, when it is one plant. A reservoir is refilled, so that is what the sheet offers first.</summary>
+    [Parameter]
+    public WateringForm? Form { get; set; }
+
     private CareKind kind = CareKind.Watered;
     private DateOnly occurredOn;
     private int? moisture;
@@ -170,6 +174,10 @@
     private string SubmitText =>
         PlantIds.Count == 1 ? "Log it" : $"Log for {Labels.Plants(PlantIds.Count)}";
 
+    // Topping up a reservoir is called refilling, the same as the tick on the watering screen
+    private string KindLabel(CareKind value) =>
+        value == CareKind.ToppedUp && Form == WateringForm.Reservoir ? WateringText.DoneLabel(WateringForm.Reservoir) : Labels.For(value);
+
     private string NotesHint => kind switch
     {
         CareKind.Fertilised => "e.g. Half strength",
@@ -181,7 +189,9 @@
     protected override async Task OnInitializedAsync()
     {
         occurredOn = Today;
-        products = (await ProductRepository.GetAllAsync())
+        if (Form is { } form)
+            kind = WateringForms.DoneKind(form);
+        products =(await ProductRepository.GetAllAsync())
             .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
         feeds = (await FeedRepository.GetAllAsync())
@@ -251,7 +261,7 @@
         error = null;
         try
         {
-            await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, Labels.For, moisture, doses,
+            await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, e => e is CareKind k ? KindLabel(k) : Labels.For(e), moisture, doses,
                 feed, water > 0 ? water : null, ec, ph);
             notes = null;
             moisture = null;
