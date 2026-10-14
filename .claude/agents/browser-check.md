@@ -14,6 +14,18 @@ Do not edit, create or delete files in the repository, and do not commit. Use Ba
 
 1. Start the dev server with `preview_start` and `{name: "stikling-web"}`. It uses port 5170 or another free port, so use the tab it returns.
 2. Read `DESIGN.md` only if you were asked to judge how something looks. For a check that something works or fits, skip it.
+3. If you were asked to use the real collection, also `preview_start` with `{name: "stikling-testdata"}` and note its port (5171 or another). Open `/backup` in the app, run this with `javascript_tool`, using that port, then click Restore in the card that appears:
+
+   ```js
+   const base = 'http://localhost:5171/';
+   const name = (await fetch(base).then(r => r.json())).filter(n => n.endsWith('.zip')).sort().at(-1);
+   const blob = await fetch(base + encodeURIComponent(name)).then(r => r.blob());
+   const dt = new DataTransfer(); dt.items.add(new File([blob], name, { type: 'application/zip' }));
+   const input = document.getElementById('restore-file'); input.files = dt.files;
+   input.dispatchEvent(new Event('change', { bubbles: true })); name
+   ```
+
+   That picks the newest backup. For an older one, use its file name. It is a real person's collection: don't sign in while it's there, don't quote plant names, notes or places in your report, and delete the database at the end like any data you added.
 
 ## Sizes
 
