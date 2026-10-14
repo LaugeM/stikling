@@ -568,4 +568,41 @@ public class FloweringTests
         Assert.NotEmpty(Mark(null, 2026, 5, 1).Validate(today));
         Assert.NotEmpty(Mark(FloweringStage.Buds, LooseDate.Of(2026, 5), plant: Guid.Empty).Validate(today));
     }
+
+    [Fact]
+    public void A_flowering_left_open_for_over_a_year_ends_and_the_next_mark_starts_a_new_one()
+    {
+        var all = Of(
+            Mark(FloweringStage.InFlower, LooseDate.Of(2024, 5)),
+            Mark(FloweringStage.InFlower, 2026, 4, 10));
+
+        Assert.Equal(2, all.Count);
+        Assert.True(all[0].EndUnknown);
+        Assert.False(all[0].IsOpen);
+        Assert.True(all[1].IsOpen);
+    }
+
+    [Fact]
+    public void Still_in_flower_within_a_year_keeps_the_same_flowering()
+    {
+        var all = Of(
+            Mark(FloweringStage.InFlower, 2026, 1, 10),
+            Mark(FloweringStage.InFlower, 2026, 6, 1));
+
+        Assert.Single(all);
+        Assert.True(all[0].IsOpen);
+    }
+
+    [Fact]
+    public void A_forgotten_open_flowering_gets_no_badge_and_no_question()
+    {
+        var marks = new[] { Mark(FloweringStage.InFlower, LooseDate.Of(2024, 5)) };
+        var today = new DateOnly(2026, 10, 14);
+
+        var all = Flowerings.Of(marks, PlantId, today);
+
+        Assert.True(all[0].EndUnknown);
+        Assert.Null(FloweringNow.Of(all, today));
+        Assert.NotNull(FloweringNow.Of(Flowerings.Of(marks, PlantId, new DateOnly(2024, 11, 1)), new DateOnly(2024, 11, 1)));
+    }
 }

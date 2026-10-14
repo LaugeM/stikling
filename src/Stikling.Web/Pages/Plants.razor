@@ -501,7 +501,7 @@ else
         var today = Time.Today();
         var marks = (await FloweringRepository.GetAllAsync()).ToLookup(m => m.PlantId);
         flowering = all
-            .Select(p => (p.Id, Now: FloweringNow.Of(Flowerings.Of(marks[p.Id], p.Id), today)))
+            .Select(p => (p.Id, Now: FloweringNow.Of(Flowerings.Of(marks[p.Id], p.Id, today), today)))
             .Where(f => f.Now is not null)
             .ToDictionary(f => f.Id, f => f.Now!);
         tableValues = CoreTable.Rows(all, careLogs, today, places.NameOf,

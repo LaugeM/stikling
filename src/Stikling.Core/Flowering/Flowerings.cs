@@ -37,8 +37,19 @@ public sealed record FloweringPeriod(
 /// <summary>Works out a plant's flowerings from its marks.</summary>
 public static class Flowerings
 {
-    /// <summary>The plant's flowerings, oldest first. Deleted marks and ones with an unknown stage are ignored.</summary>
-    public static IReadOnlyList<FloweringPeriod> Of(IEnumerable<FloweringMark> marks, Guid plantId)
+    /// <summary>
+    /// After this many days without a mark, an open flowering is taken as one whose end wasn't
+    /// written down, like a past flowering added without an end. It closes with
+    /// <see cref="FloweringPeriod.EndUnknown"/>, and the next mark starts a new one. It is longer
+    /// than <see cref="FloweringNow.StaleAfterDays"/>, so "Still in flower?" is asked first.
+    /// </summary>
+    public const int ForgottenAfterDays = 365;
+
+    /// <summary>
+    /// The plant's flowerings, oldest first. Deleted marks and ones with an unknown stage are ignored.
+    /// With <paramref name="today"/>, an open flowering forgotten by then is closed too.
+    /// </summary>
+    public static IReadOnlyList<FloweringPeriod> Of(IEnumerable<FloweringMark> marks, Guid plantId, DateOnly? today = null)
     {
         var sorted = marks
             .Where(m => !m.IsDeleted && m.PlantId == plantId && m.Stage is not null)
@@ -51,6 +62,12 @@ public static class Flowerings
 
         foreach (var mark in sorted)
         {
+            if (open is not null && Forgotten(open, mark.On.Start))
+            {
+                open.EndUnknown = true;
+                open = null;
+            }
+
             switch (mark.Stage)
             {
                 case FloweringStage.Buds:
@@ -102,8 +119,14 @@ public static class Flowerings
             }
         }
 
+        if (open is not null && today is { } day && Forgotten(open, day))
+            open.EndUnknown = true;
+
         return all.Select(b => new FloweringPeriod(b.Buds, b.InFlower, b.Done, b.EndUnknown, b.Marks)).ToList();
     }
+
+    private static bool Forgotten(Builder open, DateOnly day) =>
+        day.DayNumber - open.Marks.Max(m => m.On.Start).DayNumber > ForgottenAfterDays;
 
     private sealed class Builder
     {

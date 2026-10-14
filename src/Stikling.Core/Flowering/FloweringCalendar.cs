@@ -38,7 +38,7 @@ public sealed record FloweringCalendar(
         foreach (var plant in plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active)
                      .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase))
         {
-            var flowerings = Flowerings.Of(byPlant[plant.Id], plant.Id);
+            var flowerings = Flowerings.Of(byPlant[plant.Id], plant.Id, today);
             if (flowerings.Count == 0)
                 continue;
 

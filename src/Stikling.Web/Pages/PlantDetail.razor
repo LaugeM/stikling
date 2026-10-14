@@ -700,7 +700,7 @@ else
                     @foreach (var (stage, index) in NextStages.Select((stage, index) => (stage, index)))
                     {
                         var chosen = stage;
-                        <button type="button" class="btn @(index == 0 ? "btn-primary" : "btn-outline-primary")" disabled="@(busy || since > Today)"
+                        <button type="button" class="btn @(index == 0 ? "btn-primary" : "btn-outline-primary")" disabled="@(busy || since > Today || since == default)"
                                 @onclick="() => MarkFloweringAsync(chosen)">@FloweringText.StageLabel(stage)</button>
                     }
                 </div>
@@ -1074,7 +1074,7 @@ else
             return;
 
         var marks = await FloweringService.ForPlantAsync(plant.Id);
-        flowerings = Flowerings.Of(marks, plant.Id);
+        flowerings = Flowerings.Of(marks, plant.Id, Today);
         floweringNow = FloweringNow.Of(flowerings, Today);
         usualStart = UsualStart.Of(flowerings, Today);
 
