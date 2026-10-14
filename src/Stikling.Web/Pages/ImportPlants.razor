@@ -90,7 +90,7 @@ else if (step == Step.Result && result is not null)
 }
 else if (sheet is not null)
 {
-    <div class="import-review">
+    <div class="import-review page-full">
         @* Columns. On a phone it is the first step; on a wide screen it sits beside the plants *@
         <section class="import-pane @(step == Step.Columns ? "current" : null)" aria-label="Columns">
             <p class="import-muted">
@@ -171,7 +171,7 @@ else if (sheet is not null)
                     <button type="button" class="btn btn-link link-action" @onclick="UntickAll">Untick all</button>
                 </div>
 
-                <div class="import-block">
+                <div class="import-block import-plants">
                     @for (var i = 0; i < rows.Count; i++)
                     {
                         var index = i;
