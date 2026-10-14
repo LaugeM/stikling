@@ -14,6 +14,7 @@
 @inject TimeProvider Time
 @inject PlantNameService Names
 @inject DeviceFiles Device
+@inject SitterSheetActions Sharer
 @inject WishService WishService
 @using CoreTable = Stikling.Core.Plants.PlantTable
 
@@ -28,6 +29,7 @@
             <span class="text-body-secondary small">@visible.Count of @all.Count</span>
             <a class="btn btn-outline-primary btn-sm" href="water?from=plants">Water plants</a>
             <a class="btn btn-link btn-sm link-action" href="plants/flowering">Flowering</a>
+            <button type="button" class="btn btn-link btn-sm link-action" disabled="@(ShareCount == 0)" @onclick="OpenShare">Share as text</button>
             <a class="btn btn-link btn-sm link-action" href="wishlist">Wishlist</a>
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
                 @(selecting ? "Done" : "Select")
@@ -307,6 +309,28 @@ else
     }
 </Sheet>
 
+<Sheet Title="Share as text" @bind-Open="shareOpen">
+    <p class="text-body-secondary small">@(selecting && selected.Count > 0 ? $"The {Labels.Plants(selected.Count)} you selected." : $"The {Labels.Plants(ShareCount)} shown now, with the search and filters.") Names only, never rooms, prices, where they came from or tags.</p>
+    <div class="share-options">
+        <div class="form-check form-switch">
+            <input id="share-nicknames" type="checkbox" class="form-check-input" role="switch" @bind="shareNicknames" />
+            <label class="form-check-label" for="share-nicknames">Include your nicknames</label>
+        </div>
+        <div class="form-check form-switch">
+            <input id="share-footer" type="checkbox" class="form-check-input" role="switch" @bind="shareFooter" />
+            <label class="form-check-label" for="share-footer">End with "Kept in Stikling, stikling.app"</label>
+        </div>
+    </div>
+    <pre class="share-preview" aria-label="What will be shared">@ShareText</pre>
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" disabled="@(ShareCount == 0)" @onclick="ShareAsync">Share</button>
+        @if (shareStatus.Length > 0)
+        {
+            <span class="text-body-secondary small" role="status">@shareStatus</span>
+        }
+    </div>
+</Sheet>
+
 @if (selecting)
 {
     <div class="bulk-bar" role="region" aria-label="Actions for selected plants">
@@ -321,6 +345,21 @@ else
                 <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || bulkTags.Count == 0)"
                         @onclick="AddBulkTagsAsync">Add to @Labels.Plants(selected.Count)</button>
                 <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkTagOpen = false">Cancel</button>
+            </div>
+        }
+        else if (bulkSwapOpen)
+        {
+            <div class="bulk-row">
+                <span class="bulk-count">Offer @Labels.Plants(selected.Count) for swap</span>
+            </div>
+            <div class="bulk-row">
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
+                        @onclick="() => SetBulkSpareAsync(SpareMark.CuttingsToSpare)">Cuttings to spare</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
+                        @onclick="() => SetBulkSpareAsync(SpareMark.UpForSwap)">Up for swap</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
+                        @onclick="() => SetBulkSpareAsync(null)">Not offered</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkSwapOpen = false">Cancel</button>
             </div>
         }
         else if (bulkMoveOpen)
@@ -376,6 +415,8 @@ else
                         @onclick="OpenBulkTags">Tag</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
                         @onclick="OpenBulkMove">Move</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
+                        @onclick="OpenBulkSwap">For swap</button>
             </div>
         }
         @if (bulkMessage is not null)
@@ -471,6 +512,7 @@ else
     private bool bulkCareOpen;
     private bool bulkTagOpen;
     private bool bulkMoveOpen;
+    private bool bulkSwapOpen;
     private string? bulkPlace; // as picked, "Living room / Windowsill"
     private List<string> bulkTags = [];
     private IReadOnlyList<CareLog> careLogs = [];
@@ -659,6 +701,7 @@ else
         bulkCareOpen = false;
         bulkTagOpen = false;
         bulkMoveOpen = false;
+        bulkSwapOpen = false;
         bulkMessage = null;
         cameInIds = [];
     }
@@ -718,6 +761,64 @@ else
         bulkMessage = $"Checked {Labels.Plants(plants.Count)} for pests.";
         cameInIds = [];
         busy = false;
+    }
+
+    private void OpenBulkSwap()
+    {
+        bulkSwapOpen = true;
+        bulkMessage = null;
+    }
+
+    private async Task SetBulkSpareAsync(SpareMark? mark)
+    {
+        busy = true;
+        var plants = SelectedPlants;
+        var changed = await PlantService.SetSpareAsync(plants, mark);
+        var what = mark is { } m ? SwapLists.MarkText(m).ToLowerInvariant() : "not offered";
+        bulkMessage = changed == plants.Count
+            ? $"Marked {Labels.Plants(changed)} as {what}."
+            : changed == 0
+                ? $"{Labels.Plants(plants.Count)} already {(plants.Count == 1 ? "was" : "were")} {what}."
+                : $"Marked {Labels.Plants(changed)} as {what}. {Labels.Plants(plants.Count - changed)} already {(plants.Count - changed == 1 ? "was" : "were")}.";
+        bulkSwapOpen = false;
+        selected.Clear();
+        await LoadAsync();
+        busy = false;
+    }
+
+    // Share as text: the plants selected in Select mode, otherwise what the filters show
+    private bool shareOpen;
+    private bool shareNicknames;
+    private bool shareFooter = true;
+    private string shareStatus = "";
+
+    private IReadOnlyList<Plant> ShareList => selecting && selected.Count > 0 ? SelectedPlants : visible;
+
+    private int ShareCount => ShareList.Count;
+
+    private string ShareText => SwapLists.WritePlants(ShareList, (g, s, c) => everyday?.For(g, s, c), shareNicknames, shareFooter);
+
+    private void OpenShare()
+    {
+        shareStatus = "";
+        shareOpen = true;
+    }
+
+    private async Task ShareAsync()
+    {
+        shareStatus = await Sharer.ShareTextAsync(ShareText) switch
+        {
+            "copied" => "Copied",
+            "failed" => "Couldn't share it",
+            "shared" => "Shared",
+            _ => ""
+        };
+        if (shareStatus.Length == 0)
+            return;
+
+        StateHasChanged();
+        await Task.Delay(3000);
+        shareStatus = "";
     }
 
     private void OpenBulkTags()

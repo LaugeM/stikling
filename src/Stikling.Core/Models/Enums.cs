@@ -23,6 +23,17 @@ public enum PlantStatus
     Sold
 }
 
+/// <summary>What a plant is offered for: cuttings from it, or the plant itself.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<SpareMark>))]
+public enum SpareMark
+{
+    /// <summary>It can spare cuttings, which aren't started yet.</summary>
+    CuttingsToSpare,
+
+    /// <summary>The plant itself is up for swap.</summary>
+    UpForSwap
+}
+
 /// <summary>
 /// Which of its pots went with a plant that was given away or sold. A rooted cutting usually
 /// goes without one, a plant for someone without soil at home in its pot, and now and then one

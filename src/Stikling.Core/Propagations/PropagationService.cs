@@ -262,6 +262,20 @@ public sealed class PropagationService(
         await AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway);
     }
 
+    /// <summary>
+    /// Sets how many units are offered for swap, never more than what is left. Zero or null clears it.
+    /// </summary>
+    public async Task SetSpareAsync(Propagation propagation, int? count)
+    {
+        int? value = count is > 0 ? Math.Min(count.Value, Math.Max(0, propagation.RemainingCount)) : null;
+        if (value == 0)
+            value = null;
+        if (propagation.SpareCount == value)
+            return;
+        propagation.SpareCount = value;
+        await propagations.SaveAsync(propagation);
+    }
+
     public Task DeleteAsync(Guid id) => propagations.DeleteAsync(id);
 
     /// <summary>

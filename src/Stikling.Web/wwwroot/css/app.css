@@ -1540,6 +1540,16 @@ img.framed {
     font-weight: 600;
 }
 
+/* Offered for swap: an outline in the reading green, so it shows next to the stage without competing with it */
+.swap-badge {
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--pa-green);
+    color: var(--pa-green-dark);
+    border-radius: 0.6rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
 /* "Still in flower?" under the name: a quiet question with two full-size buttons */
 .still-card {
     display: flex;

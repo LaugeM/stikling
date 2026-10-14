@@ -104,6 +104,37 @@
     min-height: 2.75rem;
 }
 
+/* Share as text: the two switches and a preview of what will be sent */
+.share-options .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    margin: 0;
+    padding-left: 0;
+}
+
+.share-options .form-check-input {
+    float: none;
+    flex: none;
+    margin: 0;
+}
+
+.share-preview {
+    max-height: 40vh;
+    margin: 0.5rem 0 1rem;
+    padding: 0.75rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--pa-text);
+    background: var(--pa-bg);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.6rem;
+}
+
 .wish-matches {
     margin-top: 1.5rem;
 }

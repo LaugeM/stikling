@@ -113,6 +113,10 @@ else
                 {
                     <span class="badge flowering-badge">@FloweringText.Badge(flowering.Stage)</span>
                 }
+                @if (Plant.IsOffered && Plant.Spare is { } spare)
+                {
+                    <span class="badge swap-badge">@SwapLists.MarkText(spare)</span>
+                }
                 @foreach (var pest in Pests)
                 {
                     <span class="badge pest-badge">@Labels.For(pest.Pest)</span>

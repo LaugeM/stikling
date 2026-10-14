@@ -81,6 +81,10 @@ else
                         {
                             <span class="badge dormant-badge">Dormant</span>
                         }
+                        @if (propagation.SpareAvailable > 0)
+                        {
+                            <a class="badge swap-badge" href="swap">@propagation.SpareAvailable to swap</a>
+                        }
                         @if (!propagation.IsActive)
                         {
                             <span class="badge @(propagation.Stage == PropagationStage.Failed ? "text-bg-secondary" : "stage-badge")">@Labels.Stage(propagation.Stage)</span>
@@ -677,6 +681,15 @@ else
                                 <span class="sheet-action-text"><b>@(propagation.Attention is null ? "Flag it" : "Change the flag")</b><small>Keeps it on Today until it's done</small></span>
                             </button>
                         </li>
+                        @if (propagation.IsActive)
+                        {
+                            <li>
+                                <button type="button" class="sheet-action" @onclick="OpenSwap">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3" /></svg>
+                                    <span class="sheet-action-text"><b>For swap</b><small>@(propagation.SpareAvailable > 0 ? $"{propagation.SpareAvailable} offered" : "Offer some of them")</small></span>
+                                </button>
+                            </li>
+                        }
                         <li>
                             @if (propagation.IsDormant)
                             {
@@ -694,6 +707,19 @@ else
                             }
                         </li>
                     </ul>
+                    break;
+
+                case More.Swap:
+                    <div class="mb-3">
+                        <label class="form-label" for="spare-count">Cuttings available for swap</label>
+                        <input id="spare-count" type="number" class="form-control" inputmode="numeric" min="0" max="@propagation.RemainingCount"
+                               @bind="swapCount" />
+                        <div class="form-text">Up to @propagation.RemainingCount, what is left. It shows on <a href="swap">Available for swap</a>, and giving some away takes them off first.</div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SetSpareAsync">Save</button>
+                        <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                    </div>
                     break;
 
                 case More.Flag:
@@ -727,7 +753,7 @@ else
 
     private enum StageView { None, Stage, PotUp, Failed, GaveAway, PassOn }
 
-    private enum More { None, Menu, Flag, Dormant }
+    private enum More { None, Menu, Flag, Dormant, Swap }
     private bool shareOpen;
     private bool shareOnLink;
 
@@ -827,6 +853,7 @@ else
     {
         More.Flag => propagation?.Attention is null ? "Flag it" : "Change the flag",
         More.Dormant => "Dormant",
+        More.Swap => "For swap",
         _ => propagation?.DisplayName ?? "",
     };
 
@@ -992,6 +1019,30 @@ else
         if (propagation is null)
             return;
         await PropagationService.SetAttentionAsync(propagation, change.Reason, change.From);
+    }
+
+    private int swapCount;
+
+    private void OpenSwap()
+    {
+        swapCount = propagation?.SpareAvailable ?? 0;
+        more = More.Swap;
+    }
+
+    private async Task SetSpareAsync()
+    {
+        if (propagation is null)
+            return;
+        busy = true;
+        try
+        {
+            await PropagationService.SetSpareAsync(propagation, swapCount);
+            more = More.None;
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     private void OpenDormant()

@@ -232,6 +232,29 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         return changed;
     }
 
+    /// <summary>
+    /// Marks several plants as offered for swap, or clears the mark with null. Returns how many
+    /// changed. Plants that are gone are left alone.
+    /// </summary>
+    public async Task<int> SetSpareAsync(IEnumerable<Plant> selected, SpareMark? mark)
+    {
+        var changed = 0;
+        foreach (var plant in selected)
+        {
+            if (plant.IsDeleted || plant.Spare == mark)
+                continue;
+            plant.Spare = mark;
+            await plants.SaveAsync(plant);
+            changed++;
+        }
+
+        return changed;
+    }
+
+    /// <summary>Plants tagged "For swap" (in any case) that have no spare mark yet, still here.</summary>
+    public static IReadOnlyList<Plant> TaggedForSwap(IEnumerable<Plant> all) =>
+        [.. all.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.Spare is null && PlantTags.Has(p, PlantTags.ForSwap))];
+
     /// <summary>Adds the same note to several plants, e.g. "Sprayed for thrips".</summary>
     public async Task AddNoteAsync(IEnumerable<Plant> selected, string text, DateTimeOffset? occurredAt = null)
     {
