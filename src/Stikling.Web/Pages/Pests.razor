@@ -2,6 +2,8 @@
 @inject IPestCaseRepository Cases
 @inject IPestTreatmentRepository Treatments
 @inject IPlantRepository PlantRepository
+@inject SettingsService SettingsService
+@using Stikling.Core.Settings
 @inject RoomService RoomService
 @inject TimeProvider Time
 
@@ -107,7 +109,8 @@ else
             await PlantRepository.GetAllAsync(),
             await Treatments.GetAllAsync(),
             await RoomService.GetPlacesAsync(),
-            Today);
+            Today,
+            (await SettingsService.GetAsync()).CleanWeeks ?? PestService.DefaultCleanWeeks);
 
         open = views.Where(v => v.Case.IsOpen).ToList();
         due = PestService.Due(open).ToList();
@@ -128,6 +131,10 @@ else
                     <span class="badge stage-badge">@Labels.For(view.Case.Status)</span>
                 }
                 <span>@Labels.ScopeAndCount(view)</span>
+                @if (view.CleanDays is { } cleanDays)
+                {
+                    <span>· clean @cleanDays of @view.CleanTarget days</span>
+                }
             </div>
             <div class="item-meta">
                 @if (view.DaysUntilDue is not null)

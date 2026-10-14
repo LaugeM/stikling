@@ -1,5 +1,6 @@
 using Stikling.Core.Care;
 using Stikling.Core.Models;
+using Stikling.Core.Rooms;
 using Stikling.Core.Timeline;
 
 namespace Stikling.Core.Plants;
@@ -153,15 +154,23 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         return moved;
     }
 
+    /// <summary>Whether a new plant starts in quarantine: the setting is on and it came from outside the home.</summary>
+    public static bool StartsInQuarantine(PlantOrigin origin, bool settingOn) =>
+        settingOn && origin is PlantOrigin.Purchased or PlantOrigin.Swap or PlantOrigin.Gift;
+
+    /// <summary>True when a plant moved from an outdoor place to an indoor one.</summary>
+    public static bool CameInside(Guid? from, Guid? to, Places places) =>
+        places.IsOutdoors(from) && to is not null && !places.IsOutdoors(to);
+
     /// <summary>Puts a plant in quarantine from the given day, or takes it out with null.</summary>
-    public async Task SetQuarantineAsync(Plant plant, DateOnly? since, Func<Enum, string> label)
+    public async Task SetQuarantineAsync(Plant plant, DateOnly? since, Func<Enum, string> label, int? days = null)
     {
         if (plant.QuarantinedSince == since)
             return;
 
         var before = plant.Copy();
         plant.QuarantinedSince = since;
-        plant.QuarantineDays = since is null ? null : plant.QuarantineDays ?? Plant.DefaultQuarantineDays;
+        plant.QuarantineDays = since is null ? null : plant.QuarantineDays ?? days ?? Plant.DefaultQuarantineDays;
         await UpdateAsync(before, plant, label);
     }
 

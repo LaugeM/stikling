@@ -67,4 +67,22 @@ public sealed class UserSettings : Entity
     /// they're due. Null or empty means off. Older settings without it read as null.
     /// </summary>
     public List<Weekday>? RoundDays { get; set; }
+
+    /// <summary>
+    /// How many clean weeks a case being watched needs before it's ready to be resolved. Null
+    /// means 4. Older settings without it read as null.
+    /// </summary>
+    public int? CleanWeeks { get; set; }
+
+    /// <summary>
+    /// How many days a plant is kept apart when it goes into quarantine. Null means
+    /// <see cref="Plant.DefaultQuarantineDays"/>. Older settings without it read as null.
+    /// </summary>
+    public int? QuarantineDays { get; set; }
+
+    /// <summary>
+    /// Whether a plant that is added as bought, swapped or a gift starts in quarantine. Off unless
+    /// it's turned on. Older settings without it read as off.
+    /// </summary>
+    public bool QuarantineNewPlants { get; set; }
 }

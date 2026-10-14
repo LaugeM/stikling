@@ -114,6 +114,19 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
         return new RoomRename(existing.Name, plantCount, propagationCount, Merged: true);
     }
 
+    /// <summary>Marks a room or spot as outdoors, or as indoors again.</summary>
+    public async Task SetOutdoorsAsync(Guid id, bool on)
+    {
+        var all = await places.GetPlacesAsync();
+        if (all.Find(id) is not { } place)
+            throw new ArgumentException("That room isn't there any more.", nameof(id));
+
+        if (place.Outdoors == on)
+            return;
+        place.Outdoors = on;
+        await places.SaveAsync(place);
+    }
+
     /// <summary>
     /// Removes a room or spot with nothing in it. A room goes together with its empty spots. Anything
     /// still in it, or in a spot of the room, makes this throw.

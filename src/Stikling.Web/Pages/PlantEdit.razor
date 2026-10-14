@@ -2,6 +2,7 @@
 @page "/plants/{Id:guid}/edit"
 @using Stikling.Core.Settings
 @inject IPlantRepository Repository
+@inject IPestTreatmentRepository PestTreatmentRepository
 @inject ILogger<PlantEdit> Logger
 @inject IPropagationRepository Propagations
 @inject IPotRepository PotRepository
@@ -87,7 +88,7 @@ else
             <legend>Where it came from</legend>
             <div class="mb-3">
                 <label class="form-label" for="origin">How you got it</label>
-                <InputSelect id="origin" class="form-select" @bind-Value="plant.Origin">
+                <InputSelect id="origin" class="form-select" @bind-Value="plant.Origin" @bind-Value:after="ApplyQuarantineRule">
                     @foreach (var origin in Enum.GetValues<PlantOrigin>())
                     {
                         <option value="@origin">@Labels.For(origin)</option>
@@ -174,6 +175,21 @@ else
                 <div class="mb-3">
                     <RoomPicker @bind-Value="location" Rooms="rooms" />
                 </div>
+                @if (CameInsideNow)
+                {
+                    <div class="back-from-outside mb-3" role="group" aria-labelledby="back-from-outside-title">
+                        <b id="back-from-outside-title">Back from outside</b>
+                        <p class="form-text mb-2">Plants that spent time outside often bring pests in.</p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="back-quarantine" @bind="backQuarantine" />
+                            <label class="form-check-label" for="back-quarantine">Put in quarantine for @Labels.Count(quarantineLength, "day")</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="back-checked" @bind="backChecked" />
+                            <label class="form-check-label" for="back-checked">Checked it for pests, no signs</label>
+                        </div>
+                    </div>
+                }
                 <div class="mb-3">
                     <label class="form-label" for="light">Light</label>
                     <InputSelect id="light" class="form-select" @bind-Value="plant.Light">
@@ -494,7 +510,7 @@ else
     private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
 
     private string QuarantineSummary => plant is { InQuarantine: true }
-        ? $"In quarantine for {plant.QuarantineDays ?? Plant.DefaultQuarantineDays} days"
+        ? $"In quarantine for {plant.QuarantineDays ?? quarantineLength} days"
         : "Not in quarantine";
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
@@ -503,8 +519,46 @@ else
     private void SetQuarantine(ChangeEventArgs e)
     {
         var on = (bool?)e.Value == true;
+        quarantineTouched = true;
         plant!.QuarantinedSince = on ? original?.QuarantinedSince ?? Today : null;
-        plant.QuarantineDays = on ? original?.QuarantineDays ?? Plant.DefaultQuarantineDays : null;
+        plant.QuarantineDays = on ? original?.QuarantineDays ?? quarantineLength : null;
+    }
+
+    // The setting for a new plant: bought, swapped and gifted ones start in quarantine, until the
+    // person has ticked or unticked the box themselves
+    private int quarantineLength = Plant.DefaultQuarantineDays;
+    private bool quarantineNewPlants;
+    private bool quarantineTouched;
+
+    private void ApplyQuarantineRule()
+    {
+        if (!IsNew || plant is null || !quarantineNewPlants || quarantineTouched)
+            return;
+
+        var on = PlantService.StartsInQuarantine(plant.Origin, true);
+        plant.QuarantinedSince = on ? Today : null;
+        plant.QuarantineDays = on ? quarantineLength : null;
+    }
+
+    // Back from outside, offered when a saved plant's place is changed to an indoor one
+    private Places placesNow = Places.None;
+    private bool backQuarantine;
+    private bool backChecked;
+
+    private bool CameInsideNow
+    {
+        get
+        {
+            if (IsNew || original is null || original.InQuarantine || string.IsNullOrWhiteSpace(location))
+                return false;
+            if (!placesNow.IsOutdoors(original.PlaceId))
+                return false;
+
+            // A place that doesn't exist yet is indoors, unless it's a new spot in an outdoor room
+            if (placesNow.Named(location) is { } place)
+                return !placesNow.IsOutdoors(place.Id);
+            return placesNow.RoomNamed(RoomName.Split(location).Item1)?.Outdoors != true;
+        }
     }
 
     // A pot that suggests a medium sets it on a new plant, until the person has picked a medium themselves.
@@ -549,7 +603,11 @@ else
         mixes = await MixRepository.GetAllAsync();
         feeds = [.. (await FeedRepository.GetAllAsync()).OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)];
         tagSuggestions = PlantTags.Suggestions(all);
-        wateringReminderOn = (await SettingsService.GetAsync()).WateringReminder;
+        var settings = await SettingsService.GetAsync();
+        wateringReminderOn = settings.WateringReminder;
+        quarantineLength = settings.QuarantineDays ?? Plant.DefaultQuarantineDays;
+        quarantineNewPlants = settings.QuarantineNewPlants;
+        placesNow = places;
         existing = all;
 
         if (IsNew)
@@ -562,6 +620,7 @@ else
                 copiedDate = source.AcquiredOn;
                 copiedFrom = source.DisplayName;
             }
+            var fresh = plant is null;
             plant ??= new Plant { AcquiredOn = LooseDate.Of(Today) };
             if (ParentId is { } parentId && all.FirstOrDefault(p => p.Id == parentId) is { } parent)
             {
@@ -572,6 +631,8 @@ else
                 plant.Cultivar = parent.Cultivar;
                 plant.PlaceId = parent.PlaceId;
             }
+            if (fresh)
+                ApplyQuarantineRule();
         }
         else
         {
@@ -763,6 +824,13 @@ else
         try
         {
             plant.PlaceId = await RoomService.PlaceIdAsync(location);
+            var cameInside = CameInsideNow;
+            if (cameInside && backQuarantine)
+            {
+                // Set before the save, so it's one write and the history says it went into quarantine
+                plant.QuarantinedSince = Today;
+                plant.QuarantineDays = quarantineLength;
+            }
             if (IsNew)
             {
                 await PlantService.CreateAsync(plant, photos);
@@ -773,6 +841,8 @@ else
                 var places = await RoomService.GetPlacesAsync();
                 await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName, id => places.NameOf(id), FindPot, FeedName);
             }
+            if (cameInside && backChecked)
+                await PestTreatmentRepository.SaveAsync(PestService.StartPlantCheck(plant, Today));
             Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
         }
         catch (Exception ex)

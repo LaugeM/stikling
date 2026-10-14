@@ -43,6 +43,9 @@ public sealed class PutOffs
     public static string Quarantine(Guid plantId, DateOnly since) =>
         $"quarantine:{plantId}:{since:yyyy-MM-dd}";
 
+    /// <summary>The key for a pest case that is ready to be resolved, so Today can wait with asking.</summary>
+    public static string Resolve(Guid caseId) => $"resolve:{caseId}";
+
     /// <summary>
     /// The key for a plant that's due for water. The day it was last watered is part of it, so
     /// once it has been watered the next reminder isn't still hidden.

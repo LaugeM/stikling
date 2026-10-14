@@ -38,13 +38,12 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
-3. **Flowering log**, with the flowering calendar.
-4. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-5. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
-6. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
-7. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
-8. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
+2. **Flowering log**, with the flowering calendar.
+3. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+4. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
+5. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
+6. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
+7. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
 
 ### Cheap ones to slot in whenever
 
@@ -272,16 +271,16 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | Treatment log on a case: what was used and when | 2 | S | v1.x |
 | ✅ | Interval ("every 3–5 days") with "next treatment due" shown on Today | 3 | S | v1.x |
 | ✅ | A case being watched is due a check for pests once a week instead of a treatment. Checks are logged on the case, and "Found some" puts it back to treating | 3 | S | v1.x |
-| ☐ | **Clean for how long**: a case being watched has a number of clean weeks before it can be resolved, 4 unless changed in Settings. The case shows "clean 12 of 28 days", and finding a sign starts the count again | 3 | S | v1.x |
+| ✅ | **Clean for how long**: a case being watched counts the days since its last treatment, towards 4 weeks unless changed in Settings. The case shows "Clean 12 of 28 days", and finding a sign starts the count again. It is ready to resolve once the count is reached and a check was logged in the last week. Today shows it, and it never resolves by itself | 3 | S | v1.x |
 | ✅ | Quarantine flag with the day it started, a "Quarantine" filter and a badge on the card. Going in and coming out are recorded on the plant's history | 3 | S | v1.x |
-| ✅ | A length for quarantine, e.g. two weeks. When it is up, Today says it is time to check the plant and let it out | 4 | S | v1.x |
-| ☐ | **Start quarantine when adding a plant**: on the add form for a plant that was bought or swapped, one switch keeps it apart, using the length already set for quarantine. It is off unless turned on | 3 | S | v1.x |
-| ☐ | **Back from outside**: mark a room or spot as outdoors, like a balcony. Moving a plant from there to an indoor room offers to start quarantine and a check for pests. It only asks when a plant moves, never on a date | 4 | S | v1.x |
+| ✅ | A length for quarantine, e.g. two weeks, with the default set under Pests in Settings. When it is up, Today says it is time to check the plant and let it out | 4 | S | v1.x |
+| ✅ | **Start quarantine when adding a plant**: a switch under Pests in Settings, off by default. When it is on, the add form starts with In quarantine ticked for a bought, swapped or gift plant, using the length from Settings, and it can be unticked there | 3 | S | v1.x |
+| ✅ | **Back from outside**: mark a room or spot as outdoors, like a balcony. A spot in an outdoor room counts too. Moving a plant from there to an indoor room, on its edit form or with several plants at once on the Plants list, offers to start quarantine and a check for pests. It only asks when a plant moves, never on a date | 4 | S | v1.x |
 | ✅ | **Treatment recipes**, e.g. "Alcohol spray: isopropyl alcohol and a drop of dish soap, topped up with water". The ingredients are typed, each with an optional amount like 250 ml per 1 L, and there's a note on how to use it. "Mix a batch" works out the amounts for any size of bottle. Logging a treatment offers your recipes to pick from, and the treatment saves the recipe as it was that day, so changing the recipe doesn't rewrite history. Recipes are under Supplies | 4 | M | v1.x |
 | ✅ | Pest overview: all active cases in one list | 4 | S | v1.x |
 | ✅ | **Sticky trap counts** on a pest case: count everything on a (blue/yellow) sticky trap and tick when a new one goes up, and the app works out how many were caught since last time. A small chart of the catch per week shows whether treatment is working. A count never moves the next treatment, but on a case being watched it counts as the weekly check, and new ones on the trap ask whether to start treating again. The trap shows straight away for pests that fly into one (thrips, fungus gnats, whitefly), and sits behind a small link for the rest | 4 | M | v1.x |
-| ◐ | Inspection log: "checked, no signs", so you can see how long a plant has been clean. Checks are logged on a case being watched, but not on a single plant outside a case | 5 | S | v1.x |
-| ☐ | **Check the neighbours**: opening a pest case lists other plants in the same room to inspect, with "last inspected" dates | 5 | S | v1.x |
+| ✅ | Inspection log: "checked, no signs", so you can see how long a plant has been clean. Checks on a single plant are logged from its menu, and the plant page shows when it was last checked, counting checks on cases | 5 | S | v1.x |
+| ✅ | **Check the neighbours**: a case on picked plants lists the other plants in their rooms while it is being treated, with when each was last checked, and Clean and Add to case | 5 | S | v1.x |
 | ☐ | **Biological control log**: release dates for predatory mites and similar | 6 | S | v1.x |
 | ☐ | **A treatment plan with steps**: steps with the days between them, e.g. spray, spray again after 3 days, then release predatory mites after 10, saved to use again and started on a case. Today shows each step when it is due, and a step can be skipped or moved. A case with a plain interval works as it does now | 5 | M | v1.x |
 | ✅ | Pests only has a tab in the bottom bar while a case is open. The rest of the time it's under Supplies, and a plant's menu can start a case, so someone who never has pests doesn't have a tab for them | 3 | S | v1.x |

@@ -135,6 +135,44 @@
 </section>
 
 <section class="settings-group">
+    <h2>Pests</h2>
+    <div class="theme-label" id="clean-weeks-label">Clean before a case can be resolved</div>
+    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="clean-weeks-label">
+        @foreach (var weeks in cleanWeeksOptions)
+        {
+            var id = $"clean-weeks-{weeks}";
+            <input type="radio" class="btn-check" name="clean-weeks" id="@id"
+                   checked="@(cleanWeeks == weeks)" @onchange="() => SetCleanWeeksAsync(weeks)" />
+            <label class="btn btn-outline-primary" for="@id">@Labels.Count(weeks, "week")</label>
+        }
+    </div>
+    <p class="settings-hint">
+        A case being watched counts the days since its last treatment. Finding pests again starts the count over.
+    </p>
+    <div class="theme-label mt-4" id="quarantine-days-label">Quarantine length</div>
+    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="quarantine-days-label">
+        @foreach (var weeks in quarantineWeeksOptions)
+        {
+            var id = $"quarantine-days-{weeks}";
+            <input type="radio" class="btn-check" name="quarantine-days" id="@id"
+                   checked="@(quarantineDays == weeks * 7)" @onchange="() => SetQuarantineDaysAsync(weeks * 7)" />
+            <label class="btn btn-outline-primary" for="@id">@Labels.Count(weeks, "week")</label>
+        }
+    </div>
+    <p class="settings-hint">
+        How long a plant is kept apart when it goes into quarantine. You can change it for each plant.
+    </p>
+    <div class="form-check form-switch mt-4">
+        <input class="form-check-input" type="checkbox" role="switch" id="quarantine-new-plants"
+               checked="@quarantineNewPlants" @onchange="SetQuarantineNewPlantsAsync" />
+        <label class="form-check-label" for="quarantine-new-plants">Quarantine new plants</label>
+    </div>
+    <p class="settings-hint">
+        A plant you add that was bought, swapped or a gift starts in quarantine. You can untick it on the form.
+    </p>
+</section>
+
+<section class="settings-group">
     <h2>Your data</h2>
     <div class="settings-rows">
         <SettingsRow Href="rooms-and-tags" Title="Rooms and tags" Detail="@RoomsAndTagsLine" />
@@ -184,6 +222,11 @@
     ];
 
     private int recentChangesDays;
+    private static readonly int[] cleanWeeksOptions = [2, 4, 6, 8];
+    private int cleanWeeks = PestService.DefaultCleanWeeks;
+    private static readonly int[] quarantineWeeksOptions = [1, 2, 3, 4];
+    private int quarantineDays = Plant.DefaultQuarantineDays;
+    private bool quarantineNewPlants;
     private ThemeMode mode;
     private EverydayNameLanguage everydayLanguage;
     private int roomCount;
@@ -223,6 +266,9 @@
         dailyRound = settings.DailyRound;
         roundDays = [.. settings.RoundDays ?? []];
         recentChangesDays = RecentChanges.DaysOf(settings.RecentChangesDays);
+        cleanWeeks = settings.CleanWeeks ?? PestService.DefaultCleanWeeks;
+        quarantineDays = settings.QuarantineDays ?? Plant.DefaultQuarantineDays;
+        quarantineNewPlants = settings.QuarantineNewPlants;
         everydayLanguage = await Names.GetEverydayLanguageAsync();
         roomCount = (await RoomService.GetAllAsync()).Count;
         tagCount = PlantTags.InUse(await Plants.GetAllAsync()).Count;
@@ -273,6 +319,24 @@
         if (!roundDays.Remove(day))
             roundDays.Add(day);
         await SettingsService.SetRoundDaysAsync(roundDays);
+    }
+
+    private async Task SetQuarantineDaysAsync(int days)
+    {
+        quarantineDays = days;
+        await SettingsService.SetQuarantineDaysAsync(days);
+    }
+
+    private async Task SetQuarantineNewPlantsAsync(ChangeEventArgs e)
+    {
+        quarantineNewPlants = e.Value is true;
+        await SettingsService.SetQuarantineNewPlantsAsync(quarantineNewPlants);
+    }
+
+    private async Task SetCleanWeeksAsync(int weeks)
+    {
+        cleanWeeks = weeks;
+        await SettingsService.SetCleanWeeksAsync(weeks);
     }
 
     private async Task SetRecentChangesDaysAsync(int days)

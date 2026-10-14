@@ -5,6 +5,7 @@
 @inject IPropagationRepository PropagationRepository
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
+@inject IPestTreatmentRepository PestTreatmentRepository
 @inject IPotRepository PotRepository
 @inject PotService PotService
 @inject ISoilMixRepository MixRepository
@@ -95,6 +96,10 @@ else
                             <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
                         }
                     </div>
+                    @if (actionNote is not null)
+                    {
+                        <p class="profile-facts" role="status">@actionNote</p>
+                    }
                     @if (recentChanges.Count > 0)
                     {
                         <p class="profile-facts">@RecentChangesText</p>
@@ -230,6 +235,12 @@ else
                         {
                             <dt>Quarantine</dt>
                             <dd>@(quarantinedSince == Today ? "Since today" : $"Since {Labels.Date(quarantinedSince)}") · day @(plant.DaysInQuarantine(Today) ?? 0) of @(plant.QuarantineDays ?? Plant.DefaultQuarantineDays)</dd>
+                        }
+
+                        @if (lastChecked is { } checkedOn)
+                        {
+                            <dt>Checked for pests</dt>
+                            <dd>@Checked(checkedOn)</dd>
                         }
 
                         @if (plant.DormantSince is { } dormantSince)
@@ -532,6 +543,12 @@ else
                             }
                         </li>
                         <li>
+                            <button type="button" class="sheet-action" @onclick="OpenPestCheck">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" /><path d="m15 15 5 5" /><path d="m8 10.5 2 2 3.5-4" /></svg>
+                                <span class="sheet-action-text"><b>Check for pests</b><small>Log that you looked it over</small></span>
+                            </button>
+                        </li>
+                        <li>
                             <a class="sheet-action" href="pests/new?plant=@plant.Id">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
                                 <span class="sheet-action-text"><b>Found pests</b><small>Open a case to keep track of the treatments</small></span>
@@ -608,6 +625,22 @@ else
                 </div>
                 break;
 
+            case More.PestCheck:
+                <div class="mb-3">
+                    <label class="form-label" for="pest-check-on">Checked on</label>
+                    <input id="pest-check-on" type="date" class="form-control" @bind="since" max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="pest-check-notes">Notes <span class="text-body-secondary">(optional)</span></label>
+                    <textarea id="pest-check-notes" class="form-control" rows="2" @bind="checkNotes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@(busy || since > Today)" @onclick="SavePestCheckAsync">No signs</button>
+                    <a class="btn btn-link link-action" href="pests/new?plant=@plant.Id">Found some</a>
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
+                break;
+
             case More.Status:
                 @if (status != PlantStatus.Died)
                 {
@@ -679,7 +712,7 @@ else
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
 
-    private enum More { None, Menu, Flag, Dormant, Quarantine, Status, PassOn }
+    private enum More { None, Menu, Flag, Dormant, Quarantine, PestCheck, Status, PassOn }
     private bool shareOpen;
     private bool shareOnLink;
 
@@ -717,6 +750,9 @@ else
     private MoistureReading? moisture;
     private CareCalendar? careCalendar;
     private IReadOnlyList<PestCase> pests = [];
+    private DateOnly? lastChecked;
+    private string? checkNotes;
+    private string? actionNote;
     private Places places = Places.None;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyDictionary<Guid, Photo> potCovers = new Dictionary<Guid, Photo>();
@@ -776,6 +812,7 @@ else
         More.Flag => plant?.Attention is null ? "Flag it" : "Change the flag",
         More.Dormant => "Dormant",
         More.Quarantine => "Quarantine",
+        More.PestCheck => "Check for pests",
         More.Status when status == PlantStatus.Died => "It died",
         More.Status => "It left",
         More.PassOn => "Send its history",
@@ -878,7 +915,9 @@ else
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
 
             places = await RoomService.GetPlacesAsync();
-            pests = PestService.CasesFor(plant, await PestCaseRepository.GetAllAsync(), places);
+            var allCases = await PestCaseRepository.GetAllAsync();
+            pests = PestService.CasesFor(plant, allCases, places);
+            lastChecked = PestService.LastChecked(plant, allCases, await PestTreatmentRepository.GetAllAsync(), places);
             pots = await PotRepository.GetAllAsync();
             potCovers = await PotService.GetCoversAsync();
             mixes = await MixRepository.GetAllAsync();
@@ -954,11 +993,46 @@ else
         more = More.Dormant;
     }
 
-    private void OpenQuarantine()
+    private async Task OpenQuarantine()
     {
         since = Today;
-        quarantineDays = plant?.QuarantineDays ?? Plant.DefaultQuarantineDays;
+        quarantineDays = plant?.QuarantineDays
+            ?? (await SettingsService.GetAsync()).QuarantineDays ?? Plant.DefaultQuarantineDays;
         more = More.Quarantine;
+    }
+
+    private void OpenPestCheck()
+    {
+        since = Today;
+        checkNotes = null;
+        more = More.PestCheck;
+    }
+
+    private string Checked(DateOnly day)
+    {
+        var ago = Math.Max(0, Today.DayNumber - day.DayNumber);
+        return ago <= 1 ? char.ToUpperInvariant(Labels.DaysAgo(ago)[0]) + Labels.DaysAgo(ago)[1..] : $"{Labels.Date(day)} · {Labels.DaysAgo(ago)}";
+    }
+
+    private async Task SavePestCheckAsync()
+    {
+        var entry = PestService.StartPlantCheck(plant!, since);
+        entry.Notes = string.IsNullOrWhiteSpace(checkNotes) ? null : checkNotes.Trim();
+        if (entry.Validate(Today).Count > 0)
+            return;
+
+        busy = true;
+        try
+        {
+            await PestTreatmentRepository.SaveAsync(entry);
+            more = More.None;
+            actionNote = "Checked for pests, no signs.";
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     private void OpenStatus(PlantStatus to)

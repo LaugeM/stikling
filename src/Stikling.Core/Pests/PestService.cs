@@ -12,14 +12,23 @@ namespace Stikling.Core.Pests;
 /// Null for a resolved case.</param>
 /// <param name="DaysUntilDue">Negative when it's overdue, 0 when it's due today.</param>
 /// <param name="Room">The room or spot the case covers, "Living room", when it covers one.</param>
+/// <param name="CleanDays">Days since the last treatment on a case being watched, null otherwise.</param>
+/// <param name="CleanTarget">The days the count has to reach.</param>
+/// <param name="ReadyToResolve">The target is reached and there's a check from the last week.</param>
 public sealed record PestCaseView(
     PestCase Case,
     string? Room,
     IReadOnlyList<Plant> Plants,
     PestTreatment? Last,
     DateOnly? NextDue,
-    int? DaysUntilDue)
+    int? DaysUntilDue,
+    int? CleanDays = null,
+    int CleanTarget = PestService.DefaultCleanWeeks * 7,
+    bool ReadyToResolve = false)
 {
+    /// <summary>The weeks the count has to reach.</summary>
+    public int CleanWeeks => CleanTarget / 7;
+
     public bool IsDue => DaysUntilDue is <= 0;
 
     /// <summary>What's due is a look for pests rather than a treatment.</summary>
@@ -28,6 +37,9 @@ public sealed record PestCaseView(
     /// <summary>An open case being treated that has nothing logged yet, so its first treatment is due.</summary>
     public bool Untreated => Case.IsOpen && !IsCheck && Last is null;
 }
+
+/// <summary>A plant next to a case, and when it was last looked over for pests.</summary>
+public sealed record Neighbour(Plant Plant, DateOnly? LastChecked);
 
 /// <summary>
 /// Reading pest cases back: which plants a case covers, and when the next treatment is due.
@@ -40,6 +52,9 @@ public static class PestService
     /// come back weeks after the last treatment, and a weekly look is the usual way to catch that.
     /// </summary>
     public const int CheckEveryDays = 7;
+
+    /// <summary>The clean weeks a case being watched needs when Settings doesn't say otherwise.</summary>
+    public const int DefaultCleanWeeks = 4;
 
     /// <summary>
     /// The plants a case covers. Everywhere and Room are worked out from the plants as they
@@ -106,17 +121,148 @@ public static class PestService
         IEnumerable<Plant> plants,
         IEnumerable<PestTreatment> treatments,
         Places places,
-        DateOnly today)
+        DateOnly today,
+        int cleanWeeks = DefaultCleanWeeks)
     {
-        var next = NextDue(item, treatments);
+        var list = treatments.ToList();
+        var next = NextDue(item, list);
+        var since = CleanSince(item, list);
+        int? days = since is { } s ? today.DayNumber - s.DayNumber : null;
+        var target = Math.Max(1, cleanWeeks) * 7;
+
+        var recent = since is { } from && TreatmentsFor(list, item.Id).Any(t =>
+            (t.Kind == PestTreatmentKind.Checked || (t.Kind == PestTreatmentKind.TrapCount && t.OnTrap is not null))
+            && t.OccurredOn >= from
+            && t.OccurredOn >= today.AddDays(-(CheckEveryDays - 1))
+            && t.OccurredOn <= today);
+
         return new PestCaseView(
             item,
             item.Scope == PestScope.Room ? places.NameOf(item.PlaceId) : null,
             PlantsIn(item, plants, places),
-            LastFor(item, treatments),
+            LastFor(item, list),
             next,
-            next is { } due ? due.DayNumber - today.DayNumber : null);
+            next is { } due ? due.DayNumber - today.DayNumber : null,
+            days,
+            target,
+            days >= target && recent);
     }
+
+    /// <summary>
+    /// The day a case being watched has been clean since: its latest treatment, or the day it
+    /// started when nothing was treated, but never before it last went back to treating. Null for a case that isn't being watched.
+    /// </summary>
+    public static DateOnly? CleanSince(PestCase item, IEnumerable<PestTreatment> treatments)
+    {
+        if (item.Status != PestCaseStatus.Monitoring)
+            return null;
+
+        var last = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated);
+        var since = last?.OccurredOn ?? item.StartedOn;
+        return item.TreatingAgainOn is { } again && again > since ? again : since;
+    }
+
+    /// <summary>
+    /// Notes a change of status made on a case that had <paramref name="from"/>: going back to
+    /// treating, or opening a resolved case again, restarts the clean count from today.
+    /// </summary>
+    public static void StatusChanged(PestCase item, PestCaseStatus from, DateOnly today)
+    {
+        var again = (item.Status == PestCaseStatus.Active && from != PestCaseStatus.Active)
+            || (from == PestCaseStatus.Resolved && item.IsOpen);
+
+        if (again)
+            item.TreatingAgainOn = today;
+    }
+
+    /// <summary>The cases that have been clean long enough and checked lately, so they can be resolved.</summary>
+    public static IReadOnlyList<PestCaseView> ReadyToResolve(IEnumerable<PestCaseView> cases) =>
+        cases
+            .Where(v => v.Case.IsOpen && v.ReadyToResolve)
+            .OrderByDescending(v => v.CleanDays)
+            .ToList();
+
+    /// <summary>A check on a single plant outside any case, dated today.</summary>
+    public static PestTreatment StartPlantCheck(Plant plant, DateOnly today) =>
+        new() { PlantId = plant.Id, OccurredOn = today, Kind = PestTreatmentKind.Checked };
+
+    /// <summary>A plant's own checks outside a case, newest first.</summary>
+    public static IReadOnlyList<PestTreatment> ChecksFor(Guid plantId, IEnumerable<PestTreatment> treatments) =>
+        treatments
+            .Where(t => !t.IsDeleted && t.PlantId == plantId && t.Kind == PestTreatmentKind.Checked)
+            .OrderByDescending(t => t.OccurredOn)
+            .ThenByDescending(t => t.CreatedAt)
+            .ToList();
+
+    /// <summary>
+    /// When the plant was last looked over for pests: its own checks, and checks and trap counts
+    /// on any case that covers it now. Treatments don't count. Null when never.
+    /// </summary>
+    public static DateOnly? LastChecked(
+        Plant plant,
+        IEnumerable<PestCase> cases,
+        IEnumerable<PestTreatment> treatments,
+        Places places)
+    {
+        var logged = treatments.Where(t => !t.IsDeleted).ToList();
+        DateOnly? latest = null;
+
+        foreach (var t in logged)
+        {
+            if (t.PlantId == plant.Id && t.Kind == PestTreatmentKind.Checked)
+                latest = Later(latest, t.OccurredOn);
+        }
+
+        foreach (var c in cases.Where(c => !c.IsDeleted && Covers(c, plant, places)))
+        {
+            foreach (var t in logged.Where(t => t.CaseId == c.Id))
+            {
+                if (t.Kind == PestTreatmentKind.Checked || (t.Kind == PestTreatmentKind.TrapCount && t.OnTrap is not null))
+                    latest = Later(latest, t.OccurredOn);
+            }
+        }
+
+        return latest;
+    }
+
+    /// <summary>
+    /// The plants to look over while a case on picked plants is being treated: the others in the
+    /// rooms of the picked ones, spots included. Never-checked first, then the longest ago.
+    /// </summary>
+    public static IReadOnlyList<Neighbour> Neighbours(
+        PestCase item,
+        IEnumerable<Plant> plants,
+        IEnumerable<PestCase> cases,
+        IEnumerable<PestTreatment> treatments,
+        Places places)
+    {
+        if (item.Scope != PestScope.PickedPlants || item.Status != PestCaseStatus.Active)
+            return [];
+
+        var all = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
+        var caseList = cases.ToList();
+        var logged = treatments.ToList();
+
+        var rooms = all
+            .Where(p => item.PlantIds.Contains(p.Id) && p.PlaceId is not null)
+            .Select(p => places.RoomOf(p.PlaceId))
+            .OfType<Place>()
+            .Select(r => r.Id)
+            .Distinct()
+            .ToList();
+
+        return all
+            .Where(p => !item.PlantIds.Contains(p.Id)
+                && p.PlaceId is not null
+                && rooms.Any(r => places.IsIn(p.PlaceId, r)))
+            .Select(p => new Neighbour(p, LastChecked(p, caseList, logged, places)))
+            .OrderBy(n => n.LastChecked is null ? 0 : 1)
+            .ThenBy(n => n.LastChecked)
+            .ThenBy(n => n.Plant.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+    }
+
+    private static DateOnly Later(DateOnly? a, DateOnly b) => a is { } x && x > b ? x : b;
 
     /// <summary>Every case described, newest first, so the list screen is one call.</summary>
     public static IReadOnlyList<PestCaseView> Describe(
@@ -124,14 +270,15 @@ public static class PestService
         IEnumerable<Plant> plants,
         IEnumerable<PestTreatment> treatments,
         Places places,
-        DateOnly today)
+        DateOnly today,
+        int cleanWeeks = DefaultCleanWeeks)
     {
         var all = plants.ToList();
         var logged = treatments.ToList();
 
         return cases
             .Where(c => !c.IsDeleted)
-            .Select(c => Describe(c, all, logged, places, today))
+            .Select(c => Describe(c, all, logged, places, today, cleanWeeks))
             .OrderByDescending(v => v.Case.StartedOn)
             .ThenByDescending(v => v.Case.CreatedAt)
             .ToList();
