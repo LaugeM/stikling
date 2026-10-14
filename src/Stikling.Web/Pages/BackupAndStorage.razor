@@ -82,10 +82,11 @@
 
 <section class="settings-section">
     <h2 class="section-label">For a spreadsheet</h2>
-    <p class="settings-hint">A copy to open in Excel or Google Sheets. It isn't a backup and can't be restored into Stikling.</p>
+    <p class="settings-hint">A copy of your plants or propagations to open in Excel or Google Sheets, or a list of plants to bring in. A CSV isn't a backup: photos, history and care only come back from a backup.</p>
     <div class="settings-actions">
         <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPlantsCsvAsync">Plants as CSV</button>
         <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPropagationsCsvAsync">Propagations as CSV</button>
+        <a class="btn btn-outline-primary btn-sm" href="plants/import">Import plants</a>
     </div>
 </section>
 

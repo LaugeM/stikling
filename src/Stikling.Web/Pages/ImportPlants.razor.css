@@ -1,0 +1,242 @@
+/* The choose step and the result read at a normal width, even in the wide page column */
+.import-narrow {
+    max-width: 48rem;
+}
+
+.import-muted {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.import-title {
+    margin: 0.5rem 0 0.25rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.import-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+
+/* Columns and plants close up into one bordered block divided by hairlines, like the Settings rows */
+.import-block {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.import-row {
+    padding: 0.7rem 0.9rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.import-row:first-child {
+    border-top: 0;
+}
+
+.import-name {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.import-meta {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--pa-muted);
+    overflow-wrap: anywhere;
+}
+
+.import-column {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.import-column-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.import-column .form-select {
+    flex: 0 0 auto;
+    width: 11rem;
+    max-width: 48%;
+    min-height: 2.75rem;
+}
+
+.import-check {
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 0;
+}
+
+.import-check .form-check-input {
+    float: none;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.import-order small {
+    display: block;
+    font-weight: 400;
+    font-size: 0.75rem;
+}
+
+.import-order .btn {
+    white-space: normal;
+}
+
+.import-plant {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    margin: 0;
+    cursor: pointer;
+}
+
+.import-plant .form-check-input {
+    flex: 0 0 auto;
+    margin: 0.15rem 0 0;
+}
+
+.import-plant-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0.1rem;
+}
+
+.import-botanical {
+    font-size: 0.8125rem;
+    color: var(--pa-muted);
+}
+
+.import-yours {
+    font-size: 0.8125rem;
+    color: var(--pa-green-dark);
+}
+
+.import-cant {
+    font-size: 0.8125rem;
+    color: var(--pa-alert);
+}
+
+.import-add {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.import-add .alert {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.import-progress {
+    flex: 1;
+}
+
+.import-bar {
+    height: 0.4rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--pa-green-soft);
+}
+
+.import-bar span {
+    display: block;
+    width: max(0.75rem, var(--done, 0%));
+    height: 100%;
+    border-radius: inherit;
+    background: var(--pa-green);
+    transition: width 0.2s ease-out;
+}
+
+.import-progress-text {
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-muted);
+}
+
+/* On a phone the steps take turns */
+.import-pane {
+    display: none;
+}
+
+.import-pane.current {
+    display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .import-bar span {
+        transition: none;
+    }
+}
+
+/* On a wide screen the columns and the plants show together, and change together */
+@media (min-width: 64rem) {
+    .import-review {
+        display: grid;
+        grid-template-columns: 24rem minmax(0, 1fr);
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .import-pane,
+    .import-pane.current {
+        display: block;
+    }
+
+    .import-next,
+    .import-back {
+        display: none;
+    }
+
+    .import-add {
+        margin: 0.75rem 0 0;
+        padding-inline: 0;
+        bottom: 0;
+        box-shadow: none;
+    }
+
+    .import-column {
+        flex-wrap: wrap;
+    }
+
+    .import-column .form-select {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* The plants flow into columns like the Plants list, so a wide screen shows more of them at once */
+    .import-plants {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        gap: 0.6rem;
+        overflow: visible;
+        background: none;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .import-plants .import-row {
+        background: var(--pa-surface);
+        border: 1px solid var(--pa-border);
+        border-radius: 0.75rem;
+    }
+}
