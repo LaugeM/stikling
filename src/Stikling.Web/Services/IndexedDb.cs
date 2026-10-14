@@ -22,6 +22,8 @@ public static class Stores
     public const string AwayStretches = "awayStretches";
     public const string SitterSheets = "sitterSheets";
     public const string FloweringMarks = "floweringMarks";
+    public const string Problems = "problems";
+    public const string ProblemUpdates = "problemUpdates";
     public const string PropagationCareLogs = "propagationCareLogs";
     public const string Settings = "settings";
     public const string PutOffs = "putOffs";

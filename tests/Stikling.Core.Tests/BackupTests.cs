@@ -136,12 +136,14 @@ public class BackupTests
             AwayStretches = [new AwayStretch(), new AwayStretch { DeletedAt = Now }],
             SitterSheets = [new SitterSheet()],
             PropagationCareLogs = [new PropagationCareLog(), new PropagationCareLog { DeletedAt = Now }],
-            FloweringMarks = [new FloweringMark(), new FloweringMark { DeletedAt = Now }]
+            FloweringMarks = [new FloweringMark(), new FloweringMark { DeletedAt = Now }],
+            Problems = [new Problem(), new Problem { DeletedAt = Now }],
+            ProblemUpdates = [new ProblemUpdate(), new ProblemUpdate(), new ProblemUpdate { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -157,6 +159,8 @@ public class BackupTests
         Assert.Empty(data.SitterSheets);
         Assert.Empty(data.PropagationCareLogs);
         Assert.Empty(data.FloweringMarks);
+        Assert.Empty(data.Problems);
+        Assert.Empty(data.ProblemUpdates);
     }
 
     [Fact]
@@ -177,6 +181,35 @@ public class BackupTests
         Assert.Equal(LooseDate.Of(2025, 5), restored.On);
         Assert.Equal(1, BackupMerge.Merge<FloweringMark>([], back.FloweringMarks).Added);
         Assert.Equal(0, BackupMerge.Merge([mark], back.FloweringMarks).Added);
+    }
+
+    [Fact]
+    public void Problems_and_their_updates_survive_a_backup_and_a_restore_merges_them()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var problem = new Problem
+        {
+            SubjectId = Guid.NewGuid(), StartedOn = new DateOnly(2026, 10, 1), Signs = ["YellowLeaves", "Thrips"],
+            ClosedOn = new DateOnly(2026, 10, 9), Outcome = ProblemOutcome.GotBetter, UpdatedAt = Now
+        };
+        var update = new ProblemUpdate
+        {
+            ProblemId = problem.Id, OccurredOn = new DateOnly(2026, 10, 3), Trend = ProblemTrend.Better,
+            Did = ["MovedIt", "Misted"], UpdatedAt = Now
+        };
+
+        var json = JsonSerializer.Serialize(new BackupData { Problems = [problem], ProblemUpdates = [update] }, options);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        Assert.Contains("\"signs\":[\"YellowLeaves\",\"Thrips\"]", json);
+        Assert.Contains("\"outcome\":\"GotBetter\"", json);
+        Assert.Equal(["YellowLeaves", "Thrips"], Assert.Single(back.Problems).Signs);
+        Assert.Equal(["MovedIt", "Misted"], Assert.Single(back.ProblemUpdates).Did);
+        Assert.Equal(ProblemTrend.Better, back.ProblemUpdates[0].Trend);
+        Assert.Equal(1, BackupMerge.Merge<Problem>([], back.Problems).Added);
+        Assert.Equal(0, BackupMerge.Merge([problem], back.Problems).Added);
+        Assert.Equal(1, BackupMerge.Merge<ProblemUpdate>([], back.ProblemUpdates).Added);
+        Assert.Equal(0, BackupMerge.Merge([update], back.ProblemUpdates).Added);
     }
 
     [Fact]

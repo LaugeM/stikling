@@ -40,7 +40,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             Stores.Plants, Stores.Propagations, Stores.Timeline, Stores.Photos, Stores.CareLogs,
             Stores.PestCases, Stores.PestTreatments, Stores.Pots, Stores.SoilMixes, Stores.Products,
             Stores.Feeds, Stores.TreatmentRecipes, Stores.Places, Stores.GrowLights,
-            Stores.ReceivedHistories, Stores.AwayStretches, Stores.PropagationCareLogs, Stores.FloweringMarks
+            Stores.ReceivedHistories, Stores.AwayStretches, Stores.PropagationCareLogs, Stores.FloweringMarks,
+            Stores.Problems, Stores.ProblemUpdates
         ];
         foreach (var store in stores)
         {
@@ -77,7 +78,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             ReceivedHistories = await db.GetAllAsync<ReceivedHistory>(Stores.ReceivedHistories),
             AwayStretches = await db.GetAllAsync<AwayStretch>(Stores.AwayStretches),
             SitterSheets = await db.GetAllAsync<SitterSheet>(Stores.SitterSheets),
-            FloweringMarks = await db.GetAllAsync<FloweringMark>(Stores.FloweringMarks)
+            FloweringMarks = await db.GetAllAsync<FloweringMark>(Stores.FloweringMarks),
+            Problems = await db.GetAllAsync<Problem>(Stores.Problems),
+            ProblemUpdates = await db.GetAllAsync<ProblemUpdate>(Stores.ProblemUpdates)
         };
 
         using var buffer = new MemoryStream();
@@ -173,6 +176,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         await Restore(Stores.AwayStretches, data.AwayStretches);
         await Restore(Stores.SitterSheets, data.SitterSheets);
         await Restore(Stores.FloweringMarks, data.FloweringMarks);
+        await Restore(Stores.Problems, data.Problems);
+        await Restore(Stores.ProblemUpdates, data.ProblemUpdates);
 
         // A delete carried over from the backup frees the image too
         foreach (var photo in photoMeta.ToSave.Where(p => p.IsDeleted))
