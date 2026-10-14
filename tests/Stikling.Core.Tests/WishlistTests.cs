@@ -48,7 +48,7 @@ public class WishlistTests
         Assert.Empty(Wish("Monstera").Validate(today));
         Assert.Empty(Wish(name: "that pink syngonium").Validate(today));
         Assert.NotEmpty(new Wish { Name = "x", MostToPay = -1 }.Validate(today));
-        Assert.NotEmpty(new Wish { Name = "x", GotOn = today.AddDays(1) }.Validate(today));
+        Assert.Empty(new Wish { Name = "x", GotOn = today.AddDays(1) }.Validate(today));
     }
 
     [Fact]

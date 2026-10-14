@@ -124,9 +124,9 @@ else
                             </div>
                         </a>
                         <div class="wish-actions">
-                            @if (BecameLink(wish) is var (href, label))
+                            @if (BecameLink(wish) is var (href, label, kind))
                             {
-                                <a class="btn btn-outline-primary btn-sm" href="@href">@label</a>
+                                <a class="btn btn-outline-primary btn-sm" href="@href" aria-label="See @label">See @kind</a>
                             }
                             <button type="button" class="btn btn-link btn-sm" aria-label="Put back on the list: @wish.DisplayName" @onclick="() => PutBackAsync(wish)">Put back</button>
                         </div>
@@ -191,7 +191,7 @@ else
     </div>
     <pre class="wish-preview" aria-label="What will be shared">@ShareText</pre>
     <div class="d-flex align-items-center gap-3">
-        <button type="button" class="btn btn-primary" @onclick="ShareAsync">Share</button>
+        <button type="button" class="btn btn-primary share-button" @onclick="ShareAsync">Share</button>
         @if (shareStatus.Length > 0)
         {
             <span role="status">@shareStatus</span>
@@ -284,12 +284,12 @@ else
     }
 
     // A got wish links to what it became. Nothing is shown when that record has been deleted.
-    private (string Href, string Label)? BecameLink(Wish wish)
+    private (string Href, string Label, string Kind)? BecameLink(Wish wish)
     {
         if (wish.PlantId is { } plantId && plants.FirstOrDefault(p => p.Id == plantId) is { } plant)
-            return ($"plants/{plant.Id}", plant.DisplayName);
+            return ($"plants/{plant.Id}", plant.DisplayName, "plant");
         if (wish.PropagationId is { } propagationId && propagations.FirstOrDefault(p => p.Id == propagationId) is { } propagation)
-            return ($"propagations/{propagation.Id}", propagation.DisplayName);
+            return ($"propagations/{propagation.Id}", propagation.DisplayName, "cutting");
         return null;
     }
 

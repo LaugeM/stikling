@@ -50,8 +50,6 @@ public sealed class Wish : Entity
             errors.Add("Give the wish a genus, or a name of your own.");
         if (MostToPay < 0)
             errors.Add("The most you would pay can't be negative.");
-        if (GotOn > today)
-            errors.Add("The day you got it can't be in the future.");
         return errors;
     }
 }
