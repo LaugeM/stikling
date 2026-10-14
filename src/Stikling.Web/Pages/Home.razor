@@ -266,11 +266,10 @@ else
         </section>
     }
 
-    @if (!Away && !Holding && (wateringDue.Count > 0 || NextRoundLine is not null))
+    @if (!Away && !Holding && (WaterNow.Count > 0 || WaterComing.Count > 0 || NextRoundLine is not null))
     {
-        var now = wateringDue.Where(d => d.DueNow).ToList();
-        // Plants gathered onto a round day are counted in the line on the next round, not listed here
-        var coming = wateringDue.Where(d => !d.DueNow && !d.Gathered).ToList();
+        var now = WaterNow;
+        var coming = WaterComing;
         <section class="today-section">
             <div class="today-section-head">
                 <h2>Water</h2>
@@ -384,7 +383,11 @@ else
     {
     <section class="today-section">
         <h2>Worth a look</h2>
-        @if (ChecksNow.Count == 0)
+        @if (NextRoundChecksLine is { } nextChecks)
+        {
+            <p class="today-next-round"><span>@nextChecks</span></p>
+        }
+        @if (ChecksNow.Count == 0 && NextRoundChecksLine is null)
         {
             <p class="text-body-secondary mb-0">
                 @(active.Count == 0
@@ -394,7 +397,7 @@ else
                         : "Nothing waiting. Every propagation has been looked at in the last week.")
             </p>
         }
-        else
+        else if (ChecksNow.Count > 0)
         {
             <ul class="item-list">
                 @foreach (var check in ChecksNow)
@@ -588,15 +591,30 @@ else
                 return null;
 
             var plantCount = wateringDue.Count(d => d.Gathered && !d.DueNow && d.ShowOn == next);
-            if (plantCount == 0)
-                return null;
-
-            var day = next == Today.AddDays(1) ? "tomorrow" : next.DayOfWeek.ToString();
-            var line = $"Next round {day} · {Labels.Count(plantCount, "plant")} to check";
-            var propagationCount = nextRoundChecks.Count(c => FlaggedNow.All(i => i.Subject.Id != c.Propagation.Id));
-            return propagationCount > 0 ? $"{line} · {Labels.Count(propagationCount, "propagation")} to look at" : line;
+            return plantCount == 0 ? null : $"Next round {NextRoundName(next)} · {Labels.Count(plantCount, "plant")} to check";
         }
     }
+
+    // On a day that isn't a round day, the propagations waiting for the next one, for Worth a look
+    private string? NextRoundChecksLine
+    {
+        get
+        {
+            if (roundDays is not { Count: > 0 } || RoundSchedule.IsRoundDay(roundDays, Today)
+                || RoundSchedule.Next(roundDays, Today) is not { } next)
+                return null;
+
+            var count = nextRoundChecks.Count(c => !putOffs.IsPutOff(PutOffs.Check(c.Propagation.Id), Today));
+            return count == 0 ? null : $"Next round {NextRoundName(next)} · {Labels.Count(count, "propagation")} to look at";
+        }
+    }
+
+    private string NextRoundName(DateOnly next) => next == Today.AddDays(1) ? "tomorrow" : next.DayOfWeek.ToString();
+
+    private List<WateringDue> WaterNow => wateringDue.Where(d => d.DueNow).ToList();
+
+    // Plants gathered onto a round day are counted in the line on the next round, not listed as coming up
+    private List<WateringDue> WaterComing => wateringDue.Where(d => !d.DueNow && !d.Gathered).ToList();
 
     private List<Plant> QuarantineNow =>
         TodayBoard.QuarantineUp(plants, Today)
