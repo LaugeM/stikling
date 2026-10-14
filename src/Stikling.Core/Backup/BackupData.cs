@@ -38,6 +38,7 @@ public sealed class BackupData
     public List<ReceivedHistory> ReceivedHistories { get; set; } = [];
     public List<AwayStretch> AwayStretches { get; set; } = [];
     public List<SitterSheet> SitterSheets { get; set; } = [];
+    public List<FloweringMark> FloweringMarks { get; set; } = [];
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the
@@ -63,7 +64,8 @@ public sealed class BackupData
         ReceivedHistories.Count(h => !h.IsDeleted),
         AwayStretches.Count(s => !s.IsDeleted),
         SitterSheets.Count(s => !s.IsDeleted),
-        PropagationCareLogs.Count(l => !l.IsDeleted));
+        PropagationCareLogs.Count(l => !l.IsDeleted),
+        FloweringMarks.Count(m => !m.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -86,4 +88,5 @@ public sealed record BackupCounts(
     int ReceivedHistories,
     int AwayStretches,
     int SitterSheets,
-    int PropagationCareEntries);
+    int PropagationCareEntries,
+    int FloweringMarks);
