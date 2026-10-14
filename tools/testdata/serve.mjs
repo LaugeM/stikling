@@ -9,13 +9,14 @@
 
 import { createServer } from "node:http";
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, createReadStream, statSync } from "node:fs";
+import { existsSync, readdirSync, createReadStream } from "node:fs";
 import { dirname, join, basename } from "node:path";
+import { fileURLToPath } from "node:url";
 
 function findFolder() {
     if (process.env.STIKLING_TESTDATA) return process.env.STIKLING_TESTDATA;
     // The common git dir is the main checkout's .git, also when this runs in a worktree.
-    const gitDir = execFileSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { encoding: "utf8" }).trim();
+    const gitDir = execFileSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { encoding: "utf8", cwd: dirname(fileURLToPath(import.meta.url)) }).trim();
     return join(dirname(dirname(gitDir)), "stikling-testdata");
 }
 
@@ -27,9 +28,16 @@ if (!existsSync(folder)) {
 
 const port = Number(process.env.PORT ?? 5171);
 
-createServer((req, res) => {
+const local = /^(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+function handle(req, res) {
+    // The Host check stops a page on another site that points its own name at 127.0.0.1.
+    if (!local.test(req.headers.host ?? "")) {
+        res.writeHead(403).end();
+        return;
+    }
     const origin = req.headers.origin;
-    if (origin && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    if (origin?.startsWith("http://") && local.test(origin.slice("http://".length))) {
         res.setHeader("Access-Control-Allow-Origin", origin);
     }
     if (req.method !== "GET") {
@@ -37,7 +45,7 @@ createServer((req, res) => {
         return;
     }
 
-    const files = readdirSync(folder).filter(name => statSync(join(folder, name)).isFile());
+    const files = readdirSync(folder, { withFileTypes: true }).filter(f => f.isFile()).map(f => f.name);
     const path = decodeURIComponent(new URL(req.url, "http://localhost").pathname.slice(1));
 
     if (path === "") {
@@ -50,5 +58,14 @@ createServer((req, res) => {
         return;
     }
     res.writeHead(200, { "Content-Type": path.endsWith(".zip") ? "application/zip" : "application/octet-stream" });
-    createReadStream(join(folder, path)).pipe(res);
+    createReadStream(join(folder, path)).on("error", () => res.destroy()).pipe(res);
+}
+
+createServer((req, res) => {
+    try {
+        handle(req, res);
+    } catch {
+        if (!res.headersSent) res.writeHead(400);
+        res.end();
+    }
 }).listen(port, "127.0.0.1", () => console.log(`Serving ${folder} on http://localhost:${port}`));
