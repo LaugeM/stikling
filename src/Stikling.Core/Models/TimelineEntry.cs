@@ -73,7 +73,8 @@ public sealed class TolerantTimelineEventConverter : JsonConverter<TimelineEvent
             && Enum.TryParse<TimelineEvent>(reader.GetString(), out var value)
             && Enum.IsDefined(value))
             return value;
-        reader.Skip();
+        // Skip throws when a backup is read from a stream in parts. A converter always gets the whole value, so TrySkip is enough.
+        reader.TrySkip();
         return null;
     }
 
