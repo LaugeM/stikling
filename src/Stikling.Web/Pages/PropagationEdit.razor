@@ -813,7 +813,7 @@ else
                 var named = await RoomService.GetPlacesAsync();
                 await PropagationService.UpdateAsync(original!, propagation, Labels.For(propagation), id => named.NameOf(id));
             }
-            Navigation.NavigateTo($"propagations/{propagation.Id}", replace: IsNew);
+            Navigation.NavigateTo(IsNew ? $"propagations/{propagation.Id}?made=1" : $"propagations/{propagation.Id}", replace: IsNew);
         }
         catch (Exception ex)
         {

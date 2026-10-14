@@ -1,0 +1,412 @@
+@page "/labels"
+@* The file isn't called Labels because a page by that name would hide the Labels class the other pages use for their text *@
+@layout WideLayout
+@using System.Globalization
+@using Stikling.Core.Labels
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject LabelPrinter Printer
+@inject DeviceFiles Device
+@inject NavigationManager Navigation
+
+<PageTitle>Labels · Stikling</PageTitle>
+
+@* No ReloadOnSync: like an edit page, nothing should change under someone choosing what goes on the labels *@
+
+<div class="labels-page">
+    <a class="back-link" href="@(OnlyCuttings ? "propagations" : "plants")">@(OnlyCuttings ? "Propagations" : "Plants")</a>
+    <div class="page-heading">
+        <h1>Labels@(items is { Count: > 0 } ? $" · {items.Count}" : null)</h1>
+    </div>
+
+    @if (items is null)
+    {
+        <p class="text-body-secondary">Loading…</p>
+    }
+    else if (items.Count == 0)
+    {
+        <div class="empty-state">
+            <p>Pick plants or cuttings to make labels for. Use Select on Plants or Propagations, or More on a plant's page.</p>
+            <div class="labels-empty-links">
+                <a class="btn btn-outline-primary" href="plants">Plants</a>
+                <a class="btn btn-outline-primary" href="propagations">Propagations</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        var shape = settings.Shape();
+        var oneLine = shape.OneLine;
+        var parts = settings.Parts;
+
+        <div class="labels-layout">
+            <section class="labels-preview" aria-label="Labels to print">
+                <ul class="labels-sheet @TabClass" @ref="container" style="--zoom: @Num(Zoom(shape))">
+                    @foreach (var item in items)
+                    {
+                        <li class="label-item" @key="item.Id" style="--w: @Num(shape.WidthMm); --h: @Num(shape.HeightMm)">
+                            <canvas data-label role="img" aria-label="Label for @item.Content.Name"></canvas>
+                            <button type="button" class="label-remove" aria-label="Leave out @item.Content.Name" @onclick="() => Remove(item)">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </section>
+
+            <section class="labels-settings" aria-label="Label settings">
+                <div class="btn-group segmented w-100" role="radiogroup" aria-label="How to print">
+                    @foreach (var (value, label) in tabs)
+                    {
+                        var id = $"labels-tab-{value}";
+                        <input type="radio" class="btn-check" name="labels-tab" id="@id"
+                               checked="@(settings.Tab == value)" @onchange="() => SetTabAsync(value)" />
+                        <label class="btn btn-outline-primary" for="@id">@label</label>
+                    }
+                </div>
+
+                @switch (settings.Tab)
+                {
+                    case LabelTab.App:
+                        <div class="labels-field">
+                            <div class="labels-field-label" id="labels-size-label">Size</div>
+                            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="labels-size-label">
+                                @foreach (var size in LabelSettings.AppSizes)
+                                {
+                                    var id = $"labels-size-{size.Id}";
+                                    <input type="radio" class="btn-check" name="labels-size" id="@id"
+                                           checked="@(settings.AppSize == size.Id)" @onchange="() => SetAppSizeAsync(size.Id)" />
+                                    <label class="btn btn-outline-primary" for="@id">@size.Label.Replace(" mm", "")</label>
+                                }
+                                <input type="radio" class="btn-check" name="labels-size" id="labels-size-custom"
+                                       checked="@(settings.AppSize == LabelSettings.Custom)" @onchange="() => SetAppSizeAsync(LabelSettings.Custom)" />
+                                <label class="btn btn-outline-primary" for="labels-size-custom">Custom</label>
+                            </div>
+                            @if (settings.AppSize == LabelSettings.Custom)
+                            {
+                                <div class="labels-custom">
+                                    <label>
+                                        <span>Width (mm)</span>
+                                        <input type="number" class="form-control" inputmode="numeric" min="@LabelSettings.CustomMin" max="@LabelSettings.CustomMax"
+                                               @bind="settings.CustomWidthMm" @bind:event="onchange" @bind:after="SettingsChangedAsync" />
+                                    </label>
+                                    <label>
+                                        <span>Length (mm)</span>
+                                        <input type="number" class="form-control" inputmode="numeric" min="@LabelSettings.CustomMin" max="@LabelSettings.CustomMax"
+                                               @bind="settings.CustomLengthMm" @bind:event="onchange" @bind:after="SettingsChangedAsync" />
+                                    </label>
+                                </div>
+                                <p class="labels-note">Between @LabelSettings.CustomMin and @LabelSettings.CustomMax mm.</p>
+                            }
+                        </div>
+                        break;
+
+                    case LabelTab.Tape:
+                        <div class="labels-field">
+                            <div class="labels-field-label" id="labels-tape-label">Tape width</div>
+                            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="labels-tape-label">
+                                @foreach (var width in LabelSettings.TapeWidths)
+                                {
+                                    var id = $"labels-tape-{width}";
+                                    <input type="radio" class="btn-check" name="labels-tape" id="@id"
+                                           checked="@(settings.TapeMm == width)" @onchange="() => SetTapeAsync(width)" />
+                                    <label class="btn btn-outline-primary" for="@id">@width mm</label>
+                                }
+                            </div>
+                        </div>
+                        <div class="labels-field">
+                            <div class="labels-field-label" id="labels-length-label">Label length</div>
+                            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="labels-length-label">
+                                @foreach (var length in LabelSettings.TapeLengths)
+                                {
+                                    var id = $"labels-length-{length}";
+                                    <input type="radio" class="btn-check" name="labels-length" id="@id"
+                                           checked="@(settings.TapeLengthMm == length)" @onchange="() => SetLengthAsync(length)" />
+                                    <label class="btn btn-outline-primary" for="@id">@length mm</label>
+                                }
+                            </div>
+                        </div>
+                        break;
+
+                    default:
+                        <div class="labels-field">
+                            <div class="labels-field-label" id="labels-paper-label">Paper</div>
+                            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="labels-paper-label">
+                                @foreach (var (value, label) in papers)
+                                {
+                                    var id = $"labels-paper-{value}";
+                                    <input type="radio" class="btn-check" name="labels-paper" id="@id"
+                                           checked="@(settings.Paper == value)" @onchange="() => SetPaperAsync(value)" />
+                                    <label class="btn btn-outline-primary" for="@id">@label</label>
+                                }
+                            </div>
+                        </div>
+                        <div class="labels-field">
+                            <div class="labels-field-label" id="labels-layout-label">Layout</div>
+                            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="labels-layout-label">
+                                @foreach (var (value, label) in layouts)
+                                {
+                                    var id = $"labels-layout-{value}";
+                                    <input type="radio" class="btn-check" name="labels-layout" id="@id"
+                                           checked="@(settings.Layout == value)" @onchange="() => SetLayoutAsync(value)" />
+                                    <label class="btn btn-outline-primary" for="@id">@label</label>
+                                }
+                            </div>
+                            <p class="labels-note">
+                                @(settings.Layout == LabelSheetLayout.Pots
+                                    ? "Tags of 50 × 25 mm with cut lines."
+                                    : "Strips of 15 × 120 mm. Cut along the pointed end and push it into the soil.")
+                            </p>
+                        </div>
+                        break;
+                }
+
+                <fieldset class="labels-field labels-parts">
+                    <legend class="labels-field-label">Show</legend>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="labels-number" checked="@parts.Number"
+                               @onchange="e => SetPartAsync(p => p with { Number = (bool)e.Value! })" />
+                        <label class="form-check-label" for="labels-number">Number</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="labels-name" checked="@parts.Name"
+                               @onchange="e => SetPartAsync(p => p with { Name = (bool)e.Value! })" />
+                        <label class="form-check-label" for="labels-name">Name</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="labels-botanical" checked="@(!oneLine && parts.Botanical)" disabled="@oneLine"
+                               @onchange="e => SetPartAsync(p => p with { Botanical = (bool)e.Value! })" />
+                        <label class="form-check-label" for="labels-botanical">Botanical name</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="labels-date" checked="@(!oneLine && parts.Date)" disabled="@oneLine"
+                               @onchange="e => SetPartAsync(p => p with { Date = (bool)e.Value! })" />
+                        <label class="form-check-label" for="labels-date">Date</label>
+                    </div>
+                    @if (settings.NoRoomNote() is { } note)
+                    {
+                        <p class="labels-note">@note</p>
+                    }
+                </fieldset>
+
+                @if (settings.Tab == LabelTab.App)
+                {
+                    <button type="button" class="btn btn-primary w-100 labels-go" disabled="@busy" @onclick="SharePicturesAsync">
+                        @(canShareFiles ? "Share" : "Save") @Labels.Count(items.Count, "label")
+                    </button>
+                    <p class="labels-note">
+                        @(canShareFiles
+                            ? "Pick your label maker's app in the share menu."
+                            : "Saves a picture of each label. Open them in your label maker's app.")
+                    </p>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary w-100 labels-go" disabled="@busy" @onclick="PrintAsync">Print</button>
+                    @if (settings.Tab == LabelTab.Tape)
+                    {
+                        <p class="labels-note">Pick your label printer and its tape in the print dialog. Works best from a computer.</p>
+                    }
+                }
+
+                @if (message is not null)
+                {
+                    <p class="labels-note" role="status">@message</p>
+                }
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    private sealed record Item(Guid Id, bool IsCutting, LabelContent Content);
+
+    private static readonly (LabelTab Value, string Label)[] tabs =
+    [
+        (LabelTab.App, "Label maker app"),
+        (LabelTab.Tape, "Tape printer"),
+        (LabelTab.Sheet, "Sheet"),
+    ];
+
+    private static readonly (LabelPaper Value, string Label)[] papers =
+    [
+        (LabelPaper.A4, "A4"),
+        (LabelPaper.Letter, "Letter"),
+    ];
+
+    private static readonly (LabelSheetLayout Value, string Label)[] layouts =
+    [
+        (LabelSheetLayout.Pots, "Pot labels"),
+        (LabelSheetLayout.Stakes, "Plant stakes"),
+    ];
+
+    /// <summary>The plants to make labels for, as ids with commas between.</summary>
+    [SupplyParameterFromQuery(Name = "plants")]
+    public string? PlantIds { get; set; }
+
+    /// <summary>The cuttings to make labels for, as ids with commas between.</summary>
+    [SupplyParameterFromQuery(Name = "cuttings")]
+    public string? CuttingIds { get; set; }
+
+    private List<Item>? items;
+    private LabelSettings settings = new();
+    private ElementReference container;
+    private string? loadedKey;
+    private string? drawnKey;
+    private bool canShareFiles;
+    private bool busy;
+    private string? message;
+
+    private bool OnlyCuttings => string.IsNullOrWhiteSpace(PlantIds) && !string.IsNullOrWhiteSpace(CuttingIds);
+
+    private string TabClass => settings.Tab switch
+    {
+        LabelTab.Tape => "tape",
+        LabelTab.Sheet => "sheet",
+        _ => "app"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        settings = LabelSettings.FromJson(await Device.GetAsync(LabelSettings.Key));
+        canShareFiles = await Printer.CanShareFilesAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var key = $"{PlantIds}|{CuttingIds}";
+        if (key == loadedKey && items is not null)
+            return;
+        loadedKey = key;
+        items = await LoadAsync();
+    }
+
+    // The plants and cuttings asked for, in the order given. Ids that are deleted or aren't here are skipped.
+    private async Task<List<Item>> LoadAsync()
+    {
+        var plantIds = ParseIds(PlantIds);
+        var cuttingIds = ParseIds(CuttingIds);
+        var found = new List<Item>();
+
+        if (plantIds.Count > 0)
+        {
+            var plants = (await PlantRepository.GetAllAsync()).Where(p => !p.IsDeleted).ToDictionary(p => p.Id);
+            foreach (var id in plantIds)
+                if (plants.TryGetValue(id, out var plant))
+                    found.Add(new Item(id, false, LabelContent.For(plant)));
+        }
+
+        if (cuttingIds.Count > 0)
+        {
+            var cuttings = (await PropagationRepository.GetAllAsync()).Where(p => !p.IsDeleted).ToDictionary(p => p.Id);
+            foreach (var id in cuttingIds)
+                if (cuttings.TryGetValue(id, out var cutting))
+                    found.Add(new Item(id, true, LabelContent.For(cutting)));
+        }
+        return found;
+    }
+
+    private static List<Guid> ParseIds(string? text)
+    {
+        var ids = new List<Guid>();
+        foreach (var part in (text ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            if (Guid.TryParse(part, out var id) && !ids.Contains(id))
+                ids.Add(id);
+        return ids;
+    }
+
+    // The drawing is done in JavaScript, after the canvases are on the page
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (items is not { Count: > 0 })
+        {
+            drawnKey = null;
+            return;
+        }
+
+        var shape = settings.Shape();
+        var key = string.Join(',', items.Select(i => i.Id)) + $"|{settings.Parts}|{shape}";
+        if (key == drawnKey)
+            return;
+        drawnKey = key;
+        await Printer.DrawAsync(container, items.Select(i => i.Content).ToList(), settings.Parts, shape);
+    }
+
+    // Only changes this print: the record isn't touched, and going back still works
+    private void Remove(Item item)
+    {
+        items!.Remove(item);
+        var plants = items.Where(i => !i.IsCutting).Select(i => i.Id).ToList();
+        var cuttings = items.Where(i => i.IsCutting).Select(i => i.Id).ToList();
+
+        var uri = Navigation.GetUriWithQueryParameters(Navigation.Uri, new Dictionary<string, object?>
+        {
+            ["plants"] = plants.Count > 0 ? string.Join(',', plants) : null,
+            ["cuttings"] = cuttings.Count > 0 ? string.Join(',', cuttings) : null,
+        });
+        loadedKey = $"{(plants.Count > 0 ? string.Join(',', plants) : null)}|{(cuttings.Count > 0 ? string.Join(',', cuttings) : null)}";
+        message = null;
+        Navigation.NavigateTo(uri, replace: true);
+    }
+
+    private Task SetTabAsync(LabelTab tab) => Change(() => settings.Tab = tab);
+
+    private Task SetAppSizeAsync(string size) => Change(() => settings.AppSize = size);
+
+    private Task SetTapeAsync(int width) => Change(() => settings.TapeMm = width);
+
+    private Task SetLengthAsync(int length) => Change(() => settings.TapeLengthMm = length);
+
+    private Task SetPaperAsync(LabelPaper paper) => Change(() => settings.Paper = paper);
+
+    private Task SetLayoutAsync(LabelSheetLayout layout) => Change(() => settings.Layout = layout);
+
+    private Task SetPartAsync(Func<LabelParts, LabelParts> change) => Change(() => settings.Parts = change(settings.Parts));
+
+    private Task SettingsChangedAsync() => Change(() => { });
+
+    private async Task Change(Action change)
+    {
+        change();
+        settings = settings.Normalized();
+        message = null;
+        await Device.SetAsync(LabelSettings.Key, settings.ToJson());
+    }
+
+    private async Task SharePicturesAsync()
+    {
+        if (items is not { Count: > 0 })
+            return;
+
+        busy = true;
+        message = null;
+        try
+        {
+            var result = await Printer.SharePicturesAsync(items.Select(i => i.Content).ToList(), settings.Parts, settings.Shape());
+            message = result switch
+            {
+                "saved" => $"Saved {Labels.Count(items.Count, "picture")}.",
+                "failed" => "Couldn't make the pictures.",
+                _ => null
+            };
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task PrintAsync()
+    {
+        if (settings.PageRule() is not { } rule)
+            return;
+        message = null;
+        await Printer.PrintAsync(rule);
+    }
+
+    // The label is shown larger than life so the writing can be read, up to what fits the screen
+    private static double Zoom(LabelShape shape) =>
+        Math.Clamp(300 / (Math.Max(shape.WidthMm, shape.HeightMm) * 3.78), 0.8, 1.8);
+
+    private static string Num(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+}

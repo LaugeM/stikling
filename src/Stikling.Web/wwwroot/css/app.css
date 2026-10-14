@@ -3151,6 +3151,33 @@ main.app-content:has(.form-bar) {
     }
 }
 
+/* The Labels page prints only the labels. The page rule for their size is added by labels.js. */
+@media print {
+    :root:has(.labels-page),
+    body:has(.labels-page) {
+        background: #ffffff !important;
+    }
+
+    body:has(.labels-page) .app-header,
+    body:has(.labels-page) .app-nav,
+    body:has(.labels-page) .update-banner,
+    body:has(.labels-page) .first-sync-banner {
+        display: none !important;
+    }
+
+    body:has(.labels-page) .app-shell {
+        display: block !important;
+        min-height: 0 !important;
+    }
+
+    body:has(.labels-page) .app-content,
+    body:has(.labels-page) .page-wide {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
+
 /* The offer after moving plants in from outside: full-size taps like the rest */
 .came-in .btn-outline-primary {
     min-height: 2.75rem;

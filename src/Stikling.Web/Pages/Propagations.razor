@@ -5,6 +5,7 @@
 @inject IPlantRepository PlantRepository
 @inject TimeProvider Time
 @inject PlantNameService Names
+@inject NavigationManager Navigation
 
 <PageTitle>Propagations · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -16,6 +17,9 @@
         <div class="d-flex align-items-baseline gap-2">
             <span class="text-body-secondary small">@visible.Count of @all.Count</span>
             <a class="btn btn-link btn-sm link-action" href="swap">Available for swap</a>
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
+                @(selecting ? "Done" : "Select")
+            </button>
             @* Takes over from the round add button on a wide screen *@
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="propagations/new">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
@@ -68,6 +72,17 @@ else
         </div>
     </div>
 
+    @if (selecting)
+    {
+        <div class="select-all">
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="SelectAllShown">Select all shown</button>
+            @if (selected.Count > 0)
+            {
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => selected.Clear()">Clear</button>
+            }
+        </div>
+    }
+
     <div class="list-body">
     @if (visible.Count == 0)
     {
@@ -89,7 +104,8 @@ else
         </div>
     }
 
-    @foreach (var experiment in experiments)
+    @* The batches of an experiment are plain cards while picking, so each can be ticked *@
+    @foreach (var experiment in experiments.Where(_ => !selecting))
     {
         var longest = Math.Max(1, experiment.Entries.Max(e => BarDays(e) ?? 0));
         <section class="stage-group">
@@ -137,6 +153,19 @@ else
         </section>
     }
 
+    @if (selecting && experiments.Count > 0)
+    {
+        <ul class="item-list list-grid">
+            @foreach (var propagation in experiments.SelectMany(e => e.Entries).Select(e => e.Propagation))
+            {
+                <li>
+                    <PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" Pace="@Pace(propagation)"
+                                     Selectable="true" Selected="selected.Contains(propagation.Id)" OnToggle="Toggle" />
+                </li>
+            }
+        </ul>
+    }
+
     @if (ungrouped.Count > 0 && progress == ProgressFilter.Active)
     {
         @foreach (var (stage, items) in PropagationFilter.ByStage(ungrouped))
@@ -146,7 +175,10 @@ else
                 <ul class="item-list list-grid">
                     @foreach (var propagation in items)
                     {
-                        <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" Pace="@Pace(propagation)" /></li>
+                        <li>
+                            <PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" Pace="@Pace(propagation)"
+                                             Selectable="selecting" Selected="selected.Contains(propagation.Id)" OnToggle="Toggle" />
+                        </li>
                     }
                 </ul>
             </section>
@@ -157,16 +189,32 @@ else
         <ul class="item-list list-grid">
             @foreach (var propagation in ungrouped)
             {
-                <li><PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" Pace="@Pace(propagation)" /></li>
+                <li>
+                    <PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" Pace="@Pace(propagation)"
+                                     Selectable="selecting" Selected="selected.Contains(propagation.Id)" OnToggle="Toggle" />
+                </li>
             }
         </ul>
     }
     </div>
 }
 
-<a class="fab" href="propagations/new" aria-label="Start a propagation" title="Start a propagation">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-</a>
+@if (selecting)
+{
+    <div class="bulk-bar" role="region" aria-label="Actions for selected propagations">
+        <div class="bulk-row">
+            <span class="bulk-count">@selected.Count selected</span>
+            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(selected.Count == 0)"
+                    @onclick="OpenLabels">Labels</button>
+        </div>
+    </div>
+}
+else
+{
+    <a class="fab" href="propagations/new" aria-label="Start a propagation" title="Start a propagation">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+    </a>
+}
 
 @code {
     private static readonly (ProgressFilter Value, string Label)[] progressOptions =
@@ -185,6 +233,9 @@ else
 
     private Dictionary<Guid, Plant> plants = [];
 
+    private bool selecting;
+    private readonly HashSet<Guid> selected = [];
+
     private string? search;
     private ProgressFilter progress = ProgressFilter.Active;
 
@@ -199,6 +250,28 @@ else
         all = await Repository.GetAllAsync();
         Refresh();
     }
+
+    private void ToggleSelectMode()
+    {
+        selecting = !selecting;
+        selected.Clear();
+    }
+
+    private void Toggle(Propagation propagation)
+    {
+        if (!selected.Remove(propagation.Id))
+            selected.Add(propagation.Id);
+    }
+
+    private void SelectAllShown()
+    {
+        foreach (var propagation in visible)
+            selected.Add(propagation.Id);
+    }
+
+    // The selected cuttings, in the order of the list, on the page that makes their labels
+    private void OpenLabels() =>
+        Navigation.NavigateTo($"labels?cuttings={string.Join(',', visible.Where(p => selected.Contains(p.Id)).Select(p => p.Id))}");
 
     private void SetProgress(ProgressFilter value)
     {

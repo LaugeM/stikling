@@ -1,8 +1,56 @@
-@* One row in a propagation list: "3× corm · LECA · day 24". *@
+@* One row in a propagation list: "3× corm · LECA · day 24". In select mode the card is a checkbox instead of a link. *@
 @inject TimeProvider Time
 @inject PlantNameService Names
 
-<a class="item-card" href="propagations/@Propagation.Id">
+@if (Selectable)
+{
+    <label class="item-card selectable @(Selected ? "selected" : null)">
+        <input type="checkbox" class="form-check-input plant-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Propagation)" />
+        @Content
+    </label>
+}
+else
+{
+    <a class="item-card" href="propagations/@Propagation.Id">
+        @Content
+    </a>
+}
+
+@code {
+    private EverydayNameBook? everyday;
+
+    protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
+
+    [Parameter, EditorRequired]
+    public required Propagation Propagation { get; set; }
+
+    /// <summary>Shown as "from Big alocasia" when set.</summary>
+    [Parameter]
+    public string? ParentName { get; set; }
+
+    /// <summary>
+    /// How it's doing against earlier batches. Only a slow one says so on the card, since
+    /// "on time" on every card would be noise.
+    /// </summary>
+    [Parameter]
+    public RootingPace? Pace { get; set; }
+
+    /// <summary>Show the stage as a badge (lists that aren't already grouped by stage).</summary>
+    [Parameter]
+    public bool ShowStage { get; set; }
+
+    [Parameter]
+    public bool Selectable { get; set; }
+
+    [Parameter]
+    public bool Selected { get; set; }
+
+    [Parameter]
+    public EventCallback<Propagation> OnToggle { get; set; }
+
+    private DateOnly Today => Time.Today();
+
+    private RenderFragment Content => @<text>
     <PropagationThumb Propagation="Propagation" Days="@(Propagation.IsActive ? Propagation.DaysSinceStart(Today) : null)" />
 
     <div class="item-text">
@@ -59,30 +107,5 @@
             }
         </div>
     </div>
-</a>
-
-@code {
-    private EverydayNameBook? everyday;
-
-    protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
-
-    [Parameter, EditorRequired]
-    public required Propagation Propagation { get; set; }
-
-    /// <summary>Shown as "from Big alocasia" when set.</summary>
-    [Parameter]
-    public string? ParentName { get; set; }
-
-    /// <summary>
-    /// How it's doing against earlier batches. Only a slow one says so on the card, since
-    /// "on time" on every card would be noise.
-    /// </summary>
-    [Parameter]
-    public RootingPace? Pace { get; set; }
-
-    /// <summary>Show the stage as a badge (lists that aren't already grouped by stage).</summary>
-    [Parameter]
-    public bool ShowStage { get; set; }
-
-    private DateOnly Today => Time.Today();
+    </text>;
 }
