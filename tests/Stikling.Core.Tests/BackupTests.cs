@@ -138,12 +138,13 @@ public class BackupTests
             PropagationCareLogs = [new PropagationCareLog(), new PropagationCareLog { DeletedAt = Now }],
             FloweringMarks = [new FloweringMark(), new FloweringMark { DeletedAt = Now }],
             Problems = [new Problem(), new Problem { DeletedAt = Now }],
-            ProblemUpdates = [new ProblemUpdate(), new ProblemUpdate(), new ProblemUpdate { DeletedAt = Now }]
+            ProblemUpdates = [new ProblemUpdate(), new ProblemUpdate(), new ProblemUpdate { DeletedAt = Now }],
+            Wishes = [new Wish { Name = "Pink syngonium" }, new Wish { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -161,6 +162,7 @@ public class BackupTests
         Assert.Empty(data.FloweringMarks);
         Assert.Empty(data.Problems);
         Assert.Empty(data.ProblemUpdates);
+        Assert.Empty(data.Wishes);
     }
 
     [Fact]
@@ -210,6 +212,24 @@ public class BackupTests
         Assert.Equal(0, BackupMerge.Merge([problem], back.Problems).Added);
         Assert.Equal(1, BackupMerge.Merge<ProblemUpdate>([], back.ProblemUpdates).Added);
         Assert.Equal(0, BackupMerge.Merge([update], back.ProblemUpdates).Added);
+    }
+
+    [Fact]
+    public void Wishes_survive_a_backup_and_a_restore_merges_them()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var wish = new Wish
+        {
+            Genus = "Syngonium", Name = "that pink one", FoundAt = "Plant fair", MostToPay = 150.5m,
+            GotOn = new DateOnly(2026, 10, 1), PlantId = Guid.NewGuid(), UpdatedAt = Now
+        };
+
+        var back = JsonSerializer.Deserialize<BackupData>(JsonSerializer.Serialize(new BackupData { Wishes = [wish] }, options), options)!;
+
+        var restored = Assert.Single(back.Wishes);
+        Assert.Equal((wish.Id, 150.5m, wish.PlantId, wish.GotOn), (restored.Id, restored.MostToPay, restored.PlantId, restored.GotOn));
+        Assert.Equal(1, BackupMerge.Merge<Wish>([], back.Wishes).Added);
+        Assert.Equal(0, BackupMerge.Merge([wish], back.Wishes).Added);
     }
 
     [Fact]

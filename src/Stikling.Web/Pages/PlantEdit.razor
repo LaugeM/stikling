@@ -10,6 +10,8 @@
 @inject IFeedRepository FeedRepository
 @inject SettingsService SettingsService
 @inject PlantService PlantService
+@inject WishService WishService
+@inject PlantNameService Names
 @inject RoomService RoomService
 @inject PhotoService Photos
 @inject GooglePhotosService Google
@@ -59,6 +61,13 @@ else
                 <InputText id="nickname" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Big Monstera" />
             </div>
             <div class="form-text">Give it a genus, a nickname, or both.</div>
+            @if (WishHere is { } onWishlist)
+            {
+                <div class="form-check mt-2">
+                    <input type="checkbox" class="form-check-input" id="mark-wish-got" @bind="markWishGot" />
+                    <label class="form-check-label" for="mark-wish-got">On your wishlist: mark it got</label>
+                </div>
+            }
             @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.DiedBefore(plant, existing) is { Count: > 0 } diedBefore)
             {
                 <p class="form-text">
@@ -400,6 +409,20 @@ else
     [SupplyParameterFromQuery(Name = "copy")]
     public Guid? CopyOfId { get; set; }
 
+    /// <summary>Starts from a wish on the wishlist, from Got it. Once the plant is saved the wish moves to Got.</summary>
+    [SupplyParameterFromQuery(Name = "wish")]
+    public Guid? WishId { get; set; }
+
+    private IReadOnlyList<Wish> wishes = [];
+    private PlantDictionary? dictionary;
+    private bool markWishGot = true;
+
+    // The wish this plant is for: the one it was started from, else an open wish with the same names
+    private Wish? WishHere =>
+        !IsNew || plant is null ? null
+        : WishId is { } id && wishes.FirstOrDefault(w => w.Id == id && !w.IsGot) is { } chosen ? chosen
+        : WishMatches.OpenFor(plant.Genus, plant.Species, plant.Cultivar, plant.Nickname, wishes, dictionary).FirstOrDefault();
+
     /// <summary>"photos" starts from old photos, from the first screen, with the photos first.</summary>
     [SupplyParameterFromQuery(Name = "from")]
     public string? From { get; set; }
@@ -609,6 +632,8 @@ else
         quarantineNewPlants = settings.QuarantineNewPlants;
         placesNow = places;
         existing = all;
+        wishes = IsNew ? await WishService.GetAllAsync() : [];
+        dictionary = IsNew ? await Names.GetDictionaryAsync() : null;
 
         if (IsNew)
         {
@@ -622,6 +647,14 @@ else
             }
             var fresh = plant is null;
             plant ??= new Plant { AcquiredOn = LooseDate.Of(Today) };
+            if (fresh && CopyOfId is null && WishId is { } fromWish && wishes.FirstOrDefault(w => w.Id == fromWish && !w.IsGot) is { } wish)
+            {
+                plant.Genus = wish.Genus;
+                plant.Species = wish.Species;
+                plant.Cultivar = wish.Cultivar;
+                plant.Nickname = string.IsNullOrWhiteSpace(wish.Genus) ? wish.Name : null;
+                plant.Source = wish.FoundAt;
+            }
             if (ParentId is { } parentId && all.FirstOrDefault(p => p.Id == parentId) is { } parent)
             {
                 plant.Origin = PlantOrigin.Propagated;
@@ -808,6 +841,21 @@ else
         }
     }
 
+    // The plant is saved by now, so a wish that can't be moved is logged and left, not reported as a failed save
+    private async Task MarkWishGotAsync(Wish? wish)
+    {
+        if (wish is null || plant is null)
+            return;
+        try
+        {
+            await WishService.MarkGotAsync(wish.Id, plant.Id, null);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Moving the wish to Got failed");
+        }
+    }
+
     private async Task SaveAsync()
     {
         if (plant is null)
@@ -833,8 +881,10 @@ else
             }
             if (IsNew)
             {
+                var wish = markWishGot ? WishHere : null;
                 await PlantService.CreateAsync(plant, photos);
                 photos.Clear(); // they belong to the saved plant now
+                await MarkWishGotAsync(wish);
             }
             else
             {
