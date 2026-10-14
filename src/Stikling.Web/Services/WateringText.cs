@@ -55,7 +55,7 @@ public static class WateringText
     {
         var guess = due.Guess;
         var days = (guess.CheckOn ?? today).DayNumber - today.DayNumber;
-        var line = due.DueNow
+        var line = days <= 0
             ? "Probably dry by now, check with the meter"
             : days == 1 ? "Probably dry tomorrow" : $"Probably dry in {days} days";
         if (guess.LatestReading is { } reading)

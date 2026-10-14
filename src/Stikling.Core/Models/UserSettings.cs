@@ -61,4 +61,10 @@ public sealed class UserSettings : Entity
     /// Older settings without it read as null.
     /// </summary>
     public WaterCheck? WaterCheck { get; set; }
+
+    /// <summary>
+    /// The weekdays the person goes round their plants. Checks come up on the round day before
+    /// they're due. Null or empty means off. Older settings without it read as null.
+    /// </summary>
+    public List<Weekday>? RoundDays { get; set; }
 }

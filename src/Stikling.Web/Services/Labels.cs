@@ -216,6 +216,11 @@ public static class Labels
         _ => $"{days} days ago"
     };
 
+    /// <summary>"from March" for a month, "from Sat 17 Oct" for a day, for a flag set for later.</summary>
+    public static string FlagFrom(LooseDate from) => from.Precision == DatePrecision.Day
+        ? $"from {from.Start.ToString("ddd d MMM", CultureInfo.InvariantCulture)}"
+        : $"from {from.Start.ToString("MMMM", CultureInfo.InvariantCulture)}";
+
     /// <summary>"1 plant" / "3 plants".</summary>
     public static string Plants(int count) => Count(count, "plant");
 

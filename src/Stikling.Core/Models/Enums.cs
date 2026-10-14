@@ -202,3 +202,25 @@ public enum VisitPattern
     TwiceAWeek,
     Weekly
 }
+
+/// <summary>A day of the week, for the days someone goes round their plants.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<Weekday>))]
+public enum Weekday
+{
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday
+}
+
+public static class Weekdays
+{
+    public static DayOfWeek ToDayOfWeek(this Weekday day) =>
+        day == Weekday.Sunday ? DayOfWeek.Sunday : (DayOfWeek)((int)day + 1);
+
+    public static Weekday ToWeekday(this DayOfWeek day) =>
+        day == DayOfWeek.Sunday ? Weekday.Sunday : (Weekday)((int)day - 1);
+}

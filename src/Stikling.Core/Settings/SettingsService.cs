@@ -54,6 +54,14 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    public async Task SetRoundDaysAsync(IEnumerable<Weekday> days)
+    {
+        var current = await GetAsync();
+        var chosen = days.Distinct().Order().ToList();
+        current.RoundDays = chosen.Count == 0 ? null : chosen;
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetWateringReminderAsync(bool on)
     {
         var current = await GetAsync();

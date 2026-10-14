@@ -38,15 +38,13 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **Away or quiet time, and the plant-sitter sheet**, since the sheet is what you hand over when you go away. Worth having before the Christmas holidays.
-3. **Round days and Do it later**, which both decide which day something comes up on Today.
-4. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
-5. **Flowering log**, with the flowering calendar.
-6. **Problem log**: what you saw on a plant, what you did, and whether it helped.
-7. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
-8. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
-9. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
-10. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
+2. **The rest of the pest section**: Clean for how long, Start quarantine when adding a plant, Back from outside, an inspection logged on a single plant outside a case, and the neighbours to check when a case opens. That leaves the treatment plan with steps and the biological control log.
+3. **Flowering log**, with the flowering calendar.
+4. **Problem log**: what you saw on a plant, what you did, and whether it helped.
+5. **Import from a spreadsheet**, for someone who already keeps a list of their plants somewhere else. The table view is built, so this is what is left.
+6. **Wishlist, sharing your list as text, and the Available for swap list**, which are all about what you have, want and can spare.
+7. **Collection numbers and labels for a label maker**, since a label is where the number gets used.
+8. **What it likes, Growing season, and then care for common plants filled in**. The winter rest in What it likes is what Growing season asks about, and the filled-in care needs both to have somewhere to go.
 
 ### Cheap ones to slot in whenever
 
@@ -356,9 +354,9 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Going round**: open a room or spot and go through its plants one card at a time, then its propagations: a meter reading, watered, looked over, a photo, or skip. Opening it again the same day starts at the first one with nothing logged. Looked over goes on the history. Started from Today's round, Go round these in Water, the Plants list filtered to a room, or Rooms and tags | 4 | M | v1.x |
 | ☐ | **Your own walking order** for a round, set per room by dragging the cards | 6 | S | v1.x |
 | ✅ | **Away or quiet time**: set the dates you're away, or a quiet stretch of a week, two weeks, a month or a date with no reason asked, under Away and quiet time in Settings. Today and the photo reminder stop asking during it, a bar shows how far in you are, and I'm back ends it early. A week before an away stretch, Today mentions it. The watering reminder leaves a gap across a stretch out of what it learns unless something was watered in it, so a two-week trip isn't learned as how long a plant goes. On the way back, Today opens with a short list of the plants to look at first, as things to check and never to water. It never says overdue, and 3, 5, 10 or all can be set. Water and Worth a look come back when the list is done or after three days | 3 | M | v1.x |
-| ☐ | **Do it later**: a flag on a plant with the month or the day it starts to show, e.g. repot or prune from March, or repot next Saturday. It stays off Today until then, and works like the flag for needing attention once it does | 4 | S | v1.x |
+| ✅ | **Do it later**: a flag on a plant or propagation can be set to start from a month or a day, or the next round day. It stays off Today until then, shows greyed out on the page with Change and Remove, and works like the flag for needing attention from that day. One flag per plant, and it doesn't repeat | 4 | S | v1.x |
 | ☐ | **A note for next year**: a note on a plant that comes back on Today on the same date next year, or on a date you pick, e.g. "thrips showed up in May" or "repot before it starts growing". It shows next to A year ago today | 5 | S | v1.x |
-| ☐ | **Round days**: pick the days you go round your plants, e.g. Saturday, or Wednesday and Sunday. Plants due a check before the next round day are gathered onto it instead of each coming up on its own day | 3 | M | v1.x |
+| ✅ | **Round days**: pick the weekdays you go round your plants under Round days in Settings. A watering check comes up on the round day before it is due, after Still wet it waits for the next round day, and a plant that dries out faster than the gap keeps its own days. Propagations waiting for a look are gathered too. On other days Today says how many wait for the next round, with Go round now. Pests, flags and quarantine keep their own days, and the daily round only shows on round days | 3 | M | v1.x |
 | ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
 | ☐ | **Anniversaries and small celebrations**: Today says when you have had a plant for a year, and rooting, a first new leaf or a cutting promoted to a plant gets a short moment of its own | 6 | S | v1.x |
 | ✅ | **How long you've had a plant** instead of "day 430" on its photos: "1 yr 2 mo", counted from when you got it | 3 | S | v1.x |

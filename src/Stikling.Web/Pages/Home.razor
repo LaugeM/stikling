@@ -232,7 +232,7 @@ else
                             <div class="item-text">
                                 <div class="item-name">@item.Name</div>
                                 <div class="item-meta">
-                                    <span class="flag-line"><b>@item.Attention.Reason</b> · @Labels.DaysAgo(item.Attention.DaysSince(Today))</span>
+                                    <span class="flag-line"><b>@item.Attention.Reason</b> · @(item.From is { } from ? Labels.FlagFrom(from) : Labels.DaysAgo(item.Attention.DaysSince(Today)))</span>
                                 </div>
                             </div>
                         </a>
@@ -266,10 +266,10 @@ else
         </section>
     }
 
-    @if (!Away && !Holding && wateringDue.Count > 0)
+    @if (!Away && !Holding && (WaterNow.Count > 0 || WaterComing.Count > 0 || NextRoundLine is not null))
     {
-        var now = wateringDue.Where(d => d.DueNow).ToList();
-        var coming = wateringDue.Where(d => !d.DueNow).ToList();
+        var now = WaterNow;
+        var coming = WaterComing;
         <section class="today-section">
             <div class="today-section-head">
                 <h2>Water</h2>
@@ -287,6 +287,16 @@ else
                     }
                 </div>
             </div>
+            @if (NextRoundLine is { } nextRound)
+            {
+                <p class="today-next-round">
+                    <span>@nextRound</span>
+                    <a class="today-go-round" href="round/next">
+                        Go round now
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                    </a>
+                </p>
+            }
             @if (now.Any(d => d.Guess.Form == WateringForm.TopWatered && d.Guess.Mode != WateringMode.Meter))
             {
                 <details class="today-hint">
@@ -373,7 +383,11 @@ else
     {
     <section class="today-section">
         <h2>Worth a look</h2>
-        @if (ChecksNow.Count == 0)
+        @if (NextRoundChecksLine is { } nextChecks)
+        {
+            <p class="today-next-round"><span>@nextChecks</span></p>
+        }
+        @if (ChecksNow.Count == 0 && NextRoundChecksLine is null)
         {
             <p class="text-body-secondary mb-0">
                 @(active.Count == 0
@@ -383,7 +397,7 @@ else
                         : "Nothing waiting. Every propagation has been looked at in the last week.")
             </p>
         }
-        else
+        else if (ChecksNow.Count > 0)
         {
             <ul class="item-list">
                 @foreach (var check in ChecksNow)
@@ -506,6 +520,8 @@ else
 
     private IReadOnlyList<WateringDue> wateringDue = [];
     private bool wateringOn;
+    private IReadOnlyList<Weekday>? roundDays;
+    private IReadOnlyList<PropagationCheck> nextRoundChecks = [];
     private IReadOnlyList<CareLog> careLogs = [];
     private IReadOnlyList<TimelineEntry> plantChanges = [];
     private IReadOnlyList<GrowLight> lights = [];
@@ -565,6 +581,41 @@ else
     private List<AttentionItem> FlaggedNow =>
         flagged.Where(i => !putOffs.IsPutOff(PutOffs.Flag(i.Subject.Id, i.Attention), Today)).ToList();
 
+    // On a day that isn't a round day: how many wait for the next one, with a way to go round them now
+    private string? NextRoundLine
+    {
+        get
+        {
+            if (!wateringOn || roundDays is not { Count: > 0 } || RoundSchedule.IsRoundDay(roundDays, Today)
+                || RoundSchedule.Next(roundDays, Today) is not { } next)
+                return null;
+
+            var plantCount = wateringDue.Count(d => d.Gathered && !d.DueNow && d.ShowOn == next);
+            return plantCount == 0 ? null : $"Next round {NextRoundName(next)} · {Labels.Count(plantCount, "plant")} to check";
+        }
+    }
+
+    // On a day that isn't a round day, the propagations waiting for the next one, for Worth a look
+    private string? NextRoundChecksLine
+    {
+        get
+        {
+            if (roundDays is not { Count: > 0 } || RoundSchedule.IsRoundDay(roundDays, Today)
+                || RoundSchedule.Next(roundDays, Today) is not { } next)
+                return null;
+
+            var count = nextRoundChecks.Count(c => !putOffs.IsPutOff(PutOffs.Check(c.Propagation.Id), Today));
+            return count == 0 ? null : $"Next round {NextRoundName(next)} · {Labels.Count(count, "propagation")} to look at";
+        }
+    }
+
+    private string NextRoundName(DateOnly next) => next == Today.AddDays(1) ? "tomorrow" : next.DayOfWeek.ToString();
+
+    private List<WateringDue> WaterNow => wateringDue.Where(d => d.DueNow).ToList();
+
+    // Plants gathered onto a round day are counted in the line on the next round, not listed as coming up
+    private List<WateringDue> WaterComing => wateringDue.Where(d => !d.DueNow && !d.Gathered).ToList();
+
     private List<Plant> QuarantineNow =>
         TodayBoard.QuarantineUp(plants, Today)
             .Where(p => !putOffs.IsPutOff(PutOffs.Quarantine(p.Id, p.QuarantinedSince!.Value), Today)).ToList();
@@ -600,19 +651,22 @@ else
         propagations = await Propagations.GetAllAsync();
         active = propagations.Where(p => p.IsActive).ToList();
 
+        var settings = await SettingsService.GetAsync();
+        roundDays = settings.RoundDays;
+        putOffs = await PutOffService.GetAsync(Today);
+
         var latest = await Entries.GetLatestPerSubjectAsync();
         // Logging care on a propagation is looking at it too
         var careDays = PropagationCareService.NewestDays(await PropagationCareLogs.GetAllAsync());
-        checks = TodayBoard.NeedsChecking(propagations, latest, Time, careDays: careDays);
-        flagged = TodayBoard.NeedsAttention(plants, propagations);
-        putOffs = await PutOffService.GetAsync(Today);
+        checks = TodayBoard.NeedsChecking(propagations, latest, Time, careDays: careDays, roundDays: roundDays, putOffs: putOffs);
+        nextRoundChecks = TodayBoard.NeedsCheckingNextRound(propagations, latest, Time, roundDays, putOffs, careDays: careDays);
+        flagged = TodayBoard.NeedsAttention(plants, propagations, Today);
 
         places = await RoomService.GetPlacesAsync();
-        photoRound = (await SettingsService.GetAsync()).PhotoReminder
+        photoRound = settings.PhotoReminder
             ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
             : [];
 
-        var settings = await SettingsService.GetAsync();
         wateringOn = settings.WateringReminder;
         dailyRoundOn = settings.DailyRound;
         stretches = await AwayService.GetAllAsync();
@@ -813,13 +867,13 @@ else
 
     private void FindRound() =>
         roundSuggestion = dailyRoundOn
-            ? DailyRound.Suggest(places, plants, propagations, careLogs, lastActivity, putOffs, Time)
+            ? DailyRound.Suggest(places, plants, propagations, careLogs, lastActivity, putOffs, Time, roundDays)
             : null;
 
     private void FindWateringDue() =>
         wateringDue = wateringOn
             ? WateringRound.Due(plants, careLogs, plantChanges, id => potsById.GetValueOrDefault(id), lights, places, stretches,
-                Seasons.HemisphereOf(TimeZoneInfo.Local), Time, putOffs)
+                Seasons.HemisphereOf(TimeZoneInfo.Local), Time, putOffs, roundDays)
             : [];
 
     // After an answer: the new entry may have moved the guess, so read the care log again
@@ -867,7 +921,7 @@ else
             await PlantService.SetAttentionAsync(plant, null);
         else if (item.Subject is Propagation propagation)
             await PropagationService.SetAttentionAsync(propagation, null);
-        flagged = TodayBoard.NeedsAttention(plants, propagations);
+        flagged = TodayBoard.NeedsAttention(plants, propagations, Today);
     }
 
     // Nagging once a month is enough, and only when there's something to lose

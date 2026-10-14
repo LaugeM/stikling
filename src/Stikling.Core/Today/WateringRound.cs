@@ -7,8 +7,16 @@ using Stikling.Core.Rooms;
 namespace Stikling.Core.Today;
 
 /// <summary>A plant on Today for watering, and what the app has worked out about it.</summary>
-/// <param name="DueNow">True from the day it's due. False for one coming up in the next days.</param>
-public sealed record WateringDue(Plant Plant, WateringGuess Guess, bool DueNow);
+/// <param name="DueNow">True from the day it comes up on Today. False for one coming up in the next days.</param>
+/// <param name="ShowOn">
+/// The day it comes up on Today. The day it's due, or with round days the round day before it.
+/// </param>
+/// <param name="Gathered">
+/// True when round days are set and the plant isn't one that dries out faster than the time
+/// between them. A gathered plant that isn't due yet is returned so the page can count it for the
+/// next round, but isn't listed under Coming up.
+/// </param>
+public sealed record WateringDue(Plant Plant, WateringGuess Guess, bool DueNow, DateOnly ShowOn, bool Gathered);
 
 /// <summary>The plants Today suggests a look at for watering.</summary>
 public static class WateringRound
@@ -21,6 +29,11 @@ public static class WateringRound
     /// put off. Those due now come first, the longest overdue at the top, then the ones coming
     /// up, and the plant's name decides between two on the same day. A plant still learning is
     /// left out. Whether the reminder is on at all is for the page to check.
+    /// With round days set, a plant comes up on the round day before it's due, but never before
+    /// the day after it was last watered, read with the meter, or answered "Still wet". Plants
+    /// that dry out faster than the time between round days keep their own days. A plant that
+    /// comes up on a round day (<see cref="WateringDue.Gathered"/>) and isn't due yet is returned
+    /// only when it comes up on or before the next round day, and isn't a Coming up plant.
     /// </summary>
     /// <param name="timeline">Timeline entries for any subject, for telling when plants were dormant.</param>
     /// <param name="pot">Finds a pot by id, to see whether it waters itself.</param>
@@ -34,10 +47,13 @@ public static class WateringRound
         IReadOnlyList<AwayStretch> stretches,
         Hemisphere hemisphere,
         TimeProvider time,
-        PutOffs putOffs)
+        PutOffs putOffs,
+        IReadOnlyList<Weekday>? roundDays = null)
     {
         var today = time.Today();
-        var setup = new Setup(plants, logs, timeline, lights, places, stretches, time);
+        var nextRound = RoundSchedule.Next(roundDays, today);
+        var logList = logs.Where(l => !l.IsDeleted).ToList();
+        var setup = new Setup(plants, logList, timeline, lights, places, stretches, time);
 
         var due = new List<WateringDue>();
         foreach (var plant in setup.Active.Where(p => p.WateringReminder))
@@ -45,17 +61,50 @@ public static class WateringRound
             var guess = setup.GuessOf(plant, pot, hemisphere);
             if (guess.Mode == WateringMode.Learning || guess.CheckOn is not { } checkOn)
                 continue;
-            if (checkOn > today.AddDays(ComingUpDays) || putOffs.IsPutOff(PutOffs.Water(plant.Id, guess.LastWatered), today))
+            if (putOffs.IsPutOff(PutOffs.Water(plant.Id, guess.LastWatered), today))
                 continue;
 
-            due.Add(new WateringDue(plant, guess, checkOn <= today));
+            var showOn = checkOn;
+            var gathered = false;
+            if (roundDays is { Count: > 0 })
+            {
+                gathered = !(guess.UsualDays is { } usual && usual < RoundSchedule.LongestGap(roundDays));
+                showOn = RoundSchedule.ShowOn(roundDays, checkOn, Earliest(plant, guess, logList, putOffs), guess.UsualDays);
+            }
+
+            var dueNow = showOn <= today;
+            if (!dueNow && (gathered ? showOn > nextRound : checkOn > today.AddDays(ComingUpDays)))
+                continue;
+
+            due.Add(new WateringDue(plant, guess, dueNow, showOn, gathered));
         }
 
         return [.. due
             .OrderByDescending(d => d.DueNow)
+            .ThenBy(d => d.ShowOn)
             .ThenBy(d => d.Guess.CheckOn)
             .ThenBy(d => d.Plant.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
     }
+
+    // The first day a check may come up: after the plant was last watered, read with the meter or
+    // answered "Still wet", which logs nothing and only leaves its put-off
+    private static DateOnly Earliest(Plant plant, WateringGuess guess, List<CareLog> logs, PutOffs putOffs)
+    {
+        var earliest = DateOnly.MinValue;
+        if (guess.LastWatered is { } watered)
+            earliest = Later(earliest, watered.AddDays(1));
+        var reading = logs
+            .Where(l => l.PlantId == plant.Id && l.Kind == CareKind.MoistureReading)
+            .Select(l => (DateOnly?)l.OccurredOn)
+            .Max();
+        if (reading is { } read)
+            earliest = Later(earliest, read.AddDays(1));
+        if (putOffs.EndedOn(PutOffs.Water(plant.Id, guess.LastWatered)) is { } ended)
+            earliest = Later(earliest, ended);
+        return earliest;
+    }
+
+    private static DateOnly Later(DateOnly a, DateOnly b) => a > b ? a : b;
 
     /// <summary>
     /// The guess for one plant, worked out the way Today does it, so the plant's page and Today

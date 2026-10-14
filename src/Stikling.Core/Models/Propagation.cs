@@ -95,6 +95,12 @@ public sealed class Propagation : Entity
     /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
     public Attention? Attention { get; set; }
 
+    /// <summary>
+    /// When the flag starts to show on Today, if it was set for later. Only counts while it was set
+    /// for the current flag. At the top of the record, so an older version saving it keeps it.
+    /// </summary>
+    public AttentionLater? AttentionLater { get; set; }
+
     /// <summary>Share of the sown seeds that came up. Null unless it's seeds with a count of how many came up.</summary>
     [JsonIgnore]
     public double? GerminationRate =>
@@ -265,6 +271,7 @@ public sealed class Propagation : Entity
             FinishedOn ??= today;
             DormantSince = null;
             Attention = null;
+            AttentionLater = null;
         }
         else if (!IsActive)
         {

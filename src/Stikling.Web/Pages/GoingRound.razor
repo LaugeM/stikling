@@ -1,5 +1,6 @@
 @page "/round/{PlaceId:guid}"
 @page "/round/due"
+@page "/round/next"
 @page "/round/back"
 @using GoingRoundLogic = Stikling.Core.Today.GoingRound
 @using Stikling.Core.Settings
@@ -49,6 +50,11 @@ else if (cards.Count == 0)
             <p>Nothing is left to look at first.</p>
             <a class="btn btn-primary mt-3" href="">Back to Today</a>
         }
+        else if (IsNext)
+        {
+            <p>Nothing is waiting for the next round.</p>
+            <a class="btn btn-primary mt-3" href="">Back to Today</a>
+        }
         else if (IsDue)
         {
             <p>Nothing is due for water right now.</p>
@@ -65,7 +71,7 @@ else if (pos >= queue.Count)
 {
     var summary = GoingRoundLogic.Summarise(days);
     <div class="round-end">
-        <h1>@(IsDue || IsBack ? "All done" : $"{Title} done")</h1>
+        <h1>@(IsDue || IsNext || IsBack ? "All done" : $"{Title} done")</h1>
         <div class="round-tiles">
             @if (summary.Watered > 0)
             {
@@ -151,7 +157,7 @@ else
                     }
                     @if (card.DueNow && card.Guess is { } guess && plant is not null && day.WateredId is null)
                     {
-                        <p class="round-meta">@WateringText.Row(new WateringDue(plant, guess, true), Today)</p>
+                        <p class="round-meta">@WateringText.Row(new WateringDue(plant, guess, (guess.CheckOn ?? Today) <= Today, Today, false), Today)</p>
                     }
                     @if (card.Dormant)
                     {
@@ -248,13 +254,16 @@ else
     private bool IsBack => PlaceId == Guid.Empty
         && Navigation.ToBaseRelativePath(Navigation.Uri).StartsWith("round/back", StringComparison.OrdinalIgnoreCase);
 
-    private bool IsDue => PlaceId == Guid.Empty && !IsBack;
+    private bool IsNext => PlaceId == Guid.Empty
+        && Navigation.ToBaseRelativePath(Navigation.Uri).StartsWith("round/next", StringComparison.OrdinalIgnoreCase);
+
+    private bool IsDue => PlaceId == Guid.Empty && !IsBack && !IsNext;
 
     private string BackHref => From switch { "plants" => "plants", "rooms" => "rooms-and-tags", _ => "" };
 
     private string BackLabel => From switch { "plants" => "Plants", "rooms" => "Rooms and tags", _ => "Today" };
 
-    private string Title => IsBack ? "Look at these first" : IsDue ? "Due for water" : places.NameOf(PlaceId) ?? "Going round";
+    private string Title => IsBack ? "Look at these first" : IsNext ? "Next round" : IsDue ? "Due for water" : places.NameOf(PlaceId) ?? "Going round";
 
     private DateOnly Today => Time.Today();
 
@@ -294,7 +303,9 @@ else
         var lights = await LightService.GetAllAsync();
         var stretches = await AwayService.GetAllAsync();
         var pots = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
-        var wateringOn = (await SettingsService.GetAsync()).WateringReminder;
+        var userSettings = await SettingsService.GetAsync();
+        var wateringOn = userSettings.WateringReminder;
+        var roundDays = userSettings.RoundDays;
         todayEntries = await Entries.GetSinceAsync(StartOfToday);
         var hemisphere = Seasons.HemisphereOf(TimeZoneInfo.Local);
 
@@ -310,11 +321,18 @@ else
             cards = GoingRoundLogic.ForBack(rows, plants, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places,
                 stretches, hemisphere, Time, wateringOn, putOffs);
         }
+        else if (IsNext)
+        {
+            var putOffs = await PutOffService.GetAsync(Today);
+            cards = wateringOn
+                ? GoingRoundLogic.ForNext(plants, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places, stretches, hemisphere, Time, putOffs, roundDays)
+                : [];
+        }
         else if (IsDue)
         {
             var putOffs = await PutOffService.GetAsync(Today);
             cards = wateringOn
-                ? GoingRoundLogic.ForDue(plants, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places, stretches, hemisphere, Time, putOffs)
+                ? GoingRoundLogic.ForDue(plants, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places, stretches, hemisphere, Time, putOffs, roundDays)
                 : [];
         }
         else

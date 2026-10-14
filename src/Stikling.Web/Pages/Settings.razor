@@ -107,6 +107,18 @@
     <p class="settings-hint">
         Today suggests one room a day to go round.
     </p>
+    <div class="theme-label mt-4" id="round-days-label">Round days</div>
+    <div class="chip-row" role="group" aria-labelledby="round-days-label">
+        @foreach (var day in weekdays)
+        {
+            var picked = roundDays.Contains(day);
+            <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                    @onclick="() => ToggleRoundDayAsync(day)">@day.ToString()[..3]</button>
+        }
+    </div>
+    <p class="settings-hint">
+        Plants due for a check come up on your round day before, instead of each on its own day. A plant that dries out faster than the time between round days keeps its own days.
+    </p>
     <div class="theme-label mt-4" id="recent-changes-label">Recent changes on a plant</div>
     <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="recent-changes-label">
         @foreach (var option in recentChangesOptions)
@@ -209,6 +221,7 @@
         errorReportsOff = settings.ErrorReportsOff;
         wateringReminder = settings.WateringReminder;
         dailyRound = settings.DailyRound;
+        roundDays = [.. settings.RoundDays ?? []];
         recentChangesDays = RecentChanges.DaysOf(settings.RecentChangesDays);
         everydayLanguage = await Names.GetEverydayLanguageAsync();
         roomCount = (await RoomService.GetAllAsync()).Count;
@@ -249,6 +262,17 @@
     {
         dailyRound = e.Value is true;
         await SettingsService.SetDailyRoundAsync(dailyRound);
+    }
+
+    private static readonly Weekday[] weekdays = Enum.GetValues<Weekday>();
+
+    private List<Weekday> roundDays = [];
+
+    private async Task ToggleRoundDayAsync(Weekday day)
+    {
+        if (!roundDays.Remove(day))
+            roundDays.Add(day);
+        await SettingsService.SetRoundDaysAsync(roundDays);
     }
 
     private async Task SetRecentChangesDaysAsync(int days)

@@ -133,12 +133,12 @@ public static class BackList
             Add(new BackRow(plant, plant.DisplayName, BackReason.PastPace, UsualDays: guess.UsualDays, DaysSince: guess.DaysSince));
 
         // 4. Flagged, the longest ago first
-        var flagged = activePlants.Select(p => (Subject: (Entity)p, p.DisplayName, p.Attention))
-            .Concat(activeCuttings.Select(p => (Subject: (Entity)p, p.DisplayName, p.Attention)))
-            .Where(x => x.Attention is not null)
+        var flagged = activePlants.Select(p => (Subject: (Entity)p, p.DisplayName, p.Attention, p.AttentionLater))
+            .Concat(activeCuttings.Select(p => (Subject: (Entity)p, p.DisplayName, p.Attention, p.AttentionLater)))
+            .Where(x => x.Attention is not null && !AttentionLater.IsWaiting(x.Attention, x.AttentionLater, today))
             .OrderBy(x => x.Attention!.Since)
             .ThenBy(x => x.DisplayName, StringComparer.CurrentCultureIgnoreCase);
-        foreach (var (subject, name, attention) in flagged)
+        foreach (var (subject, name, attention, _) in flagged)
             Add(new BackRow(subject, name, BackReason.Flagged, FlagReason: attention!.Reason, FlagSince: attention.Since));
 
         var shown = length ?? DefaultLength;

@@ -14,7 +14,9 @@
 @inject PlantNameService Names
 @inject GooglePhotosService Google
 @inject AccountService Account
+@inject SettingsService SettingsService
 @using Stikling.Core.Propagations
+@using Stikling.Core.Settings
 
 <PageTitle>@(propagation?.DisplayName ?? "Propagation") · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -137,7 +139,7 @@ else
             }
             else if (propagation.IsActive)
             {
-                <AttentionPanel Current="propagation.Attention" Editing="false" EditingChanged="_ => more = More.Flag"
+                <AttentionPanel Current="propagation.Attention" Later="propagation.AttentionLater" NextRoundDay="nextRoundDay" Editing="false" EditingChanged="_ => more = More.Flag"
                                 Suggestions="AttentionPanel.PropagationReasons" OnSave="SetAttentionAsync" />
             }
 
@@ -695,7 +697,7 @@ else
                     break;
 
                 case More.Flag:
-                    <AttentionPanel Current="propagation.Attention" Editing="true" EditingChanged="_ => more = More.None"
+                    <AttentionPanel Current="propagation.Attention" Later="propagation.AttentionLater" NextRoundDay="nextRoundDay" Editing="true" EditingChanged="_ => more = More.None"
                                     Suggestions="AttentionPanel.PropagationReasons" OnSave="SetAttentionAsync" />
                     break;
 
@@ -904,6 +906,7 @@ else
         careLogs = PropagationCareService.For(await CareService.GetAllAsync(), Id);
         lastWatered = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.Watered, Today);
         lastWaterChange = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.ChangedWater, Today);
+        nextRoundDay = RoundSchedule.Next((await SettingsService.GetAsync()).RoundDays, Today);
     }
 
     // "watered 2 days ago" or "water changed yesterday", whichever happened last
@@ -982,11 +985,13 @@ else
         }
     }
 
-    private async Task SetAttentionAsync(string? reason)
+    private DateOnly? nextRoundDay;
+
+    private async Task SetAttentionAsync((string? Reason, LooseDate? From) change)
     {
         if (propagation is null)
             return;
-        await PropagationService.SetAttentionAsync(propagation, reason);
+        await PropagationService.SetAttentionAsync(propagation, change.Reason, change.From);
     }
 
     private void OpenDormant()

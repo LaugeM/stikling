@@ -94,6 +94,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             after.QuarantinedSince = null;
             after.QuarantineDays = null;
             after.Attention = null;
+            after.AttentionLater = null;
         }
         // The cause only belongs to a plant that died
         after.CauseOfDeath = after.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(after.CauseOfDeath)
@@ -177,11 +178,13 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 
     /// <summary>
     /// Flags a plant as needing something, e.g. "Repot soon", or clears the flag with null. It's
-    /// only a reminder for Today, so nothing goes on the history.
+    /// only a reminder for Today, so nothing goes on the history. With <paramref name="from"/> (a
+    /// month or a day) it stays off Today until then.
     /// </summary>
-    public async Task SetAttentionAsync(Plant plant, string? reason)
+    public async Task SetAttentionAsync(Plant plant, string? reason, LooseDate? from = null)
     {
         plant.Attention = Attention.Change(plant.Attention, reason, time.Today());
+        plant.AttentionLater = AttentionLater.For(plant.Attention, from);
         await plants.SaveAsync(plant);
     }
 
