@@ -87,6 +87,20 @@ public class SpreadsheetImportTests
         Assert.Equal("Date you got it", ImportFields.Label(ImportField.GotOn));
     }
 
+    [Fact]
+    public void Every_field_is_in_one_picker_group()
+    {
+        var grouped = ImportFields.Groups.SelectMany(g => g.Fields).ToList();
+        Assert.Equal(grouped.Count, grouped.Distinct().Count());
+        Assert.Equal(Enum.GetValues<ImportField>().Order(), grouped.Order());
+    }
+
+    [Fact]
+    public void Guess_reads_where_as_the_room()
+    {
+        Assert.Equal([ImportField.Name, ImportField.Place], ImportFields.Guess(["Plant", "Where"]));
+    }
+
     // QuickAdd.ReadName
 
     [Fact]

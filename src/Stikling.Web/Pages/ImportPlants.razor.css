@@ -110,6 +110,13 @@
 .import-plant .form-check-input {
     flex: 0 0 auto;
     margin: 0.15rem 0 0;
+    /* Bootstrap's pale grey border is hard to see on white, and an unticked box has to read as one */
+    border-color: var(--pa-muted);
+}
+
+/* A row left out steps back, so what will be added stands out */
+.import-plant.unticked .import-name {
+    color: var(--pa-muted);
 }
 
 .import-plant-text {
@@ -192,7 +199,8 @@
 @media (min-width: 64rem) {
     .import-review {
         display: grid;
-        grid-template-columns: 24rem minmax(0, 1fr);
+        /* The columns give up room first, so the plants still get space beside them at 64rem */
+        grid-template-columns: clamp(17rem, 32%, 24rem) minmax(0, 1fr);
         gap: 2rem;
         align-items: start;
     }
