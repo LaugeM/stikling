@@ -41,6 +41,7 @@ public sealed class BackupData
     public List<FloweringMark> FloweringMarks { get; set; } = [];
     public List<Problem> Problems { get; set; } = [];
     public List<ProblemUpdate> ProblemUpdates { get; set; } = [];
+    public List<Wish> Wishes { get; set; } = [];
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the
@@ -69,7 +70,8 @@ public sealed class BackupData
         PropagationCareLogs.Count(l => !l.IsDeleted),
         FloweringMarks.Count(m => !m.IsDeleted),
         Problems.Count(p => !p.IsDeleted),
-        ProblemUpdates.Count(u => !u.IsDeleted));
+        ProblemUpdates.Count(u => !u.IsDeleted),
+        Wishes.Count(w => !w.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -95,4 +97,5 @@ public sealed record BackupCounts(
     int PropagationCareEntries,
     int FloweringMarks,
     int Problems,
-    int ProblemUpdates);
+    int ProblemUpdates,
+    int Wishes);

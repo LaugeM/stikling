@@ -21,6 +21,8 @@ public sealed class PlantDictionary
 
     private readonly IReadOnlyList<EverydayNameData> everyday;
     private readonly Lazy<ILookup<char, SearchEntry>> searchIndex;
+    private readonly Dictionary<string, string> renamedGenera = [];
+    private readonly Dictionary<(string Genus, string Species), (string Genus, string Species)> renamedSpecies = [];
 
     public PlantDictionary(PlantNameData data) : this(data, [], "en")
     {
@@ -40,6 +42,15 @@ public sealed class PlantDictionary
 
         foreach (var genus in data.Genera)
         {
+            if (genus.Now is { } renamed)
+                renamedGenera[NameKey.Of(genus.Name)] = renamed;
+            foreach (var (old, now) in genus.Synonyms)
+            {
+                var named = now.Split(' ', 2);
+                if (named.Length == 2)
+                    renamedSpecies[(NameKey.Of(genus.Name), NameKey.Of(old))] = (named[0], named[1]);
+            }
+
             genera.Add(genus.Now is { } nowGenus
                 ? new NameEntry(new NameSuggestion(nowGenus, Formerly: genus.Name), genus.Name, genus.Name, null)
                 : new NameEntry(new NameSuggestion(genus.Name), genus.Name, genus.Name, null));
@@ -73,6 +84,20 @@ public sealed class PlantDictionary
         CultivarsByGenus = cultivars.ToLookup(e => e.Genus, StringComparer.OrdinalIgnoreCase);
         EverydayByKey = called.ToLookup(e => e.Key);
         searchIndex = new(BuildSearchIndex);
+    }
+
+    /// <summary>
+    /// The genus and species a plant goes by now, when the name typed is an old one. Names the
+    /// dictionary doesn't know as old come back as they were typed.
+    /// </summary>
+    public (string? Genus, string? Species) Current(string? genus, string? species)
+    {
+        var g = NameKey.Of(genus);
+        if (g.Length == 0)
+            return (genus, species);
+        if (renamedSpecies.TryGetValue((g, NameKey.Of(species)), out var now))
+            return now;
+        return renamedGenera.TryGetValue(g, out var nowGenus) ? (nowGenus, species) : (genus, species);
     }
 
     /// <summary>Where the names come from, to credit them.</summary>

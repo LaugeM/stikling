@@ -3,6 +3,7 @@ using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Flowering;
+using Stikling.Core.Wishlist;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
@@ -1060,6 +1061,37 @@ internal sealed class FakeProblemUpdateRepository : IProblemUpdateRepository
     {
         if (Updates.TryGetValue(id, out var update))
             update.DeletedAt = update.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeWishRepository : IWishRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Wish> Wishes { get; } = [];
+
+    public Task<IReadOnlyList<Wish>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Wish>>(Wishes.Values.Where(w => !w.IsDeleted).ToList());
+
+    public Task<Wish?> GetAsync(Guid id) =>
+        Task.FromResult(Wishes.TryGetValue(id, out var wish) && !wish.IsDeleted ? wish : null);
+
+    public Task SaveAsync(Wish wish)
+    {
+        if (wish.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid wish");
+        if (wish.CreatedAt == default)
+            wish.CreatedAt = clock;
+        wish.UpdatedAt = clock = clock.AddSeconds(1);
+        Wishes[wish.Id] = wish;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Wishes.TryGetValue(id, out var wish))
+            wish.DeletedAt = wish.UpdatedAt = clock = clock.AddSeconds(1);
         return Task.CompletedTask;
     }
 }

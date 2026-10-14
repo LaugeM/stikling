@@ -1,0 +1,323 @@
+@page "/wishlist"
+@layout WideLayout
+@inject WishService WishService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject PlantNameService Names
+@inject SitterSheetActions Sharing
+@implements IDisposable
+
+<PageTitle>Wishlist · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="plants">Plants</a>
+
+<div class="page-heading">
+    <h1>Wishlist</h1>
+    <div class="d-flex align-items-baseline justify-content-end flex-wrap gap-2">
+        @if (open.Count > 0)
+        {
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => shareOpen = true">Share as text</button>
+        }
+        @* Takes over from the round add button on a wide screen *@
+        <a class="btn btn-primary btn-sm icon-btn heading-add" href="wishlist/new">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            Add a wish
+        </a>
+    </div>
+</div>
+
+@if (wishes is null)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else
+{
+    @if (wishes.Count > 0 || plants.Count > 0 || propagations.Count > 0)
+    {
+        <div class="wish-search">
+            <input type="search" class="form-control" placeholder="Search your wishes and plants"
+                   aria-label="Search the wishlist and your plants" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
+        </div>
+    }
+
+    @if (wishes.Count == 0)
+    {
+        <div class="empty-state">
+            <p>
+                Keep the plants you're after here: the one you saw at a fair, the cultivar you keep looking for.
+                When you get one, tap Got it and it becomes a plant or a cutting. Then the wish moves to Got.
+                Search above to check whether you already have something.
+            </p>
+            <a class="btn btn-primary mt-3" href="wishlist/new">Add a wish</a>
+            <p class="mt-3"><a href="help#wishlist">More about the wishlist in Help</a></p>
+        </div>
+    }
+
+    @if (wishes.Count > 0 && Searching && shownOpen.Count == 0 && shownGot.Count == 0)
+    {
+        <p class="text-body-secondary">Nothing on your wishlist matches.</p>
+    }
+    else if (wishes.Count > 0 && !Searching && open.Count == 0)
+    {
+        <p class="text-body-secondary">No open wishes. Add one, or put one back from Got.</p>
+    }
+
+    @if (shownOpen.Count > 0)
+    {
+        <ul class="item-list list-grid">
+            @foreach (var wish in shownOpen)
+            {
+                var have = WishMatches.Have(wish, plants, dictionary).Describe();
+                <li><div class="wish-row">
+                    <a class="wish-main" href="wishlist/@wish.Id/edit">
+                        <div class="item-name">@Name(wish)</div>
+                        @if (Sub(wish) is { } sub)
+                        {
+                            <div class="item-sub-plain">@sub</div>
+                        }
+                        @if (MetaFor(wish) is { Length: > 0 } meta)
+                        {
+                            <div class="item-meta wraps">@meta</div>
+                        }
+                        @if (have is not null)
+                        {
+                            <div class="item-meta wraps wish-have">@have</div>
+                        }
+                    </a>
+                    @if (choosing == wish.Id)
+                    {
+                        <div class="wish-choice" role="group" aria-label="Got it as">
+                            <span class="wish-choice-label">Got it as</span>
+                            <a class="btn btn-primary btn-sm" href="plants/new?wish=@wish.Id">A plant</a>
+                            <a class="btn btn-primary btn-sm" href="propagations/new?wish=@wish.Id">A cutting</a>
+                            <button type="button" class="btn btn-link btn-sm" @onclick="() => choosing = null">Cancel</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="wish-actions">
+                            <button type="button" class="btn btn-outline-primary btn-sm" aria-label="Got it: @wish.DisplayName" @onclick="() => choosing = wish.Id">Got it</button>
+                        </div>
+                    }
+                </div></li>
+            }
+        </ul>
+    }
+
+    @if (shownGot.Count > 0)
+    {
+        <section class="wish-got" aria-labelledby="wish-got-title">
+            <h2 id="wish-got-title">Got <span class="text-body-secondary">(@shownGot.Count)</span></h2>
+            <ul class="item-list list-grid">
+                @foreach (var wish in shownGot)
+                {
+                    <li><div class="wish-row">
+                        <a class="wish-main" href="wishlist/@wish.Id/edit">
+                            <div class="item-name">@Name(wish)</div>
+                            @if (Sub(wish) is { } sub)
+                            {
+                                <div class="item-sub-plain">@sub</div>
+                            }
+                            <div class="item-meta wraps">
+                                Got @wish.GotOn?.ToString("d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture)
+                            </div>
+                        </a>
+                        <div class="wish-actions">
+                            @if (BecameLink(wish) is var (href, label))
+                            {
+                                <a class="btn btn-outline-primary btn-sm" href="@href">@label</a>
+                            }
+                            <button type="button" class="btn btn-link btn-sm" aria-label="Put back on the list: @wish.DisplayName" @onclick="() => PutBackAsync(wish)">Put back</button>
+                        </div>
+                    </div></li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (Searching && (havePlants.Count > 0 || havePropagations.Count > 0))
+    {
+        <section class="wish-have-group" aria-labelledby="wish-have-title">
+            <h2 id="wish-have-title">You already have</h2>
+            <ul class="item-list">
+                @foreach (var plant in havePlants)
+                {
+                    <li>
+                        <a class="item-card" href="plants/@plant.Id">
+                            <div class="item-text">
+                                <div class="item-name">@plant.DisplayName</div>
+                                @if (plant.BotanicalName is { } botanical && plant.DisplayName != botanical)
+                                {
+                                    <div class="item-sub">@botanical</div>
+                                }
+                            </div>
+                        </a>
+                    </li>
+                }
+                @foreach (var propagation in havePropagations)
+                {
+                    <li>
+                        <a class="item-card" href="propagations/@propagation.Id">
+                            <div class="item-text">
+                                <div class="item-name">@propagation.DisplayName</div>
+                                <div class="item-meta">Cutting or seedling in progress</div>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    <a class="fab" href="wishlist/new" aria-label="Add a wish" title="Add a wish">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+    </a>
+}
+
+<Sheet Title="Share as text" @bind-Open="shareOpen">
+    <p class="text-body-secondary small">Sends the plants you're looking for as plain text.</p>
+    <div class="form-check form-switch mb-2">
+        <input type="checkbox" class="form-check-input" id="share-notes" role="switch" @bind="shareNotes" />
+        <label class="form-check-label" for="share-notes">Notes</label>
+    </div>
+    <div class="form-check form-switch mb-2">
+        <input type="checkbox" class="form-check-input" id="share-price" role="switch" @bind="sharePrice" />
+        <label class="form-check-label" for="share-price">The most I would pay</label>
+    </div>
+    <div class="form-check form-switch mb-3">
+        <input type="checkbox" class="form-check-input" id="share-app" role="switch" @bind="shareApp" />
+        <label class="form-check-label" for="share-app">End with "@WishlistText.AppLine"</label>
+    </div>
+    <pre class="wish-preview" aria-label="What will be shared">@ShareText</pre>
+    <div class="d-flex align-items-center gap-3">
+        <button type="button" class="btn btn-primary" @onclick="ShareAsync">Share</button>
+        @if (shareStatus.Length > 0)
+        {
+            <span role="status">@shareStatus</span>
+        }
+    </div>
+</Sheet>
+
+@code {
+    private IReadOnlyList<Wish>? wishes;
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Propagation> propagations = [];
+    private PlantDictionary? dictionary;
+    private List<Wish> open = [];
+    private List<Wish> got = [];
+    private IReadOnlyList<Wish> shownOpen = [];
+    private IReadOnlyList<Wish> shownGot = [];
+    private IReadOnlyList<Plant> havePlants = [];
+    private IReadOnlyList<Propagation> havePropagations = [];
+    private string? search;
+    private Guid? choosing;
+    private bool shareOpen;
+    private bool shareNotes;
+    private bool sharePrice;
+    private bool shareApp = true;
+    private string shareStatus = "";
+    private bool disposed;
+
+    private bool Searching => !string.IsNullOrWhiteSpace(search);
+
+    private string ShareText => WishlistText.Write(open, dictionary?.EverydayNames,
+        new WishlistTextOptions(shareNotes, sharePrice, shareApp));
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        dictionary = await Names.GetDictionaryAsync();
+        plants = await PlantRepository.GetAllAsync();
+        propagations = await PropagationRepository.GetAllAsync();
+        var all = await WishService.GetAllAsync();
+        open = [.. all.Where(w => !w.IsGot).OrderBy(w => w.CreatedAt)];
+        got = [.. all.Where(w => w.IsGot).OrderByDescending(w => w.GotOn)];
+        wishes = all;
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        if (Searching)
+        {
+            var found = WishSearch.Wishes(wishes ?? [], search, dictionary).ToHashSet();
+            shownOpen = open.Where(found.Contains).ToList();
+            shownGot = got.Where(found.Contains).ToList();
+            havePlants = WishSearch.Plants(plants, search, dictionary);
+            havePropagations = WishSearch.Propagations(propagations, search, dictionary);
+        }
+        else
+        {
+            shownOpen = open;
+            shownGot = got;
+            havePlants = [];
+            havePropagations = [];
+        }
+    }
+
+    // The botanical name, or the name typed in when there isn't one
+    private RenderFragment Name(Wish wish) => wish.BotanicalName is not null
+        ? @<BotanicalName Genus="@wish.Genus" Species="@wish.Species" Cultivar="@wish.Cultivar" />
+        : @<text>@wish.DisplayName</text>;
+
+    // The everyday name, or the name typed in next to a botanical one
+    private string? Sub(Wish wish)
+    {
+        if (wish.BotanicalName is null)
+            return null;
+        var called = dictionary?.EverydayNames.For(wish.Genus, wish.Species, wish.Cultivar);
+        return !string.IsNullOrWhiteSpace(called) ? called : string.IsNullOrWhiteSpace(wish.Name) ? null : wish.Name.Trim();
+    }
+
+    private static string MetaFor(Wish wish)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(wish.FoundAt))
+            parts.Add(wish.FoundAt.Trim());
+        if (wish.MostToPay is { } price)
+            parts.Add($"up to {price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)}");
+        if (!string.IsNullOrWhiteSpace(wish.Notes))
+            parts.Add(wish.Notes.Trim());
+        return string.Join(" · ", parts);
+    }
+
+    // A got wish links to what it became. Nothing is shown when that record has been deleted.
+    private (string Href, string Label)? BecameLink(Wish wish)
+    {
+        if (wish.PlantId is { } plantId && plants.FirstOrDefault(p => p.Id == plantId) is { } plant)
+            return ($"plants/{plant.Id}", plant.DisplayName);
+        if (wish.PropagationId is { } propagationId && propagations.FirstOrDefault(p => p.Id == propagationId) is { } propagation)
+            return ($"propagations/{propagation.Id}", propagation.DisplayName);
+        return null;
+    }
+
+    private async Task PutBackAsync(Wish wish)
+    {
+        await WishService.PutBackAsync(wish.Id);
+        await LoadAsync();
+    }
+
+    private async Task ShareAsync()
+    {
+        shareStatus = await Sharing.ShareTextAsync(ShareText) switch
+        {
+            "copied" => "Copied",
+            "failed" => "Couldn't share it",
+            _ => ""
+        };
+        if (shareStatus.Length == 0)
+            return;
+
+        StateHasChanged();
+        await Task.Delay(3000);
+        if (!disposed)
+        {
+            shareStatus = "";
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose() => disposed = true;
+}

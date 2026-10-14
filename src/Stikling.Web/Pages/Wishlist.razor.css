@@ -1,0 +1,93 @@
+.wish-search {
+    margin-bottom: 0.9rem;
+}
+
+.wish-search .form-control {
+    min-height: 2.75rem;
+}
+
+/* A wish is a card with the text, which opens it to edit, and its actions beside or under it */
+.wish-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.wish-main {
+    flex: 1 1 12rem;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.wish-main .item-name {
+    white-space: normal;
+}
+
+.item-sub-plain {
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.wish-have {
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
+
+/* Notes and where to find it can run long, so the line stops at two */
+.wish-main .item-meta {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+    overflow: hidden;
+}
+
+.wish-actions,
+.wish-choice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.wish-choice-label {
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.wish-actions .btn,
+.wish-choice .btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.wish-got,
+.wish-have-group {
+    margin-top: 1.75rem;
+}
+
+.wish-got h2,
+.wish-have-group h2 {
+    font-size: 1.125rem;
+    margin-bottom: 0.6rem;
+}
+
+.wish-preview {
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font: inherit;
+    font-size: 0.9rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.6rem;
+}
