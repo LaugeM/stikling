@@ -101,14 +101,6 @@ else
                             <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
                         }
                     </div>
-                    @if (floweringNow is { Stale: true } stale && plant.Status == PlantStatus.Active)
-                    {
-                        <div class="still-card">
-                            <p>Still @(stale.Stage == FloweringStage.Buds ? "in bud" : "in flower")? Last marked on @Labels.Date(stale.Period.LastMarked).</p>
-                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="OpenFlowering">Done</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="StillFloweringAsync">Yes</button>
-                        </div>
-                    }
                     @if (actionNote is not null)
                     {
                         <p class="profile-facts" role="status">@actionNote</p>
@@ -119,6 +111,17 @@ else
                     }
                 </div>
             </header>
+
+                @if (floweringNow is { Stale: true } stale && plant.Status == PlantStatus.Active)
+                {
+                    <div class="still-card">
+                        <p>Still @(stale.Stage == FloweringStage.Buds ? "in bud" : "in flower")? Last marked on @Labels.Date(stale.Period.LastMarked).</p>
+                        <div class="still-actions">
+                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="StillFloweringAsync">Yes</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="OpenFlowering">Done</button>
+                        </div>
+                    </div>
+                }
 
             @if (plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(plant.CauseOfDeath))
             {
@@ -310,7 +313,7 @@ else
                         {
                             <p class="flowering-usually">
                                 Usually starts by @(FloweringText.MonthName(usual.Month)).@(usual.LateThisYear ? " Nothing yet this year." : "")
-                                <span class="text-body-secondary small">From @Labels.Count(usual.Years, "year")</span>
+                                <span class="text-body-secondary small">Learned from @Labels.Count(usual.Years, "year")</span>
                             </p>
                         }
                         <ul class="flowering-rows">
