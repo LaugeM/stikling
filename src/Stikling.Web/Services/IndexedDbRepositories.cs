@@ -1,6 +1,7 @@
 using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
+using Stikling.Core.Flowering;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
@@ -69,6 +70,12 @@ public sealed class IndexedDbAwayStretchRepository(IndexedDb db, TimeProvider ti
     : IndexedDbEntityRepository<AwayStretch>(db, time, Stores.AwayStretches), IAwayStretchRepository
 {
     protected override IReadOnlyList<string> Validate(AwayStretch stretch) => stretch.Validate();
+}
+
+public sealed class IndexedDbFloweringMarkRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<FloweringMark>(db, time, Stores.FloweringMarks), IFloweringMarkRepository
+{
+    protected override IReadOnlyList<string> Validate(FloweringMark mark) => mark.Validate(Today);
 }
 
 public sealed class IndexedDbSitterSheetRepository(IndexedDb db, TimeProvider time)

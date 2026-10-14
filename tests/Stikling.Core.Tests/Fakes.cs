@@ -2,6 +2,7 @@
 using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
+using Stikling.Core.Flowering;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
@@ -966,5 +967,36 @@ internal sealed class FakeShareLinkServer : IShareLinkServer
 
         links.RemoveAll(l => l.Id == id);
         return Task.FromResult(ShareOutcome<bool>.Success(true));
+    }
+}
+
+internal sealed class FakeFloweringMarkRepository : IFloweringMarkRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, FloweringMark> Marks { get; } = [];
+
+    public Task<IReadOnlyList<FloweringMark>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<FloweringMark>>(Marks.Values.Where(m => !m.IsDeleted).ToList());
+
+    public Task<FloweringMark?> GetAsync(Guid id) =>
+        Task.FromResult(Marks.TryGetValue(id, out var mark) && !mark.IsDeleted ? mark : null);
+
+    public Task SaveAsync(FloweringMark mark)
+    {
+        if (mark.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid mark");
+        if (mark.CreatedAt == default)
+            mark.CreatedAt = clock;
+        mark.UpdatedAt = clock = clock.AddSeconds(1);
+        Marks[mark.Id] = mark;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Marks.TryGetValue(id, out var mark))
+            mark.DeletedAt = mark.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
     }
 }

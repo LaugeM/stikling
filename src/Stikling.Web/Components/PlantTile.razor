@@ -33,6 +33,10 @@ else
     [Parameter]
     public IReadOnlyList<PestCase> Pests { get; set; } = [];
 
+    /// <summary>In flower or in bud now, for the badge.</summary>
+    [Parameter]
+    public FloweringNow? Flowering { get; set; }
+
     /// <summary>Where the tile links to. Defaults to the plant's page.</summary>
     [Parameter]
     public string? Href { get; set; }
@@ -51,7 +55,13 @@ else
     protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
 
     private bool HasBadges =>
-        Plant.Status != PlantStatus.Active || Plant.InQuarantine || Plant.IsDormant || Pests.Count > 0;
+        Plant.Status != PlantStatus.Active || Plant.InQuarantine || Plant.IsDormant || Pests.Count > 0 || ShowsFlowering(out _);
+
+    private bool ShowsFlowering(out FloweringNow now)
+    {
+        now = Flowering!;
+        return Flowering is { Stale: false } && Plant.Status == PlantStatus.Active;
+    }
 
     private RenderFragment Content => @<text>
         <div class="tile-photo potted" aria-hidden="true">
@@ -96,6 +106,10 @@ else
                     @if (Plant.IsDormant && Plant.Status == PlantStatus.Active)
                     {
                         <span class="badge dormant-badge">Dormant</span>
+                    }
+                    @if (ShowsFlowering(out var flowering))
+                    {
+                        <span class="badge flowering-badge">@FloweringText.Badge(flowering.Stage)</span>
                     }
                     @foreach (var pest in Pests)
                     {

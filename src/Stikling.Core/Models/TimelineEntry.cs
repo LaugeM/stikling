@@ -53,7 +53,10 @@ public enum TimelineEvent
     GaveAway,
 
     /// <summary>The plant or propagation was given to you. On the Created entry that starts its history.</summary>
-    Arrived
+    Arrived,
+
+    /// <summary>A plant got buds, came into flower or finished flowering.</summary>
+    Flowering
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>

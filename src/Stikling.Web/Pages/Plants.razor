@@ -5,6 +5,7 @@
 @inject RoomService RoomService
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
+@inject IFloweringMarkRepository FloweringRepository
 @inject IPestTreatmentRepository PestTreatmentRepository
 @using Stikling.Core.Settings
 @inject SettingsService SettingsService
@@ -24,6 +25,7 @@
         <div class="d-flex align-items-baseline justify-content-end flex-wrap gap-2">
             <span class="text-body-secondary small">@visible.Count of @all.Count</span>
             <a class="btn btn-outline-primary btn-sm" href="water?from=plants">Water plants</a>
+            <a class="btn btn-link btn-sm link-action" href="plants/flowering">Flowering</a>
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
                 @(selecting ? "Done" : "Select")
             </button>
@@ -226,7 +228,7 @@ else
             {
                 <li>
                     <PlantTile Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
-                               OnToggle="Toggle" Pests="@PestsFor(plant)" />
+                               OnToggle="Toggle" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)" />
                 </li>
             }
         </ul>
@@ -238,7 +240,7 @@ else
             {
                 <li>
                     <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
-                               OnToggle="Toggle" Moisture="@MoistureFor(plant)" Pests="@PestsFor(plant)"
+                               OnToggle="Toggle" Moisture="@MoistureFor(plant)" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)"
                                Location="@places.NameOf(plant.PlaceId)" />
                 </li>
             }
@@ -415,6 +417,7 @@ else
     private PlantTableSort tableSort = new();
     private bool columnsOpen;
     private Dictionary<Guid, PlantRow> tableValues = [];
+    private Dictionary<Guid, FloweringNow> flowering = [];
     private List<PlantRow> tableRows = [];
     private Dictionary<Guid, DateTimeOffset> lastActivity = [];
 
@@ -495,8 +498,14 @@ else
         tags = PlantTags.InUse(all);
         careLogs = await CareLogRepository.GetAllAsync();
         pestCases = await PestCaseRepository.GetAllAsync();
-        tableValues = CoreTable.Rows(all, careLogs, Time.Today(), places.NameOf,
-                p => everyday?.For(p.Genus, p.Species, p.Cultivar))
+        var today = Time.Today();
+        var marks = (await FloweringRepository.GetAllAsync()).ToLookup(m => m.PlantId);
+        flowering = all
+            .Select(p => (p.Id, Now: FloweringNow.Of(Flowerings.Of(marks[p.Id], p.Id, today), today)))
+            .Where(f => f.Now is not null)
+            .ToDictionary(f => f.Id, f => f.Now!);
+        tableValues = CoreTable.Rows(all, careLogs, today, places.NameOf,
+                p => everyday?.For(p.Genus, p.Species, p.Cultivar), FloweringFor)
             .ToDictionary(r => r.Plant.Id);
         lastActivity = PlantActivity.Latest(await Entries.GetLatestPerSubjectAsync(), careLogs);
         Refresh();
@@ -674,6 +683,8 @@ else
         foreach (var plant in visible)
             selected.Add(plant.Id);
     }
+
+    private FloweringNow? FloweringFor(Plant plant) => flowering.GetValueOrDefault(plant.Id);
 
     private IReadOnlyList<PestCase> PestsFor(Plant plant) => PestService.CasesFor(plant, pestCases, places);
 

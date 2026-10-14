@@ -1,4 +1,5 @@
 using Stikling.Core.Care;
+using Stikling.Core.Flowering;
 using Stikling.Core.Models;
 
 namespace Stikling.Core.Plants;
@@ -37,7 +38,8 @@ public sealed record PlantRow(
     LastCare? Repotted,
     MoistureReading? Moisture,
     string? Room,
-    string? EverydayName);
+    string? EverydayName,
+    FloweringNow? Flowering = null);
 
 /// <summary>The table view of the plant list: which columns, how they are stored and how they sort.</summary>
 public static class PlantTable
@@ -118,7 +120,8 @@ public static class PlantTable
         IEnumerable<CareLog> careLogs,
         DateOnly today,
         Func<Guid?, string?> placeName,
-        Func<Plant, string?> everydayName)
+        Func<Plant, string?> everydayName,
+        Func<Plant, FloweringNow?>? floweringOf = null)
     {
         var byPlant = careLogs.Where(l => !l.IsDeleted).ToLookup(l => l.PlantId);
 
@@ -135,7 +138,8 @@ public static class PlantTable
                     ? new MoistureReading(value, reading.OccurredOn, DaysBetween(reading.OccurredOn, today))
                     : null,
                 placeName(plant.PlaceId),
-                everydayName(plant));
+                everydayName(plant),
+                floweringOf?.Invoke(plant));
         }).ToList();
     }
 

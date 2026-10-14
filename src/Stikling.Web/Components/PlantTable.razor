@@ -119,7 +119,7 @@
             PlantColumn.Price => @<text>@plant.PricePaid?.ToString("0.##", CultureInfo.InvariantCulture)</text>,
             PlantColumn.Medium => @<text>@Labels.For(plant.Medium)</text>,
             PlantColumn.Moisture => @<text>@(row.Moisture is { } reading ? $"{reading.Value}/10" : null)</text>,
-            PlantColumn.Status => @<text>@Labels.For(plant.Status)</text>,
+            PlantColumn.Status => @<text>@Labels.For(plant.Status)@if (row.Flowering is { Stale: false } flowering && plant.Status == PlantStatus.Active){<text> · @FloweringText.Badge(flowering.Stage)</text>}</text>,
             PlantColumn.Tags => @<text>@foreach (var tag in plant.Tags){<span class="tag-label">@tag</span> }</text>,
             PlantColumn.Added => @<text>@Labels.Date(DateOnly.FromDateTime(plant.CreatedAt.LocalDateTime))</text>,
             _ => @<text></text>

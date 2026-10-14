@@ -37,6 +37,10 @@ else
     [Parameter]
     public IReadOnlyList<PestCase> Pests { get; set; } = [];
 
+    /// <summary>In flower or in bud now, for the badge.</summary>
+    [Parameter]
+    public FloweringNow? Flowering { get; set; }
+
     /// <summary>Its room or spot, "Living room / Windowsill".</summary>
     [Parameter]
     public string? Location { get; set; }
@@ -100,6 +104,10 @@ else
                 @if (Plant.IsDormant && Plant.Status == PlantStatus.Active)
                 {
                     <span class="badge dormant-badge">Dormant</span>
+                }
+                @if (Flowering is { Stale: false } flowering && Plant.Status == PlantStatus.Active)
+                {
+                    <span class="badge flowering-badge">@FloweringText.Badge(flowering.Stage)</span>
                 }
                 @foreach (var pest in Pests)
                 {

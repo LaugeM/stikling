@@ -135,12 +135,13 @@ public class BackupTests
             ReceivedHistories = [new ReceivedHistory { Name = "Mona" }, new ReceivedHistory { Name = "Old", DeletedAt = Now }],
             AwayStretches = [new AwayStretch(), new AwayStretch { DeletedAt = Now }],
             SitterSheets = [new SitterSheet()],
-            PropagationCareLogs = [new PropagationCareLog(), new PropagationCareLog { DeletedAt = Now }]
+            PropagationCareLogs = [new PropagationCareLog(), new PropagationCareLog { DeletedAt = Now }],
+            FloweringMarks = [new FloweringMark(), new FloweringMark { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -155,6 +156,39 @@ public class BackupTests
         Assert.Empty(data.AwayStretches);
         Assert.Empty(data.SitterSheets);
         Assert.Empty(data.PropagationCareLogs);
+        Assert.Empty(data.FloweringMarks);
+    }
+
+    [Fact]
+    public void Flowering_marks_survive_a_backup_and_a_restore_merges_them()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var mark = new FloweringMark
+        {
+            PlantId = Guid.NewGuid(), Stage = FloweringStage.InFlower, On = LooseDate.Of(2025, 5), UpdatedAt = Now
+        };
+
+        var json = JsonSerializer.Serialize(new BackupData { FloweringMarks = [mark] }, options);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        Assert.Contains("\"stage\":\"InFlower\"", json);
+        Assert.Contains("\"on\":\"2025-05\"", json);
+        var restored = Assert.Single(back.FloweringMarks);
+        Assert.Equal(LooseDate.Of(2025, 5), restored.On);
+        Assert.Equal(1, BackupMerge.Merge<FloweringMark>([], back.FloweringMarks).Added);
+        Assert.Equal(0, BackupMerge.Merge([mark], back.FloweringMarks).Added);
+    }
+
+    [Fact]
+    public void A_flowering_stage_from_a_later_version_reads_as_null()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        var mark = JsonSerializer.Deserialize<FloweringMark>("""{"stage":"Seeding","on":"2025-05-02"}""", options)!;
+
+        Assert.Null(mark.Stage);
+        Assert.Equal(LooseDate.Of(new DateOnly(2025, 5, 2)), mark.On);
+        Assert.Contains("\"stage\":null", JsonSerializer.Serialize(mark, options));
     }
 
     [Fact]

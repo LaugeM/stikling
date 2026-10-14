@@ -32,6 +32,7 @@ public static class SyncKinds
         "receivedHistories",
         "awayStretches",
         "sitterSheets",
+        "floweringMarks",
     ];
 
     public static readonly IReadOnlyList<string> All = [.. Collection, Settings];
