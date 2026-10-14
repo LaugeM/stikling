@@ -74,6 +74,7 @@ public class CollectionNumberTests
     [InlineData("117c--a")]
     [InlineData("-117")]
     [InlineData("117a-")]
+    [InlineData("1aaaaaaaaaaaaaaaaaaaaa!")]
     public void Shapes_that_are_not_valid(string code) => Assert.False(CollectionNumbers.IsValid(code));
 
     [Fact]

@@ -63,8 +63,8 @@ else
             }
             <div class="mb-1">
                 <label class="form-label" for="collection-number">Collection number</label>
-                <InputText id="collection-number" class="form-control" autocomplete="off"
-                           @bind-Value="propagation.CollectionNumber" @bind-Value:event="oninput" placeholder="e.g. 117a"
+                <input id="collection-number" class="form-control" autocomplete="off"
+                           @bind="propagation.CollectionNumber" @bind:event="oninput" placeholder="e.g. 117a"
                            aria-invalid="@(NumberInvalid ? "true" : null)" />
                 @if (NumberInvalid)
                 {

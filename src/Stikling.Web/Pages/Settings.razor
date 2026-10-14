@@ -251,11 +251,13 @@
 
     private async Task NumberThemAsync()
     {
-        if (numberingPlan is not { } plan)
+        if (numberingPlan is null)
             return;
         numberingBusy = true;
         try
         {
+            // Planned again from what is stored now, since a sync may have changed the plants while the sheet was open
+            var plan = await Numbering.PlanAsync();
             await Numbering.ApplyAsync(plan);
             var parts = new List<string>();
             if (plan.Plants.Count > 0)

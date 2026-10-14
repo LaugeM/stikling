@@ -63,8 +63,8 @@ else
             <div class="form-text">Give it a genus, a nickname, or both.</div>
             <div class="mt-3">
                 <label class="form-label" for="collection-number">Collection number</label>
-                <InputText id="collection-number" class="form-control" inputmode="numeric" autocomplete="off"
-                           @bind-Value="plant.CollectionNumber" @bind-Value:event="oninput" placeholder="e.g. 117"
+                <input id="collection-number" class="form-control" autocomplete="off"
+                           @bind="plant.CollectionNumber" @bind:event="oninput" placeholder="e.g. 117"
                            aria-invalid="@(NumberInvalid ? "true" : null)" />
                 @if (NumberInvalid)
                 {

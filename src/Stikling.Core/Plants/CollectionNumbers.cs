@@ -51,8 +51,12 @@ public sealed record NumberAllPlan(IReadOnlyList<NumberedPlant> Plants, IReadOnl
 /// </summary>
 public static partial class CollectionNumbers
 {
-    /// <summary>Digits, then any number of groups of an optional hyphen, lower-case letters and optional digits.</summary>
-    [GeneratedRegex(@"^\d{1,6}(-?[a-z]+\d*)*$")]
+    /// <summary>
+    /// Digits, then letters with optional digits, then any number of groups of a hyphen, letters and
+    /// optional digits: 117, 117c, 117c2, 117c-a. Every group after the first starts with a hyphen,
+    /// so no two groups can match the same text and the check never backtracks.
+    /// </summary>
+    [GeneratedRegex(@"^\d{1,6}(?:[a-z]+\d*)?(?:-[a-z]+\d*)*$")]
     private static partial Regex Shape();
 
     private const int MaxLength = 24;
