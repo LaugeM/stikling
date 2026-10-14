@@ -24,7 +24,8 @@ public enum PlantColumn
     Moisture,
     Status,
     Tags,
-    Added
+    Added,
+    Number
 }
 
 /// <summary>Which column the table is sorted by, and which way.</summary>
@@ -54,6 +55,7 @@ public static class PlantTable
     {
         PlantColumn.EverydayName => "Everyday name",
         PlantColumn.Source => "From",
+        PlantColumn.Number => "No.",
         _ => column.ToString()
     };
 
@@ -204,6 +206,7 @@ public static class PlantTable
             PlantColumn.Status => label(plant.Status),
             PlantColumn.Tags => Text(string.Join(", ", plant.Tags)),
             PlantColumn.Added => plant.CreatedAt,
+            PlantColumn.Number => CollectionNumbers.SortKey(plant.CollectionNumber),
             _ => null
         };
     }

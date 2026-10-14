@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Stikling.Core.Plants;
 
 namespace Stikling.Core.Propagations;
 
@@ -46,6 +47,7 @@ public sealed record PropagationFilter(string? Search = null, ProgressFilter Pro
         var haystack = string.Join(' ', p.Nickname, p.Genus, p.Species, p.Cultivar, p.Source, Everyday?.Invoke(p));
         return Search
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase));
+            .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase)
+                || CollectionNumbers.MatchesSearch(p.CollectionNumber, word));
     }
 }

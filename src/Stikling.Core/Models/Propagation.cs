@@ -11,6 +11,12 @@ public sealed class Propagation : Entity
     /// <summary>Your own label, e.g. "Corm test: perlite".</summary>
     public string? Nickname { get; set; }
 
+    /// <summary>
+    /// Its code, like "117a" for a cutting from plant 117. Null when it has none. Plants potted up
+    /// from it keep it. See <see cref="Plants.CollectionNumbers"/>.
+    /// </summary>
+    public string? CollectionNumber { get; set; }
+
     public string? Genus { get; set; }
     public string? Species { get; set; }
     public string? Cultivar { get; set; }
@@ -301,6 +307,8 @@ public sealed class Propagation : Entity
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus))
             errors.Add("Give the propagation a nickname or a genus.");
+        if (Plants.CollectionNumbers.Normalize(CollectionNumber) is { } code && !Plants.CollectionNumbers.IsValid(code))
+            errors.Add(Plants.CollectionNumbers.NotValidText);
         if (PottedUpCount < 0 || FailedCount < 0 || GivenAwayCount < 0)
             errors.Add("The number potted up, given away or failed can't be negative.");
         if (InitialCount < 1)

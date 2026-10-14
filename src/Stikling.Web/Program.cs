@@ -79,6 +79,7 @@ builder.Services.AddScoped<IPlantNameSource, BundledPlantNames>();
 builder.Services.AddScoped<IDeviceLanguages, BrowserLanguages>();
 builder.Services.AddScoped<TimelineService>();
 builder.Services.AddScoped<PlantService>();
+builder.Services.AddScoped<CollectionNumberService>();
 builder.Services.AddScoped<PropagationService>();
 builder.Services.AddScoped<PlantNameService>();
 builder.Services.AddScoped<RoomService>();

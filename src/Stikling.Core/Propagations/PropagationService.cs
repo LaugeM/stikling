@@ -155,9 +155,12 @@ public sealed class PropagationService(
         if (request.Date < propagation.StartedOn)
             throw new InvalidOperationException("The date can't be before the propagation started.");
         var names = PotUpNames(request.Nickname, request.Count, propagation.PottedUpCount);
-        var newPlants = names.Select(name => new Plant
+        // Worked out before RecordPottedUp changes the count they continue from
+        var codes = CollectionNumbers.PottedUpCodes(propagation, request.Count);
+        var newPlants = names.Select((name, i) => new Plant
         {
             Nickname = name,
+            CollectionNumber = codes[i],
             Genus = propagation.Genus,
             Species = propagation.Species,
             Cultivar = propagation.Cultivar,

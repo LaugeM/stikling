@@ -1,5 +1,6 @@
 using System.Text;
 using Stikling.Core.Models;
+using Stikling.Core.Plants;
 
 namespace Stikling.Core.Sharing;
 
@@ -54,6 +55,9 @@ public static class SwapLists
         return nicknames && nick is not null ? $"{name} \"{nick}\"" : name;
     }
 
+    /// <summary>"#117 Big Monstera" for a plant with a number, else the name as it is.</summary>
+    public static string WithNumber(string? number, string name) => number is null ? name : $"#{number} {name}";
+
     private static string StageText(PropagationStage stage) => stage switch
     {
         PropagationStage.Rooted => "rooted",
@@ -82,10 +86,11 @@ public static class SwapLists
             .ToList();
 
         var offered = plants.Where(p => p.IsOffered).ToList();
+        // A plant with a number is listed on its own, with the number before its name
         List<string> Counted(SpareMark mark) => [.. offered.Where(p => p.Spare == mark)
-            .GroupBy(p => NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar))
-            .OrderBy(g => g.Key, byName)
-            .Select(g => g.Count() > 1 ? $"{g.Key} ×{g.Count()}" : g.Key)];
+            .GroupBy(p => (Number: CollectionNumbers.Normalize(p.CollectionNumber), Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar)))
+            .OrderBy(g => g.Key.Name, byName).ThenBy(g => g.Key.Number, StringComparer.Ordinal)
+            .Select(g => WithNumber(g.Key.Number, g.Count() > 1 ? $"{g.Key.Name} ×{g.Count()}" : g.Key.Name))];
 
         var text = new StringBuilder();
         text.AppendLine("Available for swap");
@@ -126,12 +131,14 @@ public static class SwapLists
     {
         var lines = plants
             .Where(p => !p.IsDeleted)
-            .GroupBy(p => (Name: ShareName(p.Nickname, p.Genus, p.Species, p.Cultivar, everyday(p.Genus, p.Species, p.Cultivar), nicknames),
+            .GroupBy(p => (Number: CollectionNumbers.Normalize(p.CollectionNumber),
+                           Name: ShareName(p.Nickname, p.Genus, p.Species, p.Cultivar, everyday(p.Genus, p.Species, p.Cultivar), nicknames),
                            Mark: p.IsOffered ? p.Spare : null))
-            .OrderBy(g => g.Key.Name, StringComparer.CurrentCultureIgnoreCase).ThenBy(g => g.Key.Mark)
+            .OrderBy(g => g.Key.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(g => g.Key.Number, StringComparer.Ordinal).ThenBy(g => g.Key.Mark)
             .Select(g =>
             {
-                var line = g.Key.Name;
+                var line = WithNumber(g.Key.Number, g.Key.Name);
                 if (g.Count() > 1)
                     line += $" ×{g.Count()}";
                 return g.Key.Mark is { } mark ? $"{line}, {MarkText(mark).ToLowerInvariant()}" : line;

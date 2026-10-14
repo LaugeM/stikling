@@ -11,11 +11,15 @@ namespace Stikling.Core.Backup;
 /// </summary>
 public static class CsvExport
 {
-    internal static readonly string[] PlantHeader =
+    // The columns before Number was added, which an older export still has
+    internal static readonly string[] PlantHeaderBeforeNumber =
         ["Name", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
 
+    internal static readonly string[] PlantHeader =
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
+
     private static readonly string[] PropagationHeader =
-        ["Name", "Parent plant", "Stage", "Medium", "Started", "Room", "Notes"];
+        ["Name", "Number", "Parent plant", "Stage", "Medium", "Started", "Room", "Notes"];
 
     public static string Plants(IEnumerable<Plant> plants, Places places)
     {
@@ -25,6 +29,7 @@ public static class CsvExport
             .Select(p => new[]
             {
                 p.DisplayName,
+                p.CollectionNumber,
                 p.Nickname,
                 p.Genus,
                 p.Species,
@@ -51,6 +56,7 @@ public static class CsvExport
             .Select(p => new[]
             {
                 p.DisplayName,
+                p.CollectionNumber,
                 p.ParentPlantId is { } parent && parents.TryGetValue(parent, out var name) ? name : null,
                 p.Stage.ToString(),
                 p.Medium.ToString(),

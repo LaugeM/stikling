@@ -56,6 +56,10 @@ else
                     </div>
                 }
                 <div class="min-w-0">
+                    @if (CollectionNumbers.Normalize(plant.CollectionNumber) is { } number)
+                    {
+                        <div class="detail-number">#@number</div>
+                    }
                     <div class="title-row">
                         <h1>
                             @if (string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
@@ -80,6 +84,7 @@ else
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
+                    <NumberClashNote Code="@plant.CollectionNumber" Clashes="numberClashes" />
                     <div class="profile-badges">
                         @if (plant.Status != PlantStatus.Active)
                         {
@@ -968,6 +973,7 @@ else
     private string? leftFor;
     private PotsTaken potsTaken;
 
+    private IReadOnlyList<CodeClash> numberClashes = [];
     private IReadOnlyList<Plant> ancestors = [];
     private IReadOnlyList<Plant> offspring = [];
     private PlantGiven given = new([], 0, 0, 0, 0);
@@ -1171,6 +1177,7 @@ else
 
             var allPropagations = await PropagationRepository.GetAllAsync();
             given = PlantLineage.Given(plant, all, allPropagations);
+            numberClashes = CollectionNumbers.Clashes(plant.CollectionNumber, plant.Id, all, allPropagations);
             propagations = new PropagationFilter(Progress: ProgressFilter.All)
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
                 .ToList();

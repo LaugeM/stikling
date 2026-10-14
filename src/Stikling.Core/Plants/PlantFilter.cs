@@ -100,6 +100,7 @@ public sealed record PlantFilter(
         var haystack = string.Join(' ', [plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, Everyday?.Invoke(plant), .. plant.Tags]);
         return Search
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase));
+            .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase)
+                || CollectionNumbers.MatchesSearch(plant.CollectionNumber, word));
     }
 }

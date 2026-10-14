@@ -1,0 +1,10 @@
+@* A collection number, "#117", small and muted, before a name. Nothing when there is none. *@
+@if (CollectionNumbers.Normalize(Code) is { } number)
+{
+    <span class="number-tag">#@number</span>
+}
+
+@code {
+    [Parameter]
+    public string? Code { get; set; }
+}

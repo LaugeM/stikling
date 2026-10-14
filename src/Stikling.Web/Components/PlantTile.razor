@@ -81,6 +81,7 @@ else
 
         <div class="tile-text">
             <div class="item-name @(Plant.Favourite ? "has-star" : null)">
+                <NumberTag Code="@Plant.CollectionNumber" />
                 <span class="item-name-text">@Plant.DisplayName</span>
                 @if (Plant.Favourite)
                 {

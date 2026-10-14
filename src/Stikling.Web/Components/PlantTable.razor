@@ -86,7 +86,7 @@
         PlantColumn.Name => "name-col",
         PlantColumn.Genus or PlantColumn.Species => "italic-col",
         PlantColumn.Watered or PlantColumn.Fed or PlantColumn.Repotted or PlantColumn.Got
-            or PlantColumn.Moisture or PlantColumn.Added => "number-col",
+            or PlantColumn.Moisture or PlantColumn.Added or PlantColumn.Number => "number-col",
         PlantColumn.Price => "number-col price-col",
         PlantColumn.Tags => "tags-col",
         _ => null
@@ -121,6 +121,7 @@
             PlantColumn.Moisture => @<text>@(row.Moisture is { } reading ? $"{reading.Value}/10" : null)</text>,
             PlantColumn.Status => @<text>@Labels.For(plant.Status)@if (row.Flowering is { Stale: false } flowering && plant.Status == PlantStatus.Active){<text> · @FloweringText.Badge(flowering.Stage)</text>}</text>,
             PlantColumn.Tags => @<text>@foreach (var tag in plant.Tags){<span class="tag-label">@tag</span> }</text>,
+            PlantColumn.Number => @<text>@plant.CollectionNumber</text>,
             PlantColumn.Added => @<text>@Labels.Date(DateOnly.FromDateTime(plant.CreatedAt.LocalDateTime))</text>,
             _ => @<text></text>
         };

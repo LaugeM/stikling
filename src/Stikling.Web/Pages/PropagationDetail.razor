@@ -58,6 +58,10 @@ else
                     </div>
                 }
                 <div class="min-w-0">
+                    @if (CollectionNumbers.Normalize(propagation.CollectionNumber) is { } number)
+                    {
+                        <div class="detail-number">#@number</div>
+                    }
                     <h1>
                         @if (string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                         {
@@ -76,6 +80,7 @@ else
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
+                    <NumberClashNote Code="@propagation.CollectionNumber" Clashes="numberClashes" />
                     <div class="profile-badges">
                         @if (propagation.IsDormant)
                         {
@@ -780,6 +785,7 @@ else
     private IReadOnlyList<Propagation> allPropagations = [];
     private Plant? parent;
     private IReadOnlyList<Plant> offspring = [];
+    private IReadOnlyList<CodeClash> numberClashes = [];
     private IReadOnlyList<Room> rooms = [];
     private Places places = Places.None;
     private PropagationOutcome? outcome;
@@ -925,6 +931,7 @@ else
         offspring = plants.Where(p => p.FromPropagationId == Id)
                           .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                           .ToList();
+        numberClashes = propagation is null ? [] : CollectionNumbers.Clashes(propagation.CollectionNumber, propagation.Id, plants, propagations);
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, plants, propagations);
         outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);

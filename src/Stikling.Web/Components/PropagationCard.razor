@@ -6,7 +6,7 @@
     <PropagationThumb Propagation="Propagation" Days="@(Propagation.IsActive ? Propagation.DaysSinceStart(Today) : null)" />
 
     <div class="item-text">
-        <div class="item-name">@Propagation.DisplayName</div>
+        <div class="item-name"><NumberTag Code="@Propagation.CollectionNumber" />@Propagation.DisplayName</div>
         @if (ParentName is not null)
         {
             <div class="item-sub">from @ParentName</div>

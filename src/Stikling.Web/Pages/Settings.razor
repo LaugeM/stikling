@@ -13,6 +13,7 @@
 @inject AccountService Account
 @inject SyncRunner Sync
 @inject PlantNameService Names
+@inject CollectionNumberService Numbering
 
 <PageTitle>Settings · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -176,8 +177,13 @@
     <h2>Your data</h2>
     <div class="settings-rows">
         <SettingsRow Href="rooms-and-tags" Title="Rooms and tags" Detail="@RoomsAndTagsLine" />
+        <SettingsRow Href="#" Title="Collection numbers" Detail="Number the plants you have, oldest first." OnClick="OpenNumberingAsync" />
         <SettingsRow Href="backup" Title="Backup and storage" Detail="@BackupLine" />
     </div>
+    @if (numberingMessage is not null)
+    {
+        <p class="settings-hint" role="status">@numberingMessage</p>
+    }
     <div class="form-check form-switch mt-4">
         <input class="form-check-input" type="checkbox" role="switch" id="error-reports"
                checked="@(!errorReportsOff)" @onchange="SetErrorReportsAsync" />
@@ -199,7 +205,72 @@
     </div>
 </section>
 
+<Sheet Title="Collection numbers" @bind-Open="numberingOpen">
+    @if (numberingPlan is { } plan)
+    {
+        <p>@plan.Summary</p>
+        @if (!plan.IsEmpty)
+        {
+            <ul class="number-plan">
+                @foreach (var item in plan.Plants)
+                {
+                    <li><span class="number-plan-code">#@item.Code</span> @item.Plant.DisplayName</li>
+                }
+                @foreach (var item in plan.Cuttings)
+                {
+                    <li><span class="number-plan-code">#@item.Code</span> @item.Propagation.DisplayName</li>
+                }
+            </ul>
+            <p class="form-text">Nothing already numbered is changed, and you can edit any number afterwards.</p>
+            <div class="d-flex gap-2 mt-3">
+                <button type="button" class="btn btn-primary" disabled="@numberingBusy" @onclick="NumberThemAsync">Number them</button>
+                <button type="button" class="btn btn-outline-secondary" disabled="@numberingBusy" @onclick="() => numberingOpen = false">Cancel</button>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex gap-2 mt-3">
+                <button type="button" class="btn btn-outline-secondary" @onclick="() => numberingOpen = false">Close</button>
+            </div>
+        }
+    }
+</Sheet>
+
 @code {
+    private bool numberingOpen;
+    private bool numberingBusy;
+    private NumberAllPlan? numberingPlan;
+    private string? numberingMessage;
+
+    private async Task OpenNumberingAsync()
+    {
+        numberingMessage = null;
+        numberingPlan = await Numbering.PlanAsync();
+        numberingOpen = true;
+    }
+
+    private async Task NumberThemAsync()
+    {
+        if (numberingPlan is not { } plan)
+            return;
+        numberingBusy = true;
+        try
+        {
+            await Numbering.ApplyAsync(plan);
+            var parts = new List<string>();
+            if (plan.Plants.Count > 0)
+                parts.Add($"Numbered {Labels.Plants(plan.Plants.Count)}");
+            if (plan.Cuttings.Count > 0)
+                parts.Add($"{(parts.Count == 0 ? "Gave" : "gave")} {Labels.Count(plan.Cuttings.Count, "cutting")} a letter");
+            numberingMessage = string.Join(" and ", parts) + ".";
+            numberingOpen = false;
+        }
+        finally
+        {
+            numberingBusy = false;
+        }
+    }
+
     private static readonly (ThemeMode Mode, string Label)[] options =
     [
         (ThemeMode.System, "Match system"),

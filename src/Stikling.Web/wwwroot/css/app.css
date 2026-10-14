@@ -1180,6 +1180,51 @@ img.framed {
     font-style: normal;
 }
 
+/* The number written on the pot: quiet, above the name */
+.detail-number,
+.number-tag {
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-muted);
+}
+
+.detail-number {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.number-tag {
+    flex: none;
+    margin-right: 0.35rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.number-plan {
+    list-style: none;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.number-plan li {
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--pa-border, rgba(0, 0, 0, 0.1));
+}
+
+.number-plan-code {
+    display: inline-block;
+    min-width: 3.5rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-muted);
+}
+
+.number-clash {
+    margin: 0.1rem 0 0.3rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
 .detail-actions {
     display: flex;
     gap: 0.5rem;

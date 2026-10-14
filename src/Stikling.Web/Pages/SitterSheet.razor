@@ -409,7 +409,7 @@
             @Thumb(subject, "sheet-photo")
         }
         <div class="sheet-card-text">
-            <h3>@subject.Name</h3>
+            <h3>@subject.Label</h3>
             @if (subject.Species is { } species)
             {
                 <div class="sheet-species">@species</div>
@@ -488,7 +488,7 @@
                                     @Thumb(subject, "sheet-mini")
                                 }
                                 <div>
-                                    <b>@subject.Name</b>
+                                    <b>@subject.Label</b>
                                     @if (RowLine(subject) is { } line)
                                     {
                                         <span>@line</span>
@@ -529,7 +529,7 @@
                                         @Thumb(subject, "sheet-mini")
                                     }
                                     <div>
-                                        <b>@subject.Name</b>
+                                        <b>@subject.Label</b>
                                         @if (subject.Spot is { } spot)
                                         {
                                             <span>@spot</span>

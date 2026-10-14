@@ -56,11 +56,29 @@ else
             </div>
             @if (propagation.ParentPlantId is null)
             {
-                <div class="mb-1">
+                <div class="mb-3">
                     <label class="form-label" for="source">Source</label>
                     <InputText id="source" class="form-control" @bind-Value="propagation.Source" placeholder="e.g. Seed shop, a friend's plant" />
                 </div>
             }
+            <div class="mb-1">
+                <label class="form-label" for="collection-number">Collection number</label>
+                <InputText id="collection-number" class="form-control" autocomplete="off"
+                           @bind-Value="propagation.CollectionNumber" @bind-Value:event="oninput" placeholder="e.g. 117a"
+                           aria-invalid="@(NumberInvalid ? "true" : null)" />
+                @if (NumberInvalid)
+                {
+                    <div class="form-text text-danger">@CollectionNumbers.NotValidText</div>
+                }
+                else if (NumberClashes is { Count: > 0 } clashes)
+                {
+                    <div class="form-text">@CollectionNumbers.ClashNote(NumberCode!, clashes)</div>
+                }
+                else
+                {
+                    <div class="form-text">The number on its label, like 117a for a cutting from plant 117. Optional.</div>
+                }
+            </div>
         </fieldset>
 
         <fieldset>
@@ -459,6 +477,29 @@ else
     private bool saving;
     private List<string> errors = [];
     private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Propagation> existingPropagations = [];
+    private string? numberSuggested; // the number filled in from the parent, so a change of parent can replace it
+
+    private string? NumberCode => CollectionNumbers.Normalize(propagation?.CollectionNumber);
+    private bool NumberInvalid => NumberCode is { } code && !CollectionNumbers.IsValid(code);
+    private IReadOnlyList<CodeClash> NumberClashes =>
+        NumberCode is { } code && !NumberInvalid
+            ? CollectionNumbers.Clashes(code, propagation!.Id, plants, existingPropagations)
+            : [];
+
+    // A new propagation from a plant with a number gets the next letter after it, until the person
+    // has typed a number of their own
+    private void SuggestNumber()
+    {
+        if (!IsNew || propagation is null)
+            return;
+        var untouched = string.IsNullOrWhiteSpace(propagation.CollectionNumber) || propagation.CollectionNumber == numberSuggested;
+        if (!untouched)
+            return;
+        var parent = propagation.ParentPlantId is { } id ? plants.FirstOrDefault(p => p.Id == id) : null;
+        numberSuggested = parent is null ? null : CollectionNumbers.NextLetter(parent, existingPropagations, plants);
+        propagation.CollectionNumber = numberSuggested;
+    }
     private IReadOnlyList<Room> rooms = [];
     private Places places = Places.None;
     private string? location; // as picked, "Kitchen / Window"; made into a room when saving
@@ -543,6 +584,7 @@ else
         googleOn = await Google.IsEnabledAsync();
         var allPlants = await PlantRepository.GetAllAsync();
         var allPropagations = await Repository.GetAllAsync();
+        existingPropagations = allPropagations;
         plants = allPlants.OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
         places = await RoomService.GetPlacesAsync();
         mixes = await MixRepository.GetAllAsync();
@@ -562,6 +604,8 @@ else
                     : StartFromWish() ?? new Propagation { StartedOn = Today };
                 isDraft = true;
                 draftParentId = ParentId;
+                numberSuggested = null;
+                SuggestNumber();
             }
         }
         else
@@ -692,6 +736,7 @@ else
     // Picking a parent fills in empty name fields from it
     private void ParentChanged()
     {
+        SuggestNumber();
         if (propagation?.ParentPlantId is not { } parentId || plants.FirstOrDefault(p => p.Id == parentId) is not { } parent)
             return;
         if (string.IsNullOrWhiteSpace(propagation.Nickname) && string.IsNullOrWhiteSpace(propagation.Genus))
@@ -737,6 +782,7 @@ else
             propagation.CormSizeMm = null;
 
         propagation.ClearMixUnlessSoil();
+        propagation.CollectionNumber = CollectionNumbers.Normalize(propagation.CollectionNumber);
         errors = propagation.Validate(Today).ToList();
         if (!IsNew && propagation.PottedUpCount < PlantsFromIt)
             errors.Add($"{Labels.Count(PlantsFromIt, "plant")} potted up from it {(PlantsFromIt == 1 ? "is" : "are")} still in your collection, so the potted up count can't be lower.");
