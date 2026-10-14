@@ -15,6 +15,7 @@
 @inject PlantNameService Names
 @inject DeviceFiles Device
 @inject SitterSheetActions Sharer
+@inject WishService WishService
 @using CoreTable = Stikling.Core.Plants.PlantTable
 
 <PageTitle>Plants · Stikling</PageTitle>
@@ -29,6 +30,7 @@
             <a class="btn btn-outline-primary btn-sm" href="water?from=plants">Water plants</a>
             <a class="btn btn-link btn-sm link-action" href="plants/flowering">Flowering</a>
             <button type="button" class="btn btn-link btn-sm link-action" disabled="@(ShareCount == 0)" @onclick="OpenShare">Share as text</button>
+            <a class="btn btn-link btn-sm link-action" href="wishlist">Wishlist</a>
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
                 @(selecting ? "Done" : "Select")
             </button>
@@ -59,6 +61,7 @@ else if (all.Count == 0)
         </div>
         <p class="first-run-more">
             Keeping a list somewhere else? <a href="plants/import">Import it from a spreadsheet</a>.
+            Still looking for some? <a href="wishlist">Start a wishlist</a>.
         </p>
         <a class="first-run-help" href="help#plants">More about plants in Help</a>
     </div>
@@ -257,6 +260,34 @@ else
             }
         </ul>
     }
+}
+
+@if (wishMatches.Count > 0)
+{
+    <section class="wish-matches" aria-labelledby="wish-matches-title">
+        <h2 id="wish-matches-title">On your wishlist</h2>
+        <ul class="item-list">
+            @foreach (var wish in wishMatches)
+            {
+                <li>
+                    <a class="item-card" href="wishlist/@wish.Id/edit">
+                        <div class="item-text">
+                            <div class="item-name">
+                                @if (wish.BotanicalName is not null)
+                                {
+                                    <BotanicalName Genus="@wish.Genus" Species="@wish.Species" Cultivar="@wish.Cultivar" />
+                                }
+                                else
+                                {
+                                    @wish.DisplayName
+                                }
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
+    </section>
 }
 
 <Sheet Title="Columns" @bind-Open="columnsOpen">
@@ -540,10 +571,15 @@ else
             columns.Contains(PlantColumn.Cultivar), e => Labels.For(e));
 
     private EverydayNameBook? everyday;
+    private IReadOnlyList<Wish> wishes = [];
+    private IReadOnlyList<Wish> wishMatches = [];
+    private PlantDictionary? dictionary;
 
     private async Task LoadAsync()
     {
         everyday = await Names.GetEverydayNamesAsync();
+        dictionary = await Names.GetDictionaryAsync();
+        wishes = await WishService.GetAllAsync();
         all = await Repository.GetAllAsync();
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, all, []);
@@ -653,6 +689,7 @@ else
                 p => everyday?.For(p.Genus, p.Species, p.Cultivar), goneAs, problem ? problemPlants : null)
             .Apply(all ?? [])
             .ToList();
+        wishMatches = WishSearch.OpenWishes(wishes, search, dictionary);
         SortTable();
     }
 

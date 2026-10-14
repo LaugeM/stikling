@@ -15,6 +15,7 @@ using Stikling.Core.Settings;
 using Stikling.Core.Sharing;
 using Stikling.Core.SoilMixes;
 using Stikling.Core.Today;
+using Stikling.Core.Wishlist;
 
 namespace Stikling.Web.Services;
 
@@ -89,6 +90,12 @@ public sealed class IndexedDbProblemUpdateRepository(IndexedDb db, TimeProvider 
     : IndexedDbEntityRepository<ProblemUpdate>(db, time, Stores.ProblemUpdates), IProblemUpdateRepository
 {
     protected override IReadOnlyList<string> Validate(ProblemUpdate update) => update.Validate(Today);
+}
+
+public sealed class IndexedDbWishRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Wish>(db, time, Stores.Wishes), IWishRepository
+{
+    protected override IReadOnlyList<string> Validate(Wish wish) => wish.Validate(Today);
 }
 
 public sealed class IndexedDbSitterSheetRepository(IndexedDb db, TimeProvider time)

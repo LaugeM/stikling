@@ -5,6 +5,8 @@
 @inject IPlantRepository PlantRepository
 @inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
+@inject WishService WishService
+@inject PlantNameService Names
 @inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
@@ -81,6 +83,13 @@ else
                 <div class="form-text">
                     @(propagation.ParentPlantId is null ? "" : "Filled in from the parent plant. ")Give it a genus, a nickname, or both.
                 </div>
+                @if (WishHere is not null)
+                {
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" id="mark-wish-got" @bind="markWishGot" />
+                        <label class="form-check-label" for="mark-wish-got">On your wishlist: mark it got</label>
+                    </div>
+                }
             }
         </fieldset>
 
@@ -403,6 +412,20 @@ else
     [SupplyParameterFromQuery(Name = "parent")]
     public Guid? ParentId { get; set; }
 
+    /// <summary>Starts from a wish on the wishlist, from Got it. Once the cutting is saved the wish moves to Got.</summary>
+    [SupplyParameterFromQuery(Name = "wish")]
+    public Guid? WishId { get; set; }
+
+    private IReadOnlyList<Wish> wishes = [];
+    private PlantDictionary? dictionary;
+    private bool markWishGot = true;
+
+    // The wish this cutting is for: the one it was started from, else an open wish with the same names
+    private Wish? WishHere =>
+        !IsNew || propagation is null ? null
+        : WishId is { } id && wishes.FirstOrDefault(w => w.Id == id && !w.IsGot) is { } chosen ? chosen
+        : WishMatches.OpenFor(propagation.Genus, propagation.Species, propagation.Cultivar, propagation.Nickname, wishes, dictionary).FirstOrDefault();
+
     private static readonly PropagationStage[] ManualStages =
         [PropagationStage.Started, PropagationStage.Rooting, PropagationStage.Rooted];
 
@@ -525,6 +548,8 @@ else
         mixes = await MixRepository.GetAllAsync();
         rooms = Room.List(places, allPlants, allPropagations);
         experiments = Experiments.Names(allPropagations);
+        wishes = IsNew ? await WishService.GetAllAsync() : [];
+        dictionary = IsNew ? await Names.GetDictionaryAsync() : null;
 
         if (IsNew)
         {
@@ -534,7 +559,7 @@ else
             {
                 propagation = ParentId is { } parentId && allPlants.FirstOrDefault(p => p.Id == parentId) is { } parent
                     ? PropagationService.StartFrom(parent)
-                    : new Propagation { StartedOn = Today };
+                    : StartFromWish() ?? new Propagation { StartedOn = Today };
                 isDraft = true;
                 draftParentId = ParentId;
             }
@@ -650,6 +675,20 @@ else
             propagation.RootingAids.Add(aid);
     }
 
+    // A cutting of a wished-for plant starts with the wish's names and where to find it
+    private Propagation? StartFromWish() =>
+        WishId is { } id && wishes.FirstOrDefault(w => w.Id == id && !w.IsGot) is { } wish
+            ? new Propagation
+            {
+                StartedOn = Today,
+                Genus = wish.Genus,
+                Species = wish.Species,
+                Cultivar = wish.Cultivar,
+                Nickname = string.IsNullOrWhiteSpace(wish.Genus) ? wish.Name : null,
+                Source = wish.FoundAt
+            }
+            : null;
+
     // Picking a parent fills in empty name fields from it
     private void ParentChanged()
     {
@@ -668,6 +707,21 @@ else
     }
 
     private IReadOnlyList<SoilMix> mixes = [];
+
+    // The cutting is saved by now, so a wish that can't be moved is logged and left, not reported as a failed save
+    private async Task MarkWishGotAsync(Wish? wish)
+    {
+        if (wish is null || propagation is null)
+            return;
+        try
+        {
+            await WishService.MarkGotAsync(wish.Id, null, propagation.Id);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Moving the wish to Got failed");
+        }
+    }
 
     private async Task SaveAsync()
     {
@@ -703,8 +757,10 @@ else
             propagation.PlaceId = await RoomService.PlaceIdAsync(location);
             if (IsNew)
             {
+                var wish = markWishGot ? WishHere : null;
                 await PropagationService.CreateAsync(propagation, Labels.For(propagation), photos);
                 photos.Clear(); // they belong to the saved propagation now
+                await MarkWishGotAsync(wish);
             }
             else
             {

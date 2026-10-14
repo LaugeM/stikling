@@ -3,7 +3,7 @@
 // JSON objects with an "id" property as the key.
 
 const DB_NAME = "stikling";
-const DB_VERSION = 18;
+const DB_VERSION = 19;
 
 // The stores the first version created. Later versions add theirs in their own
 // upgrade block below, so don't add to this list.
@@ -95,6 +95,10 @@ function openDb() {
                 // Problems on a plant, and the updates added to them as they go
                 db.createObjectStore("problems", { keyPath: "id" });
                 db.createObjectStore("problemUpdates", { keyPath: "id" });
+            }
+            if (event.oldVersion < 19) {
+                // Plants wanted, and the ones got
+                db.createObjectStore("wishes", { keyPath: "id" });
             }
         };
 
