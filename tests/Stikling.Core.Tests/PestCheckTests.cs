@@ -244,6 +244,52 @@ public class PestCheckTests
     }
 
     [Fact]
+    public void Going_back_to_treating_restarts_the_count_without_a_new_treatment()
+    {
+        var item = Watched(Today.AddDays(-60));
+        var treatments = new[] { OnCase(item, Today.AddDays(-40)) };
+
+        item.Status = PestCaseStatus.Active;
+        PestService.StatusChanged(item, PestCaseStatus.Monitoring, Today.AddDays(-3));
+        item.Status = PestCaseStatus.Monitoring;
+        PestService.StatusChanged(item, PestCaseStatus.Active, Today.AddDays(-2));
+
+        Assert.Equal(Today.AddDays(-3), item.TreatingAgainOn);
+        Assert.Equal(Today.AddDays(-3), PestService.CleanSince(item, treatments));
+    }
+
+    [Fact]
+    public void A_treatment_after_going_back_to_treating_counts_from_the_treatment()
+    {
+        var item = Watched(Today.AddDays(-60));
+        item.TreatingAgainOn = Today.AddDays(-10);
+        var treatments = new[] { OnCase(item, Today.AddDays(-40)), OnCase(item, Today.AddDays(-6)) };
+
+        Assert.Equal(Today.AddDays(-6), PestService.CleanSince(item, treatments));
+    }
+
+    [Fact]
+    public void Opening_a_resolved_case_again_restarts_the_count()
+    {
+        var item = Watched(Today.AddDays(-60));
+        item.Status = PestCaseStatus.Monitoring;
+        PestService.StatusChanged(item, PestCaseStatus.Resolved, Today);
+
+        Assert.Equal(Today, item.TreatingAgainOn);
+    }
+
+    [Fact]
+    public void Starting_to_watch_or_resolving_leaves_the_count_alone()
+    {
+        var item = Watched(Today.AddDays(-60));
+        PestService.StatusChanged(item, PestCaseStatus.Active, Today);
+        item.Status = PestCaseStatus.Resolved;
+        PestService.StatusChanged(item, PestCaseStatus.Monitoring, Today);
+
+        Assert.Null(item.TreatingAgainOn);
+    }
+
+    [Fact]
     public void Without_a_treatment_it_counts_from_the_start()
     {
         var item = Watched(Today.AddDays(-9));

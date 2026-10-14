@@ -463,7 +463,9 @@ else
         if (view is null)
             return;
 
+        var from = view.Case.Status;
         view.Case.Status = PestCaseStatus.Active;
+        PestService.StatusChanged(view.Case, from, Today);
         await Repository.SaveAsync(view.Case);
         await ReloadAsync();
         askTreatAgain = false;

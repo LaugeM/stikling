@@ -150,7 +150,7 @@ public static class PestService
 
     /// <summary>
     /// The day a case being watched has been clean since: its latest treatment, or the day it
-    /// started when nothing was treated. Null for a case that isn't being watched.
+    /// started when nothing was treated, but never before it last went back to treating. Null for a case that isn't being watched.
     /// </summary>
     public static DateOnly? CleanSince(PestCase item, IEnumerable<PestTreatment> treatments)
     {
@@ -158,7 +158,21 @@ public static class PestService
             return null;
 
         var last = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated);
-        return last?.OccurredOn ?? item.StartedOn;
+        var since = last?.OccurredOn ?? item.StartedOn;
+        return item.TreatingAgainOn is { } again && again > since ? again : since;
+    }
+
+    /// <summary>
+    /// Notes a change of status made on a case that had <paramref name="from"/>: going back to
+    /// treating, or opening a resolved case again, restarts the clean count from today.
+    /// </summary>
+    public static void StatusChanged(PestCase item, PestCaseStatus from, DateOnly today)
+    {
+        var again = (item.Status == PestCaseStatus.Active && from != PestCaseStatus.Active)
+            || (from == PestCaseStatus.Resolved && item.IsOpen);
+
+        if (again)
+            item.TreatingAgainOn = today;
     }
 
     /// <summary>The cases that have been clean long enough and checked lately, so they can be resolved.</summary>

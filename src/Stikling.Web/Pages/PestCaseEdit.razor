@@ -199,6 +199,7 @@ else
         {
             item = (await Repository.GetAsync(Id!.Value))?.Copy();
             notFound = item is null;
+            loadedStatus = item?.Status;
         }
 
         room = places.NameOf(item?.PlaceId);
@@ -234,6 +235,9 @@ else
         item.ResolvedOn = item.Status == PestCaseStatus.Resolved ? item.ResolvedOn ?? Today : null;
     }
 
+    // The status the case had when the form opened, so going back to treating restarts the clean count
+    private PestCaseStatus? loadedStatus;
+
     private async Task SaveAsync()
     {
         if (item is null)
@@ -246,6 +250,9 @@ else
             errors = item.Validate(Today).ToList();
             if (errors.Count > 0)
                 return;
+
+            if (loadedStatus is { } from)
+                PestService.StatusChanged(item, from, Today);
 
             await Repository.SaveAsync(item);
             Navigation.NavigateTo($"pests/{item.Id}", replace: IsNew);

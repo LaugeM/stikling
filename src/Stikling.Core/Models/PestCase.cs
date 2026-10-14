@@ -74,6 +74,13 @@ public sealed class PestCase : Entity
     /// <summary>The day it was marked resolved, set when the status goes to Resolved.</summary>
     public DateOnly? ResolvedOn { get; set; }
 
+    /// <summary>
+    /// The day the case last went back to treating, or was opened again after being resolved.
+    /// The clean count on a case being watched starts no earlier than this, since pests found
+    /// again mean it wasn't clean. Null when that hasn't happened.
+    /// </summary>
+    public DateOnly? TreatingAgainOn { get; set; }
+
     public PestScope Scope { get; set; } = PestScope.Everywhere;
 
     /// <summary>The room or spot the case covers. Only on <see cref="PestScope.Room"/>.</summary>

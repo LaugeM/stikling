@@ -2133,9 +2133,18 @@ a.tag-label:hover {
 }
 
 .room-light {
-    margin: 0.25rem 0 0;
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    margin: 0;
     font-size: 0.9rem;
     color: var(--pa-muted);
+}
+
+/* In a flex row the label starts where the switch ends, so it needs the gap the float gave it */
+.room-light .form-check-input {
+    margin-top: 0;
+    margin-right: 0.5em;
 }
 
 /* Spots read as part of the room above them */
@@ -2894,4 +2903,9 @@ main.app-content:has(.form-bar) {
         margin: 0 !important;
         padding: 0 !important;
     }
+}
+
+/* The offer after moving plants in from outside: full-size taps like the rest */
+.came-in .btn-outline-primary {
+    min-height: 2.75rem;
 }

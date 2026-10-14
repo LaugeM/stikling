@@ -827,7 +827,7 @@ else
             var cameInside = CameInsideNow;
             if (cameInside && backQuarantine)
             {
-                // Set before the save, so it's one write. Quarantine isn't on the history when it changes.
+                // Set before the save, so it's one write and the history says it went into quarantine
                 plant.QuarantinedSince = Today;
                 plant.QuarantineDays = quarantineLength;
             }
