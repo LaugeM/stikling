@@ -24,7 +24,7 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
     /// <param name="parent">The plant it was taken from, when it has one that isn't deleted.</param>
     public static ShareCardText ForPropagation(Propagation propagation, Plant? parent, DateOnly today)
     {
-        var (latin, cultivar) = Botanical(propagation.Nickname, propagation.Genus, propagation.Species, propagation.Cultivar);
+        var (latin, cultivar) = Botanical(propagation.Nickname, propagation.Genus, propagation.Species, propagation.Cultivar, propagation.NameQualifier, propagation.NameNote);
         return new ShareCardText(propagation.DisplayName, latin, cultivar, PropagationLine(propagation, parent, today), PropagationFigure(propagation, today));
     }
 
@@ -37,16 +37,18 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
     /// <param name="taken">The propagations taken from this plant.</param>
     public static ShareCardText ForPlant(Plant plant, Plant? parent, Propagation? from, IReadOnlyCollection<Propagation> taken, DateOnly today)
     {
-        var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar);
+        var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameQualifier, plant.NameNote);
         return new ShareCardText(plant.DisplayName, latin, cultivar, PlantLine(plant, parent, from, today), PlantFigure(plant, from, taken, today));
     }
 
     // The botanical name goes under the name, unless it is the name already
-    private static (string? Latin, string? Cultivar) Botanical(string? nickname, string? genus, string? species, string? cultivar)
+    private static (string? Latin, string? Cultivar) Botanical(string? nickname, string? genus, string? species, string? cultivar,
+        NameQualifier? qualifier, string? note)
     {
         if (string.IsNullOrWhiteSpace(nickname))
             return (null, null);
-        var latin = string.Join(' ', new[] { PlantNames.Genus(genus), PlantNames.Species(species) }.OfType<string>());
+        // The note ends the botanical name, so it is set with the Latin part
+        var latin = PlantNames.Botanical(genus, species, null, qualifier, note) ?? "";
         return (latin.Length > 0 ? latin : null, PlantNames.Cultivar(cultivar));
     }
 

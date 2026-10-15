@@ -75,7 +75,7 @@ public static class CareLikes
     public static IReadOnlyList<Plant> SameSpecies(Plant plant, IEnumerable<Plant> all)
     {
         var genus = plant.Genus?.Trim();
-        var species = plant.Species?.Trim();
+        var species = plant.KnownSpecies?.Trim();
         if (string.IsNullOrEmpty(genus) || string.IsNullOrEmpty(species))
             return [];
 
@@ -83,7 +83,7 @@ public static class CareLikes
         [
             .. all.Where(p => p.Id != plant.Id && !p.IsDeleted && p.Status == PlantStatus.Active
                 && string.Equals(p.Genus?.Trim(), genus, StringComparison.CurrentCultureIgnoreCase)
-                && string.Equals(p.Species?.Trim(), species, StringComparison.CurrentCultureIgnoreCase))
+                && string.Equals(p.KnownSpecies?.Trim(), species, StringComparison.CurrentCultureIgnoreCase))
         ];
     }
 

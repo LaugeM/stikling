@@ -20,7 +20,7 @@ public static class WishSearch
             ? []
             : wishes
                 .Where(w => !w.IsDeleted)
-                .Where(w => Matches(text, w.Name, w.Genus, w.Species, w.Cultivar, dictionary))
+                .Where(w => Matches(text, w.Name, w.Genus, w.KnownSpecies, w.Cultivar, dictionary))
                 .OrderBy(w => w.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
 
@@ -30,7 +30,7 @@ public static class WishSearch
             ? []
             : plants
                 .Where(p => !p.IsDeleted && p.Status == PlantStatus.Active)
-                .Where(p => Matches(text, p.Nickname, p.Genus, p.Species, p.Cultivar, dictionary))
+                .Where(p => Matches(text, p.Nickname, p.Genus, p.KnownSpecies, p.Cultivar, dictionary))
                 .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
 
@@ -40,7 +40,7 @@ public static class WishSearch
             ? []
             : propagations
                 .Where(p => !p.IsDeleted && p.Stage is not (PropagationStage.Failed or PropagationStage.Done))
-                .Where(p => Matches(text, p.Nickname, p.Genus, p.Species, p.Cultivar, dictionary))
+                .Where(p => Matches(text, p.Nickname, p.Genus, p.KnownSpecies, p.Cultivar, dictionary))
                 .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
 

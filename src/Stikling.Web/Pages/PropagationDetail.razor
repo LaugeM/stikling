@@ -66,7 +66,7 @@ else
                     <h1>
                         @if (string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                         {
-                            <BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" />
+                            <BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" Qualifier="@propagation.NameQualifier" Note="@propagation.NameNote" />
                         }
                         else
                         {
@@ -75,9 +75,9 @@ else
                     </h1>
                     @if (!string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                     {
-                        <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" /></p>
+                        <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" Qualifier="@propagation.NameQualifier" Note="@propagation.NameNote" /></p>
                     }
-                    else if (everyday?.For(propagation.Genus, propagation.Species, propagation.Cultivar) is { } called)
+                    else if (everyday?.For(propagation.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(propagation.Species, propagation.NameQualifier), propagation.Cultivar) is { } called)
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
@@ -301,7 +301,7 @@ else
 
                         @if (careBook.IsEmpty is false && !string.IsNullOrWhiteSpace(propagation.Genus))
                         {
-                            var careFor = careBook.Find(propagation.Genus, propagation.Species);
+                            var careFor = careBook.Find(propagation.Genus, propagation.Species, propagation.NameQualifier);
                             <dt>Pets</dt>
                             <dd>
                                 @ToxicityText.Pets(careFor)@if (careFor?.PetsFrom is { } petsUrl)
@@ -333,6 +333,11 @@ else
                         {
                             <dt>Rooting aids</dt>
                             <dd>@string.Join(", ", propagation.RootingAids.Order().Select(Labels.For))</dd>
+                        }
+                        @if (propagation.DriedForHours is { } dried)
+                        {
+                            <dt>Cut end dried</dt>
+                            <dd>@Drying.Text(dried)</dd>
                         }
 
                         <dt>Location</dt>
@@ -650,8 +655,19 @@ else
                         </div>
                     }
                     <div class="mb-2">
-                        <label class="form-label" for="failed-reason">What happened? <span class="text-body-secondary">(optional)</span></label>
-                        <input id="failed-reason" class="form-control" @bind="failedReason" @bind:event="oninput" placeholder="e.g. rotted, dried out" />
+                        <span class="form-label d-block" id="failed-why-label">Why? <span class="text-body-secondary">(optional)</span></span>
+                        <div class="chip-row" role="group" aria-labelledby="failed-why-label">
+                            @foreach (var why in Enum.GetValues<FailReason>())
+                            {
+                                var picked = failedReason == why;
+                                <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                        @onclick="() => failedReason = picked ? null : why">@FailReasons.Chip(why)</button>
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label" for="failed-note">Note <span class="text-body-secondary">(optional)</span></label>
+                        <input id="failed-note" class="form-control" @bind="failedNote" @bind:event="oninput" placeholder="e.g. left too wet" />
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="failed-date">Date</label>
@@ -862,7 +878,8 @@ else
     private DateOnly since;
     private PotUpForm potUp = new();
     private int failedCount = 1;
-    private string? failedReason;
+    private FailReason? failedReason;
+    private string? failedNote;
     private int gaveCount = 1;
     private string? gaveTo;
     private DateOnly gaveDate;
@@ -1170,6 +1187,7 @@ else
     {
         failedCount = 1;
         failedReason = null;
+        failedNote = null;
         failedDate = Today;
         message = null;
         stageView = StageView.Failed;
@@ -1234,7 +1252,7 @@ else
         busy = true;
         try
         {
-            await PropagationService.MarkFailedAsync(propagation, failedCount, failedReason, failedDate);
+            await PropagationService.MarkFailedAsync(propagation, failedCount, failedReason, failedNote, failedDate);
             message = failedCount == 1 ? "Marked 1 as failed." : $"Marked {failedCount} as failed.";
             historyVersion++;
         }

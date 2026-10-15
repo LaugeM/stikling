@@ -39,7 +39,7 @@ public class TimelineEventTests
         var corms = await StartAsync(1, Today.AddDays(-20));
         var day = Today.AddDays(-7);
 
-        await service.MarkFailedAsync(corms, 1, "rotted", day);
+        await service.MarkFailedAsync(corms, 1, FailReason.Rotted, null, day);
 
         Assert.Equal(day, corms.FinishedOn);
         var entry = Change(corms);
@@ -60,8 +60,8 @@ public class TimelineEventTests
     {
         var corms = await StartAsync(2, Today.AddDays(-5));
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.MarkFailedAsync(corms, 1, null, Today.AddDays(1)));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.MarkFailedAsync(corms, 1, null, Today.AddDays(-6)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.MarkFailedAsync(corms, 1, null, null, Today.AddDays(1)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.MarkFailedAsync(corms, 1, null, null, Today.AddDays(-6)));
 
         Assert.Equal(0, corms.FailedCount);
         Assert.DoesNotContain(timeline.Entries, e => e.Kind == TimelineKind.Change);

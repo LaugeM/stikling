@@ -1,3 +1,4 @@
+using Stikling.Core.Models;
 using Stikling.Core.Names;
 
 namespace Stikling.Core.Plants;
@@ -48,6 +49,13 @@ public sealed class PlantCareBook
             genusKey = NameKey.Of(nowGenus);
         return byName.GetValueOrDefault(genusKey);
     }
+
+    /// <summary>
+    /// The same, for a plant whose name may be unsure: with sp. or a lost name any stored species
+    /// is ignored and the genus is looked up alone.
+    /// </summary>
+    public PlantCare? Find(string? genus, string? species, NameQualifier? qualifier) =>
+        Find(genus, PlantNames.SpeciesToLookUp(species, qualifier));
 
     /// <summary>The name the app shows for a source's web address, or the host when it isn't listed.</summary>
     public string SourceName(string url)

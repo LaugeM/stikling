@@ -11,12 +11,16 @@ namespace Stikling.Core.Backup;
 /// </summary>
 public static class CsvExport
 {
+    // The columns before the name columns were added, which an older export still has
+    internal static readonly string[] PlantHeaderBeforeNameSure =
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
+
     // The columns before Number was added, which an older export still has
     internal static readonly string[] PlantHeaderBeforeNumber =
         ["Name", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
 
     internal static readonly string[] PlantHeader =
-        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
 
     private static readonly string[] PropagationHeader =
         ["Name", "Number", "Parent plant", "Stage", "Medium", "Started", "Room", "Notes"];
@@ -32,8 +36,10 @@ public static class CsvExport
                 p.CollectionNumber,
                 p.Nickname,
                 p.Genus,
-                p.Species,
+                p.KnownSpecies,
                 p.Cultivar,
+                PlantNames.QualifierText(p.NameQualifier),
+                p.NameNote,
                 p.Status.ToString(),
                 places.NameOf(p.PlaceId),
                 p.AcquiredOn?.ToString(),

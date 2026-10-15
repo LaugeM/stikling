@@ -59,7 +59,10 @@ public enum TimelineEvent
     Flowering,
 
     /// <summary>A problem on a plant was opened, updated, closed or came back.</summary>
-    Problem
+    Problem,
+
+    /// <summary>A name that was unsure (cf., aff., sp. or lost) was found out.</summary>
+    Identified
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>
@@ -79,6 +82,41 @@ public sealed class TolerantTimelineEventConverter : JsonConverter<TimelineEvent
     }
 
     public override void Write(Utf8JsonWriter writer, TimelineEvent? value, JsonSerializerOptions options)
+    {
+        if (value is { } v)
+            writer.WriteStringValue(v.ToString());
+        else
+            writer.WriteNullValue();
+    }
+}
+
+/// <summary>Why units of a propagation didn't make it. Picked when marking them failed, and never required.</summary>
+public enum FailReason
+{
+    Rotted,
+    DriedOut,
+    Pests,
+    Mould,
+    NeverRooted,
+    DontKnow
+}
+
+/// <summary>Writes the reason as text and reads one this version doesn't know as null.</summary>
+public sealed class TolerantFailReasonConverter : JsonConverter<FailReason?>
+{
+    public override bool HandleNull => true;
+
+    public override FailReason? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.String
+            && Enum.TryParse<FailReason>(reader.GetString(), out var value)
+            && Enum.IsDefined(value))
+            return value;
+        reader.TrySkip();
+        return null;
+    }
+
+    public override void Write(Utf8JsonWriter writer, FailReason? value, JsonSerializerOptions options)
     {
         if (value is { } v)
             writer.WriteStringValue(v.ToString());
@@ -110,6 +148,13 @@ public sealed class TimelineEntry : Entity
     /// </summary>
     [JsonConverter(typeof(TolerantTimelineEventConverter))]
     public TimelineEvent? Event { get; set; }
+
+    /// <summary>Why the units failed. Only on a <see cref="TimelineEvent.Failed"/> entry, and null when none was picked or on older entries.</summary>
+    [JsonConverter(typeof(TolerantFailReasonConverter))]
+    public FailReason? FailReason { get; set; }
+
+    /// <summary>How many units the entry is about. Only on a failed entry, and null on older ones.</summary>
+    public int? Count { get; set; }
 
     public List<Guid> PhotoIds { get; set; } = [];
 

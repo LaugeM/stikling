@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Stikling.Core.Models;
 
 namespace Stikling.Core.Sharing;
@@ -12,6 +13,8 @@ namespace Stikling.Core.Sharing;
 /// <param name="Name">The link's name, else the card's.</param>
 /// <param name="Propagation">Only when the subject is a propagation.</param>
 /// <param name="Items">Oldest first, in the order of the page.</param>
+/// <param name="NameQualifier">How sure the name is. Last and optional, so a copy without it still reads and an older receiver ignores it.</param>
+/// <param name="NameNote">The locality or collector code that goes with the name.</param>
 public sealed record ShareCopy(
     int Version,
     SubjectType SubjectType,
@@ -22,19 +25,21 @@ public sealed record ShareCopy(
     string? Cultivar,
     ShareCopyPropagation? Propagation,
     Guid? CoverPhotoId,
-    IReadOnlyList<ShareCopyItem> Items)
+    IReadOnlyList<ShareCopyItem> Items,
+    [property: JsonConverter(typeof(TolerantNameQualifierConverter))] NameQualifier? NameQualifier = null,
+    string? NameNote = null)
 {
     public const int CurrentVersion = 1;
 
     public static ShareCopy ForPlant(SharePageModel page, Plant plant, TimeZoneInfo zone) =>
         new(CurrentVersion, SubjectType.Plant, plant.Id, page.Name, plant.Genus, plant.Species, plant.Cultivar, null,
-            page.Cover?.Id, ItemsOf(page, zone));
+            page.Cover?.Id, ItemsOf(page, zone), plant.NameQualifier, plant.NameNote);
 
     public static ShareCopy ForPropagation(SharePageModel page, Propagation propagation, TimeZoneInfo zone) =>
         new(CurrentVersion, SubjectType.Propagation, propagation.Id, page.Name, propagation.Genus, propagation.Species, propagation.Cultivar,
             new ShareCopyPropagation(propagation.Type, propagation.Medium, propagation.StartedOn, propagation.FirstRootOn,
                 propagation.FirstLeafOn, propagation.FirstGerminatedOn, propagation.RootedOn),
-            page.Cover?.Id, ItemsOf(page, zone));
+            page.Cover?.Id, ItemsOf(page, zone), propagation.NameQualifier, propagation.NameNote);
 
     private static List<ShareCopyItem> ItemsOf(SharePageModel page, TimeZoneInfo zone) =>
         page.Items.Select(item => new ShareCopyItem(

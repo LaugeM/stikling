@@ -30,7 +30,7 @@ public static class SwapTiles
             frames[photo.Id] = photo.Frame;
 
         var byName = StringComparer.CurrentCultureIgnoreCase;
-        string NameOf(string? nick, string? g, string? s, string? c) => SwapLists.ShareName(nick, g, s, c, null, nicknames);
+        string NameOf(string? nick, string? g, string? s, string? c, NameQualifier? q, string? n) => SwapLists.ShareName(nick, g, s, c, null, nicknames, q, n);
 
         (Guid? Id, PhotoFrame? Frame) CoverOf(IEnumerable<(string Name, Guid? Cover)> members)
         {
@@ -41,7 +41,7 @@ public static class SwapTiles
         var tiles = new List<SwapTile>();
 
         var cuttings = propagations.Where(p => p.SpareAvailable > 0)
-            .GroupBy(p => (Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar), p.Stage))
+            .GroupBy(p => (Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar, p.NameQualifier, p.NameNote), p.Stage))
             .OrderBy(g => g.Key.Name, byName).ThenBy(g => g.Key.Stage);
         foreach (var group in cuttings)
         {
@@ -54,7 +54,7 @@ public static class SwapTiles
 
         var offered = plants.Where(p => p.IsOffered).ToList();
         IEnumerable<SwapTile> Counted(SpareMark mark, bool onRequest) => offered.Where(p => p.Spare == mark)
-            .GroupBy(p => (Number: CollectionNumbers.Normalize(p.CollectionNumber), Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar)))
+            .GroupBy(p => (Number: CollectionNumbers.Normalize(p.CollectionNumber), Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar, p.NameQualifier, p.NameNote)))
             .OrderBy(g => g.Key.Name, byName).ThenBy(g => g.Key.Number, StringComparer.Ordinal)
             .Select(g =>
             {

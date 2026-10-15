@@ -78,6 +78,16 @@ public static class SpreadsheetImport
             var leftover = (string?)null;
             var nameUnused = false;
 
+            // Set first, since a name typed whole is compared with the name the plant would show
+            if (Get(ImportField.NameSure) is { } sure)
+            {
+                if (PlantNames.ParseQualifier(sure) is { } qualifier)
+                    draft.NameQualifier = qualifier;
+                else
+                    CantRead(ImportField.NameSure, $"Didn't know \"{sure}\" as how sure the name is, kept in About it");
+            }
+            draft.NameNote = PlantNames.Note(Get(ImportField.NameNote));
+
             var nickname = Get(ImportField.Nickname);
             var name = Get(ImportField.Name);
             if (Get(ImportField.Genus) is { } genus)
@@ -189,7 +199,7 @@ public static class SpreadsheetImport
             notes.AddRange(unread.OrderBy(u => u.Column).Select(u => $"{sheet.Headings[u.Column]}: {u.Text}"));
             draft.Notes = notes.Count == 0 ? null : string.Join('\n', notes);
 
-            var cantAdd = string.IsNullOrWhiteSpace(draft.Nickname) && string.IsNullOrWhiteSpace(draft.Genus)
+            var cantAdd = string.IsNullOrWhiteSpace(draft.Nickname) && string.IsNullOrWhiteSpace(draft.Genus) && draft.NameQualifier != NameQualifier.Unknown
                 ? "No name"
                 : draft.Validate(today).FirstOrDefault();
             var looksLikeYours = PlantMatches.SameNameEver(draft, existing).Any(p => p.AcquiredOn == draft.AcquiredOn);
