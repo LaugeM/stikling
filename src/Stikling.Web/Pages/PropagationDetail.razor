@@ -12,6 +12,7 @@
 @inject TimeProvider Time
 @inject IJSRuntime JS
 @inject PlantNameService Names
+@inject PlantCareService CommonCare
 @inject GooglePhotosService Google
 @inject AccountService Account
 @inject SettingsService SettingsService
@@ -297,6 +298,25 @@ else
                                 }
                             }
                         </dd>
+
+                        @if (careBook.IsEmpty is false && !string.IsNullOrWhiteSpace(propagation.Genus))
+                        {
+                            var careFor = careBook.Find(propagation.Genus, propagation.Species);
+                            <dt>Pets</dt>
+                            <dd>
+                                @ToxicityText.Pets(careFor)@if (careFor?.PetsFrom is { } petsUrl)
+                                {
+                                    <text> · <a href="@petsUrl" target="_blank" rel="noopener">@careBook.SourceName(petsUrl)</a></text>
+                                }
+                                @if (ToxicityText.People(careFor) is { } peopleText)
+                                {
+                                    <div class="detail-sub">@peopleText@if (careFor?.PeopleFrom is { } peopleUrl)
+                                    {
+                                        <text> · <a href="@peopleUrl" target="_blank" rel="noopener">@careBook.SourceName(peopleUrl)</a></text>
+                                    }</div>
+                                }
+                            </dd>
+                        }
 
                         @if (lastWatered is { } watered)
                         {
@@ -940,9 +960,13 @@ else
 
     private EverydayNameBook? everyday;
 
+    // What common plants usually like, here only for the Pets row. Empty if it couldn't be read.
+    private PlantCareBook careBook = PlantCareBook.Empty;
+
     private async Task LoadAsync()
     {
         everyday = await Names.GetEverydayNamesAsync();
+        careBook = await CommonCare.GetBookAsync();
         propagation = await Repository.GetAsync(Id);
         var plants = await PlantRepository.GetAllAsync();
         var propagations = allPropagations = await Repository.GetAllAsync();

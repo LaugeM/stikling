@@ -48,6 +48,14 @@ public enum RestKind
     DiesBack
 }
 
+/// <summary>Whether a source says a plant is toxic to a kind of animal or to people. Read from the care file, never stored on a plant.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<Toxicity>))]
+public enum Toxicity
+{
+    Toxic,
+    NonToxic
+}
+
 [JsonConverter(typeof(JsonStringEnumConverter<PlantStatus>))]
 public enum PlantStatus
 {

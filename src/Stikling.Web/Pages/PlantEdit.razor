@@ -12,6 +12,7 @@
 @inject PlantService PlantService
 @inject WishService WishService
 @inject PlantNameService Names
+@inject PlantCareService CommonCare
 @inject RoomService RoomService
 @inject PhotoService Photos
 @inject GooglePhotosService Google
@@ -231,6 +232,11 @@ else
                     </InputSelect>
                 </div>
             </FormSection>
+
+            @if (CareFor is { } suggested && CareSuggestion.Fills(plant, suggested) is { Count: > 0 } suggestedFills)
+            {
+                <CareOffer Care="suggested" Fills="suggestedFills" Book="careBook" OnUse="() => UseCare(suggested)" />
+            }
 
             <FormSection Title="What it likes" Summary="@LikesSummary" Open="openLikes">
                 <div class="mb-3">
@@ -585,6 +591,18 @@ else
     private bool openLives;
     private bool openLikes;
 
+    // What common plants usually like, offered above What it likes. Empty if it couldn't be read.
+    private PlantCareBook careBook = PlantCareBook.Empty;
+
+    private PlantCare? CareFor => plant is null ? null : careBook.Find(plant.Genus, plant.Species);
+
+    // Nothing is saved until the form is
+    private void UseCare(PlantCare care)
+    {
+        if (plant is not null)
+            CareSuggestion.Apply(plant, care);
+    }
+
     // The other plants of the same species offered the needs just saved, and which of them
     private IReadOnlyList<Plant> offer = [];
     private IReadOnlyList<LikesField> offerFields = [];
@@ -785,6 +803,7 @@ else
         existing = all;
         wishes = IsNew ? await WishService.GetAllAsync() : [];
         dictionary = IsNew ? await Names.GetDictionaryAsync() : null;
+        careBook = await CommonCare.GetBookAsync();
 
         if (IsNew)
         {

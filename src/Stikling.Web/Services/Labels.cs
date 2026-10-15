@@ -1,5 +1,6 @@
 using System.Globalization;
 using Stikling.Core.Models;
+using Stikling.Core.Plants;
 using Stikling.Core.Pests;
 using Stikling.Core.Pots;
 using Stikling.Core.SoilMixes;
@@ -253,6 +254,26 @@ public static class Labels
     public static string FlagFrom(LooseDate from) => from.Precision == DatePrecision.Day
         ? $"from {from.Start.ToString("ddd d MMM", CultureInfo.InvariantCulture)}"
         : $"from {from.Start.ToString("MMMM", CultureInfo.InvariantCulture)}";
+
+    /// <summary>
+    /// "Usually likes bright indirect · dry out fully · rests in winter, kept drier": the needs the care file
+    /// would fill in, in the order light, water, humidity, season with how it rests. The source comes after it.
+    /// </summary>
+    public static string Offer(IReadOnlyList<LikesField> fills, PlantCare care)
+    {
+        var parts = new List<string>();
+        if (fills.Contains(LikesField.Light) && care.Light is { } light) parts.Add(Lower(For(light)));
+        if (fills.Contains(LikesField.Water) && care.Water is { } water) parts.Add(Lower(For(water)));
+        if (fills.Contains(LikesField.Humidity) && care.Humidity is { } humidity) parts.Add(Lower(For(humidity)));
+
+        var season = fills.Contains(LikesField.Season) && care.Season is { } s ? Lower(For(s)) : null;
+        var rest = fills.Contains(LikesField.Rest) && care.Rest is { } r ? For(r) : null;
+        if (season is not null || rest is not null)
+            parts.Add(string.Join(", ", new[] { season, rest }.OfType<string>()));
+        return "Usually likes " + string.Join(" · ", parts);
+    }
+
+    private static string Lower(string text) => char.ToLowerInvariant(text[0]) + text[1..];
 
     /// <summary>"1 plant" / "3 plants".</summary>
     public static string Plants(int count) => Count(count, "plant");

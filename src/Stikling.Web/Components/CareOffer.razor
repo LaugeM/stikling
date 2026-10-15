@@ -1,0 +1,24 @@
+@* What the care file offers a plant, with the source linked and a Use button. Used on the plant form and the plant page. *@
+@if (Care is not null && Fills.Count > 0)
+{
+    <div class="care-offer @(Inline ? "care-offer-inline" : null)">
+        <span class="care-offer-text">
+            @Labels.Offer(Fills, Care)
+            @if (Care.CareFrom is { } url)
+            {
+                <text> · from <a href="@url" target="_blank" rel="noopener">@Book.SourceName(url)</a></text>
+            }
+        </span>
+        <button type="button" class="btn @(Inline ? "btn-link btn-sm link-action" : "btn-outline-primary btn-sm") care-offer-use" @onclick="OnUse">Use</button>
+    </div>
+}
+
+@code {
+    [Parameter] public PlantCare? Care { get; set; }
+    [Parameter] public IReadOnlyList<LikesField> Fills { get; set; } = [];
+    [Parameter, EditorRequired] public PlantCareBook Book { get; set; } = PlantCareBook.Empty;
+    [Parameter] public EventCallback OnUse { get; set; }
+
+    /// <summary>In a row of the details list the button is a link, on the form it is an outline button.</summary>
+    [Parameter] public bool Inline { get; set; }
+}
