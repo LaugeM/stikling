@@ -248,7 +248,7 @@ else
                     <InputSelect id="likes-water" class="form-select" @bind-Value="plant.LikesWater">
                         <option value="">Not set</option>
                         <option value="@WaterNeed.DryOut">Let it dry out fully</option>
-                        <option value="@WaterNeed.DryPartly">Let the top dry out</option>
+                        <option value="@WaterNeed.DryPartly">Let it dry out partly</option>
                         <option value="@WaterNeed.EvenlyMoist">Keep it evenly moist</option>
                     </InputSelect>
                 </div>
@@ -483,7 +483,7 @@ else
                 <li>@other.DisplayName</li>
             }
         </ul>
-        <div class="form-actions">
+        <div class="form-actions likes-offer">
             <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SetForAllAsync">Set for all @offer.Count</button>
             <button type="button" class="btn btn-link" @onclick="LeaveOffer">Only this one</button>
         </div>
