@@ -557,6 +557,7 @@ else
 
     private Plant? plant;
     private Plant? original; // the plant as it was before editing, to record what changed
+    private Plant? startedWith; // a new plant as the form started, e.g. a duplicate, to tell what was set here
     private LooseDate? copiedDate; // when the plant this one is copied from was got, to offer the same date
     private string? copiedFrom;
     private IReadOnlyList<Plant> existing = [];
@@ -816,6 +817,7 @@ else
             }
             if (fresh)
                 ApplyQuarantineRule();
+            startedWith ??= plant.Copy();
         }
         else
         {
@@ -1080,7 +1082,8 @@ else
                 plant.QuarantinedSince = Today;
                 plant.QuarantineDays = quarantineLength;
             }
-            var likesBefore = original ?? new Plant();
+            // A new plant counts from what the form started with, like a duplicate's values
+            var likesBefore = original ?? startedWith ?? new Plant();
             if (IsNew)
             {
                 var wish = markWishGot ? WishHere : null;
@@ -1098,9 +1101,7 @@ else
 
             // Others of the same species that don't have what was just set are asked before leaving
             var changed = CareLikes.Changed(likesBefore, plant);
-            var others = changed.Count == 0 ? [] : CareLikes.SameSpecies(plant, existing)
-                .Where(o => CareLikes.Changed(o, plant).Intersect(changed).Any())
-                .ToList();
+            var others = changed.Count == 0 ? [] : CareLikes.WouldChange(plant, changed, CareLikes.SameSpecies(plant, existing));
             if (others.Count > 0)
             {
                 offerFields = changed;
