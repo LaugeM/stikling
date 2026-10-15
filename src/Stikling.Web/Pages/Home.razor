@@ -344,7 +344,7 @@ else
                             <div class="item-text">
                                 <div class="item-name">@plant.DisplayName</div>
                                 <div class="item-meta">
-                                    <span>@Labels.For(plant.GrowingSeason!.Value) · has it gone dormant yet?</span>
+                                    <span>Usually @(plant.GrowingSeason == GrowingSeason.Summer ? "rests in winter" : "rests in summer")</span>
                                 </div>
                             </div>
                         </a>
