@@ -112,6 +112,14 @@ else
             }
         </fieldset>
 
+        @if (LastTimeMatch is { } lastTime)
+        {
+            <div class="last-time d-flex align-items-center justify-content-between gap-2 mb-3">
+                <span>Like last time: @LastTimeText(lastTime)</span>
+                <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => UseLastTime(lastTime)">Use</button>
+            </div>
+        }
+
         <fieldset>
             <legend>How you started it</legend>
             <div class="row g-2 mb-3">
@@ -267,6 +275,29 @@ else
                         }
                     </div>
                     <div class="form-text">Optional. Pick what you used and the results page compares batches with and without it.</div>
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" id="dry-first" checked="@dryFirst" @onchange="DryFirstChanged" />
+                        <label class="form-check-label" for="dry-first">Let the cut end dry first</label>
+                    </div>
+                    @if (dryFirst)
+                    {
+                        <div class="row g-2 mt-1" role="group" aria-label="How long it dried">
+                            <div class="col-5">
+                                <input id="dry-amount" type="number" class="form-control" min="1" max="@Drying.MaxAmount" inputmode="numeric" aria-label="How long"
+                                       aria-invalid="@(DryInvalid ? "true" : null)" value="@dryAmount" @onchange="DryAmountChanged" />
+                            </div>
+                            <div class="col-7">
+                                <select id="dry-unit" class="form-select" aria-label="Unit" @onchange="DryUnitChanged">
+                                    <option value="hours" selected="@(!dryInDays)">hours</option>
+                                    <option value="days" selected="@dryInDays">days</option>
+                                </select>
+                            </div>
+                            @if (DryInvalid)
+                            {
+                                <div class="form-text text-danger">@DryMessage</div>
+                            }
+                        </div>
+                    }
                 </div>
                 @if (propagation.Type == PropagationType.Corm)
                 {
@@ -562,6 +593,7 @@ else
         propagation.Container,
         propagation.Medium == GrowingMedium.Soil && propagation.SoilMixId is { } mix ? mixes.FirstOrDefault(m => m.Id == mix)?.Name : null,
         propagation.RootingAids.Count > 0 ? string.Join(", ", propagation.RootingAids.Select(Labels.For)) : null,
+        propagation.DriedForHours is { } dried ? $"dried {Drying.Text(dried)}" : null,
         propagation.Experiment);
 
     private string? AboutSummary => string.IsNullOrWhiteSpace(propagation?.Notes) ? null : Labels.Short(propagation.Notes);
@@ -583,7 +615,7 @@ else
 
     private static bool HasSetup(Propagation p) =>
         !string.IsNullOrWhiteSpace(p.Container) || p.SoilMixId is not null || p.RootingAids.Count > 0
-        || !string.IsNullOrWhiteSpace(p.Experiment) || p.CormSizeMm is not null;
+        || p.DriedForHours is not null || !string.IsNullOrWhiteSpace(p.Experiment) || p.CormSizeMm is not null;
 
     private static bool HasProgress(Propagation p) =>
         p.Stage != PropagationStage.Started || p.RootedOn is not null || p.FirstRootOn is not null
@@ -631,6 +663,7 @@ else
 
         if (propagation is not null)
         {
+            LoadDrying();
             openWhere = !IsNew && !string.IsNullOrWhiteSpace(location);
             openSetup = IsNew || HasSetup(propagation);
             openProgress = !IsNew && HasProgress(propagation);
@@ -724,6 +757,78 @@ else
         }
     }
 
+    // The drying is kept as hours on the propagation; these hold what is typed
+    private bool dryFirst;
+    private int? dryAmount = 1;
+    private bool dryInDays;
+
+    private void LoadDrying()
+    {
+        if (propagation?.DriedForHours is { } hours)
+        {
+            (var amount, dryInDays) = Drying.Split(hours);
+            dryAmount = amount;
+            dryFirst = true;
+        }
+        else
+        {
+            dryFirst = false;
+            dryAmount = 1;
+            dryInDays = false;
+        }
+    }
+
+    private const string DryMessage = "Say how long it dried, or untick it.";
+
+    private bool DryInvalid => dryFirst && dryAmount is not (>= 1 and <= Drying.MaxAmount);
+
+    private void SaveDrying() =>
+        propagation!.DriedForHours = dryFirst ? Drying.ToHours(dryAmount, dryInDays) : null;
+
+    private void DryFirstChanged(ChangeEventArgs e)
+    {
+        dryFirst = e.Value is true;
+        SaveDrying();
+    }
+
+    private void DryAmountChanged(ChangeEventArgs e)
+    {
+        dryAmount = int.TryParse(e.Value?.ToString(), out var amount) ? amount : null;
+        SaveDrying();
+    }
+
+    private void DryUnitChanged(ChangeEventArgs e)
+    {
+        dryInDays = e.Value?.ToString() == "days";
+        SaveDrying();
+    }
+
+    // The newest earlier propagation from the same parent, else of the same genus, offered once there is something to match on
+    private Propagation? LastTimeMatch =>
+        IsNew && propagation is not null
+        && LastTime.Find(existingPropagations, propagation.ParentPlantId, propagation.Genus) is { } found
+        && !LastTime.SameSetup(found, propagation)
+            ? found
+            : null;
+
+    private static string LastTimeText(Propagation p) => string.Join(", ", new[]
+    {
+        $"{Lower(Labels.For(p.Type))} in {Lower(Labels.For(p.Medium))}",
+        string.IsNullOrWhiteSpace(p.Container) ? null : p.Container.Trim(),
+        p.RootingAids.Count > 0 ? string.Join(", ", p.RootingAids.Order().Select(a => Lower(Labels.For(a)))) : null,
+        p.DriedForHours is { } hours ? $"dried {Drying.Text(hours)}" : null
+    }.OfType<string>());
+
+    // Mid-sentence, but not LECA or PON
+    private static string Lower(string text) =>
+        text.Any(char.IsLower) ? char.ToLowerInvariant(text[0]) + text[1..] : text;
+
+    private void UseLastTime(Propagation from)
+    {
+        LastTime.Apply(from, propagation!);
+        LoadDrying();
+    }
+
     private void ToggleAid(RootingAid aid)
     {
         if (!propagation!.RootingAids.Remove(aid))
@@ -799,6 +904,8 @@ else
         propagation.ClearMixUnlessSoil();
         propagation.CollectionNumber = CollectionNumbers.Normalize(propagation.CollectionNumber);
         errors = propagation.Validate(Today).ToList();
+        if (DryInvalid)
+            errors.Add(DryMessage);
         if (!IsNew && propagation.PottedUpCount < PlantsFromIt)
             errors.Add($"{Labels.Count(PlantsFromIt, "plant")} potted up from it {(PlantsFromIt == 1 ? "is" : "are")} still in your collection, so the potted up count can't be lower.");
         if (errors.Count > 0)

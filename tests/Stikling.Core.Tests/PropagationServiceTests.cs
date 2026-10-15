@@ -281,7 +281,7 @@ public class PropagationServiceTests
     public async Task Potting_up_the_last_one_finishes_the_propagation()
     {
         var corms = await StartCormsAsync(2);
-        await service.MarkFailedAsync(corms, 1, "rotted");
+        await service.MarkFailedAsync(corms, 1, FailReason.Rotted);
 
         var made = await service.PotUpAsync(corms, new PotUpRequest(1, Today));
 
@@ -335,7 +335,7 @@ public class PropagationServiceTests
     {
         var corms = await StartCormsAsync(2);
 
-        await service.MarkFailedAsync(corms, 2, "  ");
+        await service.MarkFailedAsync(corms, 2, null, "  ");
 
         Assert.Equal(PropagationStage.Failed, corms.Stage);
         Assert.Equal("2 failed\nFinished: 2 failed", HistoryOf(corms.Id).Last().Text);

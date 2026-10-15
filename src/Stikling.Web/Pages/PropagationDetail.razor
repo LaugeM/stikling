@@ -334,6 +334,11 @@ else
                             <dt>Rooting aids</dt>
                             <dd>@string.Join(", ", propagation.RootingAids.Order().Select(Labels.For))</dd>
                         }
+                        @if (propagation.DriedForHours is { } dried)
+                        {
+                            <dt>Cut end dried</dt>
+                            <dd>@Drying.Text(dried)</dd>
+                        }
 
                         <dt>Location</dt>
                         <dd>@(places.NameOf(propagation.PlaceId) ?? "Not set")</dd>
@@ -650,8 +655,19 @@ else
                         </div>
                     }
                     <div class="mb-2">
-                        <label class="form-label" for="failed-reason">What happened? <span class="text-body-secondary">(optional)</span></label>
-                        <input id="failed-reason" class="form-control" @bind="failedReason" @bind:event="oninput" placeholder="e.g. rotted, dried out" />
+                        <span class="form-label d-block" id="failed-why-label">Why? <span class="text-body-secondary">(optional)</span></span>
+                        <div class="chip-row" role="group" aria-labelledby="failed-why-label">
+                            @foreach (var why in Enum.GetValues<FailReason>())
+                            {
+                                var picked = failedReason == why;
+                                <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                        @onclick="() => failedReason = picked ? null : why">@FailReasons.Chip(why)</button>
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label" for="failed-note">Note <span class="text-body-secondary">(optional)</span></label>
+                        <input id="failed-note" class="form-control" @bind="failedNote" @bind:event="oninput" placeholder="e.g. left too wet" />
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="failed-date">Date</label>
@@ -862,7 +878,8 @@ else
     private DateOnly since;
     private PotUpForm potUp = new();
     private int failedCount = 1;
-    private string? failedReason;
+    private FailReason? failedReason;
+    private string? failedNote;
     private int gaveCount = 1;
     private string? gaveTo;
     private DateOnly gaveDate;
@@ -1170,6 +1187,7 @@ else
     {
         failedCount = 1;
         failedReason = null;
+        failedNote = null;
         failedDate = Today;
         message = null;
         stageView = StageView.Failed;
@@ -1234,7 +1252,7 @@ else
         busy = true;
         try
         {
-            await PropagationService.MarkFailedAsync(propagation, failedCount, failedReason, failedDate);
+            await PropagationService.MarkFailedAsync(propagation, failedCount, failedReason, failedNote, failedDate);
             message = failedCount == 1 ? "Marked 1 as failed." : $"Marked {failedCount} as failed.";
             historyVersion++;
         }
