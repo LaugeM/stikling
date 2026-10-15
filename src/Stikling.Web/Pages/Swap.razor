@@ -243,7 +243,7 @@ else
             {
                 <div class="item-sub">@botanical</div>
             }
-            else if (everyday?.For(plant.Genus, plant.Species, plant.Cultivar) is { } called)
+            else if (everyday?.For(plant.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar) is { } called)
             {
                 <div class="item-sub everyday-name">@called</div>
             }

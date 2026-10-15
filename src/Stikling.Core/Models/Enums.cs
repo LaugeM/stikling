@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Stikling.Core.Models;
@@ -276,4 +277,47 @@ public static class Weekdays
 
     public static Weekday ToWeekday(this DayOfWeek day) =>
         day == DayOfWeek.Sunday ? Weekday.Sunday : (Weekday)((int)day - 1);
+}
+
+/// <summary>
+/// How sure a name is, the way collectors write it: "Hoya cf. carnosa", "Hoya aff. carnosa",
+/// "Hoya sp." or a name lost with the tag.
+/// </summary>
+public enum NameQualifier
+{
+    /// <summary>Looks like this species.</summary>
+    Cf,
+
+    /// <summary>Close to this species.</summary>
+    Aff,
+
+    /// <summary>The species isn't known.</summary>
+    Sp,
+
+    /// <summary>The name is lost.</summary>
+    Unknown
+}
+
+/// <summary>Writes the qualifier as text and reads one this version doesn't know as null.</summary>
+public sealed class TolerantNameQualifierConverter : JsonConverter<NameQualifier?>
+{
+    public override bool HandleNull => true;
+
+    public override NameQualifier? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.String
+            && Enum.TryParse<NameQualifier>(reader.GetString(), out var value)
+            && Enum.IsDefined(value))
+            return value;
+        reader.TrySkip();
+        return null;
+    }
+
+    public override void Write(Utf8JsonWriter writer, NameQualifier? value, JsonSerializerOptions options)
+    {
+        if (value is { } v)
+            writer.WriteStringValue(v.ToString());
+        else
+            writer.WriteNullValue();
+    }
 }

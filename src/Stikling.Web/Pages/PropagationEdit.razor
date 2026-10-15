@@ -93,6 +93,7 @@ else
             else
             {
                 <PlantNameFields @bind-Genus="propagation.Genus" @bind-Species="propagation.Species" @bind-Cultivar="propagation.Cultivar"
+                                 @bind-Qualifier="propagation.NameQualifier" @bind-Note="propagation.NameNote"
                                  GenusPlaceholder="e.g. Alocasia" SpeciesPlaceholder="e.g. zebrina" CultivarPlaceholder="" />
                 <div class="mt-3">
                     <label class="form-label" for="nickname">Nickname</label>
@@ -738,6 +739,8 @@ else
                 Genus = wish.Genus,
                 Species = wish.Species,
                 Cultivar = wish.Cultivar,
+                NameQualifier = wish.NameQualifier,
+                NameNote = wish.NameNote,
                 Nickname = string.IsNullOrWhiteSpace(wish.Genus) ? wish.Name : null,
                 Source = wish.FoundAt
             }
@@ -756,6 +759,8 @@ else
             propagation.Genus = filled.Genus;
             propagation.Species = filled.Species;
             propagation.Cultivar = filled.Cultivar;
+            propagation.NameQualifier = filled.NameQualifier;
+            propagation.NameNote = filled.NameNote;
         }
         if (string.IsNullOrWhiteSpace(location))
             location = places.NameOf(parent.PlaceId);

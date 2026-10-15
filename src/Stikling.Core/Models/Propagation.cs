@@ -21,6 +21,13 @@ public sealed class Propagation : Entity
     public string? Species { get; set; }
     public string? Cultivar { get; set; }
 
+    /// <summary>How sure the name is: cf., aff., sp. or lost. Null when it is sure.</summary>
+    [JsonConverter(typeof(TolerantNameQualifierConverter))]
+    public NameQualifier? NameQualifier { get; set; }
+
+    /// <summary>A locality or collector code that goes with the name, like "Sumatra EPC 123".</summary>
+    public string? NameNote { get; set; }
+
     /// <summary>The plant it was taken from. Empty for e.g. bought seeds.</summary>
     public Guid? ParentPlantId { get; set; }
 
@@ -132,11 +139,11 @@ public sealed class Propagation : Entity
     public bool IsActive => Stage is not (PropagationStage.Done or PropagationStage.Failed);
 
     [JsonIgnore]
-    public string? BotanicalName => PlantNames.Botanical(Genus, Species, Cultivar);
+    public string? BotanicalName => PlantNames.Botanical(Genus, Species, Cultivar, NameQualifier, NameNote);
 
     [JsonIgnore]
     public string DisplayName =>
-        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? "Unnamed propagation";
+        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? (NameQualifier == Models.NameQualifier.Unknown ? "Name unknown" : "Unnamed propagation");
 
     /// <summary>
     /// The name where plants and propagations are listed together, so a propagation isn't
@@ -332,8 +339,9 @@ public sealed class Propagation : Entity
     public IReadOnlyList<string> Validate(DateOnly today)
     {
         var errors = new List<string>();
-        if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus))
+        if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus) && NameQualifier != Models.NameQualifier.Unknown)
             errors.Add("Give the propagation a nickname or a genus.");
+        errors.AddRange(PlantNames.QualifierErrors(Genus, Species, NameQualifier));
         if (Plants.CollectionNumbers.Normalize(CollectionNumber) is { } code && !Plants.CollectionNumbers.IsValid(code))
             errors.Add(Plants.CollectionNumbers.NotValidText);
         if (PottedUpCount < 0 || FailedCount < 0 || GivenAwayCount < 0)

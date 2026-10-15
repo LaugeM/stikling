@@ -166,7 +166,7 @@ public static class YearCards
     {
         const string kicker = "Quickest to root";
         var propagation = quickest.Propagation;
-        var (latin, cultivar) = Botanical(propagation.Nickname, propagation.Genus, propagation.Species, propagation.Cultivar);
+        var (latin, cultivar) = Botanical(propagation.Nickname, propagation.Genus, propagation.Species, propagation.Cultivar, propagation.NameQualifier, propagation.NameNote);
         var name = propagation.DisplayName;
         var medium = InText(label(propagation.Medium));
         var days = Days(quickest.DaysToRoot);
@@ -203,7 +203,7 @@ public static class YearCards
     {
         const string kicker = "Most photographed";
         var plant = most.Plant;
-        var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar);
+        var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameQualifier, plant.NameNote);
         var line = $"{most.PhotoCount} {(most.PhotoCount == 1 ? "photo" : "photos")} in {year}";
         return new YearCard("most-photographed", YearCardKind.Photo, "plant", kicker, plant.DisplayName, latin, cultivar,
             line, NoFigures, shown(most.PhotoId), null, null, null, null, NoPhotos,
@@ -214,7 +214,7 @@ public static class YearCards
     {
         var kicker = summary.SoFar ? "Grown this year" : $"Grown in {summary.Year}";
         var plant = grown.Plant;
-        var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar);
+        var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameQualifier, plant.NameNote);
         var line = $"{grown.DaysApart} days between these two photos";
         var before = localDay(grown.First.TakenAt).ToString("d MMM", CultureInfo.InvariantCulture);
         var after = localDay(grown.Last.TakenAt).ToString("d MMM", CultureInfo.InvariantCulture);
@@ -242,11 +242,12 @@ public static class YearCards
         label.Any(char.IsLower) ? label.ToLowerInvariant() : label;
 
     // The botanical name goes under the name, unless it is the name already
-    private static (string? Latin, string? Cultivar) Botanical(string? nickname, string? genus, string? species, string? cultivar)
+    private static (string? Latin, string? Cultivar) Botanical(string? nickname, string? genus, string? species, string? cultivar,
+        NameQualifier? qualifier, string? note)
     {
         if (string.IsNullOrWhiteSpace(nickname))
             return (null, null);
-        var latin = string.Join(' ', new[] { PlantNames.Genus(genus), PlantNames.Species(species) }.OfType<string>());
+        var latin = PlantNames.Botanical(genus, species, null, qualifier, note) ?? "";
         return (latin.Length > 0 ? latin : null, PlantNames.Cultivar(cultivar));
     }
 }

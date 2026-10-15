@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Stikling.Core.Models;
 
 /// <summary>
@@ -9,6 +11,13 @@ public sealed class Wish : Entity
     public string? Genus { get; set; }
     public string? Species { get; set; }
     public string? Cultivar { get; set; }
+
+    /// <summary>How sure the name is: cf., aff., sp. or lost. Null when it is sure.</summary>
+    [JsonConverter(typeof(TolerantNameQualifierConverter))]
+    public NameQualifier? NameQualifier { get; set; }
+
+    /// <summary>A locality or collector code that goes with the name, like "Sumatra EPC 123".</summary>
+    public string? NameNote { get; set; }
 
     /// <summary>What to call it when there is no botanical name yet, e.g. "that pink syngonium".</summary>
     public string? Name { get; set; }
@@ -37,17 +46,18 @@ public sealed class Wish : Entity
     public bool IsGot => GotOn is not null;
 
     /// <summary>"Monstera deliciosa 'Thai Constellation'", or null when no botanical name is set.</summary>
-    public string? BotanicalName => PlantNames.Botanical(Genus, Species, Cultivar);
+    public string? BotanicalName => PlantNames.Botanical(Genus, Species, Cultivar, NameQualifier, NameNote);
 
     /// <summary>The botanical name, else the name typed in.</summary>
     public string DisplayName =>
-        BotanicalName ?? (string.IsNullOrWhiteSpace(Name) ? "Unnamed wish" : Name.Trim());
+        BotanicalName ?? (string.IsNullOrWhiteSpace(Name) ? NameQualifier == Models.NameQualifier.Unknown ? "Name unknown" : "Unnamed wish" : Name.Trim());
 
     public IReadOnlyList<string> Validate(DateOnly today)
     {
         var errors = new List<string>();
-        if (string.IsNullOrWhiteSpace(Genus) && string.IsNullOrWhiteSpace(Name))
+        if (string.IsNullOrWhiteSpace(Genus) && string.IsNullOrWhiteSpace(Name) && NameQualifier != Models.NameQualifier.Unknown)
             errors.Add("Give the wish a genus, or a name of your own.");
+        errors.AddRange(PlantNames.QualifierErrors(Genus, Species, NameQualifier));
         if (MostToPay < 0)
             errors.Add("The most you would pay can't be negative.");
         return errors;

@@ -59,7 +59,10 @@ public enum TimelineEvent
     Flowering,
 
     /// <summary>A problem on a plant was opened, updated, closed or came back.</summary>
-    Problem
+    Problem,
+
+    /// <summary>A name that was unsure (cf., aff., sp. or lost) was found out.</summary>
+    Identified
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>

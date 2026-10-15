@@ -123,7 +123,7 @@ public sealed record PlantFilter(
         if (string.IsNullOrWhiteSpace(Search))
             return true;
 
-        var haystack = string.Join(' ', [plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, Everyday?.Invoke(plant), .. plant.Tags]);
+        var haystack = string.Join(' ', [plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameNote, plant.BotanicalName, Everyday?.Invoke(plant), .. plant.Tags]);
         return Search
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase)

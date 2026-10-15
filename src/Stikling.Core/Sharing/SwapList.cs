@@ -44,9 +44,10 @@ public static class SwapLists
     public static string MarkText(SpareMark mark) => mark == SpareMark.CuttingsToSpare ? "Cuttings to spare" : "Up for swap";
 
     /// <summary>The name shared for a plant: botanical with the everyday name, or the nickname when it has no botanical name.</summary>
-    public static string ShareName(string? nickname, string? genus, string? species, string? cultivar, string? everyday, bool nicknames)
+    public static string ShareName(string? nickname, string? genus, string? species, string? cultivar, string? everyday, bool nicknames,
+        NameQualifier? qualifier = null, string? note = null)
     {
-        var botanical = PlantNames.Botanical(genus, species, cultivar);
+        var botanical = PlantNames.Botanical(genus, species, cultivar, qualifier, note);
         var nick = string.IsNullOrWhiteSpace(nickname) ? null : nickname.Trim();
         if (botanical is null)
             return nick ?? "Unnamed plant";
@@ -76,11 +77,12 @@ public static class SwapLists
         bool nicknames,
         bool footer)
     {
-        string NameOf(string? nick, string? g, string? s, string? c) => ShareName(nick, g, s, c, everyday(g, s, c), nicknames);
+        string NameOf(string? nick, string? g, string? s, string? c, NameQualifier? q, string? n) =>
+            ShareName(nick, g, s, c, everyday(g, PlantNames.SpeciesToLookUp(s, q), c), nicknames, q, n);
         var byName = StringComparer.CurrentCultureIgnoreCase;
 
         var cuttings = propagations.Where(p => p.SpareAvailable > 0)
-            .GroupBy(p => (Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar), p.Stage))
+            .GroupBy(p => (Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar, p.NameQualifier, p.NameNote), p.Stage))
             .OrderBy(g => g.Key.Name, byName).ThenBy(g => g.Key.Stage)
             .Select(g => $"{g.Key.Name} ×{g.Sum(p => p.SpareAvailable)}, {StageText(g.Key.Stage)}")
             .ToList();
@@ -88,7 +90,7 @@ public static class SwapLists
         var offered = plants.Where(p => p.IsOffered).ToList();
         // A plant with a number is listed on its own, with the number before its name
         List<string> Counted(SpareMark mark) => [.. offered.Where(p => p.Spare == mark)
-            .GroupBy(p => (Number: CollectionNumbers.Normalize(p.CollectionNumber), Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar)))
+            .GroupBy(p => (Number: CollectionNumbers.Normalize(p.CollectionNumber), Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar, p.NameQualifier, p.NameNote)))
             .OrderBy(g => g.Key.Name, byName).ThenBy(g => g.Key.Number, StringComparer.Ordinal)
             .Select(g => WithNumber(g.Key.Number, g.Count() > 1 ? $"{g.Key.Name} ×{g.Count()}" : g.Key.Name))];
 
@@ -132,7 +134,7 @@ public static class SwapLists
         var lines = plants
             .Where(p => !p.IsDeleted)
             .GroupBy(p => (Number: CollectionNumbers.Normalize(p.CollectionNumber),
-                           Name: ShareName(p.Nickname, p.Genus, p.Species, p.Cultivar, everyday(p.Genus, p.Species, p.Cultivar), nicknames),
+                           Name: ShareName(p.Nickname, p.Genus, p.Species, p.Cultivar, everyday(p.Genus, PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), nicknames, p.NameQualifier, p.NameNote),
                            Mark: p.IsOffered ? p.Spare : null))
             .OrderBy(g => g.Key.Name, StringComparer.CurrentCultureIgnoreCase)
             .ThenBy(g => g.Key.Number, StringComparer.Ordinal).ThenBy(g => g.Key.Mark)

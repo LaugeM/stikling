@@ -20,6 +20,13 @@ public sealed class Plant : Entity
     /// <summary>Named variety, e.g. "Thai Constellation".</summary>
     public string? Cultivar { get; set; }
 
+    /// <summary>How sure the name is: cf., aff., sp. or lost. Null when it is sure.</summary>
+    [JsonConverter(typeof(TolerantNameQualifierConverter))]
+    public NameQualifier? NameQualifier { get; set; }
+
+    /// <summary>A locality or collector code that goes with the name, like "Sumatra EPC 123".</summary>
+    public string? NameNote { get; set; }
+
     /// <summary>The room or spot it stands in. See <see cref="Place"/>.</summary>
     public Guid? PlaceId { get; set; }
 
@@ -203,12 +210,12 @@ public sealed class Plant : Entity
 
     /// <summary>"Monstera deliciosa 'Thai Constellation'", or null when no botanical name is set.</summary>
     [JsonIgnore]
-    public string? BotanicalName => PlantNames.Botanical(Genus, Species, Cultivar);
+    public string? BotanicalName => PlantNames.Botanical(Genus, Species, Cultivar, NameQualifier, NameNote);
 
     /// <summary>The name to show in lists: the nickname, else the botanical name.</summary>
     [JsonIgnore]
     public string DisplayName =>
-        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? "Unnamed plant";
+        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? (NameQualifier == Models.NameQualifier.Unknown ? "Name unknown" : "Unnamed plant");
 
     /// <summary>
     /// Who a plant went to and what it went for, as one line: "Given to Anna · swapped for a Hoya carnosa"
@@ -261,6 +268,8 @@ public sealed class Plant : Entity
         Genus = Genus,
         Species = Species,
         Cultivar = Cultivar,
+        NameQualifier = NameQualifier,
+        NameNote = NameNote,
         PlaceId = PlaceId,
         Light = Light,
         LikesLight = LikesLight,
@@ -318,8 +327,9 @@ public sealed class Plant : Entity
     public IReadOnlyList<string> Validate(DateOnly today)
     {
         var errors = new List<string>();
-        if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus))
+        if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus) && NameQualifier != Models.NameQualifier.Unknown)
             errors.Add("Give the plant a nickname or a genus.");
+        errors.AddRange(PlantNames.QualifierErrors(Genus, Species, NameQualifier));
         if (ParentPlantId is not null && ParentPlantId == Id)
             errors.Add("A plant can't be its own parent.");
         if (Plants.CollectionNumbers.Normalize(CollectionNumber) is { } code && !Plants.CollectionNumbers.IsValid(code))

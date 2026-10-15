@@ -119,7 +119,7 @@ public static class PlantTable
     {
         if (!cultivarShown || !string.IsNullOrWhiteSpace(plant.Nickname))
             return plant.DisplayName;
-        return PlantNames.Botanical(plant.Genus, plant.Species, null)
+        return PlantNames.Botanical(plant.Genus, plant.Species, null, plant.NameQualifier, plant.NameNote)
             ?? PlantNames.Cultivar(plant.Cultivar)
             ?? plant.DisplayName;
     }

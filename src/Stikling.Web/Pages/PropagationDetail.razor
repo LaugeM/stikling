@@ -66,7 +66,7 @@ else
                     <h1>
                         @if (string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                         {
-                            <BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" />
+                            <BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" Qualifier="@propagation.NameQualifier" Note="@propagation.NameNote" />
                         }
                         else
                         {
@@ -75,9 +75,9 @@ else
                     </h1>
                     @if (!string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                     {
-                        <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" /></p>
+                        <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" Qualifier="@propagation.NameQualifier" Note="@propagation.NameNote" /></p>
                     }
-                    else if (everyday?.For(propagation.Genus, propagation.Species, propagation.Cultivar) is { } called)
+                    else if (everyday?.For(propagation.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(propagation.Species, propagation.NameQualifier), propagation.Cultivar) is { } called)
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
@@ -301,7 +301,7 @@ else
 
                         @if (careBook.IsEmpty is false && !string.IsNullOrWhiteSpace(propagation.Genus))
                         {
-                            var careFor = careBook.Find(propagation.Genus, propagation.Species);
+                            var careFor = careBook.Find(propagation.Genus, propagation.Species, propagation.NameQualifier);
                             <dt>Pets</dt>
                             <dd>
                                 @ToxicityText.Pets(careFor)@if (careFor?.PetsFrom is { } petsUrl)

@@ -88,8 +88,8 @@ public sealed class SearchService(
     {
         var item = new SearchItem(SearchKind.Plant, plant.Id, plant.DisplayName, Subtitle(plant.Nickname, plant.BotanicalName),
             null, plant.Status != PlantStatus.Active, $"plants/{plant.Id}");
-        var names = Names(plant.DisplayName, plant.Nickname, plant.Genus, plant.Species, plant.Cultivar,
-            everyday?.Invoke(plant.Genus, plant.Species, plant.Cultivar));
+        var names = Names(plant.DisplayName, plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameNote, plant.BotanicalName,
+            everyday?.Invoke(plant.Genus, PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar));
 
         List<SearchIndex.Extra> before =
             [.. PlantTags.Normalize(plant.Tags).Select(tag => new SearchIndex.Extra(Has(tag), $"tag {tag}"))];
@@ -104,7 +104,8 @@ public sealed class SearchService(
             Subtitle(propagation.Nickname, propagation.BotanicalName), null, !propagation.IsActive,
             $"propagations/{propagation.Id}");
         var names = Names(propagation.DisplayName, propagation.Nickname, propagation.Genus, propagation.Species,
-            propagation.Cultivar, propagation.Source, everyday?.Invoke(propagation.Genus, propagation.Species, propagation.Cultivar));
+            propagation.Cultivar, propagation.NameNote, propagation.BotanicalName, propagation.Source,
+            everyday?.Invoke(propagation.Genus, PlantNames.SpeciesToLookUp(propagation.Species, propagation.NameQualifier), propagation.Cultivar));
 
         List<SearchIndex.Extra> before = [];
         if (CollectionNumbers.Normalize(propagation.CollectionNumber) is { } code)
@@ -114,7 +115,7 @@ public sealed class SearchService(
 
     private static SearchIndex.Doc WishDoc(Wish wish) =>
         new(new SearchItem(SearchKind.Wish, wish.Id, wish.DisplayName, null, null, wish.IsGot, $"wishlist/{wish.Id}/edit"),
-            Names(wish.DisplayName, wish.Name, wish.Genus, wish.Species, wish.Cultivar, wish.FoundAt),
+            Names(wish.DisplayName, wish.Name, wish.Genus, wish.Species, wish.Cultivar, wish.NameNote, wish.BotanicalName, wish.FoundAt),
             Extras(wish.Notes));
 
     private static SearchIndex.Doc PotDoc(Pot pot) =>

@@ -41,7 +41,7 @@ public static class WishlistText
         if (wish.BotanicalName is not { } botanical)
             return wish.DisplayName;
 
-        var called = names?.For(wish.Genus, wish.Species, wish.Cultivar);
+        var called = names?.For(wish.Genus, PlantNames.SpeciesToLookUp(wish.Species, wish.NameQualifier), wish.Cultivar);
         if (string.IsNullOrWhiteSpace(called))
             called = wish.Name?.Trim();
         return string.IsNullOrWhiteSpace(called) ? botanical : $"{botanical} ({called})";

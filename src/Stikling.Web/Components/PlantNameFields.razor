@@ -49,13 +49,16 @@
                @oninput="e => TypeAsync(NameField.Genus, e)" @onfocus="() => active = NameField.Genus" @onblur="Blur"
                @ref="genusInput" />
     </div>
-    <div class="col-6">
-        <label class="form-label" for="species">Species</label>
-        <input id="species" class="form-control" value="@Species" placeholder="@SpeciesPlaceholder"
-               autocomplete="off" autocapitalize="none" spellcheck="false"
-               @oninput="e => TypeAsync(NameField.Species, e)" @onfocus="() => active = NameField.Species" @onblur="Blur"
-               @ref="speciesInput" />
-    </div>
+    @if (Qualifier != NameQualifier.Sp)
+    {
+        <div class="col-6">
+            <label class="form-label" for="species">Species</label>
+            <input id="species" class="form-control" value="@Species" placeholder="@SpeciesPlaceholder"
+                   autocomplete="off" autocapitalize="none" spellcheck="false"
+                   @oninput="e => TypeAsync(NameField.Species, e)" @onfocus="() => active = NameField.Species" @onblur="Blur"
+                   @ref="speciesInput" />
+        </div>
+    }
     @if (active is NameField.Genus or NameField.Species)
     {
         <div class="col-12">@Chips</div>
@@ -71,11 +74,37 @@
     {
         <div class="mt-2">@Chips</div>
     }
-    @if (everyday?.For(Genus, Species, Cultivar) is { } called)
+    @if (everyday?.For(Genus, PlantNames.SpeciesToLookUp(Species, Qualifier), Cultivar) is { } called)
     {
         <div class="form-text">Everyday name: @called</div>
     }
 </div>
+@if (!unsureOpen)
+{
+    <div class="mb-1">
+        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => unsureOpen = true">Not sure of the name?</button>
+    </div>
+}
+else
+{
+    <div class="row g-2 mt-1">
+        <div class="col-12 col-sm-6">
+            <label class="form-label" for="name-sure">How sure</label>
+            <select id="name-sure" class="form-select" @onchange="SetQualifierAsync">
+                <option value="" selected="@(Qualifier is null)">Sure</option>
+                <option value="@NameQualifier.Cf" selected="@(Qualifier == NameQualifier.Cf)">cf. (looks like this species)</option>
+                <option value="@NameQualifier.Aff" selected="@(Qualifier == NameQualifier.Aff)">aff. (close to this species)</option>
+                <option value="@NameQualifier.Sp" selected="@(Qualifier == NameQualifier.Sp)">sp. (species not known)</option>
+                <option value="@NameQualifier.Unknown" selected="@(Qualifier == NameQualifier.Unknown)">Name lost</option>
+            </select>
+        </div>
+        <div class="col-12 col-sm-6">
+            <label class="form-label" for="name-note">Locality or code</label>
+            <input id="name-note" class="form-control" value="@Note" placeholder="e.g. Sumatra, EPC 123"
+                   autocomplete="off" spellcheck="false" @oninput="e => NoteChanged.InvokeAsync(e.Value?.ToString())" />
+        </div>
+    </div>
+}
 
 @code {
     [Parameter]
@@ -96,6 +125,20 @@
     [Parameter]
     public EventCallback<string?> CultivarChanged { get; set; }
 
+    /// <summary>How sure the name is. Null when it is sure.</summary>
+    [Parameter]
+    public NameQualifier? Qualifier { get; set; }
+
+    [Parameter]
+    public EventCallback<NameQualifier?> QualifierChanged { get; set; }
+
+    /// <summary>A locality or collector code that goes with the name.</summary>
+    [Parameter]
+    public string? Note { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> NoteChanged { get; set; }
+
     [Parameter]
     public string GenusPlaceholder { get; set; } = "e.g. Monstera";
 
@@ -104,6 +147,21 @@
 
     [Parameter]
     public string CultivarPlaceholder { get; set; } = "e.g. Thai Constellation";
+
+    // The unsure-name fields stay shut until used, and show open when the name already has them
+    private bool unsureOpen;
+
+    protected override void OnParametersSet()
+    {
+        if (Qualifier is not null || !string.IsNullOrWhiteSpace(Note))
+            unsureOpen = true;
+    }
+
+    private Task SetQualifierAsync(ChangeEventArgs e)
+    {
+        Qualifier = Enum.TryParse<NameQualifier>(e.Value?.ToString(), out var value) ? value : null;
+        return QualifierChanged.InvokeAsync(Qualifier);
+    }
 
     private NameSuggester? suggester;
     private EverydayNameBook? everyday;
@@ -207,7 +265,7 @@
 
         focusNext = field switch
         {
-            NameField.Genus => speciesInput,
+            NameField.Genus => Qualifier == NameQualifier.Sp ? cultivarInput : speciesInput,
             NameField.Species => cultivarInput,
             _ => null
         };

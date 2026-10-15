@@ -37,6 +37,8 @@ public sealed class PropagationService(
         Genus = parent.Genus,
         Species = parent.Species,
         Cultivar = parent.Cultivar,
+        NameQualifier = parent.NameQualifier,
+        NameNote = parent.NameNote,
         PlaceId = parent.PlaceId,
         StartedOn = Today
     };
@@ -99,6 +101,8 @@ public sealed class PropagationService(
         var changes = PropagationChanges.Describe(before, after, label, placeName);
         if (changes.Count > 0)
             await AddChangeAsync(after, string.Join("\n", changes));
+        if (PlantNames.WasIdentified((before.Genus, before.Species, before.NameQualifier), (after.Genus, after.Species, after.NameQualifier)))
+            await AddChangeAsync(after, $"Identified as {after.BotanicalName ?? after.DisplayName}", @event: TimelineEvent.Identified);
     }
 
     /// <summary>Marks a propagation dormant from the given day, or woken up again with null.</summary>
@@ -164,6 +168,8 @@ public sealed class PropagationService(
             Genus = propagation.Genus,
             Species = propagation.Species,
             Cultivar = propagation.Cultivar,
+            NameQualifier = propagation.NameQualifier,
+            NameNote = propagation.NameNote,
             Origin = propagation.Type == PropagationType.Seed ? PlantOrigin.GrownFromSeed : PlantOrigin.Propagated,
             AcquiredOn = LooseDate.Of(request.Date),
             Source = propagation.Source,

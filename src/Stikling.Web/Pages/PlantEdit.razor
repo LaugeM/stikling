@@ -56,7 +56,8 @@ else
 
         <fieldset>
             <legend>Name</legend>
-            <PlantNameFields @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar" />
+            <PlantNameFields @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar"
+                             @bind-Qualifier="plant.NameQualifier" @bind-Note="plant.NameNote" />
             <div class="mt-3">
                 <label class="form-label" for="nickname">Nickname</label>
                 <InputText id="nickname" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Big Monstera" />
@@ -594,7 +595,7 @@ else
     // What common plants usually like, offered above What it likes. Empty if it couldn't be read.
     private PlantCareBook careBook = PlantCareBook.Empty;
 
-    private PlantCare? CareFor => plant is null ? null : careBook.Find(plant.Genus, plant.Species);
+    private PlantCare? CareFor => plant is null ? null : careBook.Find(plant.Genus, plant.Species, plant.NameQualifier);
 
     // Nothing is saved until the form is
     private void UseCare(PlantCare care)
@@ -822,6 +823,8 @@ else
                 plant.Genus = wish.Genus;
                 plant.Species = wish.Species;
                 plant.Cultivar = wish.Cultivar;
+                plant.NameQualifier = wish.NameQualifier;
+                plant.NameNote = wish.NameNote;
                 plant.Nickname = string.IsNullOrWhiteSpace(wish.Genus) ? wish.Name : null;
                 plant.Source = wish.FoundAt;
             }
@@ -832,6 +835,8 @@ else
                 plant.Genus = parent.Genus;
                 plant.Species = parent.Species;
                 plant.Cultivar = parent.Cultivar;
+                plant.NameQualifier = parent.NameQualifier;
+                plant.NameNote = parent.NameNote;
                 plant.PlaceId = parent.PlaceId;
             }
             if (fresh)
