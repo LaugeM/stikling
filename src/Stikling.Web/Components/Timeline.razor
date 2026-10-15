@@ -384,11 +384,14 @@ else
         await Photos.SetReferenceAsync(photo, !photo.IsReference);
         // A photo added as a reference has no entry, so back in the history it needs one to show
         await TimelineService.EnsureOnHistoryAsync(photo);
-        // A reference photo can't be the cover, and the page falls back to its usual default
-        if (photo.IsReference && photo.Id == CoverPhotoId)
-            await OnCoverChanged.InvokeAsync(null);
         viewerIndex = null;
         await LoadAsync();
+        // A reference photo can't be the cover, so the newest photo left in the history takes over.
+        // A photo coming back to a page with no cover becomes it.
+        if (photo.IsReference && photo.Id == CoverPhotoId)
+            await OnCoverChanged.InvokeAsync(photos.Where(p => !p.IsReference).MaxBy(p => p.TakenAt)?.Id);
+        else if (!photo.IsReference && CoverPhotoId is null)
+            await OnCoverChanged.InvokeAsync(photo.Id);
     }
 
     private Task FrameAsync((Photo Photo, PhotoFrame? Frame) change) => Photos.SetFrameAsync(change.Photo, change.Frame);
