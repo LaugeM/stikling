@@ -2,6 +2,7 @@ using System.Globalization;
 using Stikling.Core.Care;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
+using Stikling.Core.Plants;
 using Stikling.Core.Rooms;
 using Stikling.Core.Today;
 
@@ -192,7 +193,13 @@ public static class SitterSheetBuilder
             meter,
             sheet.HidePace ? null : paceLine,
             sheet.HideNotes || string.IsNullOrWhiteSpace(note) ? null : note.Trim(),
-            own, dueBeforeYouGo, checkNote);
+            own, dueBeforeYouGo, checkNote,
+            item.Entity switch
+            {
+                Plant p => CollectionNumbers.Normalize(p.CollectionNumber),
+                Propagation p => CollectionNumbers.Normalize(p.CollectionNumber),
+                _ => null
+            });
     }
 
     private static (int UsualDays, DateOnly CheckOn)? PaceOf(WateringGuess? guess) =>

@@ -40,10 +40,51 @@ public class SpreadsheetImportTests
         var headings = SheetReader.Read(CsvExport.Plants([], new Rooms.Places([]))).Headings;
         Assert.Equal(
         [
-            ImportField.Skip, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar,
+            ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar,
             ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source,
             ImportField.Price, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
         ], ImportFields.Guess(headings));
+    }
+
+    [Fact]
+    public void An_export_from_before_the_number_column_is_still_recognised()
+    {
+        string[] headings = ["Name", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
+        var guess = ImportFields.Guess(headings);
+
+        Assert.Equal(headings.Length, guess.Count);
+        Assert.DoesNotContain(ImportField.Number, guess);
+        Assert.Equal(ImportField.Nickname, guess[1]);
+        Assert.Equal(ImportField.Skip, guess[^1]);
+    }
+
+    [Fact]
+    public void Number_headings_are_recognised()
+    {
+        Assert.Equal(ImportField.Number, ImportFields.Guess(["Number"])[0]);
+        Assert.Equal(ImportField.Number, ImportFields.Guess(["Collection number"])[0]);
+        Assert.Equal(ImportField.Number, ImportFields.Guess(["No"])[0]);
+        Assert.Equal(ImportField.Number, ImportFields.Guess(["No."])[0]);
+        Assert.Equal(ImportField.Number, ImportFields.Guess(["#"])[0]);
+    }
+
+    [Fact]
+    public void A_number_is_normalized_and_kept_when_it_is_valid()
+    {
+        var row = One(" #117C ", ImportField.Number);
+
+        Assert.Equal("117c", row.Draft.CollectionNumber);
+        Assert.Empty(row.Problems);
+    }
+
+    [Fact]
+    public void A_number_that_is_not_valid_goes_to_About_it()
+    {
+        var row = One(["Name", "No"], ["Basil", "twelve"], [ImportField.Name, ImportField.Number]);
+
+        Assert.Null(row.Draft.CollectionNumber);
+        Assert.Single(row.Problems);
+        Assert.Contains("No: twelve", row.Draft.Notes);
     }
 
     [Fact]

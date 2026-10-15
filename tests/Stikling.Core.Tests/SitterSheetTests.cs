@@ -75,6 +75,24 @@ public class SitterSheetTests
         view.Subjects.Single(s => s.Name == name);
 
     [Fact]
+    public void A_collection_number_goes_on_the_card_and_in_the_text()
+    {
+        Plant("Hoya", set: p => p.CollectionNumber = "117");
+        var cutting = Cutting("Jar");
+        cutting.CollectionNumber = "117a";
+        Plant("Fern");
+
+        var view = Build();
+
+        Assert.Equal("#117 Hoya", Find(view, "Hoya").Label);
+        Assert.Equal("#117a Jar", Find(view, "Jar").Label);
+        Assert.Equal("Fern", Find(view, "Fern").Label);
+        var text = SitterSheetText.Write(view);
+        Assert.Contains("#117 Hoya", text);
+        Assert.Contains("#117a Jar", text);
+    }
+
+    [Fact]
     public void With_a_meter_a_visit_is_the_one_nearest_the_day_and_a_tie_goes_to_the_later()
     {
         var visits = new[] { new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 14), new DateOnly(2026, 10, 18) };

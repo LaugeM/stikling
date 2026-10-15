@@ -16,7 +16,7 @@ public class CsvExportTests
     {
         var csv = CsvExport.Plants([new Plant { Nickname = "Basil", CreatedAt = Now }], Places.None);
 
-        Assert.Equal("Name,Nickname,Genus,Species,Cultivar,Status,Room,Acquired,Origin,Source,Price paid,Tags,Notes,Added", Lines(csv)[0]);
+        Assert.Equal("Name,Number,Nickname,Genus,Species,Cultivar,Status,Room,Acquired,Origin,Source,Price paid,Tags,Notes,Added", Lines(csv)[0]);
         Assert.EndsWith("\r\n", csv);
         Assert.DoesNotContain("\n", csv.Replace("\r\n", ""));
     }
@@ -86,10 +86,10 @@ public class CsvExportTests
 
         var lines = Lines(CsvExport.Propagations(propagations, [parent], Places.None));
 
-        Assert.Equal("Name,Parent plant,Stage,Medium,Started,Room,Notes", lines[0]);
+        Assert.Equal("Name,Number,Parent plant,Stage,Medium,Started,Room,Notes", lines[0]);
         Assert.Equal(3, lines.Length);
-        Assert.Equal("Cutting,\"Mother, big\",Started,Water,2026-09-01,,", lines[1]);
-        Assert.StartsWith("Seeds,,", lines[2]);
+        Assert.Equal("Cutting,,\"Mother, big\",Started,Water,2026-09-01,,", lines[1]);
+        Assert.StartsWith("Seeds,,,", lines[2]);
     }
 
     [Fact]

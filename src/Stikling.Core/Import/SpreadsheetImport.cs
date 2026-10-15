@@ -107,6 +107,14 @@ public static class SpreadsheetImport
             if (nameUnused && !string.Equals(name, nickname, StringComparison.CurrentCultureIgnoreCase))
                 unread.Add((fields[ImportField.Name], name!));
 
+            if (Get(ImportField.Number) is { } number)
+            {
+                if (CollectionNumbers.Normalize(number) is { } code && CollectionNumbers.IsValid(code))
+                    draft.CollectionNumber = code;
+                else
+                    CantRead(ImportField.Number, $"Couldn't use \"{number}\" as a number, kept in About it");
+            }
+
             draft.Source = Get(ImportField.Source);
             draft.Tags = Get(ImportField.Tags) is { } tags ? ImportValues.ReadTags(tags) : [];
 

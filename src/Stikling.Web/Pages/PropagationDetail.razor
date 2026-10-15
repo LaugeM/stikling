@@ -58,6 +58,10 @@ else
                     </div>
                 }
                 <div class="min-w-0">
+                    @if (CollectionNumbers.Normalize(propagation.CollectionNumber) is { } number)
+                    {
+                        <div class="detail-number">#@number</div>
+                    }
                     <h1>
                         @if (string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                         {
@@ -76,6 +80,7 @@ else
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
+                    <NumberClashNote Code="@propagation.CollectionNumber" Clashes="numberClashes" />
                     <div class="profile-badges">
                         @if (propagation.IsDormant)
                         {
@@ -194,6 +199,10 @@ else
                     @foreach (var plant in madePlants)
                     {
                         <a class="ms-1" href="plants/@plant.Id">@plant.DisplayName</a>
+                    }
+                    @if (madePlants.Count > 0)
+                    {
+                        <span class="ms-2">· <a href="labels?plants=@string.Join(',', madePlants.Select(p => p.Id))">Print @(madePlants.Count == 1 ? "a label" : "labels")</a></span>
                     }
                 </p>
             }
@@ -401,6 +410,11 @@ else
             @if (Arrived)
             {
                 <ArrivedNote SubjectId="propagation.Id" />
+            }
+
+            @if (Made)
+            {
+                <MadeNote PropagationId="propagation.Id" />
             }
 
             @* The key reloads the history after stage changes and potting up *@
@@ -691,6 +705,12 @@ else
                             </li>
                         }
                         <li>
+                            <a class="sheet-action" href="labels?cuttings=@propagation.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9Z" /><circle cx="8" cy="8" r="1.4" /></svg>
+                                <span class="sheet-action-text"><b>Print a label</b><small>For its jar or pot</small></span>
+                            </a>
+                        </li>
+                        <li>
                             @if (propagation.IsDormant)
                             {
                                 <button type="button" class="sheet-action" disabled="@busy" @onclick="EndDormancyAsync">
@@ -751,6 +771,10 @@ else
     [SupplyParameterFromQuery(Name = "arrived")]
     public bool Arrived { get; set; }
 
+    /// <summary>Set when the propagation was just started, so the first visit offers a label for the jar.</summary>
+    [SupplyParameterFromQuery(Name = "made")]
+    public bool Made { get; set; }
+
     private enum StageView { None, Stage, PotUp, Failed, GaveAway, PassOn }
 
     private enum More { None, Menu, Flag, Dormant, Swap }
@@ -780,6 +804,7 @@ else
     private IReadOnlyList<Propagation> allPropagations = [];
     private Plant? parent;
     private IReadOnlyList<Plant> offspring = [];
+    private IReadOnlyList<CodeClash> numberClashes = [];
     private IReadOnlyList<Room> rooms = [];
     private Places places = Places.None;
     private PropagationOutcome? outcome;
@@ -925,6 +950,7 @@ else
         offspring = plants.Where(p => p.FromPropagationId == Id)
                           .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                           .ToList();
+        numberClashes = propagation is null ? [] : CollectionNumbers.Clashes(propagation.CollectionNumber, propagation.Id, plants, propagations);
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, plants, propagations);
         outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);

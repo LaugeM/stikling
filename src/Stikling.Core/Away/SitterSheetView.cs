@@ -28,6 +28,7 @@ public sealed record SitterBox(IReadOnlyList<string> Check, IReadOnlyList<Sitter
 /// <param name="How">The short name of how to water it, or what to top up. Null when it is watered the usual way.</param>
 /// <param name="Visits">The visits it is checked on. Empty without dates, or when it should be fine until you're back.</param>
 /// <param name="DueBeforeYouGo">The pace says it is due before the first day away. Shown on screen only.</param>
+/// <param name="Number">Its collection number, or null.</param>
 /// <param name="CheckNote">"Check it each time you visit" without dates, "Should be fine until you're back" with none of the visits, otherwise null.</param>
 public sealed record SitterSubject(
     Guid Id,
@@ -44,7 +45,12 @@ public sealed record SitterSubject(
     string? Note,
     IReadOnlyList<DateOnly> Visits,
     bool DueBeforeYouGo,
-    string? CheckNote);
+    string? CheckNote,
+    string? Number = null)
+{
+    /// <summary>The name, with its collection number before it when it has one: "#117 Big Monstera".</summary>
+    public string Label => Number is null ? Name : $"#{Number} {Name}";
+}
 
 /// <summary>Subjects under one heading in the order of the walk round, a room or "Elsewhere".</summary>
 public sealed record SitterGroup(string Heading, IReadOnlyList<SitterSubject> Subjects);

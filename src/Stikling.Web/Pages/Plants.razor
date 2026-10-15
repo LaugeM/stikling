@@ -17,6 +17,7 @@
 @inject DeviceFiles Device
 @inject SitterSheetActions Sharer
 @inject WishService WishService
+@inject NavigationManager Navigation
 @using CoreTable = Stikling.Core.Plants.PlantTable
 
 <PageTitle>Plants · Stikling</PageTitle>
@@ -418,6 +419,8 @@ else
                         @onclick="OpenBulkMove">Move</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
                         @onclick="OpenBulkSwap">For swap</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
+                        @onclick="OpenLabels">Labels</button>
             </div>
         }
         @if (bulkMessage is not null)
@@ -695,6 +698,10 @@ else
         wishMatches = WishSearch.OpenWishes(wishes, search, dictionary);
         SortTable();
     }
+
+    // The selected plants, in the order of the list, on the page that makes their labels
+    private void OpenLabels() =>
+        Navigation.NavigateTo($"labels?plants={string.Join(',', SelectedPlants.Select(p => p.Id))}");
 
     private void ToggleSelectMode()
     {

@@ -61,6 +61,27 @@ else
                 <InputText id="nickname" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Big Monstera" />
             </div>
             <div class="form-text">Give it a genus, a nickname, or both.</div>
+            <div class="mt-3">
+                <label class="form-label" for="collection-number">Collection number</label>
+                <input id="collection-number" class="form-control" autocomplete="off"
+                           @bind="plant.CollectionNumber" @bind:event="oninput" placeholder="e.g. 117"
+                           aria-invalid="@(NumberInvalid ? "true" : null)" />
+                @if (NumberInvalid)
+                {
+                    <div class="form-text text-danger">@CollectionNumbers.NotValidText</div>
+                }
+                else if (NumberCode is null)
+                {
+                    <div class="form-text">
+                        The number you write on the pot. Optional.
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => plant.CollectionNumber = nextNumber.ToString()">Use @nextNumber</button>
+                    </div>
+                }
+                else if (NumberClashes is { Count: > 0 } clashes)
+                {
+                    <div class="form-text">@CollectionNumbers.ClashNote(NumberCode, clashes)</div>
+                }
+            </div>
             @if (WishHere is { } onWishlist)
             {
                 <div class="form-check mt-2">
@@ -471,6 +492,15 @@ else
     private LooseDate? copiedDate; // when the plant this one is copied from was got, to offer the same date
     private string? copiedFrom;
     private IReadOnlyList<Plant> existing = [];
+    private IReadOnlyList<Propagation> existingPropagations = [];
+    private int nextNumber = 1;
+
+    private string? NumberCode => CollectionNumbers.Normalize(plant?.CollectionNumber);
+    private bool NumberInvalid => NumberCode is { } code && !CollectionNumbers.IsValid(code);
+    private IReadOnlyList<CodeClash> NumberClashes =>
+        NumberCode is { } code && !NumberInvalid
+            ? CollectionNumbers.Clashes(code, plant!.Id, existing, existingPropagations)
+            : [];
     private bool notFound;
     private bool saving;
     private List<string> errors = [];
@@ -639,7 +669,9 @@ else
         googleOn = await Google.IsEnabledAsync();
         var all = await Repository.GetAllAsync();
         var places = await RoomService.GetPlacesAsync();
-        rooms = Room.List(places, all, await Propagations.GetAllAsync());
+        existingPropagations = await Propagations.GetAllAsync();
+        rooms = Room.List(places, all, existingPropagations);
+        nextNumber = CollectionNumbers.NextFree(all);
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
         feeds = [.. (await FeedRepository.GetAllAsync()).OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)];
@@ -880,6 +912,7 @@ else
         if (plant is null)
             return;
 
+        plant.CollectionNumber = CollectionNumbers.Normalize(plant.CollectionNumber);
         errors = plant.Validate(Today).ToList();
         if (errors.Count > 0)
         {

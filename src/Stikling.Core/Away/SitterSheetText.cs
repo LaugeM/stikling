@@ -75,7 +75,7 @@ public static class SitterSheetText
                 {
                     text.AppendLine(group.Heading);
                     foreach (var subject in group.Subjects)
-                        text.AppendLine($"[ ] {subject.Name}{(subject.Spot is { } spot ? $" ({spot})" : "")}");
+                        text.AppendLine($"[ ] {subject.Label}{(subject.Spot is { } spot ? $" ({spot})" : "")}");
                 }
             }
         }
@@ -87,7 +87,7 @@ public static class SitterSheetText
             foreach (var subject in group.Subjects)
             {
                 text.AppendLine();
-                text.AppendLine(subject.Species is { } species ? $"{subject.Name} ({species})" : subject.Name);
+                text.AppendLine(subject.Species is { } species ? $"{subject.Label} ({species})" : subject.Label);
                 if (subject.Place is { } place)
                     text.AppendLine($"Where: {place}");
                 if (subject.How is { } how)

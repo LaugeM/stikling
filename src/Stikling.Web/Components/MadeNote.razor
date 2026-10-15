@@ -1,0 +1,26 @@
+@* Said once, above a propagation that was just started, with the way to a label for its jar. Closing it
+   goes to the same page without the query, so reloading doesn't bring it back. *@
+@inject NavigationManager Navigation
+
+@if (show)
+{
+    <div class="made-note" role="status">
+        <p>Saved. <a href="labels?cuttings=@PropagationId">Print a label for the jar?</a></p>
+        <button type="button" class="made-close" aria-label="Close" @onclick="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </button>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid PropagationId { get; set; }
+
+    private bool show = true;
+
+    private void Close()
+    {
+        show = false;
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("made", (string?)null), replace: true);
+    }
+}

@@ -1,0 +1,21 @@
+@* "Big Monstera also has #117.", with the names linking to the plants or propagations that share the number.
+   Only a note: two with the same number are never changed or blocked. *@
+@if (Clashes.Count > 0)
+{
+    <p class="number-clash">
+        @for (var i = 0; i < Clashes.Count; i++)
+        {
+            var clash = Clashes[i];
+            @(i == 0 ? "" : ", ")<a href="@(clash.IsPropagation ? "propagations" : "plants")/@clash.Id">@clash.Name</a>
+        }
+        also @(Clashes.Count == 1 ? "has" : "have") #@CollectionNumbers.Normalize(Code).
+    </p>
+}
+
+@code {
+    [Parameter]
+    public string? Code { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<CodeClash> Clashes { get; set; } = [];
+}

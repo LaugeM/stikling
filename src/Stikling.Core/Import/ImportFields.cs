@@ -12,6 +12,7 @@ public enum ImportField
     AboutLine,
 
     Name,
+    Number,
     Nickname,
     Genus,
     Species,
@@ -38,6 +39,7 @@ public static class ImportFields
         ImportField.Skip => "Leave out",
         ImportField.AboutLine => "A line in About it",
         ImportField.Name => "Name",
+        ImportField.Number => "Collection number",
         ImportField.Nickname => "Nickname",
         ImportField.Genus => "Genus",
         ImportField.Species => "Species",
@@ -61,7 +63,7 @@ public static class ImportFields
     public static IReadOnlyList<(string Group, ImportField[] Fields)> Groups { get; } =
     [
         ("Keep or leave out", [ImportField.AboutLine, ImportField.Skip]),
-        ("Name", [ImportField.Name, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar]),
+        ("Name", [ImportField.Name, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar]),
         ("Where and when", [ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source, ImportField.Price]),
         ("Care", [ImportField.LastWatered, ImportField.LastFed, ImportField.LastRepotted]),
         ("More about it", [ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt])
@@ -71,10 +73,13 @@ public static class ImportFields
     // the plant was added here, so neither says anything the other columns don't.
     private static readonly ImportField[] OwnExport =
     [
-        ImportField.Skip, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar,
+        ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar,
         ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source,
         ImportField.Price, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
     ];
+
+    // The same for an export from before the Number column
+    private static readonly ImportField[] OwnExportBeforeNumber = [.. OwnExport.Where((_, i) => i != 1)];
 
     private static readonly Dictionary<string, ImportField> Words = Build();
 
@@ -89,6 +94,7 @@ public static class ImportFields
 
         Add(ImportField.Name, "name", "plant", "plant name", "botanical name", "latin name", "scientific name",
             "navn", "plante", "plantenavn", "latinsk navn");
+        Add(ImportField.Number, "number", "collection number", "plant number", "no", "nr", "plant no", "nummer");
         Add(ImportField.Nickname, "nickname", "own name", "kaldenavn");
         Add(ImportField.Genus, "genus", "slægt");
         Add(ImportField.Species, "species", "art");
@@ -119,13 +125,17 @@ public static class ImportFields
     {
         if (headings.SequenceEqual(CsvExport.PlantHeader))
             return [.. OwnExport];
+        if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeNumber))
+            return [.. OwnExportBeforeNumber];
 
         var guess = new ImportField[headings.Count];
         var taken = new HashSet<ImportField>();
         for (var i = 0; i < headings.Count; i++)
         {
             guess[i] = ImportField.AboutLine;
-            if (Words.TryGetValue(Simplify(headings[i]), out var field) && taken.Add(field))
+            // A # is punctuation, which Simplify drops, so it is looked for as it is
+            var word = headings[i].Trim() == "#" ? "number" : Simplify(headings[i]);
+            if (Words.TryGetValue(word, out var field) && taken.Add(field))
                 guess[i] = field;
         }
         return guess;

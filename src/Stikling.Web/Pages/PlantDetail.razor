@@ -56,6 +56,10 @@ else
                     </div>
                 }
                 <div class="min-w-0">
+                    @if (CollectionNumbers.Normalize(plant.CollectionNumber) is { } number)
+                    {
+                        <div class="detail-number">#@number</div>
+                    }
                     <div class="title-row">
                         <h1>
                             @if (string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
@@ -80,6 +84,7 @@ else
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
+                    <NumberClashNote Code="@plant.CollectionNumber" Clashes="numberClashes" />
                     <div class="profile-badges">
                         @if (plant.Status != PlantStatus.Active)
                         {
@@ -650,6 +655,12 @@ else
                             </button>
                         </li>
                         <li>
+                            <a class="sheet-action" href="labels?plants=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9Z" /><circle cx="8" cy="8" r="1.4" /></svg>
+                                <span class="sheet-action-text"><b>Print a label</b><small>For its pot or a stake</small></span>
+                            </a>
+                        </li>
+                        <li>
                             <button type="button" class="sheet-action" @onclick="OpenFlowering">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.2" /><path d="M12 9.800C10.600 7.500 10.600 5 12 3.500c1.400 1.500 1.400 4 0 6.300Z" /><path d="M12 14.200c1.400 2.300 1.400 4.800 0 6.300-1.400-1.500-1.400-4 0-6.300Z" /><path d="M9.800 12C7.500 10.600 5 10.600 3.500 12c1.500 1.400 4 1.400 6.300 0Z" /><path d="M14.200 12c2.300 1.400 4.800 1.400 6.300 0-1.500-1.400-4-1.400-6.300 0Z" /></svg>
                                 <span class="sheet-action-text"><b>Flowering</b><small>@FloweringText.MenuHint(floweringNow, Today.Year)</small></span>
@@ -704,6 +715,12 @@ else
                     }
                     else
                     {
+                        <li>
+                            <a class="sheet-action" href="labels?plants=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9Z" /><circle cx="8" cy="8" r="1.4" /></svg>
+                                <span class="sheet-action-text"><b>Print a label</b><small>For its pot or a stake</small></span>
+                            </a>
+                        </li>
                         <li>
                             <button type="button" class="sheet-action" @onclick="() => OpenStatus(plant.Status)">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
@@ -968,6 +985,7 @@ else
     private string? leftFor;
     private PotsTaken potsTaken;
 
+    private IReadOnlyList<CodeClash> numberClashes = [];
     private IReadOnlyList<Plant> ancestors = [];
     private IReadOnlyList<Plant> offspring = [];
     private PlantGiven given = new([], 0, 0, 0, 0);
@@ -1174,6 +1192,7 @@ else
 
             var allPropagations = await PropagationRepository.GetAllAsync();
             given = PlantLineage.Given(plant, all, allPropagations);
+            numberClashes = CollectionNumbers.Clashes(plant.CollectionNumber, plant.Id, all, allPropagations);
             propagations = new PropagationFilter(Progress: ProgressFilter.All)
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
                 .ToList();

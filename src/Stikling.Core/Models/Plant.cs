@@ -7,6 +7,13 @@ public sealed class Plant : Entity
     /// <summary>Your own name for the plant, e.g. "Big Monstera" or "Kitchen basil".</summary>
     public string? Nickname { get; set; }
 
+    /// <summary>
+    /// The short number written on the pot, like "117", and for a cutting from it "117a". Null when
+    /// it has none. Optional, and not unique: a merge can make two with the same number. See
+    /// <see cref="Plants.CollectionNumbers"/>.
+    /// </summary>
+    public string? CollectionNumber { get; set; }
+
     public string? Genus { get; set; }
     public string? Species { get; set; }
 
@@ -295,6 +302,8 @@ public sealed class Plant : Entity
             errors.Add("Give the plant a nickname or a genus.");
         if (ParentPlantId is not null && ParentPlantId == Id)
             errors.Add("A plant can't be its own parent.");
+        if (Plants.CollectionNumbers.Normalize(CollectionNumber) is { } code && !Plants.CollectionNumbers.IsValid(code))
+            errors.Add(Plants.CollectionNumbers.NotValidText);
         if (PricePaid < 0)
             errors.Add("The price paid can't be negative.");
         if (AcquiredOn is { } acquired && acquired.Start > today)
