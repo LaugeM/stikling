@@ -265,7 +265,7 @@ else
 
     // The botanical name, or the name typed in when there isn't one
     private RenderFragment Name(Wish wish) => wish.BotanicalName is not null
-        ? @<BotanicalName Genus="@wish.Genus" Species="@wish.Species" Cultivar="@wish.Cultivar" />
+        ? @<BotanicalName Genus="@wish.Genus" Species="@wish.Species" Cultivar="@wish.Cultivar" Qualifier="@wish.NameQualifier" Note="@wish.NameNote" />
         : @<text>@wish.DisplayName</text>;
 
     // The everyday name, or the name typed in next to a botanical one

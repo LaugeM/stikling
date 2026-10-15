@@ -203,7 +203,7 @@ else if (sheet is not null)
                                 <span class="import-name">@row.Draft.DisplayName</span>
                                 @if (!string.IsNullOrWhiteSpace(row.Draft.Nickname) && !string.IsNullOrEmpty(row.Draft.BotanicalName))
                                 {
-                                    <span class="import-botanical"><BotanicalName Genus="@row.Draft.Genus" Species="@row.Draft.Species" Cultivar="@row.Draft.Cultivar" /></span>
+                                    <span class="import-botanical"><BotanicalName Genus="@row.Draft.Genus" Species="@row.Draft.Species" Cultivar="@row.Draft.Cultivar" Qualifier="@row.Draft.NameQualifier" Note="@row.Draft.NameNote" /></span>
                                 }
                                 @if (TypedName(index) is { } typed)
                                 {

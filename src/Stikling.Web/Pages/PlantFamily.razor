@@ -63,7 +63,7 @@ else
         <h1>
             @if (string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
             {
-                <BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" />
+                <BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" Note="@plant.NameNote" />
             }
             else
             {
@@ -72,7 +72,7 @@ else
         </h1>
         @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
         {
-            <p class="detail-sub"><BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" /></p>
+            <p class="detail-sub"><BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" Note="@plant.NameNote" /></p>
         }
         @if (plant.Status != PlantStatus.Active)
         {

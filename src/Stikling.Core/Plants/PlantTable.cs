@@ -119,7 +119,7 @@ public static class PlantTable
     {
         if (!cultivarShown || !string.IsNullOrWhiteSpace(plant.Nickname))
             return plant.DisplayName;
-        return PlantNames.Botanical(plant.Genus, plant.Species, null)
+        return PlantNames.Botanical(plant.Genus, plant.Species, null, plant.NameQualifier, plant.NameNote)
             ?? PlantNames.Cultivar(plant.Cultivar)
             ?? plant.DisplayName;
     }
@@ -201,7 +201,7 @@ public static class PlantTable
             PlantColumn.Watered => row.Watered?.On,
             PlantColumn.Fed => row.Fed?.On,
             PlantColumn.Genus => Text(plant.Genus),
-            PlantColumn.Species => Text(plant.Species),
+            PlantColumn.Species => Text(plant.KnownSpecies),
             PlantColumn.EverydayName => Text(row.EverydayName),
             PlantColumn.Room => Text(row.Room),
             PlantColumn.Got => plant.AcquiredOn?.Start,

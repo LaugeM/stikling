@@ -44,7 +44,7 @@ public sealed record PropagationFilter(string? Search = null, ProgressFilter Pro
         if (string.IsNullOrWhiteSpace(Search))
             return true;
 
-        var haystack = string.Join(' ', p.Nickname, p.Genus, p.Species, p.Cultivar, p.Source, Everyday?.Invoke(p));
+        var haystack = string.Join(' ', p.Nickname, p.Genus, p.Species, p.Cultivar, p.NameNote, p.BotanicalName, p.Source, Everyday?.Invoke(p));
         return Search
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase)

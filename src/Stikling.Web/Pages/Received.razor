@@ -51,9 +51,9 @@ else if (copy is not null && check is not null)
     }
 
     <h1 class="received-title">@copy.Name</h1>
-    @if (!string.IsNullOrWhiteSpace(copy.Genus))
+    @if (!string.IsNullOrWhiteSpace(copy.Genus) || !string.IsNullOrWhiteSpace(copy.NameNote) || copy.NameQualifier == NameQualifier.Unknown)
     {
-        <p class="received-sub"><BotanicalName Genus="@copy.Genus" Species="@copy.Species" Cultivar="@copy.Cultivar" /></p>
+        <p class="received-sub"><BotanicalName Genus="@copy.Genus" Species="@copy.Species" Cultivar="@copy.Cultivar" Qualifier="@copy.NameQualifier" Note="@copy.NameNote" /></p>
     }
     @if (CountsText is { } counts)
     {

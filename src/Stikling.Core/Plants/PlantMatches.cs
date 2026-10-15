@@ -38,8 +38,10 @@ public static class PlantMatches
 
     private static bool SameBotanicalName(Plant a, Plant b) =>
         Clean(b.Genus) is { } genus && genus == Clean(a.Genus)
-        && Clean(a.Species) == Clean(b.Species)
-        && Clean(a.Cultivar) == Clean(b.Cultivar);
+        && Clean(a.KnownSpecies) == Clean(b.KnownSpecies)
+        && Clean(a.Cultivar) == Clean(b.Cultivar)
+        && a.NameQualifier == b.NameQualifier
+        && Clean(a.NameNote) == Clean(b.NameNote);
 
     private static string? Clean(string? name) =>
         string.IsNullOrWhiteSpace(name) ? null : name.Trim().ToLowerInvariant();

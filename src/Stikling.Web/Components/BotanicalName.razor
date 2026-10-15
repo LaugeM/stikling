@@ -7,6 +7,10 @@
 {
     @(Latin is null ? null : " ")<span class="cultivar">'@cultivar'</span>
 }
+@if (PlantNames.Note(Note) is { } note)
+{
+    @(Latin is null && PlantNames.Cultivar(Cultivar) is null ? null : " ")<span>@note</span>
+}
 
 @code {
     [Parameter]
@@ -18,13 +22,13 @@
     [Parameter]
     public string? Cultivar { get; set; }
 
-    private string? Latin
-    {
-        get
-        {
-            var parts = new[] { PlantNames.Genus(Genus), PlantNames.Species(Species) }.OfType<string>();
-            var text = string.Join(' ', parts);
-            return text.Length == 0 ? null : text;
-        }
-    }
+    /// <summary>How sure the name is, so "cf." and "sp." are set in with the Latin part.</summary>
+    [Parameter]
+    public NameQualifier? Qualifier { get; set; }
+
+    /// <summary>The locality or collector code, set upright last.</summary>
+    [Parameter]
+    public string? Note { get; set; }
+
+    private string? Latin => PlantNames.Botanical(Genus, Species, null, Qualifier, null);
 }

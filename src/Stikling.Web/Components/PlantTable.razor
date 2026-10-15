@@ -111,7 +111,7 @@
             PlantColumn.Fed => Care(row.Fed),
             PlantColumn.Repotted => Care(row.Repotted),
             PlantColumn.Genus => @<text>@plant.Genus</text>,
-            PlantColumn.Species => @<text>@plant.Species</text>,
+            PlantColumn.Species => @<text>@plant.KnownSpecies</text>,
             PlantColumn.EverydayName => @<text>@row.EverydayName</text>,
             PlantColumn.Room => @<text>@row.Room</text>,
             PlantColumn.Got => @<text>@(plant.AcquiredOn is { } got ? Labels.Date(got) : null)</text>,

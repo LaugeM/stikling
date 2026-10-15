@@ -66,7 +66,7 @@ else
                         <h1>
                             @if (string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
                             {
-                                <BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" />
+                                <BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" Note="@plant.NameNote" />
                             }
                             else
                             {
@@ -80,9 +80,9 @@ else
                     </div>
                     @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
                     {
-                        <p class="detail-sub"><BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" /></p>
+                        <p class="detail-sub"><BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" Note="@plant.NameNote" /></p>
                     }
-                    else if (everyday?.For(plant.Genus, plant.Species, plant.Cultivar) is { } called)
+                    else if (everyday?.For(plant.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar) is { } called)
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
@@ -1272,7 +1272,7 @@ else
                 .ToList();
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
 
-            careFor = careBook.Find(plant.Genus, plant.Species);
+            careFor = careBook.Find(plant.Genus, plant.Species, plant.NameQualifier);
             places = await RoomService.GetPlacesAsync();
             var allCases = await PestCaseRepository.GetAllAsync();
             pests = PestService.CasesFor(plant, allCases, places);

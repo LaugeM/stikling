@@ -287,7 +287,7 @@ else
 
     private void Refresh()
     {
-        visible = new PropagationFilter(search, progress, p => everyday?.For(p.Genus, p.Species, p.Cultivar)).Apply(all ?? []).ToList();
+        visible = new PropagationFilter(search, progress, p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar)).Apply(all ?? []).ToList();
         experiments = Experiments.Group(visible, Time.Today());
 
         var grouped = experiments.SelectMany(e => e.Entries).Select(e => e.Propagation.Id).ToHashSet();

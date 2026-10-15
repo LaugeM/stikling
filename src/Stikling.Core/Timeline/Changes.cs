@@ -138,6 +138,9 @@ public static class PropagationChanges
                 ? "No rooting aids"
                 : $"Rooting aids: {string.Join(", ", after.RootingAids.Order().Select(aid => label(aid)))}");
 
+        if (before.DriedForHours != after.DriedForHours)
+            changes.Add(after.DriedForHours is { } dried ? $"Cut end dried: {Propagations.Drying.Text(dried)}" : "Cut end no longer dried first");
+
         // Finishing ends dormancy too, and the stage change already says so
         if (before.IsDormant != after.IsDormant && after.IsActive)
             changes.Add(PlantChanges.DormancyText(after.IsDormant));

@@ -291,7 +291,7 @@ else
                             <div class="item-name">
                                 @if (wish.BotanicalName is not null)
                                 {
-                                    <BotanicalName Genus="@wish.Genus" Species="@wish.Species" Cultivar="@wish.Cultivar" />
+                                    <BotanicalName Genus="@wish.Genus" Species="@wish.Species" Cultivar="@wish.Cultivar" Qualifier="@wish.NameQualifier" Note="@wish.NameNote" />
                                 }
                                 else
                                 {
@@ -633,7 +633,7 @@ else
             .Where(f => f.Now is not null)
             .ToDictionary(f => f.Id, f => f.Now!);
         tableValues = CoreTable.Rows(all, careLogs, today, places.NameOf,
-                p => everyday?.For(p.Genus, p.Species, p.Cultivar), FloweringFor)
+                p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), FloweringFor)
             .ToDictionary(r => r.Plant.Id);
         lastActivity = PlantActivity.Latest(await Entries.GetLatestPerSubjectAsync(), careLogs);
         Refresh();
@@ -728,7 +728,7 @@ else
     {
         visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
                 pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity,
-                p => everyday?.For(p.Genus, p.Species, p.Cultivar), goneAs, problem ? problemPlants : null, likes)
+                p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), goneAs, problem ? problemPlants : null, likes)
             .Apply(all ?? [])
             .ToList();
         wishMatches = WishSearch.OpenWishes(wishes, search, dictionary);

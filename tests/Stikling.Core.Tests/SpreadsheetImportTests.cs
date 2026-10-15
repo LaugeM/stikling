@@ -40,7 +40,7 @@ public class SpreadsheetImportTests
         var headings = SheetReader.Read(CsvExport.Plants([], new Rooms.Places([]))).Headings;
         Assert.Equal(
         [
-            ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar,
+            ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote,
             ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source,
             ImportField.Price, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
         ], ImportFields.Guess(headings));

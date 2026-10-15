@@ -372,9 +372,9 @@ else
     private static (string? Genus, string? Species, string? Cultivar)? SpeciesOf(Entity subject) => subject switch
     {
         Plant { Nickname: { Length: > 0 } nickname } plant when !string.IsNullOrWhiteSpace(nickname) && plant.BotanicalName is not null
-            => (plant.Genus, plant.Species, plant.Cultivar),
+            => (plant.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar),
         Propagation { Nickname: { Length: > 0 } nickname } propagation when !string.IsNullOrWhiteSpace(nickname) && propagation.BotanicalName is not null
-            => (propagation.Genus, propagation.Species, propagation.Cultivar),
+            => (propagation.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(propagation.Species, propagation.NameQualifier), propagation.Cultivar),
         _ => null
     };
 

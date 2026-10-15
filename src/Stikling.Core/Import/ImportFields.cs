@@ -17,6 +17,8 @@ public enum ImportField
     Genus,
     Species,
     Cultivar,
+    NameSure,
+    NameNote,
     Place,
     GotOn,
     Origin,
@@ -44,6 +46,8 @@ public static class ImportFields
         ImportField.Genus => "Genus",
         ImportField.Species => "Species",
         ImportField.Cultivar => "Cultivar",
+        ImportField.NameSure => "How sure the name is",
+        ImportField.NameNote => "Locality or code",
         ImportField.Place => "Room",
         ImportField.GotOn => "Date you got it",
         ImportField.Origin => "How you got it",
@@ -63,7 +67,7 @@ public static class ImportFields
     public static IReadOnlyList<(string Group, ImportField[] Fields)> Groups { get; } =
     [
         ("Keep or leave out", [ImportField.AboutLine, ImportField.Skip]),
-        ("Name", [ImportField.Name, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar]),
+        ("Name", [ImportField.Name, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote]),
         ("Where and when", [ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source, ImportField.Price]),
         ("Care", [ImportField.LastWatered, ImportField.LastFed, ImportField.LastRepotted]),
         ("More about it", [ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt])
@@ -73,13 +77,14 @@ public static class ImportFields
     // the plant was added here, so neither says anything the other columns don't.
     private static readonly ImportField[] OwnExport =
     [
-        ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar,
+        ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote,
         ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source,
         ImportField.Price, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
     ];
 
-    // The same for an export from before the Number column
-    private static readonly ImportField[] OwnExportBeforeNumber = [.. OwnExport.Where((_, i) => i != 1)];
+    // The same for an export from before the name columns, and from before the Number column
+    private static readonly ImportField[] OwnExportBeforeNameSure = [.. OwnExport.Where((_, i) => i is not (6 or 7))];
+    private static readonly ImportField[] OwnExportBeforeNumber = [.. OwnExportBeforeNameSure.Where((_, i) => i != 1)];
 
     private static readonly Dictionary<string, ImportField> Words = Build();
 
@@ -99,6 +104,8 @@ public static class ImportFields
         Add(ImportField.Genus, "genus", "slægt");
         Add(ImportField.Species, "species", "art");
         Add(ImportField.Cultivar, "cultivar", "variety", "variant", "sort", "kultivar");
+        Add(ImportField.NameSure, "name sure", "cf aff", "cf", "aff", "cf aff sp", "qualifier", "identification", "id status", "name certainty");
+        Add(ImportField.NameNote, "locality or code", "locality", "collector code", "collector number", "collector no", "collection code", "field number", "field no", "voucher", "origin locality");
         Add(ImportField.Place, "room", "location", "place", "spot", "where", "rum", "hvor", "værelse", "placering", "sted");
         Add(ImportField.GotOn, "acquired", "date acquired", "got", "date got", "bought", "purchased", "purchase date",
             "købt", "købsdato", "anskaffet", "dato");
@@ -125,6 +132,8 @@ public static class ImportFields
     {
         if (headings.SequenceEqual(CsvExport.PlantHeader))
             return [.. OwnExport];
+        if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeNameSure))
+            return [.. OwnExportBeforeNameSure];
         if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeNumber))
             return [.. OwnExportBeforeNumber];
 

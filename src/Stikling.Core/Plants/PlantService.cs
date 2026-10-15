@@ -127,6 +127,8 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName, feedName);
         if (changes.Count > 0)
             await AddChangeAsync(after.Id, string.Join("\n", changes));
+        if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
+            await AddChangeAsync(after.Id, $"Identified as {after.BotanicalName ?? after.DisplayName}", TimelineEvent.Identified);
     }
 
     /// <summary>Sets the same status on several plants, recording it on each.</summary>
@@ -291,14 +293,15 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         }
     }
 
-    private Task AddChangeAsync(Guid plantId, string text) =>
+    private Task AddChangeAsync(Guid plantId, string text, TimelineEvent? @event = null) =>
         timeline.AddAsync(new TimelineEntry
         {
             SubjectType = SubjectType.Plant,
             SubjectId = plantId,
             Kind = TimelineKind.Change,
             OccurredAt = time.GetUtcNow(),
-            Text = text
+            Text = text,
+            Event = @event
         });
 
     // A day without a time is recorded at noon, or now for today, so a photo from earlier that
