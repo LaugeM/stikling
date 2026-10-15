@@ -5,9 +5,12 @@ public static class Drying
 {
     public const int HoursPerDay = 24;
 
+    /// <summary>The most that can be entered, in hours or days.</summary>
+    public const int MaxAmount = 999;
+
     /// <summary>The hours to store, or null when nothing was entered or it isn't more than nothing.</summary>
     public static int? ToHours(int? amount, bool inDays) =>
-        amount is > 0 ? amount * (inDays ? HoursPerDay : 1) : null;
+        amount is > 0 and <= MaxAmount ? amount * (inDays ? HoursPerDay : 1) : null;
 
     /// <summary>What to show when editing: days when it divides evenly by 24 and is at least 24, else hours.</summary>
     public static (int Amount, bool InDays) Split(int hours) =>

@@ -283,8 +283,8 @@ else
                     {
                         <div class="row g-2 mt-1" role="group" aria-label="How long it dried">
                             <div class="col-5">
-                                <input id="dry-amount" type="number" class="form-control" min="1" inputmode="numeric" aria-label="How long"
-                                       value="@dryAmount" @onchange="DryAmountChanged" />
+                                <input id="dry-amount" type="number" class="form-control" min="1" max="@Drying.MaxAmount" inputmode="numeric" aria-label="How long"
+                                       aria-invalid="@(DryInvalid ? "true" : null)" value="@dryAmount" @onchange="DryAmountChanged" />
                             </div>
                             <div class="col-7">
                                 <select id="dry-unit" class="form-select" aria-label="Unit" @onchange="DryUnitChanged">
@@ -292,6 +292,10 @@ else
                                     <option value="days" selected="@dryInDays">days</option>
                                 </select>
                             </div>
+                            @if (DryInvalid)
+                            {
+                                <div class="form-text text-danger">@DryMessage</div>
+                            }
                         </div>
                     }
                 </div>
@@ -774,6 +778,10 @@ else
         }
     }
 
+    private const string DryMessage = "Say how long it dried, or untick it.";
+
+    private bool DryInvalid => dryFirst && dryAmount is not (>= 1 and <= Drying.MaxAmount);
+
     private void SaveDrying() =>
         propagation!.DriedForHours = dryFirst ? Drying.ToHours(dryAmount, dryInDays) : null;
 
@@ -896,6 +904,8 @@ else
         propagation.ClearMixUnlessSoil();
         propagation.CollectionNumber = CollectionNumbers.Normalize(propagation.CollectionNumber);
         errors = propagation.Validate(Today).ToList();
+        if (DryInvalid)
+            errors.Add(DryMessage);
         if (!IsNew && propagation.PottedUpCount < PlantsFromIt)
             errors.Add($"{Labels.Count(PlantsFromIt, "plant")} potted up from it {(PlantsFromIt == 1 ? "is" : "are")} still in your collection, so the potted up count can't be lower.");
         if (errors.Count > 0)

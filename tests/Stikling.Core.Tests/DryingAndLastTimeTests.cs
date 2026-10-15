@@ -128,4 +128,16 @@ public class DryingAndLastTimeTests
         last.RootingAids.Add(RootingAid.HeatMat);
         Assert.Single(form.RootingAids);
     }
+
+    [Fact]
+    public void Apply_replaces_the_rooting_aids_instead_of_merging()
+    {
+        var last = new Propagation { RootingAids = [RootingAid.Cinnamon] };
+        var form = new Propagation { RootingAids = [RootingAid.HeatMat, RootingAid.Cinnamon], Nickname = "Mine", InitialCount = 4 };
+
+        LastTime.Apply(last, form);
+
+        Assert.Equal([RootingAid.Cinnamon], form.RootingAids);
+        Assert.Equal(4, form.InitialCount);
+    }
 }

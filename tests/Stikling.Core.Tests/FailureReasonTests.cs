@@ -195,4 +195,21 @@ public class FailureReasonTests
     {
         Assert.Null(FailureResults.Overall([new Propagation()], By(), time));
     }
+
+    [Fact]
+    public void A_lowered_count_takes_from_not_recorded_first_then_the_oldest()
+    {
+        var p = new Propagation { Medium = GrowingMedium.Water, StartedOn = Today.AddDays(-30), InitialCount = 10, FailedCount = 4 };
+        var entries = By(
+            Entry(p, Today.AddDays(-9), 3, FailReason.Rotted),
+            Entry(p, Today.AddDays(-8), 2, null),
+            Entry(p, Today.AddDays(-7), 3, FailReason.DriedOut));
+
+        var summary = FailureResults.ByMedium([p], entries, time)[GrowingMedium.Water];
+
+        // 8 recorded, 4 left: the 2 not recorded go, then 2 of the oldest (rot)
+        Assert.Equal(4, summary.Total);
+        Assert.Equal([new ReasonCount(FailReason.DriedOut, 3), new ReasonCount(FailReason.Rotted, 1)], summary.Reasons);
+        Assert.Equal(4, summary.Stages.Values.Sum());
+    }
 }

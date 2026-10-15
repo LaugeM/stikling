@@ -87,20 +87,34 @@ public static partial class FailureResults
 
         foreach (var p in propagations)
         {
-            var seen = 0;
+            var items = new List<(FailReason? Reason, FailureStage Stage, int Units, DateTimeOffset At)>();
             if (entries.TryGetValue(p.Id, out var list))
             {
-                foreach (var entry in list.Where(e => !e.IsDeleted && TimelineEvents.Of(e) == TimelineEvent.Failed))
-                {
-                    var units = UnitsOf(entry);
-                    seen += units;
-                    if (entry.FailReason is { } why)
-                        reasons[why] = reasons.GetValueOrDefault(why) + units;
-                    else
-                        unrecorded += units;
-                    var stage = StageOn(p, time.LocalDay(entry.OccurredAt));
-                    stages[stage] = stages.GetValueOrDefault(stage) + units;
-                }
+                foreach (var entry in list.Where(e => !e.IsDeleted && TimelineEvents.Of(e) == TimelineEvent.Failed).OrderBy(e => e.OccurredAt))
+                    items.Add((entry.FailReason, StageOn(p, time.LocalDay(entry.OccurredAt)), UnitsOf(entry), entry.OccurredAt));
+            }
+
+            // The count can be lowered on the edit page, so never show more than it says: take from
+            // the ones with no reason first, then from the oldest
+            var excess = items.Sum(i => i.Units) - Math.Max(0, p.FailedCount);
+            foreach (var index in Enumerable.Range(0, items.Count).OrderBy(i => items[i].Reason is null ? 0 : 1).ThenBy(i => items[i].At))
+            {
+                if (excess <= 0)
+                    break;
+                var cut = Math.Min(excess, items[index].Units);
+                items[index] = items[index] with { Units = items[index].Units - cut };
+                excess -= cut;
+            }
+
+            var seen = 0;
+            foreach (var (reason, stage, units, _) in items.Where(i => i.Units > 0))
+            {
+                seen += units;
+                if (reason is { } why)
+                    reasons[why] = reasons.GetValueOrDefault(why) + units;
+                else
+                    unrecorded += units;
+                stages[stage] = stages.GetValueOrDefault(stage) + units;
             }
 
             // Failures with no entry left, like a corrected count, still happened
