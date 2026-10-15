@@ -66,36 +66,65 @@ public class RestSeasonTests
     }
 
     [Fact]
-    public void The_window_follows_the_latest_time_it_went_dormant()
+    public void An_early_rest_moves_next_years_window_earlier()
+    {
+        var plant = Grower(GrowingSeason.Summer);
+        var periods = WentDormant(plant, new DateOnly(2025, 10, 20));
+
+        // 20 October minus 14 days
+        Assert.Null(RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2026, 10, 5)));
+        Assert.Equal(new DateOnly(2026, 10, 6), RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2026, 10, 6)));
+    }
+
+    [Fact]
+    public void A_late_rest_does_not_move_the_window_later()
+    {
+        var plant = Grower(GrowingSeason.Summer);
+        var periods = WentDormant(plant, new DateOnly(2026, 1, 20));
+
+        Assert.Equal(new DateOnly(2026, 11, 1), RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2026, 11, 1)));
+    }
+
+    [Fact]
+    public void A_rest_far_from_its_season_is_left_out()
+    {
+        var plant = Grower(GrowingSeason.Summer);
+        var periods = WentDormant(plant, new DateOnly(2026, 7, 10));
+
+        Assert.Null(RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2026, 10, 20)));
+        Assert.Equal(new DateOnly(2026, 11, 1), RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2026, 11, 1)));
+    }
+
+    [Fact]
+    public void Only_the_latest_rest_counts()
     {
         var plant = Grower(GrowingSeason.Summer);
         var timeline = new[]
         {
-            Change(plant, new DateOnly(2024, 12, 20), "Went dormant"),
+            Change(plant, new DateOnly(2024, 10, 20), "Went dormant"),
             Change(plant, new DateOnly(2025, 3, 1), "Woke up from dormancy")
         };
         plant.DormantSince = new DateOnly(2025, 12, 15);
         var periods = DormantPeriods.Of(plant, timeline, TimeOn(new DateOnly(2026, 10, 1)));
 
-        Assert.Equal([new DateOnly(2024, 12, 20), new DateOnly(2025, 12, 15)], periods.Starts);
-        // 15 December minus 14 days is 1 December
-        Assert.Null(RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2026, 11, 30)));
-        Assert.Equal(new DateOnly(2026, 12, 1), RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2026, 12, 1)));
+        Assert.Equal([new DateOnly(2024, 10, 20), new DateOnly(2025, 12, 15)], periods.Starts);
+        Assert.Equal(new DateOnly(2026, 11, 1), RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2026, 11, 1)));
     }
 
     [Fact]
     public void A_window_starting_on_29_February_uses_the_28th_in_other_years()
     {
         var plant = Grower(GrowingSeason.Summer);
-        var timeline = new[]
-        {
-            Change(plant, new DateOnly(2024, 3, 14), "Went dormant"),
-            Change(plant, new DateOnly(2024, 6, 1), "Woke up from dormancy")
-        };
-        var periods = DormantPeriods.Of(plant, timeline, TimeOn(new DateOnly(2026, 1, 1)));
+        var periods = WentDormant(plant, new DateOnly(2024, 3, 14));
 
-        Assert.Equal(new DateOnly(2026, 2, 28), RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2026, 3, 1)));
-        Assert.Equal(new DateOnly(2028, 2, 29), RestSeason.WindowStart(plant, periods, Hemisphere.Northern, new DateOnly(2028, 2, 29)));
+        Assert.Equal(new DateOnly(2026, 2, 28), RestSeason.WindowStart(plant, periods, Hemisphere.Southern, new DateOnly(2026, 3, 1)));
+        Assert.Equal(new DateOnly(2028, 2, 29), RestSeason.WindowStart(plant, periods, Hemisphere.Southern, new DateOnly(2028, 2, 29)));
+    }
+
+    private static DormantPeriods WentDormant(Plant plant, DateOnly day)
+    {
+        plant.DormantSince = day;
+        return DormantPeriods.Of(plant, [], TimeOn(day));
     }
 
     [Fact]
@@ -152,15 +181,15 @@ public class RestSeasonTests
         var plant = Grower(GrowingSeason.Summer);
         var timeline = new[]
         {
-            Change(plant, new DateOnly(2025, 11, 20), "Went dormant"),
+            Change(plant, new DateOnly(2025, 10, 20), "Went dormant"),
             Change(plant, new DateOnly(2026, 3, 1), "Woke up from dormancy")
         };
         var periods = DormantPeriods.Of(plant, timeline, TimeOn(today));
 
-        // Learned from 20 November minus 14 days: 6 November
+        // Learned from 20 October minus 14 days: 6 October
         var asked = RestSeason.AskNow([plant], _ => periods, Hemisphere.Northern, today);
 
-        Assert.Equal(new DateOnly(2026, 11, 6), Assert.Single(asked).WindowStart);
+        Assert.Equal(new DateOnly(2026, 10, 6), Assert.Single(asked).WindowStart);
     }
 
     [Fact]

@@ -15,35 +15,48 @@ public static class RestSeason
     /// <summary>How many days before the day it went dormant last time the window starts.</summary>
     public const int LeadDays = 14;
 
+    /// <summary>How long before the usual start a past rest still counts as one of its season.</summary>
+    public const int LearnBeforeDays = 60;
+
     /// <summary>
     /// The first day of the window that today falls in, or null when it's outside the window or
-    /// the plant has no season to ask about. The window starts <see cref="LeadDays"/> before the
-    /// latest day the plant went dormant, as month and day, or on a default day for the season:
+    /// the plant has no season to ask about. The window starts on a default day for the season:
     /// 1 November for a plant that rests in winter and 1 June for one that rests in summer, and
-    /// the other way round in the south (1 May and 1 December).
+    /// the other way round in the south (1 May and 1 December). A plant that went dormant earlier
+    /// than that moves it earlier, to <see cref="LeadDays"/> before the latest day it went dormant.
+    /// A rest that came later never moves it later, and one far from its season is left out.
     /// </summary>
     public static DateOnly? WindowStart(Plant plant, DormantPeriods periods, Hemisphere hemisphere, DateOnly today)
     {
         if (plant.GrowingSeason is not (GrowingSeason.Summer or GrowingSeason.Winter))
             return null;
 
-        int month, day;
+        var restsInWinter = plant.GrowingSeason == GrowingSeason.Summer;
+        var north = hemisphere == Hemisphere.Northern;
+        var (month, day) = (restsInWinter, north) switch
+        {
+            (true, true) => (11, 1),
+            (true, false) => (5, 1),
+            (false, true) => (6, 1),
+            (false, false) => (12, 1)
+        };
+
+        // Answering late one year mustn't push next year's question past the rest, so a past rest
+        // only moves the window earlier. One far from its season, like a plant put down for
+        // another reason, is left out.
         if (periods.Starts.Count > 0)
         {
-            var learned = periods.Starts[^1].AddDays(-LeadDays);
-            (month, day) = (learned.Month, learned.Day);
-        }
-        else
-        {
-            var restsInWinter = plant.GrowingSeason == GrowingSeason.Summer;
-            var north = hemisphere == Hemisphere.Northern;
-            (month, day) = (restsInWinter, north) switch
+            var last = periods.Starts[^1];
+            var learned = last.AddDays(-LeadDays);
+            foreach (var year in new[] { last.Year - 1, last.Year })
             {
-                (true, true) => (11, 1),
-                (true, false) => (5, 1),
-                (false, true) => (6, 1),
-                (false, false) => (12, 1)
-            };
+                var usual = new DateOnly(year, month, day);
+                if (last >= usual.AddDays(-LearnBeforeDays) && last < usual.AddDays(WindowDays) && learned < usual)
+                {
+                    (month, day) = (learned.Month, learned.Day);
+                    break;
+                }
+            }
         }
 
         foreach (var year in new[] { today.Year, today.Year - 1 })
