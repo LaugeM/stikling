@@ -1,5 +1,6 @@
 @* A plant as a tile with a large square photo, for grids. In select mode the tile is a checkbox instead of a link.
    Anything in ChildContent is shown as the last line. *@
+@inject CoverPhotos Covers
 @inject PlantNameService Names
 
 @if (Selectable)
@@ -69,7 +70,7 @@ else
 
     private RenderFragment Content => @<text>
         <div class="tile-photo potted" aria-hidden="true">
-            @if (Plant.CoverPhotoId is { } coverId)
+            @if (Covers.Shown(Plant.CoverPhotoId) is { } coverId)
             {
                 <PhotoImage PhotoId="coverId" />
             }

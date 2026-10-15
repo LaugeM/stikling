@@ -4,6 +4,7 @@ using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Rooms;
+using Stikling.Core.Timeline;
 using Stikling.Core.Today;
 
 namespace Stikling.Core.Away;
@@ -36,8 +37,10 @@ public static class SitterSheetBuilder
         IEnumerable<GrowLight> lights,
         Places places,
         Hemisphere hemisphere,
-        TimeProvider time)
+        TimeProvider time,
+        IReadOnlySet<Guid>? referencePhotoIds = null)
     {
+        referencePhotoIds ??= new HashSet<Guid>();
         var today = time.Today();
         var span = AwayTime.Spans(stretches).FirstOrDefault(s => s.Kind == AwayKind.Away && s.Until > today)?.Trip;
         var visits = span is null ? [] : SitterVisits.Dates(sheet.Visits, span.From, span.Until);
@@ -53,13 +56,13 @@ public static class SitterSheetBuilder
         foreach (var plant in activePlants)
         {
             items.Add(new Item(plant, true, plant.DisplayName, plant.Nickname, plant.BotanicalName, plant.PlaceId,
-                plant.CoverPhotoId, WateringForms.Of(plant, pot), plant.WaterBy, guesses.GetValueOrDefault(plant.Id)));
+                PhotoKinds.Shown(plant.CoverPhotoId, referencePhotoIds), WateringForms.Of(plant, pot), plant.WaterBy, guesses.GetValueOrDefault(plant.Id)));
         }
         foreach (var cutting in activeCuttings)
         {
             var form = cutting.Medium == GrowingMedium.Water ? WateringForm.InWater : WateringForm.TopWatered;
             items.Add(new Item(cutting, false, cutting.ListName, cutting.Nickname, cutting.BotanicalName, cutting.PlaceId,
-                cutting.CoverPhotoId, form, null, null));
+                PhotoKinds.Shown(cutting.CoverPhotoId, referencePhotoIds), form, null, null));
         }
 
         // The order of a walk round: by room, plants before propagations, what is in the room

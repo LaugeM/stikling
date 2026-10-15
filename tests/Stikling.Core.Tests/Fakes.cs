@@ -153,8 +153,9 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
         Task.FromResult<IReadOnlyDictionary<Guid, TimelineEntry>>(
             TimelineOrder.NewestFirst(Entries).GroupBy(e => e.SubjectId).ToDictionary(g => g.Key, g => g.First()));
 
-    public Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since) =>
-        Task.FromResult(TodayBoard.RecentActivity(Entries, subjectIds, since, count));
+    public Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(
+        int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, IReadOnlySet<Guid>? referencePhotoIds = null) =>
+        Task.FromResult(TodayBoard.RecentActivity(Entries, subjectIds, since, count, referencePhotoIds));
 
     public Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() =>
         Task.FromResult<IReadOnlyList<TimelineEntry>>(Entries
@@ -208,7 +209,7 @@ internal sealed class FakePhotoRepository : IPhotoRepository
 
     public Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync() =>
         Task.FromResult<IReadOnlyDictionary<Guid, Photo>>(
-            Photos.Values.Where(p => !p.IsDeleted)
+            Photos.Values.Where(p => !p.IsDeleted && !p.IsReference)
                 .GroupBy(p => p.SubjectId)
                 .ToDictionary(g => g.Key, g => g.MaxBy(p => p.TakenAt)!));
 

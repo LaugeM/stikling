@@ -15,7 +15,8 @@ public interface ITimelineRepository
     /// list on Today. Deleted plants and propagations are left out by passing only the ones that
     /// are still there.
     /// </summary>
-    Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since);
+    Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(
+        int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, IReadOnlySet<Guid>? referencePhotoIds = null);
 
     /// <summary>The change lines on plants' histories, for any plant, leaving out looking over. Kept apart from the rest for telling when plants were dormant.</summary>
     Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync();
@@ -48,7 +49,7 @@ public interface IPhotoRepository
     /// <summary>Every photo of one kind of subject, excluding deleted ones, e.g. all pot photos for the pot library.</summary>
     Task<IReadOnlyList<Photo>> GetOfKindAsync(SubjectType subjectType);
 
-    /// <summary>The newest photo of each subject, by when it was taken, for the photo reminder.</summary>
+    /// <summary>The newest photo of each subject, by when it was taken, for the photo reminder. Reference photos don't count.</summary>
     Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync();
 
     /// <summary>Saves photo metadata. The image data is stored separately by the photo service.</summary>

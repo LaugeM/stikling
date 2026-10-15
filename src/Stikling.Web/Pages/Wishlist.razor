@@ -70,6 +70,7 @@ else
             {
                 var have = WishMatches.Have(wish, plants, dictionary).Describe();
                 <li><div class="wish-row">
+                    <WishThumb Photos="photos" Wish="wish" />
                     <a class="wish-main" href="wishlist/@wish.Id/edit">
                         <div class="item-name">@Name(wish)</div>
                         @if (Sub(wish) is { } sub)
@@ -113,6 +114,7 @@ else
                 @foreach (var wish in shownGot)
                 {
                     <li><div class="wish-row">
+                        <WishThumb Photos="photos" Wish="wish" />
                         <a class="wish-main" href="wishlist/@wish.Id/edit">
                             <div class="item-name">@Name(wish)</div>
                             @if (Sub(wish) is { } sub)
@@ -224,6 +226,9 @@ else
     private string ShareText => WishlistText.Write(open, dictionary?.EverydayNames,
         new WishlistTextOptions(shareNotes, sharePrice, shareApp));
 
+    // The newest photo of each wish that has one, by the wish's id
+    private IReadOnlyDictionary<Guid, Photo> photos = new Dictionary<Guid, Photo>();
+
     protected override Task OnInitializedAsync() => LoadAsync();
 
     private async Task LoadAsync()
@@ -232,6 +237,7 @@ else
         plants = await PlantRepository.GetAllAsync();
         propagations = await PropagationRepository.GetAllAsync();
         var all = await WishService.GetAllAsync();
+        photos = await WishService.GetNewestPhotosAsync();
         open = [.. all.Where(w => !w.IsGot).OrderBy(w => w.CreatedAt)];
         got = [.. all.Where(w => w.IsGot).OrderByDescending(w => w.GotOn)];
         wishes = all;

@@ -30,6 +30,26 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
     }
 
     /// <summary>
+    /// Call after a photo moved from the reference photos to the history. A photo that an entry
+    /// still lists is back where it was. One that was added as a reference photo has no entry, so it
+    /// gets a Photo entry on the day it was taken, the same as the Photo button makes. Returns
+    /// whether an entry was added.
+    /// </summary>
+    public async Task<bool> EnsureOnHistoryAsync(Photo photo)
+    {
+        if (photo.IsReference || photo.IsDeleted || photo.SubjectType is not (SubjectType.Plant or SubjectType.Propagation))
+            return false;
+
+        var listed = (await timeline.GetForAsync(photo.SubjectId)).Any(e => !e.IsDeleted && e.PhotoIds.Contains(photo.Id));
+        if (listed)
+            return false;
+
+        foreach (var entry in PhotoEntries.For(photo.SubjectType, photo.SubjectId, [photo], time))
+            await timeline.AddAsync(entry);
+        return true;
+    }
+
+    /// <summary>
     /// Writes that a plant or propagation was looked over, with nothing else to log. It's a
     /// change entry with an event rather than a new kind, so older versions still load it.
     /// </summary>

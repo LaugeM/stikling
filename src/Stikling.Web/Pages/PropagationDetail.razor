@@ -1,6 +1,7 @@
 @page "/propagations/{Id:guid}"
 @layout WideLayout
 @inject IPropagationRepository Repository
+@inject CoverPhotos Covers
 @inject PropagationCareService CareService
 @inject ILogger<PropagationDetail> Logger
 @inject IPlantRepository PlantRepository
@@ -33,7 +34,7 @@ else
     @* On a wide screen these are two columns: who it is on the left, its history on the right *@
     <div class="profile-layout">
         <div class="profile-side">
-            @if (propagation.CoverPhotoId is { } coverId)
+            @if (ShownCover is { } coverId)
             {
                 <div class="detail-hero">
                     <button type="button" class="detail-hero-open" aria-label="Open the cover photo" @onclick="() => timeline?.OpenPhoto(coverId)">
@@ -43,7 +44,7 @@ else
             }
 
             <header class="detail-header">
-                @if (propagation.CoverPhotoId is null && propagation.IsActive)
+                @if (ShownCover is null && propagation.IsActive)
                 {
                     // With no photo to show, the tile shows how long it has been going instead
                     var days = propagation.DaysSinceStart(Today);
@@ -52,7 +53,7 @@ else
                         <small>@(days == 1 ? "day" : "days")</small>
                     </div>
                 }
-                else if (propagation.CoverPhotoId is null)
+                else if (ShownCover is null)
                 {
                     <div class="detail-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
@@ -357,6 +358,8 @@ else
                         <h2>About it</h2>
                         <p class="detail-notes">@propagation.Notes</p>
                     }
+
+                    <ReferencePhotoAdd SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" OnAdded="() => historyVersion++" />
                 </section>
 
                 @if (offspring.Count > 0 && propagation.IsActive)
@@ -444,16 +447,16 @@ else
 
             @* The key reloads the history after stage changes and potting up *@
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
-                      CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)"
+                      CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)"
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
         </div>
     </div>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id" StartOnLink="shareOnLink"
-                CoverPhotoId="propagation.CoverPhotoId" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
+                CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
     <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId"
-                   CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
+                   CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
 
     @if (googleOn)
     {
@@ -862,6 +865,9 @@ else
     private bool detailsOpen;
     private bool scrollToPlants;
     private int historyVersion;
+
+    // A cover that is a reference photo shows as no cover. The propagation itself isn't changed.
+    private Guid? ShownCover => Covers.Shown(propagation?.CoverPhotoId);
     private EntryComposer? composer;
     private bool googleOn;
     private bool photoChoice;
@@ -890,7 +896,7 @@ else
     private DateOnly Today => Time.Today();
 
     // With no photo, the tile at the top shows the days, so the line under the name needn't
-    private bool TileShowsDays => propagation is { CoverPhotoId: null, IsActive: true };
+    private bool TileShowsDays => propagation is { IsActive: true } && ShownCover is null;
 
     private RootingPace? Pace => propagation is null ? null : RootingPace.For(propagation, allPropagations, Today);
 
@@ -993,6 +999,7 @@ else
     {
         everyday = await Names.GetEverydayNamesAsync();
         careBook = await CommonCare.GetBookAsync();
+        await Covers.EnsureLoadedAsync();
         propagation = await Repository.GetAsync(Id);
         var plants = await PlantRepository.GetAllAsync();
         var propagations = allPropagations = await Repository.GetAllAsync();

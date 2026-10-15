@@ -50,17 +50,21 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
         module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>Stores the files chosen in <paramref name="input"/> as photos of the given subject.</summary>
-    public async Task<PhotoSaveResult> SaveFromInputAsync(ElementReference input, SubjectType subjectType, Guid subjectId)
+    public async Task<PhotoSaveResult> SaveFromInputAsync(
+        ElementReference input, SubjectType subjectType, Guid subjectId, bool reference = false, bool record = true)
     {
         var response = await (await Module).InvokeAsync<SaveResponse>("saveFromInput", input);
-        return await RecordAsync(response, subjectType, subjectId);
+        return await RecordAsync(response, subjectType, subjectId, reference, record);
     }
 
     /// <summary>
     /// Makes photo records for images already stored by photos.js, whether they came from a file
     /// input or from Google Photos. Dates are picked from the camera, the file name and the file date.
+    /// With <paramref name="record"/> off only the Photo objects are made and the caller writes them later
+    /// with <see cref="RecordSavedAsync"/>.
     /// </summary>
-    public async Task<PhotoSaveResult> RecordAsync(SaveResponse response, SubjectType subjectType, Guid subjectId)
+    public async Task<PhotoSaveResult> RecordAsync(
+        SaveResponse response, SubjectType subjectType, Guid subjectId, bool reference = false, bool record = true)
     {
         var saved = new List<Photo>();
         var undated = 0;
@@ -78,13 +82,25 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
                 SubjectId = subjectId,
                 TakenAt = takenAt,
                 Width = file.Width,
-                Height = file.Height
+                Height = file.Height,
+                IsReference = reference
             };
-            await photos.AddAsync(photo);
+            if (record)
+                await photos.AddAsync(photo);
             saved.Add(photo);
         }
 
         return new PhotoSaveResult(saved, response.Failed, undated);
+    }
+
+    /// <summary>
+    /// Writes the records of photos whose image data was stored with <c>record: false</c>, once what
+    /// they belong to is saved. Until then only the image data exists, so nothing is left in the records.
+    /// </summary>
+    public async Task RecordSavedAsync(IEnumerable<Photo> saved)
+    {
+        foreach (var photo in saved)
+            await photos.AddAsync(photo);
     }
 
     /// <summary>An address usable in &lt;img src&gt;, or null if the photo is missing.</summary>
@@ -103,6 +119,16 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
         photo.Frame = frame;
         await photos.UpdateAsync(photo);
         FrameChanged?.Invoke(photo);
+    }
+
+    /// <summary>
+    /// Moves a photo to the reference photos of its plant or propagation, or back to its history.
+    /// Its timeline entry is not touched, so a photo moved back is where it was.
+    /// </summary>
+    public async Task SetReferenceAsync(Photo photo, bool reference)
+    {
+        photo.IsReference = reference;
+        await photos.UpdateAsync(photo);
     }
 
     /// <summary>The stored image data, for writing into a backup. Null when it's missing.</summary>

@@ -51,13 +51,13 @@ public class ShareLinkTests(ApiFactory api)
         return id;
     }
 
-    private static async Task<Guid> AddPhoto(SignedIn me, Guid subjectId, int hour = 9, bool uploaded = true, SubjectType type = SubjectType.Plant, int daysAgo = 5)
+    private static async Task<Guid> AddPhoto(SignedIn me, Guid subjectId, int hour = 9, bool uploaded = true, SubjectType type = SubjectType.Plant, int daysAgo = 5, bool reference = false)
     {
         var id = Guid.NewGuid();
         var taken = Monday.AddDays(-daysAgo).AddHours(hour - 12);
         await Push(me, "photos", new
         {
-            id, createdAt = taken, updatedAt = taken, subjectType = type, subjectId, takenAt = taken, width = 1600, height = 1200,
+            id, createdAt = taken, updatedAt = taken, subjectType = type, subjectId, takenAt = taken, width = 1600, height = 1200, isReference = reference,
         });
         if (uploaded)
         {
@@ -706,6 +706,24 @@ public class ShareLinkTests(ApiFactory api)
         Assert.Equal("image/jpeg", image.Content.Headers.ContentType?.MediaType);
         Assert.Equal(200, (await image.Content.ReadAsByteArrayAsync()).Length);
         Assert.Equal("public, max-age=300", image.Headers.CacheControl!.ToString());
+    }
+
+    [Fact]
+    public async Task A_reference_photo_is_not_on_the_page_and_its_image_gives_404()
+    {
+        var me = await SignIn();
+        var plant = await AddPlant(me);
+        var own = await AddPhoto(me, plant, hour: 8);
+        var reference = await AddPhoto(me, plant, hour: 10, reference: true);
+        var link = await Share(me, plant);
+
+        var (_, html, _) = await Page(link);
+
+        Assert.Contains(own.ToString(), html);
+        Assert.DoesNotContain(reference.ToString(), html);
+        Assert.Equal(HttpStatusCode.NotFound, (await Image(link, reference)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await Image(link, reference, "thumb")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await Image(link, own)).StatusCode);
     }
 
     [Fact]

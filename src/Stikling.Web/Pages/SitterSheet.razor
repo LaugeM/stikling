@@ -4,6 +4,7 @@
 @* The page has the model's name, so the model is called by another *@
 @using SheetChoices = Stikling.Core.Models.SitterSheet
 @inject SitterSheetService SheetService
+@inject CoverPhotos Covers
 @inject AwayService AwayService
 @inject IPlantRepository Plants
 @inject IPropagationRepository Propagations
@@ -235,6 +236,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await Covers.EnsureLoadedAsync();
         sheet = await SheetService.GetAsync();
         stretches = await AwayService.GetAllAsync();
         plants = await Plants.GetAllAsync();
@@ -252,7 +254,7 @@
         span = AwayTime.Spans(stretches).FirstOrDefault(s => s.Kind == AwayKind.Away && s.Until > Today);
         view = SitterSheetBuilder.Build(
             sheet!, stretches, plants, propagations, logs, changes, id => pots.GetValueOrDefault(id), lights, places,
-            Seasons.HemisphereOf(TimeZoneInfo.Local), Time);
+            Seasons.HemisphereOf(TimeZoneInfo.Local), Time, Covers.ReferenceIds);
     }
 
     // Every choice is saved as it is made, and the sheet below follows

@@ -1,5 +1,6 @@
 @* One row in the plant list: thumbnail, names, and a short status line.
    In select mode the card is a checkbox instead of a link. *@
+@inject CoverPhotos Covers
 @inject PlantNameService Names
 
 @if (Selectable)
@@ -65,7 +66,7 @@ else
 
     private RenderFragment Content => @<text>
         <div class="item-thumb potted" aria-hidden="true">
-            @if (Plant.CoverPhotoId is { } coverId)
+            @if (Covers.Shown(Plant.CoverPhotoId) is { } coverId)
             {
                 <PhotoImage PhotoId="coverId" />
             }

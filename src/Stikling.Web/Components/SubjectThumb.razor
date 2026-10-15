@@ -1,5 +1,6 @@
 @* The tile at the start of a row on Today that can hold either a plant or a propagation. *@
 @inject TimeProvider Time
+@inject CoverPhotos Covers
 
 @if (Subject is Propagation propagation)
 {
@@ -8,7 +9,7 @@
 else if (Subject is Plant plant)
 {
     <div class="item-thumb potted" aria-hidden="true">
-        @if (plant.CoverPhotoId is { } coverId)
+        @if (Covers.Shown(plant.CoverPhotoId) is { } coverId)
         {
             <PhotoImage PhotoId="coverId" />
         }

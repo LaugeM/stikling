@@ -5,7 +5,8 @@ using Stikling.Core.Models;
 namespace Stikling.Core.Backup;
 
 /// <param name="IncludeGone">Whether plants that are no longer in the collection and finished propagations are included.</param>
-public sealed record PhotoFolderOptions(bool IncludeGone);
+/// <param name="IncludeReferences">Whether reference photos are included, in a Reference folder inside their plant's or propagation's.</param>
+public sealed record PhotoFolderOptions(bool IncludeGone, bool IncludeReferences = true);
 
 /// <summary>
 /// Where each photo goes in a download of the photos on their own: one folder per plant,
@@ -41,10 +42,11 @@ public static class PhotoFolders
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var ordered = photos
             .Where(p => !p.IsDeleted && folders.ContainsKey((p.SubjectType, p.SubjectId)))
+            .Where(p => options.IncludeReferences || !p.IsReference)
             .OrderBy(p => p.TakenAt).ThenBy(p => p.CreatedAt).ThenBy(p => p.Id);
         foreach (var photo in ordered)
         {
-            var folder = folders[(photo.SubjectType, photo.SubjectId)];
+            var folder = folders[(photo.SubjectType, photo.SubjectId)] + (photo.IsReference ? "/Reference" : "");
             var local = TimeZoneInfo.ConvertTime(photo.TakenAt, zone);
             var stem = $"{folder}/{local.ToString("yyyy-MM-dd HH-mm", CultureInfo.InvariantCulture)}";
             var path = stem;

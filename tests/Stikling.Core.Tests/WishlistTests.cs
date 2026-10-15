@@ -151,7 +151,7 @@ public class WishlistTests
     [Fact]
     public async Task Got_it_keeps_the_wish_with_the_day_and_what_it_became()
     {
-        var service = new WishService(new FakeWishRepository(), Time);
+        var service = new WishService(new FakeWishRepository(), new FakePhotoRepository(), Time);
         var wish = Wish("Monstera");
         await service.SaveAsync(wish);
         var plant = Guid.NewGuid();
@@ -169,7 +169,7 @@ public class WishlistTests
     [Fact]
     public async Task A_got_wish_can_be_put_back()
     {
-        var service = new WishService(new FakeWishRepository(), Time);
+        var service = new WishService(new FakeWishRepository(), new FakePhotoRepository(), Time);
         var wish = Wish("Monstera");
         await service.SaveAsync(wish);
         await service.MarkGotAsync(wish.Id, null, Guid.NewGuid());

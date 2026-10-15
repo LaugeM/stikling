@@ -197,7 +197,7 @@ public static class PlantYear
         var found = new List<CountedPhoto>();
         foreach (var photo in photos)
         {
-            if (photo.IsDeleted || photo.ReceivedHistoryId is not null)
+            if (photo.IsDeleted || photo.IsReference || photo.ReceivedHistoryId is not null)
                 continue;
             if (photo.SubjectType == SubjectType.Plant && plantById.TryGetValue(photo.SubjectId, out var plant))
                 found.Add(new CountedPhoto(photo, plant));
@@ -222,7 +222,7 @@ public static class PlantYear
 
         // The cover when it still exists, otherwise its newest photo
         Guid? photoId = null;
-        if (best.CoverPhotoId is { } cover && allPhotos.Any(p => p.Id == cover && !p.IsDeleted))
+        if (best.CoverPhotoId is { } cover && allPhotos.Any(p => p.Id == cover && !p.IsDeleted && !p.IsReference))
             photoId = cover;
         else
             photoId = counted
