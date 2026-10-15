@@ -242,9 +242,10 @@ public sealed class SearchService(
                     SubjectType.Plant, plant.Id, plant.DisplayName, label(log.Kind), log.Notes);
         }
 
+        // A finished propagation has no care sheet, so its care notes can't be shown and are left out
         foreach (var log in await propagationCareLogs.GetAllAsync())
         {
-            if (!log.IsDeleted && propagationsById.TryGetValue(log.PropagationId, out var cutting))
+            if (!log.IsDeleted && propagationsById.TryGetValue(log.PropagationId, out var cutting) && cutting.IsActive)
                 Add(log.Id, $"propagations/{cutting.Id}?entry={log.Id}", NoteSource.PropagationCare, time.MomentOn(log.OccurredOn),
                     SubjectType.Propagation, cutting.Id, cutting.DisplayName, label(log.Kind), log.Notes);
         }

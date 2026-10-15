@@ -302,7 +302,7 @@
                 <span class="item-name-text">@item.Title</span>
                 @if (item.Gone)
                 {
-                    <span class="badge @(item.Kind == SearchKind.Propagation ? "stage-badge" : "text-bg-secondary")">@(item.Kind == SearchKind.Propagation ? "Done" : "Gone")</span>
+                    <span class="badge @(item.Kind == SearchKind.Propagation ? "stage-badge" : "text-bg-secondary")">@(item.Kind switch { SearchKind.Propagation => "Done", SearchKind.Wish => "Got", _ => "Gone" })</span>
                 }
             </div>
             @if (item.Subtitle is not null)

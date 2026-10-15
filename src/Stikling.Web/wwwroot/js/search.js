@@ -1,7 +1,7 @@
 // Keys for the Search page and the / key that opens it.
 
 // The box and the results: Arrow down goes from the box into the results, Arrow up and down move between
-// them, Arrow up on the first goes back to the box, and Escape in the box empties it. Every row to
+// them, Arrow up on the first goes back to the box, and Escape empties the box, from a result too. Every row to
 // stop on has the class search-stop. Returns something to call dispose() on when the page goes away.
 export function attach(input, root) {
     const stops = () => [...root.querySelectorAll(".search-stop")];
@@ -20,14 +20,18 @@ export function attach(input, root) {
     };
 
     const onKey = event => {
-        if (event.key !== "ArrowDown" && event.key !== "ArrowUp")
+        if (event.key !== "ArrowDown" && event.key !== "ArrowUp" && event.key !== "Escape")
             return;
         const list = stops();
         const at = list.indexOf(document.activeElement);
         if (at < 0)
             return;
         event.preventDefault();
-        if (event.key === "ArrowDown")
+        if (event.key === "Escape") {
+            input.focus();
+            input.value = "";
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        } else if (event.key === "ArrowDown")
             list[Math.min(at + 1, list.length - 1)].focus();
         else if (at === 0)
             input.focus();
