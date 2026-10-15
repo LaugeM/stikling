@@ -319,7 +319,10 @@ else
             }
             catch (JSException)
             {
-                // That picture stays blank, and the rest carry on
+                // Share and Save stay off, so say why. Picking another size draws them again
+                status = "Couldn't draw the pictures";
+                StateHasChanged();
+                return;
             }
         }
     }
