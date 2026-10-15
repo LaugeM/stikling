@@ -173,6 +173,7 @@ public sealed class PropagationService(
             Origin = propagation.Type == PropagationType.Seed ? PlantOrigin.GrownFromSeed : PlantOrigin.Propagated,
             AcquiredOn = LooseDate.Of(request.Date),
             Source = propagation.Source,
+            SellerId = propagation.SellerId,
             PlaceId = request.PlaceId,
             Medium = request.Medium,
             InnerPotId = request.PotId,

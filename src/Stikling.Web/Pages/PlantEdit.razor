@@ -14,6 +14,7 @@
 @inject PlantNameService Names
 @inject PlantCareService CommonCare
 @inject RoomService RoomService
+@inject SellerService SellerService
 @inject PhotoService Photos
 @inject GooglePhotosService Google
 @inject NavigationManager Navigation
@@ -174,8 +175,7 @@ else
             }
 
             <div class="mb-3">
-                <label class="form-label" for="source">Source</label>
-                <InputText id="source" class="form-control" @bind-Value="plant.Source" placeholder="Shop, friend, plant swap…" />
+                <SellerPicker @bind-Value="sellerText" Names="sellerNames" />
             </div>
 
             @* A price already entered stays if the origin changes, it just isn't shown *@
@@ -203,6 +203,13 @@ else
 
         <h2 class="section-label">More details</h2>
         <div class="more-details mb-4">
+            @if (ShowArrival)
+            {
+                <FormSection Title="How it arrived" Summary="@ArrivalFields.Summary(plant.ArrivedIn, plant.ArrivalProblems)" Open="openArrival">
+                    <ArrivalFields @bind-Rating="plant.ArrivedIn" Problems="plant.ArrivalProblems" @bind-Note="plant.ArrivalNote" />
+                </FormSection>
+            }
+
             <FormSection Title="Where it lives" Summary="@LivesSummary" Open="openLives">
                 <div class="mb-3">
                     <RoomPicker @bind-Value="location" Rooms="rooms" />
@@ -590,6 +597,18 @@ else
 
     // Which sections start open, worked out when the plant loads. A section only reads this once
     private bool openLives;
+    private bool openArrival;
+
+    // What the Where from box says. The seller is only looked up again when it was changed, so
+    // saving a plant whose seller was deleted doesn't bring a new one back.
+    private string? sellerText;
+    private string? sellerTextStart;
+    private bool sellerTextLoaded;
+    private IReadOnlyList<string> sellerNames = [];
+
+    private bool ShowArrival =>
+        plant is not null
+        && (SellerName.Clean(sellerText) is not null || plant.Origin is PlantOrigin.Purchased or PlantOrigin.Gift or PlantOrigin.Swap);
     private bool openLikes;
 
     // What common plants usually like, offered above What it likes. Empty if it couldn't be read.
@@ -806,6 +825,11 @@ else
         dictionary = IsNew ? await Names.GetDictionaryAsync() : null;
         careBook = await CommonCare.GetBookAsync();
 
+        var sourceFromWish = false;
+        var sellers = await SellerService.GetSellersAsync();
+        var uses = SellerSummary.CountsBySeller(sellers, all, existingPropagations);
+        sellerNames = sellers.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
+
         if (IsNew)
         {
             // The draft keeps its id, so photos taken before saving stay with it
@@ -827,6 +851,7 @@ else
                 plant.NameNote = wish.NameNote;
                 plant.Nickname = string.IsNullOrWhiteSpace(wish.Genus) ? wish.Name : null;
                 plant.Source = wish.FoundAt;
+                sourceFromWish = true;
             }
             if (ParentId is { } parentId && all.FirstOrDefault(p => p.Id == parentId) is { } parent)
             {
@@ -858,6 +883,16 @@ else
             // A feed deleted since it was picked reads as off, so saving the plant clears it the same way
             if (plant.WateringFeedId is { } feedId && !feeds.Any(f => f.Id == feedId))
                 SetWateringFeed(null);
+
+            if (!sellerTextLoaded)
+            {
+                sellerText = sellers.NameOf(plant.SellerId) ?? plant.Source;
+                // A wish's "found at" is made into a seller on save, like anything typed
+                sellerTextStart = sourceFromWish ? null : sellerText;
+                sellerTextLoaded = true;
+            }
+
+            openArrival = !IsNew && (plant.ArrivedIn is not null || plant.ArrivalProblems.Count > 0 || !string.IsNullOrWhiteSpace(plant.ArrivalNote));
 
             // All closed when adding, even from a copy, where the summaries show what was copied
             openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
@@ -1098,6 +1133,14 @@ else
         saving = true;
         try
         {
+            if (sellerText != sellerTextStart)
+            {
+                var choice = await SellerService.ChooseAsync(sellerText, SellerName.Guess(plant.Origin), plant.SellerId);
+                plant.SellerId = choice.SellerId;
+                plant.Source = choice.Source;
+                sellerTextStart = sellerText;
+            }
+
             plant.PlaceId = await RoomService.PlaceIdAsync(location);
             var cameInside = CameInsideNow;
             if (cameInside && backQuarantine)

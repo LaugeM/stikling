@@ -14,6 +14,7 @@ using Stikling.Core.Problems;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
+using Stikling.Core.Sellers;
 using Stikling.Core.Settings;
 using Stikling.Core.Sharing;
 using Stikling.Core.SoilMixes;
@@ -310,6 +311,33 @@ internal sealed class FakePlaceRepository : IPlaceRepository
         var place = new Place { Name = name, RoomId = room?.Id };
         SaveAsync(place);
         return place;
+    }
+}
+
+internal sealed class FakeSellerRepository : ISellerRepository
+{
+    // Each new seller is a second newer than the last, so "oldest first" is the order they were made
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Seller> Sellers { get; } = [];
+
+    public Task<SellerList> GetSellersAsync() => Task.FromResult(new SellerList(Sellers.Values));
+
+    public Task SaveAsync(Seller seller)
+    {
+        if (seller.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        if (seller.CreatedAt == default)
+            seller.CreatedAt = clock = clock.AddSeconds(1);
+        Sellers[seller.Id] = seller;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Sellers.TryGetValue(id, out var seller))
+            seller.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
     }
 }
 

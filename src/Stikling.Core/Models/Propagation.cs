@@ -38,6 +38,19 @@ public sealed class Propagation : Entity
     /// <summary>Where it came from when there's no parent plant, e.g. "Seeds from the garden centre".</summary>
     public string? Source { get; set; }
 
+    /// <summary>The seller it came from, with the name kept in <see cref="Source"/> too. See <see cref="Plant.SellerId"/>.</summary>
+    public Guid? SellerId { get; set; }
+
+    /// <summary>How it was when it arrived. Null when not said.</summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<ArrivalRating>))]
+    public ArrivalRating? ArrivedIn { get; set; }
+
+    /// <summary>What was wrong when it arrived.</summary>
+    [JsonConverter(typeof(TolerantEnumListConverter<ArrivalProblem>))]
+    public List<ArrivalProblem> ArrivalProblems { get; set; } = [];
+
+    public string? ArrivalNote { get; set; }
+
     public PropagationType Type { get; set; } = PropagationType.Cutting;
     public GrowingMedium Medium { get; set; } = GrowingMedium.Water;
 
@@ -267,6 +280,7 @@ public sealed class Propagation : Entity
     {
         var copy = (Propagation)MemberwiseClone();
         copy.RootingAids = [.. RootingAids];
+        copy.ArrivalProblems = [.. ArrivalProblems];
         return copy;
     }
 

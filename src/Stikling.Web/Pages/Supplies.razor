@@ -7,6 +7,7 @@
 @inject IPestCaseRepository PestCaseRepository
 @inject IPlantRepository PlantRepository
 @inject ProblemService ProblemService
+@inject SellerService SellerService
 
 <PageTitle>Supplies · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -14,10 +15,13 @@
 <h1>Supplies</h1>
 
 <p class="settings-hint">
-    The pots, mixes and products you use, so a plant or a treatment can point at them instead of you typing them again.
+    The sellers your plants came from, and the pots, mixes and products you use, so a plant or a treatment can point at them instead of you typing them again.
 </p>
 
 <div class="settings-rows">
+    <SettingsRow Href="sellers" Title="Sellers" Detail="@SellersDetail">
+        <Icon><path d="M4 9.5 5.5 4h13L20 9.5" /><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0" /><path d="M5.5 12.5V20h13v-7.5" /></Icon>
+    </SettingsRow>
     <SettingsRow Href="pots" Title="Pots" Detail="@PotSummary">
         <Icon><path d="M4.5 4.5h15v3.5h-15Z" /><path d="M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8" /></Icon>
     </SettingsRow>
@@ -47,6 +51,7 @@
     private IReadOnlyList<PotUse> pots = [];
     private IReadOnlyList<MixUse> mixes = [];
     private IReadOnlyList<ProductUse> products = [];
+    private int sellers;
     private int feeds;
     private int recipes;
     private IReadOnlyList<PestCase> pestCases = [];
@@ -59,6 +64,7 @@
         pots = await PotService.GetAllAsync();
         mixes = await MixService.GetAllAsync();
         products = await ProductService.GetAllAsync();
+        sellers = (await SellerService.GetSellersAsync()).Live.Count();
         feeds = (await FeedRepository.GetAllAsync()).Count;
         recipes = (await RecipeRepository.GetAllAsync()).Count;
         pestCases = await PestCaseRepository.GetAllAsync();
@@ -66,6 +72,9 @@
         openProblems = (await ProblemService.AllAsync())
             .Count(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.Status == PlantStatus.Active));
     }
+
+    private string SellersDetail =>
+        sellers == 0 ? "Where your plants came from" : Labels.Count(sellers, "seller");
 
     /// <summary>"6 pots, 2 free", or what pots are when there are none.</summary>
     private string PotSummary =>

@@ -14,6 +14,7 @@
 @inject IFeedRepository FeedRepository
 @inject PlantService PlantService
 @inject RoomService RoomService
+@inject SellerService SellerService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject IJSRuntime JS
@@ -250,13 +251,29 @@ else
                             {
                                 <text> · @Labels.Date(date)</text>
                             }
-                            @if (plant.DescribePurchase() is { } purchase)
+                            @if (sellers.Find(plant.SellerId) is { } seller)
+                            {
+                                <text> · </text>
+                                @if (plant.PaidText is { } paid)
+                                {
+                                    <text>Bought from <a href="sellers/@seller.Id">@seller.Name</a> for @paid</text>
+                                }
+                                else
+                                {
+                                    <a href="sellers/@seller.Id">@seller.Name</a>
+                                }
+                            }
+                            else if (plant.DescribePurchase() is { } purchase)
                             {
                                 <text> · @purchase</text>
                             }
                             else if (!string.IsNullOrWhiteSpace(plant.Source))
                             {
                                 <text> · @plant.Source</text>
+                            }
+                            @if (Arrival.PoorText(plant.ArrivedIn, plant.ArrivalProblems) is { } poor)
+                            {
+                                <text> · @poor</text>
                             }
                         </dd>
 
@@ -1053,6 +1070,7 @@ else
     private string? checkNotes;
     private string? actionNote;
     private Places places = Places.None;
+    private SellerList sellers = SellerList.None;
     private IReadOnlyList<Pot> pots = [];
 
     // Problems
@@ -1267,6 +1285,7 @@ else
 
             careFor = careBook.Find(plant.Genus, plant.Species, plant.NameQualifier);
             places = await RoomService.GetPlacesAsync();
+            sellers = await SellerService.GetSellersAsync();
             var allCases = await PestCaseRepository.GetAllAsync();
             pests = PestService.CasesFor(plant, allCases, places);
             lastChecked = PestService.LastChecked(plant, allCases, await PestTreatmentRepository.GetAllAsync(), places);

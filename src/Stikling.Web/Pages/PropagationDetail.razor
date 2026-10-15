@@ -8,6 +8,7 @@
 @inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
 @inject RoomService RoomService
+@inject SellerService SellerService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject IJSRuntime JS
@@ -171,6 +172,10 @@ else
                 {
                     <text> · from <a class="link-action" href="plants/@parent.Id">@parent.DisplayName</a></text>
                 }
+                else if (sellers.Find(propagation.SellerId) is { } headerSeller)
+                {
+                    <text> · <a class="link-action" href="sellers/@headerSeller.Id">@headerSeller.Name</a></text>
+                }
                 else if (!string.IsNullOrWhiteSpace(propagation.Source))
                 {
                     <text> · @propagation.Source</text>
@@ -226,6 +231,14 @@ else
                             @if (parent is not null)
                             {
                                 <a href="plants/@parent.Id">@parent.DisplayName</a>
+                            }
+                            else if (sellers.Find(propagation.SellerId) is { } seller)
+                            {
+                                <a href="sellers/@seller.Id">@seller.Name</a>
+                                @if (Arrival.PoorText(propagation.ArrivedIn, propagation.ArrivalProblems) is { } poor)
+                                {
+                                    <text> · @poor</text>
+                                }
                             }
                             else
                             {
@@ -833,6 +846,7 @@ else
     private IReadOnlyList<CodeClash> numberClashes = [];
     private IReadOnlyList<Room> rooms = [];
     private Places places = Places.None;
+    private SellerList sellers = SellerList.None;
     private PropagationOutcome? outcome;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
@@ -985,6 +999,7 @@ else
                           .ToList();
         numberClashes = propagation is null ? [] : CollectionNumbers.Clashes(propagation.CollectionNumber, propagation.Id, plants, propagations);
         places = await RoomService.GetPlacesAsync();
+        sellers = await SellerService.GetSellersAsync();
         rooms = Room.List(places, plants, propagations);
         outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);
         pots = await PotRepository.GetAllAsync();
