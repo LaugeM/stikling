@@ -11,7 +11,10 @@ public enum SubjectType
     Propagation,
 
     /// <summary>A pot from the library. Only photos belong to one, never a timeline entry.</summary>
-    Pot
+    Pot,
+
+    /// <summary>A wish on the wishlist. Only photos belong to one, never a timeline entry.</summary>
+    Wish
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter<TimelineKind>))]

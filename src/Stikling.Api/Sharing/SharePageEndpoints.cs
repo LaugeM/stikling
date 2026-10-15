@@ -108,8 +108,8 @@ public static class SharePageEndpoints
                 .Select(r => r.Data)
                 .SingleOrDefaultAsync();
 
-            // The same rules the page follows: the subject's own photos, and not one that is left out
-            if (!subject || data is null || Read<Photo>(data) is not { } photo || photo.IsDeleted || link.LeftOutPhotoIds.Contains(photoId))
+            // The same rules the page follows: the subject's own photos, not a reference photo, and not one that is left out
+            if (!subject || data is null || Read<Photo>(data) is not { } photo || photo.IsDeleted || photo.IsReference || link.LeftOutPhotoIds.Contains(photoId))
                 return Results.NotFound();
             var own = photo.SubjectType == link.SubjectType && photo.SubjectId == link.SubjectId;
             if (!own && !(link.SubjectType == SubjectType.Plant && await IsRootingPhotoAsync(db, link, photo)))

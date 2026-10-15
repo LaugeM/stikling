@@ -1,5 +1,6 @@
 @page "/"
 @using System.Globalization
+@inject CoverPhotos Covers
 @inject IPlantRepository Plants
 @inject IPropagationRepository Propagations
 @inject ITimelineRepository Entries
@@ -440,7 +441,7 @@ else
         </section>
 
         <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="memory.Plant.Id"
-                    CoverPhotoId="memory.Plant.CoverPhotoId" StartBeforeId="memory.Old.Id" StartAfterId="memory.Newest.Id" StartLine="@($"{memory.Heading}.")" PhotoAge="day => PhotoDayCount.PlantAge(memory.Plant, day)"
+                    CoverPhotoId="Covers.Shown(memory.Plant.CoverPhotoId)" StartBeforeId="memory.Old.Id" StartAfterId="memory.Newest.Id" StartLine="@($"{memory.Heading}.")" PhotoAge="day => PhotoDayCount.PlantAge(memory.Plant, day)"
                     Text="ShareCardText.ForPlant(memory.Plant, plants.FirstOrDefault(p => p.Id == memory.Plant.ParentPlantId),
                               propagations.FirstOrDefault(p => p.Id == memory.Plant.FromPropagationId),
                               propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
@@ -834,8 +835,10 @@ else
         foreach (var propagation in propagations)
             names[propagation.Id] = propagation.ListName;
 
+        await Covers.EnsureLoadedAsync();
+
         // Only what's still here: entries left behind by a deleted plant have nowhere to go
-        recent = await Entries.GetRecentAsync(8, names.Keys.ToHashSet(), TodayBoard.LatelySince(Time));
+        recent = await Entries.GetRecentAsync(8, names.Keys.ToHashSet(), TodayBoard.LatelySince(Time), Covers.ReferenceIds);
 
         monthResult = TodayBoard.FinishedThisMonth(propagations, Time);
         backupReminder = await BackupReminderAsync();

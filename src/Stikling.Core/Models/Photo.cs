@@ -24,6 +24,12 @@ public sealed class Photo : Entity
     /// cover, not changed or deleted.
     /// </summary>
     public Guid? ReceivedHistoryId { get; set; }
+
+    /// <summary>
+    /// A photo that isn't of the plant itself, like the seller's listing or the plant fully grown.
+    /// It stays out of the history, the cover, shared pages and the year.
+    /// </summary>
+    public bool IsReference { get; set; }
 }
 
 /// <summary>

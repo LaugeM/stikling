@@ -2,6 +2,7 @@
    place when the rest scrolls sideways. In select mode a row is a checkbox instead of a link. *@
 @using System.Globalization
 @using CoreTable = Stikling.Core.Plants.PlantTable
+@inject CoverPhotos Covers
 
 <div class="plant-table-scroll page-full">
     <table class="plant-table @(Selectable ? "selecting" : null)">
@@ -133,7 +134,7 @@
 
     private RenderFragment NameCell(Plant plant) => @<div class="name-cell">
         <span class="item-thumb potted table-thumb" aria-hidden="true">
-            @if (plant.CoverPhotoId is { } coverId)
+            @if (Covers.Shown(plant.CoverPhotoId) is { } coverId)
             {
                 <PhotoImage PhotoId="coverId" />
             }

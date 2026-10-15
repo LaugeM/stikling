@@ -167,4 +167,18 @@ public class PhotoFoldersTests
 
         Assert.Equal([kept.Id], plan.Select(p => p.PhotoId));
     }
+
+    [Fact]
+    public void Reference_photos_go_in_their_own_folder_or_are_left_out()
+    {
+        var plant = new Plant { Nickname = "Fern" };
+        var own = new Photo { SubjectType = SubjectType.Plant, SubjectId = plant.Id, TakenAt = new DateTimeOffset(2026, 10, 1, 12, 0, 0, TimeSpan.Zero) };
+        var reference = new Photo { SubjectType = SubjectType.Plant, SubjectId = plant.Id, IsReference = true, TakenAt = new DateTimeOffset(2026, 10, 2, 12, 0, 0, TimeSpan.Zero) };
+
+        var all = PhotoFolders.Plan([plant], [], [], [own, reference], new(IncludeGone: true), TimeZoneInfo.Utc);
+        var without = PhotoFolders.Plan([plant], [], [], [own, reference], new(IncludeGone: true, IncludeReferences: false), TimeZoneInfo.Utc);
+
+        Assert.Equal(["Plants/Fern/2026-10-01 12-00", "Plants/Fern/Reference/2026-10-02 12-00"], all.Select(p => p.Path));
+        Assert.Equal(["Plants/Fern/2026-10-01 12-00"], without.Select(p => p.Path));
+    }
 }

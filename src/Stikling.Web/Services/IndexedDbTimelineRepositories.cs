@@ -14,8 +14,9 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
             .GroupBy(e => e.SubjectId)
             .ToDictionary(g => g.Key, g => g.First());
 
-    public async Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since) =>
-        TodayBoard.RecentActivity(await db.GetAllAsync<TimelineEntry>(Stores.Timeline), subjectIds, since, count);
+    public async Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(
+        int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, IReadOnlySet<Guid>? referencePhotoIds = null) =>
+        TodayBoard.RecentActivity(await db.GetAllAsync<TimelineEntry>(Stores.Timeline), subjectIds, since, count, referencePhotoIds);
 
     public async Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() =>
         (await db.GetAllAsync<TimelineEntry>(Stores.Timeline))
@@ -77,7 +78,7 @@ public sealed class IndexedDbPhotoRepository(IndexedDb db, TimeProvider time) : 
 
     public async Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync() =>
         (await db.GetAllAsync<Photo>(Stores.Photos))
-            .Where(p => !p.IsDeleted)
+            .Where(p => !p.IsDeleted && !p.IsReference)
             .GroupBy(p => p.SubjectId)
             .ToDictionary(g => g.Key, g => g.MaxBy(p => p.TakenAt)!);
 

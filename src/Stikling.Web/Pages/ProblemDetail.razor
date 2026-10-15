@@ -359,7 +359,7 @@ else
 
         // The viewer pages through the photos in the order the log shows them
         var wanted = log.SelectMany(i => i.PhotoIds).Distinct().ToList();
-        var stored = (await PhotoRepository.GetForAsync(plant.Id)).ToDictionary(p => p.Id);
+        var stored = PhotoKinds.Own(await PhotoRepository.GetForAsync(plant.Id)).ToDictionary(p => p.Id);
         photos = wanted.Where(stored.ContainsKey).Select(id => stored[id]).ToList();
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
     }
