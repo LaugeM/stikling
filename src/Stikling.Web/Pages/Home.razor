@@ -329,6 +329,31 @@ else
         </section>
     }
 
+    @if (!Away && RestNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Gone dormant?</h2>
+            <ul class="item-list">
+                @foreach (var (plant, windowStart) in RestNow)
+                {
+                    <TodayRow @key="plant.Id" DoneLabel="Yes, it's dormant" OnDone="() => WentDormantAsync(plant)"
+                              OnPutOff="days => PutOffAsync(PutOffs.Rest(plant.Id, windowStart), Today.AddDays(days))"
+                              SkipLabel="Not this year" OnSkip="() => PutOffAsync(PutOffs.Rest(plant.Id, windowStart), windowStart.AddDays(RestSeason.WindowDays))">
+                        <a class="item-card" href="plants/@plant.Id">
+                            <SubjectThumb Subject="plant" />
+                            <div class="item-text">
+                                <div class="item-name">@plant.DisplayName</div>
+                                <div class="item-meta">
+                                    <span>@Labels.For(plant.GrowingSeason!.Value) · has it gone dormant yet?</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
     @if (!Away && !Holding && (WaterNow.Count > 0 || WaterComing.Count > 0 || NextRoundLine is not null))
     {
         var now = WaterNow;
@@ -699,6 +724,11 @@ else
         TodayBoard.QuarantineUp(plants, Today)
             .Where(p => !putOffs.IsPutOff(PutOffs.Quarantine(p.Id, p.QuarantinedSince!.Value), Today)).ToList();
 
+    // Plants whose usual resting time has come round and haven't gone dormant yet, unless put off
+    private List<(Plant Plant, DateOnly WindowStart)> RestNow =>
+        RestSeason.AskNow(plants, p => DormantPeriods.Of(p, plantChanges, Time), Seasons.HemisphereOf(TimeZoneInfo.Local), Today)
+            .Where(r => !putOffs.IsPutOff(PutOffs.Rest(r.Plant.Id, r.WindowStart), Today)).ToList();
+
     // A propagation already under Needs attention isn't listed a second time
     private List<PropagationCheck> ChecksNow =>
         checks.Where(c => !putOffs.IsPutOff(PutOffs.Check(c.Propagation.Id), Today)
@@ -722,7 +752,7 @@ else
     // While away nothing is asked for, and while the list on the day back is up it stands for Water and Worth a look
     private int DueCount =>
         Away ? 0
-        : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + FlaggedNow.Count + LookAgainNow.Count + QuarantineNow.Count
+        : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + FlaggedNow.Count + LookAgainNow.Count + QuarantineNow.Count + RestNow.Count
         + (Holding ? backRows.Count : ChecksNow.Count + wateringDue.Count(d => d.DueNow))
         + (roundSuggestion is not null ? 1 : 0)
         + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
@@ -1021,6 +1051,13 @@ else
     {
         await PestTreatments.SaveAsync(PestService.StartPlantCheck(plant, Today));
         await PlantService.SetQuarantineAsync(plant, null, Labels.For);
+        await LoadAsync();
+    }
+
+    // Yes, it's dormant: the same as the button on the plant's page, from today
+    private async Task WentDormantAsync(Plant plant)
+    {
+        await PlantService.SetDormantAsync(plant, Today, Labels.For);
         await LoadAsync();
     }
 

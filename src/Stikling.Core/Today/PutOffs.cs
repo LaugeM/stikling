@@ -50,6 +50,12 @@ public sealed class PutOffs
     public static string Quarantine(Guid plantId, DateOnly since) =>
         $"quarantine:{plantId}:{since:yyyy-MM-dd}";
 
+    /// <summary>
+    /// The key for asking whether a plant has gone dormant. The day the asking window started is
+    /// part of it, so next year's season isn't still hidden.
+    /// </summary>
+    public static string Rest(Guid plantId, DateOnly windowStart) => $"rest:{plantId}:{windowStart:yyyy-MM-dd}";
+
     /// <summary>The key for a pest case that is ready to be resolved, so Today can wait with asking.</summary>
     public static string Resolve(Guid caseId) => $"resolve:{caseId}";
 
