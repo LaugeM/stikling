@@ -20,6 +20,10 @@ public enum PlantColumn
     Source,
     Price,
     Medium,
+    LikesLight,
+    LikesWater,
+    LikesHumidity,
+    Season,
     Repotted,
     Moisture,
     Status,
@@ -56,6 +60,10 @@ public static class PlantTable
         PlantColumn.EverydayName => "Everyday name",
         PlantColumn.Source => "From",
         PlantColumn.Number => "No.",
+        PlantColumn.LikesLight => "Likes light",
+        PlantColumn.LikesWater => "Water",
+        PlantColumn.LikesHumidity => "Humidity",
+        PlantColumn.Season => "Season",
         _ => column.ToString()
     };
 
@@ -201,6 +209,10 @@ public static class PlantTable
             PlantColumn.Source => Text(plant.Source),
             PlantColumn.Price => plant.PricePaid,
             PlantColumn.Medium => label(plant.Medium),
+            PlantColumn.LikesLight => plant.LikesLight,
+            PlantColumn.LikesWater => plant.LikesWater,
+            PlantColumn.LikesHumidity => plant.LikesHumidity,
+            PlantColumn.Season => plant.GrowingSeason,
             PlantColumn.Repotted => row.Repotted?.On,
             PlantColumn.Moisture => row.Moisture?.Value,
             PlantColumn.Status => label(plant.Status),

@@ -268,6 +268,28 @@ else
                             <dd>@Labels.For(light)</dd>
                         }
 
+                        @if (CareLikes.HasAny(plant))
+                        {
+                            var likesLine = string.Join(" · ", new[]
+                            {
+                                plant.LikesLight is { } wantsLight ? Labels.For(wantsLight) : null,
+                                plant.LikesWater is { } wantsWater ? Labels.For(wantsWater) : null,
+                                plant.LikesHumidity is { } wantsHumidity ? Labels.For(wantsHumidity) : null
+                            }.Where(t => t is not null));
+                            <dt>Likes</dt>
+                            <dd>
+                                @likesLine
+                                @if (plant.GrowingSeason is { } season)
+                                {
+                                    <div class="@(likesLine.Length > 0 ? "detail-sub" : null)">@Labels.For(season)@(plant.RestHow is { } rest ? $", {Labels.For(rest)}" : "")</div>
+                                }
+                                @if (CareLikes.Fit(plant) is { } fit and not LightFit.Fits)
+                                {
+                                    <div class="detail-sub">Stands somewhere @(fit == LightFit.Darker ? "darker" : "brighter") than it likes</div>
+                                }
+                            </dd>
+                        }
+
                         <dt>Grows in</dt>
                         <dd>
                             @Labels.For(plant.Medium)

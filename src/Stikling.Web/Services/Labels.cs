@@ -38,6 +38,39 @@ public static class Labels
         _ => light.ToString()
     };
 
+    public static string For(WaterNeed need) => need switch
+    {
+        WaterNeed.DryOut => "Dry out fully",
+        WaterNeed.DryPartly => "Dry out partly",
+        WaterNeed.EvenlyMoist => "Evenly moist",
+        _ => need.ToString()
+    };
+
+    public static string For(HumidityNeed need) => need switch
+    {
+        HumidityNeed.Low => "Low humidity",
+        HumidityNeed.Medium => "Medium humidity",
+        HumidityNeed.High => "High humidity",
+        _ => need.ToString()
+    };
+
+    public static string For(GrowingSeason season) => season switch
+    {
+        GrowingSeason.Summer => "Rests in winter",
+        GrowingSeason.Winter => "Rests in summer",
+        GrowingSeason.NoRest => "Grows all year",
+        _ => season.ToString()
+    };
+
+    public static string For(RestKind rest) => rest switch
+    {
+        RestKind.Cooler => "kept cooler",
+        RestKind.Drier => "kept drier",
+        RestKind.CoolerAndDrier => "kept cooler and drier",
+        RestKind.DiesBack => "dies back",
+        _ => rest.ToString()
+    };
+
     public static string For(GrowingMedium medium) => medium switch
     {
         GrowingMedium.OrchidBark => "Orchid bark",

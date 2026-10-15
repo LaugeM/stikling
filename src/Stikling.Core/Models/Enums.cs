@@ -14,6 +14,40 @@ public enum LightLevel
     DirectSun
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<WaterNeed>))]
+public enum WaterNeed
+{
+    DryOut,
+    DryPartly,
+    EvenlyMoist
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<HumidityNeed>))]
+public enum HumidityNeed
+{
+    Low,
+    Medium,
+    High
+}
+
+/// <summary>Summer means it grows in summer and rests in winter. Winter is the other way round.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<GrowingSeason>))]
+public enum GrowingSeason
+{
+    Summer,
+    Winter,
+    NoRest
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<RestKind>))]
+public enum RestKind
+{
+    Cooler,
+    Drier,
+    CoolerAndDrier,
+    DiesBack
+}
+
 [JsonConverter(typeof(JsonStringEnumConverter<PlantStatus>))]
 public enum PlantStatus
 {

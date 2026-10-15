@@ -36,6 +36,20 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     }
 
     /// <summary>
+    /// Sets the given needs on each of the other plants to what this plant has, and saves them.
+    /// Writes nothing to the timeline.
+    /// </summary>
+    public async Task ApplyLikesAsync(Plant from, IReadOnlyList<LikesField> fields, IEnumerable<Plant> others)
+    {
+        foreach (var other in others)
+        {
+            CareLikes.Copy(from, other, fields);
+            CareLikes.Normalize(other);
+            await plants.SaveAsync(other);
+        }
+    }
+
+    /// <summary>
     /// Renames a tag on every plant that has it, and merges it into another tag when the new
     /// name is one already in use. Plants that are gone keep their labels, so they change too.
     /// Returns how many plants changed. An empty new name does nothing.

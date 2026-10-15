@@ -19,6 +19,17 @@ public enum PlantSort
     LastActivity
 }
 
+/// <summary>A need the plant list can be narrowed by. See <see cref="CareLikes"/>.</summary>
+public enum LikesFilter
+{
+    HighHumidity,
+    StaysMoist,
+    DriesOut,
+    RestsInWinter,
+    RestsInSummer,
+    DarkerThanItLikes
+}
+
 /// <summary>Search, filter and sort rules for the plant list.</summary>
 /// <param name="PlaceIds">The room or spot picked, as every id that counts as being in it
 /// (see <see cref="Rooms.Places.IdsIn"/>). A room also shows what's in its spots.</param>
@@ -32,6 +43,8 @@ public enum PlantSort
 /// <param name="LastActivity">When each plant last had something on its timeline, by plant id.
 /// A plant with nothing there counts from when it was added.</param>
 /// <param name="GoneAs">Under Gone, only the plants that left this way (died, given away or sold). Ignored for the other statuses.</param>
+/// <param name="Likes">Only the plants with this need: high humidity, stays moist, dries out, rests in
+/// winter or summer, or stands darker than it likes. Null for no limit.</param>
 /// <param name="Everyday">The everyday name shown for a plant, like "Snake plant", which the search looks through too.</param>
 public sealed record PlantFilter(
     string? Search = null,
@@ -45,7 +58,8 @@ public sealed record PlantFilter(
     IReadOnlyDictionary<Guid, DateTimeOffset>? LastActivity = null,
     Func<Plant, string?>? Everyday = null,
     PlantStatus? GoneAs = null,
-    IReadOnlySet<Guid>? OnlyIds = null)
+    IReadOnlySet<Guid>? OnlyIds = null,
+    LikesFilter? Likes = null)
 {
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
         Order(plants
@@ -55,6 +69,7 @@ public sealed record PlantFilter(
             .Where(p => !Quarantine || p.InQuarantine)
             .Where(p => !Dormant || p.IsDormant)
             .Where(p => OnlyIds is null || OnlyIds.Contains(p.Id))
+            .Where(MatchesLikes)
             .Where(p => Tags is null || Tags.All(tag => PlantTags.Has(p, tag)))
             .Where(MatchesSearch));
 
@@ -84,6 +99,17 @@ public sealed record PlantFilter(
     {
         StatusFilter.Active => plant.Status == PlantStatus.Active,
         StatusFilter.Gone => plant.Status != PlantStatus.Active && (GoneAs is null || plant.Status == GoneAs),
+        _ => true
+    };
+
+    private bool MatchesLikes(Plant plant) => Likes switch
+    {
+        LikesFilter.HighHumidity => plant.LikesHumidity == HumidityNeed.High,
+        LikesFilter.StaysMoist => plant.LikesWater == WaterNeed.EvenlyMoist,
+        LikesFilter.DriesOut => plant.LikesWater == WaterNeed.DryOut,
+        LikesFilter.RestsInWinter => plant.GrowingSeason == GrowingSeason.Summer,
+        LikesFilter.RestsInSummer => plant.GrowingSeason == GrowingSeason.Winter,
+        LikesFilter.DarkerThanItLikes => CareLikes.Fit(plant) == LightFit.Darker,
         _ => true
     };
 

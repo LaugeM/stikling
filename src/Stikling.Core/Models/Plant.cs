@@ -26,6 +26,21 @@ public sealed class Plant : Entity
     /// <summary>How much light it gets where it stands. Null when not set.</summary>
     public LightLevel? Light { get; set; }
 
+    /// <summary>The light it likes, which can differ from <see cref="Light"/>, where it stands. Null when not set.</summary>
+    public LightLevel? LikesLight { get; set; }
+
+    /// <summary>How it likes its water. Null when not set.</summary>
+    public WaterNeed? LikesWater { get; set; }
+
+    /// <summary>How much humidity it likes. Null when not set.</summary>
+    public HumidityNeed? LikesHumidity { get; set; }
+
+    /// <summary>When it grows and whether it rests. Null when not set.</summary>
+    public GrowingSeason? GrowingSeason { get; set; }
+
+    /// <summary>How it rests. Only meaningful when <see cref="GrowingSeason"/> is Summer or Winter.</summary>
+    public RestKind? RestHow { get; set; }
+
     public PlantOrigin Origin { get; set; } = PlantOrigin.Purchased;
 
     /// <summary>When it was got, to whatever precision is remembered: a day, a month or a year.</summary>
@@ -248,6 +263,11 @@ public sealed class Plant : Entity
         Cultivar = Cultivar,
         PlaceId = PlaceId,
         Light = Light,
+        LikesLight = LikesLight,
+        LikesWater = LikesWater,
+        LikesHumidity = LikesHumidity,
+        GrowingSeason = GrowingSeason,
+        RestHow = RestHow,
         Origin = Origin,
         Source = Source,
         PricePaid = PricePaid,
