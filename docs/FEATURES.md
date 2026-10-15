@@ -42,8 +42,7 @@ The people on Reddit who track their plants at all are mostly collectors with 50
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
 2. **Names and where a plant came from**, built together since they share the plant form: **Unsure names** (cf., aff., sp. and a locality or collector code), and **Sellers**.
 3. **Propagation results**, three small ones on the same screens: **Why a propagation failed**, **Let the cut end dry first** as a rooting aid, and **Start like last time**.
-4. **Your photos in folders**, so the photos are useful without the app. Worth saying in a post too.
-5. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering), and **A treatment plan with steps**.
+4. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering), and **A treatment plan with steps**.
 
 ### Cheap ones to slot in whenever
 
@@ -395,7 +394,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | Import propagations from a spreadsheet, with the parent plant found by name | 7 | S | v1.x |
 | ✅ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side, with Help and Settings at the bottom of it. Plant and propagation pages show the details next to the history, the Plants and Propagations lists flow into columns, and sheets open as a dialog in the middle. Phones keep the tabs at the bottom | 5 | M | v1.x |
 | ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
-| ☐ | **Your photos in folders**: a download of every photo with one folder per plant and propagation, each file named by the date it was taken, so the photos are useful without the app. Separate from the backup, which is made for the app to read back | 4 | S | v1.x |
+| ✅ | **Your photos in folders**: a download of every photo with one folder per plant and propagation, each file named by the date it was taken, so the photos are useful without the app. Separate from the backup, which is made for the app to read back | 4 | S | v1.x |
 | ☐ | Units and date format settings | 7 | M | v1.x |
 | ☐ | Danish translation | 7 | L | v1.x |
 
