@@ -213,7 +213,9 @@ public class BackupTests
 
         var seller = Assert.Single(sellers.Sellers.Values);
         Assert.Equal("Plantorama", seller.Name);
-        Assert.Equal(seller.Id, Assert.Single(plants.Plants.Values).SellerId);
+        var adopted = Assert.Single(plants.Plants.Values);
+        Assert.Equal(0, plants.Saves);
+        Assert.Equal(seller.Id, (await sellers.GetSellersAsync()).For(adopted.SellerId, adopted.Source)?.Id);
     }
 
     [Fact]

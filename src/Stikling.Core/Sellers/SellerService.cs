@@ -45,10 +45,12 @@ public sealed class SellerService(ISellerRepository sellers, IPlantRepository pl
     }
 
     /// <summary>
-    /// Gives every plant and propagation that has Source text but no seller one, the seller of that
-    /// name. Sellers are found by name first, then by the id the name makes, so a seller renamed on
-    /// another device is still the one used. Source is not changed. Safe to run again, and cheap
-    /// when there is nothing to do. Returns how many records got a seller.
+    /// Makes sure a seller exists for each name written in the Source of plants and propagations
+    /// that have no seller. It only makes sellers: no plant or propagation is saved, since two
+    /// devices doing that would overwrite each other's edits. A seller made from a name gets the id
+    /// the name makes, so every device makes the same one. A name that already has a live seller,
+    /// or whose id belongs to a deleted seller, is left alone. Safe to run again, and cheap when
+    /// there is nothing to do. Returns how many sellers it made.
     /// </summary>
     public async Task<int> AdoptSourcesAsync()
     {
@@ -61,48 +63,23 @@ public sealed class SellerService(ISellerRepository sellers, IPlantRepository pl
                 return 0;
 
             var all = await sellers.GetSellersAsync();
-            // One lookup per name, null for a seller that was deleted on purpose, which stays deleted
-            var resolved = new Dictionary<string, Seller?>(StringComparer.OrdinalIgnoreCase);
-
-            async Task<Seller?> ResolveAsync(string text, SellerKind kind)
-            {
-                var name = SellerName.Clean(text)!;
-                if (resolved.TryGetValue(name, out var known))
-                    return known;
-
-                var seller = all.Named(name);
-                if (seller is null)
-                {
-                    var id = SellerName.IdFor(name);
-                    if (all.Has(id))
-                        seller = all.Find(id);
-                    else
-                    {
-                        seller = new Seller { Id = id, Name = name, Kind = kind };
-                        await sellers.SaveAsync(seller);
-                    }
-                }
-                return resolved[name] = seller;
-            }
-
-            var adopted = 0;
+            // Plants first, so a name used by both gets the kind a plant's origin suggests
+            var names = new Dictionary<string, SellerKind>(StringComparer.OrdinalIgnoreCase);
             foreach (var plant in plantList)
-            {
-                if (await ResolveAsync(plant.Source!, SellerName.Guess(plant.Origin)) is not { } seller)
-                    continue;
-                plant.SellerId = seller.Id;
-                if (await TrySaveAsync(() => plants.SaveAsync(plant)))
-                    adopted++;
-            }
+                names.TryAdd(SellerName.Clean(plant.Source)!, SellerName.Guess(plant.Origin));
             foreach (var propagation in propagationList)
+                names.TryAdd(SellerName.Clean(propagation.Source)!, SellerKind.Other);
+
+            var made = 0;
+            foreach (var (name, kind) in names)
             {
-                if (await ResolveAsync(propagation.Source!, SellerKind.Other) is not { } seller)
+                var id = SellerName.IdFor(name);
+                if (all.For(null, name) is not null || all.Has(id))
                     continue;
-                propagation.SellerId = seller.Id;
-                if (await TrySaveAsync(() => propagations.SaveAsync(propagation)))
-                    adopted++;
+                await sellers.SaveAsync(new Seller { Id = id, Name = name, Kind = kind });
+                made++;
             }
-            return adopted;
+            return made;
         }
         finally
         {
@@ -136,14 +113,16 @@ public sealed class SellerService(ISellerRepository sellers, IPlantRepository pl
         if (changed.Validate().FirstOrDefault() is { } error)
             throw new ArgumentException(error, nameof(name));
 
+        // Worked out before the name changes, since a record that only has the old name as text counts by it
         var renamed = seller.Name != cleaned;
+        var (fromPlants, fromPropagations) = renamed ? await FromAsync(all, seller.Id) : ([], []);
         seller.Name = cleaned!;
         seller.Kind = kind;
         seller.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
         await sellers.SaveAsync(seller);
 
         if (renamed)
-            await PointAtAsync(all, seller.Id, seller.Id, seller.Name);
+            await PointAtAsync(fromPlants, fromPropagations, seller.Id, seller.Name);
     }
 
     /// <summary>
@@ -161,7 +140,8 @@ public sealed class SellerService(ISellerRepository sellers, IPlantRepository pl
             throw new ArgumentException("Pick another seller to merge into.", nameof(intoId));
 
         // What points at it (or at one merged into it) is worked out before it stops being live
-        await PointAtAsync(all, from.Id, into.Id, into.Name);
+        var (fromPlants, fromPropagations) = await FromAsync(all, from.Id);
+        await PointAtAsync(fromPlants, fromPropagations, into.Id, into.Name);
 
         from.MergedIntoId = into.Id;
         await sellers.SaveAsync(from);
@@ -198,10 +178,15 @@ public sealed class SellerService(ISellerRepository sellers, IPlantRepository pl
         }
     }
 
-    // Plants and propagations that come from the seller get the other one's id and name
-    private async Task PointAtAsync(SellerList all, Guid fromId, Guid toId, string name)
+    // The plants and propagations that come from the seller, by its id or by its name written in Source
+    private async Task<(List<Plant>, List<Propagation>)> FromAsync(SellerList all, Guid id) =>
+        ((await plants.GetAllAsync()).Where(p => all.For(p.SellerId, p.Source)?.Id == id).ToList(),
+         (await propagations.GetAllAsync()).Where(p => all.For(p.SellerId, p.Source)?.Id == id).ToList());
+
+    // They get the seller's id and name. This is the person's own change, so saving them is fine.
+    private async Task PointAtAsync(List<Plant> fromPlants, List<Propagation> fromPropagations, Guid toId, string name)
     {
-        foreach (var plant in (await plants.GetAllAsync()).Where(p => all.Find(p.SellerId)?.Id == fromId))
+        foreach (var plant in fromPlants)
         {
             if (plant.SellerId == toId && plant.Source == name)
                 continue;
@@ -209,7 +194,7 @@ public sealed class SellerService(ISellerRepository sellers, IPlantRepository pl
             plant.Source = name;
             await TrySaveAsync(() => plants.SaveAsync(plant));
         }
-        foreach (var propagation in (await propagations.GetAllAsync()).Where(p => all.Find(p.SellerId)?.Id == fromId))
+        foreach (var propagation in fromPropagations)
         {
             if (propagation.SellerId == toId && propagation.Source == name)
                 continue;

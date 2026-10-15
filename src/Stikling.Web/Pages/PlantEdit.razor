@@ -605,6 +605,7 @@ else
     private string? sellerTextStart;
     private bool sellerTextLoaded;
     private IReadOnlyList<string> sellerNames = [];
+    private SellerList sellerBook = SellerList.None;
 
     private bool ShowArrival =>
         plant is not null
@@ -827,6 +828,7 @@ else
 
         var sourceFromWish = false;
         var sellers = await SellerService.GetSellersAsync();
+        sellerBook = sellers;
         var uses = SellerSummary.CountsBySeller(sellers, all, existingPropagations);
         sellerNames = sellers.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
 
@@ -886,7 +888,7 @@ else
 
             if (!sellerTextLoaded)
             {
-                sellerText = sellers.NameOf(plant.SellerId) ?? plant.Source;
+                sellerText = sellers.For(plant.SellerId, plant.Source)?.Name ?? plant.Source;
                 // A wish's "found at" is made into a seller on save, like anything typed
                 sellerTextStart = sourceFromWish ? null : sellerText;
                 sellerTextLoaded = true;
@@ -1133,7 +1135,8 @@ else
         saving = true;
         try
         {
-            if (sellerText != sellerTextStart)
+            // Saving also links a plant that only has its seller written in Source
+            if (sellerText != sellerTextStart || (plant.SellerId is null && sellerBook.For(null, plant.Source) is not null))
             {
                 var choice = await SellerService.ChooseAsync(sellerText, SellerName.Guess(plant.Origin), plant.SellerId);
                 plant.SellerId = choice.SellerId;

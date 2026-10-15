@@ -41,32 +41,35 @@ public class SellerTests
         var c = AddPlant("Plant   Orama");
         var d = AddPropagation("PLANTORAMA");
 
-        Assert.Equal(4, await Service.AdoptSourcesAsync());
+        Assert.Equal(2, await Service.AdoptSourcesAsync());
 
         Assert.Equal(2, sellers.Sellers.Count);
-        Assert.Equal(a.SellerId, b.SellerId);
-        Assert.Equal(a.SellerId, d.SellerId);
-        Assert.NotEqual(a.SellerId, c.SellerId);
-        Assert.Equal("Plantorama", sellers.Sellers[a.SellerId!.Value].Name);
-        Assert.Equal("Plant Orama", sellers.Sellers[c.SellerId!.Value].Name);
+        var list = await sellers.GetSellersAsync();
+        Assert.Equal(list.For(null, a.Source)?.Id, list.For(null, b.Source)?.Id);
+        Assert.Equal(list.For(null, a.Source)?.Id, list.For(null, d.Source)?.Id);
+        Assert.NotEqual(list.For(null, a.Source)?.Id, list.For(null, c.Source)?.Id);
+        Assert.Equal("Plantorama", list.For(null, a.Source)!.Name);
+        Assert.Equal("Plant Orama", list.For(null, c.Source)!.Name);
     }
 
     [Fact]
-    public async Task Adopting_leaves_Source_alone_and_is_idempotent()
+    public async Task Adopting_never_saves_a_plant_or_propagation_and_is_idempotent()
     {
         var plant = AddPlant("  plantorama ");
+        var propagation = AddPropagation("Anna");
         AddPlant(null);
         AddPlant("   ");
 
-        Assert.Equal(1, await Service.AdoptSourcesAsync());
+        Assert.Equal(2, await Service.AdoptSourcesAsync());
         Assert.Equal("  plantorama ", plant.Source);
+        Assert.Null(plant.SellerId);
+        Assert.Null(propagation.SellerId);
+        Assert.Equal((0, 0), (plants.Saves, propagations.Saves));
 
-        var seller = Assert.Single(sellers.Sellers.Values);
-        var updated = plant.UpdatedAt;
+        var ids = sellers.Sellers.Keys.Order().ToList();
         Assert.Equal(0, await Service.AdoptSourcesAsync());
-        Assert.Single(sellers.Sellers);
-        Assert.Equal(seller.Id, plant.SellerId);
-        Assert.Equal(updated, plant.UpdatedAt);
+        Assert.Equal(ids, sellers.Sellers.Keys.Order().ToList());
+        Assert.Equal((0, 0), (plants.Saves, propagations.Saves));
     }
 
     [Fact]
@@ -76,12 +79,11 @@ public class SellerTests
         var otherPlants = new FakePlantRepository();
         var plantOnOther = new Plant { Nickname = "Plant", Source = "Anna" };
         otherPlants.Plants[plantOnOther.Id] = plantOnOther;
-        var plant = AddPlant("anna");
+        AddPlant("anna");
 
         await Service.AdoptSourcesAsync();
         await new SellerService(other, otherPlants, new FakePropagationRepository()).AdoptSourcesAsync();
 
-        Assert.Equal(plant.SellerId, plantOnOther.SellerId);
         Assert.Equal(Assert.Single(sellers.Sellers).Key, Assert.Single(other.Sellers).Key);
     }
 
@@ -92,14 +94,14 @@ public class SellerTests
         await sellers.SaveAsync(renamed);
         var plant = AddPlant("Plantorama");
 
-        await Service.AdoptSourcesAsync();
+        Assert.Equal(0, await Service.AdoptSourcesAsync());
 
-        Assert.Equal(renamed.Id, plant.SellerId);
         Assert.Single(sellers.Sellers);
+        Assert.Equal(renamed.Id, (await sellers.GetSellersAsync()).For(null, plant.Source)?.Id);
     }
 
     [Fact]
-    public async Task Adopting_follows_a_merge_and_leaves_a_deleted_seller_deleted()
+    public async Task The_lookup_follows_a_merge_and_a_deleted_seller_stays_deleted()
     {
         var into = AddSeller("Plantorama Odense");
         var merged = new Seller { Id = SellerName.IdFor("Plantorama"), Name = "Plantorama", MergedIntoId = into.Id, DeletedAt = DateTimeOffset.UtcNow };
@@ -109,22 +111,38 @@ public class SellerTests
         var a = AddPlant("Plantorama");
         var b = AddPlant("Anna");
 
-        await Service.AdoptSourcesAsync();
+        Assert.Equal(0, await Service.AdoptSourcesAsync());
 
-        Assert.Equal(into.Id, a.SellerId);
-        Assert.Null(b.SellerId);
+        var list = await sellers.GetSellersAsync();
+        Assert.Equal(into.Id, list.For(null, a.Source)?.Id);
+        Assert.Null(list.For(null, b.Source));
         Assert.Equal(3, sellers.Sellers.Count);
     }
 
     [Fact]
-    public async Task Adopting_uses_a_live_seller_with_the_name_before_making_one()
+    public async Task The_lookup_resolves_by_id_then_by_name_then_by_the_name_based_id()
     {
-        var existing = AddSeller("Plantorama", SellerKind.OnlineShop);
-        var plant = AddPlant("plantorama");
+        var byId = AddSeller("Plantorama");
+        var renamed = new Seller { Id = SellerName.IdFor("Anna"), Name = "Anna B" };
+        await sellers.SaveAsync(renamed);
+        var list = await sellers.GetSellersAsync();
 
-        await Service.AdoptSourcesAsync();
+        Assert.Equal(byId.Id, list.For(byId.Id, "something else")?.Id);
+        Assert.Equal(byId.Id, list.For(null, " plantorama ")?.Id);
+        Assert.Equal(renamed.Id, list.For(null, "Anna")?.Id);
+        Assert.Null(list.For(null, "Nobody"));
+        Assert.Null(list.For(null, "  "));
+        Assert.Null(list.For(Guid.NewGuid(), "Plantorama"));
+    }
 
-        Assert.Equal(existing.Id, plant.SellerId);
+    [Fact]
+    public async Task Adopting_makes_nothing_when_a_live_seller_has_the_name()
+    {
+        AddSeller("Plantorama", SellerKind.OnlineShop);
+        AddPlant("plantorama");
+
+        Assert.Equal(0, await Service.AdoptSourcesAsync());
+
         Assert.Single(sellers.Sellers);
     }
 
@@ -145,6 +163,31 @@ public class SellerTests
         Assert.Equal(SellerKind.Person, KindOf("Swap day"));
         Assert.Equal(SellerKind.Other, KindOf("Garden"));
         Assert.Equal(SellerKind.Other, KindOf("Seed bank"));
+    }
+
+    [Fact]
+    public async Task Renaming_links_the_records_that_only_had_the_old_name()
+    {
+        var seller = AddSeller("Plantorama");
+        var nameOnly = AddPlant("plantorama");
+        var linked = AddPlant("Plantorama", sellerId: seller.Id);
+
+        await Service.UpdateAsync(seller.Id, "Plantorama Odense", SellerKind.Shop, null);
+
+        Assert.Equal((seller.Id, "Plantorama Odense"), (nameOnly.SellerId, nameOnly.Source));
+        Assert.Equal((seller.Id, "Plantorama Odense"), (linked.SellerId, linked.Source));
+    }
+
+    [Fact]
+    public async Task Merging_links_the_records_that_only_had_the_name()
+    {
+        var from = AddSeller("Plantorama");
+        var into = AddSeller("Plantorama Odense");
+        var nameOnly = AddPropagation("Plantorama");
+
+        await Service.MergeAsync(from.Id, into.Id);
+
+        Assert.Equal((into.Id, "Plantorama Odense"), (nameOnly.SellerId, nameOnly.Source));
     }
 
     [Fact]
@@ -228,6 +271,7 @@ public class SellerTests
         Assert.Equal(0, await Service.AdoptSourcesAsync());
         Assert.Null(plant.SellerId);
         Assert.Equal(2, sellers.Sellers.Count);
+        Assert.Null((await sellers.GetSellersAsync()).For(plant.SellerId, plant.Source));
     }
 
     [Fact]

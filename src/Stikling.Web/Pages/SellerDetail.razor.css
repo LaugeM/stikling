@@ -20,16 +20,29 @@
 }
 
 .seller-things > li {
-    padding: 0.4rem 0;
     border-top: 1px solid var(--pa-border);
+}
+
+.seller-thing {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.6rem 0;
+    color: inherit;
+    text-decoration: none;
 }
 
 .seller-things > li:first-child {
     border-top: 0;
 }
 
+.chip {
+    min-height: 2.75rem;
+}
+
 .seller-thing-note {
-    margin-left: 0.5rem;
     font-size: 0.85rem;
     color: var(--pa-muted);
 }

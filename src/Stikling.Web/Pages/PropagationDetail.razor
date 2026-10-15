@@ -172,7 +172,7 @@ else
                 {
                     <text> · from <a class="link-action" href="plants/@parent.Id">@parent.DisplayName</a></text>
                 }
-                else if (sellers.Find(propagation.SellerId) is { } headerSeller)
+                else if (sellers.For(propagation.SellerId, propagation.Source) is { } headerSeller)
                 {
                     <text> · <a class="link-action" href="sellers/@headerSeller.Id">@headerSeller.Name</a></text>
                 }
@@ -232,12 +232,16 @@ else
                             {
                                 <a href="plants/@parent.Id">@parent.DisplayName</a>
                             }
-                            else if (sellers.Find(propagation.SellerId) is { } seller)
+                            else if (sellers.For(propagation.SellerId, propagation.Source) is { } seller)
                             {
                                 <a href="sellers/@seller.Id">@seller.Name</a>
                                 @if (Arrival.PoorText(propagation.ArrivedIn, propagation.ArrivalProblems) is { } poor)
                                 {
                                     <text> · @poor</text>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(propagation.ArrivalNote))
+                                {
+                                    <text>@(propagation.ArrivedIn == ArrivalRating.Poor ? ". " : " · ")@propagation.ArrivalNote.Trim()</text>
                                 }
                             }
                             else

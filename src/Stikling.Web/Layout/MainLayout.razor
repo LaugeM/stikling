@@ -131,7 +131,8 @@
     {
         try
         {
-            await Sellers.AdoptSourcesAsync();
+            if (await Sellers.AdoptSourcesAsync() > 0)
+                Sync.NotifyChanged(); // so a page opened first shows them
         }
         catch (Exception ex)
         {

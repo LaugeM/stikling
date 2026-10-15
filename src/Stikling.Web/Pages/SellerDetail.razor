@@ -78,8 +78,10 @@ else
                     @foreach (var plant in summary.Plants)
                     {
                         <li>
-                            <a href="plants/@plant.Id">@plant.DisplayName</a>
-                            <span class="seller-thing-note">@ThingNote(plant)</span>
+                            <a class="seller-thing" href="plants/@plant.Id">
+                                <span>@plant.DisplayName</span>
+                                <span class="seller-thing-note">@ThingNote(plant)</span>
+                            </a>
                         </li>
                     }
                 </ul>
@@ -92,8 +94,10 @@ else
                     @foreach (var propagation in summary.Propagations)
                     {
                         <li>
-                            <a href="propagations/@propagation.Id">@propagation.DisplayName</a>
-                            <span class="seller-thing-note">@Arrival.PoorText(propagation.ArrivedIn, propagation.ArrivalProblems)</span>
+                            <a class="seller-thing" href="propagations/@propagation.Id">
+                                <span>@propagation.DisplayName</span>
+                                <span class="seller-thing-note">@Arrival.PoorText(propagation.ArrivedIn, propagation.ArrivalProblems)</span>
+                            </a>
                         </li>
                     }
                 </ul>

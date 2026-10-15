@@ -86,6 +86,12 @@ public sealed class SyncRunner(
     /// <summary>Raised when a sync saved changes from the server, so the page on screen can reload.</summary>
     public event Action? Received;
 
+    /// <summary>
+    /// Lets the pages on screen reload, for changes made here that they didn't make themselves,
+    /// like the sellers made from the Source text of older plants.
+    /// </summary>
+    public void NotifyChanged() => Received?.Invoke();
+
     /// <summary>Raised when a sync fetched thumbnails, so photos shown as missing can look again.</summary>
     public event Action? PhotosArrived;
 

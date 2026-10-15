@@ -64,8 +64,8 @@ else
         rows = sellers.Live
             .Select(s => new Row(
                 s,
-                plants.Count(p => sellers.Find(p.SellerId)?.Id == s.Id),
-                propagations.Count(p => sellers.Find(p.SellerId)?.Id == s.Id)))
+                plants.Count(p => sellers.For(p.SellerId, p.Source)?.Id == s.Id),
+                propagations.Count(p => sellers.For(p.SellerId, p.Source)?.Id == s.Id)))
             .OrderByDescending(r => r.Plants + r.Propagations)
             .ThenBy(r => r.Seller.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();

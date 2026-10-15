@@ -90,4 +90,20 @@ public sealed class SellerList
     public bool Has(Guid id) => byId.ContainsKey(id);
 
     public string? NameOf(Guid? id) => Find(id)?.Name;
+
+    /// <summary>
+    /// The seller a plant or propagation comes from. Its SellerId when it has one, following a
+    /// merge; null then if that seller is gone. Without one, the live seller named like its Source,
+    /// else the one at the id the Source makes (a seller that was renamed). Null when none, and the
+    /// Source text is all there is to show. Nothing is saved: a record only gets a SellerId when
+    /// the person edits it.
+    /// </summary>
+    public Seller? For(Guid? sellerId, string? source)
+    {
+        if (sellerId is not null)
+            return Find(sellerId);
+        if (SellerName.Clean(source) is not { } name)
+            return null;
+        return Named(name) ?? Find(SellerName.IdFor(name));
+    }
 }

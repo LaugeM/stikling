@@ -29,6 +29,9 @@ internal sealed class FakePlantRepository : IPlantRepository
 {
     public Dictionary<Guid, Plant> Plants { get; } = [];
 
+    /// <summary>How many times a plant was saved.</summary>
+    public int Saves { get; private set; }
+
     public Task<IReadOnlyList<Plant>> GetAllAsync() =>
         Task.FromResult<IReadOnlyList<Plant>>(Plants.Values.Where(p => !p.IsDeleted).ToList());
 
@@ -43,6 +46,7 @@ internal sealed class FakePlantRepository : IPlantRepository
         // DateOnly.MaxValue: the fake has no clock, and the future-date rule is tested on the model itself
         if (plant.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid plant");
+        Saves++;
         Plants[plant.Id] = plant;
         return Task.CompletedTask;
     }
@@ -58,6 +62,9 @@ internal sealed class FakePlantRepository : IPlantRepository
 internal sealed class FakePropagationRepository : IPropagationRepository
 {
     public Dictionary<Guid, Propagation> Propagations { get; } = [];
+
+    /// <summary>How many times a propagation was saved.</summary>
+    public int Saves { get; private set; }
 
     public Task<IReadOnlyList<Propagation>> GetAllAsync() =>
         Task.FromResult<IReadOnlyList<Propagation>>(Propagations.Values.Where(p => !p.IsDeleted).ToList());

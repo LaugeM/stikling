@@ -604,6 +604,7 @@ else
     private string? sellerTextStart;
     private bool sellerTextLoaded;
     private IReadOnlyList<string> sellerNames = [];
+    private SellerList sellerBook = SellerList.None;
 
     private bool ShowArrival =>
         propagation is not null && propagation.ParentPlantId is null && SellerName.Clean(sellerText) is not null;
@@ -649,6 +650,7 @@ else
         location = places.NameOf(propagation?.PlaceId);
 
         var sellers = await SellerService.GetSellersAsync();
+        sellerBook = sellers;
         var uses = SellerSummary.CountsBySeller(sellers, allPlants, allPropagations);
         sellerNames = sellers.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
 
@@ -656,7 +658,7 @@ else
         {
             if (!sellerTextLoaded)
             {
-                sellerText = sellers.NameOf(propagation.SellerId) ?? propagation.Source;
+                sellerText = sellers.For(propagation.SellerId, propagation.Source)?.Name ?? propagation.Source;
                 // A Source that came with the draft, like a wish's "found at", is made into a seller on save
                 sellerTextStart = IsNew && propagation.SellerId is null ? null : sellerText;
                 sellerTextLoaded = true;
@@ -849,7 +851,7 @@ else
                 propagation.Source = null;
                 propagation.SellerId = null;
             }
-            else if (sellerText != sellerTextStart)
+            else if (sellerText != sellerTextStart || (propagation.SellerId is null && sellerBook.For(null, propagation.Source) is not null))
             {
                 var choice = await SellerService.ChooseAsync(sellerText, SellerKind.Other, propagation.SellerId);
                 propagation.SellerId = choice.SellerId;

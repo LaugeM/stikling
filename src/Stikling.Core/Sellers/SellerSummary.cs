@@ -45,8 +45,8 @@ public sealed class SellerSummary
         IEnumerable<Propagation> propagations,
         IEnumerable<PestCase> pestCases)
     {
-        var mine = plants.Where(p => !p.IsDeleted && sellers.Find(p.SellerId)?.Id == seller.Id).ToList();
-        var minePropagations = propagations.Where(p => !p.IsDeleted && sellers.Find(p.SellerId)?.Id == seller.Id).ToList();
+        var mine = plants.Where(p => !p.IsDeleted && sellers.For(p.SellerId, p.Source)?.Id == seller.Id).ToList();
+        var minePropagations = propagations.Where(p => !p.IsDeleted && sellers.For(p.SellerId, p.Source)?.Id == seller.Id).ToList();
 
         var ratings = mine.Select(p => p.ArrivedIn).Concat(minePropagations.Select(p => p.ArrivedIn)).ToList();
         var problems = mine.SelectMany(p => p.ArrivalProblems).Concat(minePropagations.SelectMany(p => p.ArrivalProblems))
@@ -97,10 +97,10 @@ public sealed class SellerSummary
     public static Dictionary<Guid, int> CountsBySeller(SellerList sellers, IEnumerable<Plant> plants, IEnumerable<Propagation> propagations)
     {
         var counts = new Dictionary<Guid, int>();
-        foreach (var id in plants.Where(p => !p.IsDeleted).Select(p => p.SellerId)
-                     .Concat(propagations.Where(p => !p.IsDeleted).Select(p => p.SellerId)))
+        foreach (var found in plants.Where(p => !p.IsDeleted).Select(p => sellers.For(p.SellerId, p.Source))
+                     .Concat(propagations.Where(p => !p.IsDeleted).Select(p => sellers.For(p.SellerId, p.Source))))
         {
-            if (sellers.Find(id) is { } seller)
+            if (found is { } seller)
                 counts[seller.Id] = counts.GetValueOrDefault(seller.Id) + 1;
         }
         return counts;

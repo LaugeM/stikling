@@ -251,7 +251,7 @@ else
                             {
                                 <text> · @Labels.Date(date)</text>
                             }
-                            @if (sellers.Find(plant.SellerId) is { } seller)
+                            @if (sellers.For(plant.SellerId, plant.Source) is { } seller)
                             {
                                 <text> · </text>
                                 @if (plant.PaidText is { } paid)
@@ -274,6 +274,10 @@ else
                             @if (Arrival.PoorText(plant.ArrivedIn, plant.ArrivalProblems) is { } poor)
                             {
                                 <text> · @poor</text>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(plant.ArrivalNote))
+                            {
+                                <text>@(plant.ArrivedIn == ArrivalRating.Poor ? ". " : " · ")@plant.ArrivalNote.Trim()</text>
                             }
                         </dd>
 
