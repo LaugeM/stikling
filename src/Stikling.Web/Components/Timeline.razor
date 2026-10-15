@@ -9,6 +9,21 @@
 
 <ReloadOnSync Reload="LoadAsync" />
 
+@if (references.Count > 0)
+{
+    <section class="reference-photos" aria-labelledby="@referenceId">
+        <p class="reference-label" id="@referenceId">Reference · not this @(SubjectType == SubjectType.Plant ? "plant" : "propagation")</p>
+        <div class="reference-row">
+            @foreach (var photo in references)
+            {
+                <button type="button" class="reference-photo" @onclick="() => viewerIndex = photoIndex[photo.Id]" aria-label="Open reference photo">
+                    <PhotoImage PhotoId="photo.Id" />
+                </button>
+            }
+        </div>
+    </section>
+}
+
 @if (days is null)
 {
     <p class="text-body-secondary">Loading history…</p>
@@ -193,21 +208,6 @@ else
                 </li>
             }
         </ol>
-    </section>
-}
-
-@if (references.Count > 0)
-{
-    <section class="reference-photos" aria-labelledby="@referenceId">
-        <p class="reference-label" id="@referenceId">Reference � not this @(SubjectType == SubjectType.Plant ? "plant" : "propagation")</p>
-        <div class="reference-row">
-            @foreach (var photo in references)
-            {
-                <button type="button" class="reference-photo" @onclick="() => viewerIndex = photoIndex[photo.Id]" aria-label="Open reference photo">
-                    <PhotoImage PhotoId="photo.Id" />
-                </button>
-            }
-        </div>
     </section>
 }
 
