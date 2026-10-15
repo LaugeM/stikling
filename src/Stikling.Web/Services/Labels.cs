@@ -266,7 +266,8 @@ public static class Labels
         if (fills.Contains(LikesField.Water) && care.Water is { } water) parts.Add(Lower(For(water)));
         if (fills.Contains(LikesField.Humidity) && care.Humidity is { } humidity) parts.Add(Lower(For(humidity)));
 
-        var season = fills.Contains(LikesField.Season) && care.Season is { } s ? Lower(For(s)) : null;
+        // A way of resting is only offered for the season the plant already has or gets, so name it with the rest
+        var season = (fills.Contains(LikesField.Season) || fills.Contains(LikesField.Rest)) && care.Season is { } s ? Lower(For(s)) : null;
         var rest = fills.Contains(LikesField.Rest) && care.Rest is { } r ? For(r) : null;
         if (season is not null || rest is not null)
             parts.Add(string.Join(", ", new[] { season, rest }.OfType<string>()));
