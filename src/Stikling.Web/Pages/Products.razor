@@ -6,6 +6,7 @@
 
 <PageTitle>Products · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
+<ShowFound ElementId="@(Show is { } shown ? $"item-{shown}" : null)" />
 
 <a class="back-link" href="supplies">Supplies</a>
 <h1>Products</h1>
@@ -162,7 +163,7 @@ else
         <ul class="product-list">
             @foreach (var use in uses)
             {
-                <li>
+                <li id="item-@use.Product.Id">
                     @if (confirming == use.Product.Id)
                     {
                         <div class="product-confirm">
@@ -204,6 +205,10 @@ else
 }
 
 @code {
+    /// <summary>An item to scroll to and mark. Set by Search.</summary>
+    [SupplyParameterFromQuery(Name = "show")]
+    public Guid? Show { get; set; }
+
     private IReadOnlyList<ProductUse> uses = [];
     private bool loading = true;
     private bool busy;

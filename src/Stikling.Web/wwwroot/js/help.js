@@ -68,6 +68,11 @@ export function attachSearch(input, noMatch) {
     input.addEventListener("input", filter);
     input.addEventListener("keydown", onKey);
     return {
+        // Puts a search in the box, like the one typed on the Search page
+        setValue: value => {
+            input.value = value;
+            filter();
+        },
         clear: () => {
             clear();
             input.focus();

@@ -602,6 +602,8 @@ else
         </Sheet>
     }
 
+    <ShowFound ElementId="@(Entry is { } found ? $"entry-{found}" : null)" Ready="@(loaded && (Tab != "care" || careOpen))" />
+
     <Sheet Title="Care" @bind-Open="careOpen">
         <div class="sheet-section">
             @if (care.Count == 0)
@@ -643,7 +645,7 @@ else
                 <ul class="care-list">
                     @foreach (var entry in care)
                     {
-                        <li>
+                        <li id="entry-@entry.Id">
                             <div class="care-entry">
                                 <span class="care-what">@CareService.Describe(entry, Labels.For)</span>
                                 <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
@@ -1002,6 +1004,10 @@ else
     /// </summary>
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
+
+    /// <summary>A history entry, or with tab=care a care entry, to scroll to and mark. Set by Search.</summary>
+    [SupplyParameterFromQuery(Name = "entry")]
+    public Guid? Entry { get; set; }
 
     private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, PestCheck, Status, PassOn, Flowering, ThisFlowering, Problem, ProblemUpdate }
     private bool shareOpen;

@@ -5,6 +5,7 @@
 
 <PageTitle>Soil mixes · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
+<ShowFound ElementId="@(Show is { } shown ? $"item-{shown}" : null)" />
 
 <a class="back-link" href="supplies">Supplies</a>
 <h1>Soil mixes</h1>
@@ -157,7 +158,7 @@ else
             <ul class="mix-list">
                 @foreach (var use in group)
                 {
-                    <li>
+                    <li id="item-@use.Mix.Id">
                         @if (confirming == use.Mix.Id)
                         {
                             <div class="mix-confirm">
@@ -249,6 +250,10 @@ else
 }
 
 @code {
+    /// <summary>An item to scroll to and mark. Set by Search.</summary>
+    [SupplyParameterFromQuery(Name = "show")]
+    public Guid? Show { get; set; }
+
     private IReadOnlyList<MixUse> uses = [];
     private IReadOnlyList<SoilMix> all = [];
     private bool loading = true;

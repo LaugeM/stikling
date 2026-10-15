@@ -64,6 +64,11 @@
     display: none;
 }
 
+/* The Search field is the header's magnifier on a phone */
+.app-nav ::deep .app-nav-search {
+    display: none;
+}
+
 .app-nav ::deep .app-nav-link {
     flex: 1;
     display: flex;
@@ -113,7 +118,14 @@
     padding-bottom: calc(8.5rem + env(safe-area-inset-bottom));
 }
 
-/* Same size and feel as an icon button, out at the edge so it lines up with the content column */
+/* Search and Settings together, out at the edge so they line up with the content column */
+.header-actions {
+    display: flex;
+    align-items: center;
+    margin: -0.5rem -0.5rem -0.5rem 0;
+}
+
+/* Same size and feel as an icon button */
 .app-header ::deep .settings-link {
     position: relative;
     display: inline-flex;
@@ -121,7 +133,7 @@
     justify-content: center;
     width: 2.75rem;
     height: 2.75rem;
-    margin: -0.5rem -0.5rem -0.5rem 0;
+    margin: 0;
     border-radius: 50%;
     color: var(--pa-muted);
 }
@@ -215,6 +227,60 @@
 
     .app-nav-title img {
         border-radius: 0.45rem;
+    }
+
+    /* Search sits under the name as a quiet field. It is a link, not a tab, so it doesn't look like one. */
+    .app-nav ::deep .app-nav-search {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-height: 2.5rem;
+        margin: 0 0 0.6rem;
+        padding: 0 0.6rem 0 0.75rem;
+        background: var(--pa-surface);
+        border: 1px solid var(--pa-border);
+        border-radius: 0.6rem;
+        color: var(--pa-muted);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .app-nav ::deep .app-nav-search:hover {
+        background: var(--pa-bg);
+    }
+
+    .app-nav ::deep .app-nav-search:focus-visible {
+        outline: 2px solid var(--pa-green);
+        outline-offset: -2px;
+    }
+
+    .app-nav ::deep .app-nav-search.active {
+        color: var(--pa-green-dark);
+        background: var(--pa-green-soft);
+        border-color: var(--pa-green-soft);
+        font-weight: 600;
+    }
+
+    .app-nav ::deep .app-nav-search span {
+        flex: 1;
+    }
+
+    .app-nav ::deep .app-nav-search svg {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .app-nav ::deep .app-nav-search kbd {
+        padding: 0.05rem 0.4rem;
+        border: 1px solid var(--pa-border);
+        border-radius: 0.3rem;
+        background: none;
+        color: var(--pa-muted);
+        font-family: inherit;
+        font-size: 0.75rem;
+        line-height: 1.4;
     }
 
     .app-nav-end {

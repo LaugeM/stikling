@@ -470,6 +470,8 @@ else
         </Sheet>
     }
 
+    <ShowFound ElementId="@(Entry is { } found ? $"entry-{found}" : null)" Ready="@loaded" />
+
     @if (propagation.IsActive)
     {
         <Sheet Title="Care" Open="careOpen" OpenChanged="open => careOpen = open">
@@ -795,6 +797,10 @@ else
     [SupplyParameterFromQuery(Name = "made")]
     public bool Made { get; set; }
 
+    /// <summary>A history or care entry to scroll to and mark. Set by Search.</summary>
+    [SupplyParameterFromQuery(Name = "entry")]
+    public Guid? Entry { get; set; }
+
     private enum StageView { None, Stage, PotUp, Failed, GaveAway, PassOn }
 
     private enum More { None, Menu, Flag, Dormant, Swap }
@@ -955,6 +961,9 @@ else
             message = null;
         }
         await LoadAsync();
+        // A care entry lives in the care sheet, so that opens to show it
+        if (Entry is { } entryId && propagation?.IsActive == true && careLogs.Any(l => l.Id == entryId))
+            careOpen = true;
         loaded = true;
     }
 
