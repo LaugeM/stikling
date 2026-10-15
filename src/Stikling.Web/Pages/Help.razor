@@ -142,6 +142,17 @@
             slow mobile data that can take half a minute. After that it opens from the phone in a moment.
         </p>
     </details>
+
+    <details class="help-item">
+        <summary>Can I search everything at once?</summary>
+        <p>
+            Tap the magnifier at the top, or <em>Search</em> in the menu on a computer, where the / key opens
+            it too. It looks through your plants, cuttings, wishes, pots, mixes, feeds, products, rooms and
+            tags, and the notes on every history, care log, problem and pest case. Tap a note to go to it.
+            Notes are searched once every word you type has at least two letters. The search boxes on the
+            Plants, Propagations and Wishlist pages still search just that list.
+        </p>
+    </details>
 </section>
 
 <section class="help-section" id="data">
@@ -1470,6 +1481,10 @@
 </section>
 
 @code {
+    /// <summary>A search to start on, from the Search page.</summary>
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? Query { get; set; }
+
     private bool searchReady;
     private ElementReference searchInput;
     private ElementReference noMatch;
@@ -1491,6 +1506,8 @@
         {
             searchModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/help.js");
             search = await searchModule.InvokeAsync<IJSObjectReference>("attachSearch", searchInput, noMatch);
+            if (!string.IsNullOrWhiteSpace(Query))
+                await search.InvokeVoidAsync("setValue", Query);
         }
     }
 

@@ -29,7 +29,7 @@ else
                     @foreach (var entry in entries)
                     {
                         var entryPhotos = entry.PhotoIds.Where(photoIndex.ContainsKey).ToList();
-                        <li class="timeline-entry kind-@entry.Kind.ToString().ToLowerInvariant()">
+                        <li id="entry-@entry.Id" class="timeline-entry kind-@entry.Kind.ToString().ToLowerInvariant()">
                             <div class="entry-head">
                                 <span class="entry-kind">@KindIcon(entry)@KindLabel(entry)</span>
                                 @* "Added" is dated by the acquired date, which has no real time of day *@

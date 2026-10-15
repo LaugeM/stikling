@@ -3365,3 +3365,117 @@ main.app-content:has(.form-bar) {
 .today-row-main:has(.look-again-row) {
     align-items: flex-start;
 }
+
+/* Search */
+.search-box {
+    margin-bottom: 1rem;
+}
+
+.search-hint {
+    margin: 0 0 1.25rem;
+    color: var(--pa-muted);
+}
+
+.search-group {
+    margin-bottom: 1.75rem;
+}
+
+.search-group-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.search-group-head .section-label {
+    margin-bottom: 0.6rem;
+}
+
+.search-more {
+    margin-top: 0.6rem;
+    padding-inline: 0;
+}
+
+/* A past search is a row that looks like the others but is a button */
+button.search-recent {
+    width: 100%;
+    gap: 0.6rem;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+button.search-recent svg {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: var(--pa-muted);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.search-recent:hover,
+.search-recent:focus-visible {
+    border-color: var(--pa-green);
+}
+
+.search-note .item-text {
+    flex: 1;
+}
+
+.search-snippet {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    margin: 0.15rem 0 0;
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+}
+
+.search-snippet strong {
+    font-weight: 700;
+    color: var(--pa-text);
+}
+
+/* From a computer up the notes get their own column beside everything else. The grid has a row for
+   each group on the left and a last row that takes the rest, so the notes can be taller or shorter
+   than the left column without the groups there spreading apart. */
+@media (min-width: 64rem) {
+    .search-results.has-notes {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: repeat(var(--search-rows), auto) 1fr;
+        column-gap: 2rem;
+        align-items: start;
+    }
+
+    .search-results.has-notes > .search-group {
+        grid-column: 1;
+    }
+
+    .search-results.has-notes > .search-notes {
+        grid-column: 2;
+        grid-row: 1 / -1;
+    }
+}
+
+/* The item a result opened, marked for a moment: filled with Leaf Tint and fading out */
+.is-found {
+    border-radius: 0.5rem;
+    animation: found-fade 2s ease-out forwards;
+}
+
+@keyframes found-fade {
+    from { background-color: var(--pa-green-soft); }
+    to { background-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .is-found {
+        animation: none;
+        background-color: var(--pa-green-soft);
+    }
+}

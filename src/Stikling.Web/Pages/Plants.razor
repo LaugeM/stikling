@@ -467,6 +467,10 @@ else
     [SupplyParameterFromQuery(Name = "tag")]
     public string? Tag { get; set; }
 
+    /// <summary>Starts the list on one room or spot, from a search result.</summary>
+    [SupplyParameterFromQuery(Name = "room")]
+    public Guid? PlaceFilter { get; set; }
+
     private static readonly (StatusFilter Value, string Label)[] statusOptions =
     [
         (StatusFilter.Active, "In collection"),
@@ -554,6 +558,19 @@ else
         columns = CoreTable.Parse(await Device.GetAsync(ColumnsKey));
         tableSort = CoreTable.ParseSort(await Device.GetAsync(TableSortKey));
         await LoadAsync();
+        PickPlace();
+    }
+
+    // The room or spot asked for, set the way the dropdown and the spot chips do. One with no plants in
+    // it isn't offered there, so it filters on its own and the list says nothing matches.
+    private void PickPlace()
+    {
+        if (PlaceFilter is not { } id || places.Find(id) is not { } place)
+            return;
+
+        room = (place.IsSpot ? places.Find(place.RoomId)?.Id ?? place.Id : place.Id).ToString();
+        spot = place.IsSpot || PickedRoom is null ? place.Id : null;
+        Refresh();
     }
 
     private async Task SetViewAsync(PlantView value)

@@ -1,0 +1,371 @@
+@page "/search"
+@layout WideLayout
+@implements IAsyncDisposable
+@inject SearchService SearchService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject PlantNameService Names
+@inject DeviceFiles Device
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+@inject IJSRuntime JS
+
+<PageTitle>Search · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<h1>Search</h1>
+
+<div class="search-box">
+    <input type="search" class="form-control" placeholder="Search everything" aria-label="Search everything"
+           autocomplete="off" spellcheck="false" enterkeyhint="search" data-search-input
+           @ref="input" value="@query" @oninput="OnInput" />
+</div>
+
+<div @ref="root">
+    @if (!Searching)
+    {
+        <p class="search-hint">Names, notes, pots, mixes, feeds, products and more.</p>
+
+        @if (recent.Count > 0)
+        {
+            <section class="search-group" aria-labelledby="recent-title">
+                <div class="search-group-head">
+                    <h2 class="section-label" id="recent-title">Recent</h2>
+                    <button type="button" class="btn btn-link btn-sm link-action search-stop" @onclick="ClearRecentAsync">Clear</button>
+                </div>
+                <ul class="item-list">
+                    @foreach (var past in recent)
+                    {
+                        <li>
+                            <button type="button" class="item-card search-recent search-stop" @onclick="() => UseRecent(past)">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
+                                <span class="item-name">@past</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+    }
+    else if (index is null)
+    {
+        <p class="text-body-secondary">Loading…</p>
+    }
+    else if (results.IsEmpty)
+    {
+        <div class="empty-state">
+            <p class="mb-1">Nothing has '@query.Trim()' in it.</p>
+            <p>Check the spelling, or try fewer words.</p>
+            <a class="btn btn-outline-primary mt-2 search-stop" href="@HelpHref">Search Help</a>
+        </div>
+    }
+    else
+    {
+        var groups = results.NonEmpty.ToList();
+        var rows = groups.Count(g => g.Kind != SearchKind.Note) + 1;
+        <div class="search-results @(results.Notes.Count > 0 ? "has-notes" : null)" style="--search-rows: @rows">
+            @foreach (var (kind, items) in groups)
+            {
+                var open = expanded.Contains(kind);
+                var shown = open ? items : items.Take(Preview).ToList();
+                <section class="search-group @(kind == SearchKind.Note ? "search-notes" : null)" aria-labelledby="group-@kind">
+                    <h2 class="section-label" id="group-@kind">@GroupLabel(kind) · @items.Count</h2>
+                    <ul class="item-list">
+                        @foreach (var item in shown)
+                        {
+                            <li>@Row(item)</li>
+                        }
+                    </ul>
+                    @if (items.Count > Preview)
+                    {
+                        <button type="button" class="btn btn-link btn-sm link-action search-more search-stop" aria-expanded="@(open ? "true" : "false")"
+                                @onclick="() => ToggleGroup(kind)">@(open ? "Show fewer" : $"Show all {items.Count}")</button>
+                    }
+                </section>
+            }
+
+            <section class="search-group" aria-labelledby="group-help">
+                <h2 class="section-label" id="group-help">Help</h2>
+                <ul class="item-list">
+                    <li>
+                        <a class="item-card search-stop" href="@HelpHref">
+                            <div class="item-text">
+                                <div class="item-name">Search Help for '@query.Trim()'</div>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The search, kept in the address so Back to this page shows the same results.</summary>
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? Q { get; set; }
+
+    private const string RecentKey = "search-recent";
+    private const int Preview = 5;
+
+    private ElementReference input;
+    private ElementReference root;
+    private IJSObjectReference? module;
+    private IJSObjectReference? keys;
+
+    private SearchIndex? index;
+    private SearchResults results = SearchResults.Empty;
+    private string query = "";
+    private string lastPushed = "";
+    private bool started;
+    private CancellationTokenSource? pushDelay;
+    private readonly HashSet<SearchKind> expanded = [];
+    private IReadOnlyList<string> recent = [];
+    private IReadOnlyDictionary<Guid, Guid?> covers = new Dictionary<Guid, Guid?>();
+    private EverydayNameBook? everyday;
+
+    private bool Searching => !string.IsNullOrWhiteSpace(query);
+
+    private string HelpHref => $"help?q={Uri.EscapeDataString(query.Trim())}";
+
+    protected override void OnParametersSet()
+    {
+        // The address changing under a search that was typed here is that search being written to it
+        if (started && (Q ?? "") == lastPushed)
+            return;
+
+        query = Q ?? "";
+        lastPushed = query;
+        expanded.Clear();
+        if (started)
+            Refresh();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        started = true;
+        recent = await ReadRecentAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        everyday = await Names.GetEverydayNamesAsync();
+        index = await SearchService.LoadAsync(e => Labels.For(e), (genus, species, cultivar) => everyday?.For(genus, species, cultivar));
+
+        // The tiles' photos, which the results don't carry
+        var photos = new Dictionary<Guid, Guid?>();
+        foreach (var plant in await PlantRepository.GetAllAsync())
+            photos[plant.Id] = plant.CoverPhotoId;
+        foreach (var propagation in await PropagationRepository.GetAllAsync())
+            photos[propagation.Id] = propagation.CoverPhotoId;
+        covers = photos;
+        Refresh();
+    }
+
+    private void Refresh() => results = index?.Find(query) ?? SearchResults.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/search.js");
+        keys = await module.InvokeAsync<IJSObjectReference>("attach", input, root);
+    }
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        query = e.Value?.ToString() ?? "";
+        expanded.Clear();
+        Refresh();
+        _ = PushQueryAsync();
+    }
+
+    // The address follows the box a moment after typing stops, since every change of address makes the
+    // menu look at the pests again
+    private async Task PushQueryAsync()
+    {
+        pushDelay?.Cancel();
+        pushDelay = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(400, pushDelay.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        var text = query.Trim();
+        if (text == lastPushed)
+            return;
+        lastPushed = text;
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("q", text.Length == 0 ? null : text), replace: true);
+    }
+
+    private void ToggleGroup(SearchKind kind)
+    {
+        if (!expanded.Remove(kind))
+            expanded.Add(kind);
+    }
+
+    private async Task UseRecent(string past)
+    {
+        query = past;
+        expanded.Clear();
+        Refresh();
+        _ = PushQueryAsync();
+        if (keys is not null)
+            await keys.InvokeVoidAsync("focus");
+    }
+
+    // A search counts as one worth keeping once a result from it is opened
+    private async Task OpenedAsync()
+    {
+        try
+        {
+            recent = RecentSearches.Add(recent, query);
+            await Device.SetAsync(RecentKey, RecentSearches.ToJson(recent));
+        }
+        catch (JSException)
+        {
+            // Not keeping the search costs only the Recent list
+        }
+    }
+
+    private async Task ClearRecentAsync()
+    {
+        recent = [];
+        try
+        {
+            await Device.SetAsync(RecentKey, null);
+        }
+        catch (JSException)
+        {
+        }
+    }
+
+    private async Task<IReadOnlyList<string>> ReadRecentAsync()
+    {
+        try
+        {
+            return RecentSearches.Parse(await Device.GetAsync(RecentKey));
+        }
+        catch (JSException)
+        {
+            return [];
+        }
+    }
+
+    private static string GroupLabel(SearchKind kind) => kind switch
+    {
+        SearchKind.Plant => "Plants",
+        SearchKind.Propagation => "Propagations",
+        SearchKind.Note => "Notes",
+        SearchKind.Wish => "Wishes",
+        SearchKind.Pot => "Pots",
+        SearchKind.Mix => "Mixes",
+        SearchKind.Feed => "Feeds",
+        SearchKind.Product => "Products",
+        SearchKind.TreatmentRecipe => "Treatment recipes",
+        SearchKind.Place => "Rooms and spots",
+        _ => "Tags"
+    };
+
+    private RenderFragment Row(SearchItem item) => item.Kind switch
+    {
+        SearchKind.Plant or SearchKind.Propagation or SearchKind.Wish => ListRow(item),
+        SearchKind.Note => NoteRow(item),
+        _ => SimpleRow(item)
+    };
+
+    private RenderFragment ListRow(SearchItem item) => @<a class="item-card search-stop" href="@item.Href" @onclick="OpenedAsync">
+        @if (item.Kind != SearchKind.Wish && covers.GetValueOrDefault(item.Id) is { } cover)
+        {
+            <div class="item-thumb" aria-hidden="true"><PhotoImage PhotoId="cover" /></div>
+        }
+        else if (item.Kind == SearchKind.Propagation)
+        {
+            <div class="item-thumb" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+            </div>
+        }
+        else
+        {
+            <div class="item-thumb potted" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+            </div>
+        }
+        <div class="item-text">
+            <div class="item-name">
+                <span class="item-name-text">@item.Title</span>
+                @if (item.Gone)
+                {
+                    <span class="badge @(item.Kind == SearchKind.Propagation ? "stage-badge" : "text-bg-secondary")">@(item.Kind == SearchKind.Propagation ? "Done" : "Gone")</span>
+                }
+            </div>
+            @if (item.Subtitle is not null)
+            {
+                <div class="item-sub">@item.Subtitle</div>
+            }
+            @if (item.Meta is not null)
+            {
+                <div class="item-meta">@item.Meta</div>
+            }
+        </div>
+    </a>;
+
+    private RenderFragment NoteRow(SearchItem item) => @<a class="item-card search-note search-stop" href="@item.Href" @onclick="OpenedAsync">
+        <div class="item-text">
+            <div class="item-meta">@NoteLine(item.Note!)</div>
+            <p class="search-snippet">@Marked(item.Note!)</p>
+        </div>
+    </a>;
+
+    private RenderFragment SimpleRow(SearchItem item) => @<a class="item-card search-stop" href="@item.Href" @onclick="OpenedAsync">
+        <div class="item-text">
+            <div class="item-name">@item.Title</div>
+            @if (item.Meta is not null)
+            {
+                <div class="item-meta">@item.Meta</div>
+            }
+        </div>
+    </a>;
+
+    private string NoteLine(SearchNote note) =>
+        $"{Labels.Date(Time.LocalDay(note.Date))} · {note.OwnerName} · {note.Label}";
+
+    // The snippet with the matched stretches in bold
+    private static RenderFragment Marked(SearchNote note) => builder =>
+    {
+        var at = 0;
+        foreach (var range in note.Ranges)
+        {
+            builder.AddContent(0, note.Snippet[at..range.Start]);
+            builder.OpenElement(1, "strong");
+            builder.AddContent(2, note.Snippet.Substring(range.Start, range.Length));
+            builder.CloseElement();
+            at = range.Start + range.Length;
+        }
+        builder.AddContent(3, note.Snippet[at..]);
+    };
+
+    public async ValueTask DisposeAsync()
+    {
+        pushDelay?.Cancel();
+        try
+        {
+            if (keys is not null)
+            {
+                await keys.InvokeVoidAsync("dispose");
+                await keys.DisposeAsync();
+            }
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+}

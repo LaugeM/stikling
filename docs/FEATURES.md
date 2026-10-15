@@ -41,10 +41,9 @@ The people on Reddit who track their plants at all are mostly collectors with 50
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
 2. **Names and where a plant came from**, built together since they share the plant form: **Unsure names** (cf., aff., sp. and a locality or collector code), **Sellers**, a **Reference photo**, and **A photo on a wish**. Decide with them whether a wish's photo becomes a reference photo when the wish is got.
-3. **Search everything**, which matters more the bigger the collection is.
-4. **Propagation results**, three small ones on the same screens: **Why a propagation failed**, **Let the cut end dry first** as a rooting aid, and **Start like last time**.
-5. **Your photos in folders**, so the photos are useful without the app. Worth saying in a post too.
-6. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering), and **A treatment plan with steps**.
+3. **Propagation results**, three small ones on the same screens: **Why a propagation failed**, **Let the cut end dry first** as a rooting aid, and **Start like last time**.
+4. **Your photos in folders**, so the photos are useful without the app. Worth saying in a post too.
+5. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering), and **A treatment plan with steps**.
 
 ### Cheap ones to slot in whenever
 
@@ -86,7 +85,7 @@ Small ones with no new screen worth the name:
 | ✅ | **Growing season**: the season is set under What it likes, as grows all year or rests in winter or in summer. When its usual resting time comes round (from November for a plant that rests in winter, May in the southern hemisphere, and later from around the day it went dormant before) Today asks "Gone dormant?". Yes marks it dormant like the button on the plant page, and Not this year stops asking until next season. It only asks about plants where a season was set, since most houseplants are tropical and don't need a rest | 5 | S | v1.x |
 | ✅ | Sort options: name, newest, room, last activity | 5 | S | v1.x |
 | ✅ | The plant list remembers the sort you picked, on the device, the way the Pots page remembers its kind | 4 | S | v1.x |
-| ☐ | **Search everything**: one search for plants, propagations, pots, mixes, feeds, products and the notes on every history, with the `/` key to start it on a computer | 4 | M | v1.x |
+| ✅ | **Search everything**: a Search page at /search, opened from a magnifier in the phone header, Search in the side menu on a computer, and the `/` key. One box looks through plants, propagations, wishes, pots, mixes, feeds, products, treatment recipes, rooms and spots, tags, and the notes on every history, care log, problem and pest case, ignoring case and accents, with every word needing to match. Results are grouped (the first 5 of each, then Show all), notes show the matched words in bold and come newest first, and a result opens the page it is on and marks the note or item. The last 5 searches are kept on the device. Searching notes starts from two letters. The searches on the Plants, Propagations and Wishlist pages stay as they are. Nothing new is stored | 4 | M | v1.x |
 | ✅ | **Quick add**: paste or type a list of names ("Alocasia zebrina, Monstera deliciosa, …") to add many plants at once. Each name is matched against the plant dictionary, and anything else on the line goes into the notes | 5 | S | v1.x |
 | ☐ | **Soil to semi-hydro transition tracker**: mark a plant as transitioning, with a checklist (roots washed, first new water root, first new leaf) and a warning if nothing happens after a set number of weeks | 5 | M | v1.x |
 | ✅ | **Problem log**: Something's wrong on a plant's More menu, for yellow leaves, root rot, sunburn, brown tips and the rest. Pick what you see, then add updates with what you did and whether it looks better, the same or worse, with photos, and close it with how it ended. Each step goes on the history, and the problem page lists the repots and moves made meanwhile. Opening one shows what you did the last times a plant of yours had the same and how it ended, never advice. Look again puts it on Today on a day you pick. Open problems have a badge, a filter on Plants, and a list on the Pests and problems page. Only plants for now | 4 | M | v1.x |

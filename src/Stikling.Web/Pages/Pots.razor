@@ -9,6 +9,7 @@
 
 <PageTitle>Pots · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
+<ShowFound ElementId="@(Show is { } shown ? $"item-{shown}" : null)" />
 
 <a class="back-link" href="supplies">Supplies</a>
 <h1>Pots</h1>
@@ -245,7 +246,7 @@ else
             <ul class="pot-list">
                 @foreach (var use in family)
                 {
-                    <li>
+                    <li id="item-@use.Pot.Id">
                         @if (confirming == use.Pot.Id)
                         {
                             <div class="pot-confirm">
@@ -298,6 +299,10 @@ else
              OnSetCover="SetCoverAsync" OnFrame="FrameAsync" OnDelete="DeleteViewerPhotoAsync" />
 
 @code {
+    /// <summary>An item to scroll to and mark. Set by Search.</summary>
+    [SupplyParameterFromQuery(Name = "show")]
+    public Guid? Show { get; set; }
+
     private IReadOnlyList<PotUse> uses = [];
     private IReadOnlyList<Pot> all = [];
     private bool loading = true;
@@ -352,6 +357,9 @@ else
         kind = Enum.TryParse<PotGroup>(await Device.GetAsync(KindKey), out var stored)
             ? stored
             : uses.Select(use => use.Pot.Group).DefaultIfEmpty(PotGroup.Inner).Min();
+        // A pot asked for by Search is shown under its own kind
+        if (uses.FirstOrDefault(use => use.Pot.Id == Show) is { } asked)
+            kind = asked.Pot.Group;
     }
 
     private async Task LoadAsync()

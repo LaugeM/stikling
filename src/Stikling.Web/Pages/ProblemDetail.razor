@@ -11,6 +11,7 @@
 
 <PageTitle>@(problem is null ? "Problem" : ProblemText.Signs(problem.KnownSigns)) · Stikling</PageTitle>
 <ReloadOnSync Reload="ReloadAsync" />
+<ShowFound ElementId="@(Entry is { } entryId ? $"entry-{entryId}" : null)" Ready="@(problem is not null && plant is not null)" />
 
 @if (problem is null || plant is null)
 {
@@ -83,7 +84,7 @@ else
                     @foreach (var item in items)
                     {
                         var shown = item;
-                        <li class="log-entry @(item.Kind is ProblemLogKind.Change ? "by-app" : "by-person")">
+                        <li id="@(item.Kind == ProblemLogKind.Update && item.Update is { } found ? $"entry-{found.Id}" : null)" class="log-entry @(item.Kind is ProblemLogKind.Change ? "by-app" : "by-person")">
                             <div class="log-head">
                                 <span class="log-kind">
                                     @switch (item.Kind)
@@ -280,6 +281,10 @@ else
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    /// <summary>An update to scroll to and mark. Set by Search.</summary>
+    [SupplyParameterFromQuery(Name = "entry")]
+    public Guid? Entry { get; set; }
 
     private enum Shown { None, Update, Edit, Close, Died }
 

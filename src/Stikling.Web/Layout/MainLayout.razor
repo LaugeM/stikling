@@ -1,5 +1,5 @@
 @inherits LayoutComponentBase
-@implements IDisposable
+@implements IAsyncDisposable
 @inject IndexedDb Db
 @inject ThemeService Theme
 @inject ErrorReports ErrorReports
@@ -9,6 +9,7 @@
 @inject IPlantRepository Plants
 @inject ProblemService Problems
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <div class="app-shell">
     <header class="app-header">
@@ -16,6 +17,10 @@
             <img src="icon-192.png" alt="" width="28" height="28" />
             Stikling
         </a>
+        <div class="header-actions">
+        <NavLink class="settings-link" href="search" aria-label="Search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+        </NavLink>
         <NavLink class="settings-link" href="settings" aria-label="@(Sync.HasProblem ? "Settings, sync problem" : "Settings")">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>
             @if (Sync.HasProblem)
@@ -23,6 +28,7 @@
                 <span class="settings-link-dot" aria-hidden="true"></span>
             }
         </NavLink>
+        </div>
     </header>
 
     <main class="app-content @(updateReady || FirstSyncNotice ? "with-banner" : null)">
@@ -44,6 +50,12 @@
             <img src="icon-192.png" alt="" width="28" height="28" />
             Stikling
         </a>
+        @* A quiet field rather than a tab, since it works from anywhere. The / key opens it too. *@
+        <NavLink class="app-nav-search" href="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            <span>Search</span>
+            <kbd aria-hidden="true">/</kbd>
+        </NavLink>
         <NavLink class="app-nav-link" href="" Match="NavLinkMatch.All">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" /><path d="M3.5 10h17M8 3v4M16 3v4" /><path d="m9 15 2 2 4-4" /></svg>
             <span>Today</span>
@@ -131,12 +143,34 @@
         }
     }
 
-    public void Dispose()
+    private DotNetObjectReference<MainLayout>? self;
+    private IJSObjectReference? searchModule;
+    private IJSObjectReference? slash;
+
+    /// <summary>Called by the / key when the person isn't typing and Search isn't open.</summary>
+    [JSInvokable]
+    public void OpenSearch() => Navigation.NavigateTo("search");
+
+    public async ValueTask DisposeAsync()
     {
         Sync.StatusChanged -= OnSyncChanged;
         Sync.Received -= OnReceived;
         Backup.Restored -= OnReceived;
         Navigation.LocationChanged -= OnLocationChanged;
+        try
+        {
+            if (slash is not null)
+            {
+                await slash.InvokeVoidAsync("dispose");
+                await slash.DisposeAsync();
+            }
+            if (searchModule is not null)
+                await searchModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        self?.Dispose();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -158,6 +192,17 @@
         catch (JSException)
         {
             // Storage that can't be made persistent still works
+        }
+
+        try
+        {
+            self = DotNetObjectReference.Create(this);
+            searchModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/search.js");
+            slash = await searchModule.InvokeAsync<IJSObjectReference>("installSlash", self);
+        }
+        catch (JSException)
+        {
+            // Without the key, Search is still opened from the header and the menu
         }
 
         // After the app is on screen, so a slow or missing connection never holds it back

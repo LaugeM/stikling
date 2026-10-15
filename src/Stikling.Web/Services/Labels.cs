@@ -191,6 +191,13 @@ public static class Labels
             _ => stage.ToString()
         };
 
+    public static string For(PropagationCareKind kind) => kind switch
+    {
+        PropagationCareKind.ChangedWater => "Changed the water",
+        PropagationCareKind.MoistureReading => "Moisture reading",
+        _ => kind.ToString()
+    };
+
     /// <summary>Any of the app's enums, for code that works with several (e.g. history text).</summary>
     public static string For(Enum value) => value switch
     {
@@ -200,6 +207,7 @@ public static class Labels
         LightLevel l => For(l),
         RootingAid a => For(a),
         CareKind c => For(c),
+        PropagationCareKind c => For(c),
         PropagationType t => For(t),
         PropagationStage s => Stage(s),
         Pest p => For(p),
