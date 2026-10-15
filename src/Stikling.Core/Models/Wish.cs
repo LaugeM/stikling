@@ -19,6 +19,10 @@ public sealed class Wish : Entity
     /// <summary>A locality or collector code that goes with the name, like "Sumatra EPC 123".</summary>
     public string? NameNote { get; set; }
 
+    /// <summary>The species that counts: none while sp. or a lost name hides it. The stored value stays.</summary>
+    [JsonIgnore]
+    public string? KnownSpecies => PlantNames.SpeciesToLookUp(Species, NameQualifier);
+
     /// <summary>What to call it when there is no botanical name yet, e.g. "that pink syngonium".</summary>
     public string? Name { get; set; }
 

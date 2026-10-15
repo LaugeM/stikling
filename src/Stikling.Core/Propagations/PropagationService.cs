@@ -101,7 +101,7 @@ public sealed class PropagationService(
         var changes = PropagationChanges.Describe(before, after, label, placeName);
         if (changes.Count > 0)
             await AddChangeAsync(after, string.Join("\n", changes));
-        if (PlantNames.WasIdentified((before.Genus, before.Species, before.NameQualifier), (after.Genus, after.Species, after.NameQualifier)))
+        if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
             await AddChangeAsync(after, $"Identified as {after.BotanicalName ?? after.DisplayName}", @event: TimelineEvent.Identified);
     }
 

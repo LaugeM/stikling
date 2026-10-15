@@ -29,7 +29,7 @@ public static class PlantNames
     public static string? Botanical(string? genus, string? species, string? cultivar, NameQualifier? qualifier, string? note)
     {
         var g = Genus(genus);
-        var s = qualifier == NameQualifier.Sp ? null : Species(species);
+        var s = qualifier is NameQualifier.Sp or NameQualifier.Unknown ? null : Species(species);
         var parts = new List<string>(5);
         if (g is not null)
             parts.Add(g);
@@ -49,14 +49,11 @@ public static class PlantNames
     }
 
     /// <summary>
-    /// True when a name that was unsure has been found out: the qualifier is gone, or the genus
-    /// or species is another. A name that was sure before is never identified.
+    /// True when a name that was unsure has been found out: it had a qualifier and has none now.
+    /// A name that was sure before is never identified.
     /// </summary>
-    public static bool WasIdentified(
-        (string? Genus, string? Species, NameQualifier? Qualifier) before,
-        (string? Genus, string? Species, NameQualifier? Qualifier) after) =>
-        before.Qualifier is not null
-        && (after.Qualifier is null || Genus(before.Genus) != Genus(after.Genus) || Species(before.Species) != Species(after.Species));
+    public static bool WasIdentified(NameQualifier? before, NameQualifier? after) =>
+        before is not null && after is null;
 
     /// <summary>The locality or collector code, trimmed. Null when nothing was typed.</summary>
     public static string? Note(string? note) =>

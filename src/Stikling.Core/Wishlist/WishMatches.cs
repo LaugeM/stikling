@@ -27,13 +27,13 @@ public static class WishMatches
     public static WishHave Have(Wish wish, IEnumerable<Plant> plants, PlantDictionary? dictionary = null)
     {
         var mine = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
-        var same = mine.Count(p => SameName(wish, p.Genus, p.Species, p.Cultivar, p.Nickname, dictionary));
+        var same = mine.Count(p => SameName(wish, p.Genus, p.KnownSpecies, p.Cultivar, p.Nickname, dictionary));
         if (same > 0)
             return new WishHave(same, null);
 
-        if (Key(wish.Genus, wish.Species, null, dictionary) is { Species.Length: > 0 } key
-            && mine.Any(p => Key(p.Genus, p.Species, null, dictionary) == key))
-            return new WishHave(0, PlantNames.Botanical(wish.Genus, wish.Species, null));
+        if (Key(wish.Genus, wish.KnownSpecies, null, dictionary) is { Species.Length: > 0 } key
+            && mine.Any(p => Key(p.Genus, p.KnownSpecies, null, dictionary) == key))
+            return new WishHave(0, PlantNames.Botanical(wish.Genus, wish.KnownSpecies, null));
         return new WishHave(0, null);
     }
 
@@ -49,7 +49,7 @@ public static class WishMatches
     /// <summary>True when a plant, propagation or add form with these names is the same plant as the wish.</summary>
     public static bool SameName(Wish wish, string? genus, string? species, string? cultivar, string? nickname, PlantDictionary? dictionary)
     {
-        var wanted = Key(wish.Genus, wish.Species, wish.Cultivar, dictionary);
+        var wanted = Key(wish.Genus, wish.KnownSpecies, wish.Cultivar, dictionary);
         if (wanted.Genus.Length > 0)
             return wanted == Key(genus, species, cultivar, dictionary);
 

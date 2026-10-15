@@ -36,7 +36,7 @@ public static class CsvExport
                 p.CollectionNumber,
                 p.Nickname,
                 p.Genus,
-                p.Species,
+                p.KnownSpecies,
                 p.Cultivar,
                 PlantNames.QualifierText(p.NameQualifier),
                 p.NameNote,

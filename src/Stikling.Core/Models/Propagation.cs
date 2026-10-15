@@ -28,6 +28,10 @@ public sealed class Propagation : Entity
     /// <summary>A locality or collector code that goes with the name, like "Sumatra EPC 123".</summary>
     public string? NameNote { get; set; }
 
+    /// <summary>The species that counts: none while sp. or a lost name hides it. The stored value stays.</summary>
+    [JsonIgnore]
+    public string? KnownSpecies => PlantNames.SpeciesToLookUp(Species, NameQualifier);
+
     /// <summary>The plant it was taken from. Empty for e.g. bought seeds.</summary>
     public Guid? ParentPlantId { get; set; }
 

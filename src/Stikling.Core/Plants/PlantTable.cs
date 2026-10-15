@@ -201,7 +201,7 @@ public static class PlantTable
             PlantColumn.Watered => row.Watered?.On,
             PlantColumn.Fed => row.Fed?.On,
             PlantColumn.Genus => Text(plant.Genus),
-            PlantColumn.Species => Text(plant.Species),
+            PlantColumn.Species => Text(plant.KnownSpecies),
             PlantColumn.EverydayName => Text(row.EverydayName),
             PlantColumn.Room => Text(row.Room),
             PlantColumn.Got => plant.AcquiredOn?.Start,

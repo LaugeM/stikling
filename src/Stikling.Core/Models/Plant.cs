@@ -27,6 +27,10 @@ public sealed class Plant : Entity
     /// <summary>A locality or collector code that goes with the name, like "Sumatra EPC 123".</summary>
     public string? NameNote { get; set; }
 
+    /// <summary>The species that counts: none while sp. or a lost name hides it. The stored value stays.</summary>
+    [JsonIgnore]
+    public string? KnownSpecies => PlantNames.SpeciesToLookUp(Species, NameQualifier);
+
     /// <summary>The room or spot it stands in. See <see cref="Place"/>.</summary>
     public Guid? PlaceId { get; set; }
 

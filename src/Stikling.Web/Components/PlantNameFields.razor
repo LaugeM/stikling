@@ -49,7 +49,7 @@
                @oninput="e => TypeAsync(NameField.Genus, e)" @onfocus="() => active = NameField.Genus" @onblur="Blur"
                @ref="genusInput" />
     </div>
-    @if (Qualifier != NameQualifier.Sp)
+    @if (Qualifier is not (NameQualifier.Sp or NameQualifier.Unknown))
     {
         <div class="col-6">
             <label class="form-label" for="species">Species</label>
@@ -265,7 +265,7 @@ else
 
         focusNext = field switch
         {
-            NameField.Genus => Qualifier == NameQualifier.Sp ? cultivarInput : speciesInput,
+            NameField.Genus => Qualifier is NameQualifier.Sp or NameQualifier.Unknown ? cultivarInput : speciesInput,
             NameField.Species => cultivarInput,
             _ => null
         };

@@ -127,7 +127,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName, feedName);
         if (changes.Count > 0)
             await AddChangeAsync(after.Id, string.Join("\n", changes));
-        if (PlantNames.WasIdentified((before.Genus, before.Species, before.NameQualifier), (after.Genus, after.Species, after.NameQualifier)))
+        if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
             await AddChangeAsync(after.Id, $"Identified as {after.BotanicalName ?? after.DisplayName}", TimelineEvent.Identified);
     }
 

@@ -27,8 +27,8 @@ public class UnsureNameTests
     [InlineData(NameQualifier.Sp, null, null, "Sumatra EPC 123", "Hoya sp. Sumatra EPC 123")]
     [InlineData(NameQualifier.Sp, null, "Red", null, "Hoya sp. 'Red'")]
     [InlineData(NameQualifier.Unknown, null, null, null, "Hoya")]
-    [InlineData(NameQualifier.Unknown, "carnosa", null, null, "Hoya carnosa")]
-    [InlineData(NameQualifier.Unknown, "carnosa", null, "Thailand", "Hoya carnosa Thailand")]
+    [InlineData(NameQualifier.Unknown, "carnosa", null, null, "Hoya")]
+    [InlineData(NameQualifier.Unknown, "carnosa", null, "Thailand", "Hoya Thailand")]
     [InlineData(null, "carnosa", null, "Thailand", "Hoya carnosa Thailand")]
     [InlineData(null, "carnosa", null, null, "Hoya carnosa")]
     public void The_botanical_name_is_written_the_way_collectors_write_it(
