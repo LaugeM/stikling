@@ -4,6 +4,8 @@
 @inject ILogger<WishEdit> Logger
 @inject NavigationManager Navigation
 @inject TimeProvider Time
+@inject PhotoService Photos
+@implements IAsyncDisposable
 
 <PageTitle>@(IsNew ? "Add a wish" : "Edit wish") Â· Stikling</PageTitle>
 
@@ -55,8 +57,38 @@ else
             </div>
         </fieldset>
 
+        <fieldset>
+            <legend>Photos</legend>
+            @if (photos.Count > 0)
+            {
+                <div class="photo-picks">
+                    @foreach (var photo in photos)
+                    {
+                        <div class="photo-pick">
+                            <PhotoImage PhotoId="photo.Id" Alt="Photo of the wish" />
+                            <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
+                                    aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                        </div>
+                    }
+                </div>
+            }
+            <div class="composer-row">
+                <label class="btn btn-outline-primary btn-sm icon-btn" for="wish-photos">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                    @(photos.Count > 0 ? "Add more" : "Add photos")
+                </label>
+                <input id="wish-photos" type="file" accept="image/*" multiple class="visually-hidden"
+                       @ref="photoInput" @onchange="AddPhotosAsync" disabled="@(busy || saving)" />
+            </div>
+            <div class="form-text">The plant at a shop, or a listing. They move to the plant as reference photos when you get it.</div>
+            @if (photoStatus is not null)
+            {
+                <p class="composer-status" role="status">@photoStatus</p>
+            }
+        </fieldset>
+
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary" disabled="@saving">Save</button>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">Save</button>
             <a class="btn btn-link" href="wishlist">Cancel</a>
         </div>
     </EditForm>
@@ -88,6 +120,16 @@ else
     private bool confirmDelete;
     private List<string> errors = [];
 
+    // The photos shown. Ones added here are saved as soon as they're picked, so they're dropped
+    // again when the form is left without saving. Ones removed here go when the wish is saved.
+    private readonly List<Photo> photos = [];
+    private readonly List<Photo> added = [];
+    private readonly List<Photo> removed = [];
+    private ElementReference photoInput;
+    private string? photoStatus;
+    private bool busy;
+    private bool done;
+
     private bool IsNew => Id is null;
 
     protected override async Task OnParametersSetAsync()
@@ -101,6 +143,64 @@ else
 
         wish = (await WishService.GetAllAsync()).FirstOrDefault(w => w.Id == Id);
         notFound = wish is null;
+        if (wish is not null && photos.Count == 0)
+            photos.AddRange(await WishService.GetPhotosAsync(wish.Id));
+    }
+
+    private async Task AddPhotosAsync()
+    {
+        if (wish is null)
+            return;
+
+        busy = true;
+        photoStatus = "Saving photos…";
+        StateHasChanged();
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(photoInput, SubjectType.Wish, wish.Id);
+            photos.InsertRange(0, result.Saved);
+            added.AddRange(result.Saved);
+            photoStatus = result.Message(guessesMatter: false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding photos to a wish failed");
+            photoStatus = $"Couldn't save the photos: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
+    private async Task RemovePhotoAsync(Photo photo)
+    {
+        photos.Remove(photo);
+        photoStatus = null;
+        if (added.Remove(photo))
+            await Photos.DeleteAsync(photo.Id);
+        else
+            removed.Add(photo);
+    }
+
+    private async Task DiscardAddedAsync()
+    {
+        foreach (var photo in added.ToList())
+            await Photos.DeleteAsync(photo.Id);
+        added.Clear();
+    }
+
+    /// <summary>Also covers leaving by Cancel, the back link or the phone's back button.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        if (done)
+            return;
+        try
+        {
+            await DiscardAddedAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away; the photos go with it
+        }
     }
 
     private async Task SaveAsync()
@@ -116,6 +216,11 @@ else
         try
         {
             await WishService.SaveAsync(wish);
+            foreach (var photo in removed)
+                await Photos.DeleteAsync(photo.Id);
+            removed.Clear();
+            added.Clear(); // they belong to the saved wish now
+            done = true;
             Navigation.NavigateTo("wishlist");
         }
         catch (Exception ex)
@@ -137,7 +242,11 @@ else
         saving = true;
         try
         {
-            await WishService.DeleteAsync(wish.Id);
+            var gone = await WishService.DeleteAsync(wish.Id);
+            foreach (var id in gone)
+                await Photos.RemoveBytesAsync(id);
+            added.Clear();
+            done = true;
             Navigation.NavigateTo("wishlist");
         }
         catch (Exception ex)

@@ -77,7 +77,7 @@ public sealed class IndexedDbPhotoRepository(IndexedDb db, TimeProvider time) : 
 
     public async Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync() =>
         (await db.GetAllAsync<Photo>(Stores.Photos))
-            .Where(p => !p.IsDeleted)
+            .Where(p => !p.IsDeleted && !p.IsReference)
             .GroupBy(p => p.SubjectId)
             .ToDictionary(g => g.Key, g => g.MaxBy(p => p.TakenAt)!);
 

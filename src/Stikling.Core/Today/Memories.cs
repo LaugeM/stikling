@@ -34,7 +34,7 @@ public static class Memories
         Func<DateTimeOffset, DateOnly> localDay)
     {
         var byPlant = photos
-            .Where(p => !p.IsDeleted && p.SubjectType == SubjectType.Plant)
+            .Where(p => !p.IsDeleted && !p.IsReference && p.SubjectType == SubjectType.Plant)
             .GroupBy(p => p.SubjectId)
             .ToDictionary(g => g.Key, g => g.ToList());
 

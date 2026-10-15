@@ -2,6 +2,7 @@
 @layout WideLayout
 @using Stikling.Core.Settings
 @inject IPlantRepository Repository
+@inject IPhotoRepository PhotoRepository
 @inject IPropagationRepository PropagationRepository
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
@@ -382,6 +383,8 @@ else
                         <h2>About it</h2>
                         <p class="detail-notes">@plant.Notes</p>
                     }
+
+                    <ReferencePhotoAdd SubjectType="SubjectType.Plant" SubjectId="plant.Id" OnAdded="() => historyVersion++" />
                 </section>
 
                 @if (pests.Count > 0)
@@ -1264,6 +1267,10 @@ else
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
                 .ToList();
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
+
+            // A cover that became a reference photo, on another device, counts as no cover
+            if (plant.CoverPhotoId is { } chosen && PhotoKinds.ValidCover(chosen, await PhotoRepository.GetForAsync(plant.Id)) is null)
+                plant.CoverPhotoId = null;
 
             careFor = careBook.Find(plant.Genus, plant.Species);
             places = await RoomService.GetPlacesAsync();

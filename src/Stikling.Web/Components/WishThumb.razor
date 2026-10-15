@@ -1,0 +1,13 @@
+@* The newest photo of a wish, small, at the start of its row on the wishlist. Nothing without a photo. *@
+@if (Photos.TryGetValue(Wish.Id, out var photo))
+{
+    <span class="wish-thumb" aria-hidden="true"><PhotoImage PhotoId="photo.Id" /></span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required IReadOnlyDictionary<Guid, Photo> Photos { get; set; }
+
+    [Parameter, EditorRequired]
+    public required Wish Wish { get; set; }
+}

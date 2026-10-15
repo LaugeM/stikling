@@ -50,17 +50,19 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
         module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>Stores the files chosen in <paramref name="input"/> as photos of the given subject.</summary>
-    public async Task<PhotoSaveResult> SaveFromInputAsync(ElementReference input, SubjectType subjectType, Guid subjectId)
+    public async Task<PhotoSaveResult> SaveFromInputAsync(
+        ElementReference input, SubjectType subjectType, Guid subjectId, bool reference = false)
     {
         var response = await (await Module).InvokeAsync<SaveResponse>("saveFromInput", input);
-        return await RecordAsync(response, subjectType, subjectId);
+        return await RecordAsync(response, subjectType, subjectId, reference);
     }
 
     /// <summary>
     /// Makes photo records for images already stored by photos.js, whether they came from a file
     /// input or from Google Photos. Dates are picked from the camera, the file name and the file date.
     /// </summary>
-    public async Task<PhotoSaveResult> RecordAsync(SaveResponse response, SubjectType subjectType, Guid subjectId)
+    public async Task<PhotoSaveResult> RecordAsync(
+        SaveResponse response, SubjectType subjectType, Guid subjectId, bool reference = false)
     {
         var saved = new List<Photo>();
         var undated = 0;
@@ -78,7 +80,8 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
                 SubjectId = subjectId,
                 TakenAt = takenAt,
                 Width = file.Width,
-                Height = file.Height
+                Height = file.Height,
+                IsReference = reference
             };
             await photos.AddAsync(photo);
             saved.Add(photo);
@@ -103,6 +106,16 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
         photo.Frame = frame;
         await photos.UpdateAsync(photo);
         FrameChanged?.Invoke(photo);
+    }
+
+    /// <summary>
+    /// Moves a photo to the reference photos of its plant or propagation, or back to its history.
+    /// Its timeline entry is not touched, so a photo moved back is where it was.
+    /// </summary>
+    public async Task SetReferenceAsync(Photo photo, bool reference)
+    {
+        photo.IsReference = reference;
+        await photos.UpdateAsync(photo);
     }
 
     /// <summary>The stored image data, for writing into a backup. Null when it's missing.</summary>

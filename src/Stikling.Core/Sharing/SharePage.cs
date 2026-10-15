@@ -114,7 +114,7 @@ public static class SharePage
             return [];
         var cutOff = CutOff(plant, zone);
         return photos
-            .Where(p => !p.IsDeleted && p.SubjectType == SubjectType.Propagation && p.SubjectId == from.Id
+            .Where(p => !p.IsDeleted && !p.IsReference && p.SubjectType == SubjectType.Propagation && p.SubjectId == from.Id
                 && Day(p.TakenAt, zone) <= cutOff)
             .GroupBy(p => p.Id).Select(g => g.First())
             .OrderBy(p => p.TakenAt)
@@ -219,7 +219,7 @@ public static class SharePage
             bool Within(DateOnly day) => section.CutOff is not { } last || day <= last;
 
             var subjectPhotos = photoList
-                .Where(p => !p.IsDeleted && p.SubjectType == type && p.SubjectId == section.Subject.Id && !leftOut.Contains(p.Id))
+                .Where(p => !p.IsDeleted && !p.IsReference && p.SubjectType == type && p.SubjectId == section.Subject.Id && !leftOut.Contains(p.Id))
                 .GroupBy(p => p.Id).Select(g => g.First())
                 .ToDictionary(p => p.Id);
             // Photos copied with a history only show through its items

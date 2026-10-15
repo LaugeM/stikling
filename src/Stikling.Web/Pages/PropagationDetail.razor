@@ -1,6 +1,7 @@
 @page "/propagations/{Id:guid}"
 @layout WideLayout
 @inject IPropagationRepository Repository
+@inject IPhotoRepository PhotoRepository
 @inject PropagationCareService CareService
 @inject ILogger<PropagationDetail> Logger
 @inject IPlantRepository PlantRepository
@@ -352,6 +353,8 @@ else
                         <h2>About it</h2>
                         <p class="detail-notes">@propagation.Notes</p>
                     }
+
+                    <ReferencePhotoAdd SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" OnAdded="() => historyVersion++" />
                 </section>
 
                 @if (offspring.Count > 0 && propagation.IsActive)
@@ -977,6 +980,10 @@ else
         everyday = await Names.GetEverydayNamesAsync();
         careBook = await CommonCare.GetBookAsync();
         propagation = await Repository.GetAsync(Id);
+
+        // A cover that became a reference photo, on another device, counts as no cover
+        if (propagation?.CoverPhotoId is { } chosen && PhotoKinds.ValidCover(chosen, await PhotoRepository.GetForAsync(propagation.Id)) is null)
+            propagation.CoverPhotoId = null;
         var plants = await PlantRepository.GetAllAsync();
         var propagations = allPropagations = await Repository.GetAllAsync();
         parent = propagation?.ParentPlantId is { } parentId ? plants.FirstOrDefault(p => p.Id == parentId) : null;

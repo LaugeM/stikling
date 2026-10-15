@@ -34,7 +34,7 @@
                     }
                     else
                     {
-                        @if (OnSetCover.HasDelegate)
+                        @if (OnSetCover.HasDelegate && !photo.IsReference)
                         {
                             @if (photo.Id == CoverPhotoId)
                             {
@@ -48,6 +48,11 @@
                         @if (OnFrame.HasDelegate)
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">Frame</button>
+                        }
+                        @* A photo from a received history stays in the history it came with *@
+                        @if (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null)
+                        {
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetReference.InvokeAsync(photo)">@(photo.IsReference ? "Move to history" : "Move to reference")</button>
                         }
                         @* A photo copied from the history it had before stays as it was given *@
                         @if (OnDelete.HasDelegate && photo.ReceivedHistoryId is null)
@@ -82,6 +87,10 @@
     [Parameter]
     public EventCallback<Photo> OnSetCover { get; set; }
 
+    /// <summary>Moves a photo between the history and the reference photos. The action only shows when this is set.</summary>
+    [Parameter]
+    public EventCallback<Photo> OnSetReference { get; set; }
+
     /// <summary>Deletes a photo. Delete only shows when this is set.</summary>
     [Parameter]
     public EventCallback<Photo> OnDelete { get; set; }
@@ -96,7 +105,7 @@
     private bool focusPending;
 
     /// <summary>Without any, the viewer is for looking only, like a pot's photos opened from a plant.</summary>
-    private bool HasActions => OnSetCover.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate;
+    private bool HasActions => OnSetCover.HasDelegate || OnSetReference.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate;
 
     private Photo? Current => Index is { } i && i >= 0 && i < PhotoList.Count ? PhotoList[i] : null;
 

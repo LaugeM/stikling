@@ -26,15 +26,20 @@ public static class SwapTiles
         bool nicknames)
     {
         var frames = new Dictionary<Guid, PhotoFrame?>();
+        var references = new HashSet<Guid>();
         foreach (var photo in photos ?? [])
+        {
             frames[photo.Id] = photo.Frame;
+            if (photo.IsReference)
+                references.Add(photo.Id);
+        }
 
         var byName = StringComparer.CurrentCultureIgnoreCase;
         string NameOf(string? nick, string? g, string? s, string? c) => SwapLists.ShareName(nick, g, s, c, null, nicknames);
 
         (Guid? Id, PhotoFrame? Frame) CoverOf(IEnumerable<(string Name, Guid? Cover)> members)
         {
-            var id = members.OrderBy(m => m.Name, byName).Select(m => m.Cover).FirstOrDefault(c => c is not null);
+            var id = members.OrderBy(m => m.Name, byName).Select(m => m.Cover).FirstOrDefault(c => c is not null && !references.Contains(c.Value));
             return (id, id is { } found ? frames.GetValueOrDefault(found) : null);
         }
 

@@ -1,0 +1,49 @@
+@* The "Add a reference photo" link in a plant's or propagation's details. The photos picked are
+   saved as reference photos: no timeline entry, and they never become the cover. *@
+@inject PhotoService Photos
+@inject ILogger<ReferencePhotoAdd> Logger
+
+<label class="btn btn-link btn-sm link-action reference-add" for="@inputId">Add a reference photo</label>
+<input id="@inputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1"
+       @ref="input" @onchange="AddAsync" disabled="@busy" />
+@if (message is not null)
+{
+    <p class="form-text mb-0" role="status">@message</p>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public SubjectType SubjectType { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    /// <summary>Raised after photos were saved, so the page can show them.</summary>
+    [Parameter]
+    public EventCallback OnAdded { get; set; }
+
+    private readonly string inputId = $"reference-photo-{Guid.NewGuid():N}";
+    private ElementReference input;
+    private bool busy;
+    private string? message;
+
+    private async Task AddAsync()
+    {
+        busy = true;
+        message = null;
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType, SubjectId, reference: true);
+            message = result.Message(guessesMatter: false);
+            if (result.Saved.Count > 0)
+                await OnAdded.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding a reference photo failed");
+            message = $"Couldn't save the photo: {ex.Message}";
+        }
+
+        busy = false;
+    }
+}

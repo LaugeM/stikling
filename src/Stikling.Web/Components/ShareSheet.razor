@@ -538,7 +538,7 @@
         canShare = await Cards.CanShareAsync();
 
         // The cover first, then the newest, so the picture it starts with is the one on the page
-        var all = await PhotoRepository.GetForAsync(SubjectId);
+        var all = PhotoKinds.Own(await PhotoRepository.GetForAsync(SubjectId)).ToList();
         photos = all.OrderByDescending(p => p.Id == CoverPhotoId).Take(40).ToList();
         photoId = photos.FirstOrDefault()?.Id;
 

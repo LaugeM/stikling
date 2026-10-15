@@ -28,7 +28,7 @@ else
                 <ol>
                     @foreach (var entry in entries)
                     {
-                        var entryPhotos = entry.PhotoIds.Where(photoIndex.ContainsKey).ToList();
+                        var entryPhotos = entry.PhotoIds.Where(id => photoIndex.ContainsKey(id) && !referenceIds.Contains(id)).ToList();
                         <li id="entry-@entry.Id" class="timeline-entry kind-@entry.Kind.ToString().ToLowerInvariant()">
                             <div class="entry-head">
                                 <span class="entry-kind">@KindIcon(entry)@KindLabel(entry)</span>
@@ -196,8 +196,23 @@ else
     </section>
 }
 
+@if (references.Count > 0)
+{
+    <section class="reference-photos" aria-labelledby="@referenceId">
+        <p class="reference-label" id="@referenceId">Reference · not this @(SubjectType == SubjectType.Plant ? "plant" : "propagation")</p>
+        <div class="reference-row">
+            @foreach (var photo in references)
+            {
+                <button type="button" class="reference-photo" @onclick="() => viewerIndex = photoIndex[photo.Id]" aria-label="Open reference photo">
+                    <PhotoImage PhotoId="photo.Id" />
+                </button>
+            }
+        </div>
+    </section>
+}
+
 <PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" PhotoAge="PhotoAge"
-             OnSetCover="SetCoverAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" />
+             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" />
 
 @code {
     [Parameter, EditorRequired]
@@ -221,6 +236,7 @@ else
     [Parameter]
     public EventCallback<Guid?> OnCoverChanged { get; set; }
 
+    private readonly string referenceId = $"reference-{Guid.NewGuid():N}";
     private readonly string beforeId = $"before-{Guid.NewGuid():N}";
     private readonly string editDateId = $"edit-date-{Guid.NewGuid():N}";
 
@@ -228,6 +244,8 @@ else
     private ReceivedHistory? received;
     private IReadOnlyList<(DateOnly Day, IReadOnlyList<ReceivedItem> Items)> beforeDays = [];
     private IReadOnlyList<Photo> photos = [];
+    private IReadOnlyList<Photo> references = [];
+    private HashSet<Guid> referenceIds = [];
     private Dictionary<Guid, int> photoIndex = [];
 
     private bool busy;
@@ -255,8 +273,16 @@ else
 
     private async Task LoadAsync()
     {
-        var entries = await Entries.GetForAsync(SubjectId);
-        var stored = await PhotoRepository.GetForAsync(SubjectId);
+        var allEntries = await Entries.GetForAsync(SubjectId);
+        var allStored = await PhotoRepository.GetForAsync(SubjectId);
+        references = PhotoKinds.References(allStored);
+        referenceIds = references.Select(p => p.Id).ToHashSet();
+        var stored = PhotoKinds.Own(allStored).ToList();
+
+        // An entry that was only reference photos is no longer part of the history
+        var entries = allEntries
+            .Where(e => e.PhotoIds.Count == 0 || !e.PhotoIds.All(referenceIds.Contains) || !string.IsNullOrWhiteSpace(e.Text))
+            .ToList();
         received = await ReceivedHistories.GetForAsync(SubjectId);
 
         // Newest first like the own history, and the same way round inside a day
@@ -279,6 +305,8 @@ else
             .Concat(stored.Where(p => p.ReceivedHistoryId is null && !inEntries.Contains(p.Id)))
             .Concat(copied)
             .ToList();
+        // The reference photos come last, so the row under the history opens the viewer on them
+        photos = [.. photos, .. references];
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
         days = TimelineOrder.ByDay(entries, Time);
 
@@ -350,6 +378,16 @@ else
     private DateOnly LocalDay(DateTimeOffset moment) => Time.LocalDay(moment);
 
     private Task SetCoverAsync(Photo photo) => OnCoverChanged.InvokeAsync(photo.Id);
+
+    private async Task SetReferenceAsync(Photo photo)
+    {
+        await Photos.SetReferenceAsync(photo, !photo.IsReference);
+        // A reference photo can't be the cover, and the page falls back to its usual default
+        if (photo.IsReference && photo.Id == CoverPhotoId)
+            await OnCoverChanged.InvokeAsync(null);
+        viewerIndex = null;
+        await LoadAsync();
+    }
 
     private Task FrameAsync((Photo Photo, PhotoFrame? Frame) change) => Photos.SetFrameAsync(change.Photo, change.Frame);
 
