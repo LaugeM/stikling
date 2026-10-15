@@ -81,6 +81,31 @@
 </section>
 
 <section class="settings-section">
+    <h2 class="section-label">Your photos in folders</h2>
+    <p class="settings-hint">
+        Every photo, with a folder for each plant, propagation and pot, named by when it was taken. For keeping or looking
+        through outside the app. To move your collection to another device, use a backup.
+    </p>
+    @if (photoCount == 0)
+    {
+        <p class="settings-hint">No photos yet.</p>
+    }
+    <label class="form-check">
+        <input type="checkbox" class="form-check-input" @bind="includeGone" disabled="@(busy || photoCount == 0)" />
+        <span class="form-check-label">Include plants that are gone and finished propagations</span>
+    </label>
+    <div class="settings-actions">
+        <button type="button" class="btn btn-outline-primary" disabled="@(busy || photoCount == 0)" @onclick="DownloadPhotosAsync">
+            @(gathering is { } g ? $"Gathering photos ({g.Done} of {g.Total})" : "Download photos")
+        </button>
+    </div>
+    @if (photoMessage is not null)
+    {
+        <p class="settings-message" role="status">@photoMessage</p>
+    }
+</section>
+
+<section class="settings-section">
     <h2 class="section-label">For a spreadsheet</h2>
     <p class="settings-hint">A copy of your plants or propagations to open in Excel or Google Sheets, or a list of plants to bring in. A CSV isn't a backup: photos, history and care only come back from a backup.</p>
     <div class="settings-actions">
@@ -131,12 +156,18 @@
     private bool focusFallback;
     private bool hasData; // whether a restore saves a backup of this device first
 
+    private int photoCount;
+    private bool includeGone = true;
+    private (int Done, int Total)? gathering;
+    private string? photoMessage;
+
     private DateOnly TodayDate => Time.Today();
 
     protected override async Task OnInitializedAsync()
     {
         lastBackup = await Files.GetLastBackupAsync();
         storage = await Db.EstimateAsync();
+        photoCount = (await Db.GetAllAsync<Photo>(Stores.Photos)).Count(p => !p.IsDeleted);
         // Only for the wording of the hint, and read without loading Clerk
         signedIn = Account.IsAvailable && await Account.WasSignedInAsync();
     }
@@ -184,6 +215,36 @@
         }
 
         storage = await Db.EstimateAsync();
+        busy = false;
+    }
+
+    private async Task DownloadPhotosAsync()
+    {
+        busy = true;
+        photoMessage = null;
+        gathering = (0, 0);
+        StateHasChanged();
+
+        try
+        {
+            var progress = new Progress<(int Done, int Total)>(p =>
+            {
+                gathering = p;
+                StateHasChanged();
+            });
+            var summary = await Backup.DownloadPhotoFoldersAsync(new PhotoFolderOptions(includeGone), progress);
+            photoMessage = $"Saved {Labels.Count(summary.Added, "photo")}. Check your downloads."
+                + (summary.Skipped > 0
+                    ? $" {Labels.Count(summary.Skipped, "photo")} couldn't be found on this device and {(summary.Skipped == 1 ? "was" : "were")} left out."
+                    : "");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Downloading the photos failed");
+            photoMessage = "Couldn't download the photos. Check that the device has room, then try again.";
+        }
+
+        gathering = null;
         busy = false;
     }
 
