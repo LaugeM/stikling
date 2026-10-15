@@ -1,0 +1,138 @@
+# Care for common plants, kept by hand. care.cs in this folder turns it into
+# src/Stikling.Web/wwwroot/data/plant-care.json, which the plant form and plant page offer from.
+#
+# One plant to a line:
+#
+#   Genus species: light | water | humidity | season | rest | cats | dogs | people | care source | pets source | people source
+#
+# A line with only a genus counts for every plant in that genus that has no line of its own. A
+# plant with a line of its own gets nothing from the genus line.
+#
+# Values, or ? when no source says:
+#   light     low, medium, bright-indirect, direct-sun (the light it likes, indoors)
+#   water     dry-out, dry-partly, moist
+#   humidity  low, medium, high
+#   season    summer (rests in winter), winter (rests in summer), all-year
+#   rest      cooler, drier, cooler-drier, dies-back (only with summer or winter)
+#   cats, dogs, people   toxic, non-toxic
+#
+# Every value comes from the source on its line, and a source is ? when its values are all ?. Light,
+# water and humidity are only taken from what a source says about growing the plant indoors. Ratings
+# meant for a garden, like "full sun" or "part shade, 2 to 6 hours of direct sun", don't count. A
+# season is only set when the source says the plant goes dormant, not when it only says to water
+# less in winter. Cats and dogs come from the ASPCA. People comes from NC State Extension's poison
+# section, and only when that section is about eating the leaves or stems.
+#
+# How the words on a page were read:
+#   light     "Bright indirect", "bright filtered", "filtered sun" and "bright light with no direct
+#             sun" are bright-indirect. "Medium", "moderate" and "indirect or low" light are medium.
+#             "Sunny window" and "some direct sun" are direct-sun.
+#   water     "Let it dry out between waterings" is dry-out. "Top inch dry", "almost dry on top",
+#             "dry slightly" and "never let it dry out completely" are dry-partly. "Keep evenly
+#             moist" and "do not let it dry out" are moist. "Water regularly" alone is ?.
+#   humidity  "High humidity", 50 to 60% or more, or a humidifier or pebble tray is high. "Medium"
+#             or "moderate" is medium. "Tolerates dry air" or "home humidity is fine" is low.
+#
+# Use the name the plant goes by now, as in plant-names.json. Old names find the line anyway, since
+# care.cs adds them. The build warns about a name it doesn't know.
+
+# Where the sources are, and the name the app shows for each
+source plants.ces.ncsu.edu: NC State Extension
+source www.missouribotanicalgarden.org: Missouri Botanical Garden
+source www.rhs.org.uk: RHS
+source www.aspca.org: ASPCA
+
+# Aroids
+Alocasia: ? | ? | ? | ? | ? | toxic | toxic | ? | ? | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/alocasia | ?
+Alocasia × mortfontanensis: bright-indirect | ? | high | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/alocasia-x-mortfontanensis/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/alocasia | https://plants.ces.ncsu.edu/plants/alocasia-x-mortfontanensis/
+Alocasia macrorrhizos: ? | ? | high | ? | ? | toxic | toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=276573 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/alocasia | ?
+Aglaonema: bright-indirect | ? | high | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/aglaonema/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/chinese-evergreen | https://plants.ces.ncsu.edu/plants/aglaonema/
+Anthurium andraeanum: bright-indirect | moist | high | ? | ? | ? | ? | toxic | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=276219 | ? | https://plants.ces.ncsu.edu/plants/anthurium-andraeanum/
+Dieffenbachia seguine: bright-indirect | dry-partly | high | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/dieffenbachia-seguine/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/dieffenbachia | https://plants.ces.ncsu.edu/plants/dieffenbachia-seguine/
+Epipremnum aureum: bright-indirect | dry-out | high | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/epipremnum-aureum/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/golden-pothos | https://plants.ces.ncsu.edu/plants/epipremnum-aureum/
+Monstera adansonii: bright-indirect | ? | high | ? | ? | ? | ? | toxic | https://plants.ces.ncsu.edu/plants/monstera-adansonii/ | ? | https://plants.ces.ncsu.edu/plants/monstera-adansonii/
+Monstera deliciosa: bright-indirect | dry-partly | high | ? | ? | toxic | toxic | toxic | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=276378 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/swiss-cheese-plant | https://plants.ces.ncsu.edu/plants/monstera-deliciosa/
+Philodendron bipinnatifidum: ? | ? | medium | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/philodendron-bipinnatifidum/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/tree-philodendron | https://plants.ces.ncsu.edu/plants/philodendron-bipinnatifidum/
+Philodendron hederaceum: medium | moist | medium | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/philodendron-hederaceum/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/heartleaf-philodendron | https://plants.ces.ncsu.edu/plants/philodendron-hederaceum/
+Rhaphidophora tetrasperma: bright-indirect | dry-partly | high | ? | ? | ? | ? | toxic | https://plants.ces.ncsu.edu/plants/rhaphidophora-tetrasperma/ | ? | https://plants.ces.ncsu.edu/plants/rhaphidophora-tetrasperma/
+Scindapsus pictus: bright-indirect | ? | ? | ? | ? | toxic | toxic | ? | https://plants.ces.ncsu.edu/plants/scindapsus-pictus/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/satin-pothos | ?
+Spathiphyllum: bright-indirect | dry-partly | ? | ? | ? | toxic | toxic | toxic | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=264610 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/peace-lily | https://plants.ces.ncsu.edu/plants/spathiphyllum/
+Syngonium podophyllum: bright-indirect | ? | high | ? | ? | toxic | toxic | toxic | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=276453 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/arrow-head-vine | https://plants.ces.ncsu.edu/plants/syngonium-podophyllum/
+Zamioculcas zamiifolia: bright-indirect | dry-out | ? | ? | ? | ? | ? | toxic | https://plants.ces.ncsu.edu/plants/zamioculcas-zamiifolia/ | ? | https://plants.ces.ncsu.edu/plants/zamioculcas-zamiifolia/
+
+# Dracaena, spider plant and relatives
+Asparagus densiflorus: bright-indirect | ? | low | ? | ? | toxic | toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=262991 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/emerald-feather | ?
+Aspidistra elatior: bright-indirect | ? | low | ? | ? | non-toxic | non-toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=282290 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/cast-iron-plant | ?
+Beaucarnea recurvata: direct-sun | dry-out | low | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/beaucarnea-recurvata/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/pony-tail | ?
+Chlorophytum comosum: medium | moist | medium | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/chlorophytum-comosum/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/spider-plant | ?
+Dracaena: ? | ? | ? | ? | ? | toxic | toxic | ? | ? | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/dracaena | ?
+Dracaena fragrans: bright-indirect | moist | high | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/dracaena-fragrans/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/corn-plant | https://plants.ces.ncsu.edu/plants/dracaena-fragrans/
+Dracaena reflexa var. angustifolia: bright-indirect | dry-partly | ? | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/dracaena-reflexa-var-angustifolia/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/madagascar-dragon-tree | https://plants.ces.ncsu.edu/plants/dracaena-reflexa-var-angustifolia/
+Dracaena sanderiana: ? | moist | ? | ? | ? | toxic | toxic | ? | https://plants.ces.ncsu.edu/plants/dracaena-sanderiana/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/dracaena | ?
+Dracaena trifasciata: ? | dry-out | low | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/dracaena-trifasciata/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/snake-plant | https://plants.ces.ncsu.edu/plants/dracaena-trifasciata/
+Yucca: ? | ? | ? | ? | ? | toxic | toxic | ? | ? | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/yucca | ?
+Yucca gigantea: ? | ? | low | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/yucca-gigantea/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/yucca | https://plants.ces.ncsu.edu/plants/yucca-gigantea/
+
+# Ficus
+Ficus benjamina: bright-indirect | dry-out | ? | ? | ? | toxic | toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=282745 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/fig | ?
+Ficus elastica: bright-indirect | ? | medium | ? | ? | ? | ? | ? | https://plants.ces.ncsu.edu/plants/ficus-elastica/ | ? | ?
+Ficus lyrata: bright-indirect | ? | medium | ? | ? | ? | ? | toxic | https://plants.ces.ncsu.edu/plants/ficus-lyrata/ | ? | https://plants.ces.ncsu.edu/plants/ficus-lyrata/
+Ficus pumila: bright-indirect | ? | high | ? | ? | ? | ? | ? | https://plants.ces.ncsu.edu/plants/ficus-pumila/ | ? | ?
+
+# Peperomia and Pilea
+Peperomia argyraea: bright-indirect | dry-partly | high | ? | ? | non-toxic | non-toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285109 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/watermelon-peperomia | ?
+Peperomia caperata: bright-indirect | dry-partly | high | ? | ? | non-toxic | non-toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285110 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/emerald-ripple-peperomia | ?
+Peperomia obtusifolia: bright-indirect | dry-partly | high | ? | ? | non-toxic | non-toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285088 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/baby-rubber-plant | ?
+Pilea peperomioides: bright-indirect | ? | medium | ? | ? | ? | ? | non-toxic | https://plants.ces.ncsu.edu/plants/pilea-peperomioides/ | ? | https://plants.ces.ncsu.edu/plants/pilea-peperomioides/
+
+# Trailing and climbing
+Ceropegia woodii: bright-indirect | dry-out | ? | summer | drier | ? | ? | ? | https://plants.ces.ncsu.edu/plants/ceropegia-woodii/ | ? | ?
+Curio rowleyanus: ? | dry-partly | ? | ? | ? | ? | ? | toxic | https://plants.ces.ncsu.edu/plants/curio-rowleyanus/ | ? | https://plants.ces.ncsu.edu/plants/curio-rowleyanus/
+Hedera helix: medium | dry-partly | ? | ? | ? | toxic | toxic | toxic | https://www.rhs.org.uk/plants/ivy/ivy-as-a-houseplant | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/english-ivy | https://plants.ces.ncsu.edu/plants/hedera-helix/
+Hoya carnosa: bright-indirect | dry-out | high | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/hoya-carnosa/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/honey-plant | ?
+Hoya kerrii: ? | dry-partly | high | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/hoya-kerrii/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/sweetheart-hoya | ?
+Tradescantia fluminensis: bright-indirect | moist | ? | ? | ? | toxic | toxic | toxic | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279259 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/inch-plant | https://plants.ces.ncsu.edu/plants/tradescantia-fluminensis/
+Tradescantia zebrina: bright-indirect | dry-out | low | ? | ? | ? | ? | toxic | https://plants.ces.ncsu.edu/plants/tradescantia-zebrina/ | ? | https://plants.ces.ncsu.edu/plants/tradescantia-zebrina/
+
+# Prayer plants. The ASPCA's Calathea entry covers the genus, and most plants sold as Calathea are Goeppertia now.
+Calathea: ? | ? | ? | ? | ? | non-toxic | non-toxic | ? | ? | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/calathea | ?
+Goeppertia: ? | ? | ? | ? | ? | non-toxic | non-toxic | ? | ? | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/calathea | ?
+Goeppertia insignis: bright-indirect | moist | high | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/goeppertia-insignis/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/calathea-lancifolia-3 | ?
+Goeppertia makoyana: bright-indirect | moist | high | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/goeppertia-makoyana/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/calathea | ?
+Goeppertia ornata: bright-indirect | moist | high | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/goeppertia-ornata/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/calathea | ?
+Goeppertia roseopicta: bright-indirect | moist | high | ? | ? | non-toxic | non-toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=364366 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/calathea | ?
+Maranta leuconeura: bright-indirect | moist | high | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/maranta-leuconeura/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/prayer-plant | ?
+
+# Coloured leaves
+Begonia rex: bright-indirect | dry-partly | high | summer | drier | toxic | toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=242218 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/rex-begonia | ?
+Codiaeum variegatum: direct-sun | moist | high | ? | ? | ? | ? | toxic | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=280233 | ? | https://plants.ces.ncsu.edu/plants/codiaeum-variegatum/
+Fittonia albivenis: bright-indirect | ? | high | ? | ? | non-toxic | non-toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=263705 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/nerve-plant | ?
+Oxalis: ? | ? | ? | ? | ? | toxic | toxic | ? | ? | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/shamrock-plant | ?
+Oxalis triangularis: ? | dry-partly | ? | summer | dies-back | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/oxalis-triangularis/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/shamrock-plant | https://plants.ces.ncsu.edu/plants/oxalis-triangularis/
+
+# Succulents and cacti
+Aloe vera: ? | dry-out | ? | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/aloe-vera/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/aloe | https://plants.ces.ncsu.edu/plants/aloe-vera/
+Crassula ovata: direct-sun | dry-out | low | ? | ? | toxic | toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279445 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/jade-plant | ?
+Echeveria elegans: ? | dry-out | ? | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/echeveria-elegans/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/hens-and-chickens | ?
+Haworthiopsis fasciata: bright-indirect | dry-out | low | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/haworthiopsis-fasciata/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/zebra-haworthia | ?
+Kalanchoe: ? | ? | ? | ? | ? | toxic | toxic | ? | ? | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/kalanchoe | ?
+Kalanchoe blossfeldiana: bright-indirect | dry-out | ? | ? | ? | toxic | toxic | toxic | https://plants.ces.ncsu.edu/plants/kalanchoe-blossfeldiana/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/kalanchoe | https://plants.ces.ncsu.edu/plants/kalanchoe-blossfeldiana/
+Schlumbergera × buckleyi: bright-indirect | moist | high | ? | ? | non-toxic | non-toxic | non-toxic | https://plants.ces.ncsu.edu/plants/schlumbergera-x-buckleyi/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/christmas-cactus | https://plants.ces.ncsu.edu/plants/schlumbergera-x-buckleyi/
+Sedum morganianum: direct-sun | dry-out | ? | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/sedum-morganianum/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/burros-tail | ?
+
+# Orchids and bromeliads
+Guzmania lingulata: bright-indirect | dry-out | high | ? | ? | non-toxic | non-toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=278139 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/orange-star | ?
+Phalaenopsis: bright-indirect | dry-partly | high | ? | ? | non-toxic | non-toxic | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=264608 | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/phalaenopsis-orchid | ?
+
+# Trees and palms
+Chamaedorea elegans: bright-indirect | dry-partly | low | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/chamaedorea-elegans/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/parlor-palm | ?
+Chrysalidocarpus lutescens: bright-indirect | moist | high | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/chrysalidocarpus-lutescens/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/areca-palm | ?
+Heptapleurum arboricola: bright-indirect | dry-out | high | ? | ? | toxic | toxic | ? | https://plants.ces.ncsu.edu/plants/heptapleurum-arboricola/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/schefflera | ?
+Howea forsteriana: medium | moist | ? | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/howea-forsteriana/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/kentia-palm | ?
+Pachira aquatica: bright-indirect | ? | ? | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/pachira-aquatica/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/money-tree | ?
+Strelitzia reginae: direct-sun | ? | ? | ? | ? | toxic | toxic | ? | https://plants.ces.ncsu.edu/plants/strelitzia-reginae/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/bird-paradise-flower | ?
+
+# Ferns
+Adiantum raddianum: bright-indirect | moist | high | ? | ? | ? | ? | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285805 | ? | ?
+Asplenium nidus: bright-indirect | moist | high | ? | ? | ? | ? | ? | https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285707 | ? | ?
+Nephrolepis exaltata: bright-indirect | moist | high | ? | ? | non-toxic | non-toxic | ? | https://plants.ces.ncsu.edu/plants/nephrolepis-exaltata/ | https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/boston-fern | ?
