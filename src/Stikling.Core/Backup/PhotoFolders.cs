@@ -17,6 +17,10 @@ public static class PhotoFolders
     private const int MaxNameLength = 80;
     private const string Unnamed = "Unnamed";
 
+    private static readonly HashSet<string> ReservedOnWindows = new(
+        ["CON", "PRN", "AUX", "NUL", .. Enumerable.Range(1, 9).SelectMany(n => new[] { $"COM{n}", $"LPT{n}" })],
+        StringComparer.OrdinalIgnoreCase);
+
     /// <summary>The photos to include with the path each gets, without an extension, in a stable order.</summary>
     public static IReadOnlyList<(Guid PhotoId, string Path)> Plan(
         IEnumerable<Plant> plants, IEnumerable<Propagation> propagations, IEnumerable<Pot> pots,
@@ -86,6 +90,9 @@ public static class PhotoFolders
         if (text.Length > MaxNameLength)
             text = text[..MaxNameLength];
         text = text.TrimEnd('.', ' ');
-        return text.Length == 0 ? Unnamed : text;
+        if (text.Length == 0)
+            return Unnamed;
+        // Windows can't make a file or folder with a device name, whatever comes after a dot
+        return ReservedOnWindows.Contains(text.Split('.')[0]) ? $"_{text}" : text;
     }
 }

@@ -229,11 +229,15 @@
         {
             var progress = new Progress<(int Done, int Total)>(p =>
             {
+                // A report can arrive after the download has finished, and must not bring the progress back
+                if (!busy) return;
                 gathering = p;
                 StateHasChanged();
             });
             var summary = await Backup.DownloadPhotoFoldersAsync(new PhotoFolderOptions(includeGone), progress);
-            photoMessage = $"Saved {Labels.Count(summary.Added, "photo")}. Check your downloads."
+            photoMessage = summary.Added + summary.Skipped == 0
+                ? (includeGone ? "No photos to include." : "No photos to include. Tick the box to include plants that are gone and finished propagations.")
+                : $"Saved {Labels.Count(summary.Added, "photo")}. Check your downloads."
                 + (summary.Skipped > 0
                     ? $" {Labels.Count(summary.Skipped, "photo")} couldn't be found on this device and {(summary.Skipped == 1 ? "was" : "were")} left out."
                     : "");
@@ -244,8 +248,8 @@
             photoMessage = "Couldn't download the photos. Check that the device has room, then try again.";
         }
 
-        gathering = null;
         busy = false;
+        gathering = null;
     }
 
     private async Task ChooseFileAsync(InputFileChangeEventArgs e)

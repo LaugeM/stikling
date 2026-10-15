@@ -121,6 +121,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             await db.GetAllAsync<Plant>(Stores.Plants), await db.GetAllAsync<Propagation>(Stores.Propagations),
             await db.GetAllAsync<Pot>(Stores.Pots), await db.GetAllAsync<Photo>(Stores.Photos), options, time.LocalTimeZone);
 
+        if (plan.Count == 0)
+            return new PhotoFolderSummary(0, 0);
+
         var added = 0;
         var skipped = 0;
         progress?.Report((0, plan.Count));

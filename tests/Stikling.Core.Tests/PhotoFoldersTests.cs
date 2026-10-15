@@ -71,6 +71,9 @@ public class PhotoFoldersTests
     [InlineData("", "Unnamed")]
     [InlineData("???", "Unnamed")]
     [InlineData(null, "Unnamed")]
+    [InlineData("CON", "_CON")]
+    [InlineData("com1.old", "_com1.old")]
+    [InlineData("Console", "Console")]
     public void Names_are_made_safe_for_file_systems(string? name, string expected) =>
         Assert.Equal(expected, PhotoFolders.SafeName(name));
 
