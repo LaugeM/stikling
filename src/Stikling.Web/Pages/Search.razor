@@ -1,6 +1,7 @@
 @page "/search"
 @layout WideLayout
 @implements IAsyncDisposable
+@inject CoverPhotos Covers
 @inject SearchService SearchService
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
@@ -156,9 +157,9 @@
         // The tiles' photos, which the results don't carry
         var photos = new Dictionary<Guid, Guid?>();
         foreach (var plant in await PlantRepository.GetAllAsync())
-            photos[plant.Id] = plant.CoverPhotoId;
+            photos[plant.Id] = Covers.Shown(plant.CoverPhotoId);
         foreach (var propagation in await PropagationRepository.GetAllAsync())
-            photos[propagation.Id] = propagation.CoverPhotoId;
+            photos[propagation.Id] = Covers.Shown(propagation.CoverPhotoId);
         covers = photos;
         Refresh();
     }

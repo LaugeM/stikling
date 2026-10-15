@@ -120,8 +120,8 @@ else
     private bool confirmDelete;
     private List<string> errors = [];
 
-    // The photos shown. Ones added here are saved as soon as they're picked, so they're dropped
-    // again when the form is left without saving. Ones removed here go when the wish is saved.
+    // The photos shown. Ones added here only have their image data stored until the wish is saved,
+    // and the data is dropped again when the form is left. Ones removed here go when the wish is saved.
     private readonly List<Photo> photos = [];
     private readonly List<Photo> added = [];
     private readonly List<Photo> removed = [];
@@ -129,12 +129,29 @@ else
     private string? photoStatus;
     private bool busy;
     private bool done;
+    private Guid? loadedFor;
+    private bool loadedOnce;
 
     private bool IsNew => Id is null;
 
     protected override async Task OnParametersSetAsync()
     {
         notFound = false;
+
+        // Another wish (or a new one) in the same page: nothing of the last one carries over
+        if (loadedOnce && loadedFor != Id)
+        {
+            await DiscardAddedAsync();
+            photos.Clear();
+            removed.Clear();
+            photoStatus = null;
+            errors = [];
+            confirmDelete = false;
+            wish = null;
+        }
+        loadedOnce = true;
+        loadedFor = Id;
+
         if (IsNew)
         {
             wish ??= new Wish();
@@ -157,7 +174,7 @@ else
         StateHasChanged();
         try
         {
-            var result = await Photos.SaveFromInputAsync(photoInput, SubjectType.Wish, wish.Id);
+            var result = await Photos.SaveFromInputAsync(photoInput, SubjectType.Wish, wish.Id, record: false);
             photos.InsertRange(0, result.Saved);
             added.AddRange(result.Saved);
             photoStatus = result.Message(guessesMatter: false);
@@ -176,7 +193,7 @@ else
         photos.Remove(photo);
         photoStatus = null;
         if (added.Remove(photo))
-            await Photos.DeleteAsync(photo.Id);
+            await Photos.RemoveBytesAsync(photo.Id);
         else
             removed.Add(photo);
     }
@@ -184,7 +201,7 @@ else
     private async Task DiscardAddedAsync()
     {
         foreach (var photo in added.ToList())
-            await Photos.DeleteAsync(photo.Id);
+            await Photos.RemoveBytesAsync(photo.Id);
         added.Clear();
     }
 
@@ -216,6 +233,7 @@ else
         try
         {
             await WishService.SaveAsync(wish);
+            await Photos.RecordSavedAsync(added);
             foreach (var photo in removed)
                 await Photos.DeleteAsync(photo.Id);
             removed.Clear();
@@ -245,7 +263,7 @@ else
             var gone = await WishService.DeleteAsync(wish.Id);
             foreach (var id in gone)
                 await Photos.RemoveBytesAsync(id);
-            added.Clear();
+            await DiscardAddedAsync();
             done = true;
             Navigation.NavigateTo("wishlist");
         }

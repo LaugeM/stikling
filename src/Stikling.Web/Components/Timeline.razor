@@ -281,7 +281,7 @@ else
 
         // An entry that was only reference photos is no longer part of the history
         var entries = allEntries
-            .Where(e => e.PhotoIds.Count == 0 || !e.PhotoIds.All(referenceIds.Contains) || !string.IsNullOrWhiteSpace(e.Text))
+            .Where(e => !PhotoKinds.OnlyReferences(e, referenceIds))
             .ToList();
         received = await ReceivedHistories.GetForAsync(SubjectId);
 
@@ -382,6 +382,8 @@ else
     private async Task SetReferenceAsync(Photo photo)
     {
         await Photos.SetReferenceAsync(photo, !photo.IsReference);
+        // A photo added as a reference has no entry, so back in the history it needs one to show
+        await TimelineService.EnsureOnHistoryAsync(photo);
         // A reference photo can't be the cover, and the page falls back to its usual default
         if (photo.IsReference && photo.Id == CoverPhotoId)
             await OnCoverChanged.InvokeAsync(null);

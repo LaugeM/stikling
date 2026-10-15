@@ -17,6 +17,20 @@ public static class PhotoKinds
         photos.Where(p => !p.IsDeleted && p.IsReference).OrderByDescending(p => p.TakenAt).ToList();
 
     /// <summary>
+    /// True for an entry that was only reference photos: it lists photos, they are all reference
+    /// photos, and it has no text. It no longer belongs on the history.
+    /// </summary>
+    public static bool OnlyReferences(TimelineEntry entry, IReadOnlySet<Guid> referenceIds) =>
+        entry.PhotoIds.Count > 0 && entry.PhotoIds.All(referenceIds.Contains) && string.IsNullOrWhiteSpace(entry.Text);
+
+    /// <summary>
+    /// The cover to show: the chosen one, or null when it is a known reference photo. A cover whose
+    /// photo isn't known (it hasn't synced yet) is shown as before. Nothing is written.
+    /// </summary>
+    public static Guid? Shown(Guid? chosen, IReadOnlySet<Guid> referenceIds) =>
+        chosen is { } id && !referenceIds.Contains(id) ? id : null;
+
+    /// <summary>
     /// The chosen cover, unless it's gone, deleted or a reference photo, in which case null so the
     /// caller falls back to the usual default as if none were chosen.
     /// </summary>

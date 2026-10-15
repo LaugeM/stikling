@@ -2,7 +2,9 @@
    it has been: the number fills the tile when there's no photo, and sits in a corner of the
    photo when there is one. A finished propagation shows its photo or the glass icon. *@
 
-@if (Propagation.CoverPhotoId is { } coverId)
+@inject CoverPhotos Covers
+
+@if (Covers.Shown(Propagation.CoverPhotoId) is { } coverId)
 {
     <div class="item-thumb">
         <PhotoImage PhotoId="coverId" />

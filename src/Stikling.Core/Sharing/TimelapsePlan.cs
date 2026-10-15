@@ -1,5 +1,3 @@
-using Stikling.Core.Models;
-
 namespace Stikling.Core.Sharing;
 
 /// <summary>How long each photo of a time-lapse is held.</summary>
@@ -85,10 +83,6 @@ public sealed class TimelapsePlan
         var crossfade = Math.Min(MaxCrossfadeSeconds, hold / 3);
         return new TimelapsePlan(shots, crossfade, ordered.Count * hold + LastExtraSeconds);
     }
-
-    /// <summary>The photos a time-lapse can use: the subject's own, leaving out deleted ones and reference photos.</summary>
-    public static IReadOnlyList<TimelapsePhoto> PhotosOf(IEnumerable<Photo> photos) =>
-        Timeline.PhotoKinds.Own(photos).Select(p => new TimelapsePhoto(p.Id, p.TakenAt)).ToList();
 
     /// <summary>The speed saved on a device, or normal when it is missing or not one of the three.</summary>
     public static TimelapseSpeed ParseSpeed(string? saved) =>

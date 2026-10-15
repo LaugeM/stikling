@@ -2,7 +2,7 @@
 @layout WideLayout
 @using Stikling.Core.Settings
 @inject IPlantRepository Repository
-@inject IPhotoRepository PhotoRepository
+@inject CoverPhotos Covers
 @inject IPropagationRepository PropagationRepository
 @inject ICareLogRepository CareLogRepository
 @inject IPestCaseRepository PestCaseRepository
@@ -41,7 +41,7 @@ else
     @* On a wide screen these are two columns: who it is on the left, its history on the right *@
     <div class="profile-layout">
         <div class="profile-side">
-            @if (plant.CoverPhotoId is { } coverId)
+            @if (ShownCover is { } coverId)
             {
                 <div class="detail-hero">
                     <button type="button" class="detail-hero-open" aria-label="Open the cover photo" @onclick="() => timeline?.OpenPhoto(coverId)">
@@ -51,7 +51,7 @@ else
             }
 
             <header class="detail-header">
-                @if (plant.CoverPhotoId is null)
+                @if (ShownCover is null)
                 {
                     <div class="detail-icon potted" aria-hidden="true">
                         <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
@@ -577,13 +577,13 @@ else
             }
 
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
-                      CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)"
+                      CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)"
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
         </div>
     </div>
 
     <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId"
-                   CoverPhotoId="plant.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
+                   CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
 
     @if (googleOn)
     {
@@ -662,7 +662,7 @@ else
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="plant.Id"
                 Plant="plant" FromPropagation="fromPropagation" StartOnLink="shareOnLink"
-                CoverPhotoId="plant.CoverPhotoId" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
+                CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
 
     <Sheet Title="@MoreTitle" Open="more != More.None" OpenChanged="open => { if (!open) more = More.None; }">
         @switch (more)
@@ -1025,6 +1025,9 @@ else
     private bool scrollToFamily;
     private More more;
     private int historyVersion;
+
+    // A cover that is a reference photo shows as no cover. The plant itself isn't changed.
+    private Guid? ShownCover => Covers.Shown(plant?.CoverPhotoId);
     private EntryComposer? composer;
     private bool googleOn;
     private bool photoChoice;
@@ -1253,6 +1256,7 @@ else
     {
         everyday = await Names.GetEverydayNamesAsync();
         careBook = await CommonCare.GetBookAsync();
+        await Covers.EnsureLoadedAsync();
         var all = await Repository.GetAllAsync();
         plant = all.FirstOrDefault(p => p.Id == Id);
         if (plant is not null)
@@ -1267,10 +1271,6 @@ else
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
                 .ToList();
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
-
-            // A cover that became a reference photo, on another device, counts as no cover
-            if (plant.CoverPhotoId is { } chosen && PhotoKinds.ValidCover(chosen, await PhotoRepository.GetForAsync(plant.Id)) is null)
-                plant.CoverPhotoId = null;
 
             careFor = careBook.Find(plant.Genus, plant.Species);
             places = await RoomService.GetPlacesAsync();

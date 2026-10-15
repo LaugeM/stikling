@@ -4,6 +4,7 @@
 @page "/round/back"
 @using GoingRoundLogic = Stikling.Core.Today.GoingRound
 @using Stikling.Core.Settings
+@inject CoverPhotos Covers
 @inject IPlantRepository Plants
 @inject ILogger<GoingRound> Logger
 @inject IPropagationRepository Propagations
@@ -361,10 +362,10 @@ else
 
     private DateTimeOffset StartOfToday => Time.MomentAt(Today.ToDateTime(TimeOnly.MinValue));
 
-    private static Guid? CoverOf(Entity subject) => subject switch
+    private Guid? CoverOf(Entity subject) => subject switch
     {
-        Plant plant => plant.CoverPhotoId,
-        Propagation propagation => propagation.CoverPhotoId,
+        Plant plant => Covers.Shown(plant.CoverPhotoId),
+        Propagation propagation => Covers.Shown(propagation.CoverPhotoId),
         _ => null
     };
 

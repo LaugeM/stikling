@@ -54,16 +54,40 @@ public class ReferencePhotoTests
     }
 
     [Fact]
-    public void A_time_lapse_leaves_reference_photos_out()
+    public void Lately_leaves_out_an_entry_that_was_only_reference_photos()
     {
-        var plantId = Guid.NewGuid();
-        var first = PhotoOf(plantId, At(9, 1));
-        var reference = PhotoOf(plantId, At(9, 2), reference: true);
-        var last = PhotoOf(plantId, At(9, 3));
+        var subject = Guid.NewGuid();
+        var reference = PhotoOf(subject, At(10, 10), reference: true);
+        var only = new TimelineEntry
+        {
+            SubjectType = SubjectType.Plant, SubjectId = subject, Kind = TimelineKind.Photo, OccurredAt = At(10, 10),
+            PhotoIds = [reference.Id]
+        };
+        var withText = new TimelineEntry
+        {
+            SubjectType = SubjectType.Plant, SubjectId = subject, Kind = TimelineKind.Note, OccurredAt = At(10, 9),
+            Text = "Bought it", PhotoIds = [reference.Id]
+        };
+        var refs = new HashSet<Guid> { reference.Id };
 
-        var photos = TimelapsePlan.PhotosOf([first, reference, last]);
+        var recent = Stikling.Core.Today.TodayBoard.RecentActivity(
+            [only, withText], new HashSet<Guid> { subject }, At(9, 1), 8, refs);
 
-        Assert.Equal([first.Id, last.Id], photos.Select(p => p.Id));
+        Assert.Equal([withText], recent);
+        Assert.True(PhotoKinds.OnlyReferences(only, refs));
+        Assert.False(PhotoKinds.OnlyReferences(withText, refs));
+    }
+
+    [Fact]
+    public void A_cover_is_shown_unless_its_photo_is_known_to_be_a_reference()
+    {
+        var reference = Guid.NewGuid();
+        var refs = new HashSet<Guid> { reference };
+
+        Assert.Null(PhotoKinds.Shown(reference, refs));
+        var notSynced = Guid.NewGuid();
+        Assert.Equal(notSynced, PhotoKinds.Shown(notSynced, refs));
+        Assert.Null(PhotoKinds.Shown(null, refs));
     }
 
     [Fact]
@@ -99,6 +123,41 @@ public class ReferencePhotoTests
         var newest = photos.GetNewestPerSubjectAsync().Result;
 
         Assert.Equal(At(9, 1), newest[plantId].TakenAt);
+    }
+
+    [Fact]
+    public async Task A_reference_photo_moved_to_history_gets_an_entry_on_the_day_it_was_taken()
+    {
+        var timeline = new FakeTimelineRepository();
+        var service = new TimelineService(timeline, new FakePhotoRepository(), Time);
+        var plantId = Guid.NewGuid();
+        var photo = PhotoOf(plantId, At(9, 3), reference: true);
+        photo.IsReference = false;
+
+        Assert.True(await service.EnsureOnHistoryAsync(photo));
+
+        var entry = Assert.Single(await timeline.GetForAsync(plantId));
+        Assert.Equal(TimelineKind.Photo, entry.Kind);
+        Assert.Equal(At(9, 3), entry.OccurredAt);
+        Assert.Equal([photo.Id], entry.PhotoIds);
+        Assert.False(await service.EnsureOnHistoryAsync(photo));
+        Assert.Single(await timeline.GetForAsync(plantId));
+    }
+
+    [Fact]
+    public async Task A_photo_an_entry_still_lists_gets_no_second_entry_when_moved_back()
+    {
+        var timeline = new FakeTimelineRepository();
+        var service = new TimelineService(timeline, new FakePhotoRepository(), Time);
+        var plantId = Guid.NewGuid();
+        var photo = PhotoOf(plantId, At(9, 3));
+        await timeline.AddAsync(new TimelineEntry
+        {
+            SubjectType = SubjectType.Plant, SubjectId = plantId, Kind = TimelineKind.Photo, OccurredAt = At(9, 3), PhotoIds = [photo.Id]
+        });
+
+        Assert.False(await service.EnsureOnHistoryAsync(photo));
+        Assert.Single(await timeline.GetForAsync(plantId));
     }
 
     private static (WishService Service, FakePhotoRepository Photos, Wish Wish) WishWithPhotos(int count)

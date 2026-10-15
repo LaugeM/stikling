@@ -1,5 +1,6 @@
 @page "/plants/{Id:guid}/family"
 @layout WideLayout
+@inject CoverPhotos Covers
 @inject IPlantRepository Repository
 @inject IPropagationRepository PropagationRepository
 
@@ -27,7 +28,7 @@ else
                     <li>
                         <a class="family-ancestor @(Left(ancestor) ? "faded" : null)" href="plants/@ancestor.Id/family">
                             <span class="family-ancestor-photo potted" aria-hidden="true">
-                                @if (ancestor.CoverPhotoId is { } coverId)
+                                @if (Covers.Shown(ancestor.CoverPhotoId) is { } coverId)
                                 {
                                     <PhotoImage PhotoId="coverId" />
                                 }
@@ -50,7 +51,7 @@ else
 
     <section class="family-focus">
         <div class="family-focus-photo potted">
-            @if (plant.CoverPhotoId is { } focusCover)
+            @if (Covers.Shown(plant.CoverPhotoId) is { } focusCover)
             {
                 <PhotoImage PhotoId="focusCover" Thumbnail="false" Alt="@($"Photo of {plant.DisplayName}")" />
             }

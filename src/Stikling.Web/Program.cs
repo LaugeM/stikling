@@ -105,6 +105,7 @@ builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<SpreadsheetImportService>();
 builder.Services.AddScoped<PropagationCareService>();
 builder.Services.AddScoped<PhotoService>();
+builder.Services.AddScoped<CoverPhotos>();
 builder.Services.AddSingleton(GoogleSettings.From(builder.Configuration));
 builder.Services.AddScoped<GooglePhotosService>();
 builder.Services.AddScoped<ShareCardService>();

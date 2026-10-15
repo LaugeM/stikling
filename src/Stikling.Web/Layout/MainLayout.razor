@@ -4,6 +4,7 @@
 @inject ThemeService Theme
 @inject ErrorReports ErrorReports
 @inject SyncRunner Sync
+@inject CoverPhotos Covers
 @inject BackupService Backup
 @inject IPestCaseRepository PestCases
 @inject IPlantRepository Plants
@@ -118,13 +119,20 @@
         Sync.StatusChanged += OnSyncChanged;
         Sync.Received += OnReceived;
         Backup.Restored += OnReceived;
+        Covers.Changed += OnCoversChanged;
         Navigation.LocationChanged += OnLocationChanged;
         await CheckPestsAsync();
     }
 
     private void OnSyncChanged() => _ = InvokeAsync(StateHasChanged);
 
-    private void OnReceived() => _ = InvokeAsync(CheckPestsAsync);
+    private void OnReceived() => _ = InvokeAsync(async () =>
+    {
+        await Covers.RefreshAsync();
+        await CheckPestsAsync();
+    });
+
+    private void OnCoversChanged() => _ = InvokeAsync(StateHasChanged);
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => _ = InvokeAsync(CheckPestsAsync);
 

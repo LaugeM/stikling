@@ -15,7 +15,8 @@ public interface ITimelineRepository
     /// list on Today. Deleted plants and propagations are left out by passing only the ones that
     /// are still there.
     /// </summary>
-    Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since);
+    Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(
+        int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, IReadOnlySet<Guid>? referencePhotoIds = null);
 
     /// <summary>The change lines on plants' histories, for any plant, leaving out looking over. Kept apart from the rest for telling when plants were dormant.</summary>
     Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync();
