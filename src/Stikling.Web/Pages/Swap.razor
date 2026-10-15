@@ -1,6 +1,9 @@
 @page "/swap"
 @layout WideLayout
-@implements IDisposable
+@implements IAsyncDisposable
+@inject IPhotoRepository PhotoRepository
+@inject SwapCardService Cards
+@inject ShareCardService ShareCard
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
 @inject PlantService PlantService
@@ -16,7 +19,7 @@
     <h1>Available for swap</h1>
     @if (list is { IsEmpty: false })
     {
-        <button type="button" class="btn btn-outline-primary swap-share" @onclick="OpenShare">Share as text</button>
+        <button type="button" class="btn btn-outline-primary swap-share" @onclick="OpenShare">Share</button>
     }
 </div>
 
@@ -86,26 +89,81 @@ else
     @ConvertPanel
 }
 
-<Sheet Title="Share as text" @bind-Open="shareOpen">
-    <div class="swap-options">
-        <div class="form-check form-switch">
-            <input id="swap-nicknames" type="checkbox" class="form-check-input" role="switch" @bind="nicknames" />
-            <label class="form-check-label" for="swap-nicknames">Include your nicknames</label>
-        </div>
-        <div class="form-check form-switch">
-            <input id="swap-footer" type="checkbox" class="form-check-input" role="switch" @bind="footer" />
-            <label class="form-check-label" for="swap-footer">Add a Stikling line at the end</label>
-        </div>
-    </div>
-    <pre class="swap-preview" aria-label="What will be shared">@ShareText</pre>
-    <div class="form-actions">
-        <button type="button" class="btn btn-primary" @onclick="ShareAsync">Share</button>
-        @if (status.Length > 0)
+<Sheet Title="Share" @bind-Open="shareOpen">
+    <div class="btn-group segmented w-100 swap-tabs" role="radiogroup" aria-label="What to share">
+        @foreach (var (value, label) in new[] { ("picture", "Picture"), ("text", "Text") })
         {
-            <span class="swap-status" role="status">@status</span>
+            var id = $"swap-tab-{value}";
+            <input type="radio" class="btn-check" name="swap-tab" id="@id"
+                   checked="@(tab == value)" @onchange="() => SetTab(value)" />
+            <label class="btn btn-outline-primary" for="@id">@label</label>
         }
     </div>
+    <div class="swap-options">
+        <div class="form-check form-switch">
+            <input id="swap-nicknames" type="checkbox" class="form-check-input" role="switch" @bind="nicknames" @bind:after="NicknamesChangedAsync" />
+            <label class="form-check-label" for="swap-nicknames">Include your nicknames</label>
+        </div>
+        @if (tab == "text")
+        {
+            <div class="form-check form-switch">
+                <input id="swap-footer" type="checkbox" class="form-check-input" role="switch" @bind="footer" />
+                <label class="form-check-label" for="swap-footer">Add a Stikling line at the end</label>
+            </div>
+        }
+    </div>
+    @if (tab == "picture")
+    {
+        <div class="swap-label" id="swap-format-label">Size</div>
+        <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="swap-format-label">
+            @foreach (var (value, label) in ShareCardService.Formats)
+            {
+                var id = $"swap-format-{value}";
+                <input type="radio" class="btn-check" name="swap-format" id="@id"
+                       checked="@(format == value)" @onchange="() => SetFormatAsync(value)" />
+                <label class="btn btn-outline-primary" for="@id">@label</label>
+            }
+        </div>
+        <div class="swap-pictures" style="@AspectStyle">
+            @for (var i = 0; i < specs.Count; i++)
+            {
+                var number = i + 1;
+                var spec = specs[i];
+                <div class="swap-picture" aria-busy="@(drawn.ContainsKey(spec.Id) ? null : "true")">
+                    @if (drawn.TryGetValue(spec.Id, out var picture))
+                    {
+                        <img src="@picture.Url" alt="Picture @number of @specs.Count of the swap list" />
+                    }
+                </div>
+            }
+        </div>
+        @if (MissingPhotos > 0)
+        {
+            <p class="swap-note">@(MissingPhotos == 1 ? "1 photo isn't on this device, so it shows the leaf." : $"{MissingPhotos} photos aren't on this device, so those show the leaf.")</p>
+        }
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(!AllDrawn)" @onclick="SharePicturesAsync">Share</button>
+            <button type="button" class="btn btn-outline-primary" disabled="@(!AllDrawn)" @onclick="SavePicturesAsync">Save</button>
+            @if (status.Length > 0)
+            {
+                <span class="swap-status" role="status">@status</span>
+            }
+        </div>
+    }
+    else
+    {
+        <pre class="swap-preview" aria-label="What will be shared">@ShareText</pre>
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" @onclick="ShareAsync">Share</button>
+            @if (status.Length > 0)
+            {
+                <span class="swap-status" role="status">@status</span>
+            }
+        </div>
+    }
 </Sheet>
+
+<canvas @ref="canvas" hidden aria-hidden="true"></canvas>
 
 @code {
     private IReadOnlyList<Plant> plants = [];
@@ -121,8 +179,19 @@ else
     private bool busy;
     private bool disposed;
     private string status = "";
+    private IReadOnlyList<Photo> photos = [];
+    private string tab = "picture";
+    private string format = "square";
+    private IReadOnlyList<SwapCardSpec> specs = [];
+    private readonly Dictionary<string, SwapCardDrawn> drawn = [];
+    private ElementReference canvas;
+    private int drawRun;
 
-    protected override Task OnInitializedAsync() => LoadAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        format = await ShareCard.GetFormatAsync();
+        await LoadAsync();
+    }
 
     private async Task LoadAsync()
     {
@@ -131,8 +200,16 @@ else
         propagations = await PropagationRepository.GetAllAsync();
         plantsById = plants.ToDictionary(p => p.Id);
         propagationsById = propagations.ToDictionary(p => p.Id);
+        photos = [.. (await PhotoRepository.GetOfKindAsync(SubjectType.Plant)).Concat(await PhotoRepository.GetOfKindAsync(SubjectType.Propagation))];
         tagged = PlantService.TaggedForSwap(plants);
         list = SwapLists.Build(plants, propagations);
+
+        // The sheet is open while changes arrive, so its pictures follow the list
+        if (shareOpen && tab == "picture" && !disposed)
+        {
+            StateHasChanged();
+            await DrawAsync();
+        }
     }
 
     private async Task ConvertAsync(SpareMark mark)
@@ -175,31 +252,121 @@ else
 
     private string ShareText => SwapLists.WriteSwap(plants, propagations, (g, s, c) => everyday?.For(g, s, c), nicknames, footer);
 
-    private void OpenShare()
+    private string AspectStyle => format switch
+    {
+        "square" => "--aspect: 1 / 1;",
+        "portrait" => "--aspect: 4 / 5;",
+        _ => "--aspect: 9 / 16;",
+    };
+
+    private bool AllDrawn => specs.Count > 0 && specs.All(s => drawn.ContainsKey(s.Id));
+
+    private int MissingPhotos => drawn.Values.Sum(d => d.Missing);
+
+    private async Task OpenShare()
     {
         status = "";
         shareOpen = true;
+        if (tab == "picture")
+            await DrawAsync();
     }
 
-    private async Task ShareAsync()
+    private async Task SetTab(string value)
     {
-        status = await Sharer.ShareTextAsync(ShareText) switch
+        tab = value;
+        status = "";
+        if (value == "picture")
+            await DrawAsync();
+    }
+
+    private async Task SetFormatAsync(string value)
+    {
+        format = value;
+        status = "";
+        await ShareCard.SetFormatAsync(value);
+        await DrawAsync();
+    }
+
+    private async Task NicknamesChangedAsync()
+    {
+        if (tab == "picture")
+            await DrawAsync();
+    }
+
+    // Draws the pictures in turn on the one canvas. A newer call takes over, so an older one stops
+    // where it is and never puts its picture in after the newer one's.
+    private async Task DrawAsync()
+    {
+        var run = ++drawRun;
+        var old = specs.Select(s => s.Id).ToList();
+        specs = SwapCardService.SpecsFor(SwapTiles.For(plants, propagations, photos, nicknames), format);
+        drawn.Clear();
+        await Cards.ReleaseAsync(old);
+        StateHasChanged();
+
+        foreach (var spec in specs)
         {
-            "copied" => "Copied",
-            "failed" => "Couldn't share it",
-            _ => ""
-        };
+            try
+            {
+                var result = await Cards.DrawAsync(canvas, spec);
+                if (run != drawRun || disposed)
+                    return;
+                if (result is not null)
+                {
+                    drawn[spec.Id] = result;
+                    StateHasChanged();
+                }
+            }
+            catch (JSException)
+            {
+                // That picture stays blank, and the rest carry on
+            }
+        }
+    }
+
+    private IReadOnlyList<string> PictureIds => [.. specs.Select(s => s.Id)];
+
+    private IReadOnlyList<string> FileNames => [.. specs.Select((_, i) => SwapCardService.FileNameFor(i, specs.Count))];
+
+    private async Task SharePicturesAsync() => await ShowStatusAsync(await Cards.ShareAllAsync(PictureIds, FileNames) switch
+    {
+        "saved" => "Saved",
+        "failed" => "Couldn't share it",
+        _ => ""
+    });
+
+    private async Task SavePicturesAsync() => await ShowStatusAsync(await Cards.SaveAllAsync(PictureIds, FileNames) switch
+    {
+        "saved" => "Saved",
+        _ => "Couldn't share it"
+    });
+
+    private async Task ShareAsync() => await ShowStatusAsync(await Sharer.ShareTextAsync(ShareText) switch
+    {
+        "copied" => "Copied",
+        "failed" => "Couldn't share it",
+        _ => ""
+    });
+
+    private async Task ShowStatusAsync(string text)
+    {
+        status = text;
         if (status.Length == 0)
             return;
 
         StateHasChanged();
         await Task.Delay(3000);
-        if (!disposed)
+        if (!disposed && status == text)
         {
             status = "";
             StateHasChanged();
         }
     }
 
-    public void Dispose() => disposed = true;
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        drawRun++;
+        await Cards.ReleaseAsync(specs.Select(s => s.Id));
+    }
 }

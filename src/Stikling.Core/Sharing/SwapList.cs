@@ -58,7 +58,7 @@ public static class SwapLists
     /// <summary>"#117 Big Monstera" for a plant with a number, else the name as it is.</summary>
     public static string WithNumber(string? number, string name) => number is null ? name : $"#{number} {name}";
 
-    private static string StageText(PropagationStage stage) => stage switch
+    internal static string StageText(PropagationStage stage) => stage switch
     {
         PropagationStage.Rooted => "rooted",
         PropagationStage.Rooting => "rooting",
