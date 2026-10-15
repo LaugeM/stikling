@@ -39,6 +39,9 @@ public sealed record RootingAidResult(
     PropagationResult<string> With,
     PropagationResult<string> Without);
 
+/// <summary>The batches that dried their cut end for about as long, as a name and the same numbers as the rooting aids.</summary>
+public sealed record DryingResult(string Name, PropagationResult<string> Result);
+
 /// <summary>
 /// Success rate and days to root per medium and per type, worked out from the counts and the
 /// rooted date every propagation already keeps. Deleted propagations are left out.
@@ -69,6 +72,27 @@ public static class PropagationResults
                 group.Aid,
                 Result("With", group.With),
                 Result("Without", counted.Where(p => !p.RootingAids.Contains(group.Aid)).ToList())))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Batches grouped by how long the cut end dried: not dried, under a day, a day or more. Only the
+    /// groups that have batches, and nothing at all while no batch was dried.
+    /// </summary>
+    public static IReadOnlyList<DryingResult> ByDrying(IEnumerable<Propagation> propagations)
+    {
+        var counted = Counted(propagations).ToList();
+        if (!counted.Any(p => p.DriedForHours is > 0))
+            return [];
+        return new[]
+            {
+                ("Not dried", counted.Where(p => p.DriedForHours is null or <= 0)),
+                ("Dried under a day", counted.Where(p => p.DriedForHours is > 0 and < 24)),
+                ("Dried a day or more", counted.Where(p => p.DriedForHours >= 24))
+            }
+            .Select(g => (g.Item1, Batches: g.Item2.ToList()))
+            .Where(g => g.Batches.Count > 0)
+            .Select(g => new DryingResult(g.Item1, Result(g.Item1, g.Batches)))
             .ToList();
     }
 

@@ -243,10 +243,10 @@ public sealed class PropagationService(
     }
 
     /// <summary>
-    /// Records units that didn't make it, with an optional reason ("rotted"). They failed on
+    /// Records units that didn't make it, with an optional reason and note ("2 failed: rotted, left too wet"). They failed on
     /// <paramref name="date"/>, today unless given, which can't be in the future or before the start.
     /// </summary>
-    public async Task MarkFailedAsync(Propagation propagation, int count, string? reason = null, DateOnly? date = null)
+    public async Task MarkFailedAsync(Propagation propagation, int count, FailReason? reason = null, string? note = null, DateOnly? date = null)
     {
         var day = date ?? Today;
         if (day > Today)
@@ -256,8 +256,10 @@ public sealed class PropagationService(
         propagation.RecordFailed(count, day);
         await propagations.SaveAsync(propagation);
 
-        var text = Clean(reason) is { } r ? $"{count} failed: {r}" : $"{count} failed";
-        await AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.Failed);
+        var why = string.Join(", ", new[] { reason is { } picked ? FailReasons.Label(picked) : null, Clean(note) }.OfType<string>());
+        var text = why.Length > 0 ? $"{count} failed: {why}" : $"{count} failed";
+        await AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.Failed,
+            failReason: reason, count: count);
     }
 
     /// <summary>
@@ -327,7 +329,8 @@ public sealed class PropagationService(
     private static string WithOutcome(string text, Propagation propagation) =>
         propagation.IsActive ? text : $"{text}\nFinished: {Outcome(propagation)}";
 
-    private Task AddChangeAsync(Propagation propagation, string text, DateTimeOffset? occurredAt = null, Guid? plantId = null, TimelineEvent? @event = null) =>
+    private Task AddChangeAsync(Propagation propagation, string text, DateTimeOffset? occurredAt = null, Guid? plantId = null, TimelineEvent? @event = null,
+        FailReason? failReason = null, int? count = null) =>
         timeline.AddAsync(new TimelineEntry
         {
             SubjectType = SubjectType.Propagation,
@@ -336,6 +339,8 @@ public sealed class PropagationService(
             OccurredAt = occurredAt ?? time.GetUtcNow(),
             Text = text,
             Event = @event,
+            FailReason = failReason,
+            Count = count,
             RelatedType = plantId is null ? null : SubjectType.Plant,
             RelatedId = plantId
         });

@@ -82,6 +82,9 @@ public sealed class Propagation : Entity
     /// <summary>What was used to help it root, e.g. cinnamon on the cut or a dome for humidity.</summary>
     public List<RootingAid> RootingAids { get; set; } = [];
 
+    /// <summary>How many hours the cut end dried before it went in. Null when it went straight in.</summary>
+    public int? DriedForHours { get; set; }
+
     /// <summary>How many units the batch started with.</summary>
     public int InitialCount { get; set; } = 1;
 
