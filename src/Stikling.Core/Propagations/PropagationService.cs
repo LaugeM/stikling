@@ -175,6 +175,13 @@ public sealed class PropagationService(
             FromPropagationId = propagation.Id
         }).ToList();
 
+        // They start with what the plant they came from likes
+        if (propagation.ParentPlantId is { } parentId && await plants.GetAsync(parentId) is { } parentPlant)
+        {
+            foreach (var plant in newPlants)
+                CareLikes.Copy(parentPlant, plant, Enum.GetValues<LikesField>());
+        }
+
         // Check everything before saving anything
         if (newPlants.SelectMany(p => p.Validate(Today)).FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);

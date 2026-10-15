@@ -12,6 +12,7 @@
 @inject PlantService PlantService
 @inject WishService WishService
 @inject PlantNameService Names
+@inject PlantCareService CommonCare
 @inject RoomService RoomService
 @inject PhotoService Photos
 @inject GooglePhotosService Google
@@ -221,7 +222,7 @@ else
                     </div>
                 }
                 <div class="mb-3">
-                    <label class="form-label" for="light">Light</label>
+                    <label class="form-label" for="light">Light where it stands</label>
                     <InputSelect id="light" class="form-select" @bind-Value="plant.Light">
                         <option value="">Not set</option>
                         @foreach (var light in Enum.GetValues<LightLevel>())
@@ -230,6 +231,65 @@ else
                         }
                     </InputSelect>
                 </div>
+            </FormSection>
+
+            @if (CareFor is { } suggested && CareSuggestion.Fills(plant, suggested) is { Count: > 0 } suggestedFills)
+            {
+                <CareOffer Care="suggested" Fills="suggestedFills" Book="careBook" OnUse="() => UseCare(suggested)" />
+            }
+
+            <FormSection Title="What it likes" Summary="@LikesSummary" Open="openLikes">
+                <div class="mb-3">
+                    <label class="form-label" for="likes-light">Light it likes</label>
+                    <InputSelect id="likes-light" class="form-select" @bind-Value="plant.LikesLight">
+                        <option value="">Not set</option>
+                        @foreach (var light in Enum.GetValues<LightLevel>())
+                        {
+                            <option value="@light">@Labels.For(light)</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="likes-water">Water</label>
+                    <InputSelect id="likes-water" class="form-select" @bind-Value="plant.LikesWater">
+                        <option value="">Not set</option>
+                        <option value="@WaterNeed.DryOut">Let it dry out fully</option>
+                        <option value="@WaterNeed.DryPartly">Let it dry out partly</option>
+                        <option value="@WaterNeed.EvenlyMoist">Keep it evenly moist</option>
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="likes-humidity">Humidity</label>
+                    <InputSelect id="likes-humidity" class="form-select" @bind-Value="plant.LikesHumidity" aria-describedby="likes-humidity-help">
+                        <option value="">Not set</option>
+                        <option value="@HumidityNeed.Low">Low</option>
+                        <option value="@HumidityNeed.Medium">Medium</option>
+                        <option value="@HumidityNeed.High">High</option>
+                    </InputSelect>
+                    <div id="likes-humidity-help" class="form-text">Low is a normal room, under about 40%. High is 60% or more, like a cabinet or next to a humidifier.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="likes-season">Growing season</label>
+                    <InputSelect id="likes-season" class="form-select" @bind-Value="plant.GrowingSeason">
+                        <option value="">Not set</option>
+                        <option value="@GrowingSeason.NoRest">Grows all year</option>
+                        <option value="@GrowingSeason.Summer">Grows in summer, rests in winter</option>
+                        <option value="@GrowingSeason.Winter">Grows in winter, rests in summer</option>
+                    </InputSelect>
+                </div>
+                @if (plant.GrowingSeason is GrowingSeason.Summer or GrowingSeason.Winter)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="likes-rest">How it rests</label>
+                        <InputSelect id="likes-rest" class="form-select" @bind-Value="plant.RestHow">
+                            <option value="">Not set</option>
+                            <option value="@RestKind.Cooler">Kept cooler</option>
+                            <option value="@RestKind.Drier">Kept drier</option>
+                            <option value="@RestKind.CoolerAndDrier">Kept cooler and drier</option>
+                            <option value="@RestKind.DiesBack">Dies back</option>
+                        </InputSelect>
+                    </div>
+                }
             </FormSection>
 
             <FormSection Title="Pot and soil" Summary="@PotSummary" Open="openPot">
@@ -420,6 +480,20 @@ else
             <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
         </div>
     </EditForm>
+
+    <Sheet Title="@OfferTitle" Open="offer.Count > 0" OpenChanged="OfferOpenChanged">
+        <p>@OfferText</p>
+        <ul class="small">
+            @foreach (var other in offer)
+            {
+                <li>@other.DisplayName</li>
+            }
+        </ul>
+        <div class="form-actions likes-offer">
+            <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SetForAllAsync">Set for all @offer.Count</button>
+            <button type="button" class="btn btn-link" @onclick="LeaveOffer">Only this one</button>
+        </div>
+    </Sheet>
 }
 
 @code {
@@ -489,6 +563,7 @@ else
 
     private Plant? plant;
     private Plant? original; // the plant as it was before editing, to record what changed
+    private Plant? startedWith; // a new plant as the form started, e.g. a duplicate, to tell what was set here
     private LooseDate? copiedDate; // when the plant this one is copied from was got, to offer the same date
     private string? copiedFrom;
     private IReadOnlyList<Plant> existing = [];
@@ -514,6 +589,50 @@ else
 
     // Which sections start open, worked out when the plant loads. A section only reads this once
     private bool openLives;
+    private bool openLikes;
+
+    // What common plants usually like, offered above What it likes. Empty if it couldn't be read.
+    private PlantCareBook careBook = PlantCareBook.Empty;
+
+    private PlantCare? CareFor => plant is null ? null : careBook.Find(plant.Genus, plant.Species);
+
+    // Nothing is saved until the form is
+    private void UseCare(PlantCare care)
+    {
+        if (plant is not null)
+            CareSuggestion.Apply(plant, care);
+    }
+
+    // The other plants of the same species offered the needs just saved, and which of them
+    private IReadOnlyList<Plant> offer = [];
+    private IReadOnlyList<LikesField> offerFields = [];
+
+    private string OfferTitle => $"Also for your other {Stikling.Core.Models.PlantNames.Botanical(plant?.Genus, plant?.Species, null)}?";
+
+    private string OfferText
+    {
+        get
+        {
+            var values = string.Join(" · ", offerFields.Select(f => LikesValue(plant!, f)));
+            var count = offer.Count;
+            return $"Set {values} for {count} other {(count == 1 ? "plant" : "plants")} of the same species too?";
+        }
+    }
+
+    private static string LikesValue(Plant p, LikesField field) => field switch
+    {
+        LikesField.Light => p.LikesLight is { } light ? Labels.For(light) : "no light it likes",
+        LikesField.Water => p.LikesWater is { } water ? Labels.For(water) : "no water need",
+        LikesField.Humidity => p.LikesHumidity is { } humidity ? Labels.For(humidity) : "no humidity need",
+        LikesField.Season => p.GrowingSeason is { } season ? Labels.For(season) : "no growing season",
+        _ => p.RestHow is { } rest ? Labels.For(rest) : "no way of resting"
+    };
+
+    private string? LikesSummary => plant is null ? null : Joined(
+        plant.LikesLight is { } light ? Labels.For(light) : null,
+        plant.LikesWater is { } water ? Labels.For(water) : null,
+        plant.LikesHumidity is { } humidity ? Labels.For(humidity) : null,
+        plant.GrowingSeason is { } season ? Labels.For(season) : null);
     private bool openPot;
     private bool openTags;
     private bool openSitter;
@@ -684,6 +803,7 @@ else
         existing = all;
         wishes = IsNew ? await WishService.GetAllAsync() : [];
         dictionary = IsNew ? await Names.GetDictionaryAsync() : null;
+        careBook = await CommonCare.GetBookAsync();
 
         if (IsNew)
         {
@@ -716,6 +836,7 @@ else
             }
             if (fresh)
                 ApplyQuarantineRule();
+            startedWith ??= plant.Copy();
         }
         else
         {
@@ -735,6 +856,7 @@ else
 
             // All closed when adding, even from a copy, where the summaries show what was copied
             openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
+            openLikes = !IsNew && CareLikes.HasAny(plant);
             openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
             openTags = !IsNew && plant.Tags.Count > 0;
             openSwap = !IsNew && plant.Spare is not null;
@@ -907,12 +1029,60 @@ else
         }
     }
 
+    private bool left;
+
+    private void GoToPlant()
+    {
+        if (left || plant is null)
+            return;
+        left = true;
+        Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
+    }
+
+    private async Task SetForAllAsync()
+    {
+        if (plant is null || saving)
+            return;
+        saving = true;
+        try
+        {
+            await PlantService.ApplyLikesAsync(plant, offerFields, offer);
+            offer = [];
+            GoToPlant();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Setting what it likes on the other plants failed");
+            errors = [$"Couldn't save: {ex.Message}"];
+            showErrors = true;
+            offer = [];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private void LeaveOffer()
+    {
+        offer = [];
+        GoToPlant();
+    }
+
+    // Closing the sheet counts as Only this one
+    private void OfferOpenChanged(bool open)
+    {
+        if (!open)
+            LeaveOffer();
+    }
+
     private async Task SaveAsync()
     {
         if (plant is null)
             return;
 
         plant.CollectionNumber = CollectionNumbers.Normalize(plant.CollectionNumber);
+        CareLikes.Normalize(plant);
         errors = plant.Validate(Today).ToList();
         if (errors.Count > 0)
         {
@@ -931,6 +1101,8 @@ else
                 plant.QuarantinedSince = Today;
                 plant.QuarantineDays = quarantineLength;
             }
+            // A new plant counts from what the form started with, like a duplicate's values
+            var likesBefore = original ?? startedWith ?? new Plant();
             if (IsNew)
             {
                 var wish = markWishGot ? WishHere : null;
@@ -945,7 +1117,19 @@ else
             }
             if (cameInside && backChecked)
                 await PestTreatmentRepository.SaveAsync(PestService.StartPlantCheck(plant, Today));
-            Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
+
+            // Others of the same species that don't have what was just set are asked before leaving
+            var changed = CareLikes.Changed(likesBefore, plant);
+            var others = changed.Count == 0 ? [] : CareLikes.WouldChange(plant, changed, CareLikes.SameSpecies(plant, existing));
+            if (others.Count > 0)
+            {
+                offerFields = changed;
+                offer = others;
+            }
+            else
+            {
+                GoToPlant();
+            }
         }
         catch (Exception ex)
         {

@@ -44,3 +44,23 @@ Wikidata has an everyday name for many species, but often not the one on the lab
 - **An everyday name:** add it to `everyday-names.en.txt` or `everyday-names.da.txt`, as `Genus species: Name, Name`. The first name is the one shown. The build warns about a genus or species it doesn't know.
 - **A wrong name from Wikidata:** add a line starting with `-` to the same file, like `- Sarracenia: Jeg er dansk`, and the build leaves it out.
 - **Another language:** add it to `languages` in `build.cs` with a file of names kept by hand, and to the language choice in Settings.
+
+## Care for common plants
+
+`care.txt` is a list kept by hand of what about 70 common houseplants usually like and whether they are toxic. `care.cs` turns it into `src/Stikling.Web/wwwroot/data/plant-care.json`, which the plant form and plant page offer from. Like the names, the JSON is never edited by hand.
+
+```
+dotnet run tools/plant-names/care.cs
+```
+
+It works offline and takes a few seconds. Run it after changing `care.txt` and commit both files. It doesn't touch `plant-names.json`.
+
+| What | Source |
+|---|---|
+| Light, water, humidity and growing season | [NC State Extension Plant Toolbox](https://plants.ces.ncsu.edu), the [Missouri Botanical Garden Plant Finder](https://www.missouribotanicalgarden.org/PlantFinder) or the [RHS](https://www.rhs.org.uk), only what they say about growing the plant indoors |
+| Toxic to cats and dogs | [ASPCA Toxic and Non-Toxic Plants](https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants) |
+| Toxic to people | NC State Extension Plant Toolbox, only its poison section about eating the leaves or stems |
+
+How a source's words are read is in the header of `care.txt`. A new plant needs a source for every value it sets, and `?` for anything no source says. The build stops with the line number when a value is unknown, a web address has no `source` line, or a value has no source.
+
+The build also adds the old names of each plant, so a plant entered as Sansevieria trifasciata finds the line for Dracaena trifasciata. It warns, without stopping, about a name that isn't an accepted genus or species in `plant-names.json`, and says what an old name goes by now.

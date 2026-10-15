@@ -1,5 +1,6 @@
 using System.Globalization;
 using Stikling.Core.Models;
+using Stikling.Core.Plants;
 using Stikling.Core.Pests;
 using Stikling.Core.Pots;
 using Stikling.Core.SoilMixes;
@@ -36,6 +37,39 @@ public static class Labels
         LightLevel.BrightIndirect => "Bright indirect",
         LightLevel.DirectSun => "Some direct sun",
         _ => light.ToString()
+    };
+
+    public static string For(WaterNeed need) => need switch
+    {
+        WaterNeed.DryOut => "Dry out fully",
+        WaterNeed.DryPartly => "Dry out partly",
+        WaterNeed.EvenlyMoist => "Evenly moist",
+        _ => need.ToString()
+    };
+
+    public static string For(HumidityNeed need) => need switch
+    {
+        HumidityNeed.Low => "Low humidity",
+        HumidityNeed.Medium => "Medium humidity",
+        HumidityNeed.High => "High humidity",
+        _ => need.ToString()
+    };
+
+    public static string For(GrowingSeason season) => season switch
+    {
+        GrowingSeason.Summer => "Rests in winter",
+        GrowingSeason.Winter => "Rests in summer",
+        GrowingSeason.NoRest => "Grows all year",
+        _ => season.ToString()
+    };
+
+    public static string For(RestKind rest) => rest switch
+    {
+        RestKind.Cooler => "kept cooler",
+        RestKind.Drier => "kept drier",
+        RestKind.CoolerAndDrier => "kept cooler and drier",
+        RestKind.DiesBack => "dies back",
+        _ => rest.ToString()
     };
 
     public static string For(GrowingMedium medium) => medium switch
@@ -220,6 +254,27 @@ public static class Labels
     public static string FlagFrom(LooseDate from) => from.Precision == DatePrecision.Day
         ? $"from {from.Start.ToString("ddd d MMM", CultureInfo.InvariantCulture)}"
         : $"from {from.Start.ToString("MMMM", CultureInfo.InvariantCulture)}";
+
+    /// <summary>
+    /// "Usually likes bright indirect · dry out fully · rests in winter, kept drier": the needs the care file
+    /// would fill in, in the order light, water, humidity, season with how it rests. The source comes after it.
+    /// </summary>
+    public static string Offer(IReadOnlyList<LikesField> fills, PlantCare care)
+    {
+        var parts = new List<string>();
+        if (fills.Contains(LikesField.Light) && care.Light is { } light) parts.Add(Lower(For(light)));
+        if (fills.Contains(LikesField.Water) && care.Water is { } water) parts.Add(Lower(For(water)));
+        if (fills.Contains(LikesField.Humidity) && care.Humidity is { } humidity) parts.Add(Lower(For(humidity)));
+
+        // A way of resting is only offered for the season the plant already has or gets, so name it with the rest
+        var season = (fills.Contains(LikesField.Season) || fills.Contains(LikesField.Rest)) && care.Season is { } s ? Lower(For(s)) : null;
+        var rest = fills.Contains(LikesField.Rest) && care.Rest is { } r ? For(r) : null;
+        if (season is not null || rest is not null)
+            parts.Add(string.Join(", ", new[] { season, rest }.OfType<string>()));
+        return "Usually likes " + string.Join(" · ", parts);
+    }
+
+    private static string Lower(string text) => char.ToLowerInvariant(text[0]) + text[1..];
 
     /// <summary>"1 plant" / "3 plants".</summary>
     public static string Plants(int count) => Count(count, "plant");

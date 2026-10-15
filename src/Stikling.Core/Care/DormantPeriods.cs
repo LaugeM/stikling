@@ -52,6 +52,9 @@ public sealed class DormantPeriods
         return new(periods);
     }
 
+    /// <summary>The days the periods started on, oldest first.</summary>
+    public IReadOnlyList<DateOnly> Starts => periods.Select(p => p.Start).Order().ToList();
+
     /// <summary>True when the day falls in a period, counting the days it started and ended on.</summary>
     public bool Contains(DateOnly day) =>
         periods.Any(p => day >= p.Start && (p.End is null || day <= p.End));

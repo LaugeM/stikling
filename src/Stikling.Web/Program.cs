@@ -76,12 +76,14 @@ builder.Services.AddScoped<IReceivedHistoryRepository, IndexedDbReceivedHistoryR
 builder.Services.AddScoped<ITimelineRepository, IndexedDbTimelineRepository>();
 builder.Services.AddScoped<IPhotoRepository, IndexedDbPhotoRepository>();
 builder.Services.AddScoped<IPlantNameSource, BundledPlantNames>();
+builder.Services.AddScoped<IPlantCareSource, BundledPlantCare>();
 builder.Services.AddScoped<IDeviceLanguages, BrowserLanguages>();
 builder.Services.AddScoped<TimelineService>();
 builder.Services.AddScoped<PlantService>();
 builder.Services.AddScoped<CollectionNumberService>();
 builder.Services.AddScoped<PropagationService>();
 builder.Services.AddScoped<PlantNameService>();
+builder.Services.AddScoped<PlantCareService>();
 builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<PotService>();
 builder.Services.AddScoped<SoilMixService>();

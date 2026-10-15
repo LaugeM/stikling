@@ -114,6 +114,20 @@ else
                 }
             }
 
+            @if (HasLikesChoice || likes is not null)
+            {
+                <select class="form-select w-auto" aria-label="What it likes"
+                        @bind="likes" @bind:after="Refresh">
+                    <option value="">Any needs</option>
+                    <option value="@LikesFilter.HighHumidity">Likes high humidity</option>
+                    <option value="@LikesFilter.StaysMoist">Likes to stay moist</option>
+                    <option value="@LikesFilter.DriesOut">Likes to dry out</option>
+                    <option value="@LikesFilter.RestsInWinter">Rests in winter</option>
+                    <option value="@LikesFilter.RestsInSummer">Rests in summer</option>
+                    <option value="@LikesFilter.DarkerThanItLikes">Darker than it likes</option>
+                </select>
+            }
+
             @if (view != PlantView.Table)
             {
                 <select class="form-select w-auto" aria-label="Sort by"
@@ -486,6 +500,7 @@ else
     private StatusFilter status = StatusFilter.Active;
     private PlantStatus? goneAs; // under Gone: how they left, null for all
     private string? room; // the picked room's id, as the dropdown gives it
+    private LikesFilter? likes; // the need picked, if any
     private Guid? spot;
     private IReadOnlyList<TagCount> tags = [];
     private readonly HashSet<string> pickedTags = new(StringComparer.OrdinalIgnoreCase);
@@ -619,6 +634,9 @@ else
         Refresh();
     }
 
+    /// <summary>The needs dropdown is worth showing once some plant has said what it likes.</summary>
+    private bool HasLikesChoice => (all ?? []).Any(p => !p.IsDeleted && p.Status == PlantStatus.Active && CareLikes.HasAny(p));
+
     /// <summary>The room dropdown is worth showing once there's more than one place to choose.</summary>
     private bool HasRoomChoice => roomsInUse.Count > 1 || roomsInUse.Any(r => r.Spots.Count > 0);
 
@@ -667,13 +685,14 @@ else
 
     /// <summary>Anything besides the status is narrowing the list.</summary>
     private bool Narrowed =>
-        !string.IsNullOrWhiteSpace(search) || !string.IsNullOrEmpty(room) || pickedTags.Count > 0 || quarantine || dormant || problem;
+        !string.IsNullOrWhiteSpace(search) || !string.IsNullOrEmpty(room) || likes is not null || pickedTags.Count > 0 || quarantine || dormant || problem;
 
     // Leaves the status alone, since its buttons are always in view
     private void ClearFilters()
     {
         search = null;
         room = null;
+        likes = null;
         spot = null;
         pickedTags.Clear();
         quarantine = false;
@@ -692,7 +711,7 @@ else
     {
         visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
                 pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity,
-                p => everyday?.For(p.Genus, p.Species, p.Cultivar), goneAs, problem ? problemPlants : null)
+                p => everyday?.For(p.Genus, p.Species, p.Cultivar), goneAs, problem ? problemPlants : null, likes)
             .Apply(all ?? [])
             .ToList();
         wishMatches = WishSearch.OpenWishes(wishes, search, dictionary);

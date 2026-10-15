@@ -18,6 +18,7 @@
 @inject TimeProvider Time
 @inject IJSRuntime JS
 @inject PlantNameService Names
+@inject PlantCareService CommonCare
 @inject ITimelineRepository TimelineRepository
 @inject GrowLightService LightService
 @inject AwayService AwayService
@@ -266,6 +267,51 @@ else
                         {
                             <dt>Light</dt>
                             <dd>@Labels.For(light)</dd>
+                        }
+
+                        @if (CareLikes.HasAny(plant))
+                        {
+                            var likesLine = string.Join(" · ", new[]
+                            {
+                                plant.LikesLight is { } wantsLight ? Labels.For(wantsLight) : null,
+                                plant.LikesWater is { } wantsWater ? Labels.For(wantsWater) : null,
+                                plant.LikesHumidity is { } wantsHumidity ? Labels.For(wantsHumidity) : null
+                            }.Where(t => t is not null));
+                            <dt>Likes</dt>
+                            <dd>
+                                @likesLine
+                                @if (plant.GrowingSeason is { } season)
+                                {
+                                    <div class="@(likesLine.Length > 0 ? "detail-sub" : null)">@Labels.For(season)@(plant.RestHow is { } rest ? $", {Labels.For(rest)}" : "")</div>
+                                }
+                                @if (CareLikes.Fit(plant) is { } fit and not LightFit.Fits)
+                                {
+                                    <div class="detail-sub">Stands somewhere @(fit == LightFit.Darker ? "darker" : "brighter") than it likes</div>
+                                }
+                            </dd>
+                        }
+                        else if (careFor is not null && CareSuggestion.Fills(plant, careFor) is { Count: > 0 } offered)
+                        {
+                            <dt>Likes</dt>
+                            <dd><CareOffer Care="careFor" Fills="offered" Book="careBook" Inline="true" OnUse="UseCareAsync" /></dd>
+                        }
+
+                        @if (careBook.IsEmpty is false && !string.IsNullOrWhiteSpace(plant.Genus))
+                        {
+                            <dt>Pets</dt>
+                            <dd>
+                                @ToxicityText.Pets(careFor)@if (careFor?.PetsFrom is { } petsUrl)
+                                {
+                                    <text> · <a href="@petsUrl" target="_blank" rel="noopener">@careBook.SourceName(petsUrl)</a></text>
+                                }
+                                @if (ToxicityText.People(careFor) is { } peopleText)
+                                {
+                                    <div class="detail-sub">@peopleText@if (careFor?.PeopleFrom is { } peopleUrl)
+                                    {
+                                        <text> · <a href="@peopleUrl" target="_blank" rel="noopener">@careBook.SourceName(peopleUrl)</a></text>
+                                    }</div>
+                                }
+                            </dd>
                         }
 
                         <dt>Grows in</dt>
@@ -1180,9 +1226,24 @@ else
         return list.Count <= 1 ? string.Concat(list) : $"{string.Join(", ", list.SkipLast(1))} and {list[^1]}";
     }
 
+    // What common plants usually like, and so what to offer. Empty if it couldn't be read.
+    private PlantCareBook careBook = PlantCareBook.Empty;
+    private PlantCare? careFor;
+
+    // Fills in only what is empty, like the form. It isn't a change worth a line on the timeline.
+    private async Task UseCareAsync()
+    {
+        if (plant is null || careFor is null)
+            return;
+        CareSuggestion.Apply(plant, careFor);
+        await Repository.SaveAsync(plant);
+        await LoadAsync();
+    }
+
     private async Task LoadAsync()
     {
         everyday = await Names.GetEverydayNamesAsync();
+        careBook = await CommonCare.GetBookAsync();
         var all = await Repository.GetAllAsync();
         plant = all.FirstOrDefault(p => p.Id == Id);
         if (plant is not null)
@@ -1198,6 +1259,7 @@ else
                 .ToList();
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
 
+            careFor = careBook.Find(plant.Genus, plant.Species);
             places = await RoomService.GetPlacesAsync();
             var allCases = await PestCaseRepository.GetAllAsync();
             pests = PestService.CasesFor(plant, allCases, places);
