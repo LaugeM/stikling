@@ -25,6 +25,7 @@ public static class Stores
     public const string Problems = "problems";
     public const string ProblemUpdates = "problemUpdates";
     public const string Wishes = "wishes";
+    public const string Sellers = "sellers";
     public const string PropagationCareLogs = "propagationCareLogs";
     public const string Settings = "settings";
     public const string PutOffs = "putOffs";

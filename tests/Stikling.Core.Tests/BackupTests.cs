@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Stikling.Core.Backup;
 using Stikling.Core.Models;
+using Stikling.Core.Sellers;
 
 namespace Stikling.Core.Tests;
 
@@ -139,12 +140,13 @@ public class BackupTests
             FloweringMarks = [new FloweringMark(), new FloweringMark { DeletedAt = Now }],
             Problems = [new Problem(), new Problem { DeletedAt = Now }],
             ProblemUpdates = [new ProblemUpdate(), new ProblemUpdate(), new ProblemUpdate { DeletedAt = Now }],
-            Wishes = [new Wish { Name = "Pink syngonium" }, new Wish { DeletedAt = Now }]
+            Wishes = [new Wish { Name = "Pink syngonium" }, new Wish { DeletedAt = Now }],
+            Sellers = [new Seller { Name = "Plantorama" }, new Seller { Name = "Old", DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -163,6 +165,57 @@ public class BackupTests
         Assert.Empty(data.Problems);
         Assert.Empty(data.ProblemUpdates);
         Assert.Empty(data.Wishes);
+        Assert.Empty(data.Sellers);
+    }
+
+    [Fact]
+    public void Sellers_and_the_arrival_of_a_plant_survive_a_backup_and_a_restore_merges_them()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var seller = new Seller { Name = "Plantorama", Kind = SellerKind.OnlineShop, Notes = "Ships on Mondays", UpdatedAt = Now };
+        var merged = new Seller { Name = "Old name", MergedIntoId = seller.Id, DeletedAt = Now, UpdatedAt = Now };
+        var plant = Plant("Coleus", Now);
+        plant.SellerId = seller.Id;
+        plant.ArrivedIn = ArrivalRating.Poor;
+        plant.ArrivalProblems = [ArrivalProblem.Pests, ArrivalProblem.RootRot];
+        plant.ArrivalNote = "Leaves were limp";
+
+        var json = JsonSerializer.Serialize(new BackupData { Sellers = [seller, merged], Plants = [plant] }, options);
+        Assert.Contains("\"kind\":\"OnlineShop\"", json);
+        Assert.Contains("\"arrivedIn\":\"Poor\"", json);
+
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        Assert.Equal(2, back.Sellers.Count);
+        Assert.Equal(SellerKind.OnlineShop, back.Sellers[0].Kind);
+        Assert.Equal(seller.Id, back.Sellers[1].MergedIntoId);
+        var restored = Assert.Single(back.Plants);
+        Assert.Equal((seller.Id, ArrivalRating.Poor, "Leaves were limp"), (restored.SellerId, restored.ArrivedIn, restored.ArrivalNote));
+        Assert.Equal([ArrivalProblem.Pests, ArrivalProblem.RootRot], restored.ArrivalProblems);
+        Assert.Equal(2, BackupMerge.Merge<Seller>([], back.Sellers).Added);
+        Assert.Equal(0, BackupMerge.Merge([seller, merged], back.Sellers).Added);
+    }
+
+    [Fact]
+    public async Task A_backup_from_before_sellers_restores_and_adopting_makes_them()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var data = JsonSerializer.Deserialize<BackupData>(
+            """{"version":1,"app":"Stikling","plants":[{"id":"7d2d5a2e-0c63-4b5e-8a4c-5e1c0b9a1111","genus":"Coleus","source":"Plantorama","origin":"Purchased"}]}""", options)!;
+        Assert.Empty(data.Sellers);
+
+        var plants = new FakePlantRepository();
+        foreach (var plant in data.Plants)
+            plants.Plants[plant.Id] = plant;
+        var sellers = new FakeSellerRepository();
+
+        Assert.Equal(1, await new SellerService(sellers, plants, new FakePropagationRepository()).AdoptSourcesAsync());
+
+        var seller = Assert.Single(sellers.Sellers.Values);
+        Assert.Equal("Plantorama", seller.Name);
+        var adopted = Assert.Single(plants.Plants.Values);
+        Assert.Equal(0, plants.Saves);
+        Assert.Equal(seller.Id, (await sellers.GetSellersAsync()).For(adopted.SellerId, adopted.Source)?.Id);
     }
 
     [Fact]

@@ -61,6 +61,23 @@ public sealed class Plant : Entity
     public string? Source { get; set; }
 
     /// <summary>
+    /// The seller it came from. <see cref="Source"/> keeps the seller's name as text beside it, so
+    /// older versions and the CSV still show it. Null for no seller; one that was deleted or isn't
+    /// known here counts as none and the Source text shows instead.
+    /// </summary>
+    public Guid? SellerId { get; set; }
+
+    /// <summary>How it was when it arrived. Null when not said.</summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<ArrivalRating>))]
+    public ArrivalRating? ArrivedIn { get; set; }
+
+    /// <summary>What was wrong when it arrived.</summary>
+    [JsonConverter(typeof(TolerantEnumListConverter<ArrivalProblem>))]
+    public List<ArrivalProblem> ArrivalProblems { get; set; } = [];
+
+    public string? ArrivalNote { get; set; }
+
+    /// <summary>
     /// What was paid, as a number with no currency, so totals per year can be added up later.
     /// Null when not entered.
     /// </summary>
@@ -248,17 +265,24 @@ public sealed class Plant : Entity
     /// </summary>
     public string? DescribePurchase()
     {
-        if (Origin != PlantOrigin.Purchased || PricePaid is not { } price)
+        if (PaidText is not { } amount)
             return null;
-        var amount = price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
         return string.IsNullOrWhiteSpace(Source) ? $"Paid {amount}" : $"Bought from {Source.Trim()} for {amount}";
     }
+
+    /// <summary>The price as written in a line, "150" or "79.5". Null unless it was purchased and a price is set.</summary>
+    [JsonIgnore]
+    public string? PaidText =>
+        Origin == PlantOrigin.Purchased && PricePaid is { } price
+            ? price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)
+            : null;
 
     /// <summary>A copy to compare with after editing. The tags get their own list.</summary>
     public Plant Copy()
     {
         var copy = (Plant)MemberwiseClone();
         copy.Tags = [.. Tags];
+        copy.ArrivalProblems = [.. ArrivalProblems];
         return copy;
     }
 
@@ -283,6 +307,7 @@ public sealed class Plant : Entity
         RestHow = RestHow,
         Origin = Origin,
         Source = Source,
+        SellerId = SellerId,
         PricePaid = PricePaid,
         Medium = Medium,
         SoilMixId = SoilMixId,

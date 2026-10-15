@@ -14,6 +14,7 @@ using Stikling.Core.Problems;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
+using Stikling.Core.Sellers;
 using Stikling.Core.Settings;
 using Stikling.Core.Sharing;
 using Stikling.Core.SoilMixes;
@@ -27,6 +28,9 @@ namespace Stikling.Core.Tests;
 internal sealed class FakePlantRepository : IPlantRepository
 {
     public Dictionary<Guid, Plant> Plants { get; } = [];
+
+    /// <summary>How many times a plant was saved.</summary>
+    public int Saves { get; private set; }
 
     public Task<IReadOnlyList<Plant>> GetAllAsync() =>
         Task.FromResult<IReadOnlyList<Plant>>(Plants.Values.Where(p => !p.IsDeleted).ToList());
@@ -42,6 +46,7 @@ internal sealed class FakePlantRepository : IPlantRepository
         // DateOnly.MaxValue: the fake has no clock, and the future-date rule is tested on the model itself
         if (plant.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid plant");
+        Saves++;
         Plants[plant.Id] = plant;
         return Task.CompletedTask;
     }
@@ -57,6 +62,9 @@ internal sealed class FakePlantRepository : IPlantRepository
 internal sealed class FakePropagationRepository : IPropagationRepository
 {
     public Dictionary<Guid, Propagation> Propagations { get; } = [];
+
+    /// <summary>How many times a propagation was saved.</summary>
+    public int Saves { get; private set; }
 
     public Task<IReadOnlyList<Propagation>> GetAllAsync() =>
         Task.FromResult<IReadOnlyList<Propagation>>(Propagations.Values.Where(p => !p.IsDeleted).ToList());
@@ -310,6 +318,33 @@ internal sealed class FakePlaceRepository : IPlaceRepository
         var place = new Place { Name = name, RoomId = room?.Id };
         SaveAsync(place);
         return place;
+    }
+}
+
+internal sealed class FakeSellerRepository : ISellerRepository
+{
+    // Each new seller is a second newer than the last, so "oldest first" is the order they were made
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Seller> Sellers { get; } = [];
+
+    public Task<SellerList> GetSellersAsync() => Task.FromResult(new SellerList(Sellers.Values));
+
+    public Task SaveAsync(Seller seller)
+    {
+        if (seller.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        if (seller.CreatedAt == default)
+            seller.CreatedAt = clock = clock.AddSeconds(1);
+        Sellers[seller.Id] = seller;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Sellers.TryGetValue(id, out var seller))
+            seller.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
     }
 }
 

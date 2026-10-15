@@ -40,7 +40,7 @@ In the order I would build them. The first ones are for reaching new people: wha
 The people on Reddit who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. The order after the demo plant is picked for them.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **Names and where a plant came from**, built together since they share the plant form: **Sellers**, a **Reference photo**, and **A photo on a wish**. Decide with them whether a wish's photo becomes a reference photo when the wish is got.
+2. **A reference photo and a photo on a wish**, built together since they share the plant form. Decide with them whether a wish's photo becomes a reference photo when the wish is got.
 3. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering), and **A treatment plan with steps**.
 
 ### Cheap ones to slot in whenever
@@ -94,7 +94,7 @@ Small ones with no new screen worth the name:
 | ☐ | Group the plant list by genus, with an A to Z jump for long lists | 6 | S | v1.x |
 | ☐ | **The collection at a glance**: how many plants there are of each genus and in each room, how many species, and the plant you have had longest. Worked out from what is stored | 6 | S | v1.x |
 | ✅ | **Collection numbers**: an optional short number per plant, e.g. 117, set on the plant form with the next free one suggested. Propagations get 117a, 117b and so on (117c-a from a lettered parent), and a cutting potted up keeps its code (117c1, 117c2 for several). Settings can number the plants you have, oldest first. The number shows on cards, tiles, pages, the plant table (No.), shared lists, the sitter sheet, the spreadsheet import and the CSV export, and the search finds it. Two with the same number are pointed out, never blocked or changed | 4 | M | v1.x |
-| ☐ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 4 | M | v1.x |
+| ✅ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 4 | M | v1.x |
 | ☐ | **How it was raised**: nursery grown, tissue culture, grown from seed or wild collected, picked under **Where it came from**. The rare plant with a locality or a collector's number can have those added too. Nothing extra shows until it's used | 6 | S | v1.x |
 | ☐ | **Orders**: a purchase or swap that brought several plants at once, with the seller, the date, the shipping and the total. The plants that came in it point to the order, so what each one cost can include its share of the shipping. Builds on Sellers | 7 | M | v1.x |
 | ✅ | **Unsure names**: mark a name as not certain yet, the way collectors write it (cf., aff., or sp. for a plant with no species name), with an optional locality or collector code, e.g. "Hoya sp. Sumatra". The name fields and the search work as before, and nothing extra shows until it's used. It also covers a plant with no name at all, so a lost tag leaves a note instead of a blank | 4 | S | v1.x |
