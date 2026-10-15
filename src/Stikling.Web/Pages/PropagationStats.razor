@@ -1,5 +1,7 @@
 @page "/propagations/results"
 @inject IPropagationRepository Repository
+@inject ITimelineRepository Timeline
+@inject TimeProvider Time
 
 <PageTitle>Results · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -41,7 +43,7 @@ else
     <section class="results-section">
         <h2>All propagations</h2>
         <ul class="results-list">
-            <li>@Row("All", overall, "Rooted")</li>
+            <li>@Row("All", overall, "Rooted", overallLost)</li>
         </ul>
     </section>
 
@@ -50,7 +52,7 @@ else
         <ul class="results-list">
             @foreach (var result in byMedium)
             {
-                <li>@Row(Labels.For(result.Key), result, "Rooted")</li>
+                <li>@Row(Labels.For(result.Key), result, "Rooted", lostByMedium.GetValueOrDefault(result.Key))</li>
             }
         </ul>
     </section>
@@ -93,6 +95,20 @@ else
             </ul>
         }
     </section>
+
+    @if (byDrying.Count > 0)
+    {
+        <section class="results-section">
+            <h2>Drying the cut end</h2>
+            <p class="aid-note">Batches grouped by how long the cut end dried before it went in, whatever the type or medium.</p>
+            <ul class="results-list">
+                @foreach (var group in byDrying)
+                {
+                    <li>@Row(group.Name, group.Result, "Rooted")</li>
+                }
+            </ul>
+        </section>
+    }
 }
 
 @code {
@@ -101,6 +117,9 @@ else
     private IReadOnlyList<PropagationResult<GrowingMedium>> byMedium = [];
     private IReadOnlyList<PropagationResult<PropagationType>> byType = [];
     private IReadOnlyList<RootingAidResult> byAid = [];
+    private IReadOnlyList<DryingResult> byDrying = [];
+    private IReadOnlyDictionary<GrowingMedium, FailureSummary> lostByMedium = new Dictionary<GrowingMedium, FailureSummary>();
+    private FailureSummary? overallLost;
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
@@ -111,9 +130,16 @@ else
         byMedium = PropagationResults.ByMedium(all);
         byType = PropagationResults.ByType(all);
         byAid = PropagationResults.ByRootingAid(all);
+        byDrying = PropagationResults.ByDrying(all);
+
+        var entries = new Dictionary<Guid, IReadOnlyList<TimelineEntry>>();
+        foreach (var p in all.Where(p => !p.IsDeleted && p.FailedCount > 0))
+            entries[p.Id] = await Timeline.GetForAsync(p.Id);
+        lostByMedium = FailureResults.ByMedium(all, entries, Time);
+        overallLost = FailureResults.Overall(all, entries, Time);
     }
 
-    private static RenderFragment Row<TKey>(string name, PropagationResult<TKey> result, string rooted) => __builder =>
+    private static RenderFragment Row<TKey>(string name, PropagationResult<TKey> result, string rooted, FailureSummary? lost = null) => __builder =>
     {
         <div class="result-row">
             <div class="result-head">
@@ -172,8 +198,27 @@ else
                     <span class="text-body-secondary">No @rooted.ToLowerInvariant() dates yet</span>
                 }
             </div>
+
+            @if (lost is not null)
+            {
+                <div class="result-line text-body-secondary">@LostText(lost)</div>
+            }
         </div>
     };
+
+    private static string LostText(FailureSummary lost)
+    {
+        var reasons = string.Join(", ", lost.Reasons.Select(r =>
+            $"{(r.Reason is { } reason ? FailReasons.LostTo(reason) : "not recorded")} {r.Units}"));
+        var stage = lost.MostlyAt switch
+        {
+            FailureStage.BeforeRooting => " · mostly before rooting",
+            FailureStage.WhileRooting => " · mostly while rooting",
+            FailureStage.AfterRooting => " · mostly after rooting",
+            _ => ""
+        };
+        return $"Lost to: {reasons}{stage}";
+    }
 
     // Below this many units a percentage looks more certain than it is
     private const int SmallSample = 5;

@@ -15,6 +15,9 @@ public sealed record ImportSummary(int Added, int Updated, int BroughtBack, int 
     public bool ChangedRecords => Added > 0 || Updated > 0 || BroughtBack > 0;
 }
 
+/// <summary>How many photos went into the photo folders download, and how many couldn't be found on this device.</summary>
+public sealed record PhotoFolderSummary(int Added, int Skipped);
+
 /// <summary>
 /// Backup to a ZIP file and back again. The ZIP holds data.json with everything the app
 /// stores, plus the photos as ordinary .webp or .jpg files, whichever each was saved as, so the pictures are usable on their own.
@@ -107,6 +110,52 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         await files.SetLastBackupAsync(today);
 
         return data.Counts;
+    }
+
+    /// <summary>
+    /// Downloads every photo, full size, in a ZIP with a folder for each plant, propagation and pot.
+    /// It is for looking through outside the app, so it is not a backup and doesn't count as one.
+    /// </summary>
+    public async Task<PhotoFolderSummary> DownloadPhotoFoldersAsync(PhotoFolderOptions options, IProgress<(int Done, int Total)>? progress = null)
+    {
+        var plan = PhotoFolders.Plan(
+            await db.GetAllAsync<Plant>(Stores.Plants), await db.GetAllAsync<Propagation>(Stores.Propagations),
+            await db.GetAllAsync<Pot>(Stores.Pots), await db.GetAllAsync<Photo>(Stores.Photos), options, time.LocalTimeZone);
+
+        if (plan.Count == 0)
+            return new PhotoFolderSummary(0, 0);
+
+        var added = 0;
+        var skipped = 0;
+        progress?.Report((0, plan.Count));
+
+        using var buffer = new MemoryStream();
+        using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            var done = 0;
+            foreach (var (photoId, path) in plan)
+            {
+                if (!await photos.HasBytesAsync(photoId))
+                    await sync.FetchPhotoAsync(photoId, PhotoSize.Full);
+
+                if (await photos.GetBytesAsync(photoId, thumbnail: false) is { } bytes)
+                {
+                    // The format is only known from the bytes, since photos are WebP or JPEG
+                    var extension = (PhotoRules.FormatOf(bytes) ?? ImageFormat.Jpeg).Extension;
+                    await using var entry = zip.CreateEntry($"{path}.{extension}", CompressionLevel.NoCompression).Open();
+                    await entry.WriteAsync(bytes);
+                    added++;
+                }
+                else
+                {
+                    skipped++;
+                }
+                progress?.Report((++done, plan.Count));
+            }
+        }
+
+        await files.DownloadAsync($"stikling-photos-{time.Today():yyyy-MM-dd}.zip", buffer.ToArray());
+        return new PhotoFolderSummary(added, skipped);
     }
 
     /// <summary>Reads a backup without changing anything, so it can be described before restoring.</summary>

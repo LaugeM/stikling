@@ -41,9 +41,7 @@ The people on Reddit who track their plants at all are mostly collectors with 50
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
 2. **A reference photo and a photo on a wish**, built together since they share the plant form. Decide with them whether a wish's photo becomes a reference photo when the wish is got.
-3. **Propagation results**, three small ones on the same screens: **Why a propagation failed**, **Let the cut end dry first** as a rooting aid, and **Start like last time**.
-4. **Your photos in folders**, so the photos are useful without the app. Worth saying in a post too.
-5. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering), and **A treatment plan with steps**.
+3. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering), and **A treatment plan with steps**.
 
 ### Cheap ones to slot in whenever
 
@@ -176,10 +174,10 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **On time or slow**: a propagation that is still rooting says whether it is on time or slower than usual, compared with your own average days to root for the same type and medium. Only shown once there are at least 3 rooted batches to compare with, and the list cards only mention it when it's slow | 4 | S | v1.x |
 | ☐ | **Is it a fair comparison?**: on the results page and in an experiment, a line saying so when the batches being compared differ in more than one thing, e.g. a different medium and a different month, so a difference isn't read as the medium's doing | 6 | S | v1.x |
 | ☐ | **Ready by**: give the date a rooted cutting should be ready, e.g. for a swap on 1 June, and the app says when to start it, from your own days to root for that type and medium. Only once there are at least 3 rooted batches to go by, like On time or slow. It answers when asked and puts nothing on Today | 6 | S | v1.x |
-| ☐ | **Start like last time**: Start propagation can fill in the type, medium, container and rooting aids from your last propagation of the same plant or type, and anything can still be changed | 4 | S | v1.x |
+| ✅ | **Start like last time**: Start propagation can fill in the type, medium, container and rooting aids from your last propagation of the same plant or type, and anything can still be changed | 4 | S | v1.x |
 | ✅ | Seed germination: sown count, germinated count and dates | 5 | S | v1.x |
 | ✅ | **Rooting aids**: what was used to help a propagation root, e.g. rooting powder or gel, cinnamon, or a bag or dome for humidity. The results page compares each one with the batches that went without it | 5 | S | v1.x |
-| ☐ | **Let the cut end dry first, as a rooting aid**: another choice under Rooting aids, with how long it dried. The results page compares those batches with the ones that went straight in, so conflicting advice is settled by your own results | 4 | S | v1.x |
+| ✅ | **Let the cut end dry first, as a rooting aid**: another choice under Rooting aids, with how long it dried. The results page compares those batches with the ones that went straight in, so conflicting advice is settled by your own results | 4 | S | v1.x |
 | ◐ | **Changing the water**: log "changed water" in one tap on a propagation in water, with an optional number of days between changes that is off until set and then comes up on Today. The results page compares batches by how often the water was changed. Logging is built (**Care** on a propagation in water); the reminder interval and the comparison on the results page are not | 6 | S | v1.x |
 | ✅ | **Care on a propagation**: a **Care** button next to Photo and Note logs a watering and a moisture reading (0 to 10) for one in soil, bark, LECA, PON, perlite or sphagnum, and a water change for one in water or on a corm riser, on today or another day. The newest shows under its name and in Details, logging care counts as looking at it for Worth a look on Today, and potting up carries the last watering over to the new plants. Kept in its own kind of record, so plants' care log is untouched | 5 | M | v1.x |
 | ✅ | **Rooted pups as plants**: Start propagation says that a pup or division with its own roots is a plant and links to Add plant with the parent picked. A propagation already in soil, bark, LECA or PON has **It's a plant now** in place of Pot up, which keeps the medium it is in | 4 | S | v1.x |
@@ -191,7 +189,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | Lineage tree view (family tree across generations). It opens on one plant with three generations of where it came from, its siblings (other cuttings from the same mother) and what has come from it. Tapping another plant moves the tree to that one, so a big family never turns into one huge chart | 4 | M | v1.x |
 | ✅ | **What a plant has given**: on a plant's page, how many cuttings it has given, how many rooted, how many were given away, and how many plants have come from those in turn | 4 | S | v1.x |
 | ☐ | **Generation**: a plant or propagation says how many generations it is from the oldest ancestor you have, e.g. "3rd generation from the kitchen Monstera". Worked out from the parent links, with nothing to fill in | 8 | S | v1.x |
-| ☐ | **Why a propagation failed**: an optional reason on Mark failed (rotted, dried out, pests, mould, don't know). The results page shows what each medium loses cuttings to, and at which stage | 4 | S | v1.x |
+| ✅ | **Why a propagation failed**: an optional reason on Mark failed (rotted, dried out, pests, mould, don't know). The results page shows what each medium loses cuttings to, and at which stage | 4 | S | v1.x |
 | ☐ | **How it differed from the ones that rooted**: a failed propagation lists what was different from your rooted ones of the same type: the medium, the rooting aids, the month it was started and how often the water was changed. Only facts from your own records, and it says so when nothing stands out | 6 | S | v1.x |
 | ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
 | ☐ | **A parent that isn't yours**: a plant that lives with someone else or is gone, like grandma's pothos, added only so its cuttings have somewhere to come from. It shows in the family tree and on its offspring, never in the plant list or on Today, and can say whose it is. A field of its own on the plant rather than a new status, so older versions still read it | 5 | S | v1.x |
@@ -395,7 +393,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | Import propagations from a spreadsheet, with the parent plant found by name | 7 | S | v1.x |
 | ✅ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side, with Help and Settings at the bottom of it. Plant and propagation pages show the details next to the history, the Plants and Propagations lists flow into columns, and sheets open as a dialog in the middle. Phones keep the tabs at the bottom | 5 | M | v1.x |
 | ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
-| ☐ | **Your photos in folders**: a download of every photo with one folder per plant and propagation, each file named by the date it was taken, so the photos are useful without the app. Separate from the backup, which is made for the app to read back | 4 | S | v1.x |
+| ✅ | **Your photos in folders**: a download of every photo with one folder per plant and propagation, each file named by the date it was taken, so the photos are useful without the app. Separate from the backup, which is made for the app to read back | 4 | S | v1.x |
 | ☐ | Units and date format settings | 7 | M | v1.x |
 | ☐ | Danish translation | 7 | L | v1.x |
 
