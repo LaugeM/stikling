@@ -8,6 +8,7 @@
 @inject WishService WishService
 @inject PlantNameService Names
 @inject RoomService RoomService
+@inject SellerService SellerService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject PhotoService Photos
@@ -57,8 +58,7 @@ else
             @if (propagation.ParentPlantId is null)
             {
                 <div class="mb-3">
-                    <label class="form-label" for="source">Source</label>
-                    <InputText id="source" class="form-control" @bind-Value="propagation.Source" placeholder="e.g. Seed shop, a friend's plant" />
+                    <SellerPicker @bind-Value="sellerText" Names="sellerNames" Placeholder="e.g. Seed shop, a friend" />
                 </div>
             }
             <div class="mb-1">
@@ -231,6 +231,13 @@ else
                     <RoomPicker @bind-Value="location" Rooms="rooms" SpotPlaceholder="e.g. Kitchen window" />
                 </div>
             </FormSection>
+
+            @if (ShowArrival)
+            {
+                <FormSection Title="How it arrived" Summary="@ArrivalFields.Summary(propagation.ArrivedIn, propagation.ArrivalProblems)" Open="openArrival">
+                    <ArrivalFields Id="arrival" @bind-Rating="propagation.ArrivedIn" Problems="propagation.ArrivalProblems" @bind-Note="propagation.ArrivalNote" />
+                </FormSection>
+            }
 
             <FormSection Title="Setup" Summary="@SetupSummary" Open="openSetup">
                 <div class="mb-3">
@@ -621,6 +628,19 @@ else
         p.Stage != PropagationStage.Started || p.RootedOn is not null || p.FirstRootOn is not null
         || p.FirstLeafOn is not null || p.SeedsGerminated is not null || p.FirstGerminatedOn is not null;
 
+    private bool openArrival;
+
+    // What the Where from box says. The seller is only looked up again when it was changed, so
+    // saving a propagation whose seller was deleted doesn't bring a new one back.
+    private string? sellerText;
+    private string? sellerTextStart;
+    private bool sellerTextLoaded;
+    private IReadOnlyList<string> sellerNames = [];
+    private SellerList sellerBook = SellerList.None;
+
+    private bool ShowArrival =>
+        propagation is not null && propagation.ParentPlantId is null && SellerName.Clean(sellerText) is not null;
+
     protected override async Task OnParametersSetAsync()
     {
         googleOn = await Google.IsEnabledAsync();
@@ -661,8 +681,23 @@ else
 
         location = places.NameOf(propagation?.PlaceId);
 
+        var sellers = await SellerService.GetSellersAsync();
+        sellerBook = sellers;
+        var uses = SellerSummary.CountsBySeller(sellers, allPlants, allPropagations);
+        sellerNames = sellers.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
+
         if (propagation is not null)
         {
+            if (!sellerTextLoaded)
+            {
+                sellerText = sellers.For(propagation.SellerId, propagation.Source)?.Name ?? propagation.Source;
+                // A Source that came with the draft, like a wish's "found at", is made into a seller on save
+                sellerTextStart = IsNew && propagation.SellerId is null ? null : sellerText;
+                sellerTextLoaded = true;
+            }
+
+            openArrival = !IsNew && (propagation.ArrivedIn is not null || propagation.ArrivalProblems.Count > 0 || !string.IsNullOrWhiteSpace(propagation.ArrivalNote));
+
             LoadDrying();
             openWhere = !IsNew && !string.IsNullOrWhiteSpace(location);
             openSetup = IsNew || HasSetup(propagation);
@@ -920,7 +955,17 @@ else
         try
         {
             if (propagation.ParentPlantId is not null)
+            {
                 propagation.Source = null;
+                propagation.SellerId = null;
+            }
+            else if (sellerText != sellerTextStart || (propagation.SellerId is null && sellerBook.For(null, propagation.Source) is not null))
+            {
+                var choice = await SellerService.ChooseAsync(sellerText, SellerKind.Other, propagation.SellerId);
+                propagation.SellerId = choice.SellerId;
+                propagation.Source = choice.Source;
+                sellerTextStart = sellerText;
+            }
 
             propagation.PlaceId = await RoomService.PlaceIdAsync(location);
             if (IsNew)

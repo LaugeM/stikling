@@ -1,0 +1,82 @@
+@page "/sellers"
+@inject SellerService SellerService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+
+<PageTitle>Sellers · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="supplies">Supplies</a>
+<h1>Sellers</h1>
+
+<p class="settings-hint">
+    Everyone your plants came from: shops, online sellers, friends and swap events. Open one to see
+    how the plants from it have done since.
+</p>
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (rows.Count == 0)
+{
+    <div class="empty-state">
+        <p>No sellers yet.</p>
+        <p class="text-body-secondary">
+            Where your plants came from shows up here once a plant has a seller. Pick one under Where from when adding a plant.
+        </p>
+    </div>
+}
+else
+{
+    <section class="settings-section">
+        <h2>Your sellers</h2>
+
+        <ul class="seller-list">
+            @foreach (var row in rows)
+            {
+                <li>
+                    <a class="seller-row" href="sellers/@row.Seller.Id">
+                        <span class="seller-title">@row.Seller.Name</span>
+                        <span class="seller-use">@Labels.For(row.Seller.Kind) · @Used(row)</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+@code {
+    private sealed record Row(Seller Seller, int Plants, int Propagations);
+
+    private IReadOnlyList<Row> rows = [];
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var sellers = await SellerService.GetSellersAsync();
+        var plants = (await PlantRepository.GetAllAsync()).Where(p => !p.IsDeleted).ToList();
+        var propagations = (await PropagationRepository.GetAllAsync()).Where(p => !p.IsDeleted).ToList();
+
+        // Two sellers can share a name after a merge on another device. Both are listed, and merging fixes it.
+        rows = sellers.Live
+            .Select(s => new Row(
+                s,
+                plants.Count(p => sellers.For(p.SellerId, p.Source)?.Id == s.Id),
+                propagations.Count(p => sellers.For(p.SellerId, p.Source)?.Id == s.Id)))
+            .OrderByDescending(r => r.Plants + r.Propagations)
+            .ThenBy(r => r.Seller.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        loading = false;
+    }
+
+    private static string Used(Row row) => (row.Plants, row.Propagations) switch
+    {
+        (0, 0) => "nothing from it yet",
+        (var plants, 0) => Labels.Count(plants, "plant"),
+        (0, var propagations) => Labels.Count(propagations, "propagation"),
+        var (plants, propagations) => $"{Labels.Count(plants, "plant")} and {Labels.Count(propagations, "propagation")}"
+    };
+}

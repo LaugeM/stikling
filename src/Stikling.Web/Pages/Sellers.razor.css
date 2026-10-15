@@ -1,0 +1,32 @@
+.seller-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.seller-list > li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.seller-list > li:first-child {
+    border-top: 0;
+}
+
+.seller-row {
+    display: block;
+    padding: 0.6rem 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.seller-title {
+    display: block;
+    font-weight: 600;
+}
+
+.seller-use {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}

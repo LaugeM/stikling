@@ -11,6 +11,7 @@ using Stikling.Core.Pots;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
+using Stikling.Core.Sellers;
 using Stikling.Core.Settings;
 using Stikling.Core.Sharing;
 using Stikling.Core.SoilMixes;
@@ -133,6 +134,15 @@ public sealed class IndexedDbPlaceRepository(IndexedDb db, TimeProvider time)
         new((await GetStoredAsync()).Where(p => !p.IsDeleted || p.MergedIntoId is not null));
 
     protected override IReadOnlyList<string> Validate(Place place) => place.Validate();
+}
+
+public sealed class IndexedDbSellerRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Seller>(db, time, Stores.Sellers), ISellerRepository
+{
+    // Merged and deleted sellers are kept, so what still points at them can be followed or skipped
+    public async Task<SellerList> GetSellersAsync() => new(await GetStoredAsync());
+
+    protected override IReadOnlyList<string> Validate(Seller seller) => seller.Validate();
 }
 
 public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)

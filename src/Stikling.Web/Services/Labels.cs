@@ -30,6 +30,34 @@ public static class Labels
         _ => origin.ToString()
     };
 
+    public static string For(SellerKind kind) => kind switch
+    {
+        SellerKind.Shop => "Shop",
+        SellerKind.OnlineShop => "Online shop",
+        SellerKind.Person => "Person",
+        SellerKind.SwapEvent => "Swap event",
+        SellerKind.Other => "Other",
+        _ => kind.ToString()
+    };
+
+    public static string For(ArrivalRating rating) => rating switch
+    {
+        ArrivalRating.Good => "Good",
+        ArrivalRating.Ok => "OK",
+        ArrivalRating.Poor => "Poor",
+        _ => rating.ToString()
+    };
+
+    public static string For(ArrivalProblem problem) => problem switch
+    {
+        ArrivalProblem.Pests => "Pests",
+        ArrivalProblem.Damaged => "Damaged or broken",
+        ArrivalProblem.RootRot => "Root rot",
+        ArrivalProblem.WrongPlant => "Wrong plant",
+        ArrivalProblem.SmallerThanShown => "Smaller than shown",
+        _ => problem.ToString()
+    };
+
     public static string For(LightLevel light) => light switch
     {
         LightLevel.Low => "Low light",

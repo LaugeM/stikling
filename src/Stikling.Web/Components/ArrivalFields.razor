@@ -1,0 +1,73 @@
+@* How a plant or cutting was when it arrived: a rating, what was wrong, and a short note. *@
+
+<div class="mb-3">
+    <span class="form-label d-block" id="@(Id)-rating-label">How it was</span>
+    <div class="chip-row" role="group" aria-labelledby="@(Id)-rating-label">
+        @foreach (var rating in Enum.GetValues<ArrivalRating>())
+        {
+            var picked = Rating == rating;
+            <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                    @onclick="() => PickRatingAsync(rating)">@Labels.For(rating)</button>
+        }
+    </div>
+</div>
+
+<div class="mb-3">
+    <span class="form-label d-block" id="@(Id)-problems-label">Anything wrong with it</span>
+    <div class="chip-row" role="group" aria-labelledby="@(Id)-problems-label">
+        @foreach (var problem in Enum.GetValues<ArrivalProblem>())
+        {
+            var picked = Problems.Contains(problem);
+            <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                    @onclick="() => ToggleProblem(problem)">@Labels.For(problem)</button>
+        }
+    </div>
+</div>
+
+<div class="mb-3">
+    <label class="form-label" for="@(Id)-note">Note</label>
+    <input id="@(Id)-note" class="form-control" autocomplete="off" placeholder="e.g. Two leaves broken in the post"
+           value="@Note" @oninput="e => NoteChanged.InvokeAsync(e.Value?.ToString())" />
+    <div class="form-text">The Sellers page adds these up, so you can see which sellers send plants in good shape.</div>
+</div>
+
+@code {
+    [Parameter]
+    public ArrivalRating? Rating { get; set; }
+
+    [Parameter]
+    public EventCallback<ArrivalRating?> RatingChanged { get; set; }
+
+    [Parameter]
+    public List<ArrivalProblem> Problems { get; set; } = [];
+
+    [Parameter]
+    public string? Note { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> NoteChanged { get; set; }
+
+    [Parameter]
+    public string Id { get; set; } = "arrival";
+
+    // Tapping the one that's picked puts it back to not said
+    private Task PickRatingAsync(ArrivalRating rating)
+    {
+        Rating = Rating == rating ? null : rating;
+        return RatingChanged.InvokeAsync(Rating);
+    }
+
+    private void ToggleProblem(ArrivalProblem problem)
+    {
+        if (!Problems.Remove(problem))
+            Problems.Add(problem);
+    }
+
+    /// <summary>The line shown on the closed section: "Poor · Pests, Root rot", or nothing.</summary>
+    public static string? Summary(ArrivalRating? rating, IEnumerable<ArrivalProblem> problems) =>
+        string.Join(" · ", new[]
+        {
+            rating is { } r ? Labels.For(r) : null,
+            problems.Any() ? string.Join(", ", problems.Select(Labels.For)) : null
+        }.Where(p => p is not null));
+}
