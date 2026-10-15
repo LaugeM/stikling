@@ -132,6 +132,19 @@ public class CareLikesTests
     }
 
     [Fact]
+    public void WouldChange_leaves_out_plants_a_way_of_resting_means_nothing_to()
+    {
+        var from = Monstera(p => { p.GrowingSeason = GrowingSeason.Summer; p.RestHow = RestKind.Cooler; });
+        var rests = Monstera(p => { p.Nickname = "Rests"; p.GrowingSeason = GrowingSeason.Summer; });
+        var noRest = Monstera(p => { p.Nickname = "No rest"; p.GrowingSeason = GrowingSeason.NoRest; });
+        var same = Monstera(p => { p.Nickname = "Same"; p.GrowingSeason = GrowingSeason.Summer; p.RestHow = RestKind.Cooler; });
+
+        var result = CareLikes.WouldChange(from, [LikesField.Rest], [rests, noRest, same]);
+
+        Assert.Equal(["Rests"], result.Select(p => p.Nickname));
+    }
+
+    [Fact]
     public void The_fields_are_stored_as_text_and_older_plants_read_as_null()
     {
         var plant = Monstera(p =>

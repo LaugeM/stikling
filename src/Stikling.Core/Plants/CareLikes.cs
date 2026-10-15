@@ -93,4 +93,17 @@ public static class CareLikes
         if (plant.GrowingSeason is not (GrowingSeason.Summer or GrowingSeason.Winter))
             plant.RestHow = null;
     }
+
+    /// <summary>
+    /// The plants of the same species that copying these fields would really change, after
+    /// <see cref="Normalize"/>. A way of resting copied to a plant that doesn't rest is left out.
+    /// </summary>
+    public static IReadOnlyList<Plant> WouldChange(Plant from, IReadOnlyList<LikesField> fields, IEnumerable<Plant> sameSpecies) =>
+        sameSpecies.Where(other =>
+        {
+            var copy = other.Copy();
+            Copy(from, copy, fields);
+            Normalize(copy);
+            return Changed(other, copy).Count > 0;
+        }).ToList();
 }

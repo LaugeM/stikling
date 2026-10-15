@@ -41,8 +41,11 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     /// </summary>
     public async Task ApplyLikesAsync(Plant from, IReadOnlyList<LikesField> fields, IEnumerable<Plant> others)
     {
-        foreach (var other in others)
+        foreach (var loaded in others)
         {
+            // Read again, so a change that arrived since the page loaded isn't saved over
+            if (await plants.GetAsync(loaded.Id) is not { IsDeleted: false } other)
+                continue;
             CareLikes.Copy(from, other, fields);
             CareLikes.Normalize(other);
             await plants.SaveAsync(other);
