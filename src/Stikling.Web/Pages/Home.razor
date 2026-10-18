@@ -265,9 +265,10 @@ else
                                 <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
                             </div>
                             <div class="item-text">
-                                <div class="item-name">@Labels.For(view.Case.Pest) · Plan done: @view.Case.PlanName</div>
+                                <div class="item-name">@Labels.For(view.Case.Pest)</div>
                                 <div class="item-meta">
-                                    <span>@Labels.ScopeAndCount(view)</span>
+                                    <span>Done with @view.Case.PlanName</span>
+                                    <span>· @Labels.ScopeAndCount(view)</span>
                                 </div>
                             </div>
                         </a>
