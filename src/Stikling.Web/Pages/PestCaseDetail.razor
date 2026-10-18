@@ -229,7 +229,7 @@ else
 
             @* Before the first treatment there's no rhythm yet, so a date for the next would only confuse.
                A case being watched still shows when its weekly check is due. *@
-            @if (!view.Untreated || view.Step is not null)
+            @if (!view.Untreated || view.Step is not null || view.PlanDoneOn is not null)
             {
                 <dt>Next one</dt>
                 <dd>

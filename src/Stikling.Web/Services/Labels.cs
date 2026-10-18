@@ -193,7 +193,7 @@ public static class Labels
     /// and nothing is logged, rather than counting days overdue since the pests were found.
     /// </summary>
     public static string Due(PestCaseView view) =>
-        view.Untreated && view.IsDue ? "no treatment yet" : Due(view.DaysUntilDue ?? 0, view.IsCheck);
+        view.Untreated && view.IsDue && view.StepNumber <= 1 ? "no treatment yet" : Due(view.DaysUntilDue ?? 0, view.IsCheck);
 
     /// <summary>"due today", "2 days overdue", "next in 3 days", or "check due today" and so on for a check.</summary>
     public static string Due(int daysUntil, bool check = false)
