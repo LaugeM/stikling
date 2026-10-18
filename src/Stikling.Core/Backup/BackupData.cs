@@ -43,6 +43,8 @@ public sealed class BackupData
     public List<ProblemUpdate> ProblemUpdates { get; set; } = [];
     public List<Wish> Wishes { get; set; } = [];
     public List<Seller> Sellers { get; set; } = [];
+    public List<OwnCareKind> OwnCareKinds { get; set; } = [];
+    public List<CareInterval> CareIntervals { get; set; } = [];
     public List<TreatmentPlan> TreatmentPlans { get; set; } = [];
 
     /// <summary>
@@ -75,6 +77,8 @@ public sealed class BackupData
         ProblemUpdates.Count(u => !u.IsDeleted),
         Wishes.Count(w => !w.IsDeleted),
         Sellers.Count(s => !s.IsDeleted),
+        OwnCareKinds.Count(k => !k.IsDeleted),
+        CareIntervals.Count(i => !i.IsDeleted),
         TreatmentPlans.Count(p => !p.IsDeleted));
 }
 
@@ -104,4 +108,6 @@ public sealed record BackupCounts(
     int ProblemUpdates,
     int Wishes,
     int Sellers,
+    int OwnCareKinds,
+    int CareIntervals,
     int TreatmentPlans);

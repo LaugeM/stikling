@@ -62,6 +62,16 @@ public sealed class CareLog : Entity
     /// <summary>The pH of the water, 0 to 14, from a meter. Only on the kinds that take a product.</summary>
     public decimal? Ph { get; set; }
 
+    /// <summary>
+    /// The own kind of care this entry is, when it is one. <see cref="Kind"/> is then what the kind
+    /// counts as: Watered, Fertilised, or Rotated for neither. These are top-level fields so an
+    /// older version that saves the record keeps them.
+    /// </summary>
+    public Guid? OwnKindId { get; set; }
+
+    /// <summary>The own kind's name as it was that day, so removing the kind leaves the entry readable.</summary>
+    public string? OwnKindName { get; set; }
+
     public string? Notes { get; set; }
 
     public CareLog Copy()
@@ -80,6 +90,14 @@ public sealed class CareLog : Entity
 
         if (OccurredOn > today)
             errors.Add("That date is in the future.");
+
+        if (OwnKindId is not null)
+        {
+            if (string.IsNullOrWhiteSpace(OwnKindName))
+                errors.Add("An entry of your own kind of care needs its name.");
+            if (Kind is not (CareKind.Rotated or CareKind.Watered or CareKind.Fertilised))
+                errors.Add("A kind of your own can only count as a watering, a feed or neither.");
+        }
 
         if (Kind == CareKind.MoistureReading)
         {

@@ -27,7 +27,7 @@ public class SearchTests
 
     private async Task<SearchIndex> Index() =>
         await new SearchService(plants, propagations, timeline, careLogs, propagationCareLogs, problems, problemUpdates,
-            pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FixedTime(Now))
+            pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FakeOwnCareKindRepository(), new FixedTime(Now))
             .LoadAsync(e => e.ToString());
 
     private async Task<SearchResults> Find(string? query) => (await Index()).Find(query);
@@ -123,7 +123,7 @@ public class SearchTests
     {
         var plant = AddPlant(genus: "Dracaena", species: "trifasciata", set: p => p.CollectionNumber = "12");
         var index = await new SearchService(plants, propagations, timeline, careLogs, propagationCareLogs, problems,
-            problemUpdates, pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FixedTime(Now))
+            problemUpdates, pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FakeOwnCareKindRepository(), new FixedTime(Now))
             .LoadAsync(e => e.ToString(), (_, species, _) => species == "trifasciata" ? "Snake plant" : null);
 
         Assert.Equal([plant.Id], index.Find("snake").Plants.Select(i => i.Id));

@@ -1,0 +1,16 @@
+/* On a wide screen the rows flow into columns at least 20rem wide, like the plants list.
+   Each row draws its own right and bottom hairline, pulled over the block's edge, so a
+   half-empty last line has no stray lines. */
+@media (min-width: 64rem) {
+    .interval-rows {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    }
+
+    .interval-rows ::deep > a.item-card {
+        border-top: 0;
+        border-right: 1px solid var(--pa-border);
+        border-bottom: 1px solid var(--pa-border);
+        margin: 0 -1px -1px 0;
+    }
+}

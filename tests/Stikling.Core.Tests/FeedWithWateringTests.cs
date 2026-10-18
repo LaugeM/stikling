@@ -19,7 +19,7 @@ public class FeedWithWateringTests
 
     public FeedWithWateringTests()
     {
-        care = new CareService(logs, timeline, plants, feeds, products, new FixedTime(Now));
+        care = new CareService(logs, timeline, plants, feeds, products, new FakeOwnCareKindRepository(), new FixedTime(Now));
         feed = new Feed
         {
             Name = " Aroid feed ",

@@ -120,6 +120,35 @@ internal sealed class FakeCareLogRepository : ICareLogRepository
     }
 }
 
+internal sealed class FakeOwnCareKindRepository : IOwnCareKindRepository
+{
+    public Dictionary<Guid, OwnCareKind> Kinds { get; } = [];
+
+    public Task<IReadOnlyList<OwnCareKind>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<OwnCareKind>>(Kinds.Values.Where(k => !k.IsDeleted).ToList());
+
+    public Task<IReadOnlyList<OwnCareKind>> GetStoredAsync() =>
+        Task.FromResult<IReadOnlyList<OwnCareKind>>(Kinds.Values.ToList());
+
+    public Task<OwnCareKind?> GetAsync(Guid id) =>
+        Task.FromResult(Kinds.TryGetValue(id, out var kind) && !kind.IsDeleted ? kind : null);
+
+    public Task SaveAsync(OwnCareKind kind)
+    {
+        if (kind.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        Kinds[kind.Id] = kind;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Kinds.TryGetValue(id, out var kind))
+            kind.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakePropagationCareLogRepository : IPropagationCareLogRepository
 {
     public List<PropagationCareLog> Logs { get; } = [];
@@ -570,6 +599,32 @@ internal sealed class FakeTreatmentRecipeRepository : ITreatmentRecipeRepository
     {
         if (Recipes.TryGetValue(id, out var recipe))
             recipe.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeCareIntervalRepository : ICareIntervalRepository
+{
+    public Dictionary<Guid, CareInterval> Intervals { get; } = [];
+
+    public Task<IReadOnlyList<CareInterval>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<CareInterval>>(Intervals.Values.Where(i => !i.IsDeleted).ToList());
+
+    public Task<CareInterval?> GetAsync(Guid id) =>
+        Task.FromResult(Intervals.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
+
+    public Task SaveAsync(CareInterval interval)
+    {
+        if (interval.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        Intervals[interval.Id] = interval;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Intervals.TryGetValue(id, out var item))
+            item.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }

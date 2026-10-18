@@ -5,6 +5,8 @@
 @inject CoverPhotos Covers
 @inject IPropagationRepository PropagationRepository
 @inject ICareLogRepository CareLogRepository
+@inject IOwnCareKindRepository OwnKindRepository
+@inject ICareIntervalRepository CareIntervalRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject IPestTreatmentRepository PestTreatmentRepository
 @inject FloweringService FloweringService
@@ -650,6 +652,27 @@ else
             }
         </div>
 
+        @if (plant.Status == PlantStatus.Active)
+        {
+            <div class="sheet-section">
+                @if (comesBack.Count > 0)
+                {
+                    <h3 class="section-label">Comes back</h3>
+                    <ul class="comes-back">
+                        @foreach (var line in comesBack)
+                        {
+                            <li><a href="care-intervals/@line.IntervalId?plant=@plant.Id">@line.Label · @line.Next · @line.Every</a></li>
+                        }
+                    </ul>
+                    <a class="comes-back-add" href="care-intervals/new?plant=@plant.Id">Add</a>
+                }
+                else
+                {
+                    <a class="comes-back-add" href="care-intervals/new?plant=@plant.Id">Set care to come back</a>
+                }
+            </div>
+        }
+
         <div class="sheet-section">
             <CareSheet PlantIds="@(new[] { plant.Id })" Form="WateringForms.Of(plant, id => pots.FirstOrDefault(p => p.Id == id))" OnLogged="CareLoggedAsync" />
         </div>
@@ -671,7 +694,7 @@ else
                     {
                         <li id="entry-@entry.Id">
                             <div class="care-entry">
-                                <span class="care-what">@CareService.Describe(entry, Labels.For)</span>
+                                <span class="care-what">@CareService.Describe(entry, Labels.For, ownKindLookup)</span>
                                 <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
                             </div>
                         </li>
@@ -1073,6 +1096,7 @@ else
     private IReadOnlyList<CareLog> care = [];
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
     private LastCare? lastWater;
+    private IReadOnlyDictionary<Guid, OwnCareKind> ownKindLookup = new Dictionary<Guid, OwnCareKind>();
     private MoistureReading? moisture;
     private CareCalendar? careCalendar;
     private IReadOnlyList<PestCase> pests = [];
@@ -1469,6 +1493,36 @@ else
         photoChoice = true;
     }
 
+    // The care intervals covering this plant, for the Comes back list in the care sheet
+    private sealed record ComesBack(Guid IntervalId, string Label, string Next, string Every);
+
+    private IReadOnlyList<ComesBack> comesBack = [];
+
+    private async Task LoadComesBackAsync(IReadOnlyList<CareLog> all)
+    {
+        if (plant is null || plant.Status != PlantStatus.Active)
+        {
+            comesBack = [];
+            return;
+        }
+
+        var intervals = CareIntervals.CoveringPlant(plant, await CareIntervalRepository.GetAllAsync(), places, all, ownKindLookup.Values, Time);
+        var feeds = (await FeedRepository.GetAllAsync()).ToDictionary(f => f.Id);
+        comesBack = [.. intervals.Select(interval =>
+        {
+            var ownName = interval.OwnKindId is { } own ? ownKindLookup.GetValueOrDefault(own)?.Name : null;
+            if (interval.OwnKindId is not null && ownName is null)
+                return null;
+            var feed = interval.FeedId is { } feedId && feeds.TryGetValue(feedId, out var found) ? found.Name : null;
+            var label = CareIntervals.Label(interval.Kind, ownName, feed);
+            var (_, due) = CareIntervals.DueFor(interval, plant, all, Time);
+            var next = interval.IsFeed && plant.IsDormant
+                ? "paused while dormant"
+                : $"next {CareIntervals.DayText(due, Today)}";
+            return new ComesBack(interval.Id, label, next, CareIntervals.EveryText(interval));
+        }).OfType<ComesBack>()];
+    }
+
     private async Task ReloadCareAsync()
     {
         if (plant is null)
@@ -1476,6 +1530,7 @@ else
 
         var all = await CareLogRepository.GetAllAsync();
         care = CareSummary.For(all, plant.Id);
+        ownKindLookup = CareLabels.Lookup(await OwnKindRepository.GetAllAsync());
         // Always show the headline kinds, even the ones never done, so "never flushed" is visible
         // Water comes first in the way the plant gets it now (watered, or refilled and topped up),
         // and the other way only when it has been logged, e.g. waterings from before a self-watering pot
@@ -1486,6 +1541,7 @@ else
             .Select(kind => (kind, CareSummary.Latest(all, plant.Id, kind, Today)))
             .Where(h => h.kind != otherKind || h.Item2 is not null)
             .ToList();
+        await LoadComesBackAsync(all);
         lastWater = CareSummary.LastWater(all, plant.Id, Today);
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
         careCalendar = CareCalendar.Build(all, plant.Id, Today);
@@ -1515,6 +1571,8 @@ else
     {
         await ReloadCareAsync();
         careOpen = false;
+        // A notable kind, or an own kind on the history, has just added a line to it
+        historyVersion++;
     }
 
     private void ShowCuttings()

@@ -1,0 +1,96 @@
+@page "/care-intervals"
+@layout WideLayout
+@inject ICareIntervalRepository Repository
+@inject IPlantRepository PlantRepository
+@inject IFeedRepository FeedRepository
+@inject OwnCareKindService OwnKindService
+@inject RoomService RoomService
+
+<PageTitle>Care intervals · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="settings">Settings</a>
+<h1>Care intervals</h1>
+
+<p class="settings-hint">
+    Care that comes back on Today. Watering isn't here: the watering reminder learns that from each plant.
+</p>
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (rows.Count == 0)
+{
+    <div class="empty-state">
+        <p>No intervals yet.</p>
+        <p class="text-body-secondary">
+            An interval is care that comes back by itself, like fertilise every 2 weeks from April to October,
+            or repot every 2 years. Today lists what is due, and one tap logs it. Watering stays with the
+            watering reminder.
+        </p>
+        <a class="btn btn-primary" href="care-intervals/new">Add an interval</a>
+    </div>
+}
+else
+{
+    <div class="settings-rows interval-rows">
+        @foreach (var row in rows)
+        {
+            <SettingsRow Href="@($"care-intervals/{row.Interval.Id}")" Title="@row.Title" Detail="@row.Detail" />
+        }
+    </div>
+
+    <div class="form-actions mt-3">
+        <a class="btn btn-primary" href="care-intervals/new">Add an interval</a>
+    </div>
+}
+
+@code {
+    private sealed record Row(CareInterval Interval, string Title, string Detail);
+
+    private IReadOnlyList<Row> rows = [];
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var intervals = await Repository.GetAllAsync();
+        var plants = await PlantRepository.GetAllAsync();
+        var places = await RoomService.GetPlacesAsync();
+        var feeds = (await FeedRepository.GetAllAsync()).ToDictionary(f => f.Id);
+        var ownKinds = (await OwnKindService.GetAllAsync()).ToDictionary(k => k.Id);
+
+        rows = [.. intervals.OrderBy(i => i.CreatedAt).Select(interval =>
+        {
+            var ownName = interval.OwnKindId is { } own ? (ownKinds.TryGetValue(own, out var kind) ? kind.Name : "Removed kind of care") : null;
+            var feed = interval.FeedId is { } feedId && feeds.TryGetValue(feedId, out var found) ? found.Name : null;
+            var title = CareIntervals.Label(interval.Kind, ownName, feed);
+
+            if (CareIntervals.CountsAsWatering(interval, CareLabels.Lookup(ownKinds.Values)))
+                return new Row(interval, title, $"Off: {ownName} now counts as a watering");
+
+            var every = CareIntervals.EveryText(interval);
+            var parts = new List<string> { char.ToUpperInvariant(every[0]) + every[1..] };
+            if (CareIntervals.MonthsText(interval) is { } months)
+                parts.Add(months);
+            parts.Add(Covers(interval, plants, places));
+            return new Row(interval, title, string.Join(" · ", parts));
+        })];
+        loading = false;
+    }
+
+    // "Semi-hydro tag (14 plants)", "All plants (52)", "Living room (8)" or "3 plants"
+    private static string Covers(CareInterval interval, IReadOnlyList<Plant> plants, Places places)
+    {
+        var count = CareIntervals.PlantsIn(interval, plants, places).Count;
+        return interval.Scope switch
+        {
+            CareScope.Everywhere => $"All plants ({count})",
+            CareScope.Room => $"{places.NameOf(interval.PlaceId) ?? "A room"} ({count})",
+            CareScope.Tag => $"{interval.Tag} tag ({Labels.Plants(count)})",
+            _ => Labels.Plants(count)
+        };
+    }
+}

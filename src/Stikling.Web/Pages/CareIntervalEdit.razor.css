@@ -1,0 +1,29 @@
+/* "Every" with its number beside the unit */
+.every-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
+.every-row .form-control {
+    width: 5.5rem;
+}
+
+.covers-count {
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
+
+/* When the first plants are due, worked out from the form as it stands */
+.first-due {
+    margin: 0 0 1rem;
+    padding: 0.75rem;
+    background: var(--pa-green-soft);
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}

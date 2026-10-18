@@ -3,7 +3,7 @@ using Stikling.Core.Models;
 namespace Stikling.Core.Care;
 
 /// <summary>The last time something was done, e.g. "Watered, 3 days ago".</summary>
-public sealed record LastCare(CareKind Kind, DateOnly On, int DaysAgo, string? Notes);
+public sealed record LastCare(CareKind Kind, DateOnly On, int DaysAgo, string? Notes, Guid? OwnKindId = null);
 
 /// <summary>The newest moisture meter reading and when it was taken.</summary>
 public sealed record MoistureReading(int Value, DateOnly On, int DaysAgo);
@@ -29,14 +29,19 @@ public static class CareSummary
     /// <summary>The last time each kind was done for a plant, newest first.</summary>
     public static IReadOnlyList<LastCare> LastPerKind(IEnumerable<CareLog> logs, Guid plantId, DateOnly today) =>
         For(logs, plantId)
-            .GroupBy(l => l.Kind)
+            .GroupBy(l => (l.Kind, l.OwnKindId))
             .Select(g => Describe(g.First(), today))
             .OrderByDescending(l => l.On)
             .ToList();
 
-    /// <summary>The last time one thing was done, or null if it never has been.</summary>
+    /// <summary>
+    /// The last time one thing was done, or null if it never has been. An own kind counts as what it
+    /// counts as, but never as Rotated, which is only what it is stored as when it counts as neither.
+    /// </summary>
     public static LastCare? Latest(IEnumerable<CareLog> logs, Guid plantId, CareKind kind, DateOnly today) =>
-        For(logs, plantId).FirstOrDefault(l => l.Kind == kind) is { } entry ? Describe(entry, today) : null;
+        For(logs, plantId).FirstOrDefault(l => l.Kind == kind && !(kind == CareKind.Rotated && l.OwnKindId is not null)) is { } entry
+            ? Describe(entry, today)
+            : null;
 
     /// <summary>The last time the plant had water: watered, or refilled and topped up. Null if it never has.</summary>
     public static LastCare? LastWater(IEnumerable<CareLog> logs, Guid plantId, DateOnly today) =>
@@ -52,7 +57,7 @@ public static class CareSummary
             : null;
 
     private static LastCare Describe(CareLog entry, DateOnly today) =>
-        new(entry.Kind, entry.OccurredOn, DaysBetween(entry.OccurredOn, today), entry.Notes);
+        new(entry.Kind, entry.OccurredOn, DaysBetween(entry.OccurredOn, today), entry.Notes, entry.OwnKindId);
 
     // Floored at 0 so an entry dated today never reads as negative
     private static int DaysBetween(DateOnly then, DateOnly today) => Math.Max(0, today.DayNumber - then.DayNumber);
