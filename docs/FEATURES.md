@@ -35,12 +35,16 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 ## Next up
 
-In the order I would build them. The first ones are for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit, and things from the app worth posting there. Danish Facebook groups wait until the Danish translation is in. After those come the priority 3 and 4 rows, with the ones that belong together built together.
+In the order I would build them, with the ones that belong together built together. The first one is for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit. Danish Facebook groups wait until the Danish translation is in.
 
 The people on Reddit who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. The order after the demo plant is picked for them.
 
-1. **A demo plant and propagation**, so a first visit shows the app with plants in it. Grid view and the family tree, which were planned with it, are built.
-2. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering), and **A treatment plan with steps**.
+1. **A demo plant and propagation**, so a first visit shows the app with plants in it. It is built in a draft pull request that is waiting on photos of a coleus at each stage. The posts on Reddit come once it is in.
+2. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering) with what is due on Today, and **A treatment plan with steps**.
+3. **Room for what a spreadsheet holds**: **Your own fields**, with filtering and sorting by them and a fixed set of choices, so the columns Import from a spreadsheet can't match get a field of their own instead of going into About it. **How it was raised** goes with them, since collectors keep nursery grown, tissue culture and seed grown apart.
+4. **Notifications**, once care intervals are in, so what comes back by itself reaches someone who doesn't open the app every day. One list a day at a time they choose, and never a reminder to water.
+5. **A big collection at a glance**: **Group the plant list by genus** with an A to Z jump, and **The collection at a glance**.
+6. **What is in a pot**: **More than one plant in a pot**, and the **Soil to semi-hydro transition tracker**.
 
 ### Cheap ones to slot in whenever
 
@@ -51,6 +55,8 @@ Small ones with no new screen worth the name:
 - Small info buttons next to the less obvious things.
 - **A note for next year**, shown next to A year ago today.
 - **Empty the outer pot** after watering a plant that stands in one.
+- **A parent that isn't yours**, for cuttings from a friend's plant.
+- **How much bigger the pot is** on Pot up.
 
 ---
 
@@ -90,11 +96,11 @@ Small ones with no new screen worth the name:
 | ✅ | Favourites / pinned plants at the top of the list | 6 | S | v1.x |
 | ✅ | Grid view with large photos as an alternative to the list | 4 | S | v1.x |
 | ✅ | **Table view**: a third view on the plant list next to List and Grid, with a column per detail (name, cultivar, last watered, fed and repotted, genus, species, everyday name, room, when and where you got it, origin, price, medium, moisture, status, tags, when it was added). Tap a heading to sort by it and again to reverse it. The Columns picker chooses what shows and each device remembers it, along with the view and the sort. On a computer it uses the whole width of the screen, and on a phone it scrolls sideways with the name column pinned. For someone used to keeping their plants in a spreadsheet | 4 | M | v1.x |
-| ☐ | Group the plant list by genus, with an A to Z jump for long lists | 6 | S | v1.x |
-| ☐ | **The collection at a glance**: how many plants there are of each genus and in each room, how many species, and the plant you have had longest. Worked out from what is stored | 6 | S | v1.x |
+| ☐ | Group the plant list by genus, with an A to Z jump for long lists | 5 | S | v1.x |
+| ☐ | **The collection at a glance**: how many plants there are of each genus and in each room, how many species, and the plant you have had longest. Worked out from what is stored | 5 | S | v1.x |
 | ✅ | **Collection numbers**: an optional short number per plant, e.g. 117, set on the plant form with the next free one suggested. Propagations get 117a, 117b and so on (117c-a from a lettered parent), and a cutting potted up keeps its code (117c1, 117c2 for several). Settings can number the plants you have, oldest first. The number shows on cards, tiles, pages, the plant table (No.), shared lists, the sitter sheet, the spreadsheet import and the CSV export, and the search finds it. Two with the same number are pointed out, never blocked or changed | 4 | M | v1.x |
 | ✅ | **Sellers**: where plants were bought as a list instead of typed out each time, with what was paid, the state the plant arrived in, and how the plants from each seller have done since | 4 | M | v1.x |
-| ☐ | **How it was raised**: nursery grown, tissue culture, grown from seed or wild collected, picked under **Where it came from**. The rare plant with a locality or a collector's number can have those added too. Nothing extra shows until it's used | 6 | S | v1.x |
+| ☐ | **How it was raised**: nursery grown, tissue culture, grown from seed or wild collected, picked under **Where it came from**. The rare plant with a locality or a collector's number can have those added too. Nothing extra shows until it's used | 4 | S | v1.x |
 | ☐ | **Orders**: a purchase or swap that brought several plants at once, with the seller, the date, the shipping and the total. The plants that came in it point to the order, so what each one cost can include its share of the shipping. Builds on Sellers | 7 | M | v1.x |
 | ✅ | **Unsure names**: mark a name as not certain yet, the way collectors write it (cf., aff., or sp. for a plant with no species name), with an optional locality or collector code, e.g. "Hoya sp. Sumatra". The name fields and the search work as before, and nothing extra shows until it's used. It also covers a plant with no name at all, so a lost tag leaves a note instead of a blank | 4 | S | v1.x |
 | ☐ | **A page for each genus and species**: tap the name on a plant to see every plant and propagation of it you have or had, how its propagations went in each medium, and a note of your own that shows on all of them, e.g. "mine like it tight" | 8 | M | v1.x |
@@ -113,12 +119,12 @@ Small ones with no new screen worth the name:
 | ☐ | **More than one plant in a pot**: a count on a plant, e.g. five aloe pups in one pot, and **Pot together** for two plants or rooted cuttings that end up in the same pot. The one potted in with the other is marked as potted with it rather than deleted, and both keep their history and lineage | 5 | M | v1.x |
 | ✅ | **Price paid** per plant: a number with no currency, under **Where it came from** when the plant was purchased. The plant's page says "Bought from Plantorama for 150" or "Paid 150", "Add another like this" copies it, and the spreadsheet export has a column for it | 7 | S | v1.x |
 | ✅ | What a plant was sold or traded for: the price, or the plant you got back | 7 | S | v1.x |
-| ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 7 | M | v1.x |
+| ☐ | **Your own fields**: add a field the app doesn't have, e.g. clone name, awards or humidity, and fill it in on any plant. Nothing extra shows until you add one | 4 | M | v1.x |
 | ☐ | **Home map**: a simple plan of each room with the plants placed where they stand, to see what is where and to go round them in order | 7 | L | v1.x |
 | ✅ | **Toxic to pets?** Whether a plant is toxic to cats and dogs, from the ASPCA, and to people, from NC State Extension, under Details on plant and propagation pages with the source linked. A plant with nothing known says "Nothing known about pets" rather than looking safe | 5 | L | v1.x |
 | ✅ | **What it likes**: the light a plant likes (apart from the light where it stands), how it likes its water, how much humidity, and its growing season with how it rests (kept cooler, kept drier, both or dies back). The plant page shows it in one row, with a note when the plant stands somewhere darker or brighter than it likes. The plant list can be filtered by it, the table has columns for it, and changing it on one plant offers to set the same on the other plants of the same species. A plant potted up from a propagation starts with what its parent likes | 4 | S | v1.x |
 | ✅ | **Care for common plants filled in**: for about 70 common houseplants, the plant form offers the light, water and humidity they usually like, and a growing season when a source says they go dormant, as "Usually likes ... · from <source>" with a Use button that only fills what is empty. A plant page with nothing set under What it likes offers the same. From a care file kept by hand in `tools/plant-names`, where every value names its source, and nothing is filled in without one | 4 | L | v1.x |
-| ☐ | Filter and sort the plant list by your own fields, and give a field a fixed set of choices so it can be set on several plants at once | 8 | S | v1.x |
+| ☐ | Filter and sort the plant list by your own fields, and give a field a fixed set of choices so it can be set on several plants at once | 4 | S | v1.x |
 | ☐ | **Symptom check**: tick what you see on a plant (yellow leaves, brown tips, drooping, spots), how wet the soil is, and anything that changed lately, and get the few likely causes with what to check next and the source each one comes from. The app can't see the plant, so it only ever says what to look at, never to water or treat, and says so when the answers don't point anywhere. What you see can go straight into the problem log | 6 | L | v1.x |
 
 ## 2. Photos & timeline
@@ -452,7 +458,7 @@ Questions come up that the app can't answer from your own data: how long a cutti
 | ☐ | **Plant facts card** from Trefle: a short card with what is known about the species, shown on the plant's page. The data is under the ODbL, so the app has to credit it, and the Trefle API token has to stay on the server, so the app asks the API and never Trefle directly. It is never pushed on anyone: a small "About this species" link on the plant page opens it | 9 | L | v2 |
 | ✅ | **Error tracking with Sentry**: errors in the app and the API are sent to Sentry, so they are seen without anyone having to report them. Reports are anonymous (no account id, IP address or anything typed in), the app's can be turned off with Send error reports in Settings, and the privacy page says what a report holds | 4 | M | v1.x |
 | ☐ | Plant identification from a photo via an identification API, only with a free one. Pl@ntNet's API is the free one: up to 500 identifications a day for non-commercial use, and it doesn't keep the photos. plant.id only gives 100 free identifications before it charges, and iNaturalist doesn't open its full identification model to other apps. Two ways in: through Stikling's own API, which keeps the key secret and shares the daily allowance between everyone signed in, or with a free key of your own added in Settings, kept on the device and used without an account, if Pl@ntNet allows calls straight from the browser. The result is a suggestion for the name fields, never filled in on its own | 9 | L | v2 |
-| ☐ | **Notifications** from the web app, now that there is a server: on Android, and on an iPhone once the app is on the home screen. Off until turned on, and only for what Today would show, like a propagation to check on or a treatment due. Everything due comes as one list a day, at a time you choose, never one notification per plant. Never a reminder to water | 5 | L | v2 |
+| ☐ | **Notifications** from the web app, now that there is a server: on Android, and on an iPhone once the app is on the home screen. Off until turned on, and only for what Today would show, like a propagation to check on or a treatment due. Everything due comes as one list a day, at a time you choose, never one notification per plant. Never a reminder to water | 4 | L | v2 |
 | ☐ | Push notifications, widgets and a Google Play release (MAUI Blazor Hybrid) | 10 | L | v3 |
 | ☐ | **Android APK** released through IzzyOnDroid first, and then F-Droid, so it can be installed without a paid store account. Both take open source apps, and each has its own rules for how a release is built and signed | 10 | L | v3 |
 
