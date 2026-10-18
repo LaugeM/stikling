@@ -421,12 +421,12 @@
         await SettingsService.SetRecentChangesDaysAsync(days);
     }
 
-    /// <summary>"3 rooms, 5 tags", for the line under the link to rooms and tags.</summary>
     private int ownKindCount;
 
     private string KindsOfCareLine =>
         ownKindCount == 0 ? "Add your own, like misted or bottom watered" : $"{ownKindCount} of your own";
 
+    /// <summary>"3 rooms, 5 tags", for the line under the link to rooms and tags.</summary>
     private string RoomsAndTagsLine =>
         (roomCount, tagCount) switch
         {
