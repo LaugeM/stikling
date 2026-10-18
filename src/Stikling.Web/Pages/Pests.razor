@@ -6,6 +6,7 @@
 @inject SettingsService SettingsService
 @using Stikling.Core.Settings
 @inject RoomService RoomService
+@inject PutOffService PutOffService
 @inject TimeProvider Time
 
 <PageTitle>Pests and problems · Stikling</PageTitle>
@@ -145,7 +146,8 @@ else
             await Treatments.GetAllAsync(),
             await RoomService.GetPlacesAsync(),
             Today,
-            (await SettingsService.GetAsync()).CleanWeeks ?? PestService.DefaultCleanWeeks);
+            (await SettingsService.GetAsync()).CleanWeeks ?? PestService.DefaultCleanWeeks,
+            await PutOffService.GetAsync(Today));
 
         open = views.Where(v => v.Case.IsOpen).ToList();
         due = PestService.Due(open).ToList();
@@ -181,6 +183,10 @@ else
                 {
                     <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(view)</span>
                     <span>· found @Labels.Date(view.Case.StartedOn)</span>
+                }
+                else if (view.PlanDoneOn is not null)
+                {
+                    <span>Plan done · found @Labels.Date(view.Case.StartedOn)</span>
                 }
                 else if (view.Case.ResolvedOn is { } on)
                 {

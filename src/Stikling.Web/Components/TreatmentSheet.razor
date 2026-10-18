@@ -1,7 +1,8 @@
 @* Logging a treatment on a pest case. The next date is prefilled from the case's interval.
    Changing it here is how you get a different gap without changing the interval itself.
    With Check set it logs a look for pests on a case being watched: only a date and notes.
-   A saved recipe is picked from chips and copied onto the treatment. Anything else is typed. *@
+   A saved recipe is picked from chips and copied onto the treatment. Anything else is typed.
+   With Step set the sheet starts filled from that step of the case's plan and saves it as done. *@
 @inject IPestTreatmentRepository Repository
 @inject ILogger<TreatmentSheet> Logger
 @inject ITreatmentRecipeRepository Recipes
@@ -11,6 +12,21 @@
     @if (error is not null)
     {
         <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
+    }
+
+    @if (Step is not null)
+    {
+        <div class="form-text mb-2">
+            Step @StepNumber of @Case.PlanSteps.Count of @Case.PlanName.
+            @if (!string.IsNullOrWhiteSpace(Step.Notes))
+            {
+                @Step.Notes
+            }
+        </div>
+        <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="treatment-off-plan" @bind="offPlan" />
+            <label class="form-check-label" for="treatment-off-plan">Not a step of the plan</label>
+        </div>
     }
 
     @if (!Check && recipes.Count > 0)
@@ -59,7 +75,7 @@
         </div>
     </div>
 
-    @if (!Check)
+    @if (!Check && !OnStep)
     {
         <div class="mt-2">
             <label class="form-label" for="treatment-next">Next one due</label>
@@ -113,6 +129,14 @@
     [Parameter]
     public bool Check { get; set; }
 
+    /// <summary>The step of the case's running plan this treatment is for.</summary>
+    [Parameter]
+    public PlanStep? Step { get; set; }
+
+    private bool offPlan;
+    private bool OnStep => Step is not null && !offPlan;
+    private int StepNumber => Step is null ? 0 : Case.PlanSteps.FindIndex(s => s.Id == Step.Id) + 1;
+
     private string? what;
     private Guid? recipeId;
     private IReadOnlyList<TreatmentRecipe> recipes = [];
@@ -140,7 +164,10 @@
 
     private void Reset()
     {
-        var draft = PestService.StartTreatment(Case, Existing, Today, recipes);
+        offPlan = false;
+        var draft = Step is { } step
+            ? PlanProgress.StartStep(Case, step, Today, recipes)
+            : PestService.StartTreatment(Case, Existing, Today, recipes);
         recipeId = draft.RecipeId;
         what = draft.RecipeId is null ? draft.What : null;
         notes = null;
@@ -181,7 +208,8 @@
                 What = Clean(what),
                 // Only a date that isn't the plain interval is worth storing, so changing the
                 // interval later still moves the cases that never had a gap set by hand
-                NextDueOn = nextDue == Default(occurredOn) ? null : nextDue
+                NextDueOn = OnStep || nextDue == Default(occurredOn) ? null : nextDue,
+                PlanStepId = OnStep ? Step!.Id : null
             };
             if (!Check && Picked is { } recipe)
                 entry.Use(recipe);

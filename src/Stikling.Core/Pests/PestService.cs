@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Rooms;
+using Stikling.Core.Today;
 
 namespace Stikling.Core.Pests;
 
@@ -15,6 +16,11 @@ namespace Stikling.Core.Pests;
 /// <param name="CleanDays">Days since the last treatment on a case being watched, null otherwise.</param>
 /// <param name="CleanTarget">The days the count has to reach.</param>
 /// <param name="ReadyToResolve">The target is reached and there's a check from the last week.</param>
+/// <param name="Step">The step of the plan being followed that is up next, or null without a running plan.</param>
+/// <param name="StepNumber">The 1-based number of <paramref name="Step"/>, 0 when there is none.</param>
+/// <param name="StepCount">How many steps the plan on the case has.</param>
+/// <param name="PlanDoneOn">When the question after the last step is due, once every step is done.</param>
+/// <param name="PlanDone">Every step is done and <paramref name="PlanDoneOn"/> has come.</param>
 public sealed record PestCaseView(
     PestCase Case,
     string? Room,
@@ -24,7 +30,12 @@ public sealed record PestCaseView(
     int? DaysUntilDue,
     int? CleanDays = null,
     int CleanTarget = PestService.DefaultCleanWeeks * 7,
-    bool ReadyToResolve = false)
+    bool ReadyToResolve = false,
+    PlanStep? Step = null,
+    int StepNumber = 0,
+    int StepCount = 0,
+    DateOnly? PlanDoneOn = null,
+    bool PlanDone = false)
 {
     /// <summary>The weeks the count has to reach.</summary>
     public int CleanWeeks => CleanTarget / 7;
@@ -99,10 +110,19 @@ public static class PestService
     /// isn't what anyone means. A case being watched is due a check a week after the last
     /// treatment, check or trap count instead. A resolved case is never due.
     /// </summary>
-    public static DateOnly? NextDue(PestCase item, IEnumerable<PestTreatment> treatments)
+    public static DateOnly? NextDue(PestCase item, IEnumerable<PestTreatment> treatments, PutOffs? putOffs = null)
     {
         if (!item.IsOpen)
             return null;
+
+        if (item.PlanRunning && item.PlanSteps.Count > 0)
+        {
+            // The step up next is what's due. When the last one is done the question that follows
+            // is shown on its own, so nothing is due as a treatment until it's answered.
+            var list = treatments.ToList();
+            var index = PlanProgress.CurrentIndex(item, list);
+            return index < 0 ? null : PlanProgress.DueOn(item, list, index, putOffs);
+        }
 
         var last = LastFor(item, treatments);
 
@@ -122,10 +142,13 @@ public static class PestService
         IEnumerable<PestTreatment> treatments,
         Places places,
         DateOnly today,
-        int cleanWeeks = DefaultCleanWeeks)
+        int cleanWeeks = DefaultCleanWeeks,
+        PutOffs? putOffs = null)
     {
         var list = treatments.ToList();
-        var next = NextDue(item, list);
+        var next = NextDue(item, list, putOffs);
+        var index = item.PlanRunning ? PlanProgress.CurrentIndex(item, list) : -1;
+        var doneOn = PlanProgress.DoneOn(item, list);
         var since = CleanSince(item, list);
         int? days = since is { } s ? today.DayNumber - s.DayNumber : null;
         var target = Math.Max(1, cleanWeeks) * 7;
@@ -145,7 +168,12 @@ public static class PestService
             next is { } due ? due.DayNumber - today.DayNumber : null,
             days,
             target,
-            days >= target && recent);
+            days >= target && recent,
+            index >= 0 ? item.PlanSteps[index] : null,
+            index + 1,
+            item.PlanStartedOn is null ? 0 : item.PlanSteps.Count,
+            doneOn,
+            doneOn is { } d && today >= d);
     }
 
     /// <summary>
@@ -157,7 +185,7 @@ public static class PestService
         if (item.Status != PestCaseStatus.Monitoring)
             return null;
 
-        var last = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated);
+        var last = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated && !t.Skipped);
         var since = last?.OccurredOn ?? item.StartedOn;
         return item.TreatingAgainOn is { } again && again > since ? again : since;
     }
@@ -166,8 +194,20 @@ public static class PestService
     /// Notes a change of status made on a case that had <paramref name="from"/>: going back to
     /// treating, or opening a resolved case again, restarts the clean count from today.
     /// </summary>
-    public static void StatusChanged(PestCase item, PestCaseStatus from, DateOnly today)
+    public static void StatusChanged(PestCase item, PestCaseStatus from, DateOnly today, IEnumerable<PestTreatment>? treatments = null)
     {
+        if (item.PlanStartedOn is not null && item.PlanStoppedOn is null)
+        {
+            // Leaving treatment stops a plan that was still going, but not one that had finished,
+            // which only stops running because the status changed. Coming back to treating after
+            // that is the plan being over, so it doesn't ask again.
+            if (from == PestCaseStatus.Active && item.Status != PestCaseStatus.Active
+                && !PlanProgress.IsFinished(item, treatments ?? []))
+                item.PlanStoppedOn = today;
+            else if (from != PestCaseStatus.Active && item.Status == PestCaseStatus.Active)
+                item.PlanStoppedOn = today;
+        }
+
         var again = (item.Status == PestCaseStatus.Active && from != PestCaseStatus.Active)
             || (from == PestCaseStatus.Resolved && item.IsOpen);
 
@@ -271,14 +311,15 @@ public static class PestService
         IEnumerable<PestTreatment> treatments,
         Places places,
         DateOnly today,
-        int cleanWeeks = DefaultCleanWeeks)
+        int cleanWeeks = DefaultCleanWeeks,
+        PutOffs? putOffs = null)
     {
         var all = plants.ToList();
         var logged = treatments.ToList();
 
         return cases
             .Where(c => !c.IsDeleted)
-            .Select(c => Describe(c, all, logged, places, today, cleanWeeks))
+            .Select(c => Describe(c, all, logged, places, today, cleanWeeks, putOffs))
             .OrderByDescending(v => v.Case.StartedOn)
             .ThenByDescending(v => v.Case.CreatedAt)
             .ToList();
@@ -310,7 +351,7 @@ public static class PestService
         IEnumerable<TreatmentRecipe>? recipes = null)
     {
         var draft = new PestTreatment { CaseId = item.Id, OccurredOn = today };
-        var last = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated);
+        var last = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated && !t.Skipped);
 
         if (last?.RecipeId is { } id)
         {
@@ -375,8 +416,8 @@ public static class PestService
     /// </summary>
     private static PestTreatment? LastFor(PestCase item, IEnumerable<PestTreatment> treatments) =>
         TreatmentsFor(treatments, item.Id).FirstOrDefault(t =>
-            t.Kind != PestTreatmentKind.TrapCount
-            || (item.Status == PestCaseStatus.Monitoring && t.OnTrap is not null));
+            !t.Skipped && (t.Kind != PestTreatmentKind.TrapCount
+            || (item.Status == PestCaseStatus.Monitoring && t.OnTrap is not null)));
 
     private static bool Covers(PestCase item, Plant plant, Places places) => item.Scope switch
     {

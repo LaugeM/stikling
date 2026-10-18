@@ -215,6 +215,10 @@ else
                                 <div class="item-name">@Labels.For(view.Case.Pest)</div>
                                 <div class="item-meta">
                                     <span class="pest-due now">@Labels.Due(view)</span>
+                                    @if (view.Step is { } step)
+                                    {
+                                        <span>· Step @view.StepNumber of @view.StepCount@(StepWhat(step) is { } what ? $" · {what}" : "")</span>
+                                    }
                                     <span>· @Labels.ScopeAndCount(view)</span>
                                 </div>
                             </div>
@@ -242,6 +246,34 @@ else
                                 <div class="item-name">@Labels.For(view.Case.Pest)</div>
                                 <div class="item-meta">
                                     <span>Clean for @Labels.Count(view.CleanWeeks, "week")</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (!Away && PlanDoneNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Plan done</h2>
+            <ul class="item-list">
+                @foreach (var view in PlanDoneNow)
+                {
+                    <TodayRow @key="view.Case.Id" DoneLabel="Start watching" OnDone="() => StartWatchingAsync(view)"
+                              SkipLabel="Keep treating" OnSkip="() => KeepTreatingAsync(view)"
+                              OnPutOff="days => PutOffAsync(PutOffs.PlanDone(view.Case.Id), Today.AddDays(days))">
+                        <a class="item-card" href="pests/@view.Case.Id">
+                            <div class="item-thumb alert" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+                            </div>
+                            <div class="item-text">
+                                <div class="item-name">@Labels.For(view.Case.Pest)</div>
+                                <div class="item-meta">
+                                    <span>Done with @view.Case.PlanName</span>
+                                    <span>· @Labels.ScopeAndCount(view)</span>
                                 </div>
                             </div>
                         </a>
@@ -673,6 +705,8 @@ else
     private IReadOnlyList<PropagationCheck> checks = [];
     private IReadOnlyList<PestCaseView> dueTreatments = [];
     private IReadOnlyList<PestCaseView> readyCases = [];
+    private IReadOnlyList<PestCaseView> planDoneCases = [];
+    private IReadOnlyList<PestTreatment> pestTreatments = [];
     private int cleanWeeks = PestService.DefaultCleanWeeks;
     private IReadOnlyList<TimelineEntry> recent = [];
     private IReadOnlyList<AttentionItem> flagged = [];
@@ -860,6 +894,13 @@ else
     private List<PestCaseView> ReadyNow =>
         readyCases.Where(v => !putOffs.IsPutOff(PutOffs.Resolve(v.Case.Id), Today)).ToList();
 
+    // Cases whose plan has run its last step, unless put off
+    private List<PestCaseView> PlanDoneNow =>
+        planDoneCases.Where(v => !putOffs.IsPutOff(PutOffs.PlanDone(v.Case.Id), Today)).ToList();
+
+    // What the step uses, for the line under the pest on Today. The recipe's name is already in What.
+    private static string? StepWhat(PlanStep step) => string.IsNullOrWhiteSpace(step.What) ? null : step.What.Trim();
+
     // Treatments first, then the cases only being watched, each under its own heading when there are any.
     // A case that is ready to resolve is asked about under Ready to resolve instead of a weekly check
     private IEnumerable<(string Heading, List<PestCaseView> Cases)> DuePests =>
@@ -873,7 +914,7 @@ else
     // While away nothing is asked for, and while the list on the day back is up it stands for Water and Worth a look
     private int DueCount =>
         Away ? 0
-        : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + FlaggedNow.Count + LookAgainNow.Count + QuarantineNow.Count + RestNow.Count
+        : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + PlanDoneNow.Count + FlaggedNow.Count + LookAgainNow.Count + QuarantineNow.Count + RestNow.Count
         + (Holding ? backRows.Count : ChecksNow.Count + wateringDue.Count(d => d.DueNow))
         + (Holding ? 0 : CareDueCount)
         + (roundSuggestion is not null ? 1 : 0)
@@ -947,9 +988,11 @@ else
         await FindYearAsync(settings, plantPhotos);
 
         var pestCases = await PestCases.GetAllAsync();
-        var described = PestService.Describe(pestCases, plants, await PestTreatments.GetAllAsync(), places, Today, cleanWeeks);
+        pestTreatments = await PestTreatments.GetAllAsync();
+        var described = PestService.Describe(pestCases, plants, pestTreatments, places, Today, cleanWeeks, putOffs);
         dueTreatments = PestService.Due(described);
         readyCases = PestService.ReadyToResolve(described);
+        planDoneCases = described.Where(v => v.Case.IsOpen && v.PlanDone).OrderBy(v => v.PlanDoneOn).ToList();
 
         backRows = backDay is { } backOn && awayNow is null
             ? BackList.Of(backOn, plants, propagations, careLogs, await BackTimeline.LoadAsync(Entries, backOn, Time), pestCases,
@@ -1199,6 +1242,24 @@ else
     {
         view.Case.Status = PestCaseStatus.Resolved;
         view.Case.ResolvedOn = Today;
+        await PestCases.SaveAsync(view.Case);
+        await LoadAsync();
+    }
+
+    // The plan is over: watch the case from here. Setting the status through StatusChanged keeps the clean count right
+    private async Task StartWatchingAsync(PestCaseView view)
+    {
+        var from = view.Case.Status;
+        view.Case.Status = PestCaseStatus.Monitoring;
+        PestService.StatusChanged(view.Case, from, Today, pestTreatments);
+        await PestCases.SaveAsync(view.Case);
+        await LoadAsync();
+    }
+
+    // The case stays Active and goes on at the plain interval from the last real treatment
+    private async Task KeepTreatingAsync(PestCaseView view)
+    {
+        view.Case.PlanStoppedOn = Today;
         await PestCases.SaveAsync(view.Case);
         await LoadAsync();
     }

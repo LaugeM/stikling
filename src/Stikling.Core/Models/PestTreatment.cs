@@ -78,6 +78,15 @@ public sealed class PestTreatment : Entity
     /// </summary>
     public bool NewTrap { get; set; }
 
+    /// <summary>The step of the case's plan this treatment was for. Only on a treatment.</summary>
+    public Guid? PlanStepId { get; set; }
+
+    /// <summary>
+    /// A step of the plan that was skipped. Saved as a treatment with nothing in it but the date
+    /// and notes, so older versions show it as a treatment without text.
+    /// </summary>
+    public bool Skipped { get; set; }
+
     public PestTreatment Copy()
     {
         var copy = (PestTreatment)MemberwiseClone();
@@ -130,6 +139,12 @@ public sealed class PestTreatment : Entity
             if (OnTrap < 0)
                 errors.Add("The count can't be below zero.");
         }
+
+        if (Skipped && (PlanStepId is null || Kind != PestTreatmentKind.Treated || treated || trapped))
+            errors.Add("A skipped step only has a date and notes.");
+
+        if (PlanStepId is not null && Kind != PestTreatmentKind.Treated)
+            errors.Add("Only a treatment can be a step of a plan.");
 
         errors.AddRange(RecipeIngredient.Validate(Ingredients));
 

@@ -288,7 +288,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | Inspection log: "checked, no signs", so you can see how long a plant has been clean. Checks on a single plant are logged from its menu, and the plant page shows when it was last checked, counting checks on cases | 5 | S | v1.x |
 | ✅ | **Check the neighbours**: a case on picked plants lists the other plants in their rooms while it is being treated, with when each was last checked, and Clean and Add to case | 5 | S | v1.x |
 | ☐ | **Biological control log**: release dates for predatory mites and similar | 6 | S | v1.x |
-| ☐ | **A treatment plan with steps**: steps with the days between them, e.g. spray, spray again after 3 days, then release predatory mites after 10, saved to use again and started on a case. Today shows each step when it is due, and a step can be skipped or moved. A case with a plain interval works as it does now | 4 | M | v1.x |
+| ✅ | **A treatment plan with steps**: steps with the days between them, e.g. spray, spray again after 3 days, then release predatory mites after 10, saved under Supplies and started on a case (or when opening one). Today shows the step that is due, and a step can be logged, skipped or moved. After the last step Today asks whether to start watching or keep treating. A case with a plain interval works as it does now | 4 | M | v1.x |
 | ✅ | Pests only has a tab in the bottom bar while a case is open. The rest of the time it's under Supplies, and a plant's menu can start a case, so someone who never has pests doesn't have a tab for them | 3 | S | v1.x |
 
 ## 5b. Supplies & shopping
