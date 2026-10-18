@@ -144,12 +144,13 @@ public class BackupTests
             Sellers = [new Seller { Name = "Plantorama" }, new Seller { Name = "Old", DeletedAt = Now }],
             OwnCareKinds = [new OwnCareKind { Name = "Misted" }, new OwnCareKind { Name = "Old", DeletedAt = Now }],
             CareIntervals = [new CareInterval(), new CareInterval { DeletedAt = Now }],
-            TreatmentPlans = [new TreatmentPlan { Name = "Mites" }, new TreatmentPlan { Name = "Old", DeletedAt = Now }]
+            TreatmentPlans = [new TreatmentPlan { Name = "Mites" }, new TreatmentPlan { Name = "Old", DeletedAt = Now }],
+            OwnFields = [new OwnField { Name = "Clone name" }, new OwnField { Name = "Old", DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -171,6 +172,7 @@ public class BackupTests
         Assert.Empty(data.Sellers);
         Assert.Empty(data.TreatmentPlans);
         Assert.Empty(data.OwnCareKinds);
+        Assert.Empty(data.OwnFields);
         Assert.Empty(data.CareIntervals);
     }
 

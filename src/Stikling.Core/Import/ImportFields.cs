@@ -22,6 +22,7 @@ public enum ImportField
     Place,
     GotOn,
     Origin,
+    Raised,
     Source,
     Price,
     Medium,
@@ -51,6 +52,7 @@ public static class ImportFields
         ImportField.Place => "Room",
         ImportField.GotOn => "Date you got it",
         ImportField.Origin => "How you got it",
+        ImportField.Raised => "How it was raised",
         ImportField.Source => "Source",
         ImportField.Price => "Price paid",
         ImportField.Medium => "Grows in",
@@ -68,7 +70,7 @@ public static class ImportFields
     [
         ("Keep or leave out", [ImportField.AboutLine, ImportField.Skip]),
         ("Name", [ImportField.Name, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote]),
-        ("Where and when", [ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source, ImportField.Price]),
+        ("Where and when", [ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source, ImportField.Price]),
         ("Care", [ImportField.LastWatered, ImportField.LastFed, ImportField.LastRepotted]),
         ("More about it", [ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt])
     ];
@@ -78,12 +80,13 @@ public static class ImportFields
     private static readonly ImportField[] OwnExport =
     [
         ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote,
-        ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source,
+        ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source,
         ImportField.Price, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
     ];
 
-    // The same for an export from before the name columns, and from before the Number column
-    private static readonly ImportField[] OwnExportBeforeNameSure = [.. OwnExport.Where((_, i) => i is not (6 or 7))];
+    // The same for an export from before the Raised column, before the name columns, and before the Number column
+    private static readonly ImportField[] OwnExportBeforeRaised = [.. OwnExport.Where((_, i) => i != 12)];
+    private static readonly ImportField[] OwnExportBeforeNameSure = [.. OwnExportBeforeRaised.Where((_, i) => i is not (6 or 7))];
     private static readonly ImportField[] OwnExportBeforeNumber = [.. OwnExportBeforeNameSure.Where((_, i) => i != 1)];
 
     private static readonly Dictionary<string, ImportField> Words = Build();
@@ -110,6 +113,7 @@ public static class ImportFields
         Add(ImportField.GotOn, "acquired", "date acquired", "got", "date got", "bought", "purchased", "purchase date",
             "købt", "købsdato", "anskaffet", "dato");
         Add(ImportField.Origin, "origin", "how got", "oprindelse");
+        Add(ImportField.Raised, "raised", "raised as", "how raised", "propagation type", "grown as", "tc", "opformering", "dyrket som");
         Add(ImportField.Source, "source", "from", "shop", "store", "bought from", "kilde", "fra", "butik", "forhandler");
         Add(ImportField.Price, "price", "price paid", "cost", "pris", "købspris");
         Add(ImportField.Medium, "medium", "soil", "substrate", "grows in", "jord", "substrat");
@@ -130,8 +134,12 @@ public static class ImportFields
     /// </summary>
     public static IReadOnlyList<ImportField> Guess(IReadOnlyList<string> headings)
     {
-        if (headings.SequenceEqual(CsvExport.PlantHeader))
-            return [.. OwnExport];
+        // Our own export, with a column after Added for each field of the person's own. Those are kept
+        // as a line in About it until the import can make fields of them.
+        if (headings.Count >= CsvExport.PlantHeader.Length && headings.Take(CsvExport.PlantHeader.Length).SequenceEqual(CsvExport.PlantHeader))
+            return [.. OwnExport, .. Enumerable.Repeat(ImportField.AboutLine, headings.Count - OwnExport.Length)];
+        if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeRaised))
+            return [.. OwnExportBeforeRaised];
         if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeNameSure))
             return [.. OwnExportBeforeNameSure];
         if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeNumber))

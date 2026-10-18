@@ -54,6 +54,29 @@ public sealed class Plant : Entity
 
     public PlantOrigin Origin { get; set; } = PlantOrigin.Purchased;
 
+    /// <summary>
+    /// How it was raised, for a plant that was bought, given, swapped or of unknown origin. Null when
+    /// not said. The stored value stays when the origin changes, so use <see cref="Raised"/> to read it.
+    /// </summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<RaisedAs>))]
+    public RaisedAs? RaisedAs { get; set; }
+
+    /// <summary>
+    /// How it was raised as far as the app can tell: seed for a plant grown from seed and cutting
+    /// for a propagated one, otherwise what <see cref="RaisedAs"/> says.
+    /// </summary>
+    [JsonIgnore]
+    public RaisedAs? Raised => Origin switch
+    {
+        PlantOrigin.GrownFromSeed => Models.RaisedAs.Seed,
+        PlantOrigin.Propagated => Models.RaisedAs.Cutting,
+        _ => RaisedAs
+    };
+
+    /// <summary>True when the plant form asks how it was raised: for a bought, given or swapped plant, or one of unknown origin.</summary>
+    [JsonIgnore]
+    public bool AsksHowRaised => Origin is PlantOrigin.Purchased or PlantOrigin.Gift or PlantOrigin.Swap or PlantOrigin.Unknown;
+
     /// <summary>When it was got, to whatever precision is remembered: a day, a month or a year.</summary>
     public LooseDate? AcquiredOn { get; set; }
 
@@ -156,6 +179,14 @@ public sealed class Plant : Entity
     public int? WateringFeedEvery { get; set; }
 
     public string? Notes { get; set; }
+
+    /// <summary>
+    /// The values of the person's own fields (<see cref="OwnField"/>), by field id, as the stored text.
+    /// A top-level field so an older version saving the plant keeps it. The values of a removed field
+    /// stay, so they come back if a field with that name is added again. A missing key means not
+    /// set, and an empty string is never stored.
+    /// </summary>
+    public Dictionary<Guid, string> OwnFields { get; set; } = [];
 
     /// <summary>How it is watered, for the plant-sitter sheet. Null when not said, and older plants read as null.</summary>
     public WaterMethod? WaterBy { get; set; }
@@ -283,12 +314,13 @@ public sealed class Plant : Entity
         var copy = (Plant)MemberwiseClone();
         copy.Tags = [.. Tags];
         copy.ArrivalProblems = [.. ArrivalProblems];
+        copy.OwnFields = new(OwnFields);
         return copy;
     }
 
     /// <summary>
     /// A new plant to add alongside this one, e.g. a second basil pot. It gets the names, room,
-    /// light, origin, source, price paid, medium, soil mix, feed with the watering, how it is watered and tags. The nickname, the date it was got, pots, notes,
+    /// light, origin, how it was raised, source, price paid, medium, soil mix, feed with the watering, how it is watered, tags and the values of its own fields. The nickname, the date it was got, pots, notes,
     /// photos and anything about how this plant is doing right now stay behind.
     /// </summary>
     public Plant Duplicate() => new()
@@ -306,6 +338,7 @@ public sealed class Plant : Entity
         GrowingSeason = GrowingSeason,
         RestHow = RestHow,
         Origin = Origin,
+        RaisedAs = RaisedAs,
         Source = Source,
         SellerId = SellerId,
         PricePaid = PricePaid,
@@ -315,6 +348,7 @@ public sealed class Plant : Entity
         WateringFeedEvery = WateringFeedEvery,
         WaterBy = WaterBy,
         Tags = [.. Tags],
+        OwnFields = new(OwnFields),
         ParentPlantId = ParentPlantId
     };
 

@@ -1,6 +1,7 @@
 using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
+using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
@@ -164,6 +165,15 @@ public sealed class IndexedDbCareIntervalRepository(IndexedDb db, TimeProvider t
     : IndexedDbEntityRepository<CareInterval>(db, time, Stores.CareIntervals), ICareIntervalRepository
 {
     protected override IReadOnlyList<string> Validate(CareInterval interval) => interval.Validate();
+}
+
+public sealed class IndexedDbOwnFieldRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<OwnField>(db, time, Stores.OwnFields), IOwnFieldRepository
+{
+    // Deleted fields are kept in the list so a removed name can be brought back
+    async Task<IReadOnlyList<OwnField>> IOwnFieldRepository.GetStoredAsync() => await GetStoredAsync();
+
+    protected override IReadOnlyList<string> Validate(OwnField field) => field.Validate();
 }
 
 public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)

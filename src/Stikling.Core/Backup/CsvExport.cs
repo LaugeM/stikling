@@ -19,18 +19,24 @@ public static class CsvExport
     internal static readonly string[] PlantHeaderBeforeNumber =
         ["Name", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
 
-    internal static readonly string[] PlantHeader =
+    // The columns before Raised was added, which an older export still has
+    internal static readonly string[] PlantHeaderBeforeRaised =
         ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
+
+    /// <summary>The fixed columns. The person's own fields follow, one column each, headed with the field's name.</summary>
+    internal static readonly string[] PlantHeader =
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Raised", "Source", "Price paid", "Tags", "Notes", "Added"];
 
     private static readonly string[] PropagationHeader =
         ["Name", "Number", "Parent plant", "Stage", "Medium", "Started", "Room", "Notes"];
 
-    public static string Plants(IEnumerable<Plant> plants, Places places)
+    /// <param name="fields">The own fields that aren't deleted, each a column after Added holding the stored value.</param>
+    public static string Plants(IEnumerable<Plant> plants, Places places, IReadOnlyList<OwnField> fields)
     {
         var rows = plants
             .Where(p => !p.IsDeleted)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
-            .Select(p => new[]
+            .Select(p => (new[]
             {
                 p.DisplayName,
                 p.CollectionNumber,
@@ -44,13 +50,14 @@ public static class CsvExport
                 places.NameOf(p.PlaceId),
                 p.AcquiredOn?.ToString(),
                 p.Origin.ToString(),
+                p.Raised?.ToString(),
                 p.Source,
                 p.PricePaid?.ToString("0.##", CultureInfo.InvariantCulture),
                 string.Join("; ", p.Tags),
                 p.Notes,
                 p.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
-            });
-        return Write(PlantHeader, rows);
+            }).Concat(fields.Select(f => p.OwnFields.TryGetValue(f.Id, out var value) ? value : null)).ToArray());
+        return Write([.. PlantHeader, .. fields.Select(f => f.Name)], rows);
     }
 
     public static string Propagations(IEnumerable<Propagation> propagations, IEnumerable<Plant> plants, Places places)

@@ -1,5 +1,6 @@
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
+using Stikling.Core.Fields;
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
@@ -36,6 +37,7 @@ public sealed class SearchService(
     IProductRepository products,
     IPlaceRepository placeRepository,
     IOwnCareKindRepository ownCareKinds,
+    IOwnFieldRepository ownFields,
     TimeProvider time)
 {
     /// <param name="label">Names the enums the way the app shows them (care kinds and pests).</param>
@@ -45,10 +47,11 @@ public sealed class SearchService(
         var allPlants = (await plants.GetAllAsync()).Where(p => !p.IsDeleted).ToList();
         var allPropagations = (await propagations.GetAllAsync()).Where(p => !p.IsDeleted).ToList();
         var places = await placeRepository.GetPlacesAsync();
+        var textFields = (await ownFields.GetAllAsync()).Where(f => f.Kind is OwnFieldKind.Text or OwnFieldKind.Choice).ToList();
 
         var docs = new Dictionary<SearchKind, IReadOnlyList<SearchIndex.Doc>>
         {
-            [SearchKind.Plant] = [.. allPlants.Select(p => PlantDoc(p, everyday))],
+            [SearchKind.Plant] = [.. allPlants.Select(p => PlantDoc(p, everyday, textFields))],
             [SearchKind.Propagation] = [.. allPropagations.Select(p => PropagationDoc(p, everyday))],
             [SearchKind.Wish] = [.. (await wishes.GetAllAsync()).Where(w => !w.IsDeleted).Select(WishDoc)],
             [SearchKind.Pot] = [.. (await pots.GetAllAsync()).Where(p => !p.IsDeleted).Select(PotDoc)],
@@ -85,7 +88,7 @@ public sealed class SearchService(
     private static string? Subtitle(string? nickname, string? botanical) =>
         !string.IsNullOrWhiteSpace(nickname) && botanical is not null ? botanical : null;
 
-    private static SearchIndex.Doc PlantDoc(Plant plant, Func<string?, string?, string?, string?>? everyday)
+    private static SearchIndex.Doc PlantDoc(Plant plant, Func<string?, string?, string?, string?>? everyday, IReadOnlyList<OwnField> textFields)
     {
         var item = new SearchItem(SearchKind.Plant, plant.Id, plant.DisplayName, Subtitle(plant.Nickname, plant.BotanicalName),
             null, plant.Status != PlantStatus.Active, $"plants/{plant.Id}");
@@ -96,6 +99,9 @@ public sealed class SearchService(
             [.. PlantTags.Normalize(plant.Tags).Select(tag => new SearchIndex.Extra(Has(tag), $"tag {tag}"))];
         if (CollectionNumbers.Normalize(plant.CollectionNumber) is { } code)
             before.Add(new SearchIndex.Extra(word => CollectionNumbers.MatchesSearch(code, word), $"number {code}"));
+        foreach (var field in textFields)
+            if (plant.OwnFields.TryGetValue(field.Id, out var value) && !string.IsNullOrWhiteSpace(value))
+                before.Add(new SearchIndex.Extra(Has(value), $"{field.Name} {value}"));
         return new(item, names, Extras(plant.Notes, [.. before]));
     }
 

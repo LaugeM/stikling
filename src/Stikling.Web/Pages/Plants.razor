@@ -2,6 +2,7 @@
 @layout WideLayout
 @inject IPlantRepository Repository
 @inject PlantService PlantService
+@inject OwnFieldService OwnFieldBook
 @inject RoomService RoomService
 @inject ICareLogRepository CareLogRepository
 @inject IPotRepository PotRepository
@@ -612,8 +613,15 @@ else
     private IReadOnlyList<Wish> wishMatches = [];
     private PlantDictionary? dictionary;
 
+    // Own text and choice fields, which the search looks through
+    private IReadOnlyList<OwnField> textFields = [];
+
+    private IEnumerable<string> FieldWords(Plant plant) =>
+        textFields.Select(f => plant.OwnFields.TryGetValue(f.Id, out var value) ? value : "").Where(v => v.Length > 0);
+
     private async Task LoadAsync()
     {
+        textFields = [.. (await OwnFieldBook.GetAllAsync()).Where(f => f.Kind is OwnFieldKind.Text or OwnFieldKind.Choice)];
         everyday = await Names.GetEverydayNamesAsync();
         dictionary = await Names.GetDictionaryAsync();
         wishes = await WishService.GetAllAsync();
@@ -728,7 +736,7 @@ else
     {
         visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
                 pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity,
-                p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), goneAs, problem ? problemPlants : null, likes)
+                p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), goneAs, problem ? problemPlants : null, likes, FieldWords)
             .Apply(all ?? [])
             .ToList();
         wishMatches = WishSearch.OpenWishes(wishes, search, dictionary);

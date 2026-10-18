@@ -1,0 +1,110 @@
+@* Adds a field of your own: a name, what it holds and, for a choice, the choices one per line. It saves
+   the field itself. Used on the Your fields page and in More details on the plant form, so the inputs
+   point at no form, and Enter doesn't submit the page's form. *@
+@inject OwnFieldService Fields
+@inject ILogger<OwnFieldForm> Logger
+
+<div class="own-field-form">
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
+    }
+
+    <div class="mb-2">
+        <label class="form-label" for="@(Prefix)-name">Name</label>
+        <input id="@(Prefix)-name" class="form-control" form="own-field-none" placeholder="e.g. Clone name" autocomplete="off"
+               maxlength="@OwnField.MaxNameLength" enterkeyhint="done" value="@name" @oninput="e => name = e.Value?.ToString() ?? string.Empty"
+               @onkeydown="Key" />
+    </div>
+
+    <div class="mb-2">
+        <div class="form-label" id="@(Prefix)-kind">What it holds</div>
+        <div class="chip-row" role="group" aria-labelledby="@(Prefix)-kind">
+            @foreach (var (value, text) in kinds)
+            {
+                var picked = kind == value;
+                <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                        @onclick="() => kind = value">@text</button>
+            }
+        </div>
+    </div>
+
+    @if (kind == OwnFieldKind.Choice)
+    {
+        <div class="mb-2">
+            <label class="form-label" for="@(Prefix)-choices">Choices, one per line</label>
+            <textarea id="@(Prefix)-choices" class="form-control" form="own-field-none" rows="4" placeholder="Yes&#10;No&#10;Maybe"
+                      value="@choices" @oninput="e => choices = e.Value?.ToString() ?? string.Empty"></textarea>
+        </div>
+    }
+
+    <div class="care-actions">
+        <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(name))" @onclick="AddAsync">Add field</button>
+        <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="Cancel">Cancel</button>
+    </div>
+</div>
+
+@code {
+    /// <summary>Makes the ids unique when the form is on a page more than once.</summary>
+    [Parameter]
+    public string Prefix { get; set; } = "own-field-new";
+
+    /// <summary>The field that was added, or the one already there with that name.</summary>
+    [Parameter]
+    public EventCallback<OwnField> Added { get; set; }
+
+    [Parameter]
+    public EventCallback Cancelled { get; set; }
+
+    private static readonly (OwnFieldKind Value, string Text)[] kinds =
+    [
+        (OwnFieldKind.Text, "Text"),
+        (OwnFieldKind.Number, "Number"),
+        (OwnFieldKind.Date, "Date"),
+        (OwnFieldKind.Choice, "Choice")
+    ];
+
+    private string name = "";
+    private OwnFieldKind kind = OwnFieldKind.Text;
+    private string choices = "";
+    private bool busy;
+    private string? error;
+
+    private async Task Key(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(name))
+            await AddAsync();
+    }
+
+    private Task Cancel() => Cancelled.InvokeAsync();
+
+    private async Task AddAsync()
+    {
+        if (busy)
+            return;
+        busy = true;
+        error = null;
+        try
+        {
+            var lines = kind == OwnFieldKind.Choice ? choices.Split('\n', StringSplitOptions.TrimEntries) : [];
+            var field = await Fields.AddAsync(name, kind, lines);
+            name = "";
+            choices = "";
+            kind = OwnFieldKind.Text;
+            await Added.InvokeAsync(field);
+        }
+        catch (InvalidOperationException ex)
+        {
+            error = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding a field failed");
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

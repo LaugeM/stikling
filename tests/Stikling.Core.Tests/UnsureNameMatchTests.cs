@@ -52,7 +52,7 @@ public class UnsureNameMatchTests
     public void The_csv_species_column_leaves_out_a_hidden_species()
     {
         var plant = new Plant { Genus = "Hoya", Species = "carnosa", NameQualifier = NameQualifier.Sp, CreatedAt = Now };
-        var line = CsvExport.Plants([plant], Places.None).Split("\r\n", StringSplitOptions.RemoveEmptyEntries)[1];
+        var line = CsvExport.Plants([plant], Places.None, []).Split("\r\n", StringSplitOptions.RemoveEmptyEntries)[1];
         Assert.DoesNotContain("carnosa,", line);
     }
 }

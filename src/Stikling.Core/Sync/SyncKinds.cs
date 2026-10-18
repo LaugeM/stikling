@@ -38,6 +38,7 @@ public static class SyncKinds
         "wishes",
         "sellers",
         "ownCareKinds",
+        "ownFields",
         "careIntervals",
         "treatmentPlans",
     ];

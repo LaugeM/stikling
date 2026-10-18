@@ -15,6 +15,7 @@
 @inject PlantCareService CommonCare
 @inject RoomService RoomService
 @inject SellerService SellerService
+@inject OwnFieldService OwnFieldBook
 @inject PhotoService Photos
 @inject GooglePhotosService Google
 @inject NavigationManager Navigation
@@ -128,6 +129,23 @@ else
                     }
                 </InputSelect>
             </div>
+
+            @* A value already chosen stays if the origin changes, it just isn't shown *@
+            @if (plant.AsksHowRaised)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="raised">How it was raised</label>
+                    <select id="raised" class="form-select" aria-describedby="raised-help"
+                            @onchange="e => plant.RaisedAs = Enum.TryParse<RaisedAs>(e.Value?.ToString(), out var how) ? how : null">
+                        <option value="" selected="@(plant.RaisedAs is null)">Not said</option>
+                        @foreach (var how in Enum.GetValues<RaisedAs>())
+                        {
+                            <option value="@how" selected="@(plant.RaisedAs == how)">@Labels.For(how)</option>
+                        }
+                    </select>
+                    <div id="raised-help" class="form-text">For a collector's number or locality, use Locality or code under the name.</div>
+                </div>
+            }
 
             <div class="mb-3">
                 <LooseDateInput @bind-Value="plant.AcquiredOn" Today="Today" Label="When you got it" />
@@ -481,6 +499,22 @@ else
                     <div class="form-text mb-3">Kept apart from your other plants, e.g. while a new plant shows it has no pests.</div>
                 </FormSection>
             }
+
+            <FormSection Title="Your fields" Summary="@FieldsSummary" Open="openFields">
+                @foreach (var field in ownFields)
+                {
+                    <OwnFieldInput Field="field" Value="@FieldInput(field)" ValueChanged="(string? value) => fieldInputs[field.Id] = value" />
+                }
+                @if (addingField)
+                {
+                    <OwnFieldForm Prefix="plant-field-new" Added="FieldAddedAsync" Cancelled="() => addingField = false" />
+                }
+                else
+                {
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => addingField = true">Add a field of your own</button>
+                }
+                <div class="form-text mb-3">Rename or remove fields under Settings, Your fields.</div>
+            </FormSection>
         </div>
 
         <div class="form-actions form-bar">
@@ -656,6 +690,14 @@ else
         plant.GrowingSeason is { } season ? Labels.For(season) : null);
     private bool openPot;
     private bool openTags;
+
+    // Your own fields. The text is as typed and is tidied when the plant is saved, so a field added
+    // here shows up with an empty input and nothing else on the form is lost.
+    private IReadOnlyList<OwnField> ownFields = [];
+    private readonly Dictionary<Guid, string?> fieldInputs = [];
+    private Guid? fieldInputsFor;
+    private bool addingField;
+    private bool openFields;
     private bool openSitter;
     private bool openSwap;
     private bool openWatering;
@@ -717,6 +759,22 @@ else
     private string? SitterSummary => string.IsNullOrWhiteSpace(plant?.SitterNote) ? null : Labels.Short(plant.SitterNote);
 
     private string? SwapSummary => plant?.Spare is { } mark ? SwapLists.MarkText(mark) : null;
+
+    private string? FieldInput(OwnField field) => fieldInputs.GetValueOrDefault(field.Id);
+
+    private string FieldsSummary =>
+        ownFields.Count == 0
+            ? "Add a field the app doesn't have"
+            : ownFields.Where(f => !string.IsNullOrWhiteSpace(FieldInput(f))).Select(f => f.Name) is { } filled && filled.Any()
+                ? string.Join(", ", filled)
+                : "None filled in";
+
+    private async Task FieldAddedAsync(OwnField field)
+    {
+        ownFields = await OwnFieldBook.GetAllAsync();
+        fieldInputs.TryAdd(field.Id, null);
+        addingField = false;
+    }
 
     private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
 
@@ -901,6 +959,16 @@ else
             openLikes = !IsNew && CareLikes.HasAny(plant);
             openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
             openTags = !IsNew && plant.Tags.Count > 0;
+
+            ownFields = await OwnFieldBook.GetAllAsync();
+            if (fieldInputsFor != plant.Id)
+            {
+                fieldInputs.Clear();
+                fieldInputsFor = plant.Id;
+            }
+            foreach (var field in ownFields)
+                fieldInputs.TryAdd(field.Id, plant.OwnFields.GetValueOrDefault(field.Id));
+            openFields = !IsNew && plant.OwnFields.Any(v => ownFields.Any(f => f.Id == v.Key) && v.Value.Length > 0);
             openSwap = !IsNew && plant.Spare is not null;
             openSitter = !IsNew && !string.IsNullOrWhiteSpace(plant.SitterNote);
             openWatering = !IsNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WaterBy is not null || plant.WateringFeedId is not null);
@@ -1126,10 +1194,27 @@ else
         plant.CollectionNumber = CollectionNumbers.Normalize(plant.CollectionNumber);
         CareLikes.Normalize(plant);
         errors = plant.Validate(Today).ToList();
+        var fieldValues = new List<(Guid Id, string? Value)>();
+        foreach (var field in ownFields)
+        {
+            var stored = OwnFieldValues.Normalize(field.Kind, FieldInput(field), out var fieldError);
+            if (fieldError is not null)
+                errors.Add($"{field.Name}: {fieldError}");
+            fieldValues.Add((field.Id, stored));
+        }
         if (errors.Count > 0)
         {
             showErrors = true;
             return;
+        }
+
+        // Only the fields that are there are set. Values of a removed field are left on the plant.
+        foreach (var (fieldId, value) in fieldValues)
+        {
+            if (value is null)
+                plant.OwnFields.Remove(fieldId);
+            else
+                plant.OwnFields[fieldId] = value;
         }
 
         saving = true;

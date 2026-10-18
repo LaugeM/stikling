@@ -147,6 +147,14 @@ public static class SpreadsheetImport
                     CantRead(ImportField.Origin, $"Didn't know \"{origin}\" as an origin, kept in About it");
             }
 
+            if (Get(ImportField.Raised) is { } raised)
+            {
+                if (ImportValues.ReadRaised(raised) is { } value)
+                    draft.RaisedAs = value;
+                else
+                    CantRead(ImportField.Raised, $"Didn't know \"{raised}\" as how it was raised, kept in About it");
+            }
+
             if (Get(ImportField.Medium) is { } medium)
             {
                 if (ImportValues.ReadMedium(medium) is { } value)

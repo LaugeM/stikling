@@ -18,6 +18,7 @@
 @inject PlantService PlantService
 @inject RoomService RoomService
 @inject SellerService SellerService
+@inject OwnFieldService OwnFieldBook
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject IJSRuntime JS
@@ -250,6 +251,10 @@ else
                         <dt>Got it</dt>
                         <dd>
                             @Labels.For(plant.Origin)
+                            @if (plant.AsksHowRaised && plant.RaisedAs is { } raised)
+                            {
+                                <text> · @Labels.For(raised)</text>
+                            }
                             @if (plant.AcquiredOn is { } date)
                             {
                                 <text> · @Labels.Date(date)</text>
@@ -396,6 +401,15 @@ else
                                     <a class="tag-label" href="@TagLink(tag)">@tag</a>
                                 }
                             </dd>
+                        }
+
+                        @foreach (var field in ownFields)
+                        {
+                            if (plant.OwnFields.TryGetValue(field.Id, out var fieldValue) && fieldValue.Length > 0)
+                            {
+                                <dt>@field.Name</dt>
+                                <dd>@OwnFieldValues.Display(field.Kind, fieldValue)</dd>
+                            }
                         }
 
                         <PublicPageRow SubjectId="plant.Id" />
@@ -1298,6 +1312,8 @@ else
         await LoadAsync();
     }
 
+    private IReadOnlyList<OwnField> ownFields = [];
+
     private async Task LoadAsync()
     {
         everyday = await Names.GetEverydayNamesAsync();
@@ -1321,6 +1337,7 @@ else
             careFor = careBook.Find(plant.Genus, plant.Species, plant.NameQualifier);
             places = await RoomService.GetPlacesAsync();
             sellers = await SellerService.GetSellersAsync();
+            ownFields = await OwnFieldBook.GetAllAsync();
             var allCases = await PestCaseRepository.GetAllAsync();
             pests = PestService.CasesFor(plant, allCases, places);
             lastChecked = PestService.LastChecked(plant, allCases, await PestTreatmentRepository.GetAllAsync(), places);

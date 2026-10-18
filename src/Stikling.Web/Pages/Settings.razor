@@ -15,6 +15,7 @@
 @inject PlantNameService Names
 @inject CollectionNumberService Numbering
 @inject OwnCareKindService OwnCareKinds
+@inject OwnFieldService OwnFieldBook
 @inject ICareIntervalRepository CareIntervalRepository
 
 <PageTitle>Settings · Stikling</PageTitle>
@@ -101,6 +102,7 @@
     </p>
     <div class="settings-rows mt-4">
         <SettingsRow Href="kinds-of-care" Title="Kinds of care" Detail="@KindsOfCareLine" />
+        <SettingsRow Href="fields" Title="Your fields" Detail="@OwnFieldsLine" />
         <SettingsRow Href="care-intervals" Title="Care intervals" Detail="@CareIntervalsLine" />
         <SettingsRow Href="away" Title="Away and quiet time" Detail="Today stops asking while you're away or taking a break" />
     </div>
@@ -350,6 +352,7 @@
         roomCount = (await RoomService.GetAllAsync()).Count;
         tagCount = PlantTags.InUse(await Plants.GetAllAsync()).Count;
         ownKindCount = (await OwnCareKinds.GetAllAsync()).Count;
+        ownFieldCount = (await OwnFieldBook.GetAllAsync()).Count;
         intervalCount = (await CareIntervalRepository.GetAllAsync()).Count;
     }
 
@@ -425,6 +428,9 @@
     }
 
     private int ownKindCount;
+    private int ownFieldCount;
+
+    private string OwnFieldsLine => ownFieldCount == 0 ? "None yet" : Labels.Count(ownFieldCount, "field");
     private int intervalCount;
 
     private string CareIntervalsLine =>

@@ -30,6 +30,16 @@ public static class Labels
         _ => origin.ToString()
     };
 
+    public static string For(RaisedAs raised) => raised switch
+    {
+        RaisedAs.NurseryGrown => "Nursery grown",
+        RaisedAs.TissueCulture => "Tissue culture",
+        RaisedAs.Seed => "From seed",
+        RaisedAs.Cutting => "From a cutting or division",
+        RaisedAs.WildCollected => "Wild collected",
+        _ => raised.ToString()
+    };
+
     public static string For(SellerKind kind) => kind switch
     {
         SellerKind.Shop => "Shop",
