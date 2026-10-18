@@ -17,7 +17,7 @@
                     var sorted = Sort.Column == column;
                     <th scope="col" class="@CellClass(column)" aria-sort="@(sorted ? (Sort.Descending ? "descending" : "ascending") : null)">
                         <button type="button" class="sort-button" @onclick="() => SortBy(column)">
-                            @CoreTable.Header(column)
+                            @CoreTable.Header(column, Fields)
                             @if (sorted)
                             {
                                 <svg class="sort-chevron" viewBox="0 0 24 24" aria-hidden="true">
@@ -59,7 +59,11 @@
     public required IReadOnlyList<PlantRow> Rows { get; set; }
 
     [Parameter, EditorRequired]
-    public required IReadOnlyList<PlantColumn> Columns { get; set; }
+    public required IReadOnlyList<TableColumn> Columns { get; set; }
+
+    /// <summary>The live fields of the person's own, for the headings and cells of their columns.</summary>
+    [Parameter]
+    public IReadOnlyList<OwnField> Fields { get; set; } = [];
 
     [Parameter, EditorRequired]
     public required PlantTableSort Sort { get; set; }
@@ -76,11 +80,18 @@
     [Parameter]
     public EventCallback<Plant> OnToggle { get; set; }
 
-    private bool cultivarShown => Columns.Contains(PlantColumn.Cultivar);
+    private bool cultivarShown => Columns.Contains((TableColumn)PlantColumn.Cultivar);
 
-    private Task SortBy(PlantColumn column) => SortChanged.InvokeAsync(CoreTable.Tap(Sort, column));
+    private Task SortBy(TableColumn column) => SortChanged.InvokeAsync(CoreTable.Tap(Sort, column));
 
     private Task Clicked(Plant plant) => Selectable ? OnToggle.InvokeAsync(plant) : Task.CompletedTask;
+
+    private string? CellClass(TableColumn tableColumn)
+    {
+        if (tableColumn.FieldId is { } fieldId)
+            return Fields.FirstOrDefault(f => f.Id == fieldId)?.Kind is OwnFieldKind.Number or OwnFieldKind.Date ? "number-col" : null;
+        return CellClass(tableColumn.Builtin ?? PlantColumn.Name);
+    }
 
     private static string? CellClass(PlantColumn column) => column switch
     {
@@ -100,8 +111,18 @@
         }
     </text>;
 
-    private RenderFragment Cell(PlantRow row, PlantColumn column)
+    private RenderFragment Cell(PlantRow row, TableColumn tableColumn)
     {
+        if (tableColumn.FieldId is { } fieldId)
+        {
+            var field = Fields.FirstOrDefault(f => f.Id == fieldId);
+            var shown = field is not null && row.Plant.OwnFields.TryGetValue(fieldId, out var stored) && stored.Length > 0
+                ? OwnFieldValues.Display(field.Kind, stored)
+                : null;
+            return @<text>@shown</text>;
+        }
+
+        var column = tableColumn.Builtin ?? PlantColumn.Name;
         var plant = row.Plant;
         return column switch
         {
@@ -116,6 +137,7 @@
             PlantColumn.Room => @<text>@row.Room</text>,
             PlantColumn.Got => @<text>@(plant.AcquiredOn is { } got ? Labels.Date(got) : null)</text>,
             PlantColumn.Origin => @<text>@Labels.For(plant.Origin)</text>,
+            PlantColumn.Raised => @<text>@(plant.Raised is { } raised ? Labels.For(raised) : null)</text>,
             PlantColumn.Source => @<text>@plant.Source</text>,
             PlantColumn.Price => @<text>@plant.PricePaid?.ToString("0.##", CultureInfo.InvariantCulture)</text>,
             PlantColumn.Medium => @<text>@Labels.For(plant.Medium)</text>,

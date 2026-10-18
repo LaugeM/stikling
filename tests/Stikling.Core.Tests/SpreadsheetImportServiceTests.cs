@@ -1,4 +1,5 @@
 using Stikling.Core.Care;
+using Stikling.Core.Fields;
 using Stikling.Core.Import;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
@@ -16,6 +17,7 @@ public class SpreadsheetImportServiceTests
     private readonly FakeCareLogRepository logs = new();
     private readonly FakePlaceRepository places = new();
     private readonly FakeTimelineRepository timeline = new();
+    private readonly FakeOwnFieldRepository fields = new();
     private readonly SpreadsheetImportService service;
 
     public SpreadsheetImportServiceTests()
@@ -25,6 +27,7 @@ public class SpreadsheetImportServiceTests
             new PlantService(plants, timeline, time),
             new CareService(logs, timeline, plants, new FakeFeedRepository(), new FakeProductRepository(), new FakeOwnCareKindRepository(), time),
             new RoomService(places, plants, new FakePropagationRepository()),
+            new OwnFieldService(fields, plants),
             plants,
             logs,
             time);
@@ -121,6 +124,7 @@ public class SpreadsheetImportServiceTests
             new PlantService(failing, timeline, time),
             new CareService(logs, timeline, plants, new FakeFeedRepository(), new FakeProductRepository(), new FakeOwnCareKindRepository(), time),
             new RoomService(places, plants, new FakePropagationRepository()),
+            new OwnFieldService(fields, plants),
             plants, logs, time);
 
         await Assert.ThrowsAsync<IOException>(() => broken.ImportAsync(rows, Label));

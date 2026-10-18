@@ -4,6 +4,7 @@
 @using System.Text.RegularExpressions
 @using Stikling.Core.Import
 @inject IPlantRepository Repository
+@inject OwnFieldService FieldBook
 @inject PlantNameService Names
 @inject IDeviceLanguages Languages
 @inject SpreadsheetImportService Importer
@@ -128,17 +129,49 @@ else if (sheet is not null)
                             <div class="import-name">@sheet.Headings[c]</div>
                             <div class="import-meta">@Samples(c)</div>
                         </div>
-                        <select class="form-select" aria-label="@sheet.Headings[c]" @onchange="e => MatchChanged(c, e)">
-                            @foreach (var (group, fields) in ImportFields.Groups)
+                        <div class="import-column-pick">
+                            <select class="form-select" aria-label="@sheet.Headings[c]" @onchange="e => MatchChanged(c, e)">
+                                @foreach (var (group, fields) in ImportFields.Groups.Where(g => !g.Fields.Contains(ImportField.OwnField)))
+                                {
+                                    <optgroup label="@group">
+                                        @foreach (var field in fields)
+                                        {
+                                            <option value="@field" selected="@(matches[c] == field)">@ImportFields.Label(field)</option>
+                                        }
+                                    </optgroup>
+                                }
+                                @if (NewFieldName(c) is not null || liveFields.Count > 0)
+                                {
+                                    <optgroup label="Your fields">
+                                        @if (NewFieldName(c) is { } offered)
+                                        {
+                                            <option value="@NewFieldValue" selected="@(targets[c] is { IsNew: true })">New field: @offered</option>
+                                        }
+                                        @foreach (var field in liveFields)
+                                        {
+                                            <option value="@($"{ExistingFieldValue}{field.Id}")" selected="@(targets[c]?.ExistingId == field.Id)">@field.Name</option>
+                                        }
+                                    </optgroup>
+                                }
+                            </select>
+                            @if (matches[c] == ImportField.OwnField && targets[c] is { } target)
                             {
-                                <optgroup label="@group">
-                                    @foreach (var field in fields)
-                                    {
-                                        <option value="@field" selected="@(matches[c] == field)">@ImportFields.Label(field)</option>
-                                    }
-                                </optgroup>
+                                @if (target.IsNew)
+                                {
+                                    <select class="form-select" aria-label="Kind of field" @onchange="e => KindChanged(c, e)">
+                                        @foreach (var kind in Enum.GetValues<OwnFieldKind>())
+                                        {
+                                            <option value="@kind" selected="@(target.Kind == kind)">@kind</option>
+                                        }
+                                    </select>
+                                    <div class="import-meta">Makes a new field called @target.Name.</div>
+                                }
+                                else
+                                {
+                                    <div class="import-meta">Goes into your field @target.Name.</div>
+                                }
                             }
-                        </select>
+                        </div>
                     </div>
                 }
             </div>
@@ -283,6 +316,8 @@ else if (sheet is not null)
     private bool firstRowIsHeadings = true;
     private Stikling.Core.Import.Sheet? sheet;
     private List<ImportField> matches = [];
+    private List<ImportOwnField?> targets = []; // where each column that is a field of its own goes, null for the others
+    private IReadOnlyList<OwnField> liveFields = [];
     private DateOrder order = DateOrder.DayFirst;
     private DateOrder chosenOrder = DateOrder.DayFirst;
     private bool askOrder;
@@ -327,6 +362,8 @@ else if (sheet is not null)
             var parts = new List<string>();
             if (result?.RoomsMade > 0)
                 parts.Add($"{Labels.Count(result.RoomsMade, "room")} made");
+            if (result?.FieldsMade.Count > 0)
+                parts.Add($"{Labels.Count(result.FieldsMade.Count, "field")} made");
             if (result?.CareDates > 0)
                 parts.Add($"{Labels.Count(result.CareDates, "care date")} logged");
             return parts.Count == 0 ? null : string.Join(" · ", parts);
@@ -359,6 +396,7 @@ else if (sheet is not null)
     {
         dictionary = await Names.GetDictionaryAsync();
         existing = await Repository.GetAllAsync();
+        liveFields = await FieldBook.GetAllAsync();
         languageOrder = DateOrderGuess.ForLanguages(await Languages.GetAsync());
         chosenOrder = languageOrder;
     }
@@ -378,6 +416,7 @@ else if (sheet is not null)
         try
         {
             existing = await Repository.GetAllAsync();
+            liveFields = await FieldBook.GetAllAsync();
             var bytes = new MemoryStream();
             await using (var stream = file.OpenReadStream(MaxBytes))
                 await stream.CopyToAsync(bytes);
@@ -395,6 +434,7 @@ else if (sheet is not null)
     {
         error = null;
         existing = await Repository.GetAllAsync();
+        liveFields = await FieldBook.GetAllAsync();
         Open(pasted, "Pasted cells", "There are no plants in what you pasted.");
     }
 
@@ -411,8 +451,8 @@ else if (sheet is not null)
         sourceName = name;
         firstRowIsHeadings = true;
         sheet = read;
-        matches = [.. ImportFields.Guess(read.Headings)];
         chosenOrder = languageOrder;
+        Guess(read);
         GoTo(Step.Columns);
         Recompute();
     }
@@ -436,14 +476,50 @@ else if (sheet is not null)
     {
         firstRowIsHeadings = e.Value is true;
         sheet = SheetReader.Read(text, firstRowIsHeadings);
-        matches = [.. ImportFields.Guess(sheet.Headings)];
+        Guess(sheet);
+        Recompute();
+    }
+
+    private void Guess(Stikling.Core.Import.Sheet read)
+    {
+        var guess = ImportFields.Guess(read, liveFields, chosenOrder, Today);
+        matches = [.. guess.Matches];
+        targets = [.. guess.Targets];
+    }
+
+    private const string NewFieldValue = "own:new";
+    private const string ExistingFieldValue = "own:";
+
+    // The heading as the name of a new field, or null when the heading is blank or a field has that name
+    private string? NewFieldName(int column)
+    {
+        var name = sheet!.Headings[column].Trim();
+        if (name.Length > OwnField.MaxNameLength)
+            name = name[..OwnField.MaxNameLength].TrimEnd();
+        return name.Length == 0 || liveFields.Any(f => string.Equals(f.Name.Trim(), name, StringComparison.CurrentCultureIgnoreCase))
+            ? null
+            : name;
+    }
+
+    private void KindChanged(int column, ChangeEventArgs e)
+    {
+        if (targets[column] is { IsNew: true } target && Enum.TryParse<OwnFieldKind>(e.Value?.ToString(), out var kind))
+            targets[column] = target with { Kind = kind };
         Recompute();
     }
 
     private void MatchChanged(int column, ChangeEventArgs e)
     {
-        var field = Enum.Parse<ImportField>(e.Value?.ToString() ?? nameof(ImportField.Skip));
+        var value = e.Value?.ToString() ?? nameof(ImportField.Skip);
+        if (value.StartsWith("own:", StringComparison.Ordinal))
+        {
+            OwnFieldChosen(column, value);
+            return;
+        }
+
+        var field = Enum.Parse<ImportField>(value);
         matches[column] = field;
+        targets[column] = null;
         if (field is not (ImportField.Skip or ImportField.AboutLine))
         {
             // One column per field: the one that had it before goes to About it
@@ -451,6 +527,33 @@ else if (sheet is not null)
             {
                 if (other != column && matches[other] == field)
                     matches[other] = ImportField.AboutLine;
+            }
+        }
+        Recompute();
+    }
+
+    private void OwnFieldChosen(int column, string value)
+    {
+        ImportOwnField? target = null;
+        if (value == NewFieldValue && NewFieldName(column) is { } name)
+        {
+            var cells = sheet!.Rows.Select(r => column < r.Count ? r[column] : "");
+            target = new ImportOwnField(name, ImportFields.GuessKind(cells, chosenOrder, Today), null);
+        }
+        else if (Guid.TryParse(value[ExistingFieldValue.Length..], out var id) && liveFields.FirstOrDefault(f => f.Id == id) is { } live)
+            target = new ImportOwnField(live.Name, live.Kind, live.Id);
+
+        if (target is null)
+            return;
+        matches[column] = ImportField.OwnField;
+        targets[column] = target;
+        // One column per field: the one that had it before goes to About it
+        for (var other = 0; other < matches.Count; other++)
+        {
+            if (other != column && targets[other]?.PreviewId == target.PreviewId)
+            {
+                matches[other] = ImportField.AboutLine;
+                targets[other] = null;
             }
         }
         Recompute();
@@ -470,7 +573,7 @@ else if (sheet is not null)
         var cells = new List<string>();
         for (var column = 0; column < matches.Count; column++)
         {
-            if (!DateFields.Contains(matches[column]))
+            if (!DateFields.Contains(matches[column]) && targets[column]?.Kind != OwnFieldKind.Date)
                 continue;
             foreach (var row in sheet.Rows)
             {
@@ -483,7 +586,7 @@ else if (sheet is not null)
         askOrder = found is null && cells.Any(cell => NumericDate.IsMatch(cell));
         order = found ?? chosenOrder;
 
-        rows = SpreadsheetImport.Preview(sheet, matches, order, dictionary, existing, Today);
+        rows = SpreadsheetImport.Preview(sheet, matches, order, dictionary, existing, Today, targets);
         ticked = [.. rows.Select((r, i) => (r, i)).Where(x => x.r.TickedByDefault).Select(x => x.i)];
     }
 
@@ -567,7 +670,7 @@ else if (sheet is not null)
             {
                 addDone = done;
                 StateHasChanged();
-            }));
+            }), targets);
         }
         catch (Exception ex)
         {

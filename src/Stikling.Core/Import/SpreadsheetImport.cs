@@ -1,3 +1,5 @@
+using System.Globalization;
+using Stikling.Core.Fields;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Stikling.Core.Plants;
@@ -44,15 +46,27 @@ public static class SpreadsheetImport
         DateOrder order,
         PlantDictionary dictionary,
         IReadOnlyList<Plant> existing,
-        DateOnly today)
+        DateOnly today,
+        IReadOnlyList<ImportOwnField?>? targets = null)
     {
         var fields = new Dictionary<ImportField, int>();
         var aboutLines = new List<int>();
+        var ownColumns = new List<(int Column, ImportOwnField Target)>();
         for (var column = 0; column < sheet.Headings.Count; column++)
         {
             var field = column < matches.Count ? matches[column] : ImportField.AboutLine;
             if (field == ImportField.Skip)
                 continue;
+            if (field == ImportField.OwnField)
+            {
+                // Without a target, or into a field another column fills, it is kept in About it
+                var target = targets is not null && column < targets.Count ? targets[column] : null;
+                if (target is null || ownColumns.Any(o => o.Target.PreviewId == target.PreviewId))
+                    aboutLines.Add(column);
+                else
+                    ownColumns.Add((column, target));
+                continue;
+            }
             if (field == ImportField.AboutLine || !fields.TryAdd(field, column))
                 aboutLines.Add(column);
         }
@@ -196,6 +210,20 @@ public static class SpreadsheetImport
                     care.Add(new ImportCare(kind, date.Start));
             }
 
+            foreach (var (column, target) in ownColumns)
+            {
+                if (column >= cells.Count || cells[column].Trim() is not { Length: > 0 } cell)
+                    continue;
+                var stored = ReadOwnValue(target, cell, order, today, out var problem);
+                if (stored is not null)
+                {
+                    draft.OwnFields[target.PreviewId] = stored;
+                    continue;
+                }
+                problems.Add(problem!);
+                unread.Add((column, cell));
+            }
+
             var notes = new List<string>();
             if (Get(ImportField.AboutIt) is { } about)
                 notes.Add(about);
@@ -222,6 +250,43 @@ public static class SpreadsheetImport
                 cantAdd));
         }
         return rows;
+    }
+
+    // The text a plant stores for a cell, or null with the problem to show when it can't be read as the field's kind
+    private static string? ReadOwnValue(ImportOwnField target, string cell, DateOrder order, DateOnly today, out string? problem)
+    {
+        problem = null;
+        switch (target.Kind)
+        {
+            case OwnFieldKind.Number:
+                var number = OwnFieldValues.Normalize(OwnFieldKind.Number, cell, out var error);
+                if (error is null && number is not null)
+                    return number;
+                // "150 kr" reads too
+                if (ImportValues.ReadPrice(cell) is { } price)
+                    return price.ToString("0.####", CultureInfo.InvariantCulture);
+                problem = $"Couldn't read \"{cell}\" as a number for {target.Name}, kept in About it";
+                return null;
+            case OwnFieldKind.Date:
+                if (ImportValues.ReadDate(cell, order, today) is not { } date)
+                {
+                    problem = $"Couldn't read \"{cell}\" as a date for {target.Name}, kept in About it";
+                    return null;
+                }
+                if (date.Precision != DatePrecision.Day)
+                {
+                    problem = $"\"{cell}\" needs a whole day for {target.Name}, kept in About it";
+                    return null;
+                }
+                return date.Start.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            default:
+                if (cell.Length > OwnFieldValues.MaxTextLength)
+                {
+                    problem = $"\"{cell}\" is too long for {target.Name}, kept in About it";
+                    return null;
+                }
+                return cell;
+        }
     }
 
     private static readonly (ImportField Field, CareKind Kind)[] CareColumns =
