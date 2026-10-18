@@ -37,13 +37,39 @@ public class SpreadsheetImportTests
     [Fact]
     public void Our_own_export_is_recognised()
     {
-        var headings = SheetReader.Read(CsvExport.Plants([], new Rooms.Places([]))).Headings;
+        var headings = SheetReader.Read(CsvExport.Plants([], new Rooms.Places([]), [])).Headings;
         Assert.Equal(
         [
             ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote,
-            ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Source,
+            ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source,
             ImportField.Price, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
         ], ImportFields.Guess(headings));
+    }
+
+    [Fact]
+    public void Our_own_export_with_columns_for_own_fields_is_recognised_and_the_extra_columns_are_kept_in_About_it()
+    {
+        var field = new OwnField { Name = "Clone name" };
+        var headings = SheetReader.Read(CsvExport.Plants([], new Rooms.Places([]), [field])).Headings;
+        var guess = ImportFields.Guess(headings);
+
+        Assert.Equal(headings.Count, guess.Count);
+        Assert.Equal(ImportField.Raised, guess[12]);
+        Assert.Equal(ImportField.Skip, guess[17]);
+        Assert.Equal(ImportField.AboutLine, guess[18]);
+    }
+
+    [Fact]
+    public void An_export_from_before_the_raised_column_is_still_recognised()
+    {
+        string[] headings = ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
+        var guess = ImportFields.Guess(headings);
+
+        Assert.Equal(headings.Length, guess.Count);
+        Assert.DoesNotContain(ImportField.Raised, guess);
+        Assert.Equal(ImportField.Origin, guess[11]);
+        Assert.Equal(ImportField.Source, guess[12]);
+        Assert.Equal(ImportField.Skip, guess[^1]);
     }
 
     [Fact]
@@ -418,7 +444,7 @@ public class SpreadsheetImportTests
         var basil = new Plant { Nickname = "Basil", AcquiredOn = LooseDate.Of(2023, 6), PlaceId = places.IdOf("Kitchen") };
         var bare = new Plant { Genus = "Alocasia" };
 
-        var csv = CsvExport.Plants([big, basil, bare], places.Current);
+        var csv = CsvExport.Plants([big, basil, bare], places.Current, []);
         var sheet = SheetReader.Read(SheetReader.Decode(CsvExport.Encode(csv)));
         var rows = SpreadsheetImport.Preview(sheet, ImportFields.Guess(sheet.Headings), DateOrder.DayFirst, Dictionary, [], Today);
 

@@ -6,6 +6,7 @@
 @inject IPlantRepository Plants
 @inject IPropagationRepository PropagationRepository
 @inject RoomService RoomService
+@inject OwnFieldService OwnFieldBook
 @inject ThemeService Theme
 @inject ErrorReports ErrorReports
 @inject PlantNameService Names
@@ -189,7 +190,7 @@
 
     private async Task ExportPlantsCsvAsync()
     {
-        var csv = CsvExport.Plants(await Plants.GetAllAsync(), await RoomService.GetPlacesAsync());
+        var csv = CsvExport.Plants(await Plants.GetAllAsync(), await RoomService.GetPlacesAsync(), await OwnFieldBook.GetAllAsync());
         await Files.DownloadAsync($"stikling-plants-{TodayDate:yyyy-MM-dd}.csv", CsvExport.Encode(csv));
     }
 

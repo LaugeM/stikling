@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
+using Stikling.Core.Plants;
 using Stikling.Core.Search;
 
 namespace Stikling.Core.Tests;
@@ -24,10 +25,11 @@ public class SearchTests
     private readonly FakeFeedRepository feeds = new();
     private readonly FakeProductRepository products = new();
     private readonly FakePlaceRepository places = new();
+    private readonly FakeOwnFieldRepository ownFields = new();
 
     private async Task<SearchIndex> Index() =>
         await new SearchService(plants, propagations, timeline, careLogs, propagationCareLogs, problems, problemUpdates,
-            pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FakeOwnCareKindRepository(), new FixedTime(Now))
+            pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FakeOwnCareKindRepository(), ownFields, new FixedTime(Now))
             .LoadAsync(e => e.ToString());
 
     private async Task<SearchResults> Find(string? query) => (await Index()).Find(query);
@@ -119,11 +121,39 @@ public class SearchTests
     }
 
     [Fact]
+    public async Task A_plant_is_found_by_the_value_of_a_text_or_choice_field_but_not_a_number_field()
+    {
+        var clone = new OwnField { Name = "Clone name", Kind = OwnFieldKind.Text };
+        var height = new OwnField { Name = "Height", Kind = OwnFieldKind.Number };
+        await ownFields.SaveAsync(clone);
+        await ownFields.SaveAsync(height);
+        var plant = AddPlant("Big", set: p => { p.OwnFields[clone.Id] = "Mirage"; p.OwnFields[height.Id] = "4521"; });
+        AddPlant("Other");
+
+        Assert.Equal([plant.Id], (await Find("mirage")).Plants.Select(i => i.Id));
+        Assert.Empty((await Find("4521")).Plants);
+
+        await ownFields.DeleteAsync(clone.Id);
+        Assert.Empty((await Find("mirage")).Plants);
+    }
+
+    [Fact]
+    public void The_plant_list_search_looks_through_the_field_text_too()
+    {
+        var plant = new Plant { Nickname = "Big" };
+        var other = new Plant { Nickname = "Small" };
+        var filter = new PlantFilter("mirage", FieldText: p => p == plant ? ["Mirage clone"] : []);
+
+        Assert.Equal([plant], filter.Apply([plant, other]));
+        Assert.Empty(new PlantFilter("mirage").Apply([plant, other]));
+    }
+
+    [Fact]
     public async Task A_plant_is_found_by_its_everyday_name_and_its_number()
     {
         var plant = AddPlant(genus: "Dracaena", species: "trifasciata", set: p => p.CollectionNumber = "12");
         var index = await new SearchService(plants, propagations, timeline, careLogs, propagationCareLogs, problems,
-            problemUpdates, pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FakeOwnCareKindRepository(), new FixedTime(Now))
+            problemUpdates, pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FakeOwnCareKindRepository(), ownFields, new FixedTime(Now))
             .LoadAsync(e => e.ToString(), (_, species, _) => species == "trifasciata" ? "Snake plant" : null);
 
         Assert.Equal([plant.Id], index.Find("snake").Plants.Select(i => i.Id));

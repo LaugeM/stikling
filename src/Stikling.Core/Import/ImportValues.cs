@@ -34,6 +34,16 @@ public static partial class ImportValues
         ("traded", PlantOrigin.Swap), ("trade", PlantOrigin.Swap), ("byttet", PlantOrigin.Swap), ("bytte", PlantOrigin.Swap),
         ("ukendt", PlantOrigin.Unknown));
 
+    private static readonly Dictionary<string, RaisedAs> RaisedValues = Words<RaisedAs>(
+        [("Nursery grown", RaisedAs.NurseryGrown), ("Tissue culture", RaisedAs.TissueCulture), ("From seed", RaisedAs.Seed),
+         ("From a cutting or division", RaisedAs.Cutting), ("Wild collected", RaisedAs.WildCollected)],
+        ("nursery", RaisedAs.NurseryGrown),
+        ("tc", RaisedAs.TissueCulture), ("tissue", RaisedAs.TissueCulture), ("vævskultur", RaisedAs.TissueCulture),
+        ("seed grown", RaisedAs.Seed), ("frø", RaisedAs.Seed),
+        ("cutting", RaisedAs.Cutting), ("rooted cutting", RaisedAs.Cutting), ("division", RaisedAs.Cutting),
+        ("stikling", RaisedAs.Cutting), ("deling", RaisedAs.Cutting),
+        ("wild", RaisedAs.WildCollected), ("wc", RaisedAs.WildCollected), ("vildtindsamlet", RaisedAs.WildCollected));
+
     private static readonly Dictionary<string, GrowingMedium> Media = Words<GrowingMedium>(
         [("Orchid bark", GrowingMedium.OrchidBark), ("LECA", GrowingMedium.Leca), ("PON", GrowingMedium.Pon),
          ("Sphagnum moss", GrowingMedium.Sphagnum), ("Corm riser", GrowingMedium.CormRiser)],
@@ -63,6 +73,9 @@ public static partial class ImportValues
 
     public static PlantOrigin? ReadOrigin(string? text) =>
         Origins.TryGetValue(Key(text ?? ""), out var value) ? value : null;
+
+    public static RaisedAs? ReadRaised(string? text) =>
+        RaisedValues.TryGetValue(Key(text ?? ""), out var value) ? value : null;
 
     public static GrowingMedium? ReadMedium(string? text) =>
         Media.TryGetValue(Key(text ?? ""), out var value) ? value : null;

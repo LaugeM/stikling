@@ -107,6 +107,16 @@ public enum PlantOrigin
     Unknown
 }
 
+/// <summary>How a plant was raised, for plants that were got from someone else or whose origin isn't known.</summary>
+public enum RaisedAs
+{
+    NurseryGrown,
+    TissueCulture,
+    Seed,
+    Cutting,
+    WildCollected
+}
+
 /// <summary>What the plant or propagation grows in.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<GrowingMedium>))]
 public enum GrowingMedium

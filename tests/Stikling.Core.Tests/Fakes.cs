@@ -2,6 +2,7 @@
 using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
+using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
 using Stikling.Core.Wishlist;
 using Stikling.Core.Lights;
@@ -145,6 +146,35 @@ internal sealed class FakeOwnCareKindRepository : IOwnCareKindRepository
     {
         if (Kinds.TryGetValue(id, out var kind))
             kind.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeOwnFieldRepository : IOwnFieldRepository
+{
+    public Dictionary<Guid, OwnField> Fields { get; } = [];
+
+    public Task<IReadOnlyList<OwnField>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<OwnField>>(Fields.Values.Where(f => !f.IsDeleted).ToList());
+
+    public Task<IReadOnlyList<OwnField>> GetStoredAsync() =>
+        Task.FromResult<IReadOnlyList<OwnField>>(Fields.Values.ToList());
+
+    public Task<OwnField?> GetAsync(Guid id) =>
+        Task.FromResult(Fields.TryGetValue(id, out var field) && !field.IsDeleted ? field : null);
+
+    public Task SaveAsync(OwnField field)
+    {
+        if (field.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        Fields[field.Id] = field;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Fields.TryGetValue(id, out var field))
+            field.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }

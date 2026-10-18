@@ -1,4 +1,6 @@
 using Stikling.Core.Care;
+using System.Globalization;
+using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
 using Stikling.Core.Models;
 
@@ -17,6 +19,7 @@ public enum PlantColumn
     Room,
     Got,
     Origin,
+    Raised,
     Source,
     Price,
     Medium,
@@ -32,8 +35,26 @@ public enum PlantColumn
     Number
 }
 
-/// <summary>Which column the table is sorted by, and which way.</summary>
-public sealed record PlantTableSort(PlantColumn Column = PlantColumn.Name, bool Descending = false);
+/// <summary>A column of the table: one the app has, or a field of the person's own.</summary>
+public readonly record struct TableColumn(PlantColumn? Builtin, Guid? FieldId)
+{
+    public static implicit operator TableColumn(PlantColumn column) => new(column, null);
+
+    public static TableColumn Field(Guid id) => new(null, id);
+
+    public bool IsField => FieldId is not null;
+
+    /// <summary>How it is stored on the device: the name of a built-in column, or "field:" and the id.</summary>
+    public override string ToString() => FieldId is { } id ? $"field:{id:D}" : Builtin.ToString()!;
+}
+
+/// <summary>Which column the table is sorted by, and which way. Name A to Z when nothing is said.</summary>
+public sealed record PlantTableSort(TableColumn Column, bool Descending = false)
+{
+    public PlantTableSort() : this(new TableColumn(PlantColumn.Name, null))
+    {
+    }
+}
 
 /// <summary>One plant's values in the table, worked out once so a cell never has to look through the care log.</summary>
 public sealed record PlantRow(
@@ -49,8 +70,10 @@ public sealed record PlantRow(
 /// <summary>The table view of the plant list: which columns, how they are stored and how they sort.</summary>
 public static class PlantTable
 {
-    public static readonly IReadOnlyList<PlantColumn> Defaults =
+    public static readonly IReadOnlyList<TableColumn> Defaults =
         [PlantColumn.Name, PlantColumn.Cultivar, PlantColumn.Watered, PlantColumn.Fed];
+
+    private const string FieldPrefix = "field:";
 
     private static readonly Dictionary<string, PlantColumn> ByName =
         Enum.GetValues<PlantColumn>().ToDictionary(c => c.ToString());
@@ -67,20 +90,50 @@ public static class PlantTable
         _ => column.ToString()
     };
 
-    /// <summary>The columns stored on the device, in table order. Name is always there, and nothing known gives the defaults.</summary>
-    public static IReadOnlyList<PlantColumn> Parse(string? stored)
-    {
-        var picked = (stored ?? "")
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(ByName.ContainsKey)
-            .Select(name => ByName[name])
-            .ToHashSet();
+    /// <summary>The heading of a column: the field's name for a field of the person's own.</summary>
+    public static string Header(TableColumn column, IEnumerable<OwnField> fields) =>
+        column.FieldId is { } id
+            ? fields.FirstOrDefault(f => f.Id == id)?.Name ?? ""
+            : Header(column.Builtin ?? PlantColumn.Name);
 
-        return picked.Count == 0 ? Defaults : Ordered(picked);
+    /// <summary>
+    /// The columns stored on the device, in table order: the built-in ones, then the fields of the
+    /// person's own by name. Name is always there, and nothing known gives the defaults. A field
+    /// that isn't in <paramref name="fields"/> (removed, or not yet synced) is dropped.
+    /// </summary>
+    public static IReadOnlyList<TableColumn> Parse(string? stored, IEnumerable<OwnField>? fields = null)
+    {
+        var live = (fields ?? []).Where(f => !f.IsDeleted).ToList();
+        var builtin = new HashSet<PlantColumn>();
+        var own = new HashSet<Guid>();
+        foreach (var part in (stored ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (ByName.TryGetValue(part, out var column))
+                builtin.Add(column);
+            else if (part.StartsWith(FieldPrefix, StringComparison.Ordinal)
+                && Guid.TryParse(part[FieldPrefix.Length..], out var id) && live.Any(f => f.Id == id))
+                own.Add(id);
+        }
+
+        if (builtin.Count == 0 && own.Count == 0)
+            return Defaults;
+        return
+        [
+            .. Ordered(builtin).Select(c => (TableColumn)c),
+            .. live.Where(f => own.Contains(f.Id))
+                .OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)
+                .Select(f => TableColumn.Field(f.Id))
+        ];
     }
 
-    public static string Write(IEnumerable<PlantColumn> columns) =>
-        string.Join(',', Ordered(columns.ToHashSet()));
+    /// <summary>Written in table order: the built-in columns, then the fields in the order given.</summary>
+    public static string Write(IEnumerable<TableColumn> columns)
+    {
+        var all = columns.ToList();
+        var builtin = all.Where(c => c.Builtin is not null).Select(c => c.Builtin!.Value).ToHashSet();
+        return string.Join(',', Ordered(builtin).Select(c => c.ToString())
+            .Concat(all.Where(c => c.IsField).Distinct().Select(c => c.ToString())));
+    }
 
     private static List<PlantColumn> Ordered(HashSet<PlantColumn> picked)
     {
@@ -88,25 +141,34 @@ public static class PlantTable
         return Enum.GetValues<PlantColumn>().Where(picked.Contains).ToList();
     }
 
-    /// <summary>Stored as the column, then " desc" when reversed: "Watered desc". Anything unknown reads as Name A to Z.</summary>
-    public static PlantTableSort ParseSort(string? stored)
+    /// <summary>
+    /// Stored as the column, then " desc" when reversed: "Watered desc" or "field:{id} desc". Anything
+    /// unknown, or a field that isn't in <paramref name="fields"/>, reads as Name A to Z.
+    /// </summary>
+    public static PlantTableSort ParseSort(string? stored, IEnumerable<OwnField>? fields = null)
     {
         var parts = (stored ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length is 1 or 2 && ByName.TryGetValue(parts[0], out var column)
-            && (parts.Length == 1 || parts[1] == "desc"))
-            return new PlantTableSort(column, parts.Length == 2);
+        if (parts.Length is 1 or 2 && (parts.Length == 1 || parts[1] == "desc"))
+        {
+            if (ByName.TryGetValue(parts[0], out var column))
+                return new PlantTableSort(column, parts.Length == 2);
+            if (parts[0].StartsWith(FieldPrefix, StringComparison.Ordinal)
+                && Guid.TryParse(parts[0][FieldPrefix.Length..], out var id)
+                && (fields ?? []).Any(f => f.Id == id && !f.IsDeleted))
+                return new PlantTableSort(TableColumn.Field(id), parts.Length == 2);
+        }
         return new PlantTableSort();
     }
 
     public static string WriteSort(PlantTableSort sort) =>
         sort.Descending ? $"{sort.Column} desc" : sort.Column.ToString();
 
-    /// <summary>Dates, where newest first is what people look for, start with the newest.</summary>
-    public static bool StartsDescending(PlantColumn column) =>
-        column is PlantColumn.Watered or PlantColumn.Fed or PlantColumn.Repotted or PlantColumn.Got or PlantColumn.Added;
+    /// <summary>Dates, where newest first is what people look for, start with the newest. Own fields start ascending.</summary>
+    public static bool StartsDescending(TableColumn column) =>
+        column.Builtin is PlantColumn.Watered or PlantColumn.Fed or PlantColumn.Repotted or PlantColumn.Got or PlantColumn.Added;
 
     /// <summary>What tapping a heading does: turn the order round when it is the sorted one, otherwise sort by it.</summary>
-    public static PlantTableSort Tap(PlantTableSort current, PlantColumn column) =>
+    public static PlantTableSort Tap(PlantTableSort current, TableColumn column) =>
         current.Column == column
             ? current with { Descending = !current.Descending }
             : new PlantTableSort(column, StartsDescending(column));
@@ -170,13 +232,14 @@ public static class PlantTable
         IEnumerable<PlantRow> rows,
         PlantTableSort sort,
         bool cultivarShown = false,
-        Func<Enum, string>? labelOf = null)
+        Func<Enum, string>? labelOf = null,
+        IReadOnlyList<OwnField>? fields = null)
     {
         var text = StringComparer.CurrentCultureIgnoreCase;
         var direction = sort.Descending ? -1 : 1;
         var label = labelOf ?? (e => e.ToString());
         var keyed = rows
-            .Select(row => (Row: row, Key: KeyOf(row, sort.Column, cultivarShown, label)))
+            .Select(row => (Row: row, Key: KeyOf(row, sort.Column, cultivarShown, label, fields)))
             .ToList();
 
         var comparer = Comparer<(PlantRow Row, IComparable? Key)>.Create((a, b) =>
@@ -191,9 +254,45 @@ public static class PlantTable
         return keyed.Order(comparer).Select(k => k.Row).ToList();
     }
 
-    private static IComparable? KeyOf(PlantRow row, PlantColumn column, bool cultivarShown, Func<Enum, string> label)
+    // Where a choice sits: its place in the list, or after all of them for a value that isn't listed
+    private readonly record struct ChoiceKey(int Rank, string Text) : IComparable
+    {
+        public int CompareTo(object? other) =>
+            other is ChoiceKey o
+                ? Rank != o.Rank ? Rank.CompareTo(o.Rank) : StringComparer.CurrentCultureIgnoreCase.Compare(Text, o.Text)
+                : 1;
+    }
+
+    // A value that doesn't fit the kind of its field sorts as blank
+    private static IComparable? FieldKey(Plant plant, OwnField? field)
+    {
+        if (field is null || !plant.OwnFields.TryGetValue(field.Id, out var raw) || string.IsNullOrWhiteSpace(raw))
+            return null;
+        var value = raw.Trim();
+        switch (field.Kind)
+        {
+            case OwnFieldKind.Number:
+                var number = OwnFieldValues.Normalize(OwnFieldKind.Number, value, out var numberError);
+                return numberError is null && number is not null ? decimal.Parse(number, CultureInfo.InvariantCulture) : null;
+            case OwnFieldKind.Date:
+                var date = OwnFieldValues.Normalize(OwnFieldKind.Date, value, out var dateError);
+                return dateError is null && date is not null
+                    ? DateOnly.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture)
+                    : null;
+            case OwnFieldKind.Choice:
+                var at = field.Choices.FindIndex(c => string.Equals(c.Trim(), value, StringComparison.CurrentCultureIgnoreCase));
+                return new ChoiceKey(at >= 0 ? at : int.MaxValue, value);
+            default:
+                return value;
+        }
+    }
+
+    private static IComparable? KeyOf(PlantRow row, TableColumn tableColumn, bool cultivarShown, Func<Enum, string> label, IReadOnlyList<OwnField>? fields)
     {
         var plant = row.Plant;
+        if (tableColumn.FieldId is { } fieldId)
+            return FieldKey(plant, fields?.FirstOrDefault(f => f.Id == fieldId));
+        var column = tableColumn.Builtin ?? PlantColumn.Name;
         return column switch
         {
             PlantColumn.Name => NameFor(plant, cultivarShown),
@@ -206,6 +305,7 @@ public static class PlantTable
             PlantColumn.Room => Text(row.Room),
             PlantColumn.Got => plant.AcquiredOn?.Start,
             PlantColumn.Origin => label(plant.Origin),
+            PlantColumn.Raised => plant.Raised is { } raised ? label(raised) : null,
             PlantColumn.Source => Text(plant.Source),
             PlantColumn.Price => plant.PricePaid,
             PlantColumn.Medium => label(plant.Medium),

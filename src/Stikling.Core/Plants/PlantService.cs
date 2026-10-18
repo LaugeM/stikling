@@ -270,6 +270,26 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         return changed;
     }
 
+    /// <summary>
+    /// Sets how several plants were raised, or clears it with null. Plants grown from seed or
+    /// propagated here are left as they are, since how they were raised follows from that, and so are
+    /// plants that are gone. Returns how many changed.
+    /// </summary>
+    public async Task<int> SetRaisedAsync(IEnumerable<Plant> selected, RaisedAs? raised)
+    {
+        var changed = 0;
+        foreach (var plant in selected)
+        {
+            if (plant.IsDeleted || !plant.AsksHowRaised || plant.RaisedAs == raised)
+                continue;
+            plant.RaisedAs = raised;
+            await plants.SaveAsync(plant);
+            changed++;
+        }
+
+        return changed;
+    }
+
     /// <summary>Plants tagged "For swap" (in any case) that have no spare mark yet, still here.</summary>
     public static IReadOnlyList<Plant> TaggedForSwap(IEnumerable<Plant> all) =>
         [.. all.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.Spare is null && PlantTags.Has(p, PlantTags.ForSwap))];

@@ -412,7 +412,7 @@ public class CollectionNumberTests
     [Fact]
     public void The_export_has_the_number()
     {
-        var csv = CsvExport.Plants([Numbered("117", "Basil")], Rooms.Places.None);
+        var csv = CsvExport.Plants([Numbered("117", "Basil")], Rooms.Places.None, []);
 
         Assert.Contains("Basil,117,Basil", csv);
     }

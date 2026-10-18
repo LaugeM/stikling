@@ -30,6 +30,13 @@ public enum LikesFilter
     DarkerThanItLikes
 }
 
+/// <summary>
+/// One pick in the Fields filter. A null <paramref name="FieldId"/> is How it was raised, and
+/// <paramref name="Value"/> a <see cref="RaisedAs"/> name matched against the effective value. Otherwise
+/// it is a field of the person's own and the value is one of its choices. A null value is "Not set".
+/// </summary>
+public sealed record FieldPick(Guid? FieldId, string? Value);
+
 /// <summary>Search, filter and sort rules for the plant list.</summary>
 /// <param name="PlaceIds">The room or spot picked, as every id that counts as being in it
 /// (see <see cref="Rooms.Places.IdsIn"/>). A room also shows what's in its spots.</param>
@@ -46,6 +53,8 @@ public enum LikesFilter
 /// <param name="Likes">Only the plants with this need: high humidity, stays moist, dries out, rests in
 /// winter or summer, or stands darker than it likes. Null for no limit.</param>
 /// <param name="Everyday">The everyday name shown for a plant, like "Snake plant", which the search looks through too.</param>
+/// <param name="Picks">Picks on How it was raised and the choice fields. A plant has to match every one.</param>
+/// <param name="FieldText">The values of the plant's own text and choice fields, which the search looks through too.</param>
 public sealed record PlantFilter(
     string? Search = null,
     StatusFilter Status = StatusFilter.Active,
@@ -59,7 +68,9 @@ public sealed record PlantFilter(
     Func<Plant, string?>? Everyday = null,
     PlantStatus? GoneAs = null,
     IReadOnlySet<Guid>? OnlyIds = null,
-    LikesFilter? Likes = null)
+    LikesFilter? Likes = null,
+    Func<Plant, IEnumerable<string>>? FieldText = null,
+    IReadOnlyList<FieldPick>? Picks = null)
 {
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
         Order(plants
@@ -70,6 +81,7 @@ public sealed record PlantFilter(
             .Where(p => !Dormant || p.IsDormant)
             .Where(p => OnlyIds is null || OnlyIds.Contains(p.Id))
             .Where(MatchesLikes)
+            .Where(MatchesPicks)
             .Where(p => Tags is null || Tags.All(tag => PlantTags.Has(p, tag)))
             .Where(MatchesSearch));
 
@@ -113,6 +125,16 @@ public sealed record PlantFilter(
         _ => true
     };
 
+    private bool MatchesPicks(Plant plant) => Picks is null || Picks.All(pick =>
+    {
+        var have = pick.FieldId is { } id
+            ? plant.OwnFields.TryGetValue(id, out var text) && !string.IsNullOrWhiteSpace(text) ? text.Trim() : null
+            : plant.Raised?.ToString();
+        return pick.Value is null
+            ? have is null
+            : have is not null && string.Equals(have, pick.Value.Trim(), StringComparison.CurrentCultureIgnoreCase);
+    });
+
     private bool MatchesLocation(Plant plant) =>
         PlaceIds is null || plant.PlaceId is { } id && PlaceIds.Contains(id);
 
@@ -123,7 +145,7 @@ public sealed record PlantFilter(
         if (string.IsNullOrWhiteSpace(Search))
             return true;
 
-        var haystack = string.Join(' ', [plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameNote, plant.BotanicalName, Everyday?.Invoke(plant), .. plant.Tags]);
+        var haystack = string.Join(' ', [plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameNote, plant.BotanicalName, Everyday?.Invoke(plant), .. plant.Tags, .. FieldText?.Invoke(plant) ?? []]);
         return Search
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase)
