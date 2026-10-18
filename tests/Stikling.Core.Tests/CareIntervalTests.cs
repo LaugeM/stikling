@@ -339,7 +339,7 @@ public class CareIntervalTests
         other.Scope = CareScope.Tag;
         other.Tag = "Variegated";
 
-        Assert.Equal([tagged.Id], CareIntervals.CoveringPlant(plant, [tagged, other], Places).Select(i => i.Id));
+        Assert.Equal([tagged.Id], CareIntervals.CoveringPlant(plant, [tagged, other], Places, [], [], Time).Select(i => i.Id));
     }
 
     // Round days and put-offs
@@ -494,6 +494,102 @@ public class CareIntervalTests
         Assert.Equal("every month", CareIntervals.EveryText(interval));
         Assert.Equal("October to March", CareIntervals.MonthsText(interval));
         Assert.Null(CareIntervals.MonthsText(Interval()));
+    }
+
+    // An own kind follows what it counts as now
+
+    private static CareInterval OwnInterval(OwnCareKind kind, CareKind storedKind)
+    {
+        var interval = Interval(storedKind);
+        interval.OwnKindId = kind.Id;
+        return interval;
+    }
+
+    [Fact]
+    public void An_own_kind_changed_to_count_as_a_watering_drops_its_interval_from_Today()
+    {
+        var kind = new OwnCareKind { Name = "Bottom watered", CountsAs = CareKind.Watered };
+        var interval = OwnInterval(kind, CareKind.Rotated);
+        var ownMap = CareLabels.Lookup([kind]);
+
+        Assert.Empty(Plan([interval], [Plant("A")], own: [kind]));
+        Assert.Null(CareIntervals.Effective(interval, ownMap));
+        Assert.True(CareIntervals.CountsAsWatering(interval, ownMap));
+        Assert.Empty(CareIntervals.CoveringPlant(Plant("A"), [interval], Places, [], [kind], Time));
+    }
+
+    [Fact]
+    public void An_own_kind_changed_between_feed_and_neither_changes_the_dormant_and_feed_behaviour()
+    {
+        var kind = new OwnCareKind { Name = "Foliar", CountsAs = CareKind.Fertilised };
+        var sleeping = Plant("Sleeping");
+        sleeping.DormantSince = Today.AddDays(-5);
+        var interval = OwnInterval(kind, CareKind.Rotated);
+        interval.FeedId = Guid.NewGuid();
+        var feed = new Feed { Id = interval.FeedId.Value, Name = "Aroid feed" };
+
+        // Stored as neither, but now a feed: dormant plants skip it and the feed shows
+        Assert.Empty(Plan([interval], [sleeping], own: [kind], feeds: [feed]));
+        var awake = Assert.Single(Plan([interval], [Plant("Awake")], own: [kind], feeds: [feed]));
+        Assert.Equal("Foliar with Aroid feed", awake.Label);
+
+        // Stored as a feed, but now neither: dormant plants go on and the feed is dropped
+        kind.CountsAs = null;
+        var stored = OwnInterval(kind, CareKind.Fertilised);
+        stored.FeedId = feed.Id;
+        var item = Assert.Single(Plan([stored], [sleeping], own: [kind], feeds: [feed]));
+        Assert.Null(item.FeedId);
+        Assert.Equal(CareKind.Rotated, item.Interval.Kind);
+    }
+
+    [Fact]
+    public void Comes_back_for_a_plant_with_nothing_logged_uses_the_same_due_day_as_Today_and_names_the_year()
+    {
+        var plant = Plant("Monstera");
+        var interval = Interval(CareKind.Repotted, 2, IntervalUnit.Years, Today);
+
+        var covering = Assert.Single(CareIntervals.CoveringPlant(plant, [interval], Places, [], [], Time));
+        var (last, due) = CareIntervals.DueFor(covering, plant, [], Time);
+        var item = Assert.Single(Plan([interval], [plant]));
+
+        Assert.Null(last);
+        Assert.Equal(item.Due, due);
+        Assert.Equal(new DateOnly(2028, 10, 18), due);
+        Assert.Equal("18 Oct 2028", CareIntervals.DayText(due, Today));
+        Assert.Equal("4 Nov", CareIntervals.DayText(new DateOnly(2026, 11, 4), Today));
+    }
+
+    [Fact]
+    public void Intervals_covering_a_plant_are_sorted_by_next_due()
+    {
+        var plant = Plant("A");
+        var later = Interval(CareKind.Repotted, 2, IntervalUnit.Years, Today);
+        later.CreatedAt = Now;
+        var sooner = Interval(CareKind.Fertilised, 1, IntervalUnit.Weeks, Today);
+        sooner.CreatedAt = Now.AddDays(10);
+
+        var order = CareIntervals.CoveringPlant(plant, [later, sooner], Places, [], [], Time);
+
+        Assert.Equal([sooner.Id, later.Id], order.Select(i => i.Id));
+    }
+
+    [Fact]
+    public void Items_due_in_one_and_two_days_are_coming_up_and_not_due_now()
+    {
+        var one = Plant("One");
+        var two = Plant("Two");
+        var three = Plant("Three");
+        var interval = Interval(every: 14, unit: IntervalUnit.Days);
+        var logs = new[]
+        {
+            Log(one, Today.AddDays(-13)), Log(two, Today.AddDays(-12)), Log(three, Today.AddDays(-11))
+        };
+
+        var items = Plan([interval], [one, two, three], logs);
+
+        Assert.Empty(CareIntervals.Now(items, Today, PutOffs.Empty()));
+        var coming = Assert.Single(CareIntervals.Coming(items, Today, PutOffs.Empty()));
+        Assert.Equal(["One", "Two"], coming.Items.Select(i => i.Plant.DisplayName));
     }
 
     // Validation

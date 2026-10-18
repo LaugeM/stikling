@@ -34,6 +34,8 @@ else
             </div>
         }
 
+        @if (offReason is null)
+        {
         <fieldset>
             <legend>What</legend>
             <div class="chip-row" role="group" aria-label="What comes back">
@@ -198,6 +200,11 @@ else
         {
             <p class="first-due">@firstDue</p>
         }
+        }
+        else
+        {
+            <p class="text-body-secondary">@offReason</p>
+        }
 
         @if (confirmingDelete)
         {
@@ -212,7 +219,10 @@ else
         else
         {
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Add interval" : "Save")</button>
+                @if (offReason is null)
+                {
+                    <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Add interval" : "Save")</button>
+                }
                 <a class="btn btn-link" href="@BackUrl">Cancel</a>
                 @if (!IsNew)
                 {
@@ -245,6 +255,7 @@ else
 
     private CareInterval? item;
     private bool notFound;
+    private string? offReason;
     private bool saving;
     private bool confirmingDelete;
     private List<string> errors = [];
@@ -282,7 +293,8 @@ else
         feeds = [.. (await FeedRepository.GetAllAsync()).Where(f => !string.IsNullOrWhiteSpace(f.Name))
             .OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)];
         // An own kind that counts as a watering can't be an interval
-        ownKinds = [.. (await OwnKindService.GetAllAsync()).Where(k => k.CountsAs != CareKind.Watered)];
+        var allOwn = await OwnKindService.GetAllAsync();
+        ownKinds = [.. allOwn.Where(k => k.CountsAs != CareKind.Watered)];
         careLogs = await CareLogRepository.GetAllAsync();
 
         if (IsNew)
@@ -306,6 +318,9 @@ else
 
         if (item is not null)
         {
+            offReason = CareIntervals.CountsAsWatering(item, CareLabels.Lookup(allOwn))
+                ? $"Off: {allOwn.First(k => k.Id == item.OwnKindId).Name} now counts as a watering. Watering stays with the watering reminder, so this interval does nothing. You can delete it."
+                : null;
             room = places.NameOf(item.PlaceId);
             partOfYear = item.HasMonths;
             fromMonth = item.FromMonth ?? 4;

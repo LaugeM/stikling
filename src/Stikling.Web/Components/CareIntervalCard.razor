@@ -10,7 +10,7 @@
                 <div class="care-label">@Group.Label</div>
                 <div class="care-meta">Done for @Labels.Plants(all.Items.Count)</div>
             </div>
-            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => UndoAsync(all)">Undo</button>
+            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => UndoAsync(all)">Undo</button>
         </div>
     }
     else
@@ -23,7 +23,7 @@
             </div>
             @if (!Coming && Remaining.Count >= 2)
             {
-                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="DoneForAllAsync">Done for all</button>
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="DoneForAllAsync">Done for all</button>
             }
         </div>
         <ul class="care-rows">

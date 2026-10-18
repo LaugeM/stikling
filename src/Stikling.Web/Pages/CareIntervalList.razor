@@ -68,6 +68,9 @@ else
             var feed = interval.FeedId is { } feedId && feeds.TryGetValue(feedId, out var found) ? found.Name : null;
             var title = CareIntervals.Label(interval.Kind, ownName, feed);
 
+            if (CareIntervals.CountsAsWatering(interval, CareLabels.Lookup(ownKinds.Values)))
+                return new Row(interval, title, $"Off: {ownName} now counts as a watering");
+
             var every = CareIntervals.EveryText(interval);
             var parts = new List<string> { char.ToUpperInvariant(every[0]) + every[1..] };
             if (CareIntervals.MonthsText(interval) is { } months)

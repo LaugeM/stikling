@@ -53,12 +53,51 @@ public static class CareIntervals
             .ToList();
     }
 
-    /// <summary>The intervals covering one plant, the one due first first.</summary>
-    public static IReadOnlyList<CareInterval> CoveringPlant(Plant plant, IEnumerable<CareInterval> intervals, Places places) =>
-        intervals
+    /// <summary>
+    /// The intervals covering one plant, the one due first first. A removed own kind or one that now
+    /// counts as a watering is left out, since such an interval is off.
+    /// </summary>
+    public static IReadOnlyList<CareInterval> CoveringPlant(
+        Plant plant, IEnumerable<CareInterval> intervals, Places places,
+        IEnumerable<CareLog> logs, IEnumerable<OwnCareKind> ownKinds, TimeProvider time)
+    {
+        var own = CareLabels.Lookup(ownKinds);
+        var mine = logs.Where(l => l.PlantId == plant.Id).ToList();
+        return intervals
             .Where(i => !i.IsDeleted && PlantsIn(i, [plant], places).Count > 0)
-            .OrderBy(i => i.CreatedAt)
+            .Select(i => Effective(i, own))
+            .OfType<CareInterval>()
+            .OrderBy(i => DueFor(i, plant, mine, time).Due)
+            .ThenBy(i => i.CreatedAt)
             .ToList();
+    }
+
+    /// <summary>
+    /// The interval as it works now. An interval of an own kind follows what the kind counts as today,
+    /// not what it counted as when the interval was made. Null when the kind is removed or now counts
+    /// as a watering, which an interval never covers.
+    /// </summary>
+    public static CareInterval? Effective(CareInterval interval, IReadOnlyDictionary<Guid, OwnCareKind> own)
+    {
+        if (interval.OwnKindId is not { } id)
+            return interval;
+        if (!own.TryGetValue(id, out var kind) || kind.LogKind == CareKind.Watered)
+            return null;
+
+        var copy = interval.Copy();
+        copy.Kind = kind.LogKind;
+        if (!copy.IsFeed)
+            copy.FeedId = null;
+        return copy;
+    }
+
+    /// <summary>Whether the interval's own kind now counts as a watering, so the interval is off.</summary>
+    public static bool CountsAsWatering(CareInterval interval, IReadOnlyDictionary<Guid, OwnCareKind> own) =>
+        interval.OwnKindId is { } id && own.TryGetValue(id, out var kind) && kind.LogKind == CareKind.Watered;
+
+    /// <summary>"18 Oct", or "18 Oct 2028" when it is not this year.</summary>
+    public static string DayText(DateOnly day, DateOnly today) =>
+        day.ToString(day.Year == today.Year ? "d MMM" : "d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
 
     /// <summary>The day plus the interval. AddMonths stops at the end of a short month, so 31 January plus a month is 28 February.</summary>
     public static DateOnly Add(DateOnly day, int every, IntervalUnit unit) => unit switch
@@ -147,11 +186,12 @@ public static class CareIntervals
         var liveFeeds = feeds.Where(f => !f.IsDeleted).GroupBy(f => f.Id).ToDictionary(g => g.Key, g => g.First());
 
         var all = new List<IntervalItem>();
-        foreach (var interval in intervals.Where(i => !i.IsDeleted && i.Validate().Count == 0))
+        foreach (var stored in intervals.Where(i => !i.IsDeleted))
         {
-            OwnCareKind? ownKind = null;
-            if (interval.OwnKindId is { } ownId && !own.TryGetValue(ownId, out ownKind))
+            // Follows what the own kind counts as now, and is left out when that is a watering
+            if (Effective(stored, own) is not { } interval || interval.Validate().Count > 0)
                 continue;
+            OwnCareKind? ownKind = interval.OwnKindId is { } ownId ? own[ownId] : null;
 
             Feed? feed = interval.FeedId is { } feedId && liveFeeds.TryGetValue(feedId, out var found) ? found : null;
             var label = Label(interval.Kind, ownKind?.Name, feed?.Name);
