@@ -15,6 +15,7 @@
 @inject PlantNameService Names
 @inject CollectionNumberService Numbering
 @inject OwnCareKindService OwnCareKinds
+@inject ICareIntervalRepository CareIntervalRepository
 
 <PageTitle>Settings · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -100,6 +101,7 @@
     </p>
     <div class="settings-rows mt-4">
         <SettingsRow Href="kinds-of-care" Title="Kinds of care" Detail="@KindsOfCareLine" />
+        <SettingsRow Href="care-intervals" Title="Care intervals" Detail="@CareIntervalsLine" />
         <SettingsRow Href="away" Title="Away and quiet time" Detail="Today stops asking while you're away or taking a break" />
     </div>
     <div class="form-check form-switch mt-4">
@@ -348,6 +350,7 @@
         roomCount = (await RoomService.GetAllAsync()).Count;
         tagCount = PlantTags.InUse(await Plants.GetAllAsync()).Count;
         ownKindCount = (await OwnCareKinds.GetAllAsync()).Count;
+        intervalCount = (await CareIntervalRepository.GetAllAsync()).Count;
     }
 
     private async Task SetEverydayLanguageAsync(EverydayNameLanguage language)
@@ -423,6 +426,10 @@
 
     /// <summary>"3 rooms, 5 tags", for the line under the link to rooms and tags.</summary>
     private int ownKindCount;
+    private int intervalCount;
+
+    private string CareIntervalsLine =>
+        intervalCount == 0 ? "Feeding, repotting and the like, coming back on Today" : Labels.Count(intervalCount, "interval");
 
     private string KindsOfCareLine =>
         ownKindCount == 0 ? "Add your own, like misted or bottom watered" : $"{ownKindCount} of your own";

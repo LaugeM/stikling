@@ -27,6 +27,7 @@ public static class Stores
     public const string Wishes = "wishes";
     public const string Sellers = "sellers";
     public const string OwnCareKinds = "ownCareKinds";
+    public const string CareIntervals = "careIntervals";
     public const string PropagationCareLogs = "propagationCareLogs";
     public const string Settings = "settings";
     public const string PutOffs = "putOffs";

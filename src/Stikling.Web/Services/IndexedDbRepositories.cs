@@ -154,6 +154,12 @@ public sealed class IndexedDbOwnCareKindRepository(IndexedDb db, TimeProvider ti
     protected override IReadOnlyList<string> Validate(OwnCareKind kind) => kind.Validate();
 }
 
+public sealed class IndexedDbCareIntervalRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<CareInterval>(db, time, Stores.CareIntervals), ICareIntervalRepository
+{
+    protected override IReadOnlyList<string> Validate(CareInterval interval) => interval.Validate();
+}
+
 public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<PropagationCareLog>(db, time, Stores.PropagationCareLogs), IPropagationCareLogRepository
 {

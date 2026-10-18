@@ -44,6 +44,7 @@ public sealed class BackupData
     public List<Wish> Wishes { get; set; } = [];
     public List<Seller> Sellers { get; set; } = [];
     public List<OwnCareKind> OwnCareKinds { get; set; } = [];
+    public List<CareInterval> CareIntervals { get; set; } = [];
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the
@@ -75,7 +76,8 @@ public sealed class BackupData
         ProblemUpdates.Count(u => !u.IsDeleted),
         Wishes.Count(w => !w.IsDeleted),
         Sellers.Count(s => !s.IsDeleted),
-        OwnCareKinds.Count(k => !k.IsDeleted));
+        OwnCareKinds.Count(k => !k.IsDeleted),
+        CareIntervals.Count(i => !i.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -104,4 +106,5 @@ public sealed record BackupCounts(
     int ProblemUpdates,
     int Wishes,
     int Sellers,
-    int OwnCareKinds);
+    int OwnCareKinds,
+    int CareIntervals);

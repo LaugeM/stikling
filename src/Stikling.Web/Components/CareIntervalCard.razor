@@ -1,0 +1,160 @@
+@* One card on Today for the plants due the same care from an interval: what it is, how often, and a row
+   for each plant with a tick and a way to put it off. Done and Undo are handled by the page. *@
+
+<section class="care-card @(Coming ? "coming" : null)" aria-label="@Group.Label">
+    @if (AllDone is { } all)
+    {
+        <div class="care-head">
+            <span class="care-tile" aria-hidden="true">@Icon</span>
+            <div class="care-head-text">
+                <div class="care-label">@Group.Label</div>
+                <div class="care-meta">Done for @Labels.Plants(all.Items.Count)</div>
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => UndoAsync(all)">Undo</button>
+        </div>
+    }
+    else
+    {
+        <div class="care-head">
+            <span class="care-tile" aria-hidden="true">@Icon</span>
+            <div class="care-head-text">
+                <div class="care-label">@Group.Label</div>
+                <div class="care-meta">@Labels.Plants(Group.Items.Count) · @CareIntervals.EveryText(Group.Interval)</div>
+            </div>
+            @if (!Coming && Remaining.Count >= 2)
+            {
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="DoneForAllAsync">Done for all</button>
+            }
+        </div>
+        <ul class="care-rows">
+            @foreach (var item in Shown)
+            {
+                if (ActionOf(item) is { } action)
+                {
+                    <li @key="item.Plant.Id" class="care-row-done">
+                        <span class="care-done-name">@item.Plant.DisplayName</span>
+                        <span class="care-done-text">Done</span>
+                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                aria-label="@($"Undo {Group.Label} for {item.Plant.DisplayName}")"
+                                @onclick="() => UndoAsync(action)">Undo</button>
+                    </li>
+                }
+                else
+                {
+                    <TodayRow @key="item.Plant.Id" DoneLabel="@($"{Group.Label} done")" OnDone="() => DoneAsync(item)"
+                              OnPutOff="days => PutOffAsync(item, days)">
+                        <a class="item-card" href="plants/@item.Plant.Id">
+                            <SubjectThumb Subject="item.Plant" />
+                            <div class="item-text">
+                                <div class="item-name">@item.Plant.DisplayName</div>
+                                <div class="item-meta">
+                                    <span>@RowMeta(item)</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            }
+        </ul>
+        @if (Group.Items.Count > Preview && !showAll)
+        {
+            <button type="button" class="btn btn-link btn-sm link-action care-show-all" @onclick="() => showAll = true">Show all @Group.Items.Count</button>
+        }
+    }
+</section>
+
+@code {
+    private const int Preview = 5;
+
+    [Parameter, EditorRequired]
+    public required IntervalGroup Group { get; set; }
+
+    [Parameter, EditorRequired]
+    public DateOnly Today { get; set; }
+
+    /// <summary>A card under Coming up: muted, and without Done for all.</summary>
+    [Parameter]
+    public bool Coming { get; set; }
+
+    /// <summary>What has been logged from here since the page loaded, by interval and plant.</summary>
+    [Parameter, EditorRequired]
+    public required IReadOnlyDictionary<(Guid Interval, Guid Plant), CareAction> Done { get; set; }
+
+    [Parameter]
+    public EventCallback<CareLogRequest> OnLog { get; set; }
+
+    [Parameter]
+    public EventCallback<CareAction> OnUndo { get; set; }
+
+    [Parameter]
+    public EventCallback<CarePutOffRequest> OnPutOff { get; set; }
+
+    private bool showAll;
+    private bool busy;
+
+    private CareAction? ActionOf(IntervalItem item) =>
+        Done.TryGetValue((item.Interval.Id, item.Plant.Id), out var action) ? action : null;
+
+    private IEnumerable<IntervalItem> Shown => showAll ? Group.Items : Group.Items.Take(Preview);
+
+    private List<IntervalItem> Remaining => Group.Items.Where(i => ActionOf(i) is null).ToList();
+
+    // The whole card turns into a Done state when everything in it was done in one tap
+    private CareAction? AllDone =>
+        Group.Items.All(i => ActionOf(i) is not null)
+            ? Group.Items.Select(ActionOf).FirstOrDefault(a => a is { All: true })
+            : null;
+
+    private string RowMeta(IntervalItem item)
+    {
+        var last = item.Last is { } day ? $"last {Labels.DaysAgo(Today.DayNumber - day.DayNumber)}" : "first time";
+        if (!Coming)
+            return last;
+
+        var days = item.Due.DayNumber - Today.DayNumber;
+        var due = days <= 0 ? "due today" : days == 1 ? "due tomorrow" : $"due in {days} days";
+        return $"{due} · {last}";
+    }
+
+    private RenderFragment Icon => __builder =>
+    {
+        <svg viewBox="0 0 24 24">
+            @if (Group.Kind == CareKind.Repotted)
+            {
+                <path d="M5 9h14l-1.5 10h-11Z" /><path d="M4 9h16" /><path d="M12 9V4" />
+            }
+            else if (Group.Kind == CareKind.Fertilised)
+            {
+                <path d="M12 3c3 3.5 5 6 5 9a5 5 0 0 1-10 0c0-3 2-5.5 5-9Z" /><path d="M12 15v-4" />
+            }
+            else
+            {
+                <path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" />
+            }
+        </svg>;
+    };
+
+    private Task DoneAsync(IntervalItem item) =>
+        RunAsync(() => OnLog.InvokeAsync(new CareLogRequest(Group, [item], false)));
+
+    private Task DoneForAllAsync() =>
+        RunAsync(() => OnLog.InvokeAsync(new CareLogRequest(Group, Remaining, true)));
+
+    private Task UndoAsync(CareAction action) => RunAsync(() => OnUndo.InvokeAsync(action));
+
+    private Task PutOffAsync(IntervalItem item, int days) =>
+        RunAsync(() => OnPutOff.InvokeAsync(new CarePutOffRequest(item, days)));
+
+    private async Task RunAsync(Func<Task> action)
+    {
+        busy = true;
+        try
+        {
+            await action();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

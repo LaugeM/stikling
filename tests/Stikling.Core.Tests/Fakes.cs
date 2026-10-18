@@ -577,6 +577,32 @@ internal sealed class FakeTreatmentRecipeRepository : ITreatmentRecipeRepository
     }
 }
 
+internal sealed class FakeCareIntervalRepository : ICareIntervalRepository
+{
+    public Dictionary<Guid, CareInterval> Intervals { get; } = [];
+
+    public Task<IReadOnlyList<CareInterval>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<CareInterval>>(Intervals.Values.Where(i => !i.IsDeleted).ToList());
+
+    public Task<CareInterval?> GetAsync(Guid id) =>
+        Task.FromResult(Intervals.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
+
+    public Task SaveAsync(CareInterval interval)
+    {
+        if (interval.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        Intervals[interval.Id] = interval;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Intervals.TryGetValue(id, out var item))
+            item.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakePestCaseRepository : IPestCaseRepository
 {
     public Dictionary<Guid, PestCase> Cases { get; } = [];

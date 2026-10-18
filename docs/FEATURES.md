@@ -40,11 +40,10 @@ In the order I would build them, with the ones that belong together built togeth
 The people on Reddit who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. The order after the demo plant is picked for them.
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. It is built in a draft pull request that is waiting on photos of a coleus at each stage. The posts on Reddit come once it is in.
-2. **Care that comes back by itself**: **Your own kinds of care**, **care intervals** for feeding, repotting and prevention (not watering) with what is due on Today, and **A treatment plan with steps**.
-3. **Room for what a spreadsheet holds**: **Your own fields**, with filtering and sorting by them and a fixed set of choices, so the columns Import from a spreadsheet can't match get a field of their own instead of going into About it. **How it was raised** goes with them, since collectors keep nursery grown, tissue culture and seed grown apart.
-4. **Notifications**, once care intervals are in, so what comes back by itself reaches someone who doesn't open the app every day. One list a day at a time they choose, and never a reminder to water.
-5. **A big collection at a glance**: **Group the plant list by genus** with an A to Z jump, and **The collection at a glance**.
-6. **What is in a pot**: **More than one plant in a pot**, and the **Soil to semi-hydro transition tracker**.
+2. **Room for what a spreadsheet holds**: **Your own fields**, with filtering and sorting by them and a fixed set of choices, so the columns Import from a spreadsheet can't match get a field of their own instead of going into About it. **How it was raised** goes with them, since collectors keep nursery grown, tissue culture and seed grown apart.
+3. **Notifications**, once care intervals are in, so what comes back by itself reaches someone who doesn't open the app every day. One list a day at a time they choose, and never a reminder to water.
+4. **A big collection at a glance**: **Group the plant list by genus** with an A to Z jump, and **The collection at a glance**.
+5. **What is in a pot**: **More than one plant in a pot**, and the **Soil to semi-hydro transition tracker**.
 
 ### Cheap ones to slot in whenever
 
@@ -244,7 +243,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | **Your own kinds of care**: add a kind of care the app doesn't have, e.g. misted, bottom watered, wired or refilled the humidifier, from the care sheet or under Settings, Kinds of care. It is logged like the others, also on several plants at once. Each kind counts as a watering, a feed or neither, so a bottom watering reaches the watering reminder and last watered, and can go on the plant's history. Stored in fields of its own on the entry rather than as a new kind in the list, so older versions still read it (as Rotated) | 4 | M | v1.x |
 | ☐ | Water type: tap, demineralised, rain | 6 | S | v1.x |
 | ☐ | Semi-hydro details: reservoir level, flush interval, last flush | 6 | M | v1.x |
-| ☐ | Optional care intervals per plant ("fertilise every 2 weeks") that show up on Today. An interval can be in days, weeks, months or years, for repotting, and can be limited to part of the year, e.g. fertilise from April to October. The same can set up a recurring pest prevention, like a systemic treatment every eight weeks | 4 | M | v1.x |
+| ✅ | **Care intervals**: care that comes back by itself, like fertilise every 2 weeks from April to October, repot every 2 years, or an own kind of care every 8 weeks. Set in days, weeks, months or years, for the whole collection, a room, a tag or picked plants, and limited to part of the year if wanted. Today lists what is due grouped by kind, with one tap to log it for a plant or all. Feeding stops while a plant is dormant, round days gather it, and watering is never on an interval because the watering reminder learns it | 4 | M | v1.x |
 | ✅ | **Nutrient dose calculator**: fill in the water on a feed or a top-up, in litres or millilitres, and each product shows how much to add | 7 | S | v1.x |
 | ☐ | Harvest log for herbs (basil, parsley): date and amount | 7 | S | v1.x |
 | ✅ | **Flowering log** (orchid, peace lily, hoya): under More on a plant's page, mark spike or buds, in flower and done, on any day up to today. Each goes on the history, with the chance to add a photo. A flowering from the past can be added with a month or a year. A badge shows in the lists while a plant is in bud or in flower, and drops after four months without a mark, when the page asks "Still in flower?". The page lists the flowerings by year and, after two years, says when the plant usually starts, e.g. by April, and says so if nothing has started yet this year. A flowering calendar, from a link on the Plants page, shows what is in flower now, what usually flowers next month and the whole year by month, from your own records. It stays off Today and only says when, never what to do about it | 3 | M | v1.x |
@@ -369,7 +368,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Put A year ago today above Worth a look** on the days it shows, since it is the part people share | 3 | S | v1.x |
 | ✅ | **Move What a plant has given under the plant's name** instead of behind Details, so cuttings taken, rooted and passed on show first | 3 | S | v1.x |
 | ☐ | **Today in your calendar**: a private link to add to any calendar app, which then shows what is due. It works on every phone and in every browser without notifications, and turning it off makes the old link stop working | 8 | L | v2 |
-| ☐ | Care intervals due (if set) | 4 | S | v1.x |
+| ✅ | Care intervals due (if set) | 4 | S | v1.x |
 | ☐ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |
 
 ## 7. Data, backup & settings
