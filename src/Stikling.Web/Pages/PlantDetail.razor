@@ -5,6 +5,7 @@
 @inject CoverPhotos Covers
 @inject IPropagationRepository PropagationRepository
 @inject ICareLogRepository CareLogRepository
+@inject IOwnCareKindRepository OwnKindRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject IPestTreatmentRepository PestTreatmentRepository
 @inject FloweringService FloweringService
@@ -671,7 +672,7 @@ else
                     {
                         <li id="entry-@entry.Id">
                             <div class="care-entry">
-                                <span class="care-what">@CareService.Describe(entry, Labels.For)</span>
+                                <span class="care-what">@CareService.Describe(entry, Labels.For, ownKindLookup)</span>
                                 <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
                             </div>
                         </li>
@@ -1073,6 +1074,7 @@ else
     private IReadOnlyList<CareLog> care = [];
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
     private LastCare? lastWater;
+    private IReadOnlyDictionary<Guid, OwnCareKind> ownKindLookup = new Dictionary<Guid, OwnCareKind>();
     private MoistureReading? moisture;
     private CareCalendar? careCalendar;
     private IReadOnlyList<PestCase> pests = [];
@@ -1476,6 +1478,7 @@ else
 
         var all = await CareLogRepository.GetAllAsync();
         care = CareSummary.For(all, plant.Id);
+        ownKindLookup = CareLabels.Lookup(await OwnKindRepository.GetAllAsync());
         // Always show the headline kinds, even the ones never done, so "never flushed" is visible
         // Water comes first in the way the plant gets it now (watered, or refilled and topped up),
         // and the other way only when it has been logged, e.g. waterings from before a self-watering pot

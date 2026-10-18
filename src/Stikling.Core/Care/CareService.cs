@@ -20,6 +20,7 @@ public sealed class CareService(
     IPlantRepository plants,
     IFeedRepository feeds,
     IProductRepository products,
+    IOwnCareKindRepository ownKinds,
     TimeProvider time)
 {
     private DateOnly Today => time.Today();
@@ -63,7 +64,9 @@ public sealed class CareService(
         Feed? feed = null,
         decimal? waterLitres = null,
         decimal? ec = null,
-        decimal? ph = null)
+        decimal? ph = null,
+        Guid? ownKindId = null,
+        string? ownKindName = null)
     {
         var used = Tidy(products);
         var entries = plantIds
@@ -81,6 +84,8 @@ public sealed class CareService(
                 WaterLitres = waterLitres,
                 Ec = ec,
                 Ph = ph,
+                OwnKindId = ownKindId,
+                OwnKindName = ownKindId is null ? null : Clean(ownKindName),
                 Notes = Clean(notes)
             })
             .ToList();
@@ -252,9 +257,10 @@ public sealed class CareService(
     /// "Repotted", "Watered: rainwater", "Fertilised: Hydro fertiliser, 2 ml/L · half strength"
     /// or "Fertilised with Aroid feed (2 L): Silica, 0.5 ml/L + Hydro fertiliser, 2 ml/L".
     /// </summary>
-    public static string Describe(CareLog entry, Func<Enum, string> label)
+    public static string Describe(CareLog entry, Func<Enum, string> label,
+        IReadOnlyDictionary<Guid, OwnCareKind>? ownKinds = null)
     {
-        var what = label(entry.Kind);
+        var what = CareLabels.For(entry, ownKinds, label);
         if (entry.Kind == CareKind.MoistureReading && entry.Moisture is { } moisture)
             what = $"{what}: {moisture}/10";
         if (Clean(entry.FeedName) is { } feed)
@@ -285,18 +291,26 @@ public sealed class CareService(
     private static string Join(string line, string? readings) =>
         readings is null ? line : $"{line} · {readings}";
 
-    private Task RecordAsync(CareLog entry, Func<Enum, string> label)
+    private async Task RecordAsync(CareLog entry, Func<Enum, string> label)
     {
-        if (!CareKinds.IsNotable(entry.Kind))
-            return Task.CompletedTask;
+        IReadOnlyDictionary<Guid, OwnCareKind>? own = null;
+        var onHistory = false;
+        if (entry.OwnKindId is { } ownId)
+        {
+            own = CareLabels.Lookup(await ownKinds.GetAllAsync());
+            onHistory = own.TryGetValue(ownId, out var kind) && kind.OnHistory;
+        }
 
-        return timeline.AddAsync(new TimelineEntry
+        if (!CareKinds.IsNotable(entry.Kind) && !onHistory)
+            return;
+
+        await timeline.AddAsync(new TimelineEntry
         {
             SubjectType = SubjectType.Plant,
             SubjectId = entry.PlantId,
             Kind = TimelineKind.Change,
             OccurredAt = time.MomentOn(entry.OccurredOn),
-            Text = Describe(entry, label)
+            Text = Describe(entry, label, own)
         });
     }
 

@@ -362,7 +362,7 @@ public class WateringPassTests
         public CareService Care { get; }
 
         public Saving() =>
-            Care = new CareService(Logs, Timeline, Plants, Feeds, Products, Time);
+            Care = new CareService(Logs, Timeline, Plants, Feeds, Products, new FakeOwnCareKindRepository(), Time);
     }
 
     [Fact]

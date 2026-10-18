@@ -120,6 +120,35 @@ internal sealed class FakeCareLogRepository : ICareLogRepository
     }
 }
 
+internal sealed class FakeOwnCareKindRepository : IOwnCareKindRepository
+{
+    public Dictionary<Guid, OwnCareKind> Kinds { get; } = [];
+
+    public Task<IReadOnlyList<OwnCareKind>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<OwnCareKind>>(Kinds.Values.Where(k => !k.IsDeleted).ToList());
+
+    public Task<IReadOnlyList<OwnCareKind>> GetStoredAsync() =>
+        Task.FromResult<IReadOnlyList<OwnCareKind>>(Kinds.Values.ToList());
+
+    public Task<OwnCareKind?> GetAsync(Guid id) =>
+        Task.FromResult(Kinds.TryGetValue(id, out var kind) && !kind.IsDeleted ? kind : null);
+
+    public Task SaveAsync(OwnCareKind kind)
+    {
+        if (kind.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        Kinds[kind.Id] = kind;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Kinds.TryGetValue(id, out var kind))
+            kind.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakePropagationCareLogRepository : IPropagationCareLogRepository
 {
     public List<PropagationCareLog> Logs { get; } = [];

@@ -145,6 +145,15 @@ public sealed class IndexedDbSellerRepository(IndexedDb db, TimeProvider time)
     protected override IReadOnlyList<string> Validate(Seller seller) => seller.Validate();
 }
 
+public sealed class IndexedDbOwnCareKindRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<OwnCareKind>(db, time, Stores.OwnCareKinds), IOwnCareKindRepository
+{
+    // Deleted kinds are kept in the list so a removed name can be brought back
+    async Task<IReadOnlyList<OwnCareKind>> IOwnCareKindRepository.GetStoredAsync() => await GetStoredAsync();
+
+    protected override IReadOnlyList<string> Validate(OwnCareKind kind) => kind.Validate();
+}
+
 public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<PropagationCareLog>(db, time, Stores.PropagationCareLogs), IPropagationCareLogRepository
 {

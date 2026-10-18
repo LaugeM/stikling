@@ -1,5 +1,6 @@
 @* Logging care. Used on one plant from its page, and on several at once from the plants list. *@
 @inject CareService CareService
+@inject OwnCareKindService OwnKindService
 @inject ILogger<CareSheet> Logger
 @inject IProductRepository ProductRepository
 @inject IFeedRepository FeedRepository
@@ -14,11 +15,21 @@
     <div class="row g-2">
         <div class="col-7">
             <label class="form-label" for="care-kind">What you did</label>
-            <select id="care-kind" class="form-select form-select-sm" @bind="kind" @bind:after="KindChanged">
+            <select id="care-kind" class="form-select form-select-sm" @bind="choice" @bind:after="ChoiceChanged">
                 @foreach (var value in Enum.GetValues<CareKind>())
                 {
                     <option value="@value">@KindLabel(value)</option>
                 }
+                @if (ownKinds.Count > 0)
+                {
+                    <optgroup label="Your own">
+                        @foreach (var item in ownKinds)
+                        {
+                            <option value="@(OwnPrefix + item.Id)">@item.Name</option>
+                        }
+                    </optgroup>
+                }
+                <option value="@AddChoice">Add your own…</option>
             </select>
         </div>
         <div class="col-5">
@@ -28,6 +39,17 @@
                    @onchange="DateChanged" />
         </div>
     </div>
+
+    @if (adding)
+    {
+        <div class="mt-2 own-kind-add">
+            <OwnKindFields Prefix="care-own" @bind-Name="newName" @bind-CountsAs="newCountsAs" @bind-OnHistory="newOnHistory" />
+            <div class="care-actions">
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(newName))" @onclick="AddKindAsync">Add</button>
+                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CancelAdd">Cancel</button>
+            </div>
+        </div>
+    }
 
     @if (kind == CareKind.MoistureReading)
     {
@@ -151,7 +173,20 @@
     [Parameter]
     public WateringForm? Form { get; set; }
 
+    private const string OwnPrefix = "own:";
+    private const string AddChoice = "add";
+
+    // What the select shows: a built-in kind's name, "own:" and the id of one of your own, or "add"
+    private string choice = nameof(CareKind.Watered);
+    private string previousChoice = nameof(CareKind.Watered);
+    // What is logged. An own kind of care is the kind it counts as, so the sheet behaves like it.
     private CareKind kind = CareKind.Watered;
+    private OwnCareKind? own;
+    private IReadOnlyList<OwnCareKind> ownKinds = [];
+    private bool adding;
+    private string newName = "";
+    private CareKind? newCountsAs;
+    private bool newOnHistory;
     private DateOnly occurredOn;
     private int? moisture;
     private IReadOnlyList<Product> products = [];
@@ -190,13 +225,70 @@
     {
         occurredOn = Today;
         if (Form is { } form)
+        {
             kind = WateringForms.DoneKind(form);
+            choice = previousChoice = kind.ToString();
+        }
+        ownKinds = await OwnKindService.GetAllAsync();
         products =(await ProductRepository.GetAllAsync())
             .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
         feeds = (await FeedRepository.GetAllAsync())
             .OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
+    }
+
+    private void ChoiceChanged()
+    {
+        if (choice == AddChoice)
+        {
+            adding = true;
+            return;
+        }
+
+        adding = false;
+        own = choice.StartsWith(OwnPrefix, StringComparison.Ordinal) && Guid.TryParse(choice[OwnPrefix.Length..], out var id)
+            ? ownKinds.FirstOrDefault(k => k.Id == id)
+            : null;
+        if (own is not null)
+            kind = own.LogKind;
+        else if (Enum.TryParse<CareKind>(choice, out var builtIn))
+            kind = builtIn;
+        else
+            choice = nameof(CareKind.Watered);
+        previousChoice = choice;
+        KindChanged();
+    }
+
+    private void CancelAdd()
+    {
+        adding = false;
+        choice = previousChoice;
+    }
+
+    private async Task AddKindAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            var added = await OwnKindService.AddAsync(newName, newCountsAs, newOnHistory);
+            ownKinds = await OwnKindService.GetAllAsync();
+            newName = "";
+            newCountsAs = null;
+            newOnHistory = false;
+            choice = OwnPrefix + added.Id;
+            ChoiceChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding a kind of care failed");
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     // Only a moisture reading carries a number, and only a feed has products, so clear them when switching away
@@ -262,7 +354,7 @@
         try
         {
             await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, e => e is CareKind k ? KindLabel(k) : Labels.For(e), moisture, doses,
-                feed, water > 0 ? water : null, ec, ph);
+                feed, water > 0 ? water : null, ec, ph, own?.Id, own?.Name);
             notes = null;
             moisture = null;
             doses.Clear();

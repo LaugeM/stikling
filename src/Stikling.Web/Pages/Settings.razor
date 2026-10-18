@@ -14,6 +14,7 @@
 @inject SyncRunner Sync
 @inject PlantNameService Names
 @inject CollectionNumberService Numbering
+@inject OwnCareKindService OwnCareKinds
 
 <PageTitle>Settings · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -98,6 +99,7 @@
         Learns how often each plant gets water and asks you to check it when it's probably dry. It says nothing about a plant until it has seen a few waterings.
     </p>
     <div class="settings-rows mt-4">
+        <SettingsRow Href="kinds-of-care" Title="Kinds of care" Detail="@KindsOfCareLine" />
         <SettingsRow Href="away" Title="Away and quiet time" Detail="Today stops asking while you're away or taking a break" />
     </div>
     <div class="form-check form-switch mt-4">
@@ -345,6 +347,7 @@
         everydayLanguage = await Names.GetEverydayLanguageAsync();
         roomCount = (await RoomService.GetAllAsync()).Count;
         tagCount = PlantTags.InUse(await Plants.GetAllAsync()).Count;
+        ownKindCount = (await OwnCareKinds.GetAllAsync()).Count;
     }
 
     private async Task SetEverydayLanguageAsync(EverydayNameLanguage language)
@@ -419,6 +422,11 @@
     }
 
     /// <summary>"3 rooms, 5 tags", for the line under the link to rooms and tags.</summary>
+    private int ownKindCount;
+
+    private string KindsOfCareLine =>
+        ownKindCount == 0 ? "Add your own, like misted or bottom watered" : $"{ownKindCount} of your own";
+
     private string RoomsAndTagsLine =>
         (roomCount, tagCount) switch
         {

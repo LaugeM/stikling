@@ -23,7 +23,7 @@ public class SpreadsheetImportServiceTests
         var time = new FixedTime(Now);
         service = new SpreadsheetImportService(
             new PlantService(plants, timeline, time),
-            new CareService(logs, timeline, plants, new FakeFeedRepository(), new FakeProductRepository(), time),
+            new CareService(logs, timeline, plants, new FakeFeedRepository(), new FakeProductRepository(), new FakeOwnCareKindRepository(), time),
             new RoomService(places, plants, new FakePropagationRepository()),
             plants,
             logs,
@@ -119,7 +119,7 @@ public class SpreadsheetImportServiceTests
         var time = new FixedTime(Now);
         var broken = new SpreadsheetImportService(
             new PlantService(failing, timeline, time),
-            new CareService(logs, timeline, plants, new FakeFeedRepository(), new FakeProductRepository(), time),
+            new CareService(logs, timeline, plants, new FakeFeedRepository(), new FakeProductRepository(), new FakeOwnCareKindRepository(), time),
             new RoomService(places, plants, new FakePropagationRepository()),
             plants, logs, time);
 

@@ -1,0 +1,65 @@
+@* The fields of one of your own kinds of care: its name, what it counts as, and whether it goes on the history.
+   Used inline in the care sheet and in the sheet on the Kinds of care page. *@
+
+<div class="mb-2">
+    <label class="form-label" for="@(Prefix)-name">Name</label>
+    <input id="@(Prefix)-name" class="form-control form-control-sm" placeholder="e.g. Misted" autocomplete="off"
+           maxlength="60" value="@Name" @oninput="NameInput" />
+</div>
+
+<div class="mb-2">
+    <div class="form-label" id="@(Prefix)-counts">Counts as</div>
+    <div class="chip-row" role="group" aria-labelledby="@(Prefix)-counts">
+        @foreach (var (value, text) in choices)
+        {
+            var picked = CountsAs == value;
+            <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                    @onclick="() => PickAsync(value)">@text</button>
+        }
+    </div>
+    <div class="form-text">
+        A watering counts for the watering reminder and last watered. A feed can have products and an EC or pH reading.
+    </div>
+</div>
+
+<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="@(Prefix)-history"
+           checked="@OnHistory" @onchange="HistoryChanged" />
+    <label class="form-check-label" for="@(Prefix)-history">Put it on the plant's history</label>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Prefix { get; set; } = "own-kind";
+
+    [Parameter]
+    public string Name { get; set; } = "";
+
+    [Parameter]
+    public EventCallback<string> NameChanged { get; set; }
+
+    [Parameter]
+    public CareKind? CountsAs { get; set; }
+
+    [Parameter]
+    public EventCallback<CareKind?> CountsAsChanged { get; set; }
+
+    [Parameter]
+    public bool OnHistory { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnHistoryChanged { get; set; }
+
+    private static readonly (CareKind? Value, string Text)[] choices =
+    [
+        (null, "Neither"),
+        (CareKind.Watered, "Watering"),
+        (CareKind.Fertilised, "Feed")
+    ];
+
+    private Task NameInput(ChangeEventArgs e) => NameChanged.InvokeAsync(e.Value?.ToString() ?? "");
+
+    private Task PickAsync(CareKind? value) => CountsAsChanged.InvokeAsync(value);
+
+    private Task HistoryChanged(ChangeEventArgs e) => OnHistoryChanged.InvokeAsync(e.Value is true);
+}

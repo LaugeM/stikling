@@ -18,7 +18,7 @@ public class CareTests
 
     public CareTests()
     {
-        service = new CareService(logs, timeline, new FakePlantRepository(), new FakeFeedRepository(), new FakeProductRepository(), new FixedTime(Now));
+        service = new CareService(logs, timeline, new FakePlantRepository(), new FakeFeedRepository(), new FakeProductRepository(), new FakeOwnCareKindRepository(), new FixedTime(Now));
     }
 
     private static string Label(Enum value) => value switch
