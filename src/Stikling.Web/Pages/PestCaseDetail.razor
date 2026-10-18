@@ -7,6 +7,8 @@
 @using Stikling.Core.Settings
 @inject RoomService RoomService
 @inject NavigationManager Navigation
+@inject ITreatmentPlanRepository PlanRepository
+@inject PutOffService PutOffService
 @inject TimeProvider Time
 
 <PageTitle>@(view is null ? "Pest case" : Labels.For(view.Case.Pest)) · Stikling</PageTitle>
@@ -55,6 +57,19 @@ else
             @* Pests seen again: back to treating, with the treatment sheet ready *@
             <button type="button" class="btn btn-outline-primary" @onclick="FoundSomeAsync">Found some</button>
         }
+        @if (view.Case.Status == PestCaseStatus.Active && !view.Case.PlanRunning)
+        {
+            @if (plans.Count > 0)
+            {
+                <button type="button" class="btn btn-outline-primary" @onclick="ToggleFollowing">
+                    @(following ? "Close" : "Follow a plan")
+                </button>
+            }
+            else
+            {
+                <a class="btn btn-outline-primary" href="treatment-plans">Make a treatment plan</a>
+            }
+        }
         <a class="btn btn-outline-primary" href="pests/@view.Case.Id/edit">Edit</a>
     </div>
 
@@ -78,12 +93,116 @@ else
         </section>
     }
 
+    @if (following && plans.Count > 0 && view.Case.Status == PestCaseStatus.Active && !view.Case.PlanRunning)
+    {
+        <section class="detail-card">
+            <h2>Follow a plan</h2>
+            <div class="chip-row mb-2" role="group" aria-label="Treatment plans">
+                @foreach (var plan in plans)
+                {
+                    <button type="button" class="chip @(pickedPlan == plan.Id ? "picked" : null)"
+                            aria-pressed="@(pickedPlan == plan.Id ? "true" : "false")"
+                            @onclick="() => pickedPlan = plan.Id">@plan.Name</button>
+                }
+            </div>
+            @if (plans.FirstOrDefault(p => p.Id == pickedPlan) is { } chosen)
+            {
+                <div class="form-text mb-2">@chosen.Summary()</div>
+            }
+            <div class="mb-2">
+                <label class="form-label" for="plan-start">Start on</label>
+                <input type="date" id="plan-start" class="form-control form-control-sm plan-date"
+                       min="@view.Case.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")"
+                       value="@planStart.ToString("yyyy-MM-dd")" @onchange="PlanStartChanged" />
+            </div>
+            <div class="care-actions">
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || pickedPlan is null)" @onclick="StartPlanAsync">Start the plan</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => following = false">Cancel</button>
+            </div>
+        </section>
+    }
+
     @if (logging && view.Case.IsOpen)
     {
         <section class="detail-card">
             <h2>@(view.IsCheck ? "Log check" : "Log treatment")</h2>
-            <TreatmentSheet @key="view.Case.Status" Case="view.Case" Existing="treatments" Check="view.IsCheck"
+            <TreatmentSheet @key="@((view.Case.Status, view.Step?.Id))" Case="view.Case" Existing="treatments" Check="view.IsCheck"
+                            Step="@(view.Case.PlanRunning ? view.Step : null)"
                             OnLogged="LoggedAsync" OnCancel="() => logging = false" />
+        </section>
+    }
+
+    @if (view.Case.PlanStartedOn is not null && view.Case.PlanSteps.Count > 0)
+    {
+        <section class="detail-card">
+            <h2>Plan: @view.Case.PlanName</h2>
+            <ol class="plan-progress">
+                @for (var i = 0; i < view.Case.PlanSteps.Count; i++)
+                {
+                    var step = view.Case.PlanSteps[i];
+                    var current = view.Step?.Id == step.Id;
+                    var done = PlanProgress.ForStep(view.Case, treatments, step.Id);
+                    <li class="plan-progress-step @(current ? "current" : null)">
+                        <div class="plan-progress-line">
+                            <span class="plan-progress-what">@StepName(step)</span>
+                            <span class="plan-progress-when">@StepWhen(step, i, current, done)</span>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(step.Notes))
+                        {
+                            <div class="plan-progress-note">@step.Notes</div>
+                        }
+                        @if (current)
+                        {
+                            @if (movingStep == step.Id)
+                            {
+                                <div class="plan-move">
+                                    <label class="form-label" for="plan-move-day">Move to</label>
+                                    <input type="date" id="plan-move-day" class="form-control form-control-sm plan-date"
+                                           min="@Today.ToString("yyyy-MM-dd")" value="@moveTo.ToString("yyyy-MM-dd")"
+                                           @onchange="MoveToChanged" />
+                                </div>
+                                <div class="care-actions">
+                                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="() => MoveStepAsync(step)">Move</button>
+                                    <button type="button" class="btn btn-link btn-sm" @onclick="() => movingStep = null">Cancel</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="care-actions">
+                                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="StartLogStep">Log</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => SkipStepAsync(step)">Skip</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => StartMove(step)">Move</button>
+                                </div>
+                            }
+                        }
+                    </li>
+                }
+            </ol>
+
+            @if (view.PlanDoneOn is { } doneOn)
+            {
+                <p class="plan-progress-note">
+                    That was the last step. @(view.PlanDone ? "Today asks" : $"From {Labels.Date(doneOn)} Today asks") whether to start watching the case.
+                </p>
+            }
+            else if (view.Case.PlanStoppedOn is { } stopped)
+            {
+                <p class="plan-progress-note">Stopped @Labels.Date(stopped). The case goes on at its interval.</p>
+            }
+
+            @if (view.Case.PlanRunning)
+            {
+                @if (confirmStop)
+                {
+                    <p class="mb-2">Stop the plan? The case goes on at its interval of @Labels.Count(view.Case.IntervalDays, "day"), and what's logged stays.</p>
+                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="StopPlanAsync">Stop the plan</button>
+                    <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmStop = false">Cancel</button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => confirmStop = true">Stop the plan</button>
+                }
+            }
         </section>
     }
 
@@ -97,6 +216,11 @@ else
                 <dt>Checking</dt>
                 <dd>Every @Labels.Count(PestService.CheckEveryDays, "day")</dd>
             }
+            else if (view.Case.PlanRunning)
+            {
+                <dt>Treating</dt>
+                <dd>Following @view.Case.PlanName</dd>
+            }
             else
             {
                 <dt>Treating</dt>
@@ -105,7 +229,7 @@ else
 
             @* Before the first treatment there's no rhythm yet, so a date for the next would only confuse.
                A case being watched still shows when its weekly check is due. *@
-            @if (!view.Untreated)
+            @if (!view.Untreated || view.Step is not null)
             {
                 <dt>Next one</dt>
                 <dd>
@@ -113,6 +237,10 @@ else
                     {
                         <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(days, view.IsCheck)</span>
                         <text> · @Labels.Date(due)</text>
+                    }
+                    else if (view.PlanDoneOn is not null)
+                    {
+                        <text>Plan done, Today asks what's next.</text>
                     }
                     else
                     {
@@ -316,7 +444,15 @@ else
     private string? message;
     private bool busy;
     private bool resolving;
+    private IReadOnlyList<TreatmentPlan> plans = [];
+    private bool following;
+    private Guid? pickedPlan;
+    private DateOnly planStart;
+    private Guid? movingStep;
+    private DateOnly moveTo;
+    private bool confirmStop;
     private IReadOnlyList<Neighbour> neighbours = [];
+    private PutOffs putOffs = PutOffs.Empty();
 
     private DateOnly Today => Time.Today();
 
@@ -326,6 +462,9 @@ else
         logging = false;
         counting = false;
         askTreatAgain = false;
+        following = false;
+        movingStep = null;
+        confirmStop = false;
         message = null;
         await ReloadAsync();
         loaded = true;
@@ -345,7 +484,11 @@ else
         places = await RoomService.GetPlacesAsync();
         var plants = await PlantRepository.GetAllAsync();
         var settings = await SettingsService.GetAsync();
-        view = PestService.Describe(item, plants, all, places, Today, settings.CleanWeeks ?? PestService.DefaultCleanWeeks);
+        putOffs = await PutOffService.GetAsync(Today);
+        plans = (await PlanRepository.GetAllAsync())
+            .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        view = PestService.Describe(item, plants, all, places, Today, settings.CleanWeeks ?? PestService.DefaultCleanWeeks, putOffs);
         neighbours = PestService.Neighbours(item, plants, await CaseRepository.GetAllAsync(), all, places);
     }
 
@@ -417,6 +560,7 @@ else
     {
         logging = !logging;
         counting = false;
+        following = false;
         message = null;
     }
 
@@ -453,8 +597,11 @@ else
         return latest.PerWeek is { } perWeek ? $"{text}, about {Math.Round(perWeek):0} a week." : $"{text}.";
     }
 
-    private static string What(PestTreatment treatment) => treatment switch
+    private string What(PestTreatment treatment) => treatment switch
     {
+        { Skipped: true } => view?.Case.PlanSteps.FirstOrDefault(s => s.Id == treatment.PlanStepId) is { } skipped
+            ? $"Skipped {StepName(skipped)}"
+            : "Skipped a step",
         { Kind: PestTreatmentKind.Checked } => "Checked",
         { Kind: PestTreatmentKind.TrapCount, OnTrap: { } onTrap } =>
             $"Counted the trap: {onTrap} on it" + (treatment.NewTrap ? ", then put up a new one" : ""),
@@ -470,13 +617,157 @@ else
 
         var from = view.Case.Status;
         view.Case.Status = PestCaseStatus.Active;
-        PestService.StatusChanged(view.Case, from, Today);
+        PestService.StatusChanged(view.Case, from, Today, treatments);
         await Repository.SaveAsync(view.Case);
         await ReloadAsync();
         askTreatAgain = false;
         counting = false;
         logging = true;
         message = null;
+    }
+
+    private static string StepName(PlanStep step) =>
+        string.IsNullOrWhiteSpace(step.What) ? "Step" : step.What.Trim();
+
+    // A done step shows its day or that it was skipped, the current one when it's due, later ones how long after
+    private string StepWhen(PlanStep step, int index, bool current, IReadOnlyList<PestTreatment> done)
+    {
+        if (done.Count > 0)
+            return done[0].Skipped ? "Skipped" : Labels.Date(done[0].OccurredOn);
+
+        if (current && view?.NextDue is { } due && view.DaysUntilDue is { } days)
+            return $"{Labels.Due(days)} · {Labels.Date(due)}";
+
+        if (!(view?.Case.PlanRunning ?? false))
+            return "Not done";
+
+        return index == 0 ? "On the start day" : $"{Labels.Count(step.DaysAfter, "day")} after";
+    }
+
+    private void ToggleFollowing()
+    {
+        following = !following;
+        logging = false;
+        counting = false;
+        message = null;
+        planStart = Today;
+        pickedPlan ??= plans.Count == 1 ? plans[0].Id : null;
+    }
+
+    private void PlanStartChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var picked))
+            planStart = picked;
+    }
+
+    private async Task StartPlanAsync()
+    {
+        if (view is null || plans.FirstOrDefault(p => p.Id == pickedPlan) is not { } plan)
+            return;
+
+        if (planStart > Today || planStart < view.Case.StartedOn)
+        {
+            message = planStart > Today ? "The plan can't start in the future." : "The plan can't start before the case.";
+            return;
+        }
+
+        busy = true;
+        try
+        {
+            view.Case.StartPlan(plan, planStart);
+            await Repository.SaveAsync(view.Case);
+            following = false;
+            await ReloadAsync();
+            message = $"Following {plan.Name}.";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void StartLogStep()
+    {
+        logging = true;
+        counting = false;
+        following = false;
+        message = null;
+    }
+
+    private async Task SkipStepAsync(PlanStep step)
+    {
+        if (view is null)
+            return;
+
+        busy = true;
+        try
+        {
+            await Treatments.SaveAsync(PlanProgress.Skip(view.Case, step, Today));
+            await ReloadAsync();
+            message = "Step skipped.";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void StartMove(PlanStep step)
+    {
+        movingStep = step.Id;
+        moveTo = view?.NextDue is { } due && due > Today ? due : Today;
+    }
+
+    private void MoveToChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var picked))
+            moveTo = picked;
+    }
+
+    // Later steps follow on their own, since each counts from the day the one before was done
+    private async Task MoveStepAsync(PlanStep step)
+    {
+        if (view is null)
+            return;
+
+        if (moveTo < Today)
+        {
+            message = "A step can only be moved to today or later.";
+            return;
+        }
+
+        busy = true;
+        try
+        {
+            await PutOffService.PutOffAsync(PutOffs.PlanStep(view.Case.Id, step.Id), moveTo);
+            movingStep = null;
+            await ReloadAsync();
+            message = $"Step moved to {Labels.Date(moveTo)}.";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task StopPlanAsync()
+    {
+        if (view is null)
+            return;
+
+        busy = true;
+        try
+        {
+            view.Case.PlanStoppedOn = Today;
+            await Repository.SaveAsync(view.Case);
+            confirmStop = false;
+            await ReloadAsync();
+            message = "Plan stopped.";
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     private async Task DeleteAsync()

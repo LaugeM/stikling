@@ -1431,7 +1431,7 @@
         <summary>What is the difference between treating and watching?</summary>
         <p>
             While a case is <strong>Treating</strong>, each treatment you log moves the next one along by the
-            interval, and the case shows when the next one is due once the first is logged. Until then, Today
+            interval (or the next step, if it follows a treatment plan), and the case shows when the next one is due once the first is logged. Until then, Today
             and the Pests and problems page show the case as having no treatment yet. Set it to <strong>Watching</strong> when the pests seem gone, and Today asks for a check
             once a week instead. If a check finds some, <em>Found some</em> puts it back to treating.
         </p>
@@ -1543,6 +1543,27 @@
             Sprays and drenches you make up yourself against pests, like an alcohol spray. Save one under
             Supplies, and logging a treatment is then a tap. <em>Mix a batch</em> works out the amounts for
             any size of bottle.
+        </p>
+    </details>
+
+    <details class="help-item">
+        <summary>Can I follow a set of treatments, like spraying twice and then predatory mites?</summary>
+        <p>
+            Yes, with a treatment plan. Under <em>Supplies</em>, then <em>Treatment plans</em>, add the steps in order. Each step after
+            the first says how many days after the step before it comes, and what it uses: one of your treatment recipes, or whatever
+            you type. To use one, open a case and tap <em>Follow a plan</em>, or pick the plan when you open the case. The first step is
+            due on the day you start.
+        </p>
+        <p>
+            While the plan runs, Today and the case show the step that is up next. <em>Log</em> it when it's done, <em>Skip</em> it if
+            you won't do it, or <em>Move</em> it to a later day. The next step counts from the day the one before was done or skipped,
+            so a late spray moves the rest along. A treatment you log outside the plan, like an extra spray, doesn't move it on.
+            After the last step Today asks whether to start watching the case or keep treating. If you keep treating, the case goes
+            on at its interval. You can also stop a plan from the case at any time.
+        </p>
+        <p>
+            The case keeps its own copy of the steps, so changing or deleting the plan later doesn't change one that is running.
+            A case without a plan works as before, with a treatment every few days at the interval you set.
         </p>
     </details>
 </section>

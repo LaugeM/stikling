@@ -56,6 +56,15 @@ public sealed class PutOffs
     /// </summary>
     public static string Rest(Guid plantId, DateOnly windowStart) => $"rest:{plantId}:{windowStart:yyyy-MM-dd}";
 
+    /// <summary>
+    /// The key for a plan step moved to another day. The step id is a copy made when the plan was
+    /// started on the case, so starting a plan again isn't still moved.
+    /// </summary>
+    public static string PlanStep(Guid caseId, Guid stepId) => $"step:{caseId}:{stepId}";
+
+    /// <summary>The key for a pest case whose plan has run its last step, so Today can wait with asking.</summary>
+    public static string PlanDone(Guid caseId) => $"plandone:{caseId}";
+
     /// <summary>The key for a pest case that is ready to be resolved, so Today can wait with asking.</summary>
     public static string Resolve(Guid caseId) => $"resolve:{caseId}";
 

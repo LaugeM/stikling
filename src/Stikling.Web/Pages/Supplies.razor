@@ -4,6 +4,7 @@
 @inject ProductService ProductService
 @inject IFeedRepository FeedRepository
 @inject ITreatmentRecipeRepository RecipeRepository
+@inject ITreatmentPlanRepository PlanRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject IPlantRepository PlantRepository
 @inject ProblemService ProblemService
@@ -37,6 +38,9 @@
     <SettingsRow Href="treatment-recipes" Title="Treatment recipes" Detail="@RecipeSummary">
         <Icon><path d="M8.5 21h6a1 1 0 0 0 1-1v-7l-2-2h-4l-2 2v7a1 1 0 0 0 1 1Z" /><path d="M10.5 11V8h5.5l2.5-1.5" /><path d="M13 8V5.5" /><path d="M20.5 9.5H22M20 12h1.5" /></Icon>
     </SettingsRow>
+    <SettingsRow Href="treatment-plans" Title="Treatment plans" Detail="@PlanSummary">
+        <Icon><circle cx="6" cy="6" r="2" /><circle cx="6" cy="12" r="2" /><circle cx="6" cy="18" r="2" /><path d="M11 6h9M11 12h9M11 18h6" /></Icon>
+    </SettingsRow>
 </div>
 
 @* Pests has its own tab only while a case or a problem is open, so this is the way in the rest of the time *@
@@ -54,6 +58,7 @@
     private int sellers;
     private int feeds;
     private int recipes;
+    private int treatmentPlans;
     private IReadOnlyList<PestCase> pestCases = [];
     private int openProblems;
 
@@ -67,6 +72,7 @@
         sellers = (await SellerService.GetSellersAsync()).Live.Count();
         feeds = (await FeedRepository.GetAllAsync()).Count;
         recipes = (await RecipeRepository.GetAllAsync()).Count;
+        treatmentPlans = (await PlanRepository.GetAllAsync()).Count;
         pestCases = await PestCaseRepository.GetAllAsync();
         var plants = await PlantRepository.GetAllAsync();
         openProblems = (await ProblemService.AllAsync())
@@ -107,6 +113,9 @@
     };
 
     private string ProblemsPart => openProblems == 0 ? "" : $", {Labels.Count(openProblems, "problem")}";
+
+    private string PlanSummary =>
+        treatmentPlans == 0 ? "Steps to follow on a pest case" : Labels.Count(treatmentPlans, "plan");
 
     private string RecipeSummary =>
         recipes == 0 ? "Sprays you mix the same way each time" : Labels.Count(recipes, "recipe");

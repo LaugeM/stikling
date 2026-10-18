@@ -322,6 +322,32 @@ internal sealed class FakePlaceRepository : IPlaceRepository
     }
 }
 
+internal sealed class FakeTreatmentPlanRepository : ITreatmentPlanRepository
+{
+    public Dictionary<Guid, TreatmentPlan> Plans { get; } = [];
+
+    public Task<IReadOnlyList<TreatmentPlan>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<TreatmentPlan>>(Plans.Values.Where(p => !p.IsDeleted).ToList());
+
+    public Task<TreatmentPlan?> GetAsync(Guid id) =>
+        Task.FromResult(Plans.TryGetValue(id, out var plan) && !plan.IsDeleted ? plan : null);
+
+    public Task SaveAsync(TreatmentPlan plan)
+    {
+        if (plan.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid plan");
+        Plans[plan.Id] = plan;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Plans.TryGetValue(id, out var plan))
+            plan.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakeSellerRepository : ISellerRepository
 {
     // Each new seller is a second newer than the last, so "oldest first" is the order they were made

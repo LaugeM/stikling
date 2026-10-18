@@ -141,12 +141,13 @@ public class BackupTests
             Problems = [new Problem(), new Problem { DeletedAt = Now }],
             ProblemUpdates = [new ProblemUpdate(), new ProblemUpdate(), new ProblemUpdate { DeletedAt = Now }],
             Wishes = [new Wish { Name = "Pink syngonium" }, new Wish { DeletedAt = Now }],
-            Sellers = [new Seller { Name = "Plantorama" }, new Seller { Name = "Old", DeletedAt = Now }]
+            Sellers = [new Seller { Name = "Plantorama" }, new Seller { Name = "Old", DeletedAt = Now }],
+            TreatmentPlans = [new TreatmentPlan { Name = "Mites" }, new TreatmentPlan { Name = "Old", DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -166,6 +167,38 @@ public class BackupTests
         Assert.Empty(data.ProblemUpdates);
         Assert.Empty(data.Wishes);
         Assert.Empty(data.Sellers);
+        Assert.Empty(data.TreatmentPlans);
+    }
+
+    [Fact]
+    public void Treatment_plans_and_the_plan_on_a_case_survive_a_backup_and_old_cases_load_without_one()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var plan = new TreatmentPlan
+        {
+            Name = "Mites",
+            Steps = [new PlanStep { What = "Spray" }, new PlanStep { DaysAfter = 3, What = "Spray again", Notes = "Underside" }],
+            UpdatedAt = Now
+        };
+        var item = new PestCase { PlanId = plan.Id, PlanName = "Mites", PlanSteps = [.. plan.Steps], PlanStartedOn = new DateOnly(2026, 9, 18) };
+        var skipped = new PestTreatment { CaseId = item.Id, PlanStepId = plan.Steps[0].Id, Skipped = true, OccurredOn = new DateOnly(2026, 9, 18) };
+
+        var json = JsonSerializer.Serialize(new BackupData { TreatmentPlans = [plan], PestCases = [item], PestTreatments = [skipped] }, options);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        var restoredPlan = Assert.Single(back.TreatmentPlans);
+        Assert.Equal([0, 3], restoredPlan.Steps.Select(s => s.DaysAfter));
+        Assert.Equal("Underside", restoredPlan.Steps[1].Notes);
+        var restoredCase = Assert.Single(back.PestCases);
+        Assert.Equal(plan.Steps.Select(s => s.Id), restoredCase.PlanSteps.Select(s => s.Id));
+        Assert.Equal(new DateOnly(2026, 9, 18), restoredCase.PlanStartedOn);
+        Assert.True(Assert.Single(back.PestTreatments).Skipped);
+        Assert.Equal(1, BackupMerge.Merge<TreatmentPlan>([], back.TreatmentPlans).Added);
+
+        var old = JsonSerializer.Deserialize<PestCase>("""{"id":"7d2d5a2e-0c63-4b5e-8a4c-5e1c0b9a1111","intervalDays":4}""", options)!;
+        Assert.Empty(old.PlanSteps);
+        Assert.Null(old.PlanStartedOn);
+        Assert.False(old.PlanRunning);
     }
 
     [Fact]
