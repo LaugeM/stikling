@@ -31,12 +31,12 @@ else if (kinds.Count == 0)
             Add a kind of care the app doesn't have, like misted, bottom watered or refilled the humidifier,
             and log it like the others.
         </p>
-        <button type="button" class="btn btn-primary" @onclick="StartNew">Add a kind of care</button>
+        <button type="button" class="btn btn-primary mt-2" @onclick="StartNew">Add a kind of care</button>
     </div>
 }
 else
 {
-    <div class="form-actions mb-3">
+    <div class="form-actions mt-3 mb-3">
         <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a kind of care</button>
     </div>
 
@@ -171,6 +171,12 @@ else
         {
             if (editing is null)
             {
+                var trimmed = name.Trim();
+                if (kinds.FirstOrDefault(k => string.Equals(k.Name.Trim(), trimmed, StringComparison.CurrentCultureIgnoreCase)) is { } existing)
+                {
+                    error = $"You already have {existing.Name}. Tap it in the list to change it.";
+                    return;
+                }
                 await KindService.AddAsync(name, countsAs, onHistory);
             }
             else

@@ -1571,6 +1571,8 @@ else
     {
         await ReloadCareAsync();
         careOpen = false;
+        // A notable kind, or an own kind on the history, has just added a line to it
+        historyVersion++;
     }
 
     private void ShowCuttings()
