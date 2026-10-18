@@ -20,6 +20,11 @@
 @inject SitterSheetService SitterSheets
 @inject TimelineService TimelineService
 @inject CareService Care
+@inject CareIntervalService CareIntervalService
+@inject ICareIntervalRepository CareIntervalRepository
+@inject IFeedRepository FeedRepository
+@inject OwnCareKindService OwnKindService
+@inject ILogger<Home> Logger
 @inject WateringAnswers Answers
 @inject AppBadge Badge
 @inject PlantService PlantService
@@ -420,6 +425,43 @@ else
         </section>
     }
 
+    @if (!Away && !Holding && (CareNow.Count > 0 || CareComing.Count > 0 || CareNextRoundLine is not null))
+    {
+        <section class="today-section">
+            <div class="today-section-head">
+                <h2>Care</h2>
+                <div class="today-head-links">
+                    <a class="today-go-round" href="care-intervals">
+                        Care intervals
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                    </a>
+                </div>
+            </div>
+            @if (careError is not null)
+            {
+                <div class="alert alert-danger py-2 px-3" role="alert">@careError</div>
+            }
+            @if (CareNextRoundLine is { } careRound)
+            {
+                <p class="today-next-round"><span>@careRound</span></p>
+            }
+            @foreach (var group in CareNow)
+            {
+                <CareIntervalCard @key="CareKey(group)" Group="group" Today="Today" Done="careDone"
+                                  OnLog="CareLogAsync" OnUndo="CareUndoAsync" OnPutOff="CarePutOffAsync" />
+            }
+            @if (CareComing.Count > 0)
+            {
+                <h3 class="today-subhead">Coming up</h3>
+                @foreach (var group in CareComing)
+                {
+                    <CareIntervalCard @key="CareKey(group)" Group="group" Today="Today" Done="careDone" Coming="true"
+                                      OnLog="CareLogAsync" OnUndo="CareUndoAsync" OnPutOff="CarePutOffAsync" />
+                }
+            }
+        </section>
+    }
+
     @if (memory is not null)
     {
         <section class="today-section memory">
@@ -695,10 +737,87 @@ else
                 || RoundSchedule.Next(roundDays, Today) is not { } next)
                 return null;
 
-            var plantCount = wateringDue.Count(d => d.Gathered && !d.DueNow && d.ShowOn == next);
-            return plantCount == 0 ? null : $"Next round {NextRoundName(next)} · {Labels.Count(plantCount, "plant")} to check";
+            var waiting = wateringDue.Where(d => d.Gathered && !d.DueNow && d.ShowOn == next).Select(d => d.Plant.Id).ToHashSet();
+            if (waiting.Count == 0)
+                return null;
+
+            // The plants waiting for care from an interval are on the same round
+            waiting.UnionWith(CareWaiting(next).Select(i => i.Plant.Id));
+            return $"Next round {NextRoundName(next)} · {Labels.Count(waiting.Count, "plant")} to check";
         }
     }
+
+    private IReadOnlyList<IntervalItem> CareWaiting(DateOnly next) =>
+        CareIntervals.WaitingForRound(careItems, next, Today, putOffs);
+
+    // The same line under Care, when nothing is waiting for water so the line under Water isn't there
+    private string? CareNextRoundLine
+    {
+        get
+        {
+            if (NextRoundLine is not null || roundDays is not { Count: > 0 } || RoundSchedule.IsRoundDay(roundDays, Today)
+                || RoundSchedule.Next(roundDays, Today) is not { } next)
+                return null;
+
+            var count = CareWaiting(next).Select(i => i.Plant.Id).Distinct().Count();
+            return count == 0 ? null : $"Next round {NextRoundName(next)} · {Labels.Count(count, "plant")} to check";
+        }
+    }
+
+    // Care from an interval that is due, and what is due in the next couple of days
+    private IReadOnlyList<IntervalItem> careItems = [];
+    private readonly Dictionary<(Guid Interval, Guid Plant), CareAction> careDone = [];
+    private string? careError;
+
+    private IReadOnlyList<IntervalGroup> CareNow => CareIntervals.Now(careItems, Today, putOffs);
+
+    private IReadOnlyList<IntervalGroup> CareComing => CareIntervals.Coming(careItems, Today, putOffs);
+
+    private static string CareKey(IntervalGroup group) => $"{group.Kind}:{group.OwnKindId}:{group.FeedId}";
+
+    private int CareDueCount =>
+        CareNow.Sum(g => g.Items.Count(i => !careDone.ContainsKey((i.Interval.Id, i.Plant.Id))));
+
+    private async Task CareLogAsync(CareLogRequest request)
+    {
+        careError = null;
+        try
+        {
+            var ids = await CareIntervalService.LogAsync(request.Group, request.Items.Select(i => i.Plant.Id), Labels.For);
+            var action = new CareAction(request.All, ids, request.Items);
+            foreach (var item in request.Items)
+                careDone[(item.Interval.Id, item.Plant.Id)] = action;
+            await Badge.SetAsync(DueCount);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Logging care from an interval failed");
+            careError = $"Couldn't log it: {ex.Message}";
+        }
+    }
+
+    private async Task CareUndoAsync(CareAction action)
+    {
+        careError = null;
+        try
+        {
+            await CareIntervalService.UndoAsync(action.EntryIds);
+            foreach (var item in action.Items)
+            {
+                if (careDone.TryGetValue((item.Interval.Id, item.Plant.Id), out var kept) && kept == action)
+                    careDone.Remove((item.Interval.Id, item.Plant.Id));
+            }
+            await Badge.SetAsync(DueCount);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Undoing care from an interval failed");
+            careError = $"Couldn't undo it: {ex.Message}";
+        }
+    }
+
+    private Task CarePutOffAsync(CarePutOffRequest request) =>
+        PutOffAsync(PutOffs.Interval(request.Item.Interval.Id, request.Item.Plant.Id, request.Item.Last), Today.AddDays(request.Days));
 
     // On a day that isn't a round day, the propagations waiting for the next one, for Worth a look
     private string? NextRoundChecksLine
@@ -756,6 +875,7 @@ else
         Away ? 0
         : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + FlaggedNow.Count + LookAgainNow.Count + QuarantineNow.Count + RestNow.Count
         + (Holding ? backRows.Count : ChecksNow.Count + wateringDue.Count(d => d.DueNow))
+        + (Holding ? 0 : CareDueCount)
         + (roundSuggestion is not null ? 1 : 0)
         + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
 
@@ -782,6 +902,12 @@ else
             await ProblemService.AllAsync(), await ProblemService.AllUpdatesAsync(), plants, Today);
 
         places = await RoomService.GetPlacesAsync();
+        careDone.Clear();
+        var careIntervals = await CareIntervalRepository.GetAllAsync();
+        careItems = careIntervals.Count == 0
+            ? []
+            : CareIntervals.Plan(careIntervals, plants, places, await CareLogs.GetAllAsync(), await OwnKindService.GetAllAsync(),
+                await FeedRepository.GetAllAsync(), Time, roundDays, putOffs);
         photoRound = settings.PhotoReminder
             ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
             : [];

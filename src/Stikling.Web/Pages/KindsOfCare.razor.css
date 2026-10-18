@@ -1,0 +1,36 @@
+.kind-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.kind-list > li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.kind-list > li:first-child {
+    border-top: 0;
+}
+
+.kind-row {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+}
+
+.kind-title {
+    display: block;
+    font-weight: 600;
+}
+
+.kind-use {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}

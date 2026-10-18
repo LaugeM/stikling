@@ -19,7 +19,7 @@ public class WateringAnswersTests
     public WateringAnswersTests()
     {
         putOffs = new PutOffService(putOffRecords);
-        answers = new WateringAnswers(new CareService(logs, new FakeTimelineRepository(), new FakePlantRepository(), new FakeFeedRepository(), new FakeProductRepository(), Time), logs, putOffs, Time);
+        answers = new WateringAnswers(new CareService(logs, new FakeTimelineRepository(), new FakePlantRepository(), new FakeFeedRepository(), new FakeProductRepository(), new FakeOwnCareKindRepository(), Time), logs, putOffs, Time);
     }
 
     private static WateringGuess Guess(WateringMode mode, int usualDays = 8) =>

@@ -141,12 +141,14 @@ public class BackupTests
             Problems = [new Problem(), new Problem { DeletedAt = Now }],
             ProblemUpdates = [new ProblemUpdate(), new ProblemUpdate(), new ProblemUpdate { DeletedAt = Now }],
             Wishes = [new Wish { Name = "Pink syngonium" }, new Wish { DeletedAt = Now }],
-            Sellers = [new Seller { Name = "Plantorama" }, new Seller { Name = "Old", DeletedAt = Now }]
+            Sellers = [new Seller { Name = "Plantorama" }, new Seller { Name = "Old", DeletedAt = Now }],
+            OwnCareKinds = [new OwnCareKind { Name = "Misted" }, new OwnCareKind { Name = "Old", DeletedAt = Now }],
+            CareIntervals = [new CareInterval(), new CareInterval { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -166,6 +168,56 @@ public class BackupTests
         Assert.Empty(data.ProblemUpdates);
         Assert.Empty(data.Wishes);
         Assert.Empty(data.Sellers);
+        Assert.Empty(data.OwnCareKinds);
+        Assert.Empty(data.CareIntervals);
+    }
+
+    [Fact]
+    public void Own_kinds_of_care_and_the_entries_that_use_them_survive_a_backup_and_a_restore_merges_them()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var kind = new OwnCareKind { Name = "Bottom watered", CountsAs = CareKind.Watered, OnHistory = true, UpdatedAt = Now };
+        var entry = new CareLog
+        {
+            PlantId = Guid.NewGuid(), Kind = CareKind.Watered, OwnKindId = kind.Id, OwnKindName = "Bottom watered", UpdatedAt = Now
+        };
+
+        var json = JsonSerializer.Serialize(new BackupData { OwnCareKinds = [kind], CareLogs = [entry] }, options);
+        Assert.Contains("\"countsAs\":\"Watered\"", json);
+        Assert.Contains("\"ownKindName\":\"Bottom watered\"", json);
+
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        var restored = Assert.Single(back.OwnCareKinds);
+        Assert.Equal(("Bottom watered", CareKind.Watered, true), (restored.Name, restored.CountsAs, restored.OnHistory));
+        var log = Assert.Single(back.CareLogs);
+        Assert.Equal((kind.Id, "Bottom watered"), (log.OwnKindId, log.OwnKindName));
+        Assert.Equal(1, BackupMerge.Merge<OwnCareKind>([], back.OwnCareKinds).Added);
+        Assert.Equal(0, BackupMerge.Merge([kind], back.OwnCareKinds).Added);
+    }
+
+    [Fact]
+    public void Care_intervals_survive_a_backup_and_a_restore_merges_them()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var interval = new CareInterval
+        {
+            Kind = CareKind.Fertilised, Every = 2, Unit = IntervalUnit.Weeks, FromMonth = 10, ToMonth = 3,
+            Scope = CareScope.Tag, Tag = "Semi-hydro", StartsOn = new DateOnly(2026, 10, 1), UpdatedAt = Now
+        };
+
+        var json = JsonSerializer.Serialize(new BackupData { CareIntervals = [interval] }, options);
+        Assert.Contains("\"unit\":\"Weeks\"", json);
+        Assert.Contains("\"scope\":\"Tag\"", json);
+
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        var restored = Assert.Single(back.CareIntervals);
+        Assert.Equal((2, IntervalUnit.Weeks, 10, 3, CareScope.Tag, "Semi-hydro"),
+            (restored.Every, restored.Unit, restored.FromMonth, restored.ToMonth, restored.Scope, restored.Tag));
+        Assert.Equal(new DateOnly(2026, 10, 1), restored.StartsOn);
+        Assert.Equal(1, BackupMerge.Merge<CareInterval>([], back.CareIntervals).Added);
+        Assert.Equal(0, BackupMerge.Merge([interval], back.CareIntervals).Added);
     }
 
     [Fact]

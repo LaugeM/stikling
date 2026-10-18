@@ -37,6 +37,8 @@ public static class SyncKinds
         "problemUpdates",
         "wishes",
         "sellers",
+        "ownCareKinds",
+        "careIntervals",
     ];
 
     public static readonly IReadOnlyList<string> All = [.. Collection, Settings];

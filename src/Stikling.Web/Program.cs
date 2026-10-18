@@ -74,6 +74,8 @@ builder.Services.AddScoped<IFloweringMarkRepository, IndexedDbFloweringMarkRepos
 builder.Services.AddScoped<IProblemRepository, IndexedDbProblemRepository>();
 builder.Services.AddScoped<IWishRepository, IndexedDbWishRepository>();
 builder.Services.AddScoped<ISellerRepository, IndexedDbSellerRepository>();
+builder.Services.AddScoped<IOwnCareKindRepository, IndexedDbOwnCareKindRepository>();
+builder.Services.AddScoped<ICareIntervalRepository, IndexedDbCareIntervalRepository>();
 builder.Services.AddScoped<IProblemUpdateRepository, IndexedDbProblemUpdateRepository>();
 builder.Services.AddScoped<IReceivedHistoryRepository, IndexedDbReceivedHistoryRepository>();
 builder.Services.AddScoped<ITimelineRepository, IndexedDbTimelineRepository>();
@@ -89,6 +91,8 @@ builder.Services.AddScoped<PlantNameService>();
 builder.Services.AddScoped<PlantCareService>();
 builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<SellerService>();
+builder.Services.AddScoped<OwnCareKindService>();
+builder.Services.AddScoped<CareIntervalService>();
 builder.Services.AddScoped<PotService>();
 builder.Services.AddScoped<SoilMixService>();
 builder.Services.AddScoped<ProductService>();

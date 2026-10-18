@@ -1,0 +1,229 @@
+@page "/kinds-of-care"
+@inject OwnCareKindService KindService
+@inject ILogger<KindsOfCare> Logger
+
+<PageTitle>Kinds of care · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="settings">Settings</a>
+<h1>Kinds of care</h1>
+
+<p class="settings-hint">
+    The kinds of care you added yourself. They are in the care sheet next to the built-in ones.
+    What a kind counts as decides what it reaches: a watering feeds the watering reminder, a feed
+    can have products.
+</p>
+
+@if (message is not null)
+{
+    <div class="alert alert-success py-2 px-3" role="status">@message</div>
+}
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (kinds.Count == 0)
+{
+    <div class="empty-state">
+        <p>No kinds of your own yet.</p>
+        <p class="text-body-secondary">
+            Add a kind of care the app doesn't have, like misted, bottom watered or refilled the humidifier,
+            and log it like the others.
+        </p>
+        <button type="button" class="btn btn-primary mt-2" @onclick="StartNew">Add a kind of care</button>
+    </div>
+}
+else
+{
+    <div class="form-actions mt-3 mb-3">
+        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a kind of care</button>
+    </div>
+
+    <section class="settings-section">
+        <h2>Your kinds</h2>
+
+        <ul class="kind-list">
+            @foreach (var kind in kinds)
+            {
+                <li>
+                    <button type="button" class="kind-row" @onclick="() => StartEdit(kind)">
+                        <span class="kind-title">@kind.Name</span>
+                        <span class="kind-use">@Use(kind)</span>
+                    </button>
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+<Sheet Title="@(editing is null ? "Add a kind of care" : "Edit kind of care")" Open="sheetOpen" OpenChanged="SheetOpenChanged">
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
+    }
+
+    @if (confirmingRemove && editing is not null)
+    {
+        <p>Remove @editing.Name? Entries already logged keep their name.</p>
+        <div class="care-actions">
+            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">Remove</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirmingRemove = false">Cancel</button>
+        </div>
+    }
+    else
+    {
+        <OwnKindFields Prefix="kind-edit" @bind-Name="name" @bind-CountsAs="countsAs" @bind-OnHistory="onHistory" />
+
+        @if (editing is not null && countsAs != editing.CountsAs && entryCount > 0)
+        {
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="kind-edit-entries" @bind="alsoChange" />
+                <label class="form-check-label" for="kind-edit-entries">Also change the @Labels.Count(entryCount, "entry", "entries") already logged</label>
+            </div>
+        }
+
+        <div class="care-actions">
+            <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(name))" @onclick="SaveAsync">
+                @(editing is null ? "Add" : "Save")
+            </button>
+            @if (editing is not null)
+            {
+                <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => confirmingRemove = true">Remove</button>
+            }
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CloseSheet">Cancel</button>
+        </div>
+    }
+</Sheet>
+
+@code {
+    private IReadOnlyList<OwnCareKind> kinds = [];
+    private bool loading = true;
+    private string? message;
+
+    private bool sheetOpen;
+    private OwnCareKind? editing;
+    private string name = "";
+    private CareKind? countsAs;
+    private bool onHistory;
+    private int entryCount;
+    private bool alsoChange;
+    private bool confirmingRemove;
+    private bool busy;
+    private string? error;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        kinds = await KindService.GetAllAsync();
+        loading = false;
+    }
+
+    private static string Use(OwnCareKind kind)
+    {
+        var counts = kind.CountsAs switch
+        {
+            CareKind.Watered => "Counts as a watering",
+            CareKind.Fertilised => "Counts as a feed",
+            _ => "Counts as neither"
+        };
+        return kind.OnHistory ? $"{counts} · On the history" : counts;
+    }
+
+    private void StartNew()
+    {
+        editing = null;
+        name = "";
+        countsAs = null;
+        onHistory = false;
+        Open(0);
+    }
+
+    private async Task StartEdit(OwnCareKind kind)
+    {
+        editing = kind;
+        name = kind.Name;
+        countsAs = kind.CountsAs;
+        onHistory = kind.OnHistory;
+        Open(await KindService.EntryCountAsync(kind.Id));
+    }
+
+    private void Open(int entries)
+    {
+        entryCount = entries;
+        alsoChange = false;
+        confirmingRemove = false;
+        error = null;
+        message = null;
+        sheetOpen = true;
+    }
+
+    private void SheetOpenChanged(bool open) => sheetOpen = open;
+
+    private void CloseSheet() => sheetOpen = false;
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            if (editing is null)
+            {
+                var trimmed = name.Trim();
+                if (kinds.FirstOrDefault(k => string.Equals(k.Name.Trim(), trimmed, StringComparison.CurrentCultureIgnoreCase)) is { } existing)
+                {
+                    error = $"You already have {existing.Name}. Tap it in the list to change it.";
+                    return;
+                }
+                await KindService.AddAsync(name, countsAs, onHistory);
+            }
+            else
+            {
+                var countsChanged = countsAs != editing.CountsAs;
+                await KindService.RenameAsync(editing.Id, name);
+                await KindService.SetOnHistoryAsync(editing.Id, onHistory);
+                var changed = await KindService.SetCountsAsAsync(editing.Id, countsAs, countsChanged && alsoChange);
+                if (countsChanged && alsoChange && changed < entryCount)
+                    message = $"Changed {changed} of the {Labels.Count(entryCount, "entry", "entries")}. The rest have products or a feed on them, so they stay as they were.";
+            }
+
+            sheetOpen = false;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving a kind of care failed");
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task RemoveAsync()
+    {
+        if (editing is null)
+            return;
+
+        busy = true;
+        try
+        {
+            await KindService.RemoveAsync(editing.Id);
+            sheetOpen = false;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Removing a kind of care failed");
+            error = ex.Message;
+            confirmingRemove = false;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

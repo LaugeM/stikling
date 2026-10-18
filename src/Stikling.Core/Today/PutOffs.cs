@@ -67,6 +67,13 @@ public sealed class PutOffs
         $"water:{plantId}:{lastWatered:yyyy-MM-dd}";
 
     /// <summary>
+    /// The key for a plant that's due for a care interval. The day it was last done is part of it,
+    /// so once it has been done the next one isn't still hidden.
+    /// </summary>
+    public static string Interval(Guid intervalId, Guid plantId, DateOnly? last) =>
+        $"interval:{intervalId}:{plantId}:{last:yyyy-MM-dd}";
+
+    /// <summary>
     /// The key for the list of what to look at first on the day back ("Done with this list"). The
     /// day back is part of it, so a later trip gets a list of its own.
     /// </summary>

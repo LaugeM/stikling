@@ -35,6 +35,7 @@ public sealed class SearchService(
     IFeedRepository feeds,
     IProductRepository products,
     IPlaceRepository placeRepository,
+    IOwnCareKindRepository ownCareKinds,
     TimeProvider time)
 {
     /// <param name="label">Names the enums the way the app shows them (care kinds and pests).</param>
@@ -236,11 +237,12 @@ public sealed class SearchService(
                 entry.SubjectId, owner.Name, entry.Kind == TimelineKind.Note ? "Note" : "Update", entry.Text);
         }
 
+        var ownKinds = CareLabels.Lookup(await ownCareKinds.GetAllAsync());
         foreach (var log in plantCareLogs)
         {
             if (plantsById.TryGetValue(log.PlantId, out var plant))
                 Add(log.Id, $"plants/{plant.Id}?tab=care&entry={log.Id}", NoteSource.PlantCare, time.MomentOn(log.OccurredOn),
-                    SubjectType.Plant, plant.Id, plant.DisplayName, label(log.Kind), log.Notes);
+                    SubjectType.Plant, plant.Id, plant.DisplayName, CareLabels.For(log, ownKinds, label), log.Notes);
         }
 
         // A finished propagation has no care sheet, so its care notes can't be shown and are left out
