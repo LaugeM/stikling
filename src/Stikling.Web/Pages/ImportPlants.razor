@@ -45,7 +45,7 @@ else if (step == Step.Result && result is not null)
     <div class="import-narrow">
         @if (undone)
         {
-            <h2 class="import-title" role="status" tabindex="-1" @ref="resultHeading">Removed @(result.Added == 1 ? "the plant" : $"the {result.Added} plants") again.</h2>
+            <h2 class="import-title" role="status" tabindex="-1" @ref="resultHeading">Removed @(result.Added == 1 ? "the plant" : $"the {result.Added} plants")@(result.FieldsMade.Count switch { 0 => "", 1 => " and the field it made", var n => $" and the {n} fields it made" }) again.</h2>
             <div class="import-buttons">
                 <a class="btn btn-primary" href="plants">Go to Plants</a>
                 <button type="button" class="btn btn-outline-primary" @onclick="StartAgain">Import more plants</button>
