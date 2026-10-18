@@ -101,6 +101,38 @@ public class OwnFieldTests
         Assert.Equal(2, (await service.GetAllAsync()).Count);
     }
 
+    [Fact]
+    public async Task A_field_renamed_then_removed_comes_back_under_its_last_name_not_its_first()
+    {
+        var field = await service.AddAsync("Clone name", OwnFieldKind.Text);
+        var plant = AddPlant("Big", (field.Id, "Pink"));
+        await service.RenameAsync(field.Id, "Cultivar code");
+        await service.RemoveAsync(field.Id);
+
+        var first = await service.AddAsync("Clone name", OwnFieldKind.Text);
+        Assert.NotEqual(field.Id, first.Id);
+        Assert.Equal(0, await service.UseCountAsync(first.Id));
+
+        var last = await service.AddAsync("Cultivar code", OwnFieldKind.Text);
+        Assert.Equal(field.Id, last.Id);
+        Assert.Equal("Pink", ValueOn(plant, last.Id));
+    }
+
+    [Fact]
+    public async Task A_removed_field_that_lost_its_name_in_a_sync_comes_back_by_its_id()
+    {
+        var field = await service.AddAsync("Awards", OwnFieldKind.Text);
+        AddPlant("Big", (field.Id, "Best in show"));
+        await service.RemoveAsync(field.Id);
+        fields.Fields[field.Id].Name = ""; // the server keeps only the id and dates of a deleted record
+
+        var back = await service.AddAsync("Awards", OwnFieldKind.Text);
+
+        Assert.Equal(field.Id, back.Id);
+        Assert.Equal("Awards", back.Name);
+        Assert.Equal(1, await service.UseCountAsync(back.Id));
+    }
+
     // Renaming
 
     [Fact]

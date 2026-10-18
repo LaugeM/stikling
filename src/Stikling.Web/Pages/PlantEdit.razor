@@ -1197,6 +1197,10 @@ else
         var fieldValues = new List<(Guid Id, string? Value)>();
         foreach (var field in ownFields)
         {
+            // A stored value left as it was is kept, even one that no longer fits after the field's
+            // kind changed, so it never stops the plant from being saved
+            if (plant.OwnFields.TryGetValue(field.Id, out var before) && FieldInput(field) == before)
+                continue;
             var stored = OwnFieldValues.Normalize(field.Kind, FieldInput(field), out var fieldError);
             if (fieldError is not null)
                 errors.Add($"{field.Name}: {fieldError}");

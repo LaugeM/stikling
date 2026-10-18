@@ -29,17 +29,23 @@ public sealed class OwnFieldService(IOwnFieldRepository fields, IPlantRepository
 
         var id = OwnField.IdFor(trimmed);
         var holder = stored.FirstOrDefault(f => f.Id == id);
-        if (holder is { IsDeleted: true })
+
+        // A removed field is found by the name it had when it was removed, which isn't the one its id
+        // came from if it was renamed. One that synced from another device has lost its name, so the
+        // removed field holding the id is taken to be it.
+        var removed = stored.FirstOrDefault(f => f.IsDeleted && SameName(f.Name, trimmed))
+            ?? (holder is { IsDeleted: true } && string.IsNullOrEmpty(holder.Name) ? holder : null);
+        if (removed is not null)
         {
-            holder.DeletedAt = null;
-            holder.Name = trimmed;
-            holder.Kind = kind;
-            holder.Choices = field.Choices;
-            await fields.SaveAsync(holder);
-            return holder;
+            removed.DeletedAt = null;
+            removed.Name = trimmed;
+            removed.Kind = kind;
+            removed.Choices = field.Choices;
+            await fields.SaveAsync(removed);
+            return removed;
         }
 
-        // A live field holding the id has been renamed since, so this one can't share it
+        // A field holding the id has been renamed since, so this one can't share it
         field.Id = holder is null ? id : Guid.NewGuid();
         await fields.SaveAsync(field);
         return field;
