@@ -29,7 +29,7 @@ public static class PhotoFolders
     {
         var folders = new Dictionary<(SubjectType, Guid), string>();
         AddFolders(folders, SubjectType.Plant, "Plants", plants
-            .Where(p => !p.IsDeleted && (options.IncludeGone || p.Status == PlantStatus.Active))
+            .Where(p => !p.IsDeleted && (options.IncludeGone || p.InCollection))
             .Select(p => (p.Id, p.CreatedAt, Name: PlantName(p))));
         AddFolders(folders, SubjectType.Propagation, "Propagations", propagations
             .Where(p => !p.IsDeleted && (options.IncludeGone || p.IsActive))

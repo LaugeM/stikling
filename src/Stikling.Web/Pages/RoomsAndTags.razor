@@ -439,7 +439,7 @@
         await LoadLightsAsync();
         var all = await Plants.GetAllAsync();
         tags = PlantTags.InUse(all);
-        activePlants = all.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active)
+        activePlants = all.Where(p => !p.IsDeleted && p.InCollection)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
     }
 

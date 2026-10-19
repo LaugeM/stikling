@@ -252,6 +252,12 @@ h1 {
     background-color: var(--pa-surface);
 }
 
+/* An unchecked radio or checkbox needs an outline that shows in both themes */
+.form-check-input:not(:checked) {
+    background-color: var(--pa-surface);
+    border-color: var(--pa-muted);
+}
+
 .form-check-input:checked {
     background-color: var(--pa-green);
     border-color: var(--pa-green);
@@ -460,6 +466,16 @@ a.item-card:active {
 .item-sub {
     font-style: italic;
     font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+/* How many are in the pot, after the name */
+.item-count {
+    flex: none;
+    margin-left: 0.35rem;
+    font-family: var(--pa-font-body, inherit);
+    font-size: 0.875rem;
+    font-weight: 400;
     color: var(--pa-muted);
 }
 

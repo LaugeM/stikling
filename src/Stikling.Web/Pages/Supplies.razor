@@ -76,7 +76,7 @@
         pestCases = await PestCaseRepository.GetAllAsync();
         var plants = await PlantRepository.GetAllAsync();
         openProblems = (await ProblemService.AllAsync())
-            .Count(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.Status == PlantStatus.Active));
+            .Count(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.InCollection));
     }
 
     private string SellersDetail =>

@@ -81,7 +81,7 @@ public static class CareLikes
 
         return
         [
-            .. all.Where(p => p.Id != plant.Id && !p.IsDeleted && p.Status == PlantStatus.Active
+            .. all.Where(p => p.Id != plant.Id && !p.IsDeleted && p.InCollection
                 && string.Equals(p.Genus?.Trim(), genus, StringComparison.CurrentCultureIgnoreCase)
                 && string.Equals(p.KnownSpecies?.Trim(), species, StringComparison.CurrentCultureIgnoreCase))
         ];

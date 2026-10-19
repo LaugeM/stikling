@@ -76,7 +76,7 @@ public static class GoingRound
         var today = time.Today();
 
         var cards = Ordered(
-            plantList.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && places.IsIn(p.PlaceId, scope.Id)),
+            plantList.Where(p => !p.IsDeleted && p.InCollection && places.IsIn(p.PlaceId, scope.Id)),
             p => p.PlaceId, p => p.DisplayName, scope, places)
             .Select(x =>
             {

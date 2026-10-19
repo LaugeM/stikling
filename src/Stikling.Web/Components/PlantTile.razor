@@ -21,6 +21,10 @@ else
     [Parameter, EditorRequired]
     public required Plant Plant { get; set; }
 
+    /// <summary>The name of the plant this one is potted with, when it is. Shown as its status.</summary>
+    [Parameter]
+    public string? PottedWith { get; set; }
+
     [Parameter]
     public bool Selectable { get; set; }
 
@@ -60,12 +64,12 @@ else
     protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
 
     private bool HasBadges =>
-        Plant.Status != PlantStatus.Active || Plant.InQuarantine || Plant.IsDormant || Plant.IsOffered || Pests.Count > 0 || (OpenProblem && Plant.Status == PlantStatus.Active) || ShowsFlowering(out _);
+        !Plant.InCollection || Plant.InQuarantine || Plant.IsDormant || Plant.IsOffered || Pests.Count > 0 || (OpenProblem && Plant.InCollection) || ShowsFlowering(out _);
 
     private bool ShowsFlowering(out FloweringNow now)
     {
         now = Flowering!;
-        return Flowering is { Stale: false } && Plant.Status == PlantStatus.Active;
+        return Flowering is { Stale: false } && Plant.InCollection;
     }
 
     private RenderFragment Content => @<text>
@@ -84,6 +88,10 @@ else
             <div class="item-name @(Plant.Favourite ? "has-star" : null)">
                 <NumberTag Code="@Plant.CollectionNumber" />
                 <span class="item-name-text">@Plant.DisplayName</span>
+                @if (Plant.HowMany > 1)
+                {
+                    <span class="item-count" title="@($"{Plant.HowMany} in the pot")">×@Plant.HowMany</span>
+                }
                 @if (Plant.Favourite)
                 {
                     <svg class="favourite-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8Z" /></svg>
@@ -101,15 +109,15 @@ else
             @if (HasBadges)
             {
                 <div class="tile-badges">
-                    @if (Plant.Status != PlantStatus.Active)
+                    @if (!Plant.InCollection)
                     {
-                        <span class="badge text-bg-secondary">@Labels.For(Plant.Status)</span>
+                        <span class="badge text-bg-secondary">@Labels.StatusOf(Plant, PottedWith)</span>
                     }
                     @if (Plant.InQuarantine)
                     {
                         <span class="badge quarantine-badge">Quarantine</span>
                     }
-                    @if (Plant.IsDormant && Plant.Status == PlantStatus.Active)
+                    @if (Plant.IsDormant && Plant.InCollection)
                     {
                         <span class="badge dormant-badge">Dormant</span>
                     }
@@ -125,7 +133,7 @@ else
                     {
                         <span class="badge pest-badge">@Labels.For(pest.Pest)</span>
                     }
-                    @if (OpenProblem && Plant.Status == PlantStatus.Active)
+                    @if (OpenProblem && Plant.InCollection)
                     {
                         <span class="badge problem-badge"><svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.WiltingLeaf</svg>Problem</span>
                     }

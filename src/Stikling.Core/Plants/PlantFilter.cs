@@ -109,8 +109,8 @@ public sealed record PlantFilter(
 
     private bool MatchesStatus(Plant plant) => Status switch
     {
-        StatusFilter.Active => plant.Status == PlantStatus.Active,
-        StatusFilter.Gone => plant.Status != PlantStatus.Active && (GoneAs is null || plant.Status == GoneAs),
+        StatusFilter.Active => plant.InCollection,
+        StatusFilter.Gone => !plant.InCollection && (GoneAs is null || plant.Status == GoneAs),
         _ => true
     };
 

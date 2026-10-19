@@ -147,11 +147,11 @@ public class OwnFieldImportTests
         var guess = Guess(csv);
 
         Assert.Equal(ImportField.Raised, guess.Matches[12]);
-        Assert.Equal(ImportField.Skip, guess.Matches[17]);
-        Assert.Equal([ImportField.OwnField, ImportField.OwnField], guess.Matches.Skip(18));
-        Assert.Equal("Clone name", guess.Targets[18]!.Name);
-        Assert.Equal(new ImportOwnField("Size", OwnFieldKind.Number, null), guess.Targets[19]);
-        Assert.All(guess.Targets.Take(18), t => Assert.Null(t));
+        Assert.Equal(ImportField.Skip, guess.Matches[19]);
+        Assert.Equal([ImportField.OwnField, ImportField.OwnField], guess.Matches.Skip(20));
+        Assert.Equal("Clone name", guess.Targets[20]!.Name);
+        Assert.Equal(new ImportOwnField("Size", OwnFieldKind.Number, null), guess.Targets[21]);
+        Assert.All(guess.Targets.Take(20), t => Assert.Null(t));
     }
 
     // Preview

@@ -13,7 +13,9 @@ public sealed record PotUpRequest(
     Guid? PlaceId = null,
     GrowingMedium Medium = GrowingMedium.Soil,
     Guid? PotId = null,
-    Guid? SoilMixId = null);
+    Guid? SoilMixId = null,
+    bool OnePot = false,
+    Guid? IntoPlantId = null);
 
 /// <summary>
 /// Propagation operations that keep the counts, the new plants and the history of both in step.
@@ -153,12 +155,27 @@ public sealed class PropagationService(
     /// Turns units of the propagation into plants. The plants keep the lineage (parent plant and
     /// propagation) and the propagation finishes when nothing is left.
     /// </summary>
-    public async Task<IReadOnlyList<Plant>> PotUpAsync(Propagation propagation, PotUpRequest request)
+    public async Task<IReadOnlyList<Plant>> PotUpAsync(Propagation propagation, PotUpRequest request, Func<Enum, string>? label = null)
     {
+        label ??= e => e.ToString();
+        Plant? into = null;
+        if (request.IntoPlantId is { } intoId)
+        {
+            into = await plants.GetAsync(intoId);
+            if (into is not { InCollection: true })
+                throw new InvalidOperationException("The plant to pot them with isn't in the collection.");
+            if (request.Date > Today)
+                throw new InvalidOperationException("The date can't be in the future.");
+        }
+        // One plant with several in the pot, or all of them in with another plant
+        var oneRecord = (request.OnePot || into is not null) && request.Count > 1;
+        var oneAny = request.OnePot || into is not null;
         // The day it was potted up also finishes the propagation when nothing is left
         if (request.Date < propagation.StartedOn)
             throw new InvalidOperationException("The date can't be before the propagation started.");
-        var names = PotUpNames(request.Nickname, request.Count, propagation.PottedUpCount);
+        IReadOnlyList<string?> names = oneAny
+            ? [string.IsNullOrWhiteSpace(request.Nickname) ? null : request.Nickname.Trim()]
+            : PotUpNames(request.Nickname, request.Count, propagation.PottedUpCount);
         // Worked out before RecordPottedUp changes the count they continue from
         var codes = CollectionNumbers.PottedUpCodes(propagation, request.Count);
         var newPlants = names.Select((name, i) => new Plant
@@ -179,7 +196,8 @@ public sealed class PropagationService(
             InnerPotId = request.PotId,
             SoilMixId = request.Medium == GrowingMedium.Soil ? request.SoilMixId : null,
             ParentPlantId = propagation.ParentPlantId,
-            FromPropagationId = propagation.Id
+            FromPropagationId = propagation.Id,
+            Count = oneRecord ? request.Count : null
         }).ToList();
 
         // They start with what the plant they came from likes
@@ -212,6 +230,9 @@ public sealed class PropagationService(
 
         await propagations.SaveAsync(propagation);
         await CarryWateringOverAsync(propagation, newPlants);
+
+        if (into is not null)
+            await new PlantService(plants, timeline, time).PotTogetherAsync(newPlants[0], into, request.Date, label);
 
         var text = $"Potted up {request.Count}: {string.Join(", ", newPlants.Select(p => p.DisplayName))}";
         await AddChangeAsync(propagation, WithOutcome(text, propagation), occurredAt,

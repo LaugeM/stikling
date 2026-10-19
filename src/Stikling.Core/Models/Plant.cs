@@ -109,6 +109,32 @@ public sealed class Plant : Entity
     public PlantStatus Status { get; set; } = PlantStatus.Active;
 
     /// <summary>
+    /// How many are in the pot, e.g. five aloe pups kept as one plant. Null means one, which is what
+    /// every older plant reads as. One is never stored.
+    /// </summary>
+    public int? Count { get; set; }
+
+    [JsonIgnore]
+    public int HowMany => Count ?? 1;
+
+    /// <summary>
+    /// The plant whose pot this one went into. Null when it has a pot of its own. The plant keeps
+    /// Status Active, since older versions can't read a new status; <see cref="InCollection"/> says
+    /// whether it counts as a plant of its own.
+    /// </summary>
+    public Guid? PottedWithPlantId { get; set; }
+
+    /// <summary>The day it went into the other plant's pot.</summary>
+    public DateOnly? PottedWithSince { get; set; }
+
+    /// <summary>
+    /// In the collection as a plant of its own, which is what lists, counts, Today and pots go by:
+    /// not died or gone, and not potted in with another plant.
+    /// </summary>
+    [JsonIgnore]
+    public bool InCollection => Status == PlantStatus.Active && PottedWithPlantId is null;
+
+    /// <summary>
     /// The day the status last changed: when it died, was given away or sold, or came back into the
     /// collection. Null for a plant whose status hasn't changed since this field was added; for those,
     /// <see cref="Year.PlantYear"/> reads the day from the plant's history instead.
@@ -234,7 +260,7 @@ public sealed class Plant : Entity
 
     /// <summary>Marked as something to swap, and still here to swap.</summary>
     [JsonIgnore]
-    public bool IsOffered => Spare is not null && !IsDeleted && Status == PlantStatus.Active;
+    public bool IsOffered => Spare is not null && !IsDeleted && InCollection;
 
     /// <summary>Pinned to the top of the plant list.</summary>
     public bool Favourite { get; set; }
@@ -357,7 +383,7 @@ public sealed class Plant : Entity
     /// plant died or left is either free again or went with it.
     /// </summary>
     public bool Uses(Guid potId) =>
-        Status == PlantStatus.Active && (InnerPotId == potId || OuterPotId == potId);
+        InCollection && (InnerPotId == potId || OuterPotId == potId);
 
     /// <summary>True when this pot left the house with the plant.</summary>
     public bool TookAway(Guid potId) => HasLeft && PotsTaken switch
@@ -411,6 +437,10 @@ public sealed class Plant : Entity
             errors.Add("It can't go dormant in the future.");
         if (WaterAt is < 1 or > 10)
             errors.Add("The watering level goes from 1 to 10.");
+        if (Count < 1)
+            errors.Add("There's at least one plant in a pot.");
+        if (PottedWithPlantId is not null && PottedWithPlantId == Id)
+            errors.Add("A plant can't be potted with itself.");
         if (PotsTaken != PotsTaken.None && !HasLeft)
             errors.Add("Only a plant that was given away or sold can take its pots with it.");
         return errors;

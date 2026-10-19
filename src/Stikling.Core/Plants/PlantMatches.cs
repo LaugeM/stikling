@@ -11,7 +11,7 @@ public static class PlantMatches
     /// on the nickname, since a lone species or cultivar says too little.</summary>
     public static IReadOnlyList<Plant> SameName(Plant draft, IEnumerable<Plant> plants) =>
         plants
-            .Where(p => p.Id != draft.Id && !p.IsDeleted && p.Status == PlantStatus.Active)
+            .Where(p => p.Id != draft.Id && !p.IsDeleted && p.InCollection)
             .Where(p => SameNickname(p, draft) || SameBotanicalName(p, draft))
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();

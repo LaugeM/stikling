@@ -388,9 +388,9 @@ else
                             {
                                 <li>
                                     <a href="plants/@plant.Id">@plant.DisplayName</a>
-                                    @if (plant.Status != PlantStatus.Active)
+                                    @if (!plant.InCollection)
                                     {
-                                        <span class="text-body-secondary small"> · @Labels.For(plant.Status)</span>
+                                        <span class="text-body-secondary small"> · @Labels.StatusOf(plant)</span>
                                     }
                                 </li>
                             }
@@ -600,6 +600,44 @@ else
                             This propagation keeps its history.
                         </p>
                     }
+                    <div class="mb-3" role="radiogroup" aria-label="How they are potted">
+                        @if (propagation.RemainingCount > 1)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="potup-mode" id="potup-each" checked="@(PotUpMode == PotUpKind.Each)" @onchange="() => potUp.Mode = PotUpKind.Each" />
+                                <label class="form-check-label" for="potup-each">Each in its own pot</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="potup-mode" id="potup-one" checked="@(PotUpMode == PotUpKind.OnePot)" @onchange="() => potUp.Mode = PotUpKind.OnePot" />
+                                <label class="form-check-label" for="potup-one">All in one pot</label>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="potup-mode" id="potup-each" checked="@(PotUpMode == PotUpKind.Each)" @onchange="() => potUp.Mode = PotUpKind.Each" />
+                                <label class="form-check-label" for="potup-each">In a pot of its own</label>
+                            </div>
+                        }
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="potup-mode" id="potup-into" checked="@(PotUpMode == PotUpKind.Into)" @onchange="() => potUp.Mode = PotUpKind.Into" />
+                            <label class="form-check-label" for="potup-into">In with a plant you have</label>
+                        </div>
+                    </div>
+                    @if (PotUpMode == PotUpKind.Into)
+                    {
+                        <div class="mb-2">
+                            <PlantSelect Id="potup-into-plant" Plants="allPlants" Genus="@(string.IsNullOrWhiteSpace(propagation.Genus) ? parent?.Genus : propagation.Genus)" Value="potUp.IntoPlantId" ValueChanged="id => potUp.IntoPlantId = id" />
+                            @if (!allPlants.Any(p => p.InCollection))
+                            {
+                                <div class="form-text">There are no plants to pot them with.</div>
+                            }
+                            else
+                            {
+                                <div class="form-text">They take that plant's pot, medium and room, and are counted in it.</div>
+                            }
+                        </div>
+                    }
                     @if (propagation.RemainingCount > 1)
                     {
                         <div class="mb-2">
@@ -611,45 +649,51 @@ else
                     <div class="mb-2">
                         <label class="form-label" for="potup-name">Nickname</label>
                         <input id="potup-name" class="form-control" @bind="potUp.Nickname" @bind:event="oninput" placeholder="@(propagation.BotanicalName ?? "")" />
-                        @if (potUp.Count > 1 || propagation.PottedUpCount > 0)
+                        @if (PotUpMode == PotUpKind.Each && (potUp.Count > 1 || propagation.PottedUpCount > 0))
                         {
                             <div class="form-text">Numbered when there are several, e.g. "@(string.IsNullOrWhiteSpace(potUp.Nickname) ? "Coleus" : potUp.Nickname.Trim()) @(propagation.PottedUpCount + 1)".</div>
                         }
                     </div>
-                    @if (InPlantMedium && !potUp.ChangeMedium)
+                    @if (PotUpMode != PotUpKind.Into)
                     {
-                        <button type="button" class="btn btn-link btn-sm link-action p-0 mb-2" @onclick="() => potUp.ChangeMedium = true">Moved it to something else?</button>
-                    }
-                    else
-                    {
-                        <div class="mb-2">
-                            <label class="form-label" for="potup-medium">Grows in</label>
-                            <select id="potup-medium" class="form-select" value="@potUp.Medium" @onchange="SetPotUpMedium">
-                                @foreach (var medium in Enum.GetValues<GrowingMedium>())
-                                {
-                                    <option value="@medium">@Labels.For(medium)</option>
-                                }
-                            </select>
-                        </div>
-                        @if (potUp.Medium == GrowingMedium.Soil)
+                        @if (InPlantMedium && !potUp.ChangeMedium)
+                        {
+                            <button type="button" class="btn btn-link btn-sm link-action p-0 mb-2" @onclick="() => potUp.ChangeMedium = true">Moved it to something else?</button>
+                        }
+                        else
                         {
                             <div class="mb-2">
-                                <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
+                                <label class="form-label" for="potup-medium">Grows in</label>
+                                <select id="potup-medium" class="form-select" value="@potUp.Medium" @onchange="SetPotUpMedium">
+                                    @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                                    {
+                                        <option value="@medium">@Labels.For(medium)</option>
+                                    }
+                                </select>
                             </div>
+                            @if (potUp.Medium == GrowingMedium.Soil)
+                            {
+                                <div class="mb-2">
+                                    <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
+                                </div>
+                            }
                         }
+                        <div class="mb-2">
+                            <PotPicker Value="potUp.PotId" ValueChanged="SetPotUpPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                        </div>
                     }
-                    <div class="mb-2">
-                        <PotPicker Value="potUp.PotId" ValueChanged="SetPotUpPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
-                    </div>
                     <div class="mb-2">
                         <label class="form-label" for="potup-date">Date</label>
                         <input id="potup-date" type="date" class="form-control" @bind="potUp.Date" min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                     </div>
-                    <div class="mb-3">
-                        <RoomPicker @bind-Value="potUp.Location" Rooms="rooms" Label="Where it goes" />
-                    </div>
+                    @if (PotUpMode != PotUpKind.Into)
+                    {
+                        <div class="mb-3">
+                            <RoomPicker @bind-Value="potUp.Location" Rooms="rooms" Label="Where it goes" />
+                        </div>
+                    }
                     <div class="form-actions">
-                        <button type="button" class="btn btn-primary" disabled="@(busy || !CountIsValid(potUp.Count))" @onclick="PotUpAsync">
+                        <button type="button" class="btn btn-primary" disabled="@(busy || !CountIsValid(potUp.Count) || (PotUpMode == PotUpKind.Into && potUp.IntoPlantId is null))" @onclick="PotUpAsync">
                             @(InPlantMedium
                                 ? (potUp.Count == 1 ? "It's a plant now" : $"Make {potUp.Count} plants")
                                 : (potUp.Count == 1 ? "Pot up" : $"Pot up {potUp.Count}"))
@@ -843,6 +887,13 @@ else
     private bool shareOpen;
     private bool shareOnLink;
 
+    private enum PotUpKind { Each, OnePot, Into }
+
+    // One left can't be split into pots, so it is only a pot of its own or in with a plant
+    private PotUpKind PotUpMode => potUp.Mode == PotUpKind.OnePot && propagation?.RemainingCount < 2 ? PotUpKind.Each : potUp.Mode;
+
+    private IReadOnlyList<Plant> allPlants = [];
+
     private sealed class PotUpForm
     {
         public int Count { get; set; } = 1;
@@ -852,6 +903,8 @@ else
         public GrowingMedium Medium { get; set; }
         public Guid? PotId { get; set; }
         public Guid? SoilMixId { get; set; }
+        public PotUpKind Mode { get; set; }
+        public Guid? IntoPlantId { get; set; }
 
         /// <summary>Shows Grows in and the mix for a propagation already in a plant medium, which hides them.</summary>
         public bool ChangeMedium { get; set; }
@@ -1027,6 +1080,7 @@ else
         await Covers.EnsureLoadedAsync();
         propagation = await Repository.GetAsync(Id);
         var plants = await PlantRepository.GetAllAsync();
+        allPlants = plants;
         var propagations = allPropagations = await Repository.GetAllAsync();
         parent = propagation?.ParentPlantId is { } parentId ? plants.FirstOrDefault(p => p.Id == parentId) : null;
         offspring = plants.Where(p => p.FromPropagationId == Id)
@@ -1261,7 +1315,8 @@ else
         {
             var placeId = await RoomService.PlaceIdAsync(potUp.Location);
             madePlants = await PropagationService.PotUpAsync(propagation, new PotUpRequest(
-                potUp.Count, potUp.Date, potUp.Nickname, placeId, potUp.Medium, potUp.PotId, potUp.Medium == GrowingMedium.Soil ? potUp.SoilMixId : null));
+                potUp.Count, potUp.Date, potUp.Nickname, placeId, potUp.Medium, potUp.PotId, potUp.Medium == GrowingMedium.Soil ? potUp.SoilMixId : null,
+                OnePot: PotUpMode == PotUpKind.OnePot, IntoPlantId: PotUpMode == PotUpKind.Into ? potUp.IntoPlantId : null), Labels.For);
             message = madePlants.Count == 1 ? "Potted up:" : $"Potted up {madePlants.Count}:";
             stageView = StageView.None;
             await LoadAsync();

@@ -35,7 +35,7 @@ public sealed record FloweringCalendar(
         var usually = new List<CalendarPlant>();
         var perMonth = Enumerable.Range(1, 12).ToDictionary(m => m, _ => new List<CalendarPlant>());
 
-        foreach (var plant in plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active)
+        foreach (var plant in plants.Where(p => !p.IsDeleted && p.InCollection)
                      .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase))
         {
             var flowerings = Flowerings.Of(byPlant[plant.Id], plant.Id, today);

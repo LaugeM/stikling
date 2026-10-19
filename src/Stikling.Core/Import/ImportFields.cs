@@ -28,6 +28,8 @@ public enum ImportField
     Raised,
     Source,
     Price,
+    HowMany,
+    PottedWith,
     Medium,
     Status,
     Tags,
@@ -76,6 +78,8 @@ public static class ImportFields
         ImportField.Raised => "How it was raised",
         ImportField.Source => "Source",
         ImportField.Price => "Price paid",
+        ImportField.HowMany => "How many",
+        ImportField.PottedWith => "Potted with (kept in About it)",
         ImportField.Medium => "Grows in",
         ImportField.Status => "Status",
         ImportField.Tags => "Tags",
@@ -94,7 +98,7 @@ public static class ImportFields
         ("Name", [ImportField.Name, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote]),
         ("Where and when", [ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source, ImportField.Price]),
         ("Care", [ImportField.LastWatered, ImportField.LastFed, ImportField.LastRepotted]),
-        ("More about it", [ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt]),
+        ("More about it", [ImportField.HowMany, ImportField.PottedWith, ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt]),
         ("Your fields", [ImportField.OwnField])
     ];
 
@@ -104,11 +108,13 @@ public static class ImportFields
     [
         ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote,
         ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source,
-        ImportField.Price, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
+        ImportField.Price, ImportField.HowMany, ImportField.PottedWith, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
     ];
 
-    // The same for an export from before the Raised column, before the name columns, and before the Number column
-    private static readonly ImportField[] OwnExportBeforeRaised = [.. OwnExport.Where((_, i) => i != 12)];
+    // The same for an export from before the How many column, before the Raised column, before the name columns, and before the Number column
+    private static readonly ImportField[] OwnExportBeforePottedWith = [.. OwnExport.Where((_, i) => i != 16)];
+    private static readonly ImportField[] OwnExportBeforeHowMany = [.. OwnExportBeforePottedWith.Where((_, i) => i != 15)];
+    private static readonly ImportField[] OwnExportBeforeRaised = [.. OwnExportBeforeHowMany.Where((_, i) => i != 12)];
     private static readonly ImportField[] OwnExportBeforeNameSure = [.. OwnExportBeforeRaised.Where((_, i) => i is not (6 or 7))];
     private static readonly ImportField[] OwnExportBeforeNumber = [.. OwnExportBeforeNameSure.Where((_, i) => i != 1)];
 
@@ -139,6 +145,8 @@ public static class ImportFields
         Add(ImportField.Raised, "raised", "raised as", "how raised", "propagation type", "grown as", "tc", "opformering", "dyrket som");
         Add(ImportField.Source, "source", "from", "shop", "store", "bought from", "kilde", "fra", "butik", "forhandler");
         Add(ImportField.Price, "price", "price paid", "cost", "pris", "købspris");
+        Add(ImportField.HowMany, "how many", "count", "qty", "quantity", "antal");
+        Add(ImportField.PottedWith, "potted with");
         Add(ImportField.Medium, "medium", "soil", "substrate", "grows in", "jord", "substrat");
         Add(ImportField.Status, "status");
         Add(ImportField.Tags, "tags", "tag", "labels", "mærker");
@@ -159,14 +167,8 @@ public static class ImportFields
     {
         // Our own export, with a column after Added for each field of the person's own. Those are kept
         // as a line in About it until the import can make fields of them.
-        if (headings.Count >= CsvExport.PlantHeader.Length && headings.Take(CsvExport.PlantHeader.Length).SequenceEqual(CsvExport.PlantHeader))
-            return [.. OwnExport, .. Enumerable.Repeat(ImportField.AboutLine, headings.Count - OwnExport.Length)];
-        if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeRaised))
-            return [.. OwnExportBeforeRaised];
-        if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeNameSure))
-            return [.. OwnExportBeforeNameSure];
-        if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeNumber))
-            return [.. OwnExportBeforeNumber];
+        if (OwnExportColumns(headings) is { } own)
+            return [.. own, .. Enumerable.Repeat(ImportField.AboutLine, headings.Count - own.Length)];
 
         var guess = new ImportField[headings.Count];
         var taken = new HashSet<ImportField>();
@@ -179,6 +181,28 @@ public static class ImportFields
                 guess[i] = field;
         }
         return guess;
+    }
+
+    // The columns of our own export when the headings are one, in any version of it. Only the two newest
+    // can have columns for the person's own fields after them.
+    private static ImportField[]? OwnExportColumns(IReadOnlyList<string> headings)
+    {
+        static bool Starts(IReadOnlyList<string> headings, string[] header) =>
+            headings.Count >= header.Length && headings.Take(header.Length).SequenceEqual(header);
+
+        if (Starts(headings, CsvExport.PlantHeader))
+            return OwnExport;
+        if (Starts(headings, CsvExport.PlantHeaderBeforePottedWith))
+            return OwnExportBeforePottedWith;
+        if (Starts(headings, CsvExport.PlantHeaderBeforeHowMany))
+            return OwnExportBeforeHowMany;
+        if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeRaised))
+            return OwnExportBeforeRaised;
+        if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeNameSure))
+            return OwnExportBeforeNameSure;
+        if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeNumber))
+            return OwnExportBeforeNumber;
+        return null;
     }
 
     /// <summary>
@@ -195,8 +219,7 @@ public static class ImportFields
         var targets = new ImportOwnField?[headings.Count];
         var usedNames = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
-        var fromOwnExport = headings.Count >= CsvExport.PlantHeader.Length
-            && headings.Take(CsvExport.PlantHeader.Length).SequenceEqual(CsvExport.PlantHeader);
+        var fromOwnExport = OwnExportColumns(headings);
         for (var i = 0; i < headings.Count; i++)
         {
             // Only a column the guess left as a line in About it. In our own export that is any column
@@ -204,7 +227,7 @@ public static class ImportFields
             // repeats a field another column took.
             if (matches[i] != ImportField.AboutLine)
                 continue;
-            if (fromOwnExport ? i < OwnExport.Length : Words.ContainsKey(Simplify(headings[i])) || headings[i].Trim() == "#")
+            if (fromOwnExport is { } own ? i < own.Length : Words.ContainsKey(Simplify(headings[i])) || headings[i].Trim() == "#")
                 continue;
 
             var name = headings[i].Trim();

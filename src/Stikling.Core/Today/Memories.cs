@@ -41,7 +41,7 @@ public static class Memories
         var found = new List<(Memory Memory, int Count)>();
         foreach (var plant in plants)
         {
-            if (plant.IsDeleted || plant.Status != PlantStatus.Active || !byPlant.TryGetValue(plant.Id, out var own))
+            if (plant.IsDeleted || !plant.InCollection || !byPlant.TryGetValue(plant.Id, out var own))
                 continue;
 
             var newest = own.OrderByDescending(p => p.TakenAt).First();

@@ -125,7 +125,7 @@ public static class TodayBoard
     /// </summary>
     public static IReadOnlyList<AttentionItem> NeedsAttention(
         IEnumerable<Plant> plants, IEnumerable<Propagation> propagations, DateOnly today) =>
-        plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.Attention is not null)
+        plants.Where(p => !p.IsDeleted && p.InCollection && p.Attention is not null)
             .Select(p => new AttentionItem(p, p.DisplayName, p.Attention!, AttentionLater.FromOf(p.Attention, p.AttentionLater)))
             .Concat(propagations.Where(p => !p.IsDeleted && p.IsActive && p.Attention is not null)
                 .Select(p => new AttentionItem(p, p.ListName, p.Attention!, AttentionLater.FromOf(p.Attention, p.AttentionLater))))
@@ -139,7 +139,7 @@ public static class TodayBoard
     /// one that has waited longest comes first.
     /// </summary>
     public static IReadOnlyList<Plant> QuarantineUp(IEnumerable<Plant> plants, DateOnly today) =>
-        plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.QuarantineEnds <= today)
+        plants.Where(p => !p.IsDeleted && p.InCollection && p.QuarantineEnds <= today)
             .OrderBy(p => p.QuarantineEnds)
             .ThenBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();

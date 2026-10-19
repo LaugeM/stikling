@@ -284,7 +284,7 @@ else
     {
         everyPlant = await PlantRepository.GetAllAsync();
         plants = everyPlant
-            .Where(p => p.Status == PlantStatus.Active)
+            .Where(p => p.InCollection)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
         places = await RoomService.GetPlacesAsync();

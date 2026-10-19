@@ -312,7 +312,7 @@ else
     private DateOnly Today => Time.Today();
 
     /// <summary>A plant that is gone only has its problem to read, or delete.</summary>
-    private bool Here => plant is { Status: PlantStatus.Active };
+    private bool Here => plant is { InCollection: true };
 
     private IReadOnlyList<ProblemTrend> trends =>
         updates.Where(u => u.Trend is not null).Select(u => u.Trend!.Value).ToList();

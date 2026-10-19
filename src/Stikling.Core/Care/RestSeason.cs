@@ -77,7 +77,7 @@ public static class RestSeason
         IEnumerable<Plant> plants, Func<Plant, DormantPeriods> periodsOf, Hemisphere hemisphere, DateOnly today)
     {
         var result = new List<(Plant Plant, DateOnly WindowStart)>();
-        foreach (var plant in plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && !p.IsDormant))
+        foreach (var plant in plants.Where(p => !p.IsDeleted && p.InCollection && !p.IsDormant))
         {
             var periods = periodsOf(plant);
             if (WindowStart(plant, periods, hemisphere, today) is { } start && !periods.Starts.Any(s => s >= start))

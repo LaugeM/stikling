@@ -45,7 +45,7 @@ public static class SitterSheetBuilder
         var span = AwayTime.Spans(stretches).FirstOrDefault(s => s.Kind == AwayKind.Away && s.Until > today)?.Trip;
         var visits = span is null ? [] : SitterVisits.Dates(sheet.Visits, span.From, span.Until);
 
-        var activePlants = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
+        var activePlants = plants.Where(p => !p.IsDeleted && p.InCollection).ToList();
         var activeCuttings = propagations.Where(p => !p.IsDeleted && p.IsActive).ToList();
         var guesses = WateringRound.GuessesForAll(
             activePlants, logs.Where(l => !l.IsDeleted), timeline, pot, lights, places, stretches, hemisphere, time);

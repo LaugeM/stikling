@@ -126,7 +126,7 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
         var first = origin is null ? Capital(rooted) : rooted is null ? origin : $"{origin}, {rooted}";
 
         // Only a plant that is still here has been "with me" until now, since the day it left isn't kept
-        var since = plant.Status == PlantStatus.Active && plant.AcquiredOn is { } acquired ? $"With me since {acquired.Text()}" : null;
+        var since = plant.InCollection && plant.AcquiredOn is { } acquired ? $"With me since {acquired.Text()}" : null;
 
         var sentences = new[] { first, since }.OfType<string>().Select(s => s + ".").ToList();
         return sentences.Count == 0 ? null : string.Join(' ', sentences);
@@ -141,7 +141,7 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
             return Counted(sign, from.Type == PropagationType.Seed ? "to come up" : "to root");
 
         // Only a day that was entered whole can be counted from; a month or a year would be a guess
-        if (plant.Status == PlantStatus.Active && plant.AcquiredOn is { Precision: DatePrecision.Day } acquired)
+        if (plant.InCollection && plant.AcquiredOn is { Precision: DatePrecision.Day } acquired)
         {
             var date = acquired.Start;
             var days = today.DayNumber - date.DayNumber;

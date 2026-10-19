@@ -58,6 +58,10 @@
     [Parameter, EditorRequired]
     public required IReadOnlyList<PlantRow> Rows { get; set; }
 
+    /// <summary>The name of the plant a plant is potted with, for its status.</summary>
+    [Parameter]
+    public Func<Plant, string?>? PottedWithName { get; set; }
+
     [Parameter, EditorRequired]
     public required IReadOnlyList<TableColumn> Columns { get; set; }
 
@@ -146,7 +150,7 @@
             PlantColumn.LikesHumidity => @<text>@(plant.LikesHumidity is { } wantsHumidity ? Labels.For(wantsHumidity) : null)</text>,
             PlantColumn.Season => @<text>@(plant.GrowingSeason is { } season ? Labels.For(season) : null)</text>,
             PlantColumn.Moisture => @<text>@(row.Moisture is { } reading ? $"{reading.Value}/10" : null)</text>,
-            PlantColumn.Status => @<text>@Labels.For(plant.Status)@if (row.Flowering is { Stale: false } flowering && plant.Status == PlantStatus.Active){<text> · @FloweringText.Badge(flowering.Stage)</text>}</text>,
+            PlantColumn.Status => @<text>@Labels.StatusOf(plant, PottedWithName?.Invoke(plant))@if (row.Flowering is { Stale: false } flowering && plant.InCollection){<text> · @FloweringText.Badge(flowering.Stage)</text>}</text>,
             PlantColumn.Tags => @<text>@foreach (var tag in plant.Tags){<span class="tag-label">@tag</span> }</text>,
             PlantColumn.Number => @<text>@plant.CollectionNumber</text>,
             PlantColumn.Added => @<text>@Labels.Date(DateOnly.FromDateTime(plant.CreatedAt.LocalDateTime))</text>,
@@ -172,6 +176,10 @@
         else
         {
             <a class="plant-name" href="plants/@plant.Id">@CoreTable.NameFor(plant, cultivarShown)</a>
+        }
+        @if (plant.HowMany > 1)
+        {
+            <span class="item-count" title="@($"{plant.HowMany} in the pot")">×@plant.HowMany</span>
         }
         @if (plant.Favourite)
         {

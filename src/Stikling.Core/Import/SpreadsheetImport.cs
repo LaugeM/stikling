@@ -194,6 +194,14 @@ public static class SpreadsheetImport
                     CantRead(ImportField.Price, $"Couldn't read \"{price}\" as a price, kept in About it");
             }
 
+            if (Get(ImportField.HowMany) is { } howMany)
+            {
+                if (int.TryParse(howMany.Trim(), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var howManyValue) && howManyValue >= 1)
+                    draft.Count = howManyValue == 1 ? null : howManyValue;
+                else
+                    CantRead(ImportField.HowMany, $"Couldn't read \"{howMany}\" as a number of plants, kept in About it");
+            }
+
             var care = new List<ImportCare>();
             foreach (var (field, kind) in CareColumns)
             {
@@ -229,6 +237,9 @@ public static class SpreadsheetImport
                 notes.Add(about);
             if (leftover is not null)
                 notes.Add(leftover);
+            // Not linked, since the plant it names may not be imported: kept as text
+            if (Get(ImportField.PottedWith) is { } pottedWith)
+                notes.Add($"Potted with {pottedWith}");
             foreach (var column in aboutLines)
                 if (column < cells.Count && cells[column].Trim() is { Length: > 0 } text)
                     notes.Add($"{sheet.Headings[column]}: {text}");

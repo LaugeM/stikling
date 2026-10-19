@@ -21,7 +21,7 @@ public sealed record MixUse(SoilMix Mix, int Plants)
 
     /// <summary>The plants still in the collection that are in a mix, by name.</summary>
     public static IReadOnlyList<Plant> PlantsIn(Guid mixId, IEnumerable<Plant> plants) => plants
-        .Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.SoilMixId == mixId)
+        .Where(p => !p.IsDeleted && p.InCollection && p.SoilMixId == mixId)
         .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
         .ToList();
 }

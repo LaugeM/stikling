@@ -19,6 +19,15 @@ public static class Labels
         _ => status.ToString()
     };
 
+    /// <summary>
+    /// What to say about a plant that isn't in the collection: its status, or that it is potted with
+    /// another plant, by name when the name is known.
+    /// </summary>
+    public static string StatusOf(Plant plant, string? pottedWith = null) =>
+        plant.Status == PlantStatus.Active && plant.PottedWithPlantId is not null
+            ? (string.IsNullOrWhiteSpace(pottedWith) ? "Potted with another plant" : $"Potted with {pottedWith}")
+            : For(plant.Status);
+
     public static string For(PlantOrigin origin) => origin switch
     {
         PlantOrigin.Purchased => "Purchased",

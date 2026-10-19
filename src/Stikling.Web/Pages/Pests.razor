@@ -135,7 +135,7 @@ else
         problems = (await ProblemService.AllAsync())
             .Where(p => p.IsOpen)
             .Select(p => (Problem: p, Plant: plants.FirstOrDefault(x => x.Id == p.SubjectId)))
-            .Where(x => x.Plant is { Status: PlantStatus.Active })
+            .Where(x => x.Plant is { InCollection: true })
             .OrderByDescending(x => x.Problem.StartedOn)
             .Select(x => new OpenProblem(x.Problem, x.Plant!, ProblemService.LatestTrend(allUpdates.Where(u => u.ProblemId == x.Problem.Id))))
             .ToList();

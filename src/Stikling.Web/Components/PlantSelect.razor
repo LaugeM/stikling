@@ -1,0 +1,64 @@
+@* A select of the plants in the collection that a plant can be potted in with, the ones of the same
+   genus first. Used by Pot together and by potting a propagation up into a plant's pot. *@
+
+<label class="form-label" for="@Id">@Label</label>
+<select id="@Id" class="form-select" value="@Value" @onchange="Changed">
+    <option value="">Pick a plant</option>
+    @if (SameGenus.Count > 0)
+    {
+        <optgroup label="Same genus">
+            @foreach (var plant in SameGenus)
+            {
+                <option value="@plant.Id">@plant.DisplayName</option>
+            }
+        </optgroup>
+    }
+    @if (Others.Count > 0)
+    {
+        <optgroup label="Other plants">
+            @foreach (var plant in Others)
+            {
+                <option value="@plant.Id">@plant.DisplayName</option>
+            }
+        </optgroup>
+    }
+</select>
+
+@code {
+    /// <summary>The plants to choose from. Only the ones in the collection are listed, and never <see cref="Except"/>.</summary>
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<Plant> Plants { get; set; }
+
+    /// <summary>The genus to list first.</summary>
+    [Parameter]
+    public string? Genus { get; set; }
+
+    /// <summary>A plant that can't be picked, like the one that is being potted.</summary>
+    [Parameter]
+    public Guid? Except { get; set; }
+
+    [Parameter]
+    public Guid? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid?> ValueChanged { get; set; }
+
+    [Parameter]
+    public string Id { get; set; } = "pot-with";
+
+    [Parameter]
+    public string Label { get; set; } = "Which plant's pot";
+
+    private IReadOnlyList<Plant> Choices => [.. Plants
+        .Where(p => !p.IsDeleted && p.InCollection && p.Id != Except)
+        .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
+
+    private bool Matches(Plant plant) =>
+        !string.IsNullOrWhiteSpace(Genus) && string.Equals(plant.Genus?.Trim(), Genus.Trim(), StringComparison.CurrentCultureIgnoreCase);
+
+    private IReadOnlyList<Plant> SameGenus => [.. Choices.Where(Matches)];
+    private IReadOnlyList<Plant> Others => [.. Choices.Where(p => !Matches(p))];
+
+    private Task Changed(ChangeEventArgs e) =>
+        ValueChanged.InvokeAsync(Guid.TryParse(e.Value?.ToString(), out var id) ? id : null);
+}

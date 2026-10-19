@@ -38,9 +38,9 @@ else
                                 }
                             </span>
                             <span class="item-name">@ancestor.DisplayName</span>
-                            @if (ancestor.Status != PlantStatus.Active)
+                            @if (!ancestor.InCollection)
                             {
-                                <span class="badge text-bg-secondary">@Labels.For(ancestor.Status)</span>
+                                <span class="badge text-bg-secondary">@Labels.StatusOf(ancestor)</span>
                             }
                         </a>
                     </li>
@@ -74,9 +74,9 @@ else
         {
             <p class="detail-sub"><BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" Note="@plant.NameNote" /></p>
         }
-        @if (plant.Status != PlantStatus.Active)
+        @if (!plant.InCollection)
         {
-            <p class="profile-facts">@Labels.For(plant.Status)</p>
+            <p class="profile-facts">@Labels.StatusOf(plant)</p>
         }
         <a class="btn btn-outline-primary" href="plants/@plant.Id">Open plant</a>
     </section>
@@ -156,7 +156,7 @@ else
         loaded = true;
     }
 
-    private static bool Left(Plant p) => p.Status != PlantStatus.Active;
+    private static bool Left(Plant p) => !p.InCollection;
 
     private async Task LoadAsync()
     {

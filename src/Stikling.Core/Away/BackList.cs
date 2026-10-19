@@ -79,7 +79,7 @@ public static class BackList
         int? length)
     {
         var today = time.Today();
-        var activePlants = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
+        var activePlants = plants.Where(p => !p.IsDeleted && p.InCollection).ToList();
         var activeCuttings = propagations.Where(p => !p.IsDeleted && p.IsActive).ToList();
         var liveLogs = logs.Where(l => !l.IsDeleted).ToList();
         var liveTimeline = timeline.Where(e => !e.IsDeleted).ToList();

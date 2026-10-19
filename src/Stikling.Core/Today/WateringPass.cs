@@ -146,5 +146,5 @@ public static class WateringPass
     }
 
     private static IEnumerable<Plant> Active(IEnumerable<Plant> plants) =>
-        plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active);
+        plants.Where(p => !p.IsDeleted && p.InCollection);
 }

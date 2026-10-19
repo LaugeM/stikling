@@ -356,6 +356,13 @@ else
                         <div class="form-text">For a plain outer pot you keep water in, with the medium wicking it up.</div>
                     }
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="how-many">How many in the pot</label>
+                    <InputNumber id="how-many" class="form-control" @bind-Value="plant.Count"
+                                 min="1" step="1" placeholder="1" inputmode="numeric" aria-describedby="how-many-help" />
+                    <div id="how-many-help" class="form-text">For pups or cuttings kept together in one pot</div>
+                </div>
             </FormSection>
 
             <FormSection Title="Watering" Summary="@WateringSummary" Open="openWatering">
@@ -1193,6 +1200,9 @@ else
 
         plant.CollectionNumber = CollectionNumbers.Normalize(plant.CollectionNumber);
         CareLikes.Normalize(plant);
+        // One is never stored
+        if (plant.Count == 1)
+            plant.Count = null;
         errors = plant.Validate(Today).ToList();
         var fieldValues = new List<(Guid Id, string? Value)>();
         foreach (var field in ownFields)
