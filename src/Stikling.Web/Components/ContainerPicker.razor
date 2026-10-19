@@ -1,0 +1,79 @@
+@* What a propagation is in. A text box with the containers you have as chips under it, because a
+   datalist is invisible on a phone. A name that isn't a container yet becomes one when the form is saved. *@
+
+<div class="container-picker">
+    <label class="form-label" for="@Id">@Label</label>
+    <input id="@Id" class="form-control" autocomplete="off" placeholder="@Placeholder"
+           value="@Value" @oninput="TypeAsync" />
+
+    @if (Matching.Count > 0)
+    {
+        <div class="chip-row mt-2" role="group" aria-label="Containers you have">
+            @foreach (var use in Matching)
+            {
+                <button type="button" class="chip" @onclick="() => SetAsync(use.Pot.Name)">@use.Pot.Name</button>
+            }
+        </div>
+    }
+
+    @if (Exact is { } exact)
+    {
+        if (Labels.Use(exact) is { Length: > 0 } line)
+        {
+            <div class="form-text">@line</div>
+        }
+    }
+    else if (ContainerName.Clean(Value) is { } typed)
+    {
+        <div class="form-text">"@typed" will be added to your containers when you save.</div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>The containers to offer, the ones used most recently first.</summary>
+    [Parameter]
+    public IReadOnlyList<PotUse> Containers { get; set; } = [];
+
+    [Parameter]
+    public string Label { get; set; } = "Container";
+
+    [Parameter]
+    public string Placeholder { get; set; } = "e.g. Clear box with lid";
+
+    [Parameter]
+    public string Id { get; set; } = "container";
+
+    private const int MostShown = 8;
+
+    // The ones that fit what's typed, leaving out the one that already says it
+    private IReadOnlyList<PotUse> Matching
+    {
+        get
+        {
+            var typed = ContainerName.Clean(Value);
+            return Containers
+                .Where(u => typed is null || (!ContainerName.Same(u.Pot.Name, typed)
+                    && (u.Pot.Name ?? "").Contains(typed, StringComparison.CurrentCultureIgnoreCase)))
+                .Take(MostShown)
+                .ToList();
+        }
+    }
+
+    private PotUse? Exact => ContainerName.Clean(Value) is { } typed
+        ? Containers.FirstOrDefault(u => ContainerName.Same(u.Pot.Name, typed))
+        : null;
+
+    private Task TypeAsync(ChangeEventArgs e) => SetAsync(e.Value?.ToString());
+
+    private Task SetAsync(string? text)
+    {
+        Value = text;
+        return ValueChanged.InvokeAsync(text);
+    }
+}

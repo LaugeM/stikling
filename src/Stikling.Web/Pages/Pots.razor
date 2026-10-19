@@ -17,7 +17,7 @@
 <p class="settings-hint">
     The pots you own, so a plant can point at one instead of you typing it again. A nursery pot goes
     inside something, an outer pot has no drainage and holds a nursery pot, and some pots need nothing
-    around them.
+    around them. Containers for propagating, like a box with a lid, have their own list.
 </p>
 
 @if (errors.Count > 0)
@@ -36,7 +36,7 @@
 }
 
 <div class="btn-group segmented pot-kinds mb-3" role="radiogroup" aria-label="Which pots to show">
-    @foreach (var group in Enum.GetValues<PotGroup>())
+    @foreach (var group in Enum.GetValues<PotKind>())
     {
         var id = $"pot-kind-{group}";
         <input type="radio" class="btn-check" name="pot-kind" id="@id"
@@ -48,15 +48,15 @@
 @if (draft is not null)
 {
     <section class="settings-section">
-        <h2>@(editing is null ? "Add a pot" : "Edit pot")</h2>
+        <h2>@(editing is null ? (IsContainer ? "Add a container" : "Add a pot") : (IsContainer ? "Edit container" : "Edit pot"))</h2>
 
         <div class="mb-3">
             <div class="form-label">What kind</div>
             <div class="chip-row" role="group" aria-label="What kind of pot">
-                @foreach (var group in Enum.GetValues<PotGroup>())
+                @foreach (var group in OfferedKinds)
                 {
-                    <button type="button" class="chip @Picked(draft.Group == group)"
-                            @onclick="() => draft.Group = group">@Labels.For(group)</button>
+                    <button type="button" class="chip @Picked(draft.Kind == group)"
+                            @onclick="() => SetDraftKind(group)">@Labels.For(group)</button>
                 }
             </div>
         </div>
@@ -73,9 +73,16 @@
                     }
                 </div>
             }
-            <input id="pot-name" class="form-control" placeholder="e.g. Clear nursery pot" autocomplete="off"
+            <input id="pot-name" class="form-control" placeholder="@(IsContainer ? "e.g. Clear box with lid" : "e.g. Clear nursery pot")" autocomplete="off"
                    value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
-            <div class="form-text">Every size of the same pot shares a name, so they stay together in the list.</div>
+            @if (IsContainer)
+            {
+                <div class="form-text">Identical containers are one entry. Say how many you have below.</div>
+            }
+            else
+            {
+                <div class="form-text">Every size of the same pot shares a name, so they stay together in the list.</div>
+            }
         </div>
 
         <div class="mb-3">
@@ -166,32 +173,35 @@
                 pot really fits, since both usually taper.
             </div>
 
-            <div class="mt-3">
-                <label class="form-label" for="pot-rim">Rim (mm)</label>
-                <input id="pot-rim" class="form-control" type="number" inputmode="decimal" min="0" step="0.5"
-                       @bind="draft.RimMm" />
-                <div class="form-text">A rim lets the pot hang on an outer pot instead of standing in it.</div>
-            </div>
-
-            <div class="mt-3">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="pot-self-watering"
-                           checked="@(draft.SelfWatering is not null)"
-                           @onchange="e => SetSelfWatering((bool?)e.Value == true)" />
-                    <label class="form-check-label" for="pot-self-watering">Waters itself</label>
+            @if (!IsContainer)
+            {
+                <div class="mt-3">
+                    <label class="form-label" for="pot-rim">Rim (mm)</label>
+                    <input id="pot-rim" class="form-control" type="number" inputmode="decimal" min="0" step="0.5"
+                           @bind="draft.RimMm" />
+                    <div class="form-text">A rim lets the pot hang on an outer pot instead of standing in it.</div>
                 </div>
-                @if (draft.SelfWatering is { } watering)
-                {
-                    <div class="chip-row mt-2" role="group" aria-label="How it waters itself">
-                        @foreach (var option in Enum.GetValues<PotWatering>())
-                        {
-                            <button type="button" class="chip @Picked(watering == option)"
-                                    @onclick="() => draft.SelfWatering = option">@Labels.For(option)</button>
-                        }
+
+                <div class="mt-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="pot-self-watering"
+                               checked="@(draft.SelfWatering is not null)"
+                               @onchange="e => SetSelfWatering((bool?)e.Value == true)" />
+                        <label class="form-check-label" for="pot-self-watering">Waters itself</label>
                     </div>
-                    <div class="form-text">A wick draws the water up. Submerged means the pot stands in it.</div>
-                }
-            </div>
+                    @if (draft.SelfWatering is { } watering)
+                    {
+                        <div class="chip-row mt-2" role="group" aria-label="How it waters itself">
+                            @foreach (var option in Enum.GetValues<PotWatering>())
+                            {
+                                <button type="button" class="chip @Picked(watering == option)"
+                                        @onclick="() => draft.SelfWatering = option">@Labels.For(option)</button>
+                            }
+                        </div>
+                        <div class="form-text">A wick draws the water up. Submerged means the pot stands in it.</div>
+                    }
+                </div>
+            }
 
             <div class="mt-3">
                 <label class="form-label" for="pot-notes">Notes</label>
@@ -201,7 +211,7 @@
 
         <div class="form-actions">
             <button type="button" class="btn btn-primary" disabled="@(busy || googleBusy)" @onclick="() => SaveAsync(again: false)">
-                @(editing is null ? "Add pot" : "Save")
+                @(editing is null ? (IsContainer ? "Add container" : "Add pot") : "Save")
             </button>
             @if (editing is null)
             {
@@ -313,11 +323,11 @@ else
     private Pot? editing;
     private bool detailsOpen;
     private Guid? confirming;
-    private int inUse;
+    private PotLinks inUse = new(0, 0);
     private int photoCount;
 
     /// <summary>Which kind of pot is listed. Nursery and outer pots are used so differently that they never share a list.</summary>
-    private PotGroup kind;
+    private PotKind kind;
     private const string KindKey = "pots-kind";
 
     /// <summary>The photo that stands for each pot that has one.</summary>
@@ -354,12 +364,12 @@ else
     {
         googleOn = await Google.IsEnabledAsync();
         await LoadAsync();
-        kind = Enum.TryParse<PotGroup>(await Device.GetAsync(KindKey), out var stored)
+        kind = Enum.TryParse<PotKind>(await Device.GetAsync(KindKey), out var stored)
             ? stored
-            : uses.Select(use => use.Pot.Group).DefaultIfEmpty(PotGroup.Inner).Min();
+            : uses.Select(use => use.Pot.Kind).DefaultIfEmpty(PotKind.Inner).Min();
         // A pot asked for by Search is shown under its own kind
         if (uses.FirstOrDefault(use => use.Pot.Id == Show) is { } asked)
-            kind = asked.Pot.Group;
+            kind = asked.Pot.Kind;
     }
 
     private async Task LoadAsync()
@@ -370,12 +380,12 @@ else
         loading = false;
     }
 
-    private IReadOnlyList<PotUse> Shown => uses.Where(use => use.Pot.Group == kind).ToList();
+    private IReadOnlyList<PotUse> Shown => uses.Where(use => use.Pot.Kind == kind).ToList();
 
     /// <summary>When some pots in the list have a photo, the rest keep its room, so the sizes line up.</summary>
     private bool AnyTiles => Shown.Any(use => covers.ContainsKey(use.Pot.Id));
 
-    private async Task ShowKindAsync(PotGroup group)
+    private async Task ShowKindAsync(PotKind group)
     {
         kind = group;
         confirming = null;
@@ -384,26 +394,52 @@ else
 
     private string AddText => kind switch
     {
-        PotGroup.Inner => "+ Add a nursery pot",
-        PotGroup.Outer => "+ Add an outer pot",
+        PotKind.Inner => "+ Add a nursery pot",
+        PotKind.Outer => "+ Add an outer pot",
+        PotKind.Propagation => "+ Add a container",
         _ => "+ Add a pot"
     };
 
     private string EmptyTitle => kind switch
     {
-        PotGroup.Inner => "No nursery pots yet.",
-        PotGroup.Outer => "No outer pots yet.",
+        PotKind.Inner => "No nursery pots yet.",
+        PotKind.Outer => "No outer pots yet.",
+        PotKind.Propagation => "No containers for propagating yet.",
         _ => "No pots that stand on their own yet."
     };
 
     private string EmptyHint => kind switch
     {
-        PotGroup.Inner => "Add the ones you use most first. A set of nursery pots is one entry per size, with how many of that size you have.",
-        PotGroup.Outer => "An outer pot has no hole in the bottom and holds a nursery pot. Give each one a photo, so similar ones are easy to tell apart when you pick one for a plant.",
+        PotKind.Propagation => "A box, jar or glass you root cuttings or corms in. Identical ones are one entry with how many you have, and Start propagation picks from them.",
+        PotKind.Inner => "Add the ones you use most first. A set of nursery pots is one entry per size, with how many of that size you have.",
+        PotKind.Outer => "An outer pot has no hole in the bottom and holds a nursery pot. Give each one a photo, so similar ones are easy to tell apart when you pick one for a plant.",
         _ => "A pot with a hole and a saucer, or a self-watering pot, that needs nothing around it."
     };
 
-    private IReadOnlyList<string> Names => draft is null ? [] : PotUse.Names(all, draft.Group);
+    private IReadOnlyList<string> Names => draft is null ? [] : PotUse.Names(all, draft.Kind);
+
+    private bool IsContainer => draft?.ForPropagation == true;
+
+    /// <summary>Picking a kind sets both fields. A container is a standalone pot marked for propagation.</summary>
+    private void SetDraftKind(PotKind picked)
+    {
+        draft!.ForPropagation = picked == PotKind.Propagation;
+        draft.Group = picked switch
+        {
+            PotKind.Inner => PotGroup.Inner,
+            PotKind.Outer => PotGroup.Outer,
+            _ => PotGroup.Standalone
+        };
+        if (draft.ForPropagation)
+            draft.RimMm = null;
+    }
+
+    /// <summary>
+    /// The kinds the form offers. A saved pot can't move between plant pot and container, since
+    /// plants or propagations already counted against it would stop counting.
+    /// </summary>
+    private IEnumerable<PotKind> OfferedKinds =>
+        Enum.GetValues<PotKind>().Where(k => editing is null || (k == PotKind.Propagation) == editing.ForPropagation);
 
     private static string? Picked(bool picked) => picked ? "picked" : null;
 
@@ -432,7 +468,15 @@ else
         errors = [];
         confirming = null;
         detailsOpen = false;
-        draft = like ?? new Pot { Group = kind };
+        if (like is null)
+        {
+            draft = new Pot();
+            SetDraftKind(kind);
+        }
+        else
+        {
+            draft = like;
+        }
         formPhotos = [];
         removedInForm.Clear();
     }
@@ -614,8 +658,8 @@ else
             await LoadAsync();
 
             // Show the list the pot went into, so it can be seen
-            if (draft.Group != kind)
-                await ShowKindAsync(draft.Group);
+            if (draft.Kind != kind)
+                await ShowKindAsync(draft.Kind);
 
             if (again)
             {
@@ -651,14 +695,25 @@ else
             _ => $"its {photoCount} photos"
         };
 
-        return inUse switch
+        var deleted = photos == "" ? "" : $" {Capital(photos)} {(photoCount == 1 ? "is" : "are")} deleted too.";
+
+        if (pot.ForPropagation)
+        {
+            return inUse.Propagations switch
+            {
+                0 when photos == "" => $"Delete {pot.DisplayName}?",
+                0 => $"Delete {pot.DisplayName} and {photos}?",
+                1 => "1 propagation is using this container. Deleting it takes it off that propagation, and changes nothing else about it." + deleted,
+                _ => $"{inUse.Propagations} propagations are using this container. Deleting it takes it off them, and changes nothing else about them." + deleted
+            };
+        }
+
+        return inUse.Plants switch
         {
             0 when photos == "" => $"Delete {pot.DisplayName}?",
             0 => $"Delete {pot.DisplayName} and {photos}?",
-            1 => "1 plant is using this pot. Deleting it takes the pot off that plant, and changes nothing else about it."
-                 + (photos == "" ? "" : $" {Capital(photos)} {(photoCount == 1 ? "is" : "are")} deleted too."),
-            _ => $"{inUse} plants are using this pot. Deleting it takes the pot off them, and changes nothing else about them."
-                 + (photos == "" ? "" : $" {Capital(photos)} {(photoCount == 1 ? "is" : "are")} deleted too.")
+            1 => "1 plant is using this pot. Deleting it takes the pot off that plant, and changes nothing else about it." + deleted,
+            _ => $"{inUse.Plants} plants are using this pot. Deleting it takes the pot off them, and changes nothing else about them." + deleted
         };
     }
 

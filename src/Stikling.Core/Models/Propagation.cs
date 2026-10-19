@@ -60,6 +60,13 @@ public sealed class Propagation : Entity
     /// <summary>Free text for the setup, e.g. "Humidity box" or "Glass jar".</summary>
     public string? Container { get; set; }
 
+    /// <summary>
+    /// The container it's in, from the pot library. <see cref="Container"/> keeps the name as text
+    /// beside it so older versions, the CSV and the timeline still show it. Null for none, or for
+    /// an old propagation not yet linked.
+    /// </summary>
+    public Guid? ContainerPotId { get; set; }
+
     /// <summary>The room or spot it stands in. See <see cref="Place"/>.</summary>
     public Guid? PlaceId { get; set; }
 

@@ -83,10 +83,23 @@
         sellers == 0 ? "Where your plants came from" : Labels.Count(sellers, "seller");
 
     /// <summary>"6 pots, 2 free", or what pots are when there are none.</summary>
-    private string PotSummary =>
-        pots.Count == 0
-            ? "The pots you own, nursery or decorative"
-            : $"{Labels.Count(pots.Sum(p => p.Here), "pot")}, {pots.Sum(p => p.Free)} free";
+    private string PotSummary
+    {
+        get
+        {
+            var plain = pots.Where(p => p.Pot.Kind != PotKind.Propagation).ToList();
+            var boxes = pots.Where(p => p.Pot.Kind == PotKind.Propagation).Sum(p => p.Here);
+            if (plain.Count == 0 && boxes == 0)
+                return "The pots you own, nursery or decorative";
+
+            var parts = new List<string>();
+            if (plain.Count > 0)
+                parts.Add($"{Labels.Count(plain.Sum(p => p.Here), "pot")}, {plain.Sum(p => p.Free)} free");
+            if (boxes > 0)
+                parts.Add(Labels.Count(boxes, "container"));
+            return string.Join(", ", parts);
+        }
+    }
 
     /// <summary>"3 mixes, 1 no longer mixed", or what mixes are when there are none.</summary>
     private string MixSummary => mixes.Count switch

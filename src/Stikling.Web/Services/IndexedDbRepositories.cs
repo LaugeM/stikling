@@ -30,6 +30,9 @@ public sealed class IndexedDbPlantRepository(IndexedDb db, TimeProvider time)
 public sealed class IndexedDbPotRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<Pot>(db, time, Stores.Pots), IPotRepository
 {
+    // Deleted pots are kept, so a deleted container's name isn't made again
+    public async Task<ContainerList> GetContainersAsync() => new(await GetStoredAsync());
+
     protected override IReadOnlyList<string> Validate(Pot pot) => pot.Validate();
 }
 

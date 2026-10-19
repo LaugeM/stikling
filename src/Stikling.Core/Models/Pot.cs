@@ -15,6 +15,19 @@ public enum PotGroup
     Standalone
 }
 
+/// <summary>
+/// The kinds the pot library shows as tabs. Never stored: a container for propagating is a
+/// standalone pot with <see cref="Pot.ForPropagation"/> set. The names of the first three must
+/// match <see cref="PotGroup"/>, since the shown tab is kept on the device by name.
+/// </summary>
+public enum PotKind
+{
+    Inner,
+    Outer,
+    Standalone,
+    Propagation
+}
+
 [JsonConverter(typeof(JsonStringEnumConverter<PotMaterial>))]
 public enum PotMaterial
 {
@@ -45,6 +58,25 @@ public enum PotWatering
 public sealed class Pot : Entity
 {
     public PotGroup Group { get; set; } = PotGroup.Inner;
+
+    /// <summary>
+    /// True for a container people root cuttings or corms in. Such a pot has Group Standalone and
+    /// this set, rather than a new PotGroup value: PotGroup is read with a plain string enum
+    /// converter, so an older version on another device would fail to read an unknown value. Older
+    /// versions list these under "On its own".
+    /// </summary>
+    public bool ForPropagation { get; set; }
+
+    /// <summary>The tab the pot is shown under. Worked out from Group and ForPropagation, never stored.</summary>
+    [JsonIgnore]
+    public PotKind Kind => ForPropagation
+        ? PotKind.Propagation
+        : Group switch
+        {
+            PotGroup.Inner => PotKind.Inner,
+            PotGroup.Outer => PotKind.Outer,
+            _ => PotKind.Standalone
+        };
 
     /// <summary>The family name, shared by every size of the same pot.</summary>
     public string? Name { get; set; }
@@ -100,7 +132,9 @@ public sealed class Pot : Entity
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add("Give the pot a name, like \"Clear nursery pot\".");
+            errors.Add(ForPropagation
+                ? "Give the container a name, like \"Clear box with lid\"."
+                : "Give the pot a name, like \"Clear nursery pot\".");
 
         if (Owned < 1)
             errors.Add("You have to have at least one of it.");

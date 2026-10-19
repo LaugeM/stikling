@@ -38,6 +38,7 @@ public static class LastTime
         to.Type = from.Type;
         to.Medium = from.Medium;
         to.Container = from.Container;
+        to.ContainerPotId = from.ContainerPotId;
         to.RootingAids = [.. from.RootingAids];
         to.DriedForHours = from.DriedForHours;
         to.ClearMixUnlessSoil();

@@ -6,6 +6,12 @@ public interface IPotRepository
 {
     Task<IReadOnlyList<Pot>> GetAllAsync();
 
+    /// <summary>
+    /// The containers for propagating, with the deleted pots kept so a name can be told apart from
+    /// one never seen.
+    /// </summary>
+    Task<ContainerList> GetContainersAsync();
+
     Task<Pot?> GetAsync(Guid id);
 
     Task SaveAsync(Pot pot);

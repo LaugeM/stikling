@@ -12,7 +12,7 @@ public class PotPhotosTests
     private readonly FakePlantRepository plants = new();
     private readonly FakePhotoRepository photos = new();
 
-    private PotService Service => new(pots, plants, photos);
+    private PotService Service => new(pots, plants, photos, new FakePropagationRepository());
 
     private static Pot Outer(string name = "Ceramic cachepot") =>
         new() { Group = PotGroup.Outer, Name = name, TopCm = 14 };

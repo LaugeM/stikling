@@ -10,6 +10,7 @@
 @inject IPlantRepository Plants
 @inject ProblemService Problems
 @inject SellerService Sellers
+@inject PotService PotLibrary
 @inject ILogger<MainLayout> Logger
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -139,6 +140,17 @@
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Turning Source text into sellers failed");
+        }
+
+        // The same for the Container text of propagations, which becomes containers in the pot library
+        try
+        {
+            if (await PotLibrary.AdoptContainersAsync() > 0)
+                Sync.NotifyChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Turning Container text into containers failed");
         }
     }
 

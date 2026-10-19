@@ -303,9 +303,9 @@ else
                         <dt>Grows in</dt>
                         <dd>
                             @Labels.For(propagation.Medium)
-                            @if (!string.IsNullOrWhiteSpace(propagation.Container))
+                            @if (ContainerName is { } container)
                             {
-                                <text> · @propagation.Container</text>
+                                <text> · @container</text>
                             }
                             @if (Mix is { } mix)
                             {
@@ -877,6 +877,13 @@ else
     private SoilMix? Mix => propagation?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id && !m.IsDeleted) : null;
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
+
+    // The container's name as it is in the pot library now, so a rename there shows here. The text is
+    // kept for a container that was deleted or never linked
+    private string? ContainerName =>
+        propagation is null ? null
+        : new ContainerList(pots).For(propagation.ContainerPotId, propagation.Container)?.Name
+          ?? (string.IsNullOrWhiteSpace(propagation.Container) ? null : propagation.Container);
     private bool loaded;
     private bool busy;
     private bool confirmDelete;

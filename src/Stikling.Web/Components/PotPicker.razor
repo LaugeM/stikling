@@ -111,7 +111,7 @@
     {
         get
         {
-            var offered = Pots.Where(pot => Groups.Contains(pot.Group)).ToList();
+            var offered = Pots.Where(pot => !pot.ForPropagation && Groups.Contains(pot.Group)).ToList();
             return Value is { } id && offered.TrueForAll(pot => pot.Id != id)
                    && Pots.FirstOrDefault(pot => pot.Id == id) is { } picked
                 ? offered.Append(picked)
@@ -119,7 +119,12 @@
         }
     }
 
-    private IReadOnlyList<string> Names => PotUse.Names(Pots, Groups[0]);
+    private IReadOnlyList<string> Names => PotUse.Names(Pots, Groups[0] switch
+    {
+        PotGroup.Inner => PotKind.Inner,
+        PotGroup.Outer => PotKind.Outer,
+        _ => PotKind.Standalone
+    });
 
     private Task PickAsync(Guid? id)
     {

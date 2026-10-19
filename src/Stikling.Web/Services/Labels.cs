@@ -250,7 +250,7 @@ public static class Labels
         PropagationStage s => Stage(s),
         Pest p => For(p),
         PestCaseStatus s => For(s),
-        PotGroup g => For(g),
+        PotKind g => For(g),
         PotMaterial m => For(m),
         PotWatering w => For(w),
         MixUnit u => For(u),
@@ -338,26 +338,29 @@ public static class Labels
     /// <summary>"2024", "June 2024" or "12 Jun 2024", depending on how much is known.</summary>
     public static string Date(LooseDate date) => date.Text();
 
-    public static string For(PotGroup group) => group switch
+    public static string For(PotKind group) => group switch
     {
-        PotGroup.Inner => "Nursery pot",
-        PotGroup.Outer => "Outer pot",
+        PotKind.Inner => "Nursery pot",
+        PotKind.Outer => "Outer pot",
+        PotKind.Propagation => "For propagating",
         _ => "Stands on its own"
     };
 
     /// <summary>The short name on the switch between kinds at the top of the pot library.</summary>
-    public static string Tab(PotGroup group) => group switch
+    public static string Tab(PotKind group) => group switch
     {
-        PotGroup.Inner => "Nursery",
-        PotGroup.Outer => "Outer",
+        PotKind.Inner => "Nursery",
+        PotKind.Outer => "Outer",
+        PotKind.Propagation => "Propagation",
         _ => "On its own"
     };
 
     /// <summary>The heading over a group of pots in the library.</summary>
-    public static string Heading(PotGroup group) => group switch
+    public static string Heading(PotKind group) => group switch
     {
-        PotGroup.Inner => "Nursery pots",
-        PotGroup.Outer => "Outer pots",
+        PotKind.Inner => "Nursery pots",
+        PotKind.Outer => "Outer pots",
+        PotKind.Propagation => "Containers for propagating",
         _ => "Pots that stand on their own"
     };
 
