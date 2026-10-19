@@ -42,7 +42,7 @@ The people on Reddit who track their plants at all are mostly collectors with 50
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. It is built in a draft pull request that is waiting on photos of a coleus at each stage. The posts on Reddit come once it is in.
 2. **Notifications**, once care intervals are in, so what comes back by itself reaches someone who doesn't open the app every day. One list a day at a time they choose, and never a reminder to water.
 3. **A big collection at a glance**: **Group the plant list by genus** with an A to Z jump, and **The collection at a glance**.
-4. **What is in a pot**: **More than one plant in a pot**, and the **Soil to semi-hydro transition tracker**.
+4. **What is in a pot**: the **Soil to semi-hydro transition tracker**. More than one plant in a pot is built.
 
 ### Cheap ones to slot in whenever
 
