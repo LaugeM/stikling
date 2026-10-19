@@ -53,7 +53,7 @@
         <div class="mb-3">
             <div class="form-label">What kind</div>
             <div class="chip-row" role="group" aria-label="What kind of pot">
-                @foreach (var group in Enum.GetValues<PotKind>())
+                @foreach (var group in OfferedKinds)
                 {
                     <button type="button" class="chip @Picked(draft.Kind == group)"
                             @onclick="() => SetDraftKind(group)">@Labels.For(group)</button>
@@ -433,6 +433,13 @@ else
         if (draft.ForPropagation)
             draft.RimMm = null;
     }
+
+    /// <summary>
+    /// The kinds the form offers. A saved pot can't move between plant pot and container, since
+    /// plants or propagations already counted against it would stop counting.
+    /// </summary>
+    private IEnumerable<PotKind> OfferedKinds =>
+        Enum.GetValues<PotKind>().Where(k => editing is null || (k == PotKind.Propagation) == editing.ForPropagation);
 
     private static string? Picked(bool picked) => picked ? "picked" : null;
 

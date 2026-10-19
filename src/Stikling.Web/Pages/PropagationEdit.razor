@@ -596,7 +596,7 @@ else
 
     private string? SetupSummary => propagation is null ? null : Joined(
         Labels.For(propagation.Medium),
-        propagation.Container,
+        containerText,
         propagation.Medium == GrowingMedium.Soil && propagation.SoilMixId is { } mix ? mixes.FirstOrDefault(m => m.Id == mix)?.Name : null,
         propagation.RootingAids.Count > 0 ? string.Join(", ", propagation.RootingAids.Select(Labels.For)) : null,
         propagation.DriedForHours is { } dried ? $"dried {Drying.Text(dried)}" : null,
