@@ -78,7 +78,7 @@ public sealed class SellerSummary
         {
             Plants = mine.OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList(),
             Propagations = minePropagations,
-            StillHere = mine.Count(p => p.Status == PlantStatus.Active),
+            StillHere = mine.Count(p => p.InCollection),
             Died = mine.Count(p => p.Status == PlantStatus.Died),
             GivenAway = mine.Count(p => p.Status == PlantStatus.GivenAway),
             Sold = mine.Count(p => p.Status == PlantStatus.Sold),

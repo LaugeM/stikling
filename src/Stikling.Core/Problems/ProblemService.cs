@@ -253,7 +253,7 @@ public sealed class ProblemService(
         foreach (var problem in problems.Where(p => !p.IsDeleted && p.IsOpen))
         {
             var plant = plants.FirstOrDefault(p => p.Id == problem.SubjectId);
-            if (plant is not { IsDeleted: false, Status: PlantStatus.Active })
+            if (plant is not { IsDeleted: false, InCollection: true })
                 continue;
             var own = updateList.Where(u => u.ProblemId == problem.Id);
             if (LookAgainOn(problem, own) is { } day && day <= today)

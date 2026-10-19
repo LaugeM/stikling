@@ -348,7 +348,7 @@ else
     private static string ThingNote(Plant plant) =>
         string.Join(" · ", new[]
         {
-            plant.Status == PlantStatus.Active ? null : Labels.For(plant.Status),
+            plant.InCollection ? null : Labels.StatusOf(plant),
             Arrival.PoorText(plant.ArrivedIn, plant.ArrivalProblems)
         }.Where(p => !string.IsNullOrEmpty(p)));
 }

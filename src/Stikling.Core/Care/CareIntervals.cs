@@ -38,7 +38,7 @@ public static class CareIntervals
     /// </summary>
     public static IReadOnlyList<Plant> PlantsIn(CareInterval interval, IEnumerable<Plant> plants, Places places)
     {
-        var here = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active);
+        var here = plants.Where(p => !p.IsDeleted && p.InCollection);
 
         var covered = interval.Scope switch
         {

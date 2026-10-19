@@ -29,7 +29,7 @@ public static class WishSearch
         string.IsNullOrWhiteSpace(text)
             ? []
             : plants
-                .Where(p => !p.IsDeleted && p.Status == PlantStatus.Active)
+                .Where(p => !p.IsDeleted && p.InCollection)
                 .Where(p => Matches(text, p.Nickname, p.Genus, p.KnownSpecies, p.Cultivar, dictionary))
                 .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();

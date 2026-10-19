@@ -106,7 +106,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         // Only a plant that left can take pots, and only the ones it has
         after.PotsTaken = after.HasLeft ? after.Fit(after.PotsTaken) : PotsTaken.None;
         // Only a plant still in the collection can be resting, kept apart or need something done
-        if (after.Status != PlantStatus.Active)
+        if (!after.InCollection)
         {
             after.DormantSince = null;
             after.QuarantinedSince = null;
@@ -140,12 +140,35 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Func<Enum, string> label,
         PotsTaken potsTaken = PotsTaken.None)
     {
+        var done = new HashSet<Guid>();
         foreach (var plant in selected.Where(p => p.Status != status))
         {
+            if (!done.Add(plant.Id))
+                continue;
             var before = plant.Copy();
             plant.Status = status;
             plant.PotsTaken = potsTaken;
             await UpdateAsync(before, plant, label);
+            await CarryStatusToPottedWithAsync(plant, label, done);
+        }
+    }
+
+    /// <summary>
+    /// The plants potted with this one get its status, so they leave and come back with it. They don't
+    /// take pots with them. Used after the status of a plant was changed.
+    /// </summary>
+    public async Task CarryStatusToPottedWithAsync(Plant plant, Func<Enum, string> label, ISet<Guid>? done = null)
+    {
+        foreach (var other in await plants.GetAllAsync())
+        {
+            if (other.PottedWithPlantId != plant.Id || other.Id == plant.Id || other.Status == plant.Status)
+                continue;
+            if (done is not null && !done.Add(other.Id))
+                continue;
+            var before = other.Copy();
+            other.Status = plant.Status;
+            other.PotsTaken = PotsTaken.None;
+            await UpdateAsync(before, other, label);
         }
     }
 
@@ -292,7 +315,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 
     /// <summary>Plants tagged "For swap" (in any case) that have no spare mark yet, still here.</summary>
     public static IReadOnlyList<Plant> TaggedForSwap(IEnumerable<Plant> all) =>
-        [.. all.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.Spare is null && PlantTags.Has(p, PlantTags.ForSwap))];
+        [.. all.Where(p => !p.IsDeleted && p.InCollection && p.Spare is null && PlantTags.Has(p, PlantTags.ForSwap))];
 
     /// <summary>Adds the same note to several plants, e.g. "Sprayed for thrips".</summary>
     public async Task AddNoteAsync(IEnumerable<Plant> selected, string text, DateTimeOffset? occurredAt = null)
@@ -313,15 +336,192 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         }
     }
 
-    private Task AddChangeAsync(Guid plantId, string text, TimelineEvent? @event = null) =>
+    /// <summary>The count to store: one is never stored.</summary>
+    internal static int? Stored(int howMany) => howMany <= 1 ? null : howMany;
+
+    private void CheckDate(DateOnly date)
+    {
+        if (date > time.Today())
+            throw new InvalidOperationException("The date can't be in the future.");
+    }
+
+    private static void CheckSome(Plant plant, int count)
+    {
+        if (count < 1 || count >= plant.HowMany)
+            throw new InvalidOperationException("Some of them has to be fewer than all of them, and at least one.");
+    }
+
+    /// <summary>
+    /// Plant <paramref name="plant"/> goes into the pot of <paramref name="into"/>. It stays a record of its
+    /// own with its history and lineage, but is no longer in the collection, and the other plant's count
+    /// grows by its count. It takes the other plant's pot, medium, mix and room. Plants already potted with
+    /// it are potted with the other plant now.
+    /// </summary>
+    public async Task PotTogetherAsync(
+        Plant plant,
+        Plant into,
+        DateOnly date,
+        Func<Enum, string> label,
+        Func<Guid, string?>? potName = null,
+        Func<Guid, string?>? mixName = null,
+        Func<Guid, string?>? placeName = null)
+    {
+        CheckDate(date);
+        if (plant.Id == into.Id)
+            throw new InvalidOperationException("A plant can't be potted with itself.");
+        if (!into.InCollection)
+            throw new InvalidOperationException("The plant to pot it with isn't in the collection.");
+        if (!plant.InCollection)
+            throw new InvalidOperationException("Only a plant in the collection can be potted with another.");
+
+        var before = plant.Copy();
+        plant.PottedWithPlantId = into.Id;
+        plant.PottedWithSince = date;
+        plant.Medium = into.Medium;
+        plant.InnerPotId = into.InnerPotId;
+        plant.OuterPotId = into.OuterPotId;
+        plant.WaterInOuterPot = into.WaterInOuterPot;
+        plant.SoilMixId = into.SoilMixId;
+        plant.PlaceId = into.PlaceId;
+        await UpdateAsync(before, plant, label, potName, mixName, placeName);
+
+        // Plants already potted with it are with the other plant now. Their count is inside its count.
+        foreach (var other in await plants.GetAllAsync())
+        {
+            if (other.PottedWithPlantId != plant.Id || other.Id == plant.Id || other.Id == into.Id)
+                continue;
+            other.PottedWithPlantId = into.Id;
+            await plants.SaveAsync(other);
+        }
+
+        into.Count = Stored(into.HowMany + plant.HowMany);
+        await plants.SaveAsync(into);
+
+        var at = time.MomentOn(date);
+        await AddChangeAsync(plant.Id, $"Potted together with {into.DisplayName}", occurredAt: at, relatedPlantId: into.Id);
+        await AddChangeAsync(into.Id, $"{plant.DisplayName} potted in with it, {into.HowMany} in the pot now", occurredAt: at, relatedPlantId: plant.Id);
+    }
+
+    /// <summary>
+    /// Undoes <see cref="PotTogetherAsync"/>: the plant has its own pot again (<paramref name="innerPotId"/>,
+    /// or none) and counts as a plant of its own. The other plant's count goes down by this one's, unless
+    /// that plant is gone.
+    /// </summary>
+    public async Task TakeOutAsync(
+        Plant plant,
+        DateOnly date,
+        Guid? innerPotId,
+        Func<Enum, string> label,
+        Func<Guid, string?>? potName = null)
+    {
+        CheckDate(date);
+        if (plant.PottedWithPlantId is not { } otherId)
+            throw new InvalidOperationException("It isn't potted with another plant.");
+        if (plant.PottedWithSince is { } since && date < since)
+            throw new InvalidOperationException("The date can't be before it was potted together.");
+
+        // Only one step: a merge can leave two plants potted with each other
+        var other = otherId == plant.Id ? null : await plants.GetAsync(otherId);
+
+        var before = plant.Copy();
+        plant.PottedWithPlantId = null;
+        plant.PottedWithSince = null;
+        plant.InnerPotId = innerPotId;
+        plant.OuterPotId = null;
+        plant.WaterInOuterPot = false;
+        await UpdateAsync(before, plant, label, potName);
+
+        var at = time.MomentOn(date);
+        if (other is null)
+        {
+            await AddChangeAsync(plant.Id, "Taken out of the pot it shared", occurredAt: at);
+            return;
+        }
+
+        other.Count = Stored(Math.Max(1, other.HowMany - plant.HowMany));
+        await plants.SaveAsync(other);
+        await AddChangeAsync(plant.Id, $"Taken out of {other.DisplayName}'s pot", occurredAt: at, relatedPlantId: other.Id);
+        await AddChangeAsync(other.Id, $"{plant.DisplayName} taken out, {other.HowMany} in the pot now", occurredAt: at, relatedPlantId: plant.Id);
+    }
+
+    /// <summary>Some of the plants in the pot died. At least one is left.</summary>
+    public async Task SomeDiedAsync(Plant plant, int count, DateOnly date)
+    {
+        CheckDate(date);
+        CheckSome(plant, count);
+        plant.Count = Stored(plant.HowMany - count);
+        await plants.SaveAsync(plant);
+        await AddChangeAsync(plant.Id, $"{count} died, {plant.HowMany} left", occurredAt: time.MomentOn(date));
+    }
+
+    /// <summary>Some of the plants in the pot were given away. At least one is left.</summary>
+    public async Task GaveSomeAwayAsync(Plant plant, int count, string? to, DateOnly date)
+    {
+        CheckDate(date);
+        CheckSome(plant, count);
+        plant.Count = Stored(plant.HowMany - count);
+        await plants.SaveAsync(plant);
+        var text = string.IsNullOrWhiteSpace(to)
+            ? $"Gave {count} away, {plant.HowMany} left"
+            : $"Gave {count} to {to.Trim()}, {plant.HowMany} left";
+        await AddChangeAsync(plant.Id, text, occurredAt: time.MomentOn(date));
+    }
+
+    /// <summary>
+    /// Some of the plants in the pot got pots of their own. Each becomes a plant, with this one as its
+    /// parent. At least one is left. Returns the new plants.
+    /// </summary>
+    public async Task<IReadOnlyList<Plant>> SplitOffAsync(Plant plant, int count, string? nickname, DateOnly date)
+    {
+        CheckDate(date);
+        CheckSome(plant, count);
+
+        var names = Propagations.PropagationService.PotUpNames(nickname, count, 0);
+        var newPlants = names.Select(name =>
+        {
+            var split = plant.Duplicate();
+            split.Nickname = name;
+            split.ParentPlantId = plant.Id;
+            split.AcquiredOn = LooseDate.Of(date);
+            return split;
+        }).ToList();
+        if (newPlants.SelectMany(p => p.Validate(time.Today())).FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+
+        var at = time.MomentOn(date);
+        foreach (var split in newPlants)
+        {
+            await plants.SaveAsync(split);
+            await timeline.AddAsync(new TimelineEntry
+            {
+                SubjectType = SubjectType.Plant,
+                SubjectId = split.Id,
+                Kind = TimelineKind.Created,
+                OccurredAt = at,
+                Text = $"Split off from {plant.DisplayName}",
+                RelatedType = SubjectType.Plant,
+                RelatedId = plant.Id
+            });
+        }
+
+        plant.Count = Stored(plant.HowMany - count);
+        await plants.SaveAsync(plant);
+        await AddChangeAsync(plant.Id, $"Potted {count} up on their own: {string.Join(", ", newPlants.Select(p => p.DisplayName))}",
+            occurredAt: at, relatedPlantId: newPlants.Count == 1 ? newPlants[0].Id : null);
+        return newPlants;
+    }
+
+    private Task AddChangeAsync(Guid plantId, string text, TimelineEvent? @event = null, DateTimeOffset? occurredAt = null, Guid? relatedPlantId = null) =>
         timeline.AddAsync(new TimelineEntry
         {
             SubjectType = SubjectType.Plant,
             SubjectId = plantId,
             Kind = TimelineKind.Change,
-            OccurredAt = time.GetUtcNow(),
+            OccurredAt = occurredAt ?? time.GetUtcNow(),
             Text = text,
-            Event = @event
+            Event = @event,
+            RelatedType = relatedPlantId is null ? null : SubjectType.Plant,
+            RelatedId = relatedPlantId
         });
 
     // A day without a time is recorded at noon, or now for today, so a photo from earlier that

@@ -39,7 +39,7 @@ public static class DailyRound
         if (roundDays is { Count: > 0 } && !RoundSchedule.IsRoundDay(roundDays, today))
             return null;
 
-        var activePlants = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
+        var activePlants = plants.Where(p => !p.IsDeleted && p.InCollection).ToList();
         var activePropagations = propagations.Where(p => !p.IsDeleted && p.IsActive).ToList();
         var roomOfPlant = activePlants.ToDictionary(p => p.Id, p => places.RoomOf(p.PlaceId)?.Id);
 

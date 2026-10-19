@@ -74,7 +74,7 @@ public static class PestService
     /// </summary>
     public static IReadOnlyList<Plant> PlantsIn(PestCase item, IEnumerable<Plant> plants, Places places)
     {
-        var here = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active);
+        var here = plants.Where(p => !p.IsDeleted && p.InCollection);
 
         var covered = item.Scope switch
         {
@@ -279,7 +279,7 @@ public static class PestService
         if (item.Scope != PestScope.PickedPlants || item.Status != PestCaseStatus.Active)
             return [];
 
-        var all = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
+        var all = plants.Where(p => !p.IsDeleted && p.InCollection).ToList();
         var caseList = cases.ToList();
         var logged = treatments.ToList();
 

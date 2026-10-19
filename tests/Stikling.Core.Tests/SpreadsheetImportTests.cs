@@ -42,7 +42,7 @@ public class SpreadsheetImportTests
         [
             ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote,
             ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source,
-            ImportField.Price, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
+            ImportField.Price, ImportField.HowMany, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
         ], ImportFields.Guess(headings));
     }
 
@@ -55,8 +55,8 @@ public class SpreadsheetImportTests
 
         Assert.Equal(headings.Count, guess.Count);
         Assert.Equal(ImportField.Raised, guess[12]);
-        Assert.Equal(ImportField.Skip, guess[17]);
-        Assert.Equal(ImportField.AboutLine, guess[18]);
+        Assert.Equal(ImportField.Skip, guess[18]);
+        Assert.Equal(ImportField.AboutLine, guess[19]);
     }
 
     [Fact]

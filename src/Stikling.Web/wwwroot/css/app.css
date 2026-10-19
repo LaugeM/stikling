@@ -463,6 +463,16 @@ a.item-card:active {
     color: var(--pa-muted);
 }
 
+/* How many are in the pot, after the name */
+.item-count {
+    flex: none;
+    margin-left: 0.35rem;
+    font-family: var(--pa-font-body, inherit);
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--pa-muted);
+}
+
 .item-meta {
     display: flex;
     flex-wrap: wrap;

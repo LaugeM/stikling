@@ -92,9 +92,9 @@ else
                     }
                     <NumberClashNote Code="@plant.CollectionNumber" Clashes="numberClashes" />
                     <div class="profile-badges">
-                        @if (plant.Status != PlantStatus.Active)
+                        @if (!plant.InCollection)
                         {
-                            <span class="badge text-bg-secondary">@Labels.For(plant.Status)</span>
+                            <span class="badge text-bg-secondary">@Labels.StatusOf(plant, pottedWithPlant?.DisplayName)</span>
                         }
                         @if (plant.InQuarantine)
                         {
@@ -104,7 +104,7 @@ else
                         {
                             <span class="badge dormant-badge">Dormant</span>
                         }
-                        @if (floweringNow is { Stale: false } && plant.Status == PlantStatus.Active)
+                        @if (floweringNow is { Stale: false } && plant.InCollection)
                         {
                             <span class="badge flowering-badge">@FloweringText.Badge(floweringNow.Stage)</span>
                         }
@@ -124,6 +124,21 @@ else
                             </a>
                         }
                     </div>
+                    @if (plant.HowMany > 1)
+                    {
+                        <p class="profile-facts">@plant.HowMany in this pot</p>
+                    }
+                    @if (pottedInHere.Count > 0)
+                    {
+                        <p class="profile-facts">
+                            Also in this pot:
+                            @for (var i = 0; i < pottedInHere.Count; i++)
+                            {
+                                var other = pottedInHere[i];
+                                <a href="plants/@other.Id">@other.DisplayName</a>@(i < pottedInHere.Count - 1 ? ", " : null)
+                            }
+                        </p>
+                    }
                     @if (actionNote is not null)
                     {
                         <p class="profile-facts" role="status">@actionNote</p>
@@ -135,7 +150,7 @@ else
                 </div>
             </header>
 
-                @if (floweringNow is { Stale: true } stale && plant.Status == PlantStatus.Active)
+                @if (floweringNow is { Stale: true } stale && plant.InCollection)
                 {
                     <div class="still-card">
                         <p>Still @(stale.Stage == FloweringStage.Buds ? "in bud" : "in flower")? Last marked on @Labels.Date(stale.Period.LastMarked).</p>
@@ -172,7 +187,7 @@ else
                         }
                     </p>
                     <div class="problem-card-actions">
-                        @if (plant.Status == PlantStatus.Active)
+                        @if (plant.InCollection)
                         {
                             <button type="button" class="btn btn-outline-primary" @onclick="() => OpenProblemUpdate(problem)">How does it look?</button>
                         }
@@ -188,6 +203,19 @@ else
             @if (plant.DescribeDeparture() is { } departure)
             {
                 <p class="profile-facts">@departure</p>
+            }
+            @if (plant.PottedWithPlantId is not null)
+            {
+                <p class="profile-facts">
+                    @if (pottedWithPlant is not null)
+                    {
+                        <text>Potted with <a href="plants/@pottedWithPlant.Id">@pottedWithPlant.DisplayName</a>@(plant.PottedWithSince is { } pottedSince ? $" since {Labels.Date(pottedSince)}" : null)</text>
+                    }
+                    else
+                    {
+                        <text>Potted with a plant that was deleted</text>
+                    }
+                </p>
             }
             @if (plant.HasLeft && Account.IsAvailable)
             {
@@ -538,9 +566,9 @@ else
                             {
                                 <li>
                                     <a href="plants/@child.Id">@child.DisplayName</a>
-                                    @if (child.Status != PlantStatus.Active)
+                                    @if (!child.InCollection)
                                     {
-                                        <span class="text-body-secondary small"> · @Labels.For(child.Status)</span>
+                                        <span class="text-body-secondary small"> · @Labels.StatusOf(child)</span>
                                     }
                                     @if (child.HasLeft && !string.IsNullOrWhiteSpace(child.LeftTo))
                                     {
@@ -596,7 +624,7 @@ else
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
                     Note
                 </button>
-                @if (plant.Status == PlantStatus.Active)
+                @if (plant.InCollection)
                 {
                     <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => careOpen = true">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10Z" /></svg>
@@ -666,7 +694,7 @@ else
             }
         </div>
 
-        @if (plant.Status == PlantStatus.Active)
+        @if (plant.InCollection)
         {
             <div class="sheet-section">
                 @if (comesBack.Count > 0)
@@ -727,7 +755,7 @@ else
         {
             case More.Menu:
                 <ul class="sheet-actions">
-                    @if (plant.Status == PlantStatus.Active)
+                    @if (plant.InCollection)
                     {
                         <li>
                             <a class="sheet-action" href="propagations/new?parent=@plant.Id">
@@ -810,6 +838,21 @@ else
                             </a>
                         </li>
                         <li>
+                            <button type="button" class="sheet-action" @onclick="OpenPotTogether">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16l-1.5 9h-13Z" /><path d="M9 11V8M15 11V8" /><path d="M9 8c0-2 1.5-3 3-4M15 8c0-2-1.5-3-3-4" /></svg>
+                                <span class="sheet-action-text"><b>Pot together</b><small>It went into another plant's pot</small></span>
+                            </button>
+                        </li>
+                        @if (plant.HowMany > 1)
+                        {
+                            <li>
+                                <button type="button" class="sheet-action" @onclick="() => more = More.Some">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="9" r="2.5" /><circle cx="16" cy="9" r="2.5" /><path d="M4 20h16" /></svg>
+                                    <span class="sheet-action-text"><b>Some of them</b><small>Died, given away or potted up on their own</small></span>
+                                </button>
+                            </li>
+                        }
+                        <li>
                             <button type="button" class="sheet-action" @onclick="() => OpenStatus(PlantStatus.GivenAway)">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h12M12 7l5 5-5 5" /><path d="M20 5v14" /></svg>
                                 <span class="sheet-action-text"><b>Gave it away or sold it</b><small>It leaves your collection, its history stays</small></span>
@@ -819,6 +862,21 @@ else
                             <button type="button" class="sheet-action danger" @onclick="() => OpenStatus(PlantStatus.Died)">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-7" /><path d="M12 14c-1-4-4-6-8-6 0 4 3 7 8 6Z" /><path d="M12 14c2-3 4.5-4 8-3.5-.5 3.5-3.5 5-8 3.5Z" /><path d="M4 21h16" /></svg>
                                 <span class="sheet-action-text"><b>It died</b><small>Its history stays, so you can see what happened</small></span>
+                            </button>
+                        </li>
+                    }
+                    else if (plant.Status == PlantStatus.Active)
+                    {
+                        <li>
+                            <a class="sheet-action" href="labels?plants=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9Z" /><circle cx="8" cy="8" r="1.4" /></svg>
+                                <span class="sheet-action-text"><b>Print a label</b><small>For its pot or a stake</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <button type="button" class="sheet-action" @onclick="OpenTakeOut">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H8M12 7l-5 5 5 5" /><path d="M4 5v14" /></svg>
+                                <span class="sheet-action-text"><b>Take it out again</b><small>It has its own pot again</small></span>
                             </button>
                         </li>
                     }
@@ -844,6 +902,103 @@ else
                         </li>
                     }
                 </ul>
+                break;
+
+            case More.PotTogether:
+                if (PotTogetherChoices == 0)
+                {
+                    <p class="mb-3">There are no other plants to pot it with.</p>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <PlantSelect Plants="allPlants" Genus="@plant.Genus" Except="plant.Id" Value="pottingInto" ValueChanged="id => pottingInto = id" />
+                        <div class="form-text">It takes that plant's pot, medium and room, and is counted in it. It keeps its own history.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="potted-on">Date</label>
+                        <input id="potted-on" type="date" class="form-control" @bind="since" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" disabled="@(busy || pottingInto is null || since > Today)" @onclick="PotTogetherAsync">Pot together</button>
+                        <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                    </div>
+                }
+                break;
+
+            case More.Some:
+                <ul class="sheet-actions">
+                    <li>
+                        <button type="button" class="sheet-action" @onclick="() => OpenSome(SomeKind.Died)">
+                            <span class="sheet-action-text"><b>Some died</b></span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="sheet-action" @onclick="() => OpenSome(SomeKind.GaveAway)">
+                            <span class="sheet-action-text"><b>Gave some away</b></span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="sheet-action" @onclick="() => OpenSome(SomeKind.PottedUp)">
+                            <span class="sheet-action-text"><b>Potted some up on their own</b></span>
+                        </button>
+                    </li>
+                </ul>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
+                break;
+
+            case More.SomeForm:
+                <div class="mb-3">
+                    <label class="form-label" for="some-count">How many (of @plant.HowMany)</label>
+                    <input id="some-count" type="number" class="form-control" min="1" max="@(plant.HowMany - 1)"
+                           inputmode="numeric" @bind="someCount" @bind:event="oninput" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="some-date">Date</label>
+                    <input id="some-date" type="date" class="form-control" @bind="since" max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+                @if (someKind == SomeKind.GaveAway)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="some-who">Who to <span class="text-body-secondary">(optional)</span></label>
+                        <input id="some-who" class="form-control" @bind="someWho" />
+                    </div>
+                }
+                @if (someKind == SomeKind.PottedUp)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="some-name">Nickname <span class="text-body-secondary">(optional)</span></label>
+                        <input id="some-name" class="form-control" @bind="someNickname" @bind:event="oninput" />
+                        @if (someCount > 1)
+                        {
+                            <div class="form-text">Numbered when there are several, e.g. "@(string.IsNullOrWhiteSpace(someNickname) ? "Coleus" : someNickname.Trim()) 1".</div>
+                        }
+                    </div>
+                }
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@(busy || someCount < 1 || someCount >= plant.HowMany || since > Today)" @onclick="SaveSomeAsync">Save</button>
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Some">Back</button>
+                </div>
+                break;
+
+            case More.TakeOut:
+                <div class="mb-3">
+                    <PotPicker Value="takeOutPot" ValueChanged="id => takeOutPot = id" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="taken-out-on">Date</label>
+                    <input id="taken-out-on" type="date" class="form-control" @bind="since"
+                           min="@((plant.PottedWithSince ?? since).ToString("yyyy-MM-dd"))" max="@Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@(busy || since > Today)" @onclick="TakeOutAsync">Take it out</button>
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
                 break;
 
             case More.Swap:
@@ -1070,7 +1225,7 @@ else
     [SupplyParameterFromQuery(Name = "entry")]
     public Guid? Entry { get; set; }
 
-    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, PestCheck, Status, PassOn, Flowering, ThisFlowering, Problem, ProblemUpdate }
+    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, PestCheck, Status, PassOn, Flowering, ThisFlowering, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
     private bool shareOpen;
     private bool shareOnLink;
 
@@ -1080,6 +1235,22 @@ else
     private bool detailsOpen;
     private bool careOpen;
     private bool busy;
+
+    private IReadOnlyList<Plant> allPlants = [];
+    private Plant? pottedWithPlant;
+    private IReadOnlyList<Plant> pottedInHere = [];
+    private Guid? pottingInto;
+    private enum SomeKind { Died, GaveAway, PottedUp }
+    private SomeKind someKind;
+    private int someCount = 1;
+    private string? someWho;
+    private string? someNickname;
+    private Guid? takeOutPot;
+    private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
+
+    private int PotTogetherChoices => allPlants.Count(p => !p.IsDeleted && p.InCollection && p.Id != plant?.Id);
+
+    private void AddPot(Pot pot) => pots = [.. pots, pot];
     private bool scrollToFamily;
     private More more;
     private int historyVersion;
@@ -1183,7 +1354,7 @@ else
             if (places.NameOf(plant!.PlaceId) is { } place)
                 yield return place;
             yield return PotName(plant.InnerPotId) is { } pot ? $"{Labels.For(plant.Medium)} in {pot}" : $"in {MediumWord(plant.Medium)}";
-            if (plant.Status == PlantStatus.Active && lastWater is { } water)
+            if (plant.InCollection && lastWater is { } water)
                 yield return WateringText.LastWater(water, WaterForm);
         }
     }
@@ -1217,6 +1388,12 @@ else
         More.Status when status == PlantStatus.Died => "It died",
         More.Status => "It left",
         More.PassOn => "Send its history",
+        More.PotTogether => "Pot together",
+        More.Some => "Some of them",
+        More.SomeForm when someKind == SomeKind.Died => "Some died",
+        More.SomeForm when someKind == SomeKind.GaveAway => "Gave some away",
+        More.SomeForm => "Potted some up on their own",
+        More.TakeOut => "Take it out again",
         _ => plant?.DisplayName ?? "",
     };
 
@@ -1323,6 +1500,11 @@ else
         plant = all.FirstOrDefault(p => p.Id == Id);
         if (plant is not null)
         {
+            allPlants = all;
+            // One step only: a merge can leave two plants potted with each other
+            pottedWithPlant = plant.PottedWithPlantId is { } withId && withId != plant.Id ? all.FirstOrDefault(p => p.Id == withId) : null;
+            pottedInHere = [.. all.Where(p => p.PottedWithPlantId == plant.Id && p.Id != plant.Id)
+                                  .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
             ancestors = PlantLineage.Ancestors(plant, all);
             offspring = PlantLineage.Offspring(plant, all);
 
@@ -1517,7 +1699,7 @@ else
 
     private async Task LoadComesBackAsync(IReadOnlyList<CareLog> all)
     {
-        if (plant is null || plant.Status != PlantStatus.Active)
+        if (plant is null || !plant.InCollection)
         {
             comesBack = [];
             return;
@@ -1573,7 +1755,7 @@ else
     private async Task ReloadWateringLineAsync(IReadOnlyList<CareLog> allCare)
     {
         wateringLine = null;
-        if (plant is not { Status: PlantStatus.Active, WateringReminder: true }
+        if (plant is not { InCollection: true, WateringReminder: true }
             || !(await SettingsService.GetAsync()).WateringReminder)
             return;
 
@@ -1610,6 +1792,85 @@ else
     private static string DaysLabel(int? days) => days is null or 0 ? "since today" : $"for {Labels.Count(days.Value, "day")}";
 
     private void OpenMore(More what) => more = what;
+
+    private void OpenPotTogether()
+    {
+        since = Today;
+        pottingInto = null;
+        more = More.PotTogether;
+    }
+
+    private void OpenSome(SomeKind kind)
+    {
+        since = Today;
+        someKind = kind;
+        someCount = 1;
+        someWho = null;
+        someNickname = null;
+        more = More.SomeForm;
+    }
+
+    private void OpenTakeOut()
+    {
+        since = Today;
+        takeOutPot = null;
+        more = More.TakeOut;
+    }
+
+    // These change other plants too, so the page is read again after
+    private async Task SaveChangeAsync(Func<Task> change)
+    {
+        await ChangeAsync(async () =>
+        {
+            try
+            {
+                await change();
+            }
+            catch (InvalidOperationException ex)
+            {
+                actionNote = $"Couldn't save: {ex.Message}";
+                return;
+            }
+            actionNote = null;
+        });
+        await LoadAsync();
+    }
+
+    private Task PotTogetherAsync() => SaveChangeAsync(async () =>
+    {
+        // Read again, so a change that arrived since the page loaded isn't saved over
+        if (pottingInto is not { } id || await Repository.GetAsync(id) is not { } into)
+            throw new InvalidOperationException("That plant doesn't exist any more.");
+        await PlantService.PotTogetherAsync(plant!, into, since, Labels.For,
+            potId => pots.FirstOrDefault(p => p.Id == potId)?.DisplayName,
+            mixId => mixes.FirstOrDefault(m => m.Id == mixId)?.Name,
+            placeId => places.NameOf(placeId));
+    });
+
+    private Task TakeOutAsync() => SaveChangeAsync(() =>
+        PlantService.TakeOutAsync(plant!, since, takeOutPot, Labels.For, potId => pots.FirstOrDefault(p => p.Id == potId)?.DisplayName));
+
+    private async Task SaveSomeAsync()
+    {
+        IReadOnlyList<Plant> made = [];
+        await SaveChangeAsync(async () =>
+        {
+            switch (someKind)
+            {
+                case SomeKind.Died:
+                    await PlantService.SomeDiedAsync(plant!, someCount, since);
+                    break;
+                case SomeKind.GaveAway:
+                    await PlantService.GaveSomeAwayAsync(plant!, someCount, someWho, since);
+                    break;
+                default:
+                    made = await PlantService.SplitOffAsync(plant!, someCount, someNickname, since);
+                    break;
+            }
+        });
+        if (made.Count == 1)
+            Navigation.NavigateTo($"plants/{made[0].Id}");
+    }
 
     private void OpenDormant()
     {
@@ -1779,6 +2040,7 @@ else
         plant.LeftFor = leftFor;
         plant.PotsTaken = potsTaken;
         await PlantService.UpdateAsync(before, plant, Labels.For);
+        await PlantService.CarryStatusToPottedWithAsync(plant, Labels.For);
     });
 
     private Task BackInCollectionAsync() => ChangeAsync(async () =>
@@ -1786,6 +2048,7 @@ else
         var before = plant!.Copy();
         plant.Status = PlantStatus.Active;
         await PlantService.UpdateAsync(before, plant, Labels.For);
+        await PlantService.CarryStatusToPottedWithAsync(plant, Labels.For);
     });
 
     private async Task DeleteAsync()

@@ -186,7 +186,7 @@ public static class WateringRound
             IEnumerable<Plant> plants, IEnumerable<CareLog> logs, IEnumerable<TimelineEntry> timeline,
             IEnumerable<GrowLight> lights, Places places, IReadOnlyList<AwayStretch> stretches, TimeProvider time)
         {
-            Active = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
+            Active = plants.Where(p => !p.IsDeleted && p.InCollection).ToList();
             this.logs = logs.Where(l => !l.IsDeleted).ToList();
             history = timeline.ToList();
             this.lights = lights.ToList();

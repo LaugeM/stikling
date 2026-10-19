@@ -225,7 +225,7 @@ public static partial class CollectionNumbers
         var next = NextFree(allPlants);
         var numbered = new List<NumberedPlant>();
         foreach (var plant in allPlants
-            .Where(p => p.Status == PlantStatus.Active && Normalize(p.CollectionNumber) is null)
+            .Where(p => p.InCollection && Normalize(p.CollectionNumber) is null)
             .OrderBy(p => p.AcquiredOn?.Start ?? DateOnly.FromDateTime(p.CreatedAt.DateTime))
             .ThenBy(p => p.CreatedAt)
             .ThenBy(p => p.Id))

@@ -38,6 +38,9 @@ public static class PlantChanges
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
 
+        if (before.HowMany != after.HowMany)
+            changes.Add($"How many: {before.HowMany} to {after.HowMany}");
+
         if (before.Light != after.Light)
             changes.Add(after.Light is { } light
                 ? $"Light: {label(light)} (was {(before.Light is { } was ? label(was) : "not set")})"

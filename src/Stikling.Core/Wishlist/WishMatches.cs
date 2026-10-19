@@ -26,7 +26,7 @@ public static class WishMatches
     /// <summary>What the plants in the collection say about a wish. Plants that died or left don't count.</summary>
     public static WishHave Have(Wish wish, IEnumerable<Plant> plants, PlantDictionary? dictionary = null)
     {
-        var mine = plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active).ToList();
+        var mine = plants.Where(p => !p.IsDeleted && p.InCollection).ToList();
         var same = mine.Count(p => SameName(wish, p.Genus, p.KnownSpecies, p.Cultivar, p.Nickname, dictionary));
         if (same > 0)
             return new WishHave(same, null);

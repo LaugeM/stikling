@@ -23,9 +23,13 @@ public static class CsvExport
     internal static readonly string[] PlantHeaderBeforeRaised =
         ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
 
+    // The columns before How many was added, which an older export still has. Own fields can follow it.
+    internal static readonly string[] PlantHeaderBeforeHowMany =
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Raised", "Source", "Price paid", "Tags", "Notes", "Added"];
+
     /// <summary>The fixed columns. The person's own fields follow, one column each, headed with the field's name.</summary>
     internal static readonly string[] PlantHeader =
-        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Raised", "Source", "Price paid", "Tags", "Notes", "Added"];
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Raised", "Source", "Price paid", "How many", "Tags", "Notes", "Added"];
 
     private static readonly string[] PropagationHeader =
         ["Name", "Number", "Parent plant", "Stage", "Medium", "Started", "Room", "Notes"];
@@ -53,6 +57,7 @@ public static class CsvExport
                 p.Raised?.ToString(),
                 p.Source,
                 p.PricePaid?.ToString("0.##", CultureInfo.InvariantCulture),
+                p.HowMany.ToString(CultureInfo.InvariantCulture),
                 string.Join("; ", p.Tags),
                 p.Notes,
                 p.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)

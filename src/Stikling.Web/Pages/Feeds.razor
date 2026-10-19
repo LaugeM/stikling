@@ -187,9 +187,9 @@ else
                                 {
                                     <li>
                                         <a href="plants/@fed.Plant.Id">@fed.Plant.DisplayName</a>
-                                        @if (fed.Plant.Status != PlantStatus.Active)
+                                        @if (!fed.Plant.InCollection)
                                         {
-                                            <span class="feed-plant-status">@Labels.For(fed.Plant.Status)</span>
+                                            <span class="feed-plant-status">@Labels.StatusOf(fed.Plant)</span>
                                         }
                                         <span class="feed-plant-dates">· @DatesText(fed)</span>
                                     </li>

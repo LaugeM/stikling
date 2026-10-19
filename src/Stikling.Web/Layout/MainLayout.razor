@@ -173,7 +173,7 @@
         if (!open)
         {
             var plants = await Plants.GetAllAsync();
-            open = (await Problems.AllAsync()).Any(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.Status == PlantStatus.Active));
+            open = (await Problems.AllAsync()).Any(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.InCollection));
         }
         if (open != pestTab)
         {
