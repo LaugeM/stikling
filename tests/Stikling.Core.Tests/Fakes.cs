@@ -319,6 +319,8 @@ internal sealed class FakePotRepository : IPotRepository
     public Task<IReadOnlyList<Pot>> GetAllAsync() =>
         Task.FromResult<IReadOnlyList<Pot>>(Pots.Values.Where(p => !p.IsDeleted).ToList());
 
+    public Task<ContainerList> GetContainersAsync() => Task.FromResult(new ContainerList(Pots.Values));
+
     public Task<Pot?> GetAsync(Guid id) =>
         Task.FromResult(Pots.TryGetValue(id, out var pot) && !pot.IsDeleted ? pot : null);
 

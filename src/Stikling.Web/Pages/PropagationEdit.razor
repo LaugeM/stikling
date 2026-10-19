@@ -9,6 +9,7 @@
 @inject PlantNameService Names
 @inject RoomService RoomService
 @inject SellerService SellerService
+@inject PotService PotService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject PhotoService Photos
@@ -261,15 +262,7 @@ else
                     </div>
                 }
                 <div class="mb-3">
-                    <label class="form-label" for="container">Container</label>
-                    <InputText id="container" class="form-control" @bind-Value="propagation.Container" list="container-list"
-                               placeholder="e.g. Plastic box with lid" autocomplete="off" />
-                    <datalist id="container-list">
-                        @foreach (var name in containers)
-                        {
-                            <option value="@name"></option>
-                        }
-                    </datalist>
+                    <ContainerPicker @bind-Value="containerText" Containers="containerUses" />
                 </div>
                 <div class="mb-3">
                     <span class="form-label d-block" id="aids-label">Rooting aids</span>
@@ -550,7 +543,13 @@ else
     private Places places = Places.None;
     private string? location; // as picked, "Kitchen / Window"; made into a room when saving
     private IReadOnlyList<string> experiments = [];
-    private IReadOnlyList<string> containers = [];
+    // What the Container box says. Looked up again only when it was changed, so saving a propagation
+    // whose container was deleted doesn't bring a new one back.
+    private string? containerText;
+    private string? containerTextStart;
+    private bool containerTextLoaded;
+    private IReadOnlyList<PotUse> containerUses = [];
+    private ContainerList containerBook = ContainerList.None;
 
     // Which sections start open, worked out when the propagation loads. A section only reads this once
     private bool openWhere;
@@ -652,7 +651,9 @@ else
         mixes = await MixRepository.GetAllAsync();
         rooms = Room.List(places, allPlants, allPropagations);
         experiments = Experiments.Names(allPropagations);
-        containers = Containers.Names(allPropagations);
+        var potUses = await PotService.GetAllAsync();
+        containerBook = new ContainerList(potUses.Select(u => u.Pot));
+        containerUses = PotUse.RecentContainers(potUses, allPropagations);
         wishes = IsNew ? await WishService.GetAllAsync() : [];
         dictionary = IsNew ? await Names.GetDictionaryAsync() : null;
 
@@ -694,6 +695,14 @@ else
                 // A Source that came with the draft, like a wish's "found at", is made into a seller on save
                 sellerTextStart = IsNew && propagation.SellerId is null ? null : sellerText;
                 sellerTextLoaded = true;
+            }
+
+            if (!containerTextLoaded)
+            {
+                containerText = containerBook.For(propagation.ContainerPotId, propagation.Container)?.Name ?? propagation.Container;
+                // A container that came with the draft, like Like last time without an id, is looked up on save
+                containerTextStart = IsNew && propagation.ContainerPotId is null ? null : containerText;
+                containerTextLoaded = true;
             }
 
             openArrival = !IsNew && (propagation.ArrivedIn is not null || propagation.ArrivalProblems.Count > 0 || !string.IsNullOrWhiteSpace(propagation.ArrivalNote));
@@ -861,6 +870,7 @@ else
     private void UseLastTime(Propagation from)
     {
         LastTime.Apply(from, propagation!);
+        containerText = containerBook.For(from.ContainerPotId, from.Container)?.Name ?? from.Container;
         LoadDrying();
     }
 
@@ -965,6 +975,14 @@ else
                 propagation.SellerId = choice.SellerId;
                 propagation.Source = choice.Source;
                 sellerTextStart = sellerText;
+            }
+
+            if (containerText != containerTextStart || (propagation.ContainerPotId is null && containerBook.For(null, propagation.Container) is not null))
+            {
+                var choice = await PotService.ChooseContainerAsync(containerText, propagation.ContainerPotId);
+                propagation.ContainerPotId = choice.PotId;
+                propagation.Container = choice.Name;
+                containerTextStart = containerText;
             }
 
             propagation.PlaceId = await RoomService.PlaceIdAsync(location);

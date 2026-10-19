@@ -167,8 +167,8 @@ public class PotUseTests
         var ceramic = new Pot { Name = "Grey ceramic", Group = PotGroup.Outer };
         var terracotta = new Pot { Name = "Terracotta", Group = PotGroup.Standalone };
 
-        Assert.Equal(["Black nursery pot", "Clear nursery pot"], PotUse.Names([big, small, black, ceramic, terracotta], PotGroup.Inner));
-        Assert.Equal(["Terracotta"], PotUse.Names([big, ceramic, terracotta], PotGroup.Standalone));
+        Assert.Equal(["Black nursery pot", "Clear nursery pot"], PotUse.Names([big, small, black, ceramic, terracotta], PotKind.Inner));
+        Assert.Equal(["Terracotta"], PotUse.Names([big, ceramic, terracotta], PotKind.Standalone));
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public class PotUseTests
     {
         var ceramic = new Pot { Name = "Grey ceramic", Group = PotGroup.Outer };
 
-        Assert.Empty(PotUse.Names([Nursery(), ceramic], PotGroup.Outer));
+        Assert.Empty(PotUse.Names([Nursery(), ceramic], PotKind.Outer));
     }
 
     private static Pot Nursery(int owned = 1) =>
