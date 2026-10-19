@@ -619,7 +619,7 @@ else
         </div>
     </div>
 
-    <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId"
+    <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId" OnPicked="() => { photoChoice = false; more = More.None; }"
                    CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
 
     @if (googleOn)
@@ -627,9 +627,9 @@ else
         <Sheet Title="Add a photo" Open="photoChoice" OpenChanged="open => photoChoice = open">
             <ul class="sheet-actions">
                 <li>
-                    <label class="sheet-action" for="@photoInputId" @onclick="() => photoChoice = false">
+                    <label class="sheet-action" for="@photoInputId">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                        <span class="sheet-action-text"><b>From this phone</b><small>Camera or gallery</small></span>
+                        <span class="sheet-action-text"><b>From this device</b><small>Camera or gallery</small></span>
                     </label>
                 </li>
                 <li>
@@ -895,7 +895,7 @@ else
                     }
                     else
                     {
-                        <label class="btn btn-primary" for="@photoInputId" @onclick="() => more = More.None">Add a photo</label>
+                        <label class="btn btn-primary" for="@photoInputId">Add a photo</label>
                     }
                     <button type="button" class="btn btn-outline-primary" @onclick="() => more = More.None">Close</button>
                 </div>

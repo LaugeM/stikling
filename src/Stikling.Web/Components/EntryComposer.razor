@@ -105,6 +105,10 @@
     [Parameter]
     public EventCallback<Guid?> OnCoverChanged { get; set; }
 
+    /// <summary>Raised when files were chosen, so the page can close a sheet that led to the picker.</summary>
+    [Parameter]
+    public EventCallback OnPicked { get; set; }
+
     /// <summary>Raised after something was added, so the page can show it.</summary>
     [Parameter]
     public EventCallback OnAdded { get; set; }
@@ -196,6 +200,7 @@
 
     private async Task AddPhotosAsync(ElementReference input)
     {
+        await OnPicked.InvokeAsync();
         busy = true;
         error = null;
         forNote = false;

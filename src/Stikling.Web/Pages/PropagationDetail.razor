@@ -472,7 +472,7 @@ else
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id" StartOnLink="shareOnLink"
                 CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
-    <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId"
+    <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId" OnPicked="() => photoChoice = false"
                    CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
 
     @if (googleOn)
@@ -480,9 +480,9 @@ else
         <Sheet Title="Add a photo" Open="photoChoice" OpenChanged="open => photoChoice = open">
             <ul class="sheet-actions">
                 <li>
-                    <label class="sheet-action" for="@photoInputId" @onclick="() => photoChoice = false">
+                    <label class="sheet-action" for="@photoInputId">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                        <span class="sheet-action-text"><b>From this phone</b><small>Camera or gallery</small></span>
+                        <span class="sheet-action-text"><b>From this device</b><small>Camera or gallery</small></span>
                     </label>
                 </li>
                 <li>
