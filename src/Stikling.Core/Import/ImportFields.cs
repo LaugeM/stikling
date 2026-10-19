@@ -29,6 +29,7 @@ public enum ImportField
     Source,
     Price,
     HowMany,
+    PottedWith,
     Medium,
     Status,
     Tags,
@@ -78,6 +79,7 @@ public static class ImportFields
         ImportField.Source => "Source",
         ImportField.Price => "Price paid",
         ImportField.HowMany => "How many",
+        ImportField.PottedWith => "Potted with (kept in About it)",
         ImportField.Medium => "Grows in",
         ImportField.Status => "Status",
         ImportField.Tags => "Tags",
@@ -96,7 +98,7 @@ public static class ImportFields
         ("Name", [ImportField.Name, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote]),
         ("Where and when", [ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source, ImportField.Price]),
         ("Care", [ImportField.LastWatered, ImportField.LastFed, ImportField.LastRepotted]),
-        ("More about it", [ImportField.HowMany, ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt]),
+        ("More about it", [ImportField.HowMany, ImportField.PottedWith, ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt]),
         ("Your fields", [ImportField.OwnField])
     ];
 
@@ -106,11 +108,12 @@ public static class ImportFields
     [
         ImportField.Skip, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote,
         ImportField.Status, ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source,
-        ImportField.Price, ImportField.HowMany, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
+        ImportField.Price, ImportField.HowMany, ImportField.PottedWith, ImportField.Tags, ImportField.AboutIt, ImportField.Skip
     ];
 
     // The same for an export from before the How many column, before the Raised column, before the name columns, and before the Number column
-    private static readonly ImportField[] OwnExportBeforeHowMany = [.. OwnExport.Where((_, i) => i != 15)];
+    private static readonly ImportField[] OwnExportBeforePottedWith = [.. OwnExport.Where((_, i) => i != 16)];
+    private static readonly ImportField[] OwnExportBeforeHowMany = [.. OwnExportBeforePottedWith.Where((_, i) => i != 15)];
     private static readonly ImportField[] OwnExportBeforeRaised = [.. OwnExportBeforeHowMany.Where((_, i) => i != 12)];
     private static readonly ImportField[] OwnExportBeforeNameSure = [.. OwnExportBeforeRaised.Where((_, i) => i is not (6 or 7))];
     private static readonly ImportField[] OwnExportBeforeNumber = [.. OwnExportBeforeNameSure.Where((_, i) => i != 1)];
@@ -143,6 +146,7 @@ public static class ImportFields
         Add(ImportField.Source, "source", "from", "shop", "store", "bought from", "kilde", "fra", "butik", "forhandler");
         Add(ImportField.Price, "price", "price paid", "cost", "pris", "købspris");
         Add(ImportField.HowMany, "how many", "count", "qty", "quantity", "antal");
+        Add(ImportField.PottedWith, "potted with");
         Add(ImportField.Medium, "medium", "soil", "substrate", "grows in", "jord", "substrat");
         Add(ImportField.Status, "status");
         Add(ImportField.Tags, "tags", "tag", "labels", "mærker");
@@ -188,6 +192,8 @@ public static class ImportFields
 
         if (Starts(headings, CsvExport.PlantHeader))
             return OwnExport;
+        if (Starts(headings, CsvExport.PlantHeaderBeforePottedWith))
+            return OwnExportBeforePottedWith;
         if (Starts(headings, CsvExport.PlantHeaderBeforeHowMany))
             return OwnExportBeforeHowMany;
         if (headings.SequenceEqual(CsvExport.PlantHeaderBeforeRaised))

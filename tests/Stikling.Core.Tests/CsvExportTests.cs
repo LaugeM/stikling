@@ -16,7 +16,7 @@ public class CsvExportTests
     {
         var csv = CsvExport.Plants([new Plant { Nickname = "Basil", CreatedAt = Now }], Places.None, []);
 
-        Assert.Equal("Name,Number,Nickname,Genus,Species,Cultivar,Name sure,Locality or code,Status,Room,Acquired,Origin,Raised,Source,Price paid,How many,Tags,Notes,Added", Lines(csv)[0]);
+        Assert.Equal("Name,Number,Nickname,Genus,Species,Cultivar,Name sure,Locality or code,Status,Room,Acquired,Origin,Raised,Source,Price paid,How many,Potted with,Tags,Notes,Added", Lines(csv)[0]);
         Assert.EndsWith("\r\n", csv);
         Assert.DoesNotContain("\n", csv.Replace("\r\n", ""));
     }

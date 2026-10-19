@@ -149,27 +149,47 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             plant.Status = status;
             plant.PotsTaken = potsTaken;
             await UpdateAsync(before, plant, label);
-            await CarryStatusToPottedWithAsync(plant, label, done);
+            await CarryStatusToPottedWithAsync(plant, before.Status, label, done);
         }
     }
 
     /// <summary>
     /// The plants potted with this one get its status, so they leave and come back with it. They don't
-    /// take pots with them. Used after the status of a plant was changed.
+    /// take pots with them. Used after the status of a plant was changed from <paramref name="statusBefore"/>.
+    /// Only plants that had that status follow, so one that died on its own stays died when this one
+    /// comes back.
     /// </summary>
-    public async Task CarryStatusToPottedWithAsync(Plant plant, Func<Enum, string> label, ISet<Guid>? done = null)
+    public async Task CarryStatusToPottedWithAsync(Plant plant, PlantStatus statusBefore, Func<Enum, string> label, ISet<Guid>? done = null)
     {
         foreach (var other in await plants.GetAllAsync())
         {
-            if (other.PottedWithPlantId != plant.Id || other.Id == plant.Id || other.Status == plant.Status)
+            if (other.PottedWithPlantId != plant.Id || other.Id == plant.Id || other.Status != statusBefore || other.Status == plant.Status)
                 continue;
             if (done is not null && !done.Add(other.Id))
                 continue;
             var before = other.Copy();
             other.Status = plant.Status;
             other.PotsTaken = PotsTaken.None;
+            other.LeftTo = plant.LeftTo;
+            other.LeftFor = plant.LeftFor;
+            other.CauseOfDeath = plant.CauseOfDeath;
             await UpdateAsync(before, other, label);
         }
+    }
+
+    /// <summary>
+    /// Deletes a plant. Plants potted with it are taken out first and get a place in the list of
+    /// their own again, and a plant that is potted with another is taken out of that pot, so the
+    /// other plant's count goes down.
+    /// </summary>
+    public async Task DeleteAsync(Plant plant, Func<Enum, string> label)
+    {
+        var today = time.Today();
+        foreach (var other in (await plants.GetAllAsync()).Where(p => p.PottedWithPlantId == plant.Id && p.Id != plant.Id).ToList())
+            await TakeOutAsync(other, today, null, label);
+        if (await plants.GetAsync(plant.Id) is { PottedWithPlantId: not null } mine)
+            await TakeOutAsync(mine, today, null, label);
+        await plants.DeleteAsync(plant.Id);
     }
 
     /// <summary>

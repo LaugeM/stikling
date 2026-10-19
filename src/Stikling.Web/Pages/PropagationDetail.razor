@@ -627,7 +627,7 @@ else
                     @if (PotUpMode == PotUpKind.Into)
                     {
                         <div class="mb-2">
-                            <PlantSelect Id="potup-into-plant" Plants="allPlants" Genus="@propagation.Genus" Value="potUp.IntoPlantId" ValueChanged="id => potUp.IntoPlantId = id" />
+                            <PlantSelect Id="potup-into-plant" Plants="allPlants" Genus="@(string.IsNullOrWhiteSpace(propagation.Genus) ? parent?.Genus : propagation.Genus)" Value="potUp.IntoPlantId" ValueChanged="id => potUp.IntoPlantId = id" />
                             @if (!allPlants.Any(p => p.InCollection))
                             {
                                 <div class="form-text">There are no plants to pot them with.</div>

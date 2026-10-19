@@ -593,6 +593,10 @@ else
                     @if (confirmDelete)
                     {
                         <p class="mb-2">Delete <strong>@plant.DisplayName</strong>? If it died or you gave it away, use the three dots next to Photo and Note to say so instead, so its history is kept.</p>
+                        @if (pottedInHere.Count > 0)
+                        {
+                            <p class="mb-2">@string.Join(", ", pottedInHere.Select(p => p.DisplayName)) potted in with it will be taken out and get their own place in the list again.</p>
+                        }
                         <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
                         <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
                     }
@@ -2040,7 +2044,7 @@ else
         plant.LeftFor = leftFor;
         plant.PotsTaken = potsTaken;
         await PlantService.UpdateAsync(before, plant, Labels.For);
-        await PlantService.CarryStatusToPottedWithAsync(plant, Labels.For);
+        await PlantService.CarryStatusToPottedWithAsync(plant, before.Status, Labels.For);
     });
 
     private Task BackInCollectionAsync() => ChangeAsync(async () =>
@@ -2048,12 +2052,12 @@ else
         var before = plant!.Copy();
         plant.Status = PlantStatus.Active;
         await PlantService.UpdateAsync(before, plant, Labels.For);
-        await PlantService.CarryStatusToPottedWithAsync(plant, Labels.For);
+        await PlantService.CarryStatusToPottedWithAsync(plant, before.Status, Labels.For);
     });
 
     private async Task DeleteAsync()
     {
-        await Repository.DeleteAsync(Id);
+        await PlantService.DeleteAsync(plant!, Labels.For);
         Navigation.NavigateTo("plants", replace: true);
     }
 }

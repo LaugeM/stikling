@@ -237,6 +237,9 @@ public static class SpreadsheetImport
                 notes.Add(about);
             if (leftover is not null)
                 notes.Add(leftover);
+            // Not linked, since the plant it names may not be imported: kept as text
+            if (Get(ImportField.PottedWith) is { } pottedWith)
+                notes.Add($"Potted with {pottedWith}");
             foreach (var column in aboutLines)
                 if (column < cells.Count && cells[column].Trim() is { Length: > 0 } text)
                     notes.Add($"{sheet.Headings[column]}: {text}");

@@ -303,6 +303,101 @@ public class PlantsInOnePotTests
         Assert.False(b.InCollection);
     }
 
+    [Fact]
+    public async Task Status_details_go_along_and_only_plants_that_shared_the_status_come_back()
+    {
+        var a = Add("A");
+        var b = Add("B");
+        var c = Add("C");
+        await service.PotTogetherAsync(b, a, Today, Label);
+        await service.PotTogetherAsync(c, a, Today, Label);
+        c.Status = PlantStatus.Died;
+
+        a.Status = PlantStatus.GivenAway;
+        a.LeftTo = "Anna";
+        var before = PlantStatus.Active;
+        await service.CarryStatusToPottedWithAsync(a, before, Label);
+
+        Assert.Equal(PlantStatus.GivenAway, b.Status);
+        Assert.Equal("Anna", b.LeftTo);
+        Assert.Equal(PlantStatus.Died, c.Status);
+
+        a.Status = PlantStatus.Active;
+        await service.CarryStatusToPottedWithAsync(a, PlantStatus.GivenAway, Label);
+
+        Assert.Equal(PlantStatus.Active, b.Status);
+        Assert.Null(b.LeftTo);
+        Assert.Equal(PlantStatus.Died, c.Status);
+    }
+
+    // Delete
+
+    [Fact]
+    public async Task Deleting_a_plant_takes_out_the_plants_potted_with_it()
+    {
+        var a = Add("A");
+        var b = Add("B", 2);
+        await service.PotTogetherAsync(b, a, Today, Label);
+
+        await service.DeleteAsync(a, Label);
+
+        Assert.True(b.InCollection);
+        Assert.Null(b.PottedWithPlantId);
+        Assert.True(plants.Plants[a.Id].IsDeleted);
+    }
+
+    [Fact]
+    public async Task Deleting_a_plant_that_is_potted_with_another_lowers_the_other_plant_s_count()
+    {
+        var a = Add("A");
+        var b = Add("B", 2);
+        await service.PotTogetherAsync(b, a, Today, Label);
+        Assert.Equal(3, a.Count);
+
+        await service.DeleteAsync(b, Label);
+
+        Assert.Null(a.Count);
+        Assert.True(plants.Plants[b.Id].IsDeleted);
+    }
+
+    // CSV
+
+    [Fact]
+    public async Task The_export_names_the_plant_a_plant_is_potted_with()
+    {
+        var a = Add("Big aloe");
+        var b = Add("Pup");
+        var c = Add("Orphan");
+        var gone = Add("Gone");
+        await service.PotTogetherAsync(b, a, Today, Label);
+        c.PottedWithPlantId = gone.Id;
+        gone.DeletedAt = Now;
+
+        var csv = Backup.CsvExport.Plants(plants.Plants.Values, Places.None, []);
+        var sheet = Import.SheetReader.Read(csv);
+        var column = sheet.Headings.ToList().IndexOf("Potted with");
+        var named = sheet.Rows.ToDictionary(r => r[0], r => r[column]);
+
+        Assert.Equal(sheet.Headings.ToList().IndexOf("How many") + 1, column);
+        Assert.Equal("Big aloe", named["Pup"]);
+        Assert.Equal("", named["Orphan"]);
+        Assert.Equal("", named["Big aloe"]);
+    }
+
+    [Fact]
+    public void Importing_keeps_potted_with_as_a_line_in_About_it_and_older_exports_still_import()
+    {
+        var headings = Import.SheetReader.Read(Backup.CsvExport.Plants([], Places.None, [])).Headings;
+        var guess = Import.ImportFields.Guess(headings);
+        Assert.Equal(Import.ImportField.PottedWith, guess[headings.ToList().IndexOf("Potted with")]);
+
+        string[] before = ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Raised", "Source", "Price paid", "How many", "Tags", "Notes", "Added", "Clone name"];
+        var older = Import.ImportFields.Guess(before);
+        Assert.Equal(before.Length, older.Count);
+        Assert.DoesNotContain(Import.ImportField.PottedWith, older);
+        Assert.Equal(Import.ImportField.AboutLine, older[^1]);
+    }
+
     // Changes
 
     [Fact]
