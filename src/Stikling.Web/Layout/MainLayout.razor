@@ -11,6 +11,7 @@
 @inject ProblemService Problems
 @inject SellerService Sellers
 @inject PotService PotLibrary
+@inject Stikling.Core.Propagations.PropagationService PropagationService
 @inject ILogger<MainLayout> Logger
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -151,6 +152,17 @@
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Turning Container text into containers failed");
+        }
+
+        // Plants potted up before their cutting's cover was carried over take it now
+        try
+        {
+            if (await PropagationService.CarryCoversAsync() > 0)
+                Sync.NotifyChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Giving potted-up plants their cutting's cover failed");
         }
     }
 

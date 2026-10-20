@@ -82,7 +82,7 @@ public class AttentionTests
     {
         var propagation = new Propagation { Nickname = "Corms", StartedOn = Today, Attention = new("Ready to pot up", Today) };
         await propagations.SaveAsync(propagation);
-        var service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+        var service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
 
         await service.MarkFailedAsync(propagation, 1);
 
@@ -174,7 +174,7 @@ public class AttentionTests
     {
         var propagation = new Propagation { Nickname = "Corms", StartedOn = Today };
         await propagations.SaveAsync(propagation);
-        var service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+        var service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
 
         await service.SetAttentionAsync(propagation, "Ready to pot up", LooseDate.Of(Today.AddDays(5)));
 
@@ -192,7 +192,7 @@ public class AttentionTests
 
         var propagation = new Propagation { Nickname = "Corms", StartedOn = Today, Attention = flag, AttentionLater = Later(flag, LooseDate.Of(2027, 3)) };
         await propagations.SaveAsync(propagation);
-        var service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+        var service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
         await service.MarkFailedAsync(propagation, 1);
         Assert.Null(propagation.AttentionLater);
     }

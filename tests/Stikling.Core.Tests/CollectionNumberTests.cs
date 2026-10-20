@@ -203,7 +203,7 @@ public class CollectionNumberTests
         var plants = new FakePlantRepository();
         var propagations = new FakePropagationRepository();
         var service = new PropagationService(propagations, plants, new FakeTimelineRepository(),
-            new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+            new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
         var cutting = Cutting("117c", set: c => c.InitialCount = 5);
         await propagations.SaveAsync(cutting);
 
@@ -219,7 +219,7 @@ public class CollectionNumberTests
     {
         var propagations = new FakePropagationRepository();
         var service = new PropagationService(propagations, new FakePlantRepository(), new FakeTimelineRepository(),
-            new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+            new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
         var cutting = Cutting(null);
         await propagations.SaveAsync(cutting);
 

@@ -21,7 +21,7 @@ public class SwapListTests
 
     private static PropagationService ServiceFor(FakePropagationRepository propagations) =>
         new(propagations, new FakePlantRepository(), new FakeTimelineRepository(),
-            new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+            new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
 
     private static string Lines(params string[] lines) => string.Join(Environment.NewLine, lines);
 

@@ -114,7 +114,7 @@ public class DormancyTests
     public async Task Waking_a_propagation_up_is_recorded_and_counts_as_looking_at_it()
     {
         var time = new FixedTime(Now);
-        var service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), time);
+        var service = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), time);
         var corms = new Propagation { Nickname = "Corms", StartedOn = Today.AddDays(-60), DormantSince = Today.AddDays(-30) };
         propagations.Propagations[corms.Id] = corms;
 
