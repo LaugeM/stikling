@@ -14,6 +14,7 @@ public class PropagationServiceTests
     private readonly FakeTimelineRepository timeline = new();
     private readonly FakePropagationCareLogRepository propagationCare = new();
     private readonly FakeCareLogRepository plantCare = new();
+    private readonly FakePhotoRepository photos = new();
     private readonly PropagationService service;
 
     private static readonly FakePlaceRepository Places = new();
@@ -22,7 +23,7 @@ public class PropagationServiceTests
 
     public PropagationServiceTests()
     {
-        service = new PropagationService(propagations, plants, timeline, propagationCare, plantCare, new FixedTime(Now));
+        service = new PropagationService(propagations, plants, timeline, propagationCare, plantCare, photos, new FixedTime(Now));
         plants.Plants[parent.Id] = parent;
     }
 

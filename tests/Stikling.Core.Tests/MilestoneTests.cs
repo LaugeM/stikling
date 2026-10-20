@@ -15,7 +15,7 @@ public class MilestoneTests
     private readonly PropagationService service;
 
     public MilestoneTests() =>
-        service = new PropagationService(propagations, new FakePlantRepository(), timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+        service = new PropagationService(propagations, new FakePlantRepository(), timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
 
     private static string Label(Enum value) => value switch
     {

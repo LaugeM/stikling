@@ -6,6 +6,7 @@
 @inject PhotoService Photos
 @inject TimeProvider Time
 @using Stikling.Core.Sharing
+@using Stikling.Core.Propagations
 
 <ReloadOnSync Reload="LoadAsync" />
 
@@ -60,6 +61,12 @@ else
                                         <button type="button" class="entry-edited" aria-expanded="@(versionsId == entry.Id ? "true" : "false")"
                                                 @onclick="() => versionsId = versionsId == entry.Id ? null : entry.Id">edited</button>
                                     }
+                                    @if (earlierIds.Contains(entry.Id))
+                                    {
+                                        <span class="entry-day">As a cutting</span>
+                                    }
+                                    else
+                                    {
                                     <span class="entry-actions">
                                         @if (TimelineService.CanCorrect(entry) && editId != entry.Id)
                                         {
@@ -73,6 +80,7 @@ else
                                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
                                         </button>
                                     </span>
+                                    }
                                 }
                             </div>
 
@@ -126,7 +134,14 @@ else
                                 </div>
                             }
 
-                            @if (entry.RelatedId is { } relatedId)
+                            @if (earlierIds.Contains(entry.Id) && EarlierPropagationId is { } cuttingId)
+                            {
+                                <a class="entry-link link-action" href="propagations/@cuttingId">
+                                    Open propagation
+                                    <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+                                </a>
+                            }
+                            else if (entry.RelatedId is { } relatedId)
                             {
                                 <a class="entry-link link-action" href="@(entry.RelatedType == SubjectType.Plant ? "plants" : "propagations")/@relatedId">
                                     @(entry.RelatedType == SubjectType.Plant ? "Open plant" : "Open propagation")
@@ -212,7 +227,7 @@ else
 }
 
 <PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" PhotoAge="PhotoAge"
-             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" />
+             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" KeptPhotoIds="earlierPhotoIds" />
 
 @code {
     [Parameter, EditorRequired]
@@ -232,6 +247,17 @@ else
     [Parameter]
     public string EmptyText { get; set; } = "No photos or notes yet.";
 
+    /// <summary>
+    /// On a plant potted up from a propagation: the propagation, whose entries with photos show on
+    /// the history as "As a cutting". They can't be changed here.
+    /// </summary>
+    [Parameter]
+    public Guid? EarlierPropagationId { get; set; }
+
+    /// <summary>The day it was potted up. Only the propagation's entries up to then show.</summary>
+    [Parameter]
+    public DateOnly? EarlierUntil { get; set; }
+
     /// <summary>Raised when the cover photo should change (null = no cover).</summary>
     [Parameter]
     public EventCallback<Guid?> OnCoverChanged { get; set; }
@@ -246,6 +272,8 @@ else
     private IReadOnlyList<Photo> photos = [];
     private IReadOnlyList<Photo> references = [];
     private HashSet<Guid> referenceIds = [];
+    private HashSet<Guid> earlierIds = [];
+    private HashSet<Guid> earlierPhotoIds = [];
     private Dictionary<Guid, int> photoIndex = [];
 
     private bool busy;
@@ -295,6 +323,20 @@ else
                 .Select(g => (g.Key, (IReadOnlyList<ReceivedItem>)g.OrderByDescending(x => x.index).Select(x => x.item).ToList()))
                 .ToList();
 
+        // The propagation's photo entries, for a plant that was potted up from one
+        IReadOnlyList<TimelineEntry> earlier = [];
+        var earlierPhotos = new Dictionary<Guid, Photo>();
+        if (EarlierPropagationId is { } fromId && EarlierUntil is { } until)
+        {
+            var cuttingPhotos = await PhotoRepository.GetForAsync(fromId);
+            earlier = CarriedPhotos.EarlierEntries(
+                await Entries.GetForAsync(fromId), PhotoKinds.References(cuttingPhotos).Select(p => p.Id).ToHashSet(), until, Time);
+            earlierPhotos = PhotoKinds.Own(cuttingPhotos).ToDictionary(p => p.Id);
+        }
+        earlierIds = earlier.Select(e => e.Id).ToHashSet();
+        var earlierShown = earlier.SelectMany(e => e.PhotoIds).Where(earlierPhotos.ContainsKey).Distinct().Select(id => earlierPhotos[id]).ToList();
+        earlierPhotoIds = earlierShown.Select(p => p.Id).ToHashSet();
+
         // The viewer pages through photos in the same order as the page shows them: the own entries,
         // the own photos in no entry, then the copied ones as the history before reads
         var byId = stored.ToDictionary(p => p.Id);
@@ -303,12 +345,13 @@ else
         var copied = beforeDays.SelectMany(d => d.Items).SelectMany(i => i.PhotoIds).Where(byId.ContainsKey).Distinct().Select(id => byId[id]);
         photos = inTimeline
             .Concat(stored.Where(p => p.ReceivedHistoryId is null && !inEntries.Contains(p.Id)))
+            .Concat(earlierShown)
             .Concat(copied)
             .ToList();
         // The reference photos come last, so the row under the history opens the viewer on them
         photos = [.. photos, .. references];
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
-        days = TimelineOrder.ByDay(entries, Time);
+        days = TimelineOrder.ByDay(entries.Concat(earlier), Time);
 
         // A photo tapped before the photos were here opens as soon as they are
         if (openWhenLoaded is { } waiting)

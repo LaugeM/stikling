@@ -113,7 +113,7 @@ public class UnsureNameTests
     private PlantService PlantService() => new(plants, timeline, new FixedTime(Now));
 
     private PropagationService PropagationService() =>
-        new(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+        new(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
 
     [Fact]
     public async Task Setting_a_plant_to_sure_notes_when_it_was_identified()

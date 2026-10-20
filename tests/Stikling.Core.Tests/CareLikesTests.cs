@@ -281,7 +281,7 @@ public class CareLikesTests
 
     private static PropagationService PropagationsWith(FakePlantRepository plants) => new(
         new FakePropagationRepository(), plants, new FakeTimelineRepository(),
-        new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+        new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
 
     [Fact]
     public async Task Potting_up_copies_what_the_parent_likes()
