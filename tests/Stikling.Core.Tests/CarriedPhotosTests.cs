@@ -129,6 +129,17 @@ public class CarriedPhotosTests
     }
 
     [Fact]
+    public async Task Carrying_covers_skips_a_deleted_cutting()
+    {
+        AddPhoto(3);
+        var plant = await OldPlantAsync(Today);
+        cutting.DeletedAt = Now;
+
+        Assert.Equal(0, await service.CarryCoversAsync());
+        Assert.Null(plant.CoverPhotoId);
+    }
+
+    [Fact]
     public async Task Carrying_covers_twice_changes_nothing_the_second_time()
     {
         AddPhoto(3);

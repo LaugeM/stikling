@@ -15,6 +15,15 @@ public static class SitterSheetText
         _ => "From the bottom"
     };
 
+    /// <summary>One line on what a way of watering means, for choosing it. Null is the plant with no way said.</summary>
+    public static string MethodHint(WaterMethod? method) => method switch
+    {
+        null => "The sheet for a plant-sitter uses the way you pick when you make it.",
+        WaterMethod.Top => "Pour water onto the soil until a little runs out below.",
+        WaterMethod.Soak => "Stand the whole pot in a bowl of water for a while, then let it drain.",
+        _ => "Stand it in a saucer of water and let it soak up what it needs."
+    };
+
     /// <summary>The steps for a way of watering. They only apply once the plant has been checked.</summary>
     public static string MethodSteps(WaterMethod method) => method switch
     {

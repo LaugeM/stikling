@@ -248,8 +248,9 @@ public sealed class PropagationService(
 
     /// <summary>
     /// Gives plants that were potted up before covers were carried over the cover of the cutting
-    /// they came from. It only sets a cover where there is none, so it is safe to run again and
-    /// every device reaches the same value. Returns how many plants changed.
+    /// they came from. It only sets a cover where there is none, and every device reaches the same
+    /// value. It is meant to run once per device: a cover someone removes later would come back.
+    /// A deleted cutting gives nothing. Returns how many plants changed.
     /// </summary>
     public async Task<int> CarryCoversAsync()
     {
@@ -258,7 +259,7 @@ public sealed class PropagationService(
         {
             if (plant.IsDeleted || plant.CoverPhotoId is not null || plant.FromPropagationId is not { } fromId)
                 continue;
-            if (await propagations.GetAsync(fromId) is not { } propagation)
+            if (await propagations.GetAsync(fromId) is not { IsDeleted: false } propagation)
                 continue;
 
             var day = CarriedPhotos.PotUpDay(plant, await timeline.GetForAsync(plant.Id), time);
