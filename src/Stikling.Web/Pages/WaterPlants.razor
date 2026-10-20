@@ -1,6 +1,8 @@
 @page "/water"
 @using Stikling.Core.Settings
 @inject IPlantRepository Plants
+@inject IPropagationRepository PropagationRepository
+@inject PropagationCareService CuttingCare
 @inject ICareLogRepository CareLogs
 @inject IPotRepository PotRepository
 @inject IFeedRepository FeedRepository
@@ -71,10 +73,11 @@ else if (stage == Stage.Rooms)
 else if (showDone)
 {
     var watered = WateredRows().ToList();
+    var wateredCuttings = WateredCuttings().ToList();
 
     <div class="pass-summary" role="status">
         <h2 tabindex="-1" @ref="doneHeading">Done for today</h2>
-        @if (watered.Count == 0)
+        @if (watered.Count == 0 && wateredCuttings.Count == 0)
         {
             <p>Nothing watered this time.</p>
         }
@@ -84,6 +87,10 @@ else if (showDone)
                 @foreach (var row in watered)
                 {
                     <li>@row.Plant.DisplayName, @DoneText(row).ToLowerInvariant()</li>
+                }
+                @foreach (var cutting in wateredCuttings)
+                {
+                    <li>@cutting.Propagation.DisplayName, watered</li>
                 }
             </ul>
         }
@@ -120,6 +127,22 @@ else
         }
     </p>
 
+    @if (feedOptions.Count > 0)
+    {
+        <div class="pass-round-feed">
+            <label class="form-label" for="round-feed">Feed this round</label>
+            <select id="round-feed" class="form-select" aria-describedby="round-feed-help" value="@(roundFeed?.ToString() ?? "")"
+                    @onchange="e => roundFeed = Guid.TryParse(e.Value?.ToString(), out var id) ? id : null">
+                <option value="">No feed</option>
+                @foreach (var option in feedOptions)
+                {
+                    <option value="@option.Id">@option.Name</option>
+                }
+            </select>
+            <div class="form-text" id="round-feed-help">Goes with every watering you log here, unless a plant has its own feed due.</div>
+        </div>
+    }
+
     @foreach (var group in groups)
     {
         var top = group.Rows.Where(r => r.Form == WateringForm.TopWatered).ToList();
@@ -129,7 +152,7 @@ else
             {
                 <h2 class="section-label">@group.Name</h2>
             }
-            @if (group.Rows.Count == 0)
+            @if (group.Rows.Count == 0 && group.Cuttings.Count == 0)
             {
                 <p class="pass-none">No plants here.</p>
             }
@@ -149,6 +172,16 @@ else
                     @foreach (var row in topUp)
                     {
                         @RowTemplate(row)
+                    }
+                </ul>
+            }
+            @if (group.Cuttings.Count > 0)
+            {
+                <h3 class="pass-sub">Cuttings</h3>
+                <ul class="item-list">
+                    @foreach (var cutting in group.Cuttings)
+                    {
+                        @CuttingTemplate(cutting)
                     }
                 </ul>
             }
@@ -188,6 +221,8 @@ else
 
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<CareLog> careLogs = [];
+    private IReadOnlyList<Propagation> propagations = [];
+    private IReadOnlyList<PropagationCareLog> cuttingLogs = [];
     private IReadOnlyList<Feed> feeds = [];
     private IReadOnlyList<Feed> feedOptions = [];
     private Dictionary<Guid, Pot> pots = [];
@@ -203,6 +238,12 @@ else
     private readonly Dictionary<Guid, Guid?> feedPicks = [];
     private readonly HashSet<Guid> saving = [];
     private readonly HashSet<Guid> pickerOpen = [];
+
+    // Cuttings have no put-off on Today, so Dry and Still damp by feel are both only kept for this visit
+    private readonly HashSet<Guid> cuttingDamp = [];
+
+    // The feed for every watering this round that has none of its own, not saved anywhere
+    private Guid? roundFeed;
 
     [SupplyParameterFromQuery(Name = "from")]
     public string? From { get; set; }
@@ -238,6 +279,8 @@ else
         places = await RoomService.GetPlacesAsync();
         plants = await Plants.GetAllAsync();
         careLogs = await CareLogs.GetAllAsync();
+        propagations = await PropagationRepository.GetAllAsync();
+        cuttingLogs = await CuttingCare.GetAllAsync();
         feeds = await FeedRepository.GetAllAsync();
         feedOptions = [.. feeds
             .Where(f => !f.IsDeleted && f.Products.Count > 0)
@@ -245,7 +288,7 @@ else
         pots = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
         putOffs = await PutOffService.GetAsync(Today);
         check = WaterChecks.Effective((await SettingsService.GetAsync()).WaterCheck, careLogs);
-        rooms = WateringPass.Rooms(plants, places);
+        rooms = WateringPass.Rooms(plants, places, propagations);
         Compute();
     }
 
@@ -270,7 +313,7 @@ else
     }
 
     private void Compute() =>
-        groups = WateringPass.Rows(picked, plants, careLogs, feeds, id => pots.GetValueOrDefault(id), places, Time, putOffs);
+        groups = WateringPass.Rows(picked, plants, careLogs, feeds, id => pots.GetValueOrDefault(id), places, Time, putOffs, propagations, cuttingLogs);
 
     // The remembered rooms, in the order they were picked, leaving out the ones that are gone
     private List<Guid> Remembered(string? value) =>
@@ -442,7 +485,8 @@ else
     // The feed picked for the plant, or the one it gets with its watering when it is due
     private Feed? FeedOf(PassRow row)
     {
-        var id = feedPicks.TryGetValue(row.Plant.Id, out var pick) ? pick : row.DefaultFeed?.Id;
+        // A pick on the row wins (even "No feed"), then the plant's own due feed, then the round's
+        var id = feedPicks.TryGetValue(row.Plant.Id, out var pick) ? pick : row.DefaultFeed?.Id ?? roundFeed;
         return feedOptions.FirstOrDefault(f => f.Id == id);
     }
 
@@ -495,20 +539,30 @@ else
     private bool IsChecked(PassRow row) =>
         row.DoneTodayId is not null || row.Reading is not null || row.StillDamp || dryByFeel.Contains(row.Plant.Id);
 
+    private bool IsChecked(PassCutting cutting) =>
+        cutting.DoneTodayId is not null || cutting.Reading is not null
+        || dryByFeel.Contains(cutting.Propagation.Id) || cuttingDamp.Contains(cutting.Propagation.Id);
+
     private IEnumerable<PassRow> AllRows() => groups.SelectMany(g => g.Rows);
 
+    private IEnumerable<PassCutting> AllCuttings() => groups.SelectMany(g => g.Cuttings);
+
     private IEnumerable<PassRow> WateredRows() => AllRows().Where(r => r.DoneTodayId is not null);
+
+    private IEnumerable<PassCutting> WateredCuttings() => AllCuttings().Where(c => c.DoneTodayId is not null);
 
     private string ProgressText()
     {
         var top = AllRows().Where(r => r.Form == WateringForm.TopWatered).ToList();
-        var done = top.Count(IsChecked);
-        var watered = WateredRows().Count();
-        if (top.Count == 0)
+        var cuttings = AllCuttings().ToList();
+        var total = top.Count + cuttings.Count;
+        var done = top.Count(IsChecked) + cuttings.Count(IsChecked);
+        var watered = WateredRows().Count() + WateredCuttings().Count();
+        if (total == 0)
             return $"Nothing to check · {watered} watered";
-        return done >= top.Count
+        return done >= total
             ? $"All checked today · {watered} watered"
-            : $"{done} of {top.Count} checked · {watered} watered";
+            : $"{done} of {total} checked · {watered} watered";
     }
 
     private void Finish()
@@ -554,7 +608,8 @@ else
         var lastWater = done ? null : CareSummary.LastWater(careLogs, plantId, Today);
 
         <li class="pass-item @(done ? "done" : null)">
-            <div role="group" aria-labelledby="@nameId">
+            <SubjectThumb Subject="row.Plant" />
+            <div class="pass-body" role="group" aria-labelledby="@nameId">
                 <a id="@nameId" class="pass-name" href="@($"plants/{plantId}")">@row.Plant.DisplayName</a>
                 @if (done)
                 {
@@ -616,6 +671,189 @@ else
                     {
                         @FeedAndButton(row, "Watered anyway", primary: false, busy, feed, open)
                     }
+                    else
+                    {
+                        @FeedAndButton(row, "Watered", primary: false, busy, feed, open)
+                    }
+                }
+            </div>
+        </li>
+    };
+
+    // Cuttings in soil or bark: the same checks as a plant, saved to the propagation's care log
+    private async Task CuttingAsync(PassCutting cutting, Func<Task<string>> save, string failure)
+    {
+        if (!saving.Add(cutting.Propagation.Id))
+            return;
+        status = null;
+        try
+        {
+            announcement = await save();
+            cuttingLogs = await CuttingCare.GetAllAsync();
+            Compute();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "{Failure}", failure);
+            status = SaveFailed;
+        }
+        saving.Remove(cutting.Propagation.Id);
+    }
+
+    private Task CuttingReadingAsync(PassCutting cutting, int value)
+    {
+        if (cutting.Reading?.Value == value)
+            return Task.CompletedTask;
+        return CuttingAsync(cutting, async () =>
+        {
+            var corrected = cutting.Reading is { } earlier
+                ? await CuttingCare.CorrectReadingAsync(cutting.Propagation.Id, earlier.Id, value)
+                : null;
+            if (corrected is null)
+                await CuttingCare.LogAsync(cutting.Propagation, PropagationCareKind.MoistureReading, Today, value);
+            return $"{cutting.Propagation.DisplayName}: reads {value}";
+        }, "Saving a meter reading for a cutting failed");
+    }
+
+    private Task CuttingDryAsync(PassCutting cutting)
+    {
+        var id = cutting.Propagation.Id;
+        if (dryByFeel.Contains(id) && !cuttingDamp.Contains(id))
+            return Task.CompletedTask;
+        dryByFeel.Add(id);
+        cuttingDamp.Remove(id);
+        announcement = $"{cutting.Propagation.DisplayName}: dry";
+        return Task.CompletedTask;
+    }
+
+    private Task CuttingDampAsync(PassCutting cutting)
+    {
+        var id = cutting.Propagation.Id;
+        if (cuttingDamp.Contains(id))
+            return Task.CompletedTask;
+        cuttingDamp.Add(id);
+        dryByFeel.Remove(id);
+        announcement = $"{cutting.Propagation.DisplayName}: still damp";
+        return Task.CompletedTask;
+    }
+
+    private Task CuttingWateredAsync(PassCutting cutting) =>
+        CuttingAsync(cutting, async () =>
+        {
+            await CuttingCare.LogAsync(cutting.Propagation, PropagationCareKind.Watered, Today);
+            return $"{cutting.Propagation.DisplayName} watered";
+        }, "Logging the watering of a cutting failed");
+
+    private Task CuttingUndoAsync(PassCutting cutting)
+    {
+        if (cutting.DoneTodayId is not { } id)
+            return Task.CompletedTask;
+        return CuttingAsync(cutting, async () =>
+        {
+            await CuttingCare.DeleteAsync(id);
+            return $"{cutting.Propagation.DisplayName}: undone";
+        }, "Undoing the watering of a cutting failed");
+    }
+
+    private Answer AnswerOf(PassCutting cutting)
+    {
+        var id = cutting.Propagation.Id;
+        if (check == WaterCheck.Soil)
+        {
+            if (cuttingDamp.Contains(id))
+                return Answer.Damp;
+            if (dryByFeel.Contains(id))
+                return Answer.Dry;
+        }
+        if (cutting.Reading is not null)
+            return cutting.Dry ? Answer.Dry : Answer.Damp;
+        if (cuttingDamp.Contains(id))
+            return Answer.Damp;
+        return dryByFeel.Contains(id) ? Answer.Dry : Answer.None;
+    }
+
+    private string MetaOf(PassCutting cutting)
+    {
+        var id = cutting.Propagation.Id;
+        var answer = AnswerOf(cutting);
+        var byReading = cutting.Reading is not null
+            && !(check == WaterCheck.Soil && (cuttingDamp.Contains(id) || dryByFeel.Contains(id)));
+        return (answer, byReading) switch
+        {
+            (Answer.Dry, true) => $"reads {cutting.Reading!.Value}, dry by your reading",
+            (Answer.Dry, _) => "dry to the touch",
+            (Answer.Damp, true) => $"reads {cutting.Reading!.Value}, still damp",
+            _ => "still damp, check again later"
+        };
+    }
+
+    private RenderFragment CuttingTemplate(PassCutting cutting) => __builder =>
+    {
+        var id = cutting.Propagation.Id;
+        var nameId = $"water-{id}";
+        var name = cutting.Propagation.DisplayName;
+        var busy = saving.Contains(id);
+        var done = cutting.DoneTodayId is not null;
+        var answer = AnswerOf(cutting);
+        var last = done ? null : PropagationCareService.Latest(cuttingLogs, id, PropagationCareKind.Watered, Today);
+
+        <li class="pass-item @(done ? "done" : null)">
+            <SubjectThumb Subject="cutting.Propagation" />
+            <div class="pass-body" role="group" aria-labelledby="@nameId">
+                <a id="@nameId" class="pass-name" href="@($"propagations/{id}")">@name</a>
+                @if (done)
+                {
+                    <div class="pass-doneline">
+                        <span>Watered</span>
+                        <span aria-hidden="true">·</span>
+                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                aria-label="@($"Undo watered for {name}")"
+                                @onclick="() => CuttingUndoAsync(cutting)">Undo</button>
+                    </div>
+                }
+                else
+                {
+                    @if (answer != Answer.None)
+                    {
+                        <span class="pass-meta">@MetaOf(cutting)</span>
+                    }
+                    else if (last is { } was)
+                    {
+                        <span class="pass-meta">watered @Labels.DaysAgo(was.DaysAgo)</span>
+                    }
+
+                    @if (check == WaterCheck.Meter)
+                    {
+                        <div class="answer-grid" role="group" aria-label="@($"Meter reading for {name}")">
+                            @for (var n = 0; n <= 10; n++)
+                            {
+                                var value = n;
+                                var isPicked = cutting.Reading?.Value == n;
+                                <button type="button" class="chip @(isPicked ? "picked" : null)" aria-pressed="@(isPicked ? "true" : "false")"
+                                        disabled="@busy" @onclick="() => CuttingReadingAsync(cutting, value)">@n</button>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="chip-row pass-soil" role="group" aria-label="@($"Soil of {name}")">
+                            <button type="button" class="chip @(answer == Answer.Dry ? "picked" : null)" aria-pressed="@(answer == Answer.Dry ? "true" : "false")"
+                                    disabled="@busy" @onclick="() => CuttingDryAsync(cutting)">Dry</button>
+                            <button type="button" class="chip @(answer == Answer.Damp ? "picked" : null)" aria-pressed="@(answer == Answer.Damp ? "true" : "false")"
+                                    disabled="@busy" @onclick="() => CuttingDampAsync(cutting)">Still damp</button>
+                        </div>
+                    }
+
+                    <div class="pass-act">
+                        @if (answer == Answer.Dry)
+                        {
+                            <button type="button" class="btn btn-primary pass-water" disabled="@busy" @onclick="() => CuttingWateredAsync(cutting)">Watered</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-link link-action pass-anyway" disabled="@busy" @onclick="() => CuttingWateredAsync(cutting)">@(answer == Answer.Damp ? "Watered anyway" : "Watered")</button>
+                        }
+                    </div>
                 }
             </div>
         </li>

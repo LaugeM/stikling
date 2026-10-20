@@ -540,4 +540,103 @@ public class WateringPassTests
         Assert.True(topped.IsDeleted);
         Assert.False(reading.IsDeleted);
     }
+
+    // Cuttings
+
+    private readonly List<Propagation> propagations = [];
+    private readonly List<PropagationCareLog> cuttingLogs = [];
+
+    private Propagation Cutting(string name, GrowingMedium medium = GrowingMedium.Soil, Place? place = null)
+    {
+        var cutting = new Propagation
+        {
+            Nickname = name, Medium = medium, PlaceId = place?.Id, StartedOn = Today.AddDays(-20), InitialCount = 1
+        };
+        propagations.Add(cutting);
+        return cutting;
+    }
+
+    private PropagationCareLog CuttingLog(Propagation cutting, PropagationCareKind kind, int? moisture = null)
+    {
+        var entry = new PropagationCareLog { PropagationId = cutting.Id, Kind = kind, OccurredOn = Today, Moisture = moisture };
+        cuttingLogs.Add(entry);
+        return entry;
+    }
+
+    private IReadOnlyList<PassGroup> RowsWithCuttings(params Place[] rooms) =>
+        WateringPass.Rows([.. rooms.Select(r => r.Id)], plants, logs, feeds, null, Places, Time,
+            propagations: propagations, propagationLogs: cuttingLogs);
+
+    [Fact]
+    public void A_room_with_only_a_soil_cutting_is_listed_and_no_room_covers_cuttings_with_no_place()
+    {
+        Cutting("Pothos", GrowingMedium.OrchidBark, kitchen);
+        Cutting("Loose cutting");
+
+        var rooms = WateringPass.Rooms(plants, Places, propagations);
+
+        Assert.Equal([kitchen.Id, WateringPass.NoRoom], rooms.Select(r => r.Id));
+    }
+
+    [Fact]
+    public void Cuttings_in_water_and_other_media_or_finished_ones_are_left_out()
+    {
+        Cutting("In water", GrowingMedium.Water, kitchen);
+        Cutting("On leca", GrowingMedium.Leca, kitchen);
+        Cutting("In sphagnum", GrowingMedium.Sphagnum, kitchen);
+        var done = Cutting("Done", GrowingMedium.Soil, kitchen);
+        done.Stage = PropagationStage.Done;
+
+        Assert.Empty(WateringPass.Rooms(plants, Places, propagations));
+        Assert.Empty(RowsWithCuttings(kitchen).Single().Cuttings);
+    }
+
+    [Fact]
+    public void Cuttings_come_in_their_room_after_the_plants_by_spot_then_name()
+    {
+        Plant("Plant", living);
+        Cutting("B in the room", place: living);
+        Cutting("A on the sill", place: windowsill);
+        Cutting("A in the room", place: living);
+
+        var group = RowsWithCuttings(living).Single();
+
+        Assert.Single(group.Rows);
+        Assert.Equal(["A in the room", "B in the room", "A on the sill"], group.Cuttings.Select(c => c.Propagation.DisplayName));
+    }
+
+    [Fact]
+    public void A_cuttings_reading_and_watering_today_are_picked_up()
+    {
+        var cutting = Cutting("Pothos", place: kitchen);
+        var reading = CuttingLog(cutting, PropagationCareKind.MoistureReading, 2);
+        var watered = CuttingLog(cutting, PropagationCareKind.Watered);
+        cuttingLogs.Add(new PropagationCareLog
+        {
+            PropagationId = cutting.Id, Kind = PropagationCareKind.MoistureReading, OccurredOn = Today.AddDays(-1), Moisture = 9
+        });
+
+        var row = RowsWithCuttings(kitchen).Single().Cuttings.Single();
+
+        Assert.Equal(new RoundReading(reading.Id, 2), row.Reading);
+        Assert.True(row.Dry);
+        Assert.Equal(watered.Id, row.DoneTodayId);
+    }
+
+    [Fact]
+    public void A_corrected_cutting_reading_is_the_newest()
+    {
+        var cutting = Cutting("Pothos", place: kitchen);
+        var first = CuttingLog(cutting, PropagationCareKind.MoistureReading, 2);
+        first.UpdatedAt = Now.AddHours(-2);
+        var second = CuttingLog(cutting, PropagationCareKind.MoistureReading, 7);
+        second.UpdatedAt = Now.AddHours(-1);
+        first.Moisture = 8;
+        first.UpdatedAt = Now;
+
+        var row = RowsWithCuttings(kitchen).Single().Cuttings.Single();
+
+        Assert.Equal(new RoundReading(first.Id, 8), row.Reading);
+        Assert.False(row.Dry);
+    }
 }
