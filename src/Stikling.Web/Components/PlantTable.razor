@@ -149,7 +149,7 @@
             PlantColumn.LikesWater => @<text>@(plant.LikesWater is { } wantsWater ? Labels.For(wantsWater) : null)</text>,
             PlantColumn.LikesHumidity => @<text>@(plant.LikesHumidity is { } wantsHumidity ? Labels.For(wantsHumidity) : null)</text>,
             PlantColumn.Season => @<text>@(plant.GrowingSeason is { } season ? Labels.For(season) : null)</text>,
-            PlantColumn.Moisture => @<text>@(row.Moisture is { } reading ? $"{reading.Value}/10" : null)</text>,
+            PlantColumn.Moisture => @<text>@(row.Moisture is { } reading ? $"{reading.Value}/10, {Labels.DaysAgo(reading.DaysAgo)}" : null)</text>,
             PlantColumn.Status => @<text>@Labels.StatusOf(plant, PottedWithName?.Invoke(plant))@if (row.Flowering is { Stale: false } flowering && plant.InCollection){<text> · @FloweringText.Badge(flowering.Stage)</text>}</text>,
             PlantColumn.Tags => @<text>@foreach (var tag in plant.Tags){<span class="tag-label">@tag</span> }</text>,
             PlantColumn.Number => @<text>@plant.CollectionNumber</text>,

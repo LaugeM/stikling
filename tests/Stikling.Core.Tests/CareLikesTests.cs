@@ -238,9 +238,9 @@ public class CareLikesTests
 
         var text = PlantTable.Write([PlantColumn.Season, PlantColumn.Medium, PlantColumn.LikesHumidity]);
 
-        Assert.Equal("Name,Medium,LikesHumidity,Season", text);
+        Assert.Equal("Name,Season,Medium,LikesHumidity", text);
         Assert.Equal(
-            [PlantColumn.Name, PlantColumn.Medium, PlantColumn.LikesHumidity, PlantColumn.Season],
+            [PlantColumn.Name, PlantColumn.Season, PlantColumn.Medium, PlantColumn.LikesHumidity],
             PlantTable.Parse(text));
     }
 

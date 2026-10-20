@@ -36,17 +36,17 @@ public class OwnFieldColumnsTests
     // Columns
 
     [Fact]
-    public void Field_columns_are_written_as_field_and_the_id_after_the_built_in_ones()
+    public void Field_columns_are_written_as_field_and_the_id_in_the_order_given()
     {
         var clone = Field("Clone name", OwnFieldKind.Text);
         var award = Field("Awards", OwnFieldKind.Text);
 
         var text = PlantTable.Write([TableColumn.Field(clone.Id), PlantColumn.Room, TableColumn.Field(award.Id)]);
 
-        Assert.Equal($"Name,Room,field:{clone.Id:D},field:{award.Id:D}", text);
-        // On the way back the fields come after the built-in ones, by name
+        Assert.Equal($"Name,field:{clone.Id:D},Room,field:{award.Id:D}", text);
+        // On the way back they are in the same order
         Assert.Equal(
-            [(TableColumn)PlantColumn.Name, PlantColumn.Room, TableColumn.Field(award.Id), TableColumn.Field(clone.Id)],
+            [(TableColumn)PlantColumn.Name, TableColumn.Field(clone.Id), PlantColumn.Room, TableColumn.Field(award.Id)],
             PlantTable.Parse(text, [clone, award]));
     }
 

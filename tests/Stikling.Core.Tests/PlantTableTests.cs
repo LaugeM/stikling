@@ -35,12 +35,88 @@ public class PlantTableTests
     }
 
     [Fact]
-    public void Write_and_parse_round_trip_in_column_order()
+    public void Write_and_parse_round_trip_in_the_order_given_with_name_first()
     {
         var text = PlantTable.Write([PlantColumn.Price, PlantColumn.Name, PlantColumn.Room]);
 
-        Assert.Equal("Name,Room,Price", text);
-        Assert.Equal([PlantColumn.Name, PlantColumn.Room, PlantColumn.Price], PlantTable.Parse(text));
+        Assert.Equal("Name,Price,Room", text);
+        Assert.Equal([PlantColumn.Name, PlantColumn.Price, PlantColumn.Room], PlantTable.Parse(text));
+    }
+
+    [Fact]
+    public void Parse_keeps_the_stored_order_moves_name_first_and_drops_duplicates()
+    {
+        Assert.Equal([PlantColumn.Name, PlantColumn.Room, PlantColumn.Fed, PlantColumn.Cultivar],
+            PlantTable.Parse("Room,Fed,Name,Cultivar,Fed"));
+        Assert.Equal([PlantColumn.Name, PlantColumn.Price], PlantTable.Parse("Price"));
+    }
+
+    [Fact]
+    public void Parse_reads_an_old_value_in_enum_order_as_it_showed_before()
+    {
+        Assert.Equal([PlantColumn.Name, PlantColumn.Cultivar, PlantColumn.Watered, PlantColumn.Fed],
+            PlantTable.Parse("Name,Cultivar,Watered,Fed"));
+    }
+
+    [Fact]
+    public void Write_and_parse_round_trip_a_custom_order_with_fields_mixed_in()
+    {
+        var a = new OwnField { Name = "Clone name" };
+        var b = new OwnField { Name = "Awards" };
+        TableColumn[] order = [PlantColumn.Name, TableColumn.Field(b.Id), PlantColumn.Room, TableColumn.Field(a.Id), PlantColumn.Fed];
+
+        Assert.Equal(order, PlantTable.Parse(PlantTable.Write(order), [a, b]));
+        // A field that is no longer there is dropped
+        Assert.Equal([PlantColumn.Name, PlantColumn.Room], PlantTable.Parse(PlantTable.Write([PlantColumn.Room, TableColumn.Field(a.Id)])));
+    }
+
+    [Fact]
+    public void Move_puts_a_column_in_its_new_place_but_never_moves_name_or_above_it()
+    {
+        TableColumn[] columns = [PlantColumn.Name, PlantColumn.Cultivar, PlantColumn.Watered, PlantColumn.Fed];
+
+        Assert.Equal([PlantColumn.Name, PlantColumn.Watered, PlantColumn.Fed, PlantColumn.Cultivar], PlantTable.Move(columns, 1, 3));
+        Assert.Equal([PlantColumn.Name, PlantColumn.Fed, PlantColumn.Cultivar, PlantColumn.Watered], PlantTable.Move(columns, 3, 1));
+        Assert.Equal(columns, PlantTable.Move(columns, 0, 2));
+        Assert.Equal([PlantColumn.Name, PlantColumn.Fed, PlantColumn.Cultivar, PlantColumn.Watered], PlantTable.Move(columns, 3, 0));
+        Assert.Equal(columns, PlantTable.Move(columns, 9, 1));
+    }
+
+    [Fact]
+    public void Toggle_adds_a_column_at_the_end_and_removes_it_again()
+    {
+        TableColumn[] columns = [PlantColumn.Name, PlantColumn.Fed, PlantColumn.Cultivar];
+
+        var added = PlantTable.Toggle(columns, PlantColumn.Genus);
+        Assert.Equal([PlantColumn.Name, PlantColumn.Fed, PlantColumn.Cultivar, PlantColumn.Genus], added);
+        Assert.Equal([PlantColumn.Name, PlantColumn.Cultivar, PlantColumn.Genus], PlantTable.Toggle(added, PlantColumn.Fed));
+        Assert.Equal(columns, PlantTable.Toggle(columns, PlantColumn.Name));
+    }
+
+    [Fact]
+    public void Rows_leave_moisture_empty_once_the_plant_was_watered_after_the_reading()
+    {
+        var plant = Named("Fern");
+        Assert.Null(Rows([plant], Log(plant, CareKind.MoistureReading, 4, l => l.Moisture = 3), Log(plant, CareKind.Watered, 2))[0].Moisture);
+        Assert.Null(Rows([plant], Log(plant, CareKind.MoistureReading, 4, l => l.Moisture = 3), Log(plant, CareKind.ToppedUp, 1))[0].Moisture);
+        var kept = Rows([plant], Log(plant, CareKind.Watered, 6), Log(plant, CareKind.MoistureReading, 4, l => l.Moisture = 3))[0];
+        Assert.Equal(3, kept.Moisture?.Value);
+        Assert.Equal(4, kept.Moisture?.DaysAgo);
+    }
+
+    [Fact]
+    public void Rows_order_a_reading_and_a_watering_on_the_same_day_by_when_they_were_logged()
+    {
+        var plant = Named("Fern");
+        var early = new DateTimeOffset(2026, 10, 13, 8, 0, 0, TimeSpan.Zero);
+        var late = early.AddHours(1);
+
+        Assert.Null(Rows([plant],
+            Log(plant, CareKind.MoistureReading, 0, l => { l.Moisture = 2; l.CreatedAt = early; }),
+            Log(plant, CareKind.Watered, 0, l => l.CreatedAt = late))[0].Moisture);
+        Assert.Equal(2, Rows([plant],
+            Log(plant, CareKind.Watered, 0, l => l.CreatedAt = early),
+            Log(plant, CareKind.MoistureReading, 0, l => { l.Moisture = 2; l.CreatedAt = late; }))[0].Moisture?.Value);
     }
 
     [Fact]
@@ -128,14 +204,14 @@ public class PlantTableTests
         var other = Named("Other");
         var row = Rows([plant, other],
             Log(plant, CareKind.Watered, 0, l => l.DeletedAt = DateTimeOffset.UnixEpoch),
-            Log(plant, CareKind.Watered, 6),
+            Log(plant, CareKind.Watered, 12),
             Log(plant, CareKind.Fertilised, 20),
             Log(plant, CareKind.Repotted, 100),
             Log(plant, CareKind.MoistureReading, 8, l => l.Moisture = 4),
             Log(plant, CareKind.MoistureReading, 3, l => l.Moisture = 7),
             Log(other, CareKind.Fertilised, 1))[0];
 
-        Assert.Equal(6, row.Watered?.DaysAgo);
+        Assert.Equal(12, row.Watered?.DaysAgo);
         Assert.Equal(20, row.Fed?.DaysAgo);
         Assert.Equal(100, row.Repotted?.DaysAgo);
         Assert.Equal(7, row.Moisture?.Value);

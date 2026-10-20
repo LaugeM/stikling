@@ -1,0 +1,101 @@
+@* The columns of the sheet view that are shown, in table order. Drag a row by its handle, or use the
+   arrow buttons, to put them in order. The dragging is done in js/reorder.js, which says where a row
+   was dropped; the order itself is kept by the page. *@
+@using CoreTable = Stikling.Core.Plants.PlantTable
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<ul class="column-order" @ref="list">
+    @for (var i = 0; i < Columns.Count; i++)
+    {
+        var index = i;
+        var column = Columns[i];
+        var isName = column == (TableColumn)PlantColumn.Name;
+        var heading = CoreTable.Header(column, Fields);
+        var id = column.FieldId is { } fieldId ? $"column-field-{fieldId:N}" : $"column-{column.Builtin}";
+        <li @key="column" class="column-row" data-row data-fixed="@(isName ? "" : null)">
+            <span class="column-handle" data-handle="@(isName ? null : "")" aria-hidden="true">
+                @if (!isName)
+                {
+                    <svg viewBox="0 0 24 24"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" /></svg>
+                }
+            </span>
+            <div class="form-check column-check">
+                <input type="checkbox" class="form-check-input" id="@id" checked disabled="@isName"
+                       @onchange="() => OnToggle.InvokeAsync(column)" />
+                <label class="form-check-label" for="@id">
+                    @heading
+                    @if (isName)
+                    {
+                        <span class="text-body-secondary small">Always shown</span>
+                    }
+                </label>
+            </div>
+            @if (!isName)
+            {
+                <button type="button" class="column-move" aria-label="Move @heading up" disabled="@(index <= 1)"
+                        @onclick="() => OnMove.InvokeAsync((index, index - 1))">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
+                </button>
+                <button type="button" class="column-move" aria-label="Move @heading down" disabled="@(index >= Columns.Count - 1)"
+                        @onclick="() => OnMove.InvokeAsync((index, index + 1))">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+            }
+        </li>
+    }
+</ul>
+
+@code {
+    /// <summary>The shown columns in table order, Name first.</summary>
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<TableColumn> Columns { get; set; }
+
+    /// <summary>The fields of the person's own, for the names of their columns.</summary>
+    [Parameter]
+    public IReadOnlyList<OwnField> Fields { get; set; } = [];
+
+    /// <summary>A column went from one place in the list to another.</summary>
+    [Parameter]
+    public EventCallback<(int From, int To)> OnMove { get; set; }
+
+    [Parameter]
+    public EventCallback<TableColumn> OnToggle { get; set; }
+
+    private ElementReference list;
+    private IJSObjectReference? module;
+    private IJSObjectReference? attached;
+    private DotNetObjectReference<ColumnOrder>? self;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        self = DotNetObjectReference.Create(this);
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/reorder.js");
+        attached = await module.InvokeAsync<IJSObjectReference>("attach", list, self);
+    }
+
+    [JSInvokable]
+    public Task Moved(int from, int to) => OnMove.InvokeAsync((from, to));
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (attached is not null)
+            {
+                await attached.InvokeVoidAsync("dispose");
+                await attached.DisposeAsync();
+            }
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away anyway
+        }
+        self?.Dispose();
+    }
+}
