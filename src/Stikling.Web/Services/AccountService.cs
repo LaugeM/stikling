@@ -111,7 +111,13 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
             throw new AccountUnavailableException(e);
         }
 
+        var known = await WasSignedInAsync();
         await RememberAsync(state);
+        // Coming back from Google and the like reloads the page, and Clerk finishes the sign-in while
+        // it loads, before it reports changes. So a sign-in found here is told to the pages and sync
+        // the way Clerk's own report would be.
+        if (state.SignedIn && !known)
+            Changed?.Invoke(state);
         return state;
     }
 

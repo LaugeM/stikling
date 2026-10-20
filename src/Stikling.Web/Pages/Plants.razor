@@ -344,35 +344,34 @@ else
 }
 
 <Sheet Title="Columns" @bind-Open="columnsOpen">
-    <p class="text-body-secondary small">Pick what to show. This device remembers it.</p>
-    @foreach (var column in Enum.GetValues<PlantColumn>())
-    {
-        var id = $"column-{column}";
-        TableColumn tableColumn = column;
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="@id" checked="@columns.Contains(tableColumn)"
-                   disabled="@(column == PlantColumn.Name)" @onchange="() => ToggleColumnAsync(tableColumn)" />
-            <label class="form-check-label" for="@id">
-                @CoreTable.Header(column)
-                @if (column == PlantColumn.Name)
-                {
-                    <span class="text-body-secondary small">Always shown</span>
-                }
-            </label>
-        </div>
+    <p class="text-body-secondary small">Pick what to show and drag to put them in order. This device remembers it.</p>
+    <ColumnOrder Columns="columns" Fields="fields" OnMove="MoveColumnAsync" OnToggle="ToggleColumnAsync" />
+    @{
+        var hidden = Enum.GetValues<PlantColumn>().Select(c => (TableColumn)c).Where(c => !columns.Contains(c)).ToList();
+        var hiddenFields = fields.Select(f => TableColumn.Field(f.Id)).Where(c => !columns.Contains(c)).ToList();
     }
-    @if (fields.Count > 0)
+    @if (hidden.Count > 0 || hiddenFields.Count > 0)
     {
-        <h3 class="section-label mt-3">Your fields</h3>
-        @foreach (var field in fields)
+        <h3 class="section-label">Not shown</h3>
+        @foreach (var tableColumn in hidden)
         {
-            var id = $"column-field-{field.Id:N}";
-            var tableColumn = TableColumn.Field(field.Id);
+            var id = $"column-{tableColumn.Builtin}";
             <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="@id" checked="@columns.Contains(tableColumn)"
-                       @onchange="() => ToggleColumnAsync(tableColumn)" />
-                <label class="form-check-label" for="@id">@field.Name</label>
+                <input type="checkbox" class="form-check-input" id="@id" @onchange="() => ToggleColumnAsync(tableColumn)" />
+                <label class="form-check-label" for="@id">@CoreTable.Header(tableColumn.Builtin!.Value)</label>
             </div>
+        }
+        @if (hiddenFields.Count > 0)
+        {
+            <h3 class="section-label mt-3">Your fields</h3>
+            @foreach (var tableColumn in hiddenFields)
+            {
+                var id = $"column-field-{tableColumn.FieldId:N}";
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="@id" @onchange="() => ToggleColumnAsync(tableColumn)" />
+                    <label class="form-check-label" for="@id">@CoreTable.Header(tableColumn, fields)</label>
+                </div>
+            }
         }
     }
 </Sheet>
@@ -675,12 +674,13 @@ else
         await Device.SetAsync(ViewKey, value.ToString());
     }
 
-    private async Task ToggleColumnAsync(TableColumn column)
+    private Task ToggleColumnAsync(TableColumn column) => SetColumnsAsync(CoreTable.Toggle(columns, column));
+
+    private Task MoveColumnAsync((int From, int To) move) => SetColumnsAsync(CoreTable.Move(columns, move.From, move.To));
+
+    private async Task SetColumnsAsync(IReadOnlyList<TableColumn> value)
     {
-        var picked = columns.ToHashSet();
-        if (!picked.Remove(column))
-            picked.Add(column);
-        columns = CoreTable.Parse(CoreTable.Write(picked), fields);
+        columns = CoreTable.Parse(CoreTable.Write(value), fields);
         // A hidden column can't show it's the sort, so the table goes back to A to Z
         if (!columns.Contains(tableSort.Column))
         {

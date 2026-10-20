@@ -104,41 +104,53 @@ public static class PlantTable
     public static IReadOnlyList<TableColumn> Parse(string? stored, IEnumerable<OwnField>? fields = null)
     {
         var live = (fields ?? []).Where(f => !f.IsDeleted).ToList();
-        var builtin = new HashSet<PlantColumn>();
-        var own = new HashSet<Guid>();
+        var found = new List<TableColumn>();
         foreach (var part in (stored ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
-            if (ByName.TryGetValue(part, out var column))
-                builtin.Add(column);
+            TableColumn column;
+            if (ByName.TryGetValue(part, out var builtin))
+                column = builtin;
             else if (part.StartsWith(FieldPrefix, StringComparison.Ordinal)
                 && Guid.TryParse(part[FieldPrefix.Length..], out var id) && live.Any(f => f.Id == id))
-                own.Add(id);
+                column = TableColumn.Field(id);
+            else
+                continue;
+            if (!found.Contains(column))
+                found.Add(column);
         }
 
-        if (builtin.Count == 0 && own.Count == 0)
-            return Defaults;
-        return
-        [
-            .. Ordered(builtin).Select(c => (TableColumn)c),
-            .. live.Where(f => own.Contains(f.Id))
-                .OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)
-                .Select(f => TableColumn.Field(f.Id))
-        ];
+        return found.Count == 0 ? Defaults : NameFirst(found);
     }
 
-    /// <summary>Written in table order: the built-in columns, then the fields in the order given.</summary>
-    public static string Write(IEnumerable<TableColumn> columns)
+    /// <summary>Written in the order given, with Name first.</summary>
+    public static string Write(IEnumerable<TableColumn> columns) =>
+        string.Join(',', NameFirst(columns).Select(c => c.ToString()));
+
+    private static List<TableColumn> NameFirst(IEnumerable<TableColumn> columns)
     {
-        var all = columns.ToList();
-        var builtin = all.Where(c => c.Builtin is not null).Select(c => c.Builtin!.Value).ToHashSet();
-        return string.Join(',', Ordered(builtin).Select(c => c.ToString())
-            .Concat(all.Where(c => c.IsField).Distinct().Select(c => c.ToString())));
+        TableColumn name = PlantColumn.Name;
+        return [name, .. columns.Where(c => c != name).Distinct()];
     }
 
-    private static List<PlantColumn> Ordered(HashSet<PlantColumn> picked)
+    /// <summary>Moves a column from one place to another and returns the new list. Name, at the start, stays there and nothing goes above it.</summary>
+    public static IReadOnlyList<TableColumn> Move(IReadOnlyList<TableColumn> columns, int from, int to)
     {
-        picked.Add(PlantColumn.Name);
-        return Enum.GetValues<PlantColumn>().Where(picked.Contains).ToList();
+        if (from < 1 || from >= columns.Count)
+            return columns;
+        to = Math.Clamp(to, 1, columns.Count - 1);
+        var list = columns.ToList();
+        var column = list[from];
+        list.RemoveAt(from);
+        list.Insert(to, column);
+        return list;
+    }
+
+    /// <summary>Turns a column on, at the end, or off. Name can't be turned off.</summary>
+    public static IReadOnlyList<TableColumn> Toggle(IReadOnlyList<TableColumn> columns, TableColumn column)
+    {
+        if (column == (TableColumn)PlantColumn.Name)
+            return columns;
+        return columns.Contains(column) ? columns.Where(c => c != column).ToList() : [.. columns, column];
     }
 
     /// <summary>
@@ -205,14 +217,24 @@ public static class PlantTable
                 Last(logs, today, CareKind.Watered, CareKind.ToppedUp),
                 Last(logs, today, CareKind.Fertilised),
                 Last(logs, today, CareKind.Repotted),
-                logs.FirstOrDefault(l => l.Kind == CareKind.MoistureReading && l.Moisture is not null)
-                    is { Moisture: { } value } reading
-                    ? new MoistureReading(value, reading.OccurredOn, DaysBetween(reading.OccurredOn, today))
-                    : null,
+                CurrentReading(byPlant[plant.Id], today),
                 placeName(plant.PlaceId),
                 everydayName(plant),
                 floweringOf?.Invoke(plant));
         }).ToList();
+    }
+
+    // A reading is taken before watering, so one with a watering or top-up after it says nothing about the soil now
+    private static MoistureReading? CurrentReading(IEnumerable<CareLog> logs, DateOnly today)
+    {
+        var all = logs.ToList();
+        var reading = all.Where(l => l.Kind == CareKind.MoistureReading && l.Moisture is not null)
+            .OrderByDescending(l => l.OccurredOn).ThenByDescending(l => l.CreatedAt).FirstOrDefault();
+        if (reading is not { Moisture: { } value })
+            return null;
+        var watered = all.Any(l => (l.Kind == CareKind.Watered || l.Kind == CareKind.ToppedUp)
+            && (l.OccurredOn > reading.OccurredOn || (l.OccurredOn == reading.OccurredOn && l.CreatedAt > reading.CreatedAt)));
+        return watered ? null : new MoistureReading(value, reading.OccurredOn, DaysBetween(reading.OccurredOn, today));
     }
 
     private static LastCare? Last(IReadOnlyList<CareLog> logs, DateOnly today, params CareKind[] kinds) =>

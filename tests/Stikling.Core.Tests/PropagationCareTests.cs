@@ -181,4 +181,29 @@ public class PropagationCareTests
         Assert.Equal("Changed the water", PropagationCareService.Describe(new() { Kind = PropagationCareKind.ChangedWater }));
         Assert.Equal("Moisture 4/10", PropagationCareService.Describe(new() { Kind = PropagationCareKind.MoistureReading, Moisture = 4 }));
     }
+
+    [Fact]
+    public async Task Correcting_a_reading_changes_the_number_on_the_same_entry()
+    {
+        var pup = Pup();
+        var entry = await service.LogAsync(pup, PropagationCareKind.MoistureReading, Today, 2);
+
+        var corrected = await service.CorrectReadingAsync(pup.Id, entry.Id, 6);
+
+        Assert.Same(entry, corrected);
+        Assert.Equal(6, Assert.Single(logs.Logs).Moisture);
+    }
+
+    [Fact]
+    public async Task Correcting_refuses_a_bad_number_and_leaves_other_entries_alone()
+    {
+        var pup = Pup();
+        var reading = await service.LogAsync(pup, PropagationCareKind.MoistureReading, Today, 2);
+        var watered = await service.LogAsync(pup, PropagationCareKind.Watered, Today);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.CorrectReadingAsync(pup.Id, reading.Id, 11));
+        Assert.Equal(2, reading.Moisture);
+        Assert.Null(await service.CorrectReadingAsync(pup.Id, watered.Id, 4));
+        Assert.Null(await service.CorrectReadingAsync(Guid.NewGuid(), reading.Id, 4));
+    }
 }

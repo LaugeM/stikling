@@ -50,12 +50,12 @@
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">Frame</button>
                         }
                         @* A photo from a received history stays in the history it came with *@
-                        @if (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null)
+                        @if (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetReference.InvokeAsync(photo)">@(photo.IsReference ? "Move to history" : "Move to reference")</button>
                         }
                         @* A photo copied from the history it had before stays as it was given *@
-                        @if (OnDelete.HasDelegate && photo.ReceivedHistoryId is null)
+                        @if (OnDelete.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">Delete</button>
                         }
@@ -98,6 +98,12 @@
     /// <summary>Saves how a photo sits where it's cropped. Frame only shows when this is set.</summary>
     [Parameter]
     public EventCallback<(Photo Photo, PhotoFrame? Frame)> OnFrame { get; set; }
+
+    /// <summary>Photos that belong to another page, like a cutting's photos on its plant. They can be framed and set as the cover, not moved or deleted from here.</summary>
+    [Parameter]
+    public IReadOnlySet<Guid>? KeptPhotoIds { get; set; }
+
+    private bool Kept(Photo photo) => KeptPhotoIds?.Contains(photo.Id) == true;
 
     private ElementReference dialog;
     private bool confirmDelete;

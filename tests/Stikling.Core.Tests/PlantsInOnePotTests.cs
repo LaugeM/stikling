@@ -415,7 +415,7 @@ public class PlantsInOnePotTests
     // Pot up
 
     private PropagationService Propagations() =>
-        new(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), Time);
+        new(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), Time);
 
     private async Task<Propagation> StartAsync(int count)
     {

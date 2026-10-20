@@ -26,6 +26,7 @@ public sealed class PropagationService(
     ITimelineRepository timeline,
     IPropagationCareLogRepository propagationCare,
     ICareLogRepository plantCare,
+    IPhotoRepository photos,
     TimeProvider time)
 {
     private DateOnly Today => time.Today();
@@ -210,6 +211,10 @@ public sealed class PropagationService(
         // Check everything before saving anything
         if (newPlants.SelectMany(p => p.Validate(Today)).FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
+        // They start with the cutting's cover, so its photos don't vanish from view
+        var carried = CarriedPhotos.Cover(propagation, await photos.GetForAsync(propagation.Id), request.Date, time);
+        foreach (var plant in newPlants)
+            plant.CoverPhotoId = carried;
         propagation.RecordPottedUp(request.Count, request.Date);
 
         var occurredAt = time.MomentOn(request.Date);
@@ -239,6 +244,32 @@ public sealed class PropagationService(
             newPlants.Count == 1 ? newPlants[0].Id : null, TimelineEvent.PottedUp);
 
         return newPlants;
+    }
+
+    /// <summary>
+    /// Gives plants that were potted up before covers were carried over the cover of the cutting
+    /// they came from. It only sets a cover where there is none, and every device reaches the same
+    /// value. It is meant to run once per device: a cover someone removes later would come back.
+    /// A deleted cutting gives nothing. Returns how many plants changed.
+    /// </summary>
+    public async Task<int> CarryCoversAsync()
+    {
+        var changed = 0;
+        foreach (var plant in await plants.GetAllAsync())
+        {
+            if (plant.IsDeleted || plant.CoverPhotoId is not null || plant.FromPropagationId is not { } fromId)
+                continue;
+            if (await propagations.GetAsync(fromId) is not { IsDeleted: false } propagation)
+                continue;
+
+            var day = CarriedPhotos.PotUpDay(plant, await timeline.GetForAsync(plant.Id), time);
+            if (CarriedPhotos.Cover(propagation, await photos.GetForAsync(propagation.Id), day, time) is not { } cover)
+                continue;
+            plant.CoverPhotoId = cover;
+            await plants.SaveAsync(plant);
+            changed++;
+        }
+        return changed;
     }
 
     /// <summary>

@@ -647,6 +647,7 @@ else
 
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
                       CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)"
+                      EarlierPropagationId="@(earlierUntil is null ? null : fromPropagation?.Id)" EarlierUntil="earlierUntil"
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
         </div>
     </div>
@@ -1282,6 +1283,8 @@ else
     private PlantGiven given = new([], 0, 0, 0, 0);
     private IReadOnlyList<Propagation> propagations = [];
     private Propagation? fromPropagation;
+    // The day it was potted up: the cutting's photos up to then show on the history
+    private DateOnly? earlierUntil;
     private IReadOnlyList<CareLog> care = [];
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
     private LastCare? lastWater;
@@ -1519,6 +1522,7 @@ else
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
                 .ToList();
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
+            earlierUntil = fromPropagation is null ? null : CarriedPhotos.PotUpDay(plant, await TimelineRepository.GetForAsync(plant.Id), Time);
 
             careFor = careBook.Find(plant.Genus, plant.Species, plant.NameQualifier);
             places = await RoomService.GetPlacesAsync();

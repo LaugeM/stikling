@@ -11,6 +11,8 @@
 @inject ProblemService Problems
 @inject SellerService Sellers
 @inject PotService PotLibrary
+@inject Stikling.Core.Propagations.PropagationService PropagationService
+@inject DeviceFiles Files
 @inject ILogger<MainLayout> Logger
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -113,6 +115,8 @@
     // the plant, so that covers opening and closing them.
     private bool pestTab;
 
+    private const string CoversCarriedKey = "covers-carried";
+
     private bool OnPestsPage =>
         Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0] is var path
         && (path == "pests" || path.StartsWith("pests/", StringComparison.Ordinal));
@@ -151,6 +155,23 @@
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Turning Container text into containers failed");
+        }
+
+        // Plants potted up before their cutting's cover was carried over take it, once per device. Run
+        // again, it would put back a cover someone has since removed.
+        try
+        {
+            if (await Files.GetAsync(CoversCarriedKey) is null)
+            {
+                var changed = await PropagationService.CarryCoversAsync();
+                await Files.SetAsync(CoversCarriedKey, "yes");
+                if (changed > 0)
+                    Sync.NotifyChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Giving potted-up plants their cutting's cover failed");
         }
     }
 

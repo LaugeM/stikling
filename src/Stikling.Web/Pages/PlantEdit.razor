@@ -393,16 +393,20 @@ else
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" for="water-by">How you water it</label>
-                        <select id="water-by" class="form-select" aria-describedby="water-by-help"
-                                @onchange="e => plant.WaterBy = Enum.TryParse<WaterMethod>(e.Value?.ToString(), out var method) ? method : null">
-                            <option value="" selected="@(plant.WaterBy is null)">Not said</option>
-                            @foreach (var method in Enum.GetValues<WaterMethod>())
+                        <div class="form-label" id="water-by-label">How you water it</div>
+                        <div role="radiogroup" aria-labelledby="water-by-label" aria-describedby="water-by-help">
+                            @foreach (var method in WaterByChoices)
                             {
-                                <option value="@method" selected="@(plant.WaterBy == method)">@SitterSheetText.MethodName(method)</option>
+                                var key = method?.ToString().ToLowerInvariant() ?? "none";
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="water-by" id="water-by-@key" aria-describedby="water-by-@key-hint"
+                                           checked="@(plant.WaterBy == method)" @onchange="() => plant.WaterBy = method" />
+                                    <label class="form-check-label" for="water-by-@key">@(method is { } named ? SitterSheetText.MethodName(named) : "Not said")</label>
+                                    <div id="water-by-@key-hint" class="form-text mt-0">@SitterSheetText.MethodHint(method)</div>
+                                </div>
                             }
-                        </select>
-                        <div id="water-by-help" class="form-text">Goes on the sheet for a plant-sitter. Not said means the way you pick for the sheet.</div>
+                        </div>
+                        <div id="water-by-help" class="form-text mt-2">Goes on the sheet for a plant-sitter. Not said means the way you pick for the sheet.</div>
                     </div>
                 }
 
@@ -546,6 +550,8 @@ else
 }
 
 @code {
+    private static readonly WaterMethod?[] WaterByChoices = [null, .. Enum.GetValues<WaterMethod>().Cast<WaterMethod?>()];
+
     private bool showErrors;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

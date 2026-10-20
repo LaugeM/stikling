@@ -238,9 +238,9 @@ public class CareLikesTests
 
         var text = PlantTable.Write([PlantColumn.Season, PlantColumn.Medium, PlantColumn.LikesHumidity]);
 
-        Assert.Equal("Name,Medium,LikesHumidity,Season", text);
+        Assert.Equal("Name,Season,Medium,LikesHumidity", text);
         Assert.Equal(
-            [PlantColumn.Name, PlantColumn.Medium, PlantColumn.LikesHumidity, PlantColumn.Season],
+            [PlantColumn.Name, PlantColumn.Season, PlantColumn.Medium, PlantColumn.LikesHumidity],
             PlantTable.Parse(text));
     }
 
@@ -281,7 +281,7 @@ public class CareLikesTests
 
     private static PropagationService PropagationsWith(FakePlantRepository plants) => new(
         new FakePropagationRepository(), plants, new FakeTimelineRepository(),
-        new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FixedTime(Now));
+        new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), new FixedTime(Now));
 
     [Fact]
     public async Task Potting_up_copies_what_the_parent_likes()
