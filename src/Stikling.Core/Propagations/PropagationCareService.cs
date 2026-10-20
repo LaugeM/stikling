@@ -37,6 +37,26 @@ public sealed class PropagationCareService(IPropagationCareLogRepository logs, T
         return entry;
     }
 
+    /// <summary>
+    /// Changes the number on a moisture reading, so a second tap the same day corrects the entry instead
+    /// of adding one. Returns null when the entry is gone, is not a reading or is not this propagation's.
+    /// </summary>
+    public async Task<PropagationCareLog?> CorrectReadingAsync(Guid propagationId, Guid id, int moisture)
+    {
+        if (await logs.GetAsync(id) is not { IsDeleted: false, Kind: PropagationCareKind.MoistureReading } entry
+            || entry.PropagationId != propagationId)
+            return null;
+        var previous = entry.Moisture;
+        entry.Moisture = moisture;
+        if (entry.Validate().FirstOrDefault() is { } error)
+        {
+            entry.Moisture = previous;
+            throw new InvalidOperationException(error);
+        }
+        await logs.SaveAsync(entry);
+        return entry;
+    }
+
     public Task DeleteAsync(Guid id) => logs.DeleteAsync(id);
 
     /// <summary>The entries of one propagation, newest first.</summary>

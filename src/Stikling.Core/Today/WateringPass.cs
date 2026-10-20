@@ -1,5 +1,6 @@
 using Stikling.Core.Care;
 using Stikling.Core.Models;
+using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Today;
@@ -20,8 +21,18 @@ public sealed record PassRow(
     Plant Plant, WateringForm Form, RoundReading? Reading, int WaterAt, Guid? DoneTodayId,
     bool Dry, bool StillDamp, Feed? DefaultFeed);
 
-/// <summary>The plants of one room on the watering screen, in the order they are walked.</summary>
-public sealed record PassGroup(Guid RoomId, string Name, IReadOnlyList<PassRow> Rows);
+/// <summary>One cutting in soil or bark on the watering screen, with what is logged today on it.</summary>
+/// <param name="Reading">Today's meter reading, when there is one.</param>
+/// <param name="WaterAt">The reading it is watered at: the usual 3, since propagations have no setting of their own.</param>
+/// <param name="DoneTodayId">The Watered entry logged today.</param>
+/// <param name="Dry">Read today, and the reading is at or below <paramref name="WaterAt"/>.</param>
+public sealed record PassCutting(Propagation Propagation, RoundReading? Reading, int WaterAt, Guid? DoneTodayId, bool Dry);
+
+/// <summary>The plants of one room on the watering screen, in the order they are walked, and its cuttings after them.</summary>
+public sealed record PassGroup(Guid RoomId, string Name, IReadOnlyList<PassRow> Rows)
+{
+    public IReadOnlyList<PassCutting> Cuttings { get; init; } = [];
+}
 
 /// <summary>
 /// Watering many plants in one pass: pick rooms, answer how dry each plant is, and water the dry
@@ -40,10 +51,13 @@ public static class WateringPass
     /// The rooms that have at least one active plant, in the order of the rooms, and <see cref="NoRoom"/>
     /// last when a plant has none.
     /// </summary>
-    public static IReadOnlyList<PassRoom> Rooms(IEnumerable<Plant> plants, Places places)
+    public static IReadOnlyList<PassRoom> Rooms(
+        IEnumerable<Plant> plants, Places places, IEnumerable<Propagation>? propagations = null)
     {
         var active = Active(plants).ToList();
         var used = active.Select(p => places.RoomOf(p.PlaceId)?.Id).ToHashSet();
+        foreach (var cutting in Cuttings(propagations))
+            used.Add(places.RoomOf(cutting.PlaceId)?.Id);
 
         var rooms = places.Rooms
             .Where(r => used.Contains(r.Id))
@@ -62,6 +76,8 @@ public static class WateringPass
     /// <param name="feeds">Every feed, for the one a plant gets with its watering.</param>
     /// <param name="pot">Finds a pot by id, to see whether it waters itself.</param>
     /// <param name="putOffs">What is put off on Today, to tell a plant answered "Still damp" earlier today.</param>
+    /// <param name="propagations">Propagations; the active ones in soil or bark are listed after the plants of their room.</param>
+    /// <param name="propagationLogs">Their care logs, for today's reading and watering.</param>
     public static IReadOnlyList<PassGroup> Rows(
         IReadOnlyList<Guid> roomIds,
         IEnumerable<Plant> plants,
@@ -70,9 +86,13 @@ public static class WateringPass
         Func<Guid, Pot?>? pot,
         Places places,
         TimeProvider time,
-        PutOffs? putOffs = null)
+        PutOffs? putOffs = null,
+        IEnumerable<Propagation>? propagations = null,
+        IEnumerable<PropagationCareLog>? propagationLogs = null)
     {
         var today = time.Today();
+        var cuttings = Cuttings(propagations).ToList();
+        var careByCutting = (propagationLogs ?? []).Where(l => !l.IsDeleted).ToLookup(l => l.PropagationId);
         var active = Active(plants).ToList();
         var careByPlant = logs.Where(l => !l.IsDeleted).ToLookup(l => l.PlantId);
         var feedById = feeds.Where(f => !f.IsDeleted).GroupBy(f => f.Id).ToDictionary(g => g.Key, g => g.First());
@@ -81,11 +101,15 @@ public static class WateringPass
         foreach (var roomId in roomIds.Distinct())
         {
             IEnumerable<Plant> inRoom;
+            IEnumerable<Propagation> cuttingsInRoom;
             string name;
             if (roomId == NoRoom)
             {
                 name = NoRoomName;
                 inRoom = active
+                    .Where(p => places.RoomOf(p.PlaceId) is null)
+                    .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase);
+                cuttingsInRoom = cuttings
                     .Where(p => places.RoomOf(p.PlaceId) is null)
                     .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase);
             }
@@ -96,6 +120,10 @@ public static class WateringPass
                         active.Where(p => places.RoomOf(p.PlaceId)?.Id == room.Id),
                         p => p.PlaceId, p => p.DisplayName, room, places)
                     .Select(x => x.Item);
+                cuttingsInRoom = GoingRound.Ordered(
+                        cuttings.Where(p => places.RoomOf(p.PlaceId)?.Id == room.Id),
+                        p => p.PlaceId, p => p.DisplayName, room, places)
+                    .Select(x => x.Item);
             }
             else
             {
@@ -103,7 +131,8 @@ public static class WateringPass
             }
 
             var rows = inRoom.Select(p => RowOf(p, careByPlant[p.Id].ToList(), feedById, pot, putOffs, today)).ToList();
-            groups.Add(new PassGroup(roomId, name, rows));
+            var cuttingRows = cuttingsInRoom.Select(p => CuttingOf(p, careByCutting[p.Id].ToList(), today)).ToList();
+            groups.Add(new PassGroup(roomId, name, rows) { Cuttings = cuttingRows });
         }
         return groups;
     }
@@ -144,6 +173,28 @@ public static class WateringPass
 
         return new PassRow(plant, form, shown, waterAt, done?.Id, dry, stillDamp, feed);
     }
+
+    private static PassCutting CuttingOf(Propagation propagation, List<PropagationCareLog> care, DateOnly today)
+    {
+        // The newest of the day, going by when it was last saved: a second tap corrects the same entry
+        var reading = care
+            .Where(l => l.Kind == PropagationCareKind.MoistureReading && l.Moisture is not null && l.OccurredOn == today)
+            .OrderBy(l => l.UpdatedAt)
+            .ThenBy(l => l.CreatedAt)
+            .LastOrDefault();
+        var done = care
+            .Where(l => l.Kind == PropagationCareKind.Watered && l.OccurredOn == today)
+            .OrderBy(l => l.CreatedAt)
+            .LastOrDefault();
+        RoundReading? shown = reading is null ? null : new RoundReading(reading.Id, reading.Moisture!.Value);
+        var dry = shown is not null && shown.Value <= Plant.DefaultWaterAt;
+        return new PassCutting(propagation, shown, Plant.DefaultWaterAt, done?.Id, dry);
+    }
+
+    // Active cuttings in soil or bark, which are watered from the top
+    private static IEnumerable<Propagation> Cuttings(IEnumerable<Propagation>? propagations) =>
+        (propagations ?? []).Where(p => !p.IsDeleted && p.IsActive
+            && p.Medium is GrowingMedium.Soil or GrowingMedium.OrchidBark);
 
     private static IEnumerable<Plant> Active(IEnumerable<Plant> plants) =>
         plants.Where(p => !p.IsDeleted && p.InCollection);
