@@ -246,6 +246,14 @@ public enum WaterMethod
     Soak
 }
 
+/// <summary>The steps of a move to semi-hydro that are ticked off. Never stored.</summary>
+public enum TransitionStep
+{
+    RootsWashed,
+    FirstWaterRoot,
+    FirstNewLeaf
+}
+
 /// <summary>How the plant-sitter sheet is laid out.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<SheetLayout>))]
 public enum SheetLayout

@@ -236,6 +236,59 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         await UpdateAsync(before, plant, label);
     }
 
+    /// <summary>True when changing the medium from one to the other is a move to semi-hydro.</summary>
+    public static bool OffersTransition(GrowingMedium before, GrowingMedium after) =>
+        before is GrowingMedium.Soil or GrowingMedium.Water && after is GrowingMedium.Leca or GrowingMedium.Pon;
+
+    /// <summary>
+    /// Starts tracking a move to LECA or PON. The steps start empty, so a second move starts clean.
+    /// A check of the default length is stored as null.
+    /// </summary>
+    public async Task StartTransitionAsync(Plant plant, DateOnly since, GrowingMedium to, int? checkWeeks, Func<Enum, string> label)
+    {
+        var before = plant.Copy();
+        plant.TransitionSince = since;
+        plant.TransitionTo = to;
+        plant.TransitionCheckWeeks = checkWeeks == Plant.DefaultTransitionCheckWeeks ? null : checkWeeks;
+        plant.RootsWashedOn = null;
+        plant.FirstWaterRootOn = null;
+        plant.FirstNewLeafOn = null;
+        await UpdateAsync(before, plant, label);
+    }
+
+    /// <summary>Sets the day of one step of the move, or clears it with null.</summary>
+    public async Task SetTransitionStepAsync(Plant plant, TransitionStep step, DateOnly? on, Func<Enum, string> label)
+    {
+        var before = plant.Copy();
+        switch (step)
+        {
+            case TransitionStep.RootsWashed: plant.RootsWashedOn = on; break;
+            case TransitionStep.FirstWaterRoot: plant.FirstWaterRootOn = on; break;
+            case TransitionStep.FirstNewLeaf: plant.FirstNewLeafOn = on; break;
+        }
+
+        if (before.RootsWashedOn == plant.RootsWashedOn && before.FirstWaterRootOn == plant.FirstWaterRootOn
+            && before.FirstNewLeafOn == plant.FirstNewLeafOn)
+            return;
+        await UpdateAsync(before, plant, label);
+    }
+
+    /// <summary>Stops tracking a move that isn't settled, and clears its dates.</summary>
+    public async Task StopTransitionAsync(Plant plant, Func<Enum, string> label)
+    {
+        if (!plant.InTransition)
+            return;
+
+        var before = plant.Copy();
+        plant.TransitionSince = null;
+        plant.TransitionTo = null;
+        plant.TransitionCheckWeeks = null;
+        plant.RootsWashedOn = null;
+        plant.FirstWaterRootOn = null;
+        plant.FirstNewLeafOn = null;
+        await UpdateAsync(before, plant, label);
+    }
+
     /// <summary>Marks a plant dormant from the given day, or woken up again with null.</summary>
     public async Task SetDormantAsync(Plant plant, DateOnly? since, Func<Enum, string> label)
     {

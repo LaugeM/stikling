@@ -196,6 +196,60 @@ else
                 </section>
             }
 
+            @if (plant.ShowsTransitionCard(Today) && plant.TransitionSince is { } movingSince)
+            {
+                var movingTo = plant.TransitionTo is { } to ? Labels.For(to) : "semi-hydro";
+                var settled = plant.TransitionSettledOn is not null;
+                var title = settled ? $"Settled in to {movingTo}" : $"Moving to {movingTo}";
+                <section class="transition-card" aria-label="@title">
+                    <p class="transition-card-name">@title</p>
+                    @if (plant.TransitionSettledOn is { } settledDay)
+                    {
+                        <p class="transition-card-meta">After @Labels.Count(Math.Max(1, (settledDay.DayNumber - movingSince.DayNumber) / 7), "week") · @Labels.Date(settledDay)</p>
+                    }
+                    else
+                    {
+                        <p class="transition-card-meta">Since @ProblemText.ShortDay(movingSince) · week @(Math.Max(0, Today.DayNumber - movingSince.DayNumber) / 7 + 1)</p>
+                    }
+                    <ul class="transition-steps">
+                        @foreach (var (step, name, done) in TransitionSteps(plant))
+                        {
+                            <li class="transition-row">
+                                <button type="button" class="transition-step @(done is null ? null : "is-done")" aria-pressed="@(done is not null ? "true" : "false")"
+                                        disabled="@busy" @onclick="() => TapTransitionStepAsync(step, name, done)">
+                                    <span class="transition-box" aria-hidden="true">
+                                        @if (done is not null)
+                                        {
+                                            <svg viewBox="0 0 24 24"><path d="m5 12.500 4.500 4.500L19 7.500" /></svg>
+                                        }
+                                    </span>
+                                    <span class="transition-step-name">@name</span>
+                                </button>
+                                @if (done is { } doneOn)
+                                {
+                                    <button type="button" class="transition-step-date" aria-label="Change the day for @name" disabled="@busy"
+                                            @onclick="() => OpenTransitionStep(step, name, doneOn)">@Labels.Date(doneOn)</button>
+                                }
+                            </li>
+                        }
+                    </ul>
+                    @if (settled)
+                    {
+                        // Nothing to stop once it has settled
+                    }
+                    else if (confirmStopTransition)
+                    {
+                        <p class="mb-2">Stop tracking the move? The dates ticked so far are cleared. The history keeps what happened.</p>
+                        <button type="button" class="btn btn-outline-primary btn-sm transition-confirm" disabled="@busy" @onclick="StopTransitionAsync">Stop tracking</button>
+                        <button type="button" class="btn btn-link btn-sm transition-confirm" @onclick="() => confirmStopTransition = false">Cancel</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-link link-action transition-stop" @onclick="() => confirmStopTransition = true">Stop tracking</button>
+                    }
+                </section>
+            }
+
             @if (plant.Status == PlantStatus.Died && !string.IsNullOrWhiteSpace(plant.CauseOfDeath))
             {
                 <p class="profile-facts">@plant.CauseOfDeath</p>
@@ -418,6 +472,13 @@ else
                         {
                             <dt>Dormant</dt>
                             <dd>@(dormantSince == Today ? "Since today" : $"Since {Labels.Date(dormantSince)} · {Labels.Count(plant.DaysDormant(Today) ?? 0, "day")}")</dd>
+                        }
+
+                        @if (plant.TransitionSettled && plant.TransitionSince is { } movedSince && plant.TransitionSettledOn is { } settledOn)
+                        {
+                            var settledWeeks = Math.Max(1, (settledOn.DayNumber - movedSince.DayNumber) / 7);
+                            <dt>Moved to semi-hydro</dt>
+                            <dd>Settled in to @(plant.TransitionTo is { } movedTo ? Labels.For(movedTo) : "semi-hydro") after @Labels.Count(settledWeeks, "week") · @Labels.Date(settledOn)</dd>
                         }
 
                         @if (plant.Tags.Count > 0)
@@ -824,6 +885,15 @@ else
                                 </button>
                             }
                         </li>
+                        @if (!plant.InTransition)
+                        {
+                            <li>
+                                <button type="button" class="sheet-action" @onclick="OpenTransition">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11h14l-1.500 8.500a1.500 1.500 0 0 1-1.500 1.200H8a1.500 1.500 0 0 1-1.500-1.200Z" /><circle cx="9" cy="7.500" r="1.800" /><circle cx="14.500" cy="7" r="1.800" /><circle cx="12" cy="3.800" r="1.200" /></svg>
+                                    <span class="sheet-action-text"><b>Moving to semi-hydro</b><small>A checklist for its new roots and leaves</small></span>
+                                </button>
+                            </li>
+                        }
                         <li>
                             <button type="button" class="sheet-action" @onclick="OpenPestCheck">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" /><path d="m15 15 5 5" /><path d="m8 10.5 2 2 3.5-4" /></svg>
@@ -1139,6 +1209,48 @@ else
                 </div>
                 break;
 
+            case More.Transition:
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label" for="transition-since">Since</label>
+                        <input id="transition-since" type="date" class="form-control" @bind="since" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="transition-to">Into</label>
+                        <select id="transition-to" class="form-select" @bind="transitionTo">
+                            <option value="@GrowingMedium.Leca">@Labels.For(GrowingMedium.Leca)</option>
+                            <option value="@GrowingMedium.Pon">@Labels.For(GrowingMedium.Pon)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label" for="transition-weeks">Check after how many weeks</label>
+                    <input id="transition-weeks" type="number" class="form-control" min="1" max="52" inputmode="numeric" @bind="transitionWeeks" />
+                </div>
+                <div class="form-text mb-3">Today asks you to look at it when nothing new has happened for that long.</div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@(busy || transitionWeeks is < 1 or > 52)" @onclick="StartTransitionAsync">Start tracking</button>
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                </div>
+                break;
+
+            case More.TransitionStep:
+                <div class="mb-3">
+                    <label class="form-label" for="transition-step-day">@stepName</label>
+                    <input id="transition-step-day" type="date" class="form-control" @bind="stepDay"
+                           min="@plant.TransitionSince?.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    @foreach (var error in stepErrors)
+                    {
+                        <div class="text-danger small mt-1" role="alert">@error</div>
+                    }
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveTransitionStepAsync">Save</button>
+                    <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="UntickTransitionStepAsync">Untick</button>
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.None">Back</button>
+                </div>
+                break;
+
             case More.PestCheck:
                 <div class="mb-3">
                     <label class="form-label" for="pest-check-on">Checked on</label>
@@ -1230,13 +1342,20 @@ else
     [SupplyParameterFromQuery(Name = "entry")]
     public Guid? Entry { get; set; }
 
-    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, PestCheck, Status, PassOn, Flowering, ThisFlowering, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
+    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, Transition, TransitionStep, PestCheck, Status, PassOn, Flowering, ThisFlowering, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
     private bool shareOpen;
     private bool shareOnLink;
 
     private Plant? plant;
     private bool loaded;
     private bool confirmDelete;
+    private bool confirmStopTransition;
+    private TransitionStep editingStep;
+    private string stepName = "";
+    private DateOnly stepDay;
+    private List<string> stepErrors = [];
+    private GrowingMedium transitionTo = GrowingMedium.Leca;
+    private int? transitionWeeks = Plant.DefaultTransitionCheckWeeks;
     private bool detailsOpen;
     private bool careOpen;
     private bool busy;
@@ -1389,6 +1508,8 @@ else
         More.Flowering => "Flowering",
         More.ThisFlowering => "This flowering",
         More.Quarantine => "Quarantine",
+        More.Transition => "Moving to semi-hydro",
+        More.TransitionStep => "Change the day",
         More.PestCheck => "Check for pests",
         More.Problem => "Something's wrong",
         More.ProblemUpdate => "How does it look?",
@@ -1894,6 +2015,14 @@ else
         more = More.Quarantine;
     }
 
+    private void OpenTransition()
+    {
+        since = Today;
+        transitionTo = plant?.Medium is GrowingMedium.Leca or GrowingMedium.Pon ? plant.Medium : GrowingMedium.Leca;
+        transitionWeeks = Plant.DefaultTransitionCheckWeeks;
+        more = More.Transition;
+    }
+
     private void OpenPestCheck()
     {
         since = Today;
@@ -2010,6 +2139,65 @@ else
 
     private Task SetDormantAsync() =>
         ChangeAsync(() => PlantService.SetDormantAsync(plant!, since, Labels.For));
+
+    private Task StartTransitionAsync() =>
+        ChangeAsync(() => PlantService.StartTransitionAsync(plant!, since, transitionTo, transitionWeeks, Labels.For));
+
+    // An unticked step is ticked for today; a ticked one opens the sheet to change its day or untick it
+    private Task TapTransitionStepAsync(TransitionStep step, string name, DateOnly? doneOn)
+    {
+        if (doneOn is { } day)
+        {
+            OpenTransitionStep(step, name, day);
+            return Task.CompletedTask;
+        }
+        return ChangeAsync(() => PlantService.SetTransitionStepAsync(plant!, step, Today, Labels.For));
+    }
+
+    private void OpenTransitionStep(TransitionStep step, string name, DateOnly day)
+    {
+        editingStep = step;
+        stepName = name;
+        stepDay = day;
+        stepErrors = [];
+        more = More.TransitionStep;
+    }
+
+    private async Task SaveTransitionStepAsync()
+    {
+        var test = plant!.Copy();
+        SetStepDay(test, stepDay);
+        stepErrors = [.. test.Validate(Today).Where(e => e.Contains("step", StringComparison.OrdinalIgnoreCase))];
+        if (stepErrors.Count > 0)
+            return;
+        await ChangeAsync(() => PlantService.SetTransitionStepAsync(plant!, editingStep, stepDay, Labels.For));
+    }
+
+    private Task UntickTransitionStepAsync() =>
+        ChangeAsync(() => PlantService.SetTransitionStepAsync(plant!, editingStep, null, Labels.For));
+
+    private void SetStepDay(Plant target, DateOnly day)
+    {
+        switch (editingStep)
+        {
+            case TransitionStep.RootsWashed: target.RootsWashedOn = day; break;
+            case TransitionStep.FirstWaterRoot: target.FirstWaterRootOn = day; break;
+            case TransitionStep.FirstNewLeaf: target.FirstNewLeafOn = day; break;
+        }
+    }
+
+    private async Task StopTransitionAsync()
+    {
+        confirmStopTransition = false;
+        await ChangeAsync(() => PlantService.StopTransitionAsync(plant!, Labels.For));
+    }
+
+    private static IEnumerable<(TransitionStep Step, string Name, DateOnly? Done)> TransitionSteps(Plant plant) =>
+    [
+        (TransitionStep.RootsWashed, "Roots washed", plant.RootsWashedOn),
+        (TransitionStep.FirstWaterRoot, "First new water root", plant.FirstWaterRootOn),
+        (TransitionStep.FirstNewLeaf, "First new leaf", plant.FirstNewLeafOn)
+    ];
 
     private Task SetQuarantineAsync() => ChangeAsync(async () =>
     {

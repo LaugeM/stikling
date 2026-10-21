@@ -253,6 +253,67 @@ public sealed class Plant : Entity
     public bool IsDormant => DormantSince is not null;
 
     /// <summary>
+    /// The day the move from soil or water to LECA or PON started. Null when it isn't being tracked,
+    /// which is what every older plant reads as. The fields are left on the plant when it settles.
+    /// </summary>
+    public DateOnly? TransitionSince { get; set; }
+
+    /// <summary>The medium it is moving into: Leca or Pon.</summary>
+    public GrowingMedium? TransitionTo { get; set; }
+
+    /// <summary>The day the soil was washed off the roots.</summary>
+    public DateOnly? RootsWashedOn { get; set; }
+
+    /// <summary>The day the first new water root showed.</summary>
+    public DateOnly? FirstWaterRootOn { get; set; }
+
+    /// <summary>The day the first new leaf showed.</summary>
+    public DateOnly? FirstNewLeafOn { get; set; }
+
+    /// <summary>Weeks without news before Today asks for a look. Null reads as <see cref="DefaultTransitionCheckWeeks"/>.</summary>
+    public int? TransitionCheckWeeks { get; set; }
+
+    public const int DefaultTransitionCheckWeeks = 6;
+
+    /// <summary>It has both a water root and a new leaf, so the move is over.</summary>
+    [JsonIgnore]
+    public bool TransitionSettled =>
+        TransitionSince is not null && FirstWaterRootOn is not null && FirstNewLeafOn is not null;
+
+    /// <summary>Tracked and not settled yet.</summary>
+    [JsonIgnore]
+    public bool InTransition => TransitionSince is not null && !TransitionSettled;
+
+    /// <summary>Days after settling that the card stays on the plant's page, so a wrong tick can be undone.</summary>
+    public const int TransitionCardDaysAfterSettling = 7;
+
+    /// <summary>The checklist card shows while the move is going on, and for a week after it settled.</summary>
+    public bool ShowsTransitionCard(DateOnly today) =>
+        InCollection && (InTransition
+            || TransitionSettledOn is { } settled && settled.AddDays(TransitionCardDaysAfterSettling) >= today);
+
+    /// <summary>The latest of the day it started and the steps ticked.</summary>
+    [JsonIgnore]
+    public DateOnly? TransitionLastNews
+    {
+        get
+        {
+            if (TransitionSince is not { } since)
+                return null;
+            var last = since;
+            foreach (var day in new[] { RootsWashedOn, FirstWaterRootOn, FirstNewLeafOn })
+                if (day is { } d && d > last)
+                    last = d;
+            return last;
+        }
+    }
+
+    /// <summary>The day it settled in: the later of the first water root and the first new leaf.</summary>
+    [JsonIgnore]
+    public DateOnly? TransitionSettledOn =>
+        TransitionSettled ? (FirstWaterRootOn > FirstNewLeafOn ? FirstWaterRootOn : FirstNewLeafOn) : null;
+
+    /// <summary>
     /// What it is offered for, shown on the Available for swap page. Null when it isn't. Only
     /// counts while the plant is still here, and is left as it is when the plant leaves.
     /// </summary>
@@ -435,6 +496,14 @@ public sealed class Plant : Entity
             errors.Add("A quarantine has to last at least a day.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
+        if (TransitionSince > today)
+            errors.Add("The move to semi-hydro can't start in the future.");
+        if (RootsWashedOn > today || FirstWaterRootOn > today || FirstNewLeafOn > today)
+            errors.Add("A step can't be in the future.");
+        if (TransitionSince is { } started && (RootsWashedOn < started || FirstWaterRootOn < started || FirstNewLeafOn < started))
+            errors.Add("A step can't come before the move started.");
+        if (TransitionCheckWeeks is < 1 or > 52)
+            errors.Add("Check after 1 to 52 weeks.");
         if (WaterAt is < 1 or > 10)
             errors.Add("The watering level goes from 1 to 10.");
         if (Count < 1)
