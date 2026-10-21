@@ -372,6 +372,31 @@ else
         </section>
     }
 
+    @if (!Away && TransitionNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Moving to semi-hydro</h2>
+            <ul class="item-list">
+                @foreach (var plant in TransitionNow)
+                {
+                    var lastNews = plant.TransitionLastNews!.Value;
+                    <TodayRow @key="plant.Id" DoneLabel="Looked, still waiting" OnDone="() => PutOffAsync(PutOffs.Transition(plant.Id, lastNews), Today.AddDays(14))"
+                              OnPutOff="days => PutOffAsync(PutOffs.Transition(plant.Id, lastNews), Today.AddDays(days))">
+                        <a class="item-card" href="plants/@plant.Id">
+                            <SubjectThumb Subject="plant" />
+                            <div class="item-text">
+                                <div class="item-name">@plant.DisplayName</div>
+                                <div class="item-meta">
+                                    <span>Nothing new for @Labels.Count((Today.DayNumber - lastNews.DayNumber) / 7, "week")</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
     @if (!Away && RestNow.Count > 0)
     {
         <section class="today-section">
@@ -886,6 +911,10 @@ else
     // Plants gathered onto a round day are counted in the line on the next round, not listed as coming up
     private List<WateringDue> WaterComing => wateringDue.Where(d => !d.DueNow && !d.Gathered).ToList();
 
+    private List<Plant> TransitionNow =>
+        TodayBoard.TransitionQuiet(plants, Today)
+            .Where(p => !putOffs.IsPutOff(PutOffs.Transition(p.Id, p.TransitionLastNews!.Value), Today)).ToList();
+
     private List<Plant> QuarantineNow =>
         TodayBoard.QuarantineUp(plants, Today)
             .Where(p => !putOffs.IsPutOff(PutOffs.Quarantine(p.Id, p.QuarantinedSince!.Value), Today)).ToList();
@@ -926,7 +955,7 @@ else
     // While away nothing is asked for, and while the list on the day back is up it stands for Water and Worth a look
     private int DueCount =>
         Away ? 0
-        : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + PlanDoneNow.Count + FlaggedNow.Count + LookAgainNow.Count + QuarantineNow.Count + RestNow.Count
+        : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + PlanDoneNow.Count + FlaggedNow.Count + LookAgainNow.Count + QuarantineNow.Count + TransitionNow.Count + RestNow.Count
         + (Holding ? backRows.Count : ChecksNow.Count + wateringDue.Count(d => d.DueNow))
         + (Holding ? 0 : CareDueCount)
         + (roundSuggestion is not null ? 1 : 0)

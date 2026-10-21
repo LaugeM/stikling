@@ -332,6 +332,14 @@ else
                     {
                         <div id="medium-help" class="form-text">@mediumHelp</div>
                     }
+                    @if (OffersTransitionNow)
+                    {
+                        <div class="form-check mt-2">
+                            <input id="track-transition" class="form-check-input" type="checkbox" @bind="trackTransition" />
+                            <label class="form-check-label" for="track-transition">Track the move to semi-hydro</label>
+                            <div class="form-text">Adds a checklist to its page for washed roots, the first water root and the first new leaf.</div>
+                        </div>
+                    }
                 </div>
 
                 <div class="mb-3">
@@ -848,17 +856,30 @@ else
     private bool mediumChosen => IsNew ? mediumPicked : true;
     private bool mediumPicked;
 
+    // Soil or water into LECA or PON on a saved plant that isn't already being tracked
+    private bool OffersTransitionNow =>
+        !IsNew && original is not null && plant is not null && plant.InCollection && !plant.InTransition
+        && PlantService.OffersTransition(original.Medium, plant.Medium);
+
+    private bool trackTransition = true;
+
     private void SetMedium(GrowingMedium medium)
     {
+        var offered = OffersTransitionNow;
         plant!.Medium = medium;
         mediumPicked = true;
+        if (!offered)
+            trackTransition = true;
     }
 
     private void SetInnerPot(Guid? id)
     {
+        var offered = OffersTransitionNow;
         plant!.InnerPotId = id;
         var pot = pots.FirstOrDefault(p => p.Id == id);
         plant.Medium = PotKinds.MediumAfterPicking(pot, plant.Medium, mediumChosen);
+        if (!offered)
+            trackTransition = true;
     }
 
     // Clearing the outer pot clears what would be kept in it
@@ -1259,6 +1280,7 @@ else
             }
             // A new plant counts from what the form started with, like a duplicate's values
             var likesBefore = original ?? startedWith ?? new Plant();
+            var startMove = OffersTransitionNow && trackTransition;
             if (IsNew)
             {
                 var wish = markWishGot ? WishHere : null;
@@ -1270,6 +1292,8 @@ else
             {
                 var places = await RoomService.GetPlacesAsync();
                 await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName, id => places.NameOf(id), FindPot, FeedName);
+                if (startMove)
+                    await PlantService.StartTransitionAsync(plant, Today, plant.Medium, null, Labels.For);
             }
             if (cameInside && backChecked)
                 await PestTreatmentRepository.SaveAsync(PestService.StartPlantCheck(plant, Today));

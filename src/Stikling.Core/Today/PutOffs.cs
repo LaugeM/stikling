@@ -51,6 +51,13 @@ public sealed class PutOffs
         $"quarantine:{plantId}:{since:yyyy-MM-dd}";
 
     /// <summary>
+    /// The key for a move to semi-hydro with no news. The day of the last news is part of it, so
+    /// ticking a new step isn't still hidden.
+    /// </summary>
+    public static string Transition(Guid plantId, DateOnly lastNews) =>
+        $"transition:{plantId}:{lastNews:yyyy-MM-dd}";
+
+    /// <summary>
     /// The key for asking whether a plant has gone dormant. The day the asking window started is
     /// part of it, so next year's season isn't still hidden.
     /// </summary>

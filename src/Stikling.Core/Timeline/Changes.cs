@@ -68,7 +68,33 @@ public static class PlantChanges
         if (before.IsDormant != after.IsDormant && after.Status == PlantStatus.Active)
             changes.Add(DormancyText(after.IsDormant));
 
+        AddTransition(changes, before, after, label);
+
         return changes;
+    }
+
+    private static void AddTransition(List<string> changes, Plant before, Plant after, Func<Enum, string> label)
+    {
+        var medium = after.TransitionTo ?? before.TransitionTo;
+        var mediumText = medium is { } m ? label(m) : "semi-hydro";
+
+        // A second move after a settled one has a new start day too
+        if (after.TransitionSince is not null && before.TransitionSince != after.TransitionSince)
+            changes.Add($"Started the move to {mediumText}");
+        if (before.RootsWashedOn is null && after.RootsWashedOn is not null)
+            changes.Add("Roots washed");
+        if (before.FirstWaterRootOn is null && after.FirstWaterRootOn is not null)
+            changes.Add("First new water root");
+        if (before.FirstNewLeafOn is null && after.FirstNewLeafOn is not null)
+            changes.Add("First new leaf");
+        if (!before.TransitionSettled && after.TransitionSettled
+            && after.TransitionSince is { } since && after.TransitionSettledOn is { } settled)
+        {
+            var weeks = Math.Max(1, (settled.DayNumber - since.DayNumber) / 7);
+            changes.Add($"Settled in to {mediumText} after {weeks} {(weeks == 1 ? "week" : "weeks")}");
+        }
+        if (before.TransitionSince is not null && after.TransitionSince is null && !before.TransitionSettled)
+            changes.Add($"Stopped tracking the move to {mediumText}");
     }
 
     /// <summary>

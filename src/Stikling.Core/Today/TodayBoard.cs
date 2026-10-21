@@ -144,6 +144,17 @@ public static class TodayBoard
             .ThenBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
+    /// <summary>
+    /// Plants in the collection moving to LECA or PON where nothing new has been ticked for the
+    /// weeks chosen. The one that has been quiet longest comes first.
+    /// </summary>
+    public static IReadOnlyList<Plant> TransitionQuiet(IEnumerable<Plant> plants, DateOnly today) =>
+        plants.Where(p => !p.IsDeleted && p.InCollection && p.InTransition
+                && p.TransitionLastNews!.Value.AddDays((p.TransitionCheckWeeks ?? Plant.DefaultTransitionCheckWeeks) * 7) <= today)
+            .OrderBy(p => p.TransitionLastNews)
+            .ThenBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
     /// <summary>How many days back Lately on Today looks.</summary>
     public const int LatelyDays = 30;
 
