@@ -1,8 +1,7 @@
 @page "/"
 @using System.Globalization
 @inject CoverPhotos Covers
-@inject IPlantRepository Plants
-@inject IPropagationRepository Propagations
+@inject TodayService TodayService
 @inject ITimelineRepository Entries
 @inject IPhotoRepository PhotoRepository
 @inject IPestCaseRepository PestCases
@@ -13,24 +12,16 @@
 @inject SettingsService SettingsService
 @inject PutOffService PutOffService
 @inject ICareLogRepository CareLogs
-@inject IPropagationCareLogRepository PropagationCareLogs
-@inject IPotRepository PotRepository
-@inject GrowLightService LightService
 @inject AwayService AwayService
 @inject SitterSheetService SitterSheets
 @inject TimelineService TimelineService
 @inject CareService Care
 @inject CareIntervalService CareIntervalService
-@inject ICareIntervalRepository CareIntervalRepository
-@inject IFeedRepository FeedRepository
-@inject OwnCareKindService OwnKindService
 @inject ILogger<Home> Logger
 @inject WateringAnswers Answers
 @inject AppBadge Badge
 @inject PlantService PlantService
-@inject ProblemService ProblemService
 @inject PropagationService PropagationService
-@inject RoomService RoomService
 @inject TimeProvider Time
 @inject YearCardService YearCardsService
 @using Stikling.Core.Year
@@ -95,7 +86,7 @@ else
         </div>
     }
 
-    @if (awayNow is { } span)
+    @if (sections.AwayNow is { } span)
     {
         var total = span.Until.DayNumber - span.From.DayNumber;
         var dayNumber = Today.DayNumber - span.From.DayNumber + 1;
@@ -135,7 +126,7 @@ else
         </section>
     }
 
-    @if (Holding && backSpan is { } back)
+    @if (sections.Holding && backSpan is { } back)
     {
         var backDays = back.Until.DayNumber - back.From.DayNumber;
         <section class="back-panel" aria-labelledby="back-title">
@@ -145,7 +136,7 @@ else
                 These first, in this order. The rest of Today comes back once you're through.
             </p>
             <ol class="back-rows">
-                @foreach (var (row, index) in backRows.Select((r, i) => (r, i)))
+                @foreach (var (row, index) in sections.BackRows.Select((r, i) => (r, i)))
                 {
                     <li @key="row.Subject.Id" class="back-row">
                         <span class="back-num" aria-hidden="true">@(index + 1)</span>
@@ -170,7 +161,7 @@ else
         </section>
     }
 
-    @if (!Away && backupReminder is { } reminder)
+    @if (!sections.Away && backupReminder is { } reminder)
     {
         <div class="reminder">
             <span>@reminder</span>
@@ -181,7 +172,7 @@ else
     @* From 64rem the sections that ask for something sit in a wide column with the rest beside it. The markup keeps the phone order. *@
     <div class="today-columns">
     <div class="today-todo">
-    @if (!Away && roundSuggestion is { } suggested)
+    @if (!sections.Away && sections.RoundSuggestion is { } suggested)
     {
         <section class="today-section">
             <h2>Today's round</h2>
@@ -204,7 +195,7 @@ else
         </section>
     }
 
-    @foreach (var (heading, cases) in AwayHides(DuePests))
+    @foreach (var (heading, cases) in AwayHides(sections.DuePests))
     {
         <section class="today-section">
             <h2>@heading</h2>
@@ -234,12 +225,12 @@ else
         </section>
     }
 
-    @if (!Away && ReadyNow.Count > 0)
+    @if (!sections.Away && sections.ReadyNow.Count > 0)
     {
         <section class="today-section">
             <h2>Ready to resolve</h2>
             <ul class="item-list">
-                @foreach (var view in ReadyNow)
+                @foreach (var view in sections.ReadyNow)
                 {
                     <TodayRow @key="view.Case.Id" DoneLabel="Resolve" OnDone="() => ResolveAsync(view)"
                               OnPutOff="days => PutOffAsync(PutOffs.Resolve(view.Case.Id), Today.AddDays(days))">
@@ -260,12 +251,12 @@ else
         </section>
     }
 
-    @if (!Away && PlanDoneNow.Count > 0)
+    @if (!sections.Away && sections.PlanDoneNow.Count > 0)
     {
         <section class="today-section">
             <h2>Plan done</h2>
             <ul class="item-list">
-                @foreach (var view in PlanDoneNow)
+                @foreach (var view in sections.PlanDoneNow)
                 {
                     <TodayRow @key="view.Case.Id" DoneLabel="Start watching" OnDone="() => StartWatchingAsync(view)"
                               SkipLabel="Keep treating" OnSkip="() => KeepTreatingAsync(view)"
@@ -288,12 +279,12 @@ else
         </section>
     }
 
-    @if (!Away && FlaggedNow.Count > 0)
+    @if (!sections.Away && sections.FlaggedNow.Count > 0)
     {
         <section class="today-section">
             <h2>Needs attention</h2>
             <ul class="item-list">
-                @foreach (var item in FlaggedNow)
+                @foreach (var item in sections.FlaggedNow)
                 {
                     <TodayRow @key="item.Subject.Id" OnDone="() => ClearFlagAsync(item)"
                               OnPutOff="days => PutOffAsync(PutOffs.Flag(item.Subject.Id, item.Attention), Today.AddDays(days))">
@@ -312,12 +303,12 @@ else
         </section>
     }
 
-    @if (!Away && LookAgainNow.Count > 0)
+    @if (!sections.Away && sections.LookAgainNow.Count > 0)
     {
         <section class="today-section">
             <h2>Look again</h2>
             <ul class="item-list">
-                @foreach (var item in LookAgainNow)
+                @foreach (var item in sections.LookAgainNow)
                 {
                     var due = item;
                     <TodayRow @key="item.Problem.Id" OnPutOff="days => PutOffAsync(PutOffs.Problem(due.Problem.Id, due.Since), Today.AddDays(days))">
@@ -348,12 +339,12 @@ else
         </section>
     }
 
-    @if (!Away && QuarantineNow.Count > 0)
+    @if (!sections.Away && sections.QuarantineNow.Count > 0)
     {
         <section class="today-section">
             <h2>Quarantine is up</h2>
             <ul class="item-list">
-                @foreach (var plant in QuarantineNow)
+                @foreach (var plant in sections.QuarantineNow)
                 {
                     <TodayRow @key="plant.Id" DoneLabel="Checked, let it out" OnDone="() => LetOutAsync(plant)"
                               OnPutOff="days => PutOffAsync(PutOffs.Quarantine(plant.Id, plant.QuarantinedSince!.Value), Today.AddDays(days))">
@@ -372,12 +363,12 @@ else
         </section>
     }
 
-    @if (!Away && TransitionNow.Count > 0)
+    @if (!sections.Away && sections.TransitionNow.Count > 0)
     {
         <section class="today-section">
             <h2>Moving to semi-hydro</h2>
             <ul class="item-list">
-                @foreach (var plant in TransitionNow)
+                @foreach (var plant in sections.TransitionNow)
                 {
                     var lastNews = plant.TransitionLastNews!.Value;
                     <TodayRow @key="plant.Id" DoneLabel="Looked, still waiting" OnDone="() => PutOffAsync(PutOffs.Transition(plant.Id, lastNews), Today.AddDays(14))"
@@ -397,12 +388,12 @@ else
         </section>
     }
 
-    @if (!Away && RestNow.Count > 0)
+    @if (!sections.Away && sections.RestNow.Count > 0)
     {
         <section class="today-section">
             <h2>Gone dormant?</h2>
             <ul class="item-list">
-                @foreach (var (plant, windowStart) in RestNow)
+                @foreach (var (plant, windowStart) in sections.RestNow)
                 {
                     <TodayRow @key="plant.Id" DoneLabel="Yes, it's dormant" OnDone="() => WentDormantAsync(plant)"
                               OnPutOff="days => PutOffAsync(PutOffs.Rest(plant.Id, windowStart), Today.AddDays(days))"
@@ -422,10 +413,10 @@ else
         </section>
     }
 
-    @if (!Away && !Holding && (WaterNow.Count > 0 || WaterComing.Count > 0 || NextRoundLine is not null))
+    @if (!sections.Away && !sections.Holding && (sections.WaterNow.Count > 0 || sections.WaterComing.Count > 0 || NextRoundWaterLine is not null))
     {
-        var now = WaterNow;
-        var coming = WaterComing;
+        var now = sections.WaterNow;
+        var coming = sections.WaterComing;
         <section class="today-section">
             <div class="today-section-head">
                 <h2>Water</h2>
@@ -443,7 +434,7 @@ else
                     }
                 </div>
             </div>
-            @if (NextRoundLine is { } nextRound)
+            @if (NextRoundWaterLine is { } nextRound)
             {
                 <p class="today-next-round">
                     <span>@nextRound</span>
@@ -487,7 +478,7 @@ else
         </section>
     }
 
-    @if (!Away && !Holding && (CareNow.Count > 0 || CareComing.Count > 0 || CareNextRoundLine is not null))
+    @if (!sections.Away && !sections.Holding && (sections.CareNow.Count > 0 || sections.CareComing.Count > 0 || CareNextRoundLine is not null))
     {
         <section class="today-section care-section">
             <div class="today-section-head">
@@ -507,15 +498,15 @@ else
             {
                 <p class="today-next-round"><span>@careRound</span></p>
             }
-            @foreach (var group in CareNow)
+            @foreach (var group in sections.CareNow)
             {
                 <CareIntervalCard @key="CareKey(group)" Group="group" Today="Today" Done="careDone"
                                   OnLog="CareLogAsync" OnUndo="CareUndoAsync" OnPutOff="CarePutOffAsync" />
             }
-            @if (CareComing.Count > 0)
+            @if (sections.CareComing.Count > 0)
             {
                 <h3 class="today-subhead">Coming up</h3>
-                @foreach (var group in CareComing)
+                @foreach (var group in sections.CareComing)
                 {
                     <CareIntervalCard @key="CareKey(group)" Group="group" Today="Today" Done="careDone" Coming="true"
                                       OnLog="CareLogAsync" OnUndo="CareUndoAsync" OnPutOff="CarePutOffAsync" />
@@ -574,7 +565,7 @@ else
         </section>
     }
 
-    @if (!Away && !Holding)
+    @if (!sections.Away && !sections.Holding)
     {
     <section class="today-section">
         <h2>Worth a look</h2>
@@ -582,20 +573,20 @@ else
         {
             <p class="today-next-round"><span>@nextChecks</span></p>
         }
-        @if (ChecksNow.Count == 0 && NextRoundChecksLine is null)
+        @if (sections.ChecksNow.Count == 0 && NextRoundChecksLine is null)
         {
             <p class="text-body-secondary mb-0">
                 @(active.Count == 0
                     ? "No propagations on the go. Open a plant and tap Propagate to start one."
-                    : checks.Count > 0
+                    : sections.Checks.Count > 0
                         ? "Nothing else waiting. The ones you put off come back by themselves."
                         : "Nothing waiting. Every propagation has been looked at in the last week.")
             </p>
         }
-        else if (ChecksNow.Count > 0)
+        else if (sections.ChecksNow.Count > 0)
         {
             <ul class="item-list">
-                @foreach (var check in ChecksNow)
+                @foreach (var check in sections.ChecksNow)
                 {
                     <TodayRow @key="check.Propagation.Id"
                               OnPutOff="days => PutOffAsync(PutOffs.Check(check.Propagation.Id), Today.AddDays(days))">
@@ -616,7 +607,7 @@ else
     </section>
     }
 
-    @if (!Away && photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today))
+    @if (!sections.Away && sections.PhotoRoundShows)
     {
         <section class="today-section">
             <h2>Photos</h2>
@@ -629,7 +620,7 @@ else
                             <svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
                         </div>
                         <div class="item-text">
-                            <div class="item-name">@Labels.Count(photoRound.Count, "photo") to take</div>
+                            <div class="item-name">@Labels.Count(sections.PhotosDue.Count, "photo") to take</div>
                             <div class="item-meta">For @Today.ToString("MMMM", CultureInfo.InvariantCulture)</div>
                         </div>
                         <svg class="round-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
@@ -639,7 +630,7 @@ else
             @if (showRound)
             {
                 <ul class="item-list photo-round" id="photo-round">
-                    @foreach (var due in photoRound)
+                    @foreach (var due in sections.PhotosDue)
                     {
                         <PhotoRoundRow @key="due.Subject.Id" Due="due" OnTaken="LoadAsync" />
                     }
@@ -719,42 +710,22 @@ else
             parts.Add(Labels.Count(suggested.Plants, "plant"));
         if (suggested.Propagations > 0)
             parts.Add(Labels.Count(suggested.Propagations, "propagation"));
-        if (wateringOn && DailyRound.DueIn(suggested.Room.Id, wateringDue, places) is > 0 and var due)
+        if (sections.WateringOn && DailyRound.DueIn(suggested.Room.Id, sections.WateringDue, data.Places) is > 0 and var due)
             parts.Add($"{due} due for water");
         return string.Join(" · ", parts);
     }
 
     private static readonly IReadOnlyList<int> MeterReadings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-    private IReadOnlyList<WateringDue> wateringDue = [];
-    private bool wateringOn;
-    private IReadOnlyList<Weekday>? roundDays;
-    private IReadOnlyList<PropagationCheck> nextRoundChecks = [];
-    private IReadOnlyList<CareLog> careLogs = [];
-    private IReadOnlyList<TimelineEntry> plantChanges = [];
-    private IReadOnlyList<GrowLight> lights = [];
-    private IReadOnlyList<AwayStretch> stretches = [];
-    private IReadOnlyDictionary<Guid, Pot> potsById = new Dictionary<Guid, Pot>();
-    private Places places = Places.None;
+    // The records and the sections worked out from them, which Core does for Today and the notification alike
+    private TodayData data = new();
+    private TodaySections sections = new();
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<Propagation> propagations = [];
     private List<Propagation> active = [];
-    private IReadOnlyList<PropagationCheck> checks = [];
-    private IReadOnlyList<PestCaseView> dueTreatments = [];
-    private IReadOnlyList<PestCaseView> readyCases = [];
-    private IReadOnlyList<PestCaseView> planDoneCases = [];
-    private IReadOnlyList<PestTreatment> pestTreatments = [];
-    private int cleanWeeks = PestService.DefaultCleanWeeks;
     private IReadOnlyList<TimelineEntry> recent = [];
-    private IReadOnlyList<AttentionItem> flagged = [];
-    private IReadOnlyList<LookAgain> lookAgain = [];
     private LookAgain? looking;
     private ProblemTrend? lookingTrend;
-    private IReadOnlyList<PhotoDue> photoRound = [];
-    private PutOffs putOffs = PutOffs.Empty();
-    private bool dailyRoundOn;
-    private IReadOnlyDictionary<Guid, DateTimeOffset> lastActivity = new Dictionary<Guid, DateTimeOffset>();
-    private DailyRoundSuggestion? roundSuggestion;
     private Dictionary<Guid, string> names = [];
     private MonthResult? monthResult;
     private string? backupReminder;
@@ -763,12 +734,9 @@ else
     private bool showRound;
     private bool loaded;
 
-    // Away and quiet time: the span on today, one coming up, and the list for the days after
-    private AwaySpan? awayNow;
+    // Away and quiet time: one coming up, the span the list on the day back belongs to, and the sitter's visits
     private AwaySpan? upcoming;
     private AwaySpan? backSpan;
-    private DateOnly? backDay;
-    private IReadOnlyList<BackRow> backRows = [];
     private IReadOnlyList<DateOnly> visitDates = [];
     private bool awayBusy;
 
@@ -785,69 +753,29 @@ else
 
     private DateOnly Today => Time.Today();
 
-    private bool Away => awayNow is not null;
+    private IEnumerable<DuePestGroup> AwayHides(IEnumerable<DuePestGroup> groups) =>
+        sections.Away ? [] : groups;
 
-    // The list of what to look at first holds back Water and Worth a look until it's done with
-    private bool Holding => backDay is { } day && BackList.IsHolding(day, backRows, putOffs, Today);
+    // The same kind of line is under Water, under Care when nothing waits for water, and under Worth a look
+    private string NextRoundLine(NextRoundCount round, string noun, string ending) =>
+        $"Next round {NextRoundName(round.Day)} · {Labels.Count(round.Count, noun)} {ending}";
 
-    private IEnumerable<(string Heading, List<PestCaseView> Cases)> AwayHides(IEnumerable<(string Heading, List<PestCaseView> Cases)> groups) =>
-        Away ? [] : groups;
+    private string? NextRoundWaterLine => sections.NextRound is { } round ? NextRoundLine(round, "plant", "to check") : null;
 
-    private List<LookAgain> LookAgainNow =>
-        lookAgain.Where(i => !putOffs.IsPutOff(PutOffs.Problem(i.Problem.Id, i.Since), Today)).ToList();
+    private string? CareNextRoundLine => sections.CareNextRound is { } round ? NextRoundLine(round, "plant", "to check") : null;
 
-    private List<AttentionItem> FlaggedNow =>
-        flagged.Where(i => !putOffs.IsPutOff(PutOffs.Flag(i.Subject.Id, i.Attention), Today)).ToList();
+    private string? NextRoundChecksLine => sections.NextRoundChecks is { } round ? NextRoundLine(round, "propagation", "to look at") : null;
 
-    // On a day that isn't a round day: how many wait for the next one, with a way to go round them now
-    private string? NextRoundLine
-    {
-        get
-        {
-            if (!wateringOn || roundDays is not { Count: > 0 } || RoundSchedule.IsRoundDay(roundDays, Today)
-                || RoundSchedule.Next(roundDays, Today) is not { } next)
-                return null;
+    private string NextRoundName(DateOnly next) => next == Today.AddDays(1) ? "tomorrow" : next.DayOfWeek.ToString();
 
-            var waiting = wateringDue.Where(d => d.Gathered && !d.DueNow && d.ShowOn == next).Select(d => d.Plant.Id).ToHashSet();
-            if (waiting.Count == 0)
-                return null;
-
-            // The plants waiting for care from an interval are on the same round
-            waiting.UnionWith(CareWaiting(next).Select(i => i.Plant.Id));
-            return $"Next round {NextRoundName(next)} · {Labels.Count(waiting.Count, "plant")} to check";
-        }
-    }
-
-    private IReadOnlyList<IntervalItem> CareWaiting(DateOnly next) =>
-        CareIntervals.WaitingForRound(careItems, next, Today, putOffs);
-
-    // The same line under Care, when nothing is waiting for water so the line under Water isn't there
-    private string? CareNextRoundLine
-    {
-        get
-        {
-            if (NextRoundLine is not null || roundDays is not { Count: > 0 } || RoundSchedule.IsRoundDay(roundDays, Today)
-                || RoundSchedule.Next(roundDays, Today) is not { } next)
-                return null;
-
-            var count = CareWaiting(next).Select(i => i.Plant.Id).Distinct().Count();
-            return count == 0 ? null : $"Next round {NextRoundName(next)} · {Labels.Count(count, "plant")} to check";
-        }
-    }
-
-    // Care from an interval that is due, and what is due in the next couple of days
-    private IReadOnlyList<IntervalItem> careItems = [];
+    // Care from an interval that is ticked off on the page is still in the list, so it is taken off the count
     private readonly Dictionary<(Guid Interval, Guid Plant), CareAction> careDone = [];
     private string? careError;
 
-    private IReadOnlyList<IntervalGroup> CareNow => CareIntervals.Now(careItems, Today, putOffs);
-
-    private IReadOnlyList<IntervalGroup> CareComing => CareIntervals.Coming(careItems, Today, putOffs);
-
     private static string CareKey(IntervalGroup group) => $"{group.Kind}:{group.OwnKindId}:{group.FeedId}";
 
-    private int CareDueCount =>
-        CareNow.Sum(g => g.Items.Count(i => !careDone.ContainsKey((i.Interval.Id, i.Plant.Id))));
+    private int CareTicked =>
+        sections.CareNow.Sum(g => g.Items.Count(i => careDone.ContainsKey((i.Interval.Id, i.Plant.Id))));
 
     private async Task CareLogAsync(CareLogRequest request)
     {
@@ -890,156 +818,36 @@ else
     private Task CarePutOffAsync(CarePutOffRequest request) =>
         PutOffAsync(PutOffs.Interval(request.Item.Interval.Id, request.Item.Plant.Id, request.Item.Last), Today.AddDays(request.Days));
 
-    // On a day that isn't a round day, the propagations waiting for the next one, for Worth a look
-    private string? NextRoundChecksLine
-    {
-        get
-        {
-            if (roundDays is not { Count: > 0 } || RoundSchedule.IsRoundDay(roundDays, Today)
-                || RoundSchedule.Next(roundDays, Today) is not { } next)
-                return null;
-
-            var count = nextRoundChecks.Count(c => !putOffs.IsPutOff(PutOffs.Check(c.Propagation.Id), Today));
-            return count == 0 ? null : $"Next round {NextRoundName(next)} · {Labels.Count(count, "propagation")} to look at";
-        }
-    }
-
-    private string NextRoundName(DateOnly next) => next == Today.AddDays(1) ? "tomorrow" : next.DayOfWeek.ToString();
-
-    private List<WateringDue> WaterNow => wateringDue.Where(d => d.DueNow).ToList();
-
-    // Plants gathered onto a round day are counted in the line on the next round, not listed as coming up
-    private List<WateringDue> WaterComing => wateringDue.Where(d => !d.DueNow && !d.Gathered).ToList();
-
-    private List<Plant> TransitionNow =>
-        TodayBoard.TransitionQuiet(plants, Today)
-            .Where(p => !putOffs.IsPutOff(PutOffs.Transition(p.Id, p.TransitionLastNews!.Value), Today)).ToList();
-
-    private List<Plant> QuarantineNow =>
-        TodayBoard.QuarantineUp(plants, Today)
-            .Where(p => !putOffs.IsPutOff(PutOffs.Quarantine(p.Id, p.QuarantinedSince!.Value), Today)).ToList();
-
-    // Plants whose usual resting time has come round and haven't gone dormant yet, found once in LoadAsync, unless put off
-    private IReadOnlyList<(Plant Plant, DateOnly WindowStart)> restAsk = [];
-
-    private List<(Plant Plant, DateOnly WindowStart)> RestNow =>
-        restAsk.Where(r => !putOffs.IsPutOff(PutOffs.Rest(r.Plant.Id, r.WindowStart), Today)).ToList();
-
-    // A propagation already under Needs attention isn't listed a second time
-    private List<PropagationCheck> ChecksNow =>
-        checks.Where(c => !putOffs.IsPutOff(PutOffs.Check(c.Propagation.Id), Today)
-                          && FlaggedNow.All(i => i.Subject.Id != c.Propagation.Id))
-            .ToList();
-
-    // Cases clean long enough and checked lately, unless put off
-    private List<PestCaseView> ReadyNow =>
-        readyCases.Where(v => !putOffs.IsPutOff(PutOffs.Resolve(v.Case.Id), Today)).ToList();
-
-    // Cases whose plan has run its last step, unless put off
-    private List<PestCaseView> PlanDoneNow =>
-        planDoneCases.Where(v => !putOffs.IsPutOff(PutOffs.PlanDone(v.Case.Id), Today)).ToList();
-
     // What the step uses, for the line under the pest on Today. The recipe's name is already in What.
     private static string? StepWhat(PlanStep step) => string.IsNullOrWhiteSpace(step.What) ? null : step.What.Trim();
 
-    // Treatments first, then the cases only being watched, each under its own heading when there are any.
-    // A case that is ready to resolve is asked about under Ready to resolve instead of a weekly check
-    private IEnumerable<(string Heading, List<PestCaseView> Cases)> DuePests =>
-        new[]
-        {
-            ("Treatment due", dueTreatments.Where(v => !v.IsCheck).ToList()),
-            ("Check for pests", dueTreatments.Where(v => v.IsCheck && !(v.ReadyToResolve && !putOffs.IsPutOff(PutOffs.Resolve(v.Case.Id), Today))).ToList())
-        }.Where(group => group.Item2.Count > 0);
-
     // Everything listed as due right now, which is also the number on the app icon
-    // While away nothing is asked for, and while the list on the day back is up it stands for Water and Worth a look
     private int DueCount =>
-        Away ? 0
-        : DuePests.Sum(group => group.Cases.Count) + ReadyNow.Count + PlanDoneNow.Count + FlaggedNow.Count + LookAgainNow.Count + QuarantineNow.Count + TransitionNow.Count + RestNow.Count
-        + (Holding ? backRows.Count : ChecksNow.Count + wateringDue.Count(d => d.DueNow))
-        + (Holding ? 0 : CareDueCount)
-        + (roundSuggestion is not null ? 1 : 0)
-        + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
+        sections.Away ? 0 : sections.DueCount - (sections.Holding ? 0 : CareTicked);
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
+    // After something changed: the sections again from the records, keeping the care plan the page has ticked things off in
+    private void Recompute() => sections = TodaySections.For(data, Today, Time, sections.CareItems);
+
     private async Task LoadAsync()
     {
-        plants = await Plants.GetAllAsync();
-        propagations = await Propagations.GetAllAsync();
+        data = await TodayService.LoadAsync();
+        plants = data.Plants;
+        propagations = data.Propagations;
         active = propagations.Where(p => p.IsActive).ToList();
-
-        var settings = await SettingsService.GetAsync();
-        roundDays = settings.RoundDays;
-        cleanWeeks = settings.CleanWeeks ?? PestService.DefaultCleanWeeks;
-        putOffs = await PutOffService.GetAsync(Today);
-
-        var latest = await Entries.GetLatestPerSubjectAsync();
-        // Logging care on a propagation is looking at it too
-        var careDays = PropagationCareService.NewestDays(await PropagationCareLogs.GetAllAsync());
-        checks = TodayBoard.NeedsChecking(propagations, latest, Time, careDays: careDays, roundDays: roundDays, putOffs: putOffs);
-        nextRoundChecks = TodayBoard.NeedsCheckingNextRound(propagations, latest, Time, roundDays, putOffs, careDays: careDays);
-        flagged = TodayBoard.NeedsAttention(plants, propagations, Today);
-        lookAgain = ProblemService.LookAgainDue(
-            await ProblemService.AllAsync(), await ProblemService.AllUpdatesAsync(), plants, Today);
-
-        places = await RoomService.GetPlacesAsync();
         careDone.Clear();
-        var careIntervals = await CareIntervalRepository.GetAllAsync();
-        careItems = careIntervals.Count == 0
-            ? []
-            : CareIntervals.Plan(careIntervals, plants, places, await CareLogs.GetAllAsync(), await OwnKindService.GetAllAsync(),
-                await FeedRepository.GetAllAsync(), Time, roundDays, putOffs);
-        photoRound = settings.PhotoReminder
-            ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
-            : [];
+        sections = TodaySections.For(data, Today, Time);
 
-        wateringOn = settings.WateringReminder;
-        dailyRoundOn = settings.DailyRound;
-        stretches = await AwayService.GetAllAsync();
-        awayNow = AwayTime.Current(stretches, Today);
-        upcoming = awayNow is null ? AwayTime.Upcoming(stretches, Today) : null;
-        backDay = AwayTime.BackDay(stretches, Today);
-        backSpan = backDay is { } day ? AwayTime.Spans(stretches).LastOrDefault(s => s.Until == day) : null;
+        upcoming = sections.Away ? null : AwayTime.Upcoming(data.Stretches, Today);
+        backSpan = sections.BackDay is { } day ? AwayTime.Spans(data.Stretches).LastOrDefault(s => s.Until == day) : null;
         visitDates = [];
-        if (awayNow is { Kind: AwayKind.Away } now)
+        if (sections.AwayNow is { Kind: AwayKind.Away } now)
             visitDates = SitterVisits.Dates((await SitterSheets.GetAsync()).Visits, now.Trip.From, now.Trip.Until);
-
-        // The list on the day back reads the same things the watering reminder does
-        var needsCare = wateringOn || backDay is not null;
-        if (wateringOn || dailyRoundOn || backDay is not null)
-            careLogs = await CareLogs.GetAllAsync();
-        if (dailyRoundOn)
-            lastActivity = await Entries.GetLastActivityBeforeAsync(Time.MomentAt(Today.ToDateTime(TimeOnly.MinValue)));
-        FindRound();
-        // The dormant question reads the plant changes too, but only for plants with a season set
-        var asksRest = plants.Any(p => p.GrowingSeason is GrowingSeason.Summer or GrowingSeason.Winter);
-        if (needsCare || asksRest)
-            plantChanges = await Entries.GetPlantChangesAsync();
-        restAsk = RestSeason.AskNow(plants, p => DormantPeriods.Of(p, plantChanges, Time), Seasons.HemisphereOf(TimeZoneInfo.Local), Today);
-        if (needsCare)
-        {
-            lights = await LightService.GetAllAsync();
-            potsById = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
-        }
-        FindWateringDue();
 
         var plantPhotos = await PhotoRepository.GetOfKindAsync(SubjectType.Plant);
         memory = Memories.Pick(plants, plantPhotos, Today, Time.LocalDay);
-        await FindYearAsync(settings, plantPhotos);
-
-        var pestCases = await PestCases.GetAllAsync();
-        pestTreatments = await PestTreatments.GetAllAsync();
-        var described = PestService.Describe(pestCases, plants, pestTreatments, places, Today, cleanWeeks, putOffs);
-        dueTreatments = PestService.Due(described);
-        readyCases = PestService.ReadyToResolve(described);
-        planDoneCases = described.Where(v => v.Case.IsOpen && v.PlanDone).OrderBy(v => v.PlanDoneOn).ToList();
-
-        backRows = backDay is { } backOn && awayNow is null
-            ? BackList.Of(backOn, plants, propagations, careLogs, await BackTimeline.LoadAsync(Entries, backOn, Time), pestCases,
-                id => potsById.GetValueOrDefault(id), lights, places, stretches, Seasons.HemisphereOf(TimeZoneInfo.Local), Time,
-                settings.BackListLength)
-            : [];
+        await FindYearAsync(data.Settings, plantPhotos);
 
         names = plants.ToDictionary(p => p.Id, p => p.DisplayName);
         foreach (var propagation in propagations)
@@ -1166,7 +974,7 @@ else
 
     private async Task DoneWithListAsync()
     {
-        if (backDay is not { } day)
+        if (sections.BackDay is not { } day)
             return;
 
         awayBusy = true;
@@ -1201,22 +1009,11 @@ else
         }
     };
 
-    private void FindRound() =>
-        roundSuggestion = dailyRoundOn
-            ? DailyRound.Suggest(places, plants, propagations, careLogs, lastActivity, putOffs, Time, roundDays)
-            : null;
-
-    private void FindWateringDue() =>
-        wateringDue = wateringOn
-            ? WateringRound.Due(plants, careLogs, plantChanges, id => potsById.GetValueOrDefault(id), lights, places, stretches,
-                Seasons.HemisphereOf(TimeZoneInfo.Local), Time, putOffs, roundDays)
-            : [];
-
     // After an answer: the new entry may have moved the guess, so read the care log again
     private async Task WateringAnsweredAsync()
     {
-        careLogs = await CareLogs.GetAllAsync();
-        FindWateringDue();
+        data = data with { CareLogs = await CareLogs.GetAllAsync() };
+        Recompute();
         await Badge.SetAsync(DueCount);
     }
 
@@ -1229,25 +1026,23 @@ else
     private async Task PutOffWaterAsync(WateringDue due, int days)
     {
         await PutOffAsync(PutOffs.Water(due.Plant.Id, due.Guess.LastWatered), Today.AddDays(days));
-        FindWateringDue();
-        await Badge.SetAsync(DueCount);
     }
 
     // "Still wet" with a meter reading, or "No meter" / "Not yet" with none
     private async Task NotYetAsync(WateringDue due, int? reading)
     {
         if (await Answers.NotYetAsync(due.Plant, due.Guess, reading, logReading: true, Labels.For) is { } putOff)
-            putOffs.PutOff(putOff.Key, putOff.Until);
+            data.PutOffs.PutOff(putOff.Key, putOff.Until);
 
         await WateringAnsweredAsync();
     }
 
     private async Task PutOffAsync(string key, DateOnly until)
     {
-        putOffs.PutOff(key, until);
+        data.PutOffs.PutOff(key, until);
         await PutOffService.PutOffAsync(key, until);
         // Putting off a room, or the round, moves it on to the next room or takes it away
-        FindRound();
+        Recompute();
         await Badge.SetAsync(DueCount);
     }
 
@@ -1292,7 +1087,7 @@ else
     {
         var from = view.Case.Status;
         view.Case.Status = PestCaseStatus.Monitoring;
-        PestService.StatusChanged(view.Case, from, Today, pestTreatments);
+        PestService.StatusChanged(view.Case, from, Today, data.PestTreatments);
         await PestCases.SaveAsync(view.Case);
         await LoadAsync();
     }
@@ -1311,7 +1106,7 @@ else
             await PlantService.SetAttentionAsync(plant, null);
         else if (item.Subject is Propagation propagation)
             await PropagationService.SetAttentionAsync(propagation, null);
-        flagged = TodayBoard.NeedsAttention(plants, propagations, Today);
+        Recompute();
     }
 
     // Nagging once a month is enough, and only when there's something to lose

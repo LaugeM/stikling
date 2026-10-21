@@ -1,7 +1,7 @@
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
 
-namespace Stikling.Web.Services;
+namespace Stikling.Core.Today;
 
 /// <summary>Reads the timeline entries the list of what to look at first on the day back needs.</summary>
 public static class BackTimeline
