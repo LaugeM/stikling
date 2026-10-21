@@ -1,5 +1,5 @@
-// Everything the hosted sync API needs on Azure: a resource group with the API and its storage in
-// it, and a budget on the subscription. docs/ops/hosting.md says how to deploy it and in what order.
+// Everything the hosted sync API needs on Azure: a resource group with the API, its storage, a Key
+// Vault and the notification job in it, and a budget on the subscription. docs/ops/hosting.md says how to deploy it and in what order.
 
 targetScope = 'subscription'
 
@@ -38,6 +38,9 @@ param sentryDsn string = ''
 @maxValue(1)
 param apiMinReplicas int = 0
 
+@description('The public half of the VAPID keys for push notifications. Empty leaves them off: no job, and the API answers 503. Set it once the private key is in the Key Vault, see docs/ops/hosting.md.')
+param vapidPublicKey string = ''
+
 @description('The monthly spending that the budget warns about, in the subscription\'s currency, which is Danish kroner and not dollars.')
 param monthlyBudget int
 
@@ -67,6 +70,7 @@ module resources 'resources.bicep' = {
     apiImage: apiImage
     apiMinReplicas: apiMinReplicas
     sentryDsn: sentryDsn
+    vapidPublicKey: vapidPublicKey
   }
 }
 
@@ -76,6 +80,9 @@ module costStop 'cost-stop.bicep' = {
   params: {
     location: location
     apiName: resources.outputs.apiName
+    jobName: resources.outputs.notifyJobName
+    environmentName: resources.outputs.environmentName
+    apiIdentityName: resources.outputs.apiIdentityName
     emails: budgetEmails
   }
 }
@@ -126,3 +133,4 @@ output apiDomainVerificationId string = resources.outputs.apiDomainVerificationI
 output shareDnsTarget string = resources.outputs.apiDnsTarget
 output shareDomainVerificationId string = resources.outputs.apiDomainVerificationId
 output deployClientId string = resources.outputs.deployClientId
+output keyVaultName string = resources.outputs.keyVaultName

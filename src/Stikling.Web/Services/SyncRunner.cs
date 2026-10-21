@@ -25,6 +25,7 @@ public sealed class SyncRunner(
     PlantNameService names,
     ShareLinkService shares,
     DeviceFiles files,
+    NotificationService notifications,
     IJSRuntime js,
     TimeProvider time) : IAsyncDisposable
 {
@@ -110,6 +111,10 @@ public sealed class SyncRunner(
         await (await Module).InvokeVoidAsync("watch", self);
 
         signedIn = await account.WasSignedInAsync();
+
+        // Uploads the notification text after changes, and when the app opens
+        _ = notifications.StartAsync();
+
         if (signedIn)
         {
             // Clerk loads before the first request, so the API starts while it does
@@ -224,6 +229,9 @@ public sealed class SyncRunner(
         waiting?.Cancel();
         await current;
 
+        // While the sign-in still lets the server be asked. Never throws
+        await notifications.TurnOffAsync();
+
         try
         {
             await account.SignOutAsync(redirectUrl);
@@ -264,6 +272,8 @@ public sealed class SyncRunner(
             throw;
         }
 
+        // The server deleted the subscriptions with the account
+        await notifications.TurnOffAsync(fromServer: false);
         await ForgetAsync();
         if (!keepData)
             await store.ClearAllAsync();
@@ -290,6 +300,10 @@ public sealed class SyncRunner(
                 Pending = await store.CountPendingAsync();
             }
             while (again && signedIn);
+
+            // The records are as they will be for a while, so the notification text is worked out from them
+            if (Problem is null && signedIn)
+                _ = notifications.UploadAsync();
         }
         catch (Exception e)
         {
@@ -414,6 +428,7 @@ public sealed class SyncRunner(
         await current;
         try
         {
+            await notifications.TurnOffAsync(fromServer: false);
             await ForgetAsync();
         }
         catch (JSException)
