@@ -80,6 +80,11 @@
     :root:has(.page-full) {
         --pa-column: 100vw;
     }
+
+    /* Today with nothing due is a short reading page, so it goes back to the centred column */
+    :root:has(.today-columns):not(:has(.today-todo .today-section)) {
+        --pa-column: 48rem;
+    }
 }
 
 /* Dark theme: theme.js sets data-bs-theme="dark" on <html> */

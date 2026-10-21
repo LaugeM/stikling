@@ -285,3 +285,31 @@ a.pass-name {
 .pass-summary-actions .btn-primary {
     min-height: 2.75rem;
 }
+
+/* A computer or a tablet held sideways: the plants flow into columns beside the menu. The meter's
+   0 to 10 stays on one line, so its rows are wider than the ones for Dry and Still damp. */
+@media (min-width: 64rem) {
+    .water-page {
+        --water-row-min: 24rem;
+    }
+
+    .water-page.water-meter {
+        --water-row-min: 40rem;
+    }
+
+    .pass-group ul.item-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(var(--water-row-min), 100%), 1fr));
+        gap: 0.6rem 0.75rem;
+        align-items: start;
+    }
+
+    .pass-group ul.item-list > ::deep li {
+        min-width: 0;
+    }
+
+    /* Text reads at a comfortable width, left aligned with the plants */
+    .water-page > :is(.pass-lead, .pass-mode, .pass-round-feed, .pass-actions, .pass-bar, .pass-summary, .empty-state, .chip-row) {
+        max-width: 48rem;
+    }
+}
