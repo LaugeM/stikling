@@ -1,0 +1,60 @@
+@* Lets photo files be dropped on a row of the Plants or Propagations list, to add them to that plant or
+   propagation. Put it once on the page. The sheet it opens is the one the Photo button uses on the page of the
+   plant or propagation, so this keeps a composer for whichever row got the files. *@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+@if (subjectId is { } id)
+{
+    <EntryComposer @key="id" SubjectType="subjectType" SubjectId="id" PhotoInputId="@inputId" />
+}
+
+@code {
+    private readonly string inputId = $"row-photo-{Guid.NewGuid():N}";
+    private SubjectType subjectType;
+    private Guid? subjectId;
+    private IJSObjectReference? module;
+    private IJSObjectReference? attached;
+    private DotNetObjectReference<RowPhotoDrop>? self;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/drop.js");
+        self = DotNetObjectReference.Create(this);
+        attached = await module.InvokeAsync<IJSObjectReference>("attachRows", self, inputId);
+    }
+
+    /// <summary>Called from drop.js with "Plant" or "Propagation" and the id. Returns once the composer is rendered.</summary>
+    [JSInvokable]
+    public async Task Choose(string type, Guid id)
+    {
+        if (!Enum.TryParse<SubjectType>(type, out var parsed) || parsed is not (SubjectType.Plant or SubjectType.Propagation))
+            return;
+        await InvokeAsync(() =>
+        {
+            subjectType = parsed;
+            subjectId = id;
+            StateHasChanged();
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (attached is not null)
+            {
+                await attached.InvokeVoidAsync("dispose");
+                await attached.DisposeAsync();
+            }
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        self?.Dispose();
+    }
+}

@@ -34,7 +34,7 @@
             {
                 var plant = row.Plant;
                 var selected = Selected.Contains(plant.Id);
-                <tr class="@(selected ? "selected" : null)" @onclick="() => Clicked(plant)">
+                <tr data-drop-subject="plants/@plant.Id" class="@(selected ? "selected" : null)" @onclick="() => Clicked(plant)">
                     @if (Selectable)
                     {
                         <td class="check-col">

@@ -5,14 +5,14 @@
 
 @if (Selectable)
 {
-    <label class="item-card selectable @(Selected ? "selected" : null)">
+    <label data-drop-subject="propagations/@Propagation.Id" class="item-card selectable @(Selected ? "selected" : null)">
         <input type="checkbox" class="form-check-input plant-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Propagation)" />
         @Content
     </label>
 }
 else
 {
-    <a class="item-card" href="propagations/@Propagation.Id">
+    <a data-drop-subject="propagations/@Propagation.Id" class="item-card" href="propagations/@Propagation.Id">
         @Content
     </a>
 }

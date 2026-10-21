@@ -758,6 +758,7 @@ else
         </div>
     </div>
 
+    <PagePhotoDrop InputId="@photoInputId" Name="@plant.DisplayName" />
     <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId" OnPicked="() => { photoChoice = false; more = More.None; }"
                    CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="AddedAsync" OnRetake="() => cameraOpen = true" />
 

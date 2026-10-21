@@ -5,14 +5,14 @@
 
 @if (Selectable)
 {
-    <label class="plant-tile selectable @(Selected ? "selected" : null) @(Faded ? "faded" : null)">
+    <label data-drop-subject="plants/@Plant.Id" class="plant-tile selectable @(Selected ? "selected" : null) @(Faded ? "faded" : null)">
         <input type="checkbox" class="form-check-input tile-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Plant)" />
         @Content
     </label>
 }
 else
 {
-    <a class="plant-tile @(Faded ? "faded" : null)" href="@(Href ?? $"plants/{Plant.Id}")">
+    <a data-drop-subject="plants/@Plant.Id" class="plant-tile @(Faded ? "faded" : null)" href="@(Href ?? $"plants/{Plant.Id}")">
         @Content
     </a>
 }
