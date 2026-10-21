@@ -1,0 +1,5 @@
+/* The tile itself is styled in app.css (.plant-tile). While picking, a shift-click must not highlight text. */
+
+.plant-tile.selectable {
+    user-select: none;
+}

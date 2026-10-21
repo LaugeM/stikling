@@ -1,6 +1,7 @@
 @page "/propagations"
 @layout WideLayout
 @using System.Globalization
+@using Stikling.Core.Selection
 @inject IPropagationRepository Repository
 @inject IPlantRepository PlantRepository
 @inject TimeProvider Time
@@ -263,6 +264,7 @@ else
 
     private bool selecting;
     private readonly HashSet<Guid> selected = [];
+    private Guid? selectAnchor;
 
     private string? search;
     private ProgressFilter progress = ProgressFilter.Active;
@@ -283,12 +285,18 @@ else
     {
         selecting = !selecting;
         selected.Clear();
+        selectAnchor = null;
     }
 
-    private void Toggle(Propagation propagation)
+    // A click in Select mode; shift picks every row between the last one clicked and this one, as shown
+    private void Toggle(SelectClick click)
     {
-        if (!selected.Remove(propagation.Id))
-            selected.Add(propagation.Id);
+        var shown = experiments.SelectMany(e => e.Entries).Select(e => e.Propagation)
+            .Concat(progress == ProgressFilter.Active
+                ? PropagationFilter.ByStage(ungrouped).SelectMany(g => g.Item2)
+                : ungrouped)
+            .Select(p => p.Id).ToList();
+        selectAnchor = SelectionRange.Apply(shown, selected, selectAnchor, click.Id, click.Shift);
     }
 
     private void SelectAllShown()

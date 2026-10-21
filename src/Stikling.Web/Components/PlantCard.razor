@@ -1,12 +1,13 @@
 @* One row in the plant list: thumbnail, names, and a short status line.
    In select mode the card is a checkbox instead of a link. *@
+@using Stikling.Core.Selection
 @inject CoverPhotos Covers
 @inject PlantNameService Names
 
 @if (Selectable)
 {
     <label data-drop-subject="plants/@Plant.Id" class="item-card selectable @(Selected ? "selected" : null)">
-        <input type="checkbox" class="form-check-input plant-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Plant)" />
+        <input type="checkbox" class="form-check-input plant-check" checked="@Selected" @onclick="e => OnToggle.InvokeAsync(new SelectClick(Plant.Id, e.ShiftKey))" />
         @Content
     </label>
 }
@@ -32,7 +33,7 @@ else
     public bool Selected { get; set; }
 
     [Parameter]
-    public EventCallback<Plant> OnToggle { get; set; }
+    public EventCallback<SelectClick> OnToggle { get; set; }
 
     /// <summary>The newest moisture meter reading, when there is one.</summary>
     [Parameter]

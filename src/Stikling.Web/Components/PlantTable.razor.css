@@ -110,6 +110,7 @@ th[aria-sort] .sort-button {
 
 .selecting tbody tr {
     cursor: pointer;
+    user-select: none;
 }
 
 .plant-table tbody tr.selected {
