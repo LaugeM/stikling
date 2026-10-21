@@ -12,6 +12,10 @@ param apiMinReplicas = 0
 // Sentry's address for the API's error reports. Public by design, like the app's in appsettings.Production.json
 param sentryDsn = 'https://b03541a8513be443b7fde8b1c48bbe73@o4512239109799936.ingest.de.sentry.io/4512239182938192'
 
+// The public half of the VAPID keys for push notifications. Left empty until the private key is in
+// the Key Vault; it gets the public key then. docs/ops/hosting.md has the steps.
+param vapidPublicKey = ''
+
 // In Danish kroner, since that is the subscription's currency. 50 kr. is about $8, so about $100 a year,
 // which is what the student credit covers
 param monthlyBudget = 50

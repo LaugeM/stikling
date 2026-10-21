@@ -15,6 +15,8 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     public DbSet<PhotoImage> PhotoImages => Set<PhotoImage>();
     public DbSet<DeletedAccount> DeletedAccounts => Set<DeletedAccount>();
     public DbSet<ShareLink> ShareLinks => Set<ShareLink>();
+    public DbSet<StoredPushSubscription> PushSubscriptions => Set<StoredPushSubscription>();
+    public DbSet<NotificationSchedule> NotificationSchedules => Set<NotificationSchedule>();
 
     /// <summary>
     /// Locks the collection's row until the end of the transaction, so changes to one collection
@@ -96,6 +98,25 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
 
             link.HasOne<Collection>().WithMany().HasForeignKey(l => l.CollectionId).OnDelete(DeleteBehavior.Cascade);
             link.HasOne<Person>().WithMany().HasForeignKey(l => l.CreatedBy).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        model.Entity<StoredPushSubscription>(subscription =>
+        {
+            subscription.Property(s => s.Endpoint).HasMaxLength(StoredPushSubscription.MaxEndpointLength);
+            subscription.Property(s => s.EndpointHash).HasMaxLength(64);
+            subscription.Property(s => s.P256dh).HasMaxLength(200);
+            subscription.Property(s => s.Auth).HasMaxLength(200);
+            subscription.HasIndex(s => s.EndpointHash).IsUnique();
+            subscription.HasIndex(s => s.PersonId);
+            subscription.HasOne<Person>().WithMany().HasForeignKey(s => s.PersonId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        model.Entity<NotificationSchedule>(schedule =>
+        {
+            schedule.HasKey(s => s.PersonId);
+            schedule.Property(s => s.TimeZone).HasMaxLength(100);
+            schedule.HasIndex(s => s.NextSendAt);
+            schedule.HasOne<Person>().WithOne().HasForeignKey<NotificationSchedule>(s => s.PersonId).OnDelete(DeleteBehavior.Cascade);
         });
 
         model.Entity<DeletedAccount>(deleted =>
