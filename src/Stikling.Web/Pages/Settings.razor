@@ -12,6 +12,7 @@
 @inject TimeProvider Time
 @inject AccountService Account
 @inject SyncRunner Sync
+@inject NotificationService Notifications
 @inject PlantNameService Names
 @inject CollectionNumberService Numbering
 @inject OwnCareKindService OwnCareKinds
@@ -139,6 +140,101 @@
     <p class="settings-hint">
         Under a plant's name, what happened lately: when it arrived, was repotted or moved.
     </p>
+</section>
+
+<section class="settings-group">
+    <h2>Notifications</h2>
+    @if (!Account.IsAvailable || (accountHintRead && !accountChecking && account is not { SignedIn: true }))
+    {
+        <p class="settings-hint mt-0">A daily list of what Today asks for. It needs an account, since the server sends it.</p>
+    }
+    else if (accountChecking || notifySupport is null)
+    {
+        <p class="settings-hint mt-0">Checking your account…</p>
+    }
+    else if (notifySupport == "needs-home-screen")
+    {
+        <p class="settings-hint mt-0">On iPhone and iPad, add Stikling to your home screen first: tap Share, then Add to Home Screen. Open it from there and turn notifications on here.</p>
+    }
+    else if (notifySupport != "ok")
+    {
+        <p class="settings-hint mt-0">This browser can't show notifications from websites.</p>
+    }
+    else if (!notifyOn)
+    {
+        @if (notifyServer == ServerCheck.NotSetUp)
+        {
+            <p class="settings-hint mt-0">Notifications aren't available yet.</p>
+        }
+        else
+        {
+            <p class="settings-hint mt-0">One notification a day with what Today asks for, never a reminder to water. Each device is turned on by itself.</p>
+            <button type="button" class="btn btn-primary" disabled="@notifyBusy" @onclick="TurnOnNotificationsAsync">Turn on</button>
+            @if (notifyMessage is not null)
+            {
+                <p class="settings-hint" role="status">@notifyMessage</p>
+            }
+        }
+    }
+    else
+    {
+        @if (notifyPermission == "denied")
+        {
+            <p class="settings-hint mt-0" role="status">Notifications are blocked for stikling.app in this browser. Allow them in the site settings (the icon next to the address), then turn them off and on again here.</p>
+        }
+        <label class="theme-label" for="notify-at">Time</label>
+        <select id="notify-at" class="form-select w-auto" @onchange="SetNotifyAtAsync">
+            @foreach (var time in notifyTimes)
+            {
+                <option value="@time.ToString("HH:mm")" selected="@(time == notifyAt)">@time.ToString("HH:mm")</option>
+            }
+        </select>
+        <div class="theme-label mt-4" id="notify-days-label">Days</div>
+        <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="notify-days-label">
+            @foreach (var option in notifyDayOptions)
+            {
+                if (option.Days == NotifyDays.RoundDays && roundDays.Count == 0 && notifyDaysChoice != NotifyDays.RoundDays)
+                {
+                    continue;
+                }
+
+                var id = $"notify-days-{option.Days.ToString().ToLowerInvariant()}";
+                <input type="radio" class="btn-check" name="notify-days" id="@id"
+                       checked="@(notifyDaysChoice == option.Days)" @onchange="() => SetNotifyDaysAsync(option.Days)" />
+                <label class="btn btn-outline-primary" for="@id">@option.Label</label>
+            }
+        </div>
+        @if (notifyDaysChoice == NotifyDays.Picked)
+        {
+            <div class="chip-row mt-3" role="group" aria-label="Days to get a notification">
+                @foreach (var day in weekdays)
+                {
+                    var picked = notifyWeekdays.Contains(day);
+                    <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                            @onclick="() => ToggleNotifyWeekdayAsync(day)">@day.ToString()[..3]</button>
+                }
+            </div>
+            @if (notifyWeekdays.Count == 0)
+            {
+                <p class="settings-hint">With no day picked, nothing is sent.</p>
+            }
+        }
+        else if (notifyDaysChoice == NotifyDays.RoundDays)
+        {
+            <p class="settings-hint">Your round days: @string.Join(", ", roundDays.Select(d => d.ToString()[..3])).</p>
+        }
+        <p class="settings-hint">
+            One notification a day with what Today asks for, never a reminder to water. The time and days are yours on every device. This device is on.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-primary" disabled="@notifyBusy" @onclick="SendTestNotificationAsync">Send a test</button>
+            <button type="button" class="btn btn-outline-secondary" disabled="@notifyBusy" @onclick="TurnOffNotificationsAsync">Turn off</button>
+        </div>
+        @if (notifyMessage is not null)
+        {
+            <p class="settings-hint" role="status">@notifyMessage</p>
+        }
+    }
 </section>
 
 <section class="settings-group">
@@ -344,6 +440,9 @@
         wateringReminder = settings.WateringReminder;
         dailyRound = settings.DailyRound;
         roundDays = [.. settings.RoundDays ?? []];
+        notifyAt = settings.NotifyAt ?? new TimeOnly(8, 0);
+        notifyDaysChoice = settings.NotifyOn;
+        notifyWeekdays = [.. settings.NotifyWeekdays ?? []];
         recentChangesDays = RecentChanges.DaysOf(settings.RecentChangesDays);
         cleanWeeks = settings.CleanWeeks ?? PestService.DefaultCleanWeeks;
         quarantineDays = settings.QuarantineDays ?? Plant.DefaultQuarantineDays;
@@ -401,6 +500,132 @@
         if (!roundDays.Remove(day))
             roundDays.Add(day);
         await SettingsService.SetRoundDaysAsync(roundDays);
+    }
+
+    // Notifications. What this device has is in NotificationService, what the person picked is in the settings
+    private static readonly TimeOnly[] notifyTimes =
+        [.. Enumerable.Range(0, 96).Select(i => new TimeOnly(i / 4, i % 4 * 15))];
+
+    private static readonly (NotifyDays Days, string Label)[] notifyDayOptions =
+    [
+        (NotifyDays.EveryDay, "Every day"),
+        (NotifyDays.RoundDays, "Round days"),
+        (NotifyDays.Picked, "Pick days")
+    ];
+
+    private string? notifySupport;
+    private string notifyPermission = "default";
+    private bool notifyOn;
+    private ServerCheck? notifyServer;
+    private bool notifyBusy;
+    private bool notifyLoadStarted;
+    private string? notifyMessage;
+    private TimeOnly notifyAt = new(8, 0);
+    private NotifyDays notifyDaysChoice = NotifyDays.EveryDay;
+    private List<Weekday> notifyWeekdays = [];
+
+    /// <summary>What this device can do and has. Only when someone is signed in, so a device without an account never touches it.</summary>
+    private async Task LoadNotificationsAsync()
+    {
+        notifyLoadStarted = true;
+        notifySupport = await Notifications.SupportAsync();
+        if (notifySupport != "ok")
+            return;
+
+        notifyPermission = await Notifications.PermissionAsync();
+        notifyOn = await Notifications.IsOnAsync();
+        if (!notifyOn)
+            notifyServer = await Notifications.CheckServerAsync();
+    }
+
+    private async Task TurnOnNotificationsAsync()
+    {
+        notifyBusy = true;
+        notifyMessage = null;
+        try
+        {
+            // The prompt comes straight from this tap, so nothing is awaited before it
+            switch (await Notifications.TurnOnAsync())
+            {
+                case TurnOnResult.Done:
+                    notifyOn = true;
+                    await LoadDataAsync();
+                    break;
+                case TurnOnResult.Ready:
+                    notifyMessage = "Ready. Tap Turn on again.";
+                    break;
+                case TurnOnResult.Denied:
+                    notifyMessage = "Notifications are blocked for stikling.app in this browser. Allow them in the site settings (the icon next to the address), then tap Turn on again.";
+                    break;
+                case TurnOnResult.NotSetUp:
+                    notifyServer = ServerCheck.NotSetUp;
+                    break;
+                default:
+                    notifyMessage = "Couldn't turn notifications on right now. Try again in a moment.";
+                    break;
+            }
+
+            notifyPermission = await Notifications.PermissionAsync();
+        }
+        finally
+        {
+            notifyBusy = false;
+        }
+    }
+
+    private async Task TurnOffNotificationsAsync()
+    {
+        notifyBusy = true;
+        notifyMessage = null;
+        try
+        {
+            await Notifications.TurnOffAsync();
+            notifyOn = false;
+            notifyServer ??= await Notifications.CheckServerAsync();
+        }
+        finally
+        {
+            notifyBusy = false;
+        }
+    }
+
+    private async Task SendTestNotificationAsync()
+    {
+        notifyBusy = true;
+        notifyMessage = null;
+        try
+        {
+            notifyMessage = (await Notifications.SendTestAsync()).Message;
+        }
+        finally
+        {
+            notifyBusy = false;
+        }
+    }
+
+    private async Task SetNotifyAtAsync(ChangeEventArgs e)
+    {
+        if (!TimeOnly.TryParseExact(e.Value?.ToString(), "HH:mm", out var time))
+            return;
+
+        notifyAt = time;
+        await SettingsService.SetNotifyAtAsync(time);
+        await Notifications.UploadAsync(force: true);
+    }
+
+    private async Task SetNotifyDaysAsync(NotifyDays days)
+    {
+        notifyDaysChoice = days;
+        await SettingsService.SetNotifyOnAsync(days);
+        await Notifications.UploadAsync(force: true);
+    }
+
+    private async Task ToggleNotifyWeekdayAsync(Weekday day)
+    {
+        if (!notifyWeekdays.Remove(day))
+            notifyWeekdays.Add(day);
+        await SettingsService.SetNotifyWeekdaysAsync(notifyWeekdays);
+        await Notifications.UploadAsync(force: true);
     }
 
     private async Task SetQuarantineDaysAsync(int days)
@@ -464,7 +689,15 @@
     {
         // Once the page is up, so a slow connection doesn't hold the rest of Settings back
         if (!accountChecking || accountLoadStarted)
+        {
+            // Signed in already (Clerk reported it while this page was open)
+            if (!notifyLoadStarted && account is { SignedIn: true })
+            {
+                await LoadNotificationsAsync();
+                StateHasChanged();
+            }
             return;
+        }
 
         accountLoadStarted = true;
         try
@@ -477,6 +710,8 @@
         }
 
         accountChecking = false;
+        if (account is { SignedIn: true })
+            await LoadNotificationsAsync();
         StateHasChanged();
     }
 

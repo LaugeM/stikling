@@ -2,13 +2,9 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using Stikling.Core.Notifications;
 
 namespace Stikling.Api.Notifications;
-
-public record NotificationDay(
-    [property: JsonPropertyName("day")] DateOnly Day,
-    [property: JsonPropertyName("text")] string Text);
 
 /// <summary>The rules for a person's notification schedule, apart from the database.</summary>
 public static class NotificationRules

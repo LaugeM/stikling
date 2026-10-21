@@ -139,6 +139,7 @@ builder.Services.AddScoped<IShareCopySource>(services => services.GetRequiredSer
 builder.Services.AddScoped<IReceivedPhotos>(services => services.GetRequiredService<SharedCopies>());
 builder.Services.AddScoped<ReceivingService>();
 builder.Services.AddScoped<IndexedDbSyncStore>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<SyncRunner>();
 
 var host = builder.Build();

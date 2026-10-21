@@ -85,4 +85,21 @@ public sealed class UserSettings : Entity
     /// it's turned on. Older settings without it read as off.
     /// </summary>
     public bool QuarantineNewPlants { get; set; }
+
+    /// <summary>
+    /// The time of day the daily notification is sent, on a quarter hour. Null until notifications
+    /// are turned on on a device, which sets it to 08:00. Older settings without it read as null.
+    /// </summary>
+    public TimeOnly? NotifyAt { get; set; }
+
+    /// <summary>
+    /// Which days the notification is sent on. Older settings without it read as every day.
+    /// </summary>
+    public NotifyDays NotifyOn { get; set; } = NotifyDays.EveryDay;
+
+    /// <summary>
+    /// The weekdays picked when <see cref="NotifyOn"/> is <see cref="NotifyDays.Picked"/>. With none
+    /// picked nothing is sent. Null or empty means none. Older settings without it read as null.
+    /// </summary>
+    public List<Weekday>? NotifyWeekdays { get; set; }
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Stikling.Api.Data;
 using Stikling.Api.People;
+using Stikling.Core.Notifications;
 
 namespace Stikling.Api.Notifications;
 
@@ -13,12 +14,6 @@ namespace Stikling.Api.Notifications;
 /// </summary>
 public static class NotificationEndpoints
 {
-    public record SubscriptionRequest(string? Endpoint, string? P256dh, string? Auth);
-
-    public record EndpointRequest(string? Endpoint);
-
-    public record DaysRequest(string? TimeZone, string? NotifyAt, List<NotificationDay>? Days);
-
     public static IEndpointRouteBuilder MapNotifications(this IEndpointRouteBuilder app)
     {
         // The app asks before it has a sign-in to subscribe with, so this one is open

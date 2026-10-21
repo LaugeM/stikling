@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Stikling.Api.Data;
 using Stikling.Api.Notifications;
+using Stikling.Core.Notifications;
 using static Stikling.Api.People.MeEndpoints;
 
 namespace Stikling.Api.Tests;
