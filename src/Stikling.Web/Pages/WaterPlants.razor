@@ -23,6 +23,8 @@
 @* Reads what is logged and the plants again. The rooms picked, the way of checking, the soil answers and the feeds someone changed stay *@
 <ReloadOnSync Reload="ReloadAsync" />
 
+@* On a computer the page takes the whole width and the plants flow into columns. The text parts keep to 48rem. *@
+<div class="page-full water-page @(check == WaterCheck.Meter ? "water-meter" : "water-soil")">
 <a class="back-link" href="@BackHref">@BackName</a>
 
 <h1>Water plants</h1>
@@ -201,6 +203,7 @@ else
         </div>
     </div>
 }
+</div>
 
 @code {
     private enum Stage { Rooms, Plants }

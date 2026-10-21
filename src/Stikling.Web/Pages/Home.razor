@@ -39,6 +39,8 @@
 <PageTitle>Today · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
+@* Today takes the whole width beside the menu on a computer once it has loaded, except the first-run page, which stays a centred column *@
+<div class="@(loaded && !FirstRun ? "page-full" : null)">
 <div class="page-heading">
     <h1>Today</h1>
     <span class="today-date">@Today.ToString("dddd d MMMM", CultureInfo.InvariantCulture)</span>
@@ -176,6 +178,9 @@ else
         </div>
     }
 
+    @* From 64rem the sections that ask for something sit in a wide column with the rest beside it. The markup keeps the phone order. *@
+    <div class="today-columns">
+    <div class="today-todo">
     @if (!Away && roundSuggestion is { } suggested)
     {
         <section class="today-section">
@@ -459,7 +464,7 @@ else
 
     @if (!Away && !Holding && (CareNow.Count > 0 || CareComing.Count > 0 || CareNextRoundLine is not null))
     {
-        <section class="today-section">
+        <section class="today-section care-section">
             <div class="today-section-head">
                 <h2>Care</h2>
                 <div class="today-head-links">
@@ -494,6 +499,8 @@ else
         </section>
     }
 
+    </div>
+    <div class="today-rest">
     @if (memory is not null)
     {
         <section class="today-section memory">
@@ -643,6 +650,8 @@ else
     {
         <p class="year-link"><a href="year">Your year so far</a></p>
     }
+    </div>
+    </div>
 
     <Sheet Title="How does it look?" Open="looking is not null" OpenChanged="open => { if (!open) looking = null; }">
         @if (looking is not null)
@@ -652,8 +661,11 @@ else
         }
     </Sheet>
 }
+</div>
 
 @code {
+    private bool FirstRun => loaded && plants.Count == 0 && propagations.Count == 0;
+
     private RenderFragment WaterRow(WateringDue due) => __builder =>
     {
         var form = due.Guess.Form;
