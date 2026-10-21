@@ -78,7 +78,8 @@ public static class TodayNotice
         if (parts.Count == 0)
             return null;
 
-        if (parts.Count > MostParts)
+        // "and 1 more" would be no shorter than the part it stands for
+        if (parts.Count > MostParts + 1)
             parts = [.. parts.Take(MostParts), $"and {parts.Count - MostParts} more"];
         return string.Join(" · ", parts);
     }
