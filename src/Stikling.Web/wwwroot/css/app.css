@@ -55,6 +55,10 @@
     --pa-nav-bottom: calc(3.5rem + env(safe-area-inset-bottom));
     --pa-nav-side: 0px;
 
+    /* How tall the sticky header is on a phone, for things that stick or scroll to just under it.
+       There is no header on a wide screen. */
+    --pa-header-height: calc(3.625rem + env(safe-area-inset-top));
+
     /* The page column and the space inside it at each side. Lists and plant and propagation
        pages widen the column on a wide screen. */
     --pa-column: 48rem;
@@ -69,6 +73,7 @@
     :root {
         --pa-nav-bottom: env(safe-area-inset-bottom);
         --pa-nav-side: 14rem;
+        --pa-header-height: 0px;
         --pa-gutter: 2rem;
     }
 
