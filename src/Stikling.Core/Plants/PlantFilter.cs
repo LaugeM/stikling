@@ -16,6 +16,7 @@ public enum PlantSort
     Name,
     Newest,
     Room,
+    Genus,
     LastActivity
 }
 
@@ -44,9 +45,10 @@ public sealed record FieldPick(Guid? FieldId, string? Value);
 /// <param name="Quarantine">Only the plants in quarantine.</param>
 /// <param name="Dormant">Only the dormant plants.</param>
 /// <param name="OnlyIds">Only these plants, like the ones with an open problem. Null for no limit.</param>
-/// <param name="Sort">Name sorts A to Z. Room sorts by the room or spot's name, with the plants that
-/// have no place last. Newest and last activity put the most recent first.</param>
-/// <param name="PlaceName">The name of a plant's room or spot, for sorting by room.</param>
+/// <param name="Sort">Name sorts A to Z. Room sorts by the room, then the spot, with the plants that
+/// have no place last. Genus sorts by genus, with the plants that have none last. Newest and last
+/// activity put the most recent first.</param>
+/// <param name="PlaceName">The full name of a plant's room or spot, for sorting by room.</param>
 /// <param name="LastActivity">When each plant last had something on its timeline, by plant id.
 /// A plant with nothing there counts from when it was added.</param>
 /// <param name="GoneAs">Under Gone, only the plants that left this way (died, given away or sold). Ignored for the other statuses.</param>
@@ -55,6 +57,11 @@ public sealed record FieldPick(Guid? FieldId, string? Value);
 /// <param name="Everyday">The everyday name shown for a plant, like "Snake plant", which the search looks through too.</param>
 /// <param name="Picks">Picks on How it was raised and the choice fields. A plant has to match every one.</param>
 /// <param name="FieldText">The values of the plant's own text and choice fields, which the search looks through too.</param>
+/// <param name="Genus">Only the plants of this genus, ignoring case and spacing.</param>
+/// <param name="WithoutGenus">Only the plants with no genus.</param>
+/// <param name="FavouritesFirst">Favourites come first. Off for the sorts that show a heading per group, so a
+/// favourite stays with the rest of its group. Within a group they still come first.</param>
+/// <param name="RoomName">The name of a plant's room alone, with no spot. Rooms are the groups of the Room sort.</param>
 public sealed record PlantFilter(
     string? Search = null,
     StatusFilter Status = StatusFilter.Active,
@@ -70,7 +77,11 @@ public sealed record PlantFilter(
     IReadOnlySet<Guid>? OnlyIds = null,
     LikesFilter? Likes = null,
     Func<Plant, IEnumerable<string>>? FieldText = null,
-    IReadOnlyList<FieldPick>? Picks = null)
+    IReadOnlyList<FieldPick>? Picks = null,
+    string? Genus = null,
+    bool WithoutGenus = false,
+    bool FavouritesFirst = true,
+    Func<Guid?, string?>? RoomName = null)
 {
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
         Order(plants
@@ -82,21 +93,29 @@ public sealed record PlantFilter(
             .Where(p => OnlyIds is null || OnlyIds.Contains(p.Id))
             .Where(MatchesLikes)
             .Where(MatchesPicks)
+            .Where(MatchesGenus)
             .Where(p => Tags is null || Tags.All(tag => PlantTags.Has(p, tag)))
             .Where(MatchesSearch));
 
-    // Favourites come first whatever the sort. Every order falls back on the name, so plants that
-    // tie keep a steady place
+    // Favourites come first unless the sort groups, and then within each group. Every order falls
+    // back on the name, so plants that tie keep a steady place
     private IEnumerable<Plant> Order(IEnumerable<Plant> all)
     {
-        var plants = all.OrderBy(p => !p.Favourite);
         var byName = StringComparer.CurrentCultureIgnoreCase;
+        var plants = FavouritesFirst ? all.OrderBy(p => !p.Favourite) : all.OrderBy(_ => 0);
         return Sort switch
         {
             PlantSort.Newest => plants.ThenByDescending(p => p.CreatedAt).ThenBy(p => p.DisplayName, byName),
             PlantSort.Room => plants
                 .ThenBy(p => RoomOf(p) is null)
                 .ThenBy(RoomOf, byName)
+                .ThenBy(p => !p.Favourite)
+                .ThenBy(p => PlaceName?.Invoke(p.PlaceId), byName)
+                .ThenBy(p => p.DisplayName, byName),
+            PlantSort.Genus => plants
+                .ThenBy(p => GenusOf(p) is null)
+                .ThenBy(GenusOf, byName)
+                .ThenBy(p => !p.Favourite)
                 .ThenBy(p => p.DisplayName, byName),
             PlantSort.LastActivity => plants
                 .ThenByDescending(p => LastActivity is not null && LastActivity.TryGetValue(p.Id, out var at) && at > p.CreatedAt ? at : p.CreatedAt)
@@ -105,7 +124,15 @@ public sealed record PlantFilter(
         };
     }
 
-    private string? RoomOf(Plant plant) => PlaceName?.Invoke(plant.PlaceId);
+    // The room alone when the page can say it, otherwise the whole place name
+    private string? RoomOf(Plant plant) => (RoomName ?? PlaceName)?.Invoke(plant.PlaceId);
+
+    private static string? GenusOf(Plant plant) =>
+        string.IsNullOrWhiteSpace(plant.Genus) ? null : plant.Genus.Trim();
+
+    private bool MatchesGenus(Plant plant) =>
+        WithoutGenus ? GenusOf(plant) is null
+        : Genus is null || string.Equals(GenusOf(plant), Genus.Trim(), StringComparison.CurrentCultureIgnoreCase);
 
     private bool MatchesStatus(Plant plant) => Status switch
     {

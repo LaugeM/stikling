@@ -1,0 +1,58 @@
+@* A column of letters down the side of a long list, to jump to a letter like in a phone's contacts.
+   Tap one, or drag a finger along them. The scrolling is done in js/letterjump.js. *@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<nav class="letter-jump" aria-label="Jump to letter" @ref="nav">
+    @foreach (var target in Letters)
+    {
+        <button type="button" data-letter="@target.Letter" data-target="@target.TargetId"
+                aria-label="Jump to @target.Letter" disabled="@(target.TargetId is null)">@target.Letter</button>
+    }
+    <span class="letter-bubble" aria-hidden="true" hidden @ref="bubble"></span>
+</nav>
+
+@code {
+    /// <summary>All 27 letters in order, each with the element it scrolls to. Letters with none are disabled.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<LetterTarget> Letters { get; set; } = [];
+
+    private ElementReference nav;
+    private ElementReference bubble;
+    private IJSObjectReference? module;
+    private IJSObjectReference? attached;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/letterjump.js");
+            attached = await module.InvokeAsync<IJSObjectReference>("attach", nav, bubble);
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (attached is not null)
+            {
+                await attached.InvokeVoidAsync("dispose");
+                await attached.DisposeAsync();
+            }
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+    }
+}

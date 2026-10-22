@@ -33,6 +33,7 @@
             <a class="btn btn-outline-primary btn-sm" href="water?from=plants">Water plants</a>
             <a class="btn btn-link btn-sm link-action" href="plants/flowering">Flowering</a>
             <button type="button" class="btn btn-link btn-sm link-action" disabled="@(ShareCount == 0)" @onclick="OpenShare">Share as text</button>
+            <a class="btn btn-link btn-sm link-action" href="plants/collection">Collection</a>
             <a class="btn btn-link btn-sm link-action" href="wishlist">Wishlist</a>
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
                 @(selecting ? "Done" : "Select")
@@ -229,6 +230,22 @@ else
             </div>
         }
 
+        @if (genus is not null || noGenus)
+        {
+            <div class="tag-filters" role="group" aria-label="Genus filter">
+                <button type="button" class="chip picked" aria-pressed="true" title="Tap to remove" @onclick="ClearGenus">
+                    @if (noGenus)
+                    {
+                        <text>No genus</text>
+                    }
+                    else
+                    {
+                        <i>@genus</i>
+                    }
+                </button>
+            </div>
+        }
+
         @if (picks.Count > 0)
         {
             <div class="tag-filters" role="group" aria-label="Field filters">
@@ -290,28 +307,54 @@ else
     }
     else if (view == PlantView.Grid)
     {
-        <ul class="plant-grid">
-            @foreach (var plant in visible)
+        <ul class="plant-grid @(ShowLetters ? "has-letters" : null)">
+            @if (groups is null)
             {
-                <li>
-                    <PlantTile Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
-                               OnToggle="Toggle" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)" OpenProblem="@problemPlants.Contains(plant.Id)" PottedWith="@PottedWithName(plant)" />
-                </li>
+                @foreach (var plant in visible)
+                {
+                    @GridRow(plant)
+                }
+            }
+            else
+            {
+                @for (var i = 0; i < groups.Count; i++)
+                {
+                    @GroupHeading(groups[i], i)
+                    @foreach (var plant in groups[i].Plants)
+                    {
+                        @GridRow(plant)
+                    }
+                }
             }
         </ul>
     }
     else
     {
-        <ul class="plant-list list-grid">
-            @foreach (var plant in visible)
+        <ul class="plant-list list-grid @(ShowLetters ? "has-letters" : null)">
+            @if (groups is null)
             {
-                <li>
-                    <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
-                               OnToggle="Toggle" Moisture="@MoistureFor(plant)" LastWater="@LastWaterFor(plant)" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)"
-                               OpenProblem="@problemPlants.Contains(plant.Id)" Location="@places.NameOf(plant.PlaceId)" PottedWith="@PottedWithName(plant)" />
-                </li>
+                @foreach (var plant in visible)
+                {
+                    @ListRow(plant)
+                }
+            }
+            else
+            {
+                @for (var i = 0; i < groups.Count; i++)
+                {
+                    @GroupHeading(groups[i], i)
+                    @foreach (var plant in groups[i].Plants)
+                    {
+                        @ListRow(plant)
+                    }
+                }
             }
         </ul>
+    }
+
+    @if (ShowLetters)
+    {
+        <LetterJump Letters="letters" />
     }
 }
 
@@ -565,6 +608,10 @@ else
     [SupplyParameterFromQuery(Name = "room")]
     public Guid? PlaceFilter { get; set; }
 
+    /// <summary>Starts the list on one genus, from the collection page. "none" is the plants with no genus.</summary>
+    [SupplyParameterFromQuery(Name = "genus")]
+    public string? GenusFilter { get; set; }
+
     private static readonly (StatusFilter Value, string Label)[] statusOptions =
     [
         (StatusFilter.Active, "In collection"),
@@ -585,6 +632,7 @@ else
         (PlantSort.Name, "A to Z"),
         (PlantSort.Newest, "Newest"),
         (PlantSort.Room, "By room"),
+        (PlantSort.Genus, "By genus"),
         (PlantSort.LastActivity, "Last activity")
     ];
 
@@ -597,6 +645,11 @@ else
     private string? search;
     private StatusFilter status = StatusFilter.Active;
     private PlantStatus? goneAs; // under Gone: how they left, null for all
+    private string? genus; // only this genus, from the collection page
+    private bool noGenus; // only the plants with no genus
+    private IReadOnlyList<PlantGroup>? groups; // under a heading each when sorted by genus or room
+    private IReadOnlyList<LetterTarget> letters = [];
+    private Dictionary<Guid, string> letterAnchors = []; // the first plant of each letter in A to Z
     private string? room; // the picked room's id, as the dropdown gives it
     private LikesFilter? likes; // the need picked, if any
     private Guid? spot;
@@ -645,6 +698,11 @@ else
         {
             pickedTags.Add(tag);
             status = StatusFilter.All; // a tag is asked for by name, so show every plant carrying it
+        }
+        if (!string.IsNullOrWhiteSpace(GenusFilter))
+        {
+            noGenus = GenusFilter.Trim().Equals("none", StringComparison.OrdinalIgnoreCase);
+            genus = noGenus ? null : GenusFilter.Trim();
         }
         if (Enum.TryParse<PlantSort>(await Device.GetAsync(SortKey), out var stored) && Enum.IsDefined(stored))
             sort = stored;
@@ -862,13 +920,15 @@ else
 
     /// <summary>Anything besides the status is narrowing the list.</summary>
     private bool Narrowed =>
-        !string.IsNullOrWhiteSpace(search) || !string.IsNullOrEmpty(room) || likes is not null || pickedTags.Count > 0 || picks.Count > 0 || quarantine || dormant || problem;
+        !string.IsNullOrWhiteSpace(search) || !string.IsNullOrEmpty(room) || genus is not null || noGenus || likes is not null || pickedTags.Count > 0 || picks.Count > 0 || quarantine || dormant || problem;
 
     // Leaves the status alone, since its buttons are always in view
     private void ClearFilters()
     {
         search = null;
         room = null;
+        genus = null;
+        noGenus = false;
         likes = null;
         spot = null;
         pickedTags.Clear();
@@ -876,6 +936,13 @@ else
         quarantine = false;
         dormant = false;
         problem = false;
+        Refresh();
+    }
+
+    private void ClearGenus()
+    {
+        genus = null;
+        noGenus = false;
         Refresh();
     }
 
@@ -889,12 +956,77 @@ else
     {
         visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
                 pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity,
-                p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), goneAs, problem ? problemPlants : null, likes, FieldWords, picks.Count > 0 ? [.. picks] : null)
+                p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), goneAs, problem ? problemPlants : null, likes, FieldWords, picks.Count > 0 ? [.. picks] : null,
+                genus, noGenus, FavouritesFirst: sort is not (PlantSort.Genus or PlantSort.Room), RoomName: id => places.RoomOf(id)?.Name)
             .Apply(all ?? [])
             .ToList();
+        FindGroups();
         wishMatches = WishSearch.OpenWishes(wishes, search, dictionary);
         SortTable();
     }
+
+    // Under a heading each when sorted by genus or room. The letter strip jumps to the first
+    // plant of a letter in A to Z, and to the first heading of a letter by genus.
+    private void FindGroups()
+    {
+        groups = sort switch
+        {
+            PlantSort.Genus => PlantGroups.Split(visible, p => string.IsNullOrWhiteSpace(p.Genus) ? null : p.Genus.Trim()),
+            PlantSort.Room => PlantGroups.Split(visible, p => places.RoomOf(p.PlaceId)?.Name),
+            _ => null
+        };
+
+        var targets = new Dictionary<char, string>();
+        letterAnchors = [];
+        if (sort == PlantSort.Name)
+        {
+            // Favourites lead the list, so a letter points at its first plant after them when it has one
+            foreach (var plant in visible.OrderBy(p => p.Favourite))
+                if (PlantGroups.LetterOf(plant.DisplayName) is { } letter && targets.TryAdd(letter, LetterId(letter)))
+                    letterAnchors[plant.Id] = LetterId(letter);
+        }
+        else if (sort == PlantSort.Genus && groups is not null)
+        {
+            for (var i = 0; i < groups.Count; i++)
+                if (PlantGroups.LetterOf(groups[i].Name) is { } letter)
+                    targets.TryAdd(letter, $"group-{i}");
+        }
+        letters = [.. "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".Select(c => new LetterTarget(c, targets.GetValueOrDefault(c)))];
+    }
+
+    private static string LetterId(char letter) => letter == '#' ? "letter-hash" : $"letter-{letter}";
+
+    // A long list in an order that has letters gets a strip down the side to jump through it
+    private bool ShowLetters => view != PlantView.Table && (sort is PlantSort.Name or PlantSort.Genus) && visible.Count >= 30;
+
+    private RenderFragment<Plant> ListRow => plant => @<li id="@(ShowLetters ? letterAnchors.GetValueOrDefault(plant.Id) : null)">
+        <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
+                   OnToggle="Toggle" Moisture="@MoistureFor(plant)" LastWater="@LastWaterFor(plant)" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)"
+                   OpenProblem="@problemPlants.Contains(plant.Id)" Location="@places.NameOf(plant.PlaceId)" PottedWith="@PottedWithName(plant)" />
+    </li>;
+
+    private RenderFragment<Plant> GridRow => plant => @<li id="@(ShowLetters ? letterAnchors.GetValueOrDefault(plant.Id) : null)">
+        <PlantTile Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
+                   OnToggle="Toggle" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)" OpenProblem="@problemPlants.Contains(plant.Id)" PottedWith="@PottedWithName(plant)" />
+    </li>;
+
+    private RenderFragment GroupHeading(PlantGroup group, int index) => @<li class="group-heading" role="presentation" id="group-@index">
+        <h2>
+            @if (group.Name is null)
+            {
+                <span class="group-none">@(sort == PlantSort.Genus ? "No genus" : "No room")</span>
+            }
+            else if (sort == PlantSort.Genus)
+            {
+                <i>@group.Name</i>
+            }
+            else
+            {
+                @group.Name
+            }
+        </h2>
+        <span class="group-count">@group.Count</span>
+    </li>;
 
     // The selected plants, in the order of the list, on the page that makes their labels
     private void OpenLabels() =>
