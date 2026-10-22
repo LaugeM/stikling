@@ -1,0 +1,73 @@
+/* Fixed down the right edge of the page, halfway between the header and the bottom navigation. On a
+   wide screen it lines up with the right edge of the page column. */
+.letter-jump {
+    position: fixed;
+    top: calc((var(--pa-header-height) + 100dvh - var(--pa-nav-bottom)) / 2);
+    right: max(0.25rem, env(safe-area-inset-right));
+    z-index: 6;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    /* A finger sliding along it must not scroll the page */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+@media (min-width: 64rem) {
+    .letter-jump {
+        right: max(0.25rem, calc((100vw - var(--pa-nav-side) - var(--pa-column)) / 2 + 0.25rem));
+    }
+}
+
+/* The visible letter is narrow, but the button reaches 2.75rem to the left to be easy to hit */
+.letter-jump button {
+    width: 2.75rem;
+    height: calc(60dvh / 27);
+    min-height: 1rem;
+    padding: 0 0.25rem 0 1.75rem;
+    border: 0;
+    background: none;
+    text-align: right;
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    font-size: 0.75rem;
+    line-height: 1;
+    color: var(--pa-green-dark);
+    cursor: pointer;
+}
+
+.letter-jump button:disabled {
+    color: var(--pa-border);
+    cursor: default;
+    /* Lets a slide that starts on a letter with nowhere to go still reach the strip */
+    pointer-events: none;
+}
+
+.letter-jump button:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+    border-radius: 0.5rem;
+}
+
+/* Shows the letter under the finger while sliding, to the left of the strip */
+.letter-bubble {
+    position: absolute;
+    right: 3.25rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--pa-green-soft);
+    font-family: var(--pa-font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--pa-green-dark);
+    pointer-events: none;
+}
+
+.letter-bubble[hidden] {
+    display: none;
+}

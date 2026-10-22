@@ -1,0 +1,169 @@
+/* One column on a phone, with the sections spaced evenly. From 64rem the totals sit beside the plant
+   held longest, and the genus bars beside the rooms and propagations. */
+.collection,
+.collection-top,
+.collection-bottom,
+.collection-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+@media (min-width: 64rem) {
+    .collection-top,
+    .collection-bottom {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(20rem, 1fr));
+        align-items: start;
+        gap: 1.75rem;
+    }
+}
+
+/* The numbers: three equal columns on a leaf tint, or in a bordered block for propagations */
+.numbers {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 1rem;
+    background: var(--pa-green-soft);
+    border-radius: 0.75rem;
+}
+
+.numbers.boxed {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+}
+
+.number {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    padding: 0.25rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--pa-text);
+}
+
+.number .figure {
+    font-family: var(--pa-font-display);
+    font-weight: 700;
+    font-size: 2.25rem;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-text);
+}
+
+.number.plants .figure {
+    color: var(--pa-clay);
+}
+
+.numbers.boxed .figure {
+    color: var(--pa-green-dark);
+}
+
+.number .word {
+    font-size: 0.75rem;
+    color: var(--pa-muted);
+}
+
+a.number:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.since {
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.plant-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* The bars: a block of rows, each one a link */
+.count-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.count-list > li + li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.count-row {
+    display: grid;
+    grid-template-columns: minmax(0, 40%) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding: 0.6rem 0.75rem;
+    color: var(--pa-text);
+    text-decoration: none;
+}
+
+a.count-row:hover,
+a.count-row:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+a.count-row:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+}
+
+.count-row .name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.count-row .name.genus {
+    font-style: italic;
+}
+
+.count-row .name.none {
+    color: var(--pa-muted);
+}
+
+.count-row .bar {
+    display: block;
+    height: 0.5rem;
+    overflow: hidden;
+    background: var(--pa-clay-soft);
+    border-radius: 999px;
+}
+
+.count-row .fill {
+    display: block;
+    height: 100%;
+    background: var(--pa-clay);
+    border-radius: 999px;
+}
+
+.count-row .count {
+    min-width: 2ch;
+    text-align: right;
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.show-all {
+    margin-top: 0.4rem;
+    padding-inline: 0;
+    min-height: 2.75rem;
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
