@@ -1291,6 +1291,47 @@
             asking until next season. Plants without a season set are never asked, since most houseplants don't rest.
         </p>
     </details>
+
+    @* Notifications need an account, so they are only described where the app has one *@
+    @if (Account.IsAvailable)
+    {
+        <details class="help-item" id="notifications">
+            <summary>How do I get a notification each day?</summary>
+            <p>
+                Sign in, then open Settings and find <em>Notifications</em>. Tap <em>Turn on</em> and allow notifications when the browser asks.
+                You get one notification a day with what Today asks for, like pest treatments that are due or plants to check, at the time you pick.
+                You can have it every day, only on your round days, or only on the weekdays you choose.
+            </p>
+            <p>
+                Each device is turned on by itself, so turn it on on the phone and leave the computer off if you like.
+                The time and the days are yours and are the same on every device.
+            </p>
+        </details>
+
+        <details class="help-item">
+            <summary>Why didn't a notification come?</summary>
+            <p>
+                A day with nothing due sends nothing, and neither does a day you haven't picked. The list is worked out on your device, so it has to have opened Stikling
+                since things changed, or a plant that became due won't be in it. Notifications can also be blocked for Stikling in the browser or in the phone's settings,
+                and a battery saver can hold them back until you pick the phone up. <em>Send a test</em> in Settings shows whether a notification reaches this device at all.
+            </p>
+        </details>
+
+        <details class="help-item">
+            <summary>Notifications on iPhone</summary>
+            <p>
+                On an iPhone or iPad, add Stikling to your home screen first: tap Share, then <em>Add to Home Screen</em>. Open it from there,
+                sign in, and turn notifications on in Settings. In Safari itself the option isn't available.
+            </p>
+        </details>
+
+        <details class="help-item">
+            <summary>Will it tell me to water?</summary>
+            <p>
+                No. A notification never asks you to water. It can ask you to check the soil of a plant, the way Today does, but whether to water is for you to decide.
+            </p>
+        </details>
+    }
 </section>
 
 <section class="help-section" id="history">

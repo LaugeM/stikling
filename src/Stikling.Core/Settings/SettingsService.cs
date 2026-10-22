@@ -62,6 +62,41 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    /// <summary>Sets the time of day for the daily notification. It is kept on a quarter hour.</summary>
+    public async Task SetNotifyAtAsync(TimeOnly time)
+    {
+        var current = await GetAsync();
+        current.NotifyAt = new TimeOnly(time.Hour, time.Minute / 15 * 15);
+        await settings.SaveAsync(current);
+    }
+
+    /// <summary>Sets the time for the daily notification when none has been picked yet. Returns the time it has.</summary>
+    public async Task<TimeOnly> EnsureNotifyAtAsync()
+    {
+        var current = await GetAsync();
+        if (current.NotifyAt is { } time)
+            return time;
+
+        current.NotifyAt = new TimeOnly(8, 0);
+        await settings.SaveAsync(current);
+        return current.NotifyAt.Value;
+    }
+
+    public async Task SetNotifyOnAsync(NotifyDays days)
+    {
+        var current = await GetAsync();
+        current.NotifyOn = days;
+        await settings.SaveAsync(current);
+    }
+
+    public async Task SetNotifyWeekdaysAsync(IEnumerable<Weekday> days)
+    {
+        var current = await GetAsync();
+        var chosen = days.Distinct().Order().ToList();
+        current.NotifyWeekdays = chosen.Count == 0 ? null : chosen;
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetWateringReminderAsync(bool on)
     {
         var current = await GetAsync();

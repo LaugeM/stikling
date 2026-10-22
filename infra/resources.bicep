@@ -1,6 +1,7 @@
 // The API, its database and its photo storage, all in one resource group. Nothing here has a
 // password: the API reaches the database and storage with its own managed identity, and GitHub
-// Actions deploys with another one that trusts the repository's main branch.
+// Actions deploys with another one that trusts the repository's main branch. The one secret is the
+// private key for push notifications, which is in the Key Vault and read through the API's identity.
 
 param location string
 param appDomain string
@@ -13,6 +14,7 @@ param githubRepository string
 param apiImage string
 param apiMinReplicas int
 param sentryDsn string
+param vapidPublicKey string
 
 // Storage account and SQL server names are global, so they get a part that is fixed per resource group
 var suffix = uniqueString(resourceGroup().id)
@@ -22,6 +24,8 @@ var storageBlobDataContributor = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 var contributor = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 var reader = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
 var managedIdentityOperator = 'f1a07417-d97a-45cb-824c-7a7467783830'
+// The built-in role Key Vault Secrets User
+var vaultReaderRole = '4633458b-17de-408a-b874-0445c86b69e6'
 
 // Identities
 
@@ -87,6 +91,35 @@ resource apiCanUseStorage 'Microsoft.Authorization/roleAssignments@2022-04-01' =
   scope: storage
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributor)
+    principalId: apiIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Push notifications
+
+// The private key of the VAPID pair is the only secret. It is put in by hand (docs/ops/hosting.md),
+// so it never passes through the Bicep, and the API and the notification job read it through their
+// identity. The name is kv plus the same part the storage and SQL names use, since "kv-stikling-"
+// with it would be longer than the 24 characters a vault name may have.
+resource vault 'Microsoft.KeyVault/vaults@2024-11-01' = {
+  name: 'kvstikling${suffix}'
+  location: location
+  properties: {
+    tenantId: subscription().tenantId
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    enableRbacAuthorization: true
+  }
+}
+
+resource apiCanReadSecrets 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(vault.id, apiIdentity.id, vaultReaderRole)
+  scope: vault
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', vaultReaderRole)
     principalId: apiIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -225,6 +258,83 @@ var shareDomains = empty(shareDomain)
       }
     ]
 
+// What the API and the notification job both get. Written once so the two can't drift.
+var sharedEnv = [
+  {
+    // Opening a connection retries for a minute, which covers short drops like Azure's maintenance
+    name: 'ConnectionStrings__Stikling'
+    value: 'Server=tcp:${sql.properties.fullyQualifiedDomainName},1433;Database=${sql::database.name};Authentication=Active Directory Managed Identity;User Id=${apiIdentity.properties.clientId};Encrypt=True;Connect Retry Count=6;Connect Retry Interval=10'
+  }
+  {
+    // Where error reports are sent. Empty sends none
+    name: 'Sentry__Dsn'
+    value: sentryDsn
+  }
+  {
+    // Which identity the storage client and the Key Vault sign in as, and that they only try that one
+    name: 'AZURE_CLIENT_ID'
+    value: apiIdentity.properties.clientId
+  }
+  {
+    name: 'AZURE_TOKEN_CREDENTIALS'
+    value: 'ManagedIdentityCredential'
+  }
+]
+
+var apiEnv = [
+  {
+    name: 'ConnectionStrings__Photos'
+    value: storage.properties.primaryEndpoints.blob
+  }
+  {
+    name: 'Clerk__Authority'
+    value: clerkAuthority
+  }
+  {
+    name: 'AppOrigins__0'
+    value: 'https://${appDomain}'
+  }
+  {
+    // The address a share link is shown as, and the host the API answers as a share page
+    name: 'Share__BaseUrl'
+    value: empty(shareDomain) ? '' : 'https://${shareDomain}'
+  }
+  {
+    name: 'Share__Host'
+    value: shareDomain
+  }
+]
+
+// Push notifications are off until the public key is set, which is after the private one is in the vault
+var notificationsOn = !empty(vapidPublicKey)
+
+var notificationEnv = notificationsOn
+  ? [
+      {
+        name: 'Notifications__VapidPublicKey'
+        value: vapidPublicKey
+      }
+      {
+        name: 'Notifications__VapidPrivateKey'
+        secretRef: 'vapid-private-key'
+      }
+      {
+        name: 'Notifications__Subject'
+        value: 'mailto:support@stikling.app'
+      }
+    ]
+  : []
+
+var notificationSecrets = notificationsOn
+  ? [
+      {
+        name: 'vapid-private-key'
+        keyVaultUrl: '${vault.properties.vaultUri}secrets/vapid-private-key'
+        identity: apiIdentity.id
+      }
+    ]
+  : []
+
 resource api 'Microsoft.App/containerApps@2024-03-01' = {
   name: 'stikling-api'
   location: location
@@ -239,6 +349,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
     workloadProfileName: 'Consumption'
     configuration: {
       activeRevisionsMode: 'Single'
+      secrets: notificationSecrets
       ingress: {
         external: true
         targetPort: 8080
@@ -255,48 +366,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.25')
             memory: '0.5Gi'
           }
-          env: [
-            {
-              // Opening a connection retries for a minute, which covers short drops like Azure's maintenance
-              name: 'ConnectionStrings__Stikling'
-              value: 'Server=tcp:${sql.properties.fullyQualifiedDomainName},1433;Database=${sql::database.name};Authentication=Active Directory Managed Identity;User Id=${apiIdentity.properties.clientId};Encrypt=True;Connect Retry Count=6;Connect Retry Interval=10'
-            }
-            {
-              name: 'ConnectionStrings__Photos'
-              value: storage.properties.primaryEndpoints.blob
-            }
-            {
-              name: 'Clerk__Authority'
-              value: clerkAuthority
-            }
-            {
-              // Where the API sends its error reports. Empty sends none
-              name: 'Sentry__Dsn'
-              value: sentryDsn
-            }
-            {
-              name: 'AppOrigins__0'
-              value: 'https://${appDomain}'
-            }
-            {
-              // The address a share link is shown as, and the host the API answers as a share page
-              name: 'Share__BaseUrl'
-              value: empty(shareDomain) ? '' : 'https://${shareDomain}'
-            }
-            {
-              name: 'Share__Host'
-              value: shareDomain
-            }
-            {
-              // Which identity the storage client signs in as, and that it only tries that one
-              name: 'AZURE_CLIENT_ID'
-              value: apiIdentity.properties.clientId
-            }
-            {
-              name: 'AZURE_TOKEN_CREDENTIALS'
-              value: 'ManagedIdentityCredential'
-            }
-          ]
+          env: concat(sharedEnv, apiEnv, notificationEnv)
         }
       ]
       scale: {
@@ -308,6 +378,56 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
   }
   dependsOn: [
     apiCanUseStorage
+    apiCanReadSecrets
+  ]
+}
+
+// Sends the daily notifications. The same image as the API, started every 15 minutes with an
+// argument that makes it send what is due and exit. It only exists once notifications are on.
+resource notifyJob 'Microsoft.App/jobs@2024-03-01' = if (notificationsOn) {
+  name: 'stikling-notify'
+  location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${apiIdentity.id}': {}
+    }
+  }
+  properties: {
+    environmentId: environment.id
+    workloadProfileName: 'Consumption'
+    configuration: {
+      triggerType: 'Schedule'
+      replicaTimeout: 300
+      replicaRetryLimit: 0
+      scheduleTriggerConfig: {
+        cronExpression: '*/15 * * * *'
+        parallelism: 1
+        replicaCompletionCount: 1
+      }
+      secrets: notificationSecrets
+    }
+    template: {
+      containers: [
+        {
+          name: 'notify'
+          image: apiImage
+          // The image's entrypoint is dotnet Stikling.Api.dll, so this runs it with send-notifications
+          args: [
+            'send-notifications'
+          ]
+          resources: {
+            cpu: json('0.25')
+            memory: '0.5Gi'
+          }
+          env: concat(sharedEnv, notificationEnv)
+        }
+      ]
+    }
+  }
+  dependsOn: [
+    apiCanUseStorage
+    apiCanReadSecrets
   ]
 }
 
@@ -349,6 +469,17 @@ resource deployCanUpdateApi 'Microsoft.Authorization/roleAssignments@2022-04-01'
   }
 }
 
+// The same for the notification job, which the workflow moves to each new image after the API
+resource deployCanUpdateJob 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (notificationsOn) {
+  name: guid(resourceGroup().id, 'stikling-notify', deployIdentity.id, contributor)
+  scope: notifyJob
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', contributor)
+    principalId: deployIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 resource deployCanJoinEnvironment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(environment.id, deployIdentity.id, contributor)
   scope: environment
@@ -383,3 +514,7 @@ output apiDnsTarget string = api.properties.configuration.ingress.fqdn
 output apiDomainVerificationId string = api.properties.customDomainVerificationId
 output deployClientId string = deployIdentity.properties.clientId
 output apiName string = api.name
+output apiIdentityName string = apiIdentity.name
+output environmentName string = environment.name
+output keyVaultName string = vault.name
+output notifyJobName string = notificationsOn ? notifyJob.name : ''

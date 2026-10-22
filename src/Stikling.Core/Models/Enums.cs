@@ -288,6 +288,15 @@ public enum Weekday
     Sunday
 }
 
+/// <summary>Which days the daily notification is sent on.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<NotifyDays>))]
+public enum NotifyDays
+{
+    EveryDay,
+    RoundDays,
+    Picked
+}
+
 public static class Weekdays
 {
     public static DayOfWeek ToDayOfWeek(this Weekday day) =>

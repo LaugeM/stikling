@@ -104,6 +104,7 @@ builder.Services.AddScoped<FeedService>();
 builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<PutOffService>();
 builder.Services.AddScoped<WateringAnswers>();
+builder.Services.AddScoped<TodayService>();
 builder.Services.AddScoped<SubjectPhotos>();
 builder.Services.AddScoped<GrowLightService>();
 builder.Services.AddScoped<AwayService>();
@@ -138,6 +139,7 @@ builder.Services.AddScoped<IShareCopySource>(services => services.GetRequiredSer
 builder.Services.AddScoped<IReceivedPhotos>(services => services.GetRequiredService<SharedCopies>());
 builder.Services.AddScoped<ReceivingService>();
 builder.Services.AddScoped<IndexedDbSyncStore>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<SyncRunner>();
 
 var host = builder.Build();

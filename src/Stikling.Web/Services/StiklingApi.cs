@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.JSInterop;
+using Stikling.Core.Notifications;
 using Stikling.Core.Sharing;
 using Stikling.Core.Sync;
 
@@ -121,6 +122,57 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
 
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<JsonElement>();
+    }
+
+    // The daily notification. A failure to reach the server or a refusal throws, except where the
+    // status itself is the answer.
+
+    /// <summary>
+    /// The key a device subscribes with, or null when the server has none (404 or 503). Needs no sign-in.
+    /// </summary>
+    /// <exception cref="HttpRequestException">The API couldn't be reached.</exception>
+    public async Task<string?> GetNotificationKeyAsync()
+    {
+        using var response = await http.GetAsync("notifications/key");
+        if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.ServiceUnavailable)
+            return null;
+
+        response.EnsureSuccessStatusCode();
+        using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        return document.RootElement.TryGetProperty("publicKey", out var key) ? key.GetString() : null;
+    }
+
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task PutSubscriptionAsync(SubscriptionRequest subscription) =>
+        await SendNotificationAsync(HttpMethod.Put, "me/notifications/subscriptions", subscription);
+
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task RemoveSubscriptionAsync(string endpoint) =>
+        await SendNotificationAsync(HttpMethod.Post, "me/notifications/subscriptions/remove", new EndpointRequest(endpoint));
+
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task PutNotificationDaysAsync(DaysRequest days) =>
+        await SendNotificationAsync(HttpMethod.Put, "me/notifications/days", days);
+
+    /// <summary>
+    /// Asks the server to send a test to this device. 204 sent, 404 the server doesn't have this
+    /// endpoint, 410 the push service says it is gone, 502 the push service refused.
+    /// </summary>
+    /// <exception cref="HttpRequestException">The API couldn't be reached.</exception>
+    public async Task<HttpStatusCode> SendNotificationTestAsync(string endpoint)
+    {
+        using var request = await RequestAsync(HttpMethod.Post, "me/notifications/test");
+        request.Content = JsonContent.Create(new EndpointRequest(endpoint));
+        using var response = await http.SendAsync(request);
+        return response.StatusCode;
+    }
+
+    private async Task SendNotificationAsync(HttpMethod method, string path, object body)
+    {
+        using var request = await RequestAsync(method, path);
+        request.Content = JsonContent.Create(body, body.GetType());
+        using var response = await http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task<IReadOnlyList<StoredPhoto>> GetStoredAsync(Guid collectionId, IReadOnlyList<Guid> ids)
