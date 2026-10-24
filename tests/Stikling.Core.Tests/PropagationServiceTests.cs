@@ -547,4 +547,35 @@ public class PropagationServiceTests
 
         Assert.Empty(plantCare.Logs);
     }
+
+    [Fact]
+    public async Task Pot_up_with_plant_ids_uses_them_and_a_rerun_after_a_failure_makes_no_duplicates()
+    {
+        var corms = await StartCormsAsync(3);
+        var ids = new[] { Guid.NewGuid(), Guid.NewGuid() };
+        var request = new PotUpRequest(2, Today, "Corm", PlantIds: ids);
+
+        // The first run stopped after saving one plant
+        await plants.SaveAsync(new Plant { Id = ids[0], Nickname = "Corm 1", FromPropagationId = corms.Id });
+        await timeline.AddAsync(new TimelineEntry { SubjectType = SubjectType.Plant, SubjectId = ids[0], Kind = TimelineKind.Created, Text = "Potted up from a propagation" });
+
+        var made = await service.PotUpAsync(corms, request);
+
+        Assert.Equal(ids, made.Select(p => p.Id));
+        Assert.Equal(2, plants.Plants.Values.Count(p => p.FromPropagationId == corms.Id));
+        Assert.All(ids, id => Assert.Single(timeline.Entries, e => e.SubjectId == id && e.Kind == TimelineKind.Created));
+        Assert.Equal(2, corms.PottedUpCount);
+    }
+
+    [Fact]
+    public async Task Pot_up_with_too_few_plant_ids_is_refused_before_anything_is_written()
+    {
+        var corms = await StartCormsAsync(3);
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            service.PotUpAsync(corms, new PotUpRequest(2, Today, PlantIds: [Guid.NewGuid()])));
+
+        Assert.Equal(0, corms.PottedUpCount);
+        Assert.DoesNotContain(plants.Plants.Values, p => p.FromPropagationId == corms.Id);
+    }
 }

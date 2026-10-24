@@ -6,6 +6,8 @@ using Stikling.Core.Timeline;
 namespace Stikling.Core.Propagations;
 
 /// <summary>What to do when potting up units of a propagation as plants.</summary>
+/// <param name="PlantIds">Ids for the new plants, in order. Given again on a retry, the plants are saved over themselves
+/// instead of made twice. There has to be one for each plant the request makes.</param>
 public sealed record PotUpRequest(
     int Count,
     DateOnly Date,
@@ -15,7 +17,8 @@ public sealed record PotUpRequest(
     Guid? PotId = null,
     Guid? SoilMixId = null,
     bool OnePot = false,
-    Guid? IntoPlantId = null);
+    Guid? IntoPlantId = null,
+    IReadOnlyList<Guid>? PlantIds = null);
 
 /// <summary>
 /// Propagation operations that keep the counts, the new plants and the history of both in step.
@@ -164,7 +167,11 @@ public sealed class PropagationService(
 
     /// <summary>
     /// Turns units of the propagation into plants. The plants keep the lineage (parent plant and
-    /// propagation) and the propagation finishes when nothing is left.
+    /// propagation) and the propagation finishes when nothing is left. The count is recorded on a copy
+    /// and the caller's propagation only changes once that is saved. With <see cref="PotUpRequest.PlantIds"/> it can be
+    /// run again after a failure before the count was stored: the plants are saved over themselves and each
+    /// gets one Created entry. The steps after the count (watering, potting together, the history line)
+    /// are not repeated by a retry.
     /// </summary>
     public async Task<IReadOnlyList<Plant>> PotUpAsync(Propagation propagation, PotUpRequest request, Func<Enum, string>? label = null)
     {
@@ -187,10 +194,13 @@ public sealed class PropagationService(
         IReadOnlyList<string?> names = oneAny
             ? [string.IsNullOrWhiteSpace(request.Nickname) ? null : request.Nickname.Trim()]
             : PotUpNames(request.Nickname, request.Count, propagation.PottedUpCount);
-        // Worked out before RecordPottedUp changes the count they continue from
+        // Worked out from the count as it is now, so a retry gives the same ones
         var codes = CollectionNumbers.PottedUpCodes(propagation, request.Count);
+        if (request.PlantIds is { } ids && ids.Count < names.Count)
+            throw new ArgumentException("There has to be an id for each new plant.", nameof(request));
         var newPlants = names.Select((name, i) => new Plant
         {
+            Id = request.PlantIds is { } given ? given[i] : Guid.NewGuid(),
             Nickname = name,
             CollectionNumber = codes[i],
             Genus = propagation.Genus,
@@ -225,12 +235,16 @@ public sealed class PropagationService(
         var carried = CarriedPhotos.Cover(propagation, await photos.GetForAsync(propagation.Id), request.Date, time);
         foreach (var plant in newPlants)
             plant.CoverPhotoId = carried;
-        propagation.RecordPottedUp(request.Count, request.Date);
+        var counted = propagation.Copy();
+        counted.RecordPottedUp(request.Count, request.Date);
 
         var occurredAt = time.MomentOn(request.Date);
         foreach (var plant in newPlants)
         {
             await plants.SaveAsync(plant);
+            // A retry has the entry already
+            if ((await timeline.GetForAsync(plant.Id)).Any(e => !e.IsDeleted && e.Kind == TimelineKind.Created))
+                continue;
             await timeline.AddAsync(new TimelineEntry
             {
                 SubjectType = SubjectType.Plant,
@@ -243,7 +257,8 @@ public sealed class PropagationService(
             });
         }
 
-        await propagations.SaveAsync(propagation);
+        await propagations.SaveAsync(counted);
+        ApplyCounts(counted, propagation);
         await CarryWateringOverAsync(propagation, newPlants);
 
         if (into is not null)
@@ -308,6 +323,7 @@ public sealed class PropagationService(
     /// <summary>
     /// Records units that didn't make it, with an optional reason and note ("2 failed: rotted, left too wet"). They failed on
     /// <paramref name="date"/>, today unless given, which can't be in the future or before the start.
+    /// The caller's propagation only gets the new counts once they are saved.
     /// </summary>
     public async Task MarkFailedAsync(Propagation propagation, int count, FailReason? reason = null, string? note = null, DateOnly? date = null)
     {
@@ -316,8 +332,10 @@ public sealed class PropagationService(
             throw new InvalidOperationException("The date can't be in the future.");
         if (day < propagation.StartedOn)
             throw new InvalidOperationException("The date can't be before the propagation started.");
-        propagation.RecordFailed(count, day);
-        await propagations.SaveAsync(propagation);
+        var counted = propagation.Copy();
+        counted.RecordFailed(count, day);
+        await propagations.SaveAsync(counted);
+        ApplyCounts(counted, propagation);
 
         var why = string.Join(", ", new[] { reason is { } picked ? FailReasons.Label(picked) : null, Clean(note) }.OfType<string>());
         var text = why.Length > 0 ? $"{count} failed: {why}" : $"{count} failed";
@@ -328,6 +346,7 @@ public sealed class PropagationService(
     /// <summary>
     /// Records units given to someone, with an optional name for who got them. They went on
     /// <paramref name="date"/>, today unless given, which can't be in the future or before the start.
+    /// The caller's propagation only gets the new counts once they are saved.
     /// </summary>
     public async Task GiveAwayAsync(Propagation propagation, int count, string? to = null, DateOnly? date = null)
     {
@@ -336,11 +355,29 @@ public sealed class PropagationService(
             throw new InvalidOperationException("The date can't be in the future.");
         if (day < propagation.StartedOn)
             throw new InvalidOperationException("The date can't be before the propagation started.");
-        propagation.RecordGivenAway(count, day);
-        await propagations.SaveAsync(propagation);
+        var counted = propagation.Copy();
+        counted.RecordGivenAway(count, day);
+        await propagations.SaveAsync(counted);
+        ApplyCounts(counted, propagation);
 
         var text = Clean(to) is { } who ? $"Gave {count} to {who}" : $"Gave {count} away";
         await AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway);
+    }
+
+    // Carries what recording a count changes from the saved copy to the caller's propagation, including
+    // the UpdatedAt the repository set on saving
+    private static void ApplyCounts(Propagation from, Propagation to)
+    {
+        to.PottedUpCount = from.PottedUpCount;
+        to.FailedCount = from.FailedCount;
+        to.GivenAwayCount = from.GivenAwayCount;
+        to.SpareCount = from.SpareCount;
+        to.Stage = from.Stage;
+        to.FinishedOn = from.FinishedOn;
+        to.DormantSince = from.DormantSince;
+        to.Attention = from.Attention;
+        to.AttentionLater = from.AttentionLater;
+        to.UpdatedAt = from.UpdatedAt;
     }
 
     /// <summary>
