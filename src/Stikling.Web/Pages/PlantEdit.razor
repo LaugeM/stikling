@@ -743,7 +743,9 @@ else
     private void SetQuarantine(ChangeEventArgs e) => form!.SetQuarantine((bool?)e.Value == true);
 
     // The form knows whether the plant has been created yet, the route only what the page was opened for
-    private bool IsNew => form?.IsNew ?? Id is null;
+    // The layout follows the route, so a save that fails after the plant was added doesn't turn the
+    // form into an edit form. Whether saving adds or updates is the form's own IsNew
+    private bool IsNew => Id is null;
 
     private bool RouteNew => Id is null;
 
