@@ -685,6 +685,30 @@ internal sealed class FakePestCaseRepository : IPestCaseRepository
     }
 }
 
+internal class FakePestTreatmentRepository : IPestTreatmentRepository
+{
+    public Dictionary<Guid, PestTreatment> Treatments { get; } = [];
+
+    public Task<IReadOnlyList<PestTreatment>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<PestTreatment>>(Treatments.Values.Where(t => !t.IsDeleted).ToList());
+
+    public Task<PestTreatment?> GetAsync(Guid id) =>
+        Task.FromResult(Treatments.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
+
+    public virtual Task SaveAsync(PestTreatment treatment)
+    {
+        Treatments[treatment.Id] = treatment;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Treatments.TryGetValue(id, out var item))
+            item.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakePlantNameSource(PlantNameData data, params EverydayNameData[] everyday) : IPlantNameSource
 {
     /// <summary>Acts like the files can't be read, e.g. offline before they were ever cached.</summary>

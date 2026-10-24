@@ -88,6 +88,7 @@ builder.Services.AddScoped<IPlantCareSource, BundledPlantCare>();
 builder.Services.AddScoped<IDeviceLanguages, BrowserLanguages>();
 builder.Services.AddScoped<TimelineService>();
 builder.Services.AddScoped<PlantService>();
+builder.Services.AddScoped<PlantForms>();
 builder.Services.AddScoped<CollectionNumberService>();
 builder.Services.AddScoped<PropagationService>();
 builder.Services.AddScoped<PlantNameService>();
