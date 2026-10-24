@@ -23,6 +23,69 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Create_and_update_store_the_collection_number_tidied()
+    {
+        var created = new Plant { Nickname = "A", CollectionNumber = " #117 " };
+        await service.CreateAsync(created);
+        Assert.Equal("117", plants.Plants[created.Id].CollectionNumber);
+
+        var before = created.Copy();
+        created.CollectionNumber = "#118";
+        await service.UpdateAsync(before, created, Label);
+        Assert.Equal("118", plants.Plants[created.Id].CollectionNumber);
+    }
+
+    [Fact]
+    public async Task Update_leaves_an_older_collection_number_alone_when_it_was_not_changed()
+    {
+        var plant = new Plant { Nickname = "A", CollectionNumber = "#117A" };
+        await plants.SaveAsync(plant);
+
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Died;
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Equal("#117A", plants.Plants[plant.Id].CollectionNumber);
+    }
+
+    [Fact]
+    public async Task Create_and_update_store_a_count_of_one_as_null()
+    {
+        var created = new Plant { Nickname = "A", Count = 1 };
+        await service.CreateAsync(created);
+        Assert.Null(plants.Plants[created.Id].Count);
+
+        var before = created.Copy();
+        created.Count = 3;
+        await service.UpdateAsync(before, created, Label);
+        Assert.Equal(3, plants.Plants[created.Id].Count);
+
+        before = created.Copy();
+        created.Count = 1;
+        await service.UpdateAsync(before, created, Label);
+        Assert.Null(plants.Plants[created.Id].Count);
+    }
+
+    [Fact]
+    public async Task Create_and_update_drop_a_way_of_resting_for_a_plant_that_does_not_rest()
+    {
+        var created = new Plant { Nickname = "A", GrowingSeason = GrowingSeason.NoRest, RestHow = RestKind.Cooler };
+        await service.CreateAsync(created);
+        Assert.Null(plants.Plants[created.Id].RestHow);
+
+        var before = created.Copy();
+        created.GrowingSeason = GrowingSeason.Summer;
+        created.RestHow = RestKind.Drier;
+        await service.UpdateAsync(before, created, Label);
+        Assert.Equal(RestKind.Drier, plants.Plants[created.Id].RestHow);
+
+        before = created.Copy();
+        created.GrowingSeason = null;
+        await service.UpdateAsync(before, created, Label);
+        Assert.Null(plants.Plants[created.Id].RestHow);
+    }
+
+    [Fact]
     public async Task RenameTag_changes_it_on_every_plant_that_has_it()
     {
         var a = await AddTagged("A", "Rare", "Swap");

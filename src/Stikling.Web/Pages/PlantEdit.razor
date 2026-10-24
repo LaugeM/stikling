@@ -1,21 +1,10 @@
 @page "/plants/new"
 @page "/plants/{Id:guid}/edit"
 @using Stikling.Core.Settings
-@inject IPlantRepository Repository
-@inject IPestTreatmentRepository PestTreatmentRepository
 @inject ILogger<PlantEdit> Logger
-@inject IPropagationRepository Propagations
-@inject IPotRepository PotRepository
-@inject ISoilMixRepository MixRepository
-@inject IFeedRepository FeedRepository
-@inject SettingsService SettingsService
+@inject PlantForms Forms
 @inject PlantService PlantService
-@inject WishService WishService
-@inject PlantNameService Names
 @inject PlantCareService CommonCare
-@inject RoomService RoomService
-@inject SellerService SellerService
-@inject OwnFieldService OwnFieldBook
 @inject PhotoService Photos
 @inject GooglePhotosService Google
 @inject NavigationManager Navigation
@@ -23,17 +12,17 @@
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
-<PageTitle>@(IsNew ? "Add plant" : "Edit plant") · Stikling</PageTitle>
+<PageTitle>@(RouteNew ? "Add plant" : "Edit plant") · Stikling</PageTitle>
 
-<a class="back-link" href="@(IsNew ? "plants" : $"plants/{Id}")">Back</a>
-<h1>@(IsNew ? "Add plant" : "Edit plant")</h1>
+<a class="back-link" href="@(RouteNew ? "plants" : $"plants/{Id}")">Back</a>
+<h1>@(RouteNew ? "Add plant" : "Edit plant")</h1>
 
 @if (IsNew && CopyOfId is null && ParentId is null && !FromPhotos)
 {
     <p class="form-text">Adding several? <a class="link-action" href="plants/quick-add">Quick add</a> or <a class="link-action" href="plants/import">import a spreadsheet</a></p>
 }
 
-@if (plant is null)
+@if (plant is null || form is null)
 {
     <p class="text-body-secondary">@(notFound ? "That plant doesn't exist." : "Loading…")</p>
 }
@@ -86,14 +75,14 @@ else
                     <div class="form-text">@CollectionNumbers.ClashNote(NumberCode, clashes)</div>
                 }
             </div>
-            @if (WishHere is { } onWishlist)
+            @if (form.WishHere is { } onWishlist)
             {
                 <div class="form-check mt-2">
-                    <input type="checkbox" class="form-check-input" id="mark-wish-got" @bind="markWishGot" />
+                    <input type="checkbox" class="form-check-input" id="mark-wish-got" @bind="form.MarkWishGot" />
                     <label class="form-check-label" for="mark-wish-got">On your wishlist: mark it got</label>
                 </div>
             }
-            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.DiedBefore(plant, existing) is { Count: > 0 } diedBefore)
+            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.DiedBefore(plant, form.Plants) is { Count: > 0 } diedBefore)
             {
                 <p class="form-text">
                     @(diedBefore.Count == 1 ? "One like this died before: " : "Some like this died before: ")
@@ -104,7 +93,7 @@ else
                     }.
                 </p>
             }
-            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.SameName(plant, existing) is { Count: > 0 } same)
+            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.SameName(plant, form.Plants) is { Count: > 0 } same)
             {
                 <p class="form-text already-have">
                     You already have
@@ -122,7 +111,7 @@ else
             <legend>Where it came from</legend>
             <div class="mb-3">
                 <label class="form-label" for="origin">How you got it</label>
-                <InputSelect id="origin" class="form-select" @bind-Value="plant.Origin" @bind-Value:after="ApplyQuarantineRule">
+                <InputSelect id="origin" class="form-select" @bind-Value="plant.Origin" @bind-Value:after="form.OriginChanged">
                     @foreach (var origin in Enum.GetValues<PlantOrigin>())
                     {
                         <option value="@origin">@Labels.For(origin)</option>
@@ -157,7 +146,7 @@ else
                         <button type="button" class="btn btn-link btn-sm link-action" @onclick="KeepToday">Use today instead</button>
                     </div>
                 }
-                @if (copiedDate is { } sameDate && sameDate != LooseDate.Of(Today))
+                @if (form.CopiedDate is { } sameDate && sameDate != LooseDate.Of(Today))
                 {
                     @if (plant.AcquiredOn == sameDate)
                     {
@@ -165,7 +154,7 @@ else
                     }
                     else
                     {
-                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => plant.AcquiredOn = sameDate">Same date as @copiedFrom (@sameDate.Text())</button>
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => plant.AcquiredOn = sameDate">Same date as @form.CopiedFrom (@sameDate.Text())</button>
                     }
                 }
             </div>
@@ -193,7 +182,7 @@ else
             }
 
             <div class="mb-3">
-                <SellerPicker @bind-Value="sellerText" Names="sellerNames" />
+                <SellerPicker @bind-Value="form.SellerText" Names="sellerNames" />
             </div>
 
             @* A price already entered stays if the origin changes, it just isn't shown *@
@@ -230,19 +219,19 @@ else
 
             <FormSection Title="Where it lives" Summary="@LivesSummary" Open="openLives">
                 <div class="mb-3">
-                    <RoomPicker @bind-Value="location" Rooms="rooms" />
+                    <RoomPicker @bind-Value="form.Location" Rooms="rooms" />
                 </div>
-                @if (CameInsideNow)
+                @if (form.CameInside)
                 {
                     <div class="back-from-outside mb-3" role="group" aria-labelledby="back-from-outside-title">
                         <b id="back-from-outside-title">Back from outside</b>
                         <p class="form-text mb-2">Plants that spent time outside often bring pests in.</p>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="back-quarantine" @bind="backQuarantine" />
-                            <label class="form-check-label" for="back-quarantine">Put in quarantine for @Labels.Count(quarantineLength, "day")</label>
+                            <input class="form-check-input" type="checkbox" id="back-quarantine" @bind="form.BackQuarantine" />
+                            <label class="form-check-label" for="back-quarantine">Put in quarantine for @Labels.Count(form.QuarantineLength, "day")</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="back-checked" @bind="backChecked" />
+                            <input class="form-check-input" type="checkbox" id="back-checked" @bind="form.BackChecked" />
                             <label class="form-check-label" for="back-checked">Checked it for pests, no signs</label>
                         </div>
                     </div>
@@ -321,7 +310,7 @@ else
             <FormSection Title="Pot and soil" Summary="@PotSummary" Open="openPot">
                 <div class="mb-3">
                     <label class="form-label" for="medium">Grows in</label>
-                    <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => SetMedium(m)" ValueExpression="() => plant.Medium"
+                    <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => form.SetMedium(m)" ValueExpression="() => plant.Medium"
                                  aria-describedby="@(Labels.Explain(plant.Medium) is null ? null : "medium-help")">
                         @foreach (var medium in Enum.GetValues<GrowingMedium>())
                         {
@@ -332,10 +321,10 @@ else
                     {
                         <div id="medium-help" class="form-text">@mediumHelp</div>
                     }
-                    @if (OffersTransitionNow)
+                    @if (form.OffersTransition)
                     {
                         <div class="form-check mt-2">
-                            <input id="track-transition" class="form-check-input" type="checkbox" @bind="trackTransition" />
+                            <input id="track-transition" class="form-check-input" type="checkbox" @bind="form.TrackTransition" />
                             <label class="form-check-label" for="track-transition">Track the move to semi-hydro</label>
                             <div class="form-text">Adds a checklist to its page for washed roots, the first water root and the first new leaf.</div>
                         </div>
@@ -343,16 +332,16 @@ else
                 </div>
 
                 <div class="mb-3">
-                    <MixPicker @bind-Value="plant.SoilMixId" Mixes="mixes" />
+                    <MixPicker @bind-Value="plant.SoilMixId" Mixes="form.Mixes" />
                 </div>
 
                 <div class="mb-3">
-                    <PotPicker Value="plant.InnerPotId" ValueChanged="SetInnerPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                    <PotPicker Value="plant.InnerPotId" ValueChanged="form.SetInnerPot" Pots="form.Pots" Groups="InnerSlot" PotAdded="form.AddPot" />
                 </div>
 
                 <div class="mb-3">
-                    <PotPicker Value="plant.OuterPotId" ValueChanged="SetOuterPot" Pots="pots" Groups="OuterSlot"
-                               Label="Outer pot" NoneText="No outer pot" PotAdded="AddPot" />
+                    <PotPicker Value="plant.OuterPotId" ValueChanged="form.SetOuterPot" Pots="form.Pots" Groups="OuterSlot"
+                               Label="Outer pot" NoneText="No outer pot" PotAdded="form.AddPot" />
                     @if (plant.OuterPotId is not null)
                     {
                         <div class="form-check mt-2">
@@ -382,13 +371,13 @@ else
                 </div>
                 <div class="form-text mb-3">
                     Today asks you to check it when it's probably dry, once it has seen a few waterings.
-                    @if (!wateringReminderOn)
+                    @if (!form.Settings.WateringReminder)
                     {
                         <text> The reminder is turned on in Settings, and it's off there now.</text>
                     }
                 </div>
 
-                @if (WateringForms.Of(plant, FindPot) == WateringForm.TopWatered)
+                @if (WateringForms.Of(plant, form.FindPot) == WateringForm.TopWatered)
                 {
                     <div class="mb-3">
                         <label class="form-label" for="water-at">Water at</label>
@@ -419,7 +408,7 @@ else
                 }
 
                 <div class="mb-3">
-                    @if (feeds.Count == 0)
+                    @if (form.Feeds.Count == 0)
                     {
                         <div class="form-label">Feed with the watering</div>
                         <div class="form-text">
@@ -435,13 +424,13 @@ else
                         <label class="form-label" for="watering-feed">Feed with the watering</label>
                         <select id="watering-feed" class="form-select" aria-describedby="watering-feed-help"
                                 @onchange="e => SetWateringFeed(e.Value?.ToString())">
-                            <option value="" selected="@(FeedChoice is null)">Off</option>
-                            @foreach (var feed in feeds)
+                            <option value="" selected="@(form.FeedChoice is null)">Off</option>
+                            @foreach (var feed in form.Feeds)
                             {
-                                <option value="@feed.Id" selected="@(FeedChoice == feed.Id)">@feed.Name</option>
+                                <option value="@feed.Id" selected="@(form.FeedChoice == feed.Id)">@feed.Name</option>
                             }
                         </select>
-                        @if (FeedChoice is not null)
+                        @if (form.FeedChoice is not null)
                         {
                             <label class="form-label mt-3" for="watering-feed-every">How often</label>
                             <select id="watering-feed-every" class="form-select"
@@ -520,9 +509,9 @@ else
             }
 
             <FormSection Title="Your fields" Summary="@FieldsSummary" Open="openFields">
-                @foreach (var field in ownFields)
+                @foreach (var field in form.OwnFields)
                 {
-                    <OwnFieldInput Field="field" Value="@FieldInput(field)" ValueChanged="(string? value) => fieldInputs[field.Id] = value" />
+                    <OwnFieldInput Field="field" Value="@form.FieldInput(field.Id)" ValueChanged="(string? value) => form.SetFieldInput(field.Id, value)" />
                 }
                 @if (addingField)
                 {
@@ -586,15 +575,8 @@ else
     [SupplyParameterFromQuery(Name = "wish")]
     public Guid? WishId { get; set; }
 
-    private IReadOnlyList<Wish> wishes = [];
-    private PlantDictionary? dictionary;
-    private bool markWishGot = true;
-
-    // The wish this plant is for: the one it was started from, else an open wish with the same names
-    private Wish? WishHere =>
-        !IsNew || plant is null ? null
-        : WishId is { } id && wishes.FirstOrDefault(w => w.Id == id && !w.IsGot) is { } chosen ? chosen
-        : WishMatches.OpenFor(plant.Genus, plant.Species, plant.Cultivar, plant.Nickname, wishes, dictionary).FirstOrDefault();
+    private PlantForm? form;
+    private (Guid? Id, Guid? CopyOfId, Guid? WishId, Guid? ParentId) formFor;
 
     /// <summary>"photos" starts from old photos, from the first screen, with the photos first.</summary>
     [SupplyParameterFromQuery(Name = "from")]
@@ -624,47 +606,31 @@ else
     private LooseDate? dateFromPhotos; // when the day it was got was moved back to the oldest photo
     private bool keepToday;
 
-    private Plant? plant;
-    private Plant? original; // the plant as it was before editing, to record what changed
-    private Plant? startedWith; // a new plant as the form started, e.g. a duplicate, to tell what was set here
-    private LooseDate? copiedDate; // when the plant this one is copied from was got, to offer the same date
-    private string? copiedFrom;
-    private IReadOnlyList<Plant> existing = [];
-    private IReadOnlyList<Propagation> existingPropagations = [];
+    private Plant? plant; // the form's draft
     private int nextNumber = 1;
 
     private string? NumberCode => CollectionNumbers.Normalize(plant?.CollectionNumber);
     private bool NumberInvalid => NumberCode is { } code && !CollectionNumbers.IsValid(code);
     private IReadOnlyList<CodeClash> NumberClashes =>
-        NumberCode is { } code && !NumberInvalid
-            ? CollectionNumbers.Clashes(code, plant!.Id, existing, existingPropagations)
+        NumberCode is { } code && !NumberInvalid && form is not null
+            ? CollectionNumbers.Clashes(code, plant!.Id, form.Plants, form.Propagations)
             : [];
     private bool notFound;
     private bool saving;
     private List<string> errors = [];
     private IReadOnlyList<Plant> possibleParents = [];
     private IReadOnlyList<Room> rooms = [];
-    private string? location; // as picked, "Living room / Windowsill"; made into a room when saving
-    private IReadOnlyList<Pot> pots = [];
-    private IReadOnlyList<SoilMix> mixes = [];
-    private IReadOnlyList<Feed> feeds = [];
     private IReadOnlyList<string> tagSuggestions = [];
 
     // Which sections start open, worked out when the plant loads. A section only reads this once
     private bool openLives;
     private bool openArrival;
 
-    // What the Where from box says. The seller is only looked up again when it was changed, so
-    // saving a plant whose seller was deleted doesn't bring a new one back.
-    private string? sellerText;
-    private string? sellerTextStart;
-    private bool sellerTextLoaded;
     private IReadOnlyList<string> sellerNames = [];
-    private SellerList sellerBook = SellerList.None;
 
     private bool ShowArrival =>
         plant is not null
-        && (SellerName.Clean(sellerText) is not null || plant.Origin is PlantOrigin.Purchased or PlantOrigin.Gift or PlantOrigin.Swap);
+        && (SellerName.Clean(form?.SellerText) is not null || plant.Origin is PlantOrigin.Purchased or PlantOrigin.Gift or PlantOrigin.Swap);
     private bool openLikes;
 
     // What common plants usually like, offered above What it likes. Empty if it couldn't be read.
@@ -714,60 +680,34 @@ else
 
     // Your own fields. The text is as typed and is tidied when the plant is saved, so a field added
     // here shows up with an empty input and nothing else on the form is lost.
-    private IReadOnlyList<OwnField> ownFields = [];
-    private readonly Dictionary<Guid, string?> fieldInputs = [];
-    private Guid? fieldInputsFor;
     private bool addingField;
     private bool openFields;
     private bool openSitter;
     private bool openSwap;
     private bool openWatering;
-    private bool wateringReminderOn;
 
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
     private static readonly PotGroup[] OuterSlot = [PotGroup.Outer];
 
     private DateOnly Today => Time.Today();
 
-    private string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
-
-    private string? MixName(Guid id) => mixes.FirstOrDefault(m => m.Id == id)?.Name;
-
-    private string? FeedName(Guid id) => feeds.FirstOrDefault(f => f.Id == id)?.Name;
-
-    /// <summary>The feed given with the water, or null when it is off or the feed is gone.</summary>
-    private Guid? FeedChoice => plant?.WateringFeedId is { } id && feeds.Any(f => f.Id == id) ? id : null;
-
-    private void SetWateringFeed(string? value)
-    {
-        if (Guid.TryParse(value, out var id))
-        {
-            plant!.WateringFeedId = id;
-            plant.WateringFeedEvery ??= 1;
-        }
-        else
-        {
-            plant!.WateringFeedId = null;
-            plant.WateringFeedEvery = null;
-        }
-    }
+    private void SetWateringFeed(string? value) =>
+        form!.SetWateringFeed(Guid.TryParse(value, out var id) ? id : null);
 
     private static string? Joined(params string?[] parts) =>
         string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
 
-    private string? LivesSummary => Joined(location, plant?.Light is { } light ? Labels.For(light) : null);
+    private string? LivesSummary => Joined(form?.Location, plant?.Light is { } light ? Labels.For(light) : null);
 
-    private string? PotSummary => plant is null ? null : Joined(
+    private string? PotSummary => plant is null || form is null ? null : Joined(
         Labels.For(plant.Medium),
-        plant.InnerPotId is { } inner ? PotName(inner) : null,
-        plant.OuterPotId is { } outer ? PotName(outer) : null,
-        plant.SoilMixId is { } mix ? MixName(mix) : null);
+        plant.InnerPotId is { } inner ? form.PotName(inner) : null,
+        plant.OuterPotId is { } outer ? form.PotName(outer) : null,
+        plant.SoilMixId is { } mix ? form.MixName(mix) : null);
 
-    private Pot? FindPot(Guid id) => pots.FirstOrDefault(p => p.Id == id);
-
-    private string? WateringSummary => plant is null ? null
+    private string? WateringSummary => plant is null || form is null ? null
         : !plant.WateringReminder ? "No reminder"
-        : plant.WaterAt is { } at && WateringForms.Of(plant, FindPot) == WateringForm.TopWatered ? $"Water at {at}"
+        : plant.WaterAt is { } at && WateringForms.Of(plant, form.FindPot) == WateringForm.TopWatered ? $"Water at {at}"
         : null;
 
     private string? AboutSummary => string.IsNullOrWhiteSpace(plant?.Notes) ? null : Labels.Short(plant.Notes);
@@ -781,116 +721,33 @@ else
 
     private string? SwapSummary => plant?.Spare is { } mark ? SwapLists.MarkText(mark) : null;
 
-    private string? FieldInput(OwnField field) => fieldInputs.GetValueOrDefault(field.Id);
-
     private string FieldsSummary =>
-        ownFields.Count == 0
+        form is null || form.OwnFields.Count == 0
             ? "Add a field the app doesn't have"
-            : ownFields.Where(f => !string.IsNullOrWhiteSpace(FieldInput(f))).Select(f => f.Name) is { } filled && filled.Any()
+            : form.OwnFields.Where(f => !string.IsNullOrWhiteSpace(form.FieldInput(f.Id))).Select(f => f.Name) is { } filled && filled.Any()
                 ? string.Join(", ", filled)
                 : "None filled in";
 
     private async Task FieldAddedAsync(OwnField field)
     {
-        ownFields = await OwnFieldBook.GetAllAsync();
-        fieldInputs.TryAdd(field.Id, null);
+        await form!.AddOwnFieldAsync(field);
         addingField = false;
     }
 
     private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
 
     private string QuarantineSummary => plant is { InQuarantine: true }
-        ? $"In quarantine for {plant.QuarantineDays ?? quarantineLength} days"
+        ? $"In quarantine for {plant.QuarantineDays ?? form!.QuarantineLength} days"
         : "Not in quarantine";
 
-    private void AddPot(Pot pot) => pots = [.. pots, pot];
+    private void SetQuarantine(ChangeEventArgs e) => form!.SetQuarantine((bool?)e.Value == true);
 
-    // Ticking it again after unticking keeps the date it had, so a slip doesn't restart the count
-    private void SetQuarantine(ChangeEventArgs e)
-    {
-        var on = (bool?)e.Value == true;
-        quarantineTouched = true;
-        plant!.QuarantinedSince = on ? original?.QuarantinedSince ?? Today : null;
-        plant.QuarantineDays = on ? original?.QuarantineDays ?? quarantineLength : null;
-    }
-
-    // The setting for a new plant: bought, swapped and gifted ones start in quarantine, until the
-    // person has ticked or unticked the box themselves
-    private int quarantineLength = Plant.DefaultQuarantineDays;
-    private bool quarantineNewPlants;
-    private bool quarantineTouched;
-
-    private void ApplyQuarantineRule()
-    {
-        if (!IsNew || plant is null || !quarantineNewPlants || quarantineTouched)
-            return;
-
-        var on = PlantService.StartsInQuarantine(plant.Origin, true);
-        plant.QuarantinedSince = on ? Today : null;
-        plant.QuarantineDays = on ? quarantineLength : null;
-    }
-
-    // Back from outside, offered when a saved plant's place is changed to an indoor one
-    private Places placesNow = Places.None;
-    private bool backQuarantine;
-    private bool backChecked;
-
-    private bool CameInsideNow
-    {
-        get
-        {
-            if (IsNew || original is null || original.InQuarantine || string.IsNullOrWhiteSpace(location))
-                return false;
-            if (!placesNow.IsOutdoors(original.PlaceId))
-                return false;
-
-            // A place that doesn't exist yet is indoors, unless it's a new spot in an outdoor room
-            if (placesNow.Named(location) is { } place)
-                return !placesNow.IsOutdoors(place.Id);
-            return placesNow.RoomNamed(RoomName.Split(location).Item1)?.Outdoors != true;
-        }
-    }
-
-    // A pot that suggests a medium sets it on a new plant, until the person has picked a medium themselves.
-    // A saved plant's medium was already chosen, so a pot never changes it
-    private bool mediumChosen => IsNew ? mediumPicked : true;
-    private bool mediumPicked;
-
-    // Soil or water into LECA or PON on a saved plant that isn't already being tracked
-    private bool OffersTransitionNow =>
-        !IsNew && original is not null && plant is not null && plant.InCollection && !plant.InTransition
-        && PlantService.OffersTransition(original.Medium, plant.Medium);
-
-    private bool trackTransition = true;
-
-    private void SetMedium(GrowingMedium medium)
-    {
-        var offered = OffersTransitionNow;
-        plant!.Medium = medium;
-        mediumPicked = true;
-        if (!offered)
-            trackTransition = true;
-    }
-
-    private void SetInnerPot(Guid? id)
-    {
-        var offered = OffersTransitionNow;
-        plant!.InnerPotId = id;
-        var pot = pots.FirstOrDefault(p => p.Id == id);
-        plant.Medium = PotKinds.MediumAfterPicking(pot, plant.Medium, mediumChosen);
-        if (!offered)
-            trackTransition = true;
-    }
-
-    // Clearing the outer pot clears what would be kept in it
-    private void SetOuterPot(Guid? id)
-    {
-        plant!.OuterPotId = id;
-        if (id is null)
-            plant.WaterInOuterPot = false;
-    }
-
+    // The form knows whether the plant has been created yet, the route only what the page was opened for
+    // The layout follows the route, so a save that fails after the plant was added doesn't turn the
+    // form into an edit form. Whether saving adds or updates is the form's own IsNew
     private bool IsNew => Id is null;
+
+    private bool RouteNew => Id is null;
 
     private bool ShowParent =>
         plant is not null
@@ -899,114 +756,40 @@ else
     protected override async Task OnParametersSetAsync()
     {
         googleOn = await Google.IsEnabledAsync();
-        var all = await Repository.GetAllAsync();
-        var places = await RoomService.GetPlacesAsync();
-        existingPropagations = await Propagations.GetAllAsync();
-        rooms = Room.List(places, all, existingPropagations);
-        nextNumber = CollectionNumbers.NextFree(all);
-        pots = await PotRepository.GetAllAsync();
-        mixes = await MixRepository.GetAllAsync();
-        feeds = [.. (await FeedRepository.GetAllAsync()).OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)];
-        tagSuggestions = PlantTags.Suggestions(all);
-        var settings = await SettingsService.GetAsync();
-        wateringReminderOn = settings.WateringReminder;
-        quarantineLength = settings.QuarantineDays ?? Plant.DefaultQuarantineDays;
-        quarantineNewPlants = settings.QuarantineNewPlants;
-        placesNow = places;
-        existing = all;
-        wishes = IsNew ? await WishService.GetAllAsync() : [];
-        dictionary = IsNew ? await Names.GetDictionaryAsync() : null;
         careBook = await CommonCare.GetBookAsync();
 
-        var sourceFromWish = false;
-        var sellers = await SellerService.GetSellersAsync();
-        sellerBook = sellers;
-        var uses = SellerSummary.CountsBySeller(sellers, all, existingPropagations);
-        sellerNames = sellers.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
+        // A new form only when the page was opened for something else, so a re-render never resets a draft
+        var key = (Id, CopyOfId, WishId, ParentId);
+        if (form is not null && formFor == key)
+            return;
 
-        if (IsNew)
-        {
-            // The draft keeps its id, so photos taken before saving stay with it
-            if (plant is null && CopyOfId is { } copyOfId && all.FirstOrDefault(p => p.Id == copyOfId) is { } source)
-            {
-                plant = source.Duplicate();
-                plant.AcquiredOn = LooseDate.Of(Today);
-                copiedDate = source.AcquiredOn;
-                copiedFrom = source.DisplayName;
-            }
-            var fresh = plant is null;
-            plant ??= new Plant { AcquiredOn = LooseDate.Of(Today) };
-            if (fresh && CopyOfId is null && WishId is { } fromWish && wishes.FirstOrDefault(w => w.Id == fromWish && !w.IsGot) is { } wish)
-            {
-                plant.Genus = wish.Genus;
-                plant.Species = wish.Species;
-                plant.Cultivar = wish.Cultivar;
-                plant.NameQualifier = wish.NameQualifier;
-                plant.NameNote = wish.NameNote;
-                plant.Nickname = string.IsNullOrWhiteSpace(wish.Genus) ? wish.Name : null;
-                plant.Source = wish.FoundAt;
-                sourceFromWish = true;
-            }
-            if (ParentId is { } parentId && all.FirstOrDefault(p => p.Id == parentId) is { } parent)
-            {
-                plant.Origin = PlantOrigin.Propagated;
-                plant.ParentPlantId = parent.Id;
-                plant.Genus = parent.Genus;
-                plant.Species = parent.Species;
-                plant.Cultivar = parent.Cultivar;
-                plant.NameQualifier = parent.NameQualifier;
-                plant.NameNote = parent.NameNote;
-                plant.PlaceId = parent.PlaceId;
-            }
-            if (fresh)
-                ApplyQuarantineRule();
-            startedWith ??= plant.Copy();
-        }
-        else
-        {
-            plant = all.FirstOrDefault(p => p.Id == Id);
-            original = plant?.Copy();
-            notFound = plant is null;
-        }
+        formFor = key;
+        form = Id is { } id ? await Forms.EditAsync(id, Labels.For) : await Forms.NewAsync(CopyOfId, WishId, ParentId, Labels.For);
+        plant = form?.Plant;
+        notFound = form is null;
+        if (form is null || plant is null)
+            return;
 
-        if (plant is not null)
-        {
-            location = places.NameOf(plant.PlaceId);
-            possibleParents = PlantLineage.PossibleParents(plant, all);
+        var all = form.Plants;
+        rooms = Room.List(form.Places, all, form.Propagations);
+        nextNumber = CollectionNumbers.NextFree(all);
+        tagSuggestions = PlantTags.Suggestions(all);
+        var uses = SellerSummary.CountsBySeller(form.SellerList, all, form.Propagations);
+        sellerNames = form.SellerList.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
+        possibleParents = PlantLineage.PossibleParents(plant, all);
 
-            // A feed deleted since it was picked reads as off, so saving the plant clears it the same way
-            if (plant.WateringFeedId is { } feedId && !feeds.Any(f => f.Id == feedId))
-                SetWateringFeed(null);
+        var isNew = form.IsNew;
+        openArrival = !isNew && (plant.ArrivedIn is not null || plant.ArrivalProblems.Count > 0 || !string.IsNullOrWhiteSpace(plant.ArrivalNote));
 
-            if (!sellerTextLoaded)
-            {
-                sellerText = sellers.For(plant.SellerId, plant.Source)?.Name ?? plant.Source;
-                // A wish's "found at" is made into a seller on save, like anything typed
-                sellerTextStart = sourceFromWish ? null : sellerText;
-                sellerTextLoaded = true;
-            }
-
-            openArrival = !IsNew && (plant.ArrivedIn is not null || plant.ArrivalProblems.Count > 0 || !string.IsNullOrWhiteSpace(plant.ArrivalNote));
-
-            // All closed when adding, even from a copy, where the summaries show what was copied
-            openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
-            openLikes = !IsNew && CareLikes.HasAny(plant);
-            openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
-            openTags = !IsNew && plant.Tags.Count > 0;
-
-            ownFields = await OwnFieldBook.GetAllAsync();
-            if (fieldInputsFor != plant.Id)
-            {
-                fieldInputs.Clear();
-                fieldInputsFor = plant.Id;
-            }
-            foreach (var field in ownFields)
-                fieldInputs.TryAdd(field.Id, plant.OwnFields.GetValueOrDefault(field.Id));
-            openFields = !IsNew && plant.OwnFields.Any(v => ownFields.Any(f => f.Id == v.Key) && v.Value.Length > 0);
-            openSwap = !IsNew && plant.Spare is not null;
-            openSitter = !IsNew && !string.IsNullOrWhiteSpace(plant.SitterNote);
-            openWatering = !IsNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WaterBy is not null || plant.WateringFeedId is not null);
-        }
+        // All closed when adding, even from a copy, where the summaries show what was copied
+        openLives = !isNew && (!string.IsNullOrWhiteSpace(form.Location) || plant.Light is not null);
+        openLikes = !isNew && CareLikes.HasAny(plant);
+        openPot = !isNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
+        openTags = !isNew && plant.Tags.Count > 0;
+        openFields = !isNew && plant.OwnFields.Any(v => form.OwnFields.Any(f => f.Id == v.Key) && v.Value.Length > 0);
+        openSwap = !isNew && plant.Spare is not null;
+        openSitter = !isNew && !string.IsNullOrWhiteSpace(plant.SitterNote);
+        openWatering = !isNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WaterBy is not null || plant.WateringFeedId is not null);
     }
 
     private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
@@ -1135,7 +918,7 @@ else
     private async Task CancelAsync()
     {
         await DiscardPhotosAsync();
-        Navigation.NavigateTo(IsNew ? "plants" : $"plants/{Id}");
+        Navigation.NavigateTo(RouteNew ? "plants" : $"plants/{Id}");
     }
 
     private async Task DiscardPhotosAsync()
@@ -1158,21 +941,6 @@ else
         }
     }
 
-    // The plant is saved by now, so a wish that can't be moved is logged and left, not reported as a failed save
-    private async Task MarkWishGotAsync(Wish? wish)
-    {
-        if (wish is null || plant is null)
-            return;
-        try
-        {
-            await WishService.MarkGotAsync(wish.Id, plant.Id, null);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Moving the wish to Got failed");
-        }
-    }
-
     private bool left;
 
     private void GoToPlant()
@@ -1180,7 +948,7 @@ else
         if (left || plant is null)
             return;
         left = true;
-        Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
+        Navigation.NavigateTo($"plants/{plant.Id}", replace: RouteNew);
     }
 
     private async Task SetForAllAsync()
@@ -1222,89 +990,32 @@ else
 
     private async Task SaveAsync()
     {
-        if (plant is null)
+        if (form is null)
             return;
 
-        plant.CollectionNumber = CollectionNumbers.Normalize(plant.CollectionNumber);
-        CareLikes.Normalize(plant);
-        // One is never stored
-        if (plant.Count == 1)
-            plant.Count = null;
-        errors = plant.Validate(Today).ToList();
-        var fieldValues = new List<(Guid Id, string? Value)>();
-        foreach (var field in ownFields)
-        {
-            // A stored value left as it was is kept, even one that no longer fits after the field's
-            // kind changed, so it never stops the plant from being saved
-            if (plant.OwnFields.TryGetValue(field.Id, out var before) && FieldInput(field) == before)
-                continue;
-            var stored = OwnFieldValues.Normalize(field.Kind, FieldInput(field), out var fieldError);
-            if (fieldError is not null)
-                errors.Add($"{field.Name}: {fieldError}");
-            fieldValues.Add((field.Id, stored));
-        }
-        if (errors.Count > 0)
-        {
-            showErrors = true;
-            return;
-        }
-
-        // Only the fields that are there are set. Values of a removed field are left on the plant.
-        foreach (var (fieldId, value) in fieldValues)
-        {
-            if (value is null)
-                plant.OwnFields.Remove(fieldId);
-            else
-                plant.OwnFields[fieldId] = value;
-        }
-
+        errors = [];
         saving = true;
         try
         {
-            // Saving also links a plant that only has its seller written in Source
-            if (sellerText != sellerTextStart || (plant.SellerId is null && sellerBook.For(null, plant.Source) is not null))
+            var result = await form.SaveAsync(photos);
+            if (result.Errors.Count > 0)
             {
-                var choice = await SellerService.ChooseAsync(sellerText, SellerName.Guess(plant.Origin), plant.SellerId);
-                plant.SellerId = choice.SellerId;
-                plant.Source = choice.Source;
-                sellerTextStart = sellerText;
+                errors = [.. result.Errors];
+                showErrors = true;
+                return;
             }
 
-            plant.PlaceId = await RoomService.PlaceIdAsync(location);
-            var cameInside = CameInsideNow;
-            if (cameInside && backQuarantine)
-            {
-                // Set before the save, so it's one write and the history says it went into quarantine
-                plant.QuarantinedSince = Today;
-                plant.QuarantineDays = quarantineLength;
-            }
-            // A new plant counts from what the form started with, like a duplicate's values
-            var likesBefore = original ?? startedWith ?? new Plant();
-            var startMove = OffersTransitionNow && trackTransition;
-            if (IsNew)
-            {
-                var wish = markWishGot ? WishHere : null;
-                await PlantService.CreateAsync(plant, photos);
+            if (result.Created)
                 photos.Clear(); // they belong to the saved plant now
-                await MarkWishGotAsync(wish);
-            }
-            else
-            {
-                var places = await RoomService.GetPlacesAsync();
-                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName, id => places.NameOf(id), FindPot, FeedName);
-                if (startMove)
-                    await PlantService.StartTransitionAsync(plant, Today, plant.Medium, null, Labels.For);
-            }
-            if (cameInside && backChecked)
-                await PestTreatmentRepository.SaveAsync(PestService.StartPlantCheck(plant, Today));
+            // The plant is saved by now, so a wish that can't be moved is logged and left, not reported as a failed save
+            if (result.WishError is { } wishError)
+                Logger.LogError(wishError, "Moving the wish to Got failed");
 
-            // Others of the same species that don't have what was just set are asked before leaving
-            var changed = CareLikes.Changed(likesBefore, plant);
-            var others = changed.Count == 0 ? [] : CareLikes.WouldChange(plant, changed, CareLikes.SameSpecies(plant, existing));
-            if (others.Count > 0)
+            if (result.LikesOffer.Count > 0)
             {
-                offerFields = changed;
-                offer = others;
+                // Others of the same species that don't have what was just set are asked before leaving
+                offerFields = result.LikesFields;
+                offer = result.LikesOffer;
             }
             else
             {
@@ -1314,6 +1025,9 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the plant failed");
+            // A plant that was created before it failed owns the photos, so they stay when leaving
+            if (!form.IsNew)
+                photos.Clear();
             errors = [$"Couldn't save: {ex.Message}"];
             showErrors = true;
         }

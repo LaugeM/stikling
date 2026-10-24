@@ -21,6 +21,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             plant.CoverPhotoId ??= PhotoEntries.Cover(photos).Id;
 
         plant.Tags = PlantTags.Normalize(plant.Tags);
+        Normalize(plant);
         await plants.SaveAsync(plant);
         await timeline.AddAsync(new TimelineEntry
         {
@@ -80,6 +81,18 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         return changed;
     }
 
+    // What every stored plant follows. Safe to run again. A collection number is only tidied when it
+    // was typed now, so an older one like "#117A" stays as it was until someone edits it
+    private static void Normalize(Plant plant, bool numberChanged = true)
+    {
+        if (numberChanged)
+            plant.CollectionNumber = CollectionNumbers.Normalize(plant.CollectionNumber);
+        CareLikes.Normalize(plant);
+        // One is never stored
+        if (plant.Count == 1)
+            plant.Count = null;
+    }
+
     /// <summary>Saves an edited plant and records what changed (status, room, medium, pot).</summary>
     /// <param name="potName">Turns a pot id into its name, so the history can say which pot.</param>
     /// <param name="placeName">The same for the room or spot, so the history can say where it went.</param>
@@ -96,6 +109,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Func<Guid, string?>? feedName = null)
     {
         after.Tags = PlantTags.Normalize(after.Tags);
+        Normalize(after, numberChanged: after.CollectionNumber != before.CollectionNumber);
         // The day it died, left or came back is what the year in review reads
         if (before.Status != after.Status)
             after.StatusSince = time.Today();
