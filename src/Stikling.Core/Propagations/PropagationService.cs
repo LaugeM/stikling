@@ -49,7 +49,8 @@ public sealed class PropagationService(
     /// <summary>
     /// Saves a new propagation and records it on its own history and the parent's. Photos taken
     /// while starting it go on its history on the days they were taken, and the newest one
-    /// becomes the cover.
+    /// becomes the cover. A create that failed partway can be run again: the record is saved over
+    /// itself, and a history entry that is already there isn't added twice.
     /// </summary>
     public async Task CreateAsync(Propagation propagation, Func<Enum, string> label, IReadOnlyList<Photo>? photos = null)
     {
@@ -58,21 +59,30 @@ public sealed class PropagationService(
             propagation.CoverPhotoId ??= PhotoEntries.Cover(photos).Id;
         await propagations.SaveAsync(propagation);
 
+        var history = await timeline.GetForAsync(propagation.Id);
         var what = Describe(propagation, label);
         var occurredAt = time.MomentOn(propagation.StartedOn);
-        await timeline.AddAsync(new TimelineEntry
+        if (!history.Any(e => !e.IsDeleted && e.Kind == TimelineKind.Created))
         {
-            SubjectType = SubjectType.Propagation,
-            SubjectId = propagation.Id,
-            Kind = TimelineKind.Created,
-            OccurredAt = PhotoEntries.StartedAt(occurredAt, photos ?? [], time),
-            Text = $"Started {what}"
-        });
+            await timeline.AddAsync(new TimelineEntry
+            {
+                SubjectType = SubjectType.Propagation,
+                SubjectId = propagation.Id,
+                Kind = TimelineKind.Created,
+                OccurredAt = PhotoEntries.StartedAt(occurredAt, photos ?? [], time),
+                Text = $"Started {what}"
+            });
+        }
 
+        var shown = history.Where(e => !e.IsDeleted).SelectMany(e => e.PhotoIds).ToHashSet();
         foreach (var entry in PhotoEntries.For(SubjectType.Propagation, propagation.Id, photos ?? [], time))
-            await timeline.AddAsync(entry);
+        {
+            if (!entry.PhotoIds.All(shown.Contains))
+                await timeline.AddAsync(entry);
+        }
 
-        if (propagation.ParentPlantId is { } parentId && await plants.GetAsync(parentId) is not null)
+        if (propagation.ParentPlantId is { } parentId && await plants.GetAsync(parentId) is not null
+            && !(await timeline.GetForAsync(parentId)).Any(e => !e.IsDeleted && e.Kind == TimelineKind.Propagated && e.RelatedId == propagation.Id))
         {
             await timeline.AddAsync(new TimelineEntry
             {

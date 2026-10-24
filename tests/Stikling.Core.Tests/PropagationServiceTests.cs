@@ -90,6 +90,22 @@ public class PropagationServiceTests
     }
 
     [Fact]
+    public async Task Create_run_twice_adds_the_history_once()
+    {
+        var first = new Photo { SubjectType = SubjectType.Propagation, TakenAt = Now.AddDays(-2) };
+        var second = new Photo { SubjectType = SubjectType.Propagation, TakenAt = Now.AddHours(-1) };
+        var cuttings = service.StartFrom(parent);
+
+        await service.CreateAsync(cuttings, Label, [first, second]);
+        await service.CreateAsync(cuttings, Label, [first, second]);
+
+        Assert.Single(propagations.Propagations);
+        Assert.Equal(1, HistoryOf(cuttings.Id).Count(e => e.Kind == TimelineKind.Created));
+        Assert.Equal(2, HistoryOf(cuttings.Id).Count(e => e.Kind == TimelineKind.Photo));
+        Assert.Equal(1, HistoryOf(parent.Id).Count(e => e.Kind == TimelineKind.Propagated && e.RelatedId == cuttings.Id));
+    }
+
+    [Fact]
     public async Task Moving_away_from_soil_clears_the_mix()
     {
         var mix = Guid.NewGuid();
