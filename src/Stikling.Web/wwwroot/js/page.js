@@ -28,7 +28,10 @@ export function languages() {
 
 // Enter in a search box picks the first result, in the element its aria-controls names, instead of
 // submitting the form it's in. Returns something to call dispose() on when the box goes away.
+// The box is null when it left the page before this ran.
 export function enterPicksFirst(input) {
+    if (!input)
+        return { dispose: () => {} };
     const onKey = event => {
         if (event.key !== "Enter")
             return;
