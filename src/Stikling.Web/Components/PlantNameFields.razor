@@ -291,16 +291,27 @@ else
         return CultivarChanged.InvokeAsync(value);
     }
 
+    // The fields can leave the page while the script is still loading: Cancel, or a name filled in
+    // from the parent plant folding them away. Nothing is hooked up to a box that is already gone.
+    private bool disposed;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         // Enter in the search box picks the first plant found, rather than saving the form
         if (firstRender)
         {
             await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+            if (disposed)
+                return;
             enterPicks = await module.InvokeAsync<IJSObjectReference>("enterPicksFirst", searchInput);
+            if (disposed)
+            {
+                await ReleaseEnterPicksAsync();
+                return;
+            }
         }
 
-        if (focusNext is not { } input)
+        if (focusNext is not { } input || disposed)
             return;
 
         focusNext = null;
@@ -309,12 +320,19 @@ else
 
     public async ValueTask DisposeAsync()
     {
-        if (enterPicks is null)
+        disposed = true;
+        await ReleaseEnterPicksAsync();
+    }
+
+    private async Task ReleaseEnterPicksAsync()
+    {
+        if (enterPicks is not { } picks)
             return;
+        enterPicks = null;
         try
         {
-            await enterPicks.InvokeVoidAsync("dispose");
-            await enterPicks.DisposeAsync();
+            await picks.InvokeVoidAsync("dispose");
+            await picks.DisposeAsync();
         }
         catch (JSDisconnectedException)
         {
