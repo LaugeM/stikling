@@ -3,6 +3,10 @@
 // the question or its answer. A topic with nothing left is hidden, and when only a few answers match
 // they open. Returns something to call dispose() on when the page goes away.
 export function attachSearch(input, noMatch) {
+    // The page can be left before this runs, and the elements are gone by then
+    if (!input || !noMatch)
+        return { setValue: () => { }, clear: () => { }, dispose: () => { } };
+
     const openUpTo = 5;
     const fold = text => text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
     const toc = document.querySelector(".help-toc");
