@@ -331,11 +331,14 @@ public sealed class Propagation : Entity
         SyncStageWithCounts(on);
     }
 
+    /// <summary>True when this many can be potted up, given away or marked failed: at least one, and no more than are left.</summary>
+    public bool CanTake(int count) => count >= 1 && count <= RemainingCount;
+
     private void CheckCount(int count)
     {
         if (!IsActive)
             throw new InvalidOperationException("This propagation is finished.");
-        if (count < 1 || count > RemainingCount)
+        if (!CanTake(count))
             throw new ArgumentOutOfRangeException(nameof(count), count, $"Choose between 1 and {RemainingCount}.");
     }
 

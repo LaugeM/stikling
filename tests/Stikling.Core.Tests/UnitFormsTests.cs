@@ -129,6 +129,27 @@ public class UnitFormsTests
     }
 
     [Fact]
+    public async Task A_reload_during_marking_failed_still_reports_the_count_as_stored()
+    {
+        var propagation = Stored();
+        var stale = propagation.Copy();
+        FailedForm? form = null;
+        timelineRepository = new FailingOnceTimeline(timeline, _ =>
+        {
+            // A sync reloads the page from before the count was stored, then the history line fails
+            form!.Propagation = stale;
+            return true;
+        });
+        form = Forms().Failed(propagation);
+
+        var result = await form.SaveAsync();
+
+        Assert.NotNull(result.LaterError);
+        Assert.Equal(1, propagation.FailedCount);
+        Assert.Equal(1, propagations.Propagations[propagation.Id].FailedCount);
+    }
+
+    [Fact]
     public async Task Giving_away_lowers_the_spare_count()
     {
         var propagation = Stored(p => p.SpareCount = 3);

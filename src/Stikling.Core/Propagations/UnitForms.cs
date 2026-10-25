@@ -34,33 +34,19 @@ public sealed class UnitForms(PropagationService propagationService, RoomService
     public GiveAwayForm GiveAway(Propagation propagation) => new(this, propagation);
 
     /// <summary>
-    /// Runs a save and tells the two failures apart. The service only changes the caller's count once
-    /// it is stored, so a count that is unchanged after an exception means nothing was counted and the
-    /// exception goes on. A changed count means the change happened and a later step failed.
+    /// Runs a save and tells the two failures apart. The service says when the count was stored and a
+    /// later step failed, with a <see cref="PartlySavedException"/>. That comes back as the result's
+    /// later error. Any other exception means nothing was counted, and it goes on.
     /// </summary>
-    /// <param name="counted">Told whether the count was stored, whether the save succeeded or not.</param>
-    internal static async Task<UnitResult> RunAsync(
-        Func<int> count,
-        Func<Task<IReadOnlyList<Plant>>> save,
-        Action<bool> counted)
+    internal static async Task<UnitResult> RunAsync(Func<Task<IReadOnlyList<Plant>>> save)
     {
-        var before = count();
         try
         {
-            var plants = await save();
-            counted(true);
-            return new UnitResult(plants, null);
+            return new UnitResult(await save(), null);
         }
-        catch (Exception ex)
+        catch (PartlySavedException ex)
         {
-            if (count() == before)
-            {
-                counted(false);
-                throw;
-            }
-
-            counted(true);
-            return new UnitResult([], ex);
+            return new UnitResult([], ex.InnerException ?? ex);
         }
     }
 }

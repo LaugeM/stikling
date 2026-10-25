@@ -13,7 +13,9 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 {
     /// <summary>
     /// Saves a new plant and records "Added to collection". Photos taken while adding it start
-    /// its history on the days they were taken, and the newest one becomes the cover.
+    /// its history on the days they were taken, and the newest one becomes the cover. A create that
+    /// failed partway can be run again with the same photos: the plant is saved over itself, and a
+    /// history entry that is already there isn't added twice.
     /// </summary>
     public async Task CreateAsync(Plant plant, IReadOnlyList<Photo>? photos = null)
     {
@@ -22,18 +24,29 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 
         plant.Tags = PlantTags.Normalize(plant.Tags);
         Normalize(plant);
+        // Only a create run again has history to look through, so a first one doesn't read the whole store
+        var again = await plants.GetAsync(plant.Id) is not null;
         await plants.SaveAsync(plant);
-        await timeline.AddAsync(new TimelineEntry
-        {
-            SubjectType = SubjectType.Plant,
-            SubjectId = plant.Id,
-            Kind = TimelineKind.Created,
-            OccurredAt = AddedAt(plant, photos ?? []),
-            Text = FirstEntryText(plant)
-        });
 
+        List<TimelineEntry> history = again ? [.. (await timeline.GetForAsync(plant.Id)).Where(e => !e.IsDeleted)] : [];
+        if (!history.Any(e => e.Kind == TimelineKind.Created))
+        {
+            await timeline.AddAsync(new TimelineEntry
+            {
+                SubjectType = SubjectType.Plant,
+                SubjectId = plant.Id,
+                Kind = TimelineKind.Created,
+                OccurredAt = AddedAt(plant, photos ?? []),
+                Text = FirstEntryText(plant)
+            });
+        }
+
+        var shown = history.SelectMany(e => e.PhotoIds).ToHashSet();
         foreach (var entry in PhotoEntries.For(SubjectType.Plant, plant.Id, photos ?? [], time))
-            await timeline.AddAsync(entry);
+        {
+            if (!entry.PhotoIds.All(shown.Contains))
+                await timeline.AddAsync(entry);
+        }
     }
 
     /// <summary>
@@ -93,7 +106,11 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             plant.Count = null;
     }
 
-    /// <summary>Saves an edited plant and records what changed (status, room, medium, pot).</summary>
+    /// <summary>
+    /// Saves an edited plant and records what changed (status, room, medium, pot). A failure in the
+    /// history after the save comes as a <see cref="PartlySavedException"/>, since running it again
+    /// would record the change twice.
+    /// </summary>
     /// <param name="potName">Turns a pot id into its name, so the history can say which pot.</param>
     /// <param name="placeName">The same for the room or spot, so the history can say where it went.</param>
     /// <param name="pot">Finds a pot by id, to see whether a pot waters itself.</param>
@@ -138,11 +155,14 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         after.LeftFor = gone && !string.IsNullOrWhiteSpace(after.LeftFor) ? after.LeftFor.Trim() : null;
         await plants.SaveAsync(after);
 
-        var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName, feedName);
-        if (changes.Count > 0)
-            await AddChangeAsync(after.Id, string.Join("\n", changes));
-        if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
-            await AddChangeAsync(after.Id, $"Identified as {after.BotanicalName ?? after.DisplayName}", TimelineEvent.Identified);
+        await PartlySavedException.AfterSaveAsync(async () =>
+        {
+            var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName, feedName);
+            if (changes.Count > 0)
+                await AddChangeAsync(after.Id, string.Join("\n", changes));
+            if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
+                await AddChangeAsync(after.Id, $"Identified as {after.BotanicalName ?? after.DisplayName}", TimelineEvent.Identified);
+        });
     }
 
     /// <summary>Sets the same status on several plants, recording it on each.</summary>

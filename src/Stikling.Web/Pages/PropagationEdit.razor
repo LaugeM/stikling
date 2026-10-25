@@ -685,6 +685,12 @@ else
 
     private async Task DiscardPhotosAsync()
     {
+        // A propagation stored before its save failed owns the photos, so they stay
+        if (form is { Stored: true })
+        {
+            photos.Clear();
+            return;
+        }
         foreach (var photo in photos)
             await Photos.DeleteAsync(photo.Id);
         photos.Clear();
@@ -750,9 +756,9 @@ else
 
             if (result.Created)
                 photos.Clear(); // they belong to the saved propagation now
-            // The cutting is saved by now, so a wish that can't be moved is logged and left, not reported as a failed save
-            if (result.WishError is { } wishError)
-                Logger.LogError(wishError, "Moving the wish to Got failed");
+            // The cutting is saved by now, so a wish that can't be moved or a history line that failed is logged, not a failed save
+            if (result.LaterError is { } later)
+                Logger.LogError(later, "A step after saving the propagation failed");
 
             var id = form.Propagation.Id;
             Navigation.NavigateTo(wasNew ? $"propagations/{id}?made=true" : $"propagations/{id}", replace: wasNew);

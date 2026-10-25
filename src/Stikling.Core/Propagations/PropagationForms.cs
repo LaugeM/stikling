@@ -46,6 +46,19 @@ public sealed class PropagationForms(
 
     internal TimeProvider Time => time;
 
+    /// <summary>Whether a propagation is stored. When that can't be read either, it counts as stored, so its photos are kept.</summary>
+    internal async Task<bool> IsStoredAsync(Guid id)
+    {
+        try
+        {
+            return await propagations.GetAsync(id) is not null;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
     private async Task<PropagationFormData> LoadAsync(bool forNew)
     {
         var allPlants = await plants.GetAllAsync();

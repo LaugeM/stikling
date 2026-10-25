@@ -14,13 +14,13 @@ namespace Stikling.Core.Plants;
 /// <param name="Created">This save created the plant, so the photos taken for it belong to it now.</param>
 /// <param name="LikesOffer">Other plants of the same species that lack the needs just set.</param>
 /// <param name="LikesFields">Which needs the offer is about.</param>
-/// <param name="WishError">Moving the wish to Got failed after the plant was saved. Logged, not a failed save.</param>
+/// <param name="LaterError">A step after the plant was saved failed, like moving the wish to Got or a line in its history. Logged, not a failed save.</param>
 public sealed record PlantFormResult(
     IReadOnlyList<string> Errors,
     bool Created,
     IReadOnlyList<Plant> LikesOffer,
     IReadOnlyList<LikesField> LikesFields,
-    Exception? WishError)
+    Exception? LaterError)
 {
     /// <summary>The form was wrong, so nothing was written.</summary>
     public PlantFormResult(IReadOnlyList<string> errors) : this(errors, false, [], [], null)
@@ -70,6 +70,7 @@ public sealed class PlantForm
         Plant = plant;
         Original = original;
         IsNew = original is null;
+        Stored = !IsNew;
         CopiedDate = copiedDate;
         CopiedFrom = copiedFrom;
         Wish = wish;
@@ -114,6 +115,12 @@ public sealed class PlantForm
 
     /// <summary>True until the plant has been created. A form that failed after creating it saves as an edit.</summary>
     public bool IsNew { get; private set; }
+
+    /// <summary>
+    /// The plant is stored, even when the create that stored it failed partway and <see cref="IsNew"/> is
+    /// still true. The photos taken for it belong to it then, so leaving the page keeps them.
+    /// </summary>
+    public bool Stored { get; private set; }
 
     /// <summary>When the plant this one is copied from was got, to offer the same date.</summary>
     public LooseDate? CopiedDate { get; }
@@ -335,14 +342,23 @@ public sealed class PlantForm
         }
 
         var created = false;
-        Exception? wishError = null;
+        Exception? laterError = null;
         if (IsNew)
         {
             var wish = MarkWishGot ? WishHere : null;
-            await deps.PlantService.CreateAsync(Plant, photos);
+            try
+            {
+                await deps.PlantService.CreateAsync(Plant, photos);
+            }
+            catch
+            {
+                Stored = await deps.IsStoredAsync(Plant.Id);
+                throw;
+            }
             created = true;
             written = true;
             IsNew = false;
+            Stored = true;
             Original = Plant.Copy();
             if (wish is not null)
             {
@@ -353,14 +369,22 @@ public sealed class PlantForm
                 }
                 catch (Exception ex)
                 {
-                    wishError = ex;
+                    laterError = ex;
                 }
             }
         }
         else
         {
             var places = await deps.RoomService.GetPlacesAsync();
-            await deps.PlantService.UpdateAsync(Original!, Plant, label, PotName, MixName, id => places.NameOf(id), FindPot, FeedName);
+            try
+            {
+                await deps.PlantService.UpdateAsync(Original!, Plant, label, PotName, MixName, id => places.NameOf(id), FindPot, FeedName);
+            }
+            catch (PartlySavedException ex)
+            {
+                // The plant is saved, so saving again mustn't record the change a second time
+                laterError = ex.InnerException ?? ex;
+            }
             written = true;
             Original = Plant.Copy();
             if (startMoveAtSave && !transitionStarted)
@@ -381,7 +405,7 @@ public sealed class PlantForm
         var changed = CareLikes.Changed(likesBefore!, Plant);
         var others = changed.Count == 0 ? [] : CareLikes.WouldChange(Plant, changed, CareLikes.SameSpecies(Plant, Plants));
         return others.Count > 0
-            ? new PlantFormResult([], created, others, changed, wishError)
-            : new PlantFormResult([], created, [], [], wishError);
+            ? new PlantFormResult([], created, others, changed, laterError)
+            : new PlantFormResult([], created, [], [], laterError);
     }
 }

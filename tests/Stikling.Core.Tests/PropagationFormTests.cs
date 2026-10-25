@@ -137,7 +137,7 @@ public class PropagationFormTests
 
         Assert.Empty(result.Errors);
         Assert.True(result.Created);
-        Assert.NotNull(result.WishError);
+        Assert.NotNull(result.LaterError);
         Assert.True(propagations.Propagations.ContainsKey(form.Propagation.Id));
     }
 
@@ -370,8 +370,11 @@ public class PropagationFormTests
         var photo = new Photo { SubjectType = SubjectType.Propagation, TakenAt = Now.AddHours(-1) };
 
         var form = await Forms().NewAsync(parent.Id, wish.Id, Label);
+        Assert.False(form.Stored);
         await Assert.ThrowsAsync<InvalidOperationException>(() => form.SaveAsync([photo]));
         Assert.True(form.IsNew);
+        // It is stored, so leaving the page keeps the photo
+        Assert.True(form.Stored);
 
         var result = await form.SaveAsync([photo]);
 
@@ -388,6 +391,33 @@ public class PropagationFormTests
         var again = await form.SaveAsync([]);
         Assert.False(again.Created);
         Assert.Single(propagations.Propagations);
+    }
+
+    [Fact]
+    public async Task An_edit_whose_history_failed_after_the_save_is_saved_and_not_recorded_twice()
+    {
+        var saved = await StoredPropagation(p =>
+        {
+            p.Medium = GrowingMedium.Soil;
+            p.Genus = "Alocasia";
+            p.Species = "zebrina";
+            p.NameQualifier = NameQualifier.Cf;
+        });
+        timelineRepository = new FailingOnceTimeline(timeline, e => e.Event == TimelineEvent.Identified);
+        var form = (await Forms().EditAsync(saved.Id, Label))!;
+        form.Propagation.Medium = GrowingMedium.Water;
+        form.Propagation.NameQualifier = null;
+
+        var result = await form.SaveAsync([]);
+
+        Assert.Empty(result.Errors);
+        Assert.NotNull(result.LaterError);
+        Assert.Equal(GrowingMedium.Water, propagations.Propagations[saved.Id].Medium);
+        Assert.Single(timeline.Entries, e => e.SubjectId == saved.Id && e.Kind == TimelineKind.Change);
+
+        await form.SaveAsync([]);
+
+        Assert.Single(timeline.Entries, e => e.SubjectId == saved.Id && e.Kind == TimelineKind.Change);
     }
 
     private sealed class FailingOncePhotoTimeline(ITimelineRepository inner) : ITimelineRepository

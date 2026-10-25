@@ -22,12 +22,15 @@ public sealed class PotUpForm
     private List<Guid>? plantIds;
     // The mode the plant ids were made for
     private PotUpKind triedMode;
+    // The ids of a failed save that stored some of its plants, until a save counts
+    private List<Guid>? storedIds;
+    private Propagation propagation;
 
     internal PotUpForm(UnitForms deps, Propagation propagation, Places places, Func<Enum, string> label)
     {
         this.deps = deps;
         this.label = label;
-        Propagation = propagation;
+        this.propagation = propagation;
 
         // A propagation named only by nickname passes it on, since a plant needs a name
         Nickname = string.IsNullOrWhiteSpace(propagation.Genus) ? propagation.Nickname : null;
@@ -42,9 +45,19 @@ public sealed class PotUpForm
 
     /// <summary>
     /// The propagation it records on. The page sets the one it reloaded after a sync, so a save never
-    /// writes the copy the sheet was opened with over a newer one.
+    /// writes the copy the sheet was opened with over a newer one. When a change from another device
+    /// leaves fewer than a <see cref="Retrying"/> form's count, the form is free to change again.
     /// </summary>
-    public Propagation Propagation { get; set; }
+    public Propagation Propagation
+    {
+        get => propagation;
+        set
+        {
+            propagation = value;
+            if (Retrying && !value.CanTake(count))
+                Retrying = false;
+        }
+    }
 
     /// <summary>
     /// How many to pot up. Once a save has failed after saving some of the plants it keeps its value,
@@ -98,6 +111,13 @@ public sealed class PotUpForm
     public bool Retrying { get; private set; }
 
     /// <summary>
+    /// A save failed after storing some of its plants, and no save has counted since. The page keeps
+    /// the form when the sheet is opened again, so the next save writes over those plants instead of
+    /// making more. Stays true when <see cref="Retrying"/> was let go, since the plants are still there.
+    /// </summary>
+    public bool HasStoredPlants => storedIds is not null;
+
+    /// <summary>
     /// The ids of the plants a save makes, empty until the first save. When only a later step failed the
     /// plants exist, so the page can find them by these.
     /// </summary>
@@ -115,7 +135,7 @@ public sealed class PotUpForm
         Retrying ? triedMode
         : Mode == PotUpKind.OnePot && Propagation.RemainingCount < 2 ? PotUpKind.Each : Mode;
 
-    public bool CountIsValid => Count >= 1 && Count <= Propagation.RemainingCount;
+    public bool CountIsValid => Propagation.CanTake(Count);
 
     public bool CanSave => CountIsValid && !(EffectiveMode == PotUpKind.Into && IntoPlantId is null);
 
@@ -135,37 +155,36 @@ public sealed class PotUpForm
     }
 
     /// <summary>
-    /// Pots the units up. An exception means nothing was counted: <see cref="Retrying"/> is set and saving
-    /// again carries on. When the count was stored and a later step failed, that comes back as
-    /// <see cref="UnitResult.LaterError"/> and the form is done.
+    /// Pots the units up. An exception means nothing was counted: <see cref="Retrying"/> is set when some
+    /// plants were stored, and saving again carries on. When the count was stored and a later step
+    /// failed, that comes back as <see cref="UnitResult.LaterError"/> and the form is done.
     /// </summary>
     public async Task<UnitResult> SaveAsync()
     {
-        // New ids unless a failed save stored some of its plants, so a retry writes over those
+        // Taken now, so a reload during the save can't change which copy it records on
+        var on = Propagation;
         if (!Retrying)
         {
             triedMode = EffectiveMode;
-            plantIds = [.. Enumerable.Range(0, PlantCount).Select(_ => Guid.NewGuid())];
+            // Plants a failed save stored are written over, as many as this save makes
+            plantIds = [.. Enumerable.Range(0, PlantCount).Select(i => storedIds is { } stored && i < stored.Count ? stored[i] : Guid.NewGuid())];
         }
 
         try
         {
-            return await UnitForms.RunAsync(
-                () => Propagation.PottedUpCount,
-                async () =>
-                {
-                    var placeId = await deps.RoomService.PlaceIdAsync(Location);
-                    return await deps.PropagationService.PotUpAsync(Propagation, new PotUpRequest(
-                        Count, Date, Nickname, placeId, Medium, PotId, Medium == GrowingMedium.Soil ? SoilMixId : null,
-                        OnePot: EffectiveMode == PotUpKind.OnePot,
-                        IntoPlantId: EffectiveMode == PotUpKind.Into ? IntoPlantId : null,
-                        PlantIds: plantIds), label);
-                },
-                counted =>
-                {
-                    if (counted)
-                        Retrying = false;
-                });
+            var result = await UnitForms.RunAsync(async () =>
+            {
+                var placeId = await deps.RoomService.PlaceIdAsync(Location);
+                return await deps.PropagationService.PotUpAsync(on, new PotUpRequest(
+                    Count, Date, Nickname, placeId, Medium, PotId, Medium == GrowingMedium.Soil ? SoilMixId : null,
+                    OnePot: EffectiveMode == PotUpKind.OnePot,
+                    IntoPlantId: EffectiveMode == PotUpKind.Into ? IntoPlantId : null,
+                    PlantIds: plantIds), label);
+            });
+            // Counted, so the plants belong to it now
+            Retrying = false;
+            storedIds = null;
+            return result;
         }
         catch
         {
@@ -179,6 +198,8 @@ public sealed class PotUpForm
             {
                 stored = true;
             }
+            if (stored)
+                storedIds = plantIds;
             Retrying = stored;
             throw;
         }

@@ -1226,8 +1226,8 @@ else
 
     private void OpenPotUp()
     {
-        // A pot up that failed before anything was counted carries on, so it keeps its plants
-        if (potUp is not { Retrying: true } || potUp.Propagation.Id != propagation!.Id)
+        // A pot up that failed after storing some of its plants carries on, so it writes over them
+        if (potUp is not { HasStoredPlants: true } || potUp.Propagation.Id != propagation!.Id)
             potUp = Units.PotUp(propagation!, places, Labels.For);
         message = null;
         stageView = StageView.PotUp;
@@ -1306,6 +1306,8 @@ else
         try
         {
             var result = await form.SaveAsync();
+            // The counts were recorded on the copy the sheet saved, which a sync may have replaced on the page
+            await LoadAsync();
             if (result.LaterError is { } later)
                 Logger.LogError(later, "A step after marking units as failed failed");
             message = form.Count == 1 ? "Marked 1 as failed." : $"Marked {form.Count} as failed.";
@@ -1335,6 +1337,8 @@ else
         try
         {
             var result = await form.SaveAsync();
+            // The counts were recorded on the copy the sheet saved, which a sync may have replaced on the page
+            await LoadAsync();
             if (result.LaterError is { } later)
                 Logger.LogError(later, "A step after marking units as given away failed");
             message = form.Count == 1 ? "Marked 1 as given away." : $"Marked {form.Count} as given away.";
