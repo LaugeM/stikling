@@ -1731,6 +1731,7 @@
     private ElementReference noMatch;
     private IJSObjectReference? searchModule;
     private IJSObjectReference? search;
+    private bool disposed;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -1738,17 +1739,47 @@
         {
             await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
             await module.InvokeVoidAsync("scrollToFragment");
+            if (disposed)
+                return;
             searchReady = true;
             StateHasChanged();
             return;
         }
 
-        if (searchReady && search is null)
+        if (searchReady && search is null && searchModule is null)
         {
-            searchModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/help.js");
-            search = await searchModule.InvokeAsync<IJSObjectReference>("attachSearch", searchInput, noMatch);
+            // The page can be left while these awaits run, so each result is released if it arrives late
+            var importedModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/help.js");
+            if (disposed)
+            {
+                await ReleaseAsync(importedModule);
+                return;
+            }
+            searchModule = importedModule;
+
+            var attached = await searchModule.InvokeAsync<IJSObjectReference>("attachSearch", searchInput, noMatch);
+            if (disposed)
+            {
+                await ReleaseAsync(attached, "dispose");
+                return;
+            }
+            search = attached;
+
             if (!string.IsNullOrWhiteSpace(Query))
                 await search.InvokeVoidAsync("setValue", Query);
+        }
+    }
+
+    private static async Task ReleaseAsync(IJSObjectReference reference, string? disposeMethod = null)
+    {
+        try
+        {
+            if (disposeMethod is not null)
+                await reference.InvokeVoidAsync(disposeMethod);
+            await reference.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
         }
     }
 
@@ -1760,6 +1791,7 @@
 
     public async ValueTask DisposeAsync()
     {
+        disposed = true;
         try
         {
             if (search is not null)
