@@ -8,6 +8,7 @@
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
+@inject UnitForms Units
 @inject RoomService RoomService
 @inject SellerService SellerService
 @inject NavigationManager Navigation
@@ -584,6 +585,7 @@ else
                     break;
 
                 case StageView.PotUp:
+                    var up = potUp!;
                     @if (InPlantMedium)
                     {
                         <p class="form-text mb-3">
@@ -604,30 +606,30 @@ else
                         @if (propagation.RemainingCount > 1)
                         {
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="potup-mode" id="potup-each" checked="@(PotUpMode == PotUpKind.Each)" @onchange="() => potUp.Mode = PotUpKind.Each" />
+                                <input class="form-check-input" type="radio" name="potup-mode" disabled="@up.Retrying" id="potup-each" checked="@(up.EffectiveMode == PotUpKind.Each)" @onchange="() => up.Mode = PotUpKind.Each" />
                                 <label class="form-check-label" for="potup-each">Each in its own pot</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="potup-mode" id="potup-one" checked="@(PotUpMode == PotUpKind.OnePot)" @onchange="() => potUp.Mode = PotUpKind.OnePot" />
+                                <input class="form-check-input" type="radio" name="potup-mode" disabled="@up.Retrying" id="potup-one" checked="@(up.EffectiveMode == PotUpKind.OnePot)" @onchange="() => up.Mode = PotUpKind.OnePot" />
                                 <label class="form-check-label" for="potup-one">All in one pot</label>
                             </div>
                         }
                         else
                         {
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="potup-mode" id="potup-each" checked="@(PotUpMode == PotUpKind.Each)" @onchange="() => potUp.Mode = PotUpKind.Each" />
+                                <input class="form-check-input" type="radio" name="potup-mode" disabled="@up.Retrying" id="potup-each" checked="@(up.EffectiveMode == PotUpKind.Each)" @onchange="() => up.Mode = PotUpKind.Each" />
                                 <label class="form-check-label" for="potup-each">In a pot of its own</label>
                             </div>
                         }
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="potup-mode" id="potup-into" checked="@(PotUpMode == PotUpKind.Into)" @onchange="() => potUp.Mode = PotUpKind.Into" />
+                            <input class="form-check-input" type="radio" name="potup-mode" disabled="@up.Retrying" id="potup-into" checked="@(up.EffectiveMode == PotUpKind.Into)" @onchange="() => up.Mode = PotUpKind.Into" />
                             <label class="form-check-label" for="potup-into">In with a plant you have</label>
                         </div>
                     </div>
-                    @if (PotUpMode == PotUpKind.Into)
+                    @if (up.EffectiveMode == PotUpKind.Into)
                     {
                         <div class="mb-2">
-                            <PlantSelect Id="potup-into-plant" Plants="allPlants" Genus="@(string.IsNullOrWhiteSpace(propagation.Genus) ? parent?.Genus : propagation.Genus)" Value="potUp.IntoPlantId" ValueChanged="id => potUp.IntoPlantId = id" />
+                            <PlantSelect Id="potup-into-plant" Plants="allPlants" Genus="@(string.IsNullOrWhiteSpace(propagation.Genus) ? parent?.Genus : propagation.Genus)" Value="up.IntoPlantId" ValueChanged="id => up.IntoPlantId = id" />
                             @if (!allPlants.Any(p => p.InCollection))
                             {
                                 <div class="form-text">There are no plants to pot them with.</div>
@@ -643,69 +645,70 @@ else
                         <div class="mb-2">
                             <label class="form-label" for="potup-count">How many (@propagation.RemainingCount left)</label>
                             <input id="potup-count" type="number" class="form-control" min="1" max="@propagation.RemainingCount"
-                                   inputmode="numeric" @bind="potUp.Count" @bind:event="oninput" />
+                                   inputmode="numeric" disabled="@up.Retrying" @bind="up.Count" @bind:event="oninput" />
                         </div>
                     }
                     <div class="mb-2">
                         <label class="form-label" for="potup-name">Nickname</label>
-                        <input id="potup-name" class="form-control" @bind="potUp.Nickname" @bind:event="oninput" placeholder="@(propagation.BotanicalName ?? "")" />
-                        @if (PotUpMode == PotUpKind.Each && (potUp.Count > 1 || propagation.PottedUpCount > 0))
+                        <input id="potup-name" class="form-control" @bind="up.Nickname" @bind:event="oninput" placeholder="@(propagation.BotanicalName ?? "")" />
+                        @if (up.EffectiveMode == PotUpKind.Each && (up.Count > 1 || propagation.PottedUpCount > 0))
                         {
-                            <div class="form-text">Numbered when there are several, e.g. "@(string.IsNullOrWhiteSpace(potUp.Nickname) ? "Coleus" : potUp.Nickname.Trim()) @(propagation.PottedUpCount + 1)".</div>
+                            <div class="form-text">Numbered when there are several, e.g. "@(string.IsNullOrWhiteSpace(up.Nickname) ? "Coleus" : up.Nickname.Trim()) @(propagation.PottedUpCount + 1)".</div>
                         }
                     </div>
-                    @if (PotUpMode != PotUpKind.Into)
+                    @if (up.EffectiveMode != PotUpKind.Into)
                     {
-                        @if (InPlantMedium && !potUp.ChangeMedium)
+                        @if (InPlantMedium && !up.ChangeMedium)
                         {
-                            <button type="button" class="btn btn-link btn-sm link-action p-0 mb-2" @onclick="() => potUp.ChangeMedium = true">Moved it to something else?</button>
+                            <button type="button" class="btn btn-link btn-sm link-action p-0 mb-2" @onclick="() => up.ChangeMedium = true">Moved it to something else?</button>
                         }
                         else
                         {
                             <div class="mb-2">
                                 <label class="form-label" for="potup-medium">Grows in</label>
-                                <select id="potup-medium" class="form-select" value="@potUp.Medium" @onchange="SetPotUpMedium">
+                                <select id="potup-medium" class="form-select" value="@up.Medium" @onchange="e => up.PickMedium(Enum.Parse<GrowingMedium>(e.Value?.ToString() ?? nameof(GrowingMedium.Soil)))">
                                     @foreach (var medium in Enum.GetValues<GrowingMedium>())
                                     {
                                         <option value="@medium">@Labels.For(medium)</option>
                                     }
                                 </select>
                             </div>
-                            @if (potUp.Medium == GrowingMedium.Soil)
+                            @if (up.Medium == GrowingMedium.Soil)
                             {
                                 <div class="mb-2">
-                                    <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
+                                    <MixPicker @bind-Value="up.SoilMixId" Mixes="mixes" />
                                 </div>
                             }
                         }
                         <div class="mb-2">
-                            <PotPicker Value="potUp.PotId" ValueChanged="SetPotUpPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                            <PotPicker Value="up.PotId" ValueChanged="id => up.PickPot(id, pots.FirstOrDefault(p => p.Id == id))" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
                         </div>
                     }
                     <div class="mb-2">
                         <label class="form-label" for="potup-date">Date</label>
-                        <input id="potup-date" type="date" class="form-control" @bind="potUp.Date" min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                        <input id="potup-date" type="date" class="form-control" @bind="up.Date" min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                     </div>
-                    @if (PotUpMode != PotUpKind.Into)
+                    @if (up.EffectiveMode != PotUpKind.Into)
                     {
                         <div class="mb-3">
-                            <RoomPicker @bind-Value="potUp.Location" Rooms="rooms" Label="Where it goes" />
+                            <RoomPicker @bind-Value="up.Location" Rooms="rooms" Label="Where it goes" />
                         </div>
                     }
                     <div class="form-actions">
-                        <button type="button" class="btn btn-primary" disabled="@(busy || !CountIsValid(potUp.Count) || (PotUpMode == PotUpKind.Into && potUp.IntoPlantId is null))" @onclick="PotUpAsync">
+                        <button type="button" class="btn btn-primary" disabled="@(busy || !up.CanSave)" @onclick="PotUpAsync">
                             @(InPlantMedium
-                                ? (potUp.Count == 1 ? "It's a plant now" : $"Make {potUp.Count} plants")
-                                : (potUp.Count == 1 ? "Pot up" : $"Pot up {potUp.Count}"))
+                                ? (up.Count == 1 ? "It's a plant now" : $"Make {up.Count} plants")
+                                : (up.Count == 1 ? "Pot up" : $"Pot up {up.Count}"))
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
                     </div>
                     break;
 
                 case StageView.Failed:
+                    var fail = failed!;
                     <p class="form-text mb-3">
                         It stays in the history and in the results. If it was a mistake, correct the count under Edit.
-                        @if (failedCount >= propagation.RemainingCount)
+                        @if (fail.Finishes)
                         {
                             <text> This finishes the propagation.</text>
                         }
@@ -715,7 +718,7 @@ else
                         <div class="mb-2">
                             <label class="form-label" for="failed-count">How many (@propagation.RemainingCount left)</label>
                             <input id="failed-count" type="number" class="form-control" min="1" max="@propagation.RemainingCount"
-                                   inputmode="numeric" @bind="failedCount" @bind:event="oninput" />
+                                   inputmode="numeric" @bind="fail.Count" @bind:event="oninput" />
                         </div>
                     }
                     <div class="mb-2">
@@ -723,33 +726,34 @@ else
                         <div class="chip-row" role="group" aria-labelledby="failed-why-label">
                             @foreach (var why in Enum.GetValues<FailReason>())
                             {
-                                var picked = failedReason == why;
+                                var picked = fail.Reason == why;
                                 <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
-                                        @onclick="() => failedReason = picked ? null : why">@FailReasons.Chip(why)</button>
+                                        @onclick="() => fail.Reason = picked ? null : why">@FailReasons.Chip(why)</button>
                             }
                         </div>
                     </div>
                     <div class="mb-2">
                         <label class="form-label" for="failed-note">Note <span class="text-body-secondary">(optional)</span></label>
-                        <input id="failed-note" class="form-control" @bind="failedNote" @bind:event="oninput" placeholder="e.g. left too wet" />
+                        <input id="failed-note" class="form-control" @bind="fail.Note" @bind:event="oninput" placeholder="e.g. left too wet" />
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="failed-date">Date</label>
-                        <input id="failed-date" type="date" class="form-control" @bind="failedDate"
+                        <input id="failed-date" type="date" class="form-control" @bind="fail.Date"
                                min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-danger" disabled="@(busy || !CountIsValid(failedCount))" @onclick="MarkFailedAsync">
-                            @(failedCount == 1 ? "Mark as failed" : $"Mark {failedCount} as failed")
+                        <button type="button" class="btn btn-danger" disabled="@(busy || !fail.CountIsValid)" @onclick="MarkFailedAsync">
+                            @(fail.Count == 1 ? "Mark as failed" : $"Mark {fail.Count} as failed")
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
                     </div>
                     break;
 
                 case StageView.GaveAway:
+                    var giving = this.gave!;
                     <p class="form-text mb-3">
                         It stays in the history and in the results.
-                        @if (gaveCount >= propagation.RemainingCount)
+                        @if (giving.Finishes)
                         {
                             <text> This finishes the propagation.</text>
                         }
@@ -759,21 +763,21 @@ else
                         <div class="mb-2">
                             <label class="form-label" for="gave-count">How many (@propagation.RemainingCount left)</label>
                             <input id="gave-count" type="number" class="form-control" min="1" max="@propagation.RemainingCount"
-                                   inputmode="numeric" @bind="gaveCount" @bind:event="oninput" />
+                                   inputmode="numeric" @bind="giving.Count" @bind:event="oninput" />
                         </div>
                     }
                     <div class="mb-2">
                         <label class="form-label" for="gave-to">Who got it? <span class="text-body-secondary">(optional)</span></label>
-                        <input id="gave-to" class="form-control" @bind="gaveTo" @bind:event="oninput" />
+                        <input id="gave-to" class="form-control" @bind="giving.To" @bind:event="oninput" />
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="gave-date">Date</label>
-                        <input id="gave-date" type="date" class="form-control" @bind="gaveDate"
+                        <input id="gave-date" type="date" class="form-control" @bind="giving.Date"
                                min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-primary" disabled="@(busy || !CountIsValid(gaveCount))" @onclick="GiveAwayAsync">
-                            @(gaveCount == 1 ? "Mark as given away" : $"Mark {gaveCount} as given away")
+                        <button type="button" class="btn btn-primary" disabled="@(busy || !giving.CountIsValid)" @onclick="GiveAwayAsync">
+                            @(giving.Count == 1 ? "Mark as given away" : $"Mark {giving.Count} as given away")
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
                     </div>
@@ -887,28 +891,7 @@ else
     private bool shareOpen;
     private bool shareOnLink;
 
-    private enum PotUpKind { Each, OnePot, Into }
-
-    // One left can't be split into pots, so it is only a pot of its own or in with a plant
-    private PotUpKind PotUpMode => potUp.Mode == PotUpKind.OnePot && propagation?.RemainingCount < 2 ? PotUpKind.Each : potUp.Mode;
-
     private IReadOnlyList<Plant> allPlants = [];
-
-    private sealed class PotUpForm
-    {
-        public int Count { get; set; } = 1;
-        public string? Nickname { get; set; }
-        public DateOnly Date { get; set; }
-        public string? Location { get; set; }
-        public GrowingMedium Medium { get; set; }
-        public Guid? PotId { get; set; }
-        public Guid? SoilMixId { get; set; }
-        public PotUpKind Mode { get; set; }
-        public Guid? IntoPlantId { get; set; }
-
-        /// <summary>Shows Grows in and the mix for a propagation already in a plant medium, which hides them.</summary>
-        public bool ChangeMedium { get; set; }
-    }
 
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
 
@@ -960,14 +943,9 @@ else
     private StageView stageView;
     private More more;
     private DateOnly since;
-    private PotUpForm potUp = new();
-    private int failedCount = 1;
-    private FailReason? failedReason;
-    private string? failedNote;
-    private int gaveCount = 1;
-    private string? gaveTo;
-    private DateOnly gaveDate;
-    private DateOnly failedDate;
+    private PotUpForm? potUp;
+    private FailedForm? failed;
+    private GiveAwayForm? gave;
     private string? message;
     private IReadOnlyList<Plant> madePlants = [];
 
@@ -1060,6 +1038,9 @@ else
             stageView = StageView.None;
             more = More.None;
             message = null;
+            potUp = null;
+            failed = null;
+            gave = null;
         }
         await LoadAsync();
         // A care entry lives in the care sheet, so that opens to show it
@@ -1079,6 +1060,16 @@ else
         careBook = await CommonCare.GetBookAsync();
         await Covers.EnsureLoadedAsync();
         propagation = await Repository.GetAsync(Id);
+        // An open sheet saves on the propagation as it is stored now, not the copy it was opened with
+        if (propagation is not null)
+        {
+            if (potUp?.Propagation.Id == propagation.Id)
+                potUp.Propagation = propagation;
+            if (failed?.Propagation.Id == propagation.Id)
+                failed.Propagation = propagation;
+            if (gave?.Propagation.Id == propagation.Id)
+                gave.Propagation = propagation;
+        }
         var plants = await PlantRepository.GetAllAsync();
         allPlants = plants;
         var propagations = allPropagations = await Repository.GetAllAsync();
@@ -1130,8 +1121,6 @@ else
         await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
         await module.InvokeVoidAsync("scrollToId", "propagation-plants");
     }
-
-    private bool CountIsValid(int count) => propagation is not null && count >= 1 && count <= propagation.RemainingCount;
 
     private void OpenStage()
     {
@@ -1235,56 +1224,25 @@ else
 
     private Task SetDormantAsync() => ChangeDormancyAsync(since);
 
-    // A pot that suggests a medium sets it, until the person has picked a medium in this form
-    private bool potUpMediumChosen;
-
-    private void SetPotUpMedium(ChangeEventArgs e)
-    {
-        potUp.Medium = Enum.Parse<GrowingMedium>(e.Value?.ToString() ?? nameof(GrowingMedium.Soil));
-        potUpMediumChosen = true;
-    }
-
-    private void SetPotUpPot(Guid? id)
-    {
-        potUp.PotId = id;
-        var pot = pots.FirstOrDefault(p => p.Id == id);
-        potUp.Medium = PotKinds.MediumAfterPicking(pot, potUp.Medium, potUpMediumChosen);
-    }
-
     private void OpenPotUp()
     {
-        var p = propagation!;
-        // Already in a plant medium, it stays there whatever pot is picked, unless the person says otherwise
-        potUpMediumChosen = p.InPlantMedium;
-        potUp = new PotUpForm
-        {
-            // A propagation named only by nickname passes it on, since a plant needs a name
-            Nickname = string.IsNullOrWhiteSpace(p.Genus) ? p.Nickname : null,
-            Date = Today,
-            Location = places.NameOf(p.PlaceId),
-            // Soil is the usual place for a potted up plant. Only a default, it's a select.
-            Medium = p.InPlantMedium ? p.Medium : GrowingMedium.Soil,
-            SoilMixId = p.Medium == GrowingMedium.Soil ? p.SoilMixId : null,
-        };
+        // A pot up that failed before anything was counted carries on, so it keeps its plants
+        if (potUp is not { Retrying: true } || potUp.Propagation.Id != propagation!.Id)
+            potUp = Units.PotUp(propagation!, places, Labels.For);
         message = null;
         stageView = StageView.PotUp;
     }
 
     private void OpenFailed()
     {
-        failedCount = 1;
-        failedReason = null;
-        failedNote = null;
-        failedDate = Today;
+        failed = Units.Failed(propagation!);
         message = null;
         stageView = StageView.Failed;
     }
 
     private void OpenGaveAway()
     {
-        gaveCount = 1;
-        gaveTo = null;
-        gaveDate = Today;
+        gave = Units.GiveAway(propagation!);
         message = null;
         stageView = StageView.GaveAway;
     }
@@ -1307,19 +1265,23 @@ else
 
     private async Task PotUpAsync()
     {
-        if (propagation is null || !CountIsValid(potUp.Count))
+        if (propagation is null || potUp is not { CanSave: true } form)
             return;
 
         busy = true;
         try
         {
-            var placeId = await RoomService.PlaceIdAsync(potUp.Location);
-            madePlants = await PropagationService.PotUpAsync(propagation, new PotUpRequest(
-                potUp.Count, potUp.Date, potUp.Nickname, placeId, potUp.Medium, potUp.PotId, potUp.Medium == GrowingMedium.Soil ? potUp.SoilMixId : null,
-                OnePot: PotUpMode == PotUpKind.OnePot, IntoPlantId: PotUpMode == PotUpKind.Into ? potUp.IntoPlantId : null), Labels.For);
-            message = madePlants.Count == 1 ? "Potted up:" : $"Potted up {madePlants.Count}:";
+            var result = await form.SaveAsync();
             stageView = StageView.None;
             await LoadAsync();
+            madePlants = result.Plants;
+            if (result.LaterError is { } later)
+            {
+                Logger.LogError(later, "A step after potting up the propagation failed");
+                // The plants were saved before the step that failed, so they are found by their ids
+                madePlants = [.. allPlants.Where(p => form.PlantIds.Contains(p.Id))];
+            }
+            message = madePlants.Count == 1 ? "Potted up:" : $"Potted up {madePlants.Count}:";
             historyVersion++;
         }
         catch (Exception ex)
@@ -1329,52 +1291,69 @@ else
             message = $"Couldn't pot up: {ex.Message}";
             stageView = StageView.None;
         }
-        busy = false;
+        finally
+        {
+            busy = false;
+        }
     }
 
     private async Task MarkFailedAsync()
     {
-        if (propagation is null || !CountIsValid(failedCount))
+        if (propagation is null || failed is not { CountIsValid: true } form)
             return;
 
         busy = true;
         try
         {
-            await PropagationService.MarkFailedAsync(propagation, failedCount, failedReason, failedNote, failedDate);
-            message = failedCount == 1 ? "Marked 1 as failed." : $"Marked {failedCount} as failed.";
+            var result = await form.SaveAsync();
+            if (result.LaterError is { } later)
+                Logger.LogError(later, "A step after marking units as failed failed");
+            message = form.Count == 1 ? "Marked 1 as failed." : $"Marked {form.Count} as failed.";
             historyVersion++;
+            madePlants = [];
+            stageView = StageView.None;
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "Marking units as failed failed");
+            madePlants = [];
             message = $"Couldn't mark as failed: {ex.Message}";
+            stageView = StageView.None;
         }
-        madePlants = [];
-        stageView = StageView.None;
-        busy = false;
+        finally
+        {
+            busy = false;
+        }
     }
 
     private async Task GiveAwayAsync()
     {
-        if (propagation is null || !CountIsValid(gaveCount))
+        if (propagation is null || gave is not { CountIsValid: true } form)
             return;
 
         busy = true;
         try
         {
-            await PropagationService.GiveAwayAsync(propagation, gaveCount, gaveTo, gaveDate);
-            message = gaveCount == 1 ? "Marked 1 as given away." : $"Marked {gaveCount} as given away.";
+            var result = await form.SaveAsync();
+            if (result.LaterError is { } later)
+                Logger.LogError(later, "A step after marking units as given away failed");
+            message = form.Count == 1 ? "Marked 1 as given away." : $"Marked {form.Count} as given away.";
             historyVersion++;
             madePlants = [];
             // Offers to send whoever got it the story, where links are available
             stageView = Account.IsAvailable ? StageView.PassOn : StageView.None;
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
-            message = $"Couldn't mark as given away: {ex.Message}";
+            Logger.LogError(ex, "Marking units as given away failed");
             madePlants = [];
+            message = $"Couldn't mark as given away: {ex.Message}";
             stageView = StageView.None;
         }
-        busy = false;
+        finally
+        {
+            busy = false;
+        }
     }
 
     private async Task SetCoverAsync(Guid? photoId)
