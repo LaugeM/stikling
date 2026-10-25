@@ -132,7 +132,7 @@ public class PlantFormTests
         var result = await form.SaveAsync([]);
 
         Assert.Empty(result.Errors);
-        Assert.NotNull(result.WishError);
+        Assert.NotNull(result.LaterError);
         Assert.True(plants.Plants.ContainsKey(form.Plant.Id));
     }
 

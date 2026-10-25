@@ -36,6 +36,41 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task A_create_run_again_after_failing_partway_adds_no_entry_twice()
+    {
+        var failing = new FailingOnceTimeline(timeline, e => e.Kind == TimelineKind.Photo);
+        var partly = new PlantService(plants, failing, new FixedTime(Now));
+        var plant = new Plant { Nickname = "A" };
+        Photo[] photos =
+        [
+            new Photo { SubjectType = SubjectType.Plant, TakenAt = Now.AddDays(-2) },
+            new Photo { SubjectType = SubjectType.Plant, TakenAt = Now.AddDays(-1) }
+        ];
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => partly.CreateAsync(plant, photos));
+        await partly.CreateAsync(plant, photos);
+
+        var history = timeline.Entries.Where(e => e.SubjectId == plant.Id).ToList();
+        Assert.Single(history, e => e.Kind == TimelineKind.Created);
+        Assert.Equal(photos.Select(p => p.Id).Order(), history.SelectMany(e => e.PhotoIds).Order());
+    }
+
+    [Fact]
+    public async Task A_history_failure_after_an_edit_says_the_plant_was_saved()
+    {
+        var plant = new Plant { Nickname = "A", Medium = GrowingMedium.Soil };
+        await plants.SaveAsync(plant);
+        var partly = new PlantService(plants, new FailingOnceTimeline(timeline, _ => true), new FixedTime(Now));
+        var before = plant.Copy();
+        plant.Medium = GrowingMedium.Leca;
+
+        var ex = await Assert.ThrowsAsync<PartlySavedException>(() => partly.UpdateAsync(before, plant, Label));
+
+        Assert.IsType<InvalidOperationException>(ex.InnerException);
+        Assert.Equal(GrowingMedium.Leca, plants.Plants[plant.Id].Medium);
+    }
+
+    [Fact]
     public async Task Update_leaves_an_older_collection_number_alone_when_it_was_not_changed()
     {
         var plant = new Plant { Nickname = "A", CollectionNumber = "#117A" };

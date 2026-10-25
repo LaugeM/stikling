@@ -11,11 +11,11 @@ namespace Stikling.Core.Propagations;
 /// <summary>What saving the start or edit form came to.</summary>
 /// <param name="Errors">What is wrong with the form. Empty means it was saved, and nothing was written otherwise.</param>
 /// <param name="Created">This save created the propagation, so the photos taken for it belong to it now.</param>
-/// <param name="WishError">Moving the wish to Got failed after the propagation was saved. Logged, not a failed save.</param>
+/// <param name="LaterError">A step after the propagation was saved failed, like moving the wish to Got or a line in its history. Logged, not a failed save.</param>
 public sealed record PropagationFormResult(
     IReadOnlyList<string> Errors,
     bool Created,
-    Exception? WishError)
+    Exception? LaterError)
 {
     /// <summary>The form was wrong, so nothing was written.</summary>
     public PropagationFormResult(IReadOnlyList<string> errors) : this(errors, false, null)
@@ -61,6 +61,7 @@ public sealed class PropagationForm
         Propagation = propagation;
         Original = original;
         IsNew = original is null;
+        Stored = !IsNew;
         Wish = wish;
         Plants = data.Plants;
         Propagations = data.Propagations;
@@ -95,6 +96,12 @@ public sealed class PropagationForm
 
     /// <summary>True until the propagation has been created. A form that failed after creating it saves as an edit.</summary>
     public bool IsNew { get; private set; }
+
+    /// <summary>
+    /// The propagation is stored, even when the create that stored it failed partway and <see cref="IsNew"/>
+    /// is still true. The photos taken for it belong to it then, so leaving the page keeps them.
+    /// </summary>
+    public bool Stored { get; private set; }
 
     /// <summary>The wish the form was started from, if it is still open.</summary>
     public Wish? Wish { get; }
@@ -287,13 +294,22 @@ public sealed class PropagationForm
         Propagation.PlaceId = await deps.RoomService.PlaceIdAsync(Location);
 
         var created = false;
-        Exception? wishError = null;
+        Exception? laterError = null;
         if (IsNew)
         {
             var wish = MarkWishGot ? WishHere : null;
-            await deps.PropagationService.CreateAsync(Propagation, label(Propagation), photos);
+            try
+            {
+                await deps.PropagationService.CreateAsync(Propagation, label(Propagation), photos);
+            }
+            catch
+            {
+                Stored = await deps.IsStoredAsync(Propagation.Id);
+                throw;
+            }
             created = true;
             IsNew = false;
+            Stored = true;
             Original = Propagation.Copy();
             if (wish is not null)
             {
@@ -304,18 +320,26 @@ public sealed class PropagationForm
                 }
                 catch (Exception ex)
                 {
-                    wishError = ex;
+                    laterError = ex;
                 }
             }
         }
         else
         {
             var places = await deps.RoomService.GetPlacesAsync();
-            await deps.PropagationService.UpdateAsync(Original!, Propagation, label(Propagation), id => places.NameOf(id));
+            try
+            {
+                await deps.PropagationService.UpdateAsync(Original!, Propagation, label(Propagation), id => places.NameOf(id));
+            }
+            catch (PartlySavedException ex)
+            {
+                // The propagation is saved, so saving again mustn't record the change a second time
+                laterError = ex.InnerException ?? ex;
+            }
             Original = Propagation.Copy();
         }
 
-        return new PropagationFormResult([], created, wishError);
+        return new PropagationFormResult([], created, laterError);
     }
 
     // "1 plant", "2 plants"

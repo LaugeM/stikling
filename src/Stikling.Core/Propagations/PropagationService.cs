@@ -54,15 +54,18 @@ public sealed class PropagationService(
     /// while starting it go on its history on the days they were taken, and the newest one
     /// becomes the cover. A create that failed partway can be run again: the record is saved over
     /// itself, and a history entry that is already there isn't added twice.
+    /// Run again with the same photos, so the ones whose entries are missing get them.
     /// </summary>
     public async Task CreateAsync(Propagation propagation, Func<Enum, string> label, IReadOnlyList<Photo>? photos = null)
     {
         propagation.ClearMixUnlessSoil();
         if (photos is { Count: > 0 })
             propagation.CoverPhotoId ??= PhotoEntries.Cover(photos).Id;
+        // Only a create run again has history to look through, so a first one doesn't read the whole store
+        var again = await propagations.GetAsync(propagation.Id) is not null;
         await propagations.SaveAsync(propagation);
 
-        var history = await timeline.GetForAsync(propagation.Id);
+        IReadOnlyList<TimelineEntry> history = again ? await timeline.GetForAsync(propagation.Id) : [];
         var what = Describe(propagation, label);
         var occurredAt = time.MomentOn(propagation.StartedOn);
         if (!history.Any(e => !e.IsDeleted && e.Kind == TimelineKind.Created))
@@ -85,7 +88,7 @@ public sealed class PropagationService(
         }
 
         if (propagation.ParentPlantId is { } parentId && await plants.GetAsync(parentId) is not null
-            && !(await timeline.GetForAsync(parentId)).Any(e => !e.IsDeleted && e.Kind == TimelineKind.Propagated && e.RelatedId == propagation.Id))
+            && !(again && (await timeline.GetForAsync(parentId)).Any(e => !e.IsDeleted && e.Kind == TimelineKind.Propagated && e.RelatedId == propagation.Id)))
         {
             await timeline.AddAsync(new TimelineEntry
             {
@@ -100,7 +103,11 @@ public sealed class PropagationService(
         }
     }
 
-    /// <summary>Saves an edited propagation and records what changed.</summary>
+    /// <summary>
+    /// Saves an edited propagation and records what changed. A failure in the history after the
+    /// save comes as a <see cref="PartlySavedException"/>, since running it again would record the
+    /// change twice.
+    /// </summary>
     /// <param name="placeName">Turns a room or spot id into its name, so the history can say where it went.</param>
     public async Task UpdateAsync(
         Propagation before,
@@ -114,11 +121,14 @@ public sealed class PropagationService(
         after.NoteRooted(Today);
         await propagations.SaveAsync(after);
 
-        var changes = PropagationChanges.Describe(before, after, label, placeName);
-        if (changes.Count > 0)
-            await AddChangeAsync(after, string.Join("\n", changes));
-        if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
-            await AddChangeAsync(after, $"Identified as {after.BotanicalName ?? after.DisplayName}", @event: TimelineEvent.Identified);
+        await PartlySavedException.AfterSaveAsync(async () =>
+        {
+            var changes = PropagationChanges.Describe(before, after, label, placeName);
+            if (changes.Count > 0)
+                await AddChangeAsync(after, string.Join("\n", changes));
+            if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
+                await AddChangeAsync(after, $"Identified as {after.BotanicalName ?? after.DisplayName}", @event: TimelineEvent.Identified);
+        });
     }
 
     /// <summary>Marks a propagation dormant from the given day, or woken up again with null.</summary>
@@ -170,8 +180,8 @@ public sealed class PropagationService(
     /// propagation) and the propagation finishes when nothing is left. The count is recorded on a copy
     /// and the caller's propagation only changes once that is saved. With <see cref="PotUpRequest.PlantIds"/> it can be
     /// run again after a failure before the count was stored: the plants are saved over themselves and each
-    /// gets one Created entry. The steps after the count (watering, potting together, the history line)
-    /// are not repeated by a retry.
+    /// gets one Created entry. A failure in the steps after the count (watering, potting together, the
+    /// history line) comes as a <see cref="PartlySavedException"/>: the pot up is done and isn't run again.
     /// </summary>
     public async Task<IReadOnlyList<Plant>> PotUpAsync(Propagation propagation, PotUpRequest request, Func<Enum, string>? label = null)
     {
@@ -235,15 +245,16 @@ public sealed class PropagationService(
         var carried = CarriedPhotos.Cover(propagation, await photos.GetForAsync(propagation.Id), request.Date, time);
         foreach (var plant in newPlants)
             plant.CoverPhotoId = carried;
-        var counted = propagation.Copy();
-        counted.RecordPottedUp(request.Count, request.Date);
+        // Fails here, before anything is saved, when the count doesn't fit
+        propagation.Copy().RecordPottedUp(request.Count, request.Date);
 
         var occurredAt = time.MomentOn(request.Date);
         foreach (var plant in newPlants)
         {
+            // Only a plant a retry already saved can have the entry, so a new one doesn't read the whole history
+            var again = await plants.GetAsync(plant.Id) is not null;
             await plants.SaveAsync(plant);
-            // A retry has the entry already
-            if ((await timeline.GetForAsync(plant.Id)).Any(e => !e.IsDeleted && e.Kind == TimelineKind.Created))
+            if (again && (await timeline.GetForAsync(plant.Id)).Any(e => !e.IsDeleted && e.Kind == TimelineKind.Created))
                 continue;
             await timeline.AddAsync(new TimelineEntry
             {
@@ -257,16 +268,19 @@ public sealed class PropagationService(
             });
         }
 
-        await propagations.SaveAsync(counted);
-        ApplyCounts(counted, propagation);
-        await CarryWateringOverAsync(propagation, newPlants);
+        await CountAsync(propagation, p => p.RecordPottedUp(request.Count, request.Date));
 
-        if (into is not null)
-            await new PlantService(plants, timeline, time).PotTogetherAsync(newPlants[0], into, request.Date, label);
+        await PartlySavedException.AfterSaveAsync(async () =>
+        {
+            await CarryWateringOverAsync(propagation, newPlants);
 
-        var text = $"Potted up {request.Count}: {string.Join(", ", newPlants.Select(p => p.DisplayName))}";
-        await AddChangeAsync(propagation, WithOutcome(text, propagation), occurredAt,
-            newPlants.Count == 1 ? newPlants[0].Id : null, TimelineEvent.PottedUp);
+            if (into is not null)
+                await new PlantService(plants, timeline, time).PotTogetherAsync(newPlants[0], into, request.Date, label);
+
+            var text = $"Potted up {request.Count}: {string.Join(", ", newPlants.Select(p => p.DisplayName))}";
+            await AddChangeAsync(propagation, WithOutcome(text, propagation), occurredAt,
+                newPlants.Count == 1 ? newPlants[0].Id : null, TimelineEvent.PottedUp);
+        });
 
         return newPlants;
     }
@@ -323,7 +337,8 @@ public sealed class PropagationService(
     /// <summary>
     /// Records units that didn't make it, with an optional reason and note ("2 failed: rotted, left too wet"). They failed on
     /// <paramref name="date"/>, today unless given, which can't be in the future or before the start.
-    /// The caller's propagation only gets the new counts once they are saved.
+    /// The caller's propagation only gets the new counts once they are saved, and a failed history line
+    /// after that comes as a <see cref="PartlySavedException"/>.
     /// </summary>
     public async Task MarkFailedAsync(Propagation propagation, int count, FailReason? reason = null, string? note = null, DateOnly? date = null)
     {
@@ -332,21 +347,19 @@ public sealed class PropagationService(
             throw new InvalidOperationException("The date can't be in the future.");
         if (day < propagation.StartedOn)
             throw new InvalidOperationException("The date can't be before the propagation started.");
-        var counted = propagation.Copy();
-        counted.RecordFailed(count, day);
-        await propagations.SaveAsync(counted);
-        ApplyCounts(counted, propagation);
+        await CountAsync(propagation, p => p.RecordFailed(count, day));
 
         var why = string.Join(", ", new[] { reason is { } picked ? FailReasons.Label(picked) : null, Clean(note) }.OfType<string>());
         var text = why.Length > 0 ? $"{count} failed: {why}" : $"{count} failed";
-        await AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.Failed,
-            failReason: reason, count: count);
+        await PartlySavedException.AfterSaveAsync(() => AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null,
+            TimelineEvent.Failed, failReason: reason, count: count));
     }
 
     /// <summary>
     /// Records units given to someone, with an optional name for who got them. They went on
     /// <paramref name="date"/>, today unless given, which can't be in the future or before the start.
-    /// The caller's propagation only gets the new counts once they are saved.
+    /// The caller's propagation only gets the new counts once they are saved, and a failed history line
+    /// after that comes as a <see cref="PartlySavedException"/>.
     /// </summary>
     public async Task GiveAwayAsync(Propagation propagation, int count, string? to = null, DateOnly? date = null)
     {
@@ -355,29 +368,22 @@ public sealed class PropagationService(
             throw new InvalidOperationException("The date can't be in the future.");
         if (day < propagation.StartedOn)
             throw new InvalidOperationException("The date can't be before the propagation started.");
-        var counted = propagation.Copy();
-        counted.RecordGivenAway(count, day);
-        await propagations.SaveAsync(counted);
-        ApplyCounts(counted, propagation);
+        await CountAsync(propagation, p => p.RecordGivenAway(count, day));
 
         var text = Clean(to) is { } who ? $"Gave {count} to {who}" : $"Gave {count} away";
-        await AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway);
+        await PartlySavedException.AfterSaveAsync(() =>
+            AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway));
     }
 
-    // Carries what recording a count changes from the saved copy to the caller's propagation, including
-    // the UpdatedAt the repository set on saving
-    private static void ApplyCounts(Propagation from, Propagation to)
+    // Records the count on a copy and saves that, then the same on the caller's propagation, so it only
+    // changes once the count is stored. It gets the UpdatedAt the repository set on saving too.
+    private async Task CountAsync(Propagation propagation, Action<Propagation> record)
     {
-        to.PottedUpCount = from.PottedUpCount;
-        to.FailedCount = from.FailedCount;
-        to.GivenAwayCount = from.GivenAwayCount;
-        to.SpareCount = from.SpareCount;
-        to.Stage = from.Stage;
-        to.FinishedOn = from.FinishedOn;
-        to.DormantSince = from.DormantSince;
-        to.Attention = from.Attention;
-        to.AttentionLater = from.AttentionLater;
-        to.UpdatedAt = from.UpdatedAt;
+        var counted = propagation.Copy();
+        record(counted);
+        await propagations.SaveAsync(counted);
+        record(propagation);
+        propagation.UpdatedAt = counted.UpdatedAt;
     }
 
     /// <summary>

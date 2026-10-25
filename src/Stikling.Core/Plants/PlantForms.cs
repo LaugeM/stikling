@@ -58,6 +58,19 @@ public sealed class PlantForms(
 
     internal TimeProvider Time => time;
 
+    /// <summary>Whether a plant is stored. When that can't be read either, it counts as stored, so its photos are kept.</summary>
+    internal async Task<bool> IsStoredAsync(Guid id)
+    {
+        try
+        {
+            return await plants.GetAsync(id) is not null;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
     private async Task<PlantFormData> LoadAsync(bool forNew)
     {
         var all = await plants.GetAllAsync();

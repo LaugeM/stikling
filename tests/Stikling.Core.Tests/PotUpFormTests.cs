@@ -343,6 +343,63 @@ public class PotUpFormTests
         // The page finds the plants by these, since the result has none
         Assert.Equal(made.Select(p => p.Id).Order(), form.PlantIds.Order());
     }
+
+    [Fact]
+    public async Task A_reload_during_the_save_does_not_turn_a_counted_pot_up_into_a_failed_one()
+    {
+        var propagation = Stored();
+        var stale = propagation.Copy();
+        PotUpForm? form = null;
+        timelineRepository = new FailingOnceTimeline(timeline, e =>
+        {
+            // A sync reloads the page while the plants are saved, from before the count was stored
+            if (e.SubjectType == SubjectType.Plant)
+                form!.Propagation = stale;
+            return e.SubjectType == SubjectType.Propagation && e.Kind == TimelineKind.Change;
+        });
+        form = Form(propagation);
+        form.Count = 2;
+
+        var result = await form.SaveAsync();
+
+        Assert.NotNull(result.LaterError);
+        Assert.False(form.Retrying);
+        Assert.False(form.HasStoredPlants);
+        Assert.Equal(2, propagations.Propagations[propagation.Id].PottedUpCount);
+        Assert.Equal(2, PlantsFrom(propagation).Count);
+    }
+
+    [Fact]
+    public async Task A_retry_whose_count_no_longer_fits_is_let_go_and_writes_over_the_stored_plants()
+    {
+        propagationRepository = new FailingOncePropagations(propagations);
+        var propagation = Stored();
+        var form = Form(propagation);
+        form.Count = 3;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => form.SaveAsync());
+        Assert.True(form.Retrying);
+        var firstIds = form.PlantIds.ToList();
+
+        // Another device marked two as failed, so three no longer fit
+        var reloaded = propagation.Copy();
+        reloaded.FailedCount = 2;
+        form.Propagation = reloaded;
+
+        Assert.False(form.Retrying);
+        Assert.True(form.HasStoredPlants);
+        Assert.False(form.CanSave);
+        form.Count = 2;
+        Assert.True(form.CanSave);
+
+        var result = await form.SaveAsync();
+
+        Assert.Null(result.LaterError);
+        Assert.False(form.HasStoredPlants);
+        Assert.Equal(2, propagations.Propagations[propagation.Id].PottedUpCount);
+        Assert.Equal(firstIds.Take(2), result.Plants.Select(p => p.Id));
+        Assert.All(result.Plants, p => Assert.Equal(1, Created(p)));
+    }
 }
 
 internal sealed class FailingOncePlants(IPlantRepository inner, int failOnSave) : IPlantRepository
