@@ -16,7 +16,8 @@
     font-size: 0.9rem;
 }
 
-.update-banner span {
+/* Only the message, not the spinner inside it, which would stretch into an oval */
+.update-banner > span {
     flex: 1;
     min-width: 8rem;
 }
