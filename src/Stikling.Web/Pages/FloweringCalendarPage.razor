@@ -28,7 +28,7 @@ else
     {
         <section class="flowering-section">
             <h2>In flower now</h2>
-            <ul class="flowering-list">
+            <ul class="flowering-list flowering-grid">
                 @foreach (var item in calendar.InFlowerNow)
                 {
                     <li>
@@ -51,7 +51,7 @@ else
     {
         <section class="flowering-section">
             <h2>Usually in flower in @FloweringText.MonthName(calendar.NextMonth)</h2>
-            <ul class="flowering-list">
+            <ul class="flowering-list flowering-grid">
                 @foreach (var item in calendar.UsuallyNextMonth)
                 {
                     <li>
@@ -78,7 +78,7 @@ else
                         }
                         else
                         {
-                            <ul class="flowering-list">
+                            <ul class="flowering-list flowering-grid">
                                 @foreach (var item in month.Plants)
                                 {
                                     <li>

@@ -1,4 +1,5 @@
 @page "/pests/{Id:guid}"
+@layout WideLayout
 @inject IPestCaseRepository Repository
 @inject IPestTreatmentRepository Treatments
 @inject IPlantRepository PlantRepository
@@ -23,6 +24,7 @@
 }
 else
 {
+    <div class="case-layout">
     <header class="detail-header">
         <div class="detail-icon @(view.Case.IsOpen ? "alert" : null)" aria-hidden="true">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
@@ -320,7 +322,7 @@ else
         </section>
     }
 
-    <section class="detail-card">
+    <section class="detail-card case-side">
         <h2>@(treatments.Any(t => t.Kind != PestTreatmentKind.Treated) ? "Treatments and checks" : "Treatments")</h2>
         @if (treatments.Count == 0)
         {
@@ -409,6 +411,8 @@ else
             </ul>
         </section>
     }
+
+    </div>
 
     <section class="danger-zone">
         @if (confirmDelete)

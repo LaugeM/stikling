@@ -1,5 +1,6 @@
 @using System.Globalization
 @page "/products"
+@layout WideLayout
 @inject IProductRepository Repository
 @inject ProductService ProductService
 @inject IJSRuntime JS
@@ -30,7 +31,7 @@
 
 @if (draft is not null)
 {
-    <section class="settings-section">
+    <section class="settings-section supply-form">
         <h2>@(editing ? "Edit product" : "Add a product")</h2>
 
         <div class="mb-3">
@@ -160,7 +161,7 @@ else
     <section class="settings-section">
         <h2>Your products</h2>
 
-        <ul class="product-list">
+        <ul class="product-list supply-grid">
             @foreach (var use in uses)
             {
                 <li id="item-@use.Product.Id">

@@ -69,6 +69,29 @@ export function attachSearch(input, noMatch) {
             clear();
     };
 
+    // On a wide screen the topic list marks the topic in view. A topic counts once its top is in
+    // the upper part of the screen, so the last one to get there is the one being read.
+    let observer = null;
+    if (toc && matchMedia("(min-width: 64rem)").matches) {
+        const links = new Map([...toc.querySelectorAll("a")].map(link => [link.hash.slice(1), link]));
+        const mark = id => {
+            for (const [name, link] of links) {
+                link.classList.toggle("current", name === id);
+                if (name === id)
+                    link.setAttribute("aria-current", "location");
+                else
+                    link.removeAttribute("aria-current");
+            }
+        };
+        observer = new IntersectionObserver(entries => {
+            const entering = entries.filter(entry => entry.isIntersecting);
+            if (entering.length > 0)
+                mark(entering[entering.length - 1].target.id);
+        }, { rootMargin: "0px 0px -75% 0px" });
+        for (const { section } of sections)
+            observer.observe(section);
+    }
+
     input.addEventListener("input", filter);
     input.addEventListener("keydown", onKey);
     return {
@@ -82,6 +105,7 @@ export function attachSearch(input, noMatch) {
             input.focus();
         },
         dispose: () => {
+            observer?.disconnect();
             input.removeEventListener("input", filter);
             input.removeEventListener("keydown", onKey);
         }

@@ -21,6 +21,14 @@ export function scrollToId(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+// Settings on a phone is one long page, so a link to a section scrolls to it. From 64rem only one
+// section shows at a time and there is nothing to scroll to.
+export function scrollToSectionOnPhone(id) {
+    if (matchMedia("(min-width: 64rem)").matches)
+        return;
+    document.getElementById(id)?.scrollIntoView({ behavior: "instant", block: "start" });
+}
+
 // The languages the browser is set to, most preferred first, like ["da-DK", "da", "en"]
 export function languages() {
     return navigator.languages?.length ? [...navigator.languages] : [navigator.language];
