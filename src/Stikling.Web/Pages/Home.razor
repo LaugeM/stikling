@@ -22,6 +22,7 @@
 @inject AppBadge Badge
 @inject PlantService PlantService
 @inject PropagationService PropagationService
+@inject ExampleService Example
 @inject TimeProvider Time
 @inject YearCardService YearCardsService
 @using Stikling.Core.Year
@@ -64,7 +65,14 @@ else if (plants.Count == 0 && propagations.Count == 0)
         <div class="first-run-actions">
             <a class="btn btn-primary" href="plants/new">Add a plant</a>
             <a class="btn btn-outline-primary" href="propagations/new">Start a propagation</a>
+            <button type="button" class="btn btn-outline-primary" disabled="@exampleBusy" @onclick="LoadExampleAsync">
+                @(exampleBusy ? "Loading the example…" : "Load an example")
+            </button>
         </div>
+        @if (exampleFailed)
+        {
+            <p class="text-danger" role="alert">Couldn't load the example. Check your connection and try again.</p>
+        }
         <p class="first-run-more">
             Have plants already? <a href="plants/quick-add">Add several at once</a>,
             <a href="plants/import">import a spreadsheet</a>, or <a href="plants/new?from=photos">start from old photos</a>.
@@ -77,6 +85,27 @@ else
     <p class="today-counts">
         @Labels.Plants(plants.Count(p => p.InCollection)) · @Labels.Count(active.Count, "propagation") going@(monthResult is null ? "" : $" · {monthResult.PottedUp} of {monthResult.Total} potted up this month")
     </p>
+
+    @if (exampleLoaded)
+    {
+        <div class="reminder">
+            @if (confirmingRemoval)
+            {
+                <span>Remove the example plants, their cuttings, and any notes, photos and care added to them? Plants you made from them stay.</span>
+                <button type="button" class="btn btn-danger btn-sm" disabled="@exampleBusy" @onclick="RemoveExampleAsync">Remove</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmingRemoval = false">Cancel</button>
+            }
+            else
+            {
+                <span>@ExampleFamily.MotherNickname and its cuttings are an example.</span>
+                <button type="button" class="btn btn-outline-primary" @onclick="() => confirmingRemoval = true">Remove</button>
+            }
+        </div>
+        @if (removeFailed)
+        {
+            <p class="text-danger" role="alert">Couldn't remove all of the example. Try Remove again.</p>
+        }
+    }
 
     @if (upcoming is not null)
     {
@@ -784,6 +813,11 @@ else
     private bool shareOpen;
     private bool showRound;
     private bool loaded;
+    private bool exampleLoaded;
+    private bool exampleBusy;
+    private bool exampleFailed;
+    private bool confirmingRemoval;
+    private bool removeFailed;
 
     // Away and quiet time: one coming up, the span the list on the day back belongs to, and the sitter's visits
     private AwaySpan? upcoming;
@@ -890,6 +924,47 @@ else
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
+    private async Task LoadExampleAsync()
+    {
+        exampleBusy = true;
+        exampleFailed = false;
+        try
+        {
+            await Example.LoadAsync();
+        }
+        catch
+        {
+            exampleFailed = true;
+        }
+
+        // Also after a failure, so an example only partly written shows its Remove row
+        await LoadAsync();
+        exampleBusy = false;
+    }
+
+    private async Task RemoveExampleAsync()
+    {
+        exampleBusy = true;
+        removeFailed = false;
+        try
+        {
+            await Example.RemoveAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Removing the example failed");
+            removeFailed = true;
+        }
+        finally
+        {
+            exampleBusy = false;
+            confirmingRemoval = false;
+        }
+
+        // Also after a failure, so whatever is left of the example still shows its Remove row
+        await LoadAsync();
+    }
+
     // After something changed: the sections again from the records, keeping the care plan the page has ticked things off in
     private void Recompute()
     {
@@ -933,6 +1008,7 @@ else
 
     private async Task LoadAsync()
     {
+        exampleLoaded = await Example.IsLoadedAsync();
         data = await TodayService.LoadAsync();
         plants = data.Plants;
         propagations = data.Propagations;
@@ -1218,6 +1294,10 @@ else
     private async Task<string?> BackupReminderAsync()
     {
         if (plants.Count == 0 && propagations.Count == 0)
+            return null;
+
+        // The example is there to look at, not to lose
+        if (plants.All(p => ExampleFamily.IsExample(p.Id)) && propagations.All(p => ExampleFamily.IsExample(p.Id)))
             return null;
 
         // Sync keeps a copy on the server, so there is nothing to remind about
