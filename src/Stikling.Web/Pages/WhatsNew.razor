@@ -23,6 +23,19 @@
     }
 </p>
 
+@* What is planned, from Next up in docs/FEATURES.md, in the same order. Written for the people using the app: what
+   they will be able to do, not what gets built. Drop a line when it ships and its What's new line goes in. No dates. *@
+<section class="whats-new-month coming-next">
+    <h2>Coming next</h2>
+    <p class="coming-next-hint">In the order they are planned. Plans can change, so there are no dates.</p>
+    <ol>
+        @foreach (var item in ComingNext)
+        {
+            <li>@item</li>
+        }
+    </ol>
+</section>
+
 @foreach (var month in Months)
 {
     <section class="whats-new-month">
@@ -39,10 +52,23 @@
 @code {
     private sealed record Month(string Name, string[] Entries);
 
+    private static readonly string[] ComingNext =
+    [
+        "A short tour of the app with an example plant, and Settings, Supplies, Help and pest cases that use the whole width on a computer.",
+        "Stikling in Danish, with a way to help translate it, and settings for units and how dates are written.",
+        "For collectors: more names to pick from, a log of each new leaf on a variegated plant, how many generations a cutting is from your oldest plant, and orders that brought several plants at once.",
+        "Photos: share a photo from your gallery straight to a plant on Android, line up a new photo with the last one, and mark the plants on a photo of a shelf.",
+        "Everyday shortcuts: water or add a note with a long press on a plant, reservoir and flushing for plants in LECA or PON, and which of your outer pots a nursery pot fits in.",
+        "Showing it off: a plant's anniversary on Today, an experiment's result as a picture to post, your year as a video, and a plant's story to print.",
+        "When something is wrong: a check of what you see on a plant with what to look at next, and short guides that work offline.",
+        "Naming a plant from a photo, a card with facts about its species, and a page to show your collection to others.",
+    ];
+
     private static readonly Month[] Months =
     [
         new("October 2026",
         [
+            "What's new now starts with what's coming next.",
             "An empty Today page can load an example plant with its cuttings, to see what the app looks like before adding your own. Remove it from Today again.",
             "After watering a plant that stands in an outer pot, Today reminds you to tip out the water. Set the wait or turn it off in Settings.",
             "Some things that aren't clear from their name, like Pot up and the stages, have a small i that explains them.",
