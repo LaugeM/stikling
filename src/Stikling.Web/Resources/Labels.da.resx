@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DateFormat" xml:space="preserve">
+    <value>d. MMM yyyy</value>
+  </data>
+  <data name="DayFormat" xml:space="preserve">
+    <value>ddd d. MMM</value>
+  </data>
+  <data name="MonthFormat" xml:space="preserve">
+    <value>MMMM</value>
+  </data>
+  <data name="MonthYearFormat" xml:space="preserve">
+    <value>MMMM yyyy</value>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
+    <value>I samlingen</value>
+  </data>
+  <data name="StatusDied" xml:space="preserve">
+    <value>Død</value>
+  </data>
+  <data name="StatusGivenAway" xml:space="preserve">
+    <value>Givet væk</value>
+  </data>
+  <data name="StatusSold" xml:space="preserve">
+    <value>Solgt</value>
+  </data>
+  <data name="StatusLivesWith" xml:space="preserve">
+    <value>Bor hos {0}</value>
+  </data>
+  <data name="StatusNotYours" xml:space="preserve">
+    <value>Ikke din</value>
+  </data>
+  <data name="StatusPottedWithOther" xml:space="preserve">
+    <value>Står i samme potte som en anden plante</value>
+  </data>
+  <data name="StatusPottedWith" xml:space="preserve">
+    <value>Står i samme potte som {0}</value>
+  </data>
+  <data name="OriginPurchased" xml:space="preserve">
+    <value>Købt</value>
+  </data>
+  <data name="OriginPropagated" xml:space="preserve">
+    <value>Formeret</value>
+  </data>
+  <data name="OriginGrownFromSeed" xml:space="preserve">
+    <value>Dyrket fra frø</value>
+  </data>
+  <data name="OriginGift" xml:space="preserve">
+    <value>Gave</value>
+  </data>
+  <data name="OriginSwap" xml:space="preserve">
+    <value>Bytte</value>
+  </data>
+  <data name="OriginUnknown" xml:space="preserve">
+    <value>Ukendt</value>
+  </data>
+  <data name="RaisedNurseryGrown" xml:space="preserve">
+    <value>Dyrket i planteskole</value>
+  </data>
+  <data name="RaisedTissueCulture" xml:space="preserve">
+    <value>Vævskultur</value>
+  </data>
+  <data name="RaisedSeed" xml:space="preserve">
+    <value>Fra frø</value>
+  </data>
+  <data name="RaisedCutting" xml:space="preserve">
+    <value>Fra en stikling eller deling</value>
+  </data>
+  <data name="RaisedWildCollected" xml:space="preserve">
+    <value>Samlet i naturen</value>
+  </data>
+  <data name="SellerShop" xml:space="preserve">
+    <value>Butik</value>
+  </data>
+  <data name="SellerOnlineShop" xml:space="preserve">
+    <value>Webshop</value>
+  </data>
+  <data name="SellerPerson" xml:space="preserve">
+    <value>Person</value>
+  </data>
+  <data name="SellerSwapEvent" xml:space="preserve">
+    <value>Byttemarked</value>
+  </data>
+  <data name="SellerOther" xml:space="preserve">
+    <value>Andet</value>
+  </data>
+  <data name="ArrivalGood" xml:space="preserve">
+    <value>God</value>
+  </data>
+  <data name="ArrivalOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ArrivalPoor" xml:space="preserve">
+    <value>Dårlig</value>
+  </data>
+  <data name="ArrivalPests" xml:space="preserve">
+    <value>Skadedyr</value>
+  </data>
+  <data name="ArrivalDamaged" xml:space="preserve">
+    <value>Beskadiget eller knækket</value>
+  </data>
+  <data name="ArrivalRootRot" xml:space="preserve">
+    <value>Rodråd</value>
+  </data>
+  <data name="ArrivalWrongPlant" xml:space="preserve">
+    <value>Forkert plante</value>
+  </data>
+  <data name="ArrivalSmallerThanShown" xml:space="preserve">
+    <value>Mindre end vist</value>
+  </data>
+  <data name="LightLow" xml:space="preserve">
+    <value>Lidt lys</value>
+  </data>
+  <data name="LightMedium" xml:space="preserve">
+    <value>Middel lys</value>
+  </data>
+  <data name="LightBrightIndirect" xml:space="preserve">
+    <value>Kraftigt indirekte lys</value>
+  </data>
+  <data name="LightDirectSun" xml:space="preserve">
+    <value>Noget direkte sol</value>
+  </data>
+  <data name="WaterDryOut" xml:space="preserve">
+    <value>Tør helt ud</value>
+  </data>
+  <data name="WaterDryPartly" xml:space="preserve">
+    <value>Tør delvist ud</value>
+  </data>
+  <data name="WaterEvenlyMoist" xml:space="preserve">
+    <value>Jævnt fugtig</value>
+  </data>
+  <data name="HumidityLow" xml:space="preserve">
+    <value>Lav luftfugtighed</value>
+  </data>
+  <data name="HumidityMedium" xml:space="preserve">
+    <value>Middel luftfugtighed</value>
+  </data>
+  <data name="HumidityHigh" xml:space="preserve">
+    <value>Høj luftfugtighed</value>
+  </data>
+  <data name="SeasonRestsInWinter" xml:space="preserve">
+    <value>Hviler om vinteren</value>
+  </data>
+  <data name="SeasonRestsInSummer" xml:space="preserve">
+    <value>Hviler om sommeren</value>
+  </data>
+  <data name="SeasonGrowsAllYear" xml:space="preserve">
+    <value>Vokser hele året</value>
+  </data>
+  <data name="RestCooler" xml:space="preserve">
+    <value>holdes køligere</value>
+  </data>
+  <data name="RestDrier" xml:space="preserve">
+    <value>holdes tørrere</value>
+  </data>
+  <data name="RestCoolerAndDrier" xml:space="preserve">
+    <value>holdes køligere og tørrere</value>
+  </data>
+  <data name="RestDiesBack" xml:space="preserve">
+    <value>visner ned</value>
+  </data>
+  <data name="UsuallyLikes" xml:space="preserve">
+    <value>Kan som regel lide {0}</value>
+  </data>
+  <data name="MediumOrchidBark" xml:space="preserve">
+    <value>Orkidébark</value>
+  </data>
+  <data name="MediumLeca" xml:space="preserve">
+    <value>LECA</value>
+  </data>
+  <data name="MediumPon" xml:space="preserve">
+    <value>PON</value>
+  </data>
+  <data name="MediumSphagnum" xml:space="preserve">
+    <value>Sphagnummos</value>
+  </data>
+  <data name="MediumCormRiser" xml:space="preserve">
+    <value>Knoldstativ</value>
+  </data>
+  <data name="ExplainLeca" xml:space="preserve">
+    <value>Brændte lerkugler. Med vand i bunden af potten suger de det op til rødderne, helt uden jord. Det kaldes semi-hydro.</value>
+  </data>
+  <data name="ExplainPon" xml:space="preserve">
+    <value>En færdig blanding af mineralkorn som pimpsten, zeolit og lavasten, brugt til semi-hydro i stedet for jord.</value>
+  </data>
+  <data name="ExplainSphagnum" xml:space="preserve">
+    <value>Langfibret mos, der holder på meget vand og stadig lukker luft ind. Bruges ofte til at få stiklinger til at slå rødder.</value>
+  </data>
+  <data name="ExplainCormRiser" xml:space="preserve">
+    <value>Knolden sidder på et hævet lag over vandet i en lukket boks, så den holder sig fugtig uden at stå i vand.</value>
+  </data>
+  <data name="ExplainAirLayer" xml:space="preserve">
+    <value>Der gror rødder på en stilk, mens den stadig sidder på planten, i fugtigt mos viklet rundt om den. Når rødderne er der, skæres den af.</value>
+  </data>
+  <data name="AidRootingPowder" xml:space="preserve">
+    <value>Rodpulver</value>
+  </data>
+  <data name="AidRootingGel" xml:space="preserve">
+    <value>Rodgel</value>
+  </data>
+  <data name="AidWillowWater" xml:space="preserve">
+    <value>Pilevand</value>
+  </data>
+  <data name="AidHumidityDome" xml:space="preserve">
+    <value>Fugtighedskuppel eller pose</value>
+  </data>
+  <data name="AidHeatMat" xml:space="preserve">
+    <value>Varmemåtte</value>
+  </data>
+  <data name="CareWatered" xml:space="preserve">
+    <value>Vandet</value>
+  </data>
+  <data name="CareFertilised" xml:space="preserve">
+    <value>Gødet</value>
+  </data>
+  <data name="CareToppedUp" xml:space="preserve">
+    <value>Fyldt op</value>
+  </data>
+  <data name="CareFlushed" xml:space="preserve">
+    <value>Skyllet igennem</value>
+  </data>
+  <data name="CareRepotted" xml:space="preserve">
+    <value>Ompottet</value>
+  </data>
+  <data name="CarePruned" xml:space="preserve">
+    <value>Beskåret</value>
+  </data>
+  <data name="CareRotated" xml:space="preserve">
+    <value>Drejet</value>
+  </data>
+  <data name="CareLeavesCleaned" xml:space="preserve">
+    <value>Blade renset</value>
+  </data>
+  <data name="CareHarvested" xml:space="preserve">
+    <value>Høstet</value>
+  </data>
+  <data name="CareMoistureReading" xml:space="preserve">
+    <value>Fugtmåling</value>
+  </data>
+  <data name="CareChangedWater" xml:space="preserve">
+    <value>Skiftede vandet</value>
+  </data>
+  <data name="TypeCutting" xml:space="preserve">
+    <value>Stikling</value>
+  </data>
+  <data name="TypeCorm" xml:space="preserve">
+    <value>Knold</value>
+  </data>
+  <data name="TypeOffset" xml:space="preserve">
+    <value>Aflægger</value>
+  </data>
+  <data name="TypeSeed" xml:space="preserve">
+    <value>Frø</value>
+  </data>
+  <data name="TypeDivision" xml:space="preserve">
+    <value>Deling</value>
+  </data>
+  <data name="TypeAirLayer" xml:space="preserve">
+    <value>Luftaflægger</value>
+  </data>
+  <data name="TypeLeaf" xml:space="preserve">
+    <value>Blad</value>
+  </data>
+  <data name="TypeOther" xml:space="preserve">
+    <value>Andet</value>
+  </data>
+  <data name="PropagationSummary" xml:space="preserve">
+    <value>{0}× {1} · {2}</value>
+  </data>
+  <data name="AgeStartedToday" xml:space="preserve">
+    <value>startet i dag</value>
+  </data>
+  <data name="AgeDay" xml:space="preserve">
+    <value>dag {0}</value>
+  </data>
+  <data name="StageStarted" xml:space="preserve">
+    <value>Startet</value>
+  </data>
+  <data name="StageRooting" xml:space="preserve">
+    <value>Slår rødder</value>
+  </data>
+  <data name="StageRooted" xml:space="preserve">
+    <value>Har slået rødder</value>
+  </data>
+  <data name="StageDone" xml:space="preserve">
+    <value>Færdig</value>
+  </data>
+  <data name="StageFailed" xml:space="preserve">
+    <value>Mislykkedes</value>
+  </data>
+  <data name="StageSown" xml:space="preserve">
+    <value>Sået</value>
+  </data>
+  <data name="StageGerminating" xml:space="preserve">
+    <value>Spirer</value>
+  </data>
+  <data name="StageSprouted" xml:space="preserve">
+    <value>Spiret</value>
+  </data>
+  <data name="PestSpiderMites" xml:space="preserve">
+    <value>Spindemider</value>
+  </data>
+  <data name="PestThrips" xml:space="preserve">
+    <value>Trips</value>
+  </data>
+  <data name="PestFungusGnats" xml:space="preserve">
+    <value>Sørgemyg</value>
+  </data>
+  <data name="PestMealybugs" xml:space="preserve">
+    <value>Uldlus</value>
+  </data>
+  <data name="PestScale" xml:space="preserve">
+    <value>Skjoldlus</value>
+  </data>
+  <data name="PestAphids" xml:space="preserve">
+    <value>Bladlus</value>
+  </data>
+  <data name="PestWhitefly" xml:space="preserve">
+    <value>Hvide fluer</value>
+  </data>
+  <data name="PestOther" xml:space="preserve">
+    <value>Andet</value>
+  </data>
+  <data name="CaseTreating" xml:space="preserve">
+    <value>I behandling</value>
+  </data>
+  <data name="CaseWatching" xml:space="preserve">
+    <value>Holder øje</value>
+  </data>
+  <data name="CaseResolved" xml:space="preserve">
+    <value>Løst</value>
+  </data>
+  <data name="ScopeAllPlants" xml:space="preserve">
+    <value>Alle planter</value>
+  </data>
+  <data name="ScopeARoom" xml:space="preserve">
+    <value>Et rum</value>
+  </data>
+  <data name="DueNoTreatmentYet" xml:space="preserve">
+    <value>ingen behandling endnu</value>
+  </data>
+  <data name="DueToday" xml:space="preserve">
+    <value>skal gøres i dag</value>
+  </data>
+  <data name="CheckDueToday" xml:space="preserve">
+    <value>tjek i dag</value>
+  </data>
+  <data name="DueOverdue_One" xml:space="preserve">
+    <value>forsinket med {0} dag</value>
+  </data>
+  <data name="DueOverdue_Other" xml:space="preserve">
+    <value>forsinket med {0} dage</value>
+  </data>
+  <data name="CheckOverdue_One" xml:space="preserve">
+    <value>tjek forsinket med {0} dag</value>
+  </data>
+  <data name="CheckOverdue_Other" xml:space="preserve">
+    <value>tjek forsinket med {0} dage</value>
+  </data>
+  <data name="DueTomorrow" xml:space="preserve">
+    <value>næste i morgen</value>
+  </data>
+  <data name="CheckDueTomorrow" xml:space="preserve">
+    <value>næste tjek i morgen</value>
+  </data>
+  <data name="DueInDays" xml:space="preserve">
+    <value>næste om {0} dage</value>
+  </data>
+  <data name="CheckDueInDays" xml:space="preserve">
+    <value>næste tjek om {0} dage</value>
+  </data>
+  <data name="DaysAgoToday" xml:space="preserve">
+    <value>i dag</value>
+  </data>
+  <data name="DaysAgoYesterday" xml:space="preserve">
+    <value>i går</value>
+  </data>
+  <data name="DaysAgoMany" xml:space="preserve">
+    <value>for {0} dage siden</value>
+  </data>
+  <data name="FlagFromMonth" xml:space="preserve">
+    <value>fra {0}</value>
+  </data>
+  <data name="FlagFromDay" xml:space="preserve">
+    <value>fra {0}</value>
+  </data>
+  <data name="PotNursery" xml:space="preserve">
+    <value>Planteskolepotte</value>
+  </data>
+  <data name="PotOuter" xml:space="preserve">
+    <value>Yderpotte</value>
+  </data>
+  <data name="PotPropagation" xml:space="preserve">
+    <value>Til formering</value>
+  </data>
+  <data name="PotStandalone" xml:space="preserve">
+    <value>Står for sig selv</value>
+  </data>
+  <data name="TabNursery" xml:space="preserve">
+    <value>Planteskole</value>
+  </data>
+  <data name="TabOuter" xml:space="preserve">
+    <value>Yder</value>
+  </data>
+  <data name="TabPropagation" xml:space="preserve">
+    <value>Formering</value>
+  </data>
+  <data name="TabStandalone" xml:space="preserve">
+    <value>For sig selv</value>
+  </data>
+  <data name="HeadingNursery" xml:space="preserve">
+    <value>Planteskolepotter</value>
+  </data>
+  <data name="HeadingOuter" xml:space="preserve">
+    <value>Yderpotter</value>
+  </data>
+  <data name="HeadingPropagation" xml:space="preserve">
+    <value>Beholdere til formering</value>
+  </data>
+  <data name="HeadingStandalone" xml:space="preserve">
+    <value>Potter, der står for sig selv</value>
+  </data>
+  <data name="MaterialTerracotta" xml:space="preserve">
+    <value>Terrakotta</value>
+  </data>
+  <data name="MaterialCeramic" xml:space="preserve">
+    <value>Keramik</value>
+  </data>
+  <data name="MaterialGlass" xml:space="preserve">
+    <value>Glas</value>
+  </data>
+  <data name="MaterialMetal" xml:space="preserve">
+    <value>Metal</value>
+  </data>
+  <data name="MaterialOther" xml:space="preserve">
+    <value>Andet</value>
+  </data>
+  <data name="MaterialPlastic" xml:space="preserve">
+    <value>Plast</value>
+  </data>
+  <data name="WateringWick" xml:space="preserve">
+    <value>Væge</value>
+  </data>
+  <data name="WateringSubmerged" xml:space="preserve">
+    <value>Nedsænket</value>
+  </data>
+  <data name="UseFree" xml:space="preserve">
+    <value>ledig</value>
+  </data>
+  <data name="UseAllFree" xml:space="preserve">
+    <value>alle {0} ledige</value>
+  </data>
+  <data name="UseInUse" xml:space="preserve">
+    <value>i brug</value>
+  </data>
+  <data name="UseAllInUse" xml:space="preserve">
+    <value>alle {0} i brug</value>
+  </data>
+  <data name="UseSome" xml:space="preserve">
+    <value>{0} af {1} i brug, {2} ledige</value>
+  </data>
+  <data name="UseGone_One" xml:space="preserve">
+    <value>{0} fulgte med en plante</value>
+  </data>
+  <data name="UseGone_Other" xml:space="preserve">
+    <value>{0} fulgte med planter</value>
+  </data>
+  <data name="TakenPlantOnly_One" xml:space="preserve">
+    <value>Kun planten</value>
+  </data>
+  <data name="TakenPlantOnly_Other" xml:space="preserve">
+    <value>Kun planterne</value>
+  </data>
+  <data name="TakenWithPot_One" xml:space="preserve">
+    <value>Med dens potte</value>
+  </data>
+  <data name="TakenWithPot_Other" xml:space="preserve">
+    <value>Med deres potter</value>
+  </data>
+  <data name="TakenWithBothPots" xml:space="preserve">
+    <value>Med begge potter</value>
+  </data>
+  <data name="TakenWithOuterPot" xml:space="preserve">
+    <value>Med dens yderpotte</value>
+  </data>
+  <data name="TakenWithOuterPots" xml:space="preserve">
+    <value>Med yderpotter også</value>
+  </data>
+  <data name="MixParts" xml:space="preserve">
+    <value>Dele</value>
+  </data>
+  <data name="MixPercent" xml:space="preserve">
+    <value>Procent</value>
+  </data>
+  <data name="MixNoAmounts" xml:space="preserve">
+    <value>Ingen mængder</value>
+  </data>
+  <data name="PercentTotal" xml:space="preserve">
+    <value>Det giver {0} %, ikke 100 %. Du kan stadig gemme det.</value>
+  </data>
+  <data name="ProductFertiliser" xml:space="preserve">
+    <value>Gødning</value>
+  </data>
+  <data name="ProductStimulant" xml:space="preserve">
+    <value>Rodnings- eller vækstmiddel</value>
+  </data>
+  <data name="ProductSilica" xml:space="preserve">
+    <value>Silica</value>
+  </data>
+  <data name="ProductCalMag" xml:space="preserve">
+    <value>Cal-mag</value>
+  </data>
+  <data name="ProductPh" xml:space="preserve">
+    <value>pH op eller ned</value>
+  </data>
+  <data name="ProductOther" xml:space="preserve">
+    <value>Noget andet</value>
+  </data>
+  <data name="NutrientNitrogen" xml:space="preserve">
+    <value>Kvælstof</value>
+  </data>
+  <data name="NutrientPhosphorus" xml:space="preserve">
+    <value>Fosfor</value>
+  </data>
+  <data name="NutrientPotassium" xml:space="preserve">
+    <value>Kalium</value>
+  </data>
+  <data name="NutrientCalcium" xml:space="preserve">
+    <value>Calcium</value>
+  </data>
+  <data name="NutrientMagnesium" xml:space="preserve">
+    <value>Magnesium</value>
+  </data>
+  <data name="NutrientSulphur" xml:space="preserve">
+    <value>Svovl</value>
+  </data>
+  <data name="NutrientSilicon" xml:space="preserve">
+    <value>Silicium</value>
+  </data>
+  <data name="NutrientIron" xml:space="preserve">
+    <value>Jern</value>
+  </data>
+  <data name="NutrientManganese" xml:space="preserve">
+    <value>Mangan</value>
+  </data>
+  <data name="NutrientZinc" xml:space="preserve">
+    <value>Zink</value>
+  </data>
+  <data name="NutrientBoron" xml:space="preserve">
+    <value>Bor</value>
+  </data>
+  <data name="NutrientCopper" xml:space="preserve">
+    <value>Kobber</value>
+  </data>
+  <data name="NutrientMolybdenum" xml:space="preserve">
+    <value>Molybdæn</value>
+  </data>
+</root>

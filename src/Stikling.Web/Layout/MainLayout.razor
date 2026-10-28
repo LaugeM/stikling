@@ -2,6 +2,7 @@
 @implements IAsyncDisposable
 @inject IndexedDb Db
 @inject ThemeService Theme
+@inject LanguageService Language
 @inject ErrorReports ErrorReports
 @inject SyncRunner Sync
 @inject CoverPhotos Covers
@@ -25,10 +26,10 @@
             Stikling
         </a>
         <div class="header-actions">
-        <NavLink class="settings-link" href="search" aria-label="Search">
+        <NavLink class="settings-link" href="search" aria-label="@Strings.Layout.Search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
         </NavLink>
-        <NavLink class="settings-link" href="settings" aria-label="@(Sync.HasProblem ? "Settings, sync problem" : "Settings")">
+        <NavLink class="settings-link" href="settings" aria-label="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : Strings.Layout.Settings)">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>
             @if (Sync.HasProblem)
             {
@@ -51,10 +52,10 @@
        their things in, which would otherwise look like the account had lost them *@
     @if (FirstSyncNotice)
     {
-        <div class="first-sync-banner" role="status">Fetching what's saved on your account…</div>
+        <div class="first-sync-banner" role="status">@Strings.Layout.FetchingAccount</div>
     }
 
-    <nav class="app-nav" aria-label="Main">
+    <nav class="app-nav" aria-label="@Strings.Layout.MainNavigation">
         @* On a wide screen the menu takes over from the header, so it carries the name and Settings *@
         <a class="app-nav-title" href="">
             <img src="icon-192.png" alt="" width="28" height="28" />
@@ -63,41 +64,41 @@
         @* A quiet field rather than a tab, since it works from anywhere. The / key opens it too. *@
         <NavLink class="app-nav-search" href="search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
-            <span>Search</span>
+            <span>@Strings.Layout.Search</span>
             <kbd aria-hidden="true">/</kbd>
         </NavLink>
         <NavLink class="app-nav-link" href="" Match="NavLinkMatch.All">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" /><path d="M3.5 10h17M8 3v4M16 3v4" /><path d="m9 15 2 2 4-4" /></svg>
-            <span>Today</span>
+            <span>@Strings.Layout.Today</span>
         </NavLink>
         <NavLink class="app-nav-link" href="plants">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
-            <span>Plants</span>
+            <span>@Strings.Layout.Plants</span>
         </NavLink>
         <NavLink class="app-nav-link" href="propagations">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
-            <span>Propagate</span>
+            <span>@Strings.Layout.Propagate</span>
         </NavLink>
         @if (pestTab)
         {
             <NavLink class="app-nav-link" href="pests">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
-                <span>Pests</span>
+                <span>@Strings.Layout.Pests</span>
             </NavLink>
         }
         @* Without its own tab, Pests is reached from Supplies, so that tab shows where you are *@
         <NavLink class="@($"app-nav-link {(!pestTab && OnPestsPage ? "active" : null)}")" href="supplies">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5h15v3.5h-15Z" /><path d="M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8" /></svg>
-            <span>Supplies</span>
+            <span>@Strings.Layout.Supplies</span>
         </NavLink>
         <div class="app-nav-end">
             <NavLink class="app-nav-link" href="help">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" /><path d="M12 17h.01" /></svg>
-                <span>Help</span>
+                <span>@Strings.Layout.Help</span>
             </NavLink>
-            <NavLink class="app-nav-link" href="settings" aria-label="@(Sync.HasProblem ? "Settings, sync problem" : null)">
+            <NavLink class="app-nav-link" href="settings" aria-label="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : null)">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>
-                <span>Settings</span>
+                <span>@Strings.Layout.Settings</span>
                 @if (Sync.HasProblem)
                 {
                     <span class="settings-link-dot" aria-hidden="true"></span>
@@ -248,6 +249,7 @@
 
         // The saved theme counts, the copy in localStorage is only for the first paint
         await Theme.ApplySavedAsync();
+        await Language.ApplySavedAsync();
         await ErrorReports.ApplySavedAsync();
         await ErrorReports.SetReleaseAsync();
 

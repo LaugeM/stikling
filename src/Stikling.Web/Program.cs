@@ -31,10 +31,9 @@ using Stikling.Core.Today;
 using Stikling.Web;
 using Stikling.Web.Services;
 
-// The app is in English, so dates read "19 Sep 2026" regardless of the browser's language
-var culture = new CultureInfo("en-GB");
-CultureInfo.DefaultThreadCurrentCulture = culture;
-CultureInfo.DefaultThreadCurrentUICulture = culture;
+// English until the language is worked out below, once the host exists. English keeps en-GB, so dates
+// read the way they always have and not the way the browser's language writes them
+SetCulture(AppLanguages.English);
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -53,6 +52,8 @@ builder.Logging.AddSentry(options =>
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped<ThemeService>();
+builder.Services.AddScoped<LanguageService>();
+builder.Services.AddScoped<IAppLanguage>(services => services.GetRequiredService<LanguageService>());
 builder.Services.AddScoped<ErrorReports>();
 builder.Services.AddScoped<IndexedDb>();
 builder.Services.AddScoped<IPlantRepository, IndexedDbPlantRepository>();
@@ -150,5 +151,30 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<SyncRunner>();
 
 var host = builder.Build();
-SentrySetup.Runtime = (IJSInProcessRuntime)host.Services.GetRequiredService<IJSRuntime>();
+var jsRuntime = (IJSInProcessRuntime)host.Services.GetRequiredService<IJSRuntime>();
+SentrySetup.Runtime = jsRuntime;
+
+// The language is chosen before the app runs, since its text is looked up as it renders. It comes from the
+// copy of the saved choice in localStorage, or else the browser. Languages still being translated are only
+// offered in development builds.
+try
+{
+    var chosen = jsRuntime.Invoke<string?>("stiklingLanguage.get");
+    var browser = jsRuntime.Invoke<string[]>("stiklingLanguage.browser");
+    SetCulture(AppLanguages.Resolve(chosen, browser, builder.HostEnvironment.IsDevelopment()));
+}
+catch (Exception)
+{
+    // Without it the app is in English
+}
+
 await host.RunAsync();
+
+static void SetCulture(string language)
+{
+    var culture = new CultureInfo(AppLanguages.CultureOf(language));
+    CultureInfo.DefaultThreadCurrentCulture = culture;
+    CultureInfo.DefaultThreadCurrentUICulture = culture;
+    CultureInfo.CurrentCulture = culture;
+    CultureInfo.CurrentUICulture = culture;
+}

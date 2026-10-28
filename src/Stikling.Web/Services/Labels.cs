@@ -4,6 +4,7 @@ using Stikling.Core.Plants;
 using Stikling.Core.Pests;
 using Stikling.Core.Pots;
 using Stikling.Core.SoilMixes;
+using Strings = Stikling.Web.Resources;
 
 namespace Stikling.Web.Services;
 
@@ -12,10 +13,10 @@ public static class Labels
 {
     public static string For(PlantStatus status) => status switch
     {
-        PlantStatus.Active => "In collection",
-        PlantStatus.Died => "Died",
-        PlantStatus.GivenAway => "Given away",
-        PlantStatus.Sold => "Sold",
+        PlantStatus.Active => Strings.Labels.StatusActive,
+        PlantStatus.Died => Strings.Labels.StatusDied,
+        PlantStatus.GivenAway => Strings.Labels.StatusGivenAway,
+        PlantStatus.Sold => Strings.Labels.StatusSold,
         _ => status.ToString()
     };
 
@@ -25,109 +26,109 @@ public static class Labels
     /// </summary>
     public static string StatusOf(Plant plant, string? pottedWith = null) =>
         plant.LivesElsewhere
-            ? (plant.LivesWithName is { } owner ? $"Lives with {owner}" : "Not yours")
+            ? (plant.LivesWithName is { } owner ? string.Format(CultureInfo.CurrentCulture, Strings.Labels.StatusLivesWith, owner) : Strings.Labels.StatusNotYours)
             : plant.Status == PlantStatus.Active && plant.PottedWithPlantId is not null
-            ? (string.IsNullOrWhiteSpace(pottedWith) ? "Potted with another plant" : $"Potted with {pottedWith}")
+            ? (string.IsNullOrWhiteSpace(pottedWith) ? Strings.Labels.StatusPottedWithOther : string.Format(CultureInfo.CurrentCulture, Strings.Labels.StatusPottedWith, pottedWith))
             : For(plant.Status);
 
     public static string For(PlantOrigin origin) => origin switch
     {
-        PlantOrigin.Purchased => "Purchased",
-        PlantOrigin.Propagated => "Propagated",
-        PlantOrigin.GrownFromSeed => "Grown from seed",
-        PlantOrigin.Gift => "Gift",
-        PlantOrigin.Swap => "Swap",
-        PlantOrigin.Unknown => "Unknown",
+        PlantOrigin.Purchased => Strings.Labels.OriginPurchased,
+        PlantOrigin.Propagated => Strings.Labels.OriginPropagated,
+        PlantOrigin.GrownFromSeed => Strings.Labels.OriginGrownFromSeed,
+        PlantOrigin.Gift => Strings.Labels.OriginGift,
+        PlantOrigin.Swap => Strings.Labels.OriginSwap,
+        PlantOrigin.Unknown => Strings.Labels.OriginUnknown,
         _ => origin.ToString()
     };
 
     public static string For(RaisedAs raised) => raised switch
     {
-        RaisedAs.NurseryGrown => "Nursery grown",
-        RaisedAs.TissueCulture => "Tissue culture",
-        RaisedAs.Seed => "From seed",
-        RaisedAs.Cutting => "From a cutting or division",
-        RaisedAs.WildCollected => "Wild collected",
+        RaisedAs.NurseryGrown => Strings.Labels.RaisedNurseryGrown,
+        RaisedAs.TissueCulture => Strings.Labels.RaisedTissueCulture,
+        RaisedAs.Seed => Strings.Labels.RaisedSeed,
+        RaisedAs.Cutting => Strings.Labels.RaisedCutting,
+        RaisedAs.WildCollected => Strings.Labels.RaisedWildCollected,
         _ => raised.ToString()
     };
 
     public static string For(SellerKind kind) => kind switch
     {
-        SellerKind.Shop => "Shop",
-        SellerKind.OnlineShop => "Online shop",
-        SellerKind.Person => "Person",
-        SellerKind.SwapEvent => "Swap event",
-        SellerKind.Other => "Other",
+        SellerKind.Shop => Strings.Labels.SellerShop,
+        SellerKind.OnlineShop => Strings.Labels.SellerOnlineShop,
+        SellerKind.Person => Strings.Labels.SellerPerson,
+        SellerKind.SwapEvent => Strings.Labels.SellerSwapEvent,
+        SellerKind.Other => Strings.Labels.SellerOther,
         _ => kind.ToString()
     };
 
     public static string For(ArrivalRating rating) => rating switch
     {
-        ArrivalRating.Good => "Good",
-        ArrivalRating.Ok => "OK",
-        ArrivalRating.Poor => "Poor",
+        ArrivalRating.Good => Strings.Labels.ArrivalGood,
+        ArrivalRating.Ok => Strings.Labels.ArrivalOk,
+        ArrivalRating.Poor => Strings.Labels.ArrivalPoor,
         _ => rating.ToString()
     };
 
     public static string For(ArrivalProblem problem) => problem switch
     {
-        ArrivalProblem.Pests => "Pests",
-        ArrivalProblem.Damaged => "Damaged or broken",
-        ArrivalProblem.RootRot => "Root rot",
-        ArrivalProblem.WrongPlant => "Wrong plant",
-        ArrivalProblem.SmallerThanShown => "Smaller than shown",
+        ArrivalProblem.Pests => Strings.Labels.ArrivalPests,
+        ArrivalProblem.Damaged => Strings.Labels.ArrivalDamaged,
+        ArrivalProblem.RootRot => Strings.Labels.ArrivalRootRot,
+        ArrivalProblem.WrongPlant => Strings.Labels.ArrivalWrongPlant,
+        ArrivalProblem.SmallerThanShown => Strings.Labels.ArrivalSmallerThanShown,
         _ => problem.ToString()
     };
 
     public static string For(LightLevel light) => light switch
     {
-        LightLevel.Low => "Low light",
-        LightLevel.Medium => "Medium light",
-        LightLevel.BrightIndirect => "Bright indirect",
-        LightLevel.DirectSun => "Some direct sun",
+        LightLevel.Low => Strings.Labels.LightLow,
+        LightLevel.Medium => Strings.Labels.LightMedium,
+        LightLevel.BrightIndirect => Strings.Labels.LightBrightIndirect,
+        LightLevel.DirectSun => Strings.Labels.LightDirectSun,
         _ => light.ToString()
     };
 
     public static string For(WaterNeed need) => need switch
     {
-        WaterNeed.DryOut => "Dry out fully",
-        WaterNeed.DryPartly => "Dry out partly",
-        WaterNeed.EvenlyMoist => "Evenly moist",
+        WaterNeed.DryOut => Strings.Labels.WaterDryOut,
+        WaterNeed.DryPartly => Strings.Labels.WaterDryPartly,
+        WaterNeed.EvenlyMoist => Strings.Labels.WaterEvenlyMoist,
         _ => need.ToString()
     };
 
     public static string For(HumidityNeed need) => need switch
     {
-        HumidityNeed.Low => "Low humidity",
-        HumidityNeed.Medium => "Medium humidity",
-        HumidityNeed.High => "High humidity",
+        HumidityNeed.Low => Strings.Labels.HumidityLow,
+        HumidityNeed.Medium => Strings.Labels.HumidityMedium,
+        HumidityNeed.High => Strings.Labels.HumidityHigh,
         _ => need.ToString()
     };
 
     public static string For(GrowingSeason season) => season switch
     {
-        GrowingSeason.Summer => "Rests in winter",
-        GrowingSeason.Winter => "Rests in summer",
-        GrowingSeason.NoRest => "Grows all year",
+        GrowingSeason.Summer => Strings.Labels.SeasonRestsInWinter,
+        GrowingSeason.Winter => Strings.Labels.SeasonRestsInSummer,
+        GrowingSeason.NoRest => Strings.Labels.SeasonGrowsAllYear,
         _ => season.ToString()
     };
 
     public static string For(RestKind rest) => rest switch
     {
-        RestKind.Cooler => "kept cooler",
-        RestKind.Drier => "kept drier",
-        RestKind.CoolerAndDrier => "kept cooler and drier",
-        RestKind.DiesBack => "dies back",
+        RestKind.Cooler => Strings.Labels.RestCooler,
+        RestKind.Drier => Strings.Labels.RestDrier,
+        RestKind.CoolerAndDrier => Strings.Labels.RestCoolerAndDrier,
+        RestKind.DiesBack => Strings.Labels.RestDiesBack,
         _ => rest.ToString()
     };
 
     public static string For(GrowingMedium medium) => medium switch
     {
-        GrowingMedium.OrchidBark => "Orchid bark",
-        GrowingMedium.Leca => "LECA",
-        GrowingMedium.Pon => "PON",
-        GrowingMedium.Sphagnum => "Sphagnum moss",
-        GrowingMedium.CormRiser => "Corm riser",
+        GrowingMedium.OrchidBark => Strings.Labels.MediumOrchidBark,
+        GrowingMedium.Leca => Strings.Labels.MediumLeca,
+        GrowingMedium.Pon => Strings.Labels.MediumPon,
+        GrowingMedium.Sphagnum => Strings.Labels.MediumSphagnum,
+        GrowingMedium.CormRiser => Strings.Labels.MediumCormRiser,
         _ => medium.ToString()
     };
 
@@ -141,65 +142,84 @@ public static class Labels
     /// <summary>A line on what the less obvious media are, or null for the ones that need none.</summary>
     public static string? Explain(GrowingMedium medium) => medium switch
     {
-        GrowingMedium.Leca => "Fired clay balls. With water in the bottom of the pot, they wick it up to the roots, with no soil. This is called semi-hydro.",
-        GrowingMedium.Pon => "A ready-made mix of mineral grains like pumice, zeolite and lava rock, used for semi-hydro in place of soil.",
-        GrowingMedium.Sphagnum => "Long-fibred moss that holds a lot of water and still lets air in. Often used to root cuttings.",
-        GrowingMedium.CormRiser => "The corm sits on a raised layer above water in a closed box, so it stays damp without sitting in water.",
+        GrowingMedium.Leca => Strings.Labels.ExplainLeca,
+        GrowingMedium.Pon => Strings.Labels.ExplainPon,
+        GrowingMedium.Sphagnum => Strings.Labels.ExplainSphagnum,
+        GrowingMedium.CormRiser => Strings.Labels.ExplainCormRiser,
         _ => null
     };
 
     /// <summary>A line on what a propagation type means, or null for the ones that need none.</summary>
     public static string? Explain(PropagationType type) => type switch
     {
-        PropagationType.AirLayer => "Roots are grown on a stem while it's still on the plant, in damp moss wrapped round it, and it's cut off once they're there.",
+        PropagationType.AirLayer => Strings.Labels.ExplainAirLayer,
         _ => null
     };
 
     public static string For(RootingAid aid) => aid switch
     {
-        RootingAid.RootingPowder => "Rooting powder",
-        RootingAid.RootingGel => "Rooting gel",
-        RootingAid.WillowWater => "Willow water",
-        RootingAid.HumidityDome => "Humidity dome or bag",
-        RootingAid.HeatMat => "Heat mat",
+        RootingAid.RootingPowder => Strings.Labels.AidRootingPowder,
+        RootingAid.RootingGel => Strings.Labels.AidRootingGel,
+        RootingAid.WillowWater => Strings.Labels.AidWillowWater,
+        RootingAid.HumidityDome => Strings.Labels.AidHumidityDome,
+        RootingAid.HeatMat => Strings.Labels.AidHeatMat,
         _ => aid.ToString()
     };
 
     public static string For(CareKind kind) => kind switch
     {
-        CareKind.ToppedUp => "Topped up",
-        CareKind.LeavesCleaned => "Leaves cleaned",
-        CareKind.MoistureReading => "Moisture reading",
+        CareKind.Watered => Strings.Labels.CareWatered,
+        CareKind.Fertilised => Strings.Labels.CareFertilised,
+        CareKind.ToppedUp => Strings.Labels.CareToppedUp,
+        CareKind.Flushed => Strings.Labels.CareFlushed,
+        CareKind.Repotted => Strings.Labels.CareRepotted,
+        CareKind.Pruned => Strings.Labels.CarePruned,
+        CareKind.Rotated => Strings.Labels.CareRotated,
+        CareKind.LeavesCleaned => Strings.Labels.CareLeavesCleaned,
+        CareKind.Harvested => Strings.Labels.CareHarvested,
+        CareKind.MoistureReading => Strings.Labels.CareMoistureReading,
         _ => kind.ToString()
     };
 
     public static string For(PropagationType type) => type switch
     {
-        PropagationType.Offset => "Offset / pup",
-        PropagationType.AirLayer => "Air layer",
+        PropagationType.Cutting => Strings.Labels.TypeCutting,
+        PropagationType.Corm => Strings.Labels.TypeCorm,
+        PropagationType.Offset => Strings.Labels.TypeOffset,
+        PropagationType.Seed => Strings.Labels.TypeSeed,
+        PropagationType.Division => Strings.Labels.TypeDivision,
+        PropagationType.AirLayer => Strings.Labels.TypeAirLayer,
+        PropagationType.Leaf => Strings.Labels.TypeLeaf,
+        PropagationType.Other => Strings.Labels.TypeOther,
         _ => type.ToString()
     };
 
     public static string For(Pest pest) => pest switch
     {
-        Pest.SpiderMites => "Spider mites",
-        Pest.FungusGnats => "Fungus gnats",
+        Pest.SpiderMites => Strings.Labels.PestSpiderMites,
+        Pest.Thrips => Strings.Labels.PestThrips,
+        Pest.FungusGnats => Strings.Labels.PestFungusGnats,
+        Pest.Mealybugs => Strings.Labels.PestMealybugs,
+        Pest.Scale => Strings.Labels.PestScale,
+        Pest.Aphids => Strings.Labels.PestAphids,
+        Pest.Whitefly => Strings.Labels.PestWhitefly,
+        Pest.Other => Strings.Labels.PestOther,
         _ => pest.ToString()
     };
 
     public static string For(PestCaseStatus status) => status switch
     {
-        PestCaseStatus.Active => "Treating",
-        PestCaseStatus.Monitoring => "Watching",
-        PestCaseStatus.Resolved => "Resolved",
+        PestCaseStatus.Active => Strings.Labels.CaseTreating,
+        PestCaseStatus.Monitoring => Strings.Labels.CaseWatching,
+        PestCaseStatus.Resolved => Strings.Labels.CaseResolved,
         _ => status.ToString()
     };
 
     /// <summary>"All plants", "Living room" or "4 plants", for a case's one-line summary.</summary>
     public static string Scope(PestCaseView view) => view.Case.Scope switch
     {
-        PestScope.Everywhere => "All plants",
-        PestScope.Room => view.Room ?? "A room",
+        PestScope.Everywhere => Strings.Labels.ScopeAllPlants,
+        PestScope.Room => view.Room ?? Strings.Labels.ScopeARoom,
         _ => Plants(view.Plants.Count)
     };
 
@@ -214,36 +234,39 @@ public static class Labels
     /// and nothing is logged, rather than counting days overdue since the pests were found.
     /// </summary>
     public static string Due(PestCaseView view) =>
-        view.Untreated && view.IsDue && view.StepNumber <= 1 ? "no treatment yet" : Due(view.DaysUntilDue ?? 0, view.IsCheck);
+        view.Untreated && view.IsDue && view.StepNumber <= 1 ? Strings.Labels.DueNoTreatmentYet : Due(view.DaysUntilDue ?? 0, view.IsCheck);
 
     /// <summary>"due today", "2 days overdue", "next in 3 days", or "check due today" and so on for a check.</summary>
-    public static string Due(int daysUntil, bool check = false)
+    public static string Due(int daysUntil, bool check = false) => daysUntil switch
     {
-        var what = check ? "check " : "";
-        return daysUntil switch
-        {
-            0 => $"{what}due today",
-            -1 => $"{what}1 day overdue",
-            < 0 => $"{what}{-daysUntil} days overdue",
-            1 => $"next {what}tomorrow",
-            _ => $"next {what}in {daysUntil} days"
-        };
-    }
+        0 => check ? Strings.Labels.CheckDueToday : Strings.Labels.DueToday,
+        < 0 => check
+            ? Plural.Of(-daysUntil, Strings.Labels.CheckOverdue_One, Strings.Labels.CheckOverdue_Other)
+            : Plural.Of(-daysUntil, Strings.Labels.DueOverdue_One, Strings.Labels.DueOverdue_Other),
+        1 => check ? Strings.Labels.CheckDueTomorrow : Strings.Labels.DueTomorrow,
+        _ => string.Format(CultureInfo.CurrentCulture, check ? Strings.Labels.CheckDueInDays : Strings.Labels.DueInDays, daysUntil)
+    };
 
     /// <summary>Stage names. Seeds get their own words: sown, germinating, sprouted.</summary>
     public static string Stage(PropagationStage stage, PropagationType type = PropagationType.Cutting) =>
         (stage, type == PropagationType.Seed) switch
         {
-            (PropagationStage.Started, true) => "Sown",
-            (PropagationStage.Rooting, true) => "Germinating",
-            (PropagationStage.Rooted, true) => "Sprouted",
+            (PropagationStage.Started, true) => Strings.Labels.StageSown,
+            (PropagationStage.Rooting, true) => Strings.Labels.StageGerminating,
+            (PropagationStage.Rooted, true) => Strings.Labels.StageSprouted,
+            (PropagationStage.Started, _) => Strings.Labels.StageStarted,
+            (PropagationStage.Rooting, _) => Strings.Labels.StageRooting,
+            (PropagationStage.Rooted, _) => Strings.Labels.StageRooted,
+            (PropagationStage.Done, _) => Strings.Labels.StageDone,
+            (PropagationStage.Failed, _) => Strings.Labels.StageFailed,
             _ => stage.ToString()
         };
 
     public static string For(PropagationCareKind kind) => kind switch
     {
-        PropagationCareKind.ChangedWater => "Changed the water",
-        PropagationCareKind.MoistureReading => "Moisture reading",
+        PropagationCareKind.Watered => Strings.Labels.CareWatered,
+        PropagationCareKind.ChangedWater => Strings.Labels.CareChangedWater,
+        PropagationCareKind.MoistureReading => Strings.Labels.CareMoistureReading,
         _ => kind.ToString()
     };
 
@@ -276,14 +299,15 @@ public static class Labels
 
     /// <summary>"3× corm · LECA".</summary>
     public static string Summary(Propagation propagation) =>
-        $"{propagation.InitialCount}× {For(propagation.Type).ToLowerInvariant()} · {For(propagation.Medium)}";
+        string.Format(CultureInfo.CurrentCulture, Strings.Labels.PropagationSummary,
+            propagation.InitialCount, For(propagation.Type).ToLowerInvariant(), For(propagation.Medium));
 
     /// <summary>"started today" / "day 24".</summary>
     public static string Age(Propagation propagation, DateOnly today) =>
         propagation.DaysSinceStart(today) switch
         {
-            0 => "started today",
-            var days => $"day {days}"
+            0 => Strings.Labels.AgeStartedToday,
+            var days => string.Format(CultureInfo.CurrentCulture, Strings.Labels.AgeDay, days)
         };
 
     /// <summary>"12.4 MB", for the storage line in Settings.</summary>
@@ -302,15 +326,15 @@ public static class Labels
     /// <summary>"today", "yesterday", "12 days ago".</summary>
     public static string DaysAgo(int days) => days switch
     {
-        <= 0 => "today",
-        1 => "yesterday",
-        _ => $"{days} days ago"
+        <= 0 => Strings.Labels.DaysAgoToday,
+        1 => Strings.Labels.DaysAgoYesterday,
+        _ => string.Format(CultureInfo.CurrentCulture, Strings.Labels.DaysAgoMany, days)
     };
 
     /// <summary>"from March" for a month, "from Sat 17 Oct" for a day, for a flag set for later.</summary>
     public static string FlagFrom(LooseDate from) => from.Precision == DatePrecision.Day
-        ? $"from {from.Start.ToString("ddd d MMM", CultureInfo.InvariantCulture)}"
-        : $"from {from.Start.ToString("MMMM", CultureInfo.InvariantCulture)}";
+        ? string.Format(CultureInfo.CurrentCulture, Strings.Labels.FlagFromDay, Format(from.Start, Strings.Labels.DayFormat))
+        : string.Format(CultureInfo.CurrentCulture, Strings.Labels.FlagFromMonth, Format(from.Start, Strings.Labels.MonthFormat));
 
     /// <summary>
     /// "Usually likes bright indirect · dry out fully · rests in winter, kept drier": the needs the care file
@@ -328,65 +352,79 @@ public static class Labels
         var rest = fills.Contains(LikesField.Rest) && care.Rest is { } r ? For(r) : null;
         if (season is not null || rest is not null)
             parts.Add(string.Join(", ", new[] { season, rest }.OfType<string>()));
-        return "Usually likes " + string.Join(" · ", parts);
+        return string.Format(CultureInfo.CurrentCulture, Strings.Labels.UsuallyLikes, string.Join(" · ", parts));
     }
 
     private static string Lower(string text) => char.ToLowerInvariant(text[0]) + text[1..];
 
     /// <summary>"1 plant" / "3 plants".</summary>
-    public static string Plants(int count) => Count(count, "plant");
+    public static string Plants(int count) => Plural.Of(count, Strings.Common.Plant_One, Strings.Common.Plant_Other);
 
-    /// <summary>"1 propagation" / "3 propagations". Plural is the singular plus "s" unless given.</summary>
+    /// <summary>
+    /// "1 propagation" / "3 propagations". Plural is the singular plus "s" unless given. This is for English
+    /// words that haven't been moved to the resource files yet. Counted text that is translated uses <see cref="Plural"/>.
+    /// </summary>
     public static string Count(int count, string singular, string? plural = null) =>
         count == 1 ? $"1 {singular}" : $"{count} {plural ?? singular + "s"}";
 
     public static string Time(DateTimeOffset moment) =>
         moment.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture);
 
-    // Invariant culture gives "19 Sep 2026" (en-GB would write "Sept")
-    public static string Date(DateOnly date) => date.ToString("d MMM yyyy", CultureInfo.InvariantCulture);
+    // English reads "19 Sep 2026" (en-GB would write "Sept"), see TextCulture
+    public static string Date(DateOnly date) => Format(date, Strings.Labels.DateFormat);
 
     /// <summary>"2024", "June 2024" or "12 Jun 2024", depending on how much is known.</summary>
-    public static string Date(LooseDate date) => date.Text();
+    public static string Date(LooseDate date) => date.Precision switch
+    {
+        DatePrecision.Year => date.Text(),
+        DatePrecision.Month => Format(date.Start, Strings.Labels.MonthYearFormat),
+        _ => Date(date.Start)
+    };
+
+    /// <summary>"Mon", for the buttons that pick weekdays.</summary>
+    public static string DayShort(Weekday day) =>
+        TextCulture.ForDates.DateTimeFormat.GetAbbreviatedDayName(Enum.Parse<DayOfWeek>(day.ToString()));
+
+    private static string Format(DateOnly date, string pattern) => date.ToString(pattern, TextCulture.ForDates);
 
     public static string For(PotKind group) => group switch
     {
-        PotKind.Inner => "Nursery pot",
-        PotKind.Outer => "Outer pot",
-        PotKind.Propagation => "For propagating",
-        _ => "Stands on its own"
+        PotKind.Inner => Strings.Labels.PotNursery,
+        PotKind.Outer => Strings.Labels.PotOuter,
+        PotKind.Propagation => Strings.Labels.PotPropagation,
+        _ => Strings.Labels.PotStandalone
     };
 
     /// <summary>The short name on the switch between kinds at the top of the pot library.</summary>
     public static string Tab(PotKind group) => group switch
     {
-        PotKind.Inner => "Nursery",
-        PotKind.Outer => "Outer",
-        PotKind.Propagation => "Propagation",
-        _ => "On its own"
+        PotKind.Inner => Strings.Labels.TabNursery,
+        PotKind.Outer => Strings.Labels.TabOuter,
+        PotKind.Propagation => Strings.Labels.TabPropagation,
+        _ => Strings.Labels.TabStandalone
     };
 
     /// <summary>The heading over a group of pots in the library.</summary>
     public static string Heading(PotKind group) => group switch
     {
-        PotKind.Inner => "Nursery pots",
-        PotKind.Outer => "Outer pots",
-        PotKind.Propagation => "Containers for propagating",
-        _ => "Pots that stand on their own"
+        PotKind.Inner => Strings.Labels.HeadingNursery,
+        PotKind.Outer => Strings.Labels.HeadingOuter,
+        PotKind.Propagation => Strings.Labels.HeadingPropagation,
+        _ => Strings.Labels.HeadingStandalone
     };
 
     public static string For(PotMaterial material) => material switch
     {
-        PotMaterial.Terracotta => "Terracotta",
-        PotMaterial.Ceramic => "Ceramic",
-        PotMaterial.Glass => "Glass",
-        PotMaterial.Metal => "Metal",
-        PotMaterial.Other => "Other",
-        _ => "Plastic"
+        PotMaterial.Terracotta => Strings.Labels.MaterialTerracotta,
+        PotMaterial.Ceramic => Strings.Labels.MaterialCeramic,
+        PotMaterial.Glass => Strings.Labels.MaterialGlass,
+        PotMaterial.Metal => Strings.Labels.MaterialMetal,
+        PotMaterial.Other => Strings.Labels.MaterialOther,
+        _ => Strings.Labels.MaterialPlastic
     };
 
     public static string For(PotWatering watering) =>
-        watering == PotWatering.Wick ? "Wick" : "Submerged";
+        watering == PotWatering.Wick ? Strings.Labels.WateringWick : Strings.Labels.WateringSubmerged;
 
     /// <summary>"2 of 3 in use, 1 free", so the library says what is still available.</summary>
     public static string Use(PotUse use)
@@ -394,16 +432,11 @@ public static class Labels
         var here = use switch
         {
             { Here: 0 } => null,
-            { InUse: 0 } => use.Here == 1 ? "free" : $"all {use.Here} free",
-            { Free: 0 } => use.Here == 1 ? "in use" : $"all {use.Here} in use",
-            _ => $"{use.InUse} of {use.Here} in use, {use.Free} free"
+            { InUse: 0 } => use.Here == 1 ? Strings.Labels.UseFree : string.Format(CultureInfo.CurrentCulture, Strings.Labels.UseAllFree, use.Here),
+            { Free: 0 } => use.Here == 1 ? Strings.Labels.UseInUse : string.Format(CultureInfo.CurrentCulture, Strings.Labels.UseAllInUse, use.Here),
+            _ => string.Format(CultureInfo.CurrentCulture, Strings.Labels.UseSome, use.InUse, use.Here, use.Free)
         };
-        var gone = use.Gone switch
-        {
-            0 => null,
-            1 => "1 went with a plant",
-            var n => $"{n} went with plants"
-        };
+        var gone = use.Gone == 0 ? null : Plural.Of(use.Gone, Strings.Labels.UseGone_One, Strings.Labels.UseGone_Other);
         return string.Join(", ", new[] { here, gone }.OfType<string>());
     }
 
@@ -420,40 +453,58 @@ public static class Labels
         if (!inner && !outer)
             return [];
 
-        var choices = new List<(PotsTaken, string)> { (PotsTaken.None, one ? "Just the plant" : "Just the plants") };
+        var choices = new List<(PotsTaken, string)> { (PotsTaken.None, one ? Strings.Labels.TakenPlantOnly_One : Strings.Labels.TakenPlantOnly_Other) };
         if (inner)
-            choices.Add((PotsTaken.Inner, one ? "With its pot" : "With their pots"));
+            choices.Add((PotsTaken.Inner, one ? Strings.Labels.TakenWithPot_One : Strings.Labels.TakenWithPot_Other));
         if (outer)
             choices.Add((PotsTaken.All, (one, inner) switch
             {
-                (true, true) => "With both pots",
-                (true, false) => "With its outer pot",
-                _ => "With outer pots too"
+                (true, true) => Strings.Labels.TakenWithBothPots,
+                (true, false) => Strings.Labels.TakenWithOuterPot,
+                _ => Strings.Labels.TakenWithOuterPots
             }));
         return choices;
     }
 
     public static string For(MixUnit unit) => unit switch
     {
-        MixUnit.Parts => "Parts",
-        MixUnit.Percent => "Percent",
-        _ => "No amounts"
+        MixUnit.Parts => Strings.Labels.MixParts,
+        MixUnit.Percent => Strings.Labels.MixPercent,
+        _ => Strings.Labels.MixNoAmounts
     };
 
     public static string For(DoseUnit unit) => Doses.Symbol(unit);
 
     public static string For(ProductKind kind) => kind switch
     {
-        ProductKind.Stimulant => "Rooting or growth stimulant",
-        ProductKind.CalMag => "Cal-mag",
-        ProductKind.Ph => "pH up or down",
-        ProductKind.Other => "Something else",
+        ProductKind.Fertiliser => Strings.Labels.ProductFertiliser,
+        ProductKind.Stimulant => Strings.Labels.ProductStimulant,
+        ProductKind.Silica => Strings.Labels.ProductSilica,
+        ProductKind.CalMag => Strings.Labels.ProductCalMag,
+        ProductKind.Ph => Strings.Labels.ProductPh,
+        ProductKind.Other => Strings.Labels.ProductOther,
         _ => kind.ToString()
     };
 
-    public static string For(Nutrient nutrient) => nutrient.ToString();
+    public static string For(Nutrient nutrient) => nutrient switch
+    {
+        Nutrient.Nitrogen => Strings.Labels.NutrientNitrogen,
+        Nutrient.Phosphorus => Strings.Labels.NutrientPhosphorus,
+        Nutrient.Potassium => Strings.Labels.NutrientPotassium,
+        Nutrient.Calcium => Strings.Labels.NutrientCalcium,
+        Nutrient.Magnesium => Strings.Labels.NutrientMagnesium,
+        Nutrient.Sulphur => Strings.Labels.NutrientSulphur,
+        Nutrient.Silicon => Strings.Labels.NutrientSilicon,
+        Nutrient.Iron => Strings.Labels.NutrientIron,
+        Nutrient.Manganese => Strings.Labels.NutrientManganese,
+        Nutrient.Zinc => Strings.Labels.NutrientZinc,
+        Nutrient.Boron => Strings.Labels.NutrientBoron,
+        Nutrient.Copper => Strings.Labels.NutrientCopper,
+        Nutrient.Molybdenum => Strings.Labels.NutrientMolybdenum,
+        _ => nutrient.ToString()
+    };
 
     /// <summary>Said under the ingredients when the percentages do not reach 100. Never blocks a save.</summary>
     public static string PercentTotal(decimal total) =>
-        $"That adds up to {SoilMix.Number(total)}%, not 100%. You can still save it.";
+        string.Format(CultureInfo.CurrentCulture, Strings.Labels.PercentTotal, SoilMix.Number(total));
 }

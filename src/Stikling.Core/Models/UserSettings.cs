@@ -13,6 +13,13 @@ public sealed class UserSettings : Entity
 
     public ThemeMode Theme { get; set; } = ThemeMode.System;
 
+    /// <summary>
+    /// The language of the app, chosen in Settings, as a code like "da". Null until it's chosen, then the
+    /// app follows the browser. Stored as a code, not an enum, so a language added by translators needs no
+    /// code change. Older settings without it read as null.
+    /// </summary>
+    public string? Language { get; set; }
+
     /// <summary>The monthly photo reminder on Today. Off until turned on in Settings.</summary>
     public bool PhotoReminder { get; set; }
 

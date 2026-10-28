@@ -46,6 +46,10 @@ The [privacy policy](https://stikling.app/privacy) says what is kept on the serv
 
 Stikling is free, with no ads.
 
+## Translating
+
+The app's text is kept in `.resx` files, English first, with Danish next to it. Other people can translate it into more languages through Hosted Weblate, which opens pull requests here. [docs/dev/translating.md](docs/dev/translating.md) says how, and has the Danish word list.
+
 ## About
 
 I built Stikling to keep track of my own plants and the cuttings I take from them. It's a hobby project by [LaugeM](https://github.com/LaugeM), and the code is open source under the [AGPL-3.0 license](LICENSE).

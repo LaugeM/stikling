@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Indstillinger</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Indstillinger · Stikling</value>
+  </data>
+  <data name="SectionsNav" xml:space="preserve">
+    <value>Sektioner i indstillinger</value>
+  </data>
+  <data name="SectionAccount" xml:space="preserve">
+    <value>Konto</value>
+  </data>
+  <data name="SectionLook" xml:space="preserve">
+    <value>Udseende</value>
+  </data>
+  <data name="SectionCare" xml:space="preserve">
+    <value>I dag og pleje</value>
+  </data>
+  <data name="SectionPlants" xml:space="preserve">
+    <value>Planter</value>
+  </data>
+  <data name="SectionNotifications" xml:space="preserve">
+    <value>Notifikationer</value>
+  </data>
+  <data name="SectionPests" xml:space="preserve">
+    <value>Skadedyr</value>
+  </data>
+  <data name="SectionData" xml:space="preserve">
+    <value>Dine data</value>
+  </data>
+  <data name="SectionAbout" xml:space="preserve">
+    <value>Om</value>
+  </data>
+  <data name="SyncNeedsLook" xml:space="preserve">
+    <value>Synkroniseringen skal tjekkes. Tryk for at se hvorfor.</value>
+  </data>
+  <data name="CheckingAccount" xml:space="preserve">
+    <value>Tjekker din konto…</value>
+  </data>
+  <data name="AccountUnreachable" xml:space="preserve">
+    <value>Kan ikke komme i kontakt med log ind-tjenesten lige nu</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Log ind</value>
+  </data>
+  <data name="SignInDetail" xml:space="preserve">
+    <value>Hav de samme planter på alle dine enheder</value>
+  </data>
+  <data name="Syncing" xml:space="preserve">
+    <value>Synkroniserer…</value>
+  </data>
+  <data name="SyncedAt" xml:space="preserve">
+    <value>Synkroniseret kl. {0}</value>
+  </data>
+  <data name="SyncedOn" xml:space="preserve">
+    <value>Synkroniseret den {0}</value>
+  </data>
+  <data name="NotSynced" xml:space="preserve">
+    <value>Endnu ikke synkroniseret</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Sprog</value>
+  </data>
+  <data name="LanguageRestartHint" xml:space="preserve">
+    <value>Når du skifter sprog, genstarter appen.</value>
+  </data>
+  <data name="HelpTranslate" xml:space="preserve">
+    <value>Hjælp med at oversætte Stikling</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Følg systemet</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Lyst</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Mørkt</value>
+  </data>
+  <data name="PhotoReminder" xml:space="preserve">
+    <value>Månedlig billedpåmindelse</value>
+  </data>
+  <data name="PhotoReminderHint" xml:space="preserve">
+    <value>Én gang om måneden viser I dag, hvad der ikke har fået et billede endnu den måned.</value>
+  </data>
+  <data name="WateringReminder" xml:space="preserve">
+    <value>Vandingspåmindelse</value>
+  </data>
+  <data name="WateringReminderHint" xml:space="preserve">
+    <value>Lærer, hvor ofte hver plante får vand, og beder dig tjekke den, når den sandsynligvis er tør. Den siger intet om en plante, før den har set et par vandinger.</value>
+  </data>
+  <data name="EmptyOuterPot" xml:space="preserve">
+    <value>Mind mig om at tømme yderpotten</value>
+  </data>
+  <data name="EmptyOuterPotAfter" xml:space="preserve">
+    <value>efter</value>
+  </data>
+  <data name="Minutes15" xml:space="preserve">
+    <value>15 minutter</value>
+  </data>
+  <data name="Minutes30" xml:space="preserve">
+    <value>30 minutter</value>
+  </data>
+  <data name="Hours1" xml:space="preserve">
+    <value>1 time</value>
+  </data>
+  <data name="Hours2" xml:space="preserve">
+    <value>2 timer</value>
+  </data>
+  <data name="Hours3" xml:space="preserve">
+    <value>3 timer</value>
+  </data>
+  <data name="EmptyOuterPotHint" xml:space="preserve">
+    <value>Når du har vandet en plante, der står i en yderpotte, beder I dag dig om at hælde det vand ud, der løb ned i den. Planter, hvis yderpotte holder på vand med vilje, er undtaget.</value>
+  </data>
+  <data name="KindsOfCare" xml:space="preserve">
+    <value>Slags pleje</value>
+  </data>
+  <data name="KindsOfCareNone" xml:space="preserve">
+    <value>Tilføj dine egne, som duggede eller vandet nedefra</value>
+  </data>
+  <data name="KindsOfCareCount" xml:space="preserve">
+    <value>{0} af dine egne</value>
+  </data>
+  <data name="CareIntervals" xml:space="preserve">
+    <value>Plejeintervaller</value>
+  </data>
+  <data name="CareIntervalsNone" xml:space="preserve">
+    <value>Gødning, ompotning og lignende, der vender tilbage i I dag</value>
+  </data>
+  <data name="Interval_One" xml:space="preserve">
+    <value>{0} interval</value>
+  </data>
+  <data name="Interval_Other" xml:space="preserve">
+    <value>{0} intervaller</value>
+  </data>
+  <data name="Away" xml:space="preserve">
+    <value>Ude og pause</value>
+  </data>
+  <data name="AwayDetail" xml:space="preserve">
+    <value>I dag holder op med at spørge, mens du er væk eller holder pause</value>
+  </data>
+  <data name="DailyRound" xml:space="preserve">
+    <value>Daglig runde</value>
+  </data>
+  <data name="DailyRoundHint" xml:space="preserve">
+    <value>I dag foreslår ét rum om dagen at gå en runde i.</value>
+  </data>
+  <data name="RoundDays" xml:space="preserve">
+    <value>Rundedage</value>
+  </data>
+  <data name="RoundDaysHint" xml:space="preserve">
+    <value>Planter, der skal tjekkes, kommer op på din rundedag før, i stedet for hver på sin egen dag. En plante, der tørrer hurtigere ud end tiden mellem rundedage, beholder sine egne dage.</value>
+  </data>
+  <data name="EverydayNames" xml:space="preserve">
+    <value>Daglige navne</value>
+  </data>
+  <data name="EverydayEnglish" xml:space="preserve">
+    <value>Engelsk</value>
+  </data>
+  <data name="EverydayDanish" xml:space="preserve">
+    <value>Dansk</value>
+  </data>
+  <data name="EverydayHint" xml:space="preserve">
+    <value>En plante uden kælenavn viser, hvad den hedder under sit botaniske navn, som {0} for {1}.</value>
+  </data>
+  <data name="GooglePhotos" xml:space="preserve">
+    <value>Vælg fra Google Fotos</value>
+  </data>
+  <data name="GooglePhotosHint" xml:space="preserve">
+    <value>Tilføjer et valg om Google Fotos ved siden af telefonens galleri, til billeder der kun ligger i skyen. Google beder dig tillade det første gang og igen efter en time.</value>
+  </data>
+  <data name="YourFields" xml:space="preserve">
+    <value>Dine felter</value>
+  </data>
+  <data name="YourFieldsNone" xml:space="preserve">
+    <value>Ingen endnu</value>
+  </data>
+  <data name="Field_One" xml:space="preserve">
+    <value>{0} felt</value>
+  </data>
+  <data name="Field_Other" xml:space="preserve">
+    <value>{0} felter</value>
+  </data>
+  <data name="RecentChanges" xml:space="preserve">
+    <value>Seneste ændringer på en plante</value>
+  </data>
+  <data name="RecentChangesHint" xml:space="preserve">
+    <value>Under en plantes navn: hvad der er sket for nylig, som da den kom, blev ompottet eller flyttet.</value>
+  </data>
+  <data name="Week_One" xml:space="preserve">
+    <value>{0} uge</value>
+  </data>
+  <data name="Week_Other" xml:space="preserve">
+    <value>{0} uger</value>
+  </data>
+  <data name="PotUpWarn" xml:space="preserve">
+    <value>Sig til, når en ny potte er meget større</value>
+  </data>
+  <data name="PotUpWarnBefore" xml:space="preserve">
+    <value>mere end</value>
+  </data>
+  <data name="PotUpWarnAfter" xml:space="preserve">
+    <value>cm bredere</value>
+  </data>
+  <data name="PotUpWarnHint" xml:space="preserve">
+    <value>Når du vælger en ny potte til en plante eller en stikling, står der en note, hvis den er så meget bredere foroven end den gamle. En bred potte holder jorden våd længere.</value>
+  </data>
+  <data name="NotifyNeedsAccount" xml:space="preserve">
+    <value>En daglig liste over det, I dag beder om. Det kræver en konto, da serveren sender den.</value>
+  </data>
+  <data name="NotifyHomeScreen" xml:space="preserve">
+    <value>På iPhone og iPad skal du først føje Stikling til din hjemmeskærm: tryk på Del og derefter Føj til hjemmeskærm. Åbn den derfra og slå notifikationer til her.</value>
+  </data>
+  <data name="NotifyUnsupported" xml:space="preserve">
+    <value>Denne browser kan ikke vise notifikationer fra websteder.</value>
+  </data>
+  <data name="NotifyNotYet" xml:space="preserve">
+    <value>Notifikationer er ikke tilgængelige endnu.</value>
+  </data>
+  <data name="NotifyIntro" xml:space="preserve">
+    <value>Én notifikation om dagen med det, I dag beder om, aldrig en påmindelse om at vande. Hver enhed slås til for sig.</value>
+  </data>
+  <data name="NotifyTurnOn" xml:space="preserve">
+    <value>Slå til</value>
+  </data>
+  <data name="NotifyReady" xml:space="preserve">
+    <value>Klar. Tryk på Slå til igen.</value>
+  </data>
+  <data name="NotifyBlockedTurnOn" xml:space="preserve">
+    <value>Notifikationer er blokeret for stikling.app i denne browser. Tillad dem i webstedets indstillinger (ikonet ved siden af adressen), og tryk derefter på Slå til igen.</value>
+  </data>
+  <data name="NotifyBlockedAlready" xml:space="preserve">
+    <value>Notifikationer er blokeret for stikling.app i denne browser. Tillad dem i webstedets indstillinger (ikonet ved siden af adressen), og slå dem derefter fra og til igen her.</value>
+  </data>
+  <data name="NotifyFailed" xml:space="preserve">
+    <value>Kunne ikke slå notifikationer til lige nu. Prøv igen om lidt.</value>
+  </data>
+  <data name="NotifyTime" xml:space="preserve">
+    <value>Tid</value>
+  </data>
+  <data name="NotifyDays" xml:space="preserve">
+    <value>Dage</value>
+  </data>
+  <data name="NotifyEveryDay" xml:space="preserve">
+    <value>Hver dag</value>
+  </data>
+  <data name="NotifyPickDays" xml:space="preserve">
+    <value>Vælg dage</value>
+  </data>
+  <data name="NotifyDaysGroup" xml:space="preserve">
+    <value>Dage med notifikation</value>
+  </data>
+  <data name="NotifyNoDayPicked" xml:space="preserve">
+    <value>Hvis ingen dag er valgt, sendes der ingenting.</value>
+  </data>
+  <data name="NotifyYourRoundDays" xml:space="preserve">
+    <value>Dine rundedage: {0}.</value>
+  </data>
+  <data name="NotifyOnHint" xml:space="preserve">
+    <value>Én notifikation om dagen med det, I dag beder om, aldrig en påmindelse om at vande. Tid og dage er dine på alle enheder. Denne enhed er slået til.</value>
+  </data>
+  <data name="NotifySendTest" xml:space="preserve">
+    <value>Send en test</value>
+  </data>
+  <data name="NotifyTurnOff" xml:space="preserve">
+    <value>Slå fra</value>
+  </data>
+  <data name="CleanWeeks" xml:space="preserve">
+    <value>Ren, før en sag kan løses</value>
+  </data>
+  <data name="CleanWeeksHint" xml:space="preserve">
+    <value>En sag, der holdes øje med, tæller dage siden sidste behandling. Hvis der findes skadedyr igen, starter tællingen forfra.</value>
+  </data>
+  <data name="QuarantineLength" xml:space="preserve">
+    <value>Karantænens længde</value>
+  </data>
+  <data name="QuarantineLengthHint" xml:space="preserve">
+    <value>Hvor længe en plante holdes for sig selv, når den kommer i karantæne. Du kan ændre det for hver plante.</value>
+  </data>
+  <data name="QuarantineNew" xml:space="preserve">
+    <value>Karantæne for nye planter</value>
+  </data>
+  <data name="QuarantineNewHint" xml:space="preserve">
+    <value>En plante, du tilføjer, som er købt, byttet eller en gave, starter i karantæne. Du kan fjerne markeringen i formularen.</value>
+  </data>
+  <data name="RoomsAndTags" xml:space="preserve">
+    <value>Rum og tags</value>
+  </data>
+  <data name="RoomsAndTagsNone" xml:space="preserve">
+    <value>Omdøb eller slå dem sammen overalt på én gang</value>
+  </data>
+  <data name="Room_One" xml:space="preserve">
+    <value>{0} rum</value>
+  </data>
+  <data name="Room_Other" xml:space="preserve">
+    <value>{0} rum</value>
+  </data>
+  <data name="Tag_One" xml:space="preserve">
+    <value>{0} tag</value>
+  </data>
+  <data name="Tag_Other" xml:space="preserve">
+    <value>{0} tags</value>
+  </data>
+  <data name="RoomsAndTagsBoth" xml:space="preserve">
+    <value>{0}, {1}</value>
+  </data>
+  <data name="CollectionNumbers" xml:space="preserve">
+    <value>Samlingsnumre</value>
+  </data>
+  <data name="CollectionNumbersDetail" xml:space="preserve">
+    <value>Giv de planter, du har, et nummer, de ældste først.</value>
+  </data>
+  <data name="NumberingHint" xml:space="preserve">
+    <value>Intet, der allerede har et nummer, bliver ændret, og du kan rette ethvert nummer bagefter.</value>
+  </data>
+  <data name="NumberThem" xml:space="preserve">
+    <value>Giv dem numre</value>
+  </data>
+  <data name="NumberedPlants" xml:space="preserve">
+    <value>Gav {0} et nummer.</value>
+  </data>
+  <data name="NumberedCuttings" xml:space="preserve">
+    <value>Gav {0} et bogstav.</value>
+  </data>
+  <data name="NumberedBoth" xml:space="preserve">
+    <value>Gav {0} et nummer og {1} et bogstav.</value>
+  </data>
+  <data name="BackupAndStorage" xml:space="preserve">
+    <value>Sikkerhedskopi og lager</value>
+  </data>
+  <data name="LastBackup" xml:space="preserve">
+    <value>Sidste sikkerhedskopi {0} ({1})</value>
+  </data>
+  <data name="NoBackup" xml:space="preserve">
+    <value>Ingen sikkerhedskopi på denne enhed endnu</value>
+  </data>
+  <data name="ErrorReports" xml:space="preserve">
+    <value>Send fejlrapporter</value>
+  </data>
+  <data name="ErrorReportsHint" xml:space="preserve">
+    <value>Når noget går galt, sender appen en rapport om, hvad der fejlede, så det kan rettes. Den indeholder aldrig dine planter, noter eller billeder.</value>
+  </data>
+  <data name="ErrorReportsLink" xml:space="preserve">
+    <value>Hvad en rapport indeholder</value>
+  </data>
+  <data name="ShowMeAround" xml:space="preserve">
+    <value>Vis mig rundt</value>
+  </data>
+  <data name="ShowMeAroundDetail" xml:space="preserve">
+    <value>En kort rundtur med en eksempelplante</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Hjælp</value>
+  </data>
+  <data name="HelpDetail" xml:space="preserve">
+    <value>Sådan virker Stikling</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privatliv</value>
+  </data>
+  <data name="PrivacyDetail" xml:space="preserve">
+    <value>Hvad der gemmes, og hvor</value>
+  </data>
+  <data name="WhatsNew" xml:space="preserve">
+    <value>Nyheder</value>
+  </data>
+  <data name="PlantNames" xml:space="preserve">
+    <value>Plantenavne</value>
+  </data>
+  <data name="PlantNamesDetail" xml:space="preserve">
+    <value>Hvor navneforslagene kommer fra</value>
+  </data>
+  <data name="SourceCode" xml:space="preserve">
+    <value>Kildekode</value>
+  </data>
+  <data name="SourceCodeDetail" xml:space="preserve">
+    <value>Stikling er open source og ligger på GitHub</value>
+  </data>
+  <data name="TourFailed" xml:space="preserve">
+    <value>Kunne ikke indlæse eksemplet. Tjek din forbindelse, og prøv igen.</value>
+  </data>
+</root>

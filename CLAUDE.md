@@ -54,6 +54,10 @@ Accounts and sync between devices are being added in steps, so people don't have
 - The server strips a record that arrives deleted to its id and dates (`SyncRules.AsStored`), so the app must never need other fields of a deleted record. Places merged into another are the one exception, and are kept whole.
 - Lists and detail pages have `<ReloadOnSync Reload="..." />`, which reloads their data when changes arrive from another device. Edit pages don't, so nothing changes under someone filling in a form.
 
+## Text people see
+
+All text people see goes in `Resources/*.resx`, English in `Name.resx` and Danish in `Name.da.resx`, and is used as `Strings.Name.Key`. Never write it inline in a Razor page or a C# file, and add the Danish with the English. Dates and counts have helpers for it. `docs/dev/translating.md` has the rules, the Danish word list and how to add an area file. Pages that haven't been moved yet still have inline English, and each later pull request moves its screens.
+
 ## The Help page
 
 `Pages/Help.razor` answers the questions someone new asks, and has a few answers for each part of the app. It has to describe the app as it is. When a change adds or changes a feature, update the answers it affects in the same pull request, and add one when the feature raises a question of its own. Check the empty states on the screens involved too, since they tell a new user what to do next and go stale the same way.

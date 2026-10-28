@@ -6,4 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Typed classes for the text in Resources, like Strings.Settings.Language. Only the English files, the ones with no culture in the name, so the Danish ones stay plain satellite resources -->
+    <EnglishResx Include="Resources\*.resx" Exclude="Resources\*.*.resx" />
+    <EmbeddedResource Update="@(EnglishResx)">
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>$(RootNamespace).Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>%(Filename)</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Resources.%(Filename).g.cs</StronglyTypedFileName>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

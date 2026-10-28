@@ -177,6 +177,14 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    /// <summary>Saves the language of the app, a code like "da".</summary>
+    public async Task SetLanguageAsync(string code)
+    {
+        var current = await GetAsync();
+        current.Language = code;
+        await settings.SaveAsync(current);
+    }
+
     /// <summary>Hides the year section on Today for the rest of that year's season.</summary>
     public async Task HideYearAsync(int year)
     {

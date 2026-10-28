@@ -1,0 +1,755 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DateFormat" xml:space="preserve">
+    <value>d MMM yyyy</value>
+    <comment>NOT TEXT: a .NET date pattern for a day with its year, like 19 Sep 2026. d is the day, MMM the short month name, yyyy the year. Keep the letters, change the order and punctuation to how dates are written.</comment>
+  </data>
+  <data name="DayFormat" xml:space="preserve">
+    <value>ddd d MMM</value>
+    <comment>NOT TEXT: a .NET date pattern for a weekday and day without the year, like Sat 17 Oct. ddd is the short weekday name.</comment>
+  </data>
+  <data name="MonthFormat" xml:space="preserve">
+    <value>MMMM</value>
+    <comment>NOT TEXT: a .NET date pattern for the full name of a month, like March.</comment>
+  </data>
+  <data name="MonthYearFormat" xml:space="preserve">
+    <value>MMMM yyyy</value>
+    <comment>NOT TEXT: a .NET date pattern for a month with its year, like June 2024.</comment>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
+    <value>In collection</value>
+    <comment>Status of a plant that is in the collection.</comment>
+  </data>
+  <data name="StatusDied" xml:space="preserve">
+    <value>Died</value>
+    <comment>Status of a plant that died.</comment>
+  </data>
+  <data name="StatusGivenAway" xml:space="preserve">
+    <value>Given away</value>
+    <comment>Status of a plant that was given away.</comment>
+  </data>
+  <data name="StatusSold" xml:space="preserve">
+    <value>Sold</value>
+    <comment>Status of a plant that was sold.</comment>
+  </data>
+  <data name="StatusLivesWith" xml:space="preserve">
+    <value>Lives with {0}</value>
+    <comment>Shown on a plant that lives with someone else. {0} is that person's name.</comment>
+  </data>
+  <data name="StatusNotYours" xml:space="preserve">
+    <value>Not yours</value>
+    <comment>Shown on a plant that lives with someone else when their name isn't known.</comment>
+  </data>
+  <data name="StatusPottedWithOther" xml:space="preserve">
+    <value>Potted with another plant</value>
+    <comment>Shown on a plant that shares a pot with another plant.</comment>
+  </data>
+  <data name="StatusPottedWith" xml:space="preserve">
+    <value>Potted with {0}</value>
+    <comment>Shown on a plant that shares a pot with another plant. {0} is that plant's name.</comment>
+  </data>
+  <data name="OriginPurchased" xml:space="preserve">
+    <value>Purchased</value>
+    <comment>Where a plant came from.</comment>
+  </data>
+  <data name="OriginPropagated" xml:space="preserve">
+    <value>Propagated</value>
+    <comment>Where a plant came from: grown from a cutting or the like.</comment>
+  </data>
+  <data name="OriginGrownFromSeed" xml:space="preserve">
+    <value>Grown from seed</value>
+    <comment>Where a plant came from.</comment>
+  </data>
+  <data name="OriginGift" xml:space="preserve">
+    <value>Gift</value>
+    <comment>Where a plant came from.</comment>
+  </data>
+  <data name="OriginSwap" xml:space="preserve">
+    <value>Swap</value>
+    <comment>Where a plant came from: swapped with someone.</comment>
+  </data>
+  <data name="OriginUnknown" xml:space="preserve">
+    <value>Unknown</value>
+    <comment>Where a plant came from.</comment>
+  </data>
+  <data name="RaisedNurseryGrown" xml:space="preserve">
+    <value>Nursery grown</value>
+    <comment>How a plant was raised.</comment>
+  </data>
+  <data name="RaisedTissueCulture" xml:space="preserve">
+    <value>Tissue culture</value>
+    <comment>How a plant was raised.</comment>
+  </data>
+  <data name="RaisedSeed" xml:space="preserve">
+    <value>From seed</value>
+    <comment>How a plant was raised.</comment>
+  </data>
+  <data name="RaisedCutting" xml:space="preserve">
+    <value>From a cutting or division</value>
+    <comment>How a plant was raised.</comment>
+  </data>
+  <data name="RaisedWildCollected" xml:space="preserve">
+    <value>Wild collected</value>
+    <comment>How a plant was raised.</comment>
+  </data>
+  <data name="SellerShop" xml:space="preserve">
+    <value>Shop</value>
+    <comment>Kind of seller.</comment>
+  </data>
+  <data name="SellerOnlineShop" xml:space="preserve">
+    <value>Online shop</value>
+    <comment>Kind of seller.</comment>
+  </data>
+  <data name="SellerPerson" xml:space="preserve">
+    <value>Person</value>
+    <comment>Kind of seller.</comment>
+  </data>
+  <data name="SellerSwapEvent" xml:space="preserve">
+    <value>Swap event</value>
+    <comment>Kind of seller.</comment>
+  </data>
+  <data name="SellerOther" xml:space="preserve">
+    <value>Other</value>
+    <comment>Kind of seller.</comment>
+  </data>
+  <data name="ArrivalGood" xml:space="preserve">
+    <value>Good</value>
+    <comment>How a plant looked when it arrived.</comment>
+  </data>
+  <data name="ArrivalOk" xml:space="preserve">
+    <value>OK</value>
+    <comment>How a plant looked when it arrived.</comment>
+  </data>
+  <data name="ArrivalPoor" xml:space="preserve">
+    <value>Poor</value>
+    <comment>How a plant looked when it arrived.</comment>
+  </data>
+  <data name="ArrivalPests" xml:space="preserve">
+    <value>Pests</value>
+    <comment>A problem a plant arrived with.</comment>
+  </data>
+  <data name="ArrivalDamaged" xml:space="preserve">
+    <value>Damaged or broken</value>
+    <comment>A problem a plant arrived with.</comment>
+  </data>
+  <data name="ArrivalRootRot" xml:space="preserve">
+    <value>Root rot</value>
+    <comment>A problem a plant arrived with.</comment>
+  </data>
+  <data name="ArrivalWrongPlant" xml:space="preserve">
+    <value>Wrong plant</value>
+    <comment>A problem a plant arrived with.</comment>
+  </data>
+  <data name="ArrivalSmallerThanShown" xml:space="preserve">
+    <value>Smaller than shown</value>
+    <comment>A problem a plant arrived with.</comment>
+  </data>
+  <data name="LightLow" xml:space="preserve">
+    <value>Low light</value>
+    <comment>How much light a plant likes. Also used in the middle of a line, in lower case.</comment>
+  </data>
+  <data name="LightMedium" xml:space="preserve">
+    <value>Medium light</value>
+    <comment>How much light a plant likes.</comment>
+  </data>
+  <data name="LightBrightIndirect" xml:space="preserve">
+    <value>Bright indirect</value>
+    <comment>How much light a plant likes.</comment>
+  </data>
+  <data name="LightDirectSun" xml:space="preserve">
+    <value>Some direct sun</value>
+    <comment>How much light a plant likes.</comment>
+  </data>
+  <data name="WaterDryOut" xml:space="preserve">
+    <value>Dry out fully</value>
+    <comment>How a plant likes its soil between waterings.</comment>
+  </data>
+  <data name="WaterDryPartly" xml:space="preserve">
+    <value>Dry out partly</value>
+    <comment>How a plant likes its soil between waterings.</comment>
+  </data>
+  <data name="WaterEvenlyMoist" xml:space="preserve">
+    <value>Evenly moist</value>
+    <comment>How a plant likes its soil between waterings.</comment>
+  </data>
+  <data name="HumidityLow" xml:space="preserve">
+    <value>Low humidity</value>
+    <comment>How humid the air should be for a plant.</comment>
+  </data>
+  <data name="HumidityMedium" xml:space="preserve">
+    <value>Medium humidity</value>
+    <comment>How humid the air should be for a plant.</comment>
+  </data>
+  <data name="HumidityHigh" xml:space="preserve">
+    <value>High humidity</value>
+    <comment>How humid the air should be for a plant.</comment>
+  </data>
+  <data name="SeasonRestsInWinter" xml:space="preserve">
+    <value>Rests in winter</value>
+    <comment>When a plant rests.</comment>
+  </data>
+  <data name="SeasonRestsInSummer" xml:space="preserve">
+    <value>Rests in summer</value>
+    <comment>When a plant rests.</comment>
+  </data>
+  <data name="SeasonGrowsAllYear" xml:space="preserve">
+    <value>Grows all year</value>
+    <comment>A plant that has no rest.</comment>
+  </data>
+  <data name="RestCooler" xml:space="preserve">
+    <value>kept cooler</value>
+    <comment>How a plant is kept while it rests. Follows the season, like Rests in winter, kept cooler. Lower case.</comment>
+  </data>
+  <data name="RestDrier" xml:space="preserve">
+    <value>kept drier</value>
+    <comment>How a plant is kept while it rests. Follows the season. Lower case.</comment>
+  </data>
+  <data name="RestCoolerAndDrier" xml:space="preserve">
+    <value>kept cooler and drier</value>
+    <comment>How a plant is kept while it rests. Follows the season. Lower case.</comment>
+  </data>
+  <data name="RestDiesBack" xml:space="preserve">
+    <value>dies back</value>
+    <comment>What a plant does while it rests. Follows the season. Lower case.</comment>
+  </data>
+  <data name="UsuallyLikes" xml:space="preserve">
+    <value>Usually likes {0}</value>
+    <comment>Offered when care details can be filled in. {0} is a list of needs like bright indirect · dry out fully · rests in winter, kept drier.</comment>
+  </data>
+  <data name="MediumOrchidBark" xml:space="preserve">
+    <value>Orchid bark</value>
+    <comment>A growing medium.</comment>
+  </data>
+  <data name="MediumLeca" xml:space="preserve">
+    <value>LECA</value>
+    <comment>A growing medium. The name is an abbreviation, keep it in capitals.</comment>
+  </data>
+  <data name="MediumPon" xml:space="preserve">
+    <value>PON</value>
+    <comment>A growing medium. The name is a brand-like abbreviation, keep it in capitals.</comment>
+  </data>
+  <data name="MediumSphagnum" xml:space="preserve">
+    <value>Sphagnum moss</value>
+    <comment>A growing medium.</comment>
+  </data>
+  <data name="MediumCormRiser" xml:space="preserve">
+    <value>Corm riser</value>
+    <comment>A growing medium: a raised layer a corm sits on above water.</comment>
+  </data>
+  <data name="ExplainLeca" xml:space="preserve">
+    <value>Fired clay balls. With water in the bottom of the pot, they wick it up to the roots, with no soil. This is called semi-hydro.</value>
+    <comment>Explains what LECA is, under the choice of medium.</comment>
+  </data>
+  <data name="ExplainPon" xml:space="preserve">
+    <value>A ready-made mix of mineral grains like pumice, zeolite and lava rock, used for semi-hydro in place of soil.</value>
+    <comment>Explains what PON is, under the choice of medium.</comment>
+  </data>
+  <data name="ExplainSphagnum" xml:space="preserve">
+    <value>Long-fibred moss that holds a lot of water and still lets air in. Often used to root cuttings.</value>
+    <comment>Explains what sphagnum moss is, under the choice of medium.</comment>
+  </data>
+  <data name="ExplainCormRiser" xml:space="preserve">
+    <value>The corm sits on a raised layer above water in a closed box, so it stays damp without sitting in water.</value>
+    <comment>Explains what a corm riser is, under the choice of medium.</comment>
+  </data>
+  <data name="ExplainAirLayer" xml:space="preserve">
+    <value>Roots are grown on a stem while it's still on the plant, in damp moss wrapped round it, and it's cut off once they're there.</value>
+    <comment>Explains what an air layer is, under the choice of propagation type.</comment>
+  </data>
+  <data name="AidRootingPowder" xml:space="preserve">
+    <value>Rooting powder</value>
+    <comment>Something used to help cuttings root.</comment>
+  </data>
+  <data name="AidRootingGel" xml:space="preserve">
+    <value>Rooting gel</value>
+    <comment>Something used to help cuttings root.</comment>
+  </data>
+  <data name="AidWillowWater" xml:space="preserve">
+    <value>Willow water</value>
+    <comment>Something used to help cuttings root.</comment>
+  </data>
+  <data name="AidHumidityDome" xml:space="preserve">
+    <value>Humidity dome or bag</value>
+    <comment>Something used to help cuttings root.</comment>
+  </data>
+  <data name="AidHeatMat" xml:space="preserve">
+    <value>Heat mat</value>
+    <comment>Something used to help cuttings root.</comment>
+  </data>
+  <data name="CareWatered" xml:space="preserve">
+    <value>Watered</value>
+    <comment>Something done to a plant or cutting, shown in its history.</comment>
+  </data>
+  <data name="CareFertilised" xml:space="preserve">
+    <value>Fertilised</value>
+    <comment>Something done to a plant, shown in its history.</comment>
+  </data>
+  <data name="CareToppedUp" xml:space="preserve">
+    <value>Topped up</value>
+    <comment>Something done to a plant in semi-hydro: the reservoir was filled back up.</comment>
+  </data>
+  <data name="CareFlushed" xml:space="preserve">
+    <value>Flushed</value>
+    <comment>Something done to a plant in semi-hydro: rinsed through to wash out built-up salts.</comment>
+  </data>
+  <data name="CareRepotted" xml:space="preserve">
+    <value>Repotted</value>
+    <comment>Something done to a plant, shown in its history.</comment>
+  </data>
+  <data name="CarePruned" xml:space="preserve">
+    <value>Pruned</value>
+    <comment>Something done to a plant, shown in its history.</comment>
+  </data>
+  <data name="CareRotated" xml:space="preserve">
+    <value>Rotated</value>
+    <comment>Something done to a plant, shown in its history: turned so another side faces the light.</comment>
+  </data>
+  <data name="CareLeavesCleaned" xml:space="preserve">
+    <value>Leaves cleaned</value>
+    <comment>Something done to a plant, shown in its history.</comment>
+  </data>
+  <data name="CareHarvested" xml:space="preserve">
+    <value>Harvested</value>
+    <comment>Something done to a plant, shown in its history.</comment>
+  </data>
+  <data name="CareMoistureReading" xml:space="preserve">
+    <value>Moisture reading</value>
+    <comment>A reading from a moisture meter, shown in a history.</comment>
+  </data>
+  <data name="CareChangedWater" xml:space="preserve">
+    <value>Changed the water</value>
+    <comment>Something done to a cutting rooting in water, shown in its history.</comment>
+  </data>
+  <data name="TypeCutting" xml:space="preserve">
+    <value>Cutting</value>
+    <comment>What was taken from a plant to start a new one.</comment>
+  </data>
+  <data name="TypeCorm" xml:space="preserve">
+    <value>Corm</value>
+    <comment>What was taken from a plant to start a new one.</comment>
+  </data>
+  <data name="TypeOffset" xml:space="preserve">
+    <value>Offset / pup</value>
+    <comment>What was taken from a plant to start a new one.</comment>
+  </data>
+  <data name="TypeSeed" xml:space="preserve">
+    <value>Seed</value>
+    <comment>What was sown to start a new plant.</comment>
+  </data>
+  <data name="TypeDivision" xml:space="preserve">
+    <value>Division</value>
+    <comment>What was taken from a plant to start a new one.</comment>
+  </data>
+  <data name="TypeAirLayer" xml:space="preserve">
+    <value>Air layer</value>
+    <comment>What was taken from a plant to start a new one.</comment>
+  </data>
+  <data name="TypeLeaf" xml:space="preserve">
+    <value>Leaf</value>
+    <comment>What was taken from a plant to start a new one.</comment>
+  </data>
+  <data name="TypeOther" xml:space="preserve">
+    <value>Other</value>
+    <comment>What was taken from a plant to start a new one.</comment>
+  </data>
+  <data name="PropagationSummary" xml:space="preserve">
+    <value>{0}× {1} · {2}</value>
+    <comment>One line on a propagation, like 3× corm · LECA. {0} is how many, {1} is the type in lower case, {2} is what it grows in.</comment>
+  </data>
+  <data name="AgeStartedToday" xml:space="preserve">
+    <value>started today</value>
+    <comment>How old a propagation is, on the day it was started.</comment>
+  </data>
+  <data name="AgeDay" xml:space="preserve">
+    <value>day {0}</value>
+    <comment>How old a propagation is. {0} is the number of days since it was started.</comment>
+  </data>
+  <data name="StageStarted" xml:space="preserve">
+    <value>Started</value>
+    <comment>Where a propagation is.</comment>
+  </data>
+  <data name="StageRooting" xml:space="preserve">
+    <value>Rooting</value>
+    <comment>Where a propagation is: roots are growing.</comment>
+  </data>
+  <data name="StageRooted" xml:space="preserve">
+    <value>Rooted</value>
+    <comment>Where a propagation is: it has roots.</comment>
+  </data>
+  <data name="StageDone" xml:space="preserve">
+    <value>Done</value>
+    <comment>Where a propagation is: finished.</comment>
+  </data>
+  <data name="StageFailed" xml:space="preserve">
+    <value>Failed</value>
+    <comment>Where a propagation is: it did not work.</comment>
+  </data>
+  <data name="StageSown" xml:space="preserve">
+    <value>Sown</value>
+    <comment>Where a seed propagation is, before it germinates.</comment>
+  </data>
+  <data name="StageGerminating" xml:space="preserve">
+    <value>Germinating</value>
+    <comment>Where a seed propagation is.</comment>
+  </data>
+  <data name="StageSprouted" xml:space="preserve">
+    <value>Sprouted</value>
+    <comment>Where a seed propagation is.</comment>
+  </data>
+  <data name="PestSpiderMites" xml:space="preserve">
+    <value>Spider mites</value>
+    <comment>A kind of pest.</comment>
+  </data>
+  <data name="PestThrips" xml:space="preserve">
+    <value>Thrips</value>
+    <comment>A kind of pest.</comment>
+  </data>
+  <data name="PestFungusGnats" xml:space="preserve">
+    <value>Fungus gnats</value>
+    <comment>A kind of pest.</comment>
+  </data>
+  <data name="PestMealybugs" xml:space="preserve">
+    <value>Mealybugs</value>
+    <comment>A kind of pest.</comment>
+  </data>
+  <data name="PestScale" xml:space="preserve">
+    <value>Scale</value>
+    <comment>A kind of pest.</comment>
+  </data>
+  <data name="PestAphids" xml:space="preserve">
+    <value>Aphids</value>
+    <comment>A kind of pest.</comment>
+  </data>
+  <data name="PestWhitefly" xml:space="preserve">
+    <value>Whitefly</value>
+    <comment>A kind of pest.</comment>
+  </data>
+  <data name="PestOther" xml:space="preserve">
+    <value>Other</value>
+    <comment>A kind of pest.</comment>
+  </data>
+  <data name="CaseTreating" xml:space="preserve">
+    <value>Treating</value>
+    <comment>Status of a pest case that is being treated.</comment>
+  </data>
+  <data name="CaseWatching" xml:space="preserve">
+    <value>Watching</value>
+    <comment>Status of a pest case that is being watched after treatment.</comment>
+  </data>
+  <data name="CaseResolved" xml:space="preserve">
+    <value>Resolved</value>
+    <comment>Status of a pest case that is over.</comment>
+  </data>
+  <data name="ScopeAllPlants" xml:space="preserve">
+    <value>All plants</value>
+    <comment>What a pest case covers.</comment>
+  </data>
+  <data name="ScopeARoom" xml:space="preserve">
+    <value>A room</value>
+    <comment>What a pest case covers, when the room has no name.</comment>
+  </data>
+  <data name="DueNoTreatmentYet" xml:space="preserve">
+    <value>no treatment yet</value>
+    <comment>On a pest case that is being treated and has no treatment logged.</comment>
+  </data>
+  <data name="DueToday" xml:space="preserve">
+    <value>due today</value>
+    <comment>When a pest treatment is next due.</comment>
+  </data>
+  <data name="CheckDueToday" xml:space="preserve">
+    <value>check due today</value>
+    <comment>When a pest check is next due.</comment>
+  </data>
+  <data name="DueOverdue_One" xml:space="preserve">
+    <value>{0} day overdue</value>
+    <comment>A pest treatment that is late by one day. {0} is the number.</comment>
+  </data>
+  <data name="DueOverdue_Other" xml:space="preserve">
+    <value>{0} days overdue</value>
+    <comment>A pest treatment that is late by more than one day. {0} is the number.</comment>
+  </data>
+  <data name="CheckOverdue_One" xml:space="preserve">
+    <value>check {0} day overdue</value>
+    <comment>A pest check that is late by one day. {0} is the number.</comment>
+  </data>
+  <data name="CheckOverdue_Other" xml:space="preserve">
+    <value>check {0} days overdue</value>
+    <comment>A pest check that is late by more than one day. {0} is the number.</comment>
+  </data>
+  <data name="DueTomorrow" xml:space="preserve">
+    <value>next tomorrow</value>
+    <comment>When the next pest treatment is due.</comment>
+  </data>
+  <data name="CheckDueTomorrow" xml:space="preserve">
+    <value>next check tomorrow</value>
+    <comment>When the next pest check is due.</comment>
+  </data>
+  <data name="DueInDays" xml:space="preserve">
+    <value>next in {0} days</value>
+    <comment>When the next pest treatment is due, at least two days away. {0} is the number.</comment>
+  </data>
+  <data name="CheckDueInDays" xml:space="preserve">
+    <value>next check in {0} days</value>
+    <comment>When the next pest check is due, at least two days away. {0} is the number.</comment>
+  </data>
+  <data name="DaysAgoToday" xml:space="preserve">
+    <value>today</value>
+    <comment>When something happened.</comment>
+  </data>
+  <data name="DaysAgoYesterday" xml:space="preserve">
+    <value>yesterday</value>
+    <comment>When something happened.</comment>
+  </data>
+  <data name="DaysAgoMany" xml:space="preserve">
+    <value>{0} days ago</value>
+    <comment>When something happened, at least two days ago. {0} is the number.</comment>
+  </data>
+  <data name="FlagFromMonth" xml:space="preserve">
+    <value>from {0}</value>
+    <comment>A flag set for later, from a month. {0} is the month name, like March.</comment>
+  </data>
+  <data name="FlagFromDay" xml:space="preserve">
+    <value>from {0}</value>
+    <comment>A flag set for later, from a day. {0} is the day, like Sat 17 Oct.</comment>
+  </data>
+  <data name="PotNursery" xml:space="preserve">
+    <value>Nursery pot</value>
+    <comment>A kind of pot: the plastic pot a plant is bought in.</comment>
+  </data>
+  <data name="PotOuter" xml:space="preserve">
+    <value>Outer pot</value>
+    <comment>A kind of pot: a decorative pot another pot stands in.</comment>
+  </data>
+  <data name="PotPropagation" xml:space="preserve">
+    <value>For propagating</value>
+    <comment>A kind of pot: a container used for cuttings.</comment>
+  </data>
+  <data name="PotStandalone" xml:space="preserve">
+    <value>Stands on its own</value>
+    <comment>A kind of pot: one that holds a plant by itself.</comment>
+  </data>
+  <data name="TabNursery" xml:space="preserve">
+    <value>Nursery</value>
+    <comment>Short name on the switch between kinds of pots.</comment>
+  </data>
+  <data name="TabOuter" xml:space="preserve">
+    <value>Outer</value>
+    <comment>Short name on the switch between kinds of pots.</comment>
+  </data>
+  <data name="TabPropagation" xml:space="preserve">
+    <value>Propagation</value>
+    <comment>Short name on the switch between kinds of pots.</comment>
+  </data>
+  <data name="TabStandalone" xml:space="preserve">
+    <value>On its own</value>
+    <comment>Short name on the switch between kinds of pots.</comment>
+  </data>
+  <data name="HeadingNursery" xml:space="preserve">
+    <value>Nursery pots</value>
+    <comment>Heading over a group of pots in the pot library.</comment>
+  </data>
+  <data name="HeadingOuter" xml:space="preserve">
+    <value>Outer pots</value>
+    <comment>Heading over a group of pots in the pot library.</comment>
+  </data>
+  <data name="HeadingPropagation" xml:space="preserve">
+    <value>Containers for propagating</value>
+    <comment>Heading over a group of pots in the pot library.</comment>
+  </data>
+  <data name="HeadingStandalone" xml:space="preserve">
+    <value>Pots that stand on their own</value>
+    <comment>Heading over a group of pots in the pot library.</comment>
+  </data>
+  <data name="MaterialTerracotta" xml:space="preserve">
+    <value>Terracotta</value>
+    <comment>What a pot is made of.</comment>
+  </data>
+  <data name="MaterialCeramic" xml:space="preserve">
+    <value>Ceramic</value>
+    <comment>What a pot is made of.</comment>
+  </data>
+  <data name="MaterialGlass" xml:space="preserve">
+    <value>Glass</value>
+    <comment>What a pot is made of.</comment>
+  </data>
+  <data name="MaterialMetal" xml:space="preserve">
+    <value>Metal</value>
+    <comment>What a pot is made of.</comment>
+  </data>
+  <data name="MaterialOther" xml:space="preserve">
+    <value>Other</value>
+    <comment>What a pot is made of.</comment>
+  </data>
+  <data name="MaterialPlastic" xml:space="preserve">
+    <value>Plastic</value>
+    <comment>What a pot is made of.</comment>
+  </data>
+  <data name="WateringWick" xml:space="preserve">
+    <value>Wick</value>
+    <comment>How a self-watering pot gets water to the plant.</comment>
+  </data>
+  <data name="WateringSubmerged" xml:space="preserve">
+    <value>Submerged</value>
+    <comment>How a pot gets water to the plant: it stands in water.</comment>
+  </data>
+  <data name="UseFree" xml:space="preserve">
+    <value>free</value>
+    <comment>In the pot library: one pot, not in use.</comment>
+  </data>
+  <data name="UseAllFree" xml:space="preserve">
+    <value>all {0} free</value>
+    <comment>In the pot library. {0} is how many pots there are.</comment>
+  </data>
+  <data name="UseInUse" xml:space="preserve">
+    <value>in use</value>
+    <comment>In the pot library: one pot, in use.</comment>
+  </data>
+  <data name="UseAllInUse" xml:space="preserve">
+    <value>all {0} in use</value>
+    <comment>In the pot library. {0} is how many pots there are.</comment>
+  </data>
+  <data name="UseSome" xml:space="preserve">
+    <value>{0} of {1} in use, {2} free</value>
+    <comment>In the pot library. {0} is how many are in use, {1} how many there are, {2} how many are free.</comment>
+  </data>
+  <data name="UseGone_One" xml:space="preserve">
+    <value>{0} went with a plant</value>
+    <comment>In the pot library: a pot that left with a plant that was given away. {0} is the number, 1.</comment>
+  </data>
+  <data name="UseGone_Other" xml:space="preserve">
+    <value>{0} went with plants</value>
+    <comment>In the pot library: pots that left with plants that were given away. {0} is the number.</comment>
+  </data>
+  <data name="TakenPlantOnly_One" xml:space="preserve">
+    <value>Just the plant</value>
+    <comment>Answer to what went with a plant that was given away or sold.</comment>
+  </data>
+  <data name="TakenPlantOnly_Other" xml:space="preserve">
+    <value>Just the plants</value>
+    <comment>Answer to what went with several plants that were given away or sold.</comment>
+  </data>
+  <data name="TakenWithPot_One" xml:space="preserve">
+    <value>With its pot</value>
+    <comment>Answer to what went with a plant that was given away or sold.</comment>
+  </data>
+  <data name="TakenWithPot_Other" xml:space="preserve">
+    <value>With their pots</value>
+    <comment>Answer to what went with several plants that were given away or sold.</comment>
+  </data>
+  <data name="TakenWithBothPots" xml:space="preserve">
+    <value>With both pots</value>
+    <comment>Answer to what went with a plant: its pot and its outer pot.</comment>
+  </data>
+  <data name="TakenWithOuterPot" xml:space="preserve">
+    <value>With its outer pot</value>
+    <comment>Answer to what went with a plant: its outer pot.</comment>
+  </data>
+  <data name="TakenWithOuterPots" xml:space="preserve">
+    <value>With outer pots too</value>
+    <comment>Answer to what went with several plants: their pots and outer pots.</comment>
+  </data>
+  <data name="MixParts" xml:space="preserve">
+    <value>Parts</value>
+    <comment>How the ingredients of a soil mix are measured.</comment>
+  </data>
+  <data name="MixPercent" xml:space="preserve">
+    <value>Percent</value>
+    <comment>How the ingredients of a soil mix are measured.</comment>
+  </data>
+  <data name="MixNoAmounts" xml:space="preserve">
+    <value>No amounts</value>
+    <comment>A soil mix with ingredients but no amounts.</comment>
+  </data>
+  <data name="PercentTotal" xml:space="preserve">
+    <value>That adds up to {0}%, not 100%. You can still save it.</value>
+    <comment>Said under a soil mix's ingredients when the percentages do not reach 100. {0} is the total.</comment>
+  </data>
+  <data name="ProductFertiliser" xml:space="preserve">
+    <value>Fertiliser</value>
+    <comment>A kind of product.</comment>
+  </data>
+  <data name="ProductStimulant" xml:space="preserve">
+    <value>Rooting or growth stimulant</value>
+    <comment>A kind of product.</comment>
+  </data>
+  <data name="ProductSilica" xml:space="preserve">
+    <value>Silica</value>
+    <comment>A kind of product.</comment>
+  </data>
+  <data name="ProductCalMag" xml:space="preserve">
+    <value>Cal-mag</value>
+    <comment>A kind of product: calcium and magnesium.</comment>
+  </data>
+  <data name="ProductPh" xml:space="preserve">
+    <value>pH up or down</value>
+    <comment>A kind of product.</comment>
+  </data>
+  <data name="ProductOther" xml:space="preserve">
+    <value>Something else</value>
+    <comment>A kind of product.</comment>
+  </data>
+  <data name="NutrientNitrogen" xml:space="preserve">
+    <value>Nitrogen</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientPhosphorus" xml:space="preserve">
+    <value>Phosphorus</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientPotassium" xml:space="preserve">
+    <value>Potassium</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientCalcium" xml:space="preserve">
+    <value>Calcium</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientMagnesium" xml:space="preserve">
+    <value>Magnesium</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientSulphur" xml:space="preserve">
+    <value>Sulphur</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientSilicon" xml:space="preserve">
+    <value>Silicon</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientIron" xml:space="preserve">
+    <value>Iron</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientManganese" xml:space="preserve">
+    <value>Manganese</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientZinc" xml:space="preserve">
+    <value>Zinc</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientBoron" xml:space="preserve">
+    <value>Boron</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientCopper" xml:space="preserve">
+    <value>Copper</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+  <data name="NutrientMolybdenum" xml:space="preserve">
+    <value>Molybdenum</value>
+    <comment>A nutrient in a fertiliser.</comment>
+  </data>
+</root>
