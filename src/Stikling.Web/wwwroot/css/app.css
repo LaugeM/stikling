@@ -3677,6 +3677,15 @@ button.search-recent svg {
     }
 }
 
+/* The flowering calendar's lists flow into columns at least 20rem wide on a wide screen */
+@media (min-width: 64rem) {
+    .page-wide ul.flowering-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        column-gap: 0.75rem;
+    }
+}
+
 /* A pest case or a problem on a wide screen: the case and its facts on the left, the updates beside
    them. The markup keeps the phone order, so the updates are placed in the second column and span
    the rows of the first. */

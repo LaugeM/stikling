@@ -1,4 +1,5 @@
 @page "/treatment-recipes"
+@layout WideLayout
 @inject ITreatmentRecipeRepository Repository
 @inject IPestTreatmentRepository Treatments
 
@@ -27,7 +28,7 @@
 
 @if (draft is not null)
 {
-    <section class="settings-section">
+    <section class="settings-section supply-form">
         <h2>@(editing ? "Edit recipe" : "Add a recipe")</h2>
 
         <div class="mb-3">
@@ -121,7 +122,7 @@ else
     <section class="settings-section">
         <h2>Your recipes</h2>
 
-        <ul class="recipe-list">
+        <ul class="recipe-list supply-grid">
             @foreach (var use in uses)
             {
                 <li id="item-@use.Recipe.Id">
