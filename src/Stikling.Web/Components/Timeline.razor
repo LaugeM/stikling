@@ -93,13 +93,17 @@ else
                                         <input id="@editDateId" type="date" class="form-control form-control-sm" @bind="editDay"
                                                max="@Today.ToString("yyyy-MM-dd")" />
                                     </div>
+                                    @if (entry.Kind == TimelineKind.Note)
+                                    {
+                                        <BringItBack Choice="editBringBack" NoteDay="editDay" Changed="() => { }" />
+                                    }
                                     @if (editError is not null)
                                     {
                                         <p class="entry-editor-error" role="alert">@editError</p>
                                     }
                                     <div class="entry-editor-row">
                                         <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveEditAsync(entry)"
-                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)))">Save</button>
+                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)) || (entry.Kind == TimelineKind.Note && !editBringBack.IsValid(editDay, Today)))">Save</button>
                                         <button type="button" class="btn btn-link btn-sm" @onclick="CancelEdit">Cancel</button>
                                     </div>
                                 </div>
@@ -107,6 +111,10 @@ else
                             else if (!string.IsNullOrWhiteSpace(entry.Text) && TimelineEvents.Of(entry) != TimelineEvent.LookedOver)
                             {
                                 <p class="entry-text">@entry.Text</p>
+                            }
+                            @if (editId != entry.Id && entry.Kind == TimelineKind.Note && entry.ComesBackOn is { } comesBack)
+                            {
+                                <p class="entry-comes-back">Comes back on @Labels.Date(comesBack)</p>
                             }
 
                             @if (versionsId == entry.Id)
@@ -282,6 +290,7 @@ else
     private Guid? editId;
     private string? editText;
     private DateOnly editDay;
+    private BringBackChoice editBringBack = new();
     private string? editError;
     private Guid? versionsId;
     private Guid loadedFor;
@@ -390,6 +399,7 @@ else
         editId = entry.Id;
         editText = entry.Text;
         editDay = LocalDay(entry.OccurredAt);
+        editBringBack = BringBackChoice.For(entry.ComesBackOn);
         editError = null;
         confirmDeleteId = null;
     }
@@ -406,6 +416,8 @@ else
         try
         {
             await TimelineService.CorrectAsync(entry, editText, editDay);
+            if (entry.Kind == TimelineKind.Note || entry.ComesBackOn is not null)
+                await TimelineService.SetComesBackAsync(entry, editBringBack.Resolve(editDay));
             CancelEdit();
         }
         catch (ArgumentException ex)

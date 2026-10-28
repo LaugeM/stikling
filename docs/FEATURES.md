@@ -46,7 +46,6 @@ The people on Reddit who track their plants at all are mostly collectors with 50
 Small ones with no new screen worth the name:
 
 - Small info buttons next to the less obvious things.
-- **A note for next year**, shown next to A year ago today.
 - **Empty the outer pot** after watering a plant that stands in one.
 - **A parent that isn't yours**, for cuttings from a friend's plant.
 - **How much bigger the pot is** on Pot up.
@@ -354,7 +353,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | **Your own walking order** for a round, set per room by dragging the cards | 6 | S | v1.x |
 | ✅ | **Away or quiet time**: set the dates you're away, or a quiet stretch of a week, two weeks, a month or a date with no reason asked, under Away and quiet time in Settings. Today and the photo reminder stop asking during it, a bar shows how far in you are, and I'm back ends it early. A week before an away stretch, Today mentions it. The watering reminder leaves a gap across a stretch out of what it learns unless something was watered in it, so a two-week trip isn't learned as how long a plant goes. On the way back, Today opens with a short list of the plants to look at first, as things to check and never to water. It never says overdue, and 3, 5, 10 or all can be set. Water and Worth a look come back when the list is done or after three days | 3 | M | v1.x |
 | ✅ | **Do it later**: a flag on a plant or propagation can be set to start from a month or a day, or the next round day. It stays off Today until then, shows greyed out on the page with Change and Remove, and works like the flag for needing attention from that day. One flag per plant, and it doesn't repeat | 4 | S | v1.x |
-| ☐ | **A note for next year**: a note on a plant that comes back on Today on the same date next year, or on a date you pick, e.g. "thrips showed up in May" or "repot before it starts growing". It shows next to A year ago today | 4 | S | v1.x |
+| ✅ | **A note for next year**: a note on a plant that comes back on Today on the same date next year, or on a date you pick, e.g. "thrips showed up in May" or "repot before it starts growing". It shows next to A year ago today | 4 | S | v1.x |
 | ✅ | **Round days**: pick the weekdays you go round your plants under Round days in Settings. A watering check comes up on the round day before it is due, after Still wet it waits for the next round day, and a plant that dries out faster than the gap keeps its own days. Propagations waiting for a look are gathered too. On other days Today says how many wait for the next round, with Go round now. Pests, flags and quarantine keep their own days, and the daily round only shows on round days | 3 | M | v1.x |
 | ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
 | ☐ | **Anniversaries and small celebrations**: Today says when you have had a plant for a year, and rooting, a first new leaf or a cutting promoted to a plant gets a short moment of its own | 6 | S | v1.x |

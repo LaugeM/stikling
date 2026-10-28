@@ -544,6 +544,27 @@ else
                               propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
     }
 
+    @if (comingBack.Count > 0)
+    {
+        <section class="today-section coming-back">
+            <h2>Notes coming back</h2>
+            <ul class="coming-back-list">
+                @foreach (var note in comingBack)
+                {
+                    <li @key="note.Entry.Id">
+                        <a class="coming-back-name" href="@(note.Entry.SubjectType == SubjectType.Plant ? "plants" : "propagations")/@note.Entry.SubjectId">@note.Name</a>
+                        <p class="coming-back-text">@note.Entry.Text</p>
+                        <p class="coming-back-written">Written @Labels.Date(Time.LocalDay(note.Entry.OccurredAt))</p>
+                        <div class="coming-back-actions">
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NoteDoneAsync(note.Entry)">Done</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => NoteAgainAsync(note.Entry)">Again next year</button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
     @if (yearTitle is not null)
     {
         <section class="today-section year-section">
@@ -730,6 +751,7 @@ else
     private MonthResult? monthResult;
     private string? backupReminder;
     private Memory? memory;
+    private IReadOnlyList<NoteComingBack> comingBack = [];
     private bool shareOpen;
     private bool showRound;
     private bool loaded;
@@ -795,6 +817,18 @@ else
         }
     }
 
+    private async Task NoteDoneAsync(TimelineEntry entry)
+    {
+        await TimelineService.MarkCameBackDoneAsync(entry);
+        await LoadAsync();
+    }
+
+    private async Task NoteAgainAsync(TimelineEntry entry)
+    {
+        await TimelineService.BringBackAgainAsync(entry);
+        await LoadAsync();
+    }
+
     private async Task CareUndoAsync(CareAction action)
     {
         careError = null;
@@ -847,6 +881,7 @@ else
 
         var plantPhotos = await PhotoRepository.GetOfKindAsync(SubjectType.Plant);
         memory = Memories.Pick(plants, plantPhotos, Today, Time.LocalDay);
+        comingBack = NotesComingBack.For(data.ComingBack, plants, propagations, Today);
         await FindYearAsync(data.Settings, plantPhotos);
 
         names = plants.ToDictionary(p => p.Id, p => p.DisplayName);

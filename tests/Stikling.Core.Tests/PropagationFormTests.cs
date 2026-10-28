@@ -434,6 +434,8 @@ public class PropagationFormTests
 
         public Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() => inner.GetPlantChangesAsync();
 
+        public Task<IReadOnlyList<TimelineEntry>> GetComingBackAsync() => inner.GetComingBackAsync();
+
         public Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetLastActivityBeforeAsync(DateTimeOffset before) =>
             inner.GetLastActivityBeforeAsync(before);
 

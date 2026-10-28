@@ -24,6 +24,9 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
                 && TimelineEvents.Of(e) != TimelineEvent.LookedOver)
             .ToList();
 
+    public async Task<IReadOnlyList<TimelineEntry>> GetComingBackAsync() =>
+        (await db.GetAllAsync<TimelineEntry>(Stores.Timeline)).Where(NotesComingBack.IsWaiting).ToList();
+
     public async Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetLastActivityBeforeAsync(DateTimeOffset before) =>
         TimelineActivity.LastBefore(await db.GetAllAsync<TimelineEntry>(Stores.Timeline), before);
 

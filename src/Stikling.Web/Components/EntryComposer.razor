@@ -53,6 +53,11 @@
             }
         </div>
 
+        @if (photos.Count == 0)
+        {
+            <BringItBack Choice="bringBack" NoteDay="NoteDay" Changed="() => { }" />
+        }
+
         @if (Status is { } status)
         {
             <p class="composer-status" role="status">@status</p>
@@ -65,7 +70,7 @@
 
         <div class="form-actions">
             <button type="button" class="btn btn-primary" @onclick="SaveAsync"
-                    disabled="@(busy || googleBusy || (photos.Count == 0 && string.IsNullOrWhiteSpace(noteText)))">
+                    disabled="@(busy || googleBusy || (photos.Count == 0 && (string.IsNullOrWhiteSpace(noteText) || !bringBack.IsValid(NoteDay, Today))))">
                 @(photos.Count > 0 ? "Add to history" : "Add note")
             </button>
             <label class="btn btn-outline-primary icon-btn" for="@sheetInputId">
@@ -135,6 +140,7 @@
     private string? noteText;
     private DateOnly? occurredOn;
     private bool pickDate;
+    private BringBackChoice bringBack = new();
     private bool open;
     private bool busy;
     private bool forNote;
@@ -145,6 +151,9 @@
     private const string DraftKey = "composer-draft-photos";
 
     private DateOnly Today => Time.Today();
+
+    // The day the note will be dated, which "same day next year" counts from
+    private DateOnly NoteDay => occurredOn ?? Today;
 
     protected override async Task OnInitializedAsync()
     {
@@ -298,7 +307,8 @@
                     SubjectId = SubjectId,
                     Kind = TimelineKind.Note,
                     OccurredAt = occurredOn is { } d ? Time.MomentOn(d) : Time.GetUtcNow(),
-                    Text = noteText.Trim()
+                    Text = noteText.Trim(),
+                    ComesBackOn = bringBack.Resolve(NoteDay)
                 });
             }
 
@@ -338,6 +348,7 @@
         failed = 0;
         undated = 0;
         error = null;
+        bringBack = new();
         ResetDate();
     }
 

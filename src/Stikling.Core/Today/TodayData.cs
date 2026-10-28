@@ -25,6 +25,7 @@ public sealed record TodayData
     public IReadOnlyDictionary<Guid, Photo> NewestPhotos { get; init; } = new Dictionary<Guid, Photo>();
     public IReadOnlyList<AwayStretch> Stretches { get; init; } = [];
     public IReadOnlyDictionary<Guid, DateTimeOffset> LastActivity { get; init; } = new Dictionary<Guid, DateTimeOffset>();
+    public IReadOnlyList<TimelineEntry> ComingBack { get; init; } = [];
     public IReadOnlyList<TimelineEntry> PlantChanges { get; init; } = [];
     public IReadOnlyList<GrowLight> Lights { get; init; } = [];
     public IReadOnlyDictionary<Guid, Pot> PotsById { get; init; } = new Dictionary<Guid, Pot>();
