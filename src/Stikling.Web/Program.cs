@@ -123,6 +123,7 @@ builder.Services.AddScoped<PropagationCareService>();
 builder.Services.AddScoped<PhotoService>();
 builder.Services.AddScoped<IExamplePhotos, ExamplePhotos>();
 builder.Services.AddScoped<ExampleService>();
+builder.Services.AddScoped<TourService>();
 builder.Services.AddScoped<CoverPhotos>();
 builder.Services.AddSingleton(GoogleSettings.From(builder.Configuration));
 builder.Services.AddScoped<GooglePhotosService>();

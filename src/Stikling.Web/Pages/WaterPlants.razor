@@ -149,7 +149,7 @@ else
     {
         var top = group.Rows.Where(r => r.Form == WateringForm.TopWatered).ToList();
         var topUp = group.Rows.Where(r => r.Form != WateringForm.TopWatered).ToList();
-        <section class="pass-group">
+        <section class="pass-group" data-tour="water">
             @if (groups.Count > 1 || rooms.Count > 1)
             {
                 <h2 class="section-label">@group.Name</h2>

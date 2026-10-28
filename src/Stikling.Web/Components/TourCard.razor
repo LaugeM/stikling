@@ -1,0 +1,144 @@
+@* The card at the bottom of the screen while the guided tour is on. MainLayout renders it once, so it
+   stays whichever page is open. What the tour is made of is in Core/Tour/GuidedTour.cs. *@
+@implements IDisposable
+@inject TourService Tour
+@inject ExampleService Example
+@inject SyncRunner Sync
+@inject ILogger<TourCard> Logger
+
+@if (Tour.Active)
+{
+    var state = Tour.State;
+    var step = state.Current;
+    <section class="tour-card" role="region" aria-label="Tour">
+        @if (!state.IsClosing)
+        {
+            <p class="tour-count">@state.Number of @state.Count</p>
+        }
+        <h2 class="tour-title" tabindex="-1" @ref="title">@step.Title</h2>
+        <div aria-live="polite">
+            <div @key="state.Index" class="tour-body">
+                @if (state.IsClosing)
+                {
+                    <p>There's more when you want it: <a href="supplies" @onclick="Tour.SkipAsync">Supplies</a> for pots, mixes and feeds, <a href="search" @onclick="Tour.SkipAsync">Search</a>, and <a href="help" @onclick="Tour.SkipAsync">Help</a>.</p>
+                    @if (exampleThere)
+                    {
+                        <p>
+                            The coleus stays as an example until you remove it.
+                            <button type="button" class="btn btn-outline-primary btn-sm tour-remove" disabled="@removing" @onclick="RemoveAsync">Remove it</button>
+                        </p>
+                        @if (removeFailed)
+                        {
+                            <p class="text-danger" role="alert">Couldn't remove all of the example. Try Remove again.</p>
+                        }
+                    }
+                }
+                else
+                {
+                    <p>@step.Text</p>
+                }
+            </div>
+        </div>
+        @if (state.IsClosing)
+        {
+            <div class="tour-actions tour-closing-actions">
+                <a class="btn btn-primary" href="plants/new" @onclick="Tour.SkipAsync">Add a plant</a>
+                <a class="btn btn-outline-primary" href="plants/import" @onclick="Tour.SkipAsync">Import a spreadsheet</a>
+            </div>
+            <div class="tour-actions">
+                <button type="button" class="btn btn-link tour-link" @onclick="Tour.BackAsync">Back</button>
+                <button type="button" class="btn btn-link tour-link tour-end" @onclick="Tour.SkipAsync">Done</button>
+            </div>
+        }
+        else
+        {
+            <div class="tour-actions">
+                <button type="button" class="btn btn-link tour-link" @onclick="Tour.SkipAsync">Skip tour</button>
+                <span class="tour-steps">
+                    @if (state.CanGoBack)
+                    {
+                        <button type="button" class="btn btn-link tour-link" @onclick="Tour.BackAsync">Back</button>
+                    }
+                    <button type="button" class="btn btn-primary" @onclick="Tour.NextAsync">Next</button>
+                </span>
+            </div>
+        }
+    </section>
+}
+
+@code {
+    private ElementReference title;
+    private int focusedFor = -1;
+    private bool exampleThere;
+    private bool removing;
+    private bool removeFailed;
+
+    protected override void OnInitialized() => Tour.Changed += OnChanged;
+
+    private void OnChanged() => _ = InvokeAsync(async () =>
+    {
+        if (Tour.State.IsClosing)
+        {
+            removeFailed = false;
+            try
+            {
+                exampleThere = await Example.IsLoadedAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Checking for the example failed");
+                exampleThere = false;
+            }
+        }
+        StateHasChanged();
+    });
+
+    // The title takes focus on each step, so a keyboard or a screen reader follows the tour
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!Tour.Active)
+        {
+            focusedFor = -1;
+            return;
+        }
+        if (focusedFor == Tour.State.Index)
+            return;
+        focusedFor = Tour.State.Index;
+        try
+        {
+            await title.FocusAsync();
+        }
+        catch (Exception ex) when (ex is JSException or InvalidOperationException)
+        {
+            // The card was replaced before it could take focus
+        }
+    }
+
+    private async Task RemoveAsync()
+    {
+        removing = true;
+        removeFailed = false;
+        try
+        {
+            await Example.RemoveAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Removing the example failed");
+            removeFailed = true;
+        }
+        finally
+        {
+            removing = false;
+        }
+
+        // So Today and any open list stop showing what was removed, also after a failure
+        Sync.NotifyChanged();
+        if (removeFailed)
+            exampleThere = await Example.IsLoadedAsync();
+        else
+            await Tour.SkipAsync();
+    }
+
+    public void Dispose() => Tour.Changed -= OnChanged;
+}

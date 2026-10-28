@@ -23,6 +23,7 @@
 @inject PlantService PlantService
 @inject PropagationService PropagationService
 @inject ExampleService Example
+@inject TourService Tour
 @inject TimeProvider Time
 @inject YearCardService YearCardsService
 @using Stikling.Core.Year
@@ -65,8 +66,8 @@ else if (plants.Count == 0 && propagations.Count == 0)
         <div class="first-run-actions">
             <a class="btn btn-primary" href="plants/new">Add a plant</a>
             <a class="btn btn-outline-primary" href="propagations/new">Start a propagation</a>
-            <button type="button" class="btn btn-outline-primary" disabled="@exampleBusy" @onclick="LoadExampleAsync">
-                @(exampleBusy ? "Loading the example…" : "Load an example")
+            <button type="button" class="btn btn-outline-primary" disabled="@exampleBusy" @onclick="ShowMeAroundAsync">
+                @(exampleBusy ? "Loading the example…" : "Show me around")
             </button>
         </div>
         @if (exampleFailed)
@@ -199,7 +200,7 @@ else
     }
 
     @* From 64rem the sections that ask for something sit in a wide column with the rest beside it. The markup keeps the phone order. *@
-    <div class="today-columns">
+    <div class="today-columns" data-tour="today">
     <div class="today-todo">
     @if (!sections.Away && sections.RoundSuggestion is { } suggested)
     {
@@ -924,7 +925,8 @@ else
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
-    private async Task LoadExampleAsync()
+    // Loads the example and starts the tour with it. If loading fails, no tour starts.
+    private async Task ShowMeAroundAsync()
     {
         exampleBusy = true;
         exampleFailed = false;
@@ -940,6 +942,9 @@ else
         // Also after a failure, so an example only partly written shows its Remove row
         await LoadAsync();
         exampleBusy = false;
+
+        if (!exampleFailed)
+            await Tour.StartAsync();
     }
 
     private async Task RemoveExampleAsync()
@@ -949,6 +954,7 @@ else
         try
         {
             await Example.RemoveAsync();
+            await Tour.SkipAsync(); // the tour is about the example
         }
         catch (Exception ex)
         {
