@@ -135,6 +135,14 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    /// <summary>Sets how long after watering Today reminds you to empty the outer pot. 0 turns it off.</summary>
+    public async Task SetEmptyOuterPotMinutesAsync(int minutes)
+    {
+        var current = await GetAsync();
+        current.EmptyOuterPotMinutes = Math.Clamp(minutes, 0, 24 * 60);
+        await settings.SaveAsync(current);
+    }
+
     /// <summary>Sets whether bought, swapped and gifted plants start in quarantine when they're added.</summary>
     public async Task SetQuarantineNewPlantsAsync(bool on)
     {

@@ -35,6 +35,7 @@ public sealed record TodaySections
     public IReadOnlyList<Plant> QuarantineNow { get; init; } = [];
     public IReadOnlyList<Plant> TransitionNow { get; init; } = [];
     public IReadOnlyList<(Plant Plant, DateOnly WindowStart)> RestNow { get; init; } = [];
+    public OuterPotReminders OuterPot { get; init; } = OuterPotReminders.None;
     public IReadOnlyList<WateringDue> WateringDue { get; init; } = [];
     public IReadOnlyList<WateringDue> WaterNow { get; init; } = [];
     public IReadOnlyList<WateringDue> WaterComing { get; init; } = [];
@@ -192,6 +193,7 @@ public sealed record TodaySections
             QuarantineNow = quarantineNow,
             TransitionNow = transitionNow,
             RestNow = restAsk,
+            OuterPot = OuterPotReminders.Find(plants, data.CareLogs, settings, clock),
             WateringDue = wateringDue,
             WaterNow = waterNow,
             WaterComing = waterComing,

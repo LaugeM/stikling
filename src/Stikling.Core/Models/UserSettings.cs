@@ -87,6 +87,12 @@ public sealed class UserSettings : Entity
     public decimal? PotUpWarnCm { get; set; }
 
     /// <summary>
+    /// How long after watering Today reminds you to empty the outer pot. Null means 60. 0 means the
+    /// reminder is off. Older settings without it read as null.
+    /// </summary>
+    public int? EmptyOuterPotMinutes { get; set; }
+
+    /// <summary>
     /// Whether a plant that is added as bought, swapped or a gift starts in quarantine. Off unless
     /// it's turned on. Older settings without it read as off.
     /// </summary>
