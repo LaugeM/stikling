@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -143,23 +144,23 @@ public sealed class PestCase : Entity
         var errors = new List<string>();
 
         if (StartedOn > today)
-            errors.Add("That start date is in the future.");
+            errors.Add(Strings.Pests.StartDateInFuture);
 
         if (IntervalDays < 1)
-            errors.Add("Treat at least every day, so the interval has to be 1 or more.");
+            errors.Add(Strings.Pests.PestCaseIntervalTooShort);
 
         if (Scope == PestScope.Room && PlaceId is null)
-            errors.Add("Pick the room the case covers.");
+            errors.Add(Strings.Pests.PestCasePickRoom);
 
         if (Scope == PestScope.PickedPlants && PlantIds.Count == 0)
-            errors.Add("Pick at least one plant.");
+            errors.Add(Strings.Pests.PestCasePickPlant);
 
         if (ResolvedOn is { } resolved)
         {
             if (resolved > today)
-                errors.Add("That resolved date is in the future.");
+                errors.Add(Strings.Pests.PestCaseResolvedInFuture);
             else if (resolved < StartedOn)
-                errors.Add("A case can't be resolved before it started.");
+                errors.Add(Strings.Pests.PestCaseResolvedBeforeStart);
         }
 
         return errors;

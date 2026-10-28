@@ -12,15 +12,15 @@
 @inject PutOffService PutOffService
 @inject TimeProvider Time
 
-<PageTitle>@(view is null ? "Pest case" : Labels.For(view.Case.Pest)) · Stikling</PageTitle>
+<PageTitle>@(view is null ? Strings.Pests.CasePageTitle : Labels.For(view.Case.Pest)) · Stikling</PageTitle>
 <ReloadOnSync Reload="ReloadAsync" />
 <ShowFound ElementId="@(Entry is { } entryId ? $"entry-{entryId}" : null)" Ready="@(view is not null)" />
 
-<a class="back-link" href="pests">Pests</a>
+<a class="back-link" href="pests">@Strings.Pests.CaseBackToPests</a>
 
 @if (view is null)
 {
-    <p class="text-body-secondary">@(loaded ? "That case doesn't exist or was deleted." : "Loading…")</p>
+    <p class="text-body-secondary">@(loaded ? Strings.Pests.CaseGone : Strings.Pests.Loading)</p>
 }
 else
 {
@@ -31,7 +31,7 @@ else
         </div>
         <div class="min-w-0">
             <h1>@Labels.For(view.Case.Pest)</h1>
-            <p class="detail-sub">@Labels.Scope(view) · found @Labels.Date(view.Case.StartedOn)</p>
+            <p class="detail-sub">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseScopeFound, Labels.Scope(view), Labels.Date(view.Case.StartedOn))</p>
             @if (view.Case.IsOpen)
             {
                 <span class="badge stage-badge">@Labels.For(view.Case.Status)</span>
@@ -42,7 +42,7 @@ else
             }
             @if (view.CleanDays is { } cleanDays)
             {
-                <p class="detail-sub mt-2 mb-0">Clean @cleanDays of @view.CleanTarget days</p>
+                <p class="detail-sub mt-2 mb-0">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCleanDays, cleanDays, view.CleanTarget)</p>
             }
         </div>
     </header>
@@ -51,28 +51,28 @@ else
         @if (view.Case.IsOpen)
         {
             <button type="button" class="btn btn-primary" @onclick="ToggleLogging">
-                @(logging ? "Close" : view.IsCheck ? "Log check" : "Log treatment")
+                @(logging ? Strings.Common.Close : view.IsCheck ? Strings.Pests.CaseLogCheck : Strings.Pests.CaseLogTreatment)
             </button>
         }
         @if (view.IsCheck)
         {
             @* Pests seen again: back to treating, with the treatment sheet ready *@
-            <button type="button" class="btn btn-outline-primary" @onclick="FoundSomeAsync">Found some</button>
+            <button type="button" class="btn btn-outline-primary" @onclick="FoundSomeAsync">@Strings.Pests.CaseFoundSome</button>
         }
         @if (view.Case.Status == PestCaseStatus.Active && !view.Case.PlanRunning)
         {
             @if (plans.Count > 0)
             {
                 <button type="button" class="btn btn-outline-primary" @onclick="ToggleFollowing">
-                    @(following ? "Close" : "Follow a plan")
+                    @(following ? Strings.Common.Close : Strings.Pests.CaseFollowPlan)
                 </button>
             }
             else
             {
-                <a class="btn btn-outline-primary" href="treatment-plans">Make a treatment plan</a>
+                <a class="btn btn-outline-primary" href="treatment-plans">@Strings.Pests.CaseMakePlan</a>
             }
         }
-        <a class="btn btn-outline-primary" href="pests/@view.Case.Id/edit">Edit</a>
+        <a class="btn btn-outline-primary" href="pests/@view.Case.Id/edit">@Strings.Common.Edit</a>
     </div>
 
     @if (message is not null)
@@ -85,12 +85,12 @@ else
         <section class="detail-card">
             @if (view.ReadyToResolve)
             {
-                <p>Clean for @Labels.Count(view.CleanWeeks, "week"). Ready to resolve.</p>
-                <button type="button" class="btn btn-primary" disabled="@resolving" @onclick="ResolveAsync">Resolve</button>
+                <p>@Plural.Of(view.CleanWeeks, Strings.Pests.CaseCleanReady_One, Strings.Pests.CaseCleanReady_Other)</p>
+                <button type="button" class="btn btn-primary" disabled="@resolving" @onclick="ResolveAsync">@Strings.Pests.CaseResolve</button>
             }
             else
             {
-                <p class="mb-0">Clean for @Labels.Count(view.CleanWeeks, "week"). Log a check to resolve it.</p>
+                <p class="mb-0">@Plural.Of(view.CleanWeeks, Strings.Pests.CaseCleanCheck_One, Strings.Pests.CaseCleanCheck_Other)</p>
             }
         </section>
     }
@@ -98,8 +98,8 @@ else
     @if (following && plans.Count > 0 && view.Case.Status == PestCaseStatus.Active && !view.Case.PlanRunning)
     {
         <section class="detail-card">
-            <h2>Follow a plan</h2>
-            <div class="chip-row mb-2" role="group" aria-label="Treatment plans">
+            <h2>@Strings.Pests.CaseFollowPlan</h2>
+            <div class="chip-row mb-2" role="group" aria-label="@Strings.Pests.CaseEditPlans">
                 @foreach (var plan in plans)
                 {
                     <button type="button" class="chip @(pickedPlan == plan.Id ? "picked" : null)"
@@ -112,14 +112,14 @@ else
                 <div class="form-text mb-2">@chosen.Summary()</div>
             }
             <div class="mb-2">
-                <label class="form-label" for="plan-start">Start on</label>
+                <label class="form-label" for="plan-start">@Strings.Pests.CaseStartOn</label>
                 <input type="date" id="plan-start" class="form-control form-control-sm plan-date"
                        min="@view.Case.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")"
                        value="@planStart.ToString("yyyy-MM-dd")" @onchange="PlanStartChanged" />
             </div>
             <div class="care-actions">
-                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || pickedPlan is null)" @onclick="StartPlanAsync">Start the plan</button>
-                <button type="button" class="btn btn-link btn-sm" @onclick="() => following = false">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || pickedPlan is null)" @onclick="StartPlanAsync">@Strings.Pests.CaseStartPlan</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => following = false">@Strings.Common.Cancel</button>
             </div>
         </section>
     }
@@ -127,7 +127,7 @@ else
     @if (logging && view.Case.IsOpen)
     {
         <section class="detail-card">
-            <h2>@(view.IsCheck ? "Log check" : "Log treatment")</h2>
+            <h2>@(view.IsCheck ? Strings.Pests.CaseLogCheck : Strings.Pests.CaseLogTreatment)</h2>
             <TreatmentSheet @key="@((view.Case.Status, view.Step?.Id))" Case="view.Case" Existing="treatments" Check="view.IsCheck"
                             Step="@(view.Case.PlanRunning ? view.Step : null)"
                             OnLogged="LoggedAsync" OnCancel="() => logging = false" />
@@ -137,7 +137,7 @@ else
     @if (view.Case.PlanStartedOn is not null && view.Case.PlanSteps.Count > 0)
     {
         <section class="detail-card">
-            <h2>Plan: @view.Case.PlanName</h2>
+            <h2>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CasePlanHeading, view.Case.PlanName)</h2>
             <ol class="plan-progress">
                 @for (var i = 0; i < view.Case.PlanSteps.Count; i++)
                 {
@@ -158,22 +158,22 @@ else
                             @if (movingStep == step.Id)
                             {
                                 <div class="plan-move">
-                                    <label class="form-label" for="plan-move-day">Move to</label>
+                                    <label class="form-label" for="plan-move-day">@Strings.Pests.CaseMoveTo</label>
                                     <input type="date" id="plan-move-day" class="form-control form-control-sm plan-date"
                                            min="@Today.ToString("yyyy-MM-dd")" value="@moveTo.ToString("yyyy-MM-dd")"
                                            @onchange="MoveToChanged" />
                                 </div>
                                 <div class="care-actions">
-                                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="() => MoveStepAsync(step)">Move</button>
-                                    <button type="button" class="btn btn-link btn-sm" @onclick="() => movingStep = null">Cancel</button>
+                                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="() => MoveStepAsync(step)">@Strings.Pests.CaseMove</button>
+                                    <button type="button" class="btn btn-link btn-sm" @onclick="() => movingStep = null">@Strings.Common.Cancel</button>
                                 </div>
                             }
                             else
                             {
                                 <div class="care-actions">
-                                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="StartLogStep">Log</button>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => SkipStepAsync(step)">Skip</button>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => StartMove(step)">Move</button>
+                                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="StartLogStep">@Strings.Pests.CaseLogStep</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => SkipStepAsync(step)">@Strings.Pests.CaseSkip</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => StartMove(step)">@Strings.Pests.CaseMove</button>
                                 </div>
                             }
                         }
@@ -183,26 +183,24 @@ else
 
             @if (view.PlanDoneOn is { } doneOn)
             {
-                <p class="plan-progress-note">
-                    That was the last step. @(view.PlanDone ? "Today asks" : $"From {Labels.Date(doneOn)} Today asks") whether to start watching the case.
-                </p>
+                <p class="plan-progress-note">@(view.PlanDone ? Strings.Pests.CaseLastStepToday : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseLastStepFrom, Labels.Date(doneOn)))</p>
             }
             else if (view.Case.PlanStoppedOn is { } stopped)
             {
-                <p class="plan-progress-note">Stopped @Labels.Date(stopped). The case goes on at its interval.</p>
+                <p class="plan-progress-note">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CasePlanStopped, Labels.Date(stopped))</p>
             }
 
             @if (view.Case.PlanRunning)
             {
                 @if (confirmStop)
                 {
-                    <p class="mb-2">Stop the plan? The case goes on at its interval of @Labels.Count(view.Case.IntervalDays, "day"), and what's logged stays.</p>
-                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="StopPlanAsync">Stop the plan</button>
-                    <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmStop = false">Cancel</button>
+                    <p class="mb-2">@Plural.Of(view.Case.IntervalDays, Strings.Pests.CaseStopConfirm_One, Strings.Pests.CaseStopConfirm_Other)</p>
+                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="StopPlanAsync">@Strings.Pests.CaseStopPlan</button>
+                    <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmStop = false">@Strings.Common.Cancel</button>
                 }
                 else
                 {
-                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => confirmStop = true">Stop the plan</button>
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => confirmStop = true">@Strings.Pests.CaseStopPlan</button>
                 }
             }
         </section>
@@ -210,30 +208,30 @@ else
 
     <section class="detail-card">
         <dl class="detail-list">
-            <dt>Covers</dt>
+            <dt>@Strings.Pests.CaseCovers</dt>
             <dd>@Labels.ScopeAndCount(view)</dd>
 
             @if (view.IsCheck)
             {
-                <dt>Checking</dt>
-                <dd>Every @Labels.Count(PestService.CheckEveryDays, "day")</dd>
+                <dt>@Strings.Pests.CaseChecking</dt>
+                <dd>@Plural.Of(PestService.CheckEveryDays, Strings.Pests.CaseEvery_One, Strings.Pests.CaseEvery_Other)</dd>
             }
             else if (view.Case.PlanRunning)
             {
-                <dt>Treating</dt>
-                <dd>Following @view.Case.PlanName</dd>
+                <dt>@Strings.Pests.CaseTreating</dt>
+                <dd>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseFollowing, view.Case.PlanName)</dd>
             }
             else
             {
-                <dt>Treating</dt>
-                <dd>Every @Labels.Count(view.Case.IntervalDays, "day")</dd>
+                <dt>@Strings.Pests.CaseTreating</dt>
+                <dd>@Plural.Of(view.Case.IntervalDays, Strings.Pests.CaseEvery_One, Strings.Pests.CaseEvery_Other)</dd>
             }
 
             @* Before the first treatment there's no rhythm yet, so a date for the next would only confuse.
                A case being watched still shows when its weekly check is due. *@
             @if (!view.Untreated || view.Step is not null || view.PlanDoneOn is not null)
             {
-                <dt>Next one</dt>
+                <dt>@Strings.Pests.CaseNext</dt>
                 <dd>
                     @if (view.NextDue is { } due && view.DaysUntilDue is { } days)
                     {
@@ -242,22 +240,22 @@ else
                     }
                     else if (view.PlanDoneOn is not null)
                     {
-                        <text>Plan done, Today asks what's next.</text>
+                        <text>@Strings.Pests.CasePlanDone</text>
                     }
                     else
                     {
-                        <text>Nothing due, the case is closed.</text>
+                        <text>@Strings.Pests.CaseNothingDue</text>
                     }
                 </dd>
             }
 
-            <dt>Last one</dt>
-            <dd>@(view.Last is { } last ? $"{Labels.Date(last.OccurredOn)} · {What(last)}" : "No treatments yet.")</dd>
+            <dt>@Strings.Pests.CaseLast</dt>
+            <dd>@(view.Last is { } last ? $"{Labels.Date(last.OccurredOn)} · {What(last)}" : Strings.Pests.CaseNoTreatments)</dd>
         </dl>
 
         @if (!string.IsNullOrWhiteSpace(view.Case.Notes))
         {
-            <h2>Notes</h2>
+            <h2>@Strings.Pests.CaseEditNotes</h2>
             <p class="detail-notes">@view.Case.Notes</p>
         }
 
@@ -265,7 +263,7 @@ else
         {
             @* Mites and mealybugs rarely end up on a trap, but someone may have one up anyway *@
             <p class="trap-offer">
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="StartCounting">Count a sticky trap</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="StartCounting">@Strings.Pests.CaseCountStickyTrap</button>
             </p>
         }
     </section>
@@ -275,10 +273,10 @@ else
     {
         <section class="detail-card">
             <div class="trap-head">
-                <h2>Sticky trap</h2>
+                <h2>@Strings.Pests.CaseStickyTrap</h2>
                 @if (view.Case.IsOpen && !counting)
                 {
-                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="StartCounting">Count trap</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="StartCounting">@Strings.Pests.CaseCountTrap</button>
                 }
             </div>
 
@@ -288,10 +286,7 @@ else
             }
             else if (!Trapped)
             {
-                <p class="text-body-secondary mb-0">
-                    @Labels.For(view.Case.Pest) get caught on a yellow or blue sticky trap. Count it
-                    now and then to see whether the treatment is working.
-                </p>
+                <p class="text-body-secondary mb-0">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseTrapIntro, Labels.For(view.Case.Pest))</p>
             }
             else
             {
@@ -301,16 +296,16 @@ else
                 }
                 else
                 {
-                    <p class="text-body-secondary mb-0">A new trap is up. Count it next time you look.</p>
+                    <p class="text-body-secondary mb-0">@Strings.Pests.CaseNewTrapUp</p>
                 }
 
                 @if (askTreatAgain && view.IsCheck)
                 {
                     @* New ones on the trap while the case is only watched: offer to go back to treating *@
                     <div class="trap-ask">
-                        <p>@(catches[^1].Caught == 1 ? "There's a new one" : "There are new ones") on the trap. Start treating again?</p>
-                        <button type="button" class="btn btn-primary btn-sm" @onclick="FoundSomeAsync">Treat again</button>
-                        <button type="button" class="btn btn-link btn-sm" @onclick="() => askTreatAgain = false">Not now</button>
+                        <p>@(catches[^1].Caught == 1 ? Strings.Pests.CaseTreatAgainOne : Strings.Pests.CaseTreatAgainMany)</p>
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="FoundSomeAsync">@Strings.Pests.CaseTreatAgain</button>
+                        <button type="button" class="btn btn-link btn-sm" @onclick="() => askTreatAgain = false">@Strings.Pests.CaseNotNow</button>
                     </div>
                 }
 
@@ -323,11 +318,11 @@ else
     }
 
     <section class="detail-card case-side">
-        <h2>@(treatments.Any(t => t.Kind != PestTreatmentKind.Treated) ? "Treatments and checks" : "Treatments")</h2>
+        <h2>@(treatments.Any(t => t.Kind != PestTreatmentKind.Treated) ? Strings.Pests.CaseTreatmentsAndChecks : Strings.Pests.CaseTreatments)</h2>
         @if (treatments.Count == 0)
         {
             <p class="text-body-secondary mb-0">
-                Nothing logged yet. Once you log the first treatment, the next one is due after the interval.
+                @Strings.Pests.CaseNothingLogged
             </p>
         }
         else
@@ -358,13 +353,13 @@ else
     </section>
 
     <section class="detail-card">
-        <h2>Plants</h2>
+        <h2>@Strings.Pests.CasePlants</h2>
         @if (view.Plants.Count == 0)
         {
             <p class="text-body-secondary mb-0">
                 @(view.Case.Scope == PestScope.Room
-                    ? "Nothing is in that room at the moment."
-                    : "No plants are covered at the moment.")
+                    ? Strings.Pests.CaseNothingInRoom
+                    : Strings.Pests.CaseNoPlants)
             </p>
         }
         else
@@ -383,10 +378,7 @@ else
             </ul>
             @if (view.Case.Scope != PestScope.PickedPlants)
             {
-                <p class="family-hint">
-                    Worked out from where the plants are now, so anything moved in while the case is
-                    open is covered too.
-                </p>
+                <p class="family-hint">@Strings.Pests.CasePlantsHint</p>
             }
         }
     </section>
@@ -394,18 +386,18 @@ else
     @if (neighbours.Count > 0)
     {
         <section class="detail-card">
-            <h2>Check the neighbours</h2>
-            <p class="text-body-secondary">Other plants in the same room. Pests spread to plants that stand close.</p>
+            <h2>@Strings.Pests.CaseNeighbours</h2>
+            <p class="text-body-secondary">@Strings.Pests.CaseNeighboursHint</p>
             <ul class="neighbour-list">
                 @foreach (var neighbour in neighbours)
                 {
                     <li @key="neighbour.Plant.Id">
                         <div class="neighbour-text">
                             <a href="plants/@neighbour.Plant.Id">@neighbour.Plant.DisplayName</a>
-                            <div class="text-body-secondary small">@(neighbour.LastChecked is { } day ? $"Checked {Labels.DaysAgo(Math.Max(0, Today.DayNumber - day.DayNumber))}" : "Never checked")</div>
+                            <div class="text-body-secondary small">@(neighbour.LastChecked is { } day ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseChecked, Labels.DaysAgo(Math.Max(0, Today.DayNumber - day.DayNumber))) : Strings.Pests.CaseNeverChecked)</div>
                         </div>
-                        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => CleanAsync(neighbour.Plant)">Clean</button>
-                        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => AddToCaseAsync(neighbour.Plant)">Add to case</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => CleanAsync(neighbour.Plant)">@Strings.Pests.CaseClean</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => AddToCaseAsync(neighbour.Plant)">@Strings.Pests.CaseAddToCase</button>
                     </li>
                 }
             </ul>
@@ -417,13 +409,13 @@ else
     <section class="danger-zone">
         @if (confirmDelete)
         {
-            <p class="mb-2">Delete this case and its treatments? If it is over, mark it resolved instead so what you did is kept.</p>
-            <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
-            <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+            <p class="mb-2">@Strings.Pests.CaseDeleteConfirm</p>
+            <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+            <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
         }
         else
         {
-            <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">Delete case</button>
+            <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">@Strings.Pests.CaseDelete</button>
         }
     </section>
 }
@@ -503,7 +495,7 @@ else
         {
             await Treatments.SaveAsync(PestService.StartPlantCheck(plant, Today));
             await ReloadAsync();
-            message = $"{plant.DisplayName} checked, no signs.";
+            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseNeighbourChecked, plant.DisplayName);
         }
         finally
         {
@@ -523,7 +515,7 @@ else
                 view.Case.PlantIds.Add(plant.Id);
             await Repository.SaveAsync(view.Case);
             await ReloadAsync();
-            message = $"{plant.DisplayName} added to the case.";
+            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseNeighbourAdded, plant.DisplayName);
         }
         finally
         {
@@ -544,7 +536,7 @@ else
             view.Case.ResolvedOn = Today;
             await Repository.SaveAsync(view.Case);
             await ReloadAsync();
-            message = "Case resolved.";
+            message = Strings.Pests.CaseResolved;
         }
         finally
         {
@@ -581,7 +573,7 @@ else
         var check = view?.IsCheck == true;
         logging = false;
         await ReloadAsync();
-        message = check ? "Check logged." : "Treatment logged.";
+        message = check ? Strings.Pests.CheckLogged : Strings.Pests.TreatmentLogged;
     }
 
     private async Task CountedAsync()
@@ -597,21 +589,23 @@ else
 
     private static string Caught(TrapCatch latest)
     {
-        var text = $"{Labels.Count(latest.Caught, "new one", "new ones")} on the trap in {Labels.Count(latest.Days, "day")}";
-        return latest.PerWeek is { } perWeek ? $"{text}, about {Math.Round(perWeek):0} a week." : $"{text}.";
+        var text = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCaught, Plural.Of(latest.Caught, Strings.Pests.CaseNew_One, Strings.Pests.CaseNew_Other), Plural.Of(latest.Days, Strings.Pests.CaseDay_One, Strings.Pests.CaseDay_Other));
+        return latest.PerWeek is { } perWeek
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCaughtAbout, text, Math.Round(perWeek).ToString("0", System.Globalization.CultureInfo.CurrentCulture))
+            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCaughtPlain, text);
     }
 
     private string What(PestTreatment treatment) => treatment switch
     {
         { Skipped: true } => view?.Case.PlanSteps.FirstOrDefault(s => s.Id == treatment.PlanStepId) is { } skipped
-            ? $"Skipped {StepName(skipped)}"
-            : "Skipped a step",
-        { Kind: PestTreatmentKind.Checked } => "Checked",
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseSkippedStep, StepName(skipped))
+            : Strings.Pests.CaseSkippedAStep,
+        { Kind: PestTreatmentKind.Checked } => Strings.Pests.CaseWhatChecked,
         { Kind: PestTreatmentKind.TrapCount, OnTrap: { } onTrap } =>
-            $"Counted the trap: {onTrap} on it" + (treatment.NewTrap ? ", then put up a new one" : ""),
-        { Kind: PestTreatmentKind.TrapCount } => "Put up a new trap",
+            treatment.NewTrap ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCountedTrapThenNew, onTrap) : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCountedTrap, onTrap),
+        { Kind: PestTreatmentKind.TrapCount } => Strings.Pests.CasePutUpTrap,
         { What: { } what } when !string.IsNullOrWhiteSpace(what) => what,
-        _ => "Treated"
+        _ => Strings.Pests.CaseWhatTreated
     };
 
     private async Task FoundSomeAsync()
@@ -631,21 +625,21 @@ else
     }
 
     private static string StepName(PlanStep step) =>
-        string.IsNullOrWhiteSpace(step.What) ? "Step" : step.What.Trim();
+        string.IsNullOrWhiteSpace(step.What) ? Strings.Pests.CaseStep : step.What.Trim();
 
     // A done step shows its day or that it was skipped, the current one when it's due, later ones how long after
     private string StepWhen(PlanStep step, int index, bool current, IReadOnlyList<PestTreatment> done)
     {
         if (done.Count > 0)
-            return done[0].Skipped ? "Skipped" : Labels.Date(done[0].OccurredOn);
+            return done[0].Skipped ? Strings.Pests.CaseStepSkipped : Labels.Date(done[0].OccurredOn);
 
         if (current && view?.NextDue is { } due && view.DaysUntilDue is { } days)
             return $"{Labels.Due(days)} · {Labels.Date(due)}";
 
         if (!(view?.Case.PlanRunning ?? false))
-            return "Not done";
+            return Strings.Pests.CaseStepNotDone;
 
-        return index == 0 ? "On the start day" : $"{Labels.Count(step.DaysAfter, "day")} after";
+        return index == 0 ? Strings.Pests.CaseStepStartDay : Plural.Of(step.DaysAfter, Strings.Pests.CaseStepAfter_One, Strings.Pests.CaseStepAfter_Other);
     }
 
     private void ToggleFollowing()
@@ -671,7 +665,7 @@ else
 
         if (planStart > Today || planStart < view.Case.StartedOn)
         {
-            message = planStart > Today ? "The plan can't start in the future." : "The plan can't start before the case.";
+            message = planStart > Today ? Strings.Pests.CasePlanFuture : Strings.Pests.CasePlanBeforeCase;
             return;
         }
 
@@ -682,7 +676,7 @@ else
             await Repository.SaveAsync(view.Case);
             following = false;
             await ReloadAsync();
-            message = $"Following {plan.Name}.";
+            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseFollowingMessage, plan.Name);
         }
         finally
         {
@@ -708,7 +702,7 @@ else
         {
             await Treatments.SaveAsync(PlanProgress.Skip(view.Case, step, Today));
             await ReloadAsync();
-            message = "Step skipped.";
+            message = Strings.Pests.CaseStepSkippedMessage;
         }
         finally
         {
@@ -736,7 +730,7 @@ else
 
         if (moveTo < Today)
         {
-            message = "A step can only be moved to today or later.";
+            message = Strings.Pests.CaseMoveTooEarly;
             return;
         }
 
@@ -746,7 +740,7 @@ else
             await PutOffService.PutOffAsync(PutOffs.PlanStep(view.Case.Id, step.Id), moveTo);
             movingStep = null;
             await ReloadAsync();
-            message = $"Step moved to {Labels.Date(moveTo)}.";
+            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseStepMoved, Labels.Date(moveTo));
         }
         finally
         {
@@ -766,7 +760,7 @@ else
             await Repository.SaveAsync(view.Case);
             confirmStop = false;
             await ReloadAsync();
-            message = "Plan stopped.";
+            message = Strings.Pests.CasePlanStoppedMessage;
         }
         finally
         {

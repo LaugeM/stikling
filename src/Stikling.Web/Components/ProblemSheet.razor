@@ -20,7 +20,7 @@
     @if (Mode == ProblemSheetMode.Open)
     {
         <div class="mb-3" role="group" aria-labelledby="@signsLabelId">
-            <span class="form-label d-block" id="@signsLabelId">What do you see?</span>
+            <span class="form-label d-block" id="@signsLabelId">@Strings.Pests.SheetWhatDoYouSee</span>
             <div class="chip-row">
                 @foreach (var sign in Enum.GetValues<ProblemSign>())
                 {
@@ -32,19 +32,19 @@
             </div>
             @if (Problem is null)
             {
-                <p class="form-text mb-0">Bugs or webbing? <a href="pests/new?plant=@Plant.Id">Open a pest case instead</a></p>
+                <p class="form-text mb-0">@((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetBugsQuestion, $"<a href=\"pests/new?plant={Plant.Id}\">{System.Net.WebUtility.HtmlEncode(Strings.Pests.SheetOpenPestCase)}</a>"))</p>
             }
         </div>
 
         <div class="mb-3">
-            <label class="form-label" for="@dateId">Since</label>
+            <label class="form-label" for="@dateId">@Strings.Pests.SheetSince</label>
             <input id="@dateId" type="date" class="form-control" @bind="day" max="@Today.ToString("yyyy-MM-dd")" />
         </div>
     }
     else
     {
         <div class="mb-3">
-            <span class="form-label d-block" id="@trendLabelId">How does it look?</span>
+            <span class="form-label d-block" id="@trendLabelId">@Strings.Pests.ProblemHowDoesItLook</span>
             <div class="btn-group segmented" role="group" aria-labelledby="@trendLabelId">
                 @foreach (var choice in Enum.GetValues<ProblemTrend>())
                 {
@@ -57,7 +57,7 @@
         </div>
 
         <div class="mb-3" role="group" aria-labelledby="@didLabelId">
-            <span class="form-label d-block" id="@didLabelId">What did you do? <span class="text-body-secondary">(optional)</span></span>
+            <span class="form-label d-block" id="@didLabelId">@Strings.Pests.SheetWhatDidYouDo <span class="text-body-secondary">@Strings.Pests.Optional</span></span>
             <div class="chip-row">
                 @foreach (var action in Enum.GetValues<ProblemAction>())
                 {
@@ -70,14 +70,14 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label" for="@dateId">On</label>
+            <label class="form-label" for="@dateId">@Strings.Pests.ProblemClosedOn</label>
             <input id="@dateId" type="date" class="form-control" @bind="day"
                    min="@Problem!.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
         </div>
     }
 
     <div class="mb-3">
-        <label class="form-label" for="@noteId">Note <span class="text-body-secondary">(optional)</span></label>
+        <label class="form-label" for="@noteId">@Strings.Pests.SheetNote <span class="text-body-secondary">@Strings.Pests.Optional</span></label>
         <textarea id="@noteId" class="form-control" rows="2" @bind="note" @bind:event="oninput"></textarea>
     </div>
 
@@ -90,9 +90,9 @@
                     @foreach (var photo in photos)
                     {
                         <div class="photo-pick">
-                            <PhotoImage PhotoId="photo.Id" Alt="Photo to add" />
+                            <PhotoImage PhotoId="photo.Id" Alt="@Strings.Pests.SheetPhotoToAdd" />
                             <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
-                                    aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                                    aria-label="@Strings.Pests.SheetRemovePhoto" title="@Strings.Pests.SheetRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                         </div>
                     }
                 </div>
@@ -100,13 +100,13 @@
             <div class="composer-row">
                 <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                    Camera
+                    @Strings.Pests.SheetCamera
                 </label>
                 <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
                        @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
                 <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
-                    Gallery
+                    @Strings.Pests.SheetGallery
                 </label>
                 <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
                        @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
@@ -119,7 +119,7 @@
     }
 
     <div class="mb-3">
-        <span class="form-label d-block" id="@againLabelId">Look again</span>
+        <span class="form-label d-block" id="@againLabelId">@Strings.Pests.SheetLookAgain</span>
         <div class="btn-group segmented" role="radiogroup" aria-labelledby="@againLabelId">
             @foreach (var (value, label) in AgainChoices)
             {
@@ -133,21 +133,21 @@
     @if (confirmDelete)
     {
         <div class="problem-confirm mb-3">
-            <span>@(deletePhotos > 0 ? "Delete this update? Its photos stay on the plant's history." : "Delete this update?")</span>
-            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">Delete</button>
-            <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+            <span>@(deletePhotos > 0 ? Strings.Pests.SheetDeleteUpdatePhotos : Strings.Pests.SheetDeleteUpdate)</span>
+            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+            <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
         </div>
     }
 
     <div class="form-actions">
-        <button type="button" class="btn btn-primary" disabled="@(busy || (Mode == ProblemSheetMode.Open && signs.Count == 0))" @onclick="SaveAsync">Save</button>
+        <button type="button" class="btn btn-primary" disabled="@(busy || (Mode == ProblemSheetMode.Open && signs.Count == 0))" @onclick="SaveAsync">@Strings.Common.Save</button>
         @if (BackLabel is not null)
         {
             <button type="button" class="btn btn-link" @onclick="() => OnBack.InvokeAsync()">@BackLabel</button>
         }
         @if (Existing is not null && !confirmDelete)
         {
-            <button type="button" class="btn btn-link text-danger ms-auto" disabled="@busy" @onclick="AskDeleteAsync">Delete update</button>
+            <button type="button" class="btn btn-link text-danger ms-auto" disabled="@busy" @onclick="AskDeleteAsync">@Strings.Pests.SheetDeleteUpdateButton</button>
         }
     </div>
 </div>
@@ -186,7 +186,7 @@
     public EventCallback OnSaved { get; set; }
 
     private static readonly (int Value, string Label)[] AgainChoices =
-        [(0, "No"), (3, "In 3 days"), (7, "In a week"), (14, "In 2 weeks")];
+        [(0, Strings.Common.No), (3, Strings.Pests.SheetIn3Days), (7, Strings.Pests.SheetInAWeek), (14, Strings.Pests.SheetIn2Weeks)];
 
     private readonly string dateId = $"problem-date-{Guid.NewGuid():N}";
     private readonly string noteId = $"problem-note-{Guid.NewGuid():N}";
@@ -285,7 +285,7 @@
     private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
     {
         busy = true;
-        photoStatus = "Saving photos…";
+        photoStatus = Strings.Pests.SheetSavingPhotos;
         StateHasChanged();
 
         try
@@ -298,7 +298,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a problem failed");
-            photoStatus = $"Couldn't save the photos: {ex.Message}";
+            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetPhotosFailed, ex.Message);
         }
 
         busy = false;
@@ -384,7 +384,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving a problem failed");
-            error = $"Couldn't save: {ex.Message}";
+            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntSave, ex.Message);
         }
         busy = false;
     }
@@ -409,7 +409,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Deleting a problem update failed");
-            error = $"Couldn't delete: {ex.Message}";
+            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntDelete, ex.Message);
         }
         busy = false;
     }

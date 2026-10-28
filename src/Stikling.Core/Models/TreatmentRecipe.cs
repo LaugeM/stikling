@@ -1,3 +1,5 @@
+using Strings = Stikling.Core.Resources;
+
 namespace Stikling.Core.Models;
 
 /// <summary>
@@ -46,7 +48,7 @@ public sealed class TreatmentRecipe : Entity
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add("Give the recipe a name.");
+            errors.Add(Strings.Pests.RecipeNeedsName);
 
         errors.AddRange(RecipeIngredient.Validate(Ingredients));
 
@@ -89,12 +91,12 @@ public sealed class RecipeIngredient
     public static IEnumerable<string> Validate(IReadOnlyList<RecipeIngredient> ingredients)
     {
         if (ingredients.Any(i => string.IsNullOrWhiteSpace(i.Name)))
-            yield return "Every ingredient needs a name.";
+            yield return Strings.Pests.IngredientNeedsName;
 
         if (ingredients.Any(i => i.Amount < 0))
-            yield return "An amount can't be less than 0.";
+            yield return Strings.Pests.IngredientAmountBelowZero;
 
         if (ingredients.Any(i => i.Per <= 0))
-            yield return "What an amount is for has to be more than 0.";
+            yield return Strings.Pests.IngredientPerAboveZero;
     }
 }

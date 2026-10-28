@@ -10,14 +10,14 @@
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
-<PageTitle>@(problem is null ? "Problem" : ProblemText.Signs(problem.KnownSigns)) · Stikling</PageTitle>
+<PageTitle>@(problem is null ? Strings.Pests.ProblemTitle : ProblemText.Signs(problem.KnownSigns)) · Stikling</PageTitle>
 <ReloadOnSync Reload="ReloadAsync" />
 <ShowFound ElementId="@(Entry is { } entryId ? $"entry-{entryId}" : null)" Ready="@(problem is not null && plant is not null)" />
 
 @if (problem is null || plant is null)
 {
-    <a class="back-link" href="plants">Plants</a>
-    <p class="text-body-secondary">@(loaded ? "That problem doesn't exist or was deleted." : "Loading…")</p>
+    <a class="back-link" href="plants">@Strings.Pests.FloweringBackToPlants</a>
+    <p class="text-body-secondary">@(loaded ? Strings.Pests.ProblemGone : Strings.Pests.Loading)</p>
 }
 else
 {
@@ -31,7 +31,7 @@ else
             var days = ProblemText.DaysLasted(problem, Today);
             <div class="day-tile problem-days">
                 <b>@days</b>
-                <small>@(days == 1 ? "day" : "days")</small>
+                <small>@Plural.Of(days, Strings.Pests.ProblemDay_One, Strings.Pests.ProblemDay_Other)</small>
             </div>
         }
         else
@@ -66,18 +66,18 @@ else
         <div class="detail-actions">
             @if (problem.IsOpen)
             {
-                <button type="button" class="btn btn-primary" @onclick="() => OpenUpdate(null)">How does it look?</button>
-                <button type="button" class="btn btn-outline-primary" @onclick="OpenClose">It's over</button>
+                <button type="button" class="btn btn-primary" @onclick="() => OpenUpdate(null)">@Strings.Pests.ProblemHowDoesItLook</button>
+                <button type="button" class="btn btn-outline-primary" @onclick="OpenClose">@Strings.Pests.ProblemItsOver</button>
             }
             else
             {
-                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="ReopenAsync">It came back</button>
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="ReopenAsync">@Strings.Pests.ProblemItCameBack</button>
             }
         </div>
     }
 
     <section class="problem-log case-side" aria-labelledby="problem-log-title">
-        <h2 id="problem-log-title">What happened</h2>
+        <h2 id="problem-log-title">@Strings.Pests.ProblemWhatHappenedHeading</h2>
         @foreach (var (day, items) in LogDays)
         {
             <div class="log-day">
@@ -93,26 +93,26 @@ else
                                     {
                                         case ProblemLogKind.Started:
                                             <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.WiltingLeaf</svg>
-                                            <text>Started</text>
+                                            <text>@Strings.Pests.ProblemLogStarted</text>
                                             break;
                                         case ProblemLogKind.Update:
                                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" /></svg>
-                                            <text>How it looked</text>
+                                            <text>@Strings.Pests.ProblemLogHowItLooked</text>
                                             break;
                                         case ProblemLogKind.Change:
                                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h14l-3.5-3.5" /><path d="M20 15H6l3.5 3.5" /></svg>
-                                            <text>Updated</text>
+                                            <text>@Strings.Pests.ProblemLogUpdated</text>
                                             break;
                                         default:
                                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
-                                            <text>Over</text>
+                                            <text>@Strings.Pests.ProblemLogOver</text>
                                             break;
                                     }
                                 </span>
                                 @if (item.Kind == ProblemLogKind.Update && Here)
                                 {
                                     <span class="log-actions">
-                                        <button type="button" class="log-action" aria-label="Change this update" title="Change this update"
+                                        <button type="button" class="log-action" aria-label="@Strings.Pests.ProblemChangeUpdate" title="@Strings.Pests.ProblemChangeUpdate"
                                                 @onclick="() => OpenUpdate(shown.Update)">
                                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
                                         </button>
@@ -148,7 +148,7 @@ else
                                     <p class="log-text">@item.Entry!.Text</p>
                                     break;
                                 default:
-                                    <p class="log-text">@(problem.Outcome is { } outcome ? ProblemText.Outcome(outcome) : "Over")</p>
+                                    <p class="log-text">@(problem.Outcome is { } outcome ? ProblemText.Outcome(outcome) : Strings.Pests.ProblemLogOver)</p>
                                     break;
                             }
 
@@ -157,7 +157,7 @@ else
                                 <div class="log-photos">
                                     @foreach (var photoId in itemPhotos)
                                     {
-                                        <button type="button" class="log-photo" @onclick="() => viewerIndex = photoIndex[photoId]" aria-label="Open photo">
+                                        <button type="button" class="log-photo" @onclick="() => viewerIndex = photoIndex[photoId]" aria-label="@Strings.Pests.ProblemOpenPhoto">
                                             <PhotoImage PhotoId="photoId" />
                                         </button>
                                     }
@@ -173,8 +173,8 @@ else
     @if (past.Count > 0)
     {
         <section class="problem-before" aria-labelledby="problem-before-title">
-            <h2 id="problem-before-title">Before, with @BeforeSign</h2>
-            <p class="problem-before-hint">What you did then, and how it ended.</p>
+            <h2 id="problem-before-title">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.ProblemBefore, BeforeSign)</h2>
+            <p class="problem-before-hint">@Strings.Pests.ProblemBeforeHint</p>
             <ul class="item-list">
                 @foreach (var earlier in past.Take(5))
                 {
@@ -201,17 +201,17 @@ else
     <section class="danger-zone problem-foot">
         @if (confirmDelete)
         {
-            <p class="mb-2">Delete this problem and its updates? The lines on the plant's history go too@(deletePhotos > 0 ? ", and any photos stay on it." : ".")</p>
-            <button class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">Delete</button>
-            <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+            <p class="mb-2">@(deletePhotos > 0 ? Strings.Pests.ProblemDeleteConfirmPhotos : Strings.Pests.ProblemDeleteConfirm)</p>
+            <button class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+            <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
         }
         else
         {
             @if (Here)
             {
-                <button class="btn btn-link btn-sm link-action" @onclick="OpenEdit">Change what you saw</button>
+                <button class="btn btn-link btn-sm link-action" @onclick="OpenEdit">@Strings.Pests.ProblemChangeWhatYouSaw</button>
             }
-            <button class="btn btn-link btn-sm text-danger link-action" @onclick="AskDeleteAsync">Delete problem</button>
+            <button class="btn btn-link btn-sm text-danger link-action" @onclick="AskDeleteAsync">@Strings.Pests.ProblemDelete</button>
         }
     </section>
 
@@ -220,11 +220,11 @@ else
         {
             case Shown.Update:
                 <ProblemSheet @key="@(editing?.Id ?? Guid.Empty)" Plant="plant" Mode="ProblemSheetMode.Update" Problem="problem"
-                              Existing="editing" BackLabel="Cancel" OnBack="CloseSheet" OnSaved="SavedAsync" />
+                              Existing="editing" BackLabel="@Strings.Common.Cancel" OnBack="CloseSheet" OnSaved="SavedAsync" />
                 break;
 
             case Shown.Edit:
-                <ProblemSheet Plant="plant" Mode="ProblemSheetMode.Open" Problem="problem" BackLabel="Cancel" OnBack="CloseSheet" OnSaved="SavedAsync" />
+                <ProblemSheet Plant="plant" Mode="ProblemSheetMode.Open" Problem="problem" BackLabel="@Strings.Common.Cancel" OnBack="CloseSheet" OnSaved="SavedAsync" />
                 break;
 
             case Shown.Close:
@@ -233,7 +233,7 @@ else
                     <div class="alert alert-danger py-2 px-3 mb-3" role="alert">@closeError</div>
                 }
                 <div class="mb-3">
-                    <label class="form-label" for="problem-closed-on">On</label>
+                    <label class="form-label" for="problem-closed-on">@Strings.Pests.ProblemClosedOn</label>
                     <input id="problem-closed-on" type="date" class="form-control" @bind="closeOn"
                            min="@problem.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                 </div>
@@ -241,39 +241,39 @@ else
                     <li>
                         <button type="button" class="sheet-action" disabled="@busy" @onclick="() => CloseAsync(ProblemOutcome.GotBetter)">
                             <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.Trend(ProblemTrend.Better)</svg>
-                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.GotBetter)</b><small>It looks healthy again</small></span>
+                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.GotBetter)</b><small>@Strings.Pests.ProblemGotBetterHint</small></span>
                         </button>
                     </li>
                     <li>
                         <button type="button" class="sheet-action" disabled="@busy" @onclick="() => CloseAsync(ProblemOutcome.WentAway)">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="m8.5 12.5 2.5 2.5 4.5-5" /></svg>
-                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.WentAway)</b><small>It cleared up without doing much</small></span>
+                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.WentAway)</b><small>@Strings.Pests.ProblemWentAwayHint</small></span>
                         </button>
                     </li>
                     <li>
                         <button type="button" class="sheet-action" disabled="@busy" @onclick="() => CloseAsync(ProblemOutcome.DidntHelp)">
                             <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.Trend(ProblemTrend.Same)</svg>
-                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.DidntHelp)</b><small>You're leaving it as it is</small></span>
+                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.DidntHelp)</b><small>@Strings.Pests.ProblemDidntHelpHint</small></span>
                         </button>
                     </li>
                     <li>
                         <button type="button" class="sheet-action danger" disabled="@busy" @onclick="() => CloseAsync(ProblemOutcome.Died)">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-7" /><path d="M12 14c-1-4-4-6-8-6 0 4 3 7 8 6Z" /><path d="M12 14c2-3 4.5-4 8-3.5-.5 3.5-3.5 5-8 3.5Z" /><path d="M4 21h16" /></svg>
-                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.Died)</b><small>The plant didn't make it</small></span>
+                            <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.Died)</b><small>@Strings.Pests.ProblemDiedHint</small></span>
                         </button>
                     </li>
                 </ul>
                 break;
 
             case Shown.Died:
-                <p class="mb-3">Mark the plant as died?</p>
+                <p class="mb-3">@Strings.Pests.ProblemMarkDiedQuestion</p>
                 <div class="mb-3">
-                    <label class="form-label" for="problem-cause">What happened? <span class="text-body-secondary">(optional)</span></label>
+                    <label class="form-label" for="problem-cause">@Strings.Pests.ProblemWhatHappened <span class="text-body-secondary">@Strings.Pests.Optional</span></label>
                     <input id="problem-cause" class="form-control" @bind="cause" />
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-danger" disabled="@busy" @onclick="MarkDiedAsync">Mark as died</button>
-                    <button type="button" class="btn btn-link" @onclick="CloseSheetAndReloadAsync">Not now</button>
+                    <button type="button" class="btn btn-danger" disabled="@busy" @onclick="MarkDiedAsync">@Strings.Pests.ProblemMarkDied</button>
+                    <button type="button" class="btn btn-link" @onclick="CloseSheetAndReloadAsync">@Strings.Pests.CaseNotNow</button>
                 </div>
                 break;
         }
@@ -323,17 +323,17 @@ else
 
     private string SheetTitle => sheet switch
     {
-        Shown.Update => "How does it look?",
-        Shown.Edit => "Something's wrong",
-        Shown.Close => "How did it end?",
-        Shown.Died => "It died",
+        Shown.Update => Strings.Pests.ProblemHowDoesItLook,
+        Shown.Edit => Strings.Pests.ProblemSomethingsWrong,
+        Shown.Close => Strings.Pests.ProblemHowDidItEnd,
+        Shown.Died => Strings.Pests.ProblemItDied,
         _ => ""
     };
 
     // "Before, with yellow leaves": the first sign the first earlier problem had in common
     private string BeforeSign => past.Count > 0 && past[0].Shared.Count > 0
         ? ProblemText.Sign(past[0].Shared[0]).ToLowerInvariant()
-        : "this";
+        : Strings.Pests.ProblemThis;
 
     private IEnumerable<(DateOnly Day, List<ProblemLogItem> Items)> LogDays =>
         log.GroupBy(i => i.Day).Select(g => (g.Key, g.ToList()));
@@ -369,8 +369,8 @@ else
     }
 
     private string DayLabel(DateOnly day) =>
-        day == Today ? "Today"
-        : day == Today.AddDays(-1) ? "Yesterday"
+        day == Today ? Strings.Pests.ProblemDayToday
+        : day == Today.AddDays(-1) ? Strings.Pests.ProblemDayYesterday
         : Labels.Date(day);
 
     private void OpenUpdate(ProblemUpdate? existing)
@@ -441,7 +441,7 @@ else
             plant.CauseOfDeath = string.IsNullOrWhiteSpace(cause) ? null : cause.Trim();
             await PlantService.UpdateAsync(before, plant, Labels.For);
             sheet = Shown.None;
-            status = "Marked as died.";
+            status = Strings.Pests.ProblemMarkedDied;
             await ReloadAsync();
         }
         finally

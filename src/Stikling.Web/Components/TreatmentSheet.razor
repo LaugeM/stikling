@@ -17,7 +17,7 @@
     @if (Step is not null)
     {
         <div class="form-text mb-2">
-            Step @StepNumber of @Case.PlanSteps.Count of @Case.PlanName.
+            @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.TreatStep, StepNumber, Case.PlanSteps.Count, Case.PlanName)
             @if (!string.IsNullOrWhiteSpace(Step.Notes))
             {
                 @Step.Notes
@@ -25,15 +25,15 @@
         </div>
         <div class="form-check form-switch mb-2">
             <input class="form-check-input" type="checkbox" role="switch" id="treatment-off-plan" @bind="offPlan" />
-            <label class="form-check-label" for="treatment-off-plan">Not a step of the plan</label>
+            <label class="form-check-label" for="treatment-off-plan">@Strings.Pests.TreatOffPlan</label>
         </div>
     }
 
     @if (!Check && recipes.Count > 0)
     {
         <div class="mb-2">
-            <div class="form-label">Recipe</div>
-            <div class="chip-row" role="group" aria-label="Recipes">
+            <div class="form-label">@Strings.Pests.TreatRecipe</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Pests.TreatRecipes">
                 @foreach (var recipe in recipes)
                 {
                     <button type="button" class="chip @(recipeId == recipe.Id ? "picked" : null)"
@@ -42,7 +42,7 @@
                 }
                 <button type="button" class="chip new @(recipeId is null ? "picked" : null)"
                         aria-pressed="@(recipeId is null ? "true" : "false")"
-                        @onclick="() => recipeId = null">Something else</button>
+                        @onclick="() => recipeId = null">@Strings.Pests.TreatSomethingElse</button>
             </div>
             @if (Picked is { } picked)
             {
@@ -62,13 +62,13 @@
         @if (!Check && recipeId is null)
         {
             <div class="col-7">
-                <label class="form-label" for="treatment-what">What you used</label>
+                <label class="form-label" for="treatment-what">@Strings.Pests.TreatWhatUsed</label>
                 <input type="text" id="treatment-what" class="form-control form-control-sm"
-                       placeholder="e.g. Alcohol spray, both sides" @bind="what" @bind:event="oninput" />
+                       placeholder="@Strings.Pests.TreatWhatPlaceholder" @bind="what" @bind:event="oninput" />
             </div>
         }
         <div class="col-5">
-            <label class="form-label" for="treatment-date">When</label>
+            <label class="form-label" for="treatment-date">@Strings.Pests.TrapCountWhen</label>
             <input type="date" id="treatment-date" class="form-control form-control-sm"
                    max="@Today.ToString("yyyy-MM-dd")" value="@occurredOn.ToString("yyyy-MM-dd")"
                    @onchange="DateChanged" />
@@ -78,34 +78,31 @@
     @if (!Check && !OnStep)
     {
         <div class="mt-2">
-            <label class="form-label" for="treatment-next">Next one due</label>
+            <label class="form-label" for="treatment-next">@Strings.Pests.TreatNextDue</label>
             <input type="date" id="treatment-next" class="form-control form-control-sm"
                    min="@occurredOn.ToString("yyyy-MM-dd")" value="@nextDue.ToString("yyyy-MM-dd")"
                    @onchange="NextDueChanged" />
-            <div class="form-text">Every @Labels.Count(Case.IntervalDays, "day") by default. Change it to leave a longer gap.</div>
+            <div class="form-text">@Plural.Of(Case.IntervalDays, Strings.Pests.TreatNextHint_One, Strings.Pests.TreatNextHint_Other)</div>
         </div>
     }
 
     @if (!Check && loaded && recipes.Count == 0)
     {
-        <div class="form-text">
-            Make up the same spray each time? Save it under <a href="treatment-recipes">Treatment recipes</a>
-            and pick it here.
-        </div>
+        <div class="form-text">@((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.TreatMakeRecipe, $"<a href=\"treatment-recipes\">{System.Net.WebUtility.HtmlEncode(Strings.Pests.TreatRecipesLink)}</a>"))</div>
     }
 
     <div class="mt-2">
-        <label class="form-label" for="treatment-notes">Notes</label>
+        <label class="form-label" for="treatment-notes">@Strings.Pests.CaseEditNotes</label>
         <input type="text" id="treatment-notes" class="form-control form-control-sm"
-               placeholder="@(Check ? "e.g. Nothing under the leaves" : "e.g. Still webbing under the new leaf")"
+               placeholder="@(Check ? Strings.Pests.TreatCheckNotesPlaceholder : Strings.Pests.TreatNotesPlaceholder)"
                @bind="notes" @bind:event="oninput" />
     </div>
 
     <div class="care-actions">
-        <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="LogAsync">@(Check ? "Log check" : "Log treatment")</button>
+        <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="LogAsync">@(Check ? Strings.Pests.CaseLogCheck : Strings.Pests.CaseLogTreatment)</button>
         @if (OnCancel.HasDelegate)
         {
-            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OnCancel">Cancel</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OnCancel">@Strings.Common.Cancel</button>
         }
     </div>
 </div>
@@ -222,7 +219,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the treatment failed");
-            error = $"Couldn't log that: {ex.Message}";
+            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.TrapCountFailed, ex.Message);
         }
         finally
         {
