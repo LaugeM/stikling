@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using System.Text.Json.Serialization;
 
 namespace Stikling.Core.Models;
@@ -54,16 +55,16 @@ public sealed class Wish : Entity
 
     /// <summary>The botanical name, else the name typed in.</summary>
     public string DisplayName =>
-        BotanicalName ?? (string.IsNullOrWhiteSpace(Name) ? NameQualifier == Models.NameQualifier.Unknown ? "Name unknown" : "Unnamed wish" : Name.Trim());
+        BotanicalName ?? (string.IsNullOrWhiteSpace(Name) ? NameQualifier == Models.NameQualifier.Unknown ? Strings.Shared.WishNameUnknown : Strings.Shared.WishUnnamed : Name.Trim());
 
     public IReadOnlyList<string> Validate(DateOnly today)
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Genus) && string.IsNullOrWhiteSpace(Name) && NameQualifier != Models.NameQualifier.Unknown)
-            errors.Add("Give the wish a genus, or a name of your own.");
+            errors.Add(Strings.Shared.WishNeedsName);
         errors.AddRange(PlantNames.QualifierErrors(Genus, Species, NameQualifier));
         if (MostToPay < 0)
-            errors.Add("The most you would pay can't be negative.");
+            errors.Add(Strings.Shared.WishPriceNegative);
         return errors;
     }
 }

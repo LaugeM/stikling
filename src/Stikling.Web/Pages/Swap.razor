@@ -10,37 +10,37 @@
 @inject PlantNameService Names
 @inject SitterSheetActions Sharer
 
-<PageTitle>Available for swap · Stikling</PageTitle>
+<PageTitle>@Strings.Shared.SwapPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="propagations">Propagations</a>
+<a class="back-link" href="propagations">@Strings.Shared.BackToPropagations</a>
 
 <div class="page-heading">
-    <h1>Available for swap</h1>
+    <h1>@Strings.Shared.SwapTitle</h1>
     @if (list is { IsEmpty: false })
     {
-        <button type="button" class="btn btn-outline-primary swap-share" @onclick="OpenShare">Share</button>
+        <button type="button" class="btn btn-outline-primary swap-share" @onclick="OpenShare">@Strings.Shared.ShareButton</button>
     }
 </div>
 
 @if (list is null)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
 }
 else if (list.IsEmpty)
 {
     @ConvertPanel
     <div class="empty-state">
-        <p>Nothing is marked for swap yet.</p>
-        <p>On a plant's or propagation's page, tap More and choose For swap.</p>
-        <a class="btn btn-outline-primary mt-3" href="plants">Go to Plants</a>
+        <p>@Strings.Shared.SwapEmptyNothing</p>
+        <p>@Strings.Shared.SwapEmptyHow</p>
+        <a class="btn btn-outline-primary mt-3" href="plants">@Strings.Shared.SwapGoToPlants</a>
     </div>
 }
 else
 {
     @if (list.Cuttings.Count > 0)
     {
-        <h2 class="section-label">Cuttings</h2>
+        <h2 class="section-label">@Strings.Shared.SwapCuttings</h2>
         <ul class="item-list list-grid swap-list">
             @foreach (var line in list.Cuttings)
             {
@@ -49,12 +49,12 @@ else
                     <a class="item-card" href="propagations/@propagation.Id">
                         <div class="item-thumb day-thumb" aria-hidden="true">
                             <b>@line.Count</b>
-                            <small>to swap</small>
+                            <small>@Strings.Shared.SwapToSwap</small>
                         </div>
                         <div class="item-text">
                             <div class="item-name">@propagation.ListName</div>
                             <div class="item-meta">
-                                <span class="visually-hidden">@line.Count @(line.Count == 1 ? "cutting" : "cuttings"),</span>
+                                <span class="visually-hidden">@Plural.Of(line.Count, Strings.Common.Cutting_One, Strings.Common.Cutting_Other),</span>
                                 <StageBadge Stage="propagation.Stage" Type="propagation.Type" />
                             </div>
                         </div>
@@ -66,7 +66,7 @@ else
 
     @if (list.OnRequest.Count > 0)
     {
-        <h2 class="section-label">Cuttings on request</h2>
+        <h2 class="section-label">@Strings.Shared.SwapOnRequest</h2>
         <ul class="item-list list-grid swap-list">
             @foreach (var line in list.OnRequest)
             {
@@ -77,7 +77,7 @@ else
 
     @if (list.Plants.Count > 0)
     {
-        <h2 class="section-label">Plants</h2>
+        <h2 class="section-label">@Strings.Shared.SwapPlants</h2>
         <ul class="item-list list-grid swap-list">
             @foreach (var line in list.Plants)
             {
@@ -89,9 +89,9 @@ else
     @ConvertPanel
 }
 
-<Sheet Title="Share" @bind-Open="shareOpen">
-    <div class="btn-group segmented w-100 swap-tabs" role="radiogroup" aria-label="What to share">
-        @foreach (var (value, label) in new[] { ("picture", "Picture"), ("text", "Text") })
+<Sheet Title="@Strings.Shared.SwapShareTitle" @bind-Open="shareOpen">
+    <div class="btn-group segmented w-100 swap-tabs" role="radiogroup" aria-label="@Strings.Shared.SwapWhatToShare">
+        @foreach (var (value, label) in new[] { ("picture", Strings.Shared.SwapTabPicture), ("text", Strings.Shared.SwapTabText) })
         {
             var id = $"swap-tab-{value}";
             <input type="radio" class="btn-check" name="swap-tab" id="@id"
@@ -102,19 +102,19 @@ else
     <div class="swap-options">
         <div class="form-check form-switch">
             <input id="swap-nicknames" type="checkbox" class="form-check-input" role="switch" @bind="nicknames" @bind:after="NicknamesChangedAsync" />
-            <label class="form-check-label" for="swap-nicknames">Include your nicknames</label>
+            <label class="form-check-label" for="swap-nicknames">@Strings.Shared.SwapNicknames</label>
         </div>
         @if (tab == "text")
         {
             <div class="form-check form-switch">
                 <input id="swap-footer" type="checkbox" class="form-check-input" role="switch" @bind="footer" />
-                <label class="form-check-label" for="swap-footer">Add a Stikling line at the end</label>
+                <label class="form-check-label" for="swap-footer">@Strings.Shared.SwapFooter</label>
             </div>
         }
     </div>
     @if (tab == "picture")
     {
-        <div class="swap-label" id="swap-format-label">Size</div>
+        <div class="swap-label" id="swap-format-label">@Strings.Shared.SwapSize</div>
         <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="swap-format-label">
             @foreach (var (value, label) in ShareCardService.Formats)
             {
@@ -132,18 +132,18 @@ else
                 <div class="swap-picture" aria-busy="@(drawn.ContainsKey(spec.Id) ? null : "true")">
                     @if (drawn.TryGetValue(spec.Id, out var picture))
                     {
-                        <img src="@picture.Url" alt="Picture @number of @specs.Count of the swap list" />
+                        <img src="@picture.Url" alt="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapPictureAlt, number, specs.Count)" />
                     }
                 </div>
             }
         </div>
         @if (MissingPhotos > 0)
         {
-            <p class="swap-note">@(MissingPhotos == 1 ? "1 photo isn't on this device, so it shows the leaf." : $"{MissingPhotos} photos aren't on this device, so those show the leaf.")</p>
+            <p class="swap-note">@Plural.Of(MissingPhotos, Strings.Shared.SwapMissingPhotos_One, Strings.Shared.SwapMissingPhotos_Other)</p>
         }
         <div class="form-actions">
-            <button type="button" class="btn btn-primary" disabled="@(!AllDrawn)" @onclick="SharePicturesAsync">Share</button>
-            <button type="button" class="btn btn-outline-primary" disabled="@(!AllDrawn)" @onclick="SavePicturesAsync">Save</button>
+            <button type="button" class="btn btn-primary" disabled="@(!AllDrawn)" @onclick="SharePicturesAsync">@Strings.Shared.ShareButton</button>
+            <button type="button" class="btn btn-outline-primary" disabled="@(!AllDrawn)" @onclick="SavePicturesAsync">@Strings.Shared.SwapSave</button>
             @if (status.Length > 0)
             {
                 <span class="swap-status" role="status">@status</span>
@@ -152,9 +152,9 @@ else
     }
     else
     {
-        <pre class="swap-preview" aria-label="What will be shared">@ShareText</pre>
+        <pre class="swap-preview" aria-label="@Strings.Shared.SwapPreview">@ShareText</pre>
         <div class="form-actions">
-            <button type="button" class="btn btn-primary" @onclick="ShareAsync">Share</button>
+            <button type="button" class="btn btn-primary" @onclick="ShareAsync">@Strings.Shared.ShareButton</button>
             @if (status.Length > 0)
             {
                 <span class="swap-status" role="status">@status</span>
@@ -225,11 +225,11 @@ else
         @if (tagged.Count > 0)
         {
             <section class="swap-convert" aria-labelledby="swap-convert-title">
-                <h2 id="swap-convert-title" class="swap-convert-title">@Labels.Plants(tagged.Count) tagged For swap</h2>
-                <p>@(tagged.Count == 1 ? "It isn't" : "They aren't") on this list yet. Say what you're offering. The tag stays.</p>
+                <h2 id="swap-convert-title" class="swap-convert-title">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapConvertTitle, Labels.Plants(tagged.Count))</h2>
+                <p>@Plural.Of(tagged.Count, Strings.Shared.SwapConvertBody_One, Strings.Shared.SwapConvertBody_Other)</p>
                 <div class="swap-convert-actions">
-                    <button type="button" class="btn btn-primary swap-choice" disabled="@busy" @onclick="() => ConvertAsync(SpareMark.CuttingsToSpare)">Cuttings to spare</button>
-                    <button type="button" class="btn btn-outline-primary swap-choice" disabled="@busy" @onclick="() => ConvertAsync(SpareMark.UpForSwap)">The @(tagged.Count == 1 ? "plant itself" : "plants themselves")</button>
+                    <button type="button" class="btn btn-primary swap-choice" disabled="@busy" @onclick="() => ConvertAsync(SpareMark.CuttingsToSpare)">@Strings.Shared.SwapConvertCuttings</button>
+                    <button type="button" class="btn btn-outline-primary swap-choice" disabled="@busy" @onclick="() => ConvertAsync(SpareMark.UpForSwap)">@Plural.Of(tagged.Count, Strings.Shared.SwapConvertItself_One, Strings.Shared.SwapConvertItself_Other)</button>
                 </div>
             </section>
         }
@@ -320,7 +320,7 @@ else
             catch (JSException)
             {
                 // Share and Save stay off, so say why. Picking another size draws them again
-                status = "Couldn't draw the pictures";
+                status = Strings.Shared.SwapDrawFailed;
                 StateHasChanged();
                 return;
             }
@@ -333,21 +333,21 @@ else
 
     private async Task SharePicturesAsync() => await ShowStatusAsync(await Cards.ShareAllAsync(PictureIds, FileNames) switch
     {
-        "saved" => "Saved",
-        "failed" => "Couldn't share it",
+        "saved" => Strings.Shared.SwapSaved,
+        "failed" => Strings.Shared.ShareFailed,
         _ => ""
     });
 
     private async Task SavePicturesAsync() => await ShowStatusAsync(await Cards.SaveAllAsync(PictureIds, FileNames) switch
     {
-        "saved" => "Saved",
-        _ => "Couldn't share it"
+        "saved" => Strings.Shared.SwapSaved,
+        _ => Strings.Shared.ShareFailed
     });
 
     private async Task ShareAsync() => await ShowStatusAsync(await Sharer.ShareTextAsync(ShareText) switch
     {
-        "copied" => "Copied",
-        "failed" => "Couldn't share it",
+        "copied" => Strings.Shared.ShareCopied,
+        "failed" => Strings.Shared.ShareFailed,
         _ => ""
     });
 

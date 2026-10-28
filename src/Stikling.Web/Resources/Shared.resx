@@ -1,0 +1,1349 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+    <comment>Shown while a page loads its data.</comment>
+  </data>
+  <data name="BackToPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Link at the top of a page that goes back to the Plants page.</comment>
+  </data>
+  <data name="ShareButton" xml:space="preserve">
+    <value>Share</value>
+    <comment>Button that shares a text or a picture.</comment>
+  </data>
+  <data name="ShareCopied" xml:space="preserve">
+    <value>Copied</value>
+    <comment>Shown after the text was copied to the clipboard instead of shared.</comment>
+  </data>
+  <data name="ShareFailed" xml:space="preserve">
+    <value>Couldn't share it</value>
+    <comment>Shown when sharing failed.</comment>
+  </data>
+  <data name="WishlistTitle" xml:space="preserve">
+    <value>Wishlist</value>
+    <comment>Heading of the Wishlist page.</comment>
+  </data>
+  <data name="WishlistPageTitle" xml:space="preserve">
+    <value>Wishlist · Stikling</value>
+    <comment>Title of the browser tab on the Wishlist page.</comment>
+  </data>
+  <data name="WishlistShareAsText" xml:space="preserve">
+    <value>Share as text</value>
+    <comment>Button and title of the sheet that shares the wishlist as plain text.</comment>
+  </data>
+  <data name="WishlistAdd" xml:space="preserve">
+    <value>Add a wish</value>
+    <comment>Button, link and title for adding a wish.</comment>
+  </data>
+  <data name="WishlistSearchPlaceholder" xml:space="preserve">
+    <value>Search your wishes and plants</value>
+    <comment>Placeholder in the search box on the Wishlist page.</comment>
+  </data>
+  <data name="WishlistSearchLabel" xml:space="preserve">
+    <value>Search the wishlist and your plants</value>
+    <comment>Name of the search box, read out by a screen reader.</comment>
+  </data>
+  <data name="WishlistEmpty" xml:space="preserve">
+    <value>Keep the plants you're after here: the one you saw at a fair, the cultivar you keep looking for. When you get one, tap Got it and it becomes a plant or a cutting. Then the wish moves to Got. Search above to check whether you already have something.</value>
+    <comment>Shown on the Wishlist page when there are no wishes. Got it and Got are the names of a button and a group on the page.</comment>
+  </data>
+  <data name="WishlistHelpLink" xml:space="preserve">
+    <value>More about the wishlist in Help</value>
+    <comment>Link to the Help page.</comment>
+  </data>
+  <data name="WishlistNoMatch" xml:space="preserve">
+    <value>Nothing on your wishlist matches.</value>
+    <comment>Shown when a search finds no wishes.</comment>
+  </data>
+  <data name="WishlistNoOpen" xml:space="preserve">
+    <value>No open wishes. Add one, or put one back from Got.</value>
+    <comment>Shown when every wish is already got. Got is the name of a group on the page.</comment>
+  </data>
+  <data name="WishlistGotItAs" xml:space="preserve">
+    <value>Got it as</value>
+    <comment>Label before the choice of what a wish became.</comment>
+  </data>
+  <data name="WishlistAPlant" xml:space="preserve">
+    <value>A plant</value>
+    <comment>Button: the wish became a plant.</comment>
+  </data>
+  <data name="WishlistACutting" xml:space="preserve">
+    <value>A cutting</value>
+    <comment>Button: the wish became a cutting.</comment>
+  </data>
+  <data name="WishlistGotIt" xml:space="preserve">
+    <value>Got it</value>
+    <comment>Button on a wish, for when you got the plant.</comment>
+  </data>
+  <data name="WishlistGotItLabel" xml:space="preserve">
+    <value>Got it: {0}</value>
+    <comment>Name of the Got it button, read out by a screen reader. {0} is the name of the wish.</comment>
+  </data>
+  <data name="WishlistGot" xml:space="preserve">
+    <value>Got</value>
+    <comment>Heading of the group of wishes that were got.</comment>
+  </data>
+  <data name="WishlistGotOn" xml:space="preserve">
+    <value>Got {0}</value>
+    <comment>Under a wish that was got. {0} is the date.</comment>
+  </data>
+  <data name="WishlistSeePlant" xml:space="preserve">
+    <value>See plant</value>
+    <comment>Button on a got wish that became a plant.</comment>
+  </data>
+  <data name="WishlistSeeCutting" xml:space="preserve">
+    <value>See cutting</value>
+    <comment>Button on a got wish that became a cutting.</comment>
+  </data>
+  <data name="WishlistSeeLabel" xml:space="preserve">
+    <value>See {0}</value>
+    <comment>Name of the See button, read out by a screen reader. {0} is the name of the plant or cutting.</comment>
+  </data>
+  <data name="WishlistPutBack" xml:space="preserve">
+    <value>Put back</value>
+    <comment>Button that moves a got wish back to the open ones.</comment>
+  </data>
+  <data name="WishlistPutBackLabel" xml:space="preserve">
+    <value>Put back on the list: {0}</value>
+    <comment>Name of the Put back button, read out by a screen reader. {0} is the name of the wish.</comment>
+  </data>
+  <data name="WishlistAlreadyHave" xml:space="preserve">
+    <value>You already have</value>
+    <comment>Heading of the plants that match a search of the wishlist.</comment>
+  </data>
+  <data name="WishlistInProgress" xml:space="preserve">
+    <value>Cutting or seedling in progress</value>
+    <comment>Under a propagation that matches a search of the wishlist.</comment>
+  </data>
+  <data name="WishlistShareHint" xml:space="preserve">
+    <value>Sends the plants you're looking for as plain text.</value>
+    <comment>In the sheet that shares the wishlist.</comment>
+  </data>
+  <data name="WishlistShareNotes" xml:space="preserve">
+    <value>Notes</value>
+    <comment>Switch in the share sheet: include the notes of each wish.</comment>
+  </data>
+  <data name="WishlistSharePrice" xml:space="preserve">
+    <value>The most I would pay</value>
+    <comment>Switch in the share sheet: include the price of each wish.</comment>
+  </data>
+  <data name="WishlistShareApp" xml:space="preserve">
+    <value>End with "{0}"</value>
+    <comment>Switch in the share sheet. {0} is the line that names the app.</comment>
+  </data>
+  <data name="WishlistSharePreview" xml:space="preserve">
+    <value>What will be shared</value>
+    <comment>Name of the preview of the shared text, read out by a screen reader.</comment>
+  </data>
+  <data name="WishlistUpTo" xml:space="preserve">
+    <value>up to {0}</value>
+    <comment>Under a wish: the most you would pay. {0} is the price.</comment>
+  </data>
+  <data name="SwapPageTitle" xml:space="preserve">
+    <value>Available for swap · Stikling</value>
+    <comment>Title of the browser tab on the Swap page.</comment>
+  </data>
+  <data name="SwapTitle" xml:space="preserve">
+    <value>Available for swap</value>
+    <comment>Heading of the Swap page.</comment>
+  </data>
+  <data name="BackToPropagations" xml:space="preserve">
+    <value>Propagations</value>
+    <comment>Link at the top of a page that goes back to the Propagations page.</comment>
+  </data>
+  <data name="SwapEmptyNothing" xml:space="preserve">
+    <value>Nothing is marked for swap yet.</value>
+    <comment>Shown on the Swap page when nothing is offered.</comment>
+  </data>
+  <data name="SwapEmptyHow" xml:space="preserve">
+    <value>On a plant's or propagation's page, tap More and choose For swap.</value>
+    <comment>Shown on the Swap page when nothing is offered. More and For swap are the names of a menu and an item on the plant page.</comment>
+  </data>
+  <data name="SwapGoToPlants" xml:space="preserve">
+    <value>Go to Plants</value>
+    <comment>Button on the Swap page when nothing is offered.</comment>
+  </data>
+  <data name="SwapCuttings" xml:space="preserve">
+    <value>Cuttings</value>
+    <comment>Heading of the cuttings on the Swap page.</comment>
+  </data>
+  <data name="SwapToSwap" xml:space="preserve">
+    <value>to swap</value>
+    <comment>Small text under the number of cuttings on a swap row.</comment>
+  </data>
+  <data name="SwapOnRequest" xml:space="preserve">
+    <value>Cuttings on request</value>
+    <comment>Heading of the plants that can spare cuttings on the Swap page.</comment>
+  </data>
+  <data name="SwapPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Heading of the plants that are up for swap on the Swap page.</comment>
+  </data>
+  <data name="SwapShareTitle" xml:space="preserve">
+    <value>Share</value>
+    <comment>Title of the sheet that shares the swap list.</comment>
+  </data>
+  <data name="SwapWhatToShare" xml:space="preserve">
+    <value>What to share</value>
+    <comment>Name of the choice between picture and text, read out by a screen reader.</comment>
+  </data>
+  <data name="SwapTabPicture" xml:space="preserve">
+    <value>Picture</value>
+    <comment>Choice in the share sheet: share the list as a picture.</comment>
+  </data>
+  <data name="SwapTabText" xml:space="preserve">
+    <value>Text</value>
+    <comment>Choice in the share sheet: share the list as text.</comment>
+  </data>
+  <data name="SwapNicknames" xml:space="preserve">
+    <value>Include your nicknames</value>
+    <comment>Switch in the share sheet.</comment>
+  </data>
+  <data name="SwapFooter" xml:space="preserve">
+    <value>Add a Stikling line at the end</value>
+    <comment>Switch in the share sheet.</comment>
+  </data>
+  <data name="SwapSize" xml:space="preserve">
+    <value>Size</value>
+    <comment>Label above the choice of picture size.</comment>
+  </data>
+  <data name="SwapPictureAlt" xml:space="preserve">
+    <value>Picture {0} of {1} of the swap list</value>
+    <comment>Description of a picture of the swap list. {0} is its number, {1} how many there are.</comment>
+  </data>
+  <data name="SwapMissingPhotos_One" xml:space="preserve">
+    <value>{0} photo isn't on this device, so it shows the leaf.</value>
+    <comment>Note under the pictures. The leaf is the picture shown where a photo is missing.</comment>
+  </data>
+  <data name="SwapMissingPhotos_Other" xml:space="preserve">
+    <value>{0} photos aren't on this device, so those show the leaf.</value>
+    <comment>Note under the pictures. The leaf is the picture shown where a photo is missing.</comment>
+  </data>
+  <data name="SwapSave" xml:space="preserve">
+    <value>Save</value>
+    <comment>Button that saves the pictures of the swap list.</comment>
+  </data>
+  <data name="SwapPreview" xml:space="preserve">
+    <value>What will be shared</value>
+    <comment>Name of the preview of the shared text, read out by a screen reader.</comment>
+  </data>
+  <data name="SwapConvertTitle" xml:space="preserve">
+    <value>{0} tagged For swap</value>
+    <comment>Heading on the Swap page. {0} is a count like 3 plants. For swap is a tag people may have added before there were marks.</comment>
+  </data>
+  <data name="SwapConvertBody_One" xml:space="preserve">
+    <value>It isn't on this list yet. Say what you're offering. The tag stays.</value>
+    <comment>Under the heading of the plants tagged For swap, when there is one plant.</comment>
+  </data>
+  <data name="SwapConvertBody_Other" xml:space="preserve">
+    <value>They aren't on this list yet. Say what you're offering. The tag stays.</value>
+    <comment>Under the heading of the plants tagged For swap, when there are several plants.</comment>
+  </data>
+  <data name="SwapConvertCuttings" xml:space="preserve">
+    <value>Cuttings to spare</value>
+    <comment>Button that marks the plants as having cuttings to spare.</comment>
+  </data>
+  <data name="SwapConvertItself_One" xml:space="preserve">
+    <value>The plant itself</value>
+    <comment>Button that marks one plant as up for swap itself.</comment>
+  </data>
+  <data name="SwapConvertItself_Other" xml:space="preserve">
+    <value>The plants themselves</value>
+    <comment>Button that marks several plants as up for swap themselves.</comment>
+  </data>
+  <data name="SwapDrawFailed" xml:space="preserve">
+    <value>Couldn't draw the pictures</value>
+    <comment>Shown when the swap pictures could not be drawn.</comment>
+  </data>
+  <data name="SwapSaved" xml:space="preserve">
+    <value>Saved</value>
+    <comment>Shown after the swap pictures were saved.</comment>
+  </data>
+  <data name="SwapCardPage" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>Small text on a picture of the swap list when the list is split over several pictures. {0} is the number of this picture, {1} how many there are.</comment>
+  </data>
+  <data name="WishEditTitle" xml:space="preserve">
+    <value>Edit wish</value>
+    <comment>Heading of the page that edits a wish.</comment>
+  </data>
+  <data name="WishEditNotFound" xml:space="preserve">
+    <value>That wish doesn't exist.</value>
+    <comment>Shown when the address of a wish matches no wish.</comment>
+  </data>
+  <data name="WishEditWhichPlant" xml:space="preserve">
+    <value>Which plant</value>
+    <comment>Heading of the first group on the wish form.</comment>
+  </data>
+  <data name="WishEditOwnName" xml:space="preserve">
+    <value>Your own name for it</value>
+    <comment>Label on the wish form.</comment>
+  </data>
+  <data name="WishEditOwnNamePlaceholder" xml:space="preserve">
+    <value>e.g. that pink syngonium</value>
+    <comment>Placeholder for the own name on the wish form.</comment>
+  </data>
+  <data name="WishEditNameHint" xml:space="preserve">
+    <value>Give it a genus, a name of your own, or both.</value>
+    <comment>Hint under the name fields on the wish form.</comment>
+  </data>
+  <data name="WishEditGettingIt" xml:space="preserve">
+    <value>Getting it</value>
+    <comment>Heading of a group on the wish form.</comment>
+  </data>
+  <data name="WishEditFoundAt" xml:space="preserve">
+    <value>Where to find it</value>
+    <comment>Label on the wish form.</comment>
+  </data>
+  <data name="WishEditFoundAtPlaceholder" xml:space="preserve">
+    <value>e.g. the plant fair in May, or a seller's name</value>
+    <comment>Placeholder on the wish form.</comment>
+  </data>
+  <data name="WishEditMostToPay" xml:space="preserve">
+    <value>The most you would pay</value>
+    <comment>Label on the wish form.</comment>
+  </data>
+  <data name="WishEditNotes" xml:space="preserve">
+    <value>Notes</value>
+    <comment>Label on the wish form.</comment>
+  </data>
+  <data name="WishEditNotesPlaceholder" xml:space="preserve">
+    <value>What you liked about it, or what to look for</value>
+    <comment>Placeholder for the notes on the wish form.</comment>
+  </data>
+  <data name="WishEditPhotos" xml:space="preserve">
+    <value>Photos</value>
+    <comment>Heading of the photos group on the wish form.</comment>
+  </data>
+  <data name="WishEditPhotoAlt" xml:space="preserve">
+    <value>Photo of the wish</value>
+    <comment>Description of a photo on the wish form.</comment>
+  </data>
+  <data name="WishEditRemovePhoto" xml:space="preserve">
+    <value>Remove photo</value>
+    <comment>Name and tooltip of the button that removes a photo from the wish form.</comment>
+  </data>
+  <data name="WishEditAddMore" xml:space="preserve">
+    <value>Add more</value>
+    <comment>Button that adds more photos to a wish that has some.</comment>
+  </data>
+  <data name="WishEditAddPhotos" xml:space="preserve">
+    <value>Add photos</value>
+    <comment>Button that adds photos to a wish.</comment>
+  </data>
+  <data name="WishEditPhotosHint" xml:space="preserve">
+    <value>The plant at a shop, or a listing. They move to the plant as reference photos when you get it.</value>
+    <comment>Hint under the photos on the wish form.</comment>
+  </data>
+  <data name="WishEditDeleteConfirm" xml:space="preserve">
+    <value>Delete this wish?</value>
+    <comment>Question before a wish is deleted.</comment>
+  </data>
+  <data name="WishEditDeleteGotNote" xml:space="preserve">
+    <value>The plant you got stays.</value>
+    <comment>Added to the delete question when the wish was already got.</comment>
+  </data>
+  <data name="WishEditSavingPhotos" xml:space="preserve">
+    <value>Saving photos…</value>
+    <comment>Shown while photos are being saved.</comment>
+  </data>
+  <data name="WishEditPhotoError" xml:space="preserve">
+    <value>Couldn't save the photos: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="WishEditSaveError" xml:space="preserve">
+    <value>Couldn't save: {0}</value>
+    <comment>Error when saving a wish. {0} is the reason.</comment>
+  </data>
+  <data name="WishEditDeleteError" xml:space="preserve">
+    <value>Couldn't delete: {0}</value>
+    <comment>Error when deleting a wish. {0} is the reason.</comment>
+  </data>
+  <data name="SearchPageTitle" xml:space="preserve">
+    <value>Search · Stikling</value>
+    <comment>Title of the browser tab on the Search page.</comment>
+  </data>
+  <data name="SearchTitle" xml:space="preserve">
+    <value>Search</value>
+    <comment>Heading of the Search page.</comment>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search everything</value>
+    <comment>Placeholder and name of the search box.</comment>
+  </data>
+  <data name="SearchHint" xml:space="preserve">
+    <value>Names, notes, pots, mixes, feeds, products and more.</value>
+    <comment>Hint under the search box before anything is typed.</comment>
+  </data>
+  <data name="SearchRecent" xml:space="preserve">
+    <value>Recent</value>
+    <comment>Heading of the list of recent searches.</comment>
+  </data>
+  <data name="SearchClear" xml:space="preserve">
+    <value>Clear</value>
+    <comment>Button that clears the list of recent searches.</comment>
+  </data>
+  <data name="SearchNothing" xml:space="preserve">
+    <value>Nothing has '{0}' in it.</value>
+    <comment>Shown when a search finds nothing. {0} is what was typed.</comment>
+  </data>
+  <data name="SearchNothingHint" xml:space="preserve">
+    <value>Check the spelling, or try fewer words.</value>
+    <comment>Shown when a search finds nothing.</comment>
+  </data>
+  <data name="SearchHelpButton" xml:space="preserve">
+    <value>Search Help</value>
+    <comment>Button that searches the Help page for the same words.</comment>
+  </data>
+  <data name="SearchShowFewer" xml:space="preserve">
+    <value>Show fewer</value>
+    <comment>Button under a group of results.</comment>
+  </data>
+  <data name="SearchShowAll" xml:space="preserve">
+    <value>Show all {0}</value>
+    <comment>Button under a group of results. {0} is how many there are.</comment>
+  </data>
+  <data name="SearchHelpGroup" xml:space="preserve">
+    <value>Help</value>
+    <comment>Heading of the group that links to the Help page.</comment>
+  </data>
+  <data name="SearchHelpFor" xml:space="preserve">
+    <value>Search Help for '{0}'</value>
+    <comment>Link in the results. {0} is what was typed.</comment>
+  </data>
+  <data name="SearchGroupPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Heading of a group of results.</comment>
+  </data>
+  <data name="SearchGroupPropagations" xml:space="preserve">
+    <value>Propagations</value>
+    <comment>Heading of a group of results.</comment>
+  </data>
+  <data name="SearchGroupNotes" xml:space="preserve">
+    <value>Notes</value>
+    <comment>Heading of a group of results.</comment>
+  </data>
+  <data name="SearchGroupWishes" xml:space="preserve">
+    <value>Wishes</value>
+    <comment>Heading of a group of results.</comment>
+  </data>
+  <data name="SearchGroupPots" xml:space="preserve">
+    <value>Pots</value>
+    <comment>Heading of a group of results.</comment>
+  </data>
+  <data name="SearchGroupMixes" xml:space="preserve">
+    <value>Mixes</value>
+    <comment>Heading of a group of results. Soil mixes.</comment>
+  </data>
+  <data name="SearchGroupFeeds" xml:space="preserve">
+    <value>Feeds</value>
+    <comment>Heading of a group of results. Fertilisers.</comment>
+  </data>
+  <data name="SearchGroupProducts" xml:space="preserve">
+    <value>Products</value>
+    <comment>Heading of a group of results.</comment>
+  </data>
+  <data name="SearchGroupRecipes" xml:space="preserve">
+    <value>Treatment recipes</value>
+    <comment>Heading of a group of results.</comment>
+  </data>
+  <data name="SearchGroupPlaces" xml:space="preserve">
+    <value>Rooms and spots</value>
+    <comment>Heading of a group of results.</comment>
+  </data>
+  <data name="SearchGroupTags" xml:space="preserve">
+    <value>Tags</value>
+    <comment>Heading of a group of results.</comment>
+  </data>
+  <data name="SearchBadgeDone" xml:space="preserve">
+    <value>Done</value>
+    <comment>Badge on a propagation in the results that is done.</comment>
+  </data>
+  <data name="SearchBadgeGot" xml:space="preserve">
+    <value>Got</value>
+    <comment>Badge on a wish in the results that was got.</comment>
+  </data>
+  <data name="SearchBadgeGone" xml:space="preserve">
+    <value>Gone</value>
+    <comment>Badge on a plant in the results that left the collection.</comment>
+  </data>
+  <data name="RoomsTitle" xml:space="preserve">
+    <value>Rooms and tags</value>
+    <comment>Heading of the page where rooms, spots and tags are managed.</comment>
+  </data>
+  <data name="RoomsPageTitle" xml:space="preserve">
+    <value>Rooms and tags · Stikling</value>
+    <comment>Title of the browser tab on the Rooms and tags page.</comment>
+  </data>
+  <data name="RoomsRooms" xml:space="preserve">
+    <value>Rooms</value>
+    <comment>Heading of the rooms section.</comment>
+  </data>
+  <data name="RoomsHint" xml:space="preserve">
+    <value>Add a room here, or let it come from where your plants and propagations are. Renaming one changes it everywhere, and renaming it to a name you already use merges the two. Mark a room or spot as having a grow light, and plants there aren't expected to slow down in winter. Mark one as outdoors, like a balcony or a garden, and a plant you move inside from there offers a quarantine.</value>
+    <comment>Explains the rooms section.</comment>
+  </data>
+  <data name="RoomsEmpty" xml:space="preserve">
+    <value>No rooms yet.</value>
+    <comment>Shown when there are no rooms.</comment>
+  </data>
+  <data name="RoomsEmptyHint" xml:space="preserve">
+    <value>A room is where a plant lives. Add one here, or pick one when you add or edit a plant.</value>
+    <comment>Shown when there are no rooms.</comment>
+  </data>
+  <data name="RoomsGoRound" xml:space="preserve">
+    <value>Go round</value>
+    <comment>Link on a room that starts the round of the plants in it.</comment>
+  </data>
+  <data name="RoomsRename" xml:space="preserve">
+    <value>Rename</value>
+    <comment>Button that renames a room, spot or tag.</comment>
+  </data>
+  <data name="RoomsAddSpot" xml:space="preserve">
+    <value>Add a spot</value>
+    <comment>Button that adds a spot to a room.</comment>
+  </data>
+  <data name="RoomsNewSpotIn" xml:space="preserve">
+    <value>New spot in {0}</value>
+    <comment>Name and placeholder of the box that names a new spot. {0} is the room.</comment>
+  </data>
+  <data name="RoomsNewRoom" xml:space="preserve">
+    <value>New room</value>
+    <comment>Name and placeholder of the box that names a new room.</comment>
+  </data>
+  <data name="RoomsAddRoom" xml:space="preserve">
+    <value>Add a room</value>
+    <comment>Button that adds a room.</comment>
+  </data>
+  <data name="RoomsGrowLightIn" xml:space="preserve">
+    <value>Grow light in {0}</value>
+    <comment>Name of the grow light switch, read out by a screen reader. {0} is the room or spot.</comment>
+  </data>
+  <data name="RoomsGrowLight" xml:space="preserve">
+    <value>Grow light</value>
+    <comment>Label of the switch that says a room or spot has a grow light.</comment>
+  </data>
+  <data name="RoomsOutdoorsBecauseRoom" xml:space="preserve">
+    <value>{0} is outdoors because the room is</value>
+    <comment>Name of the outdoors switch of a spot in an outdoor room. {0} is the spot.</comment>
+  </data>
+  <data name="RoomsOutdoorsFor" xml:space="preserve">
+    <value>Outdoors: {0}</value>
+    <comment>Name of the outdoors switch, read out by a screen reader. {0} is the room or spot.</comment>
+  </data>
+  <data name="RoomsOutdoors" xml:space="preserve">
+    <value>Outdoors</value>
+    <comment>Label of the switch that says a room or spot is outdoors.</comment>
+  </data>
+  <data name="RoomsTags" xml:space="preserve">
+    <value>Tags</value>
+    <comment>Heading of the tags section.</comment>
+  </data>
+  <data name="RoomsTagsHint" xml:space="preserve">
+    <value>Make a tag here by picking the plants it goes on, or add it when you edit a plant. Renaming a tag changes it on every plant that has it, and renaming it to a tag you already use merges the two.</value>
+    <comment>Explains the tags section.</comment>
+  </data>
+  <data name="RoomsTagsEmpty" xml:space="preserve">
+    <value>No tags yet.</value>
+    <comment>Shown when there are no tags.</comment>
+  </data>
+  <data name="RoomsTagsEmptyHint" xml:space="preserve">
+    <value>Tags are your own labels, like "rare" or "for swap". Make one here, or add it when you edit a plant.</value>
+    <comment>Shown when there are no tags.</comment>
+  </data>
+  <data name="RoomsTagLabel" xml:space="preserve">
+    <value>Tag</value>
+    <comment>Label of the box that names a new tag.</comment>
+  </data>
+  <data name="RoomsTagPlaceholder" xml:space="preserve">
+    <value>e.g. rare</value>
+    <comment>Placeholder of the box that names a new tag.</comment>
+  </data>
+  <data name="RoomsPutItOn" xml:space="preserve">
+    <value>Put it on</value>
+    <comment>Label above the list of plants a new tag is put on.</comment>
+  </data>
+  <data name="RoomsNoPlantsToTag" xml:space="preserve">
+    <value>You have no plants to tag yet.</value>
+    <comment>Shown when making a tag and there are no plants.</comment>
+  </data>
+  <data name="RoomsSearchPlants" xml:space="preserve">
+    <value>Search plants</value>
+    <comment>Name and placeholder of the search box above the plants to tag.</comment>
+  </data>
+  <data name="RoomsNoPlantMatches" xml:space="preserve">
+    <value>No plant matches that.</value>
+    <comment>Shown when the search above the plants to tag finds none.</comment>
+  </data>
+  <data name="RoomsNewTag" xml:space="preserve">
+    <value>New tag</value>
+    <comment>Button that starts a new tag.</comment>
+  </data>
+  <data name="RoomsSaveError" xml:space="preserve">
+    <value>Couldn't save that: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="RoomsLightError" xml:space="preserve">
+    <value>Couldn't save the grow light: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="RoomsAlreadyThere" xml:space="preserve">
+    <value>{0} is already there.</value>
+    <comment>Shown after adding a room or spot that exists. {0} is its name.</comment>
+  </data>
+  <data name="RoomsAdded" xml:space="preserve">
+    <value>Added {0}.</value>
+    <comment>Shown after adding a room or spot. {0} is its name.</comment>
+  </data>
+  <data name="RoomsRemoved" xml:space="preserve">
+    <value>Removed {0}.</value>
+    <comment>Shown after removing a room or spot. {0} is its name.</comment>
+  </data>
+  <data name="RoomsRemoveError" xml:space="preserve">
+    <value>Couldn't remove it: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="RoomsTagAlready" xml:space="preserve">
+    <value>{0} already had {1}.</value>
+    <comment>Shown after tagging plants that already had the tag. {0} is a count like 3 plants, {1} the tag.</comment>
+  </data>
+  <data name="RoomsTagged" xml:space="preserve">
+    <value>Tagged {0}.</value>
+    <comment>Shown after tagging plants. {0} is a count like 3 plants.</comment>
+  </data>
+  <data name="RoomsTagError" xml:space="preserve">
+    <value>Couldn't add the tag: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="RoomsEmptyPlace" xml:space="preserve">
+    <value>empty</value>
+    <comment>Under a room or spot with nothing in it.</comment>
+  </data>
+  <data name="RoomsPropagations_One" xml:space="preserve">
+    <value>{0} propagation</value>
+    <comment>Under a room or spot: how many propagations are in it.</comment>
+  </data>
+  <data name="RoomsPropagations_Other" xml:space="preserve">
+    <value>{0} propagations</value>
+    <comment>Under a room or spot: how many propagations are in it.</comment>
+  </data>
+  <data name="RoomsPlantsAndPropagations" xml:space="preserve">
+    <value>{0}, {1}</value>
+    <comment>Under a room or spot. {0} is a count of plants, {1} a count of propagations.</comment>
+  </data>
+  <data name="RoomsNothingToRename" xml:space="preserve">
+    <value>Nothing was in {0}, so there was nothing to rename.</value>
+    <comment>Shown after renaming an unused room. {0} is its name.</comment>
+  </data>
+  <data name="RoomsMovedInto" xml:space="preserve">
+    <value>{0} moved into {1}, which you were already using.</value>
+    <comment>Shown after renaming a room into one that exists. {0} is what moved, like 3 plants, {1} the room.</comment>
+  </data>
+  <data name="RoomsRenamedTo" xml:space="preserve">
+    <value>Renamed to {0}, with {1} in it.</value>
+    <comment>Shown after renaming a room. {0} is the new name, {1} is what is in it.</comment>
+  </data>
+  <data name="RoomsRenameError" xml:space="preserve">
+    <value>Couldn't rename: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="RoomsTagNothingChanged" xml:space="preserve">
+    <value>Nothing changed, {0} stays as it is.</value>
+    <comment>Shown after renaming a tag. {0} is the tag.</comment>
+  </data>
+  <data name="RoomsTagMerged" xml:space="preserve">
+    <value>{0} now tagged {1}, which you were already using.</value>
+    <comment>Shown after renaming a tag into one that exists. {0} is a count like 3 plants, {1} the tag.</comment>
+  </data>
+  <data name="RoomsTagRenamed" xml:space="preserve">
+    <value>Renamed to {0} on {1}.</value>
+    <comment>Shown after renaming a tag. {0} is the new tag, {1} a count like 3 plants.</comment>
+  </data>
+  <data name="RoomRenameNewName" xml:space="preserve">
+    <value>New name for {0}</value>
+    <comment>Name of the box that renames a room, spot or tag. {0} is its current name.</comment>
+  </data>
+  <data name="LabelsTitle" xml:space="preserve">
+    <value>Labels</value>
+    <comment>Heading of the page that prints labels for plants and cuttings.</comment>
+  </data>
+  <data name="LabelsPageTitle" xml:space="preserve">
+    <value>Labels · Stikling</value>
+    <comment>Title of the browser tab on the Labels page.</comment>
+  </data>
+  <data name="LabelsEmpty" xml:space="preserve">
+    <value>Pick plants or cuttings to make labels for. Use Select on Plants or Propagations, or More on a plant's page.</value>
+    <comment>Shown on the Labels page when nothing was picked. Select and More are the names of buttons on other pages.</comment>
+  </data>
+  <data name="LabelsPreview" xml:space="preserve">
+    <value>Labels to print</value>
+    <comment>Name of the preview of the labels, read out by a screen reader.</comment>
+  </data>
+  <data name="LabelsFor" xml:space="preserve">
+    <value>Label for {0}</value>
+    <comment>Description of the picture of one label. {0} is the name of the plant.</comment>
+  </data>
+  <data name="LabelsLeaveOut" xml:space="preserve">
+    <value>Leave out {0}</value>
+    <comment>Name of the button that takes one plant off the labels. {0} is its name.</comment>
+  </data>
+  <data name="LabelsSettings" xml:space="preserve">
+    <value>Label settings</value>
+    <comment>Name of the settings next to the preview, read out by a screen reader.</comment>
+  </data>
+  <data name="LabelsHowToPrint" xml:space="preserve">
+    <value>How to print</value>
+    <comment>Name of the choice between the three ways to print.</comment>
+  </data>
+  <data name="LabelsTabApp" xml:space="preserve">
+    <value>Label maker app</value>
+    <comment>Choice: send the labels to the app of a label maker.</comment>
+  </data>
+  <data name="LabelsTabTape" xml:space="preserve">
+    <value>Tape printer</value>
+    <comment>Choice: print on a tape printer.</comment>
+  </data>
+  <data name="LabelsTabSheet" xml:space="preserve">
+    <value>Sheet</value>
+    <comment>Choice: print on a sheet of paper.</comment>
+  </data>
+  <data name="LabelsSize" xml:space="preserve">
+    <value>Size</value>
+    <comment>Label above the choice of label size.</comment>
+  </data>
+  <data name="LabelsCustom" xml:space="preserve">
+    <value>Custom</value>
+    <comment>Choice: a label size typed in.</comment>
+  </data>
+  <data name="LabelsWidth" xml:space="preserve">
+    <value>Width (mm)</value>
+    <comment>Label of a box for a label size.</comment>
+  </data>
+  <data name="LabelsLength" xml:space="preserve">
+    <value>Length (mm)</value>
+    <comment>Label of a box for a label size.</comment>
+  </data>
+  <data name="LabelsBetween" xml:space="preserve">
+    <value>Between {0} and {1} mm.</value>
+    <comment>Hint under the custom size. {0} is the least and {1} the most.</comment>
+  </data>
+  <data name="LabelsTapeWidth" xml:space="preserve">
+    <value>Tape width</value>
+    <comment>Label above the choice of tape width.</comment>
+  </data>
+  <data name="LabelsLabelLength" xml:space="preserve">
+    <value>Label length</value>
+    <comment>Label above the choice of label length on tape.</comment>
+  </data>
+  <data name="LabelsPaper" xml:space="preserve">
+    <value>Paper</value>
+    <comment>Label above the choice of paper.</comment>
+  </data>
+  <data name="LabelsPaperA4" xml:space="preserve">
+    <value>A4</value>
+    <comment>Choice of paper size.</comment>
+  </data>
+  <data name="LabelsPaperLetter" xml:space="preserve">
+    <value>Letter</value>
+    <comment>Choice of paper size (US letter).</comment>
+  </data>
+  <data name="LabelsLayout" xml:space="preserve">
+    <value>Layout</value>
+    <comment>Label above the choice of sheet layout.</comment>
+  </data>
+  <data name="LabelsLayoutPots" xml:space="preserve">
+    <value>Pot labels</value>
+    <comment>Choice of sheet layout.</comment>
+  </data>
+  <data name="LabelsLayoutStakes" xml:space="preserve">
+    <value>Plant stakes</value>
+    <comment>Choice of sheet layout.</comment>
+  </data>
+  <data name="LabelsLayoutPotsNote" xml:space="preserve">
+    <value>Tags of 50 × 25 mm with cut lines.</value>
+    <comment>Describes the pot labels layout.</comment>
+  </data>
+  <data name="LabelsLayoutStakesNote" xml:space="preserve">
+    <value>Strips of 15 × 120 mm. Cut along the pointed end and push it into the soil.</value>
+    <comment>Describes the plant stakes layout.</comment>
+  </data>
+  <data name="LabelsShow" xml:space="preserve">
+    <value>Show</value>
+    <comment>Heading above the tick boxes for what goes on a label.</comment>
+  </data>
+  <data name="LabelsShowNumber" xml:space="preserve">
+    <value>Number</value>
+    <comment>Tick box: show the collection number on the label.</comment>
+  </data>
+  <data name="LabelsShowName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Tick box: show the name on the label.</comment>
+  </data>
+  <data name="LabelsShowBotanical" xml:space="preserve">
+    <value>Botanical name</value>
+    <comment>Tick box: show the botanical name on the label.</comment>
+  </data>
+  <data name="LabelsShowDate" xml:space="preserve">
+    <value>Date</value>
+    <comment>Tick box: show the date on the label.</comment>
+  </data>
+  <data name="LabelsShare_One" xml:space="preserve">
+    <value>Share {0} label</value>
+    <comment>Button that shares the labels as pictures.</comment>
+  </data>
+  <data name="LabelsShare_Other" xml:space="preserve">
+    <value>Share {0} labels</value>
+    <comment>Button that shares the labels as pictures.</comment>
+  </data>
+  <data name="LabelsSave_One" xml:space="preserve">
+    <value>Save {0} label</value>
+    <comment>Button that saves the labels as pictures.</comment>
+  </data>
+  <data name="LabelsSave_Other" xml:space="preserve">
+    <value>Save {0} labels</value>
+    <comment>Button that saves the labels as pictures.</comment>
+  </data>
+  <data name="LabelsShareNote" xml:space="preserve">
+    <value>Pick your label maker's app in the share menu.</value>
+    <comment>Under the share button.</comment>
+  </data>
+  <data name="LabelsSaveNote" xml:space="preserve">
+    <value>Saves a picture of each label. Open them in your label maker's app.</value>
+    <comment>Under the save button, on devices that cannot share files.</comment>
+  </data>
+  <data name="LabelsPrint" xml:space="preserve">
+    <value>Print</value>
+    <comment>Button that prints the labels.</comment>
+  </data>
+  <data name="LabelsPrintNote" xml:space="preserve">
+    <value>Pick your label printer and its tape in the print dialog. Works best from a computer.</value>
+    <comment>Under the print button on the tape printer tab.</comment>
+  </data>
+  <data name="LabelsSaved_One" xml:space="preserve">
+    <value>Saved {0} picture.</value>
+    <comment>Shown after saving the labels as pictures.</comment>
+  </data>
+  <data name="LabelsSaved_Other" xml:space="preserve">
+    <value>Saved {0} pictures.</value>
+    <comment>Shown after saving the labels as pictures.</comment>
+  </data>
+  <data name="LabelsFailed" xml:space="preserve">
+    <value>Couldn't make the pictures.</value>
+    <comment>Shown when the labels could not be made into pictures.</comment>
+  </data>
+  <data name="OwnFieldKindText" xml:space="preserve">
+    <value>Text</value>
+    <comment>Kind of an own field: free text.</comment>
+  </data>
+  <data name="OwnFieldKindNumber" xml:space="preserve">
+    <value>Number</value>
+    <comment>Kind of an own field: a number.</comment>
+  </data>
+  <data name="OwnFieldKindDate" xml:space="preserve">
+    <value>Date</value>
+    <comment>Kind of an own field: a date.</comment>
+  </data>
+  <data name="OwnFieldKindChoice" xml:space="preserve">
+    <value>Choice</value>
+    <comment>Kind of an own field: one of a list of choices.</comment>
+  </data>
+  <data name="OwnFieldsPageTitle" xml:space="preserve">
+    <value>Your fields · Stikling</value>
+    <comment>Title of the browser tab on the Your fields page.</comment>
+  </data>
+  <data name="OwnFieldsTitle" xml:space="preserve">
+    <value>Your fields</value>
+    <comment>Heading of the page where own fields are managed, and of the list on it.</comment>
+  </data>
+  <data name="OwnFieldsHint" xml:space="preserve">
+    <value>Fields you added for what the app doesn't have a place for. They show on the plant form under More details, and on a plant's page once they're filled in.</value>
+    <comment>Explains own fields. More details is the name of a section on the plant form.</comment>
+  </data>
+  <data name="OwnFieldsEmpty" xml:space="preserve">
+    <value>No fields of your own yet.</value>
+    <comment>Shown when there are no own fields.</comment>
+  </data>
+  <data name="OwnFieldsEmptyHint" xml:space="preserve">
+    <value>Add a field for anything the app doesn't have a place for, like clone name, awards or humidity. It shows on the plant form under More details and on the plant's page.</value>
+    <comment>Shown when there are no own fields. More details is the name of a section on the plant form.</comment>
+  </data>
+  <data name="OwnFieldsAdd" xml:space="preserve">
+    <value>Add a field</value>
+    <comment>Button and title of the sheet that adds an own field.</comment>
+  </data>
+  <data name="OwnFieldsAddPlus" xml:space="preserve">
+    <value>+ Add a field</value>
+    <comment>Button above the list of own fields.</comment>
+  </data>
+  <data name="OwnFieldsEdit" xml:space="preserve">
+    <value>Edit field</value>
+    <comment>Title of the sheet that edits an own field.</comment>
+  </data>
+  <data name="OwnFieldsOnNone" xml:space="preserve">
+    <value>On no plants yet</value>
+    <comment>Under an own field that no plant has a value for.</comment>
+  </data>
+  <data name="OwnFieldsOn" xml:space="preserve">
+    <value>On {0}</value>
+    <comment>Under an own field. {0} is a count like 3 plants.</comment>
+  </data>
+  <data name="OwnFieldsChoiceList" xml:space="preserve">
+    <value>Choice: {0}</value>
+    <comment>Under an own field of the kind Choice. {0} is the choices with commas between.</comment>
+  </data>
+  <data name="OwnFieldsRemoveConfirm" xml:space="preserve">
+    <value>Remove {0}? The values on {1} are kept, and come back if you add a field called {0} again.</value>
+    <comment>Question before an own field is removed. {0} is the field, {1} is a count like 3 plants.</comment>
+  </data>
+  <data name="OwnFieldsName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Label of the name of an own field.</comment>
+  </data>
+  <data name="OwnFieldsRename" xml:space="preserve">
+    <value>Rename</value>
+    <comment>Button that renames an own field or a choice.</comment>
+  </data>
+  <data name="OwnFieldsWhatItHolds" xml:space="preserve">
+    <value>What it holds</value>
+    <comment>Label above the choice of kind of an own field.</comment>
+  </data>
+  <data name="OwnFieldsNotFitting_One" xml:space="preserve">
+    <value>{0} value doesn't read as {1}. It's kept and shows as written.</value>
+    <comment>Shown when changing the kind of an own field. {0} is 1, {1} is "a number" or "a date".</comment>
+  </data>
+  <data name="OwnFieldsNotFitting_Other" xml:space="preserve">
+    <value>{0} values don't read as {1}. They're kept and show as written.</value>
+    <comment>Shown when changing the kind of an own field. {0} is how many, {1} is "a number" or "a date".</comment>
+  </data>
+  <data name="OwnFieldsAsNumber" xml:space="preserve">
+    <value>a number</value>
+    <comment>In the sentence about values that do not fit: "do not read as a number".</comment>
+  </data>
+  <data name="OwnFieldsAsDate" xml:space="preserve">
+    <value>a date</value>
+    <comment>In the sentence about values that do not fit: "do not read as a date".</comment>
+  </data>
+  <data name="OwnFieldsBecomeChoices" xml:space="preserve">
+    <value>The values already on your plants become the choices.</value>
+    <comment>Shown when changing an own field to the kind Choice.</comment>
+  </data>
+  <data name="OwnFieldsChangeToText" xml:space="preserve">
+    <value>Change to Text</value>
+    <comment>Button that changes the kind of an own field.</comment>
+  </data>
+  <data name="OwnFieldsChangeToNumber" xml:space="preserve">
+    <value>Change to Number</value>
+    <comment>Button that changes the kind of an own field.</comment>
+  </data>
+  <data name="OwnFieldsChangeToDate" xml:space="preserve">
+    <value>Change to Date</value>
+    <comment>Button that changes the kind of an own field.</comment>
+  </data>
+  <data name="OwnFieldsChangeToChoice" xml:space="preserve">
+    <value>Change to Choice</value>
+    <comment>Button that changes the kind of an own field.</comment>
+  </data>
+  <data name="OwnFieldsChoices" xml:space="preserve">
+    <value>Choices</value>
+    <comment>Heading of the choices of an own field.</comment>
+  </data>
+  <data name="OwnFieldsNoChoices" xml:space="preserve">
+    <value>No choices yet.</value>
+    <comment>Shown when an own field has no choices.</comment>
+  </data>
+  <data name="OwnFieldsChoiceNewName" xml:space="preserve">
+    <value>New name for {0}</value>
+    <comment>Name of the box that renames a choice. {0} is the choice.</comment>
+  </data>
+  <data name="OwnFieldsChoiceRenameNote" xml:space="preserve">
+    <value>This changes the plants that have {0}.</value>
+    <comment>Under the box that renames a choice. {0} is the choice.</comment>
+  </data>
+  <data name="OwnFieldsChoiceRemoveNote" xml:space="preserve">
+    <value>Removing a choice leaves it on the plants that have it.</value>
+    <comment>Under the choices of an own field.</comment>
+  </data>
+  <data name="OwnFieldsNewChoice" xml:space="preserve">
+    <value>New choice</value>
+    <comment>Placeholder and name of the box that adds a choice.</comment>
+  </data>
+  <data name="OwnFieldsRemoveField" xml:space="preserve">
+    <value>Remove field</value>
+    <comment>Button that removes an own field.</comment>
+  </data>
+  <data name="OwnFieldFormNamePlaceholder" xml:space="preserve">
+    <value>e.g. Clone name</value>
+    <comment>Placeholder for the name of a new own field.</comment>
+  </data>
+  <data name="OwnFieldFormChoices" xml:space="preserve">
+    <value>Choices, one per line</value>
+    <comment>Label of the box for the choices of a new own field.</comment>
+  </data>
+  <data name="OwnFieldFormChoicesPlaceholder" xml:space="preserve">
+    <value>Yes
+No
+Maybe</value>
+    <comment>Example choices, one per line.</comment>
+  </data>
+  <data name="OwnFieldFormAdd" xml:space="preserve">
+    <value>Add field</value>
+    <comment>Button that adds the own field.</comment>
+  </data>
+  <data name="OwnFieldInputNotSet" xml:space="preserve">
+    <value>Not set</value>
+    <comment>First choice in the list of an own field with choices.</comment>
+  </data>
+  <data name="YearPageTitle" xml:space="preserve">
+    <value>Your year · Stikling</value>
+    <comment>Title of the browser tab on the page with the cards of a year.</comment>
+  </data>
+  <data name="YearHeading" xml:space="preserve">
+    <value>Your {0}</value>
+    <comment>Heading of the page with the cards of a year. {0} is the year, like 2026.</comment>
+  </data>
+  <data name="YearPicker" xml:space="preserve">
+    <value>Year</value>
+    <comment>Name of the box that picks the year, read out by a screen reader.</comment>
+  </data>
+  <data name="YearSoFar" xml:space="preserve">
+    <value>{0} so far</value>
+    <comment>Choice in the year picker for the current year, which is not over yet.</comment>
+  </data>
+  <data name="YearNothing" xml:space="preserve">
+    <value>Nothing to show for {0} yet.</value>
+    <comment>Shown when a year has no cards. {0} is the year.</comment>
+  </data>
+  <data name="YearNothingHint" xml:space="preserve">
+    <value>Your year fills up as you add plants, take photos and start propagations, which are cuttings and other ways of growing new plants.</value>
+    <comment>Shown when a year has no cards.</comment>
+  </data>
+  <data name="YearAddPlant" xml:space="preserve">
+    <value>Add a plant</value>
+    <comment>Button shown when a year has no cards.</comment>
+  </data>
+  <data name="YearSize" xml:space="preserve">
+    <value>Size</value>
+    <comment>Label above the choice of card size.</comment>
+  </data>
+  <data name="YearCardsLabel" xml:space="preserve">
+    <value>Your {0} cards</value>
+    <comment>Name of the deck of cards, read out by a screen reader. {0} is the year.</comment>
+  </data>
+  <data name="YearPrevious" xml:space="preserve">
+    <value>Previous card</value>
+    <comment>Name of the button that goes to the previous card.</comment>
+  </data>
+  <data name="YearNext" xml:space="preserve">
+    <value>Next card</value>
+    <comment>Name of the button that goes to the next card.</comment>
+  </data>
+  <data name="YearLeftOut" xml:space="preserve">
+    <value>Left out</value>
+    <comment>Shown on a card that is left out of the share.</comment>
+  </data>
+  <data name="YearSwapPhoto" xml:space="preserve">
+    <value>Swap this photo</value>
+    <comment>Name of the button on a photo of the collage card that swaps it for another.</comment>
+  </data>
+  <data name="YearCount" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>Under the deck: which card is shown. {0} is its number, {1} how many there are.</comment>
+  </data>
+  <data name="YearTapToSwap" xml:space="preserve">
+    <value>Tap a photo to swap it.</value>
+    <comment>Hint under the collage card.</comment>
+  </data>
+  <data name="YearMissingPhotos" xml:space="preserve">
+    <value>Some photos on this card aren't on this device yet.</value>
+    <comment>Hint under a card.</comment>
+  </data>
+  <data name="YearPutBack" xml:space="preserve">
+    <value>Put back</value>
+    <comment>Button that puts a left out card back in the share.</comment>
+  </data>
+  <data name="YearLeaveOut" xml:space="preserve">
+    <value>Leave out</value>
+    <comment>Button that leaves a card out of the share.</comment>
+  </data>
+  <data name="YearShareAll" xml:space="preserve">
+    <value>Share all {0}</value>
+    <comment>Button that shares all cards as pictures. {0} is how many.</comment>
+  </data>
+  <data name="YearSaveAll" xml:space="preserve">
+    <value>Save all {0}</value>
+    <comment>Button that saves all cards as pictures. {0} is how many.</comment>
+  </data>
+  <data name="YearLost" xml:space="preserve">
+    <value>Lost this year</value>
+    <comment>Heading of the list of plants that died in the year.</comment>
+  </data>
+  <data name="YearLostNote" xml:space="preserve">
+    <value>Only shown here, never on the cards.</value>
+    <comment>Under the heading of the list of plants that died.</comment>
+  </data>
+  <data name="YearSavedAll" xml:space="preserve">
+    <value>Saved as pictures on this device. They're in your downloads.</value>
+    <comment>Shown after saving all cards.</comment>
+  </data>
+  <data name="YearSavedOne" xml:space="preserve">
+    <value>Saved as a picture on this device. It's in your downloads.</value>
+    <comment>Shown after saving one card.</comment>
+  </data>
+  <data name="YearFailedAll" xml:space="preserve">
+    <value>The pictures couldn't be made. Try again.</value>
+    <comment>Shown when the cards could not be made into pictures.</comment>
+  </data>
+  <data name="YearFailedOne" xml:space="preserve">
+    <value>The picture couldn't be made. Try again.</value>
+    <comment>Shown when a card could not be made into a picture.</comment>
+  </data>
+  <data name="PlantNamesPageTitle" xml:space="preserve">
+    <value>Plant names · Stikling</value>
+    <comment>Title of the browser tab on the Plant names page.</comment>
+  </data>
+  <data name="PlantNamesTitle" xml:space="preserve">
+    <value>Plant names</value>
+    <comment>Heading of the Plant names page.</comment>
+  </data>
+  <data name="PlantNamesHint" xml:space="preserve">
+    <value>The names suggested while you type come with the app, so they work offline. They cover the aroids, prayer plants, begonias, carnivorous plants and the genera of most other common houseplants in full. From big genera like Ficus and Euphorbia they have the species with an everyday name. Everyday names come in English, and in Danish on a device set to Danish, along with lists of cultivars, trade names and everyday names kept by hand.</value>
+    <comment>Explains where the plant name suggestions come from. A list of sources follows.</comment>
+  </data>
+  <data name="NotFoundPageTitle" xml:space="preserve">
+    <value>Not found · Stikling</value>
+    <comment>Title of the browser tab on the page shown for an address that matches nothing.</comment>
+  </data>
+  <data name="NotFoundTitle" xml:space="preserve">
+    <value>Not found</value>
+    <comment>Heading of the page shown for an address that matches nothing.</comment>
+  </data>
+  <data name="NotFoundText" xml:space="preserve">
+    <value>That page doesn't exist. {0}.</value>
+    <comment>Shown for an address that matches nothing. {0} is the link back to Today.</comment>
+  </data>
+  <data name="NotFoundGoToToday" xml:space="preserve">
+    <value>Go to Today</value>
+    <comment>Link back to the Today page. Today is the name of the page.</comment>
+  </data>
+  <data name="InfoButtonLabel" xml:space="preserve">
+    <value>What is {0}?</value>
+    <comment>Name of the small i button next to a label, read out by a screen reader. {0} is the label.</comment>
+  </data>
+  <data name="FormSectionNotSet" xml:space="preserve">
+    <value>Not set</value>
+    <comment>Summary of a folded group of fields on a form when nothing in it is filled in.</comment>
+  </data>
+  <data name="UpdateUpdating" xml:space="preserve">
+    <value>Updating Stikling. The page reloads when it's done.</value>
+    <comment>Shown in the bar at the bottom while a new version is switched on.</comment>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>A new version of Stikling is ready.</value>
+    <comment>Shown in the bar at the bottom when a new version has been downloaded.</comment>
+  </data>
+  <data name="UpdateReload" xml:space="preserve">
+    <value>Reload</value>
+    <comment>Button in the update bar that switches to the new version.</comment>
+  </data>
+  <data name="UpdateLater" xml:space="preserve">
+    <value>Later</value>
+    <comment>Button in the update bar that hides it for now.</comment>
+  </data>
+  <data name="PhotoViewerLabel" xml:space="preserve">
+    <value>Photo viewer</value>
+    <comment>Name of the full-screen photo viewer, read out by a screen reader.</comment>
+  </data>
+  <data name="PhotoViewerAlt" xml:space="preserve">
+    <value>Photo</value>
+    <comment>Description of the photo shown in the viewer.</comment>
+  </data>
+  <data name="PhotoViewerPrevious" xml:space="preserve">
+    <value>Previous photo</value>
+    <comment>Name of the button that shows the previous photo.</comment>
+  </data>
+  <data name="PhotoViewerNext" xml:space="preserve">
+    <value>Next photo</value>
+    <comment>Name of the button that shows the next photo.</comment>
+  </data>
+  <data name="PhotoViewerDeleteConfirm" xml:space="preserve">
+    <value>Delete this photo?</value>
+    <comment>Question before a photo is deleted.</comment>
+  </data>
+  <data name="PhotoViewerCover" xml:space="preserve">
+    <value>Cover photo</value>
+    <comment>Shown on the photo that is the cover of the plant or cutting.</comment>
+  </data>
+  <data name="PhotoViewerSetCover" xml:space="preserve">
+    <value>Set as cover</value>
+    <comment>Button that makes the photo the cover.</comment>
+  </data>
+  <data name="PhotoViewerFrame" xml:space="preserve">
+    <value>Frame</value>
+    <comment>Button that opens the framing of a photo: moving and zooming it where it is cropped.</comment>
+  </data>
+  <data name="PhotoViewerMoveToHistory" xml:space="preserve">
+    <value>Move to history</value>
+    <comment>Button that moves a reference photo to the history.</comment>
+  </data>
+  <data name="PhotoViewerMoveToReference" xml:space="preserve">
+    <value>Move to reference</value>
+    <comment>Button that moves a photo from the history to the reference photos.</comment>
+  </data>
+  <data name="PhotoFramerHint" xml:space="preserve">
+    <value>Drag it to move it, and pinch or use the slider to zoom. Cards and the top of the page show it like this.</value>
+    <comment>Hint above the photo being framed.</comment>
+  </data>
+  <data name="PhotoFramerBox" xml:space="preserve">
+    <value>Photo being framed. The arrow keys move it, plus and minus zoom.</value>
+    <comment>Description of the framing area, read out by a screen reader.</comment>
+  </data>
+  <data name="PhotoFramerZoom" xml:space="preserve">
+    <value>Zoom</value>
+    <comment>Label of the zoom slider.</comment>
+  </data>
+  <data name="PhotoFramerCentre" xml:space="preserve">
+    <value>Centre it</value>
+    <comment>Button that puts the photo back in the middle.</comment>
+  </data>
+  <data name="PhotoImageMissing" xml:space="preserve">
+    <value>Photo missing</value>
+    <comment>Description of the empty box shown where a photo is not on this device.</comment>
+  </data>
+  <data name="PhotoImageLoading" xml:space="preserve">
+    <value>Loading photo</value>
+    <comment>Description of the empty box shown while a photo loads.</comment>
+  </data>
+  <data name="GoogleWaiting" xml:space="preserve">
+    <value>Waiting for Google…</value>
+    <comment>Shown while asking Google Photos for access.</comment>
+  </data>
+  <data name="GoogleWaitingForPick" xml:space="preserve">
+    <value>Waiting for you to pick in Google Photos…</value>
+    <comment>Shown after Google Photos was opened.</comment>
+  </data>
+  <data name="GooglePickThenReturn" xml:space="preserve">
+    <value>Pick your photos in Google Photos, then come back here.</value>
+    <comment>Shown before Google Photos is opened.</comment>
+  </data>
+  <data name="GoogleOpenAgain" xml:space="preserve">
+    <value>Open Google Photos again</value>
+    <comment>Link that opens the Google Photos picker once more.</comment>
+  </data>
+  <data name="GoogleOpen" xml:space="preserve">
+    <value>Open Google Photos</value>
+    <comment>Link that opens the Google Photos picker.</comment>
+  </data>
+  <data name="GoogleFetching" xml:space="preserve">
+    <value>Fetching photo {0} of {1}…</value>
+    <comment>Shown while the picked photos are fetched. {0} is the number of this photo, {1} how many there are.</comment>
+  </data>
+  <data name="GoogleDenied" xml:space="preserve">
+    <value>Stikling didn't get access to Google Photos, so nothing was added.</value>
+    <comment>Shown when Google Photos access was refused.</comment>
+  </data>
+  <data name="GoogleUnreachable" xml:space="preserve">
+    <value>Couldn't reach Google Photos. Check the connection and try again.</value>
+    <comment>Shown when Google Photos could not be reached.</comment>
+  </data>
+  <data name="GoogleTimedOut" xml:space="preserve">
+    <value>Google Photos stopped waiting. Pick again to try once more.</value>
+    <comment>Shown when the Google Photos picker timed out.</comment>
+  </data>
+  <data name="GoogleSaveError" xml:space="preserve">
+    <value>Couldn't save the photos: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="RoomPickerLocation" xml:space="preserve">
+    <value>Location</value>
+    <comment>Default label of the room and spot picker.</comment>
+  </data>
+  <data name="RoomPickerRoomPlaceholder" xml:space="preserve">
+    <value>e.g. Living room</value>
+    <comment>Placeholder of the box that names a new room in the picker.</comment>
+  </data>
+  <data name="RoomPickerSpotPlaceholder" xml:space="preserve">
+    <value>e.g. On top of the PC</value>
+    <comment>Placeholder of the box that names a new spot in the picker.</comment>
+  </data>
+  <data name="RoomPickerNoRoom" xml:space="preserve">
+    <value>No room</value>
+    <comment>Choice in the room picker: not in any room.</comment>
+  </data>
+  <data name="RoomPickerNewRoom" xml:space="preserve">
+    <value>+ New room</value>
+    <comment>Choice in the room picker that adds a room.</comment>
+  </data>
+  <data name="RoomPickerNewRoomLabel" xml:space="preserve">
+    <value>New room</value>
+    <comment>Name of the box that names a new room in the picker, read out by a screen reader.</comment>
+  </data>
+  <data name="RoomPickerSpotIn" xml:space="preserve">
+    <value>Spot in {0}</value>
+    <comment>Name of the group of spots, read out by a screen reader. {0} is the room.</comment>
+  </data>
+  <data name="RoomPickerAnywhere" xml:space="preserve">
+    <value>Anywhere in {0}</value>
+    <comment>Choice in the spot picker: no particular spot. {0} is the room.</comment>
+  </data>
+  <data name="RoomPickerNewSpot" xml:space="preserve">
+    <value>+ New spot</value>
+    <comment>Choice in the room picker that adds a spot.</comment>
+  </data>
+  <data name="RoomPickerSpotHint" xml:space="preserve">
+    <value>A spot is a place inside a room, like a windowsill or the top of a desk.</value>
+    <comment>Hint under the room picker.</comment>
+  </data>
+  <data name="PotPickerPot" xml:space="preserve">
+    <value>Pot</value>
+    <comment>Default label of the pot picker.</comment>
+  </data>
+  <data name="PotPickerNone" xml:space="preserve">
+    <value>No pot</value>
+    <comment>Choice in the pot picker: no pot.</comment>
+  </data>
+  <data name="PotPickerNew" xml:space="preserve">
+    <value>+ New pot</value>
+    <comment>Choice in the pot picker that adds a pot.</comment>
+  </data>
+  <data name="PotPickerExisting" xml:space="preserve">
+    <value>Pots you already have</value>
+    <comment>Name of the group of pot names to reuse, read out by a screen reader.</comment>
+  </data>
+  <data name="PotPickerNamePlaceholder" xml:space="preserve">
+    <value>e.g. Clear nursery pot</value>
+    <comment>Placeholder for the name of a new pot.</comment>
+  </data>
+  <data name="PotPickerNameLabel" xml:space="preserve">
+    <value>Pot name</value>
+    <comment>Name of the box for the name of a new pot, read out by a screen reader.</comment>
+  </data>
+  <data name="PotPickerSizeLabel" xml:space="preserve">
+    <value>Across the top in centimetres</value>
+    <comment>Name of the box for the width of a new pot, read out by a screen reader.</comment>
+  </data>
+  <data name="PotPickerSizePlaceholder" xml:space="preserve">
+    <value>cm</value>
+    <comment>Placeholder in the box for the width of a new pot.</comment>
+  </data>
+  <data name="PotPickerAdd" xml:space="preserve">
+    <value>Add pot</value>
+    <comment>Button that adds the new pot.</comment>
+  </data>
+  <data name="PotPickerHint" xml:space="preserve">
+    <value>It joins your pot library. The rest of its details can be filled in under Supplies, then Pots.</value>
+    <comment>Hint under the box for a new pot. Supplies and Pots are the names of a page and a list in the app.</comment>
+  </data>
+</root>

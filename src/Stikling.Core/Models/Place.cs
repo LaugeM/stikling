@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using System.Text.Json.Serialization;
 
 namespace Stikling.Core.Models;
@@ -34,10 +35,10 @@ public sealed class Place : Entity
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add(IsSpot ? "Give the spot a name." : "Give the room a name.");
+            errors.Add(IsSpot ? Strings.Shared.PlaceNeedsNameSpot : Strings.Shared.PlaceNeedsNameRoom);
         // A spot can have one, since the first / is the one that splits a place in two
         else if (!IsSpot && Name.Contains('/'))
-            errors.Add("A room's name can't have a / in it, since that's what goes between a room and a spot.");
+            errors.Add(Strings.Shared.PlaceNameSlash);
 
         return errors;
     }

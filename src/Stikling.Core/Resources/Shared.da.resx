@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="KeptInStikling" xml:space="preserve">
+    <value>Samlet i Stikling, stikling.app</value>
+  </data>
+  <data name="WishlistTextHeading" xml:space="preserve">
+    <value>Planter jeg leder efter</value>
+  </data>
+  <data name="WishlistTextWouldPay" xml:space="preserve">
+    <value>Vil betale op til {0}</value>
+  </data>
+  <data name="WishHaveSame" xml:space="preserve">
+    <value>Du har {0}</value>
+  </data>
+  <data name="WishHaveAnother" xml:space="preserve">
+    <value>Du har en anden {0}</value>
+  </data>
+  <data name="WishNameUnknown" xml:space="preserve">
+    <value>Ukendt navn</value>
+  </data>
+  <data name="WishUnnamed" xml:space="preserve">
+    <value>Unavngivet ønske</value>
+  </data>
+  <data name="WishNeedsName" xml:space="preserve">
+    <value>Giv ønsket en slægt eller et eget navn.</value>
+  </data>
+  <data name="WishPriceNegative" xml:space="preserve">
+    <value>Det, du højst vil betale, kan ikke være negativt.</value>
+  </data>
+  <data name="PlaceNeedsNameSpot" xml:space="preserve">
+    <value>Giv pladsen et navn.</value>
+  </data>
+  <data name="PlaceNeedsNameRoom" xml:space="preserve">
+    <value>Giv rummet et navn.</value>
+  </data>
+  <data name="PlaceNameSlash" xml:space="preserve">
+    <value>Et rums navn må ikke have en / i sig, for den står mellem et rum og en plads.</value>
+  </data>
+  <data name="RoomGone" xml:space="preserve">
+    <value>Det rum findes ikke mere.</value>
+  </data>
+  <data name="PlaceNotEmpty" xml:space="preserve">
+    <value>{0} har stadig noget i sig.</value>
+  </data>
+  <data name="LabelGot" xml:space="preserve">
+    <value>Fået {0}</value>
+  </data>
+  <data name="LabelStarted" xml:space="preserve">
+    <value>Startet {0}</value>
+  </data>
+  <data name="LabelDayFormat" xml:space="preserve">
+    <value>d. MMM yyyy</value>
+  </data>
+  <data name="LabelMonthFormat" xml:space="preserve">
+    <value>MMM yyyy</value>
+  </data>
+  <data name="LabelNoRoomTape" xml:space="preserve">
+    <value>Der er ikke plads på {0} mm tape.</value>
+  </data>
+  <data name="LabelNoRoomLow" xml:space="preserve">
+    <value>Der er ikke plads på en så lav etiket.</value>
+  </data>
+  <data name="FieldDuplicate" xml:space="preserve">
+    <value>Du har allerede et felt, der hedder {0}.</value>
+  </data>
+  <data name="FieldChoiceEmpty" xml:space="preserve">
+    <value>Et valg må ikke være tomt.</value>
+  </data>
+  <data name="FieldChoiceLong" xml:space="preserve">
+    <value>Et valg må højst være på {0} tegn.</value>
+  </data>
+  <data name="FieldGone" xml:space="preserve">
+    <value>Det felt findes ikke mere.</value>
+  </data>
+  <data name="FieldNotNumber" xml:space="preserve">
+    <value>Det er ikke et tal.</value>
+  </data>
+  <data name="FieldNotDate" xml:space="preserve">
+    <value>Det er ikke en dato.</value>
+  </data>
+  <data name="FieldTextLong" xml:space="preserve">
+    <value>Hold det under {0} tegn.</value>
+  </data>
+  <data name="FieldNameRequired" xml:space="preserve">
+    <value>Giv feltet et navn.</value>
+  </data>
+  <data name="FieldNameLong" xml:space="preserve">
+    <value>Et feltnavn må højst være på {0} tegn.</value>
+  </data>
+  <data name="FieldTooManyChoices" xml:space="preserve">
+    <value>Et felt må højst have {0} valg.</value>
+  </data>
+  <data name="FieldChoiceTwice" xml:space="preserve">
+    <value>Hvert valg må kun være der én gang.</value>
+  </data>
+  <data name="FieldDateFormat" xml:space="preserve">
+    <value>d. MMM yyyy</value>
+  </data>
+  <data name="SearchInNotes" xml:space="preserve">
+    <value>i noterne</value>
+  </data>
+  <data name="SearchTag" xml:space="preserve">
+    <value>tag {0}</value>
+  </data>
+  <data name="SearchNumber" xml:space="preserve">
+    <value>nummer {0}</value>
+  </data>
+  <data name="SearchLivesWith" xml:space="preserve">
+    <value>bor hos {0}</value>
+  </data>
+  <data name="SearchNotYours" xml:space="preserve">
+    <value>ikke din</value>
+  </data>
+  <data name="SearchUnnamedMix" xml:space="preserve">
+    <value>Unavngivet blanding</value>
+  </data>
+  <data name="SearchUnnamedFeed" xml:space="preserve">
+    <value>Unavngivet gødning</value>
+  </data>
+  <data name="SearchUnnamedProduct" xml:space="preserve">
+    <value>Unavngivet produkt</value>
+  </data>
+  <data name="SearchUnnamedRecipe" xml:space="preserve">
+    <value>Unavngivet opskrift</value>
+  </data>
+  <data name="SearchTagPlants_One" xml:space="preserve">
+    <value>{0} plante</value>
+  </data>
+  <data name="SearchTagPlants_Other" xml:space="preserve">
+    <value>{0} planter</value>
+  </data>
+  <data name="SearchSpot" xml:space="preserve">
+    <value>Plads</value>
+  </data>
+  <data name="SearchRoom" xml:space="preserve">
+    <value>Rum</value>
+  </data>
+  <data name="SearchSpotIn" xml:space="preserve">
+    <value>Plads i {0}</value>
+  </data>
+  <data name="SearchLabelNote" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="SearchLabelUpdate" xml:space="preserve">
+    <value>Opdatering</value>
+  </data>
+  <data name="SearchLabelProblem" xml:space="preserve">
+    <value>Problem</value>
+  </data>
+  <data name="SearchLabelPests" xml:space="preserve">
+    <value>Skadedyr</value>
+  </data>
+  <data name="SwapMarkCuttings" xml:space="preserve">
+    <value>Stiklinger til overs</value>
+  </data>
+  <data name="SwapMarkUpForSwap" xml:space="preserve">
+    <value>Til bytte</value>
+  </data>
+  <data name="SwapUnnamedPlant" xml:space="preserve">
+    <value>Unavngivet plante</value>
+  </data>
+  <data name="SwapStageRooted" xml:space="preserve">
+    <value>har slået rødder</value>
+  </data>
+  <data name="SwapStageRooting" xml:space="preserve">
+    <value>slår rødder</value>
+  </data>
+  <data name="SwapStageStarted" xml:space="preserve">
+    <value>lige startet</value>
+  </data>
+  <data name="SwapListHeading" xml:space="preserve">
+    <value>Tilgængelig til bytte</value>
+  </data>
+  <data name="SwapListCuttings" xml:space="preserve">
+    <value>Stiklinger</value>
+  </data>
+  <data name="SwapListOnRequest" xml:space="preserve">
+    <value>Stiklinger på forespørgsel</value>
+  </data>
+  <data name="SwapListPlants" xml:space="preserve">
+    <value>Planter</value>
+  </data>
+  <data name="SwapCuttingLine" xml:space="preserve">
+    <value>{0} ×{1}, {2}</value>
+  </data>
+  <data name="SwapPlantCount" xml:space="preserve">
+    <value>{0} ×{1}</value>
+  </data>
+  <data name="SwapTileCuttings_One" xml:space="preserve">
+    <value>{0} stikling, {1}</value>
+  </data>
+  <data name="SwapTileCuttings_Other" xml:space="preserve">
+    <value>{0} stiklinger, {1}</value>
+  </data>
+  <data name="SwapTilePlants" xml:space="preserve">
+    <value>{0} planter</value>
+  </data>
+  <data name="SwapTilePlant" xml:space="preserve">
+    <value>Plante</value>
+  </data>
+  <data name="YearFigureAdded_One" xml:space="preserve">
+    <value>plante tilføjet</value>
+  </data>
+  <data name="YearFigureAdded_Other" xml:space="preserve">
+    <value>planter tilføjet</value>
+  </data>
+  <data name="YearFigureCutting_One" xml:space="preserve">
+    <value>stikling har slået rødder</value>
+  </data>
+  <data name="YearFigureCutting_Other" xml:space="preserve">
+    <value>stiklinger har slået rødder</value>
+  </data>
+  <data name="YearFigurePropagation_One" xml:space="preserve">
+    <value>formering har slået rødder</value>
+  </data>
+  <data name="YearFigurePropagation_Other" xml:space="preserve">
+    <value>formeringer har slået rødder</value>
+  </data>
+  <data name="YearFigurePhoto_One" xml:space="preserve">
+    <value>billede</value>
+  </data>
+  <data name="YearFigurePhoto_Other" xml:space="preserve">
+    <value>billeder</value>
+  </data>
+  <data name="YearFigureDay_One" xml:space="preserve">
+    <value>dag til rødder</value>
+  </data>
+  <data name="YearFigureDay_Other" xml:space="preserve">
+    <value>dage til rødder</value>
+  </data>
+  <data name="YearTitle" xml:space="preserve">
+    <value>Mit plantår {0}</value>
+  </data>
+  <data name="YearKickerAdded" xml:space="preserve">
+    <value>Planter tilføjet i {0}</value>
+  </data>
+  <data name="YearOriginBought" xml:space="preserve">
+    <value>{0} købt</value>
+  </data>
+  <data name="YearOriginPropagated" xml:space="preserve">
+    <value>{0} formeret</value>
+  </data>
+  <data name="YearOriginSeed" xml:space="preserve">
+    <value>{0} fra frø</value>
+  </data>
+  <data name="YearOriginGift_One" xml:space="preserve">
+    <value>{0} gave</value>
+  </data>
+  <data name="YearOriginGift_Other" xml:space="preserve">
+    <value>{0} gaver</value>
+  </data>
+  <data name="YearOriginSwap_One" xml:space="preserve">
+    <value>{0} bytte</value>
+  </data>
+  <data name="YearOriginSwap_Other" xml:space="preserve">
+    <value>{0} bytter</value>
+  </data>
+  <data name="YearOriginOther" xml:space="preserve">
+    <value>{0} andre</value>
+  </data>
+  <data name="YearKickerCuttings" xml:space="preserve">
+    <value>Stiklinger i {0}</value>
+  </data>
+  <data name="YearKickerPropagations" xml:space="preserve">
+    <value>Formeringer i {0}</value>
+  </data>
+  <data name="YearMadeIt" xml:space="preserve">
+    <value>af {0} lykkedes</value>
+  </data>
+  <data name="YearStarted" xml:space="preserve">
+    <value>startet</value>
+  </data>
+  <data name="YearStartedRooted" xml:space="preserve">
+    <value>{0} startet · {1} har slået rødder</value>
+  </data>
+  <data name="YearPropagationsAlt" xml:space="preserve">
+    <value>{0}: {1} {2}. {3} startet, {4} har slået rødder.</value>
+  </data>
+  <data name="YearQuickest" xml:space="preserve">
+    <value>Hurtigst til at slå rødder</value>
+  </data>
+  <data name="YearQuickestLine" xml:space="preserve">
+    <value>Slog rødder på {0} i {1}</value>
+  </data>
+  <data name="YearQuickestAltPhoto" xml:space="preserve">
+    <value>{0}: {1}. Slog rødder på {2} i {3}. Billede af {1}.</value>
+  </data>
+  <data name="YearQuickestLineNumber" xml:space="preserve">
+    <value>{0} slog rødder i {1}.</value>
+  </data>
+  <data name="YearQuickestAltNumber" xml:space="preserve">
+    <value>{0}: {1}, {2} til at slå rødder i {3}.</value>
+  </data>
+  <data name="YearDays_One" xml:space="preserve">
+    <value>{0} dag</value>
+  </data>
+  <data name="YearDays_Other" xml:space="preserve">
+    <value>{0} dage</value>
+  </data>
+  <data name="YearKickerBestMedium" xml:space="preserve">
+    <value>Bedste medie i {0}</value>
+  </data>
+  <data name="YearKickerMyMedium" xml:space="preserve">
+    <value>Mit medie i {0}</value>
+  </data>
+  <data name="YearMediumMadeIt" xml:space="preserve">
+    <value>af {0} lykkedes i {1}</value>
+  </data>
+  <data name="YearMediumBest" xml:space="preserve">
+    <value>Det bedste af de {0}, jeg prøvede.</value>
+  </data>
+  <data name="YearMediumAverage" xml:space="preserve">
+    <value>Slog rødder på {0} i gennemsnit.</value>
+  </data>
+  <data name="YearMostPhotographed" xml:space="preserve">
+    <value>Mest fotograferet</value>
+  </data>
+  <data name="YearMostLine_One" xml:space="preserve">
+    <value>{0} billede i {1}</value>
+  </data>
+  <data name="YearMostLine_Other" xml:space="preserve">
+    <value>{0} billeder i {1}</value>
+  </data>
+  <data name="YearMostAlt" xml:space="preserve">
+    <value>{0}: {1}, {2}. Billede af {1}.</value>
+  </data>
+  <data name="YearGrownSoFar" xml:space="preserve">
+    <value>Vokset i år</value>
+  </data>
+  <data name="YearGrownIn" xml:space="preserve">
+    <value>Vokset i {0}</value>
+  </data>
+  <data name="YearGrownLine" xml:space="preserve">
+    <value>{0} dage mellem de to billeder</value>
+  </data>
+  <data name="YearGrownDayFormat" xml:space="preserve">
+    <value>d. MMM</value>
+  </data>
+  <data name="YearGrownAlt" xml:space="preserve">
+    <value>{0}: {1}, {2} og {3}. {4}.</value>
+  </data>
+  <data name="YearCollageKicker" xml:space="preserve">
+    <value>{0} i billeder</value>
+  </data>
+  <data name="YearCollageTitle" xml:space="preserve">
+    <value>Mit plantår {0} i billeder</value>
+  </data>
+  <data name="YearCollageLine_One" xml:space="preserve">
+    <value>{0} billede taget</value>
+  </data>
+  <data name="YearCollageLine_Other" xml:space="preserve">
+    <value>{0} billeder taget</value>
+  </data>
+  <data name="YearCollageAlt" xml:space="preserve">
+    <value>En collage af billeder fra {0}. {1}.</value>
+  </data>
+</root>

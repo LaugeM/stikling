@@ -3,47 +3,47 @@
    second name for a room you already have. *@
 
 <div class="room-picker">
-    <div class="form-label">@Label</div>
+    <div class="form-label">@LabelText</div>
 
-    <div class="room-chips" role="group" aria-label="@Label">
+    <div class="room-chips" role="group" aria-label="@LabelText">
         <button type="button" class="room-chip @Picked(Value is null && !typingRoom)"
-                @onclick="() => PickRoomAsync(null)">No room</button>
+                @onclick="() => PickRoomAsync(null)">@Strings.Shared.RoomPickerNoRoom</button>
         @foreach (var room in RoomNames)
         {
             <button type="button" class="room-chip @Picked(!typingRoom && RoomName.Same(room, PickedRoom))"
                     @onclick="() => PickRoomAsync(room)">@room</button>
         }
-        <button type="button" class="room-chip new @Picked(typingRoom)" @onclick="StartNewRoomAsync">+ New room</button>
+        <button type="button" class="room-chip new @Picked(typingRoom)" @onclick="StartNewRoomAsync">@Strings.Shared.RoomPickerNewRoom</button>
     </div>
 
     @if (typingRoom)
     {
-        <input class="form-control mt-2" placeholder="@RoomPlaceholder" autocomplete="off" aria-label="New room"
+        <input class="form-control mt-2" placeholder="@RoomPlaceholderText" autocomplete="off" aria-label="@Strings.Shared.RoomPickerNewRoomLabel"
                value="@draft" @oninput="TypeRoomAsync" @ref="draftInput" />
     }
 
     @* Shown while a new room is still being typed too, so a spot can be picked without saving the room first *@
     @if (PickedRoom is { } room1)
     {
-        <div class="room-chips spots" role="group" aria-label="Spot in @room1">
+        <div class="room-chips spots" role="group" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomPickerSpotIn, room1)">
             <button type="button" class="room-chip @Picked(PickedSpot is null && !typingSpot)"
-                    @onclick="() => PickSpotAsync(null)">Anywhere in @room1</button>
+                    @onclick="() => PickSpotAsync(null)">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomPickerAnywhere, room1)</button>
             @foreach (var spot in SpotNames)
             {
                 <button type="button" class="room-chip @Picked(!typingSpot && RoomName.Same(spot, PickedSpot))"
                         @onclick="() => PickSpotAsync(spot)">@spot</button>
             }
-            <button type="button" class="room-chip new @Picked(typingSpot)" @onclick="StartNewSpotAsync">+ New spot</button>
+            <button type="button" class="room-chip new @Picked(typingSpot)" @onclick="StartNewSpotAsync">@Strings.Shared.RoomPickerNewSpot</button>
         </div>
 
         @if (typingSpot)
         {
-            <input class="form-control mt-2" placeholder="@SpotPlaceholder" autocomplete="off" aria-label="New spot in @room1"
+            <input class="form-control mt-2" placeholder="@SpotPlaceholderText" autocomplete="off" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsNewSpotIn, room1)"
                    value="@draft" @oninput="TypeSpotAsync" @ref="draftInput" />
         }
     }
 
-    <div class="form-text">A spot is a place inside a room, like a windowsill or the top of a desk.</div>
+    <div class="form-text">@Strings.Shared.RoomPickerSpotHint</div>
 </div>
 
 @code {
@@ -59,13 +59,17 @@
     public IReadOnlyList<Room> Rooms { get; set; } = [];
 
     [Parameter]
-    public string Label { get; set; } = "Location";
+    public string? Label { get; set; }
 
     [Parameter]
-    public string RoomPlaceholder { get; set; } = "e.g. Living room";
+    public string? RoomPlaceholder { get; set; }
 
     [Parameter]
-    public string SpotPlaceholder { get; set; } = "e.g. On top of the PC";
+    public string? SpotPlaceholder { get; set; }
+
+    private string LabelText => Label ?? Strings.Shared.RoomPickerLocation;
+    private string RoomPlaceholderText => RoomPlaceholder ?? Strings.Shared.RoomPickerRoomPlaceholder;
+    private string SpotPlaceholderText => SpotPlaceholder ?? Strings.Shared.RoomPickerSpotPlaceholder;
 
     private bool typingRoom;
     private bool typingSpot;

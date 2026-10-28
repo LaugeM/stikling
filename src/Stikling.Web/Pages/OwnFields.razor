@@ -2,40 +2,34 @@
 @inject OwnFieldService FieldService
 @inject ILogger<OwnFields> Logger
 
-<PageTitle>Your fields · Stikling</PageTitle>
+<PageTitle>@Strings.Shared.OwnFieldsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="settings?section=plants">Settings</a>
-<h1>Your fields</h1>
+<a class="back-link" href="settings?section=plants">@Strings.Layout.Settings</a>
+<h1>@Strings.Shared.OwnFieldsTitle</h1>
 
-<p class="settings-hint">
-    Fields you added for what the app doesn't have a place for. They show on the plant form under More details,
-    and on a plant's page once they're filled in.
-</p>
+<p class="settings-hint">@Strings.Shared.OwnFieldsHint</p>
 
 @if (loading)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
 }
 else if (fields.Count == 0)
 {
     <div class="empty-state">
-        <p>No fields of your own yet.</p>
-        <p class="text-body-secondary">
-            Add a field for anything the app doesn't have a place for, like clone name, awards or humidity.
-            It shows on the plant form under More details and on the plant's page.
-        </p>
-        <button type="button" class="btn btn-primary mt-2" @onclick="StartNew">Add a field</button>
+        <p>@Strings.Shared.OwnFieldsEmpty</p>
+        <p class="text-body-secondary">@Strings.Shared.OwnFieldsEmptyHint</p>
+        <button type="button" class="btn btn-primary mt-2" @onclick="StartNew">@Strings.Shared.OwnFieldsAdd</button>
     </div>
 }
 else
 {
     <div class="form-actions mt-3 mb-3">
-        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a field</button>
+        <button type="button" class="btn btn-primary" @onclick="StartNew">@Strings.Shared.OwnFieldsAddPlus</button>
     </div>
 
     <section class="settings-section">
-        <h2>Your fields</h2>
+        <h2>@Strings.Shared.OwnFieldsTitle</h2>
 
         <ul class="field-list">
             @foreach (var field in fields)
@@ -52,7 +46,7 @@ else
     </section>
 }
 
-<Sheet Title="@(Editing is null ? "Add a field" : "Edit field")" Open="sheetOpen" OpenChanged="SheetOpenChanged">
+<Sheet Title="@(Editing is null ? Strings.Shared.OwnFieldsAdd : Strings.Shared.OwnFieldsEdit)" Open="sheetOpen" OpenChanged="SheetOpenChanged">
     @if (error is not null)
     {
         <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
@@ -64,26 +58,26 @@ else
     }
     else if (confirmingRemove)
     {
-        <p>Remove @field.Name? The values on @Labels.Count(UseCount(field), "plant") are kept, and come back if you add a field called @field.Name again.</p>
+        <p>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsRemoveConfirm, field.Name, Labels.Plants(UseCount(field)))</p>
         <div class="care-actions">
-            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">Remove</button>
-            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirmingRemove = false">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">@Strings.Common.Remove</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirmingRemove = false">@Strings.Common.Cancel</button>
         </div>
     }
     else
     {
         <div class="mb-3">
-            <label class="form-label" for="field-edit-name">Name</label>
+            <label class="form-label" for="field-edit-name">@Strings.Shared.OwnFieldsName</label>
             <input id="field-edit-name" class="form-control form-control-sm" autocomplete="off"
                    maxlength="@OwnField.MaxNameLength" value="@name" @oninput="e => name = e.Value?.ToString() ?? string.Empty" />
             <div class="care-actions">
                 <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(name) || name.Trim() == field.Name)"
-                        @onclick="RenameAsync">Rename</button>
+                        @onclick="RenameAsync">@Strings.Shared.OwnFieldsRename</button>
             </div>
         </div>
 
         <div class="mb-3">
-            <div class="form-label" id="field-edit-kind">What it holds</div>
+            <div class="form-label" id="field-edit-kind">@Strings.Shared.OwnFieldsWhatItHolds</div>
             <div class="chip-row" role="group" aria-labelledby="field-edit-kind">
                 @foreach (var (value, text) in kinds)
                 {
@@ -97,17 +91,16 @@ else
                 @if (notFitting > 0)
                 {
                     <div class="form-text">
-                        @notFitting @(notFitting == 1 ? "value doesn't" : "values don't") read as @(pendingKind == OwnFieldKind.Number ? "a number" : "a date").
-                        @(notFitting == 1 ? "It's" : "They're") kept and @(notFitting == 1 ? "shows" : "show") as written.
+                        @string.Format(System.Globalization.CultureInfo.CurrentCulture, notFitting == 1 ? Strings.Shared.OwnFieldsNotFitting_One : Strings.Shared.OwnFieldsNotFitting_Other, notFitting, pendingKind == OwnFieldKind.Number ? Strings.Shared.OwnFieldsAsNumber : Strings.Shared.OwnFieldsAsDate)
                     </div>
                 }
                 else if (pendingKind == OwnFieldKind.Choice && field.Choices.Count == 0)
                 {
-                    <div class="form-text">The values already on your plants become the choices.</div>
+                    <div class="form-text">@Strings.Shared.OwnFieldsBecomeChoices</div>
                 }
                 <div class="care-actions">
-                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="ChangeKindAsync">Change to @KindName(pendingKind)</button>
-                    <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => pendingKind = field.Kind">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="ChangeKindAsync">@ChangeToText(pendingKind)</button>
+                    <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => pendingKind = field.Kind">@Strings.Common.Cancel</button>
                 </div>
             }
         </div>
@@ -115,10 +108,10 @@ else
         @if (field.Kind == OwnFieldKind.Choice)
         {
             <div class="mb-3">
-                <div class="form-label">Choices</div>
+                <div class="form-label">@Strings.Shared.OwnFieldsChoices</div>
                 @if (field.Choices.Count == 0)
                 {
-                    <div class="form-text">No choices yet.</div>
+                    <div class="form-text">@Strings.Shared.OwnFieldsNoChoices</div>
                 }
                 <ul class="field-choices">
                     @foreach (var choice in field.Choices)
@@ -126,38 +119,38 @@ else
                         <li>
                             @if (renamingChoice == choice)
                             {
-                                <input class="form-control form-control-sm" aria-label="New name for @choice" autocomplete="off"
+                                <input class="form-control form-control-sm" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsChoiceNewName, choice)" autocomplete="off"
                                        maxlength="@OwnField.MaxNameLength" value="@renameTo" @oninput="e => renameTo = e.Value?.ToString() ?? string.Empty" />
-                                <div class="form-text">This changes the plants that have @choice.</div>
+                                <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsChoiceRenameNote, choice)</div>
                                 <div class="care-actions">
                                     <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(renameTo))"
-                                            @onclick="() => RenameChoiceAsync(choice)">Rename</button>
-                                    <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => renamingChoice = null">Cancel</button>
+                                            @onclick="() => RenameChoiceAsync(choice)">@Strings.Shared.OwnFieldsRename</button>
+                                    <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => renamingChoice = null">@Strings.Common.Cancel</button>
                                 </div>
                             }
                             else
                             {
                                 <span class="field-choice">@choice</span>
-                                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => StartRenameChoice(choice)">Rename</button>
-                                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => RemoveChoiceAsync(choice)">Remove</button>
+                                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => StartRenameChoice(choice)">@Strings.Shared.OwnFieldsRename</button>
+                                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => RemoveChoiceAsync(choice)">@Strings.Common.Remove</button>
                             }
                         </li>
                     }
                 </ul>
-                <div class="form-text mb-2">Removing a choice leaves it on the plants that have it.</div>
+                <div class="form-text mb-2">@Strings.Shared.OwnFieldsChoiceRemoveNote</div>
                 <div class="tag-draft">
-                    <input class="form-control" placeholder="New choice" aria-label="New choice" autocomplete="off"
+                    <input class="form-control" placeholder="@Strings.Shared.OwnFieldsNewChoice" aria-label="@Strings.Shared.OwnFieldsNewChoice" autocomplete="off"
                            enterkeyhint="done" maxlength="@OwnField.MaxNameLength" value="@newChoice"
                            @oninput="e => newChoice = e.Value?.ToString() ?? string.Empty" @onkeydown="NewChoiceKey" />
                     <button type="button" class="btn btn-outline-primary" disabled="@(busy || string.IsNullOrWhiteSpace(newChoice))"
-                            @onclick="AddChoiceAsync">Add</button>
+                            @onclick="AddChoiceAsync">@Strings.Common.Add</button>
                 </div>
             </div>
         }
 
         <div class="care-actions">
-            <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => confirmingRemove = true">Remove field</button>
-            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CloseSheet">Done</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => confirmingRemove = true">@Strings.Shared.OwnFieldsRemoveField</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CloseSheet">@Strings.Common.Done</button>
         </div>
     }
 </Sheet>
@@ -183,10 +176,10 @@ else
 
     private static readonly (OwnFieldKind Value, string Text)[] kinds =
     [
-        (OwnFieldKind.Text, "Text"),
-        (OwnFieldKind.Number, "Number"),
-        (OwnFieldKind.Date, "Date"),
-        (OwnFieldKind.Choice, "Choice")
+        (OwnFieldKind.Text, Strings.Shared.OwnFieldKindText),
+        (OwnFieldKind.Number, Strings.Shared.OwnFieldKindNumber),
+        (OwnFieldKind.Date, Strings.Shared.OwnFieldKindDate),
+        (OwnFieldKind.Choice, Strings.Shared.OwnFieldKindChoice)
     ];
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
@@ -204,13 +197,21 @@ else
     private int UseCount(OwnField field) => useCounts.GetValueOrDefault(field.Id);
 
     private string UseText(OwnField field) =>
-        UseCount(field) == 0 ? "On no plants yet" : $"On {Labels.Count(UseCount(field), "plant")}";
+        UseCount(field) == 0 ? Strings.Shared.OwnFieldsOnNone : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsOn, Labels.Plants(UseCount(field)));
 
     private static string KindName(OwnFieldKind kind) => kinds.First(k => k.Value == kind).Text;
 
+    private static string ChangeToText(OwnFieldKind kind) => kind switch
+    {
+        OwnFieldKind.Number => Strings.Shared.OwnFieldsChangeToNumber,
+        OwnFieldKind.Date => Strings.Shared.OwnFieldsChangeToDate,
+        OwnFieldKind.Choice => Strings.Shared.OwnFieldsChangeToChoice,
+        _ => Strings.Shared.OwnFieldsChangeToText
+    };
+
     private static string KindText(OwnField field) =>
         field.Kind == OwnFieldKind.Choice && field.Choices.Count > 0
-            ? $"Choice: {string.Join(", ", field.Choices)}"
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsChoiceList, string.Join(", ", field.Choices))
             : KindName(field.Kind);
 
     private void StartNew()

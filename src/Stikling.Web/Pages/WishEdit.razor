@@ -7,16 +7,16 @@
 @inject PhotoService Photos
 @implements IAsyncDisposable
 
-<PageTitle>@(IsNew ? "Add a wish" : "Edit wish") · Stikling</PageTitle>
+<PageTitle>@(IsNew ? Strings.Shared.WishlistAdd : Strings.Shared.WishEditTitle) · Stikling</PageTitle>
 
 @* No ReloadOnSync: like other edit pages, nothing changes under someone filling in the form *@
 
-<a class="back-link" href="wishlist">Wishlist</a>
-<h1>@(IsNew ? "Add a wish" : "Edit wish")</h1>
+<a class="back-link" href="wishlist">@Strings.Shared.WishlistTitle</a>
+<h1>@(IsNew ? Strings.Shared.WishlistAdd : Strings.Shared.WishEditTitle)</h1>
 
 @if (wish is null)
 {
-    <p class="text-body-secondary">@(notFound ? "That wish doesn't exist." : "Loading…")</p>
+    <p class="text-body-secondary">@(notFound ? Strings.Shared.WishEditNotFound : Strings.Shared.Loading)</p>
 }
 else
 {
@@ -32,43 +32,43 @@ else
         }
 
         <fieldset>
-            <legend>Which plant</legend>
+            <legend>@Strings.Shared.WishEditWhichPlant</legend>
             <PlantNameFields @bind-Genus="wish.Genus" @bind-Species="wish.Species" @bind-Cultivar="wish.Cultivar"
                              @bind-Qualifier="wish.NameQualifier" @bind-Note="wish.NameNote" />
             <div class="mt-3">
-                <label class="form-label" for="wish-name">Your own name for it</label>
-                <InputText id="wish-name" class="form-control" @bind-Value="wish.Name" placeholder="e.g. that pink syngonium" />
+                <label class="form-label" for="wish-name">@Strings.Shared.WishEditOwnName</label>
+                <InputText id="wish-name" class="form-control" @bind-Value="wish.Name" placeholder="@Strings.Shared.WishEditOwnNamePlaceholder" />
             </div>
-            <div class="form-text">Give it a genus, a name of your own, or both.</div>
+            <div class="form-text">@Strings.Shared.WishEditNameHint</div>
         </fieldset>
 
         <fieldset>
-            <legend>Getting it</legend>
+            <legend>@Strings.Shared.WishEditGettingIt</legend>
             <div class="mb-3">
-                <label class="form-label" for="found-at">Where to find it</label>
-                <InputText id="found-at" class="form-control" @bind-Value="wish.FoundAt" placeholder="e.g. the plant fair in May, or a seller's name" />
+                <label class="form-label" for="found-at">@Strings.Shared.WishEditFoundAt</label>
+                <InputText id="found-at" class="form-control" @bind-Value="wish.FoundAt" placeholder="@Strings.Shared.WishEditFoundAtPlaceholder" />
             </div>
             <div class="mb-3">
-                <label class="form-label" for="most-to-pay">The most you would pay</label>
+                <label class="form-label" for="most-to-pay">@Strings.Shared.WishEditMostToPay</label>
                 <InputNumber id="most-to-pay" class="form-control" @bind-Value="wish.MostToPay" min="0" step="any" inputmode="decimal" />
             </div>
             <div class="mb-1">
-                <label class="form-label" for="wish-notes">Notes</label>
-                <InputTextArea id="wish-notes" class="form-control" rows="3" @bind-Value="wish.Notes" placeholder="What you liked about it, or what to look for" />
+                <label class="form-label" for="wish-notes">@Strings.Shared.WishEditNotes</label>
+                <InputTextArea id="wish-notes" class="form-control" rows="3" @bind-Value="wish.Notes" placeholder="@Strings.Shared.WishEditNotesPlaceholder" />
             </div>
         </fieldset>
 
         <fieldset>
-            <legend>Photos</legend>
+            <legend>@Strings.Shared.WishEditPhotos</legend>
             @if (photos.Count > 0)
             {
                 <div class="photo-picks">
                     @foreach (var photo in photos)
                     {
                         <div class="photo-pick">
-                            <PhotoImage PhotoId="photo.Id" Alt="Photo of the wish" />
+                            <PhotoImage PhotoId="photo.Id" Alt="@Strings.Shared.WishEditPhotoAlt" />
                             <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
-                                    aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                                    aria-label="@Strings.Shared.WishEditRemovePhoto" title="@Strings.Shared.WishEditRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                         </div>
                     }
                 </div>
@@ -76,12 +76,12 @@ else
             <div class="composer-row">
                 <label class="btn btn-outline-primary btn-sm icon-btn" for="wish-photos">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                    @(photos.Count > 0 ? "Add more" : "Add photos")
+                    @(photos.Count > 0 ? Strings.Shared.WishEditAddMore : Strings.Shared.WishEditAddPhotos)
                 </label>
                 <input id="wish-photos" type="file" accept="image/*" multiple class="visually-hidden"
                        @ref="photoInput" @onchange="AddPhotosAsync" disabled="@(busy || saving)" />
             </div>
-            <div class="form-text">The plant at a shop, or a listing. They move to the plant as reference photos when you get it.</div>
+            <div class="form-text">@Strings.Shared.WishEditPhotosHint</div>
             @if (photoStatus is not null)
             {
                 <p class="composer-status" role="status">@photoStatus</p>
@@ -89,8 +89,8 @@ else
         </fieldset>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">Save</button>
-            <a class="btn btn-link" href="wishlist">Cancel</a>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">@Strings.Common.Save</button>
+            <a class="btn btn-link" href="wishlist">@Strings.Common.Cancel</a>
         </div>
     </EditForm>
 
@@ -99,13 +99,13 @@ else
         <section class="danger-zone">
             @if (confirmDelete)
             {
-                <p class="mb-2">Delete this wish?@(wish.IsGot ? " The plant you got stays." : "")</p>
-                <button class="btn btn-danger btn-sm" disabled="@saving" @onclick="DeleteAsync">Delete</button>
-                <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+                <p class="mb-2">@Strings.Shared.WishEditDeleteConfirm@(wish.IsGot ? " " + Strings.Shared.WishEditDeleteGotNote : "")</p>
+                <button class="btn btn-danger btn-sm" disabled="@saving" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+                <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
             }
             else
             {
-                <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">Delete</button>
+                <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">@Strings.Common.Delete</button>
             }
         </section>
     }
@@ -171,7 +171,7 @@ else
             return;
 
         busy = true;
-        photoStatus = "Saving photos…";
+        photoStatus = Strings.Shared.WishEditSavingPhotos;
         StateHasChanged();
         try
         {
@@ -183,7 +183,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a wish failed");
-            photoStatus = $"Couldn't save the photos: {ex.Message}";
+            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishEditPhotoError, ex.Message);
         }
 
         busy = false;
@@ -245,7 +245,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the wish failed");
-            errors = [$"Couldn't save: {ex.Message}"];
+            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishEditSaveError, ex.Message)];
         }
         finally
         {
@@ -271,7 +271,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Deleting the wish failed");
-            errors = [$"Couldn't delete: {ex.Message}"];
+            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishEditDeleteError, ex.Message)];
             confirmDelete = false;
         }
         finally
