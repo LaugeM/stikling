@@ -3648,3 +3648,53 @@ button.search-recent svg {
 .care-editable:focus-visible {
     background: var(--pa-green-soft);
 }
+
+/* The Supplies lists on a wide screen: rows flow into columns at least 20rem wide, each in a card
+   like the Plants list. The text above them and the form to add one keep a reading width. */
+@media (min-width: 64rem) {
+    .page-wide > .settings-hint {
+        max-width: 40rem;
+    }
+
+    .page-wide > .supply-form {
+        max-width: 40rem;
+    }
+
+    .page-wide ul.supply-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        gap: 0.6rem 0.75rem;
+        align-items: start;
+    }
+
+    .page-wide ul.supply-grid > li,
+    .page-wide ul.supply-grid > li:first-child {
+        min-width: 0;
+        padding: 0.7rem 0.85rem;
+        background: var(--pa-surface);
+        border: 1px solid var(--pa-border);
+        border-radius: 0.75rem;
+    }
+}
+
+/* A pest case or a problem on a wide screen: the case and its facts on the left, the updates beside
+   them. The markup keeps the phone order, so the updates are placed in the second column and span
+   the rows of the first. */
+@media (min-width: 64rem) {
+    .case-layout {
+        display: grid;
+        grid-template-columns: clamp(16rem, 32%, 22rem) minmax(0, 1fr);
+        column-gap: clamp(1.5rem, 3%, 2.5rem);
+        align-items: start;
+    }
+
+    .case-layout > * {
+        grid-column: 1;
+        min-width: 0;
+    }
+
+    .case-layout > .case-side {
+        grid-column: 2;
+        grid-row: 1 / span 20;
+    }
+}

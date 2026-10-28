@@ -8,7 +8,7 @@
 
 <PageTitle>Account · Stikling</PageTitle>
 
-<a class="back-link" href="settings">Settings</a>
+<a class="back-link" href="settings?section=account">Settings</a>
 <h1>Account</h1>
 
 @if (!accountHintRead)
@@ -181,7 +181,7 @@ else
     {
         if (!Accounts.IsAvailable)
         {
-            Nav.NavigateTo("settings", replace: true);
+            Nav.NavigateTo("settings?section=account", replace: true);
             return;
         }
 
