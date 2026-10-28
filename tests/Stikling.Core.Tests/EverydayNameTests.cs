@@ -70,13 +70,14 @@ public class EverydayNameTests
     private static PlantNameService Service(FakePlantNameSource source, FakeSettingsRepository settings, params string[] device) =>
         new(source, new FakePlantRepository(), new FakePropagationRepository(), new SettingsService(settings), new FakeDeviceLanguages(device));
 
-    private sealed class FakeAppLanguage(string code) : IAppLanguage
+    private sealed class FakeAppLanguage(string code, bool chosen) : IAppLanguage
     {
         public string Code { get; } = code;
+        public bool Chosen { get; } = chosen;
     }
 
-    private static PlantNameService ServiceIn(string appLanguage, FakePlantNameSource source, FakeSettingsRepository settings, params string[] device) =>
-        new(source, new FakePlantRepository(), new FakePropagationRepository(), new SettingsService(settings), new FakeDeviceLanguages(device), new FakeAppLanguage(appLanguage));
+    private static PlantNameService ServiceIn(string appLanguage, bool chosen, FakePlantNameSource source, FakeSettingsRepository settings, params string[] device) =>
+        new(source, new FakePlantRepository(), new FakePropagationRepository(), new SettingsService(settings), new FakeDeviceLanguages(device), new FakeAppLanguage(appLanguage, chosen));
 
     [Fact]
     public void Typing_an_everyday_name_finds_the_plant()
@@ -222,7 +223,7 @@ public class EverydayNameTests
     {
         var settings = new FakeSettingsRepository();
         settings.Settings[UserSettings.SettingsId] = new UserSettings { Language = "da" };
-        var service = ServiceIn("da", new FakePlantNameSource(Data, English, Danish), settings, "en-GB");
+        var service = ServiceIn("da", true, new FakePlantNameSource(Data, English, Danish), settings, "en-GB");
 
         Assert.Equal("Svigermors tunge", (await service.GetEverydayNamesAsync()).For("Dracaena", "trifasciata", null));
         Assert.Equal(EverydayNameLanguage.Danish, await service.GetEverydayLanguageAsync());
@@ -233,7 +234,7 @@ public class EverydayNameTests
     {
         var settings = new FakeSettingsRepository();
         settings.Settings[UserSettings.SettingsId] = new UserSettings { Language = "en" };
-        var service = ServiceIn("en", new FakePlantNameSource(Data, English, Danish), settings, "da-DK");
+        var service = ServiceIn("en", true, new FakePlantNameSource(Data, English, Danish), settings, "da-DK");
 
         Assert.Equal("Snake plant", (await service.GetEverydayNamesAsync()).For("Dracaena", "trifasciata", null));
         Assert.Contains((await service.GetSuggesterAsync()).Search("svigermors"), f => f.Species == "trifasciata");
@@ -243,7 +244,17 @@ public class EverydayNameTests
     public async Task With_no_language_chosen_a_Danish_device_still_shows_Danish_names()
     {
         // The app is in English because Danish isn't offered yet, but the names follow the browser as before
-        var service = ServiceIn("en", new FakePlantNameSource(Data, English, Danish), new FakeSettingsRepository(), "da-DK");
+        var service = ServiceIn("en", false, new FakePlantNameSource(Data, English, Danish), new FakeSettingsRepository(), "da-DK");
+
+        Assert.Equal("Svigermors tunge", (await service.GetEverydayNamesAsync()).For("Dracaena", "trifasciata", null));
+    }
+
+    [Fact]
+    public async Task A_synced_language_this_build_does_not_offer_leaves_Danish_names_on_a_Danish_device()
+    {
+        var settings = new FakeSettingsRepository();
+        settings.Settings[UserSettings.SettingsId] = new UserSettings { Language = "da" };
+        var service = ServiceIn("en", false, new FakePlantNameSource(Data, English, Danish), settings, "da-DK");
 
         Assert.Equal("Svigermors tunge", (await service.GetEverydayNamesAsync()).For("Dracaena", "trifasciata", null));
     }
@@ -253,7 +264,7 @@ public class EverydayNameTests
     {
         var settings = new FakeSettingsRepository();
         settings.Settings[UserSettings.SettingsId] = new UserSettings { Language = "da", EverydayNames = EverydayNameLanguage.English };
-        var service = ServiceIn("da", new FakePlantNameSource(Data, English, Danish), settings, "da");
+        var service = ServiceIn("da", true, new FakePlantNameSource(Data, English, Danish), settings, "da");
 
         Assert.Equal("Snake plant", (await service.GetEverydayNamesAsync()).For("Dracaena", "trifasciata", null));
     }

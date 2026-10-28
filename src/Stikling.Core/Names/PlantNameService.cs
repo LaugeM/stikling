@@ -24,6 +24,12 @@ public interface IDeviceLanguages
 public interface IAppLanguage
 {
     string Code { get; }
+
+    /// <summary>
+    /// True when the language was picked in Settings and is offered in this build. A language saved on
+    /// another device that this build doesn't offer doesn't count, so the browser still decides.
+    /// </summary>
+    bool Chosen { get; }
 }
 
 /// <summary>Name suggestions for the plant and propagation forms, and the everyday names shown on plants.</summary>
@@ -151,7 +157,7 @@ public sealed class PlantNameService(
         var saved = await settings.GetAsync();
         var chosen = saved.EverydayNames;
         var appIsDanish = string.Equals(appLanguage?.Code, "da", StringComparison.OrdinalIgnoreCase);
-        var appLanguageChosen = saved.Language is not null;
+        var appLanguageChosen = appLanguage?.Chosen ?? false;
         bool danishDevice;
         try
         {

@@ -505,7 +505,7 @@
         (28, Weeks(4))
     ];
 
-    private string EverydayHint => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.EverydayHint,
+    private string EverydayHint => string.Format(System.Globalization.CultureInfo.CurrentCulture, System.Net.WebUtility.HtmlEncode(Strings.Settings.EverydayHint),
         System.Net.WebUtility.HtmlEncode(everydayLanguage == EverydayNameLanguage.Danish ? "Svigermors tunge" : "Snake plant"),
         "<i>Dracaena trifasciata</i>");
 

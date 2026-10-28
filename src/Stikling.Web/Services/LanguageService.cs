@@ -23,6 +23,11 @@ public sealed class LanguageService(
 
     string IAppLanguage.Code => Code;
 
+    /// <summary>True when the language in use was picked in Settings, set by Program.cs as the app starts.</summary>
+    public static bool WasChosen { get; set; }
+
+    bool IAppLanguage.Chosen => WasChosen;
+
     private static string Code =>
         AppLanguages.All.FirstOrDefault(l => l.Code == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)?.Code
         ?? AppLanguages.English;

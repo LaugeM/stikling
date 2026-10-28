@@ -35,6 +35,6 @@
         }
     }
 
-    window.stiklingLanguage = { get, set, browser };
+    window.stiklingLanguage = { get, set, browser, show: apply };
     apply(get());
 })();

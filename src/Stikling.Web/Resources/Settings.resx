@@ -524,4 +524,12 @@
     <value>Couldn't load the example. Check your connection and try again.</value>
     <comment>Shown when the example plant for the tour could not be loaded.</comment>
   </data>
+  <data name="VersionLabel" xml:space="preserve">
+    <value>Version {0}</value>
+    <comment>Next to What's new. {0} is the version, a date like 2026.10.09</comment>
+  </data>
+  <data name="DevelopmentBuild" xml:space="preserve">
+    <value>Development build</value>
+    <comment>Shown instead of the version when running a local build</comment>
+  </data>
 </root>

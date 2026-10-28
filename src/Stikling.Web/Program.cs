@@ -161,7 +161,10 @@ try
 {
     var chosen = jsRuntime.Invoke<string?>("stiklingLanguage.get");
     var browser = jsRuntime.Invoke<string[]>("stiklingLanguage.browser");
-    SetCulture(AppLanguages.Resolve(chosen, browser, builder.HostEnvironment.IsDevelopment()));
+    var language = AppLanguages.Resolve(chosen, browser, builder.HostEnvironment.IsDevelopment());
+    SetCulture(language);
+    LanguageService.WasChosen = chosen == language;
+    jsRuntime.InvokeVoid("stiklingLanguage.show", language);
 }
 catch (Exception)
 {
