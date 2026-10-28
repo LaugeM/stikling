@@ -13,12 +13,13 @@ public class ExampleServiceTests
     private readonly FakePhotoRepository photos = new();
     private readonly FakeTimelineRepository timeline = new();
     private readonly FakeCareLogRepository careLogs = new();
+    private readonly FakePropagationCareLogRepository propagationCareLogs = new();
     private readonly FakeExamplePhotos images = new();
     private readonly FixedTime time = new(Now, TimeSpan.FromHours(2));
     private readonly ExampleService service;
 
     public ExampleServiceTests() =>
-        service = new ExampleService(plants, propagations, photos, timeline, careLogs, images, time);
+        service = new ExampleService(plants, propagations, photos, timeline, careLogs, propagationCareLogs, images, time);
 
     private DateOnly DayOf(DateTimeOffset moment) => time.LocalDay(moment);
 
@@ -115,6 +116,10 @@ public class ExampleServiceTests
         };
         await timeline.AddAsync(addedNote);
         await careLogs.SaveAsync(new CareLog { PlantId = ExampleFamily.YoungPlantId, OccurredOn = Today, Kind = CareKind.Watered });
+        await propagationCareLogs.SaveAsync(new PropagationCareLog
+        {
+            PropagationId = ExampleFamily.CurrentCuttingId, OccurredOn = Today, Kind = PropagationCareKind.ChangedWater
+        });
         var offspring = new Plant { Nickname = "Mine", ParentPlantId = ExampleFamily.MotherId };
         await plants.SaveAsync(offspring);
 
@@ -124,6 +129,7 @@ public class ExampleServiceTests
         Assert.True(photos.Photos[addedPhoto.Id].IsDeleted);
         Assert.DoesNotContain(addedPhoto.Id, images.Stored);
         Assert.Empty(await careLogs.GetAllAsync());
+        Assert.Empty(await propagationCareLogs.GetAllAsync());
         var left = Assert.Single(await plants.GetAllAsync());
         Assert.Equal(offspring.Id, left.Id);
         Assert.Equal(ExampleFamily.MotherId, left.ParentPlantId);

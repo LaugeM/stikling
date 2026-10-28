@@ -91,7 +91,7 @@ else
         <div class="reminder">
             @if (confirmingRemoval)
             {
-                <span>Remove the example plants, their cuttings, and any notes and photos added to them? Plants you made from them stay.</span>
+                <span>Remove the example plants, their cuttings, and any notes, photos and care added to them? Plants you made from them stay.</span>
                 <button type="button" class="btn btn-danger btn-sm" disabled="@exampleBusy" @onclick="RemoveExampleAsync">Remove</button>
                 <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmingRemoval = false">Cancel</button>
             }
@@ -101,6 +101,10 @@ else
                 <button type="button" class="btn btn-outline-primary" @onclick="() => confirmingRemoval = true">Remove</button>
             }
         </div>
+        @if (removeFailed)
+        {
+            <p class="text-danger" role="alert">Couldn't remove all of the example. Try Remove again.</p>
+        }
     }
 
     @if (upcoming is not null)
@@ -813,6 +817,7 @@ else
     private bool exampleBusy;
     private bool exampleFailed;
     private bool confirmingRemoval;
+    private bool removeFailed;
 
     // Away and quiet time: one coming up, the span the list on the day back belongs to, and the sitter's visits
     private AwaySpan? upcoming;
@@ -940,15 +945,23 @@ else
     private async Task RemoveExampleAsync()
     {
         exampleBusy = true;
+        removeFailed = false;
         try
         {
             await Example.RemoveAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Removing the example failed");
+            removeFailed = true;
         }
         finally
         {
             exampleBusy = false;
             confirmingRemoval = false;
         }
+
+        // Also after a failure, so whatever is left of the example still shows its Remove row
         await LoadAsync();
     }
 

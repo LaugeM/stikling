@@ -13,6 +13,7 @@ public sealed class ExampleService(
     IPhotoRepository photos,
     ITimelineRepository timeline,
     ICareLogRepository careLogs,
+    IPropagationCareLogRepository propagationCareLogs,
     IExamplePhotos images,
     TimeProvider time)
 {
@@ -59,7 +60,7 @@ public sealed class ExampleService(
     }
 
     /// <summary>
-    /// Deletes the example and everything added to it: notes, photos and care logs. Plants and
+    /// Deletes the example and everything added to it: notes, photos, and the care logged on the plants and cuttings. Plants and
     /// propagations made from it stay, and keep their link to the deleted parent.
     /// </summary>
     public async Task RemoveAsync()
@@ -79,11 +80,17 @@ public sealed class ExampleService(
             .Where(log => ExampleFamily.PlantIds.Contains(log.PlantId))
             .Select(log => log.Id)
             .ToList();
+        var propagationLogIds = (await propagationCareLogs.GetAllAsync())
+            .Where(log => ExampleFamily.PropagationIds.Contains(log.PropagationId))
+            .Select(log => log.Id)
+            .ToList();
 
         foreach (var id in entryIds)
             await timeline.DeleteAsync(id);
         foreach (var id in logIds)
             await careLogs.DeleteAsync(id);
+        foreach (var id in propagationLogIds)
+            await propagationCareLogs.DeleteAsync(id);
         foreach (var id in photoIds)
         {
             if (await photos.GetAsync(id) is not null)
