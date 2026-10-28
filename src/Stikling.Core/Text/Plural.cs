@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Stikling.Web.Services;
+namespace Stikling.Core.Text;
 
 /// <summary>
 /// Picks between the singular and the plural of a counted text and puts the number in. The texts
