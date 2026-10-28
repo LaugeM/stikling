@@ -176,6 +176,16 @@ public sealed class PlantForm
 
     public void SetFieldInput(Guid fieldId, string? value) => fieldInputs[fieldId] = value;
 
+    /// <summary>
+    /// How much wider the inner pot picked now is than the one saved, for a note under the picker.
+    /// Null for a new plant, when the pot hasn't changed or when a width is missing.
+    /// </summary>
+    public PotSizeChange? InnerPotChange =>
+        Original?.InnerPotId is { } was && Plant.InnerPotId is { } now && was != now
+            ? PotSizeChange.Between(pots.FirstOrDefault(p => p.Id == was), pots.FirstOrDefault(p => p.Id == now),
+                PotSizeChange.WarnLimit(Settings))
+            : null;
+
     public string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
 
     public string? MixName(Guid id) => Mixes.FirstOrDefault(m => m.Id == id)?.Name;

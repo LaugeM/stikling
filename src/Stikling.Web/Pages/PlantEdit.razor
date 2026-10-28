@@ -337,6 +337,10 @@ else
 
                 <div class="mb-3">
                     <PotPicker Value="plant.InnerPotId" ValueChanged="form.SetInnerPot" Pots="form.Pots" Groups="InnerSlot" PotAdded="form.AddPot" />
+                    @if (form.InnerPotChange is { } sizeChange)
+                    {
+                        <div class="form-text">@sizeChange.Text</div>
+                    }
                 </div>
 
                 <div class="mb-3">

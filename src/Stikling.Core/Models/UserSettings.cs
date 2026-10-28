@@ -81,6 +81,12 @@ public sealed class UserSettings : Entity
     public int? QuarantineDays { get; set; }
 
     /// <summary>
+    /// How many cm wider across the top a new pot can be before Pot up says so. Null means 5.
+    /// Older settings without it read as null.
+    /// </summary>
+    public decimal? PotUpWarnCm { get; set; }
+
+    /// <summary>
     /// Whether a plant that is added as bought, swapped or a gift starts in quarantine. Off unless
     /// it's turned on. Older settings without it read as off.
     /// </summary>

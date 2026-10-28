@@ -682,6 +682,10 @@ else
                         }
                         <div class="mb-2">
                             <PotPicker Value="up.PotId" ValueChanged="id => up.PickPot(id, pots.FirstOrDefault(p => p.Id == id))" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                            @if (PotSizeChange.Between(new ContainerList(pots).For(propagation.ContainerPotId, propagation.Container), pots.FirstOrDefault(p => p.Id == up.PotId), potUpWarnCm) is { } sizeChange)
+                            {
+                                <div class="form-text">@sizeChange.Text</div>
+                            }
                         </div>
                     }
                     <div class="mb-2">
@@ -1087,8 +1091,12 @@ else
         careLogs = PropagationCareService.For(await CareService.GetAllAsync(), Id);
         lastWatered = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.Watered, Today);
         lastWaterChange = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.ChangedWater, Today);
-        nextRoundDay = RoundSchedule.Next((await SettingsService.GetAsync()).RoundDays, Today);
+        var settings = await SettingsService.GetAsync();
+        nextRoundDay = RoundSchedule.Next(settings.RoundDays, Today);
+        potUpWarnCm = PotSizeChange.WarnLimit(settings);
     }
+
+    private decimal potUpWarnCm = PotSizeChange.DefaultWarnCm;
 
     // "watered 2 days ago" or "water changed yesterday", whichever happened last
     private string? LastCare => (lastWatered, lastWaterChange) switch

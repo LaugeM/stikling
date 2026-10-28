@@ -49,7 +49,6 @@ Small ones with no new screen worth the name:
 - **A note for next year**, shown next to A year ago today.
 - **Empty the outer pot** after watering a plant that stands in one.
 - **A parent that isn't yours**, for cuttings from a friend's plant.
-- **How much bigger the pot is** on Pot up.
 
 ---
 
@@ -290,7 +289,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
 | ✅ | **Pot suggestions**: a plant's pot is picked from your pot library, on the plant form and when potting up. A propagation's container is picked from the containers for propagating, kept as their own list in the pot library with how many are in use | 3 | S | v1.x |
-| ☐ | **How much bigger the pot is**: on Pot up, the sheet shows the old and new pot widths and says when the new one is much wider, since that keeps the soil wet longer. It only says so above a width that can be changed in Settings, and any pot can still be picked | 5 | S | v1.x |
+| ✅ | **How much bigger the pot is**: on Pot up, the sheet shows the old and new pot widths and says when the new one is much wider, since that keeps the soil wet longer. It only says so above a width that can be changed in Settings, and any pot can still be picked | 5 | S | v1.x |
 | ☐ | **Supplies stock**: LECA, PON, perlite, sphagnum, fertilisers, sticky traps, alcohol, pots | 5 | M | v1.x |
 | ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | 5 | S | v1.x |
 | ✅ | **Your pots**: the pots you own, by kind (nursery, outer, stands on its own), what they're made of, their measurements, whether they self-water, and how many you have. A plant points at a pot and, when it has one, an outer pot | 6 | M | v1.x |
