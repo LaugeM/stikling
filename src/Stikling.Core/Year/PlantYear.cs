@@ -109,7 +109,7 @@ public static class PlantYear
         Func<DateTimeOffset, DateOnly> localDay,
         string diedLabel)
     {
-        var allPlants = plants.Where(p => !p.IsDeleted).ToList();
+        var allPlants = plants.Where(p => !p.IsDeleted && !p.LivesElsewhere).ToList();
         var allProps = propagations.Where(p => !p.IsDeleted).ToList();
         var allPhotos = photos.ToList();
         var counted = Counted(allPlants, allProps, allPhotos);
@@ -176,7 +176,7 @@ public static class PlantYear
         DateOnly today,
         Func<DateTimeOffset, DateOnly> localDay)
     {
-        var allPlants = plants.Where(p => !p.IsDeleted).ToList();
+        var allPlants = plants.Where(p => !p.IsDeleted && !p.LivesElsewhere).ToList();
         var allProps = propagations.Where(p => !p.IsDeleted).ToList();
         var years = new HashSet<int> { today.Year };
         years.UnionWith(allPlants.Select(p => AddedYear(p, localDay)));

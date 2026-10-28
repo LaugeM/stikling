@@ -22,7 +22,7 @@ public sealed class PotService(IPotRepository pots, IPlantRepository plants, IPh
 
     /// <summary>How many plants and propagations point at a pot, for the line before deleting it.</summary>
     public async Task<PotLinks> InUseAsync(Guid potId) =>
-        new((await plants.GetAllAsync()).Count(p => p.InnerPotId == potId || p.OuterPotId == potId),
+        new((await plants.GetAllAsync()).Count(p => !p.IsDeleted && !p.LivesElsewhere && (p.InnerPotId == potId || p.OuterPotId == potId)),
             (await propagations.GetAllAsync()).Count(p => p.ContainerPotId == potId));
 
     /// <summary>

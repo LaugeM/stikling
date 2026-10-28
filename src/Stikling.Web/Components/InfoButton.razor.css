@@ -1,0 +1,53 @@
+.info-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.info-button {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    /* The visible circle is 20px, the tap area reaches 44px without making the row taller. */
+    margin: -12px -8px -12px 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--pa-muted);
+    border-radius: 50%;
+}
+
+.info-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1;
+}
+
+.info-button:hover,
+.info-button[aria-expanded="true"] {
+    color: var(--bs-primary);
+}
+
+.info-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgb(var(--bs-primary-rgb) / 0.25);
+}
+
+.info-text {
+    margin: 0.5rem 0 0.75rem;
+}
+
+.info-text[hidden] {
+    display: none;
+}

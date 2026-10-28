@@ -131,6 +131,43 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
     }
 
     /// <summary>
+    /// Sets the day a note comes back on Today, or null to take it off. It isn't a correction, so the
+    /// entry's edits stay as they are. A new day makes the note come back even if it was ticked Done before.
+    /// </summary>
+    public async Task SetComesBackAsync(TimelineEntry entry, DateOnly? day)
+    {
+        if (entry.IsDeleted)
+            throw new InvalidOperationException("The entry is deleted.");
+        if (entry.Kind != TimelineKind.Note)
+            day = null;
+        if (entry.ComesBackOn == day)
+            return;
+        if (day is { } d && d <= time.Today())
+            throw new ArgumentException("Pick a day after today.", nameof(day));
+
+        entry.ComesBackOn = day;
+        entry.CameBackDoneOn = null;
+        await timeline.UpdateAsync(entry);
+    }
+
+    /// <summary>Ticks a note that came back as Done on Today.</summary>
+    public async Task MarkCameBackDoneAsync(TimelineEntry entry)
+    {
+        entry.CameBackDoneOn = time.Today();
+        await timeline.UpdateAsync(entry);
+    }
+
+    /// <summary>Sends a note that came back on for another year.</summary>
+    public async Task BringBackAgainAsync(TimelineEntry entry)
+    {
+        if (entry.ComesBackOn is not { } day)
+            return;
+        entry.ComesBackOn = NotesComingBack.NextYear(day, time.Today());
+        entry.CameBackDoneOn = null;
+        await timeline.UpdateAsync(entry);
+    }
+
+    /// <summary>
     /// Call after deleting a photo. An entry that only held photos goes too once none of them
     /// are left, so the history doesn't keep an empty "Photo" line. An entry with text stays.
     /// </summary>

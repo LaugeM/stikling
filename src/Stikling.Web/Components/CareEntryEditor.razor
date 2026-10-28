@@ -1,0 +1,187 @@
+@* Fixing or deleting one care entry on a plant, inside the plant's Care sheet. What was done and its products stay as they were. *@
+@inject CareService CareService
+@inject ILogger<CareEntryEditor> Logger
+@inject TimeProvider Time
+
+<div class="care-sheet">
+    <button type="button" class="btn btn-link btn-sm p-0 mb-2" disabled="@busy" @onclick="OnBack">Back to the history</button>
+
+    <h3 class="section-label">@CareService.Describe(Entry, Labels.For, OwnKinds)</h3>
+
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
+    }
+
+    <div>
+        <label class="form-label" for="care-edit-date">When</label>
+        <input type="date" id="care-edit-date" class="form-control form-control-sm"
+               max="@Today.ToString("yyyy-MM-dd")" value="@occurredOn.ToString("yyyy-MM-dd")"
+               @onchange="DateChanged" />
+    </div>
+
+    @if (Entry.Kind == CareKind.MoistureReading)
+    {
+        <div class="mt-2">
+            <label class="form-label" for="care-edit-moisture">Reading (0 to 10)</label>
+            <input type="number" id="care-edit-moisture" class="form-control form-control-sm"
+                   min="0" max="10" inputmode="numeric" @bind="moisture" />
+        </div>
+    }
+
+    @if (CareKinds.TakesProducts(Entry.Kind))
+    {
+        @if (!string.IsNullOrWhiteSpace(Entry.FeedName) || Entry.Products.Count > 0)
+        {
+            <div class="mt-2">
+                <div class="form-label">What went in the water</div>
+                <div class="form-text mt-0">@Used</div>
+            </div>
+        }
+
+        <div class="mt-2 care-water">
+            <label class="form-label" for="care-edit-water">Water</label>
+            <WaterInput Id="care-edit-water" Placeholder="Optional" @bind-Litres="water" />
+        </div>
+
+        <div class="row g-2 mt-1">
+            <div class="col-6">
+                <label class="form-label" for="care-edit-ec">EC (mS/cm)</label>
+                <input type="number" id="care-edit-ec" class="form-control form-control-sm"
+                       min="0" max="20" step="0.1" inputmode="decimal" placeholder="Optional" @bind="ec" />
+            </div>
+            <div class="col-6">
+                <label class="form-label" for="care-edit-ph">pH</label>
+                <input type="number" id="care-edit-ph" class="form-control form-control-sm"
+                       min="0" max="14" step="0.1" inputmode="decimal" placeholder="Optional" @bind="ph" />
+            </div>
+        </div>
+    }
+
+    <div class="mt-2">
+        <label class="form-label" for="care-edit-notes">Notes</label>
+        <input type="text" id="care-edit-notes" class="form-control form-control-sm"
+               placeholder="Optional" @bind="notes" @bind:event="oninput" />
+    </div>
+
+    <p class="form-text mt-2">To change what was done, delete this and log it again.</p>
+
+    @if (confirming)
+    {
+        <div class="alert alert-warning py-2 px-3 mb-2" role="alert">Delete this entry? It's taken out of the history and the watering reminder.</div>
+        <div class="care-actions">
+            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">Delete</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirming = false">Keep it</button>
+        </div>
+    }
+    else
+    {
+        <div class="care-actions">
+            <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="SaveAsync">Save</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => confirming = true">Delete</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required CareLog Entry { get; set; }
+
+    [Parameter]
+    public IReadOnlyDictionary<Guid, OwnCareKind>? OwnKinds { get; set; }
+
+    /// <summary>Called after the entry is saved or deleted, so the page can reload what it shows.</summary>
+    [Parameter]
+    public EventCallback OnDone { get; set; }
+
+    [Parameter]
+    public EventCallback OnBack { get; set; }
+
+    private DateOnly occurredOn;
+    private int? moisture;
+    private decimal? water;
+    private decimal? ec;
+    private decimal? ph;
+    private string? notes;
+    private string? error;
+    private bool busy;
+    private bool confirming;
+
+    private DateOnly Today => Time.Today();
+
+    private string Used
+    {
+        get
+        {
+            var products = string.Join(" + ", Entry.Products);
+            return string.IsNullOrWhiteSpace(Entry.FeedName) ? products
+                : products.Length == 0 ? Entry.FeedName : $"{Entry.FeedName}: {products}";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        occurredOn = Entry.OccurredOn;
+        moisture = Entry.Moisture;
+        water = Entry.WaterLitres;
+        ec = Entry.Ec;
+        ph = Entry.Ph;
+        notes = Entry.Notes;
+    }
+
+    private void DateChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var parsed))
+            occurredOn = parsed;
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await CareService.UpdateAsync(new CareLog
+            {
+                Id = Entry.Id,
+                OccurredOn = occurredOn,
+                Moisture = moisture,
+                WaterLitres = water > 0 ? water : null,
+                Ec = ec,
+                Ph = ph,
+                Notes = notes
+            }, Today);
+            await OnDone.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Fixing the care entry failed");
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await CareService.DeleteAsync(Entry.Id);
+            await OnDone.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Deleting the care entry failed");
+            error = ex.Message;
+            confirming = false;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

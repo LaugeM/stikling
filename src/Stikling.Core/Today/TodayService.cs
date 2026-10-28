@@ -69,6 +69,7 @@ public sealed class TodayService(
             NewestPhotos = await photos.GetNewestPerSubjectAsync(),
             Stretches = stretches,
             LastActivity = await entries.GetLastActivityBeforeAsync(time.MomentAt(today.ToDateTime(TimeOnly.MinValue))),
+            ComingBack = await entries.GetComingBackAsync(),
             PlantChanges = await entries.GetPlantChangesAsync(),
             Lights = await lights.GetAllAsync(),
             PotsById = (await pots.GetAllAsync()).ToDictionary(p => p.Id),

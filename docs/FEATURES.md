@@ -41,18 +41,6 @@ The people on Reddit who track their plants at all are mostly collectors with 50
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. It is built in a draft pull request that is waiting on photos of a coleus at each stage. The posts on Reddit come once it is in.
 
-### Cheap ones to slot in whenever
-
-Small ones with no new screen worth the name:
-
-- A "Log care" home screen shortcut.
-- **Voice notes** on note fields.
-- Small info buttons next to the less obvious things.
-- **A note for next year**, shown next to A year ago today.
-- **Empty the outer pot** after watering a plant that stands in one.
-- **A parent that isn't yours**, for cuttings from a friend's plant.
-- **How much bigger the pot is** on Pot up.
-
 ---
 
 ## 1. Plants
@@ -136,11 +124,12 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ✅ | Tap the photo at the top of a plant or propagation page to open it full screen, where **Set as cover** is. The cover used to be chosen only from a photo opened in the history, which was easy to miss | 2 | S | v1.x |
 | ✅ | **Frame a photo**: drag and zoom a photo (pinch, the slider or the mouse wheel) so the plant sits well where it's cropped, on cards, at the top of its page and in the history. Only the position and zoom are saved, the photo itself isn't changed, and photos never framed stay centred | 3 | M | v1.x |
 | ✅ | Correct a timeline entry: fix the text or the date of a note or a photo, and its photos move with it. The earlier versions are kept and shown under "edited". Automatic entries are fixed where they come from, and any entry can be deleted | 3 | S | v1.x |
+| ✅ | **Fix or delete a care entry**: tap it in a plant's Care history to change the date, reading, water, EC, pH or note, or delete it | 2 | S | v1.x |
 | ✅ | **Import existing photos with their dates**: pick old photos from the gallery and each lands on the day it was taken, so a plant's history starts from day one. The date comes from the photo itself (EXIF), then from a date in the file name, then from the file. Photos from the same day share an entry, a note keeps the photos picked with it together, and the app says how many photos had no date of their own so they can be checked. Works on a plant's page and when adding a plant, where the day it was got moves back to the oldest photo's, so the photos come after it in the history | 3 | M | v1.x |
 | ✅ | **Pot-ups and failures in the history** get their own title and icon instead of "Updated". A new optional field on the entry says what happened, and its kind stays a change, so older app versions still read the entry and show "Updated" as before. A value in the field that a version doesn't know reads as empty. Entries from before are recognised by the text the app wrote ("Potted up 2: …", "1 failed: rotted") when they are shown, so nothing stored is rewritten. A new value in `TimelineKind` would instead stop older versions from loading any history | 4 | S | v1.x |
 | ☐ | Swipe through photos side by side to compare growth | 5 | M | v1.x |
 | ✅ | **Reference photo**: a photo that isn't of your own plant, like the seller's listing, the parents of a hybrid or the plant fully grown. It sits apart from the history and never becomes the cover or day one, and it is a record of what was bought if a label goes missing | 4 | S | v1.x |
-| ☐ | **Voice notes**: a microphone button on note fields using the phone's speech-to-text | 4 | S | v1.x |
+| ✅ | **Voice notes**: covered by the keyboard's own microphone key, which works in every field and every browser. A button of the app's own was left out, since Firefox on Android has no speech-to-text for web pages and Chrome sends the audio to Google. Help says where the key is | 4 | S | v1.x |
 | ☐ | Measurements on an entry: number of leaves, height, root length | 6 | S | v1.x |
 | ☐ | **Growth curve**: a small chart of a plant's or propagation's measurements over time, once there are a few to draw | 7 | S | v1.x |
 | ☐ | **Share into Stikling**: the installed app appears in Android's share menu, so a photo from the gallery can go straight to a plant (Web Share Target) | 7 | M | v1.x |
@@ -192,7 +181,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **Why a propagation failed**: an optional reason on Mark failed (rotted, dried out, pests, mould, don't know). The results page shows what each medium loses cuttings to, and at which stage | 4 | S | v1.x |
 | ☐ | **How it differed from the ones that rooted**: a failed propagation lists what was different from your rooted ones of the same type: the medium, the rooting aids, the month it was started and how often the water was changed. Only facts from your own records, and it says so when nothing stands out | 6 | S | v1.x |
 | ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
-| ☐ | **A parent that isn't yours**: a plant that lives with someone else or is gone, like grandma's pothos, added only so its cuttings have somewhere to come from. It shows in the family tree and on its offspring, never in the plant list or on Today, and can say whose it is. A field of its own on the plant rather than a new status, so older versions still read it | 5 | S | v1.x |
+| ✅ | **A parent that isn't yours**: a plant that lives with someone else or is gone, like grandma's pothos, added only so its cuttings have somewhere to come from. It shows in the family tree and on its offspring, never in the plant list or on Today, and can say whose it is. A field of its own on the plant rather than a new status, so older versions still read it | 5 | S | v1.x |
 | ☐ | **Unsure parent**: mark where a plant came from as a guess, e.g. "probably a cutting of the kitchen Monstera", shown with a dotted line in the family tree | 7 | S | v1.x |
 | ✅ | **Labels for a label maker**: a page at /labels, reached from Select on Plants and Propagations (Labels in the action bar), from More on a plant or propagation (Print a label), after starting a propagation and after potting one up. It makes a label for each plant or cutting picked, with the collection number large on the left and the name and botanical name beside it, and the date if ticked; a label can be left out for this print. Three ways out: a phone label maker's app (one PNG per label at 203 dpi for 12×40, 14×30, 40×30, 50×30 mm or a custom size, shared through the share menu in one go, or saved where the browser can't share files), a tape printer installed on a computer (tape 9 to 24 mm, label length 30 to 60 mm, one label per page), and a sheet on A4 or Letter (pot labels of 50×25 mm with cut lines, or 15×120 mm plant stakes with a pointed end and the number at the top). Tape 12 mm and under is one line. The size and what to show are kept on the device. No QR code needed | 4 | S | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 6 | L | v1.x |
@@ -227,7 +216,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | Quick-log care: watered, fertilised, reservoir topped up, flushed, repotted, pruned, rotated, cleaned leaves, harvested | 1 | L | v1.x |
 | ✅ | Log several plants at once ("fertilised all semi-hydro plants") | 2 | M | v1.x |
 | ✅ | "Last watered / fertilised / flushed" summary on each plant | 2 | S | v1.x |
-| ☐ | **Empty the outer pot**: after watering a plant that stands in an outer pot, Today reminds you to tip out the water left in it, since a pot left standing in water for days is a common cause of root rot. How long to wait is set in Settings, an hour unless changed, and the reminder can be turned off. Plants watered together share one reminder. A notification for it can follow, now that **Notifications** is built | 4 | S | v1.x |
+| ✅ | **Empty the outer pot**: after watering a plant that stands in an outer pot, Today reminds you to tip out the water left in it, since a pot left standing in water for days is a common cause of root rot. How long to wait is set in Settings, an hour unless changed, and the reminder can be turned off. Plants watered together show in one card, each with Emptied, and All emptied for the lot. A notification for it isn't built | 4 | S | v1.x |
 | ✅ | **Moisture meter reading** (0–10) as a log type, with the latest reading shown on the card | 3 | S | v1.x |
 | ✅ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a usual dose in ml, g or drops. The dose is typed the way the bottle puts it, e.g. 5 ml per 4 L or 1 ml per 500 ml, and is optional | 4 | M | v1.x |
 | ✅ | **Nutrients on a product**: N-P-K for a fertiliser and any other nutrient (Ca, Mg, S, Si, Fe and trace elements) for any product, copied from the label as printed, shown on the Products list and when picking products for a feed | 4 | S | v1.x |
@@ -292,7 +281,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
 | ✅ | **Pot suggestions**: a plant's pot is picked from your pot library, on the plant form and when potting up. A propagation's container is picked from the containers for propagating, kept as their own list in the pot library with how many are in use | 3 | S | v1.x |
-| ☐ | **How much bigger the pot is**: on Pot up, the sheet shows the old and new pot widths and says when the new one is much wider, since that keeps the soil wet longer. It only says so above a width that can be changed in Settings, and any pot can still be picked | 5 | S | v1.x |
+| ✅ | **How much bigger the pot is**: on Pot up, the sheet shows the old and new pot widths and says when the new one is much wider, since that keeps the soil wet longer. It only says so above a width that can be changed in Settings, and any pot can still be picked | 5 | S | v1.x |
 | ☐ | **Supplies stock**: LECA, PON, perlite, sphagnum, fertilisers, sticky traps, alcohol, pots | 5 | M | v1.x |
 | ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | 5 | S | v1.x |
 | ✅ | **Your pots**: the pots you own, by kind (nursery, outer, stands on its own), what they're made of, their measurements, whether they self-water, and how many you have. A plant points at a pot and, when it has one, an outer pot | 6 | M | v1.x |
@@ -356,7 +345,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ☐ | **Your own walking order** for a round, set per room by dragging the cards | 6 | S | v1.x |
 | ✅ | **Away or quiet time**: set the dates you're away, or a quiet stretch of a week, two weeks, a month or a date with no reason asked, under Away and quiet time in Settings. Today and the photo reminder stop asking during it, a bar shows how far in you are, and I'm back ends it early. A week before an away stretch, Today mentions it. The watering reminder leaves a gap across a stretch out of what it learns unless something was watered in it, so a two-week trip isn't learned as how long a plant goes. On the way back, Today opens with a short list of the plants to look at first, as things to check and never to water. It never says overdue, and 3, 5, 10 or all can be set. Water and Worth a look come back when the list is done or after three days | 3 | M | v1.x |
 | ✅ | **Do it later**: a flag on a plant or propagation can be set to start from a month or a day, or the next round day. It stays off Today until then, shows greyed out on the page with Change and Remove, and works like the flag for needing attention from that day. One flag per plant, and it doesn't repeat | 4 | S | v1.x |
-| ☐ | **A note for next year**: a note on a plant that comes back on Today on the same date next year, or on a date you pick, e.g. "thrips showed up in May" or "repot before it starts growing". It shows next to A year ago today | 4 | S | v1.x |
+| ✅ | **A note for next year**: a note on a plant that comes back on Today on the same date next year, or on a date you pick, e.g. "thrips showed up in May" or "repot before it starts growing". It shows next to A year ago today | 4 | S | v1.x |
 | ✅ | **Round days**: pick the weekdays you go round your plants under Round days in Settings. A watering check comes up on the round day before it is due, after Still wet it waits for the next round day, and a plant that dries out faster than the gap keeps its own days. Propagations waiting for a look are gathered too. On other days Today says how many wait for the next round, with Go round now. Pests, flags and quarantine keep their own days, and the daily round only shows on round days | 3 | M | v1.x |
 | ✅ | **A year ago today**: Today shows a plant's photo from this day a year ago, or six months ago, next to its newest one, with Before and after a tap away | 3 | S | v1.x |
 | ☐ | **Anniversaries and small celebrations**: Today says when you have had a plant for a year, and rooting, a first new leaf or a cutting promoted to a plant gets a short moment of its own | 6 | S | v1.x |
@@ -409,7 +398,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ◐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation". Add plant, New propagation and Pest cases are there; Log care is missing since there is no page for it yet | 5 | S | v1.x |
+| ✅ | **Home-screen shortcuts**: long-press the app icon for Add plant, New propagation, Water plants and Pest cases | 5 | S | v1.x |
 | ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | 6 | M | v1.x |
 | ✅ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
 | ✅ | Pick photos from Google Photos, including ones only in the cloud, through Google's Photos Picker. Turned on in Settings. Photo on a plant or propagation page then asks phone or Google Photos, and the add and edit pages get a Google Photos button. The photos go straight from Google to the device. The phone's own chooser only reaches photos stored on the phone, which is why it needs Google's picker | 4 | S | v1.x |
@@ -425,7 +414,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **A page that shows while the app loads**: what Stikling is in two sentences, two screens from the app and how far the download has got, in the page itself rather than the app, so the first visit shows something straight away and search engines can read it. The first visit takes about 26 seconds on slow mobile data and 7 on fast, and the page shows after 1.4 and 0.6. Someone coming back only sees the icon, and only if the app takes a moment to start. Links to the app show a picture of it in their preview | 2 | M | v1.x |
 | ☐ | **Guided tour on the first visit**: a short walk through the app (plants, propagations, photos, backup) that can be skipped | 6 | M | v1.x |
 | ☐ | Start the tour again from Settings whenever you want | 6 | S | v1.x |
-| ☐ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | 4 | S | v1.x |
+| ✅ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | 4 | S | v1.x |
 | ☐ | A demo plant and propagation that can be loaded and removed again, so the app can be tried out without adding real plants. They need fixed ids so a device that syncs doesn't get a second copy, and removing them removes their photos too | 3 | M | v1.x |
 
 ## 7d. Guides & references

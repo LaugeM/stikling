@@ -101,6 +101,26 @@
     <p class="settings-hint">
         Learns how often each plant gets water and asks you to check it when it's probably dry. It says nothing about a plant until it has seen a few waterings.
     </p>
+    <div class="form-check mt-4">
+        <input class="form-check-input" type="checkbox" id="empty-outer-pot"
+               checked="@(emptyOuterPotMinutes > 0)" @onchange="SetEmptyOuterPotOnAsync" />
+        <label class="form-check-label" for="empty-outer-pot">Remind me to empty the outer pot</label>
+    </div>
+    @if (emptyOuterPotMinutes > 0)
+    {
+        <div class="input-group mt-2">
+            <span class="input-group-text" id="empty-outer-pot-after">after</span>
+            <select id="empty-outer-pot-wait" class="form-select" aria-labelledby="empty-outer-pot-after" @onchange="SetEmptyOuterPotWaitAsync">
+                @foreach (var (minutes, label) in emptyOuterPotWaits)
+                {
+                    <option value="@minutes" selected="@(minutes == emptyOuterPotMinutes)">@label</option>
+                }
+            </select>
+        </div>
+    }
+    <p class="settings-hint">
+        After you water a plant that stands in an outer pot, Today asks you to tip out the water that drained into it. Plants whose outer pot holds water on purpose are left out.
+    </p>
     <div class="settings-rows mt-4">
         <SettingsRow Href="kinds-of-care" Title="Kinds of care" Detail="@KindsOfCareLine" />
         <SettingsRow Href="fields" Title="Your fields" Detail="@OwnFieldsLine" />
@@ -139,6 +159,16 @@
     </div>
     <p class="settings-hint">
         Under a plant's name, what happened lately: when it arrived, was repotted or moved.
+    </p>
+    <label class="theme-label mt-4" for="pot-up-warn">Say when a new pot is much bigger</label>
+    <div class="input-group">
+        <span class="input-group-text">more than</span>
+        <input id="pot-up-warn" type="number" class="form-control" inputmode="decimal" min="1" max="20" step="0.5"
+               value="@Pot.Size(potUpWarnCm)" @onchange="SetPotUpWarnCmAsync" />
+        <span class="input-group-text">cm wider</span>
+    </div>
+    <p class="settings-hint">
+        When you pick a new pot for a plant or a cutting, a note says if it is this much wider across the top than the old one. A wide pot keeps the soil wet longer.
     </p>
 </section>
 
@@ -401,6 +431,7 @@
     private int cleanWeeks = PestService.DefaultCleanWeeks;
     private static readonly int[] quarantineWeeksOptions = [1, 2, 3, 4];
     private int quarantineDays = Plant.DefaultQuarantineDays;
+    private decimal potUpWarnCm = PotSizeChange.DefaultWarnCm;
     private bool quarantineNewPlants;
     private ThemeMode mode;
     private EverydayNameLanguage everydayLanguage;
@@ -409,6 +440,10 @@
     private DateOnly? lastBackup;
     private bool photoReminder;
     private bool wateringReminder;
+    private int emptyOuterPotMinutes;
+
+    private static readonly (int Minutes, string Label)[] emptyOuterPotWaits =
+        [(15, "15 minutes"), (30, "30 minutes"), (60, "1 hour"), (120, "2 hours"), (180, "3 hours")];
     private bool dailyRound;
     private AccountState? account;
     private bool accountChecking;
@@ -438,6 +473,7 @@
         googlePhotos = settings.GooglePhotos;
         errorReportsOff = settings.ErrorReportsOff;
         wateringReminder = settings.WateringReminder;
+        emptyOuterPotMinutes = OuterPotReminders.WaitMinutes(settings);
         dailyRound = settings.DailyRound;
         roundDays = [.. settings.RoundDays ?? []];
         notifyAt = settings.NotifyAt ?? new TimeOnly(8, 0);
@@ -446,6 +482,7 @@
         recentChangesDays = RecentChanges.DaysOf(settings.RecentChangesDays);
         cleanWeeks = settings.CleanWeeks ?? PestService.DefaultCleanWeeks;
         quarantineDays = settings.QuarantineDays ?? Plant.DefaultQuarantineDays;
+        potUpWarnCm = PotSizeChange.WarnLimit(settings);
         quarantineNewPlants = settings.QuarantineNewPlants;
         everydayLanguage = await Names.GetEverydayLanguageAsync();
         roomCount = (await RoomService.GetAllAsync()).Count;
@@ -483,6 +520,20 @@
     {
         wateringReminder = e.Value is true;
         await SettingsService.SetWateringReminderAsync(wateringReminder);
+    }
+
+    private async Task SetEmptyOuterPotOnAsync(ChangeEventArgs e)
+    {
+        emptyOuterPotMinutes = e.Value is true ? OuterPotReminders.DefaultMinutes : 0;
+        await SettingsService.SetEmptyOuterPotMinutesAsync(emptyOuterPotMinutes);
+    }
+
+    private async Task SetEmptyOuterPotWaitAsync(ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var minutes) || minutes <= 0)
+            return;
+        emptyOuterPotMinutes = minutes;
+        await SettingsService.SetEmptyOuterPotMinutesAsync(minutes);
     }
 
     private async Task SetDailyRoundAsync(ChangeEventArgs e)
@@ -626,6 +677,17 @@
             notifyWeekdays.Add(day);
         await SettingsService.SetNotifyWeekdaysAsync(notifyWeekdays);
         await Notifications.UploadAsync(force: true);
+    }
+
+    private async Task SetPotUpWarnCmAsync(ChangeEventArgs e)
+    {
+        if (!decimal.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.InvariantCulture, out var cm))
+        {
+            return;
+        }
+        potUpWarnCm = Math.Clamp(cm, 1, 20);
+        await SettingsService.SetPotUpWarnCmAsync(potUpWarnCm);
     }
 
     private async Task SetQuarantineDaysAsync(int days)

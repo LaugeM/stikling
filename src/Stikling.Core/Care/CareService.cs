@@ -183,6 +183,47 @@ public sealed class CareService(
     public Task DeleteAsync(Guid id) => logs.DeleteAsync(id);
 
     /// <summary>
+    /// Fixes an entry typed in wrong. Only the date, reading, water, EC, pH and note change; what was
+    /// done, the plant, the products and the feed stay as stored. The plant's history is left alone.
+    /// </summary>
+    public async Task UpdateAsync(CareLog entry, DateOnly today)
+    {
+        if (await logs.GetAsync(entry.Id) is not { IsDeleted: false } stored)
+            throw new InvalidOperationException("That entry is gone, so it can't be changed.");
+
+        // Work on a copy, so an entry that doesn't pass leaves the stored one as it was
+        var changed = stored.Copy();
+        changed.OccurredOn = entry.OccurredOn;
+        changed.Moisture = entry.Moisture;
+        changed.WaterLitres = entry.WaterLitres;
+        changed.Ec = entry.Ec;
+        changed.Ph = entry.Ph;
+        changed.Notes = Clean(entry.Notes);
+
+        if (changed.Validate(today).FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+
+        await logs.SaveAsync(changed);
+    }
+
+    /// <summary>
+    /// Ticks off the "empty the outer pot" reminder on these waterings. Nothing goes on the plant's
+    /// history. Entries that are gone or already ticked are left as they are.
+    /// </summary>
+    public async Task MarkOuterPotEmptiedAsync(IEnumerable<Guid> careLogIds)
+    {
+        var now = time.GetUtcNow();
+        foreach (var id in careLogIds.Distinct())
+        {
+            if (await logs.GetAsync(id) is not { IsDeleted: false, OuterPotEmptiedAt: null } stored)
+                continue;
+            var changed = stored.Copy();
+            changed.OuterPotEmptiedAt = now;
+            await logs.SaveAsync(changed);
+        }
+    }
+
+    /// <summary>
     /// Takes back a watering or topping up from the watering screen: deletes that entry and the
     /// Fertilised entry logged with it, the one for the same plant and day with a feed that was
     /// saved within 5 seconds of the watering, either side. A feeding logged by hand at another

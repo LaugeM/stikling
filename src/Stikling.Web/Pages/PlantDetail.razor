@@ -90,9 +90,13 @@ else
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
+                    @if (plant.LivesElsewhere)
+                    {
+                        <p class="detail-sub">@(plant.LivesWithName is { } owner ? $"Lives with {owner}. " : "")Not in your collection.</p>
+                    }
                     <NumberClashNote Code="@plant.CollectionNumber" Clashes="numberClashes" />
                     <div class="profile-badges">
-                        @if (!plant.InCollection)
+                        @if (!plant.InCollection && !plant.LivesElsewhere)
                         {
                             <span class="badge text-bg-secondary">@Labels.StatusOf(plant, pottedWithPlant?.DisplayName)</span>
                         }
@@ -295,11 +299,11 @@ else
                 <p class="profile-facts">
                     @if (ancestors.Count > 0 && fromPropagation is not null)
                     {
-                        <text>from <a class="link-action" href="propagations/@fromPropagation.Id">@TypeWithArticle(fromPropagation.Type)</a> of <a class="link-action" href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a></text>
+                        <text>from <a class="link-action" href="propagations/@fromPropagation.Id">@TypeWithArticle(fromPropagation.Type)</a> of <a class="link-action" href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a>@ParentNote(ancestors[0])</text>
                     }
                     else if (ancestors.Count > 0)
                     {
-                        <text>from <a class="link-action" href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a></text>
+                        <text>from <a class="link-action" href="plants/@ancestors[0].Id">@ancestors[0].DisplayName</a>@ParentNote(ancestors[0])</text>
                     }
                     else if (fromPropagation is not null)
                     {
@@ -605,7 +609,13 @@ else
                             }
                             @foreach (var ancestor in ancestors)
                             {
-                                <li><a href="plants/@ancestor.Id">@ancestor.DisplayName</a></li>
+                                <li>
+                                    <a href="plants/@ancestor.Id">@ancestor.DisplayName</a>
+                                    @if (ancestor.LivesElsewhere)
+                                    {
+                                        <span class="text-body-secondary small"> · @(ancestor.LivesWithName is { } owner ? $"lives with {owner}" : "not yours")</span>
+                                    }
+                                </li>
                             }
                         </ul>
                     }
@@ -738,7 +748,16 @@ else
 
     <ShowFound ElementId="@(Entry is { } found ? $"entry-{found}" : null)" Ready="@(loaded && (Tab != "care" || careOpen))" />
 
-    <Sheet Title="Care" @bind-Open="careOpen">
+    <Sheet Title="Care" Open="careOpen" OpenChanged="open => { careOpen = open; if (!open) careEditing = null; }">
+      @if (careEditing is not null)
+      {
+        <div class="sheet-section">
+            <CareEntryEditor @key="careEditing.Id" Entry="careEditing" OwnKinds="ownKindLookup"
+                             OnDone="CareFixedAsync" OnBack="() => careEditing = null" />
+        </div>
+      }
+      else
+      {
         <div class="sheet-section">
             @if (care.Count == 0)
             {
@@ -801,15 +820,18 @@ else
                     @foreach (var entry in care)
                     {
                         <li id="entry-@entry.Id">
-                            <div class="care-entry">
+                            <button type="button" class="care-entry care-editable" @onclick="() => careEditing = entry"
+                                    aria-label="@($"Fix or delete: {CareService.Describe(entry, Labels.For, ownKindLookup)}, {Labels.Date(entry.OccurredOn)}")">
                                 <span class="care-what">@CareService.Describe(entry, Labels.For, ownKindLookup)</span>
                                 <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
-                            </div>
+                                <svg class="care-edit-hint" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+                            </button>
                         </li>
                     }
                 </ul>
             </div>
         }
+      }
     </Sheet>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="plant.Id"
@@ -940,6 +962,15 @@ else
                             </button>
                         </li>
                     }
+                    else if (plant.LivesElsewhere)
+                    {
+                        <li>
+                            <a class="sheet-action" href="plants/@plant.Id/edit">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+                                <span class="sheet-action-text"><b>It's mine now</b><small>Untick that it lives with someone else</small></span>
+                            </a>
+                        </li>
+                    }
                     else if (plant.Status == PlantStatus.Active)
                     {
                         <li>
@@ -989,6 +1020,12 @@ else
                 }
                 else
                 {
+                    <InfoButton Topic="potting together">
+                        <Label><span class="form-label mb-0">Into another plant's pot</span></Label>
+                        <ChildContent>
+                            The plant goes into another plant's pot and counts as part of it. It leaves your list and Today, and its history is kept.
+                        </ChildContent>
+                    </InfoButton>
                     <div class="mb-3">
                         <PlantSelect Plants="allPlants" Genus="@plant.Genus" Except="plant.Id" Value="pottingInto" ValueChanged="id => pottingInto = id" />
                         <div class="form-text">It takes that plant's pot, medium and room, and is counted in it. It keeps its own history.</div>
@@ -1028,6 +1065,15 @@ else
                 break;
 
             case More.SomeForm:
+                @if (someKind == SomeKind.PottedUp)
+                {
+                    <InfoButton Topic="potting some up on their own">
+                        <Label><span class="form-label mb-0">On their own</span></Label>
+                        <ChildContent>
+                            For a pot with several of the same plant. Some go into pots of their own and become plants of their own.
+                        </ChildContent>
+                    </InfoButton>
+                }
                 <div class="mb-3">
                     <label class="form-label" for="some-count">How many (of @plant.HowMany)</label>
                     <input id="some-count" type="number" class="form-control" min="1" max="@(plant.HowMany - 1)"
@@ -1398,6 +1444,10 @@ else
 
     private IReadOnlyList<CodeClash> numberClashes = [];
     private IReadOnlyList<Plant> ancestors = [];
+
+    // A parent that lives with someone else says so, as "(lives with Grandma)" or "(not yours)"
+    private static string ParentNote(Plant parent) =>
+        !parent.LivesElsewhere ? "" : parent.LivesWithName is { } owner ? $" (lives with {owner})" : " (not yours)";
     private IReadOnlyList<Plant> offspring = [];
     private PlantGiven given = new([], 0, 0, 0, 0);
     private IReadOnlyList<Propagation> propagations = [];
@@ -1893,6 +1943,15 @@ else
             id => pots.FirstOrDefault(p => p.Id == id), await LightService.GetAllAsync(), places,
             await AwayService.GetAllAsync(), Seasons.HemisphereOf(TimeZoneInfo.Local), Time);
         wateringLine = WateringText.Summary(guess);
+    }
+
+    // The entry open for fixing in the Care sheet, or null while the history shows
+    private CareLog? careEditing;
+
+    private async Task CareFixedAsync()
+    {
+        careEditing = null;
+        await ReloadCareAsync();
     }
 
     private async Task CareLoggedAsync()

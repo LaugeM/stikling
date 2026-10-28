@@ -85,7 +85,8 @@ public sealed record PlantFilter(
 {
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
         Order(plants
-            .Where(p => !p.IsDeleted)
+            // A plant that lives with someone else isn't in the list at all, not even under Gone or All
+            .Where(p => !p.IsDeleted && !p.LivesElsewhere)
             .Where(MatchesStatus)
             .Where(MatchesLocation)
             .Where(p => !Quarantine || p.InQuarantine)

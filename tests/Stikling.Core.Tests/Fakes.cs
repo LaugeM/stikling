@@ -229,6 +229,9 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
             .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant
                 && TimelineEvents.Of(e) != TimelineEvent.LookedOver).ToList());
 
+    public Task<IReadOnlyList<TimelineEntry>> GetComingBackAsync() =>
+        Task.FromResult<IReadOnlyList<TimelineEntry>>(Entries.Where(NotesComingBack.IsWaiting).ToList());
+
     public Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetLastActivityBeforeAsync(DateTimeOffset before) =>
         Task.FromResult(TimelineActivity.LastBefore(Entries, before));
 

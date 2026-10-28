@@ -127,6 +127,22 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    /// <summary>Sets how many cm wider a new pot can be before Pot up says so.</summary>
+    public async Task SetPotUpWarnCmAsync(decimal cm)
+    {
+        var current = await GetAsync();
+        current.PotUpWarnCm = Math.Clamp(cm, 1, 20);
+        await settings.SaveAsync(current);
+    }
+
+    /// <summary>Sets how long after watering Today reminds you to empty the outer pot. 0 turns it off.</summary>
+    public async Task SetEmptyOuterPotMinutesAsync(int minutes)
+    {
+        var current = await GetAsync();
+        current.EmptyOuterPotMinutes = Math.Clamp(minutes, 0, 24 * 60);
+        await settings.SaveAsync(current);
+    }
+
     /// <summary>Sets whether bought, swapped and gifted plants start in quarantine when they're added.</summary>
     public async Task SetQuarantineNewPlantsAsync(bool on)
     {

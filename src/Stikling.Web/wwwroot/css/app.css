@@ -3613,3 +3613,38 @@ button.search-recent svg {
         background-color: var(--pa-green-soft);
     }
 }
+
+/* A care entry in a plant history that opens to be fixed */
+.care-editable {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 2.75rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    text-align: left;
+    font: inherit;
+}
+
+.care-editable .care-what {
+    flex: 1 1 auto;
+}
+
+.care-edit-hint {
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: var(--pa-muted);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.care-editable:hover,
+.care-editable:focus-visible {
+    background: var(--pa-green-soft);
+}

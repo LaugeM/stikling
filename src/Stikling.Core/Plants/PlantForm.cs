@@ -74,7 +74,7 @@ public sealed class PlantForm
         CopiedDate = copiedDate;
         CopiedFrom = copiedFrom;
         Wish = wish;
-        Plants = data.Plants;
+        plantList = [.. data.Plants];
         Propagations = data.Propagations;
         Places = data.Places;
         pots = [.. data.Pots];
@@ -144,7 +144,19 @@ public sealed class PlantForm
     /// <summary>As picked, "Living room / Windowsill". A room is made from it when saving.</summary>
     public string? Location { get; set; }
 
-    public IReadOnlyList<Plant> Plants { get; }
+    public IReadOnlyList<Plant> Plants => plantList;
+
+    private readonly List<Plant> plantList;
+
+    /// <summary>
+    /// Makes a plant saved while the form is open, like a parent that lives with someone else,
+    /// known to the form so the parent picker can list it.
+    /// </summary>
+    public void AddKnownPlant(Plant plant)
+    {
+        if (plantList.All(p => p.Id != plant.Id))
+            plantList.Add(plant);
+    }
 
     public IReadOnlyList<Propagation> Propagations { get; }
 
@@ -175,6 +187,16 @@ public sealed class PlantForm
     public string? FieldInput(Guid fieldId) => fieldInputs.GetValueOrDefault(fieldId);
 
     public void SetFieldInput(Guid fieldId, string? value) => fieldInputs[fieldId] = value;
+
+    /// <summary>
+    /// How much wider the inner pot picked now is than the one saved, for a note under the picker.
+    /// Null for a new plant, when the pot hasn't changed or when a width is missing.
+    /// </summary>
+    public PotSizeChange? InnerPotChange =>
+        Original?.InnerPotId is { } was && Plant.InnerPotId is { } now && was != now
+            ? PotSizeChange.Between(pots.FirstOrDefault(p => p.Id == was), pots.FirstOrDefault(p => p.Id == now),
+                PotSizeChange.WarnLimit(Settings))
+            : null;
 
     public string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
 
