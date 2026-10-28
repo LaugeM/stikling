@@ -1,0 +1,357 @@
+@page "/treatment-plans"
+@inject ITreatmentPlanRepository Repository
+@inject ITreatmentRecipeRepository RecipeRepository
+
+<PageTitle>Treatment plans · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+<ShowFound ElementId="@(Show is { } shown ? $"item-{shown}" : null)" />
+
+<a class="back-link" href="supplies">Supplies</a>
+<h1>Treatment plans</h1>
+
+<p class="settings-hint">
+    A set of treatments in order, like a spray, the same spray again after 3 days, and predatory
+    mites after 10 more. Start one on a pest case and the case is due each step in turn. A case
+    keeps its own copy of the steps, so editing a plan here doesn't change one that's running.
+</p>
+
+@if (errors.Count > 0)
+{
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in errors)
+        {
+            <div>@error</div>
+        }
+    </div>
+}
+
+@if (draft is not null)
+{
+    <section class="settings-section">
+        <h2>@(editing ? "Edit plan" : "Add a plan")</h2>
+
+        <div class="mb-3">
+            <label class="form-label" for="plan-name">Name</label>
+            <input id="plan-name" class="form-control" placeholder="e.g. Spider mites, three rounds" autocomplete="off"
+                   value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label">Steps</div>
+
+            <ol class="plan-steps">
+                @for (var i = 0; i < draft.Steps.Count; i++)
+                {
+                    var index = i;
+                    var step = draft.Steps[index];
+                    <li class="plan-step">
+                        <div class="plan-step-head">
+                            <div class="plan-step-days">
+                                @if (index == 0)
+                                {
+                                    <span class="plan-first">First step</span>
+                                }
+                                else
+                                {
+                                    <label class="form-label" for="@($"plan-days-{index}")">Days after the step before</label>
+                                    <input id="@($"plan-days-{index}")" type="number" min="1" inputmode="numeric"
+                                           class="form-control" value="@step.DaysAfter"
+                                           @onchange="e => SetDays(step, e.Value?.ToString())" />
+                                }
+                            </div>
+                            <div class="plan-tools">
+                                <button type="button" class="plan-tool" disabled="@(index == 0)"
+                                        aria-label="Move step @(index + 1) up"
+                                        @onclick="() => MoveUp(index)">▲</button>
+                                <button type="button" class="plan-tool" disabled="@(index == draft.Steps.Count - 1)"
+                                        aria-label="Move step @(index + 1) down"
+                                        @onclick="() => MoveDown(index)">▼</button>
+                                <button type="button" class="plan-tool remove" aria-label="Remove step @(index + 1)"
+                                        @onclick="() => Remove(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                            </div>
+                        </div>
+
+                        @if (recipes.Count > 0)
+                        {
+                            <div class="chip-row mb-2" role="group" aria-label="Recipes for step @(index + 1)">
+                                @foreach (var recipe in recipes)
+                                {
+                                    <button type="button" class="chip @(step.RecipeId == recipe.Id ? "picked" : null)"
+                                            aria-pressed="@(step.RecipeId == recipe.Id ? "true" : "false")"
+                                            @onclick="() => Pick(step, recipe)">@recipe.Name</button>
+                                }
+                            </div>
+                        }
+
+                        <div class="mb-2">
+                            <label class="form-label" for="@($"plan-what-{index}")">What</label>
+                            <input id="@($"plan-what-{index}")" class="form-control" autocomplete="off"
+                                   placeholder="e.g. Release predatory mites" value="@step.What"
+                                   @oninput="e => TypeWhat(step, e.Value?.ToString())" />
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="@($"plan-note-{index}")">Note</label>
+                            <input id="@($"plan-note-{index}")" class="form-control" autocomplete="off"
+                                   placeholder="e.g. Hang the sachets near the worst plants" value="@step.Notes"
+                                   @oninput="e => step.Notes = e.Value?.ToString()" />
+                        </div>
+                    </li>
+                }
+            </ol>
+
+            <button type="button" class="btn btn-outline-primary btn-sm" @onclick="AddStep">Add a step</button>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="plan-notes">Notes</label>
+            <textarea id="plan-notes" class="form-control" rows="2"
+                      placeholder="e.g. What this plan is for" @bind="draft.Notes"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">
+                @(editing ? "Save changes" : "Add plan")
+            </button>
+            <button type="button" class="btn btn-link" @onclick="Cancel">Cancel</button>
+            @if (editing)
+            {
+                <button type="button" class="btn btn-link text-danger" @onclick="() => confirming = draft.Id">Delete</button>
+            }
+        </div>
+
+        @if (editing && confirming == draft.Id)
+        {
+            <div class="plan-confirm">
+                <p>Delete @(draft.Name)? Cases following it keep their steps.</p>
+                <div class="care-actions">
+                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
+                            @onclick="() => DeleteAsync(draft)">Delete</button>
+                    <button type="button" class="btn btn-link btn-sm" @onclick="() => confirming = null">Cancel</button>
+                </div>
+            </div>
+        }
+    </section>
+}
+else
+{
+    <div class="form-actions mb-3">
+        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a plan</button>
+    </div>
+}
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (plans.Count == 0)
+{
+    <div class="empty-state">
+        <p>No plans yet.</p>
+        <p class="text-body-secondary">
+            Treatments often come in a sequence: spray, spray again after 3 days, then release
+            predatory mites after 10. Save it once as a plan and start it on a pest case.
+        </p>
+    </div>
+}
+else
+{
+    <section class="settings-section">
+        <h2>Your plans</h2>
+
+        <ul class="plan-list">
+            @foreach (var plan in plans)
+            {
+                <li id="item-@plan.Id">
+                    <div class="plan-title">@plan.Name</div>
+                    <div class="plan-summary">@plan.Summary()</div>
+                    <ol class="plan-contents">
+                        @foreach (var step in plan.Steps)
+                        {
+                            <li>@What(step)</li>
+                        }
+                    </ol>
+                    @if (!string.IsNullOrWhiteSpace(plan.Notes))
+                    {
+                        <div class="plan-summary">@plan.Notes</div>
+                    }
+                    <div class="care-actions">
+                        <button type="button" class="btn btn-link btn-sm link-action"
+                                @onclick="() => StartEdit(plan)">Edit</button>
+                    </div>
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+@code {
+    /// <summary>An item to scroll to and mark. Set by Search.</summary>
+    [SupplyParameterFromQuery(Name = "show")]
+    public Guid? Show { get; set; }
+
+    private IReadOnlyList<TreatmentPlan> plans = [];
+    private IReadOnlyList<TreatmentRecipe> recipes = [];
+    private bool loading = true;
+    private bool busy;
+    private List<string> errors = [];
+
+    private TreatmentPlan? draft;
+    private bool editing;
+    private Guid? confirming;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        plans = (await Repository.GetAllAsync())
+            .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        recipes = (await RecipeRepository.GetAllAsync())
+            .OrderBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        loading = false;
+    }
+
+    /// <summary>A step in the list: what it uses, and how long after the step before.</summary>
+    private string What(PlanStep step)
+    {
+        var what = step.RecipeId is { } id && recipes.FirstOrDefault(r => r.Id == id) is { } recipe
+            ? recipe.Name
+            : step.What;
+        what = string.IsNullOrWhiteSpace(what) ? "Step" : what.Trim();
+        return step.DaysAfter > 0 ? $"{what}, {Labels.Count(step.DaysAfter, "day")} later" : what;
+    }
+
+    private void AddStep()
+    {
+        // A new step defaults to a week after the one before; the first is always the start day
+        draft!.Steps.Add(new PlanStep { DaysAfter = draft.Steps.Count == 0 ? 0 : 7 });
+    }
+
+    private void SetDays(PlanStep step, string? value)
+    {
+        if (int.TryParse(value, out var days))
+            step.DaysAfter = days;
+    }
+
+    private void Pick(PlanStep step, TreatmentRecipe recipe)
+    {
+        if (step.RecipeId == recipe.Id)
+        {
+            step.RecipeId = null;
+            return;
+        }
+
+        step.RecipeId = recipe.Id;
+        step.What = recipe.Name?.Trim();
+    }
+
+    // Typing something else means it's no longer the recipe
+    private void TypeWhat(PlanStep step, string? value)
+    {
+        step.What = value;
+        if (step.RecipeId is { } id && recipes.FirstOrDefault(r => r.Id == id)?.Name?.Trim() != value?.Trim())
+            step.RecipeId = null;
+    }
+
+    // The first step is always the start day, whichever step ends up there
+    private void MoveUp(int index)
+    {
+        draft!.MoveUp(index);
+        FixFirst();
+    }
+
+    private void MoveDown(int index)
+    {
+        draft!.MoveDown(index);
+        FixFirst();
+    }
+
+    private void Remove(int index)
+    {
+        draft!.Steps.RemoveAt(index);
+        FixFirst();
+    }
+
+    private void FixFirst()
+    {
+        if (draft!.Steps.Count > 0)
+            draft.Steps[0].DaysAfter = 0;
+        foreach (var step in draft.Steps.Skip(1).Where(s => s.DaysAfter < 1))
+            step.DaysAfter = 7;
+    }
+
+    private void StartNew()
+    {
+        editing = false;
+        errors = [];
+        confirming = null;
+        draft = new TreatmentPlan { Steps = [new PlanStep()] };
+    }
+
+    private void StartEdit(TreatmentPlan plan)
+    {
+        editing = true;
+        errors = [];
+        confirming = null;
+        draft = plan.Copy();
+    }
+
+    private void Cancel()
+    {
+        draft = null;
+        editing = false;
+        confirming = null;
+        errors = [];
+    }
+
+    private async Task SaveAsync()
+    {
+        if (draft is null)
+            return;
+
+        draft.Name = draft.Name?.Trim();
+        draft.Notes = string.IsNullOrWhiteSpace(draft.Notes) ? null : draft.Notes.Trim();
+        foreach (var step in draft.Steps)
+        {
+            step.What = string.IsNullOrWhiteSpace(step.What) ? null : step.What.Trim();
+            step.Notes = string.IsNullOrWhiteSpace(step.Notes) ? null : step.Notes.Trim();
+        }
+
+        errors = draft.Validate().ToList();
+        if (errors.Count > 0)
+            return;
+
+        busy = true;
+        try
+        {
+            await Repository.SaveAsync(draft);
+            await LoadAsync();
+            Cancel();
+        }
+        catch (InvalidOperationException e)
+        {
+            errors = [e.Message];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task DeleteAsync(TreatmentPlan plan)
+    {
+        busy = true;
+        try
+        {
+            await Repository.DeleteAsync(plan.Id);
+            Cancel();
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

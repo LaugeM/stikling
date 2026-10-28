@@ -4,7 +4,11 @@
 @inject ProductService ProductService
 @inject IFeedRepository FeedRepository
 @inject ITreatmentRecipeRepository RecipeRepository
+@inject ITreatmentPlanRepository PlanRepository
 @inject IPestCaseRepository PestCaseRepository
+@inject IPlantRepository PlantRepository
+@inject ProblemService ProblemService
+@inject SellerService SellerService
 
 <PageTitle>Supplies · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -12,10 +16,13 @@
 <h1>Supplies</h1>
 
 <p class="settings-hint">
-    The pots, mixes and products you use, so a plant or a treatment can point at them instead of you typing them again.
+    The sellers your plants came from, and the pots, mixes and products you use, so a plant or a treatment can point at them instead of you typing them again.
 </p>
 
 <div class="settings-rows">
+    <SettingsRow Href="sellers" Title="Sellers" Detail="@SellersDetail">
+        <Icon><path d="M4 9.5 5.5 4h13L20 9.5" /><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0" /><path d="M5.5 12.5V20h13v-7.5" /></Icon>
+    </SettingsRow>
     <SettingsRow Href="pots" Title="Pots" Detail="@PotSummary">
         <Icon><path d="M4.5 4.5h15v3.5h-15Z" /><path d="M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8" /></Icon>
     </SettingsRow>
@@ -31,12 +38,15 @@
     <SettingsRow Href="treatment-recipes" Title="Treatment recipes" Detail="@RecipeSummary">
         <Icon><path d="M8.5 21h6a1 1 0 0 0 1-1v-7l-2-2h-4l-2 2v7a1 1 0 0 0 1 1Z" /><path d="M10.5 11V8h5.5l2.5-1.5" /><path d="M13 8V5.5" /><path d="M20.5 9.5H22M20 12h1.5" /></Icon>
     </SettingsRow>
+    <SettingsRow Href="treatment-plans" Title="Treatment plans" Detail="@PlanSummary">
+        <Icon><circle cx="6" cy="6" r="2" /><circle cx="6" cy="12" r="2" /><circle cx="6" cy="18" r="2" /><path d="M11 6h9M11 12h9M11 18h6" /></Icon>
+    </SettingsRow>
 </div>
 
-@* Pests has its own tab only while a case is open, so this is the way in the rest of the time *@
-<h2 class="section-label mt-4">Pests</h2>
+@* Pests has its own tab only while a case or a problem is open, so this is the way in the rest of the time *@
+<h2 class="section-label mt-4">Pests and problems</h2>
 <div class="settings-rows">
-    <SettingsRow Href="pests" Title="Pest cases" Detail="@PestSummary">
+    <SettingsRow Href="pests" Title="Pest cases and problems" Detail="@PestSummary">
         <Icon><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></Icon>
     </SettingsRow>
 </div>
@@ -45,9 +55,12 @@
     private IReadOnlyList<PotUse> pots = [];
     private IReadOnlyList<MixUse> mixes = [];
     private IReadOnlyList<ProductUse> products = [];
+    private int sellers;
     private int feeds;
     private int recipes;
+    private int treatmentPlans;
     private IReadOnlyList<PestCase> pestCases = [];
+    private int openProblems;
 
     protected override async Task OnInitializedAsync() => await LoadDataAsync();
 
@@ -56,16 +69,37 @@
         pots = await PotService.GetAllAsync();
         mixes = await MixService.GetAllAsync();
         products = await ProductService.GetAllAsync();
+        sellers = (await SellerService.GetSellersAsync()).Live.Count();
         feeds = (await FeedRepository.GetAllAsync()).Count;
         recipes = (await RecipeRepository.GetAllAsync()).Count;
+        treatmentPlans = (await PlanRepository.GetAllAsync()).Count;
         pestCases = await PestCaseRepository.GetAllAsync();
+        var plants = await PlantRepository.GetAllAsync();
+        openProblems = (await ProblemService.AllAsync())
+            .Count(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.InCollection));
     }
 
+    private string SellersDetail =>
+        sellers == 0 ? "Where your plants came from" : Labels.Count(sellers, "seller");
+
     /// <summary>"6 pots, 2 free", or what pots are when there are none.</summary>
-    private string PotSummary =>
-        pots.Count == 0
-            ? "The pots you own, nursery or decorative"
-            : $"{Labels.Count(pots.Sum(p => p.Here), "pot")}, {pots.Sum(p => p.Free)} free";
+    private string PotSummary
+    {
+        get
+        {
+            var plain = pots.Where(p => p.Pot.Kind != PotKind.Propagation).ToList();
+            var boxes = pots.Where(p => p.Pot.Kind == PotKind.Propagation).Sum(p => p.Here);
+            if (plain.Count == 0 && boxes == 0)
+                return "The pots you own, nursery or decorative";
+
+            var parts = new List<string>();
+            if (plain.Count > 0)
+                parts.Add($"{Labels.Count(plain.Sum(p => p.Here), "pot")}, {plain.Sum(p => p.Free)} free");
+            if (boxes > 0)
+                parts.Add(Labels.Count(boxes, "container"));
+            return string.Join(", ", parts);
+        }
+    }
 
     /// <summary>"3 mixes, 1 no longer mixed", or what mixes are when there are none.</summary>
     private string MixSummary => mixes.Count switch
@@ -81,13 +115,20 @@
 
     private string FeedSummary => feeds == 0 ? "How you dilute a product to water with" : Labels.Count(feeds, "feed");
 
-    /// <summary>"2 open", or what a case is for when none are open.</summary>
+    /// <summary>"2 open", or what a case is for when none are open, and "1 problem" for the open problems.</summary>
     private string PestSummary => pestCases.Count(c => c.IsOpen) switch
     {
+        0 when openProblems > 0 && pestCases.Count > 0 => $"None open, {pestCases.Count} resolved{ProblemsPart}",
+        0 when openProblems > 0 => $"No pest cases{ProblemsPart}",
         0 when pestCases.Count > 0 => $"None open, {pestCases.Count} resolved",
         0 => "Open one when you find pests, to keep track of the treatments",
-        var open => $"{open} open"
+        var open => $"{open} open{ProblemsPart}"
     };
+
+    private string ProblemsPart => openProblems == 0 ? "" : $", {Labels.Count(openProblems, "problem")}";
+
+    private string PlanSummary =>
+        treatmentPlans == 0 ? "Steps to follow on a pest case" : Labels.Count(treatmentPlans, "plan");
 
     private string RecipeSummary =>
         recipes == 0 ? "Sprays you mix the same way each time" : Labels.Count(recipes, "recipe");

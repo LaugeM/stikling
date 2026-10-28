@@ -35,8 +35,9 @@ public class WateringGuessTests
         double? factor = null,
         IEnumerable<TimelineEntry>? timeline = null,
         WateringForm form = WateringForm.TopWatered,
-        Hemisphere hemisphere = Hemisphere.Northern) =>
-        WateringGuess.Of(plant, logs, timeline ?? [], form, lit, hemisphere, today, factor, TimeOn(today));
+        Hemisphere hemisphere = Hemisphere.Northern,
+        IReadOnlyList<AwayStretch>? stretches = null) =>
+        WateringGuess.Of(plant, logs, timeline ?? [], form, lit, hemisphere, today, factor, stretches ?? [], TimeOn(today));
 
     [Fact]
     public void It_says_nothing_until_there_are_four_waterings()
@@ -319,6 +320,31 @@ public class WateringGuessTests
         Log(plant, new DateOnly(2026, 4, 22), CareKind.MoistureReading, 2),
         Log(plant, new DateOnly(2026, 4, 29))
     ];
+
+    [Fact]
+    public void A_reading_of_0_counts_as_dry_like_any_reading_at_or_below_the_watering_level()
+    {
+        var plant = new Plant { Nickname = "Monstera" };
+        var logs = MeterCycles(plant);
+        var today = new DateOnly(2026, 5, 5);
+
+        logs.Add(Log(plant, today, CareKind.MoistureReading, 0));
+        var guess = Guess(plant, logs, today);
+
+        Assert.Equal(WateringMode.Meter, guess.Mode);
+        Assert.Equal(today, guess.CheckOn);
+        Assert.Equal(0, guess.LatestReading!.Value);
+
+        // And a 0 in an earlier cycle is a dry-down like a 2 is
+        var earlier = new List<CareLog>
+        {
+            Log(plant, new DateOnly(2026, 4, 1)),
+            Log(plant, new DateOnly(2026, 4, 8), CareKind.MoistureReading, 0),
+            Log(plant, new DateOnly(2026, 4, 15)),
+            Log(plant, new DateOnly(2026, 4, 29))
+        };
+        Assert.Equal(WateringMode.Meter, Guess(plant, earlier, new DateOnly(2026, 4, 30)).Mode);
+    }
 
     [Fact]
     public void A_wet_reading_this_round_moves_the_day_later()

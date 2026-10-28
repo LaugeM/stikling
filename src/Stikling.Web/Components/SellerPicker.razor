@@ -1,0 +1,69 @@
+@* Where something came from. A text box with the sellers you have as chips under it, because a
+   datalist is invisible on a phone. A name that isn't a seller yet becomes one when the form is saved. *@
+
+<div class="seller-picker">
+    <label class="form-label" for="@Id">@Label</label>
+    <input id="@Id" class="form-control" autocomplete="off" placeholder="@Placeholder"
+           value="@Value" @oninput="TypeAsync" />
+
+    @if (Matching.Count > 0)
+    {
+        <div class="chip-row mt-2" role="group" aria-label="Sellers you have">
+            @foreach (var name in Matching)
+            {
+                <button type="button" class="chip" @onclick="() => SetAsync(name)">@name</button>
+            }
+        </div>
+    }
+
+    @if (IsNew)
+    {
+        <div class="form-text">"@SellerName.Clean(Value)" will be added to your sellers when you save.</div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>The names of the sellers to offer, the ones used most first.</summary>
+    [Parameter]
+    public IReadOnlyList<string> Names { get; set; } = [];
+
+    [Parameter]
+    public string Label { get; set; } = "Where from";
+
+    [Parameter]
+    public string Placeholder { get; set; } = "Shop, friend, plant swap…";
+
+    [Parameter]
+    public string Id { get; set; } = "seller";
+
+    private const int MostShown = 8;
+
+    // The ones that fit what's typed, leaving out the one that already says it
+    private IReadOnlyList<string> Matching
+    {
+        get
+        {
+            var typed = SellerName.Clean(Value);
+            return Names
+                .Where(n => typed is null || (!SellerName.Same(n, typed) && n.Contains(typed, StringComparison.CurrentCultureIgnoreCase)))
+                .Take(MostShown)
+                .ToList();
+        }
+    }
+
+    private bool IsNew => SellerName.Clean(Value) is { } typed && !Names.Any(n => SellerName.Same(n, typed));
+
+    private Task TypeAsync(ChangeEventArgs e) => SetAsync(e.Value?.ToString());
+
+    private Task SetAsync(string? text)
+    {
+        Value = text;
+        return ValueChanged.InvokeAsync(text);
+    }
+}

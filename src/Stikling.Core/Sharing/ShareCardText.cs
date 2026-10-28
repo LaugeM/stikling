@@ -24,7 +24,7 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
     /// <param name="parent">The plant it was taken from, when it has one that isn't deleted.</param>
     public static ShareCardText ForPropagation(Propagation propagation, Plant? parent, DateOnly today)
     {
-        var (latin, cultivar) = Botanical(propagation.Nickname, propagation.Genus, propagation.Species, propagation.Cultivar);
+        var (latin, cultivar) = Botanical(propagation.Nickname, propagation.Genus, propagation.Species, propagation.Cultivar, propagation.NameQualifier, propagation.NameNote);
         return new ShareCardText(propagation.DisplayName, latin, cultivar, PropagationLine(propagation, parent, today), PropagationFigure(propagation, today));
     }
 
@@ -37,16 +37,18 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
     /// <param name="taken">The propagations taken from this plant.</param>
     public static ShareCardText ForPlant(Plant plant, Plant? parent, Propagation? from, IReadOnlyCollection<Propagation> taken, DateOnly today)
     {
-        var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar);
+        var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameQualifier, plant.NameNote);
         return new ShareCardText(plant.DisplayName, latin, cultivar, PlantLine(plant, parent, from, today), PlantFigure(plant, from, taken, today));
     }
 
     // The botanical name goes under the name, unless it is the name already
-    private static (string? Latin, string? Cultivar) Botanical(string? nickname, string? genus, string? species, string? cultivar)
+    private static (string? Latin, string? Cultivar) Botanical(string? nickname, string? genus, string? species, string? cultivar,
+        NameQualifier? qualifier, string? note)
     {
         if (string.IsNullOrWhiteSpace(nickname))
             return (null, null);
-        var latin = string.Join(' ', new[] { PlantNames.Genus(genus), PlantNames.Species(species) }.OfType<string>());
+        // The note ends the botanical name, so it is set with the Latin part
+        var latin = PlantNames.Botanical(genus, species, null, qualifier, note) ?? "";
         return (latin.Length > 0 ? latin : null, PlantNames.Cultivar(cultivar));
     }
 
@@ -124,7 +126,7 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
         var first = origin is null ? Capital(rooted) : rooted is null ? origin : $"{origin}, {rooted}";
 
         // Only a plant that is still here has been "with me" until now, since the day it left isn't kept
-        var since = plant.Status == PlantStatus.Active && plant.AcquiredOn is { } acquired ? $"With me since {acquired.Text()}" : null;
+        var since = plant.InCollection && plant.AcquiredOn is { } acquired ? $"With me since {acquired.Text()}" : null;
 
         var sentences = new[] { first, since }.OfType<string>().Select(s => s + ".").ToList();
         return sentences.Count == 0 ? null : string.Join(' ', sentences);
@@ -139,7 +141,7 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
             return Counted(sign, from.Type == PropagationType.Seed ? "to come up" : "to root");
 
         // Only a day that was entered whole can be counted from; a month or a year would be a guess
-        if (plant.Status == PlantStatus.Active && plant.AcquiredOn is { Precision: DatePrecision.Day } acquired)
+        if (plant.InCollection && plant.AcquiredOn is { Precision: DatePrecision.Day } acquired)
         {
             var date = acquired.Start;
             var days = today.DayNumber - date.DayNumber;

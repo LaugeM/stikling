@@ -1,0 +1,48 @@
+.plan-progress {
+    list-style: none;
+    margin: 0 0 0.75rem;
+    padding: 0;
+}
+
+.plan-progress-step {
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.plan-progress-step:first-child {
+    border-top: 0;
+}
+
+.plan-progress-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.15rem 0.75rem;
+}
+
+.plan-progress-what {
+    font-weight: 600;
+}
+
+.plan-progress-when {
+    color: var(--pa-muted);
+    font-size: 0.9rem;
+}
+
+.plan-progress-step.current .plan-progress-when {
+    color: inherit;
+}
+
+.plan-progress-note {
+    margin: 0.15rem 0 0;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.plan-move {
+    margin-top: 0.5rem;
+}
+
+.plan-date {
+    max-width: 11rem;
+}

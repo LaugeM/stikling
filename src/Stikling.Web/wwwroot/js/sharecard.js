@@ -16,26 +16,26 @@ export const SIZES = {
     story: { width: 1080, height: 1920, name: 84, latin: 46, line: 48, figure: 420, nameLines: 2, lineLines: 5, safeBottom: 0.8 },
 };
 
-const PAPER = "#f6f7f4";
-const SURFACE = "#ffffff";
-const BORDER = "#dde3dc";
-const INK = "#1d2520";
-const MUTED = "#5f6b63";
-const DEEP_MOSS = "#1f5a37";
-const POTTING_GREEN = "#2f7d4f";
-const LEAF_TINT = "#e6f2ea";
-const CLAY = "#b85c38";
-const CLAY_SOFT = "#f6e6dc";
+export const PAPER = "#f6f7f4";
+export const SURFACE = "#ffffff";
+export const BORDER = "#dde3dc";
+export const INK = "#1d2520";
+export const MUTED = "#5f6b63";
+export const DEEP_MOSS = "#1f5a37";
+export const POTTING_GREEN = "#2f7d4f";
+export const LEAF_TINT = "#e6f2ea";
+export const CLAY = "#b85c38";
+export const CLAY_SOFT = "#f6e6dc";
 
-const DISPLAY = '"Bricolage Grotesque", system-ui, sans-serif';
-const BODY = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+export const DISPLAY = '"Bricolage Grotesque", system-ui, sans-serif';
+export const BODY = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
 
-const MARGIN = 72;
-const PAIR_GAP = 8; // between the two photos of a before and after card
+export const MARGIN = 72;
+export const PAIR_GAP = 8; // between the two photos of a before and after card
 export const PILL_INSET = 24;
 
 // The stroked icons from the app, for a card with neither photo nor number
-const ICONS = {
+export const ICONS = {
     plant: ["M12 21v-9", "M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z", "M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z"],
     propagation: ["M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z", "M12 12v4M12 16l-2 2M12 16l2 2"],
 };
@@ -237,12 +237,12 @@ export async function save(canvas, fileName) {
     return blob ? await keep(blob, fileName) : "failed";
 }
 
-async function keep(blob, fileName) {
+export async function keep(blob, fileName) {
     download(fileName, new Uint8Array(await blob.arrayBuffer()), "image/jpeg");
     return "saved";
 }
 
-function toBlob(canvas) {
+export function toBlob(canvas) {
     return new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.92));
 }
 
@@ -399,7 +399,7 @@ function paintTextCard(ctx, size, spec) {
     }
 }
 
-function paintIcon(ctx, paths, x, y, extent, color) {
+export function paintIcon(ctx, paths, x, y, extent, color) {
     const scale = extent / 24;
     ctx.save();
     ctx.translate(x, y);
@@ -415,7 +415,7 @@ function paintIcon(ctx, paths, x, y, extent, color) {
 
 // ---- Text ----
 
-function setFont(ctx, font, spacing, stretch) {
+export function setFont(ctx, font, spacing, stretch) {
     ctx.font = font;
     // Not every browser knows these two; the card is only a little wider without them
     if ("letterSpacing" in ctx) ctx.letterSpacing = spacing;
@@ -428,11 +428,27 @@ function layoutText(ctx, size, spec, maxWidth) {
     const blocks = [];
     let height = 0;
 
+    // The year cards put a small label above the name
+    if (spec.kicker) {
+        const kickerSize = Math.round(size.latin * 0.8);
+        blocks.push({ kind: "kicker", text: spec.kicker, size: kickerSize, top: height });
+        height += kickerSize * 1.3 + 14;
+    }
+
     setFont(ctx, `700 ${size.name}px ${DISPLAY}`, "-0.02em", "semi-condensed");
     const nameLines = wrap(ctx, spec.name, maxWidth, size.nameLines);
     const nameHeight = nameLines.length * size.name * 1.1;
     blocks.push({ kind: "name", lines: nameLines, size: size.name, lineHeight: size.name * 1.1, top: height });
     height += nameHeight;
+
+    // ... and a row of numbers with their words under the name
+    if (spec.figures?.length) {
+        const numSize = Math.round(size.name * 1.2);
+        const capSize = Math.round(size.latin * 0.8);
+        height += 30;
+        blocks.push({ kind: "figures", items: spec.figures, numSize, capSize, top: height });
+        height += numSize * 0.72 + 14 + capSize * 1.15;
+    }
 
     if (spec.latin || spec.cultivar) {
         height += 14;
@@ -453,7 +469,19 @@ function layoutText(ctx, size, spec, maxWidth) {
 
 function paintBlocks(ctx, blocks, x, y) {
     for (const block of blocks.items) {
-        if (block.kind === "name") {
+        if (block.kind === "kicker") {
+            let fontSize = block.size;
+            const text = block.text.toUpperCase();
+            setFont(ctx, `600 ${fontSize}px ${BODY}`, "0.06em", "normal");
+            while (ctx.measureText(text).width > blocks.maxWidth && fontSize > block.size * 0.6) {
+                fontSize -= 2;
+                setFont(ctx, `600 ${fontSize}px ${BODY}`, "0.06em", "normal");
+            }
+            ctx.fillStyle = MUTED;
+            ctx.fillText(text, x, y + block.top + block.size);
+        } else if (block.kind === "figures") {
+            paintFigures(ctx, block, x, y + block.top, blocks.maxWidth);
+        } else if (block.kind === "name") {
             setFont(ctx, `700 ${block.size}px ${DISPLAY}`, "-0.02em", "semi-condensed");
             ctx.fillStyle = INK;
             block.lines.forEach((text, i) =>
@@ -467,6 +495,33 @@ function paintBlocks(ctx, blocks, x, y) {
                 ctx.fillText(text, x, y + block.top + block.size * 1.05 + i * block.lineHeight));
         }
     }
+}
+
+// A row of numbers in Deep Moss with their words in Muted Ink under each, one column each
+function paintFigures(ctx, block, x, top, maxWidth) {
+    const column = maxWidth / block.items.length;
+    block.items.forEach((item, i) => {
+        const left = x + i * column;
+        const room = column - 24;
+        let numSize = block.numSize;
+        setFont(ctx, `800 ${numSize}px ${DISPLAY}`, "-0.02em", "condensed");
+        while (ctx.measureText(item.value).width > room && numSize > block.numSize * 0.5) {
+            numSize -= 4;
+            setFont(ctx, `800 ${numSize}px ${DISPLAY}`, "-0.02em", "condensed");
+        }
+        const baseline = top + block.numSize * 0.72;
+        ctx.fillStyle = DEEP_MOSS;
+        ctx.fillText(item.value, left, baseline);
+
+        let capSize = block.capSize;
+        setFont(ctx, `600 ${capSize}px ${DISPLAY}`, "0", "normal");
+        while (ctx.measureText(item.caption).width > room && capSize > block.capSize * 0.6) {
+            capSize -= 2;
+            setFont(ctx, `600 ${capSize}px ${DISPLAY}`, "0", "normal");
+        }
+        ctx.fillStyle = MUTED;
+        ctx.fillText(item.caption, left, baseline + 14 + capSize);
+    });
 }
 
 // Genus and species in italic, the cultivar upright in quotes after them
@@ -493,7 +548,7 @@ function paintLatin(ctx, block, x, baseline, maxWidth) {
     }
 }
 
-function paintFooter(ctx, right, baseline, fontSize) {
+export function paintFooter(ctx, right, baseline, fontSize) {
     setFont(ctx, `600 ${fontSize}px ${DISPLAY}`, "0.01em", "normal");
     ctx.fillStyle = MUTED;
     ctx.textAlign = "right";
@@ -502,7 +557,7 @@ function paintFooter(ctx, right, baseline, fontSize) {
 }
 
 // Breaks text into lines that fit, with an ellipsis when there is more than the lines allow
-function wrap(ctx, text, maxWidth, maxLines) {
+export function wrap(ctx, text, maxWidth, maxLines) {
     const fits = s => ctx.measureText(s).width <= maxWidth;
     const words = text.replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
     const lines = [];

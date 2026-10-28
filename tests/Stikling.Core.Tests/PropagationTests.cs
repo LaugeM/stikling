@@ -165,7 +165,7 @@ public class PropagationTests
         var corms = Batch(2);
         corms.FailedCount = -1;
 
-        Assert.Contains("The number potted up or failed can't be negative.", corms.Validate(DateOnly.MaxValue));
+        Assert.Contains("The number potted up, given away or failed can't be negative.", corms.Validate(DateOnly.MaxValue));
     }
 
     [Fact]
@@ -177,7 +177,7 @@ public class PropagationTests
         var corms = Batch(3);
         corms.RecordPottedUp(2, new DateOnly(2026, 9, 20));
         corms.InitialCount = 1;
-        Assert.Contains("The count can't be lower than the 2 already potted up or failed.", corms.Validate(DateOnly.MaxValue));
+        Assert.Contains("The count can't be lower than the 2 already potted up, given away or failed.", corms.Validate(DateOnly.MaxValue));
     }
 
     [Fact]
@@ -272,4 +272,47 @@ public class PropagationTests
 
         Assert.Equal([PropagationStage.Started, PropagationStage.Rooted], groups.Select(g => g.Stage));
     }
+
+    [Theory]
+    [InlineData(GrowingMedium.Soil, true)]
+    [InlineData(GrowingMedium.OrchidBark, true)]
+    [InlineData(GrowingMedium.Leca, true)]
+    [InlineData(GrowingMedium.Pon, true)]
+    [InlineData(GrowingMedium.Water, false)]
+    [InlineData(GrowingMedium.Perlite, false)]
+    [InlineData(GrowingMedium.Sphagnum, false)]
+    [InlineData(GrowingMedium.CormRiser, false)]
+    [InlineData(GrowingMedium.Other, false)]
+    public void Only_soil_bark_leca_and_pon_are_a_medium_plants_live_in(GrowingMedium medium, bool expected)
+    {
+        Assert.Equal(expected, Propagation.IsPlantMedium(medium));
+        Assert.Equal(expected, new Propagation { Medium = medium }.InPlantMedium);
+    }
+
+    [Theory]
+    [InlineData(PropagationType.Cutting, "Cutting of Alocasia zebrina")]
+    [InlineData(PropagationType.Corm, "Corm of Alocasia zebrina")]
+    [InlineData(PropagationType.Offset, "Offset of Alocasia zebrina")]
+    [InlineData(PropagationType.Seed, "Seeds of Alocasia zebrina")]
+    [InlineData(PropagationType.Division, "Division of Alocasia zebrina")]
+    [InlineData(PropagationType.AirLayer, "Air layer of Alocasia zebrina")]
+    [InlineData(PropagationType.Leaf, "Leaf cutting of Alocasia zebrina")]
+    [InlineData(PropagationType.Other, "Propagation of Alocasia zebrina")]
+    public void The_list_name_says_what_it_is_of(PropagationType type, string expected) =>
+        Assert.Equal(expected, new Propagation { Type = type, Genus = "Alocasia", Species = "zebrina" }.ListName);
+
+    [Fact]
+    public void The_list_name_uses_the_nickname_as_it_is()
+    {
+        Assert.Equal("Corm test", new Propagation { Nickname = " Corm test ", Genus = "Alocasia" }.ListName);
+    }
+
+    [Theory]
+    [InlineData(PropagationType.Cutting, "Unnamed cutting")]
+    [InlineData(PropagationType.Seed, "Unnamed seeds")]
+    [InlineData(PropagationType.AirLayer, "Unnamed air layer")]
+    [InlineData(PropagationType.Leaf, "Unnamed leaf cutting")]
+    [InlineData(PropagationType.Other, "Unnamed propagation")]
+    public void The_list_name_without_any_name_is_unnamed(PropagationType type, string expected) =>
+        Assert.Equal(expected, new Propagation { Type = type }.ListName);
 }

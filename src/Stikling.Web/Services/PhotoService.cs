@@ -38,8 +38,11 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
 {
     internal const string ModulePath = "./js/photos.js";
 
-    private sealed record SavedFile(string Id, int Width, int Height, string? CameraDate, string? FileName, DateTimeOffset FileDate);
-    private sealed record SaveResponse(List<SavedFile> Saved, int Failed);
+    /// <summary>What photos.js returns for one stored image.</summary>
+    public sealed record SavedFile(string Id, int Width, int Height, string? CameraDate, string? FileName, DateTimeOffset FileDate);
+
+    /// <summary>What photos.js and googlephotos.js return after storing images.</summary>
+    public sealed record SaveResponse(List<SavedFile> Saved, int Failed);
 
     private Task<IJSObjectReference>? module;
 
@@ -47,9 +50,22 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
         module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>Stores the files chosen in <paramref name="input"/> as photos of the given subject.</summary>
-    public async Task<PhotoSaveResult> SaveFromInputAsync(ElementReference input, SubjectType subjectType, Guid subjectId)
+    public async Task<PhotoSaveResult> SaveFromInputAsync(
+        ElementReference input, SubjectType subjectType, Guid subjectId, bool reference = false, bool record = true)
     {
         var response = await (await Module).InvokeAsync<SaveResponse>("saveFromInput", input);
+        return await RecordAsync(response, subjectType, subjectId, reference, record);
+    }
+
+    /// <summary>
+    /// Makes photo records for images already stored by photos.js, whether they came from a file
+    /// input or from Google Photos. Dates are picked from the camera, the file name and the file date.
+    /// With <paramref name="record"/> off only the Photo objects are made and the caller writes them later
+    /// with <see cref="RecordSavedAsync"/>.
+    /// </summary>
+    public async Task<PhotoSaveResult> RecordAsync(
+        SaveResponse response, SubjectType subjectType, Guid subjectId, bool reference = false, bool record = true)
+    {
         var saved = new List<Photo>();
         var undated = 0;
 
@@ -66,9 +82,11 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
                 SubjectId = subjectId,
                 TakenAt = takenAt,
                 Width = file.Width,
-                Height = file.Height
+                Height = file.Height,
+                IsReference = reference
             };
-            await photos.AddAsync(photo);
+            if (record)
+                await photos.AddAsync(photo);
             saved.Add(photo);
         }
 
@@ -87,6 +105,16 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
 
     private sealed record ImageSize(int Width, int Height);
 
+    /// <summary>
+    /// Writes the records of photos whose image data was stored with <c>record: false</c>, once what
+    /// they belong to is saved. Until then only the image data exists, so nothing is left in the records.
+    /// </summary>
+    public async Task RecordSavedAsync(IEnumerable<Photo> saved)
+    {
+        foreach (var photo in saved)
+            await photos.AddAsync(photo);
+    }
+
     /// <summary>An address usable in &lt;img src&gt;, or null if the photo is missing.</summary>
     public async Task<string?> GetUrlAsync(Guid id, bool thumbnail) =>
         await (await Module).InvokeAsync<string?>("getUrl", id, thumbnail);
@@ -103,6 +131,16 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
         photo.Frame = frame;
         await photos.UpdateAsync(photo);
         FrameChanged?.Invoke(photo);
+    }
+
+    /// <summary>
+    /// Moves a photo to the reference photos of its plant or propagation, or back to its history.
+    /// Its timeline entry is not touched, so a photo moved back is where it was.
+    /// </summary>
+    public async Task SetReferenceAsync(Photo photo, bool reference)
+    {
+        photo.IsReference = reference;
+        await photos.UpdateAsync(photo);
     }
 
     /// <summary>The stored image data, for writing into a backup. Null when it's missing.</summary>
@@ -130,6 +168,13 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     /// </summary>
     public async Task<int> DownloadAsync(Uri address, string token, Guid id, bool thumbnail) =>
         await (await Module).InvokeAsync<int>("download", address.ToString(), token, id, thumbnail);
+
+    /// <summary>
+    /// Fetches the image of a photo on a public share link from <paramref name="address"/>, makes its
+    /// thumbnail and keeps both as <paramref name="storeAs"/>. Returns false when it couldn't.
+    /// </summary>
+    public async Task<bool> FetchSharedAsync(Uri address, Guid storeAs) =>
+        await (await Module).InvokeAsync<bool>("fetchShared", address.ToString(), storeAs);
 
     /// <summary>Removes the photo: its metadata is soft-deleted and the image data is freed.</summary>
     public async Task DeleteAsync(Guid id)

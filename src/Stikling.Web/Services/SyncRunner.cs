@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
@@ -19,9 +20,12 @@ public sealed class SyncRunner(
     IndexedDbSyncStore store,
     IndexedDb db,
     ThemeService theme,
+    ErrorReports errorReports,
+    ILogger<SyncRunner> logger,
     PlantNameService names,
     ShareLinkService shares,
     DeviceFiles files,
+    NotificationService notifications,
     IJSRuntime js,
     TimeProvider time) : IAsyncDisposable
 {
@@ -83,6 +87,12 @@ public sealed class SyncRunner(
     /// <summary>Raised when a sync saved changes from the server, so the page on screen can reload.</summary>
     public event Action? Received;
 
+    /// <summary>
+    /// Lets the pages on screen reload, for changes made here that they didn't make themselves,
+    /// like the sellers made from the Source text of older plants.
+    /// </summary>
+    public void NotifyChanged() => Received?.Invoke();
+
     /// <summary>Raised when a sync fetched thumbnails, so photos shown as missing can look again.</summary>
     public event Action? PhotosArrived;
 
@@ -101,6 +111,10 @@ public sealed class SyncRunner(
         await (await Module).InvokeVoidAsync("watch", self);
 
         signedIn = await account.WasSignedInAsync();
+
+        // Uploads the notification text after changes, and when the app opens
+        _ = notifications.StartAsync();
+
         if (signedIn)
         {
             // Clerk loads before the first request, so the API starts while it does
@@ -215,6 +229,9 @@ public sealed class SyncRunner(
         waiting?.Cancel();
         await current;
 
+        // While the sign-in still lets the server be asked. Never throws
+        await notifications.TurnOffAsync();
+
         try
         {
             await account.SignOutAsync(redirectUrl);
@@ -255,6 +272,8 @@ public sealed class SyncRunner(
             throw;
         }
 
+        // The server deleted the subscriptions with the account
+        await notifications.TurnOffAsync(fromServer: false);
         await ForgetAsync();
         if (!keepData)
             await store.ClearAllAsync();
@@ -281,10 +300,15 @@ public sealed class SyncRunner(
                 Pending = await store.CountPendingAsync();
             }
             while (again && signedIn);
+
+            // The records are as they will be for a while, so the notification text is worked out from them
+            if (Problem is null && signedIn)
+                _ = notifications.UploadAsync();
         }
         catch (Exception e)
         {
             // Nothing else may stop the app, since nothing waits for a sync that runs by itself
+            logger.LogError(e, "Syncing failed");
             Problem = $"Something went wrong while syncing: {e.Message}";
             if (LastSynced is null)
                 firstSyncFailed = true;
@@ -331,6 +355,7 @@ public sealed class SyncRunner(
             if (result.Received > 0)
             {
                 await theme.ApplySavedAsync();
+                await errorReports.ApplySavedAsync();
                 names.SettingsChanged();
                 Received?.Invoke();
             }
@@ -360,6 +385,9 @@ public sealed class SyncRunner(
         }
         catch (Exception e) when (e is AccountUnavailableException or HttpRequestException or TaskCanceledException)
         {
+            // Not being able to reach the server is expected. The server answering with an error is not.
+            if (e is HttpRequestException { StatusCode: >= HttpStatusCode.InternalServerError })
+                logger.LogError(e, "The server answered a sync with an error");
             Problem = "The Stikling server can't be reached right now. Your changes are kept here and sent once it can be.";
         }
     }
@@ -400,6 +428,7 @@ public sealed class SyncRunner(
         await current;
         try
         {
+            await notifications.TurnOffAsync(fromServer: false);
             await ForgetAsync();
         }
         catch (JSException)

@@ -11,15 +11,45 @@ public sealed class Propagation : Entity
     /// <summary>Your own label, e.g. "Corm test: perlite".</summary>
     public string? Nickname { get; set; }
 
+    /// <summary>
+    /// Its code, like "117a" for a cutting from plant 117. Null when it has none. Plants potted up
+    /// from it keep it. See <see cref="Plants.CollectionNumbers"/>.
+    /// </summary>
+    public string? CollectionNumber { get; set; }
+
     public string? Genus { get; set; }
     public string? Species { get; set; }
     public string? Cultivar { get; set; }
+
+    /// <summary>How sure the name is: cf., aff., sp. or lost. Null when it is sure.</summary>
+    [JsonConverter(typeof(TolerantNameQualifierConverter))]
+    public NameQualifier? NameQualifier { get; set; }
+
+    /// <summary>A locality or collector code that goes with the name, like "Sumatra EPC 123".</summary>
+    public string? NameNote { get; set; }
+
+    /// <summary>The species that counts: none while sp. or a lost name hides it. The stored value stays.</summary>
+    [JsonIgnore]
+    public string? KnownSpecies => PlantNames.SpeciesToLookUp(Species, NameQualifier);
 
     /// <summary>The plant it was taken from. Empty for e.g. bought seeds.</summary>
     public Guid? ParentPlantId { get; set; }
 
     /// <summary>Where it came from when there's no parent plant, e.g. "Seeds from the garden centre".</summary>
     public string? Source { get; set; }
+
+    /// <summary>The seller it came from, with the name kept in <see cref="Source"/> too. See <see cref="Plant.SellerId"/>.</summary>
+    public Guid? SellerId { get; set; }
+
+    /// <summary>How it was when it arrived. Null when not said.</summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<ArrivalRating>))]
+    public ArrivalRating? ArrivedIn { get; set; }
+
+    /// <summary>What was wrong when it arrived.</summary>
+    [JsonConverter(typeof(TolerantEnumListConverter<ArrivalProblem>))]
+    public List<ArrivalProblem> ArrivalProblems { get; set; } = [];
+
+    public string? ArrivalNote { get; set; }
 
     public PropagationType Type { get; set; } = PropagationType.Cutting;
     public GrowingMedium Medium { get; set; } = GrowingMedium.Water;
@@ -29,6 +59,13 @@ public sealed class Propagation : Entity
 
     /// <summary>Free text for the setup, e.g. "Humidity box" or "Glass jar".</summary>
     public string? Container { get; set; }
+
+    /// <summary>
+    /// The container it's in, from the pot library. <see cref="Container"/> keeps the name as text
+    /// beside it so older versions, the CSV and the timeline still show it. Null for none, or for
+    /// an old propagation not yet linked.
+    /// </summary>
+    public Guid? ContainerPotId { get; set; }
 
     /// <summary>The room or spot it stands in. See <see cref="Place"/>.</summary>
     public Guid? PlaceId { get; set; }
@@ -65,15 +102,24 @@ public sealed class Propagation : Entity
     /// <summary>What was used to help it root, e.g. cinnamon on the cut or a dome for humidity.</summary>
     public List<RootingAid> RootingAids { get; set; } = [];
 
+    /// <summary>How many hours the cut end dried before it went in. Null when it went straight in.</summary>
+    public int? DriedForHours { get; set; }
+
     /// <summary>How many units the batch started with.</summary>
     public int InitialCount { get; set; } = 1;
 
     public int PottedUpCount { get; set; }
     public int FailedCount { get; set; }
 
+    /// <summary>Units given away to someone else before or without being potted up. Records from before read as 0.</summary>
+    public int GivenAwayCount { get; set; }
+
     public PropagationStage Stage { get; set; } = PropagationStage.Started;
 
     public string? Notes { get; set; }
+
+    /// <summary>A note for whoever looks after it while you are away. Not shared. Older propagations read as null.</summary>
+    public string? SitterNote { get; set; }
 
     public Guid? CoverPhotoId { get; set; }
 
@@ -89,25 +135,69 @@ public sealed class Propagation : Entity
     /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
     public Attention? Attention { get; set; }
 
+    /// <summary>
+    /// When the flag starts to show on Today, if it was set for later. Only counts while it was set
+    /// for the current flag. At the top of the record, so an older version saving it keeps it.
+    /// </summary>
+    public AttentionLater? AttentionLater { get; set; }
+
+    /// <summary>
+    /// How many of its units are offered for swap. Null or 0 when none is. What shows is never more
+    /// than what is left, see <see cref="SpareAvailable"/>.
+    /// </summary>
+    public int? SpareCount { get; set; }
+
+    /// <summary>Units offered for swap that are still here: nothing once it is finished, and never more than what is left.</summary>
+    [JsonIgnore]
+    public int SpareAvailable =>
+        IsDeleted || !IsActive || SpareCount is not > 0 ? 0 : Math.Min(SpareCount.Value, Math.Max(0, RemainingCount));
+
     /// <summary>Share of the sown seeds that came up. Null unless it's seeds with a count of how many came up.</summary>
     [JsonIgnore]
     public double? GerminationRate =>
         Type == PropagationType.Seed && SeedsGerminated is { } up && InitialCount > 0 ? up / (double)InitialCount : null;
 
-    /// <summary>Units still in the propagation (not potted up and not failed).</summary>
+    /// <summary>Units still in the propagation (not potted up, given away or failed).</summary>
     [JsonIgnore]
-    public int RemainingCount => InitialCount - PottedUpCount - FailedCount;
+    public int RemainingCount => InitialCount - PottedUpCount - FailedCount - GivenAwayCount;
 
     /// <summary>Still in progress (not done and not failed).</summary>
     [JsonIgnore]
     public bool IsActive => Stage is not (PropagationStage.Done or PropagationStage.Failed);
 
     [JsonIgnore]
-    public string? BotanicalName => PlantNames.Botanical(Genus, Species, Cultivar);
+    public string? BotanicalName => PlantNames.Botanical(Genus, Species, Cultivar, NameQualifier, NameNote);
 
     [JsonIgnore]
     public string DisplayName =>
-        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? "Unnamed propagation";
+        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? (NameQualifier == Models.NameQualifier.Unknown ? "Name unknown" : "Unnamed propagation");
+
+    /// <summary>
+    /// The name where plants and propagations are listed together, so a propagation isn't
+    /// mistaken for its parent: "Cutting of Monstera deliciosa". A nickname is used as it is.
+    /// </summary>
+    [JsonIgnore]
+    public string ListName
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(Nickname))
+                return Nickname.Trim();
+
+            var noun = Type switch
+            {
+                PropagationType.Cutting => "Cutting",
+                PropagationType.Corm => "Corm",
+                PropagationType.Offset => "Offset",
+                PropagationType.Seed => "Seeds",
+                PropagationType.Division => "Division",
+                PropagationType.AirLayer => "Air layer",
+                PropagationType.Leaf => "Leaf cutting",
+                _ => "Propagation"
+            };
+            return BotanicalName is { } botanical ? $"{noun} of {botanical}" : $"Unnamed {noun.ToLowerInvariant()}";
+        }
+    }
 
     /// <summary>How long it took to root, or null while it hasn't.</summary>
     [JsonIgnore]
@@ -179,6 +269,16 @@ public sealed class Propagation : Entity
         NoteFirstRoot();
     }
 
+    /// <summary>Soil, bark, LECA and PON are mediums plants live in. The rest (water, perlite and so on) are for rooting.</summary>
+    public static bool IsPlantMedium(GrowingMedium medium) =>
+        medium is GrowingMedium.Soil or GrowingMedium.OrchidBark or GrowingMedium.Leca or GrowingMedium.Pon;
+
+    /// <summary>
+    /// True when it is already in a medium plants live in, like a rooted pup in soil. It can become
+    /// a plant as it is, without being potted up into something else.
+    /// </summary>
+    public bool InPlantMedium => IsPlantMedium(Medium);
+
     /// <summary>A mix only makes sense in soil, so moving to another medium lets go of it.</summary>
     public void ClearMixUnlessSoil()
     {
@@ -190,6 +290,7 @@ public sealed class Propagation : Entity
     {
         var copy = (Propagation)MemberwiseClone();
         copy.RootingAids = [.. RootingAids];
+        copy.ArrivalProblems = [.. ArrivalProblems];
         return copy;
     }
 
@@ -219,11 +320,25 @@ public sealed class Propagation : Entity
         SyncStageWithCounts(on);
     }
 
+    /// <summary>Records that <paramref name="count"/> units were given away on <paramref name="on"/>.</summary>
+    public void RecordGivenAway(int count, DateOnly on)
+    {
+        CheckCount(count);
+        GivenAwayCount += count;
+        // What was given away was the spare ones first, in the same save
+        if (SpareCount is > 0)
+            SpareCount = Math.Max(0, SpareCount.Value - count);
+        SyncStageWithCounts(on);
+    }
+
+    /// <summary>True when this many can be potted up, given away or marked failed: at least one, and no more than are left.</summary>
+    public bool CanTake(int count) => count >= 1 && count <= RemainingCount;
+
     private void CheckCount(int count)
     {
         if (!IsActive)
             throw new InvalidOperationException("This propagation is finished.");
-        if (count < 1 || count > RemainingCount)
+        if (!CanTake(count))
             throw new ArgumentOutOfRangeException(nameof(count), count, $"Choose between 1 and {RemainingCount}.");
     }
 
@@ -237,10 +352,11 @@ public sealed class Propagation : Entity
     {
         if (RemainingCount <= 0)
         {
-            Stage = PottedUpCount > 0 ? PropagationStage.Done : PropagationStage.Failed;
+            Stage = PottedUpCount + GivenAwayCount > 0 ? PropagationStage.Done : PropagationStage.Failed;
             FinishedOn ??= today;
             DormantSince = null;
             Attention = null;
+            AttentionLater = null;
         }
         else if (!IsActive)
         {
@@ -254,14 +370,17 @@ public sealed class Propagation : Entity
     public IReadOnlyList<string> Validate(DateOnly today)
     {
         var errors = new List<string>();
-        if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus))
+        if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus) && NameQualifier != Models.NameQualifier.Unknown)
             errors.Add("Give the propagation a nickname or a genus.");
-        if (PottedUpCount < 0 || FailedCount < 0)
-            errors.Add("The number potted up or failed can't be negative.");
+        errors.AddRange(PlantNames.QualifierErrors(Genus, Species, NameQualifier));
+        if (Plants.CollectionNumbers.Normalize(CollectionNumber) is { } code && !Plants.CollectionNumbers.IsValid(code))
+            errors.Add(Plants.CollectionNumbers.NotValidText);
+        if (PottedUpCount < 0 || FailedCount < 0 || GivenAwayCount < 0)
+            errors.Add("The number potted up, given away or failed can't be negative.");
         if (InitialCount < 1)
             errors.Add("Start with at least 1.");
-        else if (InitialCount < PottedUpCount + FailedCount)
-            errors.Add($"The count can't be lower than the {PottedUpCount + FailedCount} already potted up or failed.");
+        else if (InitialCount < PottedUpCount + FailedCount + GivenAwayCount)
+            errors.Add($"The count can't be lower than the {PottedUpCount + FailedCount + GivenAwayCount} already potted up, given away or failed.");
         if (RootedOn is { } rooted && rooted < StartedOn)
             errors.Add("It can't have rooted before it was started.");
         if (FirstRootOn < StartedOn || FirstLeafOn < StartedOn)
@@ -280,6 +399,8 @@ public sealed class Propagation : Entity
             errors.Add("The corm size must be more than 0 and at most 200 mm.");
         if (DormantSince > today)
             errors.Add("It can't go dormant in the future.");
+        if (SpareCount < 0)
+            errors.Add("The number for swap can't be negative.");
         return errors;
     }
 }

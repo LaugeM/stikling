@@ -27,6 +27,17 @@ public sealed record AccountSettings(string? ClerkPublishableKey, string? ClerkF
     }
 }
 
+/// <summary>
+/// The Google client ID for picking photos from Google Photos, from the same appsettings files.
+/// It is public, not a secret. Without it the feature is hidden.
+/// </summary>
+public sealed record GoogleSettings(string? ClientId)
+{
+    public bool IsConfigured => !string.IsNullOrEmpty(ClientId);
+
+    public static GoogleSettings From(IConfiguration config) => new(config["Google:ClientId"]);
+}
+
 /// <summary>Who is signed in on this device, as Clerk reports it.</summary>
 public sealed record AccountState(bool SignedIn, string? Email);
 
@@ -100,7 +111,13 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
             throw new AccountUnavailableException(e);
         }
 
+        var known = await WasSignedInAsync();
         await RememberAsync(state);
+        // Coming back from Google and the like reloads the page, and Clerk finishes the sign-in while
+        // it loads, before it reports changes. So a sign-in found here is told to the pages and sync
+        // the way Clerk's own report would be.
+        if (state.SignedIn && !known)
+            Changed?.Invoke(state);
         return state;
     }
 

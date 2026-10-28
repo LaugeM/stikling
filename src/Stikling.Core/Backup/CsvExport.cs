@@ -11,35 +11,69 @@ namespace Stikling.Core.Backup;
 /// </summary>
 public static class CsvExport
 {
-    private static readonly string[] PlantHeader =
+    // The columns before the name columns were added, which an older export still has
+    internal static readonly string[] PlantHeaderBeforeNameSure =
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
+
+    // The columns before Number was added, which an older export still has
+    internal static readonly string[] PlantHeaderBeforeNumber =
         ["Name", "Nickname", "Genus", "Species", "Cultivar", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
 
-    private static readonly string[] PropagationHeader =
-        ["Name", "Parent plant", "Stage", "Medium", "Started", "Room", "Notes"];
+    // The columns before Raised was added, which an older export still has
+    internal static readonly string[] PlantHeaderBeforeRaised =
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Source", "Price paid", "Tags", "Notes", "Added"];
 
-    public static string Plants(IEnumerable<Plant> plants, Places places)
+    // The columns before How many was added, which an older export still has. Own fields can follow it.
+    internal static readonly string[] PlantHeaderBeforeHowMany =
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Raised", "Source", "Price paid", "Tags", "Notes", "Added"];
+
+    // The columns before Potted with was added, which an older export still has. Own fields can follow it.
+    internal static readonly string[] PlantHeaderBeforePottedWith =
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Raised", "Source", "Price paid", "How many", "Tags", "Notes", "Added"];
+
+    /// <summary>The fixed columns. The person's own fields follow, one column each, headed with the field's name.</summary>
+    internal static readonly string[] PlantHeader =
+        ["Name", "Number", "Nickname", "Genus", "Species", "Cultivar", "Name sure", "Locality or code", "Status", "Room", "Acquired", "Origin", "Raised", "Source", "Price paid", "How many", "Potted with", "Tags", "Notes", "Added"];
+
+    private static readonly string[] PropagationHeader =
+        ["Name", "Number", "Parent plant", "Stage", "Medium", "Started", "Room", "Notes"];
+
+    /// <param name="fields">The own fields that aren't deleted, each a column after Added holding the stored value.</param>
+    public static string Plants(IEnumerable<Plant> plants, Places places, IReadOnlyList<OwnField> fields)
     {
-        var rows = plants
-            .Where(p => !p.IsDeleted)
+        var all = plants.ToList();
+        // Only the name, one step: the import keeps it as text
+        string? PottedWith(Plant p) => p.PottedWithPlantId is { } id && id != p.Id
+            ? all.FirstOrDefault(o => o.Id == id && !o.IsDeleted)?.DisplayName
+            : null;
+        // A plant that lives with someone else isn't in the collection, which is what this lists
+        var rows = all
+            .Where(p => !p.IsDeleted && !p.LivesElsewhere)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
-            .Select(p => new[]
+            .Select(p => (new[]
             {
                 p.DisplayName,
+                p.CollectionNumber,
                 p.Nickname,
                 p.Genus,
-                p.Species,
+                p.KnownSpecies,
                 p.Cultivar,
+                PlantNames.QualifierText(p.NameQualifier),
+                p.NameNote,
                 p.Status.ToString(),
                 places.NameOf(p.PlaceId),
                 p.AcquiredOn?.ToString(),
                 p.Origin.ToString(),
+                p.Raised?.ToString(),
                 p.Source,
                 p.PricePaid?.ToString("0.##", CultureInfo.InvariantCulture),
+                p.HowMany.ToString(CultureInfo.InvariantCulture),
+                PottedWith(p),
                 string.Join("; ", p.Tags),
                 p.Notes,
                 p.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
-            });
-        return Write(PlantHeader, rows);
+            }).Concat(fields.Select(f => p.OwnFields.TryGetValue(f.Id, out var value) ? value : null)).ToArray());
+        return Write([.. PlantHeader, .. fields.Select(f => f.Name)], rows);
     }
 
     public static string Propagations(IEnumerable<Propagation> propagations, IEnumerable<Plant> plants, Places places)
@@ -51,6 +85,7 @@ public static class CsvExport
             .Select(p => new[]
             {
                 p.DisplayName,
+                p.CollectionNumber,
                 p.ParentPlantId is { } parent && parents.TryGetValue(parent, out var name) ? name : null,
                 p.Stage.ToString(),
                 p.Medium.ToString(),

@@ -41,6 +41,9 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Stikling: Server=sql,1433;Database=Stikling;User Id=sa;Password=Stikling-dev-1;TrustServerCertificate=True
       ConnectionStrings__Photos: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+      # VAPID keys for notifications, from an uncommitted .env. Without them the notification endpoints answer 503
+      Notifications__VapidPublicKey: ${VAPID_PUBLIC_KEY:-}
+      Notifications__VapidPrivateKey: ${VAPID_PRIVATE_KEY:-}
     ports:
       - "127.0.0.1:5180:8080"
     depends_on:

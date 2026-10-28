@@ -19,10 +19,15 @@
     <meta name="twitter:card" content="summary_large_image" />
     <base href="/" />
     <script src="js/theme.js"></script>
+    <script defer src="lib/sentry/bundle.min.js"></script>
+    <script defer src="js/errors.js"></script>
     <script>
         // Someone who has been here before gets the app from the service worker in a moment, so the
         // page below only shows the icon, and only if starting takes a while
         if (navigator.serviceWorker && navigator.serviceWorker.controller) document.documentElement.classList.add("returning");
+        // Someone opening a link to keep a plant's history comes for that, not for the intro, and may
+        // be starting the app for the first time, so the page says it is opening and shows the progress
+        if (location.pathname.indexOf("/received/") !== -1) document.documentElement.classList.add("returning", "receiving");
     </script>
     <style>
         /* The page that shows while the app downloads, which is also what search engines and link
@@ -659,6 +664,37 @@
                 animation-duration: 1ms;
             }
         }
+
+        /* Opening a link to keep a plant's history: the first download takes a while, so the icon shows
+           at once with a line and the same progress bar as the intro's */
+        .intro-quiet-text,
+        .intro-quiet .intro-bar {
+            display: none;
+        }
+
+        .receiving .intro-quiet {
+            align-content: center;
+            justify-items: center;
+            row-gap: 0.75rem;
+        }
+
+        .receiving .intro-quiet img {
+            opacity: 1;
+            animation: none;
+        }
+
+        .receiving .intro-quiet-text {
+            display: block;
+            margin: 0;
+            font-family: var(--intro-display);
+            font-size: 1rem;
+            color: var(--intro-ink);
+        }
+
+        .receiving .intro-quiet .intro-bar {
+            display: block;
+            width: min(16rem, 70vw);
+        }
     </style>
     <link rel="preload" id="webassembly" />
     <link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin />
@@ -827,8 +863,8 @@
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="7" width="8" height="12" rx="4" /><path d="M10 7a2 2 0 0 1 4 0M8 11H4.5M8 15H4.5M16 11h3.5M16 15h3.5M9 4.5 7.5 3M15 4.5 16.5 3" /></svg>
                             </span>
                             <div>
-                                <h3>Pests</h3>
-                                <p>Spider mites or thrips on a few plants: one case keeps the treatments, when the next is due, and the quarantine.</p>
+                                <h3>Pests and problems</h3>
+                                <p>Spider mites on a few plants, or yellow leaves on one: a pest case keeps the treatments and when the next is due, and a problem keeps what you tried and whether it helped.</p>
                             </div>
                         </li>
                         <li class="intro-row">
@@ -924,7 +960,10 @@
     <!-- /intro -->
 
     <div id="app">
-        <div class="intro-quiet"><img src="icon-192.png" alt="Stikling is starting" width="72" height="72" /></div>
+        <div class="intro-quiet"><img src="icon-192.png" alt="Stikling is starting" width="72" height="72" />
+            <p class="intro-quiet-text">Opening Stikling</p>
+            <div class="intro-bar" aria-hidden="true"><span></span></div>
+        </div>
     </div>
 
     <div id="blazor-error-ui" role="alert">

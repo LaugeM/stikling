@@ -34,10 +34,10 @@ public static class PhotoRound
             newestPhotos.TryGetValue(id, out var photo) ? time.LocalDay(photo.TakenAt) : null;
 
         var subjects =
-            plants.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && !p.IsDormant)
+            plants.Where(p => !p.IsDeleted && p.InCollection && !p.IsDormant)
                 .Select(p => new PhotoDue(p, p.DisplayName, places.NameOf(p.PlaceId), LastPhoto(p.Id)))
             .Concat(propagations.Where(p => !p.IsDeleted && p.IsActive && !p.IsDormant)
-                .Select(p => new PhotoDue(p, p.DisplayName, places.NameOf(p.PlaceId), LastPhoto(p.Id))));
+                .Select(p => new PhotoDue(p, p.ListName, places.NameOf(p.PlaceId), LastPhoto(p.Id))));
 
         return subjects
             .Where(d => d.LastPhoto is null || d.LastPhoto < monthStart)

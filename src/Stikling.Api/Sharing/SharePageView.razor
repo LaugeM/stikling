@@ -66,6 +66,14 @@
             }
         </header>
 
+        @if (Page.CanKeep)
+        {
+            <section class="keep">
+                <p>Were you given this one? Keep its history in your own Stikling. It's free, and you don't need an account.</p>
+                <p><a class="keep-link" href="@KeepUrl">Keep its history in Stikling</a></p>
+            </section>
+        }
+
         @if (Page.Items.Count > 0)
         {
             <ol class="history">
@@ -135,6 +143,9 @@
     [Parameter, EditorRequired] public HashSet<Guid> Thumbnails { get; set; } = [];
 
     [Parameter, EditorRequired] public DateOnly UpdatedDay { get; set; }
+
+    /// <summary>Where the app opens a copy of this page, like https://stikling.app/received/{token}.</summary>
+    [Parameter, EditorRequired] public string KeepUrl { get; set; } = "";
 
     private string Description => Page.Line ?? "Photos and notes from a plant kept in Stikling, a free app for your plants and cuttings.";
 

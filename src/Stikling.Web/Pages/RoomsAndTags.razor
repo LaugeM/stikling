@@ -1,5 +1,6 @@
 @page "/rooms-and-tags"
 @inject RoomService RoomService
+@inject ILogger<RoomsAndTags> Logger
 @inject PlantService PlantService
 @inject IPlantRepository Plants
 @inject GrowLightService LightService
@@ -16,6 +17,7 @@
         Add a room here, or let it come from where your plants and propagations are. Renaming one
         changes it everywhere, and renaming it to a name you already use merges the two. Mark a
         room or spot as having a grow light, and plants there aren't expected to slow down in winter.
+        Mark one as outdoors, like a balcony or a garden, and a plant you move inside from there offers a quarantine.
     </p>
 
     @if (rooms.Count == 0)
@@ -41,6 +43,10 @@
                         <div class="room-row">
                             <span class="room-name">@r.Name</span>
                             <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
+                            @if (r.Total > 0)
+                            {
+                                <a class="btn btn-link btn-sm link-action" href="round/@r.Id?from=rooms">Go round</a>
+                            }
                             <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                     @onclick="() => renaming = r.Id">Rename</button>
                             @if (r.Total == 0)
@@ -50,6 +56,7 @@
                             }
                         </div>
                         @LightSwitch(r.Id, r.Name)
+                        @OutdoorsSwitch(r.Id, r.Name, false)
                     }
 
                     @foreach (var spot in r.Spots)
@@ -75,6 +82,7 @@
                                     }
                                 </div>
                                 @LightSwitch(spot.Id, spot.Name)
+                                @OutdoorsSwitch(spot.Id, spot.Name, placeInfo.Find(r.Id)?.Outdoors == true)
                             }
                         </div>
                     }
@@ -167,6 +175,37 @@
         </div>
     };
 
+    private RenderFragment OutdoorsSwitch(Guid placeId, string name, bool roomIsOutdoors) => __builder =>
+    {
+        var id = $"outdoors-{placeId}";
+        var label = roomIsOutdoors ? $"{name} is outdoors because the room is" : $"Outdoors: {name}";
+        <div class="form-check form-switch room-light">
+            <input class="form-check-input" type="checkbox" role="switch" id="@id" disabled="@(busy || roomIsOutdoors)"
+                   aria-label="@label"
+                   checked="@(roomIsOutdoors || placeInfo.Find(placeId)?.Outdoors == true)" @onchange="e => SetOutdoorsAsync(placeId, e.Value is true)" />
+            <label class="form-check-label" for="@id">Outdoors</label>
+        </div>
+    };
+
+    private Places placeInfo = Places.None;
+
+    private async Task SetOutdoorsAsync(Guid placeId, bool on)
+    {
+        busy = true;
+        try
+        {
+            await RoomService.SetOutdoorsAsync(placeId, on);
+            placeInfo = await RoomService.GetPlacesAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Changing whether a room or spot is outdoors failed");
+            roomMessage = $"Couldn't save that: {ex.Message}";
+        }
+
+        busy = false;
+    }
+
     private HashSet<Guid> lit = [];
 
     private async Task SetLitAsync(Guid placeId, bool on)
@@ -179,6 +218,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Changing whether a spot has a grow light failed");
             roomMessage = $"Couldn't save the grow light: {ex.Message}";
         }
 
@@ -324,6 +364,7 @@
             var (place, existed) = await RoomService.AddPlaceAsync(name, roomId);
             var written = (await RoomService.GetPlacesAsync()).NameOf(place.Id);
             rooms = await RoomService.GetAllAsync();
+        placeInfo = await RoomService.GetPlacesAsync();
             roomMessage = existed ? $"{written} is already there." : $"Added {written}.";
             StopAddingRoom();
         }
@@ -345,10 +386,12 @@
             // place, which shows as no location. See RoomService.RemoveAsync.
             await RoomService.RemoveAsync(id);
             rooms = await RoomService.GetAllAsync();
+        placeInfo = await RoomService.GetPlacesAsync();
             roomMessage = $"Removed {name}.";
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Removing a room or spot failed");
             roomMessage = $"Couldn't remove it: {ex.Message}";
         }
 
@@ -371,6 +414,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding a tag failed");
             tagMessage = $"Couldn't add the tag: {ex.Message}";
         }
 
@@ -391,10 +435,11 @@
     private async Task LoadDataAsync()
     {
         rooms = await RoomService.GetAllAsync();
+        placeInfo = await RoomService.GetPlacesAsync();
         await LoadLightsAsync();
         var all = await Plants.GetAllAsync();
         tags = PlantTags.InUse(all);
-        activePlants = all.Where(p => !p.IsDeleted && p.Status == PlantStatus.Active)
+        activePlants = all.Where(p => !p.IsDeleted && p.InCollection)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
     }
 
@@ -420,6 +465,7 @@
         {
             var result = await RoomService.RenameAsync(id, to);
             rooms = await RoomService.GetAllAsync();
+        placeInfo = await RoomService.GetPlacesAsync();
             roomMessage = (result.Total, result.Merged) switch
             {
                 (0, _) => $"Nothing was in {from}, so there was nothing to rename.",
@@ -430,6 +476,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Renaming a room or spot failed");
             roomMessage = $"Couldn't rename: {ex.Message}";
         }
 
@@ -461,6 +508,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Renaming a tag failed");
             tagMessage = $"Couldn't rename: {ex.Message}";
         }
 

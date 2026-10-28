@@ -1,9 +1,7 @@
 @* One plant or propagation in the monthly photo round, with a camera button that puts the photo
    straight on its history without leaving Today. *@
-@inject PhotoService Photos
-@inject TimelineService TimelineService
-@inject IPlantRepository PlantRepository
-@inject IPropagationRepository PropagationRepository
+@inject SubjectPhotos Photos
+@inject ILogger<PhotoRoundRow> Logger
 
 <li class="today-row">
     <div class="today-row-main">
@@ -56,38 +54,17 @@
 
         try
         {
-            var subjectType = Due.Subject is Plant ? SubjectType.Plant : SubjectType.Propagation;
-            var result = await Photos.SaveFromInputAsync(input, subjectType, Due.Subject.Id);
-            status = result.Message(guessesMatter: false);
-
-            if (result.Saved.Count > 0)
-            {
-                await TimelineService.AddPhotosAsync(subjectType, Due.Subject.Id, result.Saved);
-                await SetCoverAsync(PhotoEntries.Cover(result.Saved).Id);
+            var (message, saved) = await Photos.TakeAsync(input, Due.Subject);
+            status = message;
+            if (saved)
                 await OnTaken.InvokeAsync();
-            }
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the monthly photo failed");
             status = $"Couldn't save the photo: {ex.Message}";
         }
 
         busy = false;
-    }
-
-    // The first photo of something becomes its cover, the same as on its own page
-    private async Task SetCoverAsync(Guid photoId)
-    {
-        switch (Due.Subject)
-        {
-            case Plant { CoverPhotoId: null } plant:
-                plant.CoverPhotoId = photoId;
-                await PlantRepository.SaveAsync(plant);
-                break;
-            case Propagation { CoverPhotoId: null } propagation:
-                propagation.CoverPhotoId = photoId;
-                await PropagationRepository.SaveAsync(propagation);
-                break;
-        }
     }
 }

@@ -13,7 +13,7 @@ public sealed record OutcomePlant(Plant Plant, string? Room)
 
 /// <summary>
 /// How a finished propagation turned out, worked out from what it already keeps: how long it
-/// ran, how soon it rooted, how many units were potted up or failed, and the plants it became.
+/// ran, how soon it rooted, how many units were potted up, given away or failed, and the plants it became.
 /// </summary>
 /// <param name="DaysRan">Days from the start to the day it finished. Null for one finished before the finish date was kept.</param>
 /// <param name="DaysToRoot">
@@ -26,6 +26,7 @@ public sealed record PropagationOutcome(
     int? DaysToRoot,
     int Started,
     int PottedUp,
+    int GivenAway,
     int Failed,
     IReadOnlyList<OutcomePlant> Plants)
 {
@@ -66,6 +67,7 @@ public sealed record PropagationOutcome(
             DaysToFirstSign(propagation),
             propagation.InitialCount,
             propagation.PottedUpCount,
+            propagation.GivenAwayCount,
             propagation.FailedCount,
             became);
     }

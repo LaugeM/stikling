@@ -105,36 +105,43 @@ function readExifDate(view, tiff) {
     return plain !== undefined ? text(plain) : null;
 }
 
-// Reads the files chosen in an <input type="file">, stores a compressed copy and a
-// thumbnail of each, and returns their details. Files that aren't readable images
-// are skipped and counted in "failed".
+// Stores a compressed copy and a thumbnail of one image file and returns its details, or null
+// when the file isn't a readable image.
+export async function saveFile(file) {
+    try {
+        // "from-image" applies the camera's rotation info so photos aren't sideways
+        const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+        const full = await resize(bitmap, FULL_SIZE);
+        const thumb = await resize(bitmap, THUMB_SIZE);
+        bitmap.close();
+
+        const id = crypto.randomUUID();
+        await putPhotoImages(id, full.blob, thumb.blob);
+
+        // The date is picked in .NET from these three
+        return {
+            id,
+            width: full.width,
+            height: full.height,
+            cameraDate: await readCameraDate(file),
+            fileName: file.name,
+            fileDate: new Date(file.lastModified || Date.now()).toISOString()
+        };
+    } catch {
+        return null;
+    }
+}
+
+// Reads the files chosen in an <input type="file"> and saves each one with saveFile. Files that
+// aren't readable images are skipped and counted in "failed".
 export async function saveFromInput(input) {
     const saved = [];
     let failed = 0;
 
     for (const file of Array.from(input.files ?? [])) {
-        try {
-            // "from-image" applies the camera's rotation info so photos aren't sideways
-            const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-            const full = await resize(bitmap, FULL_SIZE);
-            const thumb = await resize(bitmap, THUMB_SIZE);
-            bitmap.close();
-
-            const id = crypto.randomUUID();
-            await putPhotoImages(id, full.blob, thumb.blob);
-
-            // The date is picked in .NET from these three
-            saved.push({
-                id,
-                width: full.width,
-                height: full.height,
-                cameraDate: await readCameraDate(file),
-                fileName: file.name,
-                fileDate: new Date(file.lastModified || Date.now()).toISOString()
-            });
-        } catch {
-            failed++;
-        }
+        const details = await saveFile(file);
+        if (details) saved.push(details);
+        else failed++;
     }
 
     input.value = ""; // allow choosing the same file again
@@ -240,4 +247,49 @@ export async function download(address, token, id, thumbnail) {
     await putFetchedImage(id, thumbnail ? thumbKey(id) : id, blob);
     forgetUrls(id);
     return 200;
+}
+
+// An image fetched from a public share link, when someone keeps a copy of a plant's history. The
+// giver's device already resized it to the full size, so it is kept as it arrived and only the
+// thumbnail is made here. No sign-in is sent. Returns false when it couldn't be fetched or read.
+export async function fetchShared(address, id) {
+    try {
+        let response;
+        for (let attempt = 1; attempt <= 4; attempt++) {
+            response = await fetchUncached(address);
+            if (response.status !== 429 || attempt === 4) break;
+
+            // The API asks for a pause when many photos are fetched at once
+            const asked = Number(response.headers.get("Retry-After"));
+            const seconds = Math.min(Number.isFinite(asked) && asked > 0 ? asked : 2, 10);
+            await new Promise(resolve => setTimeout(resolve, seconds * 1000));
+        }
+        if (!response.ok) return false;
+
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        const full = new Blob([bytes], { type: imageType(bytes) });
+        const bitmap = await createImageBitmap(full);
+        let thumb;
+        try {
+            thumb = await resize(bitmap, THUMB_SIZE);
+        } finally {
+            bitmap.close();
+        }
+
+        await putPhotoImages(id, full, thumb.blob);
+        forgetUrls(id);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+// The preview loads the same images with crossorigin, so the cached copy can be used. A copy cached
+// without CORS headers, say from opening the share page, fails here, so then it is fetched again.
+async function fetchUncached(address) {
+    try {
+        return await fetch(address);
+    } catch {
+        return await fetch(address, { cache: "reload" });
+    }
 }

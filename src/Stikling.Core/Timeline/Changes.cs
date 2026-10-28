@@ -13,13 +13,15 @@ public static class PlantChanges
     /// <param name="potName">Turns a pot id into its name. Pots the caller can't name are left unsaid.</param>
     /// <param name="mixName">The same for a soil mix.</param>
     /// <param name="placeName">The same for a room or spot, "Living room / Windowsill".</param>
+    /// <param name="feedName">The same for a feed. A feed the caller can't name is left unsaid.</param>
     public static IReadOnlyList<string> Describe(
         Plant before,
         Plant after,
         Func<Enum, string> label,
         Func<Guid, string?>? potName = null,
         Func<Guid, string?>? mixName = null,
-        Func<Guid, string?>? placeName = null)
+        Func<Guid, string?>? placeName = null,
+        Func<Guid, string?>? feedName = null)
     {
         var changes = new List<string>();
 
@@ -36,6 +38,9 @@ public static class PlantChanges
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
         ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
 
+        if (before.HowMany != after.HowMany)
+            changes.Add($"How many: {before.HowMany} to {after.HowMany}");
+
         if (before.Light != after.Light)
             changes.Add(after.Light is { } light
                 ? $"Light: {label(light)} (was {(before.Light is { } was ? label(was) : "not set")})"
@@ -45,6 +50,8 @@ public static class PlantChanges
         ChangeText.AddPot(changes, before.InnerPotId, after.InnerPotId, name, "Potted into", "Taken out of its pot");
         ChangeText.AddPot(changes, before.OuterPotId, after.OuterPotId, name, "Now stands in", "No longer in an outer pot");
         ChangeText.AddPot(changes, before.SoilMixId, after.SoilMixId, mixName ?? (_ => null), "Now in", "No longer in a saved mix");
+
+        ChangeText.AddWateringFeed(changes, before, after, feedName ?? (_ => null));
 
         if (before.PotsTaken != after.PotsTaken && after.HasLeft)
             changes.Add(PotsTakenText(after));
@@ -61,7 +68,33 @@ public static class PlantChanges
         if (before.IsDormant != after.IsDormant && after.Status == PlantStatus.Active)
             changes.Add(DormancyText(after.IsDormant));
 
+        AddTransition(changes, before, after, label);
+
         return changes;
+    }
+
+    private static void AddTransition(List<string> changes, Plant before, Plant after, Func<Enum, string> label)
+    {
+        var medium = after.TransitionTo ?? before.TransitionTo;
+        var mediumText = medium is { } m ? label(m) : "semi-hydro";
+
+        // A second move after a settled one has a new start day too
+        if (after.TransitionSince is not null && before.TransitionSince != after.TransitionSince)
+            changes.Add($"Started the move to {mediumText}");
+        if (before.RootsWashedOn is null && after.RootsWashedOn is not null)
+            changes.Add("Roots washed");
+        if (before.FirstWaterRootOn is null && after.FirstWaterRootOn is not null)
+            changes.Add("First new water root");
+        if (before.FirstNewLeafOn is null && after.FirstNewLeafOn is not null)
+            changes.Add("First new leaf");
+        if (!before.TransitionSettled && after.TransitionSettled
+            && after.TransitionSince is { } since && after.TransitionSettledOn is { } settled)
+        {
+            var weeks = Math.Max(1, (settled.DayNumber - since.DayNumber) / 7);
+            changes.Add($"Settled in to {mediumText} after {weeks} {(weeks == 1 ? "week" : "weeks")}");
+        }
+        if (before.TransitionSince is not null && after.TransitionSince is null && !before.TransitionSettled)
+            changes.Add($"Stopped tracking the move to {mediumText}");
     }
 
     /// <summary>
@@ -109,6 +142,9 @@ public static class PropagationChanges
         if (before.PottedUpCount != after.PottedUpCount)
             changes.Add($"Potted up: {after.PottedUpCount} (was {before.PottedUpCount})");
 
+        if (before.GivenAwayCount != after.GivenAwayCount)
+            changes.Add($"Given away: {after.GivenAwayCount} (was {before.GivenAwayCount})");
+
         if (before.FailedCount != after.FailedCount)
             changes.Add($"Failed: {after.FailedCount} (was {before.FailedCount})");
 
@@ -130,6 +166,9 @@ public static class PropagationChanges
             changes.Add(after.RootingAids.Count == 0
                 ? "No rooting aids"
                 : $"Rooting aids: {string.Join(", ", after.RootingAids.Order().Select(aid => label(aid)))}");
+
+        if (before.DriedForHours != after.DriedForHours)
+            changes.Add(after.DriedForHours is { } dried ? $"Cut end dried: {Propagations.Drying.Text(dried)}" : "Cut end no longer dried first");
 
         // Finishing ends dormancy too, and the stage change already says so
         if (before.IsDormant != after.IsDormant && after.IsActive)
@@ -199,6 +238,25 @@ internal static class ChangeText
             changes.Add(outOf);
         else if (name(after.Value) is { } pot)
             changes.Add($"{into} {pot}");
+    }
+
+    /// <summary>"Fed with the watering: Aroid feed, every second watering", or that it stopped.</summary>
+    public static void AddWateringFeed(List<string> changes, Plant before, Plant after, Func<Guid, string?> feedName)
+    {
+        int? every = after.WateringFeedId is null ? null : Math.Clamp(after.WateringFeedEvery ?? 1, 1, 3);
+        int? wasEvery = before.WateringFeedId is null ? null : Math.Clamp(before.WateringFeedEvery ?? 1, 1, 3);
+        if (before.WateringFeedId == after.WateringFeedId && wasEvery == every)
+            return;
+
+        if (after.WateringFeedId is not { } feed)
+            changes.Add("No longer fed with the watering");
+        else if (feedName(feed) is { } name)
+            changes.Add($"Fed with the watering: {name}, " + every switch
+            {
+                2 => "every second watering",
+                3 => "every third watering",
+                _ => "every watering"
+            });
     }
 
     private static bool SameText(string? a, string? b) =>

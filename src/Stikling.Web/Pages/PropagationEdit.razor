@@ -1,13 +1,12 @@
 @page "/propagations/new"
 @page "/propagations/{Id:guid}/edit"
-@inject IPropagationRepository Repository
-@inject IPlantRepository PlantRepository
-@inject ISoilMixRepository MixRepository
+@inject PropagationForms Forms
+@inject ILogger<PropagationEdit> Logger
 @inject PropagationService PropagationService
-@inject RoomService RoomService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject PhotoService Photos
+@inject GooglePhotosService Google
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
@@ -42,21 +41,39 @@ else
             <legend>What you're propagating</legend>
             <div class="mb-3">
                 <label class="form-label" for="parent">Taken from</label>
-                <InputSelect id="parent" class="form-select" @bind-Value="propagation.ParentPlantId" @bind-Value:after="ParentChanged">
+                <InputSelect id="parent" class="form-select" @bind-Value="propagation.ParentPlantId" @bind-Value:after="form!.ParentChanged">
                     <option value="">No parent plant (e.g. bought seeds)</option>
-                    @foreach (var p in plants)
+                    @foreach (var p in form!.Plants.OrderBy(p => p.LivesElsewhere))
                     {
-                        <option value="@p.Id">@p.DisplayName</option>
+                        <option value="@p.Id">@PlantLineage.ParentLabel(p)</option>
                     }
                 </InputSelect>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => addParentOpen = true">The parent isn't mine</button>
             </div>
             @if (propagation.ParentPlantId is null)
             {
-                <div class="mb-1">
-                    <label class="form-label" for="source">Source</label>
-                    <InputText id="source" class="form-control" @bind-Value="propagation.Source" placeholder="e.g. Seed shop, a friend's plant" />
+                <div class="mb-3">
+                    <SellerPicker @bind-Value="form!.SellerText" Names="sellerNames" Placeholder="e.g. Seed shop, a friend" />
                 </div>
             }
+            <div class="mb-1">
+                <label class="form-label" for="collection-number">Collection number</label>
+                <input id="collection-number" class="form-control" autocomplete="off"
+                           @bind="propagation.CollectionNumber" @bind:event="oninput" placeholder="e.g. 117a"
+                           aria-invalid="@(NumberInvalid ? "true" : null)" />
+                @if (NumberInvalid)
+                {
+                    <div class="form-text text-danger">@CollectionNumbers.NotValidText</div>
+                }
+                else if (NumberClashes is { Count: > 0 } clashes)
+                {
+                    <div class="form-text">@CollectionNumbers.ClashNote(NumberCode!, clashes)</div>
+                }
+                else
+                {
+                    <div class="form-text">The number on its label, like 117a for a cutting from plant 117. Optional.</div>
+                }
+            </div>
         </fieldset>
 
         <fieldset>
@@ -71,6 +88,7 @@ else
             else
             {
                 <PlantNameFields @bind-Genus="propagation.Genus" @bind-Species="propagation.Species" @bind-Cultivar="propagation.Cultivar"
+                                 @bind-Qualifier="propagation.NameQualifier" @bind-Note="propagation.NameNote"
                                  GenusPlaceholder="e.g. Alocasia" SpeciesPlaceholder="e.g. zebrina" CultivarPlaceholder="" />
                 <div class="mt-3">
                     <label class="form-label" for="nickname">Nickname</label>
@@ -79,8 +97,23 @@ else
                 <div class="form-text">
                     @(propagation.ParentPlantId is null ? "" : "Filled in from the parent plant. ")Give it a genus, a nickname, or both.
                 </div>
+                @if (form!.WishHere is not null)
+                {
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" id="mark-wish-got" @bind="form!.MarkWishGot" />
+                        <label class="form-check-label" for="mark-wish-got">On your wishlist: mark it got</label>
+                    </div>
+                }
             }
         </fieldset>
+
+        @if (form!.LastTimeMatch is { } lastTime)
+        {
+            <div class="last-time d-flex align-items-center justify-content-between gap-2 mb-3">
+                <span>Like last time: @LastTimeText(lastTime)</span>
+                <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => form.UseLastTime(lastTime)">Use</button>
+            </div>
+        }
 
         <fieldset>
             <legend>How you started it</legend>
@@ -97,25 +130,18 @@ else
                 </div>
                 <div class="col-5">
                     <label class="form-label" for="count">How many</label>
-                    <InputNumber id="count" class="form-control" @bind-Value="propagation.InitialCount" min="@MinCount" inputmode="numeric" />
+                    <InputNumber id="count" class="form-control" @bind-Value="propagation.InitialCount" min="@form!.MinCount" inputmode="numeric" />
                 </div>
                 @if (Labels.Explain(propagation.Type) is { } typeHelp)
                 {
                     <div id="type-help" class="form-text">@typeHelp</div>
                 }
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="medium">Grows in</label>
-                <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium"
-                             aria-describedby="@(Labels.Explain(propagation.Medium) is null ? null : "medium-help")">
-                    @foreach (var medium in Enum.GetValues<GrowingMedium>())
-                    {
-                        <option value="@medium">@Labels.For(medium)</option>
-                    }
-                </InputSelect>
-                @if (Labels.Explain(propagation.Medium) is { } mediumHelp)
+                @if (IsNew && propagation.Type is PropagationType.Offset or PropagationType.Division)
                 {
-                    <div id="medium-help" class="form-text">@mediumHelp</div>
+                    <div class="form-text">
+                        Has it got its own roots already? Then it's a plant.
+                        <a href="@(propagation.ParentPlantId is { } parent ? $"plants/new?parent={parent}" : "plants/new")">Add it as a plant</a> instead.
+                    </div>
                 }
             </div>
             <div class="mb-1">
@@ -163,7 +189,19 @@ else
                     </label>
                     <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
                            @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+                    @if (googleOn)
+                    {
+                        <button type="button" class="btn btn-outline-primary btn-sm icon-btn" @onclick="StartGoogleAsync"
+                                disabled="@(busy || googleBusy)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                            Google Photos
+                        </button>
+                    }
                 </div>
+                @if (googleOn)
+                {
+                    <GooglePhotosPick @ref="googlePick" SubjectType="SubjectType.Propagation" SubjectId="propagation!.Id" OnSaved="GoogleSavedAsync" BusyChanged="busy => googleBusy = busy" />
+                }
 
                 <div class="form-text">The newest photo becomes the cover. You can add more later on its page.</div>
                 @if (photoStatus is not null)
@@ -183,23 +221,43 @@ else
 
         <h2 class="section-label">More details</h2>
         <div class="more-details mb-4">
-            <FormSection Title="Where it is" Summary="@location" Open="openWhere">
+            <FormSection Title="Where it is" Summary="@form!.Location" Open="openWhere">
                 <div class="mb-3">
-                    <RoomPicker @bind-Value="location" Rooms="rooms" SpotPlaceholder="e.g. Kitchen window" />
+                    <RoomPicker @bind-Value="form!.Location" Rooms="rooms" SpotPlaceholder="e.g. Kitchen window" />
                 </div>
             </FormSection>
 
+            @if (ShowArrival)
+            {
+                <FormSection Title="How it arrived" Summary="@ArrivalFields.Summary(propagation.ArrivedIn, propagation.ArrivalProblems)" Open="openArrival">
+                    <ArrivalFields Id="arrival" @bind-Rating="propagation.ArrivedIn" Problems="propagation.ArrivalProblems" @bind-Note="propagation.ArrivalNote" />
+                </FormSection>
+            }
+
             <FormSection Title="Setup" Summary="@SetupSummary" Open="openSetup">
                 <div class="mb-3">
-                    <label class="form-label" for="container">Container</label>
-                    <InputText id="container" class="form-control" @bind-Value="propagation.Container" placeholder="e.g. Humidity box" />
+                    <label class="form-label" for="medium">Grows in</label>
+                    <InputSelect id="medium" class="form-select" @bind-Value="propagation.Medium"
+                                 aria-describedby="@(Labels.Explain(propagation.Medium) is null ? null : "medium-help")">
+                        @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                        {
+                            <option value="@medium">@Labels.For(medium)</option>
+                        }
+                    </InputSelect>
+                    @if (Labels.Explain(propagation.Medium) is { } mediumHelp)
+                    {
+                        <div id="medium-help" class="form-text">@mediumHelp</div>
+                    }
                 </div>
                 @if (propagation.Medium == GrowingMedium.Soil)
                 {
                     <div class="mb-3">
-                        <MixPicker @bind-Value="propagation.SoilMixId" Mixes="mixes" />
+                        <MixPicker @bind-Value="propagation.SoilMixId" Mixes="form!.Mixes" />
                     </div>
                 }
+                <div class="mb-3">
+                    <ContainerPicker @bind-Value="form!.ContainerText" Containers="containerUses" />
+                </div>
                 <div class="mb-3">
                     <span class="form-label d-block" id="aids-label">Rooting aids</span>
                     <div class="chip-row" role="group" aria-labelledby="aids-label">
@@ -211,6 +269,29 @@ else
                         }
                     </div>
                     <div class="form-text">Optional. Pick what you used and the results page compares batches with and without it.</div>
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" id="dry-first" checked="@form!.DryFirst" @onchange="DryFirstChanged" />
+                        <label class="form-check-label" for="dry-first">Let the cut end dry first</label>
+                    </div>
+                    @if (form!.DryFirst)
+                    {
+                        <div class="row g-2 mt-1" role="group" aria-label="How long it dried">
+                            <div class="col-5">
+                                <input id="dry-amount" type="number" class="form-control" min="1" max="@Drying.MaxAmount" inputmode="numeric" aria-label="How long"
+                                       aria-invalid="@(form.DryInvalid ? "true" : null)" value="@form.DryAmount" @onchange="DryAmountChanged" />
+                            </div>
+                            <div class="col-7">
+                                <select id="dry-unit" class="form-select" aria-label="Unit" @onchange="DryUnitChanged">
+                                    <option value="hours" selected="@(!form.DryInDays)">hours</option>
+                                    <option value="days" selected="@form.DryInDays">days</option>
+                                </select>
+                            </div>
+                            @if (form.DryInvalid)
+                            {
+                                <div class="form-text text-danger">@PropagationForm.DryMessage</div>
+                            }
+                        </div>
+                    }
                 </div>
                 @if (propagation.Type == PropagationType.Corm)
                 {
@@ -241,6 +322,22 @@ else
                 </FormSection>
             }
 
+            <FormSection Title="For a plant-sitter" Summary="@SitterSummary" Open="openSitter">
+                <div class="mb-3">
+                    <label class="form-label" for="sitter-note">Note for a plant-sitter</label>
+                    <InputTextArea id="sitter-note" class="form-control" rows="3" @bind-Value="propagation.SitterNote" aria-describedby="sitter-note-help" />
+                    <div id="sitter-note-help" class="form-text">Goes on the sheet for whoever looks after your plants while you're away.</div>
+                </div>
+            </FormSection>
+
+            <FormSection Title="For swap" Summary="@SwapSummary" Open="openSwap">
+                <div class="mb-3">
+                    <label class="form-label" for="spare-count">Cuttings available for swap</label>
+                    <InputNumber id="spare-count" class="form-control" @bind-Value="propagation.SpareCount" min="0" inputmode="numeric" aria-describedby="spare-help" />
+                    <div id="spare-help" class="form-text">How many you can spare. It shows on the Available for swap page, never more than what is left, and giving some away takes them off first.</div>
+                </div>
+            </FormSection>
+
             <FormSection Title="Progress" Summary="@ProgressSummary" Open="openProgress">
                 <div class="mb-3">
                     <label class="form-label" for="stage">How far along</label>
@@ -261,21 +358,28 @@ else
                             : "It's finished, since none are left.")
                     </div>
                 </div>
-                @* Only once something has been potted up or failed, so there is a count to correct *@
-                @if (original is { PottedUpCount: > 0 } or { FailedCount: > 0 })
+                @* Only once something has been potted up, given away or failed, so there is a count to correct *@
+                @if (form!.Original is { PottedUpCount: > 0 } or { FailedCount: > 0 } or { GivenAwayCount: > 0 })
                 {
                     <div class="row g-2 mb-3">
-                        <div class="col-6">
+                        <div class="@(ShowGivenAway ? "col-4" : "col-6")">
                             <label class="form-label" for="potted-up">Potted up</label>
-                            <InputNumber id="potted-up" class="form-control" @bind-Value="propagation.PottedUpCount" min="@PlantsFromIt" inputmode="numeric" />
+                            <InputNumber id="potted-up" class="form-control" @bind-Value="propagation.PottedUpCount" min="@form!.PlantsFromIt" inputmode="numeric" />
                         </div>
-                        <div class="col-6">
+                        @if (ShowGivenAway)
+                        {
+                            <div class="col-4">
+                                <label class="form-label" for="given-away">Given away</label>
+                                <InputNumber id="given-away" class="form-control" @bind-Value="propagation.GivenAwayCount" min="0" inputmode="numeric" />
+                            </div>
+                        }
+                        <div class="@(ShowGivenAway ? "col-4" : "col-6")">
                             <label class="form-label" for="failed">Failed</label>
                             <InputNumber id="failed" class="form-control" @bind-Value="propagation.FailedCount" min="0" inputmode="numeric" />
                         </div>
                         <div class="form-text">
-                            Correct these if one was potted up or marked failed by mistake. Any left over go back to growing.
-                            @if (PlantsFromIt > 0)
+                            Correct these if one was potted up, given away or marked failed by mistake. Any left over go back to growing.
+                            @if (form!.PlantsFromIt > 0)
                             {
                                 <text> Plants potted up from it stay in your collection.</text>
                             }
@@ -327,7 +431,7 @@ else
         </div>
 
         <div class="form-actions form-bar">
-            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">@(IsNew ? "Start propagation" : "Save")</button>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || busy || googleBusy)">@(IsNew ? "Start propagation" : "Save")</button>
             @if (IsNew)
             {
                 <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
@@ -338,6 +442,8 @@ else
             }
         </div>
     </EditForm>
+
+    <ParentNotMine @bind-Open="addParentOpen" Added="ParentAdded" />
 }
 
 @code {
@@ -359,6 +465,10 @@ else
     [SupplyParameterFromQuery(Name = "parent")]
     public Guid? ParentId { get; set; }
 
+    /// <summary>Starts from a wish on the wishlist, from Got it. Once the cutting is saved the wish moves to Got.</summary>
+    [SupplyParameterFromQuery(Name = "wish")]
+    public Guid? WishId { get; set; }
+
     private static readonly PropagationStage[] ManualStages =
         [PropagationStage.Started, PropagationStage.Rooting, PropagationStage.Rooted];
 
@@ -370,27 +480,44 @@ else
     /// <summary>Photos taken while starting the propagation. They're saved with it.</summary>
     private readonly List<Photo> photos = [];
     private string? photoStatus;
+    private GooglePhotosPick? googlePick;
+    private bool googleBusy;
+
+    private async Task StartGoogleAsync()
+    {
+        if (googlePick is not null)
+            await googlePick.Start();
+    }
+
+    private bool googleOn;
     private bool busy;
     private DateOnly? dateFromPhotos; // when the start day was moved back to the oldest photo
     private bool keepToday;
 
+    private PropagationForm? form;
+    private (Guid? Id, Guid? ParentId, Guid? WishId) formFor;
     private Propagation? propagation;
-    private bool isDraft; // propagation is the new one being started, not one opened for editing
-    private Guid? draftParentId; // the plant the draft was started from
-    private Propagation? original; // as it was before editing, to record what changed
     private bool notFound;
     private bool saving;
     private List<string> errors = [];
-    private IReadOnlyList<Plant> plants = [];
+
+    private string? NumberCode => CollectionNumbers.Normalize(propagation?.CollectionNumber);
+    private bool NumberInvalid => NumberCode is { } code && !CollectionNumbers.IsValid(code);
+    private IReadOnlyList<CodeClash> NumberClashes =>
+        NumberCode is { } code && !NumberInvalid
+            ? CollectionNumbers.Clashes(code, propagation!.Id, form!.Plants, form.Propagations)
+            : [];
+
     private IReadOnlyList<Room> rooms = [];
-    private Places places = Places.None;
-    private string? location; // as picked, "Kitchen / Window"; made into a room when saving
     private IReadOnlyList<string> experiments = [];
+    private IReadOnlyList<PotUse> containerUses = [];
 
     // Which sections start open, worked out when the propagation loads. A section only reads this once
     private bool openWhere;
     private bool openSetup;
     private bool openProgress;
+    private bool openSitter;
+    private bool openSwap;
 
     // Set by "Change name", or by a name error, and kept for the rest of the visit
     private bool nameExpanded;
@@ -399,11 +526,8 @@ else
 
     private DateOnly Today => Time.Today();
 
-    // Plants potted up from it that still exist. The potted up count can't be corrected below them
-    private int PlantsFromIt => propagation is null ? 0 : plants.Count(p => p.FromPropagationId == propagation.Id);
-
-    // Units already potted up or failed can't be counted away
-    private int MinCount => Math.Max(1, (propagation?.PottedUpCount ?? 0) + (propagation?.FailedCount ?? 0));
+    // Only shown once something was given away, so it stays out of the way for everyone else
+    private bool ShowGivenAway => form?.Original is { GivenAwayCount: > 0 };
 
     private string BackUrl =>
         !IsNew ? $"propagations/{Id}"
@@ -414,7 +538,7 @@ else
     private bool NameCollapsed =>
         !nameExpanded
         && propagation?.ParentPlantId is { } parentId
-        && plants.FirstOrDefault(p => p.Id == parentId) is { } parent
+        && form!.Plants.FirstOrDefault(p => p.Id == parentId) is { } parent
         && NameMatches(propagation, PropagationService.StartFrom(parent));
 
     private static bool NameMatches(Propagation a, Propagation b) =>
@@ -426,9 +550,11 @@ else
         string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
 
     private string? SetupSummary => propagation is null ? null : Joined(
-        propagation.Container,
-        propagation.Medium == GrowingMedium.Soil && propagation.SoilMixId is { } mix ? mixes.FirstOrDefault(m => m.Id == mix)?.Name : null,
+        Labels.For(propagation.Medium),
+        form!.ContainerText,
+        propagation.Medium == GrowingMedium.Soil && propagation.SoilMixId is { } mix ? form!.Mixes.FirstOrDefault(m => m.Id == mix)?.Name : null,
         propagation.RootingAids.Count > 0 ? string.Join(", ", propagation.RootingAids.Select(Labels.For)) : null,
+        propagation.DriedForHours is { } dried ? $"dried {Drying.Text(dried)}" : null,
         propagation.Experiment);
 
     private string? AboutSummary => string.IsNullOrWhiteSpace(propagation?.Notes) ? null : Labels.Short(propagation.Notes);
@@ -438,59 +564,70 @@ else
         <InputTextArea class="form-control" rows="3" @bind-Value="propagation!.Notes" aria-label="About it" aria-describedby="about-help" />
     </div>;
 
+    private string? SwapSummary => propagation is { SpareAvailable: > 0 } ? $"{propagation.SpareAvailable} to swap" : null;
+
+    private string? SitterSummary => string.IsNullOrWhiteSpace(propagation?.SitterNote) ? null : Labels.Short(propagation.SitterNote);
+
     private string? ProgressSummary => propagation is null ? null : Joined(
         Labels.Stage(propagation.Stage, propagation.Type),
         propagation.FirstRootOn is { } root ? $"first root {Labels.Date(root)}" : null,
         propagation.FirstLeafOn is { } leaf ? $"first leaf {Labels.Date(leaf)}" : null,
-        propagation.PottedUpCount + propagation.FailedCount > 0 ? PropagationService.Outcome(propagation) : null);
+        propagation.PottedUpCount + propagation.FailedCount + propagation.GivenAwayCount > 0 ? PropagationService.Outcome(propagation) : null);
 
     private static bool HasSetup(Propagation p) =>
         !string.IsNullOrWhiteSpace(p.Container) || p.SoilMixId is not null || p.RootingAids.Count > 0
-        || !string.IsNullOrWhiteSpace(p.Experiment) || p.CormSizeMm is not null;
+        || p.DriedForHours is not null || !string.IsNullOrWhiteSpace(p.Experiment) || p.CormSizeMm is not null;
 
     private static bool HasProgress(Propagation p) =>
         p.Stage != PropagationStage.Started || p.RootedOn is not null || p.FirstRootOn is not null
         || p.FirstLeafOn is not null || p.SeedsGerminated is not null || p.FirstGerminatedOn is not null;
 
+    private bool openArrival;
+    private bool addParentOpen;
+
+    // A parent that lives with someone else was just saved: list it and pick it
+    private void ParentAdded(Plant parent)
+    {
+        form!.AddKnownPlant(parent);
+        propagation!.ParentPlantId = parent.Id;
+        form.ParentChanged();
+    }
+
+    private IReadOnlyList<string> sellerNames = [];
+
+    private bool ShowArrival =>
+        propagation is not null && propagation.ParentPlantId is null && SellerName.Clean(form!.SellerText) is not null;
+
     protected override async Task OnParametersSetAsync()
     {
-        var allPlants = await PlantRepository.GetAllAsync();
-        var allPropagations = await Repository.GetAllAsync();
-        plants = allPlants.OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
-        places = await RoomService.GetPlacesAsync();
-        mixes = await MixRepository.GetAllAsync();
-        rooms = Room.List(places, allPlants, allPropagations);
-        experiments = Experiments.Names(allPropagations);
+        googleOn = await Google.IsEnabledAsync();
 
-        if (IsNew)
-        {
-            // The draft keeps its id, so photos taken before saving stay with it. It starts again
-            // when the page is reused for a propagation from another plant, or came from editing one
-            if (propagation is null || !isDraft || draftParentId != ParentId)
-            {
-                propagation = ParentId is { } parentId && allPlants.FirstOrDefault(p => p.Id == parentId) is { } parent
-                    ? PropagationService.StartFrom(parent)
-                    : new Propagation { StartedOn = Today };
-                isDraft = true;
-                draftParentId = ParentId;
-            }
-        }
-        else
-        {
-            propagation = allPropagations.FirstOrDefault(p => p.Id == Id);
-            isDraft = false;
-            original = propagation?.Copy();
-            notFound = propagation is null;
-        }
+        // A new form only when the page was opened for something else, so a re-render never resets a draft
+        var key = (Id, ParentId, WishId);
+        if (form is not null && formFor == key)
+            return;
 
-        location = places.NameOf(propagation?.PlaceId);
+        formFor = key;
+        form = Id is { } id ? await Forms.EditAsync(id, Labels.For) : await Forms.NewAsync(ParentId, WishId, Labels.For);
+        propagation = form?.Propagation;
+        notFound = form is null;
+        if (form is null || propagation is null)
+            return;
 
-        if (propagation is not null)
-        {
-            openWhere = !IsNew && !string.IsNullOrWhiteSpace(location);
-            openSetup = !IsNew && HasSetup(propagation);
-            openProgress = !IsNew && HasProgress(propagation);
-        }
+        var all = form.Plants;
+        rooms = Room.List(form.Places, all, form.Propagations);
+        experiments = Experiments.Names(form.Propagations);
+        containerUses = PotUse.RecentContainers(form.PotUses, form.Propagations);
+        var uses = SellerSummary.CountsBySeller(form.SellerList, all, form.Propagations);
+        sellerNames = form.SellerList.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
+
+        var isNew = form.IsNew;
+        openArrival = !isNew && (propagation.ArrivedIn is not null || propagation.ArrivalProblems.Count > 0 || !string.IsNullOrWhiteSpace(propagation.ArrivalNote));
+        openWhere = !isNew && !string.IsNullOrWhiteSpace(form.Location);
+        openSetup = isNew || HasSetup(propagation);
+        openProgress = !isNew && HasProgress(propagation);
+        openSitter = !isNew && !string.IsNullOrWhiteSpace(propagation.SitterNote);
+        openSwap = !isNew && propagation.SpareCount is > 0;
     }
 
     private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
@@ -511,10 +648,19 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding photos to a propagation failed");
             photoStatus = $"Couldn't save the photos: {ex.Message}";
         }
 
         busy = false;
+    }
+
+    private Task GoogleSavedAsync(PhotoSaveResult result)
+    {
+        photos.AddRange(result.Saved);
+        photoStatus = result.Message(guessesMatter: true);
+        FollowPhotoDates();
+        return Task.CompletedTask;
     }
 
     private async Task RemovePhotoAsync(Photo photo)
@@ -551,6 +697,12 @@ else
 
     private async Task DiscardPhotosAsync()
     {
+        // A propagation stored before its save failed owns the photos, so they stay
+        if (form is { Stored: true })
+        {
+            photos.Clear();
+            return;
+        }
         foreach (var photo in photos)
             await Photos.DeleteAsync(photo.Id);
         photos.Clear();
@@ -569,77 +721,63 @@ else
         }
     }
 
+    private void DryFirstChanged(ChangeEventArgs e) => form!.DryFirst = e.Value is true;
+
+    private void DryAmountChanged(ChangeEventArgs e) =>
+        form!.DryAmount = int.TryParse(e.Value?.ToString(), out var amount) ? amount : null;
+
+    private void DryUnitChanged(ChangeEventArgs e) => form!.DryInDays = e.Value?.ToString() == "days";
+
+    private static string LastTimeText(Propagation p) => string.Join(", ", new[]
+    {
+        $"{Lower(Labels.For(p.Type))} in {Lower(Labels.For(p.Medium))}",
+        string.IsNullOrWhiteSpace(p.Container) ? null : p.Container.Trim(),
+        p.RootingAids.Count > 0 ? string.Join(", ", p.RootingAids.Order().Select(a => Lower(Labels.For(a)))) : null,
+        p.DriedForHours is { } hours ? $"dried {Drying.Text(hours)}" : null
+    }.OfType<string>());
+
+    // Mid-sentence, but not LECA or PON
+    private static string Lower(string text) =>
+        text.Any(char.IsLower) ? char.ToLowerInvariant(text[0]) + text[1..] : text;
+
     private void ToggleAid(RootingAid aid)
     {
         if (!propagation!.RootingAids.Remove(aid))
             propagation.RootingAids.Add(aid);
     }
 
-    // Picking a parent fills in empty name fields from it
-    private void ParentChanged()
-    {
-        if (propagation?.ParentPlantId is not { } parentId || plants.FirstOrDefault(p => p.Id == parentId) is not { } parent)
-            return;
-        if (string.IsNullOrWhiteSpace(propagation.Nickname) && string.IsNullOrWhiteSpace(propagation.Genus))
-        {
-            var filled = PropagationService.StartFrom(parent);
-            propagation.Nickname = filled.Nickname;
-            propagation.Genus = filled.Genus;
-            propagation.Species = filled.Species;
-            propagation.Cultivar = filled.Cultivar;
-        }
-        if (string.IsNullOrWhiteSpace(location))
-            location = places.NameOf(parent.PlaceId);
-    }
-
-    private IReadOnlyList<SoilMix> mixes = [];
-
     private async Task SaveAsync()
     {
-        if (propagation is null)
+        if (form is null)
             return;
 
-        if (propagation.Type != PropagationType.Seed)
-        {
-            propagation.SeedsGerminated = null;
-            propagation.FirstGerminatedOn = null;
-        }
-        if (propagation.Type != PropagationType.Corm)
-            propagation.CormSizeMm = null;
-
-        propagation.ClearMixUnlessSoil();
-        errors = propagation.Validate(Today).ToList();
-        if (!IsNew && propagation.PottedUpCount < PlantsFromIt)
-            errors.Add($"{Labels.Count(PlantsFromIt, "plant")} potted up from it {(PlantsFromIt == 1 ? "is" : "are")} still in your collection, so the potted up count can't be lower.");
-        if (errors.Count > 0)
-        {
-            // A name error has to be visible where it can be fixed
-            nameExpanded = true;
-            showErrors = true;
-            return;
-        }
-
+        errors = [];
         saving = true;
         try
         {
-            if (propagation.ParentPlantId is not null)
-                propagation.Source = null;
+            var wasNew = form.IsNew;
+            var result = await form.SaveAsync(photos);
+            if (result.Errors.Count > 0)
+            {
+                // A name error has to be visible where it can be fixed
+                errors = [.. result.Errors];
+                nameExpanded = true;
+                showErrors = true;
+                return;
+            }
 
-            propagation.PlaceId = await RoomService.PlaceIdAsync(location);
-            if (IsNew)
-            {
-                await PropagationService.CreateAsync(propagation, Labels.For(propagation), photos);
+            if (result.Created)
                 photos.Clear(); // they belong to the saved propagation now
-            }
-            else
-            {
-                var named = await RoomService.GetPlacesAsync();
-                await PropagationService.UpdateAsync(original!, propagation, Labels.For(propagation), id => named.NameOf(id));
-            }
-            Navigation.NavigateTo($"propagations/{propagation.Id}", replace: IsNew);
+            // The cutting is saved by now, so a wish that can't be moved or a history line that failed is logged, not a failed save
+            if (result.LaterError is { } later)
+                Logger.LogError(later, "A step after saving the propagation failed");
+
+            var id = form.Propagation.Id;
+            Navigation.NavigateTo(wasNew ? $"propagations/{id}?made=true" : $"propagations/{id}", replace: wasNew);
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the propagation failed");
             errors = [$"Couldn't save: {ex.Message}"];
             showErrors = true;
         }

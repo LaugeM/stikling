@@ -38,3 +38,34 @@
     margin-block: -0.75rem 0;
     font-size: 0.9rem;
 }
+
+.select-all {
+    display: flex;
+    gap: 1rem;
+    margin: -0.25rem 0 0.6rem;
+}
+
+/* Sits above the navigation while selecting, lined up with the page column */
+.bulk-bar {
+    position: fixed;
+    left: var(--pa-nav-side);
+    right: 0;
+    bottom: var(--pa-nav-bottom);
+    z-index: 11;
+    padding: 0.6rem var(--pa-column-inset);
+    background: var(--pa-surface);
+    border-top: 1px solid var(--pa-border);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+}
+
+.bulk-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bulk-count {
+    font-weight: 600;
+    margin-right: auto;
+}

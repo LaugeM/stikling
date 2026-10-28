@@ -1,0 +1,354 @@
+@page "/sellers/{Id:guid}"
+@inject SellerService SellerService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject IPestCaseRepository PestCaseRepository
+@inject NavigationManager Navigation
+
+<PageTitle>@(seller?.Name ?? "Seller") · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="sellers">Sellers</a>
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (seller is null || summary is null)
+{
+    <p class="text-body-secondary">That seller doesn't exist.</p>
+}
+else
+{
+    <h1>@seller.Name</h1>
+    <p class="seller-kind">@Labels.For(seller.Kind)@(string.IsNullOrWhiteSpace(seller.Notes) ? null : $" · {seller.Notes}")</p>
+
+    @if (errors.Count > 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            @foreach (var error in errors)
+            {
+                <div>@error</div>
+            }
+        </div>
+    }
+
+    <section class="settings-section">
+        <h2>How they have done</h2>
+
+        @if (summary.Total == 0)
+        {
+            <p class="text-body-secondary">Nothing comes from this seller yet. Pick it under Where from on a plant.</p>
+        }
+        else
+        {
+            <dl class="detail-list">
+                <dt>Plants</dt>
+                <dd>@PlantsText</dd>
+
+                @if (summary.Propagations.Count > 0)
+                {
+                    <dt>Propagations</dt>
+                    <dd>@Labels.Count(summary.Propagations.Count, "propagation")</dd>
+                }
+
+                <dt>Pests early on</dt>
+                <dd>@PestsText</dd>
+
+                <dt>How they arrived</dt>
+                <dd>
+                    @ArrivalText
+                    @if (summary.Problems.Count > 0)
+                    {
+                        <div class="seller-problems">@string.Join(", ", summary.Problems.Select(p => $"{Labels.For(p.Key).ToLowerInvariant()} {p.Value}"))</div>
+                    }
+                </dd>
+
+                @if (summary.PaidCount > 0)
+                {
+                    <dt>Paid</dt>
+                    <dd>@PaidText</dd>
+                }
+            </dl>
+
+            @if (summary.Plants.Count > 0)
+            {
+                <h3 class="seller-list-title">Plants</h3>
+                <ul class="seller-things">
+                    @foreach (var plant in summary.Plants)
+                    {
+                        <li>
+                            <a class="seller-thing" href="plants/@plant.Id">
+                                <span>@plant.DisplayName</span>
+                                <span class="seller-thing-note">@ThingNote(plant)</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+
+            @if (summary.Propagations.Count > 0)
+            {
+                <h3 class="seller-list-title">Propagations</h3>
+                <ul class="seller-things">
+                    @foreach (var propagation in summary.Propagations)
+                    {
+                        <li>
+                            <a class="seller-thing" href="propagations/@propagation.Id">
+                                <span>@propagation.DisplayName</span>
+                                <span class="seller-thing-note">@Arrival.PoorText(propagation.ArrivedIn, propagation.ArrivalProblems)</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        }
+    </section>
+
+    <section class="settings-section">
+        <h2>About this seller</h2>
+
+        <div class="mb-3">
+            <label class="form-label" for="seller-name">Name</label>
+            <input id="seller-name" class="form-control" autocomplete="off" @bind="name" @bind:event="oninput" />
+            <div class="form-text">Renaming it also changes the name written on every plant and propagation from it.</div>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label" id="seller-kind-label">What it is</div>
+            <div class="chip-row" role="group" aria-labelledby="seller-kind-label">
+                @foreach (var option in Enum.GetValues<SellerKind>())
+                {
+                    <button type="button" class="chip @(kind == option ? "picked" : null)"
+                            aria-pressed="@(kind == option ? "true" : "false")"
+                            @onclick="() => kind = option">@Labels.For(option)</button>
+                }
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="seller-notes">Notes</label>
+            <textarea id="seller-notes" class="form-control" rows="2" @bind="notes"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">Save changes</button>
+        </div>
+    </section>
+
+    <section class="settings-section">
+        <h2>Tidy up</h2>
+
+        @if (mode == Mode.Merging)
+        {
+            <div class="mb-3">
+                <label class="form-label" for="seller-merge">Merge into</label>
+                <select id="seller-merge" class="form-select" @bind="mergeTarget">
+                    <option value="">Pick a seller</option>
+                    @foreach (var other in others)
+                    {
+                        <option value="@other.Id">@other.Name</option>
+                    }
+                </select>
+                <div class="form-text">
+                    Everything from @seller.Name moves to the one you pick, and @seller.Name is taken off the list.
+                </div>
+            </div>
+            <div class="care-actions">
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || mergeTarget is null)" @onclick="MergeAsync">Merge</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => mode = Mode.None">Cancel</button>
+            </div>
+        }
+        else if (mode == Mode.Deleting)
+        {
+            <p>
+                Delete @seller.Name? Plants and propagations from it keep the name written on them,
+                but no longer link to a seller.
+            </p>
+            <div class="care-actions">
+                <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">Delete</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => mode = Mode.None">Cancel</button>
+            </div>
+        }
+        else
+        {
+            <div class="care-actions">
+                @if (others.Count > 0)
+                {
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="StartMerge">Merge into…</button>
+                }
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => mode = Mode.Deleting">Delete</button>
+            </div>
+        }
+    </section>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private enum Mode { None, Merging, Deleting }
+
+    private Seller? seller;
+    private SellerSummary? summary;
+    private IReadOnlyList<Seller> others = [];
+    private bool loading = true;
+    private bool busy;
+    private List<string> errors = [];
+    private Mode mode;
+
+    // Kept apart from the seller, so a sync arriving doesn't change what is being typed
+    private string name = "";
+    private SellerKind kind;
+    private string? notes;
+    private Guid? loadedFor;
+
+    private string? mergeTarget
+    {
+        get => mergeId?.ToString();
+        set => mergeId = Guid.TryParse(value, out var id) ? id : null;
+    }
+
+    private Guid? mergeId;
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var sellers = await SellerService.GetSellersAsync();
+        var found = sellers.Find(Id);
+        if (found is not null && found.Id != Id)
+        {
+            // Merged into another one, possibly on another device
+            Navigation.NavigateTo($"sellers/{found.Id}", replace: true);
+            return;
+        }
+
+        seller = found;
+        if (found is not null)
+        {
+            summary = SellerSummary.For(
+                found, sellers,
+                await PlantRepository.GetAllAsync(),
+                await PropagationRepository.GetAllAsync(),
+                await PestCaseRepository.GetAllAsync());
+            others = sellers.Live.Where(s => s.Id != found.Id).OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+
+            if (loadedFor != found.Id)
+            {
+                name = found.Name;
+                kind = found.Kind;
+                notes = found.Notes;
+                loadedFor = found.Id;
+                mode = Mode.None;
+                errors = [];
+            }
+        }
+        loading = false;
+    }
+
+    private void StartMerge()
+    {
+        mergeId = null;
+        mode = Mode.Merging;
+    }
+
+    private async Task SaveAsync()
+    {
+        await RunAsync(async () =>
+        {
+            await SellerService.UpdateAsync(Id, name, kind, notes);
+            loadedFor = null;
+        });
+    }
+
+    private async Task MergeAsync()
+    {
+        if (mergeId is not { } target)
+            return;
+
+        await RunAsync(async () =>
+        {
+            await SellerService.MergeAsync(Id, target);
+            Navigation.NavigateTo($"sellers/{target}");
+        });
+    }
+
+    private async Task DeleteAsync()
+    {
+        await RunAsync(async () =>
+        {
+            await SellerService.DeleteAsync(Id);
+            Navigation.NavigateTo("sellers");
+        });
+    }
+
+    private async Task RunAsync(Func<Task> work)
+    {
+        busy = true;
+        errors = [];
+        try
+        {
+            await work();
+            await LoadAsync();
+        }
+        catch (ArgumentException ex)
+        {
+            errors = [ex.Message];
+        }
+        catch (InvalidOperationException ex)
+        {
+            errors = [ex.Message];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private static string Money(decimal amount) =>
+        amount.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    private string PlantsText
+    {
+        get
+        {
+            if (summary!.Plants.Count == 0)
+                return "None";
+            var parts = new List<string>();
+            if (summary.StillHere > 0) parts.Add($"{summary.StillHere} still here");
+            if (summary.Died > 0) parts.Add($"{summary.Died} died");
+            if (summary.GivenAway > 0) parts.Add($"{summary.GivenAway} given away");
+            if (summary.Sold > 0) parts.Add($"{summary.Sold} sold");
+            return $"{Labels.Count(summary.Plants.Count, "plant")}: {string.Join(", ", parts)}";
+        }
+    }
+
+    private string PestsText => summary!.PestCases == 0
+        ? $"No pest cases in the first {SellerSummary.PestWindowDays} days"
+        : $"{Labels.Count(summary.PestCases, "pest case")} in the first {SellerSummary.PestWindowDays} days, covering {Labels.Count(summary.PlantsWithPests, "plant")}";
+
+    private string ArrivalText
+    {
+        get
+        {
+            if (!summary!.HasArrivals)
+                return "Not rated";
+            var parts = new List<string>();
+            if (summary.ArrivedGood > 0) parts.Add($"{summary.ArrivedGood} good");
+            if (summary.ArrivedOk > 0) parts.Add($"{summary.ArrivedOk} OK");
+            if (summary.ArrivedPoor > 0) parts.Add($"{summary.ArrivedPoor} poor");
+            return string.Join(", ", parts);
+        }
+    }
+
+    private string PaidText =>
+        $"{Money(summary!.PaidTotal)} in total, {Money(summary.PaidAverage ?? 0)} on average ({Labels.Count(summary.PaidCount, "plant")} with a price)";
+
+    private static string ThingNote(Plant plant) =>
+        string.Join(" · ", new[]
+        {
+            plant.InCollection ? null : Labels.StatusOf(plant),
+            Arrival.PoorText(plant.ArrivedIn, plant.ArrivalProblems)
+        }.Where(p => !string.IsNullOrEmpty(p)));
+}

@@ -1,0 +1,901 @@
+@page "/water"
+@using Stikling.Core.Settings
+@inject IPlantRepository Plants
+@inject IPropagationRepository PropagationRepository
+@inject PropagationCareService CuttingCare
+@inject ICareLogRepository CareLogs
+@inject IPotRepository PotRepository
+@inject IFeedRepository FeedRepository
+@inject ITimelineRepository TimelineRepository
+@inject GrowLightService LightService
+@inject AwayService AwayService
+@inject RoomService RoomService
+@inject SettingsService SettingsService
+@inject PutOffService PutOffService
+@inject WateringAnswers Answers
+@inject CareService Care
+@inject DeviceFiles Device
+@inject TimeProvider Time
+@inject ILogger<WaterPlants> Logger
+
+<PageTitle>Water plants · Stikling</PageTitle>
+
+@* Reads what is logged and the plants again. The rooms picked, the way of checking, the soil answers and the feeds someone changed stay *@
+<ReloadOnSync Reload="ReloadAsync" />
+
+@* On a computer the page takes the whole width and the plants flow into columns. The text parts keep to 48rem. *@
+<div class="page-full water-page @(check == WaterCheck.Meter ? "water-meter" : "water-soil")">
+<a class="back-link" href="@BackHref">@BackName</a>
+
+<h1>Water plants</h1>
+
+<div class="visually-hidden" role="status" aria-live="polite">@announcement</div>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (rooms.Count == 0)
+{
+    <div class="empty-state">
+        <p>No plants yet. Add one on the Plants page.</p>
+        <a class="btn btn-primary mt-3" href="plants">Go to Plants</a>
+    </div>
+}
+else if (stage == Stage.Rooms)
+{
+    <p class="pass-lead">Walk through every room, or pick the rooms in the order you walk them.</p>
+
+    <div class="pass-actions">
+        <button type="button" class="btn btn-primary" @onclick="StartAll">All rooms</button>
+    </div>
+
+    <h2 class="section-label">Or pick rooms</h2>
+
+    <div class="chip-row" role="group" aria-label="Rooms">
+        @foreach (var room in rooms)
+        {
+            var at = picked.IndexOf(room.Id);
+            <button type="button" class="chip pass-room @(at >= 0 ? "picked" : null)" aria-pressed="@(at >= 0 ? "true" : "false")"
+                    @onclick="() => TogglePicked(room.Id)">
+                <span class="pass-order @(at < 0 ? "unpicked" : null)" aria-hidden="true">@(at >= 0 ? at + 1 : null)</span>
+                @if (at >= 0)
+                {
+                    <span class="visually-hidden">Number @(at + 1): </span>
+                }
+                @room.Name
+            </button>
+        }
+    </div>
+
+    <div class="pass-actions">
+        <button type="button" class="btn btn-outline-primary" disabled="@(picked.Count == 0)" @onclick="StartAsync">Start</button>
+    </div>
+}
+else if (showDone)
+{
+    var watered = WateredRows().ToList();
+    var wateredCuttings = WateredCuttings().ToList();
+
+    <div class="pass-summary" role="status">
+        <h2 tabindex="-1" @ref="doneHeading">Done for today</h2>
+        @if (watered.Count == 0 && wateredCuttings.Count == 0)
+        {
+            <p>Nothing watered this time.</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var row in watered)
+                {
+                    <li>@row.Plant.DisplayName, @DoneText(row).ToLowerInvariant()</li>
+                }
+                @foreach (var cutting in wateredCuttings)
+                {
+                    <li>@cutting.Propagation.DisplayName, watered</li>
+                }
+            </ul>
+        }
+        <div class="pass-summary-actions">
+            <a class="btn btn-primary" href="@BackHref">Back to @BackName</a>
+            <button type="button" class="btn btn-link link-action" @onclick="KeepGoing">Keep going</button>
+        </div>
+    </div>
+}
+else
+{
+    @if (rooms.Count > 1)
+    {
+        <div class="pass-bar">
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="ChangeRooms">Change rooms</button>
+        </div>
+    }
+
+    <div class="chip-row pass-mode" role="group" aria-label="How you check">
+        <button type="button" class="chip @(check == WaterCheck.Meter ? "picked" : null)" aria-pressed="@(check == WaterCheck.Meter ? "true" : "false")"
+                @onclick="() => SetCheckAsync(WaterCheck.Meter)">Meter</button>
+        <button type="button" class="chip @(check == WaterCheck.Soil ? "picked" : null)" aria-pressed="@(check == WaterCheck.Soil ? "true" : "false")"
+                @onclick="() => SetCheckAsync(WaterCheck.Soil)">Feel the soil</button>
+    </div>
+
+    <p class="pass-lead">
+        @if (check == WaterCheck.Meter)
+        {
+            <text>Tap what the meter reads, from 0 for dry to 10 for wet.</text>
+        }
+        else
+        {
+            <text>Push a finger a few centimetres into the soil. Tap Dry or Still damp.</text>
+        }
+    </p>
+
+    @if (feedOptions.Count > 0)
+    {
+        <div class="pass-round-feed">
+            <label class="form-label" for="round-feed">Feed this round</label>
+            <select id="round-feed" class="form-select" aria-describedby="round-feed-help" value="@(roundFeed?.ToString() ?? "")"
+                    @onchange="e => roundFeed = Guid.TryParse(e.Value?.ToString(), out var id) ? id : null">
+                <option value="">No feed</option>
+                @foreach (var option in feedOptions)
+                {
+                    <option value="@option.Id">@option.Name</option>
+                }
+            </select>
+            <div class="form-text" id="round-feed-help">Goes with every watering you log here, unless a plant has its own feed due.</div>
+        </div>
+    }
+
+    @foreach (var group in groups)
+    {
+        var top = group.Rows.Where(r => r.Form == WateringForm.TopWatered).ToList();
+        var topUp = group.Rows.Where(r => r.Form != WateringForm.TopWatered).ToList();
+        <section class="pass-group">
+            @if (groups.Count > 1 || rooms.Count > 1)
+            {
+                <h2 class="section-label">@group.Name</h2>
+            }
+            @if (group.Rows.Count == 0 && group.Cuttings.Count == 0)
+            {
+                <p class="pass-none">No plants here.</p>
+            }
+            @if (top.Count > 0)
+            {
+                <ul class="item-list">
+                    @foreach (var row in top)
+                    {
+                        @RowTemplate(row)
+                    }
+                </ul>
+            }
+            @if (topUp.Count > 0)
+            {
+                <h3 class="pass-sub">Top up</h3>
+                <ul class="item-list">
+                    @foreach (var row in topUp)
+                    {
+                        @RowTemplate(row)
+                    }
+                </ul>
+            }
+            @if (group.Cuttings.Count > 0)
+            {
+                <h3 class="pass-sub">Cuttings</h3>
+                <ul class="item-list">
+                    @foreach (var cutting in group.Cuttings)
+                    {
+                        @CuttingTemplate(cutting)
+                    }
+                </ul>
+            }
+        </section>
+    }
+
+    <div class="pass-end"></div>
+
+    <div class="pass-progress" role="region" aria-label="Progress">
+        @if (status is not null)
+        {
+            <div class="alert alert-danger" role="alert">@status</div>
+        }
+        <div class="pass-progress-row">
+            <span class="pass-progress-text">@ProgressText()</span>
+            <button type="button" class="btn btn-primary" @onclick="Finish">Done</button>
+        </div>
+    </div>
+}
+</div>
+
+@code {
+    private enum Stage { Rooms, Plants }
+
+    // What the row says about the plant, from the answer given or the reading
+    private enum Answer { None, Dry, Damp }
+
+    private const string RoomsKey = "water-rooms";
+
+    private bool loaded;
+    private bool showDone;
+    private bool focusDone;
+    private string? status;
+    private string? announcement;
+    private Stage stage = Stage.Rooms;
+    private WaterCheck check = WaterCheck.Soil;
+    private ElementReference doneHeading;
+
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<CareLog> careLogs = [];
+    private IReadOnlyList<Propagation> propagations = [];
+    private IReadOnlyList<PropagationCareLog> cuttingLogs = [];
+    private IReadOnlyList<Feed> feeds = [];
+    private IReadOnlyList<Feed> feedOptions = [];
+    private Dictionary<Guid, Pot> pots = [];
+    private Places places = Places.None;
+    private PutOffs putOffs = PutOffs.Empty();
+    private IReadOnlyList<PassRoom> rooms = [];
+    private List<Guid> picked = [];
+    private IReadOnlyList<PassGroup> groups = [];
+
+    // Only kept for this visit: plants answered Dry by feel (nothing is stored for it), the feeds
+    // changed on a row, the rows being saved and the rows with the feed picker open
+    private readonly HashSet<Guid> dryByFeel = [];
+    private readonly Dictionary<Guid, Guid?> feedPicks = [];
+    private readonly HashSet<Guid> saving = [];
+    private readonly HashSet<Guid> pickerOpen = [];
+
+    // Cuttings have no put-off on Today, so Dry and Still damp by feel are both only kept for this visit
+    private readonly HashSet<Guid> cuttingDamp = [];
+
+    // The feed for every watering this round that has none of its own, not saved anywhere
+    private Guid? roundFeed;
+
+    [SupplyParameterFromQuery(Name = "from")]
+    public string? From { get; set; }
+
+    private DateOnly Today => Time.Today();
+
+    private bool FromPlants => From == "plants";
+
+    private string BackHref => FromPlants ? "plants" : "";
+
+    private string BackName => FromPlants ? "Plants" : "Today";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+        picked = Remembered(await Device.GetAsync(RoomsKey));
+        SkipRooms();
+        Compute();
+        loaded = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusDone)
+        {
+            focusDone = false;
+            await doneHeading.FocusAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        places = await RoomService.GetPlacesAsync();
+        plants = await Plants.GetAllAsync();
+        careLogs = await CareLogs.GetAllAsync();
+        propagations = await PropagationRepository.GetAllAsync();
+        cuttingLogs = await CuttingCare.GetAllAsync();
+        feeds = await FeedRepository.GetAllAsync();
+        feedOptions = [.. feeds
+            .Where(f => !f.IsDeleted && f.Products.Count > 0)
+            .OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)];
+        pots = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
+        putOffs = await PutOffService.GetAsync(Today);
+        check = WaterChecks.Effective((await SettingsService.GetAsync()).WaterCheck, careLogs);
+        rooms = WateringPass.Rooms(plants, places, propagations);
+        Compute();
+    }
+
+    // Sync brought changes in: the data is read again, and the person's own choices stay
+    private async Task ReloadAsync()
+    {
+        await LoadAsync();
+        picked = [.. picked.Where(id => rooms.Any(r => r.Id == id))];
+        SkipRooms();
+        if (rooms.Count > 1 && picked.Count == 0)
+            stage = Stage.Rooms;
+        Compute();
+    }
+
+    // With no room to pick between, the plants come straight up
+    private void SkipRooms()
+    {
+        if (rooms.Count > 1)
+            return;
+        picked = [.. rooms.Select(r => r.Id)];
+        stage = Stage.Plants;
+    }
+
+    private void Compute() =>
+        groups = WateringPass.Rows(picked, plants, careLogs, feeds, id => pots.GetValueOrDefault(id), places, Time, putOffs, propagations, cuttingLogs);
+
+    // The remembered rooms, in the order they were picked, leaving out the ones that are gone
+    private List<Guid> Remembered(string? value) =>
+    [
+        .. (value ?? "")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(s => Guid.TryParse(s, out var id) ? (Guid?)id : null)
+            .OfType<Guid>()
+            .Distinct()
+            .Where(id => rooms.Any(r => r.Id == id))
+    ];
+
+    private void TogglePicked(Guid id)
+    {
+        if (!picked.Remove(id))
+            picked.Add(id);
+    }
+
+    private void StartAll()
+    {
+        picked = [.. rooms.Select(r => r.Id)];
+        Open();
+    }
+
+    private async Task StartAsync()
+    {
+        if (picked.Count == 0)
+            return;
+        try
+        {
+            await Device.SetAsync(RoomsKey, string.Join(',', picked));
+        }
+        catch (Exception ex)
+        {
+            // Not remembering the rooms is no reason to stop
+            Logger.LogWarning(ex, "Couldn't remember the rooms picked for watering");
+        }
+        Open();
+    }
+
+    private void Open()
+    {
+        status = null;
+        Compute();
+        stage = Stage.Plants;
+    }
+
+    private void ChangeRooms()
+    {
+        status = null;
+        stage = Stage.Rooms;
+    }
+
+    private async Task SetCheckAsync(WaterCheck value)
+    {
+        if (check == value)
+            return;
+        status = null;
+        try
+        {
+            await SettingsService.SetWaterCheckAsync(value);
+            check = value;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the way of checking water failed");
+            status = SaveFailed;
+        }
+    }
+
+    private const string SaveFailed = "Couldn't save that. Try again.";
+
+    // Runs one row's save with only that row disabled, and says what happened for a screen reader
+    private async Task RowAsync(PassRow row, Func<Task<string>> save, string failure)
+    {
+        if (!saving.Add(row.Plant.Id))
+            return;
+        status = null;
+        try
+        {
+            announcement = await save();
+            careLogs = await CareLogs.GetAllAsync();
+            Compute();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "{Failure}", failure);
+            status = SaveFailed;
+        }
+        saving.Remove(row.Plant.Id);
+    }
+
+    private Task ReadingAsync(PassRow row, int value)
+    {
+        if (row.Reading?.Value == value)
+            return Task.CompletedTask;
+        return RowAsync(row, async () =>
+        {
+            await Answers.ReadingAsync(row.Plant.Id, value, row.Reading?.Id, Labels.For);
+            // A dry reading takes back an earlier "still damp", the way Dry does
+            if (row.Form == WateringForm.TopWatered && value <= row.WaterAt && WaterKey(row.Plant) is var key
+                && putOffs.IsPutOff(key, Today))
+            {
+                await PutOffService.PutOffAsync(key, Today);
+                putOffs.PutOff(key, Today);
+            }
+            return $"{row.Plant.DisplayName}: reads {value}";
+        }, "Saving a meter reading failed");
+    }
+
+    private string WaterKey(Plant plant) =>
+        PutOffs.Water(plant.Id, WateringGuess.Waterings(plant, careLogs).Cast<DateOnly?>().LastOrDefault());
+
+    // Dry by feel is only kept in this visit. If the plant was put off as still damp, that is taken back.
+    private Task DryAsync(PassRow row)
+    {
+        if (!row.StillDamp && dryByFeel.Contains(row.Plant.Id))
+            return Task.CompletedTask;
+        return RowAsync(row, async () =>
+        {
+            if (row.StillDamp)
+            {
+                var key = WaterKey(row.Plant);
+                await PutOffService.PutOffAsync(key, Today);
+                putOffs.PutOff(key, Today);
+            }
+            dryByFeel.Add(row.Plant.Id);
+            return $"{row.Plant.DisplayName}: dry";
+        }, "Taking back a still damp answer failed");
+    }
+
+    // Puts the plant off the way "No meter" does on Today
+    private Task StillDampAsync(PassRow row)
+    {
+        if (row.StillDamp)
+            return Task.CompletedTask;
+        return RowAsync(row, async () =>
+        {
+            var guess = WateringRound.GuessFor(
+                row.Plant, plants, careLogs, await TimelineRepository.GetPlantChangesAsync(),
+                id => pots.GetValueOrDefault(id), await LightService.GetAllAsync(), places,
+                await AwayService.GetAllAsync(), Seasons.HemisphereOf(TimeZoneInfo.Local), Time);
+            if (await Answers.NotYetAsync(row.Plant, guess, null, logReading: false, Labels.For) is { } wait)
+                putOffs.PutOff(wait.Key, wait.Until);
+            dryByFeel.Remove(row.Plant.Id);
+            return $"{row.Plant.DisplayName}: still damp";
+        }, "Putting a plant off as still damp failed");
+    }
+
+    private Task WateredAsync(PassRow row) =>
+        RowAsync(row, async () =>
+        {
+            await Care.LogWateringsAsync(
+                [new PassWatering(row.Plant.Id, WateringForms.DoneKind(row.Form), FeedOf(row))], Labels.For);
+            return $"{row.Plant.DisplayName} {WateringText.DoneLabel(row.Form).ToLowerInvariant()}";
+        }, "Logging the watering failed");
+
+    private Task UndoAsync(PassRow row)
+    {
+        if (row.DoneTodayId is not { } id)
+            return Task.CompletedTask;
+        return RowAsync(row, async () =>
+        {
+            await Care.UndoWateringAsync(id);
+            return $"{row.Plant.DisplayName}: undone";
+        }, "Undoing a watering failed");
+    }
+
+    // The feed picked for the plant, or the one it gets with its watering when it is due
+    private Feed? FeedOf(PassRow row)
+    {
+        // A pick on the row wins (even "No feed"), then the plant's own due feed, then the round's
+        var id = feedPicks.TryGetValue(row.Plant.Id, out var pick) ? pick : row.DefaultFeed?.Id ?? roundFeed;
+        return feedOptions.FirstOrDefault(f => f.Id == id);
+    }
+
+    private void TogglePicker(PassRow row)
+    {
+        if (!pickerOpen.Remove(row.Plant.Id))
+            pickerOpen.Add(row.Plant.Id);
+    }
+
+    private void PickFeed(PassRow row, string? value)
+    {
+        feedPicks[row.Plant.Id] = Guid.TryParse(value, out var id) ? id : null;
+        pickerOpen.Remove(row.Plant.Id);
+    }
+
+    // What the row says about the plant. For soil, an answer given by feel wins over a reading;
+    // for the meter, the reading wins over a put-off from Today.
+    private Answer AnswerOf(PassRow row)
+    {
+        if (row.Form != WateringForm.TopWatered)
+            return Answer.None;
+        if (check == WaterCheck.Soil)
+        {
+            if (row.StillDamp)
+                return Answer.Damp;
+            if (dryByFeel.Contains(row.Plant.Id))
+                return Answer.Dry;
+        }
+        if (row.Reading is not null)
+            return row.Dry ? Answer.Dry : Answer.Damp;
+        if (row.StillDamp)
+            return Answer.Damp;
+        return dryByFeel.Contains(row.Plant.Id) ? Answer.Dry : Answer.None;
+    }
+
+    private string MetaOf(PassRow row)
+    {
+        var answer = AnswerOf(row);
+        var byReading = row.Reading is not null
+            && !(check == WaterCheck.Soil && (row.StillDamp || dryByFeel.Contains(row.Plant.Id)));
+        return (answer, byReading) switch
+        {
+            (Answer.Dry, true) => $"reads {row.Reading!.Value}, dry by your reading",
+            (Answer.Dry, _) => "dry to the touch",
+            (Answer.Damp, true) => $"reads {row.Reading!.Value}, still damp",
+            _ => "still damp, check again later"
+        };
+    }
+
+    private bool IsChecked(PassRow row) =>
+        row.DoneTodayId is not null || row.Reading is not null || row.StillDamp || dryByFeel.Contains(row.Plant.Id);
+
+    private bool IsChecked(PassCutting cutting) =>
+        cutting.DoneTodayId is not null || cutting.Reading is not null
+        || dryByFeel.Contains(cutting.Propagation.Id) || cuttingDamp.Contains(cutting.Propagation.Id);
+
+    private IEnumerable<PassRow> AllRows() => groups.SelectMany(g => g.Rows);
+
+    private IEnumerable<PassCutting> AllCuttings() => groups.SelectMany(g => g.Cuttings);
+
+    private IEnumerable<PassRow> WateredRows() => AllRows().Where(r => r.DoneTodayId is not null);
+
+    private IEnumerable<PassCutting> WateredCuttings() => AllCuttings().Where(c => c.DoneTodayId is not null);
+
+    private string ProgressText()
+    {
+        var top = AllRows().Where(r => r.Form == WateringForm.TopWatered).ToList();
+        var cuttings = AllCuttings().ToList();
+        var total = top.Count + cuttings.Count;
+        var done = top.Count(IsChecked) + cuttings.Count(IsChecked);
+        var watered = WateredRows().Count() + WateredCuttings().Count();
+        if (total == 0)
+            return $"Nothing to check · {watered} watered";
+        return done >= total
+            ? $"All checked today · {watered} watered"
+            : $"{done} of {total} checked · {watered} watered";
+    }
+
+    private void Finish()
+    {
+        status = null;
+        showDone = true;
+        focusDone = true;
+    }
+
+    private void KeepGoing() => showDone = false;
+
+    // The feed an entry done today went with, found the way an undo does: on the topping up itself,
+    // or on the Fertilised entry saved with a watering
+    private string? DoneFeedName(PassRow row)
+    {
+        var entry = careLogs.FirstOrDefault(l => l.Id == row.DoneTodayId);
+        if (entry is null)
+            return null;
+        if (entry.Kind == CareKind.ToppedUp)
+            return string.IsNullOrWhiteSpace(entry.FeedName) ? null : entry.FeedName.Trim();
+        return careLogs
+            .Where(l => l.PlantId == entry.PlantId && l.Kind == CareKind.Fertilised && l.FeedId is not null
+                && l.OccurredOn == entry.OccurredOn && l.CreatedAt >= entry.CreatedAt)
+            .OrderBy(l => l.CreatedAt)
+            .Select(l => l.FeedName)
+            .FirstOrDefault(n => !string.IsNullOrWhiteSpace(n))?.Trim();
+    }
+
+    private string DoneText(PassRow row) =>
+        DoneFeedName(row) is { } feed
+            ? $"{WateringText.DoneLabel(row.Form)} with {feed}"
+            : WateringText.DoneLabel(row.Form);
+
+    private RenderFragment RowTemplate(PassRow row) => __builder =>
+    {
+        var plantId = row.Plant.Id;
+        var nameId = $"water-{plantId}";
+        var busy = saving.Contains(plantId);
+        var done = row.DoneTodayId is not null;
+        var answer = AnswerOf(row);
+        var feed = FeedOf(row);
+        var open = pickerOpen.Contains(plantId);
+        var lastWater = done ? null : CareSummary.LastWater(careLogs, plantId, Today);
+
+        <li class="pass-item @(done ? "done" : null)">
+            <SubjectThumb Subject="row.Plant" />
+            <div class="pass-body" role="group" aria-labelledby="@nameId">
+                <a id="@nameId" class="pass-name" href="@($"plants/{plantId}")">@row.Plant.DisplayName</a>
+                @if (done)
+                {
+                    <div class="pass-doneline">
+                        <span>@DoneText(row)</span>
+                        <span aria-hidden="true">·</span>
+                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                aria-label="@($"Undo {DoneText(row).ToLowerInvariant()} for {row.Plant.DisplayName}")"
+                                @onclick="() => UndoAsync(row)">Undo</button>
+                    </div>
+                }
+                else if (row.Form != WateringForm.TopWatered)
+                {
+                    <span class="pass-meta">@(row.Form == WateringForm.InWater ? "Check the water" : "Check the reservoir")@(lastWater is { } topped ? $" · {WateringText.LastWater(topped, row.Form)}" : null)</span>
+                    @FeedAndButton(row, WateringText.DoneLabel(row.Form), primary: true, busy, feed, open)
+                }
+                else
+                {
+                    @if (answer != Answer.None)
+                    {
+                        <span class="pass-meta">@MetaOf(row)</span>
+                    }
+                    else if (check == WaterCheck.Meter && CareSummary.LatestMoisture(careLogs, plantId, Today) is { } latest)
+                    {
+                        <span class="pass-meta">last reading @latest.Value, @Labels.DaysAgo(latest.DaysAgo)@(lastWater is { } was ? $" · {WateringText.LastWater(was, row.Form)}" : null)</span>
+                    }
+                    else if (lastWater is { } watered)
+                    {
+                        <span class="pass-meta">@WateringText.LastWater(watered, row.Form)</span>
+                    }
+
+                    @if (check == WaterCheck.Meter)
+                    {
+                        <div class="answer-grid" role="group" aria-label="@($"Meter reading for {row.Plant.DisplayName}")">
+                            @for (var n = 0; n <= 10; n++)
+                            {
+                                var value = n;
+                                var isPicked = row.Reading?.Value == n;
+                                <button type="button" class="chip @(isPicked ? "picked" : null)" aria-pressed="@(isPicked ? "true" : "false")"
+                                        disabled="@busy" @onclick="() => ReadingAsync(row, value)">@n</button>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="chip-row pass-soil" role="group" aria-label="@($"Soil of {row.Plant.DisplayName}")">
+                            <button type="button" class="chip @(answer == Answer.Dry ? "picked" : null)" aria-pressed="@(answer == Answer.Dry ? "true" : "false")"
+                                    disabled="@busy" @onclick="() => DryAsync(row)">Dry</button>
+                            <button type="button" class="chip @(answer == Answer.Damp ? "picked" : null)" aria-pressed="@(answer == Answer.Damp ? "true" : "false")"
+                                    disabled="@busy" @onclick="() => StillDampAsync(row)">Still damp</button>
+                        </div>
+                    }
+
+                    @if (answer == Answer.Dry)
+                    {
+                        @FeedAndButton(row, "Watered", primary: true, busy, feed, open)
+                    }
+                    else if (answer == Answer.Damp)
+                    {
+                        @FeedAndButton(row, "Watered anyway", primary: false, busy, feed, open)
+                    }
+                    else
+                    {
+                        @FeedAndButton(row, "Watered", primary: false, busy, feed, open)
+                    }
+                }
+            </div>
+        </li>
+    };
+
+    // Cuttings in soil or bark: the same checks as a plant, saved to the propagation's care log
+    private async Task CuttingAsync(PassCutting cutting, Func<Task<string>> save, string failure)
+    {
+        if (!saving.Add(cutting.Propagation.Id))
+            return;
+        status = null;
+        try
+        {
+            announcement = await save();
+            cuttingLogs = await CuttingCare.GetAllAsync();
+            Compute();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "{Failure}", failure);
+            status = SaveFailed;
+        }
+        saving.Remove(cutting.Propagation.Id);
+    }
+
+    private Task CuttingReadingAsync(PassCutting cutting, int value)
+    {
+        if (cutting.Reading?.Value == value)
+            return Task.CompletedTask;
+        return CuttingAsync(cutting, async () =>
+        {
+            var corrected = cutting.Reading is { } earlier
+                ? await CuttingCare.CorrectReadingAsync(cutting.Propagation.Id, earlier.Id, value)
+                : null;
+            if (corrected is null)
+                await CuttingCare.LogAsync(cutting.Propagation, PropagationCareKind.MoistureReading, Today, value);
+            return $"{cutting.Propagation.DisplayName}: reads {value}";
+        }, "Saving a meter reading for a cutting failed");
+    }
+
+    private Task CuttingDryAsync(PassCutting cutting)
+    {
+        var id = cutting.Propagation.Id;
+        if (dryByFeel.Contains(id) && !cuttingDamp.Contains(id))
+            return Task.CompletedTask;
+        dryByFeel.Add(id);
+        cuttingDamp.Remove(id);
+        announcement = $"{cutting.Propagation.DisplayName}: dry";
+        return Task.CompletedTask;
+    }
+
+    private Task CuttingDampAsync(PassCutting cutting)
+    {
+        var id = cutting.Propagation.Id;
+        if (cuttingDamp.Contains(id))
+            return Task.CompletedTask;
+        cuttingDamp.Add(id);
+        dryByFeel.Remove(id);
+        announcement = $"{cutting.Propagation.DisplayName}: still damp";
+        return Task.CompletedTask;
+    }
+
+    private Task CuttingWateredAsync(PassCutting cutting) =>
+        CuttingAsync(cutting, async () =>
+        {
+            await CuttingCare.LogAsync(cutting.Propagation, PropagationCareKind.Watered, Today);
+            return $"{cutting.Propagation.DisplayName} watered";
+        }, "Logging the watering of a cutting failed");
+
+    private Task CuttingUndoAsync(PassCutting cutting)
+    {
+        if (cutting.DoneTodayId is not { } id)
+            return Task.CompletedTask;
+        return CuttingAsync(cutting, async () =>
+        {
+            await CuttingCare.DeleteAsync(id);
+            return $"{cutting.Propagation.DisplayName}: undone";
+        }, "Undoing the watering of a cutting failed");
+    }
+
+    private Answer AnswerOf(PassCutting cutting)
+    {
+        var id = cutting.Propagation.Id;
+        if (check == WaterCheck.Soil)
+        {
+            if (cuttingDamp.Contains(id))
+                return Answer.Damp;
+            if (dryByFeel.Contains(id))
+                return Answer.Dry;
+        }
+        if (cutting.Reading is not null)
+            return cutting.Dry ? Answer.Dry : Answer.Damp;
+        if (cuttingDamp.Contains(id))
+            return Answer.Damp;
+        return dryByFeel.Contains(id) ? Answer.Dry : Answer.None;
+    }
+
+    private string MetaOf(PassCutting cutting)
+    {
+        var id = cutting.Propagation.Id;
+        var answer = AnswerOf(cutting);
+        var byReading = cutting.Reading is not null
+            && !(check == WaterCheck.Soil && (cuttingDamp.Contains(id) || dryByFeel.Contains(id)));
+        return (answer, byReading) switch
+        {
+            (Answer.Dry, true) => $"reads {cutting.Reading!.Value}, dry by your reading",
+            (Answer.Dry, _) => "dry to the touch",
+            (Answer.Damp, true) => $"reads {cutting.Reading!.Value}, still damp",
+            _ => "still damp, check again later"
+        };
+    }
+
+    private RenderFragment CuttingTemplate(PassCutting cutting) => __builder =>
+    {
+        var id = cutting.Propagation.Id;
+        var nameId = $"water-{id}";
+        var name = cutting.Propagation.DisplayName;
+        var busy = saving.Contains(id);
+        var done = cutting.DoneTodayId is not null;
+        var answer = AnswerOf(cutting);
+        var last = done ? null : PropagationCareService.Latest(cuttingLogs, id, PropagationCareKind.Watered, Today);
+
+        <li class="pass-item @(done ? "done" : null)">
+            <SubjectThumb Subject="cutting.Propagation" />
+            <div class="pass-body" role="group" aria-labelledby="@nameId">
+                <a id="@nameId" class="pass-name" href="@($"propagations/{id}")">@name</a>
+                @if (done)
+                {
+                    <div class="pass-doneline">
+                        <span>Watered</span>
+                        <span aria-hidden="true">·</span>
+                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                aria-label="@($"Undo watered for {name}")"
+                                @onclick="() => CuttingUndoAsync(cutting)">Undo</button>
+                    </div>
+                }
+                else
+                {
+                    @if (answer != Answer.None)
+                    {
+                        <span class="pass-meta">@MetaOf(cutting)</span>
+                    }
+                    else if (last is { } was)
+                    {
+                        <span class="pass-meta">watered @Labels.DaysAgo(was.DaysAgo)</span>
+                    }
+
+                    @if (check == WaterCheck.Meter)
+                    {
+                        <div class="answer-grid" role="group" aria-label="@($"Meter reading for {name}")">
+                            @for (var n = 0; n <= 10; n++)
+                            {
+                                var value = n;
+                                var isPicked = cutting.Reading?.Value == n;
+                                <button type="button" class="chip @(isPicked ? "picked" : null)" aria-pressed="@(isPicked ? "true" : "false")"
+                                        disabled="@busy" @onclick="() => CuttingReadingAsync(cutting, value)">@n</button>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="chip-row pass-soil" role="group" aria-label="@($"Soil of {name}")">
+                            <button type="button" class="chip @(answer == Answer.Dry ? "picked" : null)" aria-pressed="@(answer == Answer.Dry ? "true" : "false")"
+                                    disabled="@busy" @onclick="() => CuttingDryAsync(cutting)">Dry</button>
+                            <button type="button" class="chip @(answer == Answer.Damp ? "picked" : null)" aria-pressed="@(answer == Answer.Damp ? "true" : "false")"
+                                    disabled="@busy" @onclick="() => CuttingDampAsync(cutting)">Still damp</button>
+                        </div>
+                    }
+
+                    <div class="pass-act">
+                        @if (answer == Answer.Dry)
+                        {
+                            <button type="button" class="btn btn-primary pass-water" disabled="@busy" @onclick="() => CuttingWateredAsync(cutting)">Watered</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-link link-action pass-anyway" disabled="@busy" @onclick="() => CuttingWateredAsync(cutting)">@(answer == Answer.Damp ? "Watered anyway" : "Watered")</button>
+                        }
+                    </div>
+                }
+            </div>
+        </li>
+    };
+
+    // The Watered button (saves on the tap) with the feed it goes with and a way to change it
+    private RenderFragment FeedAndButton(PassRow row, string label, bool primary, bool busy, Feed? feed, bool open) => __builder =>
+    {
+        var plantId = row.Plant.Id;
+        var text = feed is null ? label : $"{label} with {feed.Name}";
+        <div class="pass-act">
+            @if (primary)
+            {
+                <button type="button" class="btn btn-primary pass-water" disabled="@busy" @onclick="() => WateredAsync(row)">@text</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-link link-action pass-anyway" disabled="@busy" @onclick="() => WateredAsync(row)">@text</button>
+            }
+            @if (feedOptions.Count > 0)
+            {
+                <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(open ? "true" : "false")"
+                        aria-label="@($"{(feed is null ? "Add a feed" : "Change the feed")} for {row.Plant.DisplayName}")"
+                        @onclick="() => TogglePicker(row)">@(feed is null ? "add feed" : "change")</button>
+            }
+        </div>
+        @if (open)
+        {
+            <div class="pass-feed">
+                <label class="pass-feed-label" for="@($"water-{plantId}-feed")">Feed</label>
+                <select id="@($"water-{plantId}-feed")" class="form-select form-select-sm" value="@(feed?.Id.ToString() ?? "")"
+                        @onchange="e => PickFeed(row, e.Value?.ToString())">
+                    <option value="">No feed</option>
+                    @foreach (var option in feedOptions)
+                    {
+                        <option value="@option.Id">@option.Name</option>
+                    }
+                </select>
+            </div>
+        }
+    };
+}

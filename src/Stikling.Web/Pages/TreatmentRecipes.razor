@@ -4,6 +4,7 @@
 
 <PageTitle>Treatment recipes · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
+<ShowFound ElementId="@(Show is { } shown ? $"item-{shown}" : null)" />
 
 <a class="back-link" href="supplies">Supplies</a>
 <h1>Treatment recipes</h1>
@@ -123,7 +124,7 @@ else
         <ul class="recipe-list">
             @foreach (var use in uses)
             {
-                <li>
+                <li id="item-@use.Recipe.Id">
                     @if (confirming == use.Recipe.Id)
                     {
                         <div class="recipe-confirm">
@@ -199,6 +200,10 @@ else
 }
 
 @code {
+    /// <summary>An item to scroll to and mark. Set by Search.</summary>
+    [SupplyParameterFromQuery(Name = "show")]
+    public Guid? Show { get; set; }
+
     private IReadOnlyList<RecipeUse> uses = [];
     private IReadOnlyList<TreatmentRecipe> all = [];
     private bool loading = true;

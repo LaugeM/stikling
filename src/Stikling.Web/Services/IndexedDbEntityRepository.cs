@@ -24,6 +24,10 @@ public abstract class IndexedDbEntityRepository<T>(IndexedDb db, TimeProvider ti
         return entity is { IsDeleted: false } ? entity : null;
     }
 
+    /// <summary>True when a record with this id is stored and soft-deleted.</summary>
+    public async Task<bool> IsDeletedAsync(Guid id) =>
+        await db.GetAsync<T>(store, id) is { IsDeleted: true };
+
     public async Task SaveAsync(T entity)
     {
         var errors = Validate(entity);

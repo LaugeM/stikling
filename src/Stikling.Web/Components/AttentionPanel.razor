@@ -1,6 +1,7 @@
 @* Flagging a plant or propagation as needing something, e.g. "Repot soon". The flag keeps it
    on Today until it's cleared, here or from Today itself. Shows nothing while there is no flag
-   and none is being written. *@
+   and none is being written. A flag can be set for later, and then stays off Today until its
+   month or day, shown here in muted colours. *@
 @inject TimeProvider Time
 
 @if (Editing)
@@ -16,9 +17,43 @@
                         @onclick="() => reason = suggestion">@suggestion</button>
             }
         </div>
-        <p class="form-text mb-3">It stays on Today until you mark it done.</p>
+        <div class="mt-3">
+            <InfoButton Topic="do it later">
+                <Label><span class="form-label mb-0">When it starts to show</span></Label>
+                <ChildContent>
+                    The flag stays on the plant, but only shows on Today from the day you pick. If you use round days, it can wait for the next round day.
+                </ChildContent>
+            </InfoButton>
+        </div>
+        <div class="btn-group segmented w-100" role="radiogroup" aria-label="When it starts to show">
+            <input type="radio" class="btn-check" name="@whenName" id="@(inputId)-now"
+                   checked="@(!later)" @onchange="() => later = false" />
+            <label class="btn btn-outline-primary" for="@(inputId)-now">Now</label>
+            <input type="radio" class="btn-check" name="@whenName" id="@(inputId)-later"
+                   checked="@later" @onchange="() => later = true" />
+            <label class="btn btn-outline-primary" for="@(inputId)-later">Later</label>
+        </div>
+        @if (later)
+        {
+            <label class="form-label mt-3" for="@(inputId)-from">From</label>
+            <select id="@(inputId)-from" class="form-select" @bind="fromChoice">
+                @foreach (var option in FromOptions)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            @if (fromChoice == DayChoice)
+            {
+                <input type="date" class="form-control mt-2" aria-label="Day" @bind="fromDay"
+                       min="@Today.AddDays(1).ToString("yyyy-MM-dd")" />
+            }
+        }
+        <p class="form-text my-3">@(later
+            ? "It stays off Today until then, and on it until you mark it done."
+            : "It stays on Today until you mark it done.")</p>
         <div class="form-actions">
-            <button type="button" class="btn btn-primary" disabled="@(busy || string.IsNullOrWhiteSpace(reason))"
+            <button type="button" class="btn btn-primary"
+                    disabled="@(busy || string.IsNullOrWhiteSpace(reason) || (later && Start() is null))"
                     @onclick="SaveAsync">@(Current is null ? "Flag it" : "Save")</button>
             <button type="button" class="btn btn-link" @onclick="CloseAsync">Cancel</button>
         </div>
@@ -26,14 +61,21 @@
 }
 else if (Current is { } flag)
 {
-    <div class="attention-note">
+    <div class="attention-note @(Waiting is not null ? "waiting" : null)">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4" /><path d="M5 4h12l-2.5 4.5L17 13H5" /></svg>
         <div class="attention-text">
             <span class="attention-reason">@flag.Reason</span>
-            <span class="attention-since">@Since(flag)</span>
+            <span class="attention-since">@(Waiting is { } from ? Labels.FlagFrom(from) : Since(flag))</span>
         </div>
         <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" @onclick="OpenAsync">Change</button>
-        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ClearAsync">Done</button>
+        @if (Waiting is not null)
+        {
+            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" @onclick="ClearAsync">Remove</button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ClearAsync">Done</button>
+        }
     </div>
 }
 
@@ -41,6 +83,14 @@ else if (Current is { } flag)
     /// <summary>The flag as it is now, or null when there isn't one.</summary>
     [Parameter]
     public Attention? Current { get; set; }
+
+    /// <summary>When the current flag starts to show, if it was set for later.</summary>
+    [Parameter]
+    public AttentionLater? Later { get; set; }
+
+    /// <summary>The next round day, offered first under Later. Null when round days aren't set.</summary>
+    [Parameter]
+    public DateOnly? NextRoundDay { get; set; }
 
     /// <summary>True while the reason is being written, which the page opens from its Flag button.</summary>
     [Parameter]
@@ -53,24 +103,96 @@ else if (Current is { } flag)
     [Parameter, EditorRequired]
     public required IReadOnlyList<string> Suggestions { get; set; }
 
-    /// <summary>Saves the reason, or clears the flag with null.</summary>
+    /// <summary>Saves the reason and the month or day it starts to show (null for now), or clears the flag with a null reason.</summary>
     [Parameter]
-    public EventCallback<string?> OnSave { get; set; }
+    public EventCallback<(string? Reason, LooseDate? From)> OnSave { get; set; }
 
     public static readonly IReadOnlyList<string> PlantReasons = ["Repot soon", "Look closer", "Ready to divide"];
     public static readonly IReadOnlyList<string> PropagationReasons = ["Change the water", "Look closer", "Ready to pot up"];
 
+    private const string RoundChoice = "round";
+    private const string DayChoice = "day";
+    private const int MonthsOffered = 11;
+
     private readonly string inputId = $"attention-{Guid.NewGuid():N}";
+    private readonly string whenName = $"attention-when-{Guid.NewGuid():N}";
     private string? reason;
     private bool busy;
     private bool wasEditing;
+    private bool later;
+    private string fromChoice = "";
+    private DateOnly? fromDay;
+
+    private DateOnly Today => Time.Today();
+
+    // The month or day a flag is still waiting for, or null when it shows on Today already
+    private LooseDate? Waiting =>
+        AttentionLater.IsWaiting(Current, Later, Today) ? AttentionLater.FromOf(Current, Later) : null;
 
     protected override void OnParametersSet()
     {
-        // Start from the current reason each time it's opened
+        // Start from the current reason and start each time it's opened
         if (Editing && !wasEditing)
+        {
             reason = Current?.Reason;
+            later = Waiting is not null;
+            fromDay = null;
+            fromChoice = FromOptions[0].Value;
+            if (Waiting is { } waiting)
+            {
+                if (waiting.Precision == DatePrecision.Month)
+                    fromChoice = MonthValue(waiting.Start);
+                else if (waiting.Start == NextRoundDay)
+                    fromChoice = RoundChoice;
+                else
+                {
+                    fromChoice = DayChoice;
+                    fromDay = waiting.Start;
+                }
+            }
+        }
         wasEditing = Editing;
+    }
+
+    private static string MonthValue(DateOnly month) =>
+        month.ToString("yyyy-MM", System.Globalization.CultureInfo.InvariantCulture);
+
+    // The next round day if there is one, then the next 11 months, then any day
+    private IReadOnlyList<(string Value, string Label)> FromOptions
+    {
+        get
+        {
+            var culture = System.Globalization.CultureInfo.InvariantCulture;
+            var options = new List<(string Value, string Label)>();
+            if (NextRoundDay is { } round)
+                options.Add((RoundChoice, $"Next round day, {round.ToString("dddd d MMM", culture)}"));
+            var first = new DateOnly(Today.Year, Today.Month, 1).AddMonths(1);
+            for (var i = 0; i < MonthsOffered; i++)
+            {
+                var month = first.AddMonths(i);
+                options.Add((MonthValue(month), month.ToString(month.Year == Today.Year ? "MMMM" : "MMMM yyyy", culture)));
+            }
+            // A start saved earlier that the list no longer reaches stays choosable
+            if (Waiting is { Precision: DatePrecision.Month } waiting
+                && options.All(o => o.Value != MonthValue(waiting.Start)))
+                options.Add((MonthValue(waiting.Start), waiting.Text()));
+            options.Add((DayChoice, "A day…"));
+            return options;
+        }
+    }
+
+    // What was picked under Later, or null for now, and while a day is still to be chosen
+    private LooseDate? Start()
+    {
+        if (!later)
+            return null;
+        if (fromChoice == RoundChoice)
+            return NextRoundDay is { } round ? LooseDate.Of(round) : null;
+        if (fromChoice == DayChoice)
+            return fromDay is { } day && day > Today ? LooseDate.Of(day) : null;
+        return DateOnly.TryParseExact(fromChoice + "-01", "yyyy-MM-dd", out var month)
+            ? LooseDate.Of(month.Year, month.Month)
+            : null;
     }
 
     private string Since(Attention flag) => $"flagged {Labels.DaysAgo(flag.DaysSince(Time.Today()))}";
@@ -82,7 +204,7 @@ else if (Current is { } flag)
     private async Task SaveAsync()
     {
         busy = true;
-        await OnSave.InvokeAsync(reason);
+        await OnSave.InvokeAsync((reason, Start()));
         busy = false;
         await CloseAsync();
     }
@@ -90,7 +212,7 @@ else if (Current is { } flag)
     private async Task ClearAsync()
     {
         busy = true;
-        await OnSave.InvokeAsync(null);
+        await OnSave.InvokeAsync((null, null));
         busy = false;
     }
 }

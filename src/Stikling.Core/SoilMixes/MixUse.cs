@@ -9,7 +9,7 @@ public sealed record MixUse(SoilMix Mix, int Plants)
     /// <summary>Every mix with its plants counted, the ones still being mixed first.</summary>
     public static IReadOnlyList<MixUse> List(IEnumerable<SoilMix> mixes, IEnumerable<Plant> plants)
     {
-        var alive = plants.Where(p => !p.IsDeleted).ToList();
+        var alive = plants.Where(p => !p.IsDeleted && !p.LivesElsewhere).ToList();
 
         return mixes
             .Where(mix => !mix.IsDeleted)
@@ -21,7 +21,7 @@ public sealed record MixUse(SoilMix Mix, int Plants)
 
     /// <summary>The plants still in the collection that are in a mix, by name.</summary>
     public static IReadOnlyList<Plant> PlantsIn(Guid mixId, IEnumerable<Plant> plants) => plants
-        .Where(p => !p.IsDeleted && p.Status == PlantStatus.Active && p.SoilMixId == mixId)
+        .Where(p => !p.IsDeleted && p.InCollection && p.SoilMixId == mixId)
         .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
         .ToList();
 }
@@ -34,7 +34,7 @@ public sealed class SoilMixService(ISoilMixRepository mixes, IPlantRepository pl
 
     /// <summary>How many plants are in a mix, for the line before changing or deleting it.</summary>
     public async Task<int> PlantsInAsync(Guid mixId) =>
-        (await plants.GetAllAsync()).Count(p => p.SoilMixId == mixId);
+        (await plants.GetAllAsync()).Count(p => !p.IsDeleted && !p.LivesElsewhere && p.SoilMixId == mixId);
 
     /// <summary>The plants in a mix that are still in the collection, sorted by name.</summary>
     public async Task<IReadOnlyList<Plant>> PlantsListAsync(Guid mixId) =>

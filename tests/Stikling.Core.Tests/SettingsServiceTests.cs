@@ -18,8 +18,19 @@ public class SettingsServiceTests
         Assert.Equal(UserSettings.SettingsId, settings.Id);
         Assert.Equal(ThemeMode.System, settings.Theme);
         Assert.False(settings.PhotoReminder);
+        Assert.False(settings.DailyRound);
         Assert.Null(await service.GetSavedAsync());
         Assert.Equal(0, repository.Saves);
+    }
+
+    [Fact]
+    public async Task The_way_of_checking_water_is_not_chosen_until_it_is_set_and_then_saved()
+    {
+        Assert.Null((await service.GetAsync()).WaterCheck);
+
+        await service.SetWaterCheckAsync(WaterCheck.Soil);
+
+        Assert.Equal(WaterCheck.Soil, (await service.GetAsync()).WaterCheck);
     }
 
     [Fact]
@@ -42,5 +53,76 @@ public class SettingsServiceTests
         var saved = Assert.Single(repository.Settings.Values);
         Assert.True(saved.PhotoReminder);
         Assert.Equal(ThemeMode.Light, saved.Theme);
+    }
+
+    [Fact]
+    public async Task Turning_on_google_photos_saves_it_and_keeps_the_rest()
+    {
+        Assert.False((await service.GetAsync()).GooglePhotos);
+
+        await service.SetThemeAsync(ThemeMode.Dark);
+        await service.SetGooglePhotosAsync(true);
+
+        var saved = Assert.Single(repository.Settings.Values);
+        Assert.True(saved.GooglePhotos);
+        Assert.Equal(ThemeMode.Dark, saved.Theme);
+        Assert.False(saved.PhotoReminder);
+        Assert.True((await service.GetAsync()).GooglePhotos);
+    }
+
+    [Fact]
+    public async Task Error_reports_are_on_until_turned_off()
+    {
+        Assert.False((await service.GetAsync()).ErrorReportsOff);
+
+        await service.SetThemeAsync(ThemeMode.Dark);
+        await service.SetErrorReportsOffAsync(true);
+
+        var saved = Assert.Single(repository.Settings.Values);
+        Assert.True(saved.ErrorReportsOff);
+        Assert.Equal(ThemeMode.Dark, saved.Theme);
+
+        await service.SetErrorReportsOffAsync(false);
+        Assert.False((await service.GetAsync()).ErrorReportsOff);
+    }
+
+    [Fact]
+    public async Task Turning_on_the_daily_round_saves_it_and_keeps_the_rest()
+    {
+        await service.SetThemeAsync(ThemeMode.Dark);
+        await service.SetDailyRoundAsync(true);
+
+        var saved = Assert.Single(repository.Settings.Values);
+        Assert.True(saved.DailyRound);
+        Assert.Equal(ThemeMode.Dark, saved.Theme);
+        Assert.False(saved.PhotoReminder);
+        Assert.True((await service.GetAsync()).DailyRound);
+    }
+
+    [Fact]
+    public async Task Hiding_the_year_saves_it_and_keeps_the_rest()
+    {
+        await service.SetThemeAsync(ThemeMode.Dark);
+        Assert.Null((await service.GetAsync()).YearHiddenFor);
+
+        await service.HideYearAsync(2026);
+
+        var settings = await service.GetAsync();
+        Assert.Equal(2026, settings.YearHiddenFor);
+        Assert.Equal(ThemeMode.Dark, settings.Theme);
+    }
+
+    [Fact]
+    public async Task The_back_list_length_is_saved_and_only_takes_the_offered_choices()
+    {
+        Assert.Null((await service.GetAsync()).BackListLength);
+
+        await service.SetBackListLengthAsync(10);
+        Assert.Equal(10, (await service.GetAsync()).BackListLength);
+
+        await service.SetBackListLengthAsync(0);
+        Assert.Equal(0, (await service.GetAsync()).BackListLength);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.SetBackListLengthAsync(4));
     }
 }

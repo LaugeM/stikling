@@ -1,0 +1,128 @@
+@* Offered right after something was given away or sold: a link to its photos and story, to send to
+   whoever got it. It is the share link of the plant or propagation, made here without opening the
+   whole Share sheet. The link logic is the Share sheet's (sync first, then ask the server for the
+   link), and "Change what the page shows" hands over to that sheet. Callers only show this panel
+   where accounts are available. *@
+@using Stikling.Core.Sync
+@inject SyncRunner Sync
+@inject ShareLinkService Links
+@inject ShareCardService Cards
+@inject NavigationManager Navigation
+
+@if (!Sync.SignedIn)
+{
+    <p class="pass-on-note">Sending its history needs an account, so the page can be shown from the server. Whoever got it doesn't need one.</p>
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" @onclick="SignInAsync">Sign in</button>
+        <button type="button" class="btn btn-link" @onclick="OnDone">Not now</button>
+    </div>
+}
+else
+{
+    <p class="pass-on-note">Send them a link to its photos and story so far. They can keep a copy in their own Stikling, without an account. It shows what a share link shows: the photos and milestones, and your notes if you leave them on. Never the room, prices or who got it.</p>
+    @if (Link is null)
+    {
+        <div class="form-check form-switch pass-on-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="pass-on-notes" checked="@showNotes" @onchange="e => showNotes = e.Value is true" disabled="@busy" />
+            <label class="form-check-label" for="pass-on-notes">Show my notes</label>
+        </div>
+    }
+    @if (error is not null)
+    {
+        <p class="pass-on-error" role="alert">@error</p>
+    }
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SendAsync">@(busy ? "Making the link…" : "Send them its history")</button>
+        @if (Link is not null)
+        {
+            <button type="button" class="btn btn-link link-action" @onclick="OnChangePage">Change what the page shows</button>
+        }
+        <button type="button" class="btn btn-link" @onclick="OnDone">Not now</button>
+    </div>
+    @if (copied)
+    {
+        <p class="form-text mt-2 mb-0" role="status">Copied</p>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public SubjectType SubjectType { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    /// <summary>The title of the share, e.g. the plant's name.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = "";
+
+    /// <summary>Not now, or after sharing.</summary>
+    [Parameter]
+    public EventCallback OnDone { get; set; }
+
+    /// <summary>Opens the Share sheet on the link.</summary>
+    [Parameter]
+    public EventCallback OnChangePage { get; set; }
+
+    private bool canShareLink;
+    private bool showNotes = true;
+    private bool busy;
+    private bool copied;
+    private string? error;
+
+    private ShareLinkInfo? Link => Links.For(SubjectId);
+
+    protected override async Task OnInitializedAsync() =>
+        canShareLink = await Cards.CanShareLinkAsync();
+
+    private async Task SendAsync()
+    {
+        error = null;
+        copied = false;
+        if (Link is null && !await MakeLinkAsync())
+            return;
+        if (Link is not { } link)
+            return;
+
+        if (canShareLink)
+        {
+            if (await Cards.ShareLinkAsync(Name, link.Url) == "failed")
+                error = "The share menu couldn't be opened. Copy the link instead.";
+            else
+                await OnDone.InvokeAsync();
+            if (error is null)
+                return;
+        }
+
+        copied = await Cards.CopyTextAsync(link.Url);
+        if (!copied)
+            error = "The link couldn't be copied. Select it and copy it by hand.";
+        else
+            error = null;
+    }
+
+    // The page has to be on the server before it can be shown from there, so it is synced first
+    private async Task<bool> MakeLinkAsync()
+    {
+        busy = true;
+        StateHasChanged();
+        try
+        {
+            await Sync.SyncNowAsync();
+            var result = await Links.CreateAsync(SubjectType, SubjectId, TimeZoneInfo.Local.Id, showNotes);
+            if (!result.Ok)
+                error = result.Offline ? "Connect to the internet to make a link." : result.Problem;
+            return result.Ok;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task SignInAsync()
+    {
+        await OnDone.InvokeAsync();
+        Navigation.NavigateTo("sign-in");
+    }
+}

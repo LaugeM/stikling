@@ -21,7 +21,7 @@ public enum CareKind
     LeavesCleaned,
     Harvested,
 
-    /// <summary>A reading off the moisture meter, 1 to 10.</summary>
+    /// <summary>A reading off the moisture meter, 0 to 10.</summary>
     MoistureReading
 }
 
@@ -38,7 +38,7 @@ public sealed class CareLog : Entity
 
     public CareKind Kind { get; set; }
 
-    /// <summary>The moisture meter reading, 1 to 10. Only on <see cref="CareKind.MoistureReading"/>.</summary>
+    /// <summary>The moisture meter reading, 0 to 10. Only on <see cref="CareKind.MoistureReading"/>.</summary>
     public int? Moisture { get; set; }
 
     /// <summary>
@@ -62,7 +62,23 @@ public sealed class CareLog : Entity
     /// <summary>The pH of the water, 0 to 14, from a meter. Only on the kinds that take a product.</summary>
     public decimal? Ph { get; set; }
 
+    /// <summary>
+    /// The own kind of care this entry is, when it is one. <see cref="Kind"/> is then what the kind
+    /// counts as: Watered, Fertilised, or Rotated for neither. These are top-level fields so an
+    /// older version that saves the record keeps them.
+    /// </summary>
+    public Guid? OwnKindId { get; set; }
+
+    /// <summary>The own kind's name as it was that day, so removing the kind leaves the entry readable.</summary>
+    public string? OwnKindName { get; set; }
+
     public string? Notes { get; set; }
+
+    /// <summary>
+    /// When the outer pot was emptied after this watering, ticked on Today. Null until then, and
+    /// for entries saved before this existed.
+    /// </summary>
+    public DateTimeOffset? OuterPotEmptiedAt { get; set; }
 
     public CareLog Copy()
     {
@@ -81,12 +97,20 @@ public sealed class CareLog : Entity
         if (OccurredOn > today)
             errors.Add("That date is in the future.");
 
+        if (OwnKindId is not null)
+        {
+            if (string.IsNullOrWhiteSpace(OwnKindName))
+                errors.Add("An entry of your own kind of care needs its name.");
+            if (Kind is not (CareKind.Rotated or CareKind.Watered or CareKind.Fertilised))
+                errors.Add("A kind of your own can only count as a watering, a feed or neither.");
+        }
+
         if (Kind == CareKind.MoistureReading)
         {
             if (Moisture is null)
-                errors.Add("Give the moisture reading a number from 1 to 10.");
-            else if (Moisture is < 1 or > 10)
-                errors.Add("The moisture reading goes from 1 to 10.");
+                errors.Add("Give the moisture reading a number from 0 to 10.");
+            else if (Moisture is < 0 or > 10)
+                errors.Add("The moisture reading goes from 0 to 10.");
         }
         else if (Moisture is not null)
         {

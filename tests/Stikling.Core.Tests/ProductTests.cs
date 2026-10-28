@@ -20,7 +20,7 @@ public class ProductTests
 
     public ProductTests()
     {
-        care = new CareService(logs, new FakeTimelineRepository(), new FixedTime(Now));
+        care = new CareService(logs, new FakeTimelineRepository(), new FakePlantRepository(), new FakeFeedRepository(), new FakeProductRepository(), new FakeOwnCareKindRepository(), new FixedTime(Now));
     }
 
     private static string Label(Enum value) => value.ToString();
@@ -239,5 +239,102 @@ public class ProductTests
         Assert.Equal(1, restored.Counts.Products);
         // Stored as text, so reordering the units can't change what old data means
         Assert.Contains("\"Millilitres\"", json);
+    }
+
+    private static Product With(params (Nutrient, decimal)[] amounts) => new()
+    {
+        Name = "Label",
+        Nutrients = [.. amounts.Select(a => new NutrientAmount { Nutrient = a.Item1, Percent = a.Item2 })]
+    };
+
+    [Fact]
+    public void No_nutrients_gives_no_text()
+    {
+        Assert.Null(Hydro().NutrientText);
+        Assert.Null(Hydro().NpkText);
+    }
+
+    [Fact]
+    public void Npk_reads_as_three_numbers()
+    {
+        var product = With((Nutrient.Nitrogen, 3), (Nutrient.Phosphorus, 1), (Nutrient.Potassium, 2.5m));
+
+        Assert.Equal("NPK 3-1-2.5", product.NutrientText);
+        Assert.Equal("3-1-2.5", product.NpkText);
+    }
+
+    [Fact]
+    public void A_missing_npk_part_shows_as_0()
+    {
+        Assert.Equal("NPK 0-0-5", With((Nutrient.Potassium, 5)).NutrientText);
+    }
+
+    [Fact]
+    public void Other_nutrients_use_their_symbols_without_npk()
+    {
+        var product = With((Nutrient.Silicon, 7));
+
+        Assert.Equal("Si 7", product.NutrientText);
+        Assert.Null(product.NpkText);
+    }
+
+    [Fact]
+    public void Nutrients_are_listed_in_enum_order_after_npk()
+    {
+        var product = With((Nutrient.Magnesium, 1), (Nutrient.Potassium, 2), (Nutrient.Calcium, 2), (Nutrient.Nitrogen, 3));
+
+        Assert.Equal("NPK 3-0-2 · Ca 2 · Mg 1", product.NutrientText);
+    }
+
+    [Fact]
+    public void A_nutrient_has_to_be_between_0_and_100()
+    {
+        Assert.Contains("A nutrient can't be less than 0 or more than 100 %.", With((Nutrient.Calcium, 101)).Validate());
+        Assert.Contains("A nutrient can't be less than 0 or more than 100 %.", With((Nutrient.Calcium, -1)).Validate());
+        Assert.Empty(With((Nutrient.Calcium, 0), (Nutrient.Iron, 100)).Validate());
+    }
+
+    [Fact]
+    public void A_nutrient_can_only_be_listed_once()
+    {
+        Assert.Contains("Each nutrient can only be listed once.", With((Nutrient.Calcium, 1), (Nutrient.Calcium, 2)).Validate());
+    }
+
+    [Fact]
+    public void Copy_does_not_share_the_nutrient_list()
+    {
+        var product = With((Nutrient.Calcium, 2));
+
+        var copy = product.Copy();
+        copy.Nutrients[0].Percent = 9;
+        copy.Nutrients.Add(new NutrientAmount { Nutrient = Nutrient.Iron, Percent = 1 });
+
+        Assert.Equal(2, Assert.Single(product.Nutrients).Percent);
+    }
+
+    [Fact]
+    public void A_product_saved_before_nutrients_reads_with_none()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        var old = JsonSerializer.Deserialize<Product>("""{"name":"Silica","kind":"Silica"}""", options)!;
+        var nulled = JsonSerializer.Deserialize<Product>("""{"name":"Silica","nutrients":null}""", options)!;
+
+        Assert.Empty(old.Nutrients);
+        Assert.Empty(nulled.Nutrients);
+        Assert.Null(old.NutrientText);
+    }
+
+    [Fact]
+    public void Nutrients_survive_a_backup_and_are_stored_as_text()
+    {
+        var product = With((Nutrient.Nitrogen, 3), (Nutrient.Silicon, 7.5m));
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        var json = JsonSerializer.Serialize(new BackupData { Products = [product] }, options);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        Assert.Equal("NPK 3-0-0 · Si 7.5", Assert.Single(back.Products).NutrientText);
+        Assert.Contains("\"Silicon\"", json);
     }
 }

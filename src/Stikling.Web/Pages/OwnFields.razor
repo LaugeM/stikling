@@ -1,0 +1,347 @@
+@page "/fields"
+@inject OwnFieldService FieldService
+@inject ILogger<OwnFields> Logger
+
+<PageTitle>Your fields · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="settings">Settings</a>
+<h1>Your fields</h1>
+
+<p class="settings-hint">
+    Fields you added for what the app doesn't have a place for. They show on the plant form under More details,
+    and on a plant's page once they're filled in.
+</p>
+
+@if (loading)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (fields.Count == 0)
+{
+    <div class="empty-state">
+        <p>No fields of your own yet.</p>
+        <p class="text-body-secondary">
+            Add a field for anything the app doesn't have a place for, like clone name, awards or humidity.
+            It shows on the plant form under More details and on the plant's page.
+        </p>
+        <button type="button" class="btn btn-primary mt-2" @onclick="StartNew">Add a field</button>
+    </div>
+}
+else
+{
+    <div class="form-actions mt-3 mb-3">
+        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a field</button>
+    </div>
+
+    <section class="settings-section">
+        <h2>Your fields</h2>
+
+        <ul class="field-list">
+            @foreach (var field in fields)
+            {
+                <li>
+                    <button type="button" class="field-row" @onclick="() => StartEdit(field)">
+                        <span class="field-title">@field.Name</span>
+                        <span class="field-kind">@KindText(field)</span>
+                        <span class="field-use">@UseText(field)</span>
+                    </button>
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+<Sheet Title="@(Editing is null ? "Add a field" : "Edit field")" Open="sheetOpen" OpenChanged="SheetOpenChanged">
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
+    }
+
+    @if (Editing is not { } field)
+    {
+        <OwnFieldForm Prefix="field-new" Added="AddedAsync" Cancelled="CloseSheet" />
+    }
+    else if (confirmingRemove)
+    {
+        <p>Remove @field.Name? The values on @Labels.Count(UseCount(field), "plant") are kept, and come back if you add a field called @field.Name again.</p>
+        <div class="care-actions">
+            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">Remove</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirmingRemove = false">Cancel</button>
+        </div>
+    }
+    else
+    {
+        <div class="mb-3">
+            <label class="form-label" for="field-edit-name">Name</label>
+            <input id="field-edit-name" class="form-control form-control-sm" autocomplete="off"
+                   maxlength="@OwnField.MaxNameLength" value="@name" @oninput="e => name = e.Value?.ToString() ?? string.Empty" />
+            <div class="care-actions">
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(name) || name.Trim() == field.Name)"
+                        @onclick="RenameAsync">Rename</button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label" id="field-edit-kind">What it holds</div>
+            <div class="chip-row" role="group" aria-labelledby="field-edit-kind">
+                @foreach (var (value, text) in kinds)
+                {
+                    var picked = pendingKind == value;
+                    <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                            @onclick="() => PickKindAsync(value)">@text</button>
+                }
+            </div>
+            @if (pendingKind != field.Kind)
+            {
+                @if (notFitting > 0)
+                {
+                    <div class="form-text">
+                        @notFitting @(notFitting == 1 ? "value doesn't" : "values don't") read as @(pendingKind == OwnFieldKind.Number ? "a number" : "a date").
+                        @(notFitting == 1 ? "It's" : "They're") kept and @(notFitting == 1 ? "shows" : "show") as written.
+                    </div>
+                }
+                else if (pendingKind == OwnFieldKind.Choice && field.Choices.Count == 0)
+                {
+                    <div class="form-text">The values already on your plants become the choices.</div>
+                }
+                <div class="care-actions">
+                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="ChangeKindAsync">Change to @KindName(pendingKind)</button>
+                    <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => pendingKind = field.Kind">Cancel</button>
+                </div>
+            }
+        </div>
+
+        @if (field.Kind == OwnFieldKind.Choice)
+        {
+            <div class="mb-3">
+                <div class="form-label">Choices</div>
+                @if (field.Choices.Count == 0)
+                {
+                    <div class="form-text">No choices yet.</div>
+                }
+                <ul class="field-choices">
+                    @foreach (var choice in field.Choices)
+                    {
+                        <li>
+                            @if (renamingChoice == choice)
+                            {
+                                <input class="form-control form-control-sm" aria-label="New name for @choice" autocomplete="off"
+                                       maxlength="@OwnField.MaxNameLength" value="@renameTo" @oninput="e => renameTo = e.Value?.ToString() ?? string.Empty" />
+                                <div class="form-text">This changes the plants that have @choice.</div>
+                                <div class="care-actions">
+                                    <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(renameTo))"
+                                            @onclick="() => RenameChoiceAsync(choice)">Rename</button>
+                                    <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => renamingChoice = null">Cancel</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="field-choice">@choice</span>
+                                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => StartRenameChoice(choice)">Rename</button>
+                                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => RemoveChoiceAsync(choice)">Remove</button>
+                            }
+                        </li>
+                    }
+                </ul>
+                <div class="form-text mb-2">Removing a choice leaves it on the plants that have it.</div>
+                <div class="tag-draft">
+                    <input class="form-control" placeholder="New choice" aria-label="New choice" autocomplete="off"
+                           enterkeyhint="done" maxlength="@OwnField.MaxNameLength" value="@newChoice"
+                           @oninput="e => newChoice = e.Value?.ToString() ?? string.Empty" @onkeydown="NewChoiceKey" />
+                    <button type="button" class="btn btn-outline-primary" disabled="@(busy || string.IsNullOrWhiteSpace(newChoice))"
+                            @onclick="AddChoiceAsync">Add</button>
+                </div>
+            </div>
+        }
+
+        <div class="care-actions">
+            <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => confirmingRemove = true">Remove field</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CloseSheet">Done</button>
+        </div>
+    }
+</Sheet>
+
+@code {
+    private IReadOnlyList<OwnField> fields = [];
+    private Dictionary<Guid, int> useCounts = [];
+    private bool loading = true;
+
+    private bool sheetOpen;
+    private Guid? editingId;
+    private string name = "";
+    private OwnFieldKind pendingKind;
+    private int notFitting;
+    private string? renamingChoice;
+    private string renameTo = "";
+    private string newChoice = "";
+    private bool confirmingRemove;
+    private bool busy;
+    private string? error;
+
+    private OwnField? Editing => editingId is { } id ? fields.FirstOrDefault(f => f.Id == id) : null;
+
+    private static readonly (OwnFieldKind Value, string Text)[] kinds =
+    [
+        (OwnFieldKind.Text, "Text"),
+        (OwnFieldKind.Number, "Number"),
+        (OwnFieldKind.Date, "Date"),
+        (OwnFieldKind.Choice, "Choice")
+    ];
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        fields = await FieldService.GetAllAsync();
+        var counts = new Dictionary<Guid, int>();
+        foreach (var field in fields)
+            counts[field.Id] = await FieldService.UseCountAsync(field.Id);
+        useCounts = counts;
+        loading = false;
+    }
+
+    private int UseCount(OwnField field) => useCounts.GetValueOrDefault(field.Id);
+
+    private string UseText(OwnField field) =>
+        UseCount(field) == 0 ? "On no plants yet" : $"On {Labels.Count(UseCount(field), "plant")}";
+
+    private static string KindName(OwnFieldKind kind) => kinds.First(k => k.Value == kind).Text;
+
+    private static string KindText(OwnField field) =>
+        field.Kind == OwnFieldKind.Choice && field.Choices.Count > 0
+            ? $"Choice: {string.Join(", ", field.Choices)}"
+            : KindName(field.Kind);
+
+    private void StartNew()
+    {
+        editingId = null;
+        Open();
+    }
+
+    private void StartEdit(OwnField field)
+    {
+        editingId = field.Id;
+        name = field.Name;
+        pendingKind = field.Kind;
+        notFitting = 0;
+        renamingChoice = null;
+        newChoice = "";
+        Open();
+    }
+
+    private void Open()
+    {
+        confirmingRemove = false;
+        error = null;
+        sheetOpen = true;
+    }
+
+    private void SheetOpenChanged(bool open) => sheetOpen = open;
+
+    private void CloseSheet() => sheetOpen = false;
+
+    private async Task AddedAsync(OwnField added)
+    {
+        sheetOpen = false;
+        await LoadAsync();
+    }
+
+    private async Task PickKindAsync(OwnFieldKind kind)
+    {
+        pendingKind = kind;
+        notFitting = Editing is { } field && kind is OwnFieldKind.Number or OwnFieldKind.Date
+            ? await FieldService.NotFittingCountAsync(field.Id, kind)
+            : 0;
+    }
+
+    // Runs a change to the open field, then loads the fields again. A failure says why in the sheet.
+    private async Task RunAsync(Func<OwnField, Task> change, string failure)
+    {
+        if (Editing is not { } field)
+            return;
+        busy = true;
+        error = null;
+        try
+        {
+            await change(field);
+            await LoadAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            error = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "{Failure}", failure);
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private Task RenameAsync() => RunAsync(async field =>
+    {
+        await FieldService.RenameAsync(field.Id, name);
+        name = name.Trim();
+    }, "Renaming a field failed");
+
+    private Task ChangeKindAsync() => RunAsync(async field =>
+    {
+        await FieldService.SetKindAsync(field.Id, pendingKind);
+        notFitting = 0;
+    }, "Changing the kind of a field failed");
+
+    private void StartRenameChoice(string choice)
+    {
+        renamingChoice = choice;
+        renameTo = choice;
+    }
+
+    private Task RenameChoiceAsync(string choice) => RunAsync(async field =>
+    {
+        await FieldService.RenameChoiceAsync(field.Id, choice, renameTo);
+        renamingChoice = null;
+    }, "Renaming a choice failed");
+
+    private Task RemoveChoiceAsync(string choice) =>
+        RunAsync(field => FieldService.RemoveChoiceAsync(field.Id, choice), "Removing a choice failed");
+
+    private async Task NewChoiceKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(newChoice))
+            await AddChoiceAsync();
+    }
+
+    private Task AddChoiceAsync() => RunAsync(async field =>
+    {
+        await FieldService.AddChoiceAsync(field.Id, newChoice);
+        newChoice = "";
+    }, "Adding a choice failed");
+
+    private async Task RemoveAsync()
+    {
+        if (Editing is not { } field)
+            return;
+        busy = true;
+        try
+        {
+            await FieldService.RemoveAsync(field.Id);
+            sheetOpen = false;
+            editingId = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Removing a field failed");
+            error = ex.Message;
+            confirmingRemove = false;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

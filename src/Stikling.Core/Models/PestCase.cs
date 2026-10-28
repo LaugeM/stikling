@@ -74,6 +74,13 @@ public sealed class PestCase : Entity
     /// <summary>The day it was marked resolved, set when the status goes to Resolved.</summary>
     public DateOnly? ResolvedOn { get; set; }
 
+    /// <summary>
+    /// The day the case last went back to treating, or was opened again after being resolved.
+    /// The clean count on a case being watched starts no earlier than this, since pests found
+    /// again mean it wasn't clean. Null when that hasn't happened.
+    /// </summary>
+    public DateOnly? TreatingAgainOn { get; set; }
+
     public PestScope Scope { get; set; } = PestScope.Everywhere;
 
     /// <summary>The room or spot the case covers. Only on <see cref="PestScope.Room"/>.</summary>
@@ -87,6 +94,38 @@ public sealed class PestCase : Entity
 
     public string? Notes { get; set; }
 
+    /// <summary>The plan this case was started on. Only to remember where the steps came from.</summary>
+    public Guid? PlanId { get; set; }
+
+    public string? PlanName { get; set; }
+
+    /// <summary>
+    /// The steps being followed, copied from the plan with ids of their own, so editing or
+    /// deleting the plan leaves them alone. Older versions ignore these fields and use
+    /// <see cref="IntervalDays"/>.
+    /// </summary>
+    public List<PlanStep> PlanSteps { get; set; } = [];
+
+    /// <summary>The day the plan was started, which is when its first step is due.</summary>
+    public DateOnly? PlanStartedOn { get; set; }
+
+    /// <summary>The day the plan was stopped, or the day it was answered after the last step.</summary>
+    public DateOnly? PlanStoppedOn { get; set; }
+
+    /// <summary>A plan is running while it has been started, not stopped, and the case is still being treated.</summary>
+    [JsonIgnore]
+    public bool PlanRunning => PlanStartedOn is not null && PlanStoppedOn is null && Status == PestCaseStatus.Active;
+
+    /// <summary>Copies the plan's steps onto the case with fresh ids and starts it on the given day.</summary>
+    public void StartPlan(TreatmentPlan plan, DateOnly on)
+    {
+        PlanId = plan.Id;
+        PlanName = plan.Name?.Trim();
+        PlanSteps = [.. plan.Steps.Select(s => { var step = s.Copy(); step.Id = Guid.NewGuid(); return step; })];
+        PlanStartedOn = on;
+        PlanStoppedOn = null;
+    }
+
     /// <summary>Active and monitoring cases are still worth showing; resolved ones aren't.</summary>
     [JsonIgnore]
     public bool IsOpen => Status != PestCaseStatus.Resolved;
@@ -95,6 +134,7 @@ public sealed class PestCase : Entity
     {
         var copy = (PestCase)MemberwiseClone();
         copy.PlantIds = [.. PlantIds];
+        copy.PlanSteps = [.. PlanSteps.Select(s => s.Copy())];
         return copy;
     }
 

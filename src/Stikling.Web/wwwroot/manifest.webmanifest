@@ -38,6 +38,11 @@
       "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
+      "name": "Water plants",
+      "url": "./water",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
       "name": "Pest cases",
       "url": "./pests",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }]
@@ -47,12 +52,38 @@
     {
       "src": "icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
     },
     {
       "src": "icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-maskable-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-monochrome-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "monochrome"
+    },
+    {
+      "src": "icon-monochrome-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "monochrome"
     }
   ]
 }

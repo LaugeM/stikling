@@ -1,0 +1,203 @@
+/* The labels, drawn to scale and always black on white, since that is what prints. The canvas is drawn
+   by wwwroot/js/labels.js; --w and --h are its size in mm, and --zoom makes it larger than life on screen. */
+.labels-sheet {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 0 0 1.25rem;
+    padding: 0.5rem 0.5rem 0 0;
+    list-style: none;
+}
+
+.label-item {
+    position: relative;
+    max-width: 100%;
+}
+
+.label-item canvas {
+    display: block;
+    width: min(calc(var(--w) * var(--zoom) * 1mm), 100%);
+    height: auto;
+    aspect-ratio: var(--w) / var(--h);
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    border-radius: 2px;
+}
+
+/* A small round button in the corner, with a 44px tap area */
+.label-remove {
+    position: absolute;
+    top: -0.6rem;
+    right: -0.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 1px solid var(--pa-border);
+    border-radius: 50%;
+    background: var(--pa-surface);
+    color: var(--pa-muted);
+}
+
+.label-remove::after {
+    content: "";
+    position: absolute;
+    inset: -0.5rem;
+}
+
+.label-remove:hover,
+.label-remove:focus-visible {
+    color: var(--pa-text);
+    border-color: var(--pa-green);
+}
+
+.label-remove svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.labels-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 1rem;
+}
+
+.labels-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.labels-field-label {
+    float: none;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.labels-custom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.labels-custom label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.labels-custom .form-control {
+    min-height: 2.75rem;
+}
+
+.labels-parts .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    margin: 0;
+    padding-left: 0;
+}
+
+.labels-parts .form-check-input {
+    float: none;
+    flex: none;
+    margin: 0;
+}
+
+.labels-go {
+    min-height: 2.75rem;
+}
+
+.labels-note {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.labels-empty-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* On a wide screen the labels are on the left and the choices in a column on the right */
+@media (min-width: 64rem) {
+    .labels-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 22rem;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .labels-settings {
+        position: sticky;
+        top: 1rem;
+    }
+}
+
+/* Only the labels print. The rest of the app's chrome is hidden in app.css. */
+@media print {
+    .back-link,
+    .page-heading,
+    .labels-settings,
+    .label-remove {
+        display: none !important;
+    }
+
+    .labels-layout {
+        display: block;
+    }
+
+    .labels-sheet {
+        display: block;
+        margin: 0;
+        padding: 0;
+        /* No gaps from the line breaks between the labels */
+        font-size: 0;
+        line-height: 0;
+    }
+
+    .label-item {
+        display: inline-block;
+        vertical-align: top;
+        max-width: none;
+        break-inside: avoid;
+    }
+
+    .label-item canvas {
+        width: calc(var(--w) * 1mm) !important;
+        height: calc(var(--h) * 1mm) !important;
+        border: 0;
+        border-radius: 0;
+    }
+
+    /* A tape label is a page of its own */
+    .labels-sheet.tape .label-item {
+        display: block;
+        break-after: page;
+    }
+
+    .labels-sheet.tape .label-item:last-child {
+        break-after: auto;
+    }
+}

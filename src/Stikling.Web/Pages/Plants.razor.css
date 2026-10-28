@@ -91,3 +91,114 @@
         flex-basis: 100%;
     }
 }
+
+/* The way into a round of the picked room or spot, tall enough to tap */
+.go-round {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+}
+
+/* Opens the column picker, as tall as the view buttons beside it */
+.columns-button {
+    min-height: 2.75rem;
+}
+
+/* Share as text: the two switches and a preview of what will be sent */
+.share-options .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    margin: 0;
+    padding-left: 0;
+}
+
+.share-options .form-check-input {
+    float: none;
+    flex: none;
+    margin: 0;
+}
+
+.share-preview {
+    max-height: 40vh;
+    margin: 0.5rem 0 1rem;
+    padding: 0.75rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--pa-text);
+    background: var(--pa-bg);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.6rem;
+}
+
+.wish-matches {
+    margin-top: 1.5rem;
+}
+
+.wish-matches h2 {
+    font-size: 1.125rem;
+    margin-bottom: 0.6rem;
+}
+
+/* A heading for each genus or room, with how many plants are under it. It stays under the header
+   while its plants scroll past, so you always know whose they are. */
+.plant-list .group-heading,
+.plant-grid .group-heading {
+    position: sticky;
+    top: var(--pa-header-height);
+    z-index: 1;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-bottom: 0.3rem;
+    background: var(--bs-body-bg);
+    scroll-margin-top: var(--pa-header-height);
+}
+
+.plant-list .group-heading:first-child,
+.plant-grid .group-heading:first-child {
+    margin-top: 0;
+}
+
+.plant-list.list-grid > li.group-heading > *,
+.plant-grid > li.group-heading > * {
+    flex: none;
+    min-width: 0;
+}
+
+.group-heading h2 {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--pa-text);
+    overflow-wrap: anywhere;
+}
+
+.group-heading .group-none {
+    color: var(--pa-muted);
+}
+
+.group-heading .group-count {
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-muted);
+}
+
+/* Where the letter strip jumps to, just under the header */
+.plant-list > li[id],
+.plant-grid > li[id] {
+    scroll-margin-top: var(--pa-header-height);
+}
+
+/* The letter strip's buttons reach over the right edge of the list, so cards stop short of them */
+.plant-list.has-letters,
+.plant-grid.has-letters {
+    padding-right: 1.75rem;
+}

@@ -82,6 +82,39 @@ namespace Stikling.Api.Data.Migrations
                     b.ToTable("Memberships");
                 });
 
+            modelBuilder.Entity("Stikling.Api.Data.NotificationSchedule", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DaysJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly?>("LastSentOn")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset?>("NextSendAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<TimeOnly>("NotifyAt")
+                        .HasColumnType("time");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("PersonId");
+
+                    b.HasIndex("NextSendAt");
+
+                    b.ToTable("NotificationSchedules");
+                });
+
             modelBuilder.Entity("Stikling.Api.Data.Person", b =>
                 {
                     b.Property<Guid>("Id")
@@ -215,6 +248,51 @@ namespace Stikling.Api.Data.Migrations
                     b.ToTable("ShareLinks");
                 });
 
+            modelBuilder.Entity("Stikling.Api.Data.StoredPushSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Auth")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("EndpointHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset?>("LastSentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("P256dh")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EndpointHash")
+                        .IsUnique();
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("PushSubscriptions");
+                });
+
             modelBuilder.Entity("Stikling.Api.Data.SyncedRecord", b =>
                 {
                     b.Property<Guid>("CollectionId")
@@ -267,6 +345,15 @@ namespace Stikling.Api.Data.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("Stikling.Api.Data.NotificationSchedule", b =>
+                {
+                    b.HasOne("Stikling.Api.Data.Person", null)
+                        .WithOne()
+                        .HasForeignKey("Stikling.Api.Data.NotificationSchedule", "PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Stikling.Api.Data.PersonSettings", b =>
                 {
                     b.HasOne("Stikling.Api.Data.Person", null)
@@ -297,6 +384,15 @@ namespace Stikling.Api.Data.Migrations
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Stikling.Api.Data.StoredPushSubscription", b =>
+                {
+                    b.HasOne("Stikling.Api.Data.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Stikling.Api.Data.SyncedRecord", b =>

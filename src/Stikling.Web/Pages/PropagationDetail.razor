@@ -1,16 +1,26 @@
 @page "/propagations/{Id:guid}"
 @layout WideLayout
 @inject IPropagationRepository Repository
+@inject CoverPhotos Covers
+@inject PropagationCareService CareService
+@inject ILogger<PropagationDetail> Logger
 @inject IPlantRepository PlantRepository
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
+@inject UnitForms Units
 @inject RoomService RoomService
+@inject SellerService SellerService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject IJSRuntime JS
 @inject PlantNameService Names
+@inject PlantCareService CommonCare
+@inject GooglePhotosService Google
+@inject AccountService Account
+@inject SettingsService SettingsService
 @using Stikling.Core.Propagations
+@using Stikling.Core.Settings
 
 <PageTitle>@(propagation?.DisplayName ?? "Propagation") · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -26,7 +36,7 @@ else
     @* On a wide screen these are two columns: who it is on the left, its history on the right *@
     <div class="profile-layout">
         <div class="profile-side">
-            @if (propagation.CoverPhotoId is { } coverId)
+            @if (ShownCover is { } coverId)
             {
                 <div class="detail-hero">
                     <button type="button" class="detail-hero-open" aria-label="Open the cover photo" @onclick="() => timeline?.OpenPhoto(coverId)">
@@ -36,7 +46,7 @@ else
             }
 
             <header class="detail-header">
-                @if (propagation.CoverPhotoId is null && propagation.IsActive)
+                @if (ShownCover is null && propagation.IsActive)
                 {
                     // With no photo to show, the tile shows how long it has been going instead
                     var days = propagation.DaysSinceStart(Today);
@@ -45,17 +55,21 @@ else
                         <small>@(days == 1 ? "day" : "days")</small>
                     </div>
                 }
-                else if (propagation.CoverPhotoId is null)
+                else if (ShownCover is null)
                 {
                     <div class="detail-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
                     </div>
                 }
                 <div class="min-w-0">
+                    @if (CollectionNumbers.Normalize(propagation.CollectionNumber) is { } number)
+                    {
+                        <div class="detail-number">#@number</div>
+                    }
                     <h1>
                         @if (string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                         {
-                            <BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" />
+                            <BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" Qualifier="@propagation.NameQualifier" Note="@propagation.NameNote" />
                         }
                         else
                         {
@@ -64,16 +78,21 @@ else
                     </h1>
                     @if (!string.IsNullOrWhiteSpace(propagation.Nickname) && propagation.BotanicalName is not null)
                     {
-                        <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" /></p>
+                        <p class="detail-sub"><BotanicalName Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" Qualifier="@propagation.NameQualifier" Note="@propagation.NameNote" /></p>
                     }
-                    else if (everyday?.For(propagation.Genus, propagation.Species, propagation.Cultivar) is { } called)
+                    else if (everyday?.For(propagation.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(propagation.Species, propagation.NameQualifier), propagation.Cultivar) is { } called)
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
+                    <NumberClashNote Code="@propagation.CollectionNumber" Clashes="numberClashes" />
                     <div class="profile-badges">
                         @if (propagation.IsDormant)
                         {
                             <span class="badge dormant-badge">Dormant</span>
+                        }
+                        @if (propagation.SpareAvailable > 0)
+                        {
+                            <a class="badge swap-badge" href="swap">@propagation.SpareAvailable to swap</a>
                         }
                         @if (!propagation.IsActive)
                         {
@@ -107,6 +126,10 @@ else
                             <dd><b>@result.PottedUp</b> of @result.Started</dd>
                         </div>
                     </dl>
+                    @if (result.GivenAway > 0)
+                    {
+                        <p class="outcome-given">@result.GivenAway given away.</p>
+                    }
                     @if (result.Failed > 0)
                     {
                         <p class="outcome-failed">@result.Failed didn't make it.</p>
@@ -129,7 +152,7 @@ else
             }
             else if (propagation.IsActive)
             {
-                <AttentionPanel Current="propagation.Attention" Editing="false" EditingChanged="_ => more = More.Flag"
+                <AttentionPanel Current="propagation.Attention" Later="propagation.AttentionLater" NextRoundDay="nextRoundDay" Editing="false" EditingChanged="_ => more = More.Flag"
                                 Suggestions="AttentionPanel.PropagationReasons" OnSave="SetAttentionAsync" />
             }
 
@@ -143,9 +166,17 @@ else
                 {
                     <text> · @place</text>
                 }
+                @if (propagation.IsActive && LastCare is { } lastCare)
+                {
+                    <text> · @lastCare</text>
+                }
                 @if (parent is not null)
                 {
                     <text> · from <a class="link-action" href="plants/@parent.Id">@parent.DisplayName</a></text>
+                }
+                else if (sellers.For(propagation.SellerId, propagation.Source) is { } headerSeller)
+                {
+                    <text> · <a class="link-action" href="sellers/@headerSeller.Id">@headerSeller.Name</a></text>
                 }
                 else if (!string.IsNullOrWhiteSpace(propagation.Source))
                 {
@@ -156,6 +187,11 @@ else
                     <text> · </text><span class="pace-slow">slower than usual</span>
                 }
             </p>
+
+            @if (propagation.GivenAwayCount > 0 && Account.IsAvailable)
+            {
+                <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="OpenPassOn">Send them its history</button>
+            }
 
             @if (propagation.IsActive && offspring.Count > 0)
             {
@@ -172,6 +208,10 @@ else
                     {
                         <a class="ms-1" href="plants/@plant.Id">@plant.DisplayName</a>
                     }
+                    @if (madePlants.Count > 0)
+                    {
+                        <span class="ms-2">· <a href="labels?plants=@string.Join(',', madePlants.Select(p => p.Id))">Print @(madePlants.Count == 1 ? "a label" : "labels")</a></span>
+                    }
                 </p>
             }
 
@@ -182,7 +222,7 @@ else
                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
                 </button>
                 <a class="btn btn-link btn-sm link-action" href="propagations/@propagation.Id/edit">Edit</a>
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => shareOpen = true">Share</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenShare">Share</button>
             </div>
 
             <div id="propagation-details" class="profile-details @(detailsOpen ? "open" : null)">
@@ -193,6 +233,18 @@ else
                             @if (parent is not null)
                             {
                                 <a href="plants/@parent.Id">@parent.DisplayName</a>
+                            }
+                            else if (sellers.For(propagation.SellerId, propagation.Source) is { } seller)
+                            {
+                                <a href="sellers/@seller.Id">@seller.Name</a>
+                                @if (Arrival.PoorText(propagation.ArrivedIn, propagation.ArrivalProblems) is { } poor)
+                                {
+                                    <text> · @poor</text>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(propagation.ArrivalNote))
+                                {
+                                    <text>@(propagation.ArrivedIn == ArrivalRating.Poor ? ". " : " · ")@propagation.ArrivalNote.Trim()</text>
+                                }
                             }
                             else
                             {
@@ -252,9 +304,9 @@ else
                         <dt>Grows in</dt>
                         <dd>
                             @Labels.For(propagation.Medium)
-                            @if (!string.IsNullOrWhiteSpace(propagation.Container))
+                            @if (ContainerName is { } container)
                             {
-                                <text> · @propagation.Container</text>
+                                <text> · @container</text>
                             }
                             @if (Mix is { } mix)
                             {
@@ -266,10 +318,45 @@ else
                             }
                         </dd>
 
+                        @if (careBook.IsEmpty is false && !string.IsNullOrWhiteSpace(propagation.Genus))
+                        {
+                            var careFor = careBook.Find(propagation.Genus, propagation.Species, propagation.NameQualifier);
+                            <dt>Pets</dt>
+                            <dd>
+                                @ToxicityText.Pets(careFor)@if (careFor?.PetsFrom is { } petsUrl)
+                                {
+                                    <text> · <a href="@petsUrl" target="_blank" rel="noopener">@careBook.SourceName(petsUrl)</a></text>
+                                }
+                                @if (ToxicityText.People(careFor) is { } peopleText)
+                                {
+                                    <div class="detail-sub">@peopleText@if (careFor?.PeopleFrom is { } peopleUrl)
+                                    {
+                                        <text> · <a href="@peopleUrl" target="_blank" rel="noopener">@careBook.SourceName(peopleUrl)</a></text>
+                                    }</div>
+                                }
+                            </dd>
+                        }
+
+                        @if (lastWatered is { } watered)
+                        {
+                            <dt>Last watered</dt>
+                            <dd>@Labels.Date(watered.Day)</dd>
+                        }
+                        @if (lastWaterChange is { } changed)
+                        {
+                            <dt>Water changed</dt>
+                            <dd>@Labels.Date(changed.Day)</dd>
+                        }
+
                         @if (propagation.RootingAids.Count > 0)
                         {
                             <dt>Rooting aids</dt>
                             <dd>@string.Join(", ", propagation.RootingAids.Order().Select(Labels.For))</dd>
+                        }
+                        @if (propagation.DriedForHours is { } dried)
+                        {
+                            <dt>Cut end dried</dt>
+                            <dd>@Drying.Text(dried)</dd>
                         }
 
                         <dt>Location</dt>
@@ -289,6 +376,8 @@ else
                         <h2>About it</h2>
                         <p class="detail-notes">@propagation.Notes</p>
                     }
+
+                    <ReferencePhotoAdd SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" OnAdded="() => historyVersion++" />
                 </section>
 
                 @if (offspring.Count > 0 && propagation.IsActive)
@@ -300,9 +389,9 @@ else
                             {
                                 <li>
                                     <a href="plants/@plant.Id">@plant.DisplayName</a>
-                                    @if (plant.Status != PlantStatus.Active)
+                                    @if (!plant.InCollection)
                                     {
-                                        <span class="text-body-secondary small"> · @Labels.For(plant.Status)</span>
+                                        <span class="text-body-secondary small"> · @Labels.StatusOf(plant)</span>
                                     }
                                 </li>
                             }
@@ -330,16 +419,30 @@ else
 
         <div class="profile-history">
             <div class="page-dock" role="group" aria-label="Add to @propagation.DisplayName">
-                <label class="btn btn-primary icon-btn" for="@photoInputId">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                    Photo
-                </label>
+                @if (googleOn)
+                {
+                    <button type="button" class="btn btn-primary icon-btn" @onclick="() => photoChoice = true">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        Photo
+                    </button>
+                }
+                else
+                {
+                    <label class="btn btn-primary icon-btn" for="@photoInputId">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        Photo
+                    </label>
+                }
                 <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
                     Note
                 </button>
                 @if (propagation.IsActive)
                 {
+                    <button type="button" class="btn btn-outline-primary icon-btn dock-care" aria-label="Care" @onclick="() => careOpen = true">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10Z" /></svg>
+                        <span class="dock-label">Care</span>
+                    </button>
                     <button type="button" class="btn btn-outline-primary icon-btn dock-stage" aria-label="Stage: @Labels.Stage(propagation.Stage, propagation.Type). Change stage" @onclick="OpenStage">
                         <span class="stage-steps" data-step="@StageStep" aria-hidden="true"><i></i><i></i><i></i></span>
                         @Labels.Stage(propagation.Stage, propagation.Type)
@@ -350,25 +453,74 @@ else
                 }
             </div>
 
+            @if (Arrived)
+            {
+                <ArrivedNote SubjectId="propagation.Id" />
+            }
+
+            @if (Made)
+            {
+                <MadeNote PropagationId="propagation.Id" />
+            }
+
             @* The key reloads the history after stage changes and potting up *@
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
-                      CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" DayOne="PhotoDayCount.StartOf(propagation)"
+                      CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)"
                       EmptyText="No photos or notes yet. Add the first one with Photo or Note." />
         </div>
     </div>
 
-    <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id"
-                CoverPhotoId="propagation.CoverPhotoId" DayOne="PhotoDayCount.StartOf(propagation)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
+    <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id" StartOnLink="shareOnLink"
+                CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
-    <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId"
-                   CoverPhotoId="propagation.CoverPhotoId" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
+    <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId" OnPicked="() => photoChoice = false"
+                   CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
+
+    @if (googleOn)
+    {
+        <Sheet Title="Add a photo" Open="photoChoice" OpenChanged="open => photoChoice = open">
+            <ul class="sheet-actions">
+                <li>
+                    <label class="sheet-action" for="@photoInputId">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        <span class="sheet-action-text"><b>From this device</b><small>Camera or gallery</small></span>
+                    </label>
+                </li>
+                <li>
+                    <button type="button" class="sheet-action" @onclick="PickFromGoogleAsync">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                        <span class="sheet-action-text"><b>From Google Photos</b><small>Including photos only in the cloud</small></span>
+                    </button>
+                </li>
+            </ul>
+        </Sheet>
+    }
+
+    <ShowFound ElementId="@(Entry is { } found ? $"entry-{found}" : null)" Ready="@loaded" />
 
     @if (propagation.IsActive)
     {
+        <Sheet Title="Care" Open="careOpen" OpenChanged="open => careOpen = open">
+            <PropagationCareSheet Propagation="propagation" Logs="careLogs" OnLogged="CareLoggedAsync" OnRemoved="LoadAsync" />
+        </Sheet>
+
         <Sheet Title="@StageTitle" Open="stageView != StageView.None" OpenChanged="open => { if (!open) stageView = StageView.None; }">
             @switch (stageView)
             {
                 case StageView.Stage:
+                    <InfoButton Topic="the stage">
+                        <Label><span class="form-label mb-0">Stage</span></Label>
+                        <ChildContent>
+                            @if (propagation.Type == PropagationType.Seed)
+                            {
+                                <text>Sown is the day the seeds went in. Germinating is once they start to sprout. Sprouted is when they are ready to pot up. Pot up and failing are separate actions.</text>
+                            }
+                            else
+                            {
+                                <text>Started is the day it was cut or put in. Rooting is once roots start. Rooted is when the roots are long enough to pot up. Pot up and failing are separate actions.</text>
+                            }
+                        </ChildContent>
+                    </InfoButton>
                     <div class="btn-group segmented stage-track mb-3" role="radiogroup" aria-label="Stage">
                         @foreach (var stage in ManualStages)
                         {
@@ -436,70 +588,150 @@ else
 
                     <div class="sheet-section">
                         <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-primary flex-fill" @onclick="OpenPotUp">Pot up</button>
+                            <button type="button" class="btn btn-primary flex-fill" @onclick="OpenPotUp">@PotUpWord</button>
                             <button type="button" class="btn btn-outline-danger flex-fill" @onclick="OpenFailed">Mark failed</button>
                         </div>
+                        <button type="button" class="btn btn-outline-primary w-100 mt-2" @onclick="OpenGaveAway">
+                            @(propagation.RemainingCount == 1 ? "Gave it away" : "Gave some away")
+                        </button>
                     </div>
                     break;
 
                 case StageView.PotUp:
-                    <p class="form-text mb-3">
-                        @(propagation.RemainingCount > 1 ? "Each one you pot up becomes a plant of its own." : "It becomes a plant of its own.")
-                        This propagation keeps its history.
-                    </p>
+                    var up = potUp!;
+                    @if (InPlantMedium)
+                    {
+                        <p class="form-text mb-3">
+                            @(propagation.RemainingCount > 1
+                                ? $"Each one becomes a plant of its own, in the {Labels.MediumWord(propagation.Medium)} they're in now."
+                                : $"It becomes a plant of its own, in the {Labels.MediumWord(propagation.Medium)} it's in now.")
+                            This propagation keeps its history.
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="form-text mb-3">
+                            @(propagation.RemainingCount > 1 ? "Each one you pot up becomes a plant of its own." : "It becomes a plant of its own.")
+                            This propagation keeps its history.
+                        </p>
+                    }
+                    <InfoButton Topic="pot up">
+                        <Label><span class="form-label mb-0">How they are potted</span></Label>
+                        <ChildContent>
+                            Rooted ones become plants of their own. You can pot each in its own pot, put them all in one pot as one plant, or pot them into a plant you already have. The propagation keeps its history, and the new plants link back to it.
+                        </ChildContent>
+                    </InfoButton>
+                    <div class="mb-3" role="radiogroup" aria-label="How they are potted">
+                        @if (propagation.RemainingCount > 1)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="potup-mode" disabled="@up.Retrying" id="potup-each" checked="@(up.EffectiveMode == PotUpKind.Each)" @onchange="() => up.Mode = PotUpKind.Each" />
+                                <label class="form-check-label" for="potup-each">Each in its own pot</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="potup-mode" disabled="@up.Retrying" id="potup-one" checked="@(up.EffectiveMode == PotUpKind.OnePot)" @onchange="() => up.Mode = PotUpKind.OnePot" />
+                                <label class="form-check-label" for="potup-one">All in one pot</label>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="potup-mode" disabled="@up.Retrying" id="potup-each" checked="@(up.EffectiveMode == PotUpKind.Each)" @onchange="() => up.Mode = PotUpKind.Each" />
+                                <label class="form-check-label" for="potup-each">In a pot of its own</label>
+                            </div>
+                        }
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="potup-mode" disabled="@up.Retrying" id="potup-into" checked="@(up.EffectiveMode == PotUpKind.Into)" @onchange="() => up.Mode = PotUpKind.Into" />
+                            <label class="form-check-label" for="potup-into">In with a plant you have</label>
+                        </div>
+                    </div>
+                    @if (up.EffectiveMode == PotUpKind.Into)
+                    {
+                        <div class="mb-2">
+                            <PlantSelect Id="potup-into-plant" Plants="allPlants" Genus="@(string.IsNullOrWhiteSpace(propagation.Genus) ? parent?.Genus : propagation.Genus)" Value="up.IntoPlantId" ValueChanged="id => up.IntoPlantId = id" />
+                            @if (!allPlants.Any(p => p.InCollection))
+                            {
+                                <div class="form-text">There are no plants to pot them with.</div>
+                            }
+                            else
+                            {
+                                <div class="form-text">They take that plant's pot, medium and room, and are counted in it.</div>
+                            }
+                        </div>
+                    }
                     @if (propagation.RemainingCount > 1)
                     {
                         <div class="mb-2">
                             <label class="form-label" for="potup-count">How many (@propagation.RemainingCount left)</label>
                             <input id="potup-count" type="number" class="form-control" min="1" max="@propagation.RemainingCount"
-                                   inputmode="numeric" @bind="potUp.Count" @bind:event="oninput" />
+                                   inputmode="numeric" disabled="@up.Retrying" @bind="up.Count" @bind:event="oninput" />
                         </div>
                     }
                     <div class="mb-2">
                         <label class="form-label" for="potup-name">Nickname</label>
-                        <input id="potup-name" class="form-control" @bind="potUp.Nickname" @bind:event="oninput" placeholder="@(propagation.BotanicalName ?? "")" />
-                        @if (potUp.Count > 1 || propagation.PottedUpCount > 0)
+                        <input id="potup-name" class="form-control" @bind="up.Nickname" @bind:event="oninput" placeholder="@(propagation.BotanicalName ?? "")" />
+                        @if (up.EffectiveMode == PotUpKind.Each && (up.Count > 1 || propagation.PottedUpCount > 0))
                         {
-                            <div class="form-text">Numbered when there are several, e.g. "@(string.IsNullOrWhiteSpace(potUp.Nickname) ? "Coleus" : potUp.Nickname.Trim()) @(propagation.PottedUpCount + 1)".</div>
+                            <div class="form-text">Numbered when there are several, e.g. "@(string.IsNullOrWhiteSpace(up.Nickname) ? "Coleus" : up.Nickname.Trim()) @(propagation.PottedUpCount + 1)".</div>
                         }
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label" for="potup-medium">Grows in</label>
-                        <select id="potup-medium" class="form-select" value="@potUp.Medium" @onchange="SetPotUpMedium">
-                            @foreach (var medium in Enum.GetValues<GrowingMedium>())
-                            {
-                                <option value="@medium">@Labels.For(medium)</option>
-                            }
-                        </select>
-                    </div>
-                    @if (potUp.Medium == GrowingMedium.Soil)
+                    @if (up.EffectiveMode != PotUpKind.Into)
                     {
+                        @if (InPlantMedium && !up.ChangeMedium)
+                        {
+                            <button type="button" class="btn btn-link btn-sm link-action p-0 mb-2" @onclick="() => up.ChangeMedium = true">Moved it to something else?</button>
+                        }
+                        else
+                        {
+                            <div class="mb-2">
+                                <label class="form-label" for="potup-medium">Grows in</label>
+                                <select id="potup-medium" class="form-select" value="@up.Medium" @onchange="e => up.PickMedium(Enum.Parse<GrowingMedium>(e.Value?.ToString() ?? nameof(GrowingMedium.Soil)))">
+                                    @foreach (var medium in Enum.GetValues<GrowingMedium>())
+                                    {
+                                        <option value="@medium">@Labels.For(medium)</option>
+                                    }
+                                </select>
+                            </div>
+                            @if (up.Medium == GrowingMedium.Soil)
+                            {
+                                <div class="mb-2">
+                                    <MixPicker @bind-Value="up.SoilMixId" Mixes="mixes" />
+                                </div>
+                            }
+                        }
                         <div class="mb-2">
-                            <MixPicker @bind-Value="potUp.SoilMixId" Mixes="mixes" />
+                            <PotPicker Value="up.PotId" ValueChanged="id => up.PickPot(id, pots.FirstOrDefault(p => p.Id == id))" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
+                            @if (PotSizeChange.Between(new ContainerList(pots).For(propagation.ContainerPotId, propagation.Container), pots.FirstOrDefault(p => p.Id == up.PotId), potUpWarnCm) is { } sizeChange)
+                            {
+                                <div class="form-text">@sizeChange.Text</div>
+                            }
                         </div>
                     }
                     <div class="mb-2">
-                        <PotPicker Value="potUp.PotId" ValueChanged="SetPotUpPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
-                    </div>
-                    <div class="mb-2">
                         <label class="form-label" for="potup-date">Date</label>
-                        <input id="potup-date" type="date" class="form-control" @bind="potUp.Date" min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                        <input id="potup-date" type="date" class="form-control" @bind="up.Date" min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                     </div>
-                    <div class="mb-3">
-                        <RoomPicker @bind-Value="potUp.Location" Rooms="rooms" Label="Where it goes" />
-                    </div>
+                    @if (up.EffectiveMode != PotUpKind.Into)
+                    {
+                        <div class="mb-3">
+                            <RoomPicker @bind-Value="up.Location" Rooms="rooms" Label="Where it goes" />
+                        </div>
+                    }
                     <div class="form-actions">
-                        <button type="button" class="btn btn-primary" disabled="@(busy || !CountIsValid(potUp.Count))" @onclick="PotUpAsync">
-                            @(potUp.Count == 1 ? "Pot up" : $"Pot up {potUp.Count}")
+                        <button type="button" class="btn btn-primary" disabled="@(busy || !up.CanSave)" @onclick="PotUpAsync">
+                            @(InPlantMedium
+                                ? (up.Count == 1 ? "It's a plant now" : $"Make {up.Count} plants")
+                                : (up.Count == 1 ? "Pot up" : $"Pot up {up.Count}"))
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
                     </div>
                     break;
 
                 case StageView.Failed:
+                    var fail = failed!;
                     <p class="form-text mb-3">
                         It stays in the history and in the results. If it was a mistake, correct the count under Edit.
-                        @if (failedCount >= propagation.RemainingCount)
+                        @if (fail.Finishes)
                         {
                             <text> This finishes the propagation.</text>
                         }
@@ -509,24 +741,74 @@ else
                         <div class="mb-2">
                             <label class="form-label" for="failed-count">How many (@propagation.RemainingCount left)</label>
                             <input id="failed-count" type="number" class="form-control" min="1" max="@propagation.RemainingCount"
-                                   inputmode="numeric" @bind="failedCount" @bind:event="oninput" />
+                                   inputmode="numeric" @bind="fail.Count" @bind:event="oninput" />
                         </div>
                     }
                     <div class="mb-2">
-                        <label class="form-label" for="failed-reason">What happened? <span class="text-body-secondary">(optional)</span></label>
-                        <input id="failed-reason" class="form-control" @bind="failedReason" @bind:event="oninput" placeholder="e.g. rotted, dried out" />
+                        <span class="form-label d-block" id="failed-why-label">Why? <span class="text-body-secondary">(optional)</span></span>
+                        <div class="chip-row" role="group" aria-labelledby="failed-why-label">
+                            @foreach (var why in Enum.GetValues<FailReason>())
+                            {
+                                var picked = fail.Reason == why;
+                                <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                        @onclick="() => fail.Reason = picked ? null : why">@FailReasons.Chip(why)</button>
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label" for="failed-note">Note <span class="text-body-secondary">(optional)</span></label>
+                        <input id="failed-note" class="form-control" @bind="fail.Note" @bind:event="oninput" placeholder="e.g. left too wet" />
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="failed-date">Date</label>
-                        <input id="failed-date" type="date" class="form-control" @bind="failedDate"
+                        <input id="failed-date" type="date" class="form-control" @bind="fail.Date"
                                min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-danger" disabled="@(busy || !CountIsValid(failedCount))" @onclick="MarkFailedAsync">
-                            @(failedCount == 1 ? "Mark as failed" : $"Mark {failedCount} as failed")
+                        <button type="button" class="btn btn-danger" disabled="@(busy || !fail.CountIsValid)" @onclick="MarkFailedAsync">
+                            @(fail.Count == 1 ? "Mark as failed" : $"Mark {fail.Count} as failed")
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
                     </div>
+                    break;
+
+                case StageView.GaveAway:
+                    var giving = this.gave!;
+                    <p class="form-text mb-3">
+                        It stays in the history and in the results.
+                        @if (giving.Finishes)
+                        {
+                            <text> This finishes the propagation.</text>
+                        }
+                    </p>
+                    @if (propagation.RemainingCount > 1)
+                    {
+                        <div class="mb-2">
+                            <label class="form-label" for="gave-count">How many (@propagation.RemainingCount left)</label>
+                            <input id="gave-count" type="number" class="form-control" min="1" max="@propagation.RemainingCount"
+                                   inputmode="numeric" @bind="giving.Count" @bind:event="oninput" />
+                        </div>
+                    }
+                    <div class="mb-2">
+                        <label class="form-label" for="gave-to">Who got it? <span class="text-body-secondary">(optional)</span></label>
+                        <input id="gave-to" class="form-control" @bind="giving.To" @bind:event="oninput" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="gave-date">Date</label>
+                        <input id="gave-date" type="date" class="form-control" @bind="giving.Date"
+                               min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" disabled="@(busy || !giving.CountIsValid)" @onclick="GiveAwayAsync">
+                            @(giving.Count == 1 ? "Mark as given away" : $"Mark {giving.Count} as given away")
+                        </button>
+                        <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">Back</button>
+                    </div>
+                    break;
+
+                case StageView.PassOn:
+                    <PassOnPanel SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" Name="@propagation.DisplayName"
+                                 OnDone="() => stageView = StageView.None" OnChangePage="ChangePassOnPage" />
                     break;
             }
         </Sheet>
@@ -541,6 +823,21 @@ else
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4" /><path d="M5 4h12l-2.5 4.5L17 13H5" /></svg>
                                 <span class="sheet-action-text"><b>@(propagation.Attention is null ? "Flag it" : "Change the flag")</b><small>Keeps it on Today until it's done</small></span>
                             </button>
+                        </li>
+                        @if (propagation.IsActive)
+                        {
+                            <li>
+                                <button type="button" class="sheet-action" @onclick="OpenSwap">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3" /></svg>
+                                    <span class="sheet-action-text"><b>For swap</b><small>@(propagation.SpareAvailable > 0 ? $"{propagation.SpareAvailable} offered" : "Offer some of them")</small></span>
+                                </button>
+                            </li>
+                        }
+                        <li>
+                            <a class="sheet-action" href="labels?cuttings=@propagation.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9Z" /><circle cx="8" cy="8" r="1.4" /></svg>
+                                <span class="sheet-action-text"><b>Print a label</b><small>For its jar or pot</small></span>
+                            </a>
                         </li>
                         <li>
                             @if (propagation.IsDormant)
@@ -561,8 +858,21 @@ else
                     </ul>
                     break;
 
+                case More.Swap:
+                    <div class="mb-3">
+                        <label class="form-label" for="spare-count">Cuttings available for swap</label>
+                        <input id="spare-count" type="number" class="form-control" inputmode="numeric" min="0" max="@propagation.RemainingCount"
+                               @bind="swapCount" />
+                        <div class="form-text">Up to @propagation.RemainingCount, what is left. It shows on <a href="swap">Available for swap</a>, and giving some away takes them off first.</div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SetSpareAsync">Save</button>
+                        <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">Back</button>
+                    </div>
+                    break;
+
                 case More.Flag:
-                    <AttentionPanel Current="propagation.Attention" Editing="true" EditingChanged="_ => more = More.None"
+                    <AttentionPanel Current="propagation.Attention" Later="propagation.AttentionLater" NextRoundDay="nextRoundDay" Editing="true" EditingChanged="_ => more = More.None"
                                     Suggestions="AttentionPanel.PropagationReasons" OnSave="SetAttentionAsync" />
                     break;
 
@@ -586,21 +896,25 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    private enum StageView { None, Stage, PotUp, Failed }
+    /// <summary>Set by the page that keeps a received history, so the first visit says where it went.</summary>
+    [SupplyParameterFromQuery(Name = "arrived")]
+    public bool Arrived { get; set; }
 
-    private enum More { None, Menu, Flag, Dormant }
+    /// <summary>Set when the propagation was just started, so the first visit offers a label for the jar.</summary>
+    [SupplyParameterFromQuery(Name = "made")]
+    public bool Made { get; set; }
+
+    /// <summary>A history or care entry to scroll to and mark. Set by Search.</summary>
+    [SupplyParameterFromQuery(Name = "entry")]
+    public Guid? Entry { get; set; }
+
+    private enum StageView { None, Stage, PotUp, Failed, GaveAway, PassOn }
+
+    private enum More { None, Menu, Flag, Dormant, Swap }
     private bool shareOpen;
+    private bool shareOnLink;
 
-    private sealed class PotUpForm
-    {
-        public int Count { get; set; } = 1;
-        public string? Nickname { get; set; }
-        public DateOnly Date { get; set; }
-        public string? Location { get; set; }
-        public GrowingMedium Medium { get; set; }
-        public Guid? PotId { get; set; }
-        public Guid? SoilMixId { get; set; }
-    }
+    private IReadOnlyList<Plant> allPlants = [];
 
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
 
@@ -611,8 +925,10 @@ else
     private IReadOnlyList<Propagation> allPropagations = [];
     private Plant? parent;
     private IReadOnlyList<Plant> offspring = [];
+    private IReadOnlyList<CodeClash> numberClashes = [];
     private IReadOnlyList<Room> rooms = [];
     private Places places = Places.None;
+    private SellerList sellers = SellerList.None;
     private PropagationOutcome? outcome;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
@@ -620,30 +936,46 @@ else
     private SoilMix? Mix => propagation?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id && !m.IsDeleted) : null;
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
+
+    // The container's name as it is in the pot library now, so a rename there shows here. The text is
+    // kept for a container that was deleted or never linked
+    private string? ContainerName =>
+        propagation is null ? null
+        : new ContainerList(pots).For(propagation.ContainerPotId, propagation.Container)?.Name
+          ?? (string.IsNullOrWhiteSpace(propagation.Container) ? null : propagation.Container);
     private bool loaded;
     private bool busy;
     private bool confirmDelete;
     private bool detailsOpen;
     private bool scrollToPlants;
     private int historyVersion;
+
+    // A cover that is a reference photo shows as no cover. The propagation itself isn't changed.
+    private Guid? ShownCover => Covers.Shown(propagation?.CoverPhotoId);
     private EntryComposer? composer;
+    private bool googleOn;
+    private bool photoChoice;
     private Timeline? timeline;
     private readonly string photoInputId = $"propagation-photo-{Guid.NewGuid():N}";
+
+    private bool careOpen;
+    private IReadOnlyList<PropagationCareLog> careLogs = [];
+    private PropagationCareLatest? lastWatered;
+    private PropagationCareLatest? lastWaterChange;
 
     private StageView stageView;
     private More more;
     private DateOnly since;
-    private PotUpForm potUp = new();
-    private int failedCount = 1;
-    private string? failedReason;
-    private DateOnly failedDate;
+    private PotUpForm? potUp;
+    private FailedForm? failed;
+    private GiveAwayForm? gave;
     private string? message;
     private IReadOnlyList<Plant> madePlants = [];
 
     private DateOnly Today => Time.Today();
 
     // With no photo, the tile at the top shows the days, so the line under the name needn't
-    private bool TileShowsDays => propagation is { CoverPhotoId: null, IsActive: true };
+    private bool TileShowsDays => propagation is { IsActive: true } && ShownCover is null;
 
     private RootingPace? Pace => propagation is null ? null : RootingPace.For(propagation, allPropagations, Today);
 
@@ -658,15 +990,23 @@ else
 
     private string StageTitle => stageView switch
     {
-        StageView.PotUp => "Pot up",
+        StageView.PotUp => PotUpWord,
         StageView.Failed => "Mark as failed",
+        StageView.GaveAway => "Gave some away",
+        StageView.PassOn => "Send its history",
         _ => "How far along",
     };
+
+    // A propagation already in soil, bark, LECA or PON is a plant in all but name, so there is nothing to pot up
+    private bool InPlantMedium => propagation?.InPlantMedium == true;
+
+    private string PotUpWord => InPlantMedium ? "It's a plant now" : "Pot up";
 
     private string MoreTitle => more switch
     {
         More.Flag => propagation?.Attention is null ? "Flag it" : "Change the flag",
         More.Dormant => "Dormant",
+        More.Swap => "For swap",
         _ => propagation?.DisplayName ?? "",
     };
 
@@ -697,14 +1037,23 @@ else
             var p = propagation!;
             var parts = new List<string> { $"{p.InitialCount} started" };
             if (p.PottedUpCount > 0) parts.Add($"{p.PottedUpCount} potted up");
+            if (p.GivenAwayCount > 0) parts.Add($"{p.GivenAwayCount} given away");
             if (p.FailedCount > 0) parts.Add($"{p.FailedCount} failed");
             if (p.IsActive && p.RemainingCount != p.InitialCount) parts.Add($"{p.RemainingCount} left");
             return string.Join(" · ", parts);
         }
     }
 
+    private async Task PickFromGoogleAsync()
+    {
+        photoChoice = false;
+        if (composer is not null)
+            await composer.PickFromGooglePhotos();
+    }
+
     protected override async Task OnParametersSetAsync()
     {
+        googleOn = await Google.IsEnabledAsync();
         if (propagation?.Id != Id)
         {
             confirmDelete = false;
@@ -712,28 +1061,77 @@ else
             stageView = StageView.None;
             more = More.None;
             message = null;
+            potUp = null;
+            failed = null;
+            gave = null;
         }
         await LoadAsync();
+        // A care entry lives in the care sheet, so that opens to show it
+        if (Entry is { } entryId && propagation?.IsActive == true && careLogs.Any(l => l.Id == entryId))
+            careOpen = true;
         loaded = true;
     }
 
     private EverydayNameBook? everyday;
 
+    // What common plants usually like, here only for the Pets row. Empty if it couldn't be read.
+    private PlantCareBook careBook = PlantCareBook.Empty;
+
     private async Task LoadAsync()
     {
         everyday = await Names.GetEverydayNamesAsync();
+        careBook = await CommonCare.GetBookAsync();
+        await Covers.EnsureLoadedAsync();
         propagation = await Repository.GetAsync(Id);
+        // An open sheet saves on the propagation as it is stored now, not the copy it was opened with
+        if (propagation is not null)
+        {
+            if (potUp?.Propagation.Id == propagation.Id)
+                potUp.Propagation = propagation;
+            if (failed?.Propagation.Id == propagation.Id)
+                failed.Propagation = propagation;
+            if (gave?.Propagation.Id == propagation.Id)
+                gave.Propagation = propagation;
+        }
         var plants = await PlantRepository.GetAllAsync();
+        allPlants = plants;
         var propagations = allPropagations = await Repository.GetAllAsync();
         parent = propagation?.ParentPlantId is { } parentId ? plants.FirstOrDefault(p => p.Id == parentId) : null;
         offspring = plants.Where(p => p.FromPropagationId == Id)
                           .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                           .ToList();
+        numberClashes = propagation is null ? [] : CollectionNumbers.Clashes(propagation.CollectionNumber, propagation.Id, plants, propagations);
         places = await RoomService.GetPlacesAsync();
+        sellers = await SellerService.GetSellersAsync();
         rooms = Room.List(places, plants, propagations);
         outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
+        careLogs = PropagationCareService.For(await CareService.GetAllAsync(), Id);
+        lastWatered = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.Watered, Today);
+        lastWaterChange = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.ChangedWater, Today);
+        var settings = await SettingsService.GetAsync();
+        nextRoundDay = RoundSchedule.Next(settings.RoundDays, Today);
+        potUpWarnCm = PotSizeChange.WarnLimit(settings);
+    }
+
+    private decimal potUpWarnCm = PotSizeChange.DefaultWarnCm;
+
+    // "watered 2 days ago" or "water changed yesterday", whichever happened last
+    private string? LastCare => (lastWatered, lastWaterChange) switch
+    {
+        (null, null) => null,
+        ({ } w, null) => $"watered {Labels.DaysAgo(w.DaysAgo)}",
+        (null, { } c) => $"water changed {Labels.DaysAgo(c.DaysAgo)}",
+        ({ } w, { } c) => c.DaysAgo < w.DaysAgo
+            ? $"water changed {Labels.DaysAgo(c.DaysAgo)}"
+            : $"watered {Labels.DaysAgo(w.DaysAgo)}"
+    };
+
+    private async Task CareLoggedAsync()
+    {
+        careOpen = false;
+        await LoadAsync();
     }
 
     private void ShowPlants()
@@ -750,8 +1148,6 @@ else
         await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
         await module.InvokeVoidAsync("scrollToId", "propagation-plants");
     }
-
-    private bool CountIsValid(int count) => propagation is not null && count >= 1 && count <= propagation.RemainingCount;
 
     private void OpenStage()
     {
@@ -795,11 +1191,37 @@ else
         }
     }
 
-    private async Task SetAttentionAsync(string? reason)
+    private DateOnly? nextRoundDay;
+
+    private async Task SetAttentionAsync((string? Reason, LooseDate? From) change)
     {
         if (propagation is null)
             return;
-        await PropagationService.SetAttentionAsync(propagation, reason);
+        await PropagationService.SetAttentionAsync(propagation, change.Reason, change.From);
+    }
+
+    private int swapCount;
+
+    private void OpenSwap()
+    {
+        swapCount = propagation?.SpareAvailable ?? 0;
+        more = More.Swap;
+    }
+
+    private async Task SetSpareAsync()
+    {
+        if (propagation is null)
+            return;
+        busy = true;
+        try
+        {
+            await PropagationService.SetSpareAsync(propagation, swapCount);
+            more = More.None;
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     private void OpenDormant()
@@ -829,95 +1251,140 @@ else
 
     private Task SetDormantAsync() => ChangeDormancyAsync(since);
 
-    // A pot that suggests a medium sets it, until the person has picked a medium in this form
-    private bool potUpMediumChosen;
-
-    private void SetPotUpMedium(ChangeEventArgs e)
-    {
-        potUp.Medium = Enum.Parse<GrowingMedium>(e.Value?.ToString() ?? nameof(GrowingMedium.Soil));
-        potUpMediumChosen = true;
-    }
-
-    private void SetPotUpPot(Guid? id)
-    {
-        potUp.PotId = id;
-        var pot = pots.FirstOrDefault(p => p.Id == id);
-        potUp.Medium = PotKinds.MediumAfterPicking(pot, potUp.Medium, potUpMediumChosen);
-    }
-
     private void OpenPotUp()
     {
-        potUpMediumChosen = false;
-        var p = propagation!;
-        potUp = new PotUpForm
-        {
-            // A propagation named only by nickname passes it on, since a plant needs a name
-            Nickname = string.IsNullOrWhiteSpace(p.Genus) ? p.Nickname : null,
-            Date = Today,
-            Location = places.NameOf(p.PlaceId),
-            // Soil is the usual place for a potted up plant. Only a default, it's a select.
-            Medium = p.Medium is GrowingMedium.Water or GrowingMedium.Perlite or GrowingMedium.Sphagnum or GrowingMedium.CormRiser
-                ? GrowingMedium.Soil
-                : p.Medium,
-            SoilMixId = p.Medium == GrowingMedium.Soil ? p.SoilMixId : null,
-        };
+        // A pot up that failed after storing some of its plants carries on, so it writes over them
+        if (potUp is not { HasStoredPlants: true } || potUp.Propagation.Id != propagation!.Id)
+            potUp = Units.PotUp(propagation!, places, Labels.For);
         message = null;
         stageView = StageView.PotUp;
     }
 
     private void OpenFailed()
     {
-        failedCount = 1;
-        failedReason = null;
-        failedDate = Today;
+        failed = Units.Failed(propagation!);
         message = null;
         stageView = StageView.Failed;
     }
 
+    private void OpenGaveAway()
+    {
+        gave = Units.GiveAway(propagation!);
+        message = null;
+        stageView = StageView.GaveAway;
+    }
+
+    private void OpenPassOn() => stageView = StageView.PassOn;
+
+    private void OpenShare()
+    {
+        shareOnLink = false;
+        shareOpen = true;
+    }
+
+    // From the offer to send its history: the Share sheet opens on the link, to change what the page shows
+    private void ChangePassOnPage()
+    {
+        stageView = StageView.None;
+        shareOnLink = true;
+        shareOpen = true;
+    }
+
     private async Task PotUpAsync()
     {
-        if (propagation is null || !CountIsValid(potUp.Count))
+        if (propagation is null || potUp is not { CanSave: true } form)
             return;
 
         busy = true;
         try
         {
-            var placeId = await RoomService.PlaceIdAsync(potUp.Location);
-            madePlants = await PropagationService.PotUpAsync(propagation, new PotUpRequest(
-                potUp.Count, potUp.Date, potUp.Nickname, placeId, potUp.Medium, potUp.PotId, potUp.Medium == GrowingMedium.Soil ? potUp.SoilMixId : null));
-            message = madePlants.Count == 1 ? "Potted up:" : $"Potted up {madePlants.Count}:";
+            var result = await form.SaveAsync();
             stageView = StageView.None;
             await LoadAsync();
+            madePlants = result.Plants;
+            if (result.LaterError is { } later)
+            {
+                Logger.LogError(later, "A step after potting up the propagation failed");
+                // The plants were saved before the step that failed, so they are found by their ids
+                madePlants = [.. allPlants.Where(p => form.PlantIds.Contains(p.Id))];
+            }
+            message = madePlants.Count == 1 ? "Potted up:" : $"Potted up {madePlants.Count}:";
             historyVersion++;
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Potting up the propagation failed");
             madePlants = [];
             message = $"Couldn't pot up: {ex.Message}";
             stageView = StageView.None;
         }
-        busy = false;
+        finally
+        {
+            busy = false;
+        }
     }
 
     private async Task MarkFailedAsync()
     {
-        if (propagation is null || !CountIsValid(failedCount))
+        if (propagation is null || failed is not { CountIsValid: true } form)
             return;
 
         busy = true;
         try
         {
-            await PropagationService.MarkFailedAsync(propagation, failedCount, failedReason, failedDate);
-            message = failedCount == 1 ? "Marked 1 as failed." : $"Marked {failedCount} as failed.";
+            var result = await form.SaveAsync();
+            // The counts were recorded on the copy the sheet saved, which a sync may have replaced on the page
+            await LoadAsync();
+            if (result.LaterError is { } later)
+                Logger.LogError(later, "A step after marking units as failed failed");
+            message = form.Count == 1 ? "Marked 1 as failed." : $"Marked {form.Count} as failed.";
             historyVersion++;
+            madePlants = [];
+            stageView = StageView.None;
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "Marking units as failed failed");
+            madePlants = [];
             message = $"Couldn't mark as failed: {ex.Message}";
+            stageView = StageView.None;
         }
-        madePlants = [];
-        stageView = StageView.None;
-        busy = false;
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task GiveAwayAsync()
+    {
+        if (propagation is null || gave is not { CountIsValid: true } form)
+            return;
+
+        busy = true;
+        try
+        {
+            var result = await form.SaveAsync();
+            // The counts were recorded on the copy the sheet saved, which a sync may have replaced on the page
+            await LoadAsync();
+            if (result.LaterError is { } later)
+                Logger.LogError(later, "A step after marking units as given away failed");
+            message = form.Count == 1 ? "Marked 1 as given away." : $"Marked {form.Count} as given away.";
+            historyVersion++;
+            madePlants = [];
+            // Offers to send whoever got it the story, where links are available
+            stageView = Account.IsAvailable ? StageView.PassOn : StageView.None;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Marking units as given away failed");
+            madePlants = [];
+            message = $"Couldn't mark as given away: {ex.Message}";
+            stageView = StageView.None;
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     private async Task SetCoverAsync(Guid? photoId)

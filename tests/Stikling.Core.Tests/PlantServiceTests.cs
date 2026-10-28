@@ -23,6 +23,104 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task Create_and_update_store_the_collection_number_tidied()
+    {
+        var created = new Plant { Nickname = "A", CollectionNumber = " #117 " };
+        await service.CreateAsync(created);
+        Assert.Equal("117", plants.Plants[created.Id].CollectionNumber);
+
+        var before = created.Copy();
+        created.CollectionNumber = "#118";
+        await service.UpdateAsync(before, created, Label);
+        Assert.Equal("118", plants.Plants[created.Id].CollectionNumber);
+    }
+
+    [Fact]
+    public async Task A_create_run_again_after_failing_partway_adds_no_entry_twice()
+    {
+        var failing = new FailingOnceTimeline(timeline, e => e.Kind == TimelineKind.Photo);
+        var partly = new PlantService(plants, failing, new FixedTime(Now));
+        var plant = new Plant { Nickname = "A" };
+        Photo[] photos =
+        [
+            new Photo { SubjectType = SubjectType.Plant, TakenAt = Now.AddDays(-2) },
+            new Photo { SubjectType = SubjectType.Plant, TakenAt = Now.AddDays(-1) }
+        ];
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => partly.CreateAsync(plant, photos));
+        await partly.CreateAsync(plant, photos);
+
+        var history = timeline.Entries.Where(e => e.SubjectId == plant.Id).ToList();
+        Assert.Single(history, e => e.Kind == TimelineKind.Created);
+        Assert.Equal(photos.Select(p => p.Id).Order(), history.SelectMany(e => e.PhotoIds).Order());
+    }
+
+    [Fact]
+    public async Task A_history_failure_after_an_edit_says_the_plant_was_saved()
+    {
+        var plant = new Plant { Nickname = "A", Medium = GrowingMedium.Soil };
+        await plants.SaveAsync(plant);
+        var partly = new PlantService(plants, new FailingOnceTimeline(timeline, _ => true), new FixedTime(Now));
+        var before = plant.Copy();
+        plant.Medium = GrowingMedium.Leca;
+
+        var ex = await Assert.ThrowsAsync<PartlySavedException>(() => partly.UpdateAsync(before, plant, Label));
+
+        Assert.IsType<InvalidOperationException>(ex.InnerException);
+        Assert.Equal(GrowingMedium.Leca, plants.Plants[plant.Id].Medium);
+    }
+
+    [Fact]
+    public async Task Update_leaves_an_older_collection_number_alone_when_it_was_not_changed()
+    {
+        var plant = new Plant { Nickname = "A", CollectionNumber = "#117A" };
+        await plants.SaveAsync(plant);
+
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Died;
+        await service.UpdateAsync(before, plant, Label);
+
+        Assert.Equal("#117A", plants.Plants[plant.Id].CollectionNumber);
+    }
+
+    [Fact]
+    public async Task Create_and_update_store_a_count_of_one_as_null()
+    {
+        var created = new Plant { Nickname = "A", Count = 1 };
+        await service.CreateAsync(created);
+        Assert.Null(plants.Plants[created.Id].Count);
+
+        var before = created.Copy();
+        created.Count = 3;
+        await service.UpdateAsync(before, created, Label);
+        Assert.Equal(3, plants.Plants[created.Id].Count);
+
+        before = created.Copy();
+        created.Count = 1;
+        await service.UpdateAsync(before, created, Label);
+        Assert.Null(plants.Plants[created.Id].Count);
+    }
+
+    [Fact]
+    public async Task Create_and_update_drop_a_way_of_resting_for_a_plant_that_does_not_rest()
+    {
+        var created = new Plant { Nickname = "A", GrowingSeason = GrowingSeason.NoRest, RestHow = RestKind.Cooler };
+        await service.CreateAsync(created);
+        Assert.Null(plants.Plants[created.Id].RestHow);
+
+        var before = created.Copy();
+        created.GrowingSeason = GrowingSeason.Summer;
+        created.RestHow = RestKind.Drier;
+        await service.UpdateAsync(before, created, Label);
+        Assert.Equal(RestKind.Drier, plants.Plants[created.Id].RestHow);
+
+        before = created.Copy();
+        created.GrowingSeason = null;
+        await service.UpdateAsync(before, created, Label);
+        Assert.Null(plants.Plants[created.Id].RestHow);
+    }
+
+    [Fact]
     public async Task RenameTag_changes_it_on_every_plant_that_has_it()
     {
         var a = await AddTagged("A", "Rare", "Swap");
@@ -458,5 +556,29 @@ public class PlantServiceTests
         var entry = Assert.Single(timeline.Entries);
         Assert.Equal("Added to collection, 2024", entry.Text);
         Assert.Equal(new DateOnly(2024, 1, 1), DateOnly.FromDateTime(entry.OccurredAt.UtcDateTime));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_sets_StatusSince_to_today_when_the_status_changes_and_leaves_it_otherwise()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+        await plants.SaveAsync(plant);
+
+        var before = plant.Copy();
+        plant.Notes = "Still fine";
+        await service.UpdateAsync(before, plant, Label);
+        Assert.Null(plant.StatusSince);
+
+        before = plant.Copy();
+        plant.Status = PlantStatus.Died;
+        await service.UpdateAsync(before, plant, Label);
+        Assert.Equal(new DateOnly(2026, 9, 19), plant.StatusSince);
+
+        var kept = new DateOnly(2026, 1, 2);
+        plant.StatusSince = kept;
+        before = plant.Copy();
+        plant.Notes = "Gone";
+        await service.UpdateAsync(before, plant, Label);
+        Assert.Equal(kept, plant.StatusSince);
     }
 }

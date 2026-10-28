@@ -1,0 +1,48 @@
+.seller-kind {
+    margin: -0.25rem 0 1rem;
+    color: var(--pa-muted);
+}
+
+.seller-problems {
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.seller-list-title {
+    margin: 1rem 0 0.25rem;
+    font-size: 1rem;
+}
+
+.seller-things {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.seller-things > li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.seller-thing {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.6rem 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.seller-things > li:first-child {
+    border-top: 0;
+}
+
+.chip {
+    min-height: 2.75rem;
+}
+
+.seller-thing-note {
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}

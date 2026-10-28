@@ -1,0 +1,67 @@
+@* The input for one of your own fields, by kind: text, a number, a date or a choice. The value is the
+   text as typed, and OwnFieldValues.Normalize tidies it when it is saved. Used on the plant form. *@
+
+<div class="mb-3">
+    <label class="form-label" for="@inputId">@Field.Name</label>
+    @switch (Field.Kind)
+    {
+        case OwnFieldKind.Number:
+            <input id="@inputId" class="form-control" type="text" inputmode="decimal" autocomplete="off"
+                   aria-describedby="@ErrorId" aria-invalid="@(Error is null ? null : "true")"
+                   value="@Value" @onchange="Changed" />
+            break;
+        case OwnFieldKind.Date:
+            <input id="@inputId" class="form-control" type="date"
+                   aria-describedby="@ErrorId" aria-invalid="@(Error is null ? null : "true")"
+                   value="@Value" @onchange="Changed" />
+            break;
+        case OwnFieldKind.Choice:
+            <select id="@inputId" class="form-select" @onchange="Changed">
+                <option value="" selected="@string.IsNullOrEmpty(Value)">Not set</option>
+                @foreach (var choice in Field.Choices)
+                {
+                    <option value="@choice" selected="@(Value == choice)">@choice</option>
+                }
+                @if (!string.IsNullOrEmpty(Value) && !Field.Choices.Contains(Value))
+                {
+                    <option value="@Value" selected>@Value</option>
+                }
+            </select>
+            break;
+        default:
+            <input id="@inputId" class="form-control" type="text" autocomplete="off"
+                   aria-describedby="@ErrorId" aria-invalid="@(Error is null ? null : "true")"
+                   value="@Value" @onchange="Changed" />
+            break;
+    }
+    @if (Error is { } error)
+    {
+        <div id="@ErrorId" class="form-text text-danger" role="alert">@error</div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public OwnField Field { get; set; } = new();
+
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    private string inputId => $"own-field-{Field.Id:N}";
+    private string ErrorId => $"{inputId}-error";
+
+    /// <summary>What is wrong with the value, or null.</summary>
+    private string? Error
+    {
+        get
+        {
+            OwnFieldValues.Normalize(Field.Kind, Value, out var error);
+            return error;
+        }
+    }
+
+    private Task Changed(ChangeEventArgs e) => ValueChanged.InvokeAsync(e.Value?.ToString());
+}

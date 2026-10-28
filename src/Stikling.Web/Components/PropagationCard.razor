@@ -1,12 +1,60 @@
-@* One row in a propagation list: "3× corm · LECA · day 24". *@
+@* One row in a propagation list: "3× corm · LECA · day 24". In select mode the card is a checkbox instead of a link. *@
 @inject TimeProvider Time
 @inject PlantNameService Names
 
-<a class="item-card" href="propagations/@Propagation.Id">
+@if (Selectable)
+{
+    <label class="item-card selectable @(Selected ? "selected" : null)">
+        <input type="checkbox" class="form-check-input plant-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Propagation)" />
+        @Content
+    </label>
+}
+else
+{
+    <a class="item-card" href="propagations/@Propagation.Id">
+        @Content
+    </a>
+}
+
+@code {
+    private EverydayNameBook? everyday;
+
+    protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
+
+    [Parameter, EditorRequired]
+    public required Propagation Propagation { get; set; }
+
+    /// <summary>Shown as "from Big alocasia" when set.</summary>
+    [Parameter]
+    public string? ParentName { get; set; }
+
+    /// <summary>
+    /// How it's doing against earlier batches. Only a slow one says so on the card, since
+    /// "on time" on every card would be noise.
+    /// </summary>
+    [Parameter]
+    public RootingPace? Pace { get; set; }
+
+    /// <summary>Show the stage as a badge (lists that aren't already grouped by stage).</summary>
+    [Parameter]
+    public bool ShowStage { get; set; }
+
+    [Parameter]
+    public bool Selectable { get; set; }
+
+    [Parameter]
+    public bool Selected { get; set; }
+
+    [Parameter]
+    public EventCallback<Propagation> OnToggle { get; set; }
+
+    private DateOnly Today => Time.Today();
+
+    private RenderFragment Content => @<text>
     <PropagationThumb Propagation="Propagation" Days="@(Propagation.IsActive ? Propagation.DaysSinceStart(Today) : null)" />
 
     <div class="item-text">
-        <div class="item-name">@Propagation.DisplayName</div>
+        <div class="item-name"><NumberTag Code="@Propagation.CollectionNumber" />@Propagation.DisplayName</div>
         @if (ParentName is not null)
         {
             <div class="item-sub">from @ParentName</div>
@@ -15,7 +63,7 @@
         {
             <div class="item-sub">@botanical</div>
         }
-        else if (everyday?.For(Propagation.Genus, Propagation.Species, Propagation.Cultivar) is { } called)
+        else if (everyday?.For(Propagation.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(Propagation.Species, Propagation.NameQualifier), Propagation.Cultivar) is { } called)
         {
             <div class="item-sub everyday-name">@called</div>
         }
@@ -29,6 +77,10 @@
                 @if (Propagation.IsDormant)
                 {
                     <span class="badge dormant-badge">Dormant</span>
+                }
+                @if (Propagation.SpareAvailable > 0)
+                {
+                    <span class="badge swap-badge">@Propagation.SpareAvailable to swap</span>
                 }
                 <span>@Labels.Summary(Propagation)</span>
                 @if (Propagation.DaysToRoot is { } days)
@@ -55,30 +107,5 @@
             }
         </div>
     </div>
-</a>
-
-@code {
-    private EverydayNameBook? everyday;
-
-    protected override async Task OnInitializedAsync() => everyday = await Names.GetEverydayNamesAsync();
-
-    [Parameter, EditorRequired]
-    public required Propagation Propagation { get; set; }
-
-    /// <summary>Shown as "from Big alocasia" when set.</summary>
-    [Parameter]
-    public string? ParentName { get; set; }
-
-    /// <summary>
-    /// How it's doing against earlier batches. Only a slow one says so on the card, since
-    /// "on time" on every card would be noise.
-    /// </summary>
-    [Parameter]
-    public RootingPace? Pace { get; set; }
-
-    /// <summary>Show the stage as a badge (lists that aren't already grouped by stage).</summary>
-    [Parameter]
-    public bool ShowStage { get; set; }
-
-    private DateOnly Today => Time.Today();
+    </text>;
 }

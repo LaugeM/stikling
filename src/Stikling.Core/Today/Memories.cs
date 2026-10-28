@@ -34,14 +34,14 @@ public static class Memories
         Func<DateTimeOffset, DateOnly> localDay)
     {
         var byPlant = photos
-            .Where(p => !p.IsDeleted && p.SubjectType == SubjectType.Plant)
+            .Where(p => !p.IsDeleted && !p.IsReference && p.SubjectType == SubjectType.Plant)
             .GroupBy(p => p.SubjectId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
         var found = new List<(Memory Memory, int Count)>();
         foreach (var plant in plants)
         {
-            if (plant.IsDeleted || plant.Status != PlantStatus.Active || !byPlant.TryGetValue(plant.Id, out var own))
+            if (plant.IsDeleted || !plant.InCollection || !byPlant.TryGetValue(plant.Id, out var own))
                 continue;
 
             var newest = own.OrderByDescending(p => p.TakenAt).First();

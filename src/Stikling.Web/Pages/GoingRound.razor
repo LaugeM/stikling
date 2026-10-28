@@ -1,0 +1,578 @@
+@page "/round/{PlaceId:guid}"
+@page "/round/due"
+@page "/round/next"
+@page "/round/back"
+@using GoingRoundLogic = Stikling.Core.Today.GoingRound
+@using Stikling.Core.Settings
+@inject CoverPhotos Covers
+@inject IPlantRepository Plants
+@inject ILogger<GoingRound> Logger
+@inject IPropagationRepository Propagations
+@inject ICareLogRepository CareLogs
+@inject ITimelineRepository Entries
+@inject IPotRepository PotRepository
+@inject IPestCaseRepository PestCases
+@inject NavigationManager Navigation
+@inject GrowLightService LightService
+@inject AwayService AwayService
+@inject RoomService RoomService
+@inject SettingsService SettingsService
+@inject PutOffService PutOffService
+@inject WateringAnswers Answers
+@inject CareService Care
+@inject TimelineService TimelineService
+@inject SubjectPhotos SubjectPhotos
+@inject TimeProvider Time
+
+<PageTitle>@Title · Stikling</PageTitle>
+
+@* No ReloadOnSync: like an edit page, the cards stay put while someone is going round *@
+
+<a class="back-link" href="@BackHref">@BackLabel</a>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (placeMissing)
+{
+    <h1>Going round</h1>
+    <div class="empty-state">
+        <p>This room isn't there any more.</p>
+        <a class="btn btn-primary mt-3" href="">Back to Today</a>
+    </div>
+}
+else if (cards.Count == 0)
+{
+    <h1>@Title</h1>
+    <div class="empty-state">
+        @if (IsBack)
+        {
+            <p>Nothing is left to look at first.</p>
+            <a class="btn btn-primary mt-3" href="">Back to Today</a>
+        }
+        else if (IsNext)
+        {
+            <p>Nothing is waiting for the next round.</p>
+            <a class="btn btn-primary mt-3" href="">Back to Today</a>
+        }
+        else if (IsDue)
+        {
+            <p>Nothing is due for water right now.</p>
+            <a class="btn btn-primary mt-3" href="">Back to Today</a>
+        }
+        else
+        {
+            <p>Nothing in @Title to go round yet. Plants and propagations you put here show up in its round.</p>
+            <a class="btn btn-primary mt-3" href="plants">Go to Plants</a>
+        }
+    </div>
+}
+else if (pos >= queue.Count)
+{
+    var summary = GoingRoundLogic.Summarise(days);
+    <div class="round-end">
+        <h1>@(IsDue || IsNext || IsBack ? "All done" : $"{Title} done")</h1>
+        <div class="round-tiles">
+            @if (summary.Watered > 0)
+            {
+                <div class="round-tile"><span class="round-count">@summary.Watered</span><span>Watered</span></div>
+            }
+            @if (summary.LookedOver > 0)
+            {
+                <div class="round-tile"><span class="round-count">@summary.LookedOver</span><span>Looked over</span></div>
+            }
+            <div class="round-tile"><span class="round-count">@summary.Skipped</span><span>Skipped</span></div>
+        </div>
+        @if (summary.Readings > 0 || summary.Photos > 0)
+        {
+            <p class="round-meta">@EndMeta(summary)</p>
+        }
+        <div class="round-end-actions">
+            <a class="btn btn-primary" href="">Back to Today</a>
+            @if (summary.Skipped > 0)
+            {
+                <button type="button" class="btn btn-outline-primary" @onclick="GoThroughSkipped">
+                    Go through the @summary.Skipped skipped
+                </button>
+            }
+        </div>
+    </div>
+}
+else
+{
+    var index = queue[pos];
+    var card = cards[index];
+    var day = days[index];
+    var plant = card.Subject as Plant;
+    var form = card.Form;
+    <div class="round" tabindex="-1" @ref="wrapper" @onkeydown="OnKeyAsync">
+        <div class="round-head">
+            <h1>@Title</h1>
+            <div class="round-counter">
+                <span class="round-position">@(pos + 1) of @queue.Count</span>
+                <button type="button" class="round-back" disabled="@(pos == 0 || busy)" @onclick="Back">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
+                    Back
+                </button>
+            </div>
+            <progress class="round-progress" max="@queue.Count" value="@pos" aria-label="Progress through the round"></progress>
+        </div>
+
+        @if (card.Heading is { } heading && (pos == 0 || index == 0 || cards[index - 1].Heading != heading))
+        {
+            <h2 class="section-label round-heading">@heading</h2>
+        }
+
+        <article class="round-card @MoveClass" @key="pos" aria-label="@card.Name">
+            <div class="round-photo">
+                @if (CoverOf(card.Subject) is { } coverId)
+                {
+                    <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {card.Name}")" />
+                }
+                else
+                {
+                    <div class="round-photo-empty @(plant is null ? "propagation" : null)" aria-hidden="true">
+                        @if (plant is null)
+                        {
+                            <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+                        }
+                        else
+                        {
+                            <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="round-body">
+                <div class="round-facts">
+                    <h2 class="round-name">@card.Name</h2>
+                    @if (SpeciesOf(card.Subject) is { } species)
+                    {
+                        <div class="round-species"><BotanicalName Genus="@species.Genus" Species="@species.Species" Cultivar="@species.Cultivar" /></div>
+                    }
+                    @if (MetaOf(card, day) is { Length: > 0 } meta)
+                    {
+                        <p class="round-meta">@meta</p>
+                    }
+                    @if (card.DueNow && card.Guess is { } guess && plant is not null && day.WateredId is null)
+                    {
+                        <p class="round-meta">@WateringText.Row(new WateringDue(plant, guess, (guess.CheckOn ?? Today) <= Today, Today, false), Today)</p>
+                    }
+                    @if (card.Dormant)
+                    {
+                        <span class="stage-badge badge">Dormant</span>
+                    }
+                </div>
+
+                <div class="round-controls">
+                    @if (form == WateringForm.TopWatered)
+                    {
+                        <div class="round-readings" role="group" aria-label="Meter reading">
+                            <span class="section-label">Meter reading</span>
+                            <div class="answer-grid">
+                                @for (var n = 0; n <= 10; n++)
+                                {
+                                    var reading = n;
+                                    var picked = day.Reading?.Value == n;
+                                    <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                            disabled="@busy" @onclick="() => ReadingAsync(reading)">@n</button>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="round-actions">
+                        @if (form is { } waterForm)
+                        {
+                            <button type="button" class="btn btn-primary round-action" aria-pressed="@(day.WateredId is null ? "false" : "true")"
+                                    disabled="@busy" @onclick="WaterAsync">
+                                @if (day.WateredId is not null)
+                                {
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                                }
+                                @WateringText.DoneLabel(waterForm)
+                            </button>
+                        }
+                        <button type="button" class="btn btn-outline-primary round-action" aria-pressed="@(day.LookedOverId is null ? "false" : "true")"
+                                disabled="@busy" @onclick="LookedOverAsync">
+                            @if (day.LookedOverId is not null)
+                            {
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                            }
+                            Looked over
+                        </button>
+                    </div>
+
+                    <div class="round-more">
+                        <label class="round-text-btn @(busy ? "disabled" : null)" for="round-photo-input">
+                            @if (day.Photo)
+                            {
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                            }
+                            else
+                            {
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                            }
+                            Photo
+                            @if (day.Photo)
+                            {
+                                <span class="visually-hidden">(added today)</span>
+                            }
+                        </label>
+                        <input id="round-photo-input" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                               @ref="photoInput" @onchange="PhotoAsync" disabled="@busy" />
+                        <button type="button" class="round-text-btn" disabled="@busy" @onclick="Skip">
+                            Skip
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                        </button>
+                    </div>
+
+                    @if (status is not null)
+                    {
+                        <p class="today-row-status" role="status">@status</p>
+                    }
+                </div>
+            </div>
+        </article>
+
+        <p class="round-keys">Keys: 1 to 0 for a reading, W watered, L looked over, S skip, arrows to move</p>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid PlaceId { get; set; }
+
+    [SupplyParameterFromQuery(Name = "from")]
+    public string? From { get; set; }
+
+    [SupplyParameterFromQuery(Name = "daily")]
+    public bool Daily { get; set; }
+
+    // The two rounds that aren't a room have no place id
+    private bool IsBack => PlaceId == Guid.Empty
+        && Navigation.ToBaseRelativePath(Navigation.Uri).StartsWith("round/back", StringComparison.OrdinalIgnoreCase);
+
+    private bool IsNext => PlaceId == Guid.Empty
+        && Navigation.ToBaseRelativePath(Navigation.Uri).StartsWith("round/next", StringComparison.OrdinalIgnoreCase);
+
+    private bool IsDue => PlaceId == Guid.Empty && !IsBack && !IsNext;
+
+    private string BackHref => From switch { "plants" => "plants", "rooms" => "rooms-and-tags", _ => "" };
+
+    private string BackLabel => From switch { "plants" => "Plants", "rooms" => "Rooms and tags", _ => "Today" };
+
+    private string Title => IsBack ? "Look at these first" : IsNext ? "Next round" : IsDue ? "Due for water" : places.NameOf(PlaceId) ?? "Going round";
+
+    private DateOnly Today => Time.Today();
+
+    private bool loaded;
+    private bool placeMissing;
+    private bool busy;
+    private bool endHandled;
+    private bool moveForward = true;
+    private bool focusNext;
+    private string? status;
+    private Places places = Places.None;
+    private IReadOnlyList<RoundCard> cards = [];
+    private IReadOnlyList<RoundDay> days = [];
+    private IReadOnlyList<CareLog> careLogs = [];
+    private IReadOnlyList<TimelineEntry> todayEntries = [];
+    private List<int> queue = [];
+    private int pos;
+    private ElementReference wrapper;
+    private ElementReference photoInput;
+
+    private string MoveClass => moveForward ? "from-right" : "from-left";
+
+    protected override async Task OnInitializedAsync()
+    {
+        places = await RoomService.GetPlacesAsync();
+        if (PlaceId != Guid.Empty && places.Find(PlaceId) is null)
+        {
+            placeMissing = true;
+            loaded = true;
+            return;
+        }
+
+        var plants = await Plants.GetAllAsync();
+        var propagations = await Propagations.GetAllAsync();
+        careLogs = await CareLogs.GetAllAsync();
+        var plantChanges = await Entries.GetPlantChangesAsync();
+        var lights = await LightService.GetAllAsync();
+        var stretches = await AwayService.GetAllAsync();
+        var pots = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
+        var userSettings = await SettingsService.GetAsync();
+        var wateringOn = userSettings.WateringReminder;
+        var roundDays = userSettings.RoundDays;
+        todayEntries = await Entries.GetSinceAsync(StartOfToday);
+        var hemisphere = Seasons.HemisphereOf(TimeZoneInfo.Local);
+
+        if (IsBack)
+        {
+            var putOffs = await PutOffService.GetAsync(Today);
+            var settings = await SettingsService.GetAsync();
+            var backDay = AwayTime.BackDay(stretches, Today);
+            var rows = backDay is { } day
+                ? BackList.Of(day, plants, propagations, careLogs, await BackTimeline.LoadAsync(Entries, day, Time), await PestCases.GetAllAsync(),
+                    id => pots.GetValueOrDefault(id), lights, places, stretches, hemisphere, Time, settings.BackListLength)
+                : [];
+            cards = GoingRoundLogic.ForBack(rows, plants, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places,
+                stretches, hemisphere, Time, wateringOn, putOffs);
+        }
+        else if (IsNext)
+        {
+            var putOffs = await PutOffService.GetAsync(Today);
+            cards = wateringOn
+                ? GoingRoundLogic.ForNext(plants, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places, stretches, hemisphere, Time, putOffs, roundDays)
+                : [];
+        }
+        else if (IsDue)
+        {
+            var putOffs = await PutOffService.GetAsync(Today);
+            cards = wateringOn
+                ? GoingRoundLogic.ForDue(plants, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places, stretches, hemisphere, Time, putOffs, roundDays)
+                : [];
+        }
+        else
+        {
+            cards = GoingRoundLogic.ForPlace(
+                PlaceId, plants, propagations, careLogs, plantChanges, id => pots.GetValueOrDefault(id), lights, places,
+                stretches, hemisphere, Time, wateringOn, await PutOffService.GetAsync(Today));
+        }
+
+        days = GoingRoundLogic.Days(cards, careLogs, todayEntries, Time);
+        queue = [.. Enumerable.Range(0, cards.Count)];
+        pos = GoingRoundLogic.StartAt(cards, days);
+        loaded = true;
+        focusNext = true;
+        await CheckEndAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusNext && loaded && pos < queue.Count)
+        {
+            focusNext = false;
+            try { await wrapper.FocusAsync(preventScroll: true); } catch { }
+        }
+    }
+
+    private DateTimeOffset StartOfToday => Time.MomentAt(Today.ToDateTime(TimeOnly.MinValue));
+
+    private Guid? CoverOf(Entity subject) => subject switch
+    {
+        Plant plant => Covers.Shown(plant.CoverPhotoId),
+        Propagation propagation => Covers.Shown(propagation.CoverPhotoId),
+        _ => null
+    };
+
+    private static (string? Genus, string? Species, string? Cultivar)? SpeciesOf(Entity subject) => subject switch
+    {
+        Plant { Nickname: { Length: > 0 } nickname } plant when !string.IsNullOrWhiteSpace(nickname) && plant.BotanicalName is not null
+            => (plant.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar),
+        Propagation { Nickname: { Length: > 0 } nickname } propagation when !string.IsNullOrWhiteSpace(nickname) && propagation.BotanicalName is not null
+            => (propagation.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(propagation.Species, propagation.NameQualifier), propagation.Cultivar),
+        _ => null
+    };
+
+    // "watered 9 days ago · reads 4", or the newest reading when none is logged today
+    private string? MetaOf(RoundCard card, RoundDay day)
+    {
+        if (card.Form is not { } form)
+            return null;
+
+        var parts = new List<string>();
+        var kind = WateringForms.DoneKind(form);
+        var verb = WateringText.DoneLabel(form).ToLowerInvariant();
+        parts.Add(CareSummary.Latest(careLogs, card.Subject.Id, kind, Today) is { } last
+            ? $"{verb} {Labels.DaysAgo(last.DaysAgo)}"
+            : $"not {verb} yet");
+
+        if (day.Reading is { } reading)
+            parts.Add($"reads {reading.Value}");
+        else if (CareSummary.LatestMoisture(careLogs, card.Subject.Id, Today) is { } latest)
+            parts.Add($"last reading {latest.Value}, {Labels.DaysAgo(latest.DaysAgo)}");
+
+        return string.Join(" · ", parts);
+    }
+
+    private static string EndMeta(RoundSummary summary)
+    {
+        var parts = new List<string>();
+        if (summary.Readings > 0)
+            parts.Add(Labels.Count(summary.Readings, "reading"));
+        if (summary.Photos > 0)
+            parts.Add(Labels.Count(summary.Photos, "photo"));
+        return string.Join(" · ", parts);
+    }
+
+    // After an action, the day of the card is worked out again from what is saved
+    private async Task RefreshAsync()
+    {
+        careLogs = await CareLogs.GetAllAsync();
+        todayEntries = await Entries.GetSinceAsync(StartOfToday);
+        days = GoingRoundLogic.Days(cards, careLogs, todayEntries, Time);
+    }
+
+    private async Task RunAsync(Func<Task> action, bool advance)
+    {
+        if (busy)
+            return;
+        busy = true;
+        status = null;
+        try
+        {
+            await action();
+            await RefreshAsync();
+            if (advance)
+                await MoveAsync(1);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "A step in the daily round failed");
+            status = $"Couldn't save that: {ex.Message}";
+        }
+        busy = false;
+    }
+
+    private (RoundCard Card, RoundDay Day) Current => (cards[queue[pos]], days[queue[pos]]);
+
+    private Task ReadingAsync(int reading)
+    {
+        var (card, day) = Current;
+        if (day.Reading?.Value == reading)
+            return Task.CompletedTask;
+        return RunAsync(() => Answers.ReadingAsync(card.Subject.Id, reading, day.Reading?.Id, Labels.For), advance: false);
+    }
+
+    private Task WaterAsync()
+    {
+        var (card, day) = Current;
+        if (card.Form is not { } form)
+            return Task.CompletedTask;
+        if (day.WateredId is { } watered)
+            return RunAsync(() => Care.DeleteAsync(watered), advance: false);
+        return RunAsync(() => Answers.WaterAsync(card.Subject.Id, form, Labels.For), advance: true);
+    }
+
+    // The reminder waits started by Looked over in this visit, by the entry's id, so taking one back can end its wait
+    private readonly Dictionary<Guid, string> lookedOverWaits = [];
+
+    private Task LookedOverAsync()
+    {
+        var (card, day) = Current;
+        if (day.LookedOverId is { } looked)
+        {
+            return RunAsync(async () =>
+            {
+                await TimelineService.RemoveAsync(looked);
+                // Taking it back also takes back the wait it started, so the plant is due on Today again
+                if (lookedOverWaits.Remove(looked, out var key))
+                    await PutOffService.PutOffAsync(key, Today);
+            }, advance: false);
+        }
+
+        return RunAsync(async () =>
+        {
+            var type = card.Subject is Plant ? SubjectType.Plant : SubjectType.Propagation;
+            var entry = await TimelineService.LookedOverAsync(type, card.Subject.Id);
+            // A plant that is due and looked at but not watered isn't ready yet, so the reminder waits
+            if (card.Subject is Plant plant && card.DueNow && card.Guess is { } guess && day.WateredId is null
+                && await Answers.NotYetAsync(plant, guess, day.Reading?.Value, logReading: false, Labels.For) is { } wait)
+                lookedOverWaits[entry.Id] = wait.Key;
+        }, advance: true);
+    }
+
+    private async Task PhotoAsync()
+    {
+        if (busy)
+            return;
+        busy = true;
+        status = "Saving the photo…";
+        try
+        {
+            var (message, saved) = await SubjectPhotos.TakeAsync(photoInput, Current.Card.Subject);
+            status = message;
+            if (saved)
+                await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding a photo in the daily round failed");
+            status = $"Couldn't save the photo: {ex.Message}";
+        }
+        busy = false;
+    }
+
+    private void Skip()
+    {
+        if (!busy)
+            _ = MoveAsync(1);
+    }
+
+    private void Back()
+    {
+        if (!busy && pos > 0)
+            _ = MoveAsync(-1);
+    }
+
+    private async Task MoveAsync(int step)
+    {
+        moveForward = step > 0;
+        pos = Math.Clamp(pos + step, 0, queue.Count);
+        status = null;
+        focusNext = true;
+        await CheckEndAsync();
+    }
+
+    // Reaching the end of the daily round finishes it for the day
+    private async Task CheckEndAsync()
+    {
+        if (pos < queue.Count || endHandled || cards.Count == 0)
+            return;
+        endHandled = true;
+        if (Daily)
+            await PutOffService.PutOffAsync(PutOffs.DailyRound, Today.AddDays(1));
+    }
+
+    private void GoThroughSkipped()
+    {
+        queue = [.. Enumerable.Range(0, cards.Count).Where(i => !days[i].Any)];
+        pos = 0;
+        moveForward = true;
+        focusNext = true;
+    }
+
+    private async Task OnKeyAsync(KeyboardEventArgs e)
+    {
+        if (busy || !loaded || pos >= queue.Count)
+            return;
+
+        if (e.CtrlKey || e.MetaKey || e.AltKey)
+            return;
+
+        switch (e.Key)
+        {
+            case "0" or "1" or "2" or "3" or "4" or "5" or "6" or "7" or "8" or "9":
+                if (Current.Card.Form == WateringForm.TopWatered)
+                    await ReadingAsync(e.Key == "0" ? 10 : int.Parse(e.Key));
+                break;
+            case "w" or "W":
+                await WaterAsync();
+                break;
+            case "l" or "L":
+                await LookedOverAsync();
+                break;
+            case "s" or "S":
+            case "ArrowRight":
+                Skip();
+                break;
+            case "ArrowLeft":
+                Back();
+                break;
+        }
+    }
+}

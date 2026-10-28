@@ -18,7 +18,7 @@ public class CareTests
 
     public CareTests()
     {
-        service = new CareService(logs, timeline, new FixedTime(Now));
+        service = new CareService(logs, timeline, new FakePlantRepository(), new FakeFeedRepository(), new FakeProductRepository(), new FakeOwnCareKindRepository(), new FixedTime(Now));
     }
 
     private static string Label(Enum value) => value switch
@@ -47,17 +47,23 @@ public class CareTests
         Assert.Contains("That date is in the future.", Entry(CareKind.Watered, Today.AddDays(1)).Validate(Today));
 
     [Theory]
-    [InlineData(0)]
+    [InlineData(-1)]
     [InlineData(11)]
-    public void A_moisture_reading_goes_from_1_to_10(int value) =>
+    public void A_moisture_reading_goes_from_0_to_10(int value) =>
         Assert.Contains(
-            "The moisture reading goes from 1 to 10.",
+            "The moisture reading goes from 0 to 10.",
             Entry(CareKind.MoistureReading, Today, moisture: value).Validate(Today));
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(10)]
+    public void A_moisture_reading_of_0_or_10_is_valid(int value) =>
+        Assert.Empty(Entry(CareKind.MoistureReading, Today, moisture: value).Validate(Today));
 
     [Fact]
     public void A_moisture_reading_needs_a_number() =>
         Assert.Contains(
-            "Give the moisture reading a number from 1 to 10.",
+            "Give the moisture reading a number from 0 to 10.",
             Entry(CareKind.MoistureReading, Today).Validate(Today));
 
     [Fact]
@@ -142,6 +148,40 @@ public class CareTests
 
         Assert.Null(CareSummary.Latest(all, plant, CareKind.Repotted, Today));
         Assert.Equal([CareKind.Repotted], CareSummary.For(all, otherPlant).Select(l => l.Kind));
+    }
+
+    [Fact]
+    public void Last_water_counts_a_top_up_as_well_as_a_watering()
+    {
+        var all = new List<CareLog>
+        {
+            Entry(CareKind.Watered, Today.AddDays(-5)),
+            Entry(CareKind.ToppedUp, Today.AddDays(-2)),
+            Entry(CareKind.Fertilised, Today.AddDays(-1))
+        };
+
+        var last = CareSummary.LastWater(all, plant, Today);
+
+        Assert.Equal(CareKind.ToppedUp, last!.Kind);
+        Assert.Equal(2, last.DaysAgo);
+    }
+
+    [Fact]
+    public void Last_water_is_the_watering_when_that_is_newer()
+    {
+        var all = new List<CareLog> { Entry(CareKind.ToppedUp, Today.AddDays(-4)), Entry(CareKind.Watered, Today.AddDays(-1)) };
+
+        Assert.Equal(CareKind.Watered, CareSummary.LastWater(all, plant, Today)!.Kind);
+    }
+
+    [Fact]
+    public void Last_water_ignores_deleted_entries_and_other_plants()
+    {
+        var deleted = Entry(CareKind.ToppedUp, Today);
+        deleted.DeletedAt = Now;
+        var all = new List<CareLog> { deleted, Entry(CareKind.Watered, Today, otherPlant), Entry(CareKind.Fertilised, Today) };
+
+        Assert.Null(CareSummary.LastWater(all, plant, Today));
     }
 
     [Fact]
@@ -268,5 +308,110 @@ public class CareTests
         Assert.Equal(1, restored.Counts.CareEntries);
         // Stored as text, so reordering the enum can't change what old data means
         Assert.Contains("\"MoistureReading\"", json);
+    }
+
+    // Fixing an entry
+
+    private async Task<CareLog> StoredAsync(CareLog entry)
+    {
+        await logs.SaveAsync(entry);
+        return entry;
+    }
+
+    [Fact]
+    public async Task A_wrong_reading_can_be_changed()
+    {
+        var stored = await StoredAsync(Entry(CareKind.MoistureReading, Today, moisture: 8));
+
+        await service.UpdateAsync(new CareLog { Id = stored.Id, Kind = CareKind.MoistureReading, OccurredOn = Today, Moisture = 3, Notes = " dry " }, Today);
+
+        var saved = Assert.Single(logs.Logs);
+        Assert.Equal(3, saved.Moisture);
+        Assert.Equal("dry", saved.Notes);
+        Assert.Equal(plant, saved.PlantId);
+    }
+
+    [Fact]
+    public async Task A_wrong_date_can_be_moved()
+    {
+        var stored = await StoredAsync(Entry(CareKind.Watered, Today));
+
+        await service.UpdateAsync(new CareLog { Id = stored.Id, OccurredOn = Today.AddDays(-2) }, Today);
+
+        Assert.Equal(Today.AddDays(-2), Assert.Single(logs.Logs).OccurredOn);
+    }
+
+    [Fact]
+    public async Task A_reading_that_doesnt_pass_is_refused_and_the_stored_one_stays()
+    {
+        var stored = await StoredAsync(Entry(CareKind.MoistureReading, Today, moisture: 4));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(new CareLog { Id = stored.Id, OccurredOn = Today, Moisture = 11 }, Today));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(new CareLog { Id = stored.Id, OccurredOn = Today.AddDays(1), Moisture = 4 }, Today));
+
+        Assert.Equal(4, Assert.Single(logs.Logs).Moisture);
+        Assert.Equal(Today, logs.Logs[0].OccurredOn);
+    }
+
+    [Fact]
+    public async Task Fixing_an_entry_never_changes_what_was_done_or_the_products()
+    {
+        var feedId = Guid.NewGuid();
+        var entry = Entry(CareKind.Fertilised, Today);
+        entry.Products = [new ProductDose { Name = "Hydro", Amount = 2 }];
+        entry.FeedId = feedId;
+        entry.FeedName = "Aroid feed";
+        var stored = await StoredAsync(entry);
+
+        await service.UpdateAsync(new CareLog
+        {
+            Id = stored.Id,
+            PlantId = otherPlant,
+            Kind = CareKind.Pruned,
+            OccurredOn = Today,
+            Products = [],
+            FeedId = null,
+            FeedName = null,
+            WaterLitres = 1.5m,
+            Ec = 1.2m,
+            Ph = 6m
+        }, Today);
+
+        var saved = Assert.Single(logs.Logs);
+        Assert.Equal(CareKind.Fertilised, saved.Kind);
+        Assert.Equal(plant, saved.PlantId);
+        Assert.Equal("Hydro", Assert.Single(saved.Products).Name);
+        Assert.Equal(feedId, saved.FeedId);
+        Assert.Equal("Aroid feed", saved.FeedName);
+        Assert.Equal(1.5m, saved.WaterLitres);
+        Assert.Equal(1.2m, saved.Ec);
+        Assert.Equal(6m, saved.Ph);
+    }
+
+    [Fact]
+    public async Task A_deleted_entry_cant_be_fixed()
+    {
+        var stored = await StoredAsync(Entry(CareKind.Watered, Today));
+        await service.DeleteAsync(stored.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(new CareLog { Id = stored.Id, OccurredOn = Today.AddDays(-1) }, Today));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(new CareLog { Id = Guid.NewGuid(), OccurredOn = Today }, Today));
+    }
+
+    [Fact]
+    public async Task Deleting_an_entry_is_soft_and_only_takes_that_one()
+    {
+        var first = await StoredAsync(Entry(CareKind.Watered, Today));
+        var second = await StoredAsync(Entry(CareKind.Watered, Today.AddDays(-1)));
+
+        await service.DeleteAsync(first.Id);
+
+        Assert.NotNull(first.DeletedAt);
+        Assert.Null(second.DeletedAt);
+        Assert.Equal(2, logs.Logs.Count);
     }
 }

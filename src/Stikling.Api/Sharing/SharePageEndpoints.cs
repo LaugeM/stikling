@@ -43,25 +43,10 @@ public static class SharePageEndpoints
         {
             http.Response.Headers.CacheControl = "no-cache";
 
-            var link = await FindAsync(db, token);
-            if (link is null)
-                return Gone(StatusCodes.Status404NotFound);
-            if (link.TurnedOffAt is not null)
-                return Gone(StatusCodes.Status410Gone);
-
-            var zone = link.TimeZone is not null && TimeZoneInfo.TryFindSystemTimeZoneById(link.TimeZone, out var found) ? found : TimeZoneInfo.Utc;
-            var today = DayIn(clock.GetUtcNow(), zone);
-            var settings = new ShareLinkSettings(link.ShowNotes, link.Name, link.Line, link.LeftOutPhotoIds);
-
-            var model = link.SubjectType switch
-            {
-                SubjectType.Plant => await PlantPageAsync(db, link, settings, zone, today),
-                SubjectType.Propagation => await PropagationPageAsync(db, link, settings, zone, today),
-                _ => null,
-            };
-
-            if (model is null)
-                return Gone(StatusCodes.Status404NotFound);
+            var looked = await LookUpAsync(db, token, clock);
+            if (looked.Status is { } status)
+                return Gone(status);
+            var (link, zone, _, model) = looked.Page!;
 
             var shown = model.Items.SelectMany(i => i.Photos).Select(p => p.Id).ToHashSet();
             var smallOnes = await db.PhotoImages.AsNoTracking()
@@ -79,6 +64,27 @@ public static class SharePageEndpoints
                 AbsoluteImagePrefix = url,
                 Thumbnails = smallOnes.ToHashSet(),
                 UpdatedDay = DayIn(model.Updated, zone),
+                KeepUrl = $"{options.Value.AppUrl.TrimEnd('/')}/received/{token}",
+            });
+        });
+
+        // A frozen copy of the page for someone who was given the plant, which they keep in their own app
+        pages.MapGet("/{token}/copy", async (string token, HttpContext http, StiklingDbContext db, TimeProvider clock) =>
+        {
+            http.Response.Headers.CacheControl = "no-cache";
+
+            var looked = await LookUpAsync(db, token, clock);
+            if (looked.Status is { } status)
+                return Results.StatusCode(status);
+            var (_, zone, subject, model) = looked.Page!;
+            if (!model.CanKeep)
+                return Results.NotFound();
+
+            return Results.Ok(subject switch
+            {
+                Plant plant => ShareCopy.ForPlant(model, plant, zone),
+                Propagation propagation => ShareCopy.ForPropagation(model, propagation, zone),
+                _ => throw new InvalidOperationException("A link is to a plant or a propagation."),
             });
         });
 
@@ -102,19 +108,65 @@ public static class SharePageEndpoints
                 .Select(r => r.Data)
                 .SingleOrDefaultAsync();
 
-            // The same rules the page follows: the subject's own photos, and not one that is left out
-            if (!subject || data is null || Read<Photo>(data) is not { } photo
-                || photo.IsDeleted || photo.SubjectType != link.SubjectType || photo.SubjectId != link.SubjectId
-                || link.LeftOutPhotoIds.Contains(photoId))
+            // The same rules the page follows: the subject's own photos, not a reference photo, and not one that is left out
+            if (!subject || data is null || Read<Photo>(data) is not { } photo || photo.IsDeleted || photo.IsReference || link.LeftOutPhotoIds.Contains(photoId))
+                return Results.NotFound();
+            var own = photo.SubjectType == link.SubjectType && photo.SubjectId == link.SubjectId;
+            if (!own && !(link.SubjectType == SubjectType.Plant && await IsRootingPhotoAsync(db, link, photo)))
                 return Results.NotFound();
 
             var image = await PhotoEndpoints.ImageAsync(db, storage, link.CollectionId, photoId, which);
             if (image is not IStatusCodeHttpResult { StatusCode: StatusCodes.Status404NotFound })
+            {
                 http.Response.Headers.CacheControl = "public, max-age=300";
+                // The app fetches these with CORS when someone keeps a copy, so a copy cached from the page itself mustn't be reused for it
+                http.Response.Headers.Append("Vary", "Origin");
+            }
             return image;
         });
 
         return app;
+    }
+
+    // A plant's page also shows the rooting it came from, so those photos of the propagation are served too
+    private static async Task<bool> IsRootingPhotoAsync(StiklingDbContext db, ShareLink link, Photo photo)
+    {
+        if (photo.SubjectType != SubjectType.Propagation)
+            return false;
+        var plant = await OneAsync<Plant>(db, link.CollectionId, "plants", link.SubjectId);
+        if (plant?.FromPropagationId != photo.SubjectId)
+            return false;
+        var from = await OneAsync<Propagation>(db, link.CollectionId, "propagations", photo.SubjectId);
+        var zone = link.TimeZone is not null && TimeZoneInfo.TryFindSystemTimeZoneById(link.TimeZone, out var found) ? found : TimeZoneInfo.Utc;
+        return SharePage.RootingPhotos(plant, from, [photo], zone).Count > 0;
+    }
+
+    private sealed record Found(ShareLink Link, TimeZoneInfo Zone, Entity Subject, SharePageModel Model);
+
+    // The link and what its page shows, or the status to answer with: 404 for an unknown token or a subject that is gone, 410 for a link turned off
+    private sealed record Lookup(int? Status, Found? Page);
+
+    private static async Task<Lookup> LookUpAsync(StiklingDbContext db, string token, TimeProvider clock)
+    {
+        var link = await FindAsync(db, token);
+        if (link is null)
+            return new Lookup(StatusCodes.Status404NotFound, null);
+        if (link.TurnedOffAt is not null)
+            return new Lookup(StatusCodes.Status410Gone, null);
+
+        var zone = link.TimeZone is not null && TimeZoneInfo.TryFindSystemTimeZoneById(link.TimeZone, out var found) ? found : TimeZoneInfo.Utc;
+        var today = DayIn(clock.GetUtcNow(), zone);
+        var settings = new ShareLinkSettings(link.ShowNotes, link.Name, link.Line, link.LeftOutPhotoIds);
+
+        var page = link.SubjectType switch
+        {
+            SubjectType.Plant => await PlantPageAsync(db, link, settings, zone, today),
+            SubjectType.Propagation => await PropagationPageAsync(db, link, settings, zone, today),
+            _ => null,
+        };
+        return page is null
+            ? new Lookup(StatusCodes.Status404NotFound, null)
+            : new Lookup(null, new Found(link, zone, page.Value.Subject, page.Value.Model));
     }
 
     /// <summary>The small page for a link that isn't there (404) or was turned off (410).</summary>
@@ -129,7 +181,7 @@ public static class SharePageEndpoints
     private static DateOnly DayIn(DateTimeOffset moment, TimeZoneInfo zone) =>
         DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(moment, zone).DateTime);
 
-    private static async Task<SharePageModel?> PlantPageAsync(
+    private static async Task<(Entity Subject, SharePageModel Model)?> PlantPageAsync(
         StiklingDbContext db, ShareLink link, ShareLinkSettings settings, TimeZoneInfo zone, DateOnly today)
     {
         var plant = await OneAsync<Plant>(db, link.CollectionId, "plants", link.SubjectId);
@@ -141,16 +193,25 @@ public static class SharePageEndpoints
         var taken = await ByPropertyAsync<Propagation>(db, link.CollectionId, "propagations", "parentPlantId", plant.Id);
         var photos = await ByPropertyAsync<Photo>(db, link.CollectionId, SyncKinds.Photos, "subjectId", plant.Id);
         var entries = await ByPropertyAsync<TimelineEntry>(db, link.CollectionId, "timeline", "subjectId", plant.Id);
+        var received = await ByPropertyAsync<ReceivedHistory>(db, link.CollectionId, "receivedHistories", "subjectId", plant.Id);
 
         var propagations = taken.ToDictionary(p => p.Id);
         if (from is not null)
             propagations[from.Id] = from;
 
+        // The rooting it came from: the propagation's photos and entries, which ForPlant cuts off at the day it was potted up
+        if (from is not null)
+        {
+            photos.AddRange(await ByPropertyAsync<Photo>(db, link.CollectionId, SyncKinds.Photos, "subjectId", from.Id));
+            entries.AddRange(await ByPropertyAsync<TimelineEntry>(db, link.CollectionId, "timeline", "subjectId", from.Id));
+            received.AddRange(await ByPropertyAsync<ReceivedHistory>(db, link.CollectionId, "receivedHistories", "subjectId", from.Id));
+        }
+
         photos = await WithImagesAsync(db, link.CollectionId, photos);
-        return SharePage.ForPlant(plant, parent, from, taken, photos, entries, propagations, settings, zone, today);
+        return (plant, SharePage.ForPlant(plant, parent, from, taken, photos, entries, received, propagations, settings, zone, today));
     }
 
-    private static async Task<SharePageModel?> PropagationPageAsync(
+    private static async Task<(Entity Subject, SharePageModel Model)?> PropagationPageAsync(
         StiklingDbContext db, ShareLink link, ShareLinkSettings settings, TimeZoneInfo zone, DateOnly today)
     {
         var propagation = await OneAsync<Propagation>(db, link.CollectionId, "propagations", link.SubjectId);
@@ -160,9 +221,10 @@ public static class SharePageEndpoints
         var parent = propagation.ParentPlantId is { } parentId ? await OneAsync<Plant>(db, link.CollectionId, "plants", parentId) : null;
         var photos = await ByPropertyAsync<Photo>(db, link.CollectionId, SyncKinds.Photos, "subjectId", propagation.Id);
         var entries = await ByPropertyAsync<TimelineEntry>(db, link.CollectionId, "timeline", "subjectId", propagation.Id);
+        var received = await ByPropertyAsync<ReceivedHistory>(db, link.CollectionId, "receivedHistories", "subjectId", propagation.Id);
 
         photos = await WithImagesAsync(db, link.CollectionId, photos);
-        return SharePage.ForPropagation(propagation, parent, photos, entries, settings, zone, today);
+        return (propagation, SharePage.ForPropagation(propagation, parent, photos, entries, received, settings, zone, today));
     }
 
     // A photo's record syncs before its image does, and a page shouldn't show an image that isn't there yet

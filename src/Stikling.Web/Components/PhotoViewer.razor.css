@@ -47,7 +47,11 @@
     flex: 1;
     min-height: 0;
     display: grid;
+    /* Rows and columns of a set size, so a tall photo on a wide screen shrinks to fit instead of
+       growing over the buttons below it */
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
     place-items: center;
+    overflow: hidden;
 }
 
 .viewer-stage ::deep .viewer-img {
@@ -84,4 +88,20 @@
 
 .viewer-nav.next {
     right: 0.5rem;
+}
+
+.viewer-cover {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #f1f4f1;
+}
+
+.viewer-cover svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: currentColor;
 }

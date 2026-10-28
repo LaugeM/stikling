@@ -32,6 +32,16 @@ public static class QuickAdd
         return plants;
     }
 
+    /// <summary>
+    /// One name read the way <see cref="Parse"/> reads each item, e.g. a Name column in a
+    /// spreadsheet. Nothing typed gives a plant with nothing set.
+    /// </summary>
+    public static Plant ReadName(string text, PlantDictionary dictionary)
+    {
+        var words = (text ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return words.Length == 0 ? new Plant() : Read(words, dictionary);
+    }
+
     private static Plant Read(string[] words, PlantDictionary dictionary)
     {
         var genus = dictionary.Genera.FirstOrDefault(g => g.Key == NameKey.Of(words[0]));

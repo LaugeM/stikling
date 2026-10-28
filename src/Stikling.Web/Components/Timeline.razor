@@ -2,10 +2,28 @@
 @inject ITimelineRepository Entries
 @inject TimelineService TimelineService
 @inject IPhotoRepository PhotoRepository
+@inject IReceivedHistoryRepository ReceivedHistories
 @inject PhotoService Photos
 @inject TimeProvider Time
+@using Stikling.Core.Sharing
+@using Stikling.Core.Propagations
 
 <ReloadOnSync Reload="LoadAsync" />
+
+@if (references.Count > 0)
+{
+    <section class="reference-photos" aria-labelledby="@referenceId">
+        <p class="reference-label" id="@referenceId">Reference · not this @(SubjectType == SubjectType.Plant ? "plant" : "propagation")</p>
+        <div class="reference-row">
+            @foreach (var photo in references)
+            {
+                <button type="button" class="reference-photo" @onclick="() => viewerIndex = photoIndex[photo.Id]" aria-label="Open reference photo">
+                    <PhotoImage PhotoId="photo.Id" />
+                </button>
+            }
+        </div>
+    </section>
+}
 
 @if (days is null)
 {
@@ -26,23 +44,29 @@ else
                 <ol>
                     @foreach (var entry in entries)
                     {
-                        var entryPhotos = entry.PhotoIds.Where(photoIndex.ContainsKey).ToList();
-                        <li class="timeline-entry kind-@entry.Kind.ToString().ToLowerInvariant()">
+                        var entryPhotos = entry.PhotoIds.Where(id => photoIndex.ContainsKey(id) && !referenceIds.Contains(id)).ToList();
+                        <li id="entry-@entry.Id" class="timeline-entry kind-@entry.Kind.ToString().ToLowerInvariant()">
                             <div class="entry-head">
                                 <span class="entry-kind">@KindIcon(entry)@KindLabel(entry)</span>
                                 @* "Added" is dated by the acquired date, which has no real time of day *@
                                 @if (entry.Kind != TimelineKind.Created)
                                 {
                                     <time datetime="@entry.OccurredAt.ToString("o")">@Labels.Time(entry.OccurredAt)</time>
-                                    @if (entry.Kind == TimelineKind.Photo && PhotoDayCount.Day(DayOne, LocalDay(entry.OccurredAt)) is { } photoDay)
+                                    @if (entry.Kind == TimelineKind.Photo && PhotoAge?.Invoke(LocalDay(entry.OccurredAt)) is { } photoAge)
                                     {
-                                        <span class="entry-day">day @photoDay</span>
+                                        <span class="entry-day">@photoAge</span>
                                     }
                                     @if (entry.Edits.Count > 0)
                                     {
                                         <button type="button" class="entry-edited" aria-expanded="@(versionsId == entry.Id ? "true" : "false")"
                                                 @onclick="() => versionsId = versionsId == entry.Id ? null : entry.Id">edited</button>
                                     }
+                                    @if (earlierIds.Contains(entry.Id))
+                                    {
+                                        <span class="entry-day">As a cutting</span>
+                                    }
+                                    else
+                                    {
                                     <span class="entry-actions">
                                         @if (TimelineService.CanCorrect(entry) && editId != entry.Id)
                                         {
@@ -56,6 +80,7 @@ else
                                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
                                         </button>
                                     </span>
+                                    }
                                 }
                             </div>
 
@@ -68,20 +93,28 @@ else
                                         <input id="@editDateId" type="date" class="form-control form-control-sm" @bind="editDay"
                                                max="@Today.ToString("yyyy-MM-dd")" />
                                     </div>
+                                    @if (entry.Kind == TimelineKind.Note)
+                                    {
+                                        <BringItBack Choice="editBringBack" NoteDay="editDay" Stored="entry.ComesBackOn" Changed="() => { }" />
+                                    }
                                     @if (editError is not null)
                                     {
                                         <p class="entry-editor-error" role="alert">@editError</p>
                                     }
                                     <div class="entry-editor-row">
                                         <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveEditAsync(entry)"
-                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)))">Save</button>
+                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)) || (entry.Kind == TimelineKind.Note && !editBringBack.IsValid(editDay, Today, entry.ComesBackOn)))">Save</button>
                                         <button type="button" class="btn btn-link btn-sm" @onclick="CancelEdit">Cancel</button>
                                     </div>
                                 </div>
                             }
-                            else if (!string.IsNullOrWhiteSpace(entry.Text))
+                            else if (!string.IsNullOrWhiteSpace(entry.Text) && TimelineEvents.Of(entry) != TimelineEvent.LookedOver)
                             {
                                 <p class="entry-text">@entry.Text</p>
+                            }
+                            @if (editId != entry.Id && entry.Kind == TimelineKind.Note && entry.ComesBackOn is { } comesBack)
+                            {
+                                <p class="entry-comes-back">Comes back on @Labels.Date(comesBack)</p>
                             }
 
                             @if (versionsId == entry.Id)
@@ -109,7 +142,14 @@ else
                                 </div>
                             }
 
-                            @if (entry.RelatedId is { } relatedId)
+                            @if (earlierIds.Contains(entry.Id) && EarlierPropagationId is { } cuttingId)
+                            {
+                                <a class="entry-link link-action" href="propagations/@cuttingId">
+                                    Open propagation
+                                    <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+                                </a>
+                            }
+                            else if (entry.RelatedId is { } relatedId)
                             {
                                 <a class="entry-link link-action" href="@(entry.RelatedType == SubjectType.Plant ? "plants" : "propagations")/@relatedId">
                                     @(entry.RelatedType == SubjectType.Plant ? "Open plant" : "Open propagation")
@@ -146,8 +186,56 @@ else
     </ol>
 }
 
-<PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" DayOne="DayOne"
-             OnSetCover="SetCoverAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" />
+@if (received is not null)
+{
+    @* What it had before it came here, frozen as the giver's page showed it. Nothing on it can be changed. *@
+    <section class="before-history" aria-labelledby="@beforeId">
+        <div class="before-divider"><span id="@beforeId">Before you got it</span></div>
+        <h3 class="before-name">@received.Name</h3>
+        <ol class="timeline">
+            @foreach (var (day, items) in beforeDays)
+            {
+                <li class="timeline-day">
+                    <h4>@DayLabel(day)</h4>
+                    <ol>
+                        @foreach (var item in items)
+                        {
+                            var itemPhotos = item.PhotoIds.Where(photoIndex.ContainsKey).ToList();
+                            <li class="timeline-entry kind-@BeforeClass(item)">
+                                <div class="entry-head">
+                                    <span class="entry-kind">@BeforeIcon(item.Kind)@(item.Kind == ShareItemKind.Milestone ? item.Text : item.Kind == ShareItemKind.Note ? "Note" : "Photo")</span>
+                                    @if (!string.IsNullOrWhiteSpace(item.DayCount))
+                                    {
+                                        <span class="entry-day">@item.DayCount</span>
+                                    }
+                                </div>
+                                @if (item.Kind == ShareItemKind.Note && !string.IsNullOrWhiteSpace(item.Text))
+                                {
+                                    <p class="entry-text">@item.Text</p>
+                                }
+                                @if (itemPhotos.Count > 0)
+                                {
+                                    <div class="entry-photos">
+                                        @foreach (var photoId in itemPhotos)
+                                        {
+                                            <button type="button" class="entry-photo" @onclick="() => viewerIndex = photoIndex[photoId]"
+                                                    aria-label="Open photo">
+                                                <PhotoImage PhotoId="photoId" />
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                            </li>
+                        }
+                    </ol>
+                </li>
+            }
+        </ol>
+    </section>
+}
+
+<PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" PhotoAge="PhotoAge"
+             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" KeptPhotoIds="earlierPhotoIds" />
 
 @code {
     [Parameter, EditorRequired]
@@ -161,20 +249,39 @@ else
 
     /// <summary>The day photos count from (day 0). Without it, no day count is shown.</summary>
     [Parameter]
-    public DateOnly? DayOne { get; set; }
+    public Func<DateOnly, string?>? PhotoAge { get; set; }
 
     /// <summary>What to say while there is nothing yet.</summary>
     [Parameter]
     public string EmptyText { get; set; } = "No photos or notes yet.";
 
+    /// <summary>
+    /// On a plant potted up from a propagation: the propagation, whose entries with photos show on
+    /// the history as "As a cutting". They can't be changed here.
+    /// </summary>
+    [Parameter]
+    public Guid? EarlierPropagationId { get; set; }
+
+    /// <summary>The day it was potted up. Only the propagation's entries up to then show.</summary>
+    [Parameter]
+    public DateOnly? EarlierUntil { get; set; }
+
     /// <summary>Raised when the cover photo should change (null = no cover).</summary>
     [Parameter]
     public EventCallback<Guid?> OnCoverChanged { get; set; }
 
+    private readonly string referenceId = $"reference-{Guid.NewGuid():N}";
+    private readonly string beforeId = $"before-{Guid.NewGuid():N}";
     private readonly string editDateId = $"edit-date-{Guid.NewGuid():N}";
 
     private IReadOnlyList<(DateOnly Day, IReadOnlyList<TimelineEntry> Entries)>? days;
+    private ReceivedHistory? received;
+    private IReadOnlyList<(DateOnly Day, IReadOnlyList<ReceivedItem> Items)> beforeDays = [];
     private IReadOnlyList<Photo> photos = [];
+    private IReadOnlyList<Photo> references = [];
+    private HashSet<Guid> referenceIds = [];
+    private HashSet<Guid> earlierIds = [];
+    private HashSet<Guid> earlierPhotoIds = [];
     private Dictionary<Guid, int> photoIndex = [];
 
     private bool busy;
@@ -183,6 +290,7 @@ else
     private Guid? editId;
     private string? editText;
     private DateOnly editDay;
+    private BringBackChoice editBringBack = new();
     private string? editError;
     private Guid? versionsId;
     private Guid loadedFor;
@@ -202,15 +310,57 @@ else
 
     private async Task LoadAsync()
     {
-        var entries = await Entries.GetForAsync(SubjectId);
-        var stored = await PhotoRepository.GetForAsync(SubjectId);
+        var allEntries = await Entries.GetForAsync(SubjectId);
+        var allStored = await PhotoRepository.GetForAsync(SubjectId);
+        references = PhotoKinds.References(allStored);
+        referenceIds = references.Select(p => p.Id).ToHashSet();
+        var stored = PhotoKinds.Own(allStored).ToList();
 
-        // The viewer pages through photos in the same order as the timeline shows them
+        // An entry that was only reference photos is no longer part of the history
+        var entries = allEntries
+            .Where(e => !PhotoKinds.OnlyReferences(e, referenceIds))
+            .ToList();
+        received = await ReceivedHistories.GetForAsync(SubjectId);
+
+        // Newest first like the own history, and the same way round inside a day
+        beforeDays = received is null
+            ? []
+            : received.Items
+                .Select((item, index) => (item, index))
+                .GroupBy(x => x.item.Day)
+                .OrderByDescending(g => g.Key)
+                .Select(g => (g.Key, (IReadOnlyList<ReceivedItem>)g.OrderByDescending(x => x.index).Select(x => x.item).ToList()))
+                .ToList();
+
+        // The propagation's photo entries, for a plant that was potted up from one
+        IReadOnlyList<TimelineEntry> earlier = [];
+        var earlierPhotos = new Dictionary<Guid, Photo>();
+        if (EarlierPropagationId is { } fromId && EarlierUntil is { } until)
+        {
+            var cuttingPhotos = await PhotoRepository.GetForAsync(fromId);
+            earlier = CarriedPhotos.EarlierEntries(
+                await Entries.GetForAsync(fromId), PhotoKinds.References(cuttingPhotos).Select(p => p.Id).ToHashSet(), until, Time);
+            earlierPhotos = PhotoKinds.Own(cuttingPhotos).ToDictionary(p => p.Id);
+        }
+        earlierIds = earlier.Select(e => e.Id).ToHashSet();
+        var earlierShown = earlier.SelectMany(e => e.PhotoIds).Where(earlierPhotos.ContainsKey).Distinct().Select(id => earlierPhotos[id]).ToList();
+        earlierPhotoIds = earlierShown.Select(p => p.Id).ToHashSet();
+
+        // The viewer pages through photos in the same order as the page shows them: the own entries,
+        // the own photos in no entry, then the copied ones as the history before reads
         var byId = stored.ToDictionary(p => p.Id);
         var inTimeline = entries.SelectMany(e => e.PhotoIds).Where(byId.ContainsKey).Distinct().Select(id => byId[id]);
-        photos = inTimeline.Concat(stored.Where(p => !entries.Any(e => e.PhotoIds.Contains(p.Id)))).ToList();
+        var inEntries = entries.SelectMany(e => e.PhotoIds).ToHashSet();
+        var copied = beforeDays.SelectMany(d => d.Items).SelectMany(i => i.PhotoIds).Where(byId.ContainsKey).Distinct().Select(id => byId[id]);
+        photos = inTimeline
+            .Concat(stored.Where(p => p.ReceivedHistoryId is null && !inEntries.Contains(p.Id)))
+            .Concat(earlierShown)
+            .Concat(copied)
+            .ToList();
+        // The reference photos come last, so the row under the history opens the viewer on them
+        photos = [.. photos, .. references];
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
-        days = TimelineOrder.ByDay(entries, Time);
+        days = TimelineOrder.ByDay(entries.Concat(earlier), Time);
 
         // A photo tapped before the photos were here opens as soon as they are
         if (openWhenLoaded is { } waiting)
@@ -249,6 +399,7 @@ else
         editId = entry.Id;
         editText = entry.Text;
         editDay = LocalDay(entry.OccurredAt);
+        editBringBack = BringBackChoice.For(entry.ComesBackOn);
         editError = null;
         confirmDeleteId = null;
     }
@@ -265,6 +416,8 @@ else
         try
         {
             await TimelineService.CorrectAsync(entry, editText, editDay);
+            if (entry.Kind == TimelineKind.Note || entry.ComesBackOn is not null)
+                await TimelineService.SetComesBackAsync(entry, editBringBack.Resolve(editDay, Today));
             CancelEdit();
         }
         catch (ArgumentException ex)
@@ -280,6 +433,21 @@ else
     private DateOnly LocalDay(DateTimeOffset moment) => Time.LocalDay(moment);
 
     private Task SetCoverAsync(Photo photo) => OnCoverChanged.InvokeAsync(photo.Id);
+
+    private async Task SetReferenceAsync(Photo photo)
+    {
+        await Photos.SetReferenceAsync(photo, !photo.IsReference);
+        // A photo added as a reference has no entry, so back in the history it needs one to show
+        await TimelineService.EnsureOnHistoryAsync(photo);
+        viewerIndex = null;
+        await LoadAsync();
+        // A reference photo can't be the cover, so the newest photo left in the history takes over.
+        // A photo coming back to a page with no cover becomes it.
+        if (photo.IsReference && photo.Id == CoverPhotoId)
+            await OnCoverChanged.InvokeAsync(photos.Where(p => !p.IsReference).MaxBy(p => p.TakenAt)?.Id);
+        else if (!photo.IsReference && CoverPhotoId is null)
+            await OnCoverChanged.InvokeAsync(photo.Id);
+    }
 
     private Task FrameAsync((Photo Photo, PhotoFrame? Frame) change) => Photos.SetFrameAsync(change.Photo, change.Frame);
 
@@ -311,6 +479,12 @@ else
     {
         TimelineEvent.PottedUp => "Potted up",
         TimelineEvent.Failed => "Didn't make it",
+        TimelineEvent.GaveAway => "Given away",
+        TimelineEvent.LookedOver => "Looked over",
+        TimelineEvent.Flowering => "Flowering",
+        TimelineEvent.Arrived => "Arrived",
+        TimelineEvent.Problem => "Problem",
+        TimelineEvent.Identified => "Identified",
         _ => KindLabel(entry.Kind)
     };
 
@@ -318,8 +492,28 @@ else
     {
         TimelineEvent.PottedUp => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 11V7" /><path d="M12 8c0-2.5 1.7-4 4.5-4 0 2.5-1.7 4-4.5 4Z" /><path d="M12 9c0-2-1.4-3-3.5-3 0 2 1.4 3 3.5 3Z" /><path d="M5 11h14l-1.6 9H6.6Z" /></svg>"""),
         TimelineEvent.Failed => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21v-8" /><path d="M9 13c-4 0-6-2-6-5 3 0 6 1 6 5Z" /><path d="M15 4.500l5 5M20 4.500l-5 5" /></svg>"""),
+        TimelineEvent.GaveAway => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h12M12 7l5 5-5 5" /><path d="M20 5v14" /></svg>"""),
+        TimelineEvent.LookedOver => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" /></svg>"""),
+        TimelineEvent.Flowering => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.5" /><path d="M12 9.500C10.500 7 10.500 4.500 12 3c1.500 1.500 1.500 4 0 6.500Z" /><path d="M12 14.500c1.500 2.500 1.500 5 0 6.500-1.500-1.500-1.500-4 0-6.500Z" /><path d="M9.500 12C7 10.500 4.500 10.500 3 12c1.500 1.500 4 1.500 6.500 0Z" /><path d="M14.500 12c2.500 1.500 5 1.500 6.500 0-1.500-1.500-4-1.500-6.500 0Z" /></svg>"""),
+        TimelineEvent.Problem => new($"""<svg viewBox="0 0 24 24" aria-hidden="true">{ProblemIcons.WiltingLeaf}</svg>"""),
+        TimelineEvent.Identified => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.500" cy="10.500" r="6" /><path d="M15 15l5.500 5.500" /><path d="M8 10.500l2 2 3.500-3.500" /></svg>"""),
+        TimelineEvent.Arrived => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v9H4Z" /><path d="M3 7.5h18V11H3Z" /><path d="M12 7.5V20" /><path d="M12 7.5C10 7.5 7.5 7 7.5 5.25 7.5 4 8.500 3.5 9.500 3.5 11 3.5 12 5 12 7.5Z" /><path d="M12 7.5c2 0 4.500-.5 4.500-2.250 0-1.250-1-1.750-2-1.750C13 3.5 12 5 12 7.5Z" /></svg>"""),
         _ => KindIcon(entry.Kind)
     };
+
+    private static string BeforeClass(ReceivedItem item) => item.Kind switch
+    {
+        ShareItemKind.Note => "note",
+        ShareItemKind.Photos => "photo",
+        _ => "created"
+    };
+
+    private static MarkupString BeforeIcon(ShareItemKind kind) => KindIcon(kind switch
+    {
+        ShareItemKind.Note => TimelineKind.Note,
+        ShareItemKind.Photos => TimelineKind.Photo,
+        _ => TimelineKind.Created
+    });
 
     private static string KindLabel(TimelineKind kind) => kind switch
     {

@@ -15,6 +15,7 @@ public static class SyncKinds
     [
         "plants",
         "propagations",
+        "propagationCareLogs",
         "timeline",
         Photos,
         "careLogs",
@@ -28,6 +29,18 @@ public static class SyncKinds
         "places",
         "putOffs",
         "growLights",
+        "receivedHistories",
+        "awayStretches",
+        "sitterSheets",
+        "floweringMarks",
+        "problems",
+        "problemUpdates",
+        "wishes",
+        "sellers",
+        "ownCareKinds",
+        "ownFields",
+        "careIntervals",
+        "treatmentPlans",
     ];
 
     public static readonly IReadOnlyList<string> All = [.. Collection, Settings];

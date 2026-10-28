@@ -28,7 +28,10 @@ export function languages() {
 
 // Enter in a search box picks the first result, in the element its aria-controls names, instead of
 // submitting the form it's in. Returns something to call dispose() on when the box goes away.
+// The box is null when it left the page before this ran.
 export function enterPicksFirst(input) {
+    if (!input)
+        return { dispose: () => {} };
     const onKey = event => {
         if (event.key !== "Enter")
             return;
@@ -37,4 +40,23 @@ export function enterPicksFirst(input) {
     };
     input.addEventListener("keydown", onKey);
     return { dispose: () => input.removeEventListener("keydown", onKey) };
+}
+
+// Scrolls to an element and fills it for a moment (the is-found class), for a result opened from Search.
+// The page may still be drawing the element, so it looks again for a few seconds.
+export function showFound(id) {
+    let tries = 0;
+    const look = () => {
+        const element = document.getElementById(id);
+        if (!element) {
+            if (++tries < 30)
+                setTimeout(look, 100);
+            return;
+        }
+        element.scrollIntoView({ behavior: "instant", block: "center" });
+        element.classList.remove("is-found");
+        void element.offsetWidth;
+        element.classList.add("is-found");
+    };
+    look();
 }

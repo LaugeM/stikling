@@ -57,6 +57,7 @@ jobs:
         run: >
           docker build --file src/Stikling.Api/Dockerfile
           --label org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          --build-arg SOURCE_REVISION_ID=${{ github.sha }}
           --tag "$API_IMAGE:${{ github.sha }}" --tag "$API_IMAGE:main" .
 
       # Pull requests only check that it builds
@@ -102,6 +103,17 @@ jobs:
         run: >
           az containerapp update --resource-group rg-stikling --name stikling-api
           --image "$API_IMAGE:${{ github.sha }}" --output none
+
+      # The job that sends the daily notifications runs the same image. It only exists once the Bicep
+      # has been deployed with the notification keys, so this does nothing before that.
+      - name: Move the notification job to the new image
+        run: |
+          if az containerapp job show --resource-group rg-stikling --name stikling-notify --output none 2>/dev/null; then
+            az containerapp job update --resource-group rg-stikling --name stikling-notify \
+              --image "$API_IMAGE:${{ github.sha }}" --output none
+          else
+            echo "No notification job yet, skipping."
+          fi
 
       # The new copy of the API takes a moment to start and apply its migrations
       - name: Check that it answers

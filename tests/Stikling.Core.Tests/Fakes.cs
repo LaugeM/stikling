@@ -1,15 +1,21 @@
 ﻿using System.Text.Json;
+using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
+using Stikling.Core.Fields;
+using Stikling.Core.Flowering;
+using Stikling.Core.Wishlist;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
+using Stikling.Core.Problems;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
+using Stikling.Core.Sellers;
 using Stikling.Core.Settings;
 using Stikling.Core.Sharing;
 using Stikling.Core.SoilMixes;
@@ -24,17 +30,24 @@ internal sealed class FakePlantRepository : IPlantRepository
 {
     public Dictionary<Guid, Plant> Plants { get; } = [];
 
+    /// <summary>How many times a plant was saved.</summary>
+    public int Saves { get; private set; }
+
     public Task<IReadOnlyList<Plant>> GetAllAsync() =>
         Task.FromResult<IReadOnlyList<Plant>>(Plants.Values.Where(p => !p.IsDeleted).ToList());
 
     public Task<Plant?> GetAsync(Guid id) =>
         Task.FromResult(Plants.TryGetValue(id, out var p) && !p.IsDeleted ? p : null);
 
+    public Task<bool> IsDeletedAsync(Guid id) =>
+        Task.FromResult(Plants.TryGetValue(id, out var p) && p.IsDeleted);
+
     public Task SaveAsync(Plant plant)
     {
         // DateOnly.MaxValue: the fake has no clock, and the future-date rule is tested on the model itself
         if (plant.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid plant");
+        Saves++;
         Plants[plant.Id] = plant;
         return Task.CompletedTask;
     }
@@ -51,11 +64,17 @@ internal sealed class FakePropagationRepository : IPropagationRepository
 {
     public Dictionary<Guid, Propagation> Propagations { get; } = [];
 
+    /// <summary>How many times a propagation was saved.</summary>
+    public int Saves { get; private set; }
+
     public Task<IReadOnlyList<Propagation>> GetAllAsync() =>
         Task.FromResult<IReadOnlyList<Propagation>>(Propagations.Values.Where(p => !p.IsDeleted).ToList());
 
     public Task<Propagation?> GetAsync(Guid id) =>
         Task.FromResult(Propagations.TryGetValue(id, out var p) && !p.IsDeleted ? p : null);
+
+    public Task<bool> IsDeletedAsync(Guid id) =>
+        Task.FromResult(Propagations.TryGetValue(id, out var p) && p.IsDeleted);
 
     public Task SaveAsync(Propagation propagation)
     {
@@ -102,6 +121,94 @@ internal sealed class FakeCareLogRepository : ICareLogRepository
     }
 }
 
+internal sealed class FakeOwnCareKindRepository : IOwnCareKindRepository
+{
+    public Dictionary<Guid, OwnCareKind> Kinds { get; } = [];
+
+    public Task<IReadOnlyList<OwnCareKind>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<OwnCareKind>>(Kinds.Values.Where(k => !k.IsDeleted).ToList());
+
+    public Task<IReadOnlyList<OwnCareKind>> GetStoredAsync() =>
+        Task.FromResult<IReadOnlyList<OwnCareKind>>(Kinds.Values.ToList());
+
+    public Task<OwnCareKind?> GetAsync(Guid id) =>
+        Task.FromResult(Kinds.TryGetValue(id, out var kind) && !kind.IsDeleted ? kind : null);
+
+    public Task SaveAsync(OwnCareKind kind)
+    {
+        if (kind.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        Kinds[kind.Id] = kind;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Kinds.TryGetValue(id, out var kind))
+            kind.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeOwnFieldRepository : IOwnFieldRepository
+{
+    public Dictionary<Guid, OwnField> Fields { get; } = [];
+
+    public Task<IReadOnlyList<OwnField>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<OwnField>>(Fields.Values.Where(f => !f.IsDeleted).ToList());
+
+    public Task<IReadOnlyList<OwnField>> GetStoredAsync() =>
+        Task.FromResult<IReadOnlyList<OwnField>>(Fields.Values.ToList());
+
+    public Task<OwnField?> GetAsync(Guid id) =>
+        Task.FromResult(Fields.TryGetValue(id, out var field) && !field.IsDeleted ? field : null);
+
+    public Task SaveAsync(OwnField field)
+    {
+        if (field.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        Fields[field.Id] = field;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Fields.TryGetValue(id, out var field))
+            field.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakePropagationCareLogRepository : IPropagationCareLogRepository
+{
+    public List<PropagationCareLog> Logs { get; } = [];
+
+    public Task<IReadOnlyList<PropagationCareLog>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<PropagationCareLog>>(Logs.Where(l => !l.IsDeleted).ToList());
+
+    public Task<PropagationCareLog?> GetAsync(Guid id) =>
+        Task.FromResult(Logs.FirstOrDefault(l => l.Id == id && !l.IsDeleted));
+
+    public Task SaveAsync(PropagationCareLog entry)
+    {
+        if (entry.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid care entry");
+        var index = Logs.FindIndex(l => l.Id == entry.Id);
+        if (index >= 0)
+            Logs[index] = entry;
+        else
+            Logs.Add(entry);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Logs.FirstOrDefault(l => l.Id == id) is { } entry)
+            entry.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakeTimelineRepository : ITimelineRepository
 {
     public List<TimelineEntry> Entries { get; } = [];
@@ -113,21 +220,29 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
         Task.FromResult<IReadOnlyDictionary<Guid, TimelineEntry>>(
             TimelineOrder.NewestFirst(Entries).GroupBy(e => e.SubjectId).ToDictionary(g => g.Key, g => g.First()));
 
-    public Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since) =>
-        Task.FromResult(TodayBoard.RecentActivity(Entries, subjectIds, since, count));
+    public Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(
+        int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, IReadOnlySet<Guid>? referencePhotoIds = null) =>
+        Task.FromResult(TodayBoard.RecentActivity(Entries, subjectIds, since, count, referencePhotoIds));
 
     public Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() =>
         Task.FromResult<IReadOnlyList<TimelineEntry>>(Entries
-            .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant).ToList());
+            .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant
+                && TimelineEvents.Of(e) != TimelineEvent.LookedOver).ToList());
+
+    public Task<IReadOnlyList<TimelineEntry>> GetComingBackAsync() =>
+        Task.FromResult<IReadOnlyList<TimelineEntry>>(Entries.Where(NotesComingBack.IsWaiting).ToList());
+
+    public Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetLastActivityBeforeAsync(DateTimeOffset before) =>
+        Task.FromResult(TimelineActivity.LastBefore(Entries, before));
+
+    public Task<IReadOnlyList<TimelineEntry>> GetSinceAsync(DateTimeOffset since) =>
+        Task.FromResult<IReadOnlyList<TimelineEntry>>(Entries.Where(e => !e.IsDeleted && e.OccurredAt >= since).ToList());
 
     public Task AddAsync(TimelineEntry entry)
     {
-        // Like the real store, an entry with an id that is already there replaces it
-        var index = Entries.FindIndex(e => e.Id == entry.Id);
-        if (index >= 0)
-            Entries[index] = entry;
-        else
-            Entries.Add(entry);
+        // An entry added again with an id that is stored replaces it, like the device's store does
+        Entries.RemoveAll(e => e.Id == entry.Id);
+        Entries.Add(entry);
         return Task.CompletedTask;
     }
 
@@ -164,7 +279,7 @@ internal sealed class FakePhotoRepository : IPhotoRepository
 
     public Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync() =>
         Task.FromResult<IReadOnlyDictionary<Guid, Photo>>(
-            Photos.Values.Where(p => !p.IsDeleted)
+            Photos.Values.Where(p => !p.IsDeleted && !p.IsReference)
                 .GroupBy(p => p.SubjectId)
                 .ToDictionary(g => g.Key, g => g.MaxBy(p => p.TakenAt)!));
 
@@ -206,6 +321,8 @@ internal sealed class FakePotRepository : IPotRepository
 
     public Task<IReadOnlyList<Pot>> GetAllAsync() =>
         Task.FromResult<IReadOnlyList<Pot>>(Pots.Values.Where(p => !p.IsDeleted).ToList());
+
+    public Task<ContainerList> GetContainersAsync() => Task.FromResult(new ContainerList(Pots.Values));
 
     public Task<Pot?> GetAsync(Guid id) =>
         Task.FromResult(Pots.TryGetValue(id, out var pot) && !pot.IsDeleted ? pot : null);
@@ -266,6 +383,59 @@ internal sealed class FakePlaceRepository : IPlaceRepository
         var place = new Place { Name = name, RoomId = room?.Id };
         SaveAsync(place);
         return place;
+    }
+}
+
+internal sealed class FakeTreatmentPlanRepository : ITreatmentPlanRepository
+{
+    public Dictionary<Guid, TreatmentPlan> Plans { get; } = [];
+
+    public Task<IReadOnlyList<TreatmentPlan>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<TreatmentPlan>>(Plans.Values.Where(p => !p.IsDeleted).ToList());
+
+    public Task<TreatmentPlan?> GetAsync(Guid id) =>
+        Task.FromResult(Plans.TryGetValue(id, out var plan) && !plan.IsDeleted ? plan : null);
+
+    public Task SaveAsync(TreatmentPlan plan)
+    {
+        if (plan.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid plan");
+        Plans[plan.Id] = plan;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Plans.TryGetValue(id, out var plan))
+            plan.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeSellerRepository : ISellerRepository
+{
+    // Each new seller is a second newer than the last, so "oldest first" is the order they were made
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Seller> Sellers { get; } = [];
+
+    public Task<SellerList> GetSellersAsync() => Task.FromResult(new SellerList(Sellers.Values));
+
+    public Task SaveAsync(Seller seller)
+    {
+        if (seller.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        if (seller.CreatedAt == default)
+            seller.CreatedAt = clock = clock.AddSeconds(1);
+        Sellers[seller.Id] = seller;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Sellers.TryGetValue(id, out var seller))
+            seller.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
     }
 }
 
@@ -347,6 +517,51 @@ internal sealed class FakeFeedRepository : IFeedRepository
     }
 }
 
+internal sealed class FakeAwayStretchRepository : IAwayStretchRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, AwayStretch> Stretches { get; } = [];
+
+    public Task<IReadOnlyList<AwayStretch>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<AwayStretch>>(Stretches.Values.Where(s => !s.IsDeleted).ToList());
+
+    public Task<AwayStretch?> GetAsync(Guid id) =>
+        Task.FromResult(Stretches.TryGetValue(id, out var stretch) && !stretch.IsDeleted ? stretch : null);
+
+    public Task SaveAsync(AwayStretch stretch)
+    {
+        if (stretch.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid stretch");
+        if (stretch.CreatedAt == default)
+            stretch.CreatedAt = clock;
+        stretch.UpdatedAt = clock = clock.AddSeconds(1);
+        Stretches[stretch.Id] = stretch;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Stretches.TryGetValue(id, out var stretch))
+            stretch.DeletedAt = stretch.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeSitterSheetRepository : ISitterSheetRepository
+{
+    public Dictionary<Guid, SitterSheet> Sheets { get; } = [];
+
+    public Task<SitterSheet?> GetAsync(Guid id) =>
+        Task.FromResult(Sheets.TryGetValue(id, out var sheet) && !sheet.IsDeleted ? sheet : null);
+
+    public Task SaveAsync(SitterSheet sheet)
+    {
+        Sheets[sheet.Id] = sheet;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakeGrowLightRepository : IGrowLightRepository
 {
     public Dictionary<Guid, GrowLight> Lights { get; } = [];
@@ -369,6 +584,30 @@ internal sealed class FakeGrowLightRepository : IGrowLightRepository
     {
         if (Lights.TryGetValue(id, out var light))
             light.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeReceivedHistoryRepository : IReceivedHistoryRepository
+{
+    public Dictionary<Guid, ReceivedHistory> Histories { get; } = [];
+
+    public Task<ReceivedHistory?> GetForAsync(Guid subjectId) =>
+        Task.FromResult(Histories.Values.Where(h => h.SubjectId == subjectId && !h.IsDeleted).OrderByDescending(h => h.UpdatedAt).FirstOrDefault());
+
+    public Task<ReceivedHistory?> GetAsync(Guid id) =>
+        Task.FromResult(Histories.TryGetValue(id, out var history) && !history.IsDeleted ? history : null);
+
+    public Task SaveAsync(ReceivedHistory history)
+    {
+        Histories[history.Id] = history;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Histories.TryGetValue(id, out var history))
+            history.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }
@@ -399,6 +638,32 @@ internal sealed class FakeTreatmentRecipeRepository : ITreatmentRecipeRepository
     }
 }
 
+internal sealed class FakeCareIntervalRepository : ICareIntervalRepository
+{
+    public Dictionary<Guid, CareInterval> Intervals { get; } = [];
+
+    public Task<IReadOnlyList<CareInterval>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<CareInterval>>(Intervals.Values.Where(i => !i.IsDeleted).ToList());
+
+    public Task<CareInterval?> GetAsync(Guid id) =>
+        Task.FromResult(Intervals.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
+
+    public Task SaveAsync(CareInterval interval)
+    {
+        if (interval.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        Intervals[interval.Id] = interval;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Intervals.TryGetValue(id, out var item))
+            item.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
 internal sealed class FakePestCaseRepository : IPestCaseRepository
 {
     public Dictionary<Guid, PestCase> Cases { get; } = [];
@@ -418,6 +683,30 @@ internal sealed class FakePestCaseRepository : IPestCaseRepository
     public Task DeleteAsync(Guid id)
     {
         if (Cases.TryGetValue(id, out var item))
+            item.DeletedAt = DateTimeOffset.UtcNow;
+        return Task.CompletedTask;
+    }
+}
+
+internal class FakePestTreatmentRepository : IPestTreatmentRepository
+{
+    public Dictionary<Guid, PestTreatment> Treatments { get; } = [];
+
+    public Task<IReadOnlyList<PestTreatment>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<PestTreatment>>(Treatments.Values.Where(t => !t.IsDeleted).ToList());
+
+    public Task<PestTreatment?> GetAsync(Guid id) =>
+        Task.FromResult(Treatments.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
+
+    public virtual Task SaveAsync(PestTreatment treatment)
+    {
+        Treatments[treatment.Id] = treatment;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Treatments.TryGetValue(id, out var item))
             item.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
@@ -856,5 +1145,129 @@ internal sealed class FakeShareLinkServer : IShareLinkServer
 
         links.RemoveAll(l => l.Id == id);
         return Task.FromResult(ShareOutcome<bool>.Success(true));
+    }
+}
+
+internal sealed class FakeFloweringMarkRepository : IFloweringMarkRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, FloweringMark> Marks { get; } = [];
+
+    public Task<IReadOnlyList<FloweringMark>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<FloweringMark>>(Marks.Values.Where(m => !m.IsDeleted).ToList());
+
+    public Task<FloweringMark?> GetAsync(Guid id) =>
+        Task.FromResult(Marks.TryGetValue(id, out var mark) && !mark.IsDeleted ? mark : null);
+
+    public Task SaveAsync(FloweringMark mark)
+    {
+        if (mark.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid mark");
+        if (mark.CreatedAt == default)
+            mark.CreatedAt = clock;
+        mark.UpdatedAt = clock = clock.AddSeconds(1);
+        Marks[mark.Id] = mark;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Marks.TryGetValue(id, out var mark))
+            mark.DeletedAt = mark.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeProblemRepository : IProblemRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Problem> Problems { get; } = [];
+
+    public Task<IReadOnlyList<Problem>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Problem>>(Problems.Values.Where(p => !p.IsDeleted).ToList());
+
+    public Task<Problem?> GetAsync(Guid id) =>
+        Task.FromResult(Problems.TryGetValue(id, out var problem) && !problem.IsDeleted ? problem : null);
+
+    public Task SaveAsync(Problem problem)
+    {
+        if (problem.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid problem");
+        if (problem.CreatedAt == default)
+            problem.CreatedAt = clock;
+        problem.UpdatedAt = clock = clock.AddSeconds(1);
+        Problems[problem.Id] = problem;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Problems.TryGetValue(id, out var problem))
+            problem.DeletedAt = problem.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeProblemUpdateRepository : IProblemUpdateRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, ProblemUpdate> Updates { get; } = [];
+
+    public Task<IReadOnlyList<ProblemUpdate>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<ProblemUpdate>>(Updates.Values.Where(u => !u.IsDeleted).ToList());
+
+    public Task<ProblemUpdate?> GetAsync(Guid id) =>
+        Task.FromResult(Updates.TryGetValue(id, out var update) && !update.IsDeleted ? update : null);
+
+    public Task SaveAsync(ProblemUpdate update)
+    {
+        if (update.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid update");
+        if (update.CreatedAt == default)
+            update.CreatedAt = clock;
+        update.UpdatedAt = clock = clock.AddSeconds(1);
+        Updates[update.Id] = update;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Updates.TryGetValue(id, out var update))
+            update.DeletedAt = update.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeWishRepository : IWishRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Wish> Wishes { get; } = [];
+
+    public Task<IReadOnlyList<Wish>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Wish>>(Wishes.Values.Where(w => !w.IsDeleted).ToList());
+
+    public Task<Wish?> GetAsync(Guid id) =>
+        Task.FromResult(Wishes.TryGetValue(id, out var wish) && !wish.IsDeleted ? wish : null);
+
+    public Task SaveAsync(Wish wish)
+    {
+        if (wish.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid wish");
+        if (wish.CreatedAt == default)
+            wish.CreatedAt = clock;
+        wish.UpdatedAt = clock = clock.AddSeconds(1);
+        Wishes[wish.Id] = wish;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Wishes.TryGetValue(id, out var wish))
+            wish.DeletedAt = wish.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
     }
 }

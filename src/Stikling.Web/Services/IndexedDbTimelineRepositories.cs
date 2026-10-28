@@ -14,12 +14,25 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
             .GroupBy(e => e.SubjectId)
             .ToDictionary(g => g.Key, g => g.First());
 
-    public async Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since) =>
-        TodayBoard.RecentActivity(await db.GetAllAsync<TimelineEntry>(Stores.Timeline), subjectIds, since, count);
+    public async Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(
+        int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, IReadOnlySet<Guid>? referencePhotoIds = null) =>
+        TodayBoard.RecentActivity(await db.GetAllAsync<TimelineEntry>(Stores.Timeline), subjectIds, since, count, referencePhotoIds);
 
     public async Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() =>
         (await db.GetAllAsync<TimelineEntry>(Stores.Timeline))
-            .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant)
+            .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant
+                && TimelineEvents.Of(e) != TimelineEvent.LookedOver)
+            .ToList();
+
+    public async Task<IReadOnlyList<TimelineEntry>> GetComingBackAsync() =>
+        (await db.GetAllAsync<TimelineEntry>(Stores.Timeline)).Where(NotesComingBack.IsWaiting).ToList();
+
+    public async Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetLastActivityBeforeAsync(DateTimeOffset before) =>
+        TimelineActivity.LastBefore(await db.GetAllAsync<TimelineEntry>(Stores.Timeline), before);
+
+    public async Task<IReadOnlyList<TimelineEntry>> GetSinceAsync(DateTimeOffset since) =>
+        (await db.GetAllAsync<TimelineEntry>(Stores.Timeline))
+            .Where(e => !e.IsDeleted && e.OccurredAt >= since)
             .ToList();
 
     public async Task AddAsync(TimelineEntry entry)
@@ -68,7 +81,7 @@ public sealed class IndexedDbPhotoRepository(IndexedDb db, TimeProvider time) : 
 
     public async Task<IReadOnlyDictionary<Guid, Photo>> GetNewestPerSubjectAsync() =>
         (await db.GetAllAsync<Photo>(Stores.Photos))
-            .Where(p => !p.IsDeleted)
+            .Where(p => !p.IsDeleted && !p.IsReference)
             .GroupBy(p => p.SubjectId)
             .ToDictionary(g => g.Key, g => g.MaxBy(p => p.TakenAt)!);
 

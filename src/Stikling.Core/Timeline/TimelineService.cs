@@ -30,6 +30,48 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
     }
 
     /// <summary>
+    /// Call after a photo moved from the reference photos to the history. A photo that an entry
+    /// still lists is back where it was. One that was added as a reference photo has no entry, so it
+    /// gets a Photo entry on the day it was taken, the same as the Photo button makes. Returns
+    /// whether an entry was added.
+    /// </summary>
+    public async Task<bool> EnsureOnHistoryAsync(Photo photo)
+    {
+        if (photo.IsReference || photo.IsDeleted || photo.SubjectType is not (SubjectType.Plant or SubjectType.Propagation))
+            return false;
+
+        var listed = (await timeline.GetForAsync(photo.SubjectId)).Any(e => !e.IsDeleted && e.PhotoIds.Contains(photo.Id));
+        if (listed)
+            return false;
+
+        foreach (var entry in PhotoEntries.For(photo.SubjectType, photo.SubjectId, [photo], time))
+            await timeline.AddAsync(entry);
+        return true;
+    }
+
+    /// <summary>
+    /// Writes that a plant or propagation was looked over, with nothing else to log. It's a
+    /// change entry with an event rather than a new kind, so older versions still load it.
+    /// </summary>
+    public async Task<TimelineEntry> LookedOverAsync(SubjectType type, Guid subjectId)
+    {
+        var entry = new TimelineEntry
+        {
+            SubjectType = type,
+            SubjectId = subjectId,
+            Kind = TimelineKind.Change,
+            Event = TimelineEvent.LookedOver,
+            Text = "Looked over",
+            OccurredAt = time.GetLocalNow()
+        };
+        await timeline.AddAsync(entry);
+        return entry;
+    }
+
+    /// <summary>Takes an entry off the history again (soft delete), e.g. a look over tapped by mistake.</summary>
+    public Task RemoveAsync(Guid entryId) => timeline.DeleteAsync(entryId);
+
+    /// <summary>
     /// Only what the user wrote can be corrected. Automatic entries copy something stored
     /// elsewhere (a stage date, a care log), so they are fixed there instead.
     /// </summary>
@@ -86,6 +128,43 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Sets the day a note comes back on Today, or null to take it off. It isn't a correction, so the
+    /// entry's edits stay as they are. A new day makes the note come back even if it was ticked Done before.
+    /// </summary>
+    public async Task SetComesBackAsync(TimelineEntry entry, DateOnly? day)
+    {
+        if (entry.IsDeleted)
+            throw new InvalidOperationException("The entry is deleted.");
+        if (entry.Kind != TimelineKind.Note)
+            day = null;
+        if (entry.ComesBackOn == day)
+            return;
+        if (day is { } d && d <= time.Today())
+            throw new ArgumentException("Pick a day after today.", nameof(day));
+
+        entry.ComesBackOn = day;
+        entry.CameBackDoneOn = null;
+        await timeline.UpdateAsync(entry);
+    }
+
+    /// <summary>Ticks a note that came back as Done on Today.</summary>
+    public async Task MarkCameBackDoneAsync(TimelineEntry entry)
+    {
+        entry.CameBackDoneOn = time.Today();
+        await timeline.UpdateAsync(entry);
+    }
+
+    /// <summary>Sends a note that came back on for another year.</summary>
+    public async Task BringBackAgainAsync(TimelineEntry entry)
+    {
+        if (entry.ComesBackOn is not { } day)
+            return;
+        entry.ComesBackOn = NotesComingBack.NextYear(day, time.Today());
+        entry.CameBackDoneOn = null;
+        await timeline.UpdateAsync(entry);
     }
 
     /// <summary>

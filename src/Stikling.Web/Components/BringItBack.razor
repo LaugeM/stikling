@@ -1,0 +1,72 @@
+@* "Bring it back" on a note: it comes back on Today the same day next year, or on a day the person picks.
+   Fills in the Choice it is given, so the page that saves the note reads the day from there. *@
+@inject TimeProvider Time
+
+<div class="bring-back">
+    @if (Choice.Mode == BringBackMode.No)
+    {
+        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => Set(BringBackMode.SameDayNextYear)">Bring it back</button>
+    }
+    else
+    {
+        <label for="@selectId">Bring it back</label>
+        <select id="@selectId" class="form-select form-select-sm" value="@Choice.Mode" @onchange="ModeChangedAsync">
+            <option value="@BringBackMode.SameDayNextYear">Same day next year</option>
+            <option value="@BringBackMode.OnADay">On a day…</option>
+        </select>
+        @if (Choice.Mode == BringBackMode.OnADay)
+        {
+            <input type="date" class="form-control form-control-sm" aria-label="Day it comes back"
+                   value="@(Choice.Picked?.ToString("yyyy-MM-dd"))" min="@((Stored is { } kept && kept <= Today ? kept : Today.AddDays(1)).ToString("yyyy-MM-dd"))"
+                   @onchange="DayChangedAsync" />
+        }
+        else
+        {
+            <span class="bring-back-day">@(Choice.Resolve(NoteDay, Today) is { } day ? Labels.Date(day) : "")</span>
+        }
+        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => Set(BringBackMode.No)">Don't bring it back</button>
+        @if (!Choice.IsValid(NoteDay, Today, Stored))
+        {
+            <p class="bring-back-error" role="alert">Pick a day after today.</p>
+        }
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public BringBackChoice Choice { get; set; } = new();
+
+    /// <summary>The day the note happened on, which "same day next year" counts from.</summary>
+    [Parameter, EditorRequired]
+    public DateOnly NoteDay { get; set; }
+
+    /// <summary>The day the note already comes back on, which stays valid even if it is today or past.</summary>
+    [Parameter]
+    public DateOnly? Stored { get; set; }
+
+    /// <summary>Raised after the choice changed, so the page can check it again.</summary>
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    private readonly string selectId = $"bring-back-{Guid.NewGuid():N}";
+
+    private DateOnly Today => Time.Today();
+
+    private Task Set(BringBackMode mode)
+    {
+        // Opening on a day starts from the year on, so the date box isn't empty
+        if (mode == BringBackMode.OnADay && Choice.Picked is null)
+            Choice.Picked = NotesComingBack.SameDayNextYear(NoteDay, Today);
+        Choice.Mode = mode;
+        return Changed.InvokeAsync();
+    }
+
+    private Task ModeChangedAsync(ChangeEventArgs e) =>
+        Set(Enum.TryParse<BringBackMode>(e.Value?.ToString(), out var mode) && mode != BringBackMode.No ? mode : BringBackMode.SameDayNextYear);
+
+    private Task DayChangedAsync(ChangeEventArgs e)
+    {
+        Choice.Picked = DateOnly.TryParse(e.Value?.ToString(), out var day) ? day : null;
+        return Changed.InvokeAsync();
+    }
+}

@@ -14,9 +14,9 @@ public class CsvExportTests
     [Fact]
     public void Plants_start_with_a_header_row_and_use_crlf()
     {
-        var csv = CsvExport.Plants([new Plant { Nickname = "Basil", CreatedAt = Now }], Places.None);
+        var csv = CsvExport.Plants([new Plant { Nickname = "Basil", CreatedAt = Now }], Places.None, []);
 
-        Assert.Equal("Name,Nickname,Genus,Species,Cultivar,Status,Room,Acquired,Origin,Source,Price paid,Tags,Notes,Added", Lines(csv)[0]);
+        Assert.Equal("Name,Number,Nickname,Genus,Species,Cultivar,Name sure,Locality or code,Status,Room,Acquired,Origin,Raised,Source,Price paid,How many,Potted with,Tags,Notes,Added", Lines(csv)[0]);
         Assert.EndsWith("\r\n", csv);
         Assert.DoesNotContain("\n", csv.Replace("\r\n", ""));
     }
@@ -26,7 +26,7 @@ public class CsvExportTests
     {
         var csv = CsvExport.Plants(
             [new Plant { Nickname = "A", PricePaid = 79.50m, CreatedAt = Now }, new Plant { Nickname = "B", CreatedAt = Now }],
-            Places.None);
+            Places.None, []);
 
         var lines = Lines(csv);
         Assert.Contains(",79.5,", lines[1]);
@@ -38,7 +38,7 @@ public class CsvExportTests
     {
         var plant = new Plant { Nickname = "Big, green", Notes = "She said \"hi\"\nsecond line", CreatedAt = Now };
 
-        var csv = CsvExport.Plants([plant], Places.None);
+        var csv = CsvExport.Plants([plant], Places.None, []);
 
         Assert.Contains("\"Big, green\"", csv);
         Assert.Contains("\"She said \"\"hi\"\"\nsecond line\"", csv);
@@ -54,7 +54,7 @@ public class CsvExportTests
             new Plant { Nickname = "Aloe", CreatedAt = Now, Status = PlantStatus.Died }
         };
 
-        var lines = Lines(CsvExport.Plants(plants, Places.None));
+        var lines = Lines(CsvExport.Plants(plants, Places.None, []));
 
         Assert.Equal(3, lines.Length);
         Assert.StartsWith("Aloe,", lines[1]);
@@ -67,7 +67,7 @@ public class CsvExportTests
     {
         var plant = new Plant { Nickname = "Basil", Tags = ["rare", "for swap"], CreatedAt = Now };
 
-        var line = Lines(CsvExport.Plants([plant], Places.None))[1];
+        var line = Lines(CsvExport.Plants([plant], Places.None, []))[1];
 
         Assert.Contains(",rare; for swap,", line);
         Assert.Matches(@",\d{4}-\d{2}-\d{2}$", line);
@@ -86,10 +86,10 @@ public class CsvExportTests
 
         var lines = Lines(CsvExport.Propagations(propagations, [parent], Places.None));
 
-        Assert.Equal("Name,Parent plant,Stage,Medium,Started,Room,Notes", lines[0]);
+        Assert.Equal("Name,Number,Parent plant,Stage,Medium,Started,Room,Notes", lines[0]);
         Assert.Equal(3, lines.Length);
-        Assert.Equal("Cutting,\"Mother, big\",Started,Water,2026-09-01,,", lines[1]);
-        Assert.StartsWith("Seeds,,", lines[2]);
+        Assert.Equal("Cutting,,\"Mother, big\",Started,Water,2026-09-01,,", lines[1]);
+        Assert.StartsWith("Seeds,,,", lines[2]);
     }
 
     [Fact]

@@ -170,6 +170,81 @@ public class PlantFilterTests
     }
 
     [Fact]
+    public void Genus_sorts_by_genus_with_plants_without_one_last()
+    {
+        Plant nameless = new() { Nickname = "Aloe" };
+        Plant hoyaB = new() { Nickname = "B", Genus = "hoya" };
+        Plant hoyaA = new() { Nickname = "A", Genus = " Hoya " };
+
+        var result = new PlantFilter(Sort: PlantSort.Genus).Apply([nameless, Thai, hoyaB, hoyaA, Basil]).ToList();
+
+        Assert.Equal([hoyaA, hoyaB, Thai, Basil, nameless], result);
+    }
+
+    [Fact]
+    public void Genus_sort_puts_favourites_first_in_each_genus_when_favourites_do_not_lead()
+    {
+        Plant plain = new() { Nickname = "A", Genus = "Hoya" };
+        Plant favourite = new() { Nickname = "B", Genus = "Hoya", Favourite = true };
+        Plant ficus = new() { Nickname = "C", Genus = "Ficus" };
+
+        var result = new PlantFilter(Sort: PlantSort.Genus, FavouritesFirst: false).Apply([plain, favourite, ficus]).ToList();
+
+        Assert.Equal([ficus, favourite, plain], result);
+    }
+
+    [Fact]
+    public void Favourites_leading_the_list_can_be_turned_off()
+    {
+        Plant ficus = new() { Nickname = "F", Genus = "Ficus" };
+        Plant hoya = new() { Nickname = "H", Genus = "Hoya" };
+        Plant favouriteFicus = new() { Nickname = "Z", Genus = "Ficus", Favourite = true };
+
+        var withFavourites = new PlantFilter(Sort: PlantSort.Genus).Apply([ficus, hoya, favouriteFicus]).ToList();
+        var without = new PlantFilter(Sort: PlantSort.Genus, FavouritesFirst: false).Apply([ficus, hoya, favouriteFicus]).ToList();
+
+        Assert.Equal([favouriteFicus, ficus, hoya], withFavourites);
+        Assert.Equal([favouriteFicus, ficus, hoya], without);
+        Assert.Equal([ficus, hoya, favouriteFicus], new PlantFilter(Sort: PlantSort.Name, FavouritesFirst: false).Apply([favouriteFicus, hoya, ficus]).ToList());
+    }
+
+    [Fact]
+    public void Genus_filter_matches_ignoring_case_and_spacing()
+    {
+        Assert.Equal([Monstera, Thai], new PlantFilter(Genus: " monstera ").Apply(All));
+    }
+
+    [Fact]
+    public void Without_genus_shows_only_plants_with_none()
+    {
+        Plant nameless = new() { Nickname = "Aloe" };
+        Plant blank = new() { Nickname = "Blank", Genus = "  " };
+
+        var result = new PlantFilter(WithoutGenus: true).Apply([Thai, nameless, blank]).ToList();
+
+        Assert.Equal([nameless, blank], result);
+    }
+
+    [Fact]
+    public void Room_sort_groups_a_room_with_its_spots_and_the_room_level_plants_come_first()
+    {
+        var places = new FakePlaceRepository();
+        var living = places.Add("Living room");
+        var kitchen = places.Add("Kitchen");
+        var sill = places.Add("Windowsill", living);
+        Plant onSill = new() { Nickname = "A on sill", PlaceId = sill.Id };
+        Plant inLiving = new() { Nickname = "Z in room", PlaceId = living.Id };
+        Plant inKitchen = new() { Nickname = "M kitchen", PlaceId = kitchen.Id };
+        Plant homeless = new() { Nickname = "Aloe" };
+        var current = places.Current;
+
+        var result = new PlantFilter(Sort: PlantSort.Room, PlaceName: current.NameOf, RoomName: id => current.RoomOf(id)?.Name, FavouritesFirst: false)
+            .Apply([homeless, onSill, inKitchen, inLiving]).ToList();
+
+        Assert.Equal([inKitchen, inLiving, onSill, homeless], result);
+    }
+
+    [Fact]
     public void Last_activity_uses_the_latest_timeline_entry_or_else_when_the_plant_was_added()
     {
         Plant quiet = new() { Nickname = "A", CreatedAt = DateTimeOffset.UnixEpoch.AddDays(3) };

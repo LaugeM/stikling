@@ -21,7 +21,7 @@ A batch of 21 small features built with parallel workers came to about a third t
 
 ## 1. Note the usage
 
-When the user ran `/coordinate`, note the plan usage (weekly and 5-hour percentage) before anything else. It's reported at the end.
+Note the plan usage (weekly and 5-hour percentage) before the first worker starts, whether the user ran `/coordinate` or this session started the skill after a plan was approved. `mcp__ccd_session_mgmt__get_usage` reads it. It's reported at the end, with the usage after.
 
 ## 2. Plan
 
@@ -82,7 +82,7 @@ Check any UI change in the browser at phone width by running the `browser-check`
 
 In the chat, not in the pull request, tell the user:
 
-- the plan usage before and after, when it was noted
+- the plan usage before and after
 - how many workers ran, how many came back with questions and how many were sent back for fixes
 - what the reviewer found
 

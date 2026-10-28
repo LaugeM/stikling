@@ -16,8 +16,27 @@ public enum PlantSort
     Name,
     Newest,
     Room,
+    Genus,
     LastActivity
 }
+
+/// <summary>A need the plant list can be narrowed by. See <see cref="CareLikes"/>.</summary>
+public enum LikesFilter
+{
+    HighHumidity,
+    StaysMoist,
+    DriesOut,
+    RestsInWinter,
+    RestsInSummer,
+    DarkerThanItLikes
+}
+
+/// <summary>
+/// One pick in the Fields filter. A null <paramref name="FieldId"/> is How it was raised, and
+/// <paramref name="Value"/> a <see cref="RaisedAs"/> name matched against the effective value. Otherwise
+/// it is a field of the person's own and the value is one of its choices. A null value is "Not set".
+/// </summary>
+public sealed record FieldPick(Guid? FieldId, string? Value);
 
 /// <summary>Search, filter and sort rules for the plant list.</summary>
 /// <param name="PlaceIds">The room or spot picked, as every id that counts as being in it
@@ -25,13 +44,24 @@ public enum PlantSort
 /// <param name="Tags">Picking several tags narrows the list: a plant has to carry all of them.</param>
 /// <param name="Quarantine">Only the plants in quarantine.</param>
 /// <param name="Dormant">Only the dormant plants.</param>
-/// <param name="Sort">Name sorts A to Z. Room sorts by the room or spot's name, with the plants that
-/// have no place last. Newest and last activity put the most recent first.</param>
-/// <param name="PlaceName">The name of a plant's room or spot, for sorting by room.</param>
+/// <param name="OnlyIds">Only these plants, like the ones with an open problem. Null for no limit.</param>
+/// <param name="Sort">Name sorts A to Z. Room sorts by the room, then the spot, with the plants that
+/// have no place last. Genus sorts by genus, with the plants that have none last. Newest and last
+/// activity put the most recent first.</param>
+/// <param name="PlaceName">The full name of a plant's room or spot, for sorting by room.</param>
 /// <param name="LastActivity">When each plant last had something on its timeline, by plant id.
 /// A plant with nothing there counts from when it was added.</param>
 /// <param name="GoneAs">Under Gone, only the plants that left this way (died, given away or sold). Ignored for the other statuses.</param>
+/// <param name="Likes">Only the plants with this need: high humidity, stays moist, dries out, rests in
+/// winter or summer, or stands darker than it likes. Null for no limit.</param>
 /// <param name="Everyday">The everyday name shown for a plant, like "Snake plant", which the search looks through too.</param>
+/// <param name="Picks">Picks on How it was raised and the choice fields. A plant has to match every one.</param>
+/// <param name="FieldText">The values of the plant's own text and choice fields, which the search looks through too.</param>
+/// <param name="Genus">Only the plants of this genus, ignoring case and spacing.</param>
+/// <param name="WithoutGenus">Only the plants with no genus.</param>
+/// <param name="FavouritesFirst">Favourites come first. Off for the sorts that show a heading per group, so a
+/// favourite stays with the rest of its group. Within a group they still come first.</param>
+/// <param name="RoomName">The name of a plant's room alone, with no spot. Rooms are the groups of the Room sort.</param>
 public sealed record PlantFilter(
     string? Search = null,
     StatusFilter Status = StatusFilter.Active,
@@ -43,30 +73,50 @@ public sealed record PlantFilter(
     Func<Guid?, string?>? PlaceName = null,
     IReadOnlyDictionary<Guid, DateTimeOffset>? LastActivity = null,
     Func<Plant, string?>? Everyday = null,
-    PlantStatus? GoneAs = null)
+    PlantStatus? GoneAs = null,
+    IReadOnlySet<Guid>? OnlyIds = null,
+    LikesFilter? Likes = null,
+    Func<Plant, IEnumerable<string>>? FieldText = null,
+    IReadOnlyList<FieldPick>? Picks = null,
+    string? Genus = null,
+    bool WithoutGenus = false,
+    bool FavouritesFirst = true,
+    Func<Guid?, string?>? RoomName = null)
 {
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
         Order(plants
-            .Where(p => !p.IsDeleted)
+            // A plant that lives with someone else isn't in the list at all, not even under Gone or All
+            .Where(p => !p.IsDeleted && !p.LivesElsewhere)
             .Where(MatchesStatus)
             .Where(MatchesLocation)
             .Where(p => !Quarantine || p.InQuarantine)
             .Where(p => !Dormant || p.IsDormant)
+            .Where(p => OnlyIds is null || OnlyIds.Contains(p.Id))
+            .Where(MatchesLikes)
+            .Where(MatchesPicks)
+            .Where(MatchesGenus)
             .Where(p => Tags is null || Tags.All(tag => PlantTags.Has(p, tag)))
             .Where(MatchesSearch));
 
-    // Favourites come first whatever the sort. Every order falls back on the name, so plants that
-    // tie keep a steady place
+    // Favourites come first unless the sort groups, and then within each group. Every order falls
+    // back on the name, so plants that tie keep a steady place
     private IEnumerable<Plant> Order(IEnumerable<Plant> all)
     {
-        var plants = all.OrderBy(p => !p.Favourite);
         var byName = StringComparer.CurrentCultureIgnoreCase;
+        var plants = FavouritesFirst ? all.OrderBy(p => !p.Favourite) : all.OrderBy(_ => 0);
         return Sort switch
         {
             PlantSort.Newest => plants.ThenByDescending(p => p.CreatedAt).ThenBy(p => p.DisplayName, byName),
             PlantSort.Room => plants
                 .ThenBy(p => RoomOf(p) is null)
                 .ThenBy(RoomOf, byName)
+                .ThenBy(p => !p.Favourite)
+                .ThenBy(p => PlaceName?.Invoke(p.PlaceId), byName)
+                .ThenBy(p => p.DisplayName, byName),
+            PlantSort.Genus => plants
+                .ThenBy(p => GenusOf(p) is null)
+                .ThenBy(GenusOf, byName)
+                .ThenBy(p => !p.Favourite)
                 .ThenBy(p => p.DisplayName, byName),
             PlantSort.LastActivity => plants
                 .ThenByDescending(p => LastActivity is not null && LastActivity.TryGetValue(p.Id, out var at) && at > p.CreatedAt ? at : p.CreatedAt)
@@ -75,14 +125,43 @@ public sealed record PlantFilter(
         };
     }
 
-    private string? RoomOf(Plant plant) => PlaceName?.Invoke(plant.PlaceId);
+    // The room alone when the page can say it, otherwise the whole place name
+    private string? RoomOf(Plant plant) => (RoomName ?? PlaceName)?.Invoke(plant.PlaceId);
+
+    private static string? GenusOf(Plant plant) =>
+        string.IsNullOrWhiteSpace(plant.Genus) ? null : plant.Genus.Trim();
+
+    private bool MatchesGenus(Plant plant) =>
+        WithoutGenus ? GenusOf(plant) is null
+        : Genus is null || string.Equals(GenusOf(plant), Genus.Trim(), StringComparison.CurrentCultureIgnoreCase);
 
     private bool MatchesStatus(Plant plant) => Status switch
     {
-        StatusFilter.Active => plant.Status == PlantStatus.Active,
-        StatusFilter.Gone => plant.Status != PlantStatus.Active && (GoneAs is null || plant.Status == GoneAs),
+        StatusFilter.Active => plant.InCollection,
+        StatusFilter.Gone => !plant.InCollection && (GoneAs is null || plant.Status == GoneAs),
         _ => true
     };
+
+    private bool MatchesLikes(Plant plant) => Likes switch
+    {
+        LikesFilter.HighHumidity => plant.LikesHumidity == HumidityNeed.High,
+        LikesFilter.StaysMoist => plant.LikesWater == WaterNeed.EvenlyMoist,
+        LikesFilter.DriesOut => plant.LikesWater == WaterNeed.DryOut,
+        LikesFilter.RestsInWinter => plant.GrowingSeason == GrowingSeason.Summer,
+        LikesFilter.RestsInSummer => plant.GrowingSeason == GrowingSeason.Winter,
+        LikesFilter.DarkerThanItLikes => CareLikes.Fit(plant) == LightFit.Darker,
+        _ => true
+    };
+
+    private bool MatchesPicks(Plant plant) => Picks is null || Picks.All(pick =>
+    {
+        var have = pick.FieldId is { } id
+            ? plant.OwnFields.TryGetValue(id, out var text) && !string.IsNullOrWhiteSpace(text) ? text.Trim() : null
+            : plant.Raised?.ToString();
+        return pick.Value is null
+            ? have is null
+            : have is not null && string.Equals(have, pick.Value.Trim(), StringComparison.CurrentCultureIgnoreCase);
+    });
 
     private bool MatchesLocation(Plant plant) =>
         PlaceIds is null || plant.PlaceId is { } id && PlaceIds.Contains(id);
@@ -94,9 +173,10 @@ public sealed record PlantFilter(
         if (string.IsNullOrWhiteSpace(Search))
             return true;
 
-        var haystack = string.Join(' ', [plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, Everyday?.Invoke(plant), .. plant.Tags]);
+        var haystack = string.Join(' ', [plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameNote, plant.BotanicalName, Everyday?.Invoke(plant), .. plant.Tags, .. FieldText?.Invoke(plant) ?? []]);
         return Search
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase));
+            .All(word => haystack.Contains(word, StringComparison.CurrentCultureIgnoreCase)
+                || CollectionNumbers.MatchesSearch(plant.CollectionNumber, word));
     }
 }

@@ -11,7 +11,7 @@ public static class PlantMatches
     /// on the nickname, since a lone species or cultivar says too little.</summary>
     public static IReadOnlyList<Plant> SameName(Plant draft, IEnumerable<Plant> plants) =>
         plants
-            .Where(p => p.Id != draft.Id && !p.IsDeleted && p.Status == PlantStatus.Active)
+            .Where(p => p.Id != draft.Id && !p.IsDeleted && p.InCollection)
             .Where(p => SameNickname(p, draft) || SameBotanicalName(p, draft))
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
@@ -25,13 +25,23 @@ public static class PlantMatches
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
+    /// <summary>Plants with the same name by the same rules as <see cref="SameName"/>, whatever their
+    /// status, so a list read in again finds the plants that died or left as well.</summary>
+    public static IReadOnlyList<Plant> SameNameEver(Plant draft, IEnumerable<Plant> plants) =>
+        plants
+            .Where(p => p.Id != draft.Id && !p.IsDeleted)
+            .Where(p => SameNickname(p, draft) || SameBotanicalName(p, draft))
+            .ToList();
+
     private static bool SameNickname(Plant a, Plant b) =>
         Clean(b.Nickname) is { } nickname && nickname == Clean(a.Nickname);
 
     private static bool SameBotanicalName(Plant a, Plant b) =>
         Clean(b.Genus) is { } genus && genus == Clean(a.Genus)
-        && Clean(a.Species) == Clean(b.Species)
-        && Clean(a.Cultivar) == Clean(b.Cultivar);
+        && Clean(a.KnownSpecies) == Clean(b.KnownSpecies)
+        && Clean(a.Cultivar) == Clean(b.Cultivar)
+        && a.NameQualifier == b.NameQualifier
+        && Clean(a.NameNote) == Clean(b.NameNote);
 
     private static string? Clean(string? name) =>
         string.IsNullOrWhiteSpace(name) ? null : name.Trim().ToLowerInvariant();

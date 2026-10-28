@@ -8,12 +8,22 @@ using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Auth;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
+using Stikling.Api.Notifications;
 using Stikling.Api.People;
 using Stikling.Api.Photos;
+using Stikling.Api.Reports;
 using Stikling.Api.Sharing;
 using Stikling.Api.Sync;
 
+// The Container Apps job that sends the daily notifications. It is the same image with this argument,
+// and runs as a plain host instead of the web app.
+if (args.Contains(NotificationJob.Command))
+    return await NotificationJob.RunAsync(args);
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Error reports. Off while Sentry:Dsn is empty, as it is locally and in the tests.
+builder.WebHost.UseSentry(options => ErrorReporting.Configure(options, builder.Configuration["Sentry:Dsn"]));
 
 builder.Services.AddDbContext<StiklingDbContext>((services, options) =>
     options.UseSqlServer(services.GetRequiredService<IConfiguration>().GetConnectionString("Stikling")
@@ -42,6 +52,8 @@ builder.Services.AddTestSignIn();
 builder.Services.AddCollectionAuthorization();
 builder.Services.AddRequestLimits(builder.Configuration);
 builder.Services.Configure<ShareOptions>(builder.Configuration.GetSection(ShareOptions.Section));
+builder.Services.Configure<NotificationOptions>(builder.Configuration.GetSection(NotificationOptions.Section));
+builder.Services.AddSingleton<IPushSender, WebPushSender>();
 
 // Writes the HTML of the share pages. Text is encoded as HTML, but letters like ø and · are left as
 // they are instead of numbered references.
@@ -107,5 +119,7 @@ app.MapRecords();
 app.MapPhotos();
 app.MapShareLinks();
 app.MapSharePages();
+app.MapNotifications();
 
 app.Run();
+return 0;

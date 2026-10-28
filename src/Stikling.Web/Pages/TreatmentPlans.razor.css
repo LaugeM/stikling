@@ -1,0 +1,101 @@
+.plan-steps {
+    list-style: none;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    counter-reset: plan-step;
+}
+
+.plan-step {
+    counter-increment: plan-step;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.plan-step:first-child {
+    border-top: 0;
+}
+
+/* The days field sits left and the move and remove buttons right, each button 44px to tap */
+.plan-step-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.plan-step-days {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.plan-step-days .form-control {
+    max-width: 8rem;
+}
+
+.plan-first {
+    display: inline-block;
+    padding: 0.5rem 0;
+    font-weight: 600;
+}
+
+.plan-tools {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 0.25rem;
+}
+
+.plan-tool {
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    background: none;
+    color: var(--pa-muted);
+}
+
+.plan-tool:disabled {
+    opacity: 0.35;
+}
+
+.plan-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.plan-list > li {
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.plan-list > li:first-child {
+    border-top: 0;
+}
+
+.plan-title {
+    font-weight: 600;
+}
+
+.plan-summary {
+    margin: 0.15rem 0 0.35rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.plan-contents {
+    margin: 0.25rem 0 0.35rem;
+    padding-left: 1.4rem;
+    font-size: 0.9rem;
+}
+
+.plan-contents li {
+    padding: 0.1rem 0;
+}
+
+.plan-confirm {
+    margin-top: 0.75rem;
+}
+
+.plan-confirm p {
+    margin-bottom: 0.5rem;
+}

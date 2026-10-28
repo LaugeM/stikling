@@ -318,7 +318,7 @@
 
     /// <summary>The day photos count from (day 0). Without it, dates have no day count.</summary>
     [Parameter]
-    public DateOnly? DayOne { get; set; }
+    public Func<DateOnly, string?>? PhotoAge { get; set; }
 
     /// <summary>The photo the card starts with, when there is one.</summary>
     [Parameter]
@@ -334,6 +334,18 @@
     /// <summary>The line for the starting pair, in place of how far apart the photos are. Picking other photos goes back to the count.</summary>
     [Parameter]
     public string? StartLine { get; set; }
+
+    /// <summary>The plant being shared, so the link page can include the rooting it came from.</summary>
+    [Parameter]
+    public Plant? Plant { get; set; }
+
+    /// <summary>The propagation the plant was potted up from. Its photos up to the pot up day are on the plant's link page.</summary>
+    [Parameter]
+    public Propagation? FromPropagation { get; set; }
+
+    /// <summary>Opens on the link when links are available, for when someone was just offered to send it.</summary>
+    [Parameter]
+    public bool StartOnLink { get; set; }
 
     private enum ShareMode { One, Pair, Timelapse, Link }
 
@@ -351,6 +363,8 @@
     private ElementReference canvas;
     private IReadOnlyList<Photo> photos = [];
     private IReadOnlyList<Photo> allPhotos = [];
+    // The photos the link page can show: the rooting a plant came from, then its own
+    private IReadOnlyList<Photo> linkPhotos = [];
     private IReadOnlyList<Photo> pairPhotos = [];
     private ShareMode mode;
     private Guid? beforeId;
@@ -410,15 +424,15 @@
 
     private SubjectType LinkSubject => Tone == "propagation" ? SubjectType.Propagation : SubjectType.Plant;
 
-    private int PhotosOnPage => allPhotos.Count(p => !linkLeftOut.Contains(p.Id));
+    private int PhotosOnPage => linkPhotos.Count(p => !linkLeftOut.Contains(p.Id));
 
     // The cover when it is on the page, otherwise the newest photo that is
     private Photo? PreviewPhoto
     {
         get
         {
-            var shown = allPhotos.Where(p => !linkLeftOut.Contains(p.Id)).ToList();
-            return shown.FirstOrDefault(p => p.Id == CoverPhotoId) ?? shown.LastOrDefault();
+            var shown = linkPhotos.Where(p => !linkLeftOut.Contains(p.Id)).ToList();
+            return shown.FirstOrDefault(p => p.Id == CoverPhotoId) ?? shown.MaxBy(p => p.TakenAt);
         }
     }
 
@@ -468,7 +482,7 @@
     private string DayText(Photo photo)
     {
         var day = Time.LocalDay(photo.TakenAt);
-        return Labels.Date(day) + PhotoDayCount.Suffix(DayOne, day);
+        return Labels.Date(day) + PhotoDayCount.Suffix(PhotoAge?.Invoke(day));
     }
 
     private string? ApartLine(Guid? before, Guid? after)
@@ -524,7 +538,7 @@
         canShare = await Cards.CanShareAsync();
 
         // The cover first, then the newest, so the picture it starts with is the one on the page
-        var all = await PhotoRepository.GetForAsync(SubjectId);
+        var all = PhotoKinds.Own(await PhotoRepository.GetForAsync(SubjectId)).ToList();
         photos = all.OrderByDescending(p => p.Id == CoverPhotoId).Take(40).ToList();
         photoId = photos.FirstOrDefault()?.Id;
 
@@ -535,6 +549,10 @@
         var starting = TimelapsePlan.Spread(allPhotos.Select(p => new TimelapsePhoto(p.Id, p.TakenAt))).Select(p => p.Id).ToHashSet();
         foreach (var p in allPhotos.Where(p => !starting.Contains(p.Id)))
             leftOut.Add(p.Id);
+        IReadOnlyList<Photo> rooting = [];
+        if (Tone == "plant" && Plant is not null && FromPropagation is { IsDeleted: false })
+            rooting = SharePage.RootingPhotos(Plant, FromPropagation, await PhotoRepository.GetForAsync(FromPropagation.Id), TimeZoneInfo.Local);
+        linkPhotos = [.. rooting, .. allPhotos];
         pairPhotos = allPhotos.Count <= 60 ? allPhotos : allPhotos.Take(30).Concat(allPhotos.TakeLast(30)).ToList();
         beforeId = allPhotos.FirstOrDefault()?.Id;
         afterId = allPhotos.LastOrDefault()?.Id;
@@ -547,6 +565,13 @@
             // A long history leaves out its middle, so make sure the picked photos are there to see
             if (!pairPhotos.Any(p => p.Id == beforeId))
                 pairPhotos = pairPhotos.Append(PhotoOf(beforeId)!).OrderBy(p => p.TakenAt).ToList();
+        }
+        if (StartOnLink && LinkAvailable)
+        {
+            cardName = name;
+            cardLine = line;
+            mode = ShareMode.Link;
+            await EnterLinkAsync();
         }
         ready = true;
     }
@@ -742,7 +767,7 @@
     {
         try
         {
-            waitingPhotos = await Sync.CountPhotosWaitingAsync(allPhotos.Select(p => p.Id).ToList());
+            waitingPhotos = await Sync.CountPhotosWaitingAsync(linkPhotos.Select(p => p.Id).ToList());
         }
         catch (JSException)
         {
@@ -923,7 +948,7 @@
             <div class="share-field">
                 <div class="share-label" id="share-link-ticks-label">Photos on the page</div>
                 <div class="share-photos" role="group" aria-labelledby="share-link-ticks-label">
-                    @foreach (var photo in allPhotos)
+                    @foreach (var photo in linkPhotos)
                     {
                         var ticked = !linkLeftOut.Contains(photo.Id);
                         <button type="button" role="checkbox" aria-checked="@(ticked ? "true" : "false")"
@@ -937,7 +962,7 @@
                         </button>
                     }
                 </div>
-                <p class="form-text mb-0">@PhotosOnPage of @allPhotos.Count photos are on the page. Tap one to leave it off.</p>
+                <p class="form-text mb-0">@PhotosOnPage of @linkPhotos.Count photos are on the page. Tap one to leave it off.</p>
                 @UploadingNote
             </div>
 

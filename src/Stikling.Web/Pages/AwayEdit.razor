@@ -1,0 +1,254 @@
+@page "/away/new"
+@page "/away/{Id:guid}"
+@using System.Globalization
+@inject AwayService AwayService
+@inject ILogger<AwayEdit> Logger
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+
+<PageTitle>@(IsNew ? "Add away or quiet time" : "Away or quiet time") · Stikling</PageTitle>
+
+@* No ReloadOnSync: like other edit pages, nothing changes under someone filling in the form *@
+
+<a class="back-link" href="away">Away and quiet time</a>
+<h1>@(IsNew ? "Add away or quiet time" : "Away or quiet time")</h1>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@(notFound ? "That one doesn't exist." : "Loading…")</p>
+}
+else
+{
+    <EditForm Model="this" OnSubmit="SaveAsync" class="edit-form">
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        <fieldset>
+            <legend>What it is</legend>
+            <div class="btn-group segmented w-100 mb-3" role="radiogroup" aria-label="Kind">
+                @foreach (var (value, label) in kindOptions)
+                {
+                    var id = $"kind-{value}";
+                    <input type="radio" class="btn-check" name="kind" id="@id"
+                           checked="@(kind == value)" @onchange="() => kind = value" />
+                    <label class="btn btn-outline-primary" for="@id">@label</label>
+                }
+            </div>
+
+            @if (kind == AwayKind.Away)
+            {
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label" for="from">Leaving</label>
+                        <InputDate id="from" class="form-control" @bind-Value="from" @bind-Value:after="FromChanged" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="until">Back on</label>
+                        <InputDate id="until" class="form-control" @bind-Value="until" @bind-Value:after="UntilChanged" aria-describedby="until-help" />
+                    </div>
+                </div>
+                <div class="form-text" id="until-help">Today asks again from this day.</div>
+            }
+            else
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="from">From</label>
+                    <InputDate id="from" class="form-control" @bind-Value="from" />
+                </div>
+                <div class="form-label" id="for-label">For</div>
+                <div class="chip-row" role="radiogroup" aria-labelledby="for-label">
+                    @foreach (var (value, label) in lengthOptions)
+                    {
+                        <button type="button" role="radio" class="chip @(length == value ? "picked" : null)"
+                                aria-checked="@(length == value ? "true" : "false")" @onclick="() => length = value">@label</button>
+                    }
+                </div>
+                @if (length == QuietLength.Date)
+                {
+                    <div class="mt-3">
+                        <label class="form-label" for="until">Until</label>
+                        <InputDate id="until" class="form-control" @bind-Value="until" aria-describedby="until-help" />
+                    </div>
+                }
+                <div class="form-text" id="until-help">Today asks again on @End.ToString("dddd d MMMM", CultureInfo.InvariantCulture).</div>
+            }
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" disabled="@saving">Save</button>
+            <a class="btn btn-link" href="away">Cancel</a>
+        </div>
+    </EditForm>
+
+    @if (!IsNew)
+    {
+        <section class="danger-zone">
+            @if (confirmDelete)
+            {
+                <p class="mb-2">Delete this? Today goes back to asking for things on these days.</p>
+                <button class="btn btn-danger btn-sm" disabled="@saving" @onclick="DeleteAsync">Delete</button>
+                <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+            }
+            else
+            {
+                <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">Delete</button>
+            }
+        </section>
+    }
+}
+
+@code {
+    private enum QuietLength
+    {
+        Week,
+        TwoWeeks,
+        Month,
+        Date
+    }
+
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private static readonly (AwayKind Value, string Label)[] kindOptions =
+    [
+        (AwayKind.Away, "Away"),
+        (AwayKind.Quiet, "Quiet time")
+    ];
+
+    private static readonly (QuietLength Value, string Label)[] lengthOptions =
+    [
+        (QuietLength.Week, "1 week"),
+        (QuietLength.TwoWeeks, "2 weeks"),
+        (QuietLength.Month, "A month"),
+        (QuietLength.Date, "Pick a date")
+    ];
+
+    private AwayStretch? stretch;
+    private bool loaded;
+    private bool notFound;
+    private bool saving;
+    private bool confirmDelete;
+    private bool untilTouched;
+    private List<string> errors = [];
+
+    private AwayKind kind = AwayKind.Away;
+    private DateOnly from;
+    private DateOnly until;
+    private QuietLength length = QuietLength.Week;
+
+    private bool IsNew => Id is null;
+
+    private DateOnly Today => Time.Today();
+
+    // The day back: picked for Away, and for Quiet time worked out from the length unless a date is picked
+    private DateOnly End => kind == AwayKind.Away || length == QuietLength.Date
+        ? until
+        : length switch
+        {
+            QuietLength.Week => from.AddDays(7),
+            QuietLength.TwoWeeks => from.AddDays(14),
+            _ => from.AddMonths(1)
+        };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loaded = false;
+        notFound = false;
+        if (IsNew)
+        {
+            stretch = null;
+            from = Today;
+            until = from.AddDays(7);
+            untilTouched = false;
+        }
+        else
+        {
+            stretch = (await AwayService.GetAllAsync()).FirstOrDefault(s => s.Id == Id);
+            if (stretch is null)
+            {
+                notFound = true;
+                return;
+            }
+
+            kind = stretch.Kind;
+            from = stretch.From;
+            until = stretch.Until;
+            untilTouched = true;
+            length = stretch.Until == from.AddDays(7) ? QuietLength.Week
+                : stretch.Until == from.AddDays(14) ? QuietLength.TwoWeeks
+                : stretch.Until == from.AddMonths(1) ? QuietLength.Month
+                : QuietLength.Date;
+        }
+
+        loaded = true;
+    }
+
+    // Back on follows the day of leaving, a week on, until someone has picked it themselves
+    private void FromChanged()
+    {
+        if (IsNew && !untilTouched)
+            until = from.AddDays(7);
+    }
+
+    private void UntilChanged() => untilTouched = true;
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        try
+        {
+            var end = End;
+            if (end <= from)
+            {
+                errors = [kind == AwayKind.Away ? "Back on has to be after you leave." : "The end has to be after the start."];
+                return;
+            }
+
+            var item = stretch ?? new AwayStretch();
+            item.Kind = kind;
+            item.From = from;
+            item.Until = end;
+            await AwayService.SaveAsync(item);
+            Navigation.NavigateTo("away");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the away time failed");
+            errors = [$"Couldn't save: {ex.Message}"];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (stretch is null)
+            return;
+
+        saving = true;
+        try
+        {
+            await AwayService.DeleteAsync(stretch.Id);
+            Navigation.NavigateTo("away");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Deleting the away time failed");
+            errors = [$"Couldn't delete: {ex.Message}"];
+            confirmDelete = false;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+}

@@ -28,7 +28,7 @@ public sealed record Room(Guid Id, string Name, IReadOnlyList<RoomSpot> Spots, i
     /// </summary>
     public static IReadOnlyList<Room> List(Places places, IEnumerable<Plant> plants, IEnumerable<Propagation> propagations)
     {
-        var plantsIn = Tally(places, plants.Where(p => !p.IsDeleted).Select(p => p.PlaceId));
+        var plantsIn = Tally(places, plants.Where(p => !p.IsDeleted && !p.LivesElsewhere).Select(p => p.PlaceId));
         var propagationsIn = Tally(places, propagations.Where(p => !p.IsDeleted).Select(p => p.PlaceId));
 
         int PlantsIn(Place place) => plantsIn.GetValueOrDefault(place.Id);

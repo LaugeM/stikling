@@ -1,7 +1,7 @@
 @page "/"
 @using System.Globalization
-@inject IPlantRepository Plants
-@inject IPropagationRepository Propagations
+@inject CoverPhotos Covers
+@inject TodayService TodayService
 @inject ITimelineRepository Entries
 @inject IPhotoRepository PhotoRepository
 @inject IPestCaseRepository PestCases
@@ -12,19 +12,27 @@
 @inject SettingsService SettingsService
 @inject PutOffService PutOffService
 @inject ICareLogRepository CareLogs
-@inject IPotRepository PotRepository
-@inject GrowLightService LightService
+@inject AwayService AwayService
+@inject SitterSheetService SitterSheets
+@inject TimelineService TimelineService
 @inject CareService Care
+@inject CareIntervalService CareIntervalService
+@inject ILogger<Home> Logger
+@inject WateringAnswers Answers
 @inject AppBadge Badge
 @inject PlantService PlantService
 @inject PropagationService PropagationService
-@inject RoomService RoomService
 @inject ExampleService Example
 @inject TimeProvider Time
+@inject YearCardService YearCardsService
+@using Stikling.Core.Year
+@implements IAsyncDisposable
 
 <PageTitle>Today · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
+@* Today takes the whole width beside the menu on a computer once it has loaded, except the first-run page, which stays a centred column *@
+<div class="@(loaded && !FirstRun ? "page-full" : null)">
 <div class="page-heading">
     <h1>Today</h1>
     <span class="today-date">@Today.ToString("dddd d MMMM", CultureInfo.InvariantCulture)</span>
@@ -67,7 +75,7 @@ else if (plants.Count == 0 && propagations.Count == 0)
         }
         <p class="first-run-more">
             Have plants already? <a href="plants/quick-add">Add several at once</a>,
-            or <a href="plants/new?from=photos">start from old photos</a>.
+            <a href="plants/import">import a spreadsheet</a>, or <a href="plants/new?from=photos">start from old photos</a>.
         </p>
         <a class="first-run-help" href="help">How Stikling works</a>
     </div>
@@ -75,7 +83,7 @@ else if (plants.Count == 0 && propagations.Count == 0)
 else
 {
     <p class="today-counts">
-        @Labels.Plants(plants.Count(p => p.Status == PlantStatus.Active)) · @Labels.Count(active.Count, "propagation") going@(monthResult is null ? "" : $" · {monthResult.PottedUp} of {monthResult.Total} potted up this month")
+        @Labels.Plants(plants.Count(p => p.InCollection)) · @Labels.Count(active.Count, "propagation") going@(monthResult is null ? "" : $" · {monthResult.PottedUp} of {monthResult.Total} potted up this month")
     </p>
 
     @if (exampleLoaded)
@@ -95,7 +103,90 @@ else
         </div>
     }
 
-    @if (backupReminder is { } reminder)
+    @if (upcoming is not null)
+    {
+        <div class="reminder">
+            <span><b>Away from @upcoming.From.ToString("dddd d MMMM", CultureInfo.InvariantCulture).</b> Leave whoever looks after them a sheet of what to check and when.</span>
+            <a class="btn btn-outline-primary" href="sitter-sheet">Sitter sheet</a>
+        </div>
+    }
+
+    @if (sections.AwayNow is { } span)
+    {
+        var total = span.Until.DayNumber - span.From.DayNumber;
+        var dayNumber = Today.DayNumber - span.From.DayNumber + 1;
+        var toGo = span.Until.DayNumber - Today.DayNumber;
+        var isAway = span.Kind == AwayKind.Away;
+        <section class="away-block" aria-label="@(isAway ? "You're away" : "Quiet time")">
+            <h2 class="away-title"><span>@(isAway ? "You're away" : "Quiet time")</span>@Labels.Count(toGo, "day") to go</h2>
+            <div class="away-bar" role="img" aria-label="@BarLabel(span, dayNumber, total)">
+                <div class="away-bar-done" style="width: @Percent(dayNumber - 0.5, total)"></div>
+                @foreach (var visit in visitDates)
+                {
+                    <span class="away-visit" style="left: @Percent(visit.DayNumber - span.From.DayNumber + 0.5, total)"></span>
+                }
+                <span class="away-bar-now" style="left: @Percent(dayNumber - 0.5, total)"></span>
+            </div>
+            <div class="away-ends">
+                <span>@span.From.ToString("ddd d MMM", CultureInfo.InvariantCulture)</span>
+                @if (visitDates.Count > 0)
+                {
+                    <span class="away-key">Dots are the sitter's visits</span>
+                }
+                <span>@(isAway ? "back" : "until") <b>@span.Until.ToString("ddd d MMM", CultureInfo.InvariantCulture)</b></span>
+            </div>
+            <p class="away-note">
+                @(isAway
+                    ? "Nothing here asks for anything until you're back."
+                    : $"Nothing here asks for anything until {span.Until.ToString("dddd d MMMM", CultureInfo.InvariantCulture)}.")
+            </p>
+            <div class="away-actions">
+                <button type="button" class="btn btn-primary" disabled="@awayBusy" @onclick="ImBackAsync">I'm back</button>
+                <a class="btn btn-outline-primary" href="@(span.Stretches.Count == 1 ? $"away/{span.Stretches[0].Id}" : "away")">Change</a>
+                @if (isAway)
+                {
+                    <a class="away-link" href="sitter-sheet">Sitter sheet</a>
+                }
+            </div>
+        </section>
+    }
+
+    @if (sections.Holding && backSpan is { } back)
+    {
+        var backDays = back.Until.DayNumber - back.From.DayNumber;
+        <section class="back-panel" aria-labelledby="back-title">
+            <h2 id="back-title">Welcome back</h2>
+            <p class="back-lead">
+                @(back.Kind == AwayKind.Away ? $"{Labels.Count(backDays, "day")} away." : $"{Labels.Count(backDays, "day")} of quiet time.")
+                These first, in this order. The rest of Today comes back once you're through.
+            </p>
+            <ol class="back-rows">
+                @foreach (var (row, index) in sections.BackRows.Select((r, i) => (r, i)))
+                {
+                    <li @key="row.Subject.Id" class="back-row">
+                        <span class="back-num" aria-hidden="true">@(index + 1)</span>
+                        <a class="back-main" href="@SubjectThumb.LinkTo(row.Subject)">
+                            <SubjectThumb Subject="row.Subject" />
+                            <div class="item-text">
+                                <div class="item-name">@row.Name</div>
+                                <div class="item-meta">@BackMeta(row)</div>
+                            </div>
+                        </a>
+                        <button type="button" class="row-btn" title="Looked at it" aria-label="Looked at it" disabled="@awayBusy"
+                                @onclick="() => LookedAtAsync(row)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                        </button>
+                    </li>
+                }
+            </ol>
+            <div class="back-foot">
+                <a class="btn btn-primary" href="round/back">Go round these</a>
+                <button type="button" class="back-done" disabled="@awayBusy" @onclick="DoneWithListAsync">Done with this list</button>
+            </div>
+        </section>
+    }
+
+    @if (!sections.Away && backupReminder is { } reminder)
     {
         <div class="reminder">
             <span>@reminder</span>
@@ -103,7 +194,33 @@ else
         </div>
     }
 
-    @foreach (var (heading, cases) in DuePests)
+    @* From 64rem the sections that ask for something sit in a wide column with the rest beside it. The markup keeps the phone order. *@
+    <div class="today-columns">
+    <div class="today-todo">
+    @if (!sections.Away && sections.RoundSuggestion is { } suggested)
+    {
+        <section class="today-section">
+            <h2>Today's round</h2>
+            <ul class="item-list">
+                <TodayRow OnPutOff="days => PutOffAsync(PutOffs.Round(suggested.Room.Id), Today.AddDays(days))"
+                          SkipLabel="Skip today" OnSkip="() => PutOffAsync(PutOffs.DailyRound, Today.AddDays(1))">
+                    <a class="item-card" href="round/@suggested.Room.Id?daily=true">
+                        <div class="item-thumb" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5" /><path d="M6 10.5V19h12v-8.5" /><path d="M10 19v-5h4v5" /></svg>
+                        </div>
+                        <div class="item-text">
+                            <div class="item-name">@suggested.Room.Name</div>
+                            <div class="item-meta wraps">
+                                <span>@RoundMeta(suggested)</span>
+                            </div>
+                        </div>
+                    </a>
+                </TodayRow>
+            </ul>
+        </section>
+    }
+
+    @foreach (var (heading, cases) in AwayHides(sections.DuePests))
     {
         <section class="today-section">
             <h2>@heading</h2>
@@ -119,6 +236,10 @@ else
                                 <div class="item-name">@Labels.For(view.Case.Pest)</div>
                                 <div class="item-meta">
                                     <span class="pest-due now">@Labels.Due(view)</span>
+                                    @if (view.Step is { } step)
+                                    {
+                                        <span>· Step @view.StepNumber of @view.StepCount@(StepWhat(step) is { } what ? $" · {what}" : "")</span>
+                                    }
                                     <span>· @Labels.ScopeAndCount(view)</span>
                                 </div>
                             </div>
@@ -129,21 +250,23 @@ else
         </section>
     }
 
-    @if (FlaggedNow.Count > 0)
+    @if (!sections.Away && sections.ReadyNow.Count > 0)
     {
         <section class="today-section">
-            <h2>Needs attention</h2>
+            <h2>Ready to resolve</h2>
             <ul class="item-list">
-                @foreach (var item in FlaggedNow)
+                @foreach (var view in sections.ReadyNow)
                 {
-                    <TodayRow @key="item.Subject.Id" OnDone="() => ClearFlagAsync(item)"
-                              OnPutOff="days => PutOffAsync(PutOffs.Flag(item.Subject.Id, item.Attention), Today.AddDays(days))">
-                        <a class="item-card" href="@SubjectThumb.LinkTo(item.Subject)">
-                            <SubjectThumb Subject="item.Subject" />
+                    <TodayRow @key="view.Case.Id" DoneLabel="Resolve" OnDone="() => ResolveAsync(view)"
+                              OnPutOff="days => PutOffAsync(PutOffs.Resolve(view.Case.Id), Today.AddDays(days))">
+                        <a class="item-card" href="pests/@view.Case.Id">
+                            <div class="item-thumb alert" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+                            </div>
                             <div class="item-text">
-                                <div class="item-name">@item.Name</div>
+                                <div class="item-name">@Labels.For(view.Case.Pest)</div>
                                 <div class="item-meta">
-                                    <span class="flag-line"><b>@item.Attention.Reason</b> · @Labels.DaysAgo(item.Attention.DaysSince(Today))</span>
+                                    <span>Clean for @Labels.Count(view.CleanWeeks, "week")</span>
                                 </div>
                             </div>
                         </a>
@@ -153,14 +276,102 @@ else
         </section>
     }
 
-    @if (QuarantineNow.Count > 0)
+    @if (!sections.Away && sections.PlanDoneNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Plan done</h2>
+            <ul class="item-list">
+                @foreach (var view in sections.PlanDoneNow)
+                {
+                    <TodayRow @key="view.Case.Id" DoneLabel="Start watching" OnDone="() => StartWatchingAsync(view)"
+                              SkipLabel="Keep treating" OnSkip="() => KeepTreatingAsync(view)"
+                              OnPutOff="days => PutOffAsync(PutOffs.PlanDone(view.Case.Id), Today.AddDays(days))">
+                        <a class="item-card" href="pests/@view.Case.Id">
+                            <div class="item-thumb alert" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+                            </div>
+                            <div class="item-text">
+                                <div class="item-name">@Labels.For(view.Case.Pest)</div>
+                                <div class="item-meta">
+                                    <span>Done with @view.Case.PlanName</span>
+                                    <span>· @Labels.ScopeAndCount(view)</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (!sections.Away && sections.FlaggedNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Needs attention</h2>
+            <ul class="item-list">
+                @foreach (var item in sections.FlaggedNow)
+                {
+                    <TodayRow @key="item.Subject.Id" OnDone="() => ClearFlagAsync(item)"
+                              OnPutOff="days => PutOffAsync(PutOffs.Flag(item.Subject.Id, item.Attention), Today.AddDays(days))">
+                        <a class="item-card" href="@SubjectThumb.LinkTo(item.Subject)">
+                            <SubjectThumb Subject="item.Subject" />
+                            <div class="item-text">
+                                <div class="item-name">@item.Name</div>
+                                <div class="item-meta">
+                                    <span class="flag-line"><b>@item.Attention.Reason</b> · @(item.From is { } from ? Labels.FlagFrom(from) : Labels.DaysAgo(item.Attention.DaysSince(Today)))</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (!sections.Away && sections.LookAgainNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Look again</h2>
+            <ul class="item-list">
+                @foreach (var item in sections.LookAgainNow)
+                {
+                    var due = item;
+                    <TodayRow @key="item.Problem.Id" OnPutOff="days => PutOffAsync(PutOffs.Problem(due.Problem.Id, due.Since), Today.AddDays(days))">
+                        <div class="look-again-row">
+                            <a class="item-card look-again-link" href="problems/@item.Problem.Id">
+                                <SubjectThumb Subject="item.Plant" />
+                                <div class="item-text">
+                                    <div class="item-name">@item.Plant.DisplayName</div>
+                                    <div class="item-meta">
+                                        <span>@ProblemText.Signs(item.Problem.KnownSigns) · @Labels.Count(ProblemText.DaysLasted(item.Problem, Today), "day")</span>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="look-again-buttons" role="group" aria-label="How does @item.Plant.DisplayName look?">
+                                @foreach (var trend in Enum.GetValues<ProblemTrend>())
+                                {
+                                    var picked = trend;
+                                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => LookAt(due, picked)">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">@ProblemIcons.Trend(trend)</svg>
+                                        @(trend == ProblemTrend.Same ? "Same" : ProblemText.Trend(trend))
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (!sections.Away && sections.QuarantineNow.Count > 0)
     {
         <section class="today-section">
             <h2>Quarantine is up</h2>
             <ul class="item-list">
-                @foreach (var plant in QuarantineNow)
+                @foreach (var plant in sections.QuarantineNow)
                 {
-                    <TodayRow @key="plant.Id"
+                    <TodayRow @key="plant.Id" DoneLabel="Checked, let it out" OnDone="() => LetOutAsync(plant)"
                               OnPutOff="days => PutOffAsync(PutOffs.Quarantine(plant.Id, plant.QuarantinedSince!.Value), Today.AddDays(days))">
                         <a class="item-card" href="plants/@plant.Id">
                             <SubjectThumb Subject="plant" />
@@ -177,12 +388,128 @@ else
         </section>
     }
 
-    @if (wateringDue.Count > 0)
+    @if (!sections.Away && sections.TransitionNow.Count > 0)
     {
-        var now = wateringDue.Where(d => d.DueNow).ToList();
-        var coming = wateringDue.Where(d => !d.DueNow).ToList();
         <section class="today-section">
-            <h2>Water</h2>
+            <h2>Moving to semi-hydro</h2>
+            <ul class="item-list">
+                @foreach (var plant in sections.TransitionNow)
+                {
+                    var lastNews = plant.TransitionLastNews!.Value;
+                    <TodayRow @key="plant.Id" DoneLabel="Looked, still waiting" OnDone="() => PutOffAsync(PutOffs.Transition(plant.Id, lastNews), Today.AddDays(14))"
+                              OnPutOff="days => PutOffAsync(PutOffs.Transition(plant.Id, lastNews), Today.AddDays(days))">
+                        <a class="item-card" href="plants/@plant.Id">
+                            <SubjectThumb Subject="plant" />
+                            <div class="item-text">
+                                <div class="item-name">@plant.DisplayName</div>
+                                <div class="item-meta">
+                                    <span>Nothing new for @Labels.Count((Today.DayNumber - lastNews.DayNumber) / 7, "week")</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (!sections.Away && sections.RestNow.Count > 0)
+    {
+        <section class="today-section">
+            <h2>Gone dormant?</h2>
+            <ul class="item-list">
+                @foreach (var (plant, windowStart) in sections.RestNow)
+                {
+                    <TodayRow @key="plant.Id" DoneLabel="Yes, it's dormant" OnDone="() => WentDormantAsync(plant)"
+                              OnPutOff="days => PutOffAsync(PutOffs.Rest(plant.Id, windowStart), Today.AddDays(days))"
+                              SkipLabel="Not this year" OnSkip="() => PutOffAsync(PutOffs.Rest(plant.Id, windowStart), windowStart.AddDays(RestSeason.WindowDays))">
+                        <a class="item-card" href="plants/@plant.Id">
+                            <SubjectThumb Subject="plant" />
+                            <div class="item-text">
+                                <div class="item-name">@plant.DisplayName</div>
+                                <div class="item-meta">
+                                    <span>Usually @(plant.GrowingSeason == GrowingSeason.Summer ? "rests in winter" : "rests in summer")</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (!sections.Away && sections.OuterPot.Due.Count > 0)
+    {
+        <section class="today-section">
+            <div class="today-section-head">
+                <h2>Empty the outer pot</h2>
+                @if (sections.OuterPot.Due.Count >= 2)
+                {
+                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @onclick="() => EmptiedAsync(sections.OuterPot.Due)">All emptied</button>
+                }
+            </div>
+            <ul class="item-list">
+                @foreach (var due in sections.OuterPot.Due)
+                {
+                    <li @key="due.Plant.Id" class="today-row">
+                        <div class="today-row-main">
+                            <a class="item-card" href="plants/@due.Plant.Id">
+                                <SubjectThumb Subject="due.Plant" />
+                                <div class="item-text">
+                                    <div class="item-name">@due.Plant.DisplayName</div>
+                                </div>
+                            </a>
+                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @onclick="() => EmptiedAsync([due])">Emptied</button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (!sections.Away && !sections.Holding && (sections.WaterNow.Count > 0 || sections.WaterComing.Count > 0 || NextRoundWaterLine is not null))
+    {
+        var now = sections.WaterNow;
+        var coming = sections.WaterComing;
+        <section class="today-section">
+            <div class="today-section-head">
+                <h2>Water</h2>
+                <div class="today-head-links">
+                    <a class="today-go-round" href="water">
+                        Water plants
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                    </a>
+                    @if (now.Count >= 2)
+                    {
+                        <a class="today-go-round" href="round/due">
+                            Go round these
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                        </a>
+                    }
+                </div>
+            </div>
+            @if (NextRoundWaterLine is { } nextRound)
+            {
+                <p class="today-next-round">
+                    <span>@nextRound</span>
+                    <a class="today-go-round" href="round/next">
+                        Go round now
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                    </a>
+                </p>
+            }
+            @if (now.Any(d => d.Guess.Form == WateringForm.TopWatered && d.Guess.Mode != WateringMode.Meter))
+            {
+                <details class="today-hint">
+                    <summary>How to tell if it needs water</summary>
+                    <ul>
+                        <li>Push a finger 2 to 3 cm into the soil and feel whether it's dry. Plants that like to dry out may want it drier further down.</li>
+                        <li>For a deep pot, push in a wooden skewer and pull it out. Soil sticking to it means it's still wet.</li>
+                        <li>Lift the pot. A dry one feels much lighter than right after watering.</li>
+                        <li>A moisture meter gives a number. Log the reading with Still wet, and the reminder learns from it.</li>
+                    </ul>
+                </details>
+            }
             @if (now.Count > 0)
             {
                 <ul class="item-list">
@@ -205,29 +532,143 @@ else
         </section>
     }
 
+    @if (!sections.Away && !sections.Holding && (sections.CareNow.Count > 0 || sections.CareComing.Count > 0 || CareNextRoundLine is not null))
+    {
+        <section class="today-section care-section">
+            <div class="today-section-head">
+                <h2>Care</h2>
+                <div class="today-head-links">
+                    <a class="today-go-round" href="care-intervals">
+                        Care intervals
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                    </a>
+                </div>
+            </div>
+            @if (careError is not null)
+            {
+                <div class="alert alert-danger py-2 px-3" role="alert">@careError</div>
+            }
+            @if (CareNextRoundLine is { } careRound)
+            {
+                <p class="today-next-round"><span>@careRound</span></p>
+            }
+            @foreach (var group in sections.CareNow)
+            {
+                <CareIntervalCard @key="CareKey(group)" Group="group" Today="Today" Done="careDone"
+                                  OnLog="CareLogAsync" OnUndo="CareUndoAsync" OnPutOff="CarePutOffAsync" />
+            }
+            @if (sections.CareComing.Count > 0)
+            {
+                <h3 class="today-subhead">Coming up</h3>
+                @foreach (var group in sections.CareComing)
+                {
+                    <CareIntervalCard @key="CareKey(group)" Group="group" Today="Today" Done="careDone" Coming="true"
+                                      OnLog="CareLogAsync" OnUndo="CareUndoAsync" OnPutOff="CarePutOffAsync" />
+                }
+            }
+        </section>
+    }
+
+    </div>
+    <div class="today-rest">
+    @if (memory is not null)
+    {
+        <section class="today-section memory">
+            <h2>@memory.Heading</h2>
+            <div class="memory-photos">
+                <figure>
+                    <div class="memory-photo"><PhotoImage PhotoId="memory.Old.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Old.TakenAt))}")" /></div>
+                    <figcaption>@Labels.Date(Time.LocalDay(memory.Old.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.PlantAge(memory.Plant, Time.LocalDay(memory.Old.TakenAt)))</figcaption>
+                </figure>
+                <figure>
+                    <div class="memory-photo"><PhotoImage PhotoId="memory.Newest.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Newest.TakenAt))}")" /></div>
+                    <figcaption>@Labels.Date(Time.LocalDay(memory.Newest.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.PlantAge(memory.Plant, Time.LocalDay(memory.Newest.TakenAt)))</figcaption>
+                </figure>
+            </div>
+            <div class="memory-footer">
+                <a class="memory-name" href="plants/@memory.Plant.Id">@memory.Plant.DisplayName</a>
+                <button type="button" class="btn btn-outline-primary" @onclick="() => shareOpen = true">Before and after</button>
+            </div>
+        </section>
+
+        <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="memory.Plant.Id"
+                    CoverPhotoId="Covers.Shown(memory.Plant.CoverPhotoId)" StartBeforeId="memory.Old.Id" StartAfterId="memory.Newest.Id" StartLine="@($"{memory.Heading}.")" PhotoAge="day => PhotoDayCount.PlantAge(memory.Plant, day)"
+                    Text="ShareCardText.ForPlant(memory.Plant, plants.FirstOrDefault(p => p.Id == memory.Plant.ParentPlantId),
+                              propagations.FirstOrDefault(p => p.Id == memory.Plant.FromPropagationId),
+                              propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
+    }
+
+    @if (comingBack.Count > 0)
+    {
+        <section class="today-section coming-back">
+            <h2>Notes coming back</h2>
+            <ul class="coming-back-list">
+                @foreach (var note in comingBack)
+                {
+                    <li @key="note.Entry.Id">
+                        <a class="coming-back-name" href="@(note.Entry.SubjectType == SubjectType.Plant ? "plants" : "propagations")/@note.Entry.SubjectId">@note.Name</a>
+                        <p class="coming-back-text">@note.Entry.Text</p>
+                        <p class="coming-back-written">Written @Labels.Date(Time.LocalDay(note.Entry.OccurredAt))</p>
+                        <div class="coming-back-actions">
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NoteDoneAsync(note.Entry)">Done</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => NoteAgainAsync(note.Entry)">Again next year</button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (yearTitle is not null)
+    {
+        <section class="today-section year-section">
+            <h2>Your @yearSeason with your plants</h2>
+            <div class="year-promo">
+                <div class="year-thumb" aria-hidden="true">
+                    @if (yearUrl is not null)
+                    {
+                        <img src="@yearUrl" alt="" />
+                    }
+                </div>
+                <div class="year-promo-text">
+                    <p>@yearFigures</p>
+                    <a class="btn btn-primary" href="year/@yearSeason">See your year</a>
+                </div>
+            </div>
+            <button type="button" class="btn btn-link btn-sm link-action year-hide" @onclick="HideYearAsync">Hide for this season</button>
+            <canvas @ref="yearCanvas" hidden aria-hidden="true"></canvas>
+        </section>
+    }
+
+    @if (!sections.Away && !sections.Holding)
+    {
     <section class="today-section">
         <h2>Worth a look</h2>
-        @if (ChecksNow.Count == 0)
+        @if (NextRoundChecksLine is { } nextChecks)
+        {
+            <p class="today-next-round"><span>@nextChecks</span></p>
+        }
+        @if (sections.ChecksNow.Count == 0 && NextRoundChecksLine is null)
         {
             <p class="text-body-secondary mb-0">
                 @(active.Count == 0
                     ? "No propagations on the go. Open a plant and tap Propagate to start one."
-                    : checks.Count > 0
+                    : sections.Checks.Count > 0
                         ? "Nothing else waiting. The ones you put off come back by themselves."
                         : "Nothing waiting. Every propagation has been looked at in the last week.")
             </p>
         }
-        else
+        else if (sections.ChecksNow.Count > 0)
         {
             <ul class="item-list">
-                @foreach (var check in ChecksNow)
+                @foreach (var check in sections.ChecksNow)
                 {
                     <TodayRow @key="check.Propagation.Id"
                               OnPutOff="days => PutOffAsync(PutOffs.Check(check.Propagation.Id), Today.AddDays(days))">
                         <a class="item-card" href="propagations/@check.Propagation.Id">
                             <PropagationThumb Propagation="check.Propagation" Days="check.Propagation.DaysSinceStart(Today)" />
                             <div class="item-text">
-                                <div class="item-name">@check.Propagation.DisplayName</div>
+                                <div class="item-name">@check.Propagation.ListName</div>
                                 <div class="item-meta">
                                     <StageBadge Stage="check.Propagation.Stage" Type="check.Propagation.Type" />
                                     <span>@Labels.Summary(check.Propagation) · @LastSeen(check)</span>
@@ -239,8 +680,9 @@ else
             </ul>
         }
     </section>
+    }
 
-    @if (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today))
+    @if (!sections.Away && sections.PhotoRoundShows)
     {
         <section class="today-section">
             <h2>Photos</h2>
@@ -253,7 +695,7 @@ else
                             <svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
                         </div>
                         <div class="item-text">
-                            <div class="item-name">@Labels.Count(photoRound.Count, "photo") to take</div>
+                            <div class="item-name">@Labels.Count(sections.PhotosDue.Count, "photo") to take</div>
                             <div class="item-meta">For @Today.ToString("MMMM", CultureInfo.InvariantCulture)</div>
                         </div>
                         <svg class="round-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
@@ -263,40 +705,13 @@ else
             @if (showRound)
             {
                 <ul class="item-list photo-round" id="photo-round">
-                    @foreach (var due in photoRound)
+                    @foreach (var due in sections.PhotosDue)
                     {
                         <PhotoRoundRow @key="due.Subject.Id" Due="due" OnTaken="LoadAsync" />
                     }
                 </ul>
             }
         </section>
-    }
-
-    @if (memory is not null)
-    {
-        <section class="today-section memory">
-            <h2>@memory.Heading</h2>
-            <div class="memory-photos">
-                <figure>
-                    <div class="memory-photo"><PhotoImage PhotoId="memory.Old.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Old.TakenAt))}")" /></div>
-                    <figcaption>@Labels.Date(Time.LocalDay(memory.Old.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.StartOf(memory.Plant), Time.LocalDay(memory.Old.TakenAt))</figcaption>
-                </figure>
-                <figure>
-                    <div class="memory-photo"><PhotoImage PhotoId="memory.Newest.Id" Alt="@($"{memory.Plant.DisplayName} on {Labels.Date(Time.LocalDay(memory.Newest.TakenAt))}")" /></div>
-                    <figcaption>@Labels.Date(Time.LocalDay(memory.Newest.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.StartOf(memory.Plant), Time.LocalDay(memory.Newest.TakenAt))</figcaption>
-                </figure>
-            </div>
-            <div class="memory-footer">
-                <a class="memory-name" href="plants/@memory.Plant.Id">@memory.Plant.DisplayName</a>
-                <button type="button" class="btn btn-outline-primary" @onclick="() => shareOpen = true">Before and after</button>
-            </div>
-        </section>
-
-        <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="memory.Plant.Id"
-                    CoverPhotoId="memory.Plant.CoverPhotoId" StartBeforeId="memory.Old.Id" StartAfterId="memory.Newest.Id" StartLine="@($"{memory.Heading}.")" DayOne="PhotoDayCount.StartOf(memory.Plant)"
-                    Text="ShareCardText.ForPlant(memory.Plant, plants.FirstOrDefault(p => p.Id == memory.Plant.ParentPlantId),
-                              propagations.FirstOrDefault(p => p.Id == memory.Plant.FromPropagationId),
-                              propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
     }
 
     <section class="today-section">
@@ -321,9 +736,27 @@ else
             </ul>
         }
     </section>
+
+    @if (yearTitle is null)
+    {
+        <p class="year-link"><a href="year">Your year so far</a></p>
+    }
+    </div>
+    </div>
+
+    <Sheet Title="How does it look?" Open="looking is not null" OpenChanged="open => { if (!open) looking = null; }">
+        @if (looking is not null)
+        {
+            <ProblemSheet @key="looking.Problem.Id" Plant="looking.Plant" Mode="ProblemSheetMode.Update" Problem="looking.Problem"
+                          StartTrend="lookingTrend" BackLabel="Cancel" OnBack="() => looking = null" OnSaved="LookedAsync" />
+        }
+    </Sheet>
 }
+</div>
 
 @code {
+    private bool FirstRun => loaded && plants.Count == 0 && propagations.Count == 0;
+
     private RenderFragment WaterRow(WateringDue due) => __builder =>
     {
         var form = due.Guess.Form;
@@ -345,28 +778,34 @@ else
         </TodayRow>;
     };
 
-    private static readonly IReadOnlyList<int> MeterReadings = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    private string RoundMeta(DailyRoundSuggestion suggested)
+    {
+        var parts = new List<string>();
+        if (suggested.Plants > 0)
+            parts.Add(Labels.Count(suggested.Plants, "plant"));
+        if (suggested.Propagations > 0)
+            parts.Add(Labels.Count(suggested.Propagations, "propagation"));
+        if (sections.WateringOn && DailyRound.DueIn(suggested.Room.Id, sections.WateringDue, data.Places) is > 0 and var due)
+            parts.Add($"{due} due for water");
+        return string.Join(" · ", parts);
+    }
 
-    private IReadOnlyList<WateringDue> wateringDue = [];
-    private bool wateringOn;
-    private IReadOnlyList<CareLog> careLogs = [];
-    private IReadOnlyList<TimelineEntry> plantChanges = [];
-    private IReadOnlyList<GrowLight> lights = [];
-    private IReadOnlyDictionary<Guid, Pot> potsById = new Dictionary<Guid, Pot>();
-    private Places places = Places.None;
+    private static readonly IReadOnlyList<int> MeterReadings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    // The records and the sections worked out from them, which Core does for Today and the notification alike
+    private TodayData data = new();
+    private TodaySections sections = new();
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<Propagation> propagations = [];
     private List<Propagation> active = [];
-    private IReadOnlyList<PropagationCheck> checks = [];
-    private IReadOnlyList<PestCaseView> dueTreatments = [];
     private IReadOnlyList<TimelineEntry> recent = [];
-    private IReadOnlyList<AttentionItem> flagged = [];
-    private IReadOnlyList<PhotoDue> photoRound = [];
-    private PutOffs putOffs = PutOffs.Empty();
+    private LookAgain? looking;
+    private ProblemTrend? lookingTrend;
     private Dictionary<Guid, string> names = [];
     private MonthResult? monthResult;
     private string? backupReminder;
     private Memory? memory;
+    private IReadOnlyList<NoteComingBack> comingBack = [];
     private bool shareOpen;
     private bool showRound;
     private bool loaded;
@@ -375,34 +814,108 @@ else
     private bool exampleFailed;
     private bool confirmingRemoval;
 
+    // Away and quiet time: one coming up, the span the list on the day back belongs to, and the sitter's visits
+    private AwaySpan? upcoming;
+    private AwaySpan? backSpan;
+    private IReadOnlyList<DateOnly> visitDates = [];
+    private bool awayBusy;
+
+    // Your year with your plants, shown from 1 December to 15 January
+    private YearCard? yearTitle;
+
+    // Its own id, so the year page's title card and this one never release each other's picture
+    private const string TodayCardId = "today-title";
+    private int yearSeason;
+    private string yearFigures = "";
+    private string? yearUrl;
+    private string? yearDrawnKey;
+    private ElementReference yearCanvas;
+
     private DateOnly Today => Time.Today();
 
-    private List<AttentionItem> FlaggedNow =>
-        flagged.Where(i => !putOffs.IsPutOff(PutOffs.Flag(i.Subject.Id, i.Attention), Today)).ToList();
+    private IEnumerable<DuePestGroup> AwayHides(IEnumerable<DuePestGroup> groups) =>
+        sections.Away ? [] : groups;
 
-    private List<Plant> QuarantineNow =>
-        TodayBoard.QuarantineUp(plants, Today)
-            .Where(p => !putOffs.IsPutOff(PutOffs.Quarantine(p.Id, p.QuarantinedSince!.Value), Today)).ToList();
+    // The same kind of line is under Water, under Care when nothing waits for water, and under Worth a look
+    private string NextRoundLine(NextRoundCount round, string noun, string ending) =>
+        $"Next round {NextRoundName(round.Day)} · {Labels.Count(round.Count, noun)} {ending}";
 
-    // A propagation already under Needs attention isn't listed a second time
-    private List<PropagationCheck> ChecksNow =>
-        checks.Where(c => !putOffs.IsPutOff(PutOffs.Check(c.Propagation.Id), Today)
-                          && FlaggedNow.All(i => i.Subject.Id != c.Propagation.Id))
-            .ToList();
+    private string? NextRoundWaterLine => sections.NextRound is { } round ? NextRoundLine(round, "plant", "to check") : null;
 
-    // Treatments first, then the cases only being watched, each under its own heading when there are any
-    private IEnumerable<(string Heading, List<PestCaseView> Cases)> DuePests =>
-        new[]
+    private string? CareNextRoundLine => sections.CareNextRound is { } round ? NextRoundLine(round, "plant", "to check") : null;
+
+    private string? NextRoundChecksLine => sections.NextRoundChecks is { } round ? NextRoundLine(round, "propagation", "to look at") : null;
+
+    private string NextRoundName(DateOnly next) => next == Today.AddDays(1) ? "tomorrow" : next.DayOfWeek.ToString();
+
+    // Care from an interval that is ticked off on the page is still in the list, so it is taken off the count
+    private readonly Dictionary<(Guid Interval, Guid Plant), CareAction> careDone = [];
+    private string? careError;
+
+    private static string CareKey(IntervalGroup group) => $"{group.Kind}:{group.OwnKindId}:{group.FeedId}";
+
+    private int CareTicked =>
+        sections.CareNow.Sum(g => g.Items.Count(i => careDone.ContainsKey((i.Interval.Id, i.Plant.Id))));
+
+    private async Task CareLogAsync(CareLogRequest request)
+    {
+        careError = null;
+        try
         {
-            ("Treatment due", dueTreatments.Where(v => !v.IsCheck).ToList()),
-            ("Check for pests", dueTreatments.Where(v => v.IsCheck).ToList())
-        }.Where(group => group.Item2.Count > 0);
+            var ids = await CareIntervalService.LogAsync(request.Group, request.Items.Select(i => i.Plant.Id), Labels.For);
+            var action = new CareAction(request.All, ids, request.Items);
+            foreach (var item in request.Items)
+                careDone[(item.Interval.Id, item.Plant.Id)] = action;
+            await Badge.SetAsync(DueCount);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Logging care from an interval failed");
+            careError = $"Couldn't log it: {ex.Message}";
+        }
+    }
+
+    private async Task NoteDoneAsync(TimelineEntry entry)
+    {
+        await TimelineService.MarkCameBackDoneAsync(entry);
+        await LoadAsync();
+    }
+
+    private async Task NoteAgainAsync(TimelineEntry entry)
+    {
+        await TimelineService.BringBackAgainAsync(entry);
+        await LoadAsync();
+    }
+
+    private async Task CareUndoAsync(CareAction action)
+    {
+        careError = null;
+        try
+        {
+            await CareIntervalService.UndoAsync(action.EntryIds);
+            foreach (var item in action.Items)
+            {
+                if (careDone.TryGetValue((item.Interval.Id, item.Plant.Id), out var kept) && kept == action)
+                    careDone.Remove((item.Interval.Id, item.Plant.Id));
+            }
+            await Badge.SetAsync(DueCount);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Undoing care from an interval failed");
+            careError = $"Couldn't undo it: {ex.Message}";
+        }
+    }
+
+    private Task CarePutOffAsync(CarePutOffRequest request) =>
+        PutOffAsync(PutOffs.Interval(request.Item.Interval.Id, request.Item.Plant.Id, request.Item.Last), Today.AddDays(request.Days));
+
+    // What the step uses, for the line under the pest on Today. The recipe's name is already in What.
+    private static string? StepWhat(PlanStep step) => string.IsNullOrWhiteSpace(step.What) ? null : step.What.Trim();
 
     // Everything listed as due right now, which is also the number on the app icon
     private int DueCount =>
-        DuePests.Sum(group => group.Cases.Count) + FlaggedNow.Count + QuarantineNow.Count + ChecksNow.Count
-        + wateringDue.Count(d => d.DueNow)
-        + (photoRound.Count > 0 && !putOffs.IsPutOff(PutOffs.PhotoRound, Today) ? 1 : 0);
+        sections.Away ? 0 : sections.DueCount - (sections.Holding ? 0 : CareTicked);
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
@@ -439,44 +952,77 @@ else
         await LoadAsync();
     }
 
+    // After something changed: the sections again from the records, keeping the care plan the page has ticked things off in
+    private void Recompute()
+    {
+        sections = TodaySections.For(data, Today, Time, sections.CareItems);
+        WatchOuterPot();
+    }
+
+    private bool emptying;
+    private Timer? outerPotTimer;
+
+    private async Task EmptiedAsync(IEnumerable<OuterPotDue> due)
+    {
+        emptying = true;
+        try
+        {
+            await Care.MarkOuterPotEmptiedAsync(due.Select(d => d.CareLogId).ToList());
+            await LoadAsync();
+        }
+        finally
+        {
+            emptying = false;
+        }
+    }
+
+    // A reminder still waiting for its time shows up by itself when the wait runs out
+    private void WatchOuterPot()
+    {
+        outerPotTimer?.Dispose();
+        outerPotTimer = null;
+        if (sections.OuterPot.NextDueAt is not { } at)
+            return;
+
+        var wait = at - Time.GetUtcNow() + TimeSpan.FromSeconds(1);
+        outerPotTimer = new Timer(_ => _ = InvokeAsync(async () =>
+        {
+            // Read again, so a watering logged or ticked meanwhile is counted
+            await LoadAsync();
+            StateHasChanged();
+        }), null, wait < TimeSpan.Zero ? TimeSpan.Zero : wait, Timeout.InfiniteTimeSpan);
+    }
+
     private async Task LoadAsync()
     {
         exampleLoaded = await Example.IsLoadedAsync();
-        plants = await Plants.GetAllAsync();
-        propagations = await Propagations.GetAllAsync();
+        data = await TodayService.LoadAsync();
+        plants = data.Plants;
+        propagations = data.Propagations;
         active = propagations.Where(p => p.IsActive).ToList();
+        careDone.Clear();
+        sections = TodaySections.For(data, Today, Time);
+        WatchOuterPot();
 
-        var latest = await Entries.GetLatestPerSubjectAsync();
-        checks = TodayBoard.NeedsChecking(propagations, latest, Time);
-        flagged = TodayBoard.NeedsAttention(plants, propagations);
-        putOffs = await PutOffService.GetAsync(Today);
+        upcoming = sections.Away ? null : AwayTime.Upcoming(data.Stretches, Today);
+        backSpan = sections.BackDay is { } day ? AwayTime.Spans(data.Stretches).LastOrDefault(s => s.Until == day) : null;
+        visitDates = [];
+        if (sections.AwayNow is { Kind: AwayKind.Away } now)
+            visitDates = SitterVisits.Dates((await SitterSheets.GetAsync()).Visits, now.Trip.From, now.Trip.Until);
 
-        places = await RoomService.GetPlacesAsync();
-        photoRound = (await SettingsService.GetAsync()).PhotoReminder
-            ? PhotoRound.Due(plants, propagations, await PhotoRepository.GetNewestPerSubjectAsync(), places, Time)
-            : [];
-
-        wateringOn = (await SettingsService.GetAsync()).WateringReminder;
-        if (wateringOn)
-        {
-            careLogs = await CareLogs.GetAllAsync();
-            plantChanges = await Entries.GetPlantChangesAsync();
-            lights = await LightService.GetAllAsync();
-            potsById = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
-        }
-        FindWateringDue();
-
-        memory = Memories.Pick(plants, await PhotoRepository.GetOfKindAsync(SubjectType.Plant), Today, Time.LocalDay);
-
-        dueTreatments = PestService.Due(
-            PestService.Describe(await PestCases.GetAllAsync(), plants, await PestTreatments.GetAllAsync(), places, Today));
+        var plantPhotos = await PhotoRepository.GetOfKindAsync(SubjectType.Plant);
+        memory = Memories.Pick(plants, plantPhotos, Today, Time.LocalDay);
+        comingBack = NotesComingBack.For(data.ComingBack, plants, propagations, Today);
+        await FindYearAsync(data.Settings, plantPhotos);
 
         names = plants.ToDictionary(p => p.Id, p => p.DisplayName);
         foreach (var propagation in propagations)
-            names[propagation.Id] = propagation.DisplayName;
+            names[propagation.Id] = propagation.ListName;
+
+        await Covers.EnsureLoadedAsync();
 
         // Only what's still here: entries left behind by a deleted plant have nowhere to go
-        recent = await Entries.GetRecentAsync(8, names.Keys.ToHashSet(), TodayBoard.LatelySince(Time));
+        recent = await Entries.GetRecentAsync(8, names.Keys.ToHashSet(), TodayBoard.LatelySince(Time), Covers.ReferenceIds);
 
         monthResult = TodayBoard.FinishedThisMonth(propagations, Time);
         backupReminder = await BackupReminderAsync();
@@ -484,58 +1030,242 @@ else
         await Badge.SetAsync(DueCount);
     }
 
-    private void FindWateringDue() =>
-        wateringDue = wateringOn
-            ? WateringRound.Due(plants, careLogs, plantChanges, id => potsById.GetValueOrDefault(id), lights, places,
-                Seasons.HemisphereOf(TimeZoneInfo.Local), Time, putOffs)
-            : [];
+    // From 1 December the year is this one, and until 15 January it is the one just gone
+    private static int? SeasonYear(DateOnly today) =>
+        today.Month == 12 ? today.Year
+        : today is { Month: 1, Day: <= 15 } ? today.Year - 1
+        : null;
+
+    // The photos of propagations and the plant changes are only read when there is a season to show
+    private async Task FindYearAsync(UserSettings settings, IReadOnlyList<Photo> plantPhotos)
+    {
+        yearTitle = null;
+        if (SeasonYear(Today) is not { } season || settings.YearHiddenFor == season)
+            return;
+
+        var photos = plantPhotos.Concat(await PhotoRepository.GetOfKindAsync(SubjectType.Propagation)).ToList();
+        var summary = PlantYear.For(season, plants, propagations, photos, await Entries.GetPlantChangesAsync(),
+            Today, Time.LocalDay, Labels.For(PlantStatus.Died));
+        if (summary.CardCount < 2)
+            return;
+
+        var title = YearCards.For(summary, Labels.For, photos, Time.LocalDay)[0];
+        yearSeason = season;
+        yearFigures = string.Join(", ", title.Figures.Select(f => $"{f.Value} {f.Caption}"));
+        yearTitle = title;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (yearTitle is not { } title)
+            return;
+
+        // The small card is drawn once for what it says, and again when that changes
+        var key = $"{yearSeason}|{title.AltText}|{title.Photo?.PhotoId}";
+        if (key == yearDrawnKey)
+            return;
+
+        yearDrawnKey = key;
+        try
+        {
+            var drawn = await YearCardsService.DrawAsync(yearCanvas, YearCardSpec.From(title, "story") with { Id = TodayCardId });
+            if (drawn is not null)
+            {
+                yearUrl = drawn.Url;
+                StateHasChanged();
+            }
+        }
+        catch (JSException)
+        {
+            // The line beside it says the same without the picture
+        }
+    }
+
+    private async Task HideYearAsync()
+    {
+        await SettingsService.HideYearAsync(yearSeason);
+        yearTitle = null;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        outerPotTimer?.Dispose();
+        outerPotTimer = null;
+        if (yearUrl is not null)
+        {
+            try
+            {
+                await YearCardsService.ReleaseAsync([TodayCardId]);
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+        }
+    }
+
+    private static string Percent(double part, int total) =>
+        (Math.Clamp(part / total, 0, 1) * 100).ToString("0.##", CultureInfo.InvariantCulture) + "%";
+
+    private string BarLabel(AwaySpan span, int dayNumber, int total)
+    {
+        var label = $"{span.From.ToString("d MMMM", CultureInfo.InvariantCulture)} to {span.Until.ToString("d MMMM", CultureInfo.InvariantCulture)}, today is day {dayNumber} of {total}";
+        return visitDates.Count > 0 ? $"{label}, {Labels.Count(visitDates.Count, "visit")}" : label;
+    }
+
+    private async Task ImBackAsync()
+    {
+        awayBusy = true;
+        try
+        {
+            await AwayService.ImBackAsync(Today);
+            await LoadAsync();
+        }
+        finally
+        {
+            awayBusy = false;
+        }
+    }
+
+    private async Task LookedAtAsync(BackRow row)
+    {
+        awayBusy = true;
+        try
+        {
+            await TimelineService.LookedOverAsync(row.Subject is Plant ? SubjectType.Plant : SubjectType.Propagation, row.Subject.Id);
+            await LoadAsync();
+        }
+        finally
+        {
+            awayBusy = false;
+        }
+    }
+
+    private async Task DoneWithListAsync()
+    {
+        if (sections.BackDay is not { } day)
+            return;
+
+        awayBusy = true;
+        try
+        {
+            await PutOffAsync(PutOffs.BackList(day), day.AddDays(AwayTime.BackDays));
+        }
+        finally
+        {
+            awayBusy = false;
+        }
+    }
+
+    // What the row says it's there for. Never "overdue", and only "water" in "In water".
+    private RenderFragment BackMeta(BackRow row) => __builder =>
+    {
+        switch (row.Reason)
+        {
+            case BackReason.Pest:
+                <span class="pest-due now">@Labels.For(row.Pest!.Value)</span>
+                <span> · case open since @row.CaseStart!.Value.ToString("d MMMM", CultureInfo.InvariantCulture)</span>
+                break;
+            case BackReason.InWater:
+                <span>In water · @Labels.Count(row.DaysSinceLogged ?? 0, "day") since you looked</span>
+                break;
+            case BackReason.PastPace:
+                <span>Usually every @Labels.Count(row.UsualDays ?? 0, "day") · it's been @Labels.Count(row.DaysSince ?? 0, "day")</span>
+                break;
+            default:
+                <span>Flagged: @row.FlagReason · @Labels.DaysAgo(Today.DayNumber - (row.FlagSince ?? Today).DayNumber)</span>
+                break;
+        }
+    };
 
     // After an answer: the new entry may have moved the guess, so read the care log again
     private async Task WateringAnsweredAsync()
     {
-        careLogs = await CareLogs.GetAllAsync();
-        FindWateringDue();
+        data = data with { CareLogs = await CareLogs.GetAllAsync() };
+        Recompute();
         await Badge.SetAsync(DueCount);
     }
 
     private async Task WaterDoneAsync(WateringDue due)
     {
-        await Care.LogAsync(Care.Start(due.Plant.Id, WateringText.DoneKind(due.Guess.Form)), Labels.For);
+        await Answers.WaterAsync(due.Plant.Id, due.Guess.Form, Labels.For);
         await WateringAnsweredAsync();
     }
 
     private async Task PutOffWaterAsync(WateringDue due, int days)
     {
         await PutOffAsync(PutOffs.Water(due.Plant.Id, due.Guess.LastWatered), Today.AddDays(days));
-        FindWateringDue();
-        await Badge.SetAsync(DueCount);
     }
 
     // "Still wet" with a meter reading, or "No meter" / "Not yet" with none
     private async Task NotYetAsync(WateringDue due, int? reading)
     {
-        if (reading is { } value)
-        {
-            var entry = Care.Start(due.Plant.Id, CareKind.MoistureReading);
-            entry.Moisture = value;
-            await Care.LogAsync(entry, Labels.For);
-        }
-
-        // A reading moves a guess that is made from the meter. For one made from the days between
-        // waterings it says nothing new, so it waits a while like the other answers.
-        if (reading is null || due.Guess.Mode != WateringMode.Meter)
-        {
-            var wait = WateringGuess.StillWetWait(due.Guess.UsualDays ?? 1);
-            await PutOffAsync(PutOffs.Water(due.Plant.Id, due.Guess.LastWatered), Today.AddDays(wait));
-        }
+        if (await Answers.NotYetAsync(due.Plant, due.Guess, reading, logReading: true, Labels.For) is { } putOff)
+            data.PutOffs.PutOff(putOff.Key, putOff.Until);
 
         await WateringAnsweredAsync();
     }
 
     private async Task PutOffAsync(string key, DateOnly until)
     {
-        putOffs.PutOff(key, until);
+        data.PutOffs.PutOff(key, until);
         await PutOffService.PutOffAsync(key, until);
+        // Putting off a room, or the round, moves it on to the next room or takes it away
+        Recompute();
+        await Badge.SetAsync(DueCount);
+    }
+
+    private void LookAt(LookAgain item, ProblemTrend trend)
+    {
+        looking = item;
+        lookingTrend = trend;
+    }
+
+    private async Task LookedAsync()
+    {
+        looking = null;
+        await LoadAsync();
+        await Badge.SetAsync(DueCount);
+    }
+
+    // Looked it over and it's clean: logs a check on the plant and lets it out of quarantine
+    private async Task LetOutAsync(Plant plant)
+    {
+        await PestTreatments.SaveAsync(PestService.StartPlantCheck(plant, Today));
+        await PlantService.SetQuarantineAsync(plant, null, Labels.For);
+        await LoadAsync();
+    }
+
+    // Yes, it's dormant: the same as the button on the plant's page, from today
+    private async Task WentDormantAsync(Plant plant)
+    {
+        await PlantService.SetDormantAsync(plant, Today, Labels.For);
+        await LoadAsync();
+    }
+
+    private async Task ResolveAsync(PestCaseView view)
+    {
+        view.Case.Status = PestCaseStatus.Resolved;
+        view.Case.ResolvedOn = Today;
+        await PestCases.SaveAsync(view.Case);
+        await LoadAsync();
+    }
+
+    // The plan is over: watch the case from here. Setting the status through StatusChanged keeps the clean count right
+    private async Task StartWatchingAsync(PestCaseView view)
+    {
+        var from = view.Case.Status;
+        view.Case.Status = PestCaseStatus.Monitoring;
+        PestService.StatusChanged(view.Case, from, Today, data.PestTreatments);
+        await PestCases.SaveAsync(view.Case);
+        await LoadAsync();
+    }
+
+    // The case stays Active and goes on at the plain interval from the last real treatment
+    private async Task KeepTreatingAsync(PestCaseView view)
+    {
+        view.Case.PlanStoppedOn = Today;
+        await PestCases.SaveAsync(view.Case);
+        await LoadAsync();
     }
 
     private async Task ClearFlagAsync(AttentionItem item)
@@ -544,7 +1274,7 @@ else
             await PlantService.SetAttentionAsync(plant, null);
         else if (item.Subject is Propagation propagation)
             await PropagationService.SetAttentionAsync(propagation, null);
-        flagged = TodayBoard.NeedsAttention(plants, propagations);
+        Recompute();
     }
 
     // Nagging once a month is enough, and only when there's something to lose

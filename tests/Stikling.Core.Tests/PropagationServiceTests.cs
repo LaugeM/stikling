@@ -12,6 +12,9 @@ public class PropagationServiceTests
     private readonly FakePlantRepository plants = new();
     private readonly FakePropagationRepository propagations = new();
     private readonly FakeTimelineRepository timeline = new();
+    private readonly FakePropagationCareLogRepository propagationCare = new();
+    private readonly FakeCareLogRepository plantCare = new();
+    private readonly FakePhotoRepository photos = new();
     private readonly PropagationService service;
 
     private static readonly FakePlaceRepository Places = new();
@@ -20,7 +23,7 @@ public class PropagationServiceTests
 
     public PropagationServiceTests()
     {
-        service = new PropagationService(propagations, plants, timeline, new FixedTime(Now));
+        service = new PropagationService(propagations, plants, timeline, propagationCare, plantCare, photos, new FixedTime(Now));
         plants.Plants[parent.Id] = parent;
     }
 
@@ -84,6 +87,22 @@ public class PropagationServiceTests
         Assert.Null(cuttings.CoverPhotoId);
         var entry = Assert.Single(HistoryOf(cuttings.Id));
         Assert.Equal(TimelineKind.Created, entry.Kind);
+    }
+
+    [Fact]
+    public async Task Create_run_twice_adds_the_history_once()
+    {
+        var first = new Photo { SubjectType = SubjectType.Propagation, TakenAt = Now.AddDays(-2) };
+        var second = new Photo { SubjectType = SubjectType.Propagation, TakenAt = Now.AddHours(-1) };
+        var cuttings = service.StartFrom(parent);
+
+        await service.CreateAsync(cuttings, Label, [first, second]);
+        await service.CreateAsync(cuttings, Label, [first, second]);
+
+        Assert.Single(propagations.Propagations);
+        Assert.Equal(1, HistoryOf(cuttings.Id).Count(e => e.Kind == TimelineKind.Created));
+        Assert.Equal(2, HistoryOf(cuttings.Id).Count(e => e.Kind == TimelineKind.Photo));
+        Assert.Equal(1, HistoryOf(parent.Id).Count(e => e.Kind == TimelineKind.Propagated && e.RelatedId == cuttings.Id));
     }
 
     [Fact]
@@ -279,7 +298,7 @@ public class PropagationServiceTests
     public async Task Potting_up_the_last_one_finishes_the_propagation()
     {
         var corms = await StartCormsAsync(2);
-        await service.MarkFailedAsync(corms, 1, "rotted");
+        await service.MarkFailedAsync(corms, 1, FailReason.Rotted);
 
         var made = await service.PotUpAsync(corms, new PotUpRequest(1, Today));
 
@@ -333,10 +352,90 @@ public class PropagationServiceTests
     {
         var corms = await StartCormsAsync(2);
 
-        await service.MarkFailedAsync(corms, 2, "  ");
+        await service.MarkFailedAsync(corms, 2, null, "  ");
 
         Assert.Equal(PropagationStage.Failed, corms.Stage);
         Assert.Equal("2 failed\nFinished: 2 failed", HistoryOf(corms.Id).Last().Text);
+    }
+
+    [Fact]
+    public async Task Giving_some_away_is_neither_potted_up_nor_failed()
+    {
+        var corms = await StartCormsAsync(3);
+
+        await service.GiveAwayAsync(corms, 1, "  Anna ");
+
+        Assert.Equal(1, corms.GivenAwayCount);
+        Assert.Equal(2, corms.RemainingCount);
+        Assert.True(corms.IsActive);
+        var entry = HistoryOf(corms.Id).Last();
+        Assert.Equal("Gave 1 to Anna", entry.Text);
+        Assert.Equal(TimelineEvent.GaveAway, entry.Event);
+    }
+
+    [Fact]
+    public async Task Giving_away_without_a_name_says_so_and_the_last_ones_finish_the_propagation()
+    {
+        var corms = await StartCormsAsync(3);
+        await service.MarkFailedAsync(corms, 1);
+
+        await service.GiveAwayAsync(corms, 2, " ");
+
+        Assert.Equal(PropagationStage.Done, corms.Stage);
+        Assert.Equal(Today, corms.FinishedOn);
+        Assert.Equal("Gave 2 away\nFinished: 2 given away, 1 failed", HistoryOf(corms.Id).Last().Text);
+    }
+
+    [Fact]
+    public async Task Giving_everything_away_finishes_it_as_done_and_failing_everything_does_not()
+    {
+        var given = await StartCormsAsync(1);
+        await service.GiveAwayAsync(given, 1);
+        var failed = await StartCormsAsync(1);
+        await service.MarkFailedAsync(failed, 1);
+
+        Assert.Equal(PropagationStage.Done, given.Stage);
+        Assert.Equal(PropagationStage.Failed, failed.Stage);
+    }
+
+    [Fact]
+    public async Task Giving_away_checks_the_count_and_the_date()
+    {
+        var corms = await StartCormsAsync(2);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GiveAwayAsync(corms, 3));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.GiveAwayAsync(corms, 1, null, Today.AddDays(1)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.GiveAwayAsync(corms, 1, null, corms.StartedOn.AddDays(-1)));
+        Assert.Equal(0, corms.GivenAwayCount);
+    }
+
+    [Fact]
+    public async Task Given_away_units_are_in_the_outcome_and_the_edit_note_but_not_the_success_rate()
+    {
+        var corms = await StartCormsAsync(4);
+        await service.PotUpAsync(corms, new PotUpRequest(1, Today));
+        await service.GiveAwayAsync(corms, 1);
+        await service.MarkFailedAsync(corms, 1);
+
+        Assert.Equal("1 potted up, 1 given away, 1 failed", PropagationService.Outcome(corms));
+        var result = PropagationResults.Overall([corms])!;
+        Assert.Equal(1, result.Succeeded);
+        Assert.Equal(1, result.Failed);
+        Assert.Equal(0.5, result.SuccessRate);
+
+        var before = corms.Copy();
+        corms.GivenAwayCount = 0;
+        await service.UpdateAsync(before, corms, Label);
+        Assert.Contains("Given away: 0 (was 1)", HistoryOf(corms.Id).Last().Text);
+    }
+
+    [Fact]
+    public void Given_away_counts_are_validated()
+    {
+        var p = new Propagation { Nickname = "x", InitialCount = 2, GivenAwayCount = 3, StartedOn = Today };
+        Assert.Contains(p.Validate(Today), e => e.Contains("potted up, given away or failed"));
+        p.GivenAwayCount = -1;
+        Assert.Contains("The number potted up, given away or failed can't be negative.", p.Validate(Today));
     }
 
     [Theory]
@@ -347,5 +446,136 @@ public class PropagationServiceTests
     public void Pot_up_names_are_numbered_within_a_batch(string? nickname, int count, int already, string?[] expected)
     {
         Assert.Equal(expected, PropagationService.PotUpNames(nickname, count, already));
+    }
+
+    private async Task<Propagation> StartInSoilAsync()
+    {
+        var pup = service.StartFrom(parent);
+        pup.Type = PropagationType.Offset;
+        pup.Medium = GrowingMedium.Soil;
+        pup.InitialCount = 2;
+        pup.StartedOn = Today.AddDays(-10);
+        await service.CreateAsync(pup, Label);
+        return pup;
+    }
+
+    private static PropagationCareLog CareLog(Propagation pup, PropagationCareKind kind, int daysAgo, bool deleted = false) => new()
+    {
+        PropagationId = pup.Id,
+        Kind = kind,
+        OccurredOn = Today.AddDays(-daysAgo),
+        DeletedAt = deleted ? Now : null
+    };
+
+    [Fact]
+    public async Task Potting_up_carries_the_last_watering_over_to_each_new_plant()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 6));
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 2));
+
+        var made = await service.PotUpAsync(pup, new PotUpRequest(2, Today));
+
+        Assert.Equal(2, plantCare.Logs.Count);
+        Assert.All(plantCare.Logs, l =>
+        {
+            Assert.Equal(CareKind.Watered, l.Kind);
+            Assert.Equal(Today.AddDays(-2), l.OccurredOn);
+        });
+        Assert.Equal(made.Select(p => p.Id).Order(), plantCare.Logs.Select(l => l.PlantId).Order());
+    }
+
+    [Fact]
+    public async Task Potting_up_carries_nothing_over_without_a_watering()
+    {
+        var pup = await StartInSoilAsync();
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Empty(plantCare.Logs);
+    }
+
+    [Fact]
+    public async Task A_water_change_or_moisture_reading_alone_is_not_carried_over()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.ChangedWater, 1));
+        await propagationCare.SaveAsync(new PropagationCareLog
+        {
+            PropagationId = pup.Id, Kind = PropagationCareKind.MoistureReading, Moisture = 5, OccurredOn = Today
+        });
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Empty(plantCare.Logs);
+    }
+
+    [Fact]
+    public async Task A_water_change_newer_than_the_watering_means_nothing_is_carried_over()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 5));
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.ChangedWater, 1));
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Empty(plantCare.Logs);
+    }
+
+    [Fact]
+    public async Task A_deleted_watering_is_not_carried_over()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 4));
+        await propagationCare.SaveAsync(CareLog(pup, PropagationCareKind.Watered, 1, deleted: true));
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Equal(Today.AddDays(-4), Assert.Single(plantCare.Logs).OccurredOn);
+    }
+
+    [Fact]
+    public async Task Another_propagations_watering_is_not_carried_over()
+    {
+        var pup = await StartInSoilAsync();
+        await propagationCare.SaveAsync(new PropagationCareLog
+        {
+            PropagationId = Guid.NewGuid(), Kind = PropagationCareKind.Watered, OccurredOn = Today
+        });
+
+        await service.PotUpAsync(pup, new PotUpRequest(1, Today));
+
+        Assert.Empty(plantCare.Logs);
+    }
+
+    [Fact]
+    public async Task Pot_up_with_plant_ids_uses_them_and_a_rerun_after_a_failure_makes_no_duplicates()
+    {
+        var corms = await StartCormsAsync(3);
+        var ids = new[] { Guid.NewGuid(), Guid.NewGuid() };
+        var request = new PotUpRequest(2, Today, "Corm", PlantIds: ids);
+
+        // The first run stopped after saving one plant
+        await plants.SaveAsync(new Plant { Id = ids[0], Nickname = "Corm 1", FromPropagationId = corms.Id });
+        await timeline.AddAsync(new TimelineEntry { SubjectType = SubjectType.Plant, SubjectId = ids[0], Kind = TimelineKind.Created, Text = "Potted up from a propagation" });
+
+        var made = await service.PotUpAsync(corms, request);
+
+        Assert.Equal(ids, made.Select(p => p.Id));
+        Assert.Equal(2, plants.Plants.Values.Count(p => p.FromPropagationId == corms.Id));
+        Assert.All(ids, id => Assert.Single(timeline.Entries, e => e.SubjectId == id && e.Kind == TimelineKind.Created));
+        Assert.Equal(2, corms.PottedUpCount);
+    }
+
+    [Fact]
+    public async Task Pot_up_with_too_few_plant_ids_is_refused_before_anything_is_written()
+    {
+        var corms = await StartCormsAsync(3);
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            service.PotUpAsync(corms, new PotUpRequest(2, Today, PlantIds: [Guid.NewGuid()])));
+
+        Assert.Equal(0, corms.PottedUpCount);
+        Assert.DoesNotContain(plants.Plants.Values, p => p.FromPropagationId == corms.Id);
     }
 }

@@ -1,11 +1,21 @@
 @inherits LayoutComponentBase
-@implements IDisposable
+@implements IAsyncDisposable
 @inject IndexedDb Db
 @inject ThemeService Theme
+@inject ErrorReports ErrorReports
 @inject SyncRunner Sync
+@inject CoverPhotos Covers
 @inject BackupService Backup
 @inject IPestCaseRepository PestCases
+@inject IPlantRepository Plants
+@inject ProblemService Problems
+@inject SellerService Sellers
+@inject PotService PotLibrary
+@inject Stikling.Core.Propagations.PropagationService PropagationService
+@inject DeviceFiles Files
+@inject ILogger<MainLayout> Logger
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <div class="app-shell">
     <header class="app-header">
@@ -13,6 +23,10 @@
             <img src="icon-192.png" alt="" width="28" height="28" />
             Stikling
         </a>
+        <div class="header-actions">
+        <NavLink class="settings-link" href="search" aria-label="Search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+        </NavLink>
         <NavLink class="settings-link" href="settings" aria-label="@(Sync.HasProblem ? "Settings, sync problem" : "Settings")">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>
             @if (Sync.HasProblem)
@@ -20,6 +34,7 @@
                 <span class="settings-link-dot" aria-hidden="true"></span>
             }
         </NavLink>
+        </div>
     </header>
 
     <main class="app-content @(updateReady || FirstSyncNotice ? "with-banner" : null)">
@@ -41,6 +56,12 @@
             <img src="icon-192.png" alt="" width="28" height="28" />
             Stikling
         </a>
+        @* A quiet field rather than a tab, since it works from anywhere. The / key opens it too. *@
+        <NavLink class="app-nav-search" href="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            <span>Search</span>
+            <kbd aria-hidden="true">/</kbd>
+        </NavLink>
         <NavLink class="app-nav-link" href="" Match="NavLinkMatch.All">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" /><path d="M3.5 10h17M8 3v4M16 3v4" /><path d="m9 15 2 2 4-4" /></svg>
             <span>Today</span>
@@ -87,10 +108,14 @@
 
     private bool FirstSyncNotice => Sync.FirstSync && !updateReady;
 
-    // Pests only has a tab while a case is open, so someone who never has pests isn't shown one.
-    // It is worked out again when the page changes, when sync brings changes and when a backup
-    // is restored. Saving a case goes to its page, so that covers opening and resolving one.
+    // Pests only has a tab while a case is open, or a problem on a plant that is still here, so
+    // someone who never has either isn't shown one. Its label stays Pests, since the page's whole
+    // name is too long for a tab. It is worked out again when the page changes, when sync brings
+    // changes and when a backup is restored. Saving a case or a problem goes to a page or back to
+    // the plant, so that covers opening and closing them.
     private bool pestTab;
+
+    private const string CoversCarriedKey = "covers-carried";
 
     private bool OnPestsPage =>
         Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0] is var path
@@ -101,19 +126,76 @@
         Sync.StatusChanged += OnSyncChanged;
         Sync.Received += OnReceived;
         Backup.Restored += OnReceived;
+        Covers.Changed += OnCoversChanged;
         Navigation.LocationChanged += OnLocationChanged;
+        await AdoptSellersAsync();
         await CheckPestsAsync();
+    }
+
+    // Plants and propagations with Source text but no seller get one. It is safe to run again, so it
+    // runs at start-up and whenever changes arrive, from a sync or a restored backup.
+    private async Task AdoptSellersAsync()
+    {
+        try
+        {
+            if (await Sellers.AdoptSourcesAsync() > 0)
+                Sync.NotifyChanged(); // so a page opened first shows them
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Turning Source text into sellers failed");
+        }
+
+        // The same for the Container text of propagations, which becomes containers in the pot library
+        try
+        {
+            if (await PotLibrary.AdoptContainersAsync() > 0)
+                Sync.NotifyChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Turning Container text into containers failed");
+        }
+
+        // Plants potted up before their cutting's cover was carried over take it, once per device. Run
+        // again, it would put back a cover someone has since removed.
+        try
+        {
+            if (await Files.GetAsync(CoversCarriedKey) is null)
+            {
+                var changed = await PropagationService.CarryCoversAsync();
+                await Files.SetAsync(CoversCarriedKey, "yes");
+                if (changed > 0)
+                    Sync.NotifyChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Giving potted-up plants their cutting's cover failed");
+        }
     }
 
     private void OnSyncChanged() => _ = InvokeAsync(StateHasChanged);
 
-    private void OnReceived() => _ = InvokeAsync(CheckPestsAsync);
+    private void OnReceived() => _ = InvokeAsync(async () =>
+    {
+        await AdoptSellersAsync();
+        await Covers.RefreshAsync();
+        await CheckPestsAsync();
+    });
+
+    private void OnCoversChanged() => _ = InvokeAsync(StateHasChanged);
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => _ = InvokeAsync(CheckPestsAsync);
 
     private async Task CheckPestsAsync()
     {
         var open = (await PestCases.GetAllAsync()).Any(c => c.IsOpen);
+        if (!open)
+        {
+            var plants = await Plants.GetAllAsync();
+            open = (await Problems.AllAsync()).Any(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.InCollection));
+        }
         if (open != pestTab)
         {
             pestTab = open;
@@ -121,12 +203,34 @@
         }
     }
 
-    public void Dispose()
+    private DotNetObjectReference<MainLayout>? self;
+    private IJSObjectReference? searchModule;
+    private IJSObjectReference? slash;
+
+    /// <summary>Called by the / key when the person isn't typing and Search isn't open.</summary>
+    [JSInvokable]
+    public void OpenSearch() => Navigation.NavigateTo("search");
+
+    public async ValueTask DisposeAsync()
     {
         Sync.StatusChanged -= OnSyncChanged;
         Sync.Received -= OnReceived;
         Backup.Restored -= OnReceived;
         Navigation.LocationChanged -= OnLocationChanged;
+        try
+        {
+            if (slash is not null)
+            {
+                await slash.InvokeVoidAsync("dispose");
+                await slash.DisposeAsync();
+            }
+            if (searchModule is not null)
+                await searchModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        self?.Dispose();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -136,6 +240,8 @@
 
         // The saved theme counts, the copy in localStorage is only for the first paint
         await Theme.ApplySavedAsync();
+        await ErrorReports.ApplySavedAsync();
+        await ErrorReports.SetReleaseAsync();
 
         try
         {
@@ -146,6 +252,17 @@
         catch (JSException)
         {
             // Storage that can't be made persistent still works
+        }
+
+        try
+        {
+            self = DotNetObjectReference.Create(this);
+            searchModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/search.js");
+            slash = await searchModule.InvokeAsync<IJSObjectReference>("installSlash", self);
+        }
+        catch (JSException)
+        {
+            // Without the key, Search is still opened from the header and the menu
         }
 
         // After the app is on screen, so a slow or missing connection never holds it back

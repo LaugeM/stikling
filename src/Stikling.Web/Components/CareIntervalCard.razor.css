@@ -1,0 +1,125 @@
+/* A Surface card with a hairline border, no shadow. The plant rows inside are divided by hairlines
+   rather than being cards of their own. */
+.care-card {
+    margin-bottom: 0.6rem;
+    padding: 0.75rem 0.85rem 0.25rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.care-card.coming {
+    background: transparent;
+    color: var(--pa-muted);
+}
+
+.care-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.6rem;
+}
+
+/* A stroked icon on a Leaf Tint tile in Potting Green */
+.care-tile {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.6rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-green);
+}
+
+.care-card.coming .care-tile {
+    opacity: 0.75;
+}
+
+.care-tile svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.care-head-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.care-label {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    color: var(--pa-text);
+}
+
+.care-card.coming .care-label {
+    color: var(--pa-muted);
+}
+
+.care-meta {
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.care-head .btn {
+    flex: none;
+}
+
+.care-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.care-rows > ::deep li {
+    border-top: 1px solid var(--pa-border);
+    padding-block: 0.4rem;
+}
+
+/* The shared row on Today brings its own card; inside this one it is just a line */
+.care-rows ::deep .item-card {
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+}
+
+.care-rows ::deep .item-thumb {
+    width: 2.75rem;
+    height: 2.75rem;
+}
+
+.care-rows ::deep .item-thumb svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.care-row-done {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    min-height: 3.5rem;
+}
+
+.care-done-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 600;
+    color: var(--pa-text);
+}
+
+.care-done-text {
+    font-size: 0.85rem;
+    color: var(--pa-green-dark);
+}
+
+.care-show-all {
+    margin: 0 0 0.25rem;
+}

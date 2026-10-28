@@ -1,7 +1,10 @@
 @page "/pests/new"
 @page "/pests/{Id:guid}/edit"
 @inject IPestCaseRepository Repository
+@inject ILogger<PestCaseEdit> Logger
 @inject IPlantRepository PlantRepository
+@inject ITreatmentPlanRepository PlanRepository
+@inject IPestTreatmentRepository TreatmentRepository
 @inject IPropagationRepository PropagationRepository
 @inject RoomService RoomService
 @inject NavigationManager Navigation
@@ -121,6 +124,24 @@ else
 
         <fieldset>
             <legend>Treatment</legend>
+            @if (IsNew && plans.Count > 0)
+            {
+                <div class="mb-3">
+                    <div class="form-label">Treatment plan</div>
+                    <div class="chip-row" role="group" aria-label="Treatment plans">
+                        <button type="button" class="chip @(pickedPlan is null ? "picked" : null)"
+                                aria-pressed="@(pickedPlan is null ? "true" : "false")"
+                                @onclick="() => pickedPlan = null">No plan</button>
+                        @foreach (var plan in plans)
+                        {
+                            <button type="button" class="chip @(pickedPlan == plan.Id ? "picked" : null)"
+                                    aria-pressed="@(pickedPlan == plan.Id ? "true" : "false")"
+                                    @onclick="() => pickedPlan = plan.Id">@plan.Name</button>
+                        }
+                    </div>
+                    <div class="form-text">Starts on the day you found it. @(pickedPlan is null ? "Without one, the case is treated at the interval below." : "")</div>
+                </div>
+            }
             <div class="mb-1">
                 <label class="form-label" for="interval">Treat every</label>
                 <div class="input-group">
@@ -128,7 +149,18 @@ else
                     <span class="input-group-text">days</span>
                 </div>
             </div>
-            <div class="form-text">Spider mites want 3 to 5 days, so the next round lands before the eggs hatch.</div>
+            @if (pickedPlan is not null)
+            {
+                <div class="form-text">Used once the plan is done.</div>
+            }
+            else if (FollowingPlan)
+            {
+                <div class="form-text">Following @item.PlanName. The interval is used if you stop the plan.</div>
+            }
+            else
+            {
+                <div class="form-text">Spider mites want 3 to 5 days, so the next round lands before the eggs hatch.</div>
+            }
         </fieldset>
 
         <fieldset>
@@ -165,9 +197,16 @@ else
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<Room> rooms = [];
     private Places places = Places.None;
+    private IReadOnlyList<TreatmentPlan> plans = [];
+    private IReadOnlyList<PestTreatment> caseTreatments = [];
+    private Guid? pickedPlan;
     private string? room; // as picked, "Living room"; made into a room when saving
 
     private bool IsNew => Id is null;
+
+    // The status the form opened with, since changing it in the form shouldn't hide the plan line
+    private bool FollowingPlan =>
+        item is { PlanStartedOn: not null, PlanStoppedOn: null } && loadedStatus == PestCaseStatus.Active;
 
     private DateOnly Today => Time.Today();
 
@@ -179,11 +218,16 @@ else
     {
         var allPlants = await PlantRepository.GetAllAsync();
         plants = allPlants
-            .Where(p => p.Status == PlantStatus.Active)
+            .Where(p => p.InCollection)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, allPlants, await PropagationRepository.GetAllAsync());
+
+        plans = (await PlanRepository.GetAllAsync())
+            .Where(p => !p.IsDeleted)
+            .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
 
         if (IsNew)
         {
@@ -198,6 +242,8 @@ else
         {
             item = (await Repository.GetAsync(Id!.Value))?.Copy();
             notFound = item is null;
+            loadedStatus = item?.Status;
+            caseTreatments = item is null ? [] : PestService.TreatmentsFor(await TreatmentRepository.GetAllAsync(), item.Id);
         }
 
         room = places.NameOf(item?.PlaceId);
@@ -233,6 +279,9 @@ else
         item.ResolvedOn = item.Status == PestCaseStatus.Resolved ? item.ResolvedOn ?? Today : null;
     }
 
+    // The status the case had when the form opened, so going back to treating restarts the clean count
+    private PestCaseStatus? loadedStatus;
+
     private async Task SaveAsync()
     {
         if (item is null)
@@ -246,11 +295,18 @@ else
             if (errors.Count > 0)
                 return;
 
+            if (loadedStatus is { } from)
+                PestService.StatusChanged(item, from, Today, caseTreatments);
+
+            if (IsNew && plans.FirstOrDefault(p => p.Id == pickedPlan) is { } plan)
+                item.StartPlan(plan, item.StartedOn);
+
             await Repository.SaveAsync(item);
             Navigation.NavigateTo($"pests/{item.Id}", replace: IsNew);
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Saving the pest case failed");
             errors = [$"Couldn't save: {ex.Message}"];
         }
         finally

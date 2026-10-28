@@ -8,13 +8,13 @@
 @inject IJSRuntime JS
 
 <div class="mb-3">
-    <label class="form-label" for="name-search">What plant is it?</label>
-    <input id="name-search" type="search" class="form-control" value="@query" placeholder="e.g. snake plant or Monstera deliciosa"
-           autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="name-results"
+    <label class="form-label" for="@(IdPrefix)name-search">What plant is it?</label>
+    <input id="@(IdPrefix)name-search" type="search" class="form-control" value="@query" placeholder="e.g. snake plant or Monstera deliciosa"
+           autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="@(IdPrefix)name-results"
            @oninput="e => query = e.Value?.ToString()" @ref="searchInput" />
     @if (Found is { Count: > 0 } found)
     {
-        <div id="name-results" class="name-results" role="group" aria-label="Plants found">
+        <div id="@(IdPrefix)name-results" class="name-results" role="group" aria-label="Plants found">
             @foreach (var result in found)
             {
                 <button type="button" class="name-result" @onclick="() => PickFoundAsync(result)">
@@ -38,32 +38,35 @@
     }
     else if (suggester is not null && NameKeyLength >= NameSuggester.MinLettersWithoutGenus)
     {
-        <div id="name-results" class="form-text">Nothing by that name in the app's list. You can still type it in below.</div>
+        <div id="@(IdPrefix)name-results" class="form-text">Nothing by that name in the app's list. You can still type it in below.</div>
     }
 </div>
 <div class="row g-2 mb-3">
     <div class="col-6">
-        <label class="form-label" for="genus">Genus</label>
-        <input id="genus" class="form-control" value="@Genus" placeholder="@GenusPlaceholder"
+        <label class="form-label" for="@(IdPrefix)genus">Genus</label>
+        <input id="@(IdPrefix)genus" class="form-control" value="@Genus" placeholder="@GenusPlaceholder"
                autocomplete="off" autocapitalize="words" spellcheck="false"
                @oninput="e => TypeAsync(NameField.Genus, e)" @onfocus="() => active = NameField.Genus" @onblur="Blur"
                @ref="genusInput" />
     </div>
-    <div class="col-6">
-        <label class="form-label" for="species">Species</label>
-        <input id="species" class="form-control" value="@Species" placeholder="@SpeciesPlaceholder"
-               autocomplete="off" autocapitalize="none" spellcheck="false"
-               @oninput="e => TypeAsync(NameField.Species, e)" @onfocus="() => active = NameField.Species" @onblur="Blur"
-               @ref="speciesInput" />
-    </div>
+    @if (Qualifier is not (NameQualifier.Sp or NameQualifier.Unknown))
+    {
+        <div class="col-6">
+            <label class="form-label" for="@(IdPrefix)species">Species</label>
+            <input id="@(IdPrefix)species" class="form-control" value="@Species" placeholder="@SpeciesPlaceholder"
+                   autocomplete="off" autocapitalize="none" spellcheck="false"
+                   @oninput="e => TypeAsync(NameField.Species, e)" @onfocus="() => active = NameField.Species" @onblur="Blur"
+                   @ref="speciesInput" />
+        </div>
+    }
     @if (active is NameField.Genus or NameField.Species)
     {
         <div class="col-12">@Chips</div>
     }
 </div>
 <div class="mb-1">
-    <label class="form-label" for="cultivar">Cultivar / variety</label>
-    <input id="cultivar" class="form-control" value="@Cultivar" placeholder="@CultivarPlaceholder"
+    <label class="form-label" for="@(IdPrefix)cultivar">Cultivar / variety</label>
+    <input id="@(IdPrefix)cultivar" class="form-control" value="@Cultivar" placeholder="@CultivarPlaceholder"
            autocomplete="off" autocapitalize="words" spellcheck="false"
            @oninput="e => TypeAsync(NameField.Cultivar, e)" @onfocus="() => active = NameField.Cultivar" @onblur="Blur"
            @ref="cultivarInput" />
@@ -71,13 +74,44 @@
     {
         <div class="mt-2">@Chips</div>
     }
-    @if (everyday?.For(Genus, Species, Cultivar) is { } called)
+    @if (everyday?.For(Genus, PlantNames.SpeciesToLookUp(Species, Qualifier), Cultivar) is { } called)
     {
         <div class="form-text">Everyday name: @called</div>
     }
 </div>
+@if (!unsureOpen)
+{
+    <div class="mb-1">
+        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => unsureOpen = true">Not sure of the name?</button>
+    </div>
+}
+else
+{
+    <div class="row g-2 mt-1">
+        <div class="col-12 col-sm-6">
+            <label class="form-label" for="@(IdPrefix)name-sure">How sure</label>
+            <select id="@(IdPrefix)name-sure" class="form-select" @onchange="SetQualifierAsync">
+                <option value="" selected="@(Qualifier is null)">Sure</option>
+                <option value="@NameQualifier.Cf" selected="@(Qualifier == NameQualifier.Cf)">cf. (looks like this species)</option>
+                <option value="@NameQualifier.Aff" selected="@(Qualifier == NameQualifier.Aff)">aff. (close to this species)</option>
+                <option value="@NameQualifier.Sp" selected="@(Qualifier == NameQualifier.Sp)">sp. (species not known)</option>
+                <option value="@NameQualifier.Unknown" selected="@(Qualifier == NameQualifier.Unknown)">Name lost</option>
+            </select>
+        </div>
+        <div class="col-12 col-sm-6">
+            <label class="form-label" for="@(IdPrefix)name-note">Locality or code</label>
+            <input id="@(IdPrefix)name-note" class="form-control" value="@Note" placeholder="e.g. Sumatra, EPC 123"
+                   autocomplete="off" spellcheck="false" @oninput="e => NoteChanged.InvokeAsync(e.Value?.ToString())" />
+        </div>
+    </div>
+}
 
 @code {
+    /// <summary>Put before every id, so a second set of name fields on the same page doesn't share them.</summary>
+    [Parameter]
+    public string IdPrefix { get; set; } = "";
+
+
     [Parameter]
     public string? Genus { get; set; }
 
@@ -96,6 +130,20 @@
     [Parameter]
     public EventCallback<string?> CultivarChanged { get; set; }
 
+    /// <summary>How sure the name is. Null when it is sure.</summary>
+    [Parameter]
+    public NameQualifier? Qualifier { get; set; }
+
+    [Parameter]
+    public EventCallback<NameQualifier?> QualifierChanged { get; set; }
+
+    /// <summary>A locality or collector code that goes with the name.</summary>
+    [Parameter]
+    public string? Note { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> NoteChanged { get; set; }
+
     [Parameter]
     public string GenusPlaceholder { get; set; } = "e.g. Monstera";
 
@@ -104,6 +152,21 @@
 
     [Parameter]
     public string CultivarPlaceholder { get; set; } = "e.g. Thai Constellation";
+
+    // The unsure-name fields stay shut until used, and show open when the name already has them
+    private bool unsureOpen;
+
+    protected override void OnParametersSet()
+    {
+        if (Qualifier is not null || !string.IsNullOrWhiteSpace(Note))
+            unsureOpen = true;
+    }
+
+    private Task SetQualifierAsync(ChangeEventArgs e)
+    {
+        Qualifier = Enum.TryParse<NameQualifier>(e.Value?.ToString(), out var value) ? value : null;
+        return QualifierChanged.InvokeAsync(Qualifier);
+    }
 
     private NameSuggester? suggester;
     private EverydayNameBook? everyday;
@@ -207,7 +270,7 @@
 
         focusNext = field switch
         {
-            NameField.Genus => speciesInput,
+            NameField.Genus => Qualifier is NameQualifier.Sp or NameQualifier.Unknown ? cultivarInput : speciesInput,
             NameField.Species => cultivarInput,
             _ => null
         };
@@ -233,16 +296,27 @@
         return CultivarChanged.InvokeAsync(value);
     }
 
+    // The fields can leave the page while the script is still loading: Cancel, or a name filled in
+    // from the parent plant folding them away. Nothing is hooked up to a box that is already gone.
+    private bool disposed;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         // Enter in the search box picks the first plant found, rather than saving the form
         if (firstRender)
         {
             await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+            if (disposed)
+                return;
             enterPicks = await module.InvokeAsync<IJSObjectReference>("enterPicksFirst", searchInput);
+            if (disposed)
+            {
+                await ReleaseEnterPicksAsync();
+                return;
+            }
         }
 
-        if (focusNext is not { } input)
+        if (focusNext is not { } input || disposed)
             return;
 
         focusNext = null;
@@ -251,12 +325,19 @@
 
     public async ValueTask DisposeAsync()
     {
-        if (enterPicks is null)
+        disposed = true;
+        await ReleaseEnterPicksAsync();
+    }
+
+    private async Task ReleaseEnterPicksAsync()
+    {
+        if (enterPicks is not { } picks)
             return;
+        enterPicks = null;
         try
         {
-            await enterPicks.InvokeVoidAsync("dispose");
-            await enterPicks.DisposeAsync();
+            await picks.InvokeVoidAsync("dispose");
+            await picks.DisposeAsync();
         }
         catch (JSDisconnectedException)
         {

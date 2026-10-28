@@ -17,6 +17,19 @@ public sealed class Photo : Entity
 
     /// <summary>How the photo sits where it's cropped, on cards and at the top of a page. Null is centred.</summary>
     public PhotoFrame? Frame { get; set; }
+
+    /// <summary>
+    /// Set on a photo copied from the history a plant or propagation had before it was received.
+    /// It is an ordinary photo of the subject, but read-only: it can be framed and set as the
+    /// cover, not changed or deleted.
+    /// </summary>
+    public Guid? ReceivedHistoryId { get; set; }
+
+    /// <summary>
+    /// A photo that isn't of the plant itself, like the seller's listing or the plant fully grown.
+    /// It stays out of the history, the cover, shared pages and the year.
+    /// </summary>
+    public bool IsReference { get; set; }
 }
 
 /// <summary>

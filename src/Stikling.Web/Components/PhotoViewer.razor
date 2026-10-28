@@ -1,10 +1,10 @@
-@* Full-screen photo viewer with previous/next, and "set as cover", framing and delete where the page allows them. *@
+@* Full-screen photo viewer with previous/next, and "set as cover", framing and delete where the page allows them. Photos copied from a received history can't be deleted. *@
 
 @if (Current is { } photo)
 {
     <div class="viewer" role="dialog" aria-modal="true" aria-label="Photo viewer" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
         <div class="viewer-bar">
-            <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))@PhotoDayCount.Suffix(DayOne, DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))</span>
+            <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))@PhotoDayCount.Suffix(PhotoAge?.Invoke(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime)))</span>
             <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
         </div>
 
@@ -34,18 +34,28 @@
                     }
                     else
                     {
-                        @if (OnSetCover.HasDelegate)
+                        @if (OnSetCover.HasDelegate && !photo.IsReference)
                         {
-                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)"
-                                    disabled="@(photo.Id == CoverPhotoId)">
-                                @(photo.Id == CoverPhotoId ? "Cover photo" : "Set as cover")
-                            </button>
+                            @if (photo.Id == CoverPhotoId)
+                            {
+                                <span class="viewer-cover"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" /></svg>Cover photo</span>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)">Set as cover</button>
+                            }
                         }
                         @if (OnFrame.HasDelegate)
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">Frame</button>
                         }
-                        @if (OnDelete.HasDelegate)
+                        @* A photo from a received history stays in the history it came with *@
+                        @if (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
+                        {
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetReference.InvokeAsync(photo)">@(photo.IsReference ? "Move to history" : "Move to reference")</button>
+                        }
+                        @* A photo copied from the history it had before stays as it was given *@
+                        @if (OnDelete.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">Delete</button>
                         }
@@ -72,10 +82,14 @@
 
     /// <summary>The day the photos count from (day 0). Without it, no day count is shown.</summary>
     [Parameter]
-    public DateOnly? DayOne { get; set; }
+    public Func<DateOnly, string?>? PhotoAge { get; set; }
 
     [Parameter]
     public EventCallback<Photo> OnSetCover { get; set; }
+
+    /// <summary>Moves a photo between the history and the reference photos. The action only shows when this is set.</summary>
+    [Parameter]
+    public EventCallback<Photo> OnSetReference { get; set; }
 
     /// <summary>Deletes a photo. Delete only shows when this is set.</summary>
     [Parameter]
@@ -85,13 +99,19 @@
     [Parameter]
     public EventCallback<(Photo Photo, PhotoFrame? Frame)> OnFrame { get; set; }
 
+    /// <summary>Photos that belong to another page, like a cutting's photos on its plant. They can be framed and set as the cover, not moved or deleted from here.</summary>
+    [Parameter]
+    public IReadOnlySet<Guid>? KeptPhotoIds { get; set; }
+
+    private bool Kept(Photo photo) => KeptPhotoIds?.Contains(photo.Id) == true;
+
     private ElementReference dialog;
     private bool confirmDelete;
     private bool framing;
     private bool focusPending;
 
     /// <summary>Without any, the viewer is for looking only, like a pot's photos opened from a plant.</summary>
-    private bool HasActions => OnSetCover.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate;
+    private bool HasActions => OnSetCover.HasDelegate || OnSetReference.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate;
 
     private Photo? Current => Index is { } i && i >= 0 && i < PhotoList.Count ? PhotoList[i] : null;
 

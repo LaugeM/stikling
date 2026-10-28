@@ -20,6 +20,10 @@ public enum WateringForm
 
 public static class WateringForms
 {
+    /// <summary>The care entry that says the plant has had its water: watered, or topped up for the others.</summary>
+    public static CareKind DoneKind(WateringForm form) =>
+        form == WateringForm.TopWatered ? CareKind.Watered : CareKind.ToppedUp;
+
     /// <summary>The form for a plant as it is now.</summary>
     /// <param name="pot">Finds a pot by id, to see whether it waters itself. Without it, pots count as ordinary.</param>
     public static WateringForm Of(Plant plant, Func<Guid, Pot?>? pot = null)

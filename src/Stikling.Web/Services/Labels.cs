@@ -1,5 +1,6 @@
 using System.Globalization;
 using Stikling.Core.Models;
+using Stikling.Core.Plants;
 using Stikling.Core.Pests;
 using Stikling.Core.Pots;
 using Stikling.Core.SoilMixes;
@@ -18,6 +19,17 @@ public static class Labels
         _ => status.ToString()
     };
 
+    /// <summary>
+    /// What to say about a plant that isn't in the collection: its status, or that it is potted with
+    /// another plant, by name when the name is known.
+    /// </summary>
+    public static string StatusOf(Plant plant, string? pottedWith = null) =>
+        plant.LivesElsewhere
+            ? (plant.LivesWithName is { } owner ? $"Lives with {owner}" : "Not yours")
+            : plant.Status == PlantStatus.Active && plant.PottedWithPlantId is not null
+            ? (string.IsNullOrWhiteSpace(pottedWith) ? "Potted with another plant" : $"Potted with {pottedWith}")
+            : For(plant.Status);
+
     public static string For(PlantOrigin origin) => origin switch
     {
         PlantOrigin.Purchased => "Purchased",
@@ -29,6 +41,44 @@ public static class Labels
         _ => origin.ToString()
     };
 
+    public static string For(RaisedAs raised) => raised switch
+    {
+        RaisedAs.NurseryGrown => "Nursery grown",
+        RaisedAs.TissueCulture => "Tissue culture",
+        RaisedAs.Seed => "From seed",
+        RaisedAs.Cutting => "From a cutting or division",
+        RaisedAs.WildCollected => "Wild collected",
+        _ => raised.ToString()
+    };
+
+    public static string For(SellerKind kind) => kind switch
+    {
+        SellerKind.Shop => "Shop",
+        SellerKind.OnlineShop => "Online shop",
+        SellerKind.Person => "Person",
+        SellerKind.SwapEvent => "Swap event",
+        SellerKind.Other => "Other",
+        _ => kind.ToString()
+    };
+
+    public static string For(ArrivalRating rating) => rating switch
+    {
+        ArrivalRating.Good => "Good",
+        ArrivalRating.Ok => "OK",
+        ArrivalRating.Poor => "Poor",
+        _ => rating.ToString()
+    };
+
+    public static string For(ArrivalProblem problem) => problem switch
+    {
+        ArrivalProblem.Pests => "Pests",
+        ArrivalProblem.Damaged => "Damaged or broken",
+        ArrivalProblem.RootRot => "Root rot",
+        ArrivalProblem.WrongPlant => "Wrong plant",
+        ArrivalProblem.SmallerThanShown => "Smaller than shown",
+        _ => problem.ToString()
+    };
+
     public static string For(LightLevel light) => light switch
     {
         LightLevel.Low => "Low light",
@@ -36,6 +86,39 @@ public static class Labels
         LightLevel.BrightIndirect => "Bright indirect",
         LightLevel.DirectSun => "Some direct sun",
         _ => light.ToString()
+    };
+
+    public static string For(WaterNeed need) => need switch
+    {
+        WaterNeed.DryOut => "Dry out fully",
+        WaterNeed.DryPartly => "Dry out partly",
+        WaterNeed.EvenlyMoist => "Evenly moist",
+        _ => need.ToString()
+    };
+
+    public static string For(HumidityNeed need) => need switch
+    {
+        HumidityNeed.Low => "Low humidity",
+        HumidityNeed.Medium => "Medium humidity",
+        HumidityNeed.High => "High humidity",
+        _ => need.ToString()
+    };
+
+    public static string For(GrowingSeason season) => season switch
+    {
+        GrowingSeason.Summer => "Rests in winter",
+        GrowingSeason.Winter => "Rests in summer",
+        GrowingSeason.NoRest => "Grows all year",
+        _ => season.ToString()
+    };
+
+    public static string For(RestKind rest) => rest switch
+    {
+        RestKind.Cooler => "kept cooler",
+        RestKind.Drier => "kept drier",
+        RestKind.CoolerAndDrier => "kept cooler and drier",
+        RestKind.DiesBack => "dies back",
+        _ => rest.ToString()
     };
 
     public static string For(GrowingMedium medium) => medium switch
@@ -131,7 +214,7 @@ public static class Labels
     /// and nothing is logged, rather than counting days overdue since the pests were found.
     /// </summary>
     public static string Due(PestCaseView view) =>
-        view.Untreated && view.IsDue ? "no treatment yet" : Due(view.DaysUntilDue ?? 0, view.IsCheck);
+        view.Untreated && view.IsDue && view.StepNumber <= 1 ? "no treatment yet" : Due(view.DaysUntilDue ?? 0, view.IsCheck);
 
     /// <summary>"due today", "2 days overdue", "next in 3 days", or "check due today" and so on for a check.</summary>
     public static string Due(int daysUntil, bool check = false)
@@ -157,6 +240,13 @@ public static class Labels
             _ => stage.ToString()
         };
 
+    public static string For(PropagationCareKind kind) => kind switch
+    {
+        PropagationCareKind.ChangedWater => "Changed the water",
+        PropagationCareKind.MoistureReading => "Moisture reading",
+        _ => kind.ToString()
+    };
+
     /// <summary>Any of the app's enums, for code that works with several (e.g. history text).</summary>
     public static string For(Enum value) => value switch
     {
@@ -166,11 +256,12 @@ public static class Labels
         LightLevel l => For(l),
         RootingAid a => For(a),
         CareKind c => For(c),
+        PropagationCareKind c => For(c),
         PropagationType t => For(t),
         PropagationStage s => Stage(s),
         Pest p => For(p),
         PestCaseStatus s => For(s),
-        PotGroup g => For(g),
+        PotKind g => For(g),
         PotMaterial m => For(m),
         PotWatering w => For(w),
         MixUnit u => For(u),
@@ -204,6 +295,10 @@ public static class Labels
         _ => $"{bytes / (1024d * 1024 * 1024):0.##} GB"
     };
 
+    /// <summary>"soil" in the middle of a line, but LECA and PON stay in capitals.</summary>
+    public static string MediumWord(GrowingMedium medium) =>
+        For(medium) is var label && label == label.ToUpperInvariant() ? label : label.ToLowerInvariant();
+
     /// <summary>"today", "yesterday", "12 days ago".</summary>
     public static string DaysAgo(int days) => days switch
     {
@@ -211,6 +306,32 @@ public static class Labels
         1 => "yesterday",
         _ => $"{days} days ago"
     };
+
+    /// <summary>"from March" for a month, "from Sat 17 Oct" for a day, for a flag set for later.</summary>
+    public static string FlagFrom(LooseDate from) => from.Precision == DatePrecision.Day
+        ? $"from {from.Start.ToString("ddd d MMM", CultureInfo.InvariantCulture)}"
+        : $"from {from.Start.ToString("MMMM", CultureInfo.InvariantCulture)}";
+
+    /// <summary>
+    /// "Usually likes bright indirect · dry out fully · rests in winter, kept drier": the needs the care file
+    /// would fill in, in the order light, water, humidity, season with how it rests. The source comes after it.
+    /// </summary>
+    public static string Offer(IReadOnlyList<LikesField> fills, PlantCare care)
+    {
+        var parts = new List<string>();
+        if (fills.Contains(LikesField.Light) && care.Light is { } light) parts.Add(Lower(For(light)));
+        if (fills.Contains(LikesField.Water) && care.Water is { } water) parts.Add(Lower(For(water)));
+        if (fills.Contains(LikesField.Humidity) && care.Humidity is { } humidity) parts.Add(Lower(For(humidity)));
+
+        // A way of resting is only offered for the season the plant already has or gets, so name it with the rest
+        var season = (fills.Contains(LikesField.Season) || fills.Contains(LikesField.Rest)) && care.Season is { } s ? Lower(For(s)) : null;
+        var rest = fills.Contains(LikesField.Rest) && care.Rest is { } r ? For(r) : null;
+        if (season is not null || rest is not null)
+            parts.Add(string.Join(", ", new[] { season, rest }.OfType<string>()));
+        return "Usually likes " + string.Join(" · ", parts);
+    }
+
+    private static string Lower(string text) => char.ToLowerInvariant(text[0]) + text[1..];
 
     /// <summary>"1 plant" / "3 plants".</summary>
     public static string Plants(int count) => Count(count, "plant");
@@ -228,26 +349,29 @@ public static class Labels
     /// <summary>"2024", "June 2024" or "12 Jun 2024", depending on how much is known.</summary>
     public static string Date(LooseDate date) => date.Text();
 
-    public static string For(PotGroup group) => group switch
+    public static string For(PotKind group) => group switch
     {
-        PotGroup.Inner => "Nursery pot",
-        PotGroup.Outer => "Outer pot",
+        PotKind.Inner => "Nursery pot",
+        PotKind.Outer => "Outer pot",
+        PotKind.Propagation => "For propagating",
         _ => "Stands on its own"
     };
 
     /// <summary>The short name on the switch between kinds at the top of the pot library.</summary>
-    public static string Tab(PotGroup group) => group switch
+    public static string Tab(PotKind group) => group switch
     {
-        PotGroup.Inner => "Nursery",
-        PotGroup.Outer => "Outer",
+        PotKind.Inner => "Nursery",
+        PotKind.Outer => "Outer",
+        PotKind.Propagation => "Propagation",
         _ => "On its own"
     };
 
     /// <summary>The heading over a group of pots in the library.</summary>
-    public static string Heading(PotGroup group) => group switch
+    public static string Heading(PotKind group) => group switch
     {
-        PotGroup.Inner => "Nursery pots",
-        PotGroup.Outer => "Outer pots",
+        PotKind.Inner => "Nursery pots",
+        PotKind.Outer => "Outer pots",
+        PotKind.Propagation => "Containers for propagating",
         _ => "Pots that stand on their own"
     };
 
@@ -326,6 +450,8 @@ public static class Labels
         ProductKind.Other => "Something else",
         _ => kind.ToString()
     };
+
+    public static string For(Nutrient nutrient) => nutrient.ToString();
 
     /// <summary>Said under the ingredients when the percentages do not reach 100. Never blocks a save.</summary>
     public static string PercentTotal(decimal total) =>

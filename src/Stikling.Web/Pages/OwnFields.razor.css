@@ -1,0 +1,57 @@
+.field-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.field-list > li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.field-list > li:first-child {
+    border-top: 0;
+}
+
+.field-row {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+}
+
+.field-title {
+    display: block;
+    font-weight: 600;
+}
+
+.field-kind,
+.field-use {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.field-choices {
+    list-style: none;
+    margin: 0 0 0.5rem;
+    padding: 0;
+}
+
+.field-choices > li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0;
+}
+
+.field-choice {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}

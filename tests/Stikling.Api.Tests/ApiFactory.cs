@@ -1,3 +1,4 @@
+using System.Buffers.Text;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -13,7 +14,9 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Stikling.Api.Data;
+using Stikling.Api.Notifications;
 using Testcontainers.Azurite;
 using Testcontainers.MsSql;
 
@@ -42,6 +45,20 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         .WithCommand("--skipApiVersionCheck")
         .Build();
 
+    /// <summary>The VAPID key pair the API is set up with: the public point and the private value, as base64url.</summary>
+    public static readonly (string Public, string Private) Vapid = MakeVapidKeys();
+
+    /// <summary>Stands in for the push services, and records what the API sent.</summary>
+    public FakePushSender Push { get; } = new();
+
+    private static (string, string) MakeVapidKeys()
+    {
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var parameters = key.ExportParameters(true);
+        var point = new byte[] { 0x04 }.Concat(parameters.Q.X!).Concat(parameters.Q.Y!).ToArray();
+        return (Base64Url.EncodeToString(point), Base64Url.EncodeToString(parameters.D!));
+    }
+
     public SecurityKey SigningKey { get; } = new RsaSecurityKey(RSA.Create(2048)) { KeyId = "test" };
 
     public async Task InitializeAsync()
@@ -66,6 +83,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             builder.UseSetting(key, value);
 
         builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IPushSender>();
+            services.AddSingleton<IPushSender>(Push);
             services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, jwt =>
             {
                 // Stands in for the OpenID configuration the API would fetch from Clerk
@@ -73,7 +93,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
                 configuration.SigningKeys.Add(SigningKey);
                 jwt.Configuration = configuration;
                 jwt.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(configuration);
-            }));
+            });
+        });
     }
 
     private Dictionary<string, string?> Settings => new()
@@ -85,6 +106,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         ["Clerk:Authority"] = Issuer,
         ["AppOrigins:0"] = AppOrigin,
         ["Share:BaseUrl"] = ShareBaseUrl,
+        ["Notifications:VapidPublicKey"] = Vapid.Public,
+        ["Notifications:VapidPrivateKey"] = Vapid.Private,
     };
 
     /// <summary>

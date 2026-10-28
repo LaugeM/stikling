@@ -11,7 +11,9 @@ RUN dotnet restore src/Stikling.Api/Stikling.Api.csproj
 
 COPY src/Stikling.Api/ src/Stikling.Api/
 COPY src/Stikling.Core/ src/Stikling.Core/
-RUN dotnet publish src/Stikling.Api/Stikling.Api.csproj --configuration Release --no-restore --output /app
+# The commit, which ends up in the version error reports are tagged with. Optional.
+ARG SOURCE_REVISION_ID
+RUN dotnet publish src/Stikling.Api/Stikling.Api.csproj --configuration Release --no-restore --output /app ${SOURCE_REVISION_ID:+-p:SourceRevisionId=$SOURCE_REVISION_ID}
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app

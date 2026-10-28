@@ -77,6 +77,13 @@ public sealed class Places
         : place.IsSpot ? RoomName.Combine(Find(place.RoomId)?.Name, place.Name)
         : place.Name;
 
+    /// <summary>
+    /// True when the place, or the room around it, is marked as outdoors. False for no place and
+    /// an unknown one.
+    /// </summary>
+    public bool IsOutdoors(Guid? id) =>
+        Find(id) is { } place && (place.Outdoors || (place.IsSpot && Find(place.RoomId)?.Outdoors == true));
+
     /// <summary>True when the place is the given one, or a spot inside it.</summary>
     public bool IsIn(Guid? placeId, Guid? scopeId)
     {

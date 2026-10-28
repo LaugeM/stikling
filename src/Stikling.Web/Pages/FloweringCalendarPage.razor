@@ -1,0 +1,111 @@
+@page "/plants/flowering"
+@layout WideLayout
+@inject IPlantRepository PlantRepository
+@inject IFloweringMarkRepository MarkRepository
+@inject TimeProvider Time
+
+<PageTitle>Flowering · Stikling</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="plants">Plants</a>
+<h1>Flowering</h1>
+
+@if (calendar is null)
+{
+    <p class="text-body-secondary">Loading…</p>
+}
+else if (calendar.IsEmpty && calendar.InFlowerNow.Count == 0 && calendar.BudsNow.Count == 0)
+{
+    <div class="empty-state">
+        <p><strong>Nothing has flowered yet</strong></p>
+        <p>Mark a plant as flowering from its page, under More. You can add past flowerings there too, so this calendar has something to go on.</p>
+        <a class="btn btn-link link-action mt-2" href="help#flowering">More about flowering in Help</a>
+    </div>
+}
+else
+{
+    @if (calendar.InFlowerNow.Count > 0 || calendar.BudsNow.Count > 0)
+    {
+        <section class="flowering-section">
+            <h2>In flower now</h2>
+            <ul class="flowering-list">
+                @foreach (var item in calendar.InFlowerNow)
+                {
+                    <li>
+                        <a class="flowering-plant" href="plants/@item.Plant.Id">@item.Plant.DisplayName</a>
+                        <span class="flowering-when">since @FloweringText.Date(item.Since, Today.Year)</span>
+                    </li>
+                }
+                @foreach (var item in calendar.BudsNow)
+                {
+                    <li>
+                        <a class="flowering-plant" href="plants/@item.Plant.Id">@item.Plant.DisplayName</a>
+                        <span class="flowering-when">@FloweringText.Since(FloweringStage.Buds, item.Since, Today.Year)</span>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (calendar.UsuallyNextMonth.Count > 0)
+    {
+        <section class="flowering-section">
+            <h2>Usually in flower in @FloweringText.MonthName(calendar.NextMonth)</h2>
+            <ul class="flowering-list">
+                @foreach (var item in calendar.UsuallyNextMonth)
+                {
+                    <li>
+                        <a class="flowering-plant" href="plants/@item.Plant.Id">@item.Plant.DisplayName</a>
+                        <span class="flowering-when">@FloweringText.InYears(item.Years)</span>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (!calendar.IsEmpty)
+    {
+        <section class="flowering-section page-full">
+            <h2>Through the year</h2>
+            <div class="flowering-year">
+                @foreach (var month in calendar.Months)
+                {
+                    <div class="flowering-month @(month.Month == Today.Month ? "current" : null)">
+                        <h3>@FloweringText.MonthName(month.Month)</h3>
+                        @if (month.Plants.Count == 0)
+                        {
+                            <p class="flowering-when mb-0">Nothing yet</p>
+                        }
+                        else
+                        {
+                            <ul class="flowering-list">
+                                @foreach (var item in month.Plants)
+                                {
+                                    <li>
+                                        <a class="flowering-plant" href="plants/@item.Plant.Id">@item.Plant.DisplayName</a>
+                                        <span class="flowering-when">@FloweringText.InYears(item.Years)</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+    }
+}
+
+@code {
+    private FloweringCalendar? calendar;
+
+    private DateOnly Today => Time.Today();
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var plants = await PlantRepository.GetAllAsync();
+        var marks = await MarkRepository.GetAllAsync();
+        calendar = FloweringCalendar.Build(plants, marks, Today);
+    }
+}

@@ -1,0 +1,474 @@
+@page "/care-intervals/new"
+@page "/care-intervals/{Id:guid}"
+@using System.Globalization
+@inject ICareIntervalRepository Repository
+@inject ILogger<CareIntervalEdit> Logger
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject ICareLogRepository CareLogRepository
+@inject IFeedRepository FeedRepository
+@inject OwnCareKindService OwnKindService
+@inject RoomService RoomService
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+
+<PageTitle>@(IsNew ? "Add an interval" : "Edit interval") · Stikling</PageTitle>
+
+<a class="back-link" href="@BackUrl">Back</a>
+<h1>@(IsNew ? "Add an interval" : "Edit interval")</h1>
+
+@if (item is null)
+{
+    <p class="text-body-secondary">@(notFound ? "That interval doesn't exist." : "Loading…")</p>
+}
+else
+{
+    <EditForm Model="item" OnSubmit="SaveAsync" class="edit-form">
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        @if (offReason is null)
+        {
+        <fieldset>
+            <legend>What</legend>
+            <div class="chip-row" role="group" aria-label="What comes back">
+                @foreach (var kind in CareInterval.AllowedKinds)
+                {
+                    var picked = item.OwnKindId is null && item.Kind == kind;
+                    <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                            @onclick="() => PickKind(kind)">@Labels.For(kind)</button>
+                }
+                @foreach (var own in ownKinds)
+                {
+                    var picked = item.OwnKindId == own.Id;
+                    <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                            @onclick="() => PickOwnKind(own)">@own.Name</button>
+                }
+            </div>
+            <div class="form-text">Watering isn't here. The watering reminder learns that from each plant.</div>
+
+            @if (item.IsFeed)
+            {
+                <div class="form-label mt-3" id="feed-label">Feed</div>
+                <div class="chip-row" role="group" aria-labelledby="feed-label">
+                    <button type="button" class="chip @(item.FeedId is null ? "picked" : null)" aria-pressed="@(item.FeedId is null ? "true" : "false")"
+                            @onclick="() => item.FeedId = null">Any feed</button>
+                    @foreach (var feed in feeds)
+                    {
+                        var picked = item.FeedId == feed.Id;
+                        <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                @onclick="() => item.FeedId = feed.Id">@feed.Name</button>
+                    }
+                </div>
+            }
+        </fieldset>
+
+        <fieldset>
+            <legend>How often</legend>
+            <div class="every-row">
+                <div>
+                    <label class="form-label" for="every">Every</label>
+                    <InputNumber id="every" class="form-control" @bind-Value="item.Every" min="1" inputmode="numeric" />
+                </div>
+                <div class="btn-group segmented" role="radiogroup" aria-label="Unit">
+                    @foreach (var unit in Enum.GetValues<IntervalUnit>())
+                    {
+                        var id = $"unit-{unit}";
+                        <input type="radio" class="btn-check" name="unit" id="@id"
+                               checked="@(item.Unit == unit)" @onchange="() => item.Unit = unit" />
+                        <label class="btn btn-outline-primary" for="@id">@unit</label>
+                    }
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>When in the year</legend>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="part-of-year"
+                       checked="@partOfYear" @onchange="SetPartOfYear" />
+                <label class="form-check-label" for="part-of-year">Only part of the year</label>
+            </div>
+            @if (partOfYear)
+            {
+                <div class="row g-2 mt-1">
+                    <div class="col-6">
+                        <label class="form-label" for="from-month">From</label>
+                        <select id="from-month" class="form-select" @bind="fromMonth">
+                            @foreach (var month in Enumerable.Range(1, 12))
+                            {
+                                <option value="@month">@CareIntervals.MonthName(month)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="to-month">To</label>
+                        <select id="to-month" class="form-select" @bind="toMonth">
+                            @foreach (var month in Enumerable.Range(1, 12))
+                            {
+                                <option value="@month">@CareIntervals.MonthName(month)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-text">@MonthsLine</div>
+            }
+            else
+            {
+                <div class="form-text">It comes back all year.</div>
+            }
+        </fieldset>
+
+        <fieldset>
+            <legend>Covers</legend>
+            <div class="btn-group segmented mb-3" role="radiogroup" aria-label="What it covers">
+                @foreach (var (value, label) in scopeOptions)
+                {
+                    var id = $"scope-{value}";
+                    <input type="radio" class="btn-check" name="scope" id="@id"
+                           checked="@(item.Scope == value)" @onchange="() => SetScope(value)" />
+                    <label class="btn btn-outline-primary" for="@id">@label</label>
+                }
+            </div>
+
+            @if (item.Scope == CareScope.Room)
+            {
+                <div class="mb-1">
+                    <RoomPicker @bind-Value="room" Rooms="rooms" Label="Room" />
+                </div>
+            }
+            else if (item.Scope == CareScope.Tag)
+            {
+                @if (tags.Count == 0)
+                {
+                    <p class="text-body-secondary mb-1">No plant has a tag yet. Add tags on a plant's page.</p>
+                }
+                else
+                {
+                    <div class="chip-row" role="group" aria-label="Tag">
+                        @foreach (var tag in tags)
+                        {
+                            var picked = PlantTags.Same(item.Tag, tag.Name);
+                            <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                    @onclick="() => item.Tag = tag.Name">@tag.Name</button>
+                        }
+                    </div>
+                }
+            }
+            else if (item.Scope == CareScope.PickedPlants)
+            {
+                <ul class="item-list pick-list">
+                    @foreach (var plant in plants)
+                    {
+                        <li>
+                            <label class="item-card selectable @(item.PlantIds.Contains(plant.Id) ? "selected" : null)">
+                                <input type="checkbox" class="form-check-input plant-check"
+                                       checked="@item.PlantIds.Contains(plant.Id)" @onchange="() => Toggle(plant.Id)" />
+                                <div class="item-text">
+                                    <div class="item-name">@plant.DisplayName</div>
+                                    @if (places.NameOf(plant.PlaceId) is { } location)
+                                    {
+                                        <div class="item-meta"><span>@location</span></div>
+                                    }
+                                </div>
+                            </label>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-body-secondary mb-1">Every plant in the collection, including ones added later.</p>
+            }
+
+            <p class="covers-count" aria-live="polite">@Labels.Plants(Covered.Count) now</p>
+        </fieldset>
+
+        <fieldset>
+            <legend>Notes</legend>
+            <InputTextArea class="form-control" rows="3" @bind-Value="item.Notes" aria-label="Notes" />
+        </fieldset>
+
+        @if (FirstDueLine is { } firstDue)
+        {
+            <p class="first-due">@firstDue</p>
+        }
+        }
+        else
+        {
+            <p class="text-body-secondary">@offReason</p>
+        }
+
+        @if (confirmingDelete)
+        {
+            <div class="confirm-card confirm-card-danger" role="alert">
+                <p class="mb-2">Delete this interval? Nothing logged is changed.</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" disabled="@saving" @onclick="DeleteAsync">Delete</button>
+                    <button type="button" class="btn btn-link" disabled="@saving" @onclick="() => confirmingDelete = false">Cancel</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="form-actions">
+                @if (offReason is null)
+                {
+                    <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Add interval" : "Save")</button>
+                }
+                <a class="btn btn-link" href="@BackUrl">Cancel</a>
+                @if (!IsNew)
+                {
+                    <button type="button" class="btn btn-outline-danger ms-auto" disabled="@saving" @onclick="() => confirmingDelete = true">Delete</button>
+                }
+            </div>
+        }
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    /// <summary>The plant whose page this was opened from. On a new interval it starts as the one plant picked.</summary>
+    [SupplyParameterFromQuery(Name = "plant")]
+    public Guid? PlantId { get; set; }
+
+    /// <summary>A kind to start from: a built-in one by name, or the id of an own kind.</summary>
+    [SupplyParameterFromQuery(Name = "kind")]
+    public string? KindName { get; set; }
+
+    private static readonly (CareScope Value, string Label)[] scopeOptions =
+    [
+        (CareScope.PickedPlants, "Pick plants"),
+        (CareScope.Room, "A room"),
+        (CareScope.Tag, "A tag"),
+        (CareScope.Everywhere, "All plants")
+    ];
+
+    private CareInterval? item;
+    private bool notFound;
+    private string? offReason;
+    private bool saving;
+    private bool confirmingDelete;
+    private List<string> errors = [];
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Plant> everyPlant = [];
+    private IReadOnlyList<Room> rooms = [];
+    private IReadOnlyList<TagCount> tags = [];
+    private IReadOnlyList<Feed> feeds = [];
+    private IReadOnlyList<OwnCareKind> ownKinds = [];
+    private IReadOnlyList<CareLog> careLogs = [];
+    private Places places = Places.None;
+    private string? room; // as picked, "Living room"; made into a room when saving
+    private bool partOfYear;
+    private int fromMonth = 4;
+    private int toMonth = 10;
+
+    private bool IsNew => Id is null;
+
+    private DateOnly Today => Time.Today();
+
+    private bool FromPlant => PlantId is { } id && everyPlant.Any(p => p.Id == id);
+
+    private string BackUrl => FromPlant ? $"plants/{PlantId}" : "care-intervals";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        everyPlant = await PlantRepository.GetAllAsync();
+        plants = everyPlant
+            .Where(p => p.InCollection)
+            .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        places = await RoomService.GetPlacesAsync();
+        rooms = Room.List(places, everyPlant, await PropagationRepository.GetAllAsync());
+        tags = PlantTags.InUse(everyPlant);
+        feeds = [.. (await FeedRepository.GetAllAsync()).Where(f => !string.IsNullOrWhiteSpace(f.Name))
+            .OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)];
+        // An own kind that counts as a watering can't be an interval
+        var allOwn = await OwnKindService.GetAllAsync();
+        ownKinds = [.. allOwn.Where(k => k.CountsAs != CareKind.Watered)];
+        careLogs = await CareLogRepository.GetAllAsync();
+
+        if (IsNew)
+        {
+            item = new CareInterval { StartsOn = Today };
+            if (FromPlant)
+            {
+                item.Scope = CareScope.PickedPlants;
+                item.PlantIds.Add(PlantId!.Value);
+            }
+            if (Guid.TryParse(KindName, out var ownId) && ownKinds.FirstOrDefault(k => k.Id == ownId) is { } own)
+                PickOwnKind(own);
+            else if (Enum.TryParse<CareKind>(KindName, out var kind) && CareInterval.AllowedKinds.Contains(kind))
+                PickKind(kind);
+        }
+        else
+        {
+            item = (await Repository.GetAsync(Id!.Value))?.Copy();
+            notFound = item is null;
+        }
+
+        if (item is not null)
+        {
+            offReason = CareIntervals.CountsAsWatering(item, CareLabels.Lookup(allOwn))
+                ? $"Off: {allOwn.First(k => k.Id == item.OwnKindId).Name} now counts as a watering. Watering stays with the watering reminder, so this interval does nothing. You can delete it."
+                : null;
+            room = places.NameOf(item.PlaceId);
+            partOfYear = item.HasMonths;
+            fromMonth = item.FromMonth ?? 4;
+            toMonth = item.ToMonth ?? 10;
+        }
+    }
+
+    private void PickKind(CareKind kind)
+    {
+        if (item is null)
+            return;
+
+        item.Kind = kind;
+        item.OwnKindId = null;
+        if (!item.IsFeed)
+            item.FeedId = null;
+    }
+
+    private void PickOwnKind(OwnCareKind own)
+    {
+        if (item is null)
+            return;
+
+        item.Kind = own.LogKind;
+        item.OwnKindId = own.Id;
+        if (!item.IsFeed)
+            item.FeedId = null;
+    }
+
+    private void SetPartOfYear(ChangeEventArgs e) => partOfYear = e.Value is true;
+
+    private void SetScope(CareScope scope)
+    {
+        if (item is null)
+            return;
+
+        item.Scope = scope;
+        if (scope != CareScope.Room)
+            room = null;
+        if (scope != CareScope.PickedPlants)
+            item.PlantIds.Clear();
+        if (scope != CareScope.Tag)
+            item.Tag = null;
+    }
+
+    private void Toggle(Guid plantId)
+    {
+        if (item is null)
+            return;
+
+        if (!item.PlantIds.Remove(plantId))
+            item.PlantIds.Add(plantId);
+    }
+
+    // What the form says now, as an interval, for the count and the first due day
+    private CareInterval Draft
+    {
+        get
+        {
+            var draft = item!.Copy();
+            draft.PlaceId = draft.Scope == CareScope.Room ? places.Named(room)?.Id : null;
+            draft.FromMonth = partOfYear ? fromMonth : null;
+            draft.ToMonth = partOfYear ? toMonth : null;
+            return draft;
+        }
+    }
+
+    private IReadOnlyList<Plant> Covered => item is null ? [] : CareIntervals.PlantsIn(Draft, plants, places);
+
+    private string MonthsLine =>
+        toMonth < fromMonth
+            ? $"{CareIntervals.MonthName(fromMonth)} to {CareIntervals.MonthName(toMonth)}, over the new year"
+            : $"{CareIntervals.MonthName(fromMonth)} to {CareIntervals.MonthName(toMonth)}";
+
+    // "First due 1 November", or the range when the plants differ
+    private string? FirstDueLine
+    {
+        get
+        {
+            if (item is null || item.Every < 1 || CareIntervals.FirstDue(Draft, plants, places, careLogs, Time) is not var (first, last))
+                return null;
+
+            if (first == last)
+                return $"First due {Day(first, true)}";
+            return first.Month == last.Month && first.Year == last.Year
+                ? $"First due between {first.Day} and {Day(last, true)}"
+                : $"First due between {Day(first, true)} and {Day(last, true)}";
+        }
+    }
+
+    private string Day(DateOnly day, bool withMonth) =>
+        day.ToString(withMonth ? "d MMMM" : "d", CultureInfo.InvariantCulture)
+        + (day.Year != Today.Year ? $" {day.Year}" : "");
+
+    private async Task SaveAsync()
+    {
+        if (item is null)
+            return;
+
+        saving = true;
+        try
+        {
+            item.PlaceId = item.Scope == CareScope.Room ? await RoomService.PlaceIdAsync(room) : null;
+            item.Tag = item.Scope == CareScope.Tag ? PlantTags.Clean(item.Tag) : null;
+            item.FromMonth = partOfYear ? fromMonth : null;
+            item.ToMonth = partOfYear ? toMonth : null;
+            if (!item.IsFeed)
+                item.FeedId = null;
+            item.Notes = string.IsNullOrWhiteSpace(item.Notes) ? null : item.Notes.Trim();
+
+            errors = item.Validate().ToList();
+            if (errors.Count > 0)
+                return;
+
+            await Repository.SaveAsync(item);
+            Navigation.NavigateTo(BackUrl, replace: true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the care interval failed");
+            errors = [$"Couldn't save: {ex.Message}"];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (item is null || IsNew)
+            return;
+
+        saving = true;
+        try
+        {
+            await Repository.DeleteAsync(item.Id);
+            Navigation.NavigateTo(BackUrl, replace: true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Deleting the care interval failed");
+            errors = [$"Couldn't delete: {ex.Message}"];
+            confirmingDelete = false;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+}

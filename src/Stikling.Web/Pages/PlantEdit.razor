@@ -1,30 +1,28 @@
 @page "/plants/new"
 @page "/plants/{Id:guid}/edit"
 @using Stikling.Core.Settings
-@inject IPlantRepository Repository
-@inject IPropagationRepository Propagations
-@inject IPotRepository PotRepository
-@inject ISoilMixRepository MixRepository
-@inject SettingsService SettingsService
+@inject ILogger<PlantEdit> Logger
+@inject PlantForms Forms
 @inject PlantService PlantService
-@inject RoomService RoomService
+@inject PlantCareService CommonCare
 @inject PhotoService Photos
+@inject GooglePhotosService Google
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
-<PageTitle>@(IsNew ? "Add plant" : "Edit plant") · Stikling</PageTitle>
+<PageTitle>@(RouteNew ? "Add plant" : "Edit plant") · Stikling</PageTitle>
 
-<a class="back-link" href="@(IsNew ? "plants" : $"plants/{Id}")">Back</a>
-<h1>@(IsNew ? "Add plant" : "Edit plant")</h1>
+<a class="back-link" href="@(RouteNew ? "plants" : $"plants/{Id}")">Back</a>
+<h1>@(RouteNew ? "Add plant" : "Edit plant")</h1>
 
 @if (IsNew && CopyOfId is null && ParentId is null && !FromPhotos)
 {
-    <p class="form-text">Adding several? <a class="link-action" href="plants/quick-add">Quick add</a></p>
+    <p class="form-text">Adding several? <a class="link-action" href="plants/quick-add">Quick add</a> or <a class="link-action" href="plants/import">import a spreadsheet</a></p>
 }
 
-@if (plant is null)
+@if (plant is null || form is null)
 {
     <p class="text-body-secondary">@(notFound ? "That plant doesn't exist." : "Loading…")</p>
 }
@@ -49,13 +47,42 @@ else
 
         <fieldset>
             <legend>Name</legend>
-            <PlantNameFields @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar" />
+            <PlantNameFields @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar"
+                             @bind-Qualifier="plant.NameQualifier" @bind-Note="plant.NameNote" />
             <div class="mt-3">
                 <label class="form-label" for="nickname">Nickname</label>
                 <InputText id="nickname" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Big Monstera" />
             </div>
             <div class="form-text">Give it a genus, a nickname, or both.</div>
-            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.DiedBefore(plant, existing) is { Count: > 0 } diedBefore)
+            <div class="mt-3">
+                <label class="form-label" for="collection-number">Collection number</label>
+                <input id="collection-number" class="form-control" autocomplete="off"
+                           @bind="plant.CollectionNumber" @bind:event="oninput" placeholder="e.g. 117"
+                           aria-invalid="@(NumberInvalid ? "true" : null)" />
+                @if (NumberInvalid)
+                {
+                    <div class="form-text text-danger">@CollectionNumbers.NotValidText</div>
+                }
+                else if (NumberCode is null)
+                {
+                    <div class="form-text">
+                        The number you write on the pot. Optional.
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => plant.CollectionNumber = nextNumber.ToString()">Use @nextNumber</button>
+                    </div>
+                }
+                else if (NumberClashes is { Count: > 0 } clashes)
+                {
+                    <div class="form-text">@CollectionNumbers.ClashNote(NumberCode, clashes)</div>
+                }
+            </div>
+            @if (form.WishHere is { } onWishlist)
+            {
+                <div class="form-check mt-2">
+                    <input type="checkbox" class="form-check-input" id="mark-wish-got" @bind="form.MarkWishGot" />
+                    <label class="form-check-label" for="mark-wish-got">On your wishlist: mark it got</label>
+                </div>
+            }
+            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.DiedBefore(plant, form.Plants) is { Count: > 0 } diedBefore)
             {
                 <p class="form-text">
                     @(diedBefore.Count == 1 ? "One like this died before: " : "Some like this died before: ")
@@ -66,7 +93,7 @@ else
                     }.
                 </p>
             }
-            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.SameName(plant, existing) is { Count: > 0 } same)
+            @if (IsNew && CopyOfId is null && ParentId is null && PlantMatches.SameName(plant, form.Plants) is { Count: > 0 } same)
             {
                 <p class="form-text already-have">
                     You already have
@@ -84,13 +111,30 @@ else
             <legend>Where it came from</legend>
             <div class="mb-3">
                 <label class="form-label" for="origin">How you got it</label>
-                <InputSelect id="origin" class="form-select" @bind-Value="plant.Origin">
+                <InputSelect id="origin" class="form-select" @bind-Value="plant.Origin" @bind-Value:after="form.OriginChanged">
                     @foreach (var origin in Enum.GetValues<PlantOrigin>())
                     {
                         <option value="@origin">@Labels.For(origin)</option>
                     }
                 </InputSelect>
             </div>
+
+            @* A value already chosen stays if the origin changes, it just isn't shown *@
+            @if (plant.AsksHowRaised)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="raised">How it was raised</label>
+                    <select id="raised" class="form-select" aria-describedby="raised-help"
+                            @onchange="e => plant.RaisedAs = Enum.TryParse<RaisedAs>(e.Value?.ToString(), out var how) ? how : null">
+                        <option value="" selected="@(plant.RaisedAs is null)">Not said</option>
+                        @foreach (var how in Enum.GetValues<RaisedAs>())
+                        {
+                            <option value="@how" selected="@(plant.RaisedAs == how)">@Labels.For(how)</option>
+                        }
+                    </select>
+                    <div id="raised-help" class="form-text">For a collector's number or locality, use Locality or code under the name.</div>
+                </div>
+            }
 
             <div class="mb-3">
                 <LooseDateInput @bind-Value="plant.AcquiredOn" Today="Today" Label="When you got it" />
@@ -102,7 +146,7 @@ else
                         <button type="button" class="btn btn-link btn-sm link-action" @onclick="KeepToday">Use today instead</button>
                     </div>
                 }
-                @if (copiedDate is { } sameDate && sameDate != LooseDate.Of(Today))
+                @if (form.CopiedDate is { } sameDate && sameDate != LooseDate.Of(Today))
                 {
                     @if (plant.AcquiredOn == sameDate)
                     {
@@ -110,7 +154,7 @@ else
                     }
                     else
                     {
-                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => plant.AcquiredOn = sameDate">Same date as @copiedFrom (@sameDate.Text())</button>
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => plant.AcquiredOn = sameDate">Same date as @form.CopiedFrom (@sameDate.Text())</button>
                     }
                 }
             </div>
@@ -123,9 +167,10 @@ else
                         <option value="">Not one of mine / unknown</option>
                         @foreach (var p in possibleParents)
                         {
-                            <option value="@p.Id">@p.DisplayName</option>
+                            <option value="@p.Id">@PlantLineage.ParentLabel(p)</option>
                         }
                     </InputSelect>
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => addParentOpen = true">The parent isn't mine</button>
                     @if (IsNew && plant.ParentPlantId is { } parentId)
                     {
                         <div class="form-text">
@@ -137,9 +182,26 @@ else
                 </div>
             }
 
+            @if (!IsNew)
+            {
+                <div class="mb-3">
+                    <div class="form-check">
+                        <InputCheckbox id="lives-elsewhere" class="form-check-input" @bind-Value="plant.LivesElsewhere" />
+                        <label class="form-check-label" for="lives-elsewhere">Not mine, it lives with someone else</label>
+                    </div>
+                    @if (plant.LivesElsewhere)
+                    {
+                        <div class="mt-2">
+                            <label class="form-label" for="lives-with">Whose is it?</label>
+                            <InputText id="lives-with" class="form-control" @bind-Value="plant.LivesWith" placeholder="e.g. Grandma" />
+                        </div>
+                        <div class="form-text">It stays out of your plant list and Today. Untick this when it becomes yours.</div>
+                    }
+                </div>
+            }
+
             <div class="mb-3">
-                <label class="form-label" for="source">Source</label>
-                <InputText id="source" class="form-control" @bind-Value="plant.Source" placeholder="Shop, friend, plant swap…" />
+                <SellerPicker @bind-Value="form.SellerText" Names="sellerNames" />
             </div>
 
             @* A price already entered stays if the origin changes, it just isn't shown *@
@@ -167,12 +229,34 @@ else
 
         <h2 class="section-label">More details</h2>
         <div class="more-details mb-4">
+            @if (ShowArrival)
+            {
+                <FormSection Title="How it arrived" Summary="@ArrivalFields.Summary(plant.ArrivedIn, plant.ArrivalProblems)" Open="openArrival">
+                    <ArrivalFields @bind-Rating="plant.ArrivedIn" Problems="plant.ArrivalProblems" @bind-Note="plant.ArrivalNote" />
+                </FormSection>
+            }
+
             <FormSection Title="Where it lives" Summary="@LivesSummary" Open="openLives">
                 <div class="mb-3">
-                    <RoomPicker @bind-Value="location" Rooms="rooms" />
+                    <RoomPicker @bind-Value="form.Location" Rooms="rooms" />
                 </div>
+                @if (form.CameInside)
+                {
+                    <div class="back-from-outside mb-3" role="group" aria-labelledby="back-from-outside-title">
+                        <b id="back-from-outside-title">Back from outside</b>
+                        <p class="form-text mb-2">Plants that spent time outside often bring pests in.</p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="back-quarantine" @bind="form.BackQuarantine" />
+                            <label class="form-check-label" for="back-quarantine">Put in quarantine for @Labels.Count(form.QuarantineLength, "day")</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="back-checked" @bind="form.BackChecked" />
+                            <label class="form-check-label" for="back-checked">Checked it for pests, no signs</label>
+                        </div>
+                    </div>
+                }
                 <div class="mb-3">
-                    <label class="form-label" for="light">Light</label>
+                    <label class="form-label" for="light">Light where it stands</label>
                     <InputSelect id="light" class="form-select" @bind-Value="plant.Light">
                         <option value="">Not set</option>
                         @foreach (var light in Enum.GetValues<LightLevel>())
@@ -183,10 +267,69 @@ else
                 </div>
             </FormSection>
 
+            @if (CareFor is { } suggested && CareSuggestion.Fills(plant, suggested) is { Count: > 0 } suggestedFills)
+            {
+                <CareOffer Care="suggested" Fills="suggestedFills" Book="careBook" OnUse="() => UseCare(suggested)" />
+            }
+
+            <FormSection Title="What it likes" Summary="@LikesSummary" Open="openLikes">
+                <div class="mb-3">
+                    <label class="form-label" for="likes-light">Light it likes</label>
+                    <InputSelect id="likes-light" class="form-select" @bind-Value="plant.LikesLight">
+                        <option value="">Not set</option>
+                        @foreach (var light in Enum.GetValues<LightLevel>())
+                        {
+                            <option value="@light">@Labels.For(light)</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="likes-water">Water</label>
+                    <InputSelect id="likes-water" class="form-select" @bind-Value="plant.LikesWater">
+                        <option value="">Not set</option>
+                        <option value="@WaterNeed.DryOut">Let it dry out fully</option>
+                        <option value="@WaterNeed.DryPartly">Let it dry out partly</option>
+                        <option value="@WaterNeed.EvenlyMoist">Keep it evenly moist</option>
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="likes-humidity">Humidity</label>
+                    <InputSelect id="likes-humidity" class="form-select" @bind-Value="plant.LikesHumidity" aria-describedby="likes-humidity-help">
+                        <option value="">Not set</option>
+                        <option value="@HumidityNeed.Low">Low</option>
+                        <option value="@HumidityNeed.Medium">Medium</option>
+                        <option value="@HumidityNeed.High">High</option>
+                    </InputSelect>
+                    <div id="likes-humidity-help" class="form-text">Low is a normal room, under about 40%. High is 60% or more, like a cabinet or next to a humidifier.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="likes-season">Growing season</label>
+                    <InputSelect id="likes-season" class="form-select" @bind-Value="plant.GrowingSeason">
+                        <option value="">Not set</option>
+                        <option value="@GrowingSeason.NoRest">Grows all year</option>
+                        <option value="@GrowingSeason.Summer">Grows in summer, rests in winter</option>
+                        <option value="@GrowingSeason.Winter">Grows in winter, rests in summer</option>
+                    </InputSelect>
+                </div>
+                @if (plant.GrowingSeason is GrowingSeason.Summer or GrowingSeason.Winter)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="likes-rest">How it rests</label>
+                        <InputSelect id="likes-rest" class="form-select" @bind-Value="plant.RestHow">
+                            <option value="">Not set</option>
+                            <option value="@RestKind.Cooler">Kept cooler</option>
+                            <option value="@RestKind.Drier">Kept drier</option>
+                            <option value="@RestKind.CoolerAndDrier">Kept cooler and drier</option>
+                            <option value="@RestKind.DiesBack">Dies back</option>
+                        </InputSelect>
+                    </div>
+                }
+            </FormSection>
+
             <FormSection Title="Pot and soil" Summary="@PotSummary" Open="openPot">
                 <div class="mb-3">
                     <label class="form-label" for="medium">Grows in</label>
-                    <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => SetMedium(m)" ValueExpression="() => plant.Medium"
+                    <InputSelect id="medium" class="form-select" Value="plant.Medium" ValueChanged="(GrowingMedium m) => form.SetMedium(m)" ValueExpression="() => plant.Medium"
                                  aria-describedby="@(Labels.Explain(plant.Medium) is null ? null : "medium-help")">
                         @foreach (var medium in Enum.GetValues<GrowingMedium>())
                         {
@@ -197,29 +340,54 @@ else
                     {
                         <div id="medium-help" class="form-text">@mediumHelp</div>
                     }
-                </div>
-
-                <div class="mb-3">
-                    <MixPicker @bind-Value="plant.SoilMixId" Mixes="mixes" />
-                </div>
-
-                <div class="mb-3">
-                    <PotPicker Value="plant.InnerPotId" ValueChanged="SetInnerPot" Pots="pots" Groups="InnerSlot" PotAdded="AddPot" />
-                </div>
-
-                <div class="mb-3">
-                    <PotPicker Value="plant.OuterPotId" ValueChanged="SetOuterPot" Pots="pots" Groups="OuterSlot"
-                               Label="Outer pot" NoneText="No outer pot" PotAdded="AddPot" />
-                    @if (plant.OuterPotId is not null)
+                    @if (form.OffersTransition)
                     {
                         <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" id="water-outer"
-                                   checked="@plant.WaterInOuterPot"
-                                   @onchange="e => plant.WaterInOuterPot = (bool?)e.Value == true" />
-                            <label class="form-check-label" for="water-outer">Keep water in the outer pot</label>
+                            <input id="track-transition" class="form-check-input" type="checkbox" @bind="form.TrackTransition" />
+                            <label class="form-check-label" for="track-transition">Track the move to semi-hydro</label>
+                            <div class="form-text">Adds a checklist to its page for washed roots, the first water root and the first new leaf.</div>
                         </div>
-                        <div class="form-text">For a plain outer pot you keep water in, with the medium wicking it up.</div>
                     }
+                </div>
+
+                <div class="mb-3">
+                    <MixPicker @bind-Value="plant.SoilMixId" Mixes="form.Mixes" />
+                </div>
+
+                <div class="mb-3">
+                    <PotPicker Value="plant.InnerPotId" ValueChanged="form.SetInnerPot" Pots="form.Pots" Groups="InnerSlot" PotAdded="form.AddPot" />
+                    @if (form.InnerPotChange is { } sizeChange)
+                    {
+                        <div class="form-text">@sizeChange.Text</div>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <PotPicker Value="plant.OuterPotId" ValueChanged="form.SetOuterPot" Pots="form.Pots" Groups="OuterSlot"
+                               Label="Outer pot" NoneText="No outer pot" PotAdded="form.AddPot" />
+                    @if (plant.OuterPotId is not null)
+                    {
+                        <InfoButton Topic="keeping water in the outer pot">
+                            <Label>
+                                <div class="form-check mt-2 mb-0">
+                                    <input class="form-check-input" type="checkbox" id="water-outer"
+                                           checked="@plant.WaterInOuterPot"
+                                           @onchange="e => plant.WaterInOuterPot = (bool?)e.Value == true" />
+                                    <label class="form-check-label" for="water-outer">Keep water in the outer pot</label>
+                                </div>
+                            </Label>
+                            <ChildContent>
+                                The outer pot holds water on purpose and the plant wicks it up, like a self-watering pot. Leave it off for an ordinary outer pot that you tip out after watering.
+                            </ChildContent>
+                        </InfoButton>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="how-many">How many in the pot</label>
+                    <InputNumber id="how-many" class="form-control" @bind-Value="plant.Count"
+                                 min="1" step="1" placeholder="1" inputmode="numeric" aria-describedby="how-many-help" />
+                    <div id="how-many-help" class="form-text">For pups or cuttings kept together in one pot</div>
                 </div>
             </FormSection>
 
@@ -232,13 +400,13 @@ else
                 </div>
                 <div class="form-text mb-3">
                     Today asks you to check it when it's probably dry, once it has seen a few waterings.
-                    @if (!wateringReminderOn)
+                    @if (!form.Settings.WateringReminder)
                     {
                         <text> The reminder is turned on in Settings, and it's off there now.</text>
                     }
                 </div>
 
-                @if (WateringForms.Of(plant, FindPot) == WateringForm.TopWatered)
+                @if (WateringForms.Of(plant, form.FindPot) == WateringForm.TopWatered)
                 {
                     <div class="mb-3">
                         <label class="form-label" for="water-at">Water at</label>
@@ -250,7 +418,60 @@ else
                             Set it higher for a plant kept moister, like a peace lily.
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <div class="form-label" id="water-by-label">How you water it</div>
+                        <div role="radiogroup" aria-labelledby="water-by-label" aria-describedby="water-by-help">
+                            @foreach (var method in WaterByChoices)
+                            {
+                                var key = method?.ToString().ToLowerInvariant() ?? "none";
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="water-by" id="water-by-@key" aria-describedby="water-by-@key-hint"
+                                           checked="@(plant.WaterBy == method)" @onchange="() => plant.WaterBy = method" />
+                                    <label class="form-check-label" for="water-by-@key">@(method is { } named ? SitterSheetText.MethodName(named) : "Not said")</label>
+                                    <div id="water-by-@key-hint" class="form-text mt-0">@SitterSheetText.MethodHint(method)</div>
+                                </div>
+                            }
+                        </div>
+                        <div id="water-by-help" class="form-text mt-2">Goes on the sheet for a plant-sitter. Not said means the way you pick for the sheet.</div>
+                    </div>
                 }
+
+                <div class="mb-3">
+                    @if (form.Feeds.Count == 0)
+                    {
+                        <div class="form-label">Feed with the watering</div>
+                        <div class="form-text">
+                            Save a feed under Feeds first, then it can be given with the water here.
+                            @if (!IsNew)
+                            {
+                                <a href="feeds">Feeds</a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <label class="form-label" for="watering-feed">Feed with the watering</label>
+                        <select id="watering-feed" class="form-select" aria-describedby="watering-feed-help"
+                                @onchange="e => SetWateringFeed(e.Value?.ToString())">
+                            <option value="" selected="@(form.FeedChoice is null)">Off</option>
+                            @foreach (var feed in form.Feeds)
+                            {
+                                <option value="@feed.Id" selected="@(form.FeedChoice == feed.Id)">@feed.Name</option>
+                            }
+                        </select>
+                        @if (form.FeedChoice is not null)
+                        {
+                            <label class="form-label mt-3" for="watering-feed-every">How often</label>
+                            <select id="watering-feed-every" class="form-select"
+                                    @onchange="e => plant.WateringFeedEvery = int.TryParse(e.Value?.ToString(), out var n) ? n : 1">
+                                <option value="1" selected="@((plant.WateringFeedEvery ?? 1) == 1)">Every watering</option>
+                                <option value="2" selected="@(plant.WateringFeedEvery == 2)">Every second watering</option>
+                                <option value="3" selected="@(plant.WateringFeedEvery == 3)">Every third watering</option>
+                            </select>
+                        }
+                        <div id="watering-feed-help" class="form-text">Ticking Watered or Topped up also logs this feed and its doses.</div>
+                    }
+                </div>
             </FormSection>
 
             @if (IsNew)
@@ -259,6 +480,29 @@ else
                     @AboutField
                 </FormSection>
             }
+
+            <FormSection Title="For a plant-sitter" Summary="@SitterSummary" Open="openSitter">
+                <div class="mb-3">
+                    <label class="form-label" for="sitter-note">Note for a plant-sitter</label>
+                    <InputTextArea id="sitter-note" class="form-control" rows="3" @bind-Value="plant.SitterNote" aria-describedby="sitter-note-help" />
+                    <div id="sitter-note-help" class="form-text">Goes on the sheet for whoever looks after your plants while you're away.</div>
+                </div>
+            </FormSection>
+
+            <FormSection Title="For swap" Summary="@SwapSummary" Open="openSwap">
+                <div class="mb-3">
+                    <label class="form-label" for="spare">Offered for swap</label>
+                    <select id="spare" class="form-select" aria-describedby="spare-help"
+                            @onchange="e => plant.Spare = Enum.TryParse<SpareMark>(e.Value?.ToString(), out var mark) ? mark : null">
+                        <option value="" selected="@(plant.Spare is null)">Not offered</option>
+                        @foreach (var mark in Enum.GetValues<SpareMark>())
+                        {
+                            <option value="@mark" selected="@(plant.Spare == mark)">@SwapLists.MarkText(mark)</option>
+                        }
+                    </select>
+                    <div id="spare-help" class="form-text">Shows on the Available for swap page, which you can share as text.</div>
+                </div>
+            </FormSection>
 
             <FormSection Title="Tags" Summary="@TagsSummary" Open="openTags">
                 <div class="mb-3">
@@ -292,16 +536,50 @@ else
                     <div class="form-text mb-3">Kept apart from your other plants, e.g. while a new plant shows it has no pests.</div>
                 </FormSection>
             }
+
+            <FormSection Title="Your fields" Summary="@FieldsSummary" Open="openFields">
+                @foreach (var field in form.OwnFields)
+                {
+                    <OwnFieldInput Field="field" Value="@form.FieldInput(field.Id)" ValueChanged="(string? value) => form.SetFieldInput(field.Id, value)" />
+                }
+                @if (addingField)
+                {
+                    <OwnFieldForm Prefix="plant-field-new" Added="FieldAddedAsync" Cancelled="() => addingField = false" />
+                }
+                else
+                {
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => addingField = true">Add a field of your own</button>
+                }
+                <div class="form-text mb-3">Rename or remove fields under Settings, Your fields.</div>
+            </FormSection>
         </div>
 
         <div class="form-actions form-bar">
-            <button type="submit" class="btn btn-primary" disabled="@(saving || busy)">@(IsNew ? "Add plant" : "Save")</button>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || busy || googleBusy)">@(IsNew ? "Add plant" : "Save")</button>
             <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
         </div>
     </EditForm>
+
+    <ParentNotMine @bind-Open="addParentOpen" Added="ParentAdded" />
+
+    <Sheet Title="@OfferTitle" Open="offer.Count > 0" OpenChanged="OfferOpenChanged">
+        <p>@OfferText</p>
+        <ul class="small">
+            @foreach (var other in offer)
+            {
+                <li>@other.DisplayName</li>
+            }
+        </ul>
+        <div class="form-actions likes-offer">
+            <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SetForAllAsync">Set for all @offer.Count</button>
+            <button type="button" class="btn btn-link" @onclick="LeaveOffer">Only this one</button>
+        </div>
+    </Sheet>
 }
 
 @code {
+    private static readonly WaterMethod?[] WaterByChoices = [null, .. Enum.GetValues<WaterMethod>().Cast<WaterMethod?>()];
+
     private bool showErrors;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -324,6 +602,13 @@ else
     [SupplyParameterFromQuery(Name = "copy")]
     public Guid? CopyOfId { get; set; }
 
+    /// <summary>Starts from a wish on the wishlist, from Got it. Once the plant is saved the wish moves to Got.</summary>
+    [SupplyParameterFromQuery(Name = "wish")]
+    public Guid? WishId { get; set; }
+
+    private PlantForm? form;
+    private (Guid? Id, Guid? CopyOfId, Guid? WishId, Guid? ParentId) formFor;
+
     /// <summary>"photos" starts from old photos, from the first screen, with the photos first.</summary>
     [SupplyParameterFromQuery(Name = "from")]
     public string? From { get; set; }
@@ -334,6 +619,16 @@ else
     private readonly string galleryId = $"gallery-{Guid.NewGuid():N}";
     private ElementReference cameraInput;
     private ElementReference galleryInput;
+    private GooglePhotosPick? googlePick;
+    private bool googleBusy;
+
+    private async Task StartGoogleAsync()
+    {
+        if (googlePick is not null)
+            await googlePick.Start();
+    }
+
+    private bool googleOn;
 
     /// <summary>Photos taken while adding the plant. They're saved with the plant.</summary>
     private readonly List<Photo> photos = [];
@@ -342,53 +637,117 @@ else
     private LooseDate? dateFromPhotos; // when the day it was got was moved back to the oldest photo
     private bool keepToday;
 
-    private Plant? plant;
-    private Plant? original; // the plant as it was before editing, to record what changed
-    private LooseDate? copiedDate; // when the plant this one is copied from was got, to offer the same date
-    private string? copiedFrom;
-    private IReadOnlyList<Plant> existing = [];
+    private Plant? plant; // the form's draft
+    private int nextNumber = 1;
+
+    private string? NumberCode => CollectionNumbers.Normalize(plant?.CollectionNumber);
+    private bool NumberInvalid => NumberCode is { } code && !CollectionNumbers.IsValid(code);
+    private IReadOnlyList<CodeClash> NumberClashes =>
+        NumberCode is { } code && !NumberInvalid && form is not null
+            ? CollectionNumbers.Clashes(code, plant!.Id, form.Plants, form.Propagations)
+            : [];
     private bool notFound;
     private bool saving;
     private List<string> errors = [];
     private IReadOnlyList<Plant> possibleParents = [];
+    private bool addParentOpen;
+
+    // A parent that lives with someone else was just saved: list it and pick it
+    private void ParentAdded(Plant parent)
+    {
+        form!.AddKnownPlant(parent);
+        possibleParents = PlantLineage.PossibleParents(plant!, form.Plants);
+        plant!.ParentPlantId = parent.Id;
+    }
     private IReadOnlyList<Room> rooms = [];
-    private string? location; // as picked, "Living room / Windowsill"; made into a room when saving
-    private IReadOnlyList<Pot> pots = [];
-    private IReadOnlyList<SoilMix> mixes = [];
     private IReadOnlyList<string> tagSuggestions = [];
 
     // Which sections start open, worked out when the plant loads. A section only reads this once
     private bool openLives;
+    private bool openArrival;
+
+    private IReadOnlyList<string> sellerNames = [];
+
+    private bool ShowArrival =>
+        plant is not null
+        && (SellerName.Clean(form?.SellerText) is not null || plant.Origin is PlantOrigin.Purchased or PlantOrigin.Gift or PlantOrigin.Swap);
+    private bool openLikes;
+
+    // What common plants usually like, offered above What it likes. Empty if it couldn't be read.
+    private PlantCareBook careBook = PlantCareBook.Empty;
+
+    private PlantCare? CareFor => plant is null ? null : careBook.Find(plant.Genus, plant.Species, plant.NameQualifier);
+
+    // Nothing is saved until the form is
+    private void UseCare(PlantCare care)
+    {
+        if (plant is not null)
+            CareSuggestion.Apply(plant, care);
+    }
+
+    // The other plants of the same species offered the needs just saved, and which of them
+    private IReadOnlyList<Plant> offer = [];
+    private IReadOnlyList<LikesField> offerFields = [];
+
+    private string OfferTitle => $"Also for your other {Stikling.Core.Models.PlantNames.Botanical(plant?.Genus, plant?.Species, null)}?";
+
+    private string OfferText
+    {
+        get
+        {
+            var values = string.Join(" · ", offerFields.Select(f => LikesValue(plant!, f)));
+            var count = offer.Count;
+            return $"Set {values} for {count} other {(count == 1 ? "plant" : "plants")} of the same species too?";
+        }
+    }
+
+    private static string LikesValue(Plant p, LikesField field) => field switch
+    {
+        LikesField.Light => p.LikesLight is { } light ? Labels.For(light) : "no light it likes",
+        LikesField.Water => p.LikesWater is { } water ? Labels.For(water) : "no water need",
+        LikesField.Humidity => p.LikesHumidity is { } humidity ? Labels.For(humidity) : "no humidity need",
+        LikesField.Season => p.GrowingSeason is { } season ? Labels.For(season) : "no growing season",
+        _ => p.RestHow is { } rest ? Labels.For(rest) : "no way of resting"
+    };
+
+    private string? LikesSummary => plant is null ? null : Joined(
+        plant.LikesLight is { } light ? Labels.For(light) : null,
+        plant.LikesWater is { } water ? Labels.For(water) : null,
+        plant.LikesHumidity is { } humidity ? Labels.For(humidity) : null,
+        plant.GrowingSeason is { } season ? Labels.For(season) : null);
     private bool openPot;
     private bool openTags;
+
+    // Your own fields. The text is as typed and is tidied when the plant is saved, so a field added
+    // here shows up with an empty input and nothing else on the form is lost.
+    private bool addingField;
+    private bool openFields;
+    private bool openSitter;
+    private bool openSwap;
     private bool openWatering;
-    private bool wateringReminderOn;
 
     private static readonly PotGroup[] InnerSlot = [PotGroup.Inner, PotGroup.Standalone];
     private static readonly PotGroup[] OuterSlot = [PotGroup.Outer];
 
     private DateOnly Today => Time.Today();
 
-    private string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
-
-    private string? MixName(Guid id) => mixes.FirstOrDefault(m => m.Id == id)?.Name;
+    private void SetWateringFeed(string? value) =>
+        form!.SetWateringFeed(Guid.TryParse(value, out var id) ? id : null);
 
     private static string? Joined(params string?[] parts) =>
         string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
 
-    private string? LivesSummary => Joined(location, plant?.Light is { } light ? Labels.For(light) : null);
+    private string? LivesSummary => Joined(form?.Location, plant?.Light is { } light ? Labels.For(light) : null);
 
-    private string? PotSummary => plant is null ? null : Joined(
+    private string? PotSummary => plant is null || form is null ? null : Joined(
         Labels.For(plant.Medium),
-        plant.InnerPotId is { } inner ? PotName(inner) : null,
-        plant.OuterPotId is { } outer ? PotName(outer) : null,
-        plant.SoilMixId is { } mix ? MixName(mix) : null);
+        plant.InnerPotId is { } inner ? form.PotName(inner) : null,
+        plant.OuterPotId is { } outer ? form.PotName(outer) : null,
+        plant.SoilMixId is { } mix ? form.MixName(mix) : null);
 
-    private Pot? FindPot(Guid id) => pots.FirstOrDefault(p => p.Id == id);
-
-    private string? WateringSummary => plant is null ? null
+    private string? WateringSummary => plant is null || form is null ? null
         : !plant.WateringReminder ? "No reminder"
-        : plant.WaterAt is { } at && WateringForms.Of(plant, FindPot) == WateringForm.TopWatered ? $"Water at {at}"
+        : plant.WaterAt is { } at && WateringForms.Of(plant, form.FindPot) == WateringForm.TopWatered ? $"Water at {at}"
         : null;
 
     private string? AboutSummary => string.IsNullOrWhiteSpace(plant?.Notes) ? null : Labels.Short(plant.Notes);
@@ -398,49 +757,37 @@ else
         <InputTextArea class="form-control" rows="3" @bind-Value="plant!.Notes" aria-label="About it" aria-describedby="about-help" />
     </div>;
 
+    private string? SitterSummary => string.IsNullOrWhiteSpace(plant?.SitterNote) ? null : Labels.Short(plant.SitterNote);
+
+    private string? SwapSummary => plant?.Spare is { } mark ? SwapLists.MarkText(mark) : null;
+
+    private string FieldsSummary =>
+        form is null || form.OwnFields.Count == 0
+            ? "Add a field the app doesn't have"
+            : form.OwnFields.Where(f => !string.IsNullOrWhiteSpace(form.FieldInput(f.Id))).Select(f => f.Name) is { } filled && filled.Any()
+                ? string.Join(", ", filled)
+                : "None filled in";
+
+    private async Task FieldAddedAsync(OwnField field)
+    {
+        await form!.AddOwnFieldAsync(field);
+        addingField = false;
+    }
+
     private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
 
     private string QuarantineSummary => plant is { InQuarantine: true }
-        ? $"In quarantine for {plant.QuarantineDays ?? Plant.DefaultQuarantineDays} days"
+        ? $"In quarantine for {plant.QuarantineDays ?? form!.QuarantineLength} days"
         : "Not in quarantine";
 
-    private void AddPot(Pot pot) => pots = [.. pots, pot];
+    private void SetQuarantine(ChangeEventArgs e) => form!.SetQuarantine((bool?)e.Value == true);
 
-    // Ticking it again after unticking keeps the date it had, so a slip doesn't restart the count
-    private void SetQuarantine(ChangeEventArgs e)
-    {
-        var on = (bool?)e.Value == true;
-        plant!.QuarantinedSince = on ? original?.QuarantinedSince ?? Today : null;
-        plant.QuarantineDays = on ? original?.QuarantineDays ?? Plant.DefaultQuarantineDays : null;
-    }
-
-    // A pot that suggests a medium sets it on a new plant, until the person has picked a medium themselves.
-    // A saved plant's medium was already chosen, so a pot never changes it
-    private bool mediumChosen => IsNew ? mediumPicked : true;
-    private bool mediumPicked;
-
-    private void SetMedium(GrowingMedium medium)
-    {
-        plant!.Medium = medium;
-        mediumPicked = true;
-    }
-
-    private void SetInnerPot(Guid? id)
-    {
-        plant!.InnerPotId = id;
-        var pot = pots.FirstOrDefault(p => p.Id == id);
-        plant.Medium = PotKinds.MediumAfterPicking(pot, plant.Medium, mediumChosen);
-    }
-
-    // Clearing the outer pot clears what would be kept in it
-    private void SetOuterPot(Guid? id)
-    {
-        plant!.OuterPotId = id;
-        if (id is null)
-            plant.WaterInOuterPot = false;
-    }
-
+    // The form knows whether the plant has been created yet, the route only what the page was opened for
+    // The layout follows the route, so a save that fails after the plant was added doesn't turn the
+    // form into an edit form. Whether saving adds or updates is the form's own IsNew
     private bool IsNew => Id is null;
+
+    private bool RouteNew => Id is null;
 
     private bool ShowParent =>
         plant is not null
@@ -448,54 +795,41 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        var all = await Repository.GetAllAsync();
-        var places = await RoomService.GetPlacesAsync();
-        rooms = Room.List(places, all, await Propagations.GetAllAsync());
-        pots = await PotRepository.GetAllAsync();
-        mixes = await MixRepository.GetAllAsync();
+        googleOn = await Google.IsEnabledAsync();
+        careBook = await CommonCare.GetBookAsync();
+
+        // A new form only when the page was opened for something else, so a re-render never resets a draft
+        var key = (Id, CopyOfId, WishId, ParentId);
+        if (form is not null && formFor == key)
+            return;
+
+        formFor = key;
+        form = Id is { } id ? await Forms.EditAsync(id, Labels.For) : await Forms.NewAsync(CopyOfId, WishId, ParentId, Labels.For);
+        plant = form?.Plant;
+        notFound = form is null;
+        if (form is null || plant is null)
+            return;
+
+        var all = form.Plants;
+        rooms = Room.List(form.Places, all, form.Propagations);
+        nextNumber = CollectionNumbers.NextFree(all);
         tagSuggestions = PlantTags.Suggestions(all);
-        wateringReminderOn = (await SettingsService.GetAsync()).WateringReminder;
-        existing = all;
+        var uses = SellerSummary.CountsBySeller(form.SellerList, all, form.Propagations);
+        sellerNames = form.SellerList.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
+        possibleParents = PlantLineage.PossibleParents(plant, all);
 
-        if (IsNew)
-        {
-            // The draft keeps its id, so photos taken before saving stay with it
-            if (plant is null && CopyOfId is { } copyOfId && all.FirstOrDefault(p => p.Id == copyOfId) is { } source)
-            {
-                plant = source.Duplicate();
-                plant.AcquiredOn = LooseDate.Of(Today);
-                copiedDate = source.AcquiredOn;
-                copiedFrom = source.DisplayName;
-            }
-            plant ??= new Plant { AcquiredOn = LooseDate.Of(Today) };
-            if (ParentId is { } parentId && all.FirstOrDefault(p => p.Id == parentId) is { } parent)
-            {
-                plant.Origin = PlantOrigin.Propagated;
-                plant.ParentPlantId = parent.Id;
-                plant.Genus = parent.Genus;
-                plant.Species = parent.Species;
-                plant.Cultivar = parent.Cultivar;
-                plant.PlaceId = parent.PlaceId;
-            }
-        }
-        else
-        {
-            plant = all.FirstOrDefault(p => p.Id == Id);
-            original = plant?.Copy();
-            notFound = plant is null;
-        }
+        var isNew = form.IsNew;
+        openArrival = !isNew && (plant.ArrivedIn is not null || plant.ArrivalProblems.Count > 0 || !string.IsNullOrWhiteSpace(plant.ArrivalNote));
 
-        if (plant is not null)
-        {
-            location = places.NameOf(plant.PlaceId);
-            possibleParents = PlantLineage.PossibleParents(plant, all);
-
-            // All closed when adding, even from a copy, where the summaries show what was copied
-            openLives = !IsNew && (!string.IsNullOrWhiteSpace(location) || plant.Light is not null);
-            openPot = !IsNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
-            openTags = !IsNew && plant.Tags.Count > 0;
-            openWatering = !IsNew && (!plant.WateringReminder || plant.WaterAt is not null);
-        }
+        // All closed when adding, even from a copy, where the summaries show what was copied
+        openLives = !isNew && (!string.IsNullOrWhiteSpace(form.Location) || plant.Light is not null);
+        openLikes = !isNew && CareLikes.HasAny(plant);
+        openPot = !isNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
+        openTags = !isNew && plant.Tags.Count > 0;
+        openFields = !isNew && plant.OwnFields.Any(v => form.OwnFields.Any(f => f.Id == v.Key) && v.Value.Length > 0);
+        openSwap = !isNew && plant.Spare is not null;
+        openSitter = !isNew && !string.IsNullOrWhiteSpace(plant.SitterNote);
+        openWatering = !isNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WaterBy is not null || plant.WateringFeedId is not null);
     }
 
     private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
@@ -516,10 +850,19 @@ else
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Adding photos to a plant failed");
             photoStatus = $"Couldn't save the photos: {ex.Message}";
         }
 
         busy = false;
+    }
+
+    private Task GoogleSavedAsync(PhotoSaveResult result)
+    {
+        photos.AddRange(result.Saved);
+        photoStatus = result.Message(guessesMatter: true);
+        FollowPhotoDates();
+        return Task.CompletedTask;
     }
 
     private async Task RemovePhotoAsync(Photo photo)
@@ -587,7 +930,19 @@ else
             </label>
             <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
                    @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+            @if (googleOn)
+            {
+                <button type="button" class="btn btn-outline-primary icon-btn @(FromPhotos ? null : "btn-sm")" @onclick="StartGoogleAsync"
+                        disabled="@(busy || googleBusy)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                    Google Photos
+                </button>
+            }
         </div>
+        @if (googleOn && plant is not null)
+        {
+            <GooglePhotosPick @ref="googlePick" SubjectType="SubjectType.Plant" SubjectId="plant.Id" OnSaved="GoogleSavedAsync" BusyChanged="busy => googleBusy = busy" />
+        }
 
         @if (!FromPhotos)
         {
@@ -603,11 +958,17 @@ else
     private async Task CancelAsync()
     {
         await DiscardPhotosAsync();
-        Navigation.NavigateTo(IsNew ? "plants" : $"plants/{Id}");
+        Navigation.NavigateTo(RouteNew ? "plants" : $"plants/{Id}");
     }
 
     private async Task DiscardPhotosAsync()
     {
+        // A plant stored before its save failed owns the photos, so they stay
+        if (form is { Stored: true })
+        {
+            photos.Clear();
+            return;
+        }
         foreach (var photo in photos)
             await Photos.DeleteAsync(photo.Id);
         photos.Clear();
@@ -626,36 +987,90 @@ else
         }
     }
 
-    private async Task SaveAsync()
+    private bool left;
+
+    private void GoToPlant()
     {
-        if (plant is null)
+        if (left || plant is null)
             return;
+        left = true;
+        Navigation.NavigateTo($"plants/{plant.Id}", replace: RouteNew);
+    }
 
-        errors = plant.Validate(Today).ToList();
-        if (errors.Count > 0)
-        {
-            showErrors = true;
+    private async Task SetForAllAsync()
+    {
+        if (plant is null || saving)
             return;
-        }
-
         saving = true;
         try
         {
-            plant.PlaceId = await RoomService.PlaceIdAsync(location);
-            if (IsNew)
-            {
-                await PlantService.CreateAsync(plant, photos);
-                photos.Clear(); // they belong to the saved plant now
-            }
-            else
-            {
-                var places = await RoomService.GetPlacesAsync();
-                await PlantService.UpdateAsync(original!, plant, Labels.For, PotName, MixName, id => places.NameOf(id), FindPot);
-            }
-            Navigation.NavigateTo($"plants/{plant.Id}", replace: IsNew);
+            await PlantService.ApplyLikesAsync(plant, offerFields, offer);
+            offer = [];
+            GoToPlant();
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Setting what it likes on the other plants failed");
+            errors = [$"Couldn't save: {ex.Message}"];
+            showErrors = true;
+            offer = [];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private void LeaveOffer()
+    {
+        offer = [];
+        GoToPlant();
+    }
+
+    // Closing the sheet counts as Only this one
+    private void OfferOpenChanged(bool open)
+    {
+        if (!open)
+            LeaveOffer();
+    }
+
+    private async Task SaveAsync()
+    {
+        if (form is null)
+            return;
+
+        errors = [];
+        saving = true;
+        try
+        {
+            var result = await form.SaveAsync(photos);
+            if (result.Errors.Count > 0)
+            {
+                errors = [.. result.Errors];
+                showErrors = true;
+                return;
+            }
+
+            if (result.Created)
+                photos.Clear(); // they belong to the saved plant now
+            // The plant is saved by now, so a wish that can't be moved or a history line that failed is logged, not a failed save
+            if (result.LaterError is { } later)
+                Logger.LogError(later, "A step after saving the plant failed");
+
+            if (result.LikesOffer.Count > 0)
+            {
+                // Others of the same species that don't have what was just set are asked before leaving
+                offerFields = result.LikesFields;
+                offer = result.LikesOffer;
+            }
+            else
+            {
+                GoToPlant();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the plant failed");
             errors = [$"Couldn't save: {ex.Message}"];
             showErrors = true;
         }

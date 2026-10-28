@@ -1,0 +1,149 @@
+@* The inside of the Care sheet on a propagation: what can be logged in its medium, and what has been. *@
+@using System.Globalization
+@inject PropagationCareService CareService
+@inject ILogger<PropagationCareSheet> Logger
+@inject TimeProvider Time
+
+<div class="care-sheet">
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
+    }
+
+    <div class="care-actions">
+        @foreach (var kind in kinds)
+        {
+            @if (kind == PropagationCareKind.MoistureReading)
+            {
+                <div>
+                    <div class="form-label" id="care-moisture-label">Moisture reading</div>
+                    <div class="chip-row moisture-row" role="group" aria-labelledby="care-moisture-label">
+                        @for (var reading = 0; reading <= 10; reading++)
+                        {
+                            var value = reading;
+                            <button type="button" class="chip" disabled="@busy" @onclick="() => LogAsync(kind, value)">@value</button>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <button type="button" class="btn @(kind == kinds[0] ? "btn-primary" : "btn-outline-primary") w-100" disabled="@busy"
+                        @onclick="() => LogAsync(kind, null)">@ButtonText(kind)</button>
+            }
+        }
+    </div>
+
+    @if (!showDate)
+    {
+        <button type="button" class="btn btn-link btn-sm p-0 mt-2" @onclick="() => showDate = true">Another day?</button>
+    }
+    else
+    {
+        <div class="mt-2">
+            <label class="form-label" for="care-date">When</label>
+            <input type="date" id="care-date" class="form-control form-control-sm"
+                   min="@Propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")"
+                   value="@occurredOn.ToString("yyyy-MM-dd")" @onchange="DateChanged" />
+        </div>
+    }
+</div>
+
+@if (Logs.Count > 0)
+{
+    <div class="sheet-section">
+        <h3 class="section-label">History</h3>
+        <ul class="care-list">
+            @foreach (var entry in Logs)
+            {
+                <li id="entry-@entry.Id">
+                    <div class="care-entry care-removable">
+                        <span class="care-what">@PropagationCareService.Describe(entry)</span>
+                        <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
+                        <button type="button" class="care-remove" aria-label="Remove" disabled="@busy" @onclick="() => RemoveAsync(entry)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                        </button>
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Propagation Propagation { get; set; } = null!;
+
+    /// <summary>This propagation's entries, newest first.</summary>
+    [Parameter]
+    public IReadOnlyList<PropagationCareLog> Logs { get; set; } = [];
+
+    /// <summary>Something was logged. The page closes the sheet and loads again.</summary>
+    [Parameter]
+    public EventCallback OnLogged { get; set; }
+
+    /// <summary>An entry was removed. The page loads again and the sheet stays open.</summary>
+    [Parameter]
+    public EventCallback OnRemoved { get; set; }
+
+    private DateOnly occurredOn;
+    private bool showDate;
+    private bool busy;
+    private string? error;
+
+    private DateOnly Today => Time.Today();
+
+    private IReadOnlyList<PropagationCareKind> kinds => PropagationCareService.KindsFor(Propagation.Medium);
+
+    protected override void OnInitialized() => occurredOn = Today;
+
+    private string When => occurredOn == Today ? "today" : $"on {Labels.Date(occurredOn)}";
+
+    private string ButtonText(PropagationCareKind kind) => kind switch
+    {
+        PropagationCareKind.ChangedWater => $"Changed the water {When}",
+        _ => $"Watered {When}"
+    };
+
+    private void DateChanged(ChangeEventArgs e)
+    {
+        // An empty or half-typed date leaves the day as it was
+        if (DateOnly.TryParseExact(e.Value?.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var day))
+            occurredOn = day;
+    }
+
+    private async Task LogAsync(PropagationCareKind kind, int? moisture)
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await CareService.LogAsync(Propagation, kind, occurredOn, moisture);
+            await OnLogged.InvokeAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            error = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Logging care on the propagation failed");
+            error = "Couldn't save that. Try again.";
+        }
+        busy = false;
+    }
+
+    private async Task RemoveAsync(PropagationCareLog entry)
+    {
+        busy = true;
+        try
+        {
+            await CareService.DeleteAsync(entry.Id);
+            await OnRemoved.InvokeAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

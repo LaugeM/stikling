@@ -3,7 +3,7 @@
 // JSON objects with an "id" property as the key.
 
 const DB_NAME = "stikling";
-const DB_VERSION = 13;
+const DB_VERSION = 24;
 
 // The stores the first version created. Later versions add theirs in their own
 // upgrade block below, so don't add to this list.
@@ -73,6 +73,52 @@ function openDb() {
             }
             if (event.oldVersion < 13) {
                 db.createObjectStore("growLights", { keyPath: "id" });
+            }
+            if (event.oldVersion < 14) {
+                // What a plant or cutting was given with: who from and the history it came with
+                db.createObjectStore("receivedHistories", { keyPath: "id" });
+            }
+            if (event.oldVersion < 15) {
+                // Stretches away or quiet, and the choices behind the plant-sitter sheet
+                db.createObjectStore("awayStretches", { keyPath: "id" });
+                db.createObjectStore("sitterSheets", { keyPath: "id" });
+            }
+            if (event.oldVersion < 16) {
+                // Watering, moisture readings and water changes logged on a propagation
+                db.createObjectStore("propagationCareLogs", { keyPath: "id" });
+            }
+            if (event.oldVersion < 17) {
+                // When a plant had buds, was in flower and finished, one mark per stage
+                db.createObjectStore("floweringMarks", { keyPath: "id" });
+            }
+            if (event.oldVersion < 18) {
+                // Problems on a plant, and the updates added to them as they go
+                db.createObjectStore("problems", { keyPath: "id" });
+                db.createObjectStore("problemUpdates", { keyPath: "id" });
+            }
+            if (event.oldVersion < 19) {
+                // Plants wanted, and the ones got
+                db.createObjectStore("wishes", { keyPath: "id" });
+            }
+            if (event.oldVersion < 20) {
+                // Where plants came from: shops, online sellers, people and swap events
+                db.createObjectStore("sellers", { keyPath: "id" });
+            }
+            if (event.oldVersion < 21) {
+                // Kinds of care people added themselves, like misted or bottom watered
+                db.createObjectStore("ownCareKinds", { keyPath: "id" });
+            }
+            if (event.oldVersion < 22) {
+                // Care that comes back by itself: fertilise every 2 weeks, repot every 2 years
+                db.createObjectStore("careIntervals", { keyPath: "id" });
+            }
+            if (event.oldVersion < 23) {
+                // Treatment plans: the steps to follow on a pest case
+                db.createObjectStore("treatmentPlans", { keyPath: "id" });
+            }
+            if (event.oldVersion < 24) {
+                // Fields people added themselves, like clone name or awards, which plants fill in
+                db.createObjectStore("ownFields", { keyPath: "id" });
             }
         };
 

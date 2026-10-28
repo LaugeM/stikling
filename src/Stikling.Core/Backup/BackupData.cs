@@ -20,6 +20,7 @@ public sealed class BackupData
 
     public List<Plant> Plants { get; set; } = [];
     public List<Propagation> Propagations { get; set; } = [];
+    public List<PropagationCareLog> PropagationCareLogs { get; set; } = [];
     public List<TimelineEntry> Timeline { get; set; } = [];
     public List<Photo> Photos { get; set; } = [];
     public List<CareLog> CareLogs { get; set; } = [];
@@ -34,6 +35,18 @@ public sealed class BackupData
     public List<UserSettings> Settings { get; set; } = [];
     public List<PutOff> PutOffs { get; set; } = [];
     public List<GrowLight> GrowLights { get; set; } = [];
+    public List<ReceivedHistory> ReceivedHistories { get; set; } = [];
+    public List<AwayStretch> AwayStretches { get; set; } = [];
+    public List<SitterSheet> SitterSheets { get; set; } = [];
+    public List<FloweringMark> FloweringMarks { get; set; } = [];
+    public List<Problem> Problems { get; set; } = [];
+    public List<ProblemUpdate> ProblemUpdates { get; set; } = [];
+    public List<Wish> Wishes { get; set; } = [];
+    public List<Seller> Sellers { get; set; } = [];
+    public List<OwnCareKind> OwnCareKinds { get; set; } = [];
+    public List<CareInterval> CareIntervals { get; set; } = [];
+    public List<TreatmentPlan> TreatmentPlans { get; set; } = [];
+    public List<OwnField> OwnFields { get; set; } = [];
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the
@@ -55,7 +68,20 @@ public sealed class BackupData
         Places.Count(p => !p.IsDeleted && !p.IsSpot),
         Settings.Count(s => !s.IsDeleted),
         PutOffs.Count(p => !p.IsDeleted),
-        GrowLights.Count(l => !l.IsDeleted));
+        GrowLights.Count(l => !l.IsDeleted),
+        ReceivedHistories.Count(h => !h.IsDeleted),
+        AwayStretches.Count(s => !s.IsDeleted),
+        SitterSheets.Count(s => !s.IsDeleted),
+        PropagationCareLogs.Count(l => !l.IsDeleted),
+        FloweringMarks.Count(m => !m.IsDeleted),
+        Problems.Count(p => !p.IsDeleted),
+        ProblemUpdates.Count(u => !u.IsDeleted),
+        Wishes.Count(w => !w.IsDeleted),
+        Sellers.Count(s => !s.IsDeleted),
+        OwnCareKinds.Count(k => !k.IsDeleted),
+        CareIntervals.Count(i => !i.IsDeleted),
+        TreatmentPlans.Count(p => !p.IsDeleted),
+        OwnFields.Count(f => !f.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -74,4 +100,17 @@ public sealed record BackupCounts(
     int Rooms,
     int Settings,
     int PutOffs,
-    int GrowLights);
+    int GrowLights,
+    int ReceivedHistories,
+    int AwayStretches,
+    int SitterSheets,
+    int PropagationCareEntries,
+    int FloweringMarks,
+    int Problems,
+    int ProblemUpdates,
+    int Wishes,
+    int Sellers,
+    int OwnCareKinds,
+    int CareIntervals,
+    int TreatmentPlans,
+    int OwnFields);

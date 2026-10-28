@@ -55,12 +55,21 @@ public static class WateringText
     {
         var guess = due.Guess;
         var days = (guess.CheckOn ?? today).DayNumber - today.DayNumber;
-        var line = due.DueNow
+        var line = days <= 0
             ? "Probably dry by now, check with the meter"
             : days == 1 ? "Probably dry tomorrow" : $"Probably dry in {days} days";
         if (guess.LatestReading is { } reading)
             line += $", last reading {reading.Value}, {Labels.DaysAgo(reading.DaysAgo)}";
         return line;
+    }
+
+    /// <summary>When the plant last had water, e.g. "watered 3 days ago" or "refilled 3 days ago".</summary>
+    public static string LastWater(LastCare last, WateringForm form)
+    {
+        var verb = last.Kind == CareKind.ToppedUp
+            ? form == WateringForm.Reservoir ? "refilled" : "topped up"
+            : "watered";
+        return $"{verb} {Labels.DaysAgo(last.DaysAgo)}";
     }
 
     private static string Every(int days) => days == 1 ? "every day" : $"every {days} days";
@@ -75,10 +84,6 @@ public static class WateringText
         WateringForm.Reservoir => "Refilled",
         _ => "Topped up"
     };
-
-    /// <summary>The care entry the tick logs.</summary>
-    public static CareKind DoneKind(WateringForm form) =>
-        form == WateringForm.TopWatered ? CareKind.Watered : CareKind.ToppedUp;
 
     /// <summary>The second button: the plant is still wet, or the water isn't due yet.</summary>
     public static string NotYetLabel(WateringForm form) =>
