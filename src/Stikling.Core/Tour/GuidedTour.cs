@@ -23,9 +23,9 @@ public sealed class GuidedTour
         new($"propagations/{ExampleFamily.CurrentCuttingId}", "stage", "A cutting",
             "A cutting you're rooting is a propagation. It keeps where it came from, what it's rooting in and how many days it has taken. When it has rooted, it becomes a plant of its own."),
         new("water", "water", "Watering",
-            "Tick what you watered as you go round. There's no fixed watering day. Stikling learns from what you log and asks you to check a plant when it's probably dry."),
+            "Tick what you watered as you go round. Stikling learns from what you log and asks you to check a plant when it's probably dry."),
         new("backup", "spreadsheet", "Your data",
-            "Everything stays on this device, with no account needed. Save a backup or a spreadsheet whenever you like, or import yours to bring your plants in.")
+            "Everything is kept on this device, and you don't need an account. Save a backup or a spreadsheet whenever you like, or import yours to bring your plants in.")
     ];
 
     /// <summary>The card after the last stop. It has no count and marks nothing.</summary>

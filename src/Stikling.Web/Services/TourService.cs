@@ -29,6 +29,8 @@ public sealed class TourService(NavigationManager navigation, IJSRuntime js) : I
     public async Task StartAsync()
     {
         tour.Start();
+        // Starting again from Settings during a tour must not add the handler twice
+        navigation.LocationChanged -= OnLocationChanged;
         navigation.LocationChanged += OnLocationChanged;
         await CallAsync("listen", self ??= DotNetObjectReference.Create(this));
         await ShowAsync();
