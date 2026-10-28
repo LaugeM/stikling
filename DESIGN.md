@@ -372,6 +372,13 @@ This replaced a 3px coloured bar down the left edge. The bar was flagged as a ge
 ### Before You Got It
 The history a plant or cutting had before it was given away, shown under its own history on the page of the friend who kept it. A divider starts it: "Before you got it" in Label type with a 1px Border hairline filling the rest of the line. Under it the giver's name for the plant is a heading in Title type, and then the items group by day, newest first, in the same entries as the own history. A milestone reads like an entry the app recorded, in Muted Ink with the sprout, a note takes the pencil and Deep Moss, and photos take the camera. Nothing in it can be changed: no time, no edit and no delete, and its photos can be framed or made the cover but not deleted in the viewer. Their own history starts above it with an Arrived entry, a stroked gift, so the two never run together.
 
+### Tour Card
+The card for the guided tour (Show me around), rendered once in the layout so it stays on whatever page is open. Surface with a 1px Border, 0.75rem corners, 1rem padding and the Anchored bar shadow, since it overlaps the page. Inside: "2 of 5" in Label type, the title in Title type, the text in Body, then a row with Skip tour as a link-style button on the left and Back (link style, not on the first step) and Next (primary) on the right. The closing card has no count, a few links, an outline Remove it button for the example, Add a plant and Import a spreadsheet, and Back and Done as links.
+
+On a phone it is fixed just above the bottom navigation, and on a plant or propagation page above the Photo, Note and Care bar, so those stay in reach. From 64rem it sits in the bottom right corner, 22rem wide and 2rem from the edges. While the tour is on the content gets extra bottom padding so the card never hides the end of a page. It rises in once when the tour starts, and between steps only the text fades; with reduced motion nothing moves.
+
+The part of the page a step is about gets a 2px Potting Green outline with a 3px offset and its own corner radius, no animation (`tour-mark`, set by `wwwroot/js/tour.js` on the first visible element with a matching `data-tour`). The Photo, Note and Care bar is outlined on its inside, since it reaches the screen edges on a phone.
+
 ### Empty State
 Centred Muted Ink text on Surface inside a dashed Border at 0.75rem radius, with 2.5rem of vertical padding. Used for "nothing matches" and for empty sections.
 

@@ -16,6 +16,7 @@
 @inject ILogger<MainLayout> Logger
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject TourService Tour
 
 <div class="app-shell">
     <header class="app-header">
@@ -37,9 +38,12 @@
         </div>
     </header>
 
-    <main class="app-content @(updateReady || FirstSyncNotice ? "with-banner" : null)">
+    <main class="app-content @(updateReady || FirstSyncNotice ? "with-banner" : null) @(Tour.Active ? "with-tour" : null) @(Tour.State.IsClosing ? "tour-closing" : null)">
         @Body
     </main>
+
+    @* While the tour is on, a card sits above the bottom navigation on every page *@
+    <TourCard />
 
     <UpdateBanner ReadyChanged="ready => updateReady = ready" />
 
@@ -127,6 +131,7 @@
         Sync.Received += OnReceived;
         Backup.Restored += OnReceived;
         Covers.Changed += OnCoversChanged;
+        Tour.Changed += OnTourChanged;
         Navigation.LocationChanged += OnLocationChanged;
         await AdoptSellersAsync();
         await CheckPestsAsync();
@@ -184,6 +189,8 @@
         await CheckPestsAsync();
     });
 
+    private void OnTourChanged() => _ = InvokeAsync(StateHasChanged);
+
     private void OnCoversChanged() => _ = InvokeAsync(StateHasChanged);
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => _ = InvokeAsync(CheckPestsAsync);
@@ -217,6 +224,7 @@
         Sync.Received -= OnReceived;
         Backup.Restored -= OnReceived;
         Navigation.LocationChanged -= OnLocationChanged;
+        Tour.Changed -= OnTourChanged;
         try
         {
             if (slash is not null)

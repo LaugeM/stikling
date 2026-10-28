@@ -15,6 +15,8 @@
 @inject NotificationService Notifications
 @inject PlantNameService Names
 @inject CollectionNumberService Numbering
+@inject ExampleService Example
+@inject TourService Tour
 @inject OwnCareKindService OwnCareKinds
 @inject OwnFieldService OwnFieldBook
 @inject ICareIntervalRepository CareIntervalRepository
@@ -329,12 +331,17 @@
 <section class="settings-group">
     <h2>About</h2>
     <div class="settings-rows">
+        <SettingsRow Href="#" Title="Show me around" Detail="A short tour, with an example plant" OnClick="StartTourAsync" />
         <SettingsRow Href="help" Title="Help" Detail="How Stikling works" />
         <SettingsRow Href="privacy" Title="Privacy" Detail="What is kept and where" />
         <SettingsRow Href="settings/whats-new" Title="What's new" Detail="@AppVersion.Label" />
         <SettingsRow Href="plant-names" Title="Plant names" Detail="Where the name suggestions come from" />
         <SettingsRow Href="https://github.com/LaugeM/stikling" Title="Source code" Detail="Stikling is open source, on GitHub" External="true" />
     </div>
+    @if (tourFailed)
+    {
+        <p class="text-danger" role="alert">Couldn't load the example. Check your connection and try again.</p>
+    }
 </section>
 
 <Sheet Title="Collection numbers" @bind-Open="numberingOpen">
@@ -373,6 +380,26 @@
     private bool numberingBusy;
     private NumberAllPlan? numberingPlan;
     private string? numberingMessage;
+
+    private bool tourFailed;
+
+    // Loads the example if it was removed, then starts the tour on Today
+    private async Task StartTourAsync()
+    {
+        tourFailed = false;
+        try
+        {
+            if (!await Example.IsLoadedAsync())
+                await Example.LoadAsync();
+        }
+        catch
+        {
+            tourFailed = true;
+            return;
+        }
+
+        await Tour.StartAsync();
+    }
 
     private async Task OpenNumberingAsync()
     {

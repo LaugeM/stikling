@@ -443,7 +443,7 @@ else
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10Z" /></svg>
                         <span class="dock-label">Care</span>
                     </button>
-                    <button type="button" class="btn btn-outline-primary icon-btn dock-stage" aria-label="Stage: @Labels.Stage(propagation.Stage, propagation.Type). Change stage" @onclick="OpenStage">
+                    <button type="button" class="btn btn-outline-primary icon-btn dock-stage" data-tour="stage" aria-label="Stage: @Labels.Stage(propagation.Stage, propagation.Type). Change stage" @onclick="OpenStage">
                         <span class="stage-steps" data-step="@StageStep" aria-hidden="true"><i></i><i></i><i></i></span>
                         @Labels.Stage(propagation.Stage, propagation.Type)
                     </button>

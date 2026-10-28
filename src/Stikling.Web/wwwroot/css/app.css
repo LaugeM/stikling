@@ -3648,3 +3648,153 @@ button.search-recent svg {
 .care-editable:focus-visible {
     background: var(--pa-green-soft);
 }
+
+/* The guided tour. The part of the page a step is about gets an outline, and a card with the step
+   sits above the bottom navigation on every page while the tour is on. */
+.tour-mark {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 3px;
+}
+
+/* The dock reaches the screen edges on a phone, so its outline goes inside */
+.page-dock.tour-mark {
+    outline-offset: -4px;
+}
+
+.tour-card {
+    position: fixed;
+    z-index: 12;
+    left: var(--pa-column-inset);
+    right: var(--pa-column-inset);
+    bottom: calc(var(--pa-nav-bottom) + 0.5rem);
+    padding: 1rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+}
+
+/* On a plant or propagation page the dock is fixed above the navigation, so the card sits on top of it */
+@media (max-width: 63.99rem) {
+    main.app-content:has(.page-dock) ~ .tour-card {
+        bottom: calc(var(--pa-nav-bottom) + 4.25rem);
+    }
+}
+
+/* Water plants keeps a Done bar stuck to the bottom of the page, so the card sits on top of it on every screen */
+main.app-content:has(.pass-progress) ~ .tour-card {
+    bottom: calc(var(--pa-nav-bottom) + 5.25rem);
+}
+
+.tour-count {
+    margin: 0 0 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.tour-title {
+    margin: 0 0 0.35rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.tour-title:focus {
+    outline: none;
+}
+
+.tour-body p {
+    margin: 0 0 0.6rem;
+    line-height: 1.5;
+}
+
+.tour-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.tour-actions .btn {
+    min-height: 2.75rem;
+}
+
+.tour-closing-actions {
+    justify-content: flex-start;
+}
+
+.tour-steps {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.tour-link {
+    padding-inline: 0.25rem;
+}
+
+.tour-remove {
+    min-height: 2.75rem;
+    margin-inline-start: 0.25rem;
+}
+
+/* Room at the end of the page so the card never hides it */
+main.app-content.with-tour,
+main.app-content.with-banner.with-tour {
+    padding-bottom: calc(var(--pa-nav-bottom) + 16rem);
+}
+
+main.app-content.with-tour:has(.page-dock),
+main.app-content.with-banner.with-tour:has(.page-dock) {
+    padding-bottom: calc(var(--pa-nav-bottom) + 20rem);
+}
+
+main.app-content.with-tour:has(.pass-progress),
+main.app-content.with-banner.with-tour:has(.pass-progress) {
+    padding-bottom: calc(var(--pa-nav-bottom) + 20rem);
+}
+
+main.app-content.with-tour.tour-closing,
+main.app-content.with-banner.with-tour.tour-closing {
+    padding-bottom: calc(var(--pa-nav-bottom) + 24rem);
+}
+
+@media (min-width: 64rem) {
+    .tour-card {
+        left: auto;
+        right: 2rem;
+        bottom: calc(var(--pa-nav-bottom) + 2rem);
+        width: 22rem;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .tour-card {
+        animation: tour-rise 0.25s ease-out;
+    }
+
+    .tour-body {
+        animation: tour-fade 0.2s ease-out;
+    }
+}
+
+@keyframes tour-rise {
+    from {
+        opacity: 0;
+        transform: translateY(1rem);
+    }
+}
+
+@keyframes tour-fade {
+    from {
+        opacity: 0;
+    }
+}
