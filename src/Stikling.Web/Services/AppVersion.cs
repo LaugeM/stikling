@@ -24,5 +24,7 @@ public static class AppVersion
     public static string? ShortCommit => Commit is { } commit ? commit[..7] : null;
 
     /// <summary>"Version 2026.10.09", or "Development build".</summary>
-    public static string Label => Date is { } date ? $"Version {date}" : "Development build";
+    public static string Label => Date is { } date
+        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Stikling.Web.Resources.Settings.VersionLabel, date)
+        : Stikling.Web.Resources.Settings.DevelopmentBuild;
 }

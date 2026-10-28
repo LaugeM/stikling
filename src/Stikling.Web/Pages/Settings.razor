@@ -4,6 +4,7 @@
 @using Stikling.Core.Settings
 @using Stikling.Core.Sync
 @inject ThemeService Theme
+@inject LanguageService Language
 @inject ErrorReports ErrorReports
 @inject RoomService RoomService
 @inject IPlantRepository Plants
@@ -24,13 +25,13 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-<PageTitle>Settings · Stikling</PageTitle>
+<PageTitle>@Strings.Settings.PageTitle</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
 
-<h1>Settings</h1>
+<h1>@Strings.Settings.Title</h1>
 
 <div class="settings-layout">
-    <nav class="settings-nav" aria-label="Settings sections">
+    <nav class="settings-nav" aria-label="@Strings.Settings.SectionsNav">
         @foreach (var (id, title) in Sections)
         {
             <a class="settings-nav-link" href="settings?section=@id" aria-current="@(id == OpenSection ? "page" : null)"
@@ -47,31 +48,45 @@
         @if (Account.IsAvailable && accountHintRead)
         {
             <section class="settings-group @Closed("account")" id="account">
-                <h2>Account</h2>
+                <h2>@Strings.Settings.SectionAccount</h2>
                 <div class="settings-rows">
                     @if (account is { SignedIn: true })
                     {
-                        <SettingsRow Href="account" Title="@account.Email" Detail="@(Sync.HasProblem ? "Sync needs a look. Tap to see why." : SyncLine)" Alert="@Sync.HasProblem" />
+                        <SettingsRow Href="account" Title="@account.Email" Detail="@(Sync.HasProblem ? Strings.Settings.SyncNeedsLook : SyncLine)" Alert="@Sync.HasProblem" />
                     }
                     else if (accountChecking)
                     {
-                        <SettingsRow Href="account" Title="Account" Detail="Checking your account…" />
+                        <SettingsRow Href="account" Title="@Strings.Settings.SectionAccount" Detail="@Strings.Settings.CheckingAccount" />
                     }
                     else if (accountUnreachable)
                     {
-                        <SettingsRow Href="account" Title="Account" Detail="Can't reach the sign-in service right now" />
+                        <SettingsRow Href="account" Title="@Strings.Settings.SectionAccount" Detail="@Strings.Settings.AccountUnreachable" />
                     }
                     else
                     {
-                        <SettingsRow Href="sign-in" Title="Sign in" Detail="Keep your plants the same on all your devices" />
+                        <SettingsRow Href="sign-in" Title="@Strings.Settings.SignIn" Detail="@Strings.Settings.SignInDetail" />
                     }
                 </div>
             </section>
         }
 
         <section class="settings-group @Closed("look")" id="look">
-            <h2>Look</h2>
-            <div class="theme-label" id="theme-label">Theme</div>
+            <h2>@Strings.Settings.SectionLook</h2>
+            @if (Language.Offered.Count > 1)
+            {
+                <label class="theme-label" for="language">@Strings.Settings.Language</label>
+                <select id="language" class="form-select w-auto" @onchange="SetLanguageAsync">
+                    @foreach (var language in Language.Offered)
+                    {
+                        <option value="@language.Code" selected="@(language.Code == Language.Current)">@language.NativeName</option>
+                    }
+                </select>
+                <p class="settings-hint">
+                    @Strings.Settings.LanguageRestartHint
+                    <a href="https://github.com/LaugeM/stikling/blob/main/docs/dev/translating.md" target="_blank" rel="noopener">@Strings.Settings.HelpTranslate</a>
+                </p>
+            }
+            <div class="theme-label @(Language.Offered.Count > 1 ? "mt-4" : null)" id="theme-label">@Strings.Settings.Theme</div>
             <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="theme-label">
                 @foreach (var option in options)
                 {
@@ -84,32 +99,32 @@
         </section>
 
         <section class="settings-group @Closed("care")" id="care">
-            <h2>Today and care</h2>
+            <h2>@Strings.Settings.SectionCare</h2>
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" role="switch" id="photo-reminder"
                        checked="@photoReminder" @onchange="SetPhotoReminderAsync" />
-                <label class="form-check-label" for="photo-reminder">Monthly photo reminder</label>
+                <label class="form-check-label" for="photo-reminder">@Strings.Settings.PhotoReminder</label>
             </div>
             <p class="settings-hint">
-                Once a month, Today lists what hasn't had a photo yet that month.
+                @Strings.Settings.PhotoReminderHint
             </p>
             <div class="form-check form-switch mt-4">
                 <input class="form-check-input" type="checkbox" role="switch" id="watering-reminder"
                        checked="@wateringReminder" @onchange="SetWateringReminderAsync" />
-                <label class="form-check-label" for="watering-reminder">Watering reminder</label>
+                <label class="form-check-label" for="watering-reminder">@Strings.Settings.WateringReminder</label>
             </div>
             <p class="settings-hint">
-                Learns how often each plant gets water and asks you to check it when it's probably dry. It says nothing about a plant until it has seen a few waterings.
+                @Strings.Settings.WateringReminderHint
             </p>
             <div class="form-check mt-4">
                 <input class="form-check-input" type="checkbox" id="empty-outer-pot"
                        checked="@(emptyOuterPotMinutes > 0)" @onchange="SetEmptyOuterPotOnAsync" />
-                <label class="form-check-label" for="empty-outer-pot">Remind me to empty the outer pot</label>
+                <label class="form-check-label" for="empty-outer-pot">@Strings.Settings.EmptyOuterPot</label>
             </div>
             @if (emptyOuterPotMinutes > 0)
             {
                 <div class="input-group mt-2">
-                    <span class="input-group-text" id="empty-outer-pot-after">after</span>
+                    <span class="input-group-text" id="empty-outer-pot-after">@Strings.Settings.EmptyOuterPotAfter</span>
                     <select id="empty-outer-pot-wait" class="form-select" aria-labelledby="empty-outer-pot-after" @onchange="SetEmptyOuterPotWaitAsync">
                         @foreach (var (minutes, label) in emptyOuterPotWaits)
                         {
@@ -119,38 +134,38 @@
                 </div>
             }
             <p class="settings-hint">
-                After you water a plant that stands in an outer pot, Today asks you to tip out the water that drained into it. Plants whose outer pot holds water on purpose are left out.
+                @Strings.Settings.EmptyOuterPotHint
             </p>
             <div class="settings-rows mt-4">
-                <SettingsRow Href="kinds-of-care" Title="Kinds of care" Detail="@KindsOfCareLine" />
-                <SettingsRow Href="care-intervals" Title="Care intervals" Detail="@CareIntervalsLine" />
-                <SettingsRow Href="away" Title="Away and quiet time" Detail="Today stops asking while you're away or taking a break" />
+                <SettingsRow Href="kinds-of-care" Title="@Strings.Settings.KindsOfCare" Detail="@KindsOfCareLine" />
+                <SettingsRow Href="care-intervals" Title="@Strings.Settings.CareIntervals" Detail="@CareIntervalsLine" />
+                <SettingsRow Href="away" Title="@Strings.Settings.Away" Detail="@Strings.Settings.AwayDetail" />
             </div>
             <div class="form-check form-switch mt-4">
                 <input class="form-check-input" type="checkbox" role="switch" id="daily-round"
                        checked="@dailyRound" @onchange="SetDailyRoundAsync" />
-                <label class="form-check-label" for="daily-round">Daily round</label>
+                <label class="form-check-label" for="daily-round">@Strings.Settings.DailyRound</label>
             </div>
             <p class="settings-hint">
-                Today suggests one room a day to go round.
+                @Strings.Settings.DailyRoundHint
             </p>
-            <div class="theme-label mt-4" id="round-days-label">Round days</div>
+            <div class="theme-label mt-4" id="round-days-label">@Strings.Settings.RoundDays</div>
             <div class="chip-row" role="group" aria-labelledby="round-days-label">
                 @foreach (var day in weekdays)
                 {
                     var picked = roundDays.Contains(day);
                     <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
-                            @onclick="() => ToggleRoundDayAsync(day)">@day.ToString()[..3]</button>
+                            @onclick="() => ToggleRoundDayAsync(day)">@Labels.DayShort(day)</button>
                 }
             </div>
             <p class="settings-hint">
-                Plants due for a check come up on your round day before, instead of each on its own day. A plant that dries out faster than the time between round days keeps its own days.
+                @Strings.Settings.RoundDaysHint
             </p>
         </section>
 
         <section class="settings-group @Closed("plants")" id="plants">
-            <h2>Plants</h2>
-            <div class="theme-label" id="everyday-label">Everyday names</div>
+            <h2>@Strings.Settings.SectionPlants</h2>
+            <div class="theme-label" id="everyday-label">@Strings.Settings.EverydayNames</div>
             <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="everyday-label">
                 @foreach (var option in everydayOptions)
                 {
@@ -161,23 +176,23 @@
                 }
             </div>
             <p class="settings-hint">
-                A plant with no nickname shows what it's called under its botanical name, like @(everydayLanguage == EverydayNameLanguage.Danish ? "Svigermors tunge" : "Snake plant") for <i>Dracaena trifasciata</i>.
+                @((MarkupString)EverydayHint)
             </p>
             @if (Google.IsConfigured)
             {
                 <div class="form-check form-switch mt-4">
                     <input class="form-check-input" type="checkbox" role="switch" id="google-photos"
                            checked="@googlePhotos" @onchange="SetGooglePhotosAsync" />
-                    <label class="form-check-label" for="google-photos">Pick from Google Photos</label>
+                    <label class="form-check-label" for="google-photos">@Strings.Settings.GooglePhotos</label>
                 </div>
                 <p class="settings-hint">
-                    Adds a Google Photos choice next to the phone's gallery, for photos that are only in the cloud. Google asks you to allow it the first time, and again after an hour.
+                    @Strings.Settings.GooglePhotosHint
                 </p>
             }
             <div class="settings-rows mt-4">
-                <SettingsRow Href="fields" Title="Your fields" Detail="@OwnFieldsLine" />
+                <SettingsRow Href="fields" Title="@Strings.Settings.YourFields" Detail="@OwnFieldsLine" />
             </div>
-            <div class="theme-label mt-4" id="recent-changes-label">Recent changes on a plant</div>
+            <div class="theme-label mt-4" id="recent-changes-label">@Strings.Settings.RecentChanges</div>
             <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="recent-changes-label">
                 @foreach (var option in recentChangesOptions)
                 {
@@ -188,48 +203,48 @@
                 }
             </div>
             <p class="settings-hint">
-                Under a plant's name, what happened lately: when it arrived, was repotted or moved.
+                @Strings.Settings.RecentChangesHint
             </p>
-            <label class="theme-label mt-4" for="pot-up-warn">Say when a new pot is much bigger</label>
+            <label class="theme-label mt-4" for="pot-up-warn">@Strings.Settings.PotUpWarn</label>
             <div class="input-group">
-                <span class="input-group-text">more than</span>
+                <span class="input-group-text">@Strings.Settings.PotUpWarnBefore</span>
                 <input id="pot-up-warn" type="number" class="form-control" inputmode="decimal" min="1" max="20" step="0.5"
                        value="@Pot.Size(potUpWarnCm)" @onchange="SetPotUpWarnCmAsync" />
-                <span class="input-group-text">cm wider</span>
+                <span class="input-group-text">@Strings.Settings.PotUpWarnAfter</span>
             </div>
             <p class="settings-hint">
-                When you pick a new pot for a plant or a cutting, a note says if it is this much wider across the top than the old one. A wide pot keeps the soil wet longer.
+                @Strings.Settings.PotUpWarnHint
             </p>
         </section>
 
         <section class="settings-group @Closed("notifications")" id="notifications">
-            <h2>Notifications</h2>
+            <h2>@Strings.Settings.SectionNotifications</h2>
             @if (!Account.IsAvailable || (accountHintRead && !accountChecking && account is not { SignedIn: true }))
             {
-                <p class="settings-hint mt-0">A daily list of what Today asks for. It needs an account, since the server sends it.</p>
+                <p class="settings-hint mt-0">@Strings.Settings.NotifyNeedsAccount</p>
             }
             else if (accountChecking || notifySupport is null)
             {
-                <p class="settings-hint mt-0">Checking your account…</p>
+                <p class="settings-hint mt-0">@Strings.Settings.CheckingAccount</p>
             }
             else if (notifySupport == "needs-home-screen")
             {
-                <p class="settings-hint mt-0">On iPhone and iPad, add Stikling to your home screen first: tap Share, then Add to Home Screen. Open it from there and turn notifications on here.</p>
+                <p class="settings-hint mt-0">@Strings.Settings.NotifyHomeScreen</p>
             }
             else if (notifySupport != "ok")
             {
-                <p class="settings-hint mt-0">This browser can't show notifications from websites.</p>
+                <p class="settings-hint mt-0">@Strings.Settings.NotifyUnsupported</p>
             }
             else if (!notifyOn)
             {
                 @if (notifyServer == ServerCheck.NotSetUp)
                 {
-                    <p class="settings-hint mt-0">Notifications aren't available yet.</p>
+                    <p class="settings-hint mt-0">@Strings.Settings.NotifyNotYet</p>
                 }
                 else
                 {
-                    <p class="settings-hint mt-0">One notification a day with what Today asks for, never a reminder to water. Each device is turned on by itself.</p>
-                    <button type="button" class="btn btn-primary" disabled="@notifyBusy" @onclick="TurnOnNotificationsAsync">Turn on</button>
+                    <p class="settings-hint mt-0">@Strings.Settings.NotifyIntro</p>
+                    <button type="button" class="btn btn-primary" disabled="@notifyBusy" @onclick="TurnOnNotificationsAsync">@Strings.Settings.NotifyTurnOn</button>
                     @if (notifyMessage is not null)
                     {
                         <p class="settings-hint" role="status">@notifyMessage</p>
@@ -240,16 +255,16 @@
             {
                 @if (notifyPermission == "denied")
                 {
-                    <p class="settings-hint mt-0" role="status">Notifications are blocked for stikling.app in this browser. Allow them in the site settings (the icon next to the address), then turn them off and on again here.</p>
+                    <p class="settings-hint mt-0" role="status">@Strings.Settings.NotifyBlockedAlready</p>
                 }
-                <label class="theme-label" for="notify-at">Time</label>
+                <label class="theme-label" for="notify-at">@Strings.Settings.NotifyTime</label>
                 <select id="notify-at" class="form-select w-auto" @onchange="SetNotifyAtAsync">
                     @foreach (var time in notifyTimes)
                     {
                         <option value="@time.ToString("HH:mm")" selected="@(time == notifyAt)">@time.ToString("HH:mm")</option>
                     }
                 </select>
-                <div class="theme-label mt-4" id="notify-days-label">Days</div>
+                <div class="theme-label mt-4" id="notify-days-label">@Strings.Settings.NotifyDays</div>
                 <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="notify-days-label">
                     @foreach (var option in notifyDayOptions)
                     {
@@ -266,29 +281,29 @@
                 </div>
                 @if (notifyDaysChoice == NotifyDays.Picked)
                 {
-                    <div class="chip-row mt-3" role="group" aria-label="Days to get a notification">
+                    <div class="chip-row mt-3" role="group" aria-label="@Strings.Settings.NotifyDaysGroup">
                         @foreach (var day in weekdays)
                         {
                             var picked = notifyWeekdays.Contains(day);
                             <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
-                                    @onclick="() => ToggleNotifyWeekdayAsync(day)">@day.ToString()[..3]</button>
+                                    @onclick="() => ToggleNotifyWeekdayAsync(day)">@Labels.DayShort(day)</button>
                         }
                     </div>
                     @if (notifyWeekdays.Count == 0)
                     {
-                        <p class="settings-hint">With no day picked, nothing is sent.</p>
+                        <p class="settings-hint">@Strings.Settings.NotifyNoDayPicked</p>
                     }
                 }
                 else if (notifyDaysChoice == NotifyDays.RoundDays)
                 {
-                    <p class="settings-hint">Your round days: @string.Join(", ", roundDays.Select(d => d.ToString()[..3])).</p>
+                    <p class="settings-hint">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.NotifyYourRoundDays, string.Join(", ", roundDays.Select(Labels.DayShort)))</p>
                 }
                 <p class="settings-hint">
-                    One notification a day with what Today asks for, never a reminder to water. The time and days are yours on every device. This device is on.
+                    @Strings.Settings.NotifyOnHint
                 </p>
                 <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-outline-primary" disabled="@notifyBusy" @onclick="SendTestNotificationAsync">Send a test</button>
-                    <button type="button" class="btn btn-outline-secondary" disabled="@notifyBusy" @onclick="TurnOffNotificationsAsync">Turn off</button>
+                    <button type="button" class="btn btn-outline-primary" disabled="@notifyBusy" @onclick="SendTestNotificationAsync">@Strings.Settings.NotifySendTest</button>
+                    <button type="button" class="btn btn-outline-secondary" disabled="@notifyBusy" @onclick="TurnOffNotificationsAsync">@Strings.Settings.NotifyTurnOff</button>
                 </div>
                 @if (notifyMessage is not null)
                 {
@@ -298,49 +313,49 @@
         </section>
 
         <section class="settings-group @Closed("pests")" id="pests">
-            <h2>Pests</h2>
-            <div class="theme-label" id="clean-weeks-label">Clean before a case can be resolved</div>
+            <h2>@Strings.Settings.SectionPests</h2>
+            <div class="theme-label" id="clean-weeks-label">@Strings.Settings.CleanWeeks</div>
             <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="clean-weeks-label">
                 @foreach (var weeks in cleanWeeksOptions)
                 {
                     var id = $"clean-weeks-{weeks}";
                     <input type="radio" class="btn-check" name="clean-weeks" id="@id"
                            checked="@(cleanWeeks == weeks)" @onchange="() => SetCleanWeeksAsync(weeks)" />
-                    <label class="btn btn-outline-primary" for="@id">@Labels.Count(weeks, "week")</label>
+                    <label class="btn btn-outline-primary" for="@id">@Weeks(weeks)</label>
                 }
             </div>
             <p class="settings-hint">
-                A case being watched counts the days since its last treatment. Finding pests again starts the count over.
+                @Strings.Settings.CleanWeeksHint
             </p>
-            <div class="theme-label mt-4" id="quarantine-days-label">Quarantine length</div>
+            <div class="theme-label mt-4" id="quarantine-days-label">@Strings.Settings.QuarantineLength</div>
             <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="quarantine-days-label">
                 @foreach (var weeks in quarantineWeeksOptions)
                 {
                     var id = $"quarantine-days-{weeks}";
                     <input type="radio" class="btn-check" name="quarantine-days" id="@id"
                            checked="@(quarantineDays == weeks * 7)" @onchange="() => SetQuarantineDaysAsync(weeks * 7)" />
-                    <label class="btn btn-outline-primary" for="@id">@Labels.Count(weeks, "week")</label>
+                    <label class="btn btn-outline-primary" for="@id">@Weeks(weeks)</label>
                 }
             </div>
             <p class="settings-hint">
-                How long a plant is kept apart when it goes into quarantine. You can change it for each plant.
+                @Strings.Settings.QuarantineLengthHint
             </p>
             <div class="form-check form-switch mt-4">
                 <input class="form-check-input" type="checkbox" role="switch" id="quarantine-new-plants"
                        checked="@quarantineNewPlants" @onchange="SetQuarantineNewPlantsAsync" />
-                <label class="form-check-label" for="quarantine-new-plants">Quarantine new plants</label>
+                <label class="form-check-label" for="quarantine-new-plants">@Strings.Settings.QuarantineNew</label>
             </div>
             <p class="settings-hint">
-                A plant you add that was bought, swapped or a gift starts in quarantine. You can untick it on the form.
+                @Strings.Settings.QuarantineNewHint
             </p>
         </section>
 
         <section class="settings-group @Closed("data")" id="data">
-            <h2>Your data</h2>
+            <h2>@Strings.Settings.SectionData</h2>
             <div class="settings-rows">
-                <SettingsRow Href="rooms-and-tags" Title="Rooms and tags" Detail="@RoomsAndTagsLine" />
-                <SettingsRow Href="#" Title="Collection numbers" Detail="Number the plants you have, oldest first." OnClick="OpenNumberingAsync" />
-                <SettingsRow Href="backup" Title="Backup and storage" Detail="@BackupLine" />
+                <SettingsRow Href="rooms-and-tags" Title="@Strings.Settings.RoomsAndTags" Detail="@RoomsAndTagsLine" />
+                <SettingsRow Href="#" Title="@Strings.Settings.CollectionNumbers" Detail="@Strings.Settings.CollectionNumbersDetail" OnClick="OpenNumberingAsync" />
+                <SettingsRow Href="backup" Title="@Strings.Settings.BackupAndStorage" Detail="@BackupLine" />
             </div>
             @if (numberingMessage is not null)
             {
@@ -349,32 +364,32 @@
             <div class="form-check form-switch mt-4">
                 <input class="form-check-input" type="checkbox" role="switch" id="error-reports"
                        checked="@(!errorReportsOff)" @onchange="SetErrorReportsAsync" />
-                <label class="form-check-label" for="error-reports">Send error reports</label>
+                <label class="form-check-label" for="error-reports">@Strings.Settings.ErrorReports</label>
             </div>
             <p class="settings-hint">
-                When something goes wrong, the app sends a report of what failed so it can be fixed. It never has your plants, notes or photos. <a href="privacy#error-reports">What's in a report</a>
+                @Strings.Settings.ErrorReportsHint <a href="privacy#error-reports">@Strings.Settings.ErrorReportsLink</a>
             </p>
         </section>
 
         <section class="settings-group @Closed("about")" id="about">
-            <h2>About</h2>
+            <h2>@Strings.Settings.SectionAbout</h2>
             <div class="settings-rows">
-                <SettingsRow Href="#" Title="Show me around" Detail="A short tour, with an example plant" OnClick="StartTourAsync" />
-                <SettingsRow Href="help" Title="Help" Detail="How Stikling works" />
-                <SettingsRow Href="privacy" Title="Privacy" Detail="What is kept and where" />
-                <SettingsRow Href="settings/whats-new" Title="What's new" Detail="@AppVersion.Label" />
-                <SettingsRow Href="plant-names" Title="Plant names" Detail="Where the name suggestions come from" />
-                <SettingsRow Href="https://github.com/LaugeM/stikling" Title="Source code" Detail="Stikling is open source, on GitHub" External="true" />
+                <SettingsRow Href="#" Title="@Strings.Settings.ShowMeAround" Detail="@Strings.Settings.ShowMeAroundDetail" OnClick="StartTourAsync" />
+                <SettingsRow Href="help" Title="@Strings.Settings.Help" Detail="@Strings.Settings.HelpDetail" />
+                <SettingsRow Href="privacy" Title="@Strings.Settings.Privacy" Detail="@Strings.Settings.PrivacyDetail" />
+                <SettingsRow Href="settings/whats-new" Title="@Strings.Settings.WhatsNew" Detail="@AppVersion.Label" />
+                <SettingsRow Href="plant-names" Title="@Strings.Settings.PlantNames" Detail="@Strings.Settings.PlantNamesDetail" />
+                <SettingsRow Href="https://github.com/LaugeM/stikling" Title="@Strings.Settings.SourceCode" Detail="@Strings.Settings.SourceCodeDetail" External="true" />
             </div>
             @if (tourFailed)
             {
-                <p class="text-danger" role="alert">Couldn't load the example. Check your connection and try again.</p>
+                <p class="text-danger" role="alert">@Strings.Settings.TourFailed</p>
             }
         </section>
     </div>
 </div>
 
-<Sheet Title="Collection numbers" @bind-Open="numberingOpen">
+<Sheet Title="@Strings.Settings.CollectionNumbers" @bind-Open="numberingOpen">
     @if (numberingPlan is { } plan)
     {
         <p>@plan.Summary</p>
@@ -390,16 +405,16 @@
                     <li><span class="number-plan-code">#@item.Code</span> @item.Propagation.DisplayName</li>
                 }
             </ul>
-            <p class="form-text">Nothing already numbered is changed, and you can edit any number afterwards.</p>
+            <p class="form-text">@Strings.Settings.NumberingHint</p>
             <div class="d-flex gap-2 mt-3">
-                <button type="button" class="btn btn-primary" disabled="@numberingBusy" @onclick="NumberThemAsync">Number them</button>
-                <button type="button" class="btn btn-outline-secondary" disabled="@numberingBusy" @onclick="() => numberingOpen = false">Cancel</button>
+                <button type="button" class="btn btn-primary" disabled="@numberingBusy" @onclick="NumberThemAsync">@Strings.Settings.NumberThem</button>
+                <button type="button" class="btn btn-outline-secondary" disabled="@numberingBusy" @onclick="() => numberingOpen = false">@Strings.Common.Cancel</button>
             </div>
         }
         else
         {
             <div class="d-flex gap-2 mt-3">
-                <button type="button" class="btn btn-outline-secondary" @onclick="() => numberingOpen = false">Close</button>
+                <button type="button" class="btn btn-outline-secondary" @onclick="() => numberingOpen = false">@Strings.Common.Close</button>
             </div>
         }
     }
@@ -448,12 +463,14 @@
             // Planned again from what is stored now, since a sync may have changed the plants while the sheet was open
             var plan = await Numbering.PlanAsync();
             await Numbering.ApplyAsync(plan);
-            var parts = new List<string>();
-            if (plan.Plants.Count > 0)
-                parts.Add($"Numbered {Labels.Plants(plan.Plants.Count)}");
-            if (plan.Cuttings.Count > 0)
-                parts.Add($"{(parts.Count == 0 ? "Gave" : "gave")} {Labels.Count(plan.Cuttings.Count, "cutting")} a letter");
-            numberingMessage = string.Join(" and ", parts) + ".";
+            numberingMessage = (plan.Plants.Count, plan.Cuttings.Count) switch
+            {
+                (> 0, > 0) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.NumberedBoth,
+                    Labels.Plants(plan.Plants.Count), CuttingCount(plan.Cuttings.Count)),
+                (> 0, _) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.NumberedPlants, Labels.Plants(plan.Plants.Count)),
+                (_, > 0) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.NumberedCuttings, CuttingCount(plan.Cuttings.Count)),
+                _ => null
+            };
             numberingOpen = false;
         }
         finally
@@ -462,26 +479,35 @@
         }
     }
 
-    private static readonly (ThemeMode Mode, string Label)[] options =
+    private static string CuttingCount(int count) => Plural.Of(count, Strings.Common.Cutting_One, Strings.Common.Cutting_Other);
+
+    private static string Weeks(int weeks) => Plural.Of(weeks, Strings.Settings.Week_One, Strings.Settings.Week_Other);
+
+    // Read when the page is made, so they follow the language
+    private static (ThemeMode Mode, string Label)[] options =>
     [
-        (ThemeMode.System, "Match system"),
-        (ThemeMode.Light, "Light"),
-        (ThemeMode.Dark, "Dark")
+        (ThemeMode.System, Strings.Settings.ThemeSystem),
+        (ThemeMode.Light, Strings.Settings.ThemeLight),
+        (ThemeMode.Dark, Strings.Settings.ThemeDark)
     ];
 
-    private static readonly (EverydayNameLanguage Language, string Label)[] everydayOptions =
+    private static (EverydayNameLanguage Language, string Label)[] everydayOptions =>
     [
-        (EverydayNameLanguage.English, "English"),
-        (EverydayNameLanguage.Danish, "Danish")
+        (EverydayNameLanguage.English, Strings.Settings.EverydayEnglish),
+        (EverydayNameLanguage.Danish, Strings.Settings.EverydayDanish)
     ];
 
-    private static readonly (int Days, string Label)[] recentChangesOptions =
+    private static (int Days, string Label)[] recentChangesOptions =>
     [
-        (0, "Off"),
-        (7, "1 week"),
-        (14, "2 weeks"),
-        (28, "4 weeks")
+        (0, Strings.Common.Off),
+        (7, Weeks(1)),
+        (14, Weeks(2)),
+        (28, Weeks(4))
     ];
+
+    private string EverydayHint => string.Format(System.Globalization.CultureInfo.CurrentCulture, System.Net.WebUtility.HtmlEncode(Strings.Settings.EverydayHint),
+        System.Net.WebUtility.HtmlEncode(everydayLanguage == EverydayNameLanguage.Danish ? "Svigermors tunge" : "Snake plant"),
+        "<i>Dracaena trifasciata</i>");
 
     private int recentChangesDays;
     private static readonly int[] cleanWeeksOptions = [2, 4, 6, 8];
@@ -499,8 +525,8 @@
     private bool wateringReminder;
     private int emptyOuterPotMinutes;
 
-    private static readonly (int Minutes, string Label)[] emptyOuterPotWaits =
-        [(15, "15 minutes"), (30, "30 minutes"), (60, "1 hour"), (120, "2 hours"), (180, "3 hours")];
+    private static (int Minutes, string Label)[] emptyOuterPotWaits =>
+        [(15, Strings.Settings.Minutes15), (30, Strings.Settings.Minutes30), (60, Strings.Settings.Hours1), (120, Strings.Settings.Hours2), (180, Strings.Settings.Hours3)];
     private bool dailyRound;
     private AccountState? account;
     private bool accountChecking;
@@ -614,11 +640,11 @@
     private static readonly TimeOnly[] notifyTimes =
         [.. Enumerable.Range(0, 96).Select(i => new TimeOnly(i / 4, i % 4 * 15))];
 
-    private static readonly (NotifyDays Days, string Label)[] notifyDayOptions =
+    private static (NotifyDays Days, string Label)[] notifyDayOptions =>
     [
-        (NotifyDays.EveryDay, "Every day"),
-        (NotifyDays.RoundDays, "Round days"),
-        (NotifyDays.Picked, "Pick days")
+        (NotifyDays.EveryDay, Strings.Settings.NotifyEveryDay),
+        (NotifyDays.RoundDays, Strings.Settings.RoundDays),
+        (NotifyDays.Picked, Strings.Settings.NotifyPickDays)
     ];
 
     private string? notifySupport;
@@ -660,16 +686,16 @@
                     await LoadDataAsync();
                     break;
                 case TurnOnResult.Ready:
-                    notifyMessage = "Ready. Tap Turn on again.";
+                    notifyMessage = Strings.Settings.NotifyReady;
                     break;
                 case TurnOnResult.Denied:
-                    notifyMessage = "Notifications are blocked for stikling.app in this browser. Allow them in the site settings (the icon next to the address), then tap Turn on again.";
+                    notifyMessage = Strings.Settings.NotifyBlockedTurnOn;
                     break;
                 case TurnOnResult.NotSetUp:
                     notifyServer = ServerCheck.NotSetUp;
                     break;
                 default:
-                    notifyMessage = "Couldn't turn notifications on right now. Try again in a moment.";
+                    notifyMessage = Strings.Settings.NotifyFailed;
                     break;
             }
 
@@ -774,29 +800,40 @@
     private int ownKindCount;
     private int ownFieldCount;
 
-    private string OwnFieldsLine => ownFieldCount == 0 ? "None yet" : Labels.Count(ownFieldCount, "field");
+    private string OwnFieldsLine => ownFieldCount == 0 ? Strings.Settings.YourFieldsNone : Plural.Of(ownFieldCount, Strings.Settings.Field_One, Strings.Settings.Field_Other);
     private int intervalCount;
 
     private string CareIntervalsLine =>
-        intervalCount == 0 ? "Feeding, repotting and the like, coming back on Today" : Labels.Count(intervalCount, "interval");
+        intervalCount == 0 ? Strings.Settings.CareIntervalsNone : Plural.Of(intervalCount, Strings.Settings.Interval_One, Strings.Settings.Interval_Other);
 
     private string KindsOfCareLine =>
-        ownKindCount == 0 ? "Add your own, like misted or bottom watered" : $"{ownKindCount} of your own";
+        ownKindCount == 0 ? Strings.Settings.KindsOfCareNone : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.KindsOfCareCount, ownKindCount);
 
     /// <summary>"3 rooms, 5 tags", for the line under the link to rooms and tags.</summary>
     private string RoomsAndTagsLine =>
         (roomCount, tagCount) switch
         {
-            (0, 0) => "Rename or merge them everywhere at once",
-            (_, 0) => Labels.Count(roomCount, "room"),
-            (0, _) => Labels.Count(tagCount, "tag"),
-            _ => $"{Labels.Count(roomCount, "room")}, {Labels.Count(tagCount, "tag")}"
+            (0, 0) => Strings.Settings.RoomsAndTagsNone,
+            (_, 0) => Rooms(roomCount),
+            (0, _) => Tags(tagCount),
+            _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.RoomsAndTagsBoth, Rooms(roomCount), Tags(tagCount))
         };
+
+    private static string Rooms(int count) => Plural.Of(count, Strings.Settings.Room_One, Strings.Settings.Room_Other);
+
+    private static string Tags(int count) => Plural.Of(count, Strings.Settings.Tag_One, Strings.Settings.Tag_Other);
 
     private string BackupLine =>
         lastBackup is { } date
-            ? $"Last backup {Labels.Date(date)} ({Labels.DaysAgo(Time.Today().DayNumber - date.DayNumber)})"
-            : "No backup on this device yet";
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.LastBackup,
+                Labels.Date(date), Labels.DaysAgo(Time.Today().DayNumber - date.DayNumber))
+            : Strings.Settings.NoBackup;
+
+    private async Task SetLanguageAsync(ChangeEventArgs e)
+    {
+        if (e.Value?.ToString() is { } code && code != Language.Current)
+            await Language.SetAsync(code);
+    }
 
     private async Task SetModeAsync(ThemeMode newMode)
     {
@@ -816,14 +853,14 @@
         get
         {
             if (Account.IsAvailable && accountHintRead)
-                yield return ("account", "Account");
-            yield return ("look", "Look");
-            yield return ("care", "Today and care");
-            yield return ("plants", "Plants");
-            yield return ("notifications", "Notifications");
-            yield return ("pests", "Pests");
-            yield return ("data", "Your data");
-            yield return ("about", "About");
+                yield return ("account", Strings.Settings.SectionAccount);
+            yield return ("look", Strings.Settings.SectionLook);
+            yield return ("care", Strings.Settings.SectionCare);
+            yield return ("plants", Strings.Settings.SectionPlants);
+            yield return ("notifications", Strings.Settings.SectionNotifications);
+            yield return ("pests", Strings.Settings.SectionPests);
+            yield return ("data", Strings.Settings.SectionData);
+            yield return ("about", Strings.Settings.SectionAbout);
         }
     }
 
@@ -886,10 +923,12 @@
     /// <summary>"Synced at 14:32", for the line under the email.</summary>
     private string SyncLine => (Sync.Running, Sync.LastSynced) switch
     {
-        (true, _) => "Syncing…",
-        (_, { } at) when at.ToLocalTime().Date == Time.GetLocalNow().Date => $"Synced at {Labels.Time(at)}",
-        (_, { } at) => $"Synced on {Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))}",
-        _ => "Not synced yet"
+        (true, _) => Strings.Settings.Syncing,
+        (_, { } at) when at.ToLocalTime().Date == Time.GetLocalNow().Date =>
+            string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.SyncedAt, Labels.Time(at)),
+        (_, { } at) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.SyncedOn,
+            Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))),
+        _ => Strings.Settings.NotSynced
     };
 
     private void OnSyncChanged() => _ = InvokeAsync(StateHasChanged);

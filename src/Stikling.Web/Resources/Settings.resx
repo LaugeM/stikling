@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Heading of the Settings page.</comment>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Settings · Stikling</value>
+    <comment>Title of the browser tab on the Settings page.</comment>
+  </data>
+  <data name="SectionsNav" xml:space="preserve">
+    <value>Settings sections</value>
+    <comment>Name of the list of sections on the Settings page, read out by a screen reader.</comment>
+  </data>
+  <data name="SectionAccount" xml:space="preserve">
+    <value>Account</value>
+    <comment>Heading of a section in Settings, and its link.</comment>
+  </data>
+  <data name="SectionLook" xml:space="preserve">
+    <value>Look</value>
+    <comment>Heading of a section in Settings, and its link. Language and theme.</comment>
+  </data>
+  <data name="SectionCare" xml:space="preserve">
+    <value>Today and care</value>
+    <comment>Heading of a section in Settings, and its link. Today is the name of the Today page.</comment>
+  </data>
+  <data name="SectionPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Heading of a section in Settings, and its link.</comment>
+  </data>
+  <data name="SectionNotifications" xml:space="preserve">
+    <value>Notifications</value>
+    <comment>Heading of a section in Settings, and its link.</comment>
+  </data>
+  <data name="SectionPests" xml:space="preserve">
+    <value>Pests</value>
+    <comment>Heading of a section in Settings, and its link.</comment>
+  </data>
+  <data name="SectionData" xml:space="preserve">
+    <value>Your data</value>
+    <comment>Heading of a section in Settings, and its link.</comment>
+  </data>
+  <data name="SectionAbout" xml:space="preserve">
+    <value>About</value>
+    <comment>Heading of a section in Settings, and its link.</comment>
+  </data>
+  <data name="SyncNeedsLook" xml:space="preserve">
+    <value>Sync needs a look. Tap to see why.</value>
+    <comment>Line under the account when syncing has a problem.</comment>
+  </data>
+  <data name="CheckingAccount" xml:space="preserve">
+    <value>Checking your account…</value>
+    <comment>Shown while the app finds out whether someone is signed in.</comment>
+  </data>
+  <data name="AccountUnreachable" xml:space="preserve">
+    <value>Can't reach the sign-in service right now</value>
+    <comment>Line under the account when the sign-in service can't be reached.</comment>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Sign in</value>
+    <comment>Link to the sign-in page.</comment>
+  </data>
+  <data name="SignInDetail" xml:space="preserve">
+    <value>Keep your plants the same on all your devices</value>
+    <comment>Line under the sign-in link.</comment>
+  </data>
+  <data name="Syncing" xml:space="preserve">
+    <value>Syncing…</value>
+    <comment>Line under the account while a sync is running.</comment>
+  </data>
+  <data name="SyncedAt" xml:space="preserve">
+    <value>Synced at {0}</value>
+    <comment>Line under the account. {0} is the time, like 14:32.</comment>
+  </data>
+  <data name="SyncedOn" xml:space="preserve">
+    <value>Synced on {0}</value>
+    <comment>Line under the account. {0} is a date, like 19 Sep 2026.</comment>
+  </data>
+  <data name="NotSynced" xml:space="preserve">
+    <value>Not synced yet</value>
+    <comment>Line under the account when it has never synced on this device.</comment>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+    <comment>Label of the choice of language for the app, at the top of the Look section.</comment>
+  </data>
+  <data name="LanguageRestartHint" xml:space="preserve">
+    <value>Changing the language restarts the app.</value>
+    <comment>Small text under the language choice.</comment>
+  </data>
+  <data name="HelpTranslate" xml:space="preserve">
+    <value>Help translate Stikling</value>
+    <comment>Link to a guide for people who want to translate the app.</comment>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Theme</value>
+    <comment>Label of the choice between light and dark colours.</comment>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Match system</value>
+    <comment>Theme choice: use whatever the device is set to.</comment>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Light</value>
+    <comment>Theme choice.</comment>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Dark</value>
+    <comment>Theme choice.</comment>
+  </data>
+  <data name="PhotoReminder" xml:space="preserve">
+    <value>Monthly photo reminder</value>
+    <comment>Switch in Settings.</comment>
+  </data>
+  <data name="PhotoReminderHint" xml:space="preserve">
+    <value>Once a month, Today lists what hasn't had a photo yet that month.</value>
+    <comment>Small text under the switch. Today is the name of the Today page.</comment>
+  </data>
+  <data name="WateringReminder" xml:space="preserve">
+    <value>Watering reminder</value>
+    <comment>Switch in Settings.</comment>
+  </data>
+  <data name="WateringReminderHint" xml:space="preserve">
+    <value>Learns how often each plant gets water and asks you to check it when it's probably dry. It says nothing about a plant until it has seen a few waterings.</value>
+    <comment>Small text under the switch.</comment>
+  </data>
+  <data name="EmptyOuterPot" xml:space="preserve">
+    <value>Remind me to empty the outer pot</value>
+    <comment>Checkbox in Settings.</comment>
+  </data>
+  <data name="EmptyOuterPotAfter" xml:space="preserve">
+    <value>after</value>
+    <comment>Before a choice of how long to wait, like after 30 minutes.</comment>
+  </data>
+  <data name="Minutes15" xml:space="preserve">
+    <value>15 minutes</value>
+    <comment>A time to wait, in a list.</comment>
+  </data>
+  <data name="Minutes30" xml:space="preserve">
+    <value>30 minutes</value>
+    <comment>A time to wait, in a list.</comment>
+  </data>
+  <data name="Hours1" xml:space="preserve">
+    <value>1 hour</value>
+    <comment>A time to wait, in a list.</comment>
+  </data>
+  <data name="Hours2" xml:space="preserve">
+    <value>2 hours</value>
+    <comment>A time to wait, in a list.</comment>
+  </data>
+  <data name="Hours3" xml:space="preserve">
+    <value>3 hours</value>
+    <comment>A time to wait, in a list.</comment>
+  </data>
+  <data name="EmptyOuterPotHint" xml:space="preserve">
+    <value>After you water a plant that stands in an outer pot, Today asks you to tip out the water that drained into it. Plants whose outer pot holds water on purpose are left out.</value>
+    <comment>Small text under the checkbox. Today is the name of the Today page.</comment>
+  </data>
+  <data name="KindsOfCare" xml:space="preserve">
+    <value>Kinds of care</value>
+    <comment>Link to the page where you add your own kinds of care.</comment>
+  </data>
+  <data name="KindsOfCareNone" xml:space="preserve">
+    <value>Add your own, like misted or bottom watered</value>
+    <comment>Line under the link when there are none yet.</comment>
+  </data>
+  <data name="KindsOfCareCount" xml:space="preserve">
+    <value>{0} of your own</value>
+    <comment>Line under the link. {0} is how many kinds you added.</comment>
+  </data>
+  <data name="CareIntervals" xml:space="preserve">
+    <value>Care intervals</value>
+    <comment>Link to the page where you set how often something comes back on Today.</comment>
+  </data>
+  <data name="CareIntervalsNone" xml:space="preserve">
+    <value>Feeding, repotting and the like, coming back on Today</value>
+    <comment>Line under the link when there are none yet. Today is the name of the Today page.</comment>
+  </data>
+  <data name="Interval_One" xml:space="preserve">
+    <value>{0} interval</value>
+    <comment>A count of care intervals when there is exactly one. {0} is the number.</comment>
+  </data>
+  <data name="Interval_Other" xml:space="preserve">
+    <value>{0} intervals</value>
+    <comment>A count of care intervals when there is not exactly one. {0} is the number.</comment>
+  </data>
+  <data name="Away" xml:space="preserve">
+    <value>Away and quiet time</value>
+    <comment>Link to the page where you say when you're away.</comment>
+  </data>
+  <data name="AwayDetail" xml:space="preserve">
+    <value>Today stops asking while you're away or taking a break</value>
+    <comment>Line under the link. Today is the name of the Today page.</comment>
+  </data>
+  <data name="DailyRound" xml:space="preserve">
+    <value>Daily round</value>
+    <comment>Switch in Settings.</comment>
+  </data>
+  <data name="DailyRoundHint" xml:space="preserve">
+    <value>Today suggests one room a day to go round.</value>
+    <comment>Small text under the switch. Today is the name of the Today page.</comment>
+  </data>
+  <data name="RoundDays" xml:space="preserve">
+    <value>Round days</value>
+    <comment>Label over the weekdays you go round your plants, and a choice of days for notifications.</comment>
+  </data>
+  <data name="RoundDaysHint" xml:space="preserve">
+    <value>Plants due for a check come up on your round day before, instead of each on its own day. A plant that dries out faster than the time between round days keeps its own days.</value>
+    <comment>Small text under the weekdays.</comment>
+  </data>
+  <data name="EverydayNames" xml:space="preserve">
+    <value>Everyday names</value>
+    <comment>Label of the choice of language for the everyday names shown under a plant's botanical name.</comment>
+  </data>
+  <data name="EverydayEnglish" xml:space="preserve">
+    <value>English</value>
+    <comment>Choice of language for everyday plant names.</comment>
+  </data>
+  <data name="EverydayDanish" xml:space="preserve">
+    <value>Danish</value>
+    <comment>Choice of language for everyday plant names.</comment>
+  </data>
+  <data name="EverydayHint" xml:space="preserve">
+    <value>A plant with no nickname shows what it's called under its botanical name, like {0} for {1}.</value>
+    <comment>Small text under the choice. {0} is an example everyday name and {1} is the botanical name in italics. Keep the {1}, it is the same in every language.</comment>
+  </data>
+  <data name="GooglePhotos" xml:space="preserve">
+    <value>Pick from Google Photos</value>
+    <comment>Switch in Settings.</comment>
+  </data>
+  <data name="GooglePhotosHint" xml:space="preserve">
+    <value>Adds a Google Photos choice next to the phone's gallery, for photos that are only in the cloud. Google asks you to allow it the first time, and again after an hour.</value>
+    <comment>Small text under the switch.</comment>
+  </data>
+  <data name="YourFields" xml:space="preserve">
+    <value>Your fields</value>
+    <comment>Link to the page where you add your own fields to plants.</comment>
+  </data>
+  <data name="YourFieldsNone" xml:space="preserve">
+    <value>None yet</value>
+    <comment>Line under the link when there are none.</comment>
+  </data>
+  <data name="Field_One" xml:space="preserve">
+    <value>{0} field</value>
+    <comment>A count of your own fields when there is exactly one. {0} is the number.</comment>
+  </data>
+  <data name="Field_Other" xml:space="preserve">
+    <value>{0} fields</value>
+    <comment>A count of your own fields when there is not exactly one. {0} is the number.</comment>
+  </data>
+  <data name="RecentChanges" xml:space="preserve">
+    <value>Recent changes on a plant</value>
+    <comment>Label of a choice of how long a plant's page keeps saying what happened lately.</comment>
+  </data>
+  <data name="RecentChangesHint" xml:space="preserve">
+    <value>Under a plant's name, what happened lately: when it arrived, was repotted or moved.</value>
+    <comment>Small text under the choice.</comment>
+  </data>
+  <data name="Week_One" xml:space="preserve">
+    <value>{0} week</value>
+    <comment>A number of weeks when there is exactly one. {0} is the number.</comment>
+  </data>
+  <data name="Week_Other" xml:space="preserve">
+    <value>{0} weeks</value>
+    <comment>A number of weeks when there is not exactly one. {0} is the number.</comment>
+  </data>
+  <data name="PotUpWarn" xml:space="preserve">
+    <value>Say when a new pot is much bigger</value>
+    <comment>Label of a number field.</comment>
+  </data>
+  <data name="PotUpWarnBefore" xml:space="preserve">
+    <value>more than</value>
+    <comment>Before the number field, like more than 5 cm wider.</comment>
+  </data>
+  <data name="PotUpWarnAfter" xml:space="preserve">
+    <value>cm wider</value>
+    <comment>After the number field, like more than 5 cm wider.</comment>
+  </data>
+  <data name="PotUpWarnHint" xml:space="preserve">
+    <value>When you pick a new pot for a plant or a cutting, a note says if it is this much wider across the top than the old one. A wide pot keeps the soil wet longer.</value>
+    <comment>Small text under the number field.</comment>
+  </data>
+  <data name="NotifyNeedsAccount" xml:space="preserve">
+    <value>A daily list of what Today asks for. It needs an account, since the server sends it.</value>
+    <comment>Shown in Notifications when nobody is signed in. Today is the name of the Today page.</comment>
+  </data>
+  <data name="NotifyHomeScreen" xml:space="preserve">
+    <value>On iPhone and iPad, add Stikling to your home screen first: tap Share, then Add to Home Screen. Open it from there and turn notifications on here.</value>
+    <comment>Shown in Notifications on an iPhone or iPad. Share and Add to Home Screen are buttons in the browser, use the words the device shows.</comment>
+  </data>
+  <data name="NotifyUnsupported" xml:space="preserve">
+    <value>This browser can't show notifications from websites.</value>
+    <comment>Shown in Notifications.</comment>
+  </data>
+  <data name="NotifyNotYet" xml:space="preserve">
+    <value>Notifications aren't available yet.</value>
+    <comment>Shown in Notifications.</comment>
+  </data>
+  <data name="NotifyIntro" xml:space="preserve">
+    <value>One notification a day with what Today asks for, never a reminder to water. Each device is turned on by itself.</value>
+    <comment>Shown in Notifications before they are turned on. Today is the name of the Today page.</comment>
+  </data>
+  <data name="NotifyTurnOn" xml:space="preserve">
+    <value>Turn on</value>
+    <comment>Button that turns notifications on.</comment>
+  </data>
+  <data name="NotifyReady" xml:space="preserve">
+    <value>Ready. Tap Turn on again.</value>
+    <comment>Shown after the first tap on Turn on. Turn on is the button, use the same words as the button.</comment>
+  </data>
+  <data name="NotifyBlockedTurnOn" xml:space="preserve">
+    <value>Notifications are blocked for stikling.app in this browser. Allow them in the site settings (the icon next to the address), then tap Turn on again.</value>
+    <comment>Shown after trying to turn notifications on. Turn on is the button, use the same words as the button.</comment>
+  </data>
+  <data name="NotifyBlockedAlready" xml:space="preserve">
+    <value>Notifications are blocked for stikling.app in this browser. Allow them in the site settings (the icon next to the address), then turn them off and on again here.</value>
+    <comment>Shown in Notifications when the browser blocks them.</comment>
+  </data>
+  <data name="NotifyFailed" xml:space="preserve">
+    <value>Couldn't turn notifications on right now. Try again in a moment.</value>
+    <comment>Shown when turning notifications on failed.</comment>
+  </data>
+  <data name="NotifyTime" xml:space="preserve">
+    <value>Time</value>
+    <comment>Label of the time of day a notification is sent.</comment>
+  </data>
+  <data name="NotifyDays" xml:space="preserve">
+    <value>Days</value>
+    <comment>Label of the choice of which days a notification is sent.</comment>
+  </data>
+  <data name="NotifyEveryDay" xml:space="preserve">
+    <value>Every day</value>
+    <comment>Choice of which days a notification is sent.</comment>
+  </data>
+  <data name="NotifyPickDays" xml:space="preserve">
+    <value>Pick days</value>
+    <comment>Choice of which days a notification is sent: the ones you pick.</comment>
+  </data>
+  <data name="NotifyDaysGroup" xml:space="preserve">
+    <value>Days to get a notification</value>
+    <comment>Name of the weekday buttons, read out by a screen reader.</comment>
+  </data>
+  <data name="NotifyNoDayPicked" xml:space="preserve">
+    <value>With no day picked, nothing is sent.</value>
+    <comment>Small text under the weekday buttons.</comment>
+  </data>
+  <data name="NotifyYourRoundDays" xml:space="preserve">
+    <value>Your round days: {0}.</value>
+    <comment>Small text. {0} is a list of weekdays, like Mon, Thu.</comment>
+  </data>
+  <data name="NotifyOnHint" xml:space="preserve">
+    <value>One notification a day with what Today asks for, never a reminder to water. The time and days are yours on every device. This device is on.</value>
+    <comment>Shown in Notifications once they are on. Today is the name of the Today page.</comment>
+  </data>
+  <data name="NotifySendTest" xml:space="preserve">
+    <value>Send a test</value>
+    <comment>Button that sends a test notification.</comment>
+  </data>
+  <data name="NotifyTurnOff" xml:space="preserve">
+    <value>Turn off</value>
+    <comment>Button that turns notifications off.</comment>
+  </data>
+  <data name="CleanWeeks" xml:space="preserve">
+    <value>Clean before a case can be resolved</value>
+    <comment>Label of a choice of how many weeks. A case is a pest case.</comment>
+  </data>
+  <data name="CleanWeeksHint" xml:space="preserve">
+    <value>A case being watched counts the days since its last treatment. Finding pests again starts the count over.</value>
+    <comment>Small text under the choice. A case is a pest case.</comment>
+  </data>
+  <data name="QuarantineLength" xml:space="preserve">
+    <value>Quarantine length</value>
+    <comment>Label of a choice of how many weeks.</comment>
+  </data>
+  <data name="QuarantineLengthHint" xml:space="preserve">
+    <value>How long a plant is kept apart when it goes into quarantine. You can change it for each plant.</value>
+    <comment>Small text under the choice.</comment>
+  </data>
+  <data name="QuarantineNew" xml:space="preserve">
+    <value>Quarantine new plants</value>
+    <comment>Switch in Settings.</comment>
+  </data>
+  <data name="QuarantineNewHint" xml:space="preserve">
+    <value>A plant you add that was bought, swapped or a gift starts in quarantine. You can untick it on the form.</value>
+    <comment>Small text under the switch.</comment>
+  </data>
+  <data name="RoomsAndTags" xml:space="preserve">
+    <value>Rooms and tags</value>
+    <comment>Link to the page for rooms and tags.</comment>
+  </data>
+  <data name="RoomsAndTagsNone" xml:space="preserve">
+    <value>Rename or merge them everywhere at once</value>
+    <comment>Line under the link when there are no rooms or tags yet.</comment>
+  </data>
+  <data name="Room_One" xml:space="preserve">
+    <value>{0} room</value>
+    <comment>A count of rooms when there is exactly one. {0} is the number.</comment>
+  </data>
+  <data name="Room_Other" xml:space="preserve">
+    <value>{0} rooms</value>
+    <comment>A count of rooms when there is not exactly one. {0} is the number.</comment>
+  </data>
+  <data name="Tag_One" xml:space="preserve">
+    <value>{0} tag</value>
+    <comment>A count of tags when there is exactly one. {0} is the number.</comment>
+  </data>
+  <data name="Tag_Other" xml:space="preserve">
+    <value>{0} tags</value>
+    <comment>A count of tags when there is not exactly one. {0} is the number.</comment>
+  </data>
+  <data name="RoomsAndTagsBoth" xml:space="preserve">
+    <value>{0}, {1}</value>
+    <comment>Line under the link. {0} is a count of rooms and {1} a count of tags, like 3 rooms, 5 tags.</comment>
+  </data>
+  <data name="CollectionNumbers" xml:space="preserve">
+    <value>Collection numbers</value>
+    <comment>Link and heading for numbering the plants you have.</comment>
+  </data>
+  <data name="CollectionNumbersDetail" xml:space="preserve">
+    <value>Number the plants you have, oldest first.</value>
+    <comment>Line under the link.</comment>
+  </data>
+  <data name="NumberingHint" xml:space="preserve">
+    <value>Nothing already numbered is changed, and you can edit any number afterwards.</value>
+    <comment>Small text in the sheet that lists the numbers to give.</comment>
+  </data>
+  <data name="NumberThem" xml:space="preserve">
+    <value>Number them</value>
+    <comment>Button in the sheet that gives the plants their numbers.</comment>
+  </data>
+  <data name="NumberedPlants" xml:space="preserve">
+    <value>Numbered {0}.</value>
+    <comment>Message after numbering. {0} is a count of plants.</comment>
+  </data>
+  <data name="NumberedCuttings" xml:space="preserve">
+    <value>Gave {0} a letter.</value>
+    <comment>Message after numbering. {0} is a count of cuttings.</comment>
+  </data>
+  <data name="NumberedBoth" xml:space="preserve">
+    <value>Numbered {0} and gave {1} a letter.</value>
+    <comment>Message after numbering. {0} is a count of plants and {1} a count of cuttings.</comment>
+  </data>
+  <data name="BackupAndStorage" xml:space="preserve">
+    <value>Backup and storage</value>
+    <comment>Link to the backup page.</comment>
+  </data>
+  <data name="LastBackup" xml:space="preserve">
+    <value>Last backup {0} ({1})</value>
+    <comment>Line under the link. {0} is a date, like 19 Sep 2026, and {1} is how long ago, like 3 days ago.</comment>
+  </data>
+  <data name="NoBackup" xml:space="preserve">
+    <value>No backup on this device yet</value>
+    <comment>Line under the link.</comment>
+  </data>
+  <data name="ErrorReports" xml:space="preserve">
+    <value>Send error reports</value>
+    <comment>Switch in Settings.</comment>
+  </data>
+  <data name="ErrorReportsHint" xml:space="preserve">
+    <value>When something goes wrong, the app sends a report of what failed so it can be fixed. It never has your plants, notes or photos.</value>
+    <comment>Small text under the switch. A link follows it.</comment>
+  </data>
+  <data name="ErrorReportsLink" xml:space="preserve">
+    <value>What's in a report</value>
+    <comment>Link after the small text under the error reports switch.</comment>
+  </data>
+  <data name="ShowMeAround" xml:space="preserve">
+    <value>Show me around</value>
+    <comment>Link that starts a short tour of the app.</comment>
+  </data>
+  <data name="ShowMeAroundDetail" xml:space="preserve">
+    <value>A short tour, with an example plant</value>
+    <comment>Line under the link.</comment>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Help</value>
+    <comment>Link to the Help page.</comment>
+  </data>
+  <data name="HelpDetail" xml:space="preserve">
+    <value>How Stikling works</value>
+    <comment>Line under the link.</comment>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacy</value>
+    <comment>Link to the privacy page.</comment>
+  </data>
+  <data name="PrivacyDetail" xml:space="preserve">
+    <value>What is kept and where</value>
+    <comment>Line under the link.</comment>
+  </data>
+  <data name="WhatsNew" xml:space="preserve">
+    <value>What's new</value>
+    <comment>Link to the page that lists what changed in the app.</comment>
+  </data>
+  <data name="PlantNames" xml:space="preserve">
+    <value>Plant names</value>
+    <comment>Link to the page about the plant name suggestions.</comment>
+  </data>
+  <data name="PlantNamesDetail" xml:space="preserve">
+    <value>Where the name suggestions come from</value>
+    <comment>Line under the link.</comment>
+  </data>
+  <data name="SourceCode" xml:space="preserve">
+    <value>Source code</value>
+    <comment>Link to the code on GitHub.</comment>
+  </data>
+  <data name="SourceCodeDetail" xml:space="preserve">
+    <value>Stikling is open source, on GitHub</value>
+    <comment>Line under the link.</comment>
+  </data>
+  <data name="TourFailed" xml:space="preserve">
+    <value>Couldn't load the example. Check your connection and try again.</value>
+    <comment>Shown when the example plant for the tour could not be loaded.</comment>
+  </data>
+  <data name="VersionLabel" xml:space="preserve">
+    <value>Version {0}</value>
+    <comment>Next to What's new. {0} is the version, a date like 2026.10.09</comment>
+  </data>
+  <data name="DevelopmentBuild" xml:space="preserve">
+    <value>Development build</value>
+    <comment>Shown instead of the version when running a local build</comment>
+  </data>
+</root>

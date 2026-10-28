@@ -20,13 +20,26 @@ public interface IDeviceLanguages
     Task<IReadOnlyList<string>> GetAsync();
 }
 
+/// <summary>The language the app is shown in right now, as a code like "en" or "da".</summary>
+public interface IAppLanguage
+{
+    string Code { get; }
+
+    /// <summary>
+    /// True when the language was picked in Settings and is offered in this build. A language saved on
+    /// another device that this build doesn't offer doesn't count, so the browser still decides.
+    /// </summary>
+    bool Chosen { get; }
+}
+
 /// <summary>Name suggestions for the plant and propagation forms, and the everyday names shown on plants.</summary>
 public sealed class PlantNameService(
     IPlantNameSource source,
     IPlantRepository plants,
     IPropagationRepository propagations,
     SettingsService settings,
-    IDeviceLanguages deviceLanguages)
+    IDeviceLanguages deviceLanguages,
+    IAppLanguage? appLanguage = null)
 {
     private PlantNameData? data;
     private readonly Dictionary<string, EverydayNameData> everyday = [];
@@ -137,9 +150,14 @@ public sealed class PlantNameService(
 
     // English is always loaded. Danish is loaded on a device whose browser lists Danish, so typing
     // "svigermors tunge" works there whichever names are shown, and wherever Danish is chosen.
+    // With no choice of everyday names, they follow the app's language when that was chosen in Settings,
+    // and else the browser's, as they always did.
     private async Task<Languages> DecideLanguagesAsync()
     {
-        var chosen = (await settings.GetAsync()).EverydayNames;
+        var saved = await settings.GetAsync();
+        var chosen = saved.EverydayNames;
+        var appIsDanish = string.Equals(appLanguage?.Code, "da", StringComparison.OrdinalIgnoreCase);
+        var appLanguageChosen = appLanguage?.Chosen ?? false;
         bool danishDevice;
         try
         {
@@ -154,7 +172,7 @@ public sealed class PlantNameService(
         {
             EverydayNameLanguage.Danish => "da",
             EverydayNameLanguage.English => "en",
-            _ => danishDevice ? "da" : "en"
+            _ => appIsDanish || (!appLanguageChosen && danishDevice) ? "da" : "en"
         };
         return new Languages(danishDevice || shown == "da" ? "en,da" : "en", shown);
     }

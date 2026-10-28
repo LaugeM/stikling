@@ -20,6 +20,7 @@ public sealed class SyncRunner(
     IndexedDbSyncStore store,
     IndexedDb db,
     ThemeService theme,
+    LanguageService language,
     ErrorReports errorReports,
     ILogger<SyncRunner> logger,
     PlantNameService names,
@@ -355,6 +356,7 @@ public sealed class SyncRunner(
             if (result.Received > 0)
             {
                 await theme.ApplySavedAsync();
+                await language.ApplySavedAsync();
                 await errorReports.ApplySavedAsync();
                 names.SettingsChanged();
                 Received?.Invoke();

@@ -8,6 +8,7 @@
 @inject RoomService RoomService
 @inject OwnFieldService OwnFieldBook
 @inject ThemeService Theme
+@inject LanguageService Language
 @inject ErrorReports ErrorReports
 @inject PlantNameService Names
 @inject IndexedDb Db
@@ -329,6 +330,7 @@
             file.Zip.Position = 0;
             var summary = await Backup.ImportAsync(file.Zip);
             await Theme.ApplySavedAsync();
+            await Language.ApplySavedAsync();
             await ErrorReports.ApplySavedAsync();
             Names.SettingsChanged();
             message = summary switch
