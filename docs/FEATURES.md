@@ -46,7 +46,6 @@ The people on Reddit who track their plants at all are mostly collectors with 50
 Small ones with no new screen worth the name:
 
 - Small info buttons next to the less obvious things.
-- **Empty the outer pot** after watering a plant that stands in one.
 - **A parent that isn't yours**, for cuttings from a friend's plant.
 
 ---
@@ -224,7 +223,7 @@ Built around your routine: moisture meter instead of a watering schedule, semi-h
 | ✅ | Quick-log care: watered, fertilised, reservoir topped up, flushed, repotted, pruned, rotated, cleaned leaves, harvested | 1 | L | v1.x |
 | ✅ | Log several plants at once ("fertilised all semi-hydro plants") | 2 | M | v1.x |
 | ✅ | "Last watered / fertilised / flushed" summary on each plant | 2 | S | v1.x |
-| ☐ | **Empty the outer pot**: after watering a plant that stands in an outer pot, Today reminds you to tip out the water left in it, since a pot left standing in water for days is a common cause of root rot. How long to wait is set in Settings, an hour unless changed, and the reminder can be turned off. Plants watered together share one reminder. A notification for it can follow, now that **Notifications** is built | 4 | S | v1.x |
+| ✅ | **Empty the outer pot**: after watering a plant that stands in an outer pot, Today reminds you to tip out the water left in it, since a pot left standing in water for days is a common cause of root rot. How long to wait is set in Settings, an hour unless changed, and the reminder can be turned off. Plants watered together share one reminder. A notification for it isn't built | 4 | S | v1.x |
 | ✅ | **Moisture meter reading** (0–10) as a log type, with the latest reading shown on the card | 3 | S | v1.x |
 | ✅ | **Products**: your fertilisers (the hydro one, the general one, the herb one), each with a usual dose in ml, g or drops. The dose is typed the way the bottle puts it, e.g. 5 ml per 4 L or 1 ml per 500 ml, and is optional | 4 | M | v1.x |
 | ✅ | **Nutrients on a product**: N-P-K for a fertiliser and any other nutrient (Ca, Mg, S, Si, Fe and trace elements) for any product, copied from the label as printed, shown on the Products list and when picking products for a feed | 4 | S | v1.x |

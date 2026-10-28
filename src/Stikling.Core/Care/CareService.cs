@@ -207,6 +207,23 @@ public sealed class CareService(
     }
 
     /// <summary>
+    /// Ticks off the "empty the outer pot" reminder on these waterings. Nothing goes on the plant's
+    /// history. Entries that are gone or already ticked are left as they are.
+    /// </summary>
+    public async Task MarkOuterPotEmptiedAsync(IEnumerable<Guid> careLogIds)
+    {
+        var now = time.GetUtcNow();
+        foreach (var id in careLogIds.Distinct())
+        {
+            if (await logs.GetAsync(id) is not { IsDeleted: false, OuterPotEmptiedAt: null } stored)
+                continue;
+            var changed = stored.Copy();
+            changed.OuterPotEmptiedAt = now;
+            await logs.SaveAsync(changed);
+        }
+    }
+
+    /// <summary>
     /// Takes back a watering or topping up from the watering screen: deletes that entry and the
     /// Fertilised entry logged with it, the one for the same plant and day with a feed that was
     /// saved within 5 seconds of the watering, either side. A feeding logged by hand at another

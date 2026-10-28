@@ -413,6 +413,35 @@ else
         </section>
     }
 
+    @if (!sections.Away && sections.OuterPot.Due.Count > 0)
+    {
+        <section class="today-section">
+            <div class="today-section-head">
+                <h2>Empty the outer pot</h2>
+                @if (sections.OuterPot.Due.Count >= 2)
+                {
+                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @onclick="() => EmptiedAsync(sections.OuterPot.Due)">All emptied</button>
+                }
+            </div>
+            <ul class="item-list">
+                @foreach (var due in sections.OuterPot.Due)
+                {
+                    <li @key="due.Plant.Id" class="today-row">
+                        <div class="today-row-main">
+                            <a class="item-card" href="plants/@due.Plant.Id">
+                                <SubjectThumb Subject="due.Plant" />
+                                <div class="item-text">
+                                    <div class="item-name">@due.Plant.DisplayName</div>
+                                </div>
+                            </a>
+                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @onclick="() => EmptiedAsync([due])">Emptied</button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
     @if (!sections.Away && !sections.Holding && (sections.WaterNow.Count > 0 || sections.WaterComing.Count > 0 || NextRoundWaterLine is not null))
     {
         var now = sections.WaterNow;
@@ -862,7 +891,45 @@ else
     protected override Task OnInitializedAsync() => LoadAsync();
 
     // After something changed: the sections again from the records, keeping the care plan the page has ticked things off in
-    private void Recompute() => sections = TodaySections.For(data, Today, Time, sections.CareItems);
+    private void Recompute()
+    {
+        sections = TodaySections.For(data, Today, Time, sections.CareItems);
+        WatchOuterPot();
+    }
+
+    private bool emptying;
+    private Timer? outerPotTimer;
+
+    private async Task EmptiedAsync(IEnumerable<OuterPotDue> due)
+    {
+        emptying = true;
+        try
+        {
+            await Care.MarkOuterPotEmptiedAsync(due.Select(d => d.CareLogId).ToList());
+            await LoadAsync();
+        }
+        finally
+        {
+            emptying = false;
+        }
+    }
+
+    // A reminder still waiting for its time shows up by itself when the wait runs out
+    private void WatchOuterPot()
+    {
+        outerPotTimer?.Dispose();
+        outerPotTimer = null;
+        if (sections.OuterPot.NextDueAt is not { } at)
+            return;
+
+        var wait = at - Time.GetUtcNow() + TimeSpan.FromSeconds(1);
+        outerPotTimer = new Timer(_ => _ = InvokeAsync(async () =>
+        {
+            // Read again, so a watering logged or ticked meanwhile is counted
+            await LoadAsync();
+            StateHasChanged();
+        }), null, wait < TimeSpan.Zero ? TimeSpan.Zero : wait, Timeout.InfiniteTimeSpan);
+    }
 
     private async Task LoadAsync()
     {
@@ -872,6 +939,7 @@ else
         active = propagations.Where(p => p.IsActive).ToList();
         careDone.Clear();
         sections = TodaySections.For(data, Today, Time);
+        WatchOuterPot();
 
         upcoming = sections.Away ? null : AwayTime.Upcoming(data.Stretches, Today);
         backSpan = sections.BackDay is { } day ? AwayTime.Spans(data.Stretches).LastOrDefault(s => s.Until == day) : null;
@@ -958,6 +1026,8 @@ else
 
     public async ValueTask DisposeAsync()
     {
+        outerPotTimer?.Dispose();
+        outerPotTimer = null;
         if (yearUrl is not null)
         {
             try

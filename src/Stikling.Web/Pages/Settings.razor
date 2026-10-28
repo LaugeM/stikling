@@ -101,6 +101,26 @@
     <p class="settings-hint">
         Learns how often each plant gets water and asks you to check it when it's probably dry. It says nothing about a plant until it has seen a few waterings.
     </p>
+    <div class="form-check mt-4">
+        <input class="form-check-input" type="checkbox" id="empty-outer-pot"
+               checked="@(emptyOuterPotMinutes > 0)" @onchange="SetEmptyOuterPotOnAsync" />
+        <label class="form-check-label" for="empty-outer-pot">Remind me to empty the outer pot</label>
+    </div>
+    @if (emptyOuterPotMinutes > 0)
+    {
+        <div class="input-group mt-2">
+            <span class="input-group-text" id="empty-outer-pot-after">after</span>
+            <select id="empty-outer-pot-wait" class="form-select" aria-labelledby="empty-outer-pot-after" @onchange="SetEmptyOuterPotWaitAsync">
+                @foreach (var (minutes, label) in emptyOuterPotWaits)
+                {
+                    <option value="@minutes" selected="@(minutes == emptyOuterPotMinutes)">@label</option>
+                }
+            </select>
+        </div>
+    }
+    <p class="settings-hint">
+        After you water a plant that stands in an outer pot, Today asks you to tip out the water that drained into it. Plants whose outer pot holds water on purpose are left out.
+    </p>
     <div class="settings-rows mt-4">
         <SettingsRow Href="kinds-of-care" Title="Kinds of care" Detail="@KindsOfCareLine" />
         <SettingsRow Href="fields" Title="Your fields" Detail="@OwnFieldsLine" />
@@ -420,6 +440,10 @@
     private DateOnly? lastBackup;
     private bool photoReminder;
     private bool wateringReminder;
+    private int emptyOuterPotMinutes;
+
+    private static readonly (int Minutes, string Label)[] emptyOuterPotWaits =
+        [(15, "15 minutes"), (30, "30 minutes"), (60, "1 hour"), (120, "2 hours"), (180, "3 hours")];
     private bool dailyRound;
     private AccountState? account;
     private bool accountChecking;
@@ -449,6 +473,7 @@
         googlePhotos = settings.GooglePhotos;
         errorReportsOff = settings.ErrorReportsOff;
         wateringReminder = settings.WateringReminder;
+        emptyOuterPotMinutes = OuterPotReminders.WaitMinutes(settings);
         dailyRound = settings.DailyRound;
         roundDays = [.. settings.RoundDays ?? []];
         notifyAt = settings.NotifyAt ?? new TimeOnly(8, 0);
@@ -495,6 +520,20 @@
     {
         wateringReminder = e.Value is true;
         await SettingsService.SetWateringReminderAsync(wateringReminder);
+    }
+
+    private async Task SetEmptyOuterPotOnAsync(ChangeEventArgs e)
+    {
+        emptyOuterPotMinutes = e.Value is true ? OuterPotReminders.DefaultMinutes : 0;
+        await SettingsService.SetEmptyOuterPotMinutesAsync(emptyOuterPotMinutes);
+    }
+
+    private async Task SetEmptyOuterPotWaitAsync(ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var minutes) || minutes <= 0)
+            return;
+        emptyOuterPotMinutes = minutes;
+        await SettingsService.SetEmptyOuterPotMinutesAsync(minutes);
     }
 
     private async Task SetDailyRoundAsync(ChangeEventArgs e)

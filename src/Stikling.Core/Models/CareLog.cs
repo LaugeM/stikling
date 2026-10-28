@@ -74,6 +74,12 @@ public sealed class CareLog : Entity
 
     public string? Notes { get; set; }
 
+    /// <summary>
+    /// When the outer pot was emptied after this watering, ticked on Today. Null until then, and
+    /// for entries saved before this existed.
+    /// </summary>
+    public DateTimeOffset? OuterPotEmptiedAt { get; set; }
+
     public CareLog Copy()
     {
         var copy = (CareLog)MemberwiseClone();
