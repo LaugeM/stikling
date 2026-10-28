@@ -800,9 +800,12 @@
         }
     }
 
-    // A missing or unknown name opens the first section shown
+    // A missing or unknown name opens the first section shown. A link to Account waits for the account check
+    // instead of showing Look for a moment first.
     private string OpenSection =>
-        Sections.Any(s => s.Id == Section) ? Section! : Sections.First().Id;
+        Sections.Any(s => s.Id == Section) ? Section!
+        : Section == "account" && Account.IsAvailable && !accountHintRead ? "account"
+        : Sections.First().Id;
 
     private string? Closed(string id) => id == OpenSection ? null : "settings-closed";
 

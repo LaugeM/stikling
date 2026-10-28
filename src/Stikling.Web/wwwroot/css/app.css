@@ -3693,6 +3693,9 @@ button.search-recent svg {
     .case-layout {
         display: grid;
         grid-template-columns: clamp(16rem, 32%, 22rem) minmax(0, 1fr);
+        /* The last, flexible row takes whatever height the updates need beyond the left column's cards,
+           so a long history doesn't spread those cards apart */
+        grid-template-rows: repeat(20, auto) 1fr;
         column-gap: clamp(1.5rem, 3%, 2.5rem);
         align-items: start;
     }
@@ -3704,6 +3707,6 @@ button.search-recent svg {
 
     .case-layout > .case-side {
         grid-column: 2;
-        grid-row: 1 / span 20;
+        grid-row: 1 / -1;
     }
 }
