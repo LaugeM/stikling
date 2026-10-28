@@ -29,7 +29,7 @@ public sealed record PotUse(Pot Pot, int InUse, int Gone)
     /// </summary>
     public static IReadOnlyList<PotUse> List(IEnumerable<Pot> pots, IEnumerable<Plant> plants, IEnumerable<Propagation>? propagations = null)
     {
-        var alive = plants.Where(p => !p.IsDeleted).ToList();
+        var alive = plants.Where(p => !p.IsDeleted && !p.LivesElsewhere).ToList();
         var potList = pots.ToList();
         var containers = new ContainerList(potList);
         var going = (propagations ?? []).Where(p => !p.IsDeleted && p.IsActive).ToList();

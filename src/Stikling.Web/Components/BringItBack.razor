@@ -17,15 +17,15 @@
         @if (Choice.Mode == BringBackMode.OnADay)
         {
             <input type="date" class="form-control form-control-sm" aria-label="Day it comes back"
-                   value="@(Choice.Picked?.ToString("yyyy-MM-dd"))" min="@Today.AddDays(1).ToString("yyyy-MM-dd")"
+                   value="@(Choice.Picked?.ToString("yyyy-MM-dd"))" min="@((Stored is { } kept && kept <= Today ? kept : Today.AddDays(1)).ToString("yyyy-MM-dd"))"
                    @onchange="DayChangedAsync" />
         }
         else
         {
-            <span class="bring-back-day">@(Choice.Resolve(NoteDay) is { } day ? Labels.Date(day) : "")</span>
+            <span class="bring-back-day">@(Choice.Resolve(NoteDay, Today) is { } day ? Labels.Date(day) : "")</span>
         }
         <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => Set(BringBackMode.No)">Don't bring it back</button>
-        @if (!Choice.IsValid(NoteDay, Today))
+        @if (!Choice.IsValid(NoteDay, Today, Stored))
         {
             <p class="bring-back-error" role="alert">Pick a day after today.</p>
         }
@@ -40,6 +40,10 @@
     [Parameter, EditorRequired]
     public DateOnly NoteDay { get; set; }
 
+    /// <summary>The day the note already comes back on, which stays valid even if it is today or past.</summary>
+    [Parameter]
+    public DateOnly? Stored { get; set; }
+
     /// <summary>Raised after the choice changed, so the page can check it again.</summary>
     [Parameter]
     public EventCallback Changed { get; set; }
@@ -52,7 +56,7 @@
     {
         // Opening on a day starts from the year on, so the date box isn't empty
         if (mode == BringBackMode.OnADay && Choice.Picked is null)
-            Choice.Picked = NotesComingBack.SameDayNextYear(NoteDay);
+            Choice.Picked = NotesComingBack.SameDayNextYear(NoteDay, Today);
         Choice.Mode = mode;
         return Changed.InvokeAsync();
     }

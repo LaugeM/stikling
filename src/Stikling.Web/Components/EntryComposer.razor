@@ -308,7 +308,7 @@
                     Kind = TimelineKind.Note,
                     OccurredAt = occurredOn is { } d ? Time.MomentOn(d) : Time.GetUtcNow(),
                     Text = noteText.Trim(),
-                    ComesBackOn = bringBack.Resolve(NoteDay)
+                    ComesBackOn = bringBack.Resolve(NoteDay, Today)
                 });
             }
 

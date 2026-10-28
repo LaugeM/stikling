@@ -140,10 +140,10 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
             throw new InvalidOperationException("The entry is deleted.");
         if (entry.Kind != TimelineKind.Note)
             day = null;
-        if (day is { } d && d <= time.Today())
-            throw new ArgumentException("Pick a day after today.", nameof(day));
         if (entry.ComesBackOn == day)
             return;
+        if (day is { } d && d <= time.Today())
+            throw new ArgumentException("Pick a day after today.", nameof(day));
 
         entry.ComesBackOn = day;
         entry.CameBackDoneOn = null;

@@ -9,7 +9,7 @@ public sealed record MixUse(SoilMix Mix, int Plants)
     /// <summary>Every mix with its plants counted, the ones still being mixed first.</summary>
     public static IReadOnlyList<MixUse> List(IEnumerable<SoilMix> mixes, IEnumerable<Plant> plants)
     {
-        var alive = plants.Where(p => !p.IsDeleted).ToList();
+        var alive = plants.Where(p => !p.IsDeleted && !p.LivesElsewhere).ToList();
 
         return mixes
             .Where(mix => !mix.IsDeleted)
@@ -34,7 +34,7 @@ public sealed class SoilMixService(ISoilMixRepository mixes, IPlantRepository pl
 
     /// <summary>How many plants are in a mix, for the line before changing or deleting it.</summary>
     public async Task<int> PlantsInAsync(Guid mixId) =>
-        (await plants.GetAllAsync()).Count(p => p.SoilMixId == mixId);
+        (await plants.GetAllAsync()).Count(p => !p.IsDeleted && !p.LivesElsewhere && p.SoilMixId == mixId);
 
     /// <summary>The plants in a mix that are still in the collection, sorted by name.</summary>
     public async Task<IReadOnlyList<Plant>> PlantsListAsync(Guid mixId) =>

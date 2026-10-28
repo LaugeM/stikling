@@ -139,7 +139,9 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         // Only a plant that left can take pots, and only the ones it has
         after.PotsTaken = after.HasLeft ? after.Fit(after.PotsTaken) : PotsTaken.None;
         // Only a plant still in the collection can be resting, kept apart or need something done
-        if (!after.InCollection)
+        // (A plant that is only out because it lives elsewhere keeps them, for when it is ticked back.)
+        var onlyElsewhere = after.LivesElsewhere && after.Status == PlantStatus.Active && after.PottedWithPlantId is null;
+        if (!after.InCollection && !onlyElsewhere)
         {
             after.DormantSince = null;
             after.QuarantinedSince = null;

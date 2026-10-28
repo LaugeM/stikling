@@ -38,6 +38,9 @@ public static class NotesComingBack
     /// <summary>Same day next year. 29 February becomes 28 February.</summary>
     public static DateOnly SameDayNextYear(DateOnly day) => day.AddYears(1);
 
+    /// <summary>The note's day and month in the next year that is still ahead of <paramref name="today"/>, so an old note gets a day that can be picked.</summary>
+    public static DateOnly SameDayNextYear(DateOnly day, DateOnly today) => NextYear(day, today);
+
     /// <summary>A year on from <paramref name="day"/>, and once more for every year it has already gone by, so it is after <paramref name="today"/>.</summary>
     public static DateOnly NextYear(DateOnly day, DateOnly today)
     {
@@ -68,14 +71,17 @@ public sealed class BringBackChoice
         comesBackOn is { } day ? new BringBackChoice { Mode = BringBackMode.OnADay, Picked = day } : new BringBackChoice();
 
     /// <summary>The day the note comes back on, or null when it isn't brought back (or no day is picked).</summary>
-    public DateOnly? Resolve(DateOnly noteDay) => Mode switch
+    public DateOnly? Resolve(DateOnly noteDay, DateOnly today) => Mode switch
     {
-        BringBackMode.SameDayNextYear => NotesComingBack.SameDayNextYear(noteDay),
+        BringBackMode.SameDayNextYear => NotesComingBack.SameDayNextYear(noteDay, today),
         BringBackMode.OnADay => Picked,
         _ => null
     };
 
-    /// <summary>False when a day is asked for and isn't after <paramref name="today"/>.</summary>
-    public bool IsValid(DateOnly noteDay, DateOnly today) =>
-        Mode == BringBackMode.No || Resolve(noteDay) is { } day && day > today;
+    /// <summary>
+    /// False when a day is asked for and isn't after <paramref name="today"/>. A day that is the same as the one
+    /// <paramref name="stored"/> on the note is always fine, so a note that has come back can still be edited.
+    /// </summary>
+    public bool IsValid(DateOnly noteDay, DateOnly today, DateOnly? stored = null) =>
+        Mode == BringBackMode.No || Resolve(noteDay, today) is { } day && (day > today || day == stored);
 }

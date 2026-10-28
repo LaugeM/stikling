@@ -95,7 +95,7 @@ else
                                     </div>
                                     @if (entry.Kind == TimelineKind.Note)
                                     {
-                                        <BringItBack Choice="editBringBack" NoteDay="editDay" Changed="() => { }" />
+                                        <BringItBack Choice="editBringBack" NoteDay="editDay" Stored="entry.ComesBackOn" Changed="() => { }" />
                                     }
                                     @if (editError is not null)
                                     {
@@ -103,7 +103,7 @@ else
                                     }
                                     <div class="entry-editor-row">
                                         <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveEditAsync(entry)"
-                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)) || (entry.Kind == TimelineKind.Note && !editBringBack.IsValid(editDay, Today)))">Save</button>
+                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)) || (entry.Kind == TimelineKind.Note && !editBringBack.IsValid(editDay, Today, entry.ComesBackOn)))">Save</button>
                                         <button type="button" class="btn btn-link btn-sm" @onclick="CancelEdit">Cancel</button>
                                     </div>
                                 </div>
@@ -417,7 +417,7 @@ else
         {
             await TimelineService.CorrectAsync(entry, editText, editDay);
             if (entry.Kind == TimelineKind.Note || entry.ComesBackOn is not null)
-                await TimelineService.SetComesBackAsync(entry, editBringBack.Resolve(editDay));
+                await TimelineService.SetComesBackAsync(entry, editBringBack.Resolve(editDay, Today));
             CancelEdit();
         }
         catch (ArgumentException ex)

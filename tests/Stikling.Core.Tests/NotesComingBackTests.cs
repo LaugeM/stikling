@@ -222,10 +222,10 @@ public class NotesComingBackTests
     {
         var noteDay = new DateOnly(2026, 5, 14);
 
-        Assert.Null(new BringBackChoice().Resolve(noteDay));
-        Assert.Equal(new DateOnly(2027, 5, 14), new BringBackChoice { Mode = BringBackMode.SameDayNextYear }.Resolve(noteDay));
+        Assert.Null(new BringBackChoice().Resolve(noteDay, Today));
+        Assert.Equal(new DateOnly(2027, 5, 14), new BringBackChoice { Mode = BringBackMode.SameDayNextYear }.Resolve(noteDay, Today));
         Assert.Equal(new DateOnly(2027, 1, 1),
-            new BringBackChoice { Mode = BringBackMode.OnADay, Picked = new DateOnly(2027, 1, 1) }.Resolve(noteDay));
+            new BringBackChoice { Mode = BringBackMode.OnADay, Picked = new DateOnly(2027, 1, 1) }.Resolve(noteDay, Today));
     }
 
     [Fact]
@@ -233,7 +233,7 @@ public class NotesComingBackTests
     {
         Assert.True(new BringBackChoice().IsValid(Today, Today));
         Assert.True(new BringBackChoice { Mode = BringBackMode.SameDayNextYear }.IsValid(Today, Today));
-        Assert.False(new BringBackChoice { Mode = BringBackMode.SameDayNextYear }.IsValid(Today.AddYears(-2), Today));
+        Assert.True(new BringBackChoice { Mode = BringBackMode.SameDayNextYear }.IsValid(Today.AddYears(-2), Today));
         Assert.False(new BringBackChoice { Mode = BringBackMode.OnADay, Picked = Today }.IsValid(Today, Today));
         Assert.False(new BringBackChoice { Mode = BringBackMode.OnADay }.IsValid(Today, Today));
     }
