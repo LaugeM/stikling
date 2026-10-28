@@ -28,3 +28,25 @@
 .whats-new-month li {
     margin-bottom: 0.6rem;
 }
+
+.coming-next {
+    padding: 1rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.coming-next-hint {
+    color: var(--pa-muted);
+    font-size: 0.875rem;
+    margin-bottom: 0.6rem;
+}
+
+.coming-next ol {
+    padding-left: 1.25rem;
+    margin: 0;
+}
+
+.coming-next li:last-child {
+    margin-bottom: 0;
+}
