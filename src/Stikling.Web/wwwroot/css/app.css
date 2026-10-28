@@ -3681,6 +3681,11 @@ button.search-recent svg {
     }
 }
 
+/* Water plants keeps a Done bar stuck to the bottom of the page, so the card sits on top of it on every screen */
+main.app-content:has(.pass-progress) ~ .tour-card {
+    bottom: calc(var(--pa-nav-bottom) + 4.75rem);
+}
+
 .tour-count {
     margin: 0 0 0.25rem;
     font-size: 0.85rem;
@@ -3748,6 +3753,11 @@ main.app-content.with-banner.with-tour {
 
 main.app-content.with-tour:has(.page-dock),
 main.app-content.with-banner.with-tour:has(.page-dock) {
+    padding-bottom: calc(var(--pa-nav-bottom) + 20rem);
+}
+
+main.app-content.with-tour:has(.pass-progress),
+main.app-content.with-banner.with-tour:has(.pass-progress) {
     padding-bottom: calc(var(--pa-nav-bottom) + 20rem);
 }
 
