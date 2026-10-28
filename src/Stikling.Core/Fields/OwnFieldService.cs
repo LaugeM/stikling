@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 
@@ -63,7 +64,7 @@ public sealed class OwnFieldService(IOwnFieldRepository fields, IPlantRepository
         if (renamed.Validate().FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
         if ((await fields.GetAllAsync()).Any(f => f.Id != id && SameName(f.Name, trimmed)))
-            throw new InvalidOperationException($"You already have a field called {trimmed}.");
+            throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldDuplicate, trimmed));
 
         await fields.SaveAsync(renamed);
     }
@@ -125,9 +126,9 @@ public sealed class OwnFieldService(IOwnFieldRepository fields, IPlantRepository
         var field = await fields.GetAsync(id) ?? throw Gone();
         var target = (to ?? "").Trim();
         if (target.Length == 0)
-            throw new InvalidOperationException("A choice can't be empty.");
+            throw new InvalidOperationException(Strings.Shared.FieldChoiceEmpty);
         if (target.Length > OwnField.MaxNameLength)
-            throw new InvalidOperationException($"A choice can be at most {OwnField.MaxNameLength} characters.");
+            throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldChoiceLong, OwnField.MaxNameLength));
 
         var changed = field.Copy();
         var index = changed.Choices.FindIndex(c => SameName(c, from));
@@ -204,7 +205,7 @@ public sealed class OwnFieldService(IOwnFieldRepository fields, IPlantRepository
     public static List<string> TidyChoices(IEnumerable<string>? choices) =>
         [.. (choices ?? []).Select(c => (c ?? "").Trim()).Where(c => c.Length > 0).Distinct(StringComparer.CurrentCultureIgnoreCase)];
 
-    private static InvalidOperationException Gone() => new("That field is gone.");
+    private static InvalidOperationException Gone() => new(Strings.Shared.FieldGone);
 
     private static bool SameName(string a, string b) =>
         string.Equals(a?.Trim(), b?.Trim(), StringComparison.CurrentCultureIgnoreCase);

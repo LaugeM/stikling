@@ -11,13 +11,13 @@
 @inject TimeProvider Time
 @inject IJSRuntime JS
 
-<PageTitle>Search · Stikling</PageTitle>
+<PageTitle>@Strings.Shared.SearchPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<h1>Search</h1>
+<h1>@Strings.Shared.SearchTitle</h1>
 
 <div class="search-box">
-    <input type="search" class="form-control" placeholder="Search everything" aria-label="Search everything"
+    <input type="search" class="form-control" placeholder="@Strings.Shared.SearchPlaceholder" aria-label="@Strings.Shared.SearchPlaceholder"
            autocomplete="off" spellcheck="false" enterkeyhint="search" data-search-input
            @ref="input" value="@query" @oninput="OnInput" />
 </div>
@@ -25,14 +25,14 @@
 <div @ref="root">
     @if (!Searching)
     {
-        <p class="search-hint">Names, notes, pots, mixes, feeds, products and more.</p>
+        <p class="search-hint">@Strings.Shared.SearchHint</p>
 
         @if (recent.Count > 0)
         {
             <section class="search-group" aria-labelledby="recent-title">
                 <div class="search-group-head">
-                    <h2 class="section-label" id="recent-title">Recent</h2>
-                    <button type="button" class="btn btn-link btn-sm link-action search-stop" @onclick="ClearRecentAsync">Clear</button>
+                    <h2 class="section-label" id="recent-title">@Strings.Shared.SearchRecent</h2>
+                    <button type="button" class="btn btn-link btn-sm link-action search-stop" @onclick="ClearRecentAsync">@Strings.Shared.SearchClear</button>
                 </div>
                 <ul class="item-list">
                     @foreach (var past in recent)
@@ -50,14 +50,14 @@
     }
     else if (index is null)
     {
-        <p class="text-body-secondary">Loading…</p>
+        <p class="text-body-secondary">@Strings.Shared.Loading</p>
     }
     else if (results.IsEmpty)
     {
         <div class="empty-state">
-            <p class="mb-1">Nothing has '@query.Trim()' in it.</p>
-            <p>Check the spelling, or try fewer words.</p>
-            <a class="btn btn-outline-primary mt-2 search-stop" href="@HelpHref">Search Help</a>
+            <p class="mb-1">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchNothing, query.Trim())</p>
+            <p>@Strings.Shared.SearchNothingHint</p>
+            <a class="btn btn-outline-primary mt-2 search-stop" href="@HelpHref">@Strings.Shared.SearchHelpButton</a>
         </div>
     }
     else
@@ -80,18 +80,18 @@
                     @if (items.Count > Preview)
                     {
                         <button type="button" class="btn btn-link btn-sm link-action search-more search-stop" aria-expanded="@(open ? "true" : "false")"
-                                @onclick="() => ToggleGroup(kind)">@(open ? "Show fewer" : $"Show all {items.Count}")</button>
+                                @onclick="() => ToggleGroup(kind)">@(open ? Strings.Shared.SearchShowFewer : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchShowAll, items.Count))</button>
                     }
                 </section>
             }
 
             <section class="search-group" aria-labelledby="group-help">
-                <h2 class="section-label" id="group-help">Help</h2>
+                <h2 class="section-label" id="group-help">@Strings.Shared.SearchHelpGroup</h2>
                 <ul class="item-list">
                     <li>
                         <a class="item-card search-stop" href="@HelpHref">
                             <div class="item-text">
-                                <div class="item-name">Search Help for '@query.Trim()'</div>
+                                <div class="item-name">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchHelpFor, query.Trim())</div>
                             </div>
                         </a>
                     </li>
@@ -261,17 +261,17 @@
 
     private static string GroupLabel(SearchKind kind) => kind switch
     {
-        SearchKind.Plant => "Plants",
-        SearchKind.Propagation => "Propagations",
-        SearchKind.Note => "Notes",
-        SearchKind.Wish => "Wishes",
-        SearchKind.Pot => "Pots",
-        SearchKind.Mix => "Mixes",
-        SearchKind.Feed => "Feeds",
-        SearchKind.Product => "Products",
-        SearchKind.TreatmentRecipe => "Treatment recipes",
-        SearchKind.Place => "Rooms and spots",
-        _ => "Tags"
+        SearchKind.Plant => Strings.Shared.SearchGroupPlants,
+        SearchKind.Propagation => Strings.Shared.SearchGroupPropagations,
+        SearchKind.Note => Strings.Shared.SearchGroupNotes,
+        SearchKind.Wish => Strings.Shared.SearchGroupWishes,
+        SearchKind.Pot => Strings.Shared.SearchGroupPots,
+        SearchKind.Mix => Strings.Shared.SearchGroupMixes,
+        SearchKind.Feed => Strings.Shared.SearchGroupFeeds,
+        SearchKind.Product => Strings.Shared.SearchGroupProducts,
+        SearchKind.TreatmentRecipe => Strings.Shared.SearchGroupRecipes,
+        SearchKind.Place => Strings.Shared.SearchGroupPlaces,
+        _ => Strings.Shared.SearchGroupTags
     };
 
     private RenderFragment Row(SearchItem item) => item.Kind switch
@@ -303,7 +303,7 @@
                 <span class="item-name-text">@item.Title</span>
                 @if (item.Gone)
                 {
-                    <span class="badge @(item.Kind == SearchKind.Propagation ? "stage-badge" : "text-bg-secondary")">@(item.Kind switch { SearchKind.Propagation => "Done", SearchKind.Wish => "Got", _ => "Gone" })</span>
+                    <span class="badge @(item.Kind == SearchKind.Propagation ? "stage-badge" : "text-bg-secondary")">@(item.Kind switch { SearchKind.Propagation => Strings.Shared.SearchBadgeDone, SearchKind.Wish => Strings.Shared.SearchBadgeGot, _ => Strings.Shared.SearchBadgeGone })</span>
                 }
             </div>
             @if (item.Subtitle is not null)

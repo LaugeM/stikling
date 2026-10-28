@@ -1,11 +1,11 @@
 @* One room, spot or tag being renamed or added on the Rooms and tags page. *@
 
 <div class="room-rename">
-    <input class="form-control form-control-sm" aria-label="@(Label ?? $"New name for {Name}")" placeholder="@Label" autocomplete="off"
+    <input class="form-control form-control-sm" aria-label="@(Label ?? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomRenameNewName, Name))" placeholder="@Label" autocomplete="off"
            value="@draft" @oninput="Type" @ref="input" />
     <button type="button" class="btn btn-primary btn-sm" disabled="@(Busy || string.IsNullOrWhiteSpace(draft))"
-            @onclick="() => OnSave.InvokeAsync(draft)">Save</button>
-    <button type="button" class="btn btn-link btn-sm" disabled="@Busy" @onclick="OnCancel">Cancel</button>
+            @onclick="() => OnSave.InvokeAsync(draft)">@Strings.Common.Save</button>
+    <button type="button" class="btn btn-link btn-sm" disabled="@Busy" @onclick="OnCancel">@Strings.Common.Cancel</button>
 </div>
 
 @code {

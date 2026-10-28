@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Wishlist;
 
@@ -11,7 +12,7 @@ public sealed record WishlistTextOptions(bool Notes = false, bool MostToPay = fa
 /// <summary>The wishlist as plain text, to send in a message. Only the wishes still open are in it.</summary>
 public static class WishlistText
 {
-    public const string AppLine = "Kept in Stikling, stikling.app";
+    public static string AppLine => Strings.Shared.KeptInStikling;
 
     public static string Write(IEnumerable<Wish> wishes, EverydayNameBook? names, WishlistTextOptions options)
     {
@@ -20,14 +21,14 @@ public static class WishlistText
             .OrderBy(w => w.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
-        var text = new StringBuilder("Plants I'm looking for");
+        var text = new StringBuilder(Strings.Shared.WishlistTextHeading);
         foreach (var wish in open)
         {
             text.Append("\n- ").Append(Line(wish, names));
             if (options.Notes && wish.Notes?.Trim() is { Length: > 0 } notes)
                 text.Append("\n  ").Append(notes.ReplaceLineEndings(" "));
             if (options.MostToPay && wish.MostToPay is { } price)
-                text.Append("\n  Would pay up to ").Append(price.ToString("0.##", CultureInfo.InvariantCulture));
+                text.Append("\n  ").Append(string.Format(CultureInfo.CurrentCulture, Strings.Shared.WishlistTextWouldPay, price.ToString("0.##", CultureInfo.InvariantCulture)));
         }
 
         if (options.AppLine)

@@ -17,7 +17,7 @@
             break;
         case OwnFieldKind.Choice:
             <select id="@inputId" class="form-select" @onchange="Changed">
-                <option value="" selected="@string.IsNullOrEmpty(Value)">Not set</option>
+                <option value="" selected="@string.IsNullOrEmpty(Value)">@Strings.Shared.OwnFieldInputNotSet</option>
                 @foreach (var choice in Field.Choices)
                 {
                     <option value="@choice" selected="@(Value == choice)">@choice</option>

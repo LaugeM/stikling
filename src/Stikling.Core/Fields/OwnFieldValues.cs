@@ -1,3 +1,5 @@
+using Stikling.Core.Text;
+using Strings = Stikling.Core.Resources;
 using System.Globalization;
 using Stikling.Core.Models;
 
@@ -27,17 +29,17 @@ public static class OwnFieldValues
             case OwnFieldKind.Number:
                 if (TryReadNumber(text, out var number))
                     return number.ToString("0.####", CultureInfo.InvariantCulture);
-                error = "That isn't a number.";
+                error = Strings.Shared.FieldNotNumber;
                 return null;
             case OwnFieldKind.Date:
                 if (DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
                     return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-                error = "That isn't a date.";
+                error = Strings.Shared.FieldNotDate;
                 return null;
             default:
                 if (text.Length > MaxTextLength)
                 {
-                    error = $"Keep it under {MaxTextLength} characters.";
+                    error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldTextLong, MaxTextLength);
                     return null;
                 }
                 return text;
@@ -47,7 +49,7 @@ public static class OwnFieldValues
     /// <summary>The value as shown on the plant's page. A value that doesn't fit its kind shows as it was written.</summary>
     public static string Display(OwnFieldKind kind, string stored) =>
         kind == OwnFieldKind.Date && TryReadDate(stored, out var date)
-            ? date.ToString("d MMM yyyy", CultureInfo.InvariantCulture)
+            ? date.ToString(Strings.Shared.FieldDateFormat, TextCulture.ForDates)
             : stored;
 
     /// <summary>True when the stored text reads as this kind. Text and choices always do.</summary>

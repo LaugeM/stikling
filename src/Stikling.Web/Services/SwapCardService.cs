@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
 using Stikling.Core.Sharing;
+using Strings = Stikling.Web.Resources;
 
 namespace Stikling.Web.Services;
 
@@ -42,8 +43,8 @@ public sealed class SwapCardService(IJSRuntime js) : IAsyncDisposable
     {
         var pages = SwapTiles.Split(tiles, format);
         return [.. pages.Select((page, i) => new SwapCardSpec(
-            IdFor(i), format, "Available for swap",
-            pages.Count > 1 ? $"{i + 1} of {pages.Count}" : null,
+            IdFor(i), format, Strings.Shared.SwapTitle,
+            pages.Count > 1 ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapCardPage, i + 1, pages.Count) : null,
             [.. page.Select(SwapCardTile.From)]))];
     }
 

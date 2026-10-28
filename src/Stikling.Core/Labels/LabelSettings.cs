@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -151,7 +152,7 @@ public sealed class LabelSettings
         if (!settings.Shape().OneLine)
             return null;
         return settings.Tab == LabelTab.Tape
-            ? $"No room on {settings.TapeMm} mm tape."
-            : "No room on a label this low.";
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.LabelNoRoomTape, settings.TapeMm)
+            : Strings.Shared.LabelNoRoomLow;
     }
 }

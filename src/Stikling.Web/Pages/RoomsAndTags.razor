@@ -5,26 +5,21 @@
 @inject IPlantRepository Plants
 @inject GrowLightService LightService
 
-<PageTitle>Rooms and tags · Stikling</PageTitle>
+<PageTitle>@Strings.Shared.RoomsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
 
-<a class="back-link" href="settings?section=data">Settings</a>
-<h1>Rooms and tags</h1>
+<a class="back-link" href="settings?section=data">@Strings.Layout.Settings</a>
+<h1>@Strings.Shared.RoomsTitle</h1>
 
 <section class="settings-section">
-    <h2 class="section-label">Rooms</h2>
-    <p class="settings-hint">
-        Add a room here, or let it come from where your plants and propagations are. Renaming one
-        changes it everywhere, and renaming it to a name you already use merges the two. Mark a
-        room or spot as having a grow light, and plants there aren't expected to slow down in winter.
-        Mark one as outdoors, like a balcony or a garden, and a plant you move inside from there offers a quarantine.
-    </p>
+    <h2 class="section-label">@Strings.Shared.RoomsRooms</h2>
+    <p class="settings-hint">@Strings.Shared.RoomsHint</p>
 
     @if (rooms.Count == 0)
     {
         <div class="empty-state mt-3">
-            <p>No rooms yet.</p>
-            <p class="text-body-secondary">A room is where a plant lives. Add one here, or pick one when you add or edit a plant.</p>
+            <p>@Strings.Shared.RoomsEmpty</p>
+            <p class="text-body-secondary">@Strings.Shared.RoomsEmptyHint</p>
             @AddRoomControl
         </div>
     }
@@ -45,14 +40,14 @@
                             <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
                             @if (r.Total > 0)
                             {
-                                <a class="btn btn-link btn-sm link-action" href="round/@r.Id?from=rooms">Go round</a>
+                                <a class="btn btn-link btn-sm link-action" href="round/@r.Id?from=rooms">@Strings.Shared.RoomsGoRound</a>
                             }
                             <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
-                                    @onclick="() => renaming = r.Id">Rename</button>
+                                    @onclick="() => renaming = r.Id">@Strings.Shared.RoomsRename</button>
                             @if (r.Total == 0)
                             {
                                 <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
-                                        @onclick="() => RemoveAsync(r.Id, r.Name)">Remove</button>
+                                        @onclick="() => RemoveAsync(r.Id, r.Name)">@Strings.Common.Remove</button>
                             }
                         </div>
                         @LightSwitch(r.Id, r.Name)
@@ -74,11 +69,11 @@
                                     <span class="room-name">@spot.Name</span>
                                     <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
                                     <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
-                                            @onclick="() => renaming = spot.Id">Rename</button>
+                                            @onclick="() => renaming = spot.Id">@Strings.Shared.RoomsRename</button>
                                     @if (spot.Total == 0)
                                     {
                                         <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
-                                                @onclick="() => RemoveAsync(spot.Id, spot.Name)">Remove</button>
+                                                @onclick="() => RemoveAsync(spot.Id, spot.Name)">@Strings.Common.Remove</button>
                                     }
                                 </div>
                                 @LightSwitch(spot.Id, spot.Name)
@@ -90,13 +85,13 @@
                     <div class="room-spot">
                         @if (addingSpotIn == r.Id)
                         {
-                            <RoomRenameRow Label="@($"New spot in {r.Name}")" Busy="busy"
+                            <RoomRenameRow Label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsNewSpotIn, r.Name)" Busy="busy"
                                            OnSave="name => AddPlaceAsync(r.Id, name)" OnCancel="StopAddingRoom" />
                         }
                         else
                         {
                             <button type="button" class="btn btn-link btn-sm link-action add-spot" disabled="@busy"
-                                    @onclick="() => StartAddingSpot(r.Id)">Add a spot</button>
+                                    @onclick="() => StartAddingSpot(r.Id)">@Strings.Shared.RoomsAddSpot</button>
                         }
                     </div>
                 </li>
@@ -115,17 +110,14 @@
 </section>
 
 <section class="settings-section">
-    <h2 class="section-label">Tags</h2>
-    <p class="settings-hint">
-        Make a tag here by picking the plants it goes on, or add it when you edit a plant. Renaming a
-        tag changes it on every plant that has it, and renaming it to a tag you already use merges the two.
-    </p>
+    <h2 class="section-label">@Strings.Shared.RoomsTags</h2>
+    <p class="settings-hint">@Strings.Shared.RoomsTagsHint</p>
 
     @if (tags.Count == 0)
     {
         <div class="empty-state mt-3">
-            <p>No tags yet.</p>
-            <p class="text-body-secondary">Tags are your own labels, like "rare" or "for swap". Make one here, or add it when you edit a plant.</p>
+            <p>@Strings.Shared.RoomsTagsEmpty</p>
+            <p class="text-body-secondary">@Strings.Shared.RoomsTagsEmptyHint</p>
             @AddTagControl
         </div>
     }
@@ -145,7 +137,7 @@
                             <span class="room-name">@t.Name</span>
                             <span class="room-count">@Labels.Plants(t.Plants)</span>
                             <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
-                                    @onclick="() => renamingTag = t.Name">Rename</button>
+                                    @onclick="() => renamingTag = t.Name">@Strings.Shared.RoomsRename</button>
                         </div>
                     }
                 </li>
@@ -169,21 +161,21 @@
         var id = $"light-{placeId}";
         <div class="form-check form-switch room-light">
             <input class="form-check-input" type="checkbox" role="switch" id="@id" disabled="@busy"
-                   aria-label="@($"Grow light in {name}")"
+                   aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsGrowLightIn, name)"
                    checked="@lit.Contains(placeId)" @onchange="e => SetLitAsync(placeId, e.Value is true)" />
-            <label class="form-check-label" for="@id">Grow light</label>
+            <label class="form-check-label" for="@id">@Strings.Shared.RoomsGrowLight</label>
         </div>
     };
 
     private RenderFragment OutdoorsSwitch(Guid placeId, string name, bool roomIsOutdoors) => __builder =>
     {
         var id = $"outdoors-{placeId}";
-        var label = roomIsOutdoors ? $"{name} is outdoors because the room is" : $"Outdoors: {name}";
+        var label = string.Format(System.Globalization.CultureInfo.CurrentCulture, roomIsOutdoors ? Strings.Shared.RoomsOutdoorsBecauseRoom : Strings.Shared.RoomsOutdoorsFor, name);
         <div class="form-check form-switch room-light">
             <input class="form-check-input" type="checkbox" role="switch" id="@id" disabled="@(busy || roomIsOutdoors)"
                    aria-label="@label"
                    checked="@(roomIsOutdoors || placeInfo.Find(placeId)?.Outdoors == true)" @onchange="e => SetOutdoorsAsync(placeId, e.Value is true)" />
-            <label class="form-check-label" for="@id">Outdoors</label>
+            <label class="form-check-label" for="@id">@Strings.Shared.RoomsOutdoors</label>
         </div>
     };
 
@@ -200,7 +192,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Changing whether a room or spot is outdoors failed");
-            roomMessage = $"Couldn't save that: {ex.Message}";
+            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsSaveError, ex.Message);
         }
 
         busy = false;
@@ -219,7 +211,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Changing whether a spot has a grow light failed");
-            roomMessage = $"Couldn't save the grow light: {ex.Message}";
+            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsLightError, ex.Message);
         }
 
         busy = false;
@@ -233,12 +225,12 @@
     {
         if (addingRoom)
         {
-            <RoomRenameRow Label="New room" Busy="busy" OnSave="name => AddPlaceAsync(null, name)" OnCancel="StopAddingRoom" />
+            <RoomRenameRow Label="@Strings.Shared.RoomsNewRoom" Busy="busy" OnSave="name => AddPlaceAsync(null, name)" OnCancel="StopAddingRoom" />
         }
         else
         {
             <button type="button" class="btn btn-outline-primary" disabled="@busy"
-                    @onclick="StartAddingRoom">Add a room</button>
+                    @onclick="StartAddingRoom">@Strings.Shared.RoomsAddRoom</button>
         }
     };
 
@@ -248,21 +240,21 @@
         {
             var shown = ShownPlants;
             <div class="add-form">
-                <label class="form-label" for="new-tag-name">Tag</label>
-                <input id="new-tag-name" class="form-control" autocomplete="off" placeholder="e.g. rare"
+                <label class="form-label" for="new-tag-name">@Strings.Shared.RoomsTagLabel</label>
+                <input id="new-tag-name" class="form-control" autocomplete="off" placeholder="@Strings.Shared.RoomsTagPlaceholder"
                        value="@newTag" @oninput="TypeTag" />
 
-                <div class="form-label mt-3" id="new-tag-plants">Put it on</div>
+                <div class="form-label mt-3" id="new-tag-plants">@Strings.Shared.RoomsPutItOn</div>
                 @if (activePlants.Count == 0)
                 {
-                    <p class="text-body-secondary">You have no plants to tag yet.</p>
+                    <p class="text-body-secondary">@Strings.Shared.RoomsNoPlantsToTag</p>
                 }
                 else
                 {
                     @if (activePlants.Count > 10)
                     {
-                        <input type="search" class="form-control mb-2" autocomplete="off" aria-label="Search plants"
-                               placeholder="Search plants" value="@tagSearch" @oninput="TypeSearch" />
+                        <input type="search" class="form-control mb-2" autocomplete="off" aria-label="@Strings.Shared.RoomsSearchPlants"
+                               placeholder="@Strings.Shared.RoomsSearchPlants" value="@tagSearch" @oninput="TypeSearch" />
                     }
                     <div class="tag-plants" role="group" aria-labelledby="new-tag-plants">
                         @foreach (var p in shown)
@@ -276,7 +268,7 @@
                         }
                         @if (shown.Count == 0)
                         {
-                            <p class="text-body-secondary mb-0">No plant matches that.</p>
+                            <p class="text-body-secondary mb-0">@Strings.Shared.RoomsNoPlantMatches</p>
                         }
                     </div>
                 }
@@ -284,15 +276,15 @@
                 <div class="add-actions">
                     <button type="button" class="btn btn-primary"
                             disabled="@(busy || PlantTags.Clean(newTag) is null || ticked.Count == 0)"
-                            @onclick="AddTagAsync">Save</button>
-                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="StopAddingTag">Cancel</button>
+                            @onclick="AddTagAsync">@Strings.Common.Save</button>
+                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="StopAddingTag">@Strings.Common.Cancel</button>
                 </div>
             </div>
         }
         else
         {
             <button type="button" class="btn btn-outline-primary" disabled="@busy"
-                    @onclick="StartAddingTag">New tag</button>
+                    @onclick="StartAddingTag">@Strings.Shared.RoomsNewTag</button>
         }
     };
 
@@ -365,7 +357,7 @@
             var written = (await RoomService.GetPlacesAsync()).NameOf(place.Id);
             rooms = await RoomService.GetAllAsync();
         placeInfo = await RoomService.GetPlacesAsync();
-            roomMessage = existed ? $"{written} is already there." : $"Added {written}.";
+            roomMessage = existed ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsAlreadyThere, written) : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsAdded, written);
             StopAddingRoom();
         }
         catch (ArgumentException ex)
@@ -387,12 +379,12 @@
             await RoomService.RemoveAsync(id);
             rooms = await RoomService.GetAllAsync();
         placeInfo = await RoomService.GetPlacesAsync();
-            roomMessage = $"Removed {name}.";
+            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRemoved, name);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Removing a room or spot failed");
-            roomMessage = $"Couldn't remove it: {ex.Message}";
+            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRemoveError, ex.Message);
         }
 
         busy = false;
@@ -408,14 +400,14 @@
             var changed = await PlantService.AddTagsAsync(chosen, [name]);
             tags = PlantTags.InUse(await Plants.GetAllAsync());
             tagMessage = changed == 0
-                ? $"{Labels.Plants(chosen.Count)} already had {name}."
-                : $"Tagged {Labels.Plants(changed)}.";
+                ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagAlready, Labels.Plants(chosen.Count), name)
+                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagged, Labels.Plants(changed));
             StopAddingTag();
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding a tag failed");
-            tagMessage = $"Couldn't add the tag: {ex.Message}";
+            tagMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagError, ex.Message);
         }
 
         busy = false;
@@ -446,10 +438,10 @@
     /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
     private static string Held(int plants, int propagations) => (plants, propagations) switch
     {
-        (0, 0) => "empty",
+        (0, 0) => Strings.Shared.RoomsEmptyPlace,
         (_, 0) => Labels.Plants(plants),
-        (0, _) => Labels.Count(propagations, "propagation"),
-        _ => $"{Labels.Plants(plants)}, {Labels.Count(propagations, "propagation")}"
+        (0, _) => Plural.Of(propagations, Strings.Shared.RoomsPropagations_One, Strings.Shared.RoomsPropagations_Other),
+        _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsPlantsAndPropagations, Labels.Plants(plants), Plural.Of(propagations, Strings.Shared.RoomsPropagations_One, Strings.Shared.RoomsPropagations_Other))
     };
 
     private void StopRenaming()
@@ -468,16 +460,16 @@
         placeInfo = await RoomService.GetPlacesAsync();
             roomMessage = (result.Total, result.Merged) switch
             {
-                (0, _) => $"Nothing was in {from}, so there was nothing to rename.",
-                (_, true) => $"{Held(result.Plants, result.Propagations)} moved into {result.Name}, which you were already using.",
-                _ => $"Renamed to {result.Name}, with {Held(result.Plants, result.Propagations)} in it."
+                (0, _) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsNothingToRename, from),
+                (_, true) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsMovedInto, Held(result.Plants, result.Propagations), result.Name),
+                _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRenamedTo, result.Name, Held(result.Plants, result.Propagations))
             };
             renaming = null;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Renaming a room or spot failed");
-            roomMessage = $"Couldn't rename: {ex.Message}";
+            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRenameError, ex.Message);
         }
 
         busy = false;
@@ -500,16 +492,16 @@
             tags = PlantTags.InUse(await Plants.GetAllAsync());
             tagMessage = (changed, merged) switch
             {
-                (0, _) => $"Nothing changed, {from} stays as it is.",
-                (_, true) => $"{Labels.Plants(changed)} now tagged {name}, which you were already using.",
-                _ => $"Renamed to {name} on {Labels.Plants(changed)}."
+                (0, _) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagNothingChanged, from),
+                (_, true) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagMerged, Labels.Plants(changed), name),
+                _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagRenamed, name, Labels.Plants(changed))
             };
             renamingTag = null;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Renaming a tag failed");
-            tagMessage = $"Couldn't rename: {ex.Message}";
+            tagMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRenameError, ex.Message);
         }
 
         busy = false;
