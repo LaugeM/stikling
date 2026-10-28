@@ -41,12 +41,6 @@ The people on Reddit who track their plants at all are mostly collectors with 50
 
 1. **A demo plant and propagation**, so a first visit shows the app with plants in it. It is built in a draft pull request that is waiting on photos of a coleus at each stage. The posts on Reddit come once it is in.
 
-### Cheap ones to slot in whenever
-
-Small ones with no new screen worth the name:
-
-- Small info buttons next to the less obvious things.
-
 ---
 
 ## 1. Plants
@@ -420,7 +414,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **A page that shows while the app loads**: what Stikling is in two sentences, two screens from the app and how far the download has got, in the page itself rather than the app, so the first visit shows something straight away and search engines can read it. The first visit takes about 26 seconds on slow mobile data and 7 on fast, and the page shows after 1.4 and 0.6. Someone coming back only sees the icon, and only if the app takes a moment to start. Links to the app show a picture of it in their preview | 2 | M | v1.x |
 | ☐ | **Guided tour on the first visit**: a short walk through the app (plants, propagations, photos, backup) that can be skipped | 6 | M | v1.x |
 | ☐ | Start the tour again from Settings whenever you want | 6 | S | v1.x |
-| ☐ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | 4 | S | v1.x |
+| ✅ | Small info buttons next to the less obvious things, e.g. what "Pot up" does and what the stages mean | 4 | S | v1.x |
 | ☐ | A demo plant and propagation that can be loaded and removed again, so the app can be tried out without adding real plants. They need fixed ids so a device that syncs doesn't get a second copy, and removing them removes their photos too | 3 | M | v1.x |
 
 ## 7d. Guides & references

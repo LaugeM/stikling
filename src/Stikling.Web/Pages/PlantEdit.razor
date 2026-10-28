@@ -367,13 +367,19 @@ else
                                Label="Outer pot" NoneText="No outer pot" PotAdded="form.AddPot" />
                     @if (plant.OuterPotId is not null)
                     {
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" id="water-outer"
-                                   checked="@plant.WaterInOuterPot"
-                                   @onchange="e => plant.WaterInOuterPot = (bool?)e.Value == true" />
-                            <label class="form-check-label" for="water-outer">Keep water in the outer pot</label>
-                        </div>
-                        <div class="form-text">For a plain outer pot you keep water in, with the medium wicking it up.</div>
+                        <InfoButton Topic="keeping water in the outer pot">
+                            <Label>
+                                <div class="form-check mt-2 mb-0">
+                                    <input class="form-check-input" type="checkbox" id="water-outer"
+                                           checked="@plant.WaterInOuterPot"
+                                           @onchange="e => plant.WaterInOuterPot = (bool?)e.Value == true" />
+                                    <label class="form-check-label" for="water-outer">Keep water in the outer pot</label>
+                                </div>
+                            </Label>
+                            <ChildContent>
+                                The outer pot holds water on purpose and the plant wicks it up, like a self-watering pot. Leave it off for an ordinary outer pot that you tip out after watering.
+                            </ChildContent>
+                        </InfoButton>
                     }
                 </div>
 
