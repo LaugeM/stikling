@@ -35,11 +35,11 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 ## Next up
 
-In the order I would build them, with the ones that belong together built together. The first one is for reaching new people: what someone sees when they find the app from a post on TikTok, Instagram or Reddit. Danish Facebook groups wait until the Danish translation is in.
+Nothing to build right now. Everything with priority 1 to 4 is built, and the last item, the demo plant and propagation, is in, so a first visit shows the app with plants in it.
 
-The people on Reddit who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. The order after the demo plant is picked for them.
+What comes next is posts on Reddit (r/propagation, r/houseplants and the collector subreddits), and the next features are picked from what people there ask for. Danish Facebook groups wait until the Danish translation is in.
 
-1. **A demo plant and propagation**, so a first visit shows the app with plants in it. It is built in a draft pull request that is waiting on photos of a coleus at each stage. The posts on Reddit come once it is in.
+The people on Reddit who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. Whatever goes on this list next is picked for them.
 
 ---
 
