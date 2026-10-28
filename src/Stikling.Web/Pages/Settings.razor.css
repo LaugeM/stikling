@@ -1,5 +1,6 @@
 .settings-group {
     margin-bottom: 1.75rem;
+    scroll-margin-top: var(--pa-header-height);
 }
 
 .settings-group h2 {
@@ -15,4 +16,83 @@
     margin-bottom: 0.35rem;
     font-size: 0.875rem;
     color: var(--pa-muted);
+}
+
+/* The list of sections is only for a wide screen. A phone keeps one long page. */
+.settings-nav {
+    display: none;
+}
+
+/* A section list down the left that stays while the open section scrolls on the right */
+@media (min-width: 64rem) {
+    .settings-layout {
+        display: grid;
+        grid-template-columns: 15rem minmax(0, 40rem);
+        column-gap: 2.5rem;
+        align-items: start;
+    }
+
+    .settings-nav {
+        position: sticky;
+        top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .settings-nav-link {
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-height: 2.75rem;
+        padding: 0 0.75rem;
+        border-radius: 0.6rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--pa-muted);
+        text-decoration: none;
+        transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .settings-nav-link:hover {
+        color: var(--pa-text);
+        background: var(--pa-bg);
+    }
+
+    .settings-nav-link:focus-visible {
+        outline: 2px solid var(--pa-green);
+        outline-offset: -2px;
+    }
+
+    .settings-nav-link[aria-current="page"] {
+        color: var(--pa-green-dark);
+        background: var(--pa-green-soft);
+        font-weight: 600;
+    }
+
+    /* A sync problem, with a ring in the row's colour */
+    .settings-nav-dot {
+        position: absolute;
+        top: 50%;
+        right: 0.9rem;
+        width: 0.6rem;
+        height: 0.6rem;
+        margin-top: -0.3rem;
+        border-radius: 50%;
+        background: var(--pa-alert);
+        box-shadow: 0 0 0 2px var(--pa-surface);
+    }
+
+    /* Only the open section shows */
+    .settings-closed {
+        display: none;
+    }
+
+    /* The open section's heading reads as a heading, not as the small label it is on a phone */
+    .settings-group h2 {
+        font-size: 1.125rem;
+        text-transform: none;
+        letter-spacing: normal;
+        color: var(--pa-text);
+    }
 }

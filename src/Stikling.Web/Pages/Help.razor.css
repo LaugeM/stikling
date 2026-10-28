@@ -131,3 +131,62 @@
         transition: none;
     }
 }
+
+/* On a wide screen the topics are a list down the left that stays while the answers scroll. The
+   markup keeps the phone order, so the list is placed in the first column across the rows of the rest. */
+@media (min-width: 64rem) {
+    .help-layout {
+        display: grid;
+        grid-template-columns: 14rem minmax(0, 44rem);
+        column-gap: 2.5rem;
+        align-items: start;
+    }
+
+    .help-layout > * {
+        grid-column: 2;
+        min-width: 0;
+    }
+
+    .help-layout > .help-toc {
+        grid-column: 1;
+        grid-row: 1 / span 20;
+        position: sticky;
+        top: 1.5rem;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0.15rem;
+        margin-bottom: 0;
+    }
+
+    .help-toc[hidden] {
+        display: none;
+    }
+
+    .help-toc .chip {
+        min-height: 2.75rem;
+        padding: 0 0.75rem;
+        border: 0;
+        border-radius: 0.6rem;
+        background: none;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--pa-muted);
+        transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .help-toc .chip:hover {
+        background: var(--pa-bg);
+        color: var(--pa-text);
+    }
+
+    .help-toc .chip:focus-visible {
+        outline: 2px solid var(--pa-green);
+        outline-offset: -2px;
+    }
+
+    .help-toc .chip.current {
+        background: var(--pa-green-soft);
+        color: var(--pa-green-dark);
+        font-weight: 600;
+    }
+}

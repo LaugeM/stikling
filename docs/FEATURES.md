@@ -37,16 +37,15 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them, with the ones that belong together built together. The demo plant and propagation is in, so a first visit shows the app with plants in it.
 
-The first group is for the people a post brings in, so the posts on Reddit (r/propagation, r/houseplants and the collector subreddits) wait until it is built. Those who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. Danish comes right after, so every feature from then on is written in both languages from the start, and the Danish Facebook groups can be asked once it is in.
+The first group was for the people a post brings in, and it is built, so the posts on Reddit (r/propagation, r/houseplants and the collector subreddits) can go up. Those who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. Danish is next, so every feature from then on is written in both languages from the start, and the Danish Facebook groups can be asked once it is in.
 
-1. **First visit**: the guided tour, which can be started again from Settings. A check of every screen on a wide screen, with Supplies as grids as part of it. A page with what's built and what's coming.
-2. **Danish**: the translation, with a way for others to help translate, and settings for units and date format.
-3. **For collectors**: more of the plant dictionary, the leaf log for variegated plants, Generation and Orders.
-4. **Photos**: Share into Stikling, the ghost overlay, and a photo of a shelf or spot with the plants marked on it.
-5. **Everyday shortcuts and details**: quick actions, semi-hydro details and Does it fit?
-6. **Showing it off**: anniversaries and small celebrations, an experiment's result as an image, your year as a video, and a plant's story to print.
-7. **When something is wrong**: the symptom check, and built-in guides that open from the place they are about.
-8. **On the server**: plant identification from a photo, the plant facts card and a public read-only collection page. Identification services name the species, not the cultivar, so a variegated or lab-made cultivar still has to be picked by hand, from the dictionary. Check that Trefle is still kept up before planning the facts card.
+1. **Danish**: the translation, with a way for others to help translate, and settings for units and date format.
+2. **For collectors**: more of the plant dictionary, the leaf log for variegated plants, Generation and Orders.
+3. **Photos**: Share into Stikling, the ghost overlay, and a photo of a shelf or spot with the plants marked on it.
+4. **Everyday shortcuts and details**: quick actions, semi-hydro details and Does it fit?
+5. **Showing it off**: anniversaries and small celebrations, an experiment's result as an image, your year as a video, and a plant's story to print.
+6. **When something is wrong**: the symptom check, and built-in guides that open from the place they are about.
+7. **On the server**: plant identification from a photo, the plant facts card and a public read-only collection page. Identification services name the species, not the cultivar, so a variegated or lab-made cultivar still has to be picked by hand, from the dictionary. Check that Trefle is still kept up before planning the facts card.
 
 ---
 
@@ -388,14 +387,14 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Import from a spreadsheet**: a CSV file, or cells pasted from Excel or Google Sheets. Each column is matched to a field from its heading, in English or Danish, and every match can be changed. A column that fits no field becomes a field of its own, named after the heading with the kind guessed (or goes into About it, or is left out), missing rooms are made, and last watered, fed and repotted dates go into the care log. Rows that look like a plant you have are left unticked, the app's own CSV export reads back in, and the result screen can undo the whole import, the new fields too | 5 | M | v1.x |
 | ☐ | Import propagations from a spreadsheet, with the parent plant found by name | 7 | S | v1.x |
 | ✅ | **Side menu on wide screens**: on a computer or a tablet held sideways, the tabs move to a menu down the side, with Help and Settings at the bottom of it. Plant and propagation pages show the details next to the history, the Plants and Propagations lists flow into columns, Today shows what needs doing next to the rest, Water plants flows its plants into columns, and sheets open as a dialog in the middle. Phones keep the tabs at the bottom | 5 | M | v1.x |
-| ☐ | **Pest cases and problems in two columns on a wide screen**, like plant pages: the case and its facts on the left, the updates beside them | 6 | S | v1.x |
-| ☐ | **Supplies as grids on a wide screen**: Pots, Products, Soil mixes, Feeds and Sellers flow into columns the way the Plants list does, instead of one long list in the middle | 3 | S | v1.x |
+| ✅ | **Pest cases and problems in two columns on a wide screen**, like plant pages: the case and its facts on the left, the updates beside them | 6 | S | v1.x |
+| ✅ | **Supplies as grids on a wide screen**: Pots, Products, Soil mixes, Feeds and Sellers flow into columns the way the Plants list does, instead of one long list in the middle | 3 | S | v1.x |
 | ☐ | **Drop photos onto a plant on a computer**: drag one or more photo files onto a plant or propagation page, or onto its row in a list, to add them, the same as picking them with Photo | 5 | S | v1.x |
 | ☐ | **Keyboard shortcuts**: N for a new plant, W to water, Esc to close a sheet, arrow keys through lists and `?` for a sheet that lists them all. Only `/` for Search exists so far | 6 | S | v1.x |
 | ☐ | **Shift-click to select a range** of plants or propagations in Select and in the table, instead of picking them one at a time | 6 | S | v1.x |
 | ☐ | **The list and a plant side by side**: on a wide screen, clicking a plant opens it in a pane next to the list, so you can go through plants without going back each time. Has to fit with the plant page's own two columns | 7 | M | v1.x |
-| ☐ | **Settings in two panes on a wide screen**: the sections down the left and the open one on the right | 7 | S | v1.x |
-| ☐ | **Contents down the side of the Help page** on a wide screen, so you can jump to a part of the app | 7 | S | v1.x |
+| ✅ | **Settings in two panes on a wide screen**: the sections down the left and the open one on the right. The App section is split into Look, Today and care, and Plants, on the phone too | 7 | S | v1.x |
+| ✅ | **Contents down the side of the Help page** on a wide screen, so you can jump to a part of the app | 7 | S | v1.x |
 | ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |
 | ✅ | **Your photos in folders**: a download of every photo with one folder per plant and propagation, each file named by the date it was taken, so the photos are useful without the app. Separate from the backup, which is made for the app to read back | 4 | S | v1.x |
 | ☐ | Units and date format settings | 3 | M | v1.x |

@@ -1,4 +1,5 @@
 @page "/help"
+@layout WideLayout
 @* Short answers to what people ask. Keep this in step with the app: a feature that is added or
    changed should have its answer added or changed here in the same pull request. The deploy renders it
    to plain HTML for search engines and llms.txt (tools/static-pages/render.cs), without a browser, so
@@ -9,8 +10,10 @@
 
 <PageTitle>Help · Stikling</PageTitle>
 
-<a class="back-link" href="settings">Settings</a>
+<a class="back-link" href="settings?section=about">Settings</a>
 <h1>Help</h1>
+
+<div class="help-layout">
 
 <p class="help-intro">
     Short answers to the questions that come up most. Tap a question to open it.
@@ -1800,6 +1803,8 @@
         </p>
     </details>
 </section>
+
+</div>
 
 @code {
     /// <summary>A search to start on, from the Search page.</summary>

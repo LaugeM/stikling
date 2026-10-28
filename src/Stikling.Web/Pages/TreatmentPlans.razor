@@ -1,4 +1,5 @@
 @page "/treatment-plans"
+@layout WideLayout
 @inject ITreatmentPlanRepository Repository
 @inject ITreatmentRecipeRepository RecipeRepository
 
@@ -27,7 +28,7 @@
 
 @if (draft is not null)
 {
-    <section class="settings-section">
+    <section class="settings-section supply-form">
         <h2>@(editing ? "Edit plan" : "Add a plan")</h2>
 
         <div class="mb-3">
@@ -159,7 +160,7 @@ else
     <section class="settings-section">
         <h2>Your plans</h2>
 
-        <ul class="plan-list">
+        <ul class="plan-list supply-grid">
             @foreach (var plan in plans)
             {
                 <li id="item-@plan.Id">

@@ -1,4 +1,5 @@
 @page "/settings"
+@layout WideLayout
 @implements IDisposable
 @using Stikling.Core.Settings
 @using Stikling.Core.Sync
@@ -20,329 +21,358 @@
 @inject OwnCareKindService OwnCareKinds
 @inject OwnFieldService OwnFieldBook
 @inject ICareIntervalRepository CareIntervalRepository
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Settings · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
 
 <h1>Settings</h1>
 
-@if (Account.IsAvailable && accountHintRead)
-{
-    <section class="settings-group">
-        <h2>Account</h2>
-        <div class="settings-rows">
-            @if (account is { SignedIn: true })
+<div class="settings-layout">
+    <nav class="settings-nav" aria-label="Settings sections">
+        @foreach (var (id, title) in Sections)
+        {
+            <a class="settings-nav-link" href="settings?section=@id" aria-current="@(id == OpenSection ? "page" : null)"
+               @onclick="() => Open(id)" @onclick:preventDefault>
+                <span>@title</span>
+                @if (id == "account" && Sync.HasProblem)
+                {
+                    <span class="settings-nav-dot" aria-hidden="true"></span>
+                }
+            </a>
+        }
+    </nav>
+    <div class="settings-panes">
+        @if (Account.IsAvailable && accountHintRead)
+        {
+            <section class="settings-group @Closed("account")" id="account">
+                <h2>Account</h2>
+                <div class="settings-rows">
+                    @if (account is { SignedIn: true })
+                    {
+                        <SettingsRow Href="account" Title="@account.Email" Detail="@(Sync.HasProblem ? "Sync needs a look. Tap to see why." : SyncLine)" Alert="@Sync.HasProblem" />
+                    }
+                    else if (accountChecking)
+                    {
+                        <SettingsRow Href="account" Title="Account" Detail="Checking your account…" />
+                    }
+                    else if (accountUnreachable)
+                    {
+                        <SettingsRow Href="account" Title="Account" Detail="Can't reach the sign-in service right now" />
+                    }
+                    else
+                    {
+                        <SettingsRow Href="sign-in" Title="Sign in" Detail="Keep your plants the same on all your devices" />
+                    }
+                </div>
+            </section>
+        }
+
+        <section class="settings-group @Closed("look")" id="look">
+            <h2>Look</h2>
+            <div class="theme-label" id="theme-label">Theme</div>
+            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="theme-label">
+                @foreach (var option in options)
+                {
+                    var id = $"theme-{option.Mode.ToString().ToLowerInvariant()}";
+                    <input type="radio" class="btn-check" name="theme" id="@id"
+                           checked="@(mode == option.Mode)" @onchange="() => SetModeAsync(option.Mode)" />
+                    <label class="btn btn-outline-primary" for="@id">@option.Label</label>
+                }
+            </div>
+        </section>
+
+        <section class="settings-group @Closed("care")" id="care">
+            <h2>Today and care</h2>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="photo-reminder"
+                       checked="@photoReminder" @onchange="SetPhotoReminderAsync" />
+                <label class="form-check-label" for="photo-reminder">Monthly photo reminder</label>
+            </div>
+            <p class="settings-hint">
+                Once a month, Today lists what hasn't had a photo yet that month.
+            </p>
+            <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" role="switch" id="watering-reminder"
+                       checked="@wateringReminder" @onchange="SetWateringReminderAsync" />
+                <label class="form-check-label" for="watering-reminder">Watering reminder</label>
+            </div>
+            <p class="settings-hint">
+                Learns how often each plant gets water and asks you to check it when it's probably dry. It says nothing about a plant until it has seen a few waterings.
+            </p>
+            <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" id="empty-outer-pot"
+                       checked="@(emptyOuterPotMinutes > 0)" @onchange="SetEmptyOuterPotOnAsync" />
+                <label class="form-check-label" for="empty-outer-pot">Remind me to empty the outer pot</label>
+            </div>
+            @if (emptyOuterPotMinutes > 0)
             {
-                <SettingsRow Href="account" Title="@account.Email" Detail="@(Sync.HasProblem ? "Sync needs a look. Tap to see why." : SyncLine)" Alert="@Sync.HasProblem" />
+                <div class="input-group mt-2">
+                    <span class="input-group-text" id="empty-outer-pot-after">after</span>
+                    <select id="empty-outer-pot-wait" class="form-select" aria-labelledby="empty-outer-pot-after" @onchange="SetEmptyOuterPotWaitAsync">
+                        @foreach (var (minutes, label) in emptyOuterPotWaits)
+                        {
+                            <option value="@minutes" selected="@(minutes == emptyOuterPotMinutes)">@label</option>
+                        }
+                    </select>
+                </div>
             }
-            else if (accountChecking)
+            <p class="settings-hint">
+                After you water a plant that stands in an outer pot, Today asks you to tip out the water that drained into it. Plants whose outer pot holds water on purpose are left out.
+            </p>
+            <div class="settings-rows mt-4">
+                <SettingsRow Href="kinds-of-care" Title="Kinds of care" Detail="@KindsOfCareLine" />
+                <SettingsRow Href="care-intervals" Title="Care intervals" Detail="@CareIntervalsLine" />
+                <SettingsRow Href="away" Title="Away and quiet time" Detail="Today stops asking while you're away or taking a break" />
+            </div>
+            <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" role="switch" id="daily-round"
+                       checked="@dailyRound" @onchange="SetDailyRoundAsync" />
+                <label class="form-check-label" for="daily-round">Daily round</label>
+            </div>
+            <p class="settings-hint">
+                Today suggests one room a day to go round.
+            </p>
+            <div class="theme-label mt-4" id="round-days-label">Round days</div>
+            <div class="chip-row" role="group" aria-labelledby="round-days-label">
+                @foreach (var day in weekdays)
+                {
+                    var picked = roundDays.Contains(day);
+                    <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                            @onclick="() => ToggleRoundDayAsync(day)">@day.ToString()[..3]</button>
+                }
+            </div>
+            <p class="settings-hint">
+                Plants due for a check come up on your round day before, instead of each on its own day. A plant that dries out faster than the time between round days keeps its own days.
+            </p>
+        </section>
+
+        <section class="settings-group @Closed("plants")" id="plants">
+            <h2>Plants</h2>
+            <div class="theme-label" id="everyday-label">Everyday names</div>
+            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="everyday-label">
+                @foreach (var option in everydayOptions)
+                {
+                    var id = $"everyday-{option.Language.ToString().ToLowerInvariant()}";
+                    <input type="radio" class="btn-check" name="everyday" id="@id"
+                           checked="@(everydayLanguage == option.Language)" @onchange="() => SetEverydayLanguageAsync(option.Language)" />
+                    <label class="btn btn-outline-primary" for="@id">@option.Label</label>
+                }
+            </div>
+            <p class="settings-hint">
+                A plant with no nickname shows what it's called under its botanical name, like @(everydayLanguage == EverydayNameLanguage.Danish ? "Svigermors tunge" : "Snake plant") for <i>Dracaena trifasciata</i>.
+            </p>
+            @if (Google.IsConfigured)
             {
-                <SettingsRow Href="account" Title="Account" Detail="Checking your account…" />
+                <div class="form-check form-switch mt-4">
+                    <input class="form-check-input" type="checkbox" role="switch" id="google-photos"
+                           checked="@googlePhotos" @onchange="SetGooglePhotosAsync" />
+                    <label class="form-check-label" for="google-photos">Pick from Google Photos</label>
+                </div>
+                <p class="settings-hint">
+                    Adds a Google Photos choice next to the phone's gallery, for photos that are only in the cloud. Google asks you to allow it the first time, and again after an hour.
+                </p>
             }
-            else if (accountUnreachable)
+            <div class="settings-rows mt-4">
+                <SettingsRow Href="fields" Title="Your fields" Detail="@OwnFieldsLine" />
+            </div>
+            <div class="theme-label mt-4" id="recent-changes-label">Recent changes on a plant</div>
+            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="recent-changes-label">
+                @foreach (var option in recentChangesOptions)
+                {
+                    var id = $"recent-changes-{option.Days}";
+                    <input type="radio" class="btn-check" name="recent-changes" id="@id"
+                           checked="@(recentChangesDays == option.Days)" @onchange="() => SetRecentChangesDaysAsync(option.Days)" />
+                    <label class="btn btn-outline-primary" for="@id">@option.Label</label>
+                }
+            </div>
+            <p class="settings-hint">
+                Under a plant's name, what happened lately: when it arrived, was repotted or moved.
+            </p>
+            <label class="theme-label mt-4" for="pot-up-warn">Say when a new pot is much bigger</label>
+            <div class="input-group">
+                <span class="input-group-text">more than</span>
+                <input id="pot-up-warn" type="number" class="form-control" inputmode="decimal" min="1" max="20" step="0.5"
+                       value="@Pot.Size(potUpWarnCm)" @onchange="SetPotUpWarnCmAsync" />
+                <span class="input-group-text">cm wider</span>
+            </div>
+            <p class="settings-hint">
+                When you pick a new pot for a plant or a cutting, a note says if it is this much wider across the top than the old one. A wide pot keeps the soil wet longer.
+            </p>
+        </section>
+
+        <section class="settings-group @Closed("notifications")" id="notifications">
+            <h2>Notifications</h2>
+            @if (!Account.IsAvailable || (accountHintRead && !accountChecking && account is not { SignedIn: true }))
             {
-                <SettingsRow Href="account" Title="Account" Detail="Can't reach the sign-in service right now" />
+                <p class="settings-hint mt-0">A daily list of what Today asks for. It needs an account, since the server sends it.</p>
+            }
+            else if (accountChecking || notifySupport is null)
+            {
+                <p class="settings-hint mt-0">Checking your account…</p>
+            }
+            else if (notifySupport == "needs-home-screen")
+            {
+                <p class="settings-hint mt-0">On iPhone and iPad, add Stikling to your home screen first: tap Share, then Add to Home Screen. Open it from there and turn notifications on here.</p>
+            }
+            else if (notifySupport != "ok")
+            {
+                <p class="settings-hint mt-0">This browser can't show notifications from websites.</p>
+            }
+            else if (!notifyOn)
+            {
+                @if (notifyServer == ServerCheck.NotSetUp)
+                {
+                    <p class="settings-hint mt-0">Notifications aren't available yet.</p>
+                }
+                else
+                {
+                    <p class="settings-hint mt-0">One notification a day with what Today asks for, never a reminder to water. Each device is turned on by itself.</p>
+                    <button type="button" class="btn btn-primary" disabled="@notifyBusy" @onclick="TurnOnNotificationsAsync">Turn on</button>
+                    @if (notifyMessage is not null)
+                    {
+                        <p class="settings-hint" role="status">@notifyMessage</p>
+                    }
+                }
             }
             else
             {
-                <SettingsRow Href="sign-in" Title="Sign in" Detail="Keep your plants the same on all your devices" />
-            }
-        </div>
-    </section>
-}
-
-<section class="settings-group">
-    <h2>App</h2>
-    <div class="theme-label" id="theme-label">Theme</div>
-    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="theme-label">
-        @foreach (var option in options)
-        {
-            var id = $"theme-{option.Mode.ToString().ToLowerInvariant()}";
-            <input type="radio" class="btn-check" name="theme" id="@id"
-                   checked="@(mode == option.Mode)" @onchange="() => SetModeAsync(option.Mode)" />
-            <label class="btn btn-outline-primary" for="@id">@option.Label</label>
-        }
-    </div>
-    <div class="theme-label mt-4" id="everyday-label">Everyday names</div>
-    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="everyday-label">
-        @foreach (var option in everydayOptions)
-        {
-            var id = $"everyday-{option.Language.ToString().ToLowerInvariant()}";
-            <input type="radio" class="btn-check" name="everyday" id="@id"
-                   checked="@(everydayLanguage == option.Language)" @onchange="() => SetEverydayLanguageAsync(option.Language)" />
-            <label class="btn btn-outline-primary" for="@id">@option.Label</label>
-        }
-    </div>
-    <p class="settings-hint">
-        A plant with no nickname shows what it's called under its botanical name, like @(everydayLanguage == EverydayNameLanguage.Danish ? "Svigermors tunge" : "Snake plant") for <i>Dracaena trifasciata</i>.
-    </p>
-    <div class="form-check form-switch mt-4">
-        <input class="form-check-input" type="checkbox" role="switch" id="photo-reminder"
-               checked="@photoReminder" @onchange="SetPhotoReminderAsync" />
-        <label class="form-check-label" for="photo-reminder">Monthly photo reminder</label>
-    </div>
-    <p class="settings-hint">
-        Once a month, Today lists what hasn't had a photo yet that month.
-    </p>
-    @if (Google.IsConfigured)
-    {
-        <div class="form-check form-switch mt-4">
-            <input class="form-check-input" type="checkbox" role="switch" id="google-photos"
-                   checked="@googlePhotos" @onchange="SetGooglePhotosAsync" />
-            <label class="form-check-label" for="google-photos">Pick from Google Photos</label>
-        </div>
-        <p class="settings-hint">
-            Adds a Google Photos choice next to the phone's gallery, for photos that are only in the cloud. Google asks you to allow it the first time, and again after an hour.
-        </p>
-    }
-    <div class="form-check form-switch mt-4">
-        <input class="form-check-input" type="checkbox" role="switch" id="watering-reminder"
-               checked="@wateringReminder" @onchange="SetWateringReminderAsync" />
-        <label class="form-check-label" for="watering-reminder">Watering reminder</label>
-    </div>
-    <p class="settings-hint">
-        Learns how often each plant gets water and asks you to check it when it's probably dry. It says nothing about a plant until it has seen a few waterings.
-    </p>
-    <div class="form-check mt-4">
-        <input class="form-check-input" type="checkbox" id="empty-outer-pot"
-               checked="@(emptyOuterPotMinutes > 0)" @onchange="SetEmptyOuterPotOnAsync" />
-        <label class="form-check-label" for="empty-outer-pot">Remind me to empty the outer pot</label>
-    </div>
-    @if (emptyOuterPotMinutes > 0)
-    {
-        <div class="input-group mt-2">
-            <span class="input-group-text" id="empty-outer-pot-after">after</span>
-            <select id="empty-outer-pot-wait" class="form-select" aria-labelledby="empty-outer-pot-after" @onchange="SetEmptyOuterPotWaitAsync">
-                @foreach (var (minutes, label) in emptyOuterPotWaits)
+                @if (notifyPermission == "denied")
                 {
-                    <option value="@minutes" selected="@(minutes == emptyOuterPotMinutes)">@label</option>
+                    <p class="settings-hint mt-0" role="status">Notifications are blocked for stikling.app in this browser. Allow them in the site settings (the icon next to the address), then turn them off and on again here.</p>
                 }
-            </select>
-        </div>
-    }
-    <p class="settings-hint">
-        After you water a plant that stands in an outer pot, Today asks you to tip out the water that drained into it. Plants whose outer pot holds water on purpose are left out.
-    </p>
-    <div class="settings-rows mt-4">
-        <SettingsRow Href="kinds-of-care" Title="Kinds of care" Detail="@KindsOfCareLine" />
-        <SettingsRow Href="fields" Title="Your fields" Detail="@OwnFieldsLine" />
-        <SettingsRow Href="care-intervals" Title="Care intervals" Detail="@CareIntervalsLine" />
-        <SettingsRow Href="away" Title="Away and quiet time" Detail="Today stops asking while you're away or taking a break" />
-    </div>
-    <div class="form-check form-switch mt-4">
-        <input class="form-check-input" type="checkbox" role="switch" id="daily-round"
-               checked="@dailyRound" @onchange="SetDailyRoundAsync" />
-        <label class="form-check-label" for="daily-round">Daily round</label>
-    </div>
-    <p class="settings-hint">
-        Today suggests one room a day to go round.
-    </p>
-    <div class="theme-label mt-4" id="round-days-label">Round days</div>
-    <div class="chip-row" role="group" aria-labelledby="round-days-label">
-        @foreach (var day in weekdays)
-        {
-            var picked = roundDays.Contains(day);
-            <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
-                    @onclick="() => ToggleRoundDayAsync(day)">@day.ToString()[..3]</button>
-        }
-    </div>
-    <p class="settings-hint">
-        Plants due for a check come up on your round day before, instead of each on its own day. A plant that dries out faster than the time between round days keeps its own days.
-    </p>
-    <div class="theme-label mt-4" id="recent-changes-label">Recent changes on a plant</div>
-    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="recent-changes-label">
-        @foreach (var option in recentChangesOptions)
-        {
-            var id = $"recent-changes-{option.Days}";
-            <input type="radio" class="btn-check" name="recent-changes" id="@id"
-                   checked="@(recentChangesDays == option.Days)" @onchange="() => SetRecentChangesDaysAsync(option.Days)" />
-            <label class="btn btn-outline-primary" for="@id">@option.Label</label>
-        }
-    </div>
-    <p class="settings-hint">
-        Under a plant's name, what happened lately: when it arrived, was repotted or moved.
-    </p>
-    <label class="theme-label mt-4" for="pot-up-warn">Say when a new pot is much bigger</label>
-    <div class="input-group">
-        <span class="input-group-text">more than</span>
-        <input id="pot-up-warn" type="number" class="form-control" inputmode="decimal" min="1" max="20" step="0.5"
-               value="@Pot.Size(potUpWarnCm)" @onchange="SetPotUpWarnCmAsync" />
-        <span class="input-group-text">cm wider</span>
-    </div>
-    <p class="settings-hint">
-        When you pick a new pot for a plant or a cutting, a note says if it is this much wider across the top than the old one. A wide pot keeps the soil wet longer.
-    </p>
-</section>
+                <label class="theme-label" for="notify-at">Time</label>
+                <select id="notify-at" class="form-select w-auto" @onchange="SetNotifyAtAsync">
+                    @foreach (var time in notifyTimes)
+                    {
+                        <option value="@time.ToString("HH:mm")" selected="@(time == notifyAt)">@time.ToString("HH:mm")</option>
+                    }
+                </select>
+                <div class="theme-label mt-4" id="notify-days-label">Days</div>
+                <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="notify-days-label">
+                    @foreach (var option in notifyDayOptions)
+                    {
+                        if (option.Days == NotifyDays.RoundDays && roundDays.Count == 0 && notifyDaysChoice != NotifyDays.RoundDays)
+                        {
+                            continue;
+                        }
 
-<section class="settings-group">
-    <h2>Notifications</h2>
-    @if (!Account.IsAvailable || (accountHintRead && !accountChecking && account is not { SignedIn: true }))
-    {
-        <p class="settings-hint mt-0">A daily list of what Today asks for. It needs an account, since the server sends it.</p>
-    }
-    else if (accountChecking || notifySupport is null)
-    {
-        <p class="settings-hint mt-0">Checking your account…</p>
-    }
-    else if (notifySupport == "needs-home-screen")
-    {
-        <p class="settings-hint mt-0">On iPhone and iPad, add Stikling to your home screen first: tap Share, then Add to Home Screen. Open it from there and turn notifications on here.</p>
-    }
-    else if (notifySupport != "ok")
-    {
-        <p class="settings-hint mt-0">This browser can't show notifications from websites.</p>
-    }
-    else if (!notifyOn)
-    {
-        @if (notifyServer == ServerCheck.NotSetUp)
-        {
-            <p class="settings-hint mt-0">Notifications aren't available yet.</p>
-        }
-        else
-        {
-            <p class="settings-hint mt-0">One notification a day with what Today asks for, never a reminder to water. Each device is turned on by itself.</p>
-            <button type="button" class="btn btn-primary" disabled="@notifyBusy" @onclick="TurnOnNotificationsAsync">Turn on</button>
-            @if (notifyMessage is not null)
-            {
-                <p class="settings-hint" role="status">@notifyMessage</p>
-            }
-        }
-    }
-    else
-    {
-        @if (notifyPermission == "denied")
-        {
-            <p class="settings-hint mt-0" role="status">Notifications are blocked for stikling.app in this browser. Allow them in the site settings (the icon next to the address), then turn them off and on again here.</p>
-        }
-        <label class="theme-label" for="notify-at">Time</label>
-        <select id="notify-at" class="form-select w-auto" @onchange="SetNotifyAtAsync">
-            @foreach (var time in notifyTimes)
-            {
-                <option value="@time.ToString("HH:mm")" selected="@(time == notifyAt)">@time.ToString("HH:mm")</option>
-            }
-        </select>
-        <div class="theme-label mt-4" id="notify-days-label">Days</div>
-        <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="notify-days-label">
-            @foreach (var option in notifyDayOptions)
-            {
-                if (option.Days == NotifyDays.RoundDays && roundDays.Count == 0 && notifyDaysChoice != NotifyDays.RoundDays)
+                        var id = $"notify-days-{option.Days.ToString().ToLowerInvariant()}";
+                        <input type="radio" class="btn-check" name="notify-days" id="@id"
+                               checked="@(notifyDaysChoice == option.Days)" @onchange="() => SetNotifyDaysAsync(option.Days)" />
+                        <label class="btn btn-outline-primary" for="@id">@option.Label</label>
+                    }
+                </div>
+                @if (notifyDaysChoice == NotifyDays.Picked)
                 {
-                    continue;
+                    <div class="chip-row mt-3" role="group" aria-label="Days to get a notification">
+                        @foreach (var day in weekdays)
+                        {
+                            var picked = notifyWeekdays.Contains(day);
+                            <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                    @onclick="() => ToggleNotifyWeekdayAsync(day)">@day.ToString()[..3]</button>
+                        }
+                    </div>
+                    @if (notifyWeekdays.Count == 0)
+                    {
+                        <p class="settings-hint">With no day picked, nothing is sent.</p>
+                    }
                 }
-
-                var id = $"notify-days-{option.Days.ToString().ToLowerInvariant()}";
-                <input type="radio" class="btn-check" name="notify-days" id="@id"
-                       checked="@(notifyDaysChoice == option.Days)" @onchange="() => SetNotifyDaysAsync(option.Days)" />
-                <label class="btn btn-outline-primary" for="@id">@option.Label</label>
-            }
-        </div>
-        @if (notifyDaysChoice == NotifyDays.Picked)
-        {
-            <div class="chip-row mt-3" role="group" aria-label="Days to get a notification">
-                @foreach (var day in weekdays)
+                else if (notifyDaysChoice == NotifyDays.RoundDays)
                 {
-                    var picked = notifyWeekdays.Contains(day);
-                    <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
-                            @onclick="() => ToggleNotifyWeekdayAsync(day)">@day.ToString()[..3]</button>
+                    <p class="settings-hint">Your round days: @string.Join(", ", roundDays.Select(d => d.ToString()[..3])).</p>
+                }
+                <p class="settings-hint">
+                    One notification a day with what Today asks for, never a reminder to water. The time and days are yours on every device. This device is on.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-primary" disabled="@notifyBusy" @onclick="SendTestNotificationAsync">Send a test</button>
+                    <button type="button" class="btn btn-outline-secondary" disabled="@notifyBusy" @onclick="TurnOffNotificationsAsync">Turn off</button>
+                </div>
+                @if (notifyMessage is not null)
+                {
+                    <p class="settings-hint" role="status">@notifyMessage</p>
+                }
+            }
+        </section>
+
+        <section class="settings-group @Closed("pests")" id="pests">
+            <h2>Pests</h2>
+            <div class="theme-label" id="clean-weeks-label">Clean before a case can be resolved</div>
+            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="clean-weeks-label">
+                @foreach (var weeks in cleanWeeksOptions)
+                {
+                    var id = $"clean-weeks-{weeks}";
+                    <input type="radio" class="btn-check" name="clean-weeks" id="@id"
+                           checked="@(cleanWeeks == weeks)" @onchange="() => SetCleanWeeksAsync(weeks)" />
+                    <label class="btn btn-outline-primary" for="@id">@Labels.Count(weeks, "week")</label>
                 }
             </div>
-            @if (notifyWeekdays.Count == 0)
+            <p class="settings-hint">
+                A case being watched counts the days since its last treatment. Finding pests again starts the count over.
+            </p>
+            <div class="theme-label mt-4" id="quarantine-days-label">Quarantine length</div>
+            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="quarantine-days-label">
+                @foreach (var weeks in quarantineWeeksOptions)
+                {
+                    var id = $"quarantine-days-{weeks}";
+                    <input type="radio" class="btn-check" name="quarantine-days" id="@id"
+                           checked="@(quarantineDays == weeks * 7)" @onchange="() => SetQuarantineDaysAsync(weeks * 7)" />
+                    <label class="btn btn-outline-primary" for="@id">@Labels.Count(weeks, "week")</label>
+                }
+            </div>
+            <p class="settings-hint">
+                How long a plant is kept apart when it goes into quarantine. You can change it for each plant.
+            </p>
+            <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" role="switch" id="quarantine-new-plants"
+                       checked="@quarantineNewPlants" @onchange="SetQuarantineNewPlantsAsync" />
+                <label class="form-check-label" for="quarantine-new-plants">Quarantine new plants</label>
+            </div>
+            <p class="settings-hint">
+                A plant you add that was bought, swapped or a gift starts in quarantine. You can untick it on the form.
+            </p>
+        </section>
+
+        <section class="settings-group @Closed("data")" id="data">
+            <h2>Your data</h2>
+            <div class="settings-rows">
+                <SettingsRow Href="rooms-and-tags" Title="Rooms and tags" Detail="@RoomsAndTagsLine" />
+                <SettingsRow Href="#" Title="Collection numbers" Detail="Number the plants you have, oldest first." OnClick="OpenNumberingAsync" />
+                <SettingsRow Href="backup" Title="Backup and storage" Detail="@BackupLine" />
+            </div>
+            @if (numberingMessage is not null)
             {
-                <p class="settings-hint">With no day picked, nothing is sent.</p>
+                <p class="settings-hint" role="status">@numberingMessage</p>
             }
-        }
-        else if (notifyDaysChoice == NotifyDays.RoundDays)
-        {
-            <p class="settings-hint">Your round days: @string.Join(", ", roundDays.Select(d => d.ToString()[..3])).</p>
-        }
-        <p class="settings-hint">
-            One notification a day with what Today asks for, never a reminder to water. The time and days are yours on every device. This device is on.
-        </p>
-        <div class="d-flex flex-wrap gap-2">
-            <button type="button" class="btn btn-outline-primary" disabled="@notifyBusy" @onclick="SendTestNotificationAsync">Send a test</button>
-            <button type="button" class="btn btn-outline-secondary" disabled="@notifyBusy" @onclick="TurnOffNotificationsAsync">Turn off</button>
-        </div>
-        @if (notifyMessage is not null)
-        {
-            <p class="settings-hint" role="status">@notifyMessage</p>
-        }
-    }
-</section>
+            <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" role="switch" id="error-reports"
+                       checked="@(!errorReportsOff)" @onchange="SetErrorReportsAsync" />
+                <label class="form-check-label" for="error-reports">Send error reports</label>
+            </div>
+            <p class="settings-hint">
+                When something goes wrong, the app sends a report of what failed so it can be fixed. It never has your plants, notes or photos. <a href="privacy#error-reports">What's in a report</a>
+            </p>
+        </section>
 
-<section class="settings-group">
-    <h2>Pests</h2>
-    <div class="theme-label" id="clean-weeks-label">Clean before a case can be resolved</div>
-    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="clean-weeks-label">
-        @foreach (var weeks in cleanWeeksOptions)
-        {
-            var id = $"clean-weeks-{weeks}";
-            <input type="radio" class="btn-check" name="clean-weeks" id="@id"
-                   checked="@(cleanWeeks == weeks)" @onchange="() => SetCleanWeeksAsync(weeks)" />
-            <label class="btn btn-outline-primary" for="@id">@Labels.Count(weeks, "week")</label>
-        }
+        <section class="settings-group @Closed("about")" id="about">
+            <h2>About</h2>
+            <div class="settings-rows">
+                <SettingsRow Href="#" Title="Show me around" Detail="A short tour, with an example plant" OnClick="StartTourAsync" />
+                <SettingsRow Href="help" Title="Help" Detail="How Stikling works" />
+                <SettingsRow Href="privacy" Title="Privacy" Detail="What is kept and where" />
+                <SettingsRow Href="settings/whats-new" Title="What's new" Detail="@AppVersion.Label" />
+                <SettingsRow Href="plant-names" Title="Plant names" Detail="Where the name suggestions come from" />
+                <SettingsRow Href="https://github.com/LaugeM/stikling" Title="Source code" Detail="Stikling is open source, on GitHub" External="true" />
+            </div>
+            @if (tourFailed)
+            {
+                <p class="text-danger" role="alert">Couldn't load the example. Check your connection and try again.</p>
+            }
+        </section>
     </div>
-    <p class="settings-hint">
-        A case being watched counts the days since its last treatment. Finding pests again starts the count over.
-    </p>
-    <div class="theme-label mt-4" id="quarantine-days-label">Quarantine length</div>
-    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="quarantine-days-label">
-        @foreach (var weeks in quarantineWeeksOptions)
-        {
-            var id = $"quarantine-days-{weeks}";
-            <input type="radio" class="btn-check" name="quarantine-days" id="@id"
-                   checked="@(quarantineDays == weeks * 7)" @onchange="() => SetQuarantineDaysAsync(weeks * 7)" />
-            <label class="btn btn-outline-primary" for="@id">@Labels.Count(weeks, "week")</label>
-        }
-    </div>
-    <p class="settings-hint">
-        How long a plant is kept apart when it goes into quarantine. You can change it for each plant.
-    </p>
-    <div class="form-check form-switch mt-4">
-        <input class="form-check-input" type="checkbox" role="switch" id="quarantine-new-plants"
-               checked="@quarantineNewPlants" @onchange="SetQuarantineNewPlantsAsync" />
-        <label class="form-check-label" for="quarantine-new-plants">Quarantine new plants</label>
-    </div>
-    <p class="settings-hint">
-        A plant you add that was bought, swapped or a gift starts in quarantine. You can untick it on the form.
-    </p>
-</section>
-
-<section class="settings-group">
-    <h2>Your data</h2>
-    <div class="settings-rows">
-        <SettingsRow Href="rooms-and-tags" Title="Rooms and tags" Detail="@RoomsAndTagsLine" />
-        <SettingsRow Href="#" Title="Collection numbers" Detail="Number the plants you have, oldest first." OnClick="OpenNumberingAsync" />
-        <SettingsRow Href="backup" Title="Backup and storage" Detail="@BackupLine" />
-    </div>
-    @if (numberingMessage is not null)
-    {
-        <p class="settings-hint" role="status">@numberingMessage</p>
-    }
-    <div class="form-check form-switch mt-4">
-        <input class="form-check-input" type="checkbox" role="switch" id="error-reports"
-               checked="@(!errorReportsOff)" @onchange="SetErrorReportsAsync" />
-        <label class="form-check-label" for="error-reports">Send error reports</label>
-    </div>
-    <p class="settings-hint">
-        When something goes wrong, the app sends a report of what failed so it can be fixed. It never has your plants, notes or photos. <a href="privacy#error-reports">What's in a report</a>
-    </p>
-</section>
-
-<section class="settings-group">
-    <h2>About</h2>
-    <div class="settings-rows">
-        <SettingsRow Href="#" Title="Show me around" Detail="A short tour, with an example plant" OnClick="StartTourAsync" />
-        <SettingsRow Href="help" Title="Help" Detail="How Stikling works" />
-        <SettingsRow Href="privacy" Title="Privacy" Detail="What is kept and where" />
-        <SettingsRow Href="settings/whats-new" Title="What's new" Detail="@AppVersion.Label" />
-        <SettingsRow Href="plant-names" Title="Plant names" Detail="Where the name suggestions come from" />
-        <SettingsRow Href="https://github.com/LaugeM/stikling" Title="Source code" Detail="Stikling is open source, on GitHub" External="true" />
-    </div>
-    @if (tourFailed)
-    {
-        <p class="text-danger" role="alert">Couldn't load the example. Check your connection and try again.</p>
-    }
-</section>
+</div>
 
 <Sheet Title="Collection numbers" @bind-Open="numberingOpen">
     @if (numberingPlan is { } plan)
@@ -774,8 +804,57 @@
         await Theme.SetModeAsync(newMode);
     }
 
+    /// <summary>Which section is open on a wide screen, like notifications. A phone shows them all.</summary>
+    [SupplyParameterFromQuery(Name = "section")]
+    public string? Section { get; set; }
+
+    private string? scrolledFor;
+
+    /// <summary>The sections that are shown, in order. Account is only there when it can be used.</summary>
+    private IEnumerable<(string Id, string Title)> Sections
+    {
+        get
+        {
+            if (Account.IsAvailable && accountHintRead)
+                yield return ("account", "Account");
+            yield return ("look", "Look");
+            yield return ("care", "Today and care");
+            yield return ("plants", "Plants");
+            yield return ("notifications", "Notifications");
+            yield return ("pests", "Pests");
+            yield return ("data", "Your data");
+            yield return ("about", "About");
+        }
+    }
+
+    // A missing or unknown name opens the first section shown. A link to Account waits for the account check
+    // instead of showing Look for a moment first.
+    private string OpenSection =>
+        Sections.Any(s => s.Id == Section) ? Section!
+        : Section == "account" && Account.IsAvailable && !accountHintRead ? "account"
+        : Sections.First().Id;
+
+    private string? Closed(string id) => id == OpenSection ? null : "settings-closed";
+
+    private void Open(string id) => Navigation.NavigateTo($"settings?section={id}", replace: true);
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // A phone shows every section, so a link to one scrolls to it
+        if (accountHintRead && !string.IsNullOrEmpty(Section) && scrolledFor != Section)
+        {
+            scrolledFor = Section;
+            try
+            {
+                await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+                await module.InvokeVoidAsync("scrollToSectionOnPhone", Section);
+            }
+            catch (JSException)
+            {
+                // Not scrolling only leaves the page at the top
+            }
+        }
+
         // Once the page is up, so a slow connection doesn't hold the rest of Settings back
         if (!accountChecking || accountLoadStarted)
         {

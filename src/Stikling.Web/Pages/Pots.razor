@@ -1,4 +1,5 @@
 @page "/pots"
+@layout WideLayout
 @inject IPotRepository Repository
 @inject ILogger<Pots> Logger
 @inject PotService PotService
@@ -47,7 +48,7 @@
 
 @if (draft is not null)
 {
-    <section class="settings-section">
+    <section class="settings-section supply-form">
         <h2>@(editing is null ? (IsContainer ? "Add a container" : "Add a pot") : (IsContainer ? "Edit container" : "Edit pot"))</h2>
 
         <div class="mb-3">
@@ -253,7 +254,7 @@ else
         @foreach (var family in Shown.GroupBy(use => use.Pot.Name, StringComparer.CurrentCultureIgnoreCase))
         {
             <h3 class="pot-family">@family.Key</h3>
-            <ul class="pot-list">
+            <ul class="pot-list supply-grid">
                 @foreach (var use in family)
                 {
                     <li id="item-@use.Pot.Id">
