@@ -27,6 +27,9 @@ public interface ITimelineRepository
     /// </summary>
     Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetLastActivityBeforeAsync(DateTimeOffset before);
 
+    /// <summary>The notes that aren't deleted, have a day to come back on and haven't been ticked Done since.</summary>
+    Task<IReadOnlyList<TimelineEntry>> GetComingBackAsync();
+
     /// <summary>The entries that aren't deleted and happened at or after <paramref name="since"/>.</summary>
     Task<IReadOnlyList<TimelineEntry>> GetSinceAsync(DateTimeOffset since);
 

@@ -1,0 +1,20 @@
+.bring-back {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.bring-back select,
+.bring-back input {
+    width: auto;
+}
+
+.bring-back-error {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--pa-alert);
+}

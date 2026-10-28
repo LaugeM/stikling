@@ -169,6 +169,15 @@ public sealed class TimelineEntry : Entity
 
     public Guid? RelatedId { get; set; }
 
+    /// <summary>
+    /// The day a note comes back on Today ("Bring it back"). Only on notes, and null on every entry
+    /// from before this was kept. Changing it isn't a correction, so it adds nothing to <see cref="Edits"/>.
+    /// </summary>
+    public DateOnly? ComesBackOn { get; set; }
+
+    /// <summary>The day the note that came back was ticked Done on Today. Null until then.</summary>
+    public DateOnly? CameBackDoneOn { get; set; }
+
     /// <summary>Earlier versions of the entry, oldest first. Empty when it was never corrected.</summary>
     public List<TimelineEdit> Edits { get; set; } = [];
 }

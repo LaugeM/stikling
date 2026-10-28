@@ -585,3 +585,42 @@
         align-items: start;
     }
 }
+
+.coming-back-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.coming-back-list li + li {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.coming-back-name {
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: inherit;
+}
+
+.coming-back-text {
+    margin: 0.25rem 0 0;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.coming-back-written {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.coming-back-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
