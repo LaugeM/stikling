@@ -191,9 +191,9 @@ public static class ExampleFamily
             Entry(CurrentDayOneId, propagation, CurrentCuttingId, NoonOn(Ago(12)), TimelineKind.Note,
                 "Day 1. Cut just below a pair of leaves and took the lowest ones off.", DayOnePhotoId),
             Entry(CurrentFirstRootId, propagation, CurrentCuttingId, NoonOn(Ago(6)), TimelineKind.Note,
-                "First roots showing, a week in.", FirstRootsPhotoId),
+                "A week in, and the roots are coming fast.", FirstRootsPhotoId),
             Entry(CurrentRootsNoteId, propagation, CurrentCuttingId, NoonOn(Ago(2)), TimelineKind.Note,
-                "Roots about 2 cm now. Changed the water.")
+                "Changed the water. The roots are long enough to pot it up soon.")
         };
 
         return new ExampleRecords([mother, young], [first, current], photos, entries);
