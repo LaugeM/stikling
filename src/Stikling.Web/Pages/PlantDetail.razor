@@ -1020,6 +1020,12 @@ else
                 }
                 else
                 {
+                    <InfoButton Topic="potting together">
+                        <Label><span class="form-label mb-0">Into another plant's pot</span></Label>
+                        <ChildContent>
+                            The plant goes into another plant's pot and counts as part of it. It leaves your list and Today, and its history is kept.
+                        </ChildContent>
+                    </InfoButton>
                     <div class="mb-3">
                         <PlantSelect Plants="allPlants" Genus="@plant.Genus" Except="plant.Id" Value="pottingInto" ValueChanged="id => pottingInto = id" />
                         <div class="form-text">It takes that plant's pot, medium and room, and is counted in it. It keeps its own history.</div>
@@ -1059,6 +1065,15 @@ else
                 break;
 
             case More.SomeForm:
+                @if (someKind == SomeKind.PottedUp)
+                {
+                    <InfoButton Topic="potting some up on their own">
+                        <Label><span class="form-label mb-0">On their own</span></Label>
+                        <ChildContent>
+                            For a pot with several of the same plant. Some go into pots of their own and become plants of their own.
+                        </ChildContent>
+                    </InfoButton>
+                }
                 <div class="mb-3">
                     <label class="form-label" for="some-count">How many (of @plant.HowMany)</label>
                     <input id="some-count" type="number" class="form-control" min="1" max="@(plant.HowMany - 1)"

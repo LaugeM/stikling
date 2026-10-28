@@ -508,6 +508,19 @@ else
             @switch (stageView)
             {
                 case StageView.Stage:
+                    <InfoButton Topic="the stage">
+                        <Label><span class="form-label mb-0">Stage</span></Label>
+                        <ChildContent>
+                            @if (propagation.Type == PropagationType.Seed)
+                            {
+                                <text>Sown is the day the seeds went in. Germinating is once they start to sprout. Sprouted is when they are ready to pot up. Pot up and failing are separate actions.</text>
+                            }
+                            else
+                            {
+                                <text>Started is the day it was cut or put in. Rooting is once roots start. Rooted is when the roots are long enough to pot up. Pot up and failing are separate actions.</text>
+                            }
+                        </ChildContent>
+                    </InfoButton>
                     <div class="btn-group segmented stage-track mb-3" role="radiogroup" aria-label="Stage">
                         @foreach (var stage in ManualStages)
                         {
@@ -602,6 +615,12 @@ else
                             This propagation keeps its history.
                         </p>
                     }
+                    <InfoButton Topic="pot up">
+                        <Label><span class="form-label mb-0">How they are potted</span></Label>
+                        <ChildContent>
+                            Rooted ones become plants of their own. You can pot each in its own pot, put them all in one pot as one plant, or pot them into a plant you already have. The propagation keeps its history, and the new plants link back to it.
+                        </ChildContent>
+                    </InfoButton>
                     <div class="mb-3" role="radiogroup" aria-label="How they are potted">
                         @if (propagation.RemainingCount > 1)
                         {

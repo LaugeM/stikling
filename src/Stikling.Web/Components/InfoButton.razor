@@ -1,0 +1,30 @@
+@* A label or action name with a small "i" after it. Tapping it shows a short explanation right
+   under the row, and tapping again hides it. Nothing floats. Put the label in Label and the
+   explanation in ChildContent. Don't put it inside a button or label: the row goes in Label
+   and the "i" sits beside it, outside. *@
+<div class="info-row">
+    @Label
+    <button type="button" class="info-button" aria-expanded="@(open ? "true" : "false")" aria-controls="@textId"
+            aria-label="What is @Topic?" @onclick="() => open = !open">
+        <span class="info-circle" aria-hidden="true">i</span>
+    </button>
+</div>
+<div id="@textId" class="info-text form-text" hidden="@(!open)">@ChildContent</div>
+
+@code {
+    private static int next;
+
+    [Parameter, EditorRequired]
+    public string Topic { get; set; } = "";
+
+    /// <summary>What sits before the "i", like a field label.</summary>
+    [Parameter]
+    public RenderFragment? Label { get; set; }
+
+    /// <summary>The explanation, two or three short lines.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private readonly string textId = $"info-{Interlocked.Increment(ref next)}";
+    private bool open;
+}
