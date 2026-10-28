@@ -18,7 +18,7 @@ Each area has its own file: `Common` (words used on many screens), `Labels` (nam
 Each piece of text is a key with a value. The key says what the text is, like `EverydayNames` or `ThemeDark`. Never change a key, only the value.
 
 - **Placeholders** like `{0}` and `{1}` are filled in by the app with a name, a number or a date. Keep them in your translation, in whatever order the sentence needs. A test fails if one is missing or new.
-- **Counts** come in pairs: `Plant_One` is used for exactly one and `Plant_Other` for any other number, including none. `{0}` is the number. Translate both, even if your language uses the same word.
+- **Counts** come in pairs: `Plant_One` is used for exactly one and `Plant_Other` for any other number, including none. `{0}` is the number. Translate both, even if your language uses the same word. The `_One` text may leave out `{0}` when your language says it without the number, like "Hver dag" for "Every {0} day".
 - **Comments** on a key say where the text shows and what the placeholders are. Read them before translating.
 - **Date patterns** like `DateFormat` are not text. They are .NET date patterns: `d` is the day, `MMM` the short month name and `yyyy` the year. Change the order and the punctuation to how dates are written in your language, and leave the letters alone.
 - A few pieces of text have HTML in them, like `<i>`. Keep the tags where they are.

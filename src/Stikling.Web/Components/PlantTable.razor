@@ -10,7 +10,7 @@
             <tr>
                 @if (Selectable)
                 {
-                    <th scope="col" class="check-col"><span class="visually-hidden">Selected</span></th>
+                    <th scope="col" class="check-col"><span class="visually-hidden">@Strings.Plants.TableSelected</span></th>
                 }
                 @foreach (var column in Columns)
                 {
@@ -84,6 +84,9 @@
     [Parameter]
     public EventCallback<Plant> OnToggle { get; set; }
 
+    private static string F(string format, params object?[] args) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
+
     private bool cultivarShown => Columns.Contains((TableColumn)PlantColumn.Cultivar);
 
     private Task SortBy(TableColumn column) => SortChanged.InvokeAsync(CoreTable.Tap(Sort, column));
@@ -149,7 +152,7 @@
             PlantColumn.LikesWater => @<text>@(plant.LikesWater is { } wantsWater ? Labels.For(wantsWater) : null)</text>,
             PlantColumn.LikesHumidity => @<text>@(plant.LikesHumidity is { } wantsHumidity ? Labels.For(wantsHumidity) : null)</text>,
             PlantColumn.Season => @<text>@(plant.GrowingSeason is { } season ? Labels.For(season) : null)</text>,
-            PlantColumn.Moisture => @<text>@(row.Moisture is { } reading ? $"{reading.Value}/10, {Labels.DaysAgo(reading.DaysAgo)}" : null)</text>,
+            PlantColumn.Moisture => @<text>@(row.Moisture is { } reading ? F(Strings.Plants.TableMoisture, reading.Value, Labels.DaysAgo(reading.DaysAgo)) : null)</text>,
             PlantColumn.Status => @<text>@Labels.StatusOf(plant, PottedWithName?.Invoke(plant))@if (row.Flowering is { Stale: false } flowering && plant.InCollection){<text> · @FloweringText.Badge(flowering.Stage)</text>}</text>,
             PlantColumn.Tags => @<text>@foreach (var tag in plant.Tags){<span class="tag-label">@tag</span> }</text>,
             PlantColumn.Number => @<text>@plant.CollectionNumber</text>,
@@ -179,12 +182,12 @@
         }
         @if (plant.HowMany > 1)
         {
-            <span class="item-count" title="@($"{plant.HowMany} in the pot")">×@plant.HowMany</span>
+            <span class="item-count" title="@F(Strings.Plants.CardInPot, plant.HowMany)">×@plant.HowMany</span>
         }
         @if (plant.Favourite)
         {
             <svg class="favourite-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8Z" /></svg>
-            <span class="visually-hidden">Favourite</span>
+            <span class="visually-hidden">@Strings.PlantDetail.Favourite</span>
         }
     </div>;
 }
