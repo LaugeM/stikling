@@ -739,6 +739,15 @@ else
     <ShowFound ElementId="@(Entry is { } found ? $"entry-{found}" : null)" Ready="@(loaded && (Tab != "care" || careOpen))" />
 
     <Sheet Title="Care" @bind-Open="careOpen">
+      @if (careEditing is not null)
+      {
+        <div class="sheet-section">
+            <CareEntryEditor @key="careEditing.Id" Entry="careEditing" OwnKinds="ownKindLookup"
+                             OnDone="CareFixedAsync" OnBack="() => careEditing = null" />
+        </div>
+      }
+      else
+      {
         <div class="sheet-section">
             @if (care.Count == 0)
             {
@@ -801,15 +810,18 @@ else
                     @foreach (var entry in care)
                     {
                         <li id="entry-@entry.Id">
-                            <div class="care-entry">
+                            <button type="button" class="care-entry care-editable" @onclick="() => careEditing = entry"
+                                    aria-label="@($"Fix or delete: {CareService.Describe(entry, Labels.For, ownKindLookup)}, {Labels.Date(entry.OccurredOn)}")">
                                 <span class="care-what">@CareService.Describe(entry, Labels.For, ownKindLookup)</span>
                                 <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
-                            </div>
+                                <svg class="care-edit-hint" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+                            </button>
                         </li>
                     }
                 </ul>
             </div>
         }
+      }
     </Sheet>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="plant.Id"
@@ -1893,6 +1905,15 @@ else
             id => pots.FirstOrDefault(p => p.Id == id), await LightService.GetAllAsync(), places,
             await AwayService.GetAllAsync(), Seasons.HemisphereOf(TimeZoneInfo.Local), Time);
         wateringLine = WateringText.Summary(guess);
+    }
+
+    // The entry open for fixing in the Care sheet, or null while the history shows
+    private CareLog? careEditing;
+
+    private async Task CareFixedAsync()
+    {
+        careEditing = null;
+        await ReloadCareAsync();
     }
 
     private async Task CareLoggedAsync()
