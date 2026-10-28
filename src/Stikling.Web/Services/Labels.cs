@@ -24,7 +24,9 @@ public static class Labels
     /// another plant, by name when the name is known.
     /// </summary>
     public static string StatusOf(Plant plant, string? pottedWith = null) =>
-        plant.Status == PlantStatus.Active && plant.PottedWithPlantId is not null
+        plant.LivesElsewhere
+            ? (plant.LivesWithName is { } owner ? $"Lives with {owner}" : "Not yours")
+            : plant.Status == PlantStatus.Active && plant.PottedWithPlantId is not null
             ? (string.IsNullOrWhiteSpace(pottedWith) ? "Potted with another plant" : $"Potted with {pottedWith}")
             : For(plant.Status);
 

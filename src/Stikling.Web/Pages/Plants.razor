@@ -792,7 +792,7 @@ else
         everyday = await Names.GetEverydayNamesAsync();
         dictionary = await Names.GetDictionaryAsync();
         wishes = await WishService.GetAllAsync();
-        all = await Repository.GetAllAsync();
+        all = [.. (await Repository.GetAllAsync()).Where(p => !p.LivesElsewhere)];  // ones that live with someone else are only parents, not in this list
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, all, []);
         roomsInUse = Room.InUse(rooms);

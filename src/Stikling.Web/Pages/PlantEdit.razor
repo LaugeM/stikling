@@ -167,9 +167,10 @@ else
                         <option value="">Not one of mine / unknown</option>
                         @foreach (var p in possibleParents)
                         {
-                            <option value="@p.Id">@p.DisplayName</option>
+                            <option value="@p.Id">@PlantLineage.ParentLabel(p)</option>
                         }
                     </InputSelect>
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => addParentOpen = true">The parent isn't mine</button>
                     @if (IsNew && plant.ParentPlantId is { } parentId)
                     {
                         <div class="form-text">
@@ -177,6 +178,24 @@ else
                             <a href="propagations/new?parent=@parentId">Start a propagation instead</a>,
                             and pot it up when it's ready.
                         </div>
+                    }
+                </div>
+            }
+
+            @if (!IsNew)
+            {
+                <div class="mb-3">
+                    <div class="form-check">
+                        <InputCheckbox id="lives-elsewhere" class="form-check-input" @bind-Value="plant.LivesElsewhere" />
+                        <label class="form-check-label" for="lives-elsewhere">Not mine, it lives with someone else</label>
+                    </div>
+                    @if (plant.LivesElsewhere)
+                    {
+                        <div class="mt-2">
+                            <label class="form-label" for="lives-with">Whose is it?</label>
+                            <InputText id="lives-with" class="form-control" @bind-Value="plant.LivesWith" placeholder="e.g. Grandma" />
+                        </div>
+                        <div class="form-text">It stays out of your plant list and Today. Untick this when it becomes yours.</div>
                     }
                 </div>
             }
@@ -531,6 +550,8 @@ else
         </div>
     </EditForm>
 
+    <ParentNotMine @bind-Open="addParentOpen" Added="ParentAdded" />
+
     <Sheet Title="@OfferTitle" Open="offer.Count > 0" OpenChanged="OfferOpenChanged">
         <p>@OfferText</p>
         <ul class="small">
@@ -619,6 +640,15 @@ else
     private bool saving;
     private List<string> errors = [];
     private IReadOnlyList<Plant> possibleParents = [];
+    private bool addParentOpen;
+
+    // A parent that lives with someone else was just saved: list it and pick it
+    private void ParentAdded(Plant parent)
+    {
+        form!.AddKnownPlant(parent);
+        possibleParents = PlantLineage.PossibleParents(plant!, form.Plants);
+        plant!.ParentPlantId = parent.Id;
+    }
     private IReadOnlyList<Room> rooms = [];
     private IReadOnlyList<string> tagSuggestions = [];
 

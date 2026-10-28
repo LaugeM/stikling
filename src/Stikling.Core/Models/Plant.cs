@@ -128,11 +128,25 @@ public sealed class Plant : Entity
     public DateOnly? PottedWithSince { get; set; }
 
     /// <summary>
+    /// A plant that lives with someone else, like the parent a cutting came from. It has a page and
+    /// can be a parent, but isn't in the collection. Off unless set, and the plant keeps Status
+    /// Active, since older versions can't read a new status.
+    /// </summary>
+    public bool LivesElsewhere { get; set; }
+
+    /// <summary>Whose it is, in the person's own words ("Grandma"). Trimmed, and null when empty. Only meaningful while <see cref="LivesElsewhere"/> is on.</summary>
+    public string? LivesWith { get; set; }
+
+    /// <summary>
     /// In the collection as a plant of its own, which is what lists, counts, Today and pots go by:
-    /// not died or gone, and not potted in with another plant.
+    /// not died or gone, not potted in with another plant, and not one that lives with someone else.
     /// </summary>
     [JsonIgnore]
-    public bool InCollection => Status == PlantStatus.Active && PottedWithPlantId is null;
+    public bool InCollection => Status == PlantStatus.Active && PottedWithPlantId is null && !LivesElsewhere;
+
+    /// <summary>Who it lives with, trimmed, or null when not said.</summary>
+    [JsonIgnore]
+    public string? LivesWithName => string.IsNullOrWhiteSpace(LivesWith) ? null : LivesWith.Trim();
 
     /// <summary>
     /// The day the status last changed: when it died, was given away or sold, or came back into the

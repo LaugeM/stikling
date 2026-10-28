@@ -100,10 +100,21 @@ public static class PlantLineage
             }
         }
 
+        // Plants that live with someone else are valid parents too, listed after your own
         return list.Where(p => !excluded.Contains(p.Id))
-                   .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+                   .OrderBy(p => p.LivesElsewhere)
+                   .ThenBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                    .ToList();
     }
+
+    /// <summary>
+    /// A plant's name in a parent picker. One that lives with someone else says whose it is
+    /// ("Pothos · lives with Grandma"), or "not yours" when that isn't said.
+    /// </summary>
+    public static string ParentLabel(Plant plant) =>
+        !plant.LivesElsewhere ? plant.DisplayName
+        : plant.LivesWithName is { } owner ? $"{plant.DisplayName} · lives with {owner}"
+        : $"{plant.DisplayName} · not yours";
 
     /// <summary>
     /// What a plant has given: units taken per propagation type, how many of them rooted, the
