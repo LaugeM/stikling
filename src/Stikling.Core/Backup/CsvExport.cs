@@ -46,8 +46,9 @@ public static class CsvExport
         string? PottedWith(Plant p) => p.PottedWithPlantId is { } id && id != p.Id
             ? all.FirstOrDefault(o => o.Id == id && !o.IsDeleted)?.DisplayName
             : null;
+        // A plant that lives with someone else isn't in the collection, which is what this lists
         var rows = all
-            .Where(p => !p.IsDeleted)
+            .Where(p => !p.IsDeleted && !p.LivesElsewhere)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .Select(p => (new[]
             {

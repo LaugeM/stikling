@@ -1,0 +1,85 @@
+@* A small form in a sheet for a parent plant that lives with someone else, like the plant a cutting
+   from a friend came from. It is saved as a plant that isn't in the collection, and handed back so
+   the page can pick it as the parent. It sits outside the page's form, so Enter here adds the
+   parent instead of saving the page. *@
+@inject PlantService PlantService
+@inject TimeProvider Time
+@inject ILogger<ParentNotMine> Logger
+
+<Sheet Title="A parent that isn't yours" Open="Open" OpenChanged="OpenChanged">
+    <form @onsubmit="AddAsync" novalidate>
+        <p class="form-text">It stays out of your plant list and Today. It is only here so a cutting can show where it came from.</p>
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+        <PlantNameFields IdPrefix="@IdPrefix" @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar" />
+        <div class="mb-3">
+            <label class="form-label" for="@(IdPrefix)nickname">Nickname</label>
+            <InputText id="@($"{IdPrefix}nickname")" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Grandma's pothos" />
+            <div class="form-text">Give it a genus, a nickname, or both.</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="@(IdPrefix)lives-with">Whose is it?</label>
+            <InputText id="@($"{IdPrefix}lives-with")" class="form-control" @bind-Value="plant.LivesWith" placeholder="e.g. Grandma" />
+        </div>
+        <button type="submit" class="btn btn-primary" disabled="@saving">Add</button>
+    </form>
+</Sheet>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>Called with the saved plant, once it exists.</summary>
+    [Parameter]
+    public EventCallback<Plant> Added { get; set; }
+
+    /// <summary>Put before the ids, since the page behind has name fields of its own.</summary>
+    [Parameter]
+    public string IdPrefix { get; set; } = "pm-";
+
+    private Plant plant = New();
+    private List<string> errors = [];
+    private bool saving;
+
+    private static Plant New() => new() { LivesElsewhere = true, Origin = PlantOrigin.Unknown };
+
+    private async Task AddAsync()
+    {
+        errors = [];
+        saving = true;
+        try
+        {
+            var found = plant.Validate(Time.Today());
+            if (found.Count > 0)
+            {
+                errors = [.. found];
+                return;
+            }
+
+            await PlantService.CreateAsync(plant);
+            var saved = plant;
+            plant = New();
+            await OpenChanged.InvokeAsync(false);
+            await Added.InvokeAsync(saved);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving a parent that isn't yours failed");
+            errors = [$"Couldn't save: {ex.Message}"];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+}

@@ -63,7 +63,7 @@ public sealed class PropagationForm
         IsNew = original is null;
         Stored = !IsNew;
         Wish = wish;
-        Plants = data.Plants;
+        plantList = [.. data.Plants];
         Propagations = data.Propagations;
         Places = data.Places;
         Mixes = data.Mixes;
@@ -124,7 +124,19 @@ public sealed class PropagationForm
     public string? Location { get; set; }
 
     /// <summary>Sorted by name.</summary>
-    public IReadOnlyList<Plant> Plants { get; }
+    public IReadOnlyList<Plant> Plants => plantList;
+
+    private readonly List<Plant> plantList;
+
+    /// <summary>
+    /// Makes a plant saved while the form is open, like a parent that lives with someone else,
+    /// known to the form so the parent picker can list it.
+    /// </summary>
+    public void AddKnownPlant(Plant plant)
+    {
+        if (plantList.All(p => p.Id != plant.Id))
+            plantList.Add(plant);
+    }
 
     public IReadOnlyList<Propagation> Propagations { get; }
 

@@ -43,11 +43,12 @@ else
                 <label class="form-label" for="parent">Taken from</label>
                 <InputSelect id="parent" class="form-select" @bind-Value="propagation.ParentPlantId" @bind-Value:after="form!.ParentChanged">
                     <option value="">No parent plant (e.g. bought seeds)</option>
-                    @foreach (var p in form!.Plants)
+                    @foreach (var p in form!.Plants.OrderBy(p => p.LivesElsewhere))
                     {
-                        <option value="@p.Id">@p.DisplayName</option>
+                        <option value="@p.Id">@PlantLineage.ParentLabel(p)</option>
                     }
                 </InputSelect>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => addParentOpen = true">The parent isn't mine</button>
             </div>
             @if (propagation.ParentPlantId is null)
             {
@@ -441,6 +442,8 @@ else
             }
         </div>
     </EditForm>
+
+    <ParentNotMine @bind-Open="addParentOpen" Added="ParentAdded" />
 }
 
 @code {
@@ -580,6 +583,15 @@ else
         || p.FirstLeafOn is not null || p.SeedsGerminated is not null || p.FirstGerminatedOn is not null;
 
     private bool openArrival;
+    private bool addParentOpen;
+
+    // A parent that lives with someone else was just saved: list it and pick it
+    private void ParentAdded(Plant parent)
+    {
+        form!.AddKnownPlant(parent);
+        propagation!.ParentPlantId = parent.Id;
+        form.ParentChanged();
+    }
 
     private IReadOnlyList<string> sellerNames = [];
 

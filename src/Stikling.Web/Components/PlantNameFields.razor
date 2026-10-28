@@ -8,13 +8,13 @@
 @inject IJSRuntime JS
 
 <div class="mb-3">
-    <label class="form-label" for="name-search">What plant is it?</label>
-    <input id="name-search" type="search" class="form-control" value="@query" placeholder="e.g. snake plant or Monstera deliciosa"
-           autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="name-results"
+    <label class="form-label" for="@(IdPrefix)name-search">What plant is it?</label>
+    <input id="@(IdPrefix)name-search" type="search" class="form-control" value="@query" placeholder="e.g. snake plant or Monstera deliciosa"
+           autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="@(IdPrefix)name-results"
            @oninput="e => query = e.Value?.ToString()" @ref="searchInput" />
     @if (Found is { Count: > 0 } found)
     {
-        <div id="name-results" class="name-results" role="group" aria-label="Plants found">
+        <div id="@(IdPrefix)name-results" class="name-results" role="group" aria-label="Plants found">
             @foreach (var result in found)
             {
                 <button type="button" class="name-result" @onclick="() => PickFoundAsync(result)">
@@ -38,13 +38,13 @@
     }
     else if (suggester is not null && NameKeyLength >= NameSuggester.MinLettersWithoutGenus)
     {
-        <div id="name-results" class="form-text">Nothing by that name in the app's list. You can still type it in below.</div>
+        <div id="@(IdPrefix)name-results" class="form-text">Nothing by that name in the app's list. You can still type it in below.</div>
     }
 </div>
 <div class="row g-2 mb-3">
     <div class="col-6">
-        <label class="form-label" for="genus">Genus</label>
-        <input id="genus" class="form-control" value="@Genus" placeholder="@GenusPlaceholder"
+        <label class="form-label" for="@(IdPrefix)genus">Genus</label>
+        <input id="@(IdPrefix)genus" class="form-control" value="@Genus" placeholder="@GenusPlaceholder"
                autocomplete="off" autocapitalize="words" spellcheck="false"
                @oninput="e => TypeAsync(NameField.Genus, e)" @onfocus="() => active = NameField.Genus" @onblur="Blur"
                @ref="genusInput" />
@@ -52,8 +52,8 @@
     @if (Qualifier is not (NameQualifier.Sp or NameQualifier.Unknown))
     {
         <div class="col-6">
-            <label class="form-label" for="species">Species</label>
-            <input id="species" class="form-control" value="@Species" placeholder="@SpeciesPlaceholder"
+            <label class="form-label" for="@(IdPrefix)species">Species</label>
+            <input id="@(IdPrefix)species" class="form-control" value="@Species" placeholder="@SpeciesPlaceholder"
                    autocomplete="off" autocapitalize="none" spellcheck="false"
                    @oninput="e => TypeAsync(NameField.Species, e)" @onfocus="() => active = NameField.Species" @onblur="Blur"
                    @ref="speciesInput" />
@@ -65,8 +65,8 @@
     }
 </div>
 <div class="mb-1">
-    <label class="form-label" for="cultivar">Cultivar / variety</label>
-    <input id="cultivar" class="form-control" value="@Cultivar" placeholder="@CultivarPlaceholder"
+    <label class="form-label" for="@(IdPrefix)cultivar">Cultivar / variety</label>
+    <input id="@(IdPrefix)cultivar" class="form-control" value="@Cultivar" placeholder="@CultivarPlaceholder"
            autocomplete="off" autocapitalize="words" spellcheck="false"
            @oninput="e => TypeAsync(NameField.Cultivar, e)" @onfocus="() => active = NameField.Cultivar" @onblur="Blur"
            @ref="cultivarInput" />
@@ -89,8 +89,8 @@ else
 {
     <div class="row g-2 mt-1">
         <div class="col-12 col-sm-6">
-            <label class="form-label" for="name-sure">How sure</label>
-            <select id="name-sure" class="form-select" @onchange="SetQualifierAsync">
+            <label class="form-label" for="@(IdPrefix)name-sure">How sure</label>
+            <select id="@(IdPrefix)name-sure" class="form-select" @onchange="SetQualifierAsync">
                 <option value="" selected="@(Qualifier is null)">Sure</option>
                 <option value="@NameQualifier.Cf" selected="@(Qualifier == NameQualifier.Cf)">cf. (looks like this species)</option>
                 <option value="@NameQualifier.Aff" selected="@(Qualifier == NameQualifier.Aff)">aff. (close to this species)</option>
@@ -99,14 +99,19 @@ else
             </select>
         </div>
         <div class="col-12 col-sm-6">
-            <label class="form-label" for="name-note">Locality or code</label>
-            <input id="name-note" class="form-control" value="@Note" placeholder="e.g. Sumatra, EPC 123"
+            <label class="form-label" for="@(IdPrefix)name-note">Locality or code</label>
+            <input id="@(IdPrefix)name-note" class="form-control" value="@Note" placeholder="e.g. Sumatra, EPC 123"
                    autocomplete="off" spellcheck="false" @oninput="e => NoteChanged.InvokeAsync(e.Value?.ToString())" />
         </div>
     </div>
 }
 
 @code {
+    /// <summary>Put before every id, so a second set of name fields on the same page doesn't share them.</summary>
+    [Parameter]
+    public string IdPrefix { get; set; } = "";
+
+
     [Parameter]
     public string? Genus { get; set; }
 

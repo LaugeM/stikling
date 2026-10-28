@@ -91,7 +91,8 @@ public sealed class SearchService(
     private static SearchIndex.Doc PlantDoc(Plant plant, Func<string?, string?, string?, string?>? everyday, IReadOnlyList<OwnField> textFields)
     {
         var item = new SearchItem(SearchKind.Plant, plant.Id, plant.DisplayName, Subtitle(plant.Nickname, plant.BotanicalName),
-            null, !plant.InCollection, $"plants/{plant.Id}");
+            plant.LivesElsewhere ? (plant.LivesWithName is { } whose ? $"lives with {whose}" : "not yours") : null,
+            !plant.InCollection && !plant.LivesElsewhere, $"plants/{plant.Id}");
         var names = Names(plant.DisplayName, plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameNote, plant.BotanicalName,
             everyday?.Invoke(plant.Genus, PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar));
 

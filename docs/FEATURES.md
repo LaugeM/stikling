@@ -47,7 +47,6 @@ Small ones with no new screen worth the name:
 
 - Small info buttons next to the less obvious things.
 - **Empty the outer pot** after watering a plant that stands in one.
-- **A parent that isn't yours**, for cuttings from a friend's plant.
 
 ---
 
@@ -189,7 +188,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | **Why a propagation failed**: an optional reason on Mark failed (rotted, dried out, pests, mould, don't know). The results page shows what each medium loses cuttings to, and at which stage | 4 | S | v1.x |
 | ☐ | **How it differed from the ones that rooted**: a failed propagation lists what was different from your rooted ones of the same type: the medium, the rooting aids, the month it was started and how often the water was changed. Only facts from your own records, and it says so when nothing stands out | 6 | S | v1.x |
 | ✅ | **Given away / swapped**: record who got a cutting, so the family tree extends to friends' plants | 7 | S | v1.x |
-| ☐ | **A parent that isn't yours**: a plant that lives with someone else or is gone, like grandma's pothos, added only so its cuttings have somewhere to come from. It shows in the family tree and on its offspring, never in the plant list or on Today, and can say whose it is. A field of its own on the plant rather than a new status, so older versions still read it | 5 | S | v1.x |
+| ✅ | **A parent that isn't yours**: a plant that lives with someone else or is gone, like grandma's pothos, added only so its cuttings have somewhere to come from. It shows in the family tree and on its offspring, never in the plant list or on Today, and can say whose it is. A field of its own on the plant rather than a new status, so older versions still read it | 5 | S | v1.x |
 | ☐ | **Unsure parent**: mark where a plant came from as a guess, e.g. "probably a cutting of the kitchen Monstera", shown with a dotted line in the family tree | 7 | S | v1.x |
 | ✅ | **Labels for a label maker**: a page at /labels, reached from Select on Plants and Propagations (Labels in the action bar), from More on a plant or propagation (Print a label), after starting a propagation and after potting one up. It makes a label for each plant or cutting picked, with the collection number large on the left and the name and botanical name beside it, and the date if ticked; a label can be left out for this print. Three ways out: a phone label maker's app (one PNG per label at 203 dpi for 12×40, 14×30, 40×30, 50×30 mm or a custom size, shared through the share menu in one go, or saved where the browser can't share files), a tape printer installed on a computer (tape 9 to 24 mm, label length 30 to 60 mm, one label per page), and a sheet on A4 or Letter (pot labels of 50×25 mm with cut lines, or 15×120 mm plant stakes with a pointed end and the number at the top). Tape 12 mm and under is one line. The size and what to show are kept on the device. No QR code needed | 4 | S | v1.x |
 | ☐ | Printable QR labels for jars and pots; scanning one opens the plant or propagation | 6 | L | v1.x |
