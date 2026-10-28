@@ -6,14 +6,19 @@
             @Labels.Offer(Fills, Care)
             @if (Care.CareFrom is { } url)
             {
-                <text> · from <a href="@url" target="_blank" rel="noopener">@Book.SourceName(url)</a></text>
+                <text> · @SourceText(url)</text>
             }
         </span>
-        <button type="button" class="btn @(Inline ? "btn-link btn-sm link-action" : "btn-outline-primary btn-sm") care-offer-use" @onclick="OnUse">Use</button>
+        <button type="button" class="btn @(Inline ? "btn-link btn-sm link-action" : "btn-outline-primary btn-sm") care-offer-use" @onclick="OnUse">@Strings.Plants.CareOfferUse</button>
     </div>
 }
 
 @code {
+    // "from <link>": the link goes where {0} is
+    private MarkupString SourceText(string url) => (MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture,
+        Strings.Plants.CareOfferFrom,
+        $"<a href=\"{System.Net.WebUtility.HtmlEncode(url)}\" target=\"_blank\" rel=\"noopener\">{System.Net.WebUtility.HtmlEncode(Book.SourceName(url))}</a>");
+
     [Parameter] public PlantCare? Care { get; set; }
     [Parameter] public IReadOnlyList<LikesField> Fills { get; set; } = [];
     [Parameter, EditorRequired] public PlantCareBook Book { get; set; } = PlantCareBook.Empty;
