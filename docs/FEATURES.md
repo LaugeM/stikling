@@ -45,8 +45,6 @@ The people on Reddit who track their plants at all are mostly collectors with 50
 
 Small ones with no new screen worth the name:
 
-- A "Log care" home screen shortcut.
-- **Voice notes** on note fields.
 - Small info buttons next to the less obvious things.
 - **A note for next year**, shown next to A year ago today.
 - **Empty the outer pot** after watering a plant that stands in one.
@@ -140,7 +138,7 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ✅ | **Pot-ups and failures in the history** get their own title and icon instead of "Updated". A new optional field on the entry says what happened, and its kind stays a change, so older app versions still read the entry and show "Updated" as before. A value in the field that a version doesn't know reads as empty. Entries from before are recognised by the text the app wrote ("Potted up 2: …", "1 failed: rotted") when they are shown, so nothing stored is rewritten. A new value in `TimelineKind` would instead stop older versions from loading any history | 4 | S | v1.x |
 | ☐ | Swipe through photos side by side to compare growth | 5 | M | v1.x |
 | ✅ | **Reference photo**: a photo that isn't of your own plant, like the seller's listing, the parents of a hybrid or the plant fully grown. It sits apart from the history and never becomes the cover or day one, and it is a record of what was bought if a label goes missing | 4 | S | v1.x |
-| ☐ | **Voice notes**: a microphone button on note fields using the phone's speech-to-text | 4 | S | v1.x |
+| ✅ | **Voice notes**: covered by the keyboard's own microphone key, which works in every field and every browser. A button of the app's own was left out, since Firefox on Android has no speech-to-text for web pages and Chrome sends the audio to Google. Help says where the key is | 4 | S | v1.x |
 | ☐ | Measurements on an entry: number of leaves, height, root length | 6 | S | v1.x |
 | ☐ | **Growth curve**: a small chart of a plant's or propagation's measurements over time, once there are a few to draw | 7 | S | v1.x |
 | ☐ | **Share into Stikling**: the installed app appears in Android's share menu, so a photo from the gallery can go straight to a plant (Web Share Target) | 7 | M | v1.x |
@@ -409,7 +407,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ◐ | **Home-screen shortcuts**: long-press the app icon for "Add plant", "Log care", "New propagation". Add plant, New propagation and Pest cases are there; Log care is missing since there is no page for it yet | 5 | S | v1.x |
+| ✅ | **Home-screen shortcuts**: long-press the app icon for Add plant, New propagation, Water plants and Pest cases | 5 | S | v1.x |
 | ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | 6 | M | v1.x |
 | ✅ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
 | ✅ | Pick photos from Google Photos, including ones only in the cloud, through Google's Photos Picker. Turned on in Settings. Photo on a plant or propagation page then asks phone or Google Photos, and the add and edit pages get a Google Photos button. The photos go straight from Google to the device. The phone's own chooser only reaches photos stored on the phone, which is why it needs Google's picker | 4 | S | v1.x |
