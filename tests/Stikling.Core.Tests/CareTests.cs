@@ -309,4 +309,109 @@ public class CareTests
         // Stored as text, so reordering the enum can't change what old data means
         Assert.Contains("\"MoistureReading\"", json);
     }
+
+    // Fixing an entry
+
+    private async Task<CareLog> StoredAsync(CareLog entry)
+    {
+        await logs.SaveAsync(entry);
+        return entry;
+    }
+
+    [Fact]
+    public async Task A_wrong_reading_can_be_changed()
+    {
+        var stored = await StoredAsync(Entry(CareKind.MoistureReading, Today, moisture: 8));
+
+        await service.UpdateAsync(new CareLog { Id = stored.Id, Kind = CareKind.MoistureReading, OccurredOn = Today, Moisture = 3, Notes = " dry " }, Today);
+
+        var saved = Assert.Single(logs.Logs);
+        Assert.Equal(3, saved.Moisture);
+        Assert.Equal("dry", saved.Notes);
+        Assert.Equal(plant, saved.PlantId);
+    }
+
+    [Fact]
+    public async Task A_wrong_date_can_be_moved()
+    {
+        var stored = await StoredAsync(Entry(CareKind.Watered, Today));
+
+        await service.UpdateAsync(new CareLog { Id = stored.Id, OccurredOn = Today.AddDays(-2) }, Today);
+
+        Assert.Equal(Today.AddDays(-2), Assert.Single(logs.Logs).OccurredOn);
+    }
+
+    [Fact]
+    public async Task A_reading_that_doesnt_pass_is_refused_and_the_stored_one_stays()
+    {
+        var stored = await StoredAsync(Entry(CareKind.MoistureReading, Today, moisture: 4));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(new CareLog { Id = stored.Id, OccurredOn = Today, Moisture = 11 }, Today));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(new CareLog { Id = stored.Id, OccurredOn = Today.AddDays(1), Moisture = 4 }, Today));
+
+        Assert.Equal(4, Assert.Single(logs.Logs).Moisture);
+        Assert.Equal(Today, logs.Logs[0].OccurredOn);
+    }
+
+    [Fact]
+    public async Task Fixing_an_entry_never_changes_what_was_done_or_the_products()
+    {
+        var feedId = Guid.NewGuid();
+        var entry = Entry(CareKind.Fertilised, Today);
+        entry.Products = [new ProductDose { Name = "Hydro", Amount = 2 }];
+        entry.FeedId = feedId;
+        entry.FeedName = "Aroid feed";
+        var stored = await StoredAsync(entry);
+
+        await service.UpdateAsync(new CareLog
+        {
+            Id = stored.Id,
+            PlantId = otherPlant,
+            Kind = CareKind.Pruned,
+            OccurredOn = Today,
+            Products = [],
+            FeedId = null,
+            FeedName = null,
+            WaterLitres = 1.5m,
+            Ec = 1.2m,
+            Ph = 6m
+        }, Today);
+
+        var saved = Assert.Single(logs.Logs);
+        Assert.Equal(CareKind.Fertilised, saved.Kind);
+        Assert.Equal(plant, saved.PlantId);
+        Assert.Equal("Hydro", Assert.Single(saved.Products).Name);
+        Assert.Equal(feedId, saved.FeedId);
+        Assert.Equal("Aroid feed", saved.FeedName);
+        Assert.Equal(1.5m, saved.WaterLitres);
+        Assert.Equal(1.2m, saved.Ec);
+        Assert.Equal(6m, saved.Ph);
+    }
+
+    [Fact]
+    public async Task A_deleted_entry_cant_be_fixed()
+    {
+        var stored = await StoredAsync(Entry(CareKind.Watered, Today));
+        await service.DeleteAsync(stored.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(new CareLog { Id = stored.Id, OccurredOn = Today.AddDays(-1) }, Today));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(new CareLog { Id = Guid.NewGuid(), OccurredOn = Today }, Today));
+    }
+
+    [Fact]
+    public async Task Deleting_an_entry_is_soft_and_only_takes_that_one()
+    {
+        var first = await StoredAsync(Entry(CareKind.Watered, Today));
+        var second = await StoredAsync(Entry(CareKind.Watered, Today.AddDays(-1)));
+
+        await service.DeleteAsync(first.Id);
+
+        Assert.NotNull(first.DeletedAt);
+        Assert.Null(second.DeletedAt);
+        Assert.Equal(2, logs.Logs.Count);
+    }
 }
