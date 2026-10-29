@@ -49,9 +49,12 @@
         }
     }
 
+    /// <summary>Called by update.js. <paramref name="updating"/> is true when the page reloaded while an update
+    /// was still switching over, so the bar keeps saying it's updating.</summary>
     [JSInvokable]
-    public async Task OnUpdateReady() => await InvokeAsync(async () =>
+    public async Task OnUpdateReady(bool updating) => await InvokeAsync(async () =>
     {
+        this.updating = updating;
         await SetReadyAsync(true);
         StateHasChanged();
     });

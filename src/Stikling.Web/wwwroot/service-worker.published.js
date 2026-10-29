@@ -4,7 +4,11 @@
 self.importScripts('./service-worker-assets.js');
 self.addEventListener('install', event => event.waitUntil(onInstall(event)));
 self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
-self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
+// Only the app's own files go through the worker. Calls to the API, Clerk and Sentry go straight to the
+// network, so they never keep an old worker busy and hold up a new version taking over.
+self.addEventListener('fetch', event => {
+    if (event.request.url.startsWith(baseUrl.href)) event.respondWith(onFetch(event));
+});
 
 // The app shows a "new version ready" bar; this lets its Reload button take over straight away
 self.addEventListener('message', event => {
