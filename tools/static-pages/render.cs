@@ -6,6 +6,7 @@
 #:project ../../src/Stikling.Web/Stikling.Web.csproj
 #:property PublishAot=false
 
+using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +21,9 @@ if (args.Length != 1)
     Console.Error.WriteLine("Usage: dotnet run tools/static-pages/render.cs -- <output folder>");
     return 1;
 }
+
+// The pages are English for now, whatever language the machine running this is set to
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = new CultureInfo("en");
 
 // The live site's settings, so the answers about signing in read as they do there
 var config = new ConfigurationBuilder()
