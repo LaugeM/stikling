@@ -12,14 +12,14 @@
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
-<PageTitle>@(IsNew ? "Add an interval" : "Edit interval") · Stikling</PageTitle>
+<PageTitle>@(IsNew ? Strings.Care.IntervalEditPageTitleNew : Strings.Care.IntervalEditPageTitle)</PageTitle>
 
-<a class="back-link" href="@BackUrl">Back</a>
-<h1>@(IsNew ? "Add an interval" : "Edit interval")</h1>
+<a class="back-link" href="@BackUrl">@Strings.Common.Back</a>
+<h1>@(IsNew ? Strings.Care.IntervalListAdd : Strings.Care.IntervalEditTitle)</h1>
 
 @if (item is null)
 {
-    <p class="text-body-secondary">@(notFound ? "That interval doesn't exist." : "Loading…")</p>
+    <p class="text-body-secondary">@(notFound ? Strings.Care.IntervalEditNotFound : Strings.Care.Loading)</p>
 }
 else
 {
@@ -37,8 +37,8 @@ else
         @if (offReason is null)
         {
         <fieldset>
-            <legend>What</legend>
-            <div class="chip-row" role="group" aria-label="What comes back">
+            <legend>@Strings.Care.IntervalEditWhat</legend>
+            <div class="chip-row" role="group" aria-label="@Strings.Care.IntervalEditWhatComesBack">
                 @foreach (var kind in CareInterval.AllowedKinds)
                 {
                     var picked = item.OwnKindId is null && item.Kind == kind;
@@ -52,14 +52,14 @@ else
                             @onclick="() => PickOwnKind(own)">@own.Name</button>
                 }
             </div>
-            <div class="form-text">Watering isn't here. The watering reminder learns that from each plant.</div>
+            <div class="form-text">@Strings.Care.IntervalEditNoWatering</div>
 
             @if (item.IsFeed)
             {
-                <div class="form-label mt-3" id="feed-label">Feed</div>
+                <div class="form-label mt-3" id="feed-label">@Strings.Care.SheetFeed</div>
                 <div class="chip-row" role="group" aria-labelledby="feed-label">
                     <button type="button" class="chip @(item.FeedId is null ? "picked" : null)" aria-pressed="@(item.FeedId is null ? "true" : "false")"
-                            @onclick="() => item.FeedId = null">Any feed</button>
+                            @onclick="() => item.FeedId = null">@Strings.Care.IntervalEditAnyFeed</button>
                     @foreach (var feed in feeds)
                     {
                         var picked = item.FeedId == feed.Id;
@@ -71,36 +71,36 @@ else
         </fieldset>
 
         <fieldset>
-            <legend>How often</legend>
+            <legend>@Strings.Care.IntervalEditHowOften</legend>
             <div class="every-row">
                 <div>
-                    <label class="form-label" for="every">Every</label>
+                    <label class="form-label" for="every">@Strings.Care.IntervalEditEvery</label>
                     <InputNumber id="every" class="form-control" @bind-Value="item.Every" min="1" inputmode="numeric" />
                 </div>
-                <div class="btn-group segmented" role="radiogroup" aria-label="Unit">
+                <div class="btn-group segmented" role="radiogroup" aria-label="@Strings.Care.IntervalEditUnit">
                     @foreach (var unit in Enum.GetValues<IntervalUnit>())
                     {
                         var id = $"unit-{unit}";
                         <input type="radio" class="btn-check" name="unit" id="@id"
                                checked="@(item.Unit == unit)" @onchange="() => item.Unit = unit" />
-                        <label class="btn btn-outline-primary" for="@id">@unit</label>
+                        <label class="btn btn-outline-primary" for="@id">@UnitLabel(unit)</label>
                     }
                 </div>
             </div>
         </fieldset>
 
         <fieldset>
-            <legend>When in the year</legend>
+            <legend>@Strings.Care.IntervalEditWhenInYear</legend>
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" role="switch" id="part-of-year"
                        checked="@partOfYear" @onchange="SetPartOfYear" />
-                <label class="form-check-label" for="part-of-year">Only part of the year</label>
+                <label class="form-check-label" for="part-of-year">@Strings.Care.IntervalEditPartOfYear</label>
             </div>
             @if (partOfYear)
             {
                 <div class="row g-2 mt-1">
                     <div class="col-6">
-                        <label class="form-label" for="from-month">From</label>
+                        <label class="form-label" for="from-month">@Strings.Care.IntervalEditFrom</label>
                         <select id="from-month" class="form-select" @bind="fromMonth">
                             @foreach (var month in Enumerable.Range(1, 12))
                             {
@@ -109,7 +109,7 @@ else
                         </select>
                     </div>
                     <div class="col-6">
-                        <label class="form-label" for="to-month">To</label>
+                        <label class="form-label" for="to-month">@Strings.Care.IntervalEditTo</label>
                         <select id="to-month" class="form-select" @bind="toMonth">
                             @foreach (var month in Enumerable.Range(1, 12))
                             {
@@ -122,13 +122,13 @@ else
             }
             else
             {
-                <div class="form-text">It comes back all year.</div>
+                <div class="form-text">@Strings.Care.IntervalEditAllYear</div>
             }
         </fieldset>
 
         <fieldset>
-            <legend>Covers</legend>
-            <div class="btn-group segmented mb-3" role="radiogroup" aria-label="What it covers">
+            <legend>@Strings.Care.IntervalEditCovers</legend>
+            <div class="btn-group segmented mb-3" role="radiogroup" aria-label="@Strings.Care.IntervalEditWhatItCovers">
                 @foreach (var (value, label) in scopeOptions)
                 {
                     var id = $"scope-{value}";
@@ -141,18 +141,18 @@ else
             @if (item.Scope == CareScope.Room)
             {
                 <div class="mb-1">
-                    <RoomPicker @bind-Value="room" Rooms="rooms" Label="Room" />
+                    <RoomPicker @bind-Value="room" Rooms="rooms" Label="@Strings.Care.IntervalEditRoom" />
                 </div>
             }
             else if (item.Scope == CareScope.Tag)
             {
                 @if (tags.Count == 0)
                 {
-                    <p class="text-body-secondary mb-1">No plant has a tag yet. Add tags on a plant's page.</p>
+                    <p class="text-body-secondary mb-1">@Strings.Care.IntervalEditNoTags</p>
                 }
                 else
                 {
-                    <div class="chip-row" role="group" aria-label="Tag">
+                    <div class="chip-row" role="group" aria-label="@Strings.Care.IntervalEditTag">
                         @foreach (var tag in tags)
                         {
                             var picked = PlantTags.Same(item.Tag, tag.Name);
@@ -185,15 +185,15 @@ else
             }
             else
             {
-                <p class="text-body-secondary mb-1">Every plant in the collection, including ones added later.</p>
+                <p class="text-body-secondary mb-1">@Strings.Care.IntervalEditEveryPlant</p>
             }
 
-            <p class="covers-count" aria-live="polite">@Labels.Plants(Covered.Count) now</p>
+            <p class="covers-count" aria-live="polite">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditCoversNow, Labels.Plants(Covered.Count)))</p>
         </fieldset>
 
         <fieldset>
-            <legend>Notes</legend>
-            <InputTextArea class="form-control" rows="3" @bind-Value="item.Notes" aria-label="Notes" />
+            <legend>@Strings.Care.CareNotes</legend>
+            <InputTextArea class="form-control" rows="3" @bind-Value="item.Notes" aria-label="@Strings.Care.CareNotes" />
         </fieldset>
 
         @if (FirstDueLine is { } firstDue)
@@ -209,10 +209,10 @@ else
         @if (confirmingDelete)
         {
             <div class="confirm-card confirm-card-danger" role="alert">
-                <p class="mb-2">Delete this interval? Nothing logged is changed.</p>
+                <p class="mb-2">@Strings.Care.IntervalEditDeleteConfirm</p>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-danger" disabled="@saving" @onclick="DeleteAsync">Delete</button>
-                    <button type="button" class="btn btn-link" disabled="@saving" @onclick="() => confirmingDelete = false">Cancel</button>
+                    <button type="button" class="btn btn-danger" disabled="@saving" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+                    <button type="button" class="btn btn-link" disabled="@saving" @onclick="() => confirmingDelete = false">@Strings.Common.Cancel</button>
                 </div>
             </div>
         }
@@ -221,12 +221,12 @@ else
             <div class="form-actions">
                 @if (offReason is null)
                 {
-                    <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Add interval" : "Save")</button>
+                    <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? Strings.Care.IntervalEditAdd : Strings.Common.Save)</button>
                 }
-                <a class="btn btn-link" href="@BackUrl">Cancel</a>
+                <a class="btn btn-link" href="@BackUrl">@Strings.Common.Cancel</a>
                 @if (!IsNew)
                 {
-                    <button type="button" class="btn btn-outline-danger ms-auto" disabled="@saving" @onclick="() => confirmingDelete = true">Delete</button>
+                    <button type="button" class="btn btn-outline-danger ms-auto" disabled="@saving" @onclick="() => confirmingDelete = true">@Strings.Common.Delete</button>
                 }
             </div>
         }
@@ -245,13 +245,21 @@ else
     [SupplyParameterFromQuery(Name = "kind")]
     public string? KindName { get; set; }
 
-    private static readonly (CareScope Value, string Label)[] scopeOptions =
+    private static (CareScope Value, string Label)[] scopeOptions =>
     [
-        (CareScope.PickedPlants, "Pick plants"),
-        (CareScope.Room, "A room"),
-        (CareScope.Tag, "A tag"),
-        (CareScope.Everywhere, "All plants")
+        (CareScope.PickedPlants, Strings.Care.IntervalEditScopePick),
+        (CareScope.Room, Strings.Care.IntervalEditScopeRoom),
+        (CareScope.Tag, Strings.Care.IntervalEditScopeTag),
+        (CareScope.Everywhere, Strings.Care.IntervalEditScopeAll)
     ];
+
+    private static string UnitLabel(IntervalUnit unit) => unit switch
+    {
+        IntervalUnit.Days => Strings.Care.IntervalEditUnitDays,
+        IntervalUnit.Weeks => Strings.Care.IntervalEditUnitWeeks,
+        IntervalUnit.Months => Strings.Care.IntervalEditUnitMonths,
+        _ => Strings.Care.IntervalEditUnitYears
+    };
 
     private CareInterval? item;
     private bool notFound;
@@ -319,7 +327,7 @@ else
         if (item is not null)
         {
             offReason = CareIntervals.CountsAsWatering(item, CareLabels.Lookup(allOwn))
-                ? $"Off: {allOwn.First(k => k.Id == item.OwnKindId).Name} now counts as a watering. Watering stays with the watering reminder, so this interval does nothing. You can delete it."
+                ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditOff, allOwn.First(k => k.Id == item.OwnKindId).Name)
                 : null;
             room = places.NameOf(item.PlaceId);
             partOfYear = item.HasMonths;
@@ -391,9 +399,8 @@ else
     private IReadOnlyList<Plant> Covered => item is null ? [] : CareIntervals.PlantsIn(Draft, plants, places);
 
     private string MonthsLine =>
-        toMonth < fromMonth
-            ? $"{CareIntervals.MonthName(fromMonth)} to {CareIntervals.MonthName(toMonth)}, over the new year"
-            : $"{CareIntervals.MonthName(fromMonth)} to {CareIntervals.MonthName(toMonth)}";
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, toMonth < fromMonth ? Strings.Care.IntervalEditMonthsOverNewYear : Strings.Care.IntervalEditMonths,
+            CareIntervals.MonthName(fromMonth), CareIntervals.MonthName(toMonth));
 
     // "First due 1 November", or the range when the plants differ
     private string? FirstDueLine
@@ -404,16 +411,15 @@ else
                 return null;
 
             if (first == last)
-                return $"First due {Day(first, true)}";
+                return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditFirstDue, Day(first));
             return first.Month == last.Month && first.Year == last.Year
-                ? $"First due between {first.Day} and {Day(last, true)}"
-                : $"First due between {Day(first, true)} and {Day(last, true)}";
+                ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditFirstDueSameMonth, first.Day, Day(last))
+                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditFirstDueRange, Day(first), Day(last));
         }
     }
 
-    private string Day(DateOnly day, bool withMonth) =>
-        day.ToString(withMonth ? "d MMMM" : "d", CultureInfo.InvariantCulture)
-        + (day.Year != Today.Year ? $" {day.Year}" : "");
+    private string Day(DateOnly day) =>
+        day.ToString(day.Year != Today.Year ? Strings.Care.DayMonthYearLongFormat : Strings.Care.DayMonthLongFormat, TextCulture.ForDates);
 
     private async Task SaveAsync()
     {
@@ -441,7 +447,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the care interval failed");
-            errors = [$"Couldn't save: {ex.Message}"];
+            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditSaveFailed, ex.Message)];
         }
         finally
         {
@@ -463,7 +469,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Deleting the care interval failed");
-            errors = [$"Couldn't delete: {ex.Message}"];
+            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditDeleteFailed, ex.Message)];
             confirmingDelete = false;
         }
         finally

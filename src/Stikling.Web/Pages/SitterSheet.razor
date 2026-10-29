@@ -17,15 +17,15 @@
 @inject SitterSheetActions SheetActions
 @inject TimeProvider Time
 
-<PageTitle>Sheet for a plant-sitter · Stikling</PageTitle>
+<PageTitle>@Strings.Care.SitterPageTitle</PageTitle>
 
 @* No ReloadOnSync: like an edit page, nothing should change under someone choosing what goes on it *@
 
 <div class="sitter-page">
     <div class="sitter-screen">
-        <a class="back-link" href="away">Away and quiet time</a>
+        <a class="back-link" href="away">@Strings.Care.AwayTitle</a>
         <div class="page-heading">
-            <h1>Sheet for a plant-sitter</h1>
+            <h1>@Strings.Care.AwaySitterSheet</h1>
             @* On a wide screen the actions sit here, on a phone they are in the bar at the bottom *@
             @if (view is not null)
             {
@@ -37,30 +37,30 @@
 
         @if (view is null || sheet is null)
         {
-            <p class="text-body-secondary">Loading…</p>
+            <p class="text-body-secondary">@Strings.Care.Loading</p>
         }
         else
         {
             <p class="text-body-secondary">
-                A page to print, save as a PDF or share as text for whoever looks after your plants. It says when to check a plant, never when to water it.
+                @Strings.Care.SitterIntro
             </p>
 
-            <section class="sitter-options" aria-label="Sheet options">
+            <section class="sitter-options" aria-label="@Strings.Care.SitterOptionsLabel">
                 <div class="sitter-stretch">
                     @if (view.From is not null && view.Until is not null)
                     {
-                        <span>Away @SitterSheetText.Day(view.From.Value) to @SitterSheetText.Day(view.Until.Value)</span>
-                        <a class="link-action" href="@ChangeLink">Change</a>
+                        <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterAway, SitterSheetText.Day(view.From.Value), SitterSheetText.Day(view.Until.Value)))</span>
+                        <a class="link-action" href="@ChangeLink">@Strings.Care.SitterChange</a>
                     }
                     else
                     {
-                        <span>Add when you're away to put visit dates on it.</span>
-                        <a class="link-action" href="away/new">Add</a>
+                        <span>@Strings.Care.SitterAddAway</span>
+                        <a class="link-action" href="away/new">@Strings.Common.Add</a>
                     }
                 </div>
 
                 <div class="mb-3">
-                    <div class="form-label" id="layout-label">Layout</div>
+                    <div class="form-label" id="layout-label">@Strings.Care.SitterLayout</div>
                     <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="layout-label">
                         @foreach (var (value, label) in layoutOptions)
                         {
@@ -73,7 +73,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label" for="visits">Visits</label>
+                    <label class="form-label" for="visits">@Strings.Care.SitterVisits</label>
                     <select id="visits" class="form-select" @onchange="e => ChangeAsync(() => sheet.Visits = ParseVisits(e.Value))">
                         @foreach (var (value, label) in visitOptions)
                         {
@@ -83,7 +83,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <div class="form-label" id="usual-label">Usual way to water</div>
+                    <div class="form-label" id="usual-label">@Strings.Care.SitterUsualWayLabel</div>
                     <div class="chip-row" role="radiogroup" aria-labelledby="usual-label">
                         @foreach (var method in Enum.GetValues<WaterMethod>())
                         {
@@ -94,11 +94,11 @@
                         }
                         <button type="button" role="radio" class="chip @(sheet.UseOwnWords ? "picked" : null)"
                                 aria-checked="@(sheet.UseOwnWords ? "true" : "false")"
-                                @onclick="() => ChangeAsync(() => sheet.UseOwnWords = true)">In your own words</button>
+                                @onclick="() => ChangeAsync(() => sheet.UseOwnWords = true)">@Strings.Care.SitterOwnWords</button>
                     </div>
                     @if (sheet.UseOwnWords)
                     {
-                        <label class="form-label mt-3" for="own-words">How to water a plant that needs it</label>
+                        <label class="form-label mt-3" for="own-words">@Strings.Care.SitterOwnWordsLabel</label>
                         <textarea id="own-words" class="form-control" rows="3" value="@sheet.OwnWords"
                                   @onchange="e => ChangeAsync(() => sheet.OwnWords = e.Value?.ToString())"></textarea>
                     }
@@ -108,35 +108,35 @@
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="has-meter"
                                checked="@sheet.HasMeter" @onchange="e => ChangeAsync(() => sheet.HasMeter = e.Value is true)" />
-                        <label class="form-check-label" for="has-meter">There's a moisture meter</label>
+                        <label class="form-check-label" for="has-meter">@Strings.Care.SitterHasMeter</label>
                     </div>
                     @if (sheet.HasMeter)
                     {
-                        <label class="form-label mt-2" for="meter-where">Where is it?</label>
+                        <label class="form-label mt-2" for="meter-where">@Strings.Care.SitterMeterWhere</label>
                         <input id="meter-where" class="form-control" value="@sheet.MeterWhere"
                                @onchange="e => ChangeAsync(() => sheet.MeterWhere = e.Value?.ToString())" />
                     }
                 </div>
 
                 <fieldset class="mb-3">
-                    <legend class="form-label">Show</legend>
-                    @Show("show-photos", "Photos", !sheet.HidePhotos, on => sheet.HidePhotos = !on)
-                    @Show("show-places", "Where it is", !sheet.HidePlaces, on => sheet.HidePlaces = !on)
-                    @Show("show-how", "How it's watered", !sheet.HideHowWatered, on => sheet.HideHowWatered = !on)
-                    @Show("show-pace", "How often", !sheet.HidePace, on => sheet.HidePace = !on)
-                    @Show("show-notes", "Notes", !sheet.HideNotes, on => sheet.HideNotes = !on)
+                    <legend class="form-label">@Strings.Care.SitterShow</legend>
+                    @Show("show-photos", Strings.Care.SitterShowPhotos, !sheet.HidePhotos, on => sheet.HidePhotos = !on)
+                    @Show("show-places", Strings.Care.SitterShowPlaces, !sheet.HidePlaces, on => sheet.HidePlaces = !on)
+                    @Show("show-how", Strings.Care.SitterShowHow, !sheet.HideHowWatered, on => sheet.HideHowWatered = !on)
+                    @Show("show-pace", Strings.Care.SitterShowPace, !sheet.HidePace, on => sheet.HidePace = !on)
+                    @Show("show-notes", Strings.Care.SitterShowNotes, !sheet.HideNotes, on => sheet.HideNotes = !on)
                 </fieldset>
 
                 <div class="mb-3">
-                    <label class="form-label" for="general-note">A note for whoever looks after them</label>
+                    <label class="form-label" for="general-note">@Strings.Care.SitterGeneralNote</label>
                     <textarea id="general-note" class="form-control" rows="3" value="@sheet.GeneralNote"
                               @onchange="e => ChangeAsync(() => sheet.GeneralNote = e.Value?.ToString())"></textarea>
                 </div>
 
-                <FormSection Title="Plants on the sheet" Summary="@ListSummary">
+                <FormSection Title="@Strings.Care.SitterListTitle" Summary="@ListSummary">
                     @if (view.Candidates.Count == 0)
                     {
-                        <p class="form-text mb-0">No plants or propagations yet.</p>
+                        <p class="form-text mb-0">@Strings.Care.SitterListEmpty</p>
                     }
                     else
                     {
@@ -157,9 +157,9 @@
                                     </div>
                                     @if (candidate.TopWatered)
                                     {
-                                        <select class="form-select form-select-sm" aria-label="How @candidate.Name is watered"
+                                        <select class="form-select form-select-sm" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterWateredHow, candidate.Name))"
                                                 @onchange="e => SetWaterByAsync(candidate.Id, e.Value?.ToString())">
-                                            <option value="" selected="@(candidate.WaterBy is null)">Not said</option>
+                                            <option value="" selected="@(candidate.WaterBy is null)">@Strings.Care.SitterNotSaid</option>
                                             @foreach (var method in Enum.GetValues<WaterMethod>())
                                             {
                                                 <option value="@method" selected="@(candidate.WaterBy == method)">@SitterSheetText.MethodName(method)</option>
@@ -175,11 +175,11 @@
 
             @if (view.DueBeforeYouGo.Count > 0 && view.From > Today)
             {
-                <p class="sitter-note">Look at these before you go: @string.Join(", ", view.DueBeforeYouGo).</p>
+                <p class="sitter-note">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterDueBeforeYouGo, string.Join(", ", view.DueBeforeYouGo)))</p>
             }
             @if (!view.AnyPace && view.Subjects.Any(s => s.IsPlant))
             {
-                <p class="sitter-note">None of these have a watering pace yet, so they're on every visit. Logging waterings in the app teaches it.</p>
+                <p class="sitter-note">@Strings.Care.SitterNoPace</p>
             }
 
             <p class="visually-hidden" role="status">@status</p>
@@ -197,21 +197,21 @@
 </div>
 
 @code {
-    private static readonly (SheetLayout Value, string Label)[] layoutOptions =
+    private static (SheetLayout Value, string Label)[] layoutOptions =>
     [
-        (SheetLayout.Labels, "Plant labels"),
-        (SheetLayout.Visits, "Visits first"),
-        (SheetLayout.Chart, "Chart")
+        (SheetLayout.Labels, Strings.Care.SitterLayoutLabels),
+        (SheetLayout.Visits, Strings.Care.SitterLayoutVisits),
+        (SheetLayout.Chart, Strings.Care.SitterLayoutChart)
     ];
 
-    private static readonly (VisitPattern Value, string Label)[] visitOptions =
+    private static (VisitPattern Value, string Label)[] visitOptions =>
     [
-        (VisitPattern.EveryDay, "Every day"),
-        (VisitPattern.EveryTwoDays, "Every 2 days"),
-        (VisitPattern.EveryThreeDays, "Every 3 days"),
-        (VisitPattern.TwiceAWeek, "Twice a week"),
-        (VisitPattern.Weekly, "Once a week"),
-        (VisitPattern.None, "No visits")
+        (VisitPattern.EveryDay, Strings.Care.SitterVisitsEveryDay),
+        (VisitPattern.EveryTwoDays, Strings.Care.SitterVisitsEveryTwo),
+        (VisitPattern.EveryThreeDays, Strings.Care.SitterVisitsEveryThree),
+        (VisitPattern.TwiceAWeek, Strings.Care.SitterVisitsTwiceAWeek),
+        (VisitPattern.Weekly, Strings.Care.SitterVisitsWeekly),
+        (VisitPattern.None, Strings.Care.SitterVisitsNone)
     ];
 
     private SheetChoices? sheet;
@@ -232,7 +232,7 @@
 
     private string ChangeLink => span is { Stretches.Count: 1 } one ? $"away/{one.Stretches[0].Id}" : "away";
 
-    private string ListSummary => view is null ? "" : $"{view.Candidates.Count(c => c.OnSheet)} of {view.Candidates.Count} on the sheet";
+    private string ListSummary => view is null ? "" : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterListSummary, view.Candidates.Count(c => c.OnSheet), view.Candidates.Count);
 
     protected override async Task OnInitializedAsync()
     {
@@ -300,8 +300,8 @@
 
         status = await SheetActions.ShareTextAsync(SitterSheetText.Write(view)) switch
         {
-            "copied" => "Copied",
-            "failed" => "Couldn't share it",
+            "copied" => Strings.Care.SitterCopied,
+            "failed" => Strings.Care.SitterShareFailed,
             _ => ""
         };
         if (status.Length == 0)
@@ -319,8 +319,8 @@
     public void Dispose() => disposed = true;
 
     private RenderFragment ActionButtons => @<text>
-        <button type="button" class="btn btn-primary" @onclick="PrintAsync">Print or save as PDF</button>
-        <button type="button" class="btn btn-outline-primary" @onclick="ShareAsync">Share as text</button>
+        <button type="button" class="btn btn-primary" @onclick="PrintAsync">@Strings.Care.SitterPrint</button>
+        <button type="button" class="btn btn-outline-primary" @onclick="ShareAsync">@Strings.Care.SitterShare</button>
         @if (status.Length > 0)
         {
             <span class="sitter-status" aria-hidden="true">@status</span>
@@ -335,7 +335,7 @@
 
     // The sheet itself, which looks the same on screen and on paper and in either theme
 
-    private RenderFragment Paper(SitterSheetView sheetView) => @<article class="sitter-paper" aria-label="The sheet">
+    private RenderFragment Paper(SitterSheetView sheetView) => @<article class="sitter-paper" aria-label="@Strings.Care.SitterPaperLabel">
         <header class="sheet-top">
             <div>
                 <h2 class="sheet-title">@sheetView.Title</h2>
@@ -346,7 +346,7 @@
             </div>
             @if (sheetView.Layout == SheetLayout.Labels && sheetView.HasDates)
             {
-                <div class="sheet-dates">Visits<b>@string.Join(" · ", sheetView.Visits.Select(SitterSheetText.ShortDay))</b></div>
+                <div class="sheet-dates">@Strings.Care.SitterVisits<b>@string.Join(" · ", sheetView.Visits.Select(SitterSheetText.ShortDay))</b></div>
             }
         </header>
 
@@ -443,7 +443,7 @@
                 @foreach (var date in sheetView.Visits)
                 {
                     var on = subject.Visits.Contains(date);
-                    <span class="@(on ? null : "off")"><span class="sheet-box-tick"></span> @SitterSheetText.ShortDay(date)@if (!on){<span class="visually-hidden"> (no check needed)</span>}</span>
+                    <span class="@(on ? null : "off")"><span class="sheet-box-tick"></span> @SitterSheetText.ShortDay(date)@if (!on){<span class="visually-hidden"> @Strings.Care.SitterNoCheckNeeded</span>}</span>
                 }
             </div>
         }
@@ -472,10 +472,10 @@
         @foreach (var visit in sheetView.ByVisit)
         {
             <section class="sheet-visit">
-                <h3>@SitterSheetText.LongDay(visit.Date) <small>@visit.Count to check</small></h3>
+                <h3>@SitterSheetText.LongDay(visit.Date) <small>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterToCheck, visit.Count))</small></h3>
                 @if (visit.Count == 0)
                 {
-                    <p class="sheet-none">Nothing to check. Everything should be fine.</p>
+                    <p class="sheet-none">@Strings.Care.SitterNothingToCheck</p>
                 }
                 @foreach (var group in visit.Groups)
                 {
@@ -509,12 +509,12 @@
         <table class="sheet-chart">
             <thead>
                 <tr>
-                    <th class="plant" scope="col">Plant, in the order you walk past</th>
+                    <th class="plant" scope="col">@Strings.Care.SitterChartPlant</th>
                     @foreach (var date in sheetView.Visits)
                     {
-                        <th scope="col">@date.ToString("ddd", CultureInfo.InvariantCulture)<small>@date.ToString("d MMM", CultureInfo.InvariantCulture)</small></th>
+                        <th scope="col">@date.ToString(Strings.Care.SitterChartWeekdayFormat, TextCulture.ForDates)<small>@date.ToString(Strings.Care.SitterChartDateFormat, TextCulture.ForDates)</small></th>
                     }
-                    <th class="how" scope="col">How</th>
+                    <th class="how" scope="col">@Strings.Care.SitterChartHow</th>
                 </tr>
             </thead>
             <tbody>
@@ -543,11 +543,11 @@
                             {
                                 @if (subject.Visits.Contains(date))
                                 {
-                                    <td><span class="sheet-box-tick"></span><span class="visually-hidden">Check it</span></td>
+                                    <td><span class="sheet-box-tick"></span><span class="visually-hidden">@Strings.Care.SitterChartCheckIt</span></td>
                                 }
                                 else
                                 {
-                                    <td class="no"><span aria-hidden="true">·</span><span class="visually-hidden">No check needed</span></td>
+                                    <td class="no"><span aria-hidden="true">·</span><span class="visually-hidden">@Strings.Care.SitterChartNoCheck</span></td>
                                 }
                             }
                             <td class="how">@ChartHow(subject)</td>
@@ -557,7 +557,7 @@
             </tbody>
         </table>
         </div>
-        <p class="sheet-key">A box means check it that day, and tick it once you have, watered or not. A dot means there's no need to check it that day.</p>
+        <p class="sheet-key">@Strings.Care.SitterChartKey</p>
     </div>;
 
     private static string? ChartHow(SitterSubject subject) =>

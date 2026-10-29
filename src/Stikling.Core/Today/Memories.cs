@@ -1,4 +1,6 @@
+using Stikling.Core.Care;
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Today;
 
@@ -8,9 +10,9 @@ public sealed record Memory(Plant Plant, Photo Old, Photo Newest, int Months)
 {
     public string Heading => Months switch
     {
-        6 => "Six months ago today",
-        12 => "A year ago today",
-        _ => $"{Months / 12} years ago today"
+        6 => Strings.Care.MemoryHalfYear,
+        12 => Strings.Care.MemoryYear,
+        _ => CareText.F(Strings.Care.MemoryYears, Months / 12)
     };
 }
 

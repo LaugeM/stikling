@@ -5,27 +5,27 @@
 @inject SettingsService SettingsService
 @inject TimeProvider Time
 
-<PageTitle>Away and quiet time · Stikling</PageTitle>
+<PageTitle>@Strings.Care.AwayPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="settings?section=care">Settings</a>
+<a class="back-link" href="settings?section=care">@Strings.Care.BackToSettings</a>
 
 <div class="page-heading">
-    <h1>Away and quiet time</h1>
+    <h1>@Strings.Care.AwayTitle</h1>
     @* Takes over from the round add button on a wide screen *@
     <a class="btn btn-primary btn-sm icon-btn heading-add" href="away/new">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-        Add
+        @Strings.Common.Add
     </a>
 </div>
 
 <p class="text-body-secondary">
-    While you're away or taking a break, Today stops asking for anything, and the watering reminder doesn't learn from the gap.
+    @Strings.Care.AwayHint
 </p>
 
 @if (stretches is null)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Care.Loading</p>
 }
 else
 {
@@ -36,8 +36,8 @@ else
                     <svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7Z" /><path d="M15 3v4h4M10 12h6M10 16h6" /></svg>
                 </div>
                 <div class="item-text">
-                    <div class="item-name">Sheet for a plant-sitter</div>
-                    <div class="item-meta"><span>What to check, and when, for whoever looks after your plants</span></div>
+                    <div class="item-name">@Strings.Care.AwaySitterSheet</div>
+                    <div class="item-meta"><span>@Strings.Care.AwaySitterSheetMeta</span></div>
                 </div>
             </a>
         </li>
@@ -46,7 +46,7 @@ else
     @if (stretches.Count == 0)
     {
         <div class="empty-state">
-            <p>Nothing planned. Add a trip, and Today goes quiet while you're gone and makes a sheet for whoever looks after your plants.</p>
+            <p>@Strings.Care.AwayEmpty</p>
         </div>
     }
     else
@@ -67,16 +67,16 @@ else
                             }
                         </div>
                         <div class="item-text">
-                            <div class="item-name">@(stretch.Kind == AwayKind.Away ? "Away" : "Quiet time")</div>
+                            <div class="item-name">@(stretch.Kind == AwayKind.Away ? Strings.Care.AwayKindAway : Strings.Care.AwayKindQuiet)</div>
                             <div class="item-meta">
-                                <span>@stretch.From.ToString("d MMMM", CultureInfo.InvariantCulture) to @stretch.Until.ToString("d MMMM yyyy", CultureInfo.InvariantCulture)</span>
+                                <span>@string.Format(CultureInfo.CurrentCulture, Strings.Care.AwayRange, Stikling.Core.Away.SitterSheetText.Day(stretch.From), stretch.Until.ToString(Strings.Care.DayMonthYearLongFormat, Stikling.Core.Text.TextCulture.ForDates))</span>
                                 @if (stretch.IsOn(Today))
                                 {
-                                    <span>· on now</span>
+                                    <span>@Strings.Care.AwayOnNow</span>
                                 }
                                 else if (stretch.From > Today)
                                 {
-                                    <span>· coming up</span>
+                                    <span>@Strings.Care.AwayComingUp</span>
                                 }
                             </div>
                         </div>
@@ -87,8 +87,8 @@ else
     }
 
     <section class="settings-group mt-4">
-        <h2>After a break</h2>
-        <div class="theme-label" id="back-length-label">Look at these first</div>
+        <h2>@Strings.Care.AwayAfterBreak</h2>
+        <div class="theme-label" id="back-length-label">@Strings.Care.AwayLookFirst</div>
         <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="back-length-label">
             @foreach (var (length, label) in lengthOptions)
             {
@@ -99,22 +99,22 @@ else
             }
         </div>
         <p class="settings-hint">
-            On the day you're back, Today lists this many plants and cuttings to look at before anything else.
+            @Strings.Care.AwayAfterBreakHint
         </p>
     </section>
 
-    <a class="fab" href="away/new" aria-label="Add away or quiet time" title="Add away or quiet time">
+    <a class="fab" href="away/new" aria-label="@Strings.Care.AwayAddLabel" title="@Strings.Care.AwayAddLabel">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
     </a>
 }
 
 @code {
-    private static readonly (int Length, string Label)[] lengthOptions =
+    private static (int Length, string Label)[] lengthOptions =>
     [
         (3, "3"),
         (5, "5"),
         (10, "10"),
-        (0, "All")
+        (0, Strings.Care.AwayAll)
     ];
 
     private IReadOnlyList<AwayStretch>? stretches;

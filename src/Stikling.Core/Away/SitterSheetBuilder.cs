@@ -5,7 +5,9 @@ using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Rooms;
 using Stikling.Core.Timeline;
+using Stikling.Core.Text;
 using Stikling.Core.Today;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Away;
 
@@ -16,10 +18,10 @@ namespace Stikling.Core.Away;
 /// </summary>
 public static class SitterSheetBuilder
 {
-    public const string Title = "Looking after the plants";
-    public const string Elsewhere = "Elsewhere";
-    public const string EveryVisit = "Check it each time you visit";
-    public const string FineUntilBack = "Should be fine until you're back";
+    public static string Title => Strings.Care.SitterTitle;
+    public static string Elsewhere => Strings.Care.SitterElsewhere;
+    public static string EveryVisit => Strings.Care.SitterEveryVisit;
+    public static string FineUntilBack => Strings.Care.SitterFineUntilBack;
 
     /// <summary>
     /// The sheet for the Away stretch that is on, else the next one. With none, the sheet has no
@@ -141,28 +143,28 @@ public static class SitterSheetBuilder
         // How to water is only said when it differs from the way the sheet usually does it
         string? how = null;
         if (item.Form == WateringForm.Reservoir)
-            how = "Top up the reservoir";
+            how = Strings.Care.SitterTopUpReservoir;
         else if (item.Form == WateringForm.InWater)
-            how = "Top up the water";
+            how = Strings.Care.SitterTopUpWater;
         else if (item.IsPlant && DiffersFromUsual(item.WaterBy, sheet, ownWords))
             how = SitterSheetText.MethodName(item.WaterBy!.Value);
 
         string? meter = null;
         if (sheet.HasMeter && item.IsPlant && item.Form == WateringForm.TopWatered)
-            meter = $"Water only at {((Plant)item.Entity).WaterAt ?? Plant.DefaultWaterAt} or below on the meter.";
+            meter = CareText.F(Strings.Care.SitterMeterAt, ((Plant)item.Entity).WaterAt ?? Plant.DefaultWaterAt);
 
         var pace = item.IsPlant ? PaceOf(item.Guess) : null;
         string paceLine;
         if (item.Form == WateringForm.InWater)
-            paceLine = "Check the water every visit.";
+            paceLine = Strings.Care.SitterPaceInWater;
         else if (!item.IsPlant)
-            paceLine = "Check it every visit.";
+            paceLine = Strings.Care.SitterPaceEveryVisit;
         else if (pace is { } topUp && item.Form == WateringForm.Reservoir)
-            paceLine = $"Usually needs topping up about every {topUp.UsualDays} days. Check the level first, and leave it if there's still water in it.";
+            paceLine = CareText.F(Strings.Care.SitterPaceReservoir, topUp.UsualDays);
         else if (pace is { } known)
-            paceLine = $"Usually dry enough to need water about every {known.UsualDays} days. Check it first, and leave it if it's still damp.";
+            paceLine = CareText.F(Strings.Care.SitterPaceKnown, known.UsualDays);
         else
-            paceLine = "Not learned yet, so check it every visit.";
+            paceLine = Strings.Care.SitterPaceUnknown;
 
         var note = item.Entity switch
         {
@@ -253,29 +255,23 @@ public static class SitterSheetBuilder
         List<string> check;
         if (sheet.HasMeter)
         {
-            var where = string.IsNullOrWhiteSpace(sheet.MeterWhere) ? "" : ", " + sheet.MeterWhere.Trim().TrimEnd('.');
+            var where = string.IsNullOrWhiteSpace(sheet.MeterWhere) ? null : sheet.MeterWhere.Trim().TrimEnd('.');
             check =
             [
-                $"There's a moisture meter{where}. Push it into the soil about halfway down and read the number. "
-                    + "Water only if it reads at or below the number on the plant's card. "
-                    + "If it's higher, leave it: it's fine until your next visit.",
-                "No reading? Push a finger 2 to 3 cm into the soil, and water only if it's dry all the way down."
+                where is null ? Strings.Care.SitterMeter : CareText.F(Strings.Care.SitterMeterIn, where),
+                Strings.Care.SitterNoReading
             ];
         }
         else
         {
-            check =
-            [
-                "Push a finger 2 to 3 cm into the soil. Water only if it's dry all the way down. "
-                    + "If it's damp, or you're not sure, leave it. It's safe to wait until your next visit."
-            ];
+            check = [Strings.Care.SitterFinger];
         }
 
         var steps = new List<SitterStep>();
         if (!sheet.HideHowWatered)
         {
             steps.Add(ownWords is not null
-                ? new SitterStep("Usual way", ownWords)
+                ? new SitterStep(Strings.Care.SitterUsualWay, ownWords)
                 : new SitterStep(SitterSheetText.MethodName(sheet.DefaultMethod), SitterSheetText.MethodSteps(sheet.DefaultMethod)));
             steps.AddRange(differing.Select(m => new SitterStep(SitterSheetText.MethodName(m), SitterSheetText.MethodSteps(m))));
 
@@ -286,31 +282,31 @@ public static class SitterSheetBuilder
 
         return new SitterBox(
             check, steps,
-            !sheet.HideHowWatered && topsUp ? "Plants in water or on a reservoir only need topping up." : null);
+            !sheet.HideHowWatered && topsUp ? Strings.Care.SitterTopUpOnly : null);
     }
 
     private static string HeaderLine(AwaySpan? span, VisitPattern pattern, int plants, IReadOnlyList<Propagation> cuttings)
     {
         var parts = new List<string>();
         if (span is not null)
-            parts.Add($"{SitterSheetText.Day(span.From)} to {SitterSheetText.Day(span.Until)}");
+            parts.Add(CareText.F(Strings.Care.SitterDates, SitterSheetText.Day(span.From), SitterSheetText.Day(span.Until)));
 
         if (plants > 0)
-            parts.Add(Count(plants, "plant", "plants"));
+            parts.Add(Plural.Of(plants, Strings.Care.SitterPlants_One, Strings.Care.SitterPlants_Other));
         if (cuttings.Count > 0)
         {
             parts.Add(cuttings.All(c => c.Type == PropagationType.Cutting)
-                ? Count(cuttings.Count, "cutting", "cuttings")
-                : Count(cuttings.Count, "propagation", "propagations"));
+                ? Plural.Of(cuttings.Count, Strings.Care.SitterCuttings_One, Strings.Care.SitterCuttings_Other)
+                : Plural.Of(cuttings.Count, Strings.Care.SitterPropagations_One, Strings.Care.SitterPropagations_Other));
         }
 
         var visit = pattern switch
         {
-            VisitPattern.EveryDay => "a visit every day",
-            VisitPattern.EveryTwoDays => "a visit every 2 days",
-            VisitPattern.EveryThreeDays => "a visit every 3 days",
-            VisitPattern.TwiceAWeek => "a visit twice a week",
-            VisitPattern.Weekly => "a visit once a week",
+            VisitPattern.EveryDay => Strings.Care.SitterVisitEveryDay,
+            VisitPattern.EveryTwoDays => Strings.Care.SitterVisitEveryTwo,
+            VisitPattern.EveryThreeDays => Strings.Care.SitterVisitEveryThree,
+            VisitPattern.TwiceAWeek => Strings.Care.SitterVisitTwiceAWeek,
+            VisitPattern.Weekly => Strings.Care.SitterVisitWeekly,
             _ => null
         };
         if (visit is not null)
@@ -318,7 +314,4 @@ public static class SitterSheetBuilder
 
         return string.Join(" · ", parts);
     }
-
-    private static string Count(int count, string singular, string plural) =>
-        count == 1 ? $"1 {singular}" : string.Create(CultureInfo.InvariantCulture, $"{count} {plural}");
 }

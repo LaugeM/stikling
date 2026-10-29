@@ -1,6 +1,9 @@
+using System.Globalization;
 using Stikling.Core.Care;
 using Stikling.Core.Models;
+using Stikling.Core.Text;
 using Stikling.Core.Today;
+using Strings = Stikling.Web.Resources;
 
 namespace Stikling.Web.Services;
 
@@ -10,26 +13,26 @@ namespace Stikling.Web.Services;
 /// </summary>
 public static class WateringText
 {
-    private const string Longer = "Longer now the days are shorter.";
-
     /// <summary>The line on the plant's page.</summary>
     public static string Summary(WateringGuess guess)
     {
         if (guess.Mode == WateringMode.Learning)
         {
-            return $"Learning how often it needs water: {Labels.Count(guess.WateringsNeeded, "more watering")} before it can say.";
+            return F(Strings.Care.WateringLearning,
+                Plural.Of(guess.WateringsNeeded, Strings.Care.WateringsMore_One, Strings.Care.WateringsMore_Other));
         }
 
         var text = (guess.Form, guess.Mode) switch
         {
             (WateringForm.TopWatered, WateringMode.Meter) =>
-                $"Usually dry about {Labels.Count(guess.UsualDays ?? 1, "day")} after watering, learned from {Labels.Count(guess.LearnedFrom, "watering")}.",
+                F(Strings.Care.WateringSummaryMeter, Days(guess.UsualDays ?? 1), Waterings(guess.LearnedFrom)),
             (WateringForm.TopWatered, _) =>
-                $"Usually watered about {Every(guess.UsualDays ?? 1)}, learned from {Labels.Count(guess.LearnedFrom, "watering")}.",
+                F(Strings.Care.WateringSummaryTop, Every(guess.UsualDays ?? 1), Waterings(guess.LearnedFrom)),
             (WateringForm.Reservoir, _) =>
-                $"The reservoir usually lasts about {Labels.Count(guess.UsualDays ?? 1, "day")}, learned from {Labels.Count(guess.LearnedFrom, "refill")}.",
+                F(Strings.Care.WateringSummaryReservoir, Days(guess.UsualDays ?? 1),
+                    Plural.Of(guess.LearnedFrom, Strings.Care.WateringRefills_One, Strings.Care.WateringRefills_Other)),
             _ =>
-                $"The water is usually topped up about {Every(guess.UsualDays ?? 1)}, learned from {guess.LearnedFrom}."
+                F(Strings.Care.WateringSummaryInWater, Every(guess.UsualDays ?? 1), guess.LearnedFrom)
         };
         return Season(guess) is { } season ? $"{text} {season}" : text;
     }
@@ -42,11 +45,11 @@ public static class WateringText
         {
             (WateringForm.TopWatered, WateringMode.Meter) => MeterRow(due, today),
             (WateringForm.TopWatered, _) =>
-                $"Usually watered about {Every(guess.UsualDays ?? 1)}, it's been {Labels.Count(guess.DaysSince ?? 0, "day")}",
+                F(Strings.Care.WateringRowTop, Every(guess.UsualDays ?? 1), Days(guess.DaysSince ?? 0)),
             (WateringForm.Reservoir, _) =>
-                $"The reservoir usually lasts about {Labels.Count(guess.UsualDays ?? 1, "day")}, it's been {Labels.Count(guess.DaysSince ?? 0, "day")}",
+                F(Strings.Care.WateringRowReservoir, Days(guess.UsualDays ?? 1), Days(guess.DaysSince ?? 0)),
             _ =>
-                $"The water is usually topped up about {Every(guess.UsualDays ?? 1)}, it's been {Labels.Count(guess.DaysSince ?? 0, "day")}"
+                F(Strings.Care.WateringRowInWater, Every(guess.UsualDays ?? 1), Days(guess.DaysSince ?? 0))
         };
         return Season(guess) is { } season ? $"{text} · {season}" : text;
     }
@@ -55,37 +58,50 @@ public static class WateringText
     {
         var guess = due.Guess;
         var days = (guess.CheckOn ?? today).DayNumber - today.DayNumber;
-        var line = days <= 0
-            ? "Probably dry by now, check with the meter"
-            : days == 1 ? "Probably dry tomorrow" : $"Probably dry in {days} days";
         if (guess.LatestReading is { } reading)
-            line += $", last reading {reading.Value}, {Labels.DaysAgo(reading.DaysAgo)}";
-        return line;
+        {
+            var ago = Labels.DaysAgo(reading.DaysAgo);
+            return days <= 0 ? F(Strings.Care.WateringDryNowReading, reading.Value, ago)
+                : days == 1 ? F(Strings.Care.WateringDryTomorrowReading, reading.Value, ago)
+                : F(Strings.Care.WateringDryInReading, days, reading.Value, ago);
+        }
+
+        return days <= 0 ? Strings.Care.WateringDryNow
+            : days == 1 ? Strings.Care.WateringDryTomorrow
+            : F(Strings.Care.WateringDryIn, days);
     }
 
     /// <summary>When the plant last had water, e.g. "watered 3 days ago" or "refilled 3 days ago".</summary>
     public static string LastWater(LastCare last, WateringForm form)
     {
-        var verb = last.Kind == CareKind.ToppedUp
-            ? form == WateringForm.Reservoir ? "refilled" : "topped up"
-            : "watered";
-        return $"{verb} {Labels.DaysAgo(last.DaysAgo)}";
+        var format = last.Kind == CareKind.ToppedUp
+            ? form == WateringForm.Reservoir ? Strings.Care.WateringRefilledAgo : Strings.Care.WateringToppedUpAgo
+            : Strings.Care.WateringWateredAgo;
+        return F(format, Labels.DaysAgo(last.DaysAgo));
     }
 
-    private static string Every(int days) => days == 1 ? "every day" : $"every {days} days";
+    private static string F(string format, params object[] args) => string.Format(CultureInfo.CurrentCulture, format, args);
+
+    private static string Days(int days) => Plural.Of(days, Strings.Care.WateringDays_One, Strings.Care.WateringDays_Other);
+
+    private static string Waterings(int count) =>
+        Plural.Of(count, Strings.Care.WateringWaterings_One, Strings.Care.WateringWaterings_Other);
+
+    private static string Every(int days) =>
+        days == 1 ? Strings.Care.WateringEveryDay : F(Strings.Care.WateringEveryDays, days);
 
     private static string? Season(WateringGuess guess) =>
-        guess is { SeasonAdjusted: true, DaysShortening: true } ? Longer : null;
+        guess is { SeasonAdjusted: true, DaysShortening: true } ? Strings.Care.WateringLonger : null;
 
     /// <summary>Said on the tick, and what is logged: Watered, or Refilled / Topped up for the others.</summary>
     public static string DoneLabel(WateringForm form) => form switch
     {
-        WateringForm.TopWatered => "Watered",
-        WateringForm.Reservoir => "Refilled",
-        _ => "Topped up"
+        WateringForm.TopWatered => Strings.Care.WateringDoneWatered,
+        WateringForm.Reservoir => Strings.Care.WateringDoneRefilled,
+        _ => Strings.Care.WateringDoneToppedUp
     };
 
     /// <summary>The second button: the plant is still wet, or the water isn't due yet.</summary>
     public static string NotYetLabel(WateringForm form) =>
-        form == WateringForm.TopWatered ? "Still wet" : "Not yet";
+        form == WateringForm.TopWatered ? Strings.Care.WateringStillWet : Strings.Care.WateringNotYet;
 }

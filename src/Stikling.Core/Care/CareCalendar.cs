@@ -1,4 +1,6 @@
 using Stikling.Core.Models;
+using Stikling.Core.Text;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Care;
 
@@ -39,9 +41,10 @@ public sealed class CareCalendar
 
     /// <summary>The sentence read out for the grid.</summary>
     public string Summary =>
-        $"Last 12 months: watered {Times(Waterings)}, fed {Times(Feeds)}, {Readings} meter {(Readings == 1 ? "reading" : "readings")}";
+        CareText.F(Strings.Care.CalendarSummary, Times(Waterings), Times(Feeds),
+            Plural.Of(Readings, Strings.Care.CalendarReadings_One, Strings.Care.CalendarReadings_Other));
 
-    private static string Times(int n) => n == 1 ? "1 time" : $"{n} times";
+    private static string Times(int n) => Plural.Of(n, Strings.Care.CalendarTimes_One, Strings.Care.CalendarTimes_Other);
 
     /// <summary>The mark one entry gives its day, or None for the kinds the calendar doesn't show.</summary>
     public static CareDayMark MarkFor(CareLog log) => log.Kind switch
