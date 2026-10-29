@@ -37,8 +37,8 @@ public class AppLanguageTests
     public void A_language_still_being_translated_is_only_used_when_asked_for()
     {
         var progress = AppLanguages.All.Where(l => !l.Ready).Select(l => l.Code).ToList();
-        Assert.Contains("da", progress);
 
+        // Empty once every language is ready, until a new one is added
         foreach (var code in progress)
         {
             Assert.Equal("en", AppLanguages.Resolve(code, [code + "-XX"], includeInProgress: false));
@@ -51,7 +51,8 @@ public class AppLanguageTests
     public void A_ready_language_is_offered_to_everyone()
     {
         Assert.Contains(AppLanguages.Offered(includeInProgress: false), l => l.Code == "en");
-        Assert.Equal("en", Assert.Single(AppLanguages.Offered(includeInProgress: false)).Code);
+        Assert.Contains(AppLanguages.Offered(includeInProgress: false), l => l.Code == "da");
+        Assert.All(AppLanguages.Offered(includeInProgress: false), l => Assert.True(l.Ready));
     }
 
     [Fact]

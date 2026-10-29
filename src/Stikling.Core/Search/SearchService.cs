@@ -1,3 +1,4 @@
+using System.Globalization;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Fields;
@@ -43,8 +44,9 @@ public sealed class SearchService(
     TimeProvider time)
 {
     /// <param name="label">Names the enums the way the app shows them (care kinds and pests).</param>
+    /// <param name="englishLabel">Names the same enums in English, so a history line saved before lines had a key can be read back and shown in the app's language.</param>
     /// <param name="everyday">The everyday name for a genus, species and cultivar, like "Snake plant". Null for none.</param>
-    public async Task<SearchIndex> LoadAsync(Func<Enum, string> label, Func<string?, string?, string?, string?>? everyday = null)
+    public async Task<SearchIndex> LoadAsync(Func<Enum, string> label, Func<Enum, string> englishLabel, Func<string?, string?, string?, string?>? everyday = null)
     {
         var allPlants = (await plants.GetAllAsync()).Where(p => !p.IsDeleted).ToList();
         var allPropagations = (await propagations.GetAllAsync()).Where(p => !p.IsDeleted).ToList();
@@ -65,7 +67,7 @@ public sealed class SearchService(
             [SearchKind.Tag] = [.. PlantTags.InUse(allPlants).Select(TagDoc)]
         };
 
-        return new SearchIndex(docs, await NotesAsync(allPlants, allPropagations, label));
+        return new SearchIndex(docs, await NotesAsync(allPlants, allPropagations, label, englishLabel));
     }
 
     private static string Names(params string?[] parts) =>
@@ -194,7 +196,7 @@ public sealed class SearchService(
     // Notes
 
     private async Task<List<SearchIndex.NoteDoc>> NotesAsync(
-        List<Plant> allPlants, List<Propagation> allPropagations, Func<Enum, string> label)
+        List<Plant> allPlants, List<Propagation> allPropagations, Func<Enum, string> label, Func<Enum, string> englishLabel)
     {
         var plantsById = allPlants.ToDictionary(p => p.Id);
         var propagationsById = allPropagations.ToDictionary(p => p.Id);
@@ -218,13 +220,16 @@ public sealed class SearchService(
 
         var plantCareLogs = (await careLogs.GetAllAsync()).Where(l => !l.IsDeleted).ToList();
 
+        // History lines are searched as the reader sees them, in the language of the app
+        string Shown(TimelineEntry entry) => HistoryText.Show(entry, label, englishLabel, CultureInfo.CurrentUICulture);
+
         // Repotting and the like write a history line with the care note in it, which would be
         // listed next to the care log itself
         bool RepeatsCareNote(TimelineEntry entry)
         {
             if (entry.Kind != TimelineKind.Change || entry.SubjectType != SubjectType.Plant)
                 return false;
-            var text = SearchText.Fold(SearchIndex.Collapse(entry.Text ?? ""));
+            var text = SearchText.Fold(SearchIndex.Collapse(Shown(entry)));
             var day = time.LocalDay(entry.OccurredAt);
             return plantCareLogs.Any(l => l.PlantId == entry.SubjectId && l.OccurredOn == day
                 && SearchText.Fold(SearchIndex.Collapse(l.Notes ?? "")) is { Length: > 0 } notes && text.Contains(notes, StringComparison.Ordinal));
@@ -243,7 +248,7 @@ public sealed class SearchService(
 
             var route = owner.Type == SubjectType.Plant ? "plants" : "propagations";
             Add(entry.Id, $"{route}/{entry.SubjectId}?entry={entry.Id}", NoteSource.Timeline, entry.OccurredAt, owner.Type,
-                entry.SubjectId, owner.Name, entry.Kind == TimelineKind.Note ? Strings.Shared.SearchLabelNote : Strings.Shared.SearchLabelUpdate, entry.Text);
+                entry.SubjectId, owner.Name, entry.Kind == TimelineKind.Note ? Strings.Shared.SearchLabelNote : Strings.Shared.SearchLabelUpdate, Shown(entry));
         }
 
         var ownKinds = CareLabels.Lookup(await ownCareKinds.GetAllAsync());

@@ -46,8 +46,9 @@ public sealed class SearchIndex
     }
 
     /// <summary>
-    /// Every word has to be found, ignoring case and accents. Notes are only searched when every word
-    /// has at least two letters, since one letter would find nearly every note.
+    /// Every word has to be found, ignoring case and accents. Notes leave out words of one letter, since one
+    /// letter would find nearly every note, so "went to a friend" or the Danish "gik i hvile" still finds a note.
+    /// A search of only one-letter words doesn't look in notes.
     /// </summary>
     public SearchResults Find(string? query)
     {
@@ -56,11 +57,12 @@ public sealed class SearchIndex
             return SearchResults.Empty;
 
         var notesOk = words.All(w => w.Length >= 2);
+        var noteWords = words.Where(w => w.Length >= 2).ToList();
         var groups = new Dictionary<SearchKind, IReadOnlyList<SearchItem>>();
         foreach (var (kind, list) in docs)
             groups[kind] = Order(list.Select(d => Match(d, words, notesOk)).OfType<Found>(), words[0]);
 
-        groups[SearchKind.Note] = notesOk ? FindNotes(words) : [];
+        groups[SearchKind.Note] = noteWords.Count > 0 ? FindNotes(noteWords) : [];
         return new SearchResults(groups);
     }
 

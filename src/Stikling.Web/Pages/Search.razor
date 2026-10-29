@@ -152,7 +152,7 @@
     private async Task LoadAsync()
     {
         everyday = await Names.GetEverydayNamesAsync();
-        index = await SearchService.LoadAsync(e => Labels.For(e), (genus, species, cultivar) => everyday?.For(genus, species, cultivar));
+        index = await SearchService.LoadAsync(e => Labels.For(e), Labels.English, (genus, species, cultivar) => everyday?.For(genus, species, cultivar));
 
         // The tiles' photos, which the results don't carry
         var photos = new Dictionary<Guid, Guid?>();

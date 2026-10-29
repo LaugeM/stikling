@@ -1,34 +1,49 @@
 @page "/deletion"
-@* How to delete what Stikling keeps. The text is in wwwroot/pages/deletion.html, which the live site also
-   serves as plain HTML at /deletion for Meta's check (see prepare-pages.py). *@
-@inject HttpClient Http
+@using System.Globalization
+@using System.Net
+@* How to delete what Stikling keeps. The live site also serves it as plain HTML at /deletion for Meta's check
+   (tools/static-pages/render.cs and prepare-pages.py), so it renders from the text in Supplies.resx without
+   calling JavaScript. The links come from the text, not from anything a person typed. *@
 
 <PageTitle>@Strings.Supplies.DeletionPageTitle</PageTitle>
 
 <a class="back-link" href="privacy">@Strings.Supplies.DeletionBack</a>
 
-@if (text is not null)
-{
-    @((MarkupString)text)
-}
-else if (failed)
-{
-    <p>@Strings.Supplies.DeletionFailed</p>
-}
+<h1>@Strings.Supplies.DeletionHeading</h1>
+
+<section class="deletion-section">
+    <h2>@Strings.Supplies.DeletionWithAccountTitle</h2>
+    <p>
+        @Strings.Supplies.DeletionWithAccountIntro
+    </p>
+    <ol>
+        <li>@Markup(Strings.Supplies.DeletionStep1, "<a href=\"https://stikling.app\">stikling.app</a>")</li>
+        <li>@Strings.Supplies.DeletionStep2</li>
+        <li>@Markup(Strings.Supplies.DeletionStep3, $"<em>{WebUtility.HtmlEncode(Strings.Supplies.DeletionDeleteAccountButton)}</em>")</li>
+    </ol>
+    <p>
+        @Strings.Supplies.DeletionErased
+    </p>
+    <p>
+        @Markup(Strings.Supplies.DeletionCantSignIn, "<a href=\"mailto:support@stikling.app\">support@stikling.app</a>")
+    </p>
+    <p>
+        @Strings.Supplies.DeletionOtherApps
+    </p>
+</section>
+
+<section class="deletion-section">
+    <h2>@Strings.Supplies.DeletionWithoutAccountTitle</h2>
+    <p>
+        @Strings.Supplies.DeletionWithoutAccountText
+    </p>
+</section>
+
+<p class="deletion-more">
+    @Markup(Strings.Supplies.DeletionMore, $"<a href=\"privacy\">{WebUtility.HtmlEncode(Strings.Supplies.DeletionPrivacyPage)}</a>")
+</p>
 
 @code {
-    private string? text;
-    private bool failed;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            text = await Http.GetStringAsync("pages/deletion.html");
-        }
-        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
-        {
-            failed = true;
-        }
-    }
+    private static MarkupString Markup(string text, string inner) =>
+        new(string.Format(CultureInfo.CurrentCulture, text, inner));
 }

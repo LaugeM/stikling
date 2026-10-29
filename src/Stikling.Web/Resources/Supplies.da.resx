@@ -318,8 +318,47 @@
   <data name="DeletionBack" xml:space="preserve">
     <value>Privatliv</value>
   </data>
-  <data name="DeletionFailed" xml:space="preserve">
-    <value>Kunne ikke hente siden. Tjek, at du er online, og prøv igen.</value>
+  <data name="DeletionHeading" xml:space="preserve">
+    <value>Sådan sletter du dine data</value>
+  </data>
+  <data name="DeletionWithAccountTitle" xml:space="preserve">
+    <value>Med en konto</value>
+  </data>
+  <data name="DeletionWithAccountIntro" xml:space="preserve">
+    <value>Det virker på samme måde, uanset om du loggede ind med Google, Facebook, Discord eller din mail.</value>
+  </data>
+  <data name="DeletionStep1" xml:space="preserve">
+    <value>Åbn Stikling på {0}, og tryk på tandhjulet øverst.</value>
+  </data>
+  <data name="DeletionStep2" xml:space="preserve">
+    <value>Tryk på din konto øverst i Indstillinger, rækken med din mail.</value>
+  </data>
+  <data name="DeletionStep3" xml:space="preserve">
+    <value>Tryk på {0} nederst, og bekræft.</value>
+  </data>
+  <data name="DeletionDeleteAccountButton" xml:space="preserve">
+    <value>Slet konto</value>
+  </data>
+  <data name="DeletionErased" xml:space="preserve">
+    <value>Dine planter, billeder og indstillinger bliver slettet fra Stikling-serveren med det samme, og Clerk sletter dit login. Databasens automatiske sikkerhedskopier har stadig en kopi i op til 7 dage, og derefter er den væk. Du vælger selv, om den enhed, du gør det på, beholder det, den har.</value>
+  </data>
+  <data name="DeletionCantSignIn" xml:space="preserve">
+    <value>Kan du ikke logge ind mere, så skriv til {0} fra den mailadresse, som kontoen har, og bed om at få den slettet.</value>
+  </data>
+  <data name="DeletionOtherApps" xml:space="preserve">
+    <value>Stikling står også på listen over de apps, din Facebook-, Google- eller Discord-konto har logget ind i. Du kan fjerne den fra listen i selve kontoens indstillinger.</value>
+  </data>
+  <data name="DeletionWithoutAccountTitle" xml:space="preserve">
+    <value>Uden en konto</value>
+  </data>
+  <data name="DeletionWithoutAccountText" xml:space="preserve">
+    <value>Alt ligger på din enhed, og intet ligger på serveren. Hvis du rydder webstedets data for stikling.app i din browser eller sletter den installerede app, forsvinder det hele.</value>
+  </data>
+  <data name="DeletionMore" xml:space="preserve">
+    <value>{0} fortæller, hvad der gemmes, og hvor.</value>
+  </data>
+  <data name="DeletionPrivacyPage" xml:space="preserve">
+    <value>Siden om privatliv</value>
   </data>
   <data name="DosePlaceholder" xml:space="preserve">
     <value>Dosis</value>

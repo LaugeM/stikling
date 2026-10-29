@@ -2430,8 +2430,8 @@ a.tag-label:hover {
     font-weight: 400;
 }
 
-/* The deletion page. Its text is plain HTML in wwwroot/pages, shown by the app and, on the live site,
-   served at /deletion before the app starts, so these styles can't be scoped to the page */
+/* The deletion page. The app shows it and, on the live site, it is also served as plain HTML at /deletion
+   before the app starts (see tools/static-pages/render.cs), so these styles can't be scoped to the page */
 .deletion-section {
     margin-top: 1.5rem;
 }
@@ -2455,7 +2455,7 @@ a.tag-label:hover {
     color: var(--pa-muted);
 }
 
-/* A page from wwwroot/pages as the live site serves it, before the app has started */
+/* A page the live site serves as plain HTML (help, privacy, deletion), before the app has started */
 .static-page {
     max-width: 48rem;
     margin: 0 auto;

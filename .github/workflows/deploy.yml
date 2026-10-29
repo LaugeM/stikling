@@ -32,7 +32,7 @@ jobs:
             -p:InformationalVersion="$(date -u +%Y.%m.%d)" \
             -p:SourceRevisionId="${{ github.sha }}"
 
-      # Help and Privacy as plain HTML, for search engines and AI tools that don't run the app
+      # The front page, Help, Privacy and Deletion as plain HTML in every ready language, for search engines and AI tools that don't run the app
       - name: Render the static pages
         run: dotnet run tools/static-pages/render.cs -- release/static-pages
 
