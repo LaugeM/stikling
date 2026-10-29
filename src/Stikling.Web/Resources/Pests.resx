@@ -1,0 +1,1172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PestsPageTitle" xml:space="preserve">
+    <value>Pests and problems · Stikling</value>
+    <comment>Title of the browser tab on the Pests page.</comment>
+  </data>
+  <data name="PestsTitle" xml:space="preserve">
+    <value>Pests and problems</value>
+    <comment>Heading of the Pests page.</comment>
+  </data>
+  <data name="OpenCase_One" xml:space="preserve">
+    <value>{0} open case</value>
+    <comment>Count next to the heading on the Pests page. A case is one pest outbreak being followed.</comment>
+  </data>
+  <data name="OpenCase_Other" xml:space="preserve">
+    <value>{0} open cases</value>
+  </data>
+  <data name="OpenPestCase" xml:space="preserve">
+    <value>Open a pest case</value>
+    <comment>Button, and the name of the round add button, that starts a new pest case.</comment>
+  </data>
+  <data name="PestsEmpty" xml:space="preserve">
+    <value>Nothing wrong right now. When you find pests, open a case for the plants they're on. For anything else, like yellow leaves or rot, use Something's wrong on the plant's page.</value>
+    <comment>Empty state of the Pests page. 'Something's wrong' is the name of a button on the plant page.</comment>
+  </data>
+  <data name="OpenACase" xml:space="preserve">
+    <value>Open a case</value>
+    <comment>Button in the empty state of the Pests page.</comment>
+  </data>
+  <data name="PestsDueNow" xml:space="preserve">
+    <value>Due now</value>
+    <comment>Heading of the pest cases that are due, followed by a count.</comment>
+  </data>
+  <data name="PestsOpen" xml:space="preserve">
+    <value>Open</value>
+    <comment>Heading of the pest cases that are open and not due, followed by a count.</comment>
+  </data>
+  <data name="PestsProblems" xml:space="preserve">
+    <value>Problems</value>
+    <comment>Heading of the open problems on the Pests page, followed by a count.</comment>
+  </data>
+  <data name="PestsResolved" xml:space="preserve">
+    <value>Resolved</value>
+    <comment>Heading of the resolved pest cases, followed by a count.</comment>
+  </data>
+  <data name="PestsCleanDays" xml:space="preserve">
+    <value>clean {0} of {1} days</value>
+    <comment>Part of a pest case card. {0} is the days without pests so far, {1} the days needed to count as resolved.</comment>
+  </data>
+  <data name="PestsFoundDue" xml:space="preserve">
+    <value>found {0}</value>
+    <comment>Part of a pest case card, after when the next treatment is due. {0} is a date.</comment>
+  </data>
+  <data name="PestsPlanDoneFound" xml:space="preserve">
+    <value>Plan done · found {0}</value>
+    <comment>Part of a pest case card whose treatment plan is finished. {0} is a date.</comment>
+  </data>
+  <data name="PestsResolvedOn" xml:space="preserve">
+    <value>Resolved {0}</value>
+    <comment>Part of a resolved pest case card. {0} is a date.</comment>
+  </data>
+  <data name="PestsFound" xml:space="preserve">
+    <value>Found {0}</value>
+    <comment>Part of a pest case card. {0} is a date.</comment>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+    <comment>Shown while a page loads its data.</comment>
+  </data>
+  <data name="FloweringPageTitle" xml:space="preserve">
+    <value>Flowering · Stikling</value>
+    <comment>Title of the browser tab on the Flowering page.</comment>
+  </data>
+  <data name="FloweringTitle" xml:space="preserve">
+    <value>Flowering</value>
+    <comment>Heading of the Flowering page.</comment>
+  </data>
+  <data name="FloweringBackToPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Link back to the Plants page, at the top of the Flowering page.</comment>
+  </data>
+  <data name="FloweringEmptyTitle" xml:space="preserve">
+    <value>Nothing has flowered yet</value>
+    <comment>Empty state of the Flowering page.</comment>
+  </data>
+  <data name="FloweringEmptyBody" xml:space="preserve">
+    <value>Mark a plant as flowering from its page, under More. You can add past flowerings there too, so this calendar has something to go on.</value>
+    <comment>Empty state of the Flowering page. More is the name of a menu on the plant page.</comment>
+  </data>
+  <data name="FloweringHelpLink" xml:space="preserve">
+    <value>More about flowering in Help</value>
+    <comment>Link to the Help page.</comment>
+  </data>
+  <data name="FloweringInFlowerNow" xml:space="preserve">
+    <value>In flower now</value>
+    <comment>Heading of the plants in flower or in bud.</comment>
+  </data>
+  <data name="FloweringSince" xml:space="preserve">
+    <value>since {0}</value>
+    <comment>Next to a plant in flower. {0} is a date.</comment>
+  </data>
+  <data name="FloweringUsuallyIn" xml:space="preserve">
+    <value>Usually in flower in {0}</value>
+    <comment>Heading of the plants that usually flower next month. {0} is a month name.</comment>
+  </data>
+  <data name="FloweringThroughYear" xml:space="preserve">
+    <value>Through the year</value>
+    <comment>Heading of the calendar with one box per month.</comment>
+  </data>
+  <data name="FloweringNothingYet" xml:space="preserve">
+    <value>Nothing yet</value>
+    <comment>Shown in a month of the calendar with no flowerings.</comment>
+  </data>
+  <data name="TrapChartCaption" xml:space="preserve">
+    <value>Caught per week, worked out from each count.</value>
+    <comment>Caption under the chart of sticky trap counts.</comment>
+  </data>
+  <data name="TrapChartDescription" xml:space="preserve">
+    <value>Caught per week: {0}</value>
+    <comment>Read out by a screen reader for the trap chart. {0} is a list of the points.</comment>
+  </data>
+  <data name="TrapChartPoint" xml:space="preserve">
+    <value>{0} by {1}</value>
+    <comment>One point in the trap chart read out by a screen reader. {0} is the number caught per week, {1} a date.</comment>
+  </data>
+  <data name="TrapCountOnTrap" xml:space="preserve">
+    <value>On the trap</value>
+    <comment>Label of the field for how many insects are on the sticky trap.</comment>
+  </data>
+  <data name="TrapCountPlaceholder" xml:space="preserve">
+    <value>e.g. 12</value>
+    <comment>Placeholder in the trap count field.</comment>
+  </data>
+  <data name="TrapCountWhen" xml:space="preserve">
+    <value>When</value>
+    <comment>Label of the date field.</comment>
+  </data>
+  <data name="TrapCountHint" xml:space="preserve">
+    <value>Count everything on it, not only the new ones. The app works out what's new.</value>
+    <comment>Hint under the trap count field.</comment>
+  </data>
+  <data name="TrapCountNewTrap" xml:space="preserve">
+    <value>Put up a new trap</value>
+    <comment>Checkbox when nothing was counted.</comment>
+  </data>
+  <data name="TrapCountNewTrapAfter" xml:space="preserve">
+    <value>Put up a new trap after counting</value>
+    <comment>Checkbox when a count was filled in.</comment>
+  </data>
+  <data name="TrapCountNotes" xml:space="preserve">
+    <value>Notes</value>
+    <comment>Label of the notes field.</comment>
+  </data>
+  <data name="TrapCountNotesPlaceholder" xml:space="preserve">
+    <value>e.g. Yellow trap by the window</value>
+    <comment>Placeholder in the notes field.</comment>
+  </data>
+  <data name="TrapCountLogNew" xml:space="preserve">
+    <value>Log new trap</value>
+    <comment>Button when only a new trap is logged.</comment>
+  </data>
+  <data name="TrapCountLogCount" xml:space="preserve">
+    <value>Log count</value>
+    <comment>Button that saves the trap count.</comment>
+  </data>
+  <data name="TrapCountFailed" xml:space="preserve">
+    <value>Couldn't log that: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="CaseEditTitle" xml:space="preserve">
+    <value>Edit case</value>
+    <comment>Heading and tab title of the page for changing a pest case.</comment>
+  </data>
+  <data name="CaseNotFound" xml:space="preserve">
+    <value>That case doesn't exist.</value>
+    <comment>Shown when the link to a pest case points at one that is gone.</comment>
+  </data>
+  <data name="CaseEditWhatFound" xml:space="preserve">
+    <value>What you found</value>
+    <comment>Heading of the first group of fields on the pest case form.</comment>
+  </data>
+  <data name="CaseEditPest" xml:space="preserve">
+    <value>Pest</value>
+    <comment>Label of the field for the kind of pest.</comment>
+  </data>
+  <data name="CaseEditFoundOn" xml:space="preserve">
+    <value>Found on</value>
+    <comment>Label of the date field on the pest case form.</comment>
+  </data>
+  <data name="CaseEditHowItStands" xml:space="preserve">
+    <value>How it stands</value>
+    <comment>Label of the field for the status of a pest case.</comment>
+  </data>
+  <data name="CaseEditStatusHint" xml:space="preserve">
+    <value>Watching means the treatments have stopped but you are still checking. A resolved case stops showing up.</value>
+    <comment>Hint under the status field. Watching and Resolved are statuses of a case.</comment>
+  </data>
+  <data name="CaseEditResolvedOn" xml:space="preserve">
+    <value>Resolved on</value>
+    <comment>Label of the date field shown when the case is resolved.</comment>
+  </data>
+  <data name="CaseEditWhatCovers" xml:space="preserve">
+    <value>What it covers</value>
+    <comment>Heading of the group of fields for which plants a pest case is about.</comment>
+  </data>
+  <data name="CaseEditCoversLabel" xml:space="preserve">
+    <value>What the case covers</value>
+    <comment>Name of the choice between picked plants, a room and all plants, read out by a screen reader.</comment>
+  </data>
+  <data name="CaseEditRoom" xml:space="preserve">
+    <value>Room</value>
+    <comment>Label of the room picker on the pest case form.</comment>
+  </data>
+  <data name="CaseEditEverywhere" xml:space="preserve">
+    <value>Every plant in the collection, including ones added while the case is open.</value>
+    <comment>Shown when the case covers all plants.</comment>
+  </data>
+  <data name="CaseEditTreatment" xml:space="preserve">
+    <value>Treatment</value>
+    <comment>Heading of the group of fields for how a pest case is treated.</comment>
+  </data>
+  <data name="CaseEditPlan" xml:space="preserve">
+    <value>Treatment plan</value>
+    <comment>Label of the choice of treatment plan.</comment>
+  </data>
+  <data name="CaseEditPlans" xml:space="preserve">
+    <value>Treatment plans</value>
+    <comment>Name of the list of treatment plans to pick from, read out by a screen reader.</comment>
+  </data>
+  <data name="CaseEditNoPlan" xml:space="preserve">
+    <value>No plan</value>
+    <comment>Button that picks no treatment plan.</comment>
+  </data>
+  <data name="CaseEditPlanStarts" xml:space="preserve">
+    <value>Starts on the day you found it.</value>
+    <comment>Hint under the treatment plans when one is picked.</comment>
+  </data>
+  <data name="CaseEditPlanStartsWithout" xml:space="preserve">
+    <value>Starts on the day you found it. Without one, the case is treated at the interval below.</value>
+    <comment>Hint under the treatment plans when no plan is picked. 'One' is a plan.</comment>
+  </data>
+  <data name="CaseEditTreatEvery" xml:space="preserve">
+    <value>Treat every</value>
+    <comment>Label of the field for the days between treatments. A unit follows it.</comment>
+  </data>
+  <data name="CaseEditDays" xml:space="preserve">
+    <value>days</value>
+    <comment>Unit after the number of days between treatments.</comment>
+  </data>
+  <data name="CaseEditUsedAfterPlan" xml:space="preserve">
+    <value>Used once the plan is done.</value>
+    <comment>Hint under the interval field when a plan is picked.</comment>
+  </data>
+  <data name="CaseEditFollowing" xml:space="preserve">
+    <value>Following {0}. The interval is used if you stop the plan.</value>
+    <comment>Hint under the interval field. {0} is the name of the treatment plan.</comment>
+  </data>
+  <data name="CaseEditSpiderMites" xml:space="preserve">
+    <value>Spider mites want 3 to 5 days, so the next round lands before the eggs hatch.</value>
+    <comment>Hint under the interval field.</comment>
+  </data>
+  <data name="CaseEditNotes" xml:space="preserve">
+    <value>Notes</value>
+    <comment>Heading and name of the notes field on the pest case form.</comment>
+  </data>
+  <data name="CaseEditOpen" xml:space="preserve">
+    <value>Open case</value>
+    <comment>Button that saves a new pest case.</comment>
+  </data>
+  <data name="CaseEditPickPlants" xml:space="preserve">
+    <value>Pick plants</value>
+    <comment>Choice of what a pest case covers.</comment>
+  </data>
+  <data name="CaseEditOneRoom" xml:space="preserve">
+    <value>One room</value>
+    <comment>Choice of what a pest case covers.</comment>
+  </data>
+  <data name="CaseEditAllPlants" xml:space="preserve">
+    <value>All plants</value>
+    <comment>Choice of what a pest case covers.</comment>
+  </data>
+  <data name="CouldntSave" xml:space="preserve">
+    <value>Couldn't save: {0}</value>
+    <comment>Error under a form. {0} is the reason.</comment>
+  </data>
+  <data name="CasePageTitle" xml:space="preserve">
+    <value>Pest case</value>
+    <comment>Title of the browser tab on a pest case page while it loads.</comment>
+  </data>
+  <data name="CaseBackToPests" xml:space="preserve">
+    <value>Pests</value>
+    <comment>Link back to the Pests page at the top of a pest case.</comment>
+  </data>
+  <data name="CaseGone" xml:space="preserve">
+    <value>That case doesn't exist or was deleted.</value>
+    <comment>Shown when the link to a pest case points at one that is gone.</comment>
+  </data>
+  <data name="CaseScopeFound" xml:space="preserve">
+    <value>{0} · found {1}</value>
+    <comment>Under the heading of a pest case. {0} is what it covers, like 'All plants'. {1} is a date.</comment>
+  </data>
+  <data name="CaseCleanDays" xml:space="preserve">
+    <value>Clean {0} of {1} days</value>
+    <comment>Under the heading of a pest case. {0} is the days without pests so far, {1} the days needed to count as resolved.</comment>
+  </data>
+  <data name="CaseLogCheck" xml:space="preserve">
+    <value>Log check</value>
+    <comment>Button, and heading of the form, for logging that a case was checked.</comment>
+  </data>
+  <data name="CaseLogTreatment" xml:space="preserve">
+    <value>Log treatment</value>
+    <comment>Button, and heading of the form, for logging a treatment.</comment>
+  </data>
+  <data name="CaseFoundSome" xml:space="preserve">
+    <value>Found some</value>
+    <comment>Button on a pest case that is being watched, for when pests are seen again.</comment>
+  </data>
+  <data name="CaseFollowPlan" xml:space="preserve">
+    <value>Follow a plan</value>
+    <comment>Button, and heading of the form, for starting a treatment plan on a pest case.</comment>
+  </data>
+  <data name="CaseMakePlan" xml:space="preserve">
+    <value>Make a treatment plan</value>
+    <comment>Link shown when there is no treatment plan yet.</comment>
+  </data>
+  <data name="CaseCleanReady_One" xml:space="preserve">
+    <value>Clean for {0} week. Ready to resolve.</value>
+    <comment>Shown on a pest case that has been clean long enough. {0} is the number of weeks.</comment>
+  </data>
+  <data name="CaseCleanReady_Other" xml:space="preserve">
+    <value>Clean for {0} weeks. Ready to resolve.</value>
+  </data>
+  <data name="CaseResolve" xml:space="preserve">
+    <value>Resolve</value>
+    <comment>Button that marks a pest case as resolved.</comment>
+  </data>
+  <data name="CaseCleanCheck_One" xml:space="preserve">
+    <value>Clean for {0} week. Log a check to resolve it.</value>
+    <comment>Shown on a pest case that has been clean long enough but needs a check first. {0} is the number of weeks.</comment>
+  </data>
+  <data name="CaseCleanCheck_Other" xml:space="preserve">
+    <value>Clean for {0} weeks. Log a check to resolve it.</value>
+  </data>
+  <data name="CaseStartOn" xml:space="preserve">
+    <value>Start on</value>
+    <comment>Label of the date field for when a treatment plan starts.</comment>
+  </data>
+  <data name="CaseStartPlan" xml:space="preserve">
+    <value>Start the plan</value>
+    <comment>Button that starts a treatment plan on a pest case.</comment>
+  </data>
+  <data name="CasePlanHeading" xml:space="preserve">
+    <value>Plan: {0}</value>
+    <comment>Heading of the steps of a treatment plan on a pest case. {0} is the name of the plan.</comment>
+  </data>
+  <data name="CaseMoveTo" xml:space="preserve">
+    <value>Move to</value>
+    <comment>Label of the date field for moving a step of a plan.</comment>
+  </data>
+  <data name="CaseMove" xml:space="preserve">
+    <value>Move</value>
+    <comment>Button that moves a step of a treatment plan to another day.</comment>
+  </data>
+  <data name="CaseLogStep" xml:space="preserve">
+    <value>Log</value>
+    <comment>Button that logs the current step of a treatment plan.</comment>
+  </data>
+  <data name="CaseSkip" xml:space="preserve">
+    <value>Skip</value>
+    <comment>Button that skips the current step of a treatment plan.</comment>
+  </data>
+  <data name="CaseLastStepToday" xml:space="preserve">
+    <value>That was the last step. Today asks whether to start watching the case.</value>
+    <comment>Shown when the last step of a plan is done. Today is the name of the Today page.</comment>
+  </data>
+  <data name="CaseLastStepFrom" xml:space="preserve">
+    <value>That was the last step. From {0} Today asks whether to start watching the case.</value>
+    <comment>Shown when the last step of a plan is done. {0} is a date. Today is the name of the Today page.</comment>
+  </data>
+  <data name="CasePlanStopped" xml:space="preserve">
+    <value>Stopped {0}. The case goes on at its interval.</value>
+    <comment>Shown after a treatment plan was stopped. {0} is a date.</comment>
+  </data>
+  <data name="CaseStopConfirm_One" xml:space="preserve">
+    <value>Stop the plan? The case goes on at its interval of {0} day, and what's logged stays.</value>
+    <comment>Asks before stopping a treatment plan. {0} is the number of days between treatments.</comment>
+  </data>
+  <data name="CaseStopConfirm_Other" xml:space="preserve">
+    <value>Stop the plan? The case goes on at its interval of {0} days, and what's logged stays.</value>
+  </data>
+  <data name="CaseStopPlan" xml:space="preserve">
+    <value>Stop the plan</value>
+    <comment>Button that stops a treatment plan.</comment>
+  </data>
+  <data name="CaseCovers" xml:space="preserve">
+    <value>Covers</value>
+    <comment>Label in the details of a pest case, for which plants it covers.</comment>
+  </data>
+  <data name="CaseChecking" xml:space="preserve">
+    <value>Checking</value>
+    <comment>Label in the details of a pest case that is being watched.</comment>
+  </data>
+  <data name="CaseEvery_One" xml:space="preserve">
+    <value>Every {0} day</value>
+    <comment>How often a case is treated or checked. {0} is the number of days.</comment>
+  </data>
+  <data name="CaseEvery_Other" xml:space="preserve">
+    <value>Every {0} days</value>
+  </data>
+  <data name="CaseTreating" xml:space="preserve">
+    <value>Treating</value>
+    <comment>Label in the details of a pest case that is being treated.</comment>
+  </data>
+  <data name="CaseFollowing" xml:space="preserve">
+    <value>Following {0}</value>
+    <comment>Details of a pest case. {0} is the name of the treatment plan.</comment>
+  </data>
+  <data name="CaseNext" xml:space="preserve">
+    <value>Next one</value>
+    <comment>Label in the details of a pest case, for the next treatment or check.</comment>
+  </data>
+  <data name="CasePlanDone" xml:space="preserve">
+    <value>Plan done, Today asks what's next.</value>
+    <comment>Details of a pest case whose plan is finished. Today is the name of the Today page.</comment>
+  </data>
+  <data name="CaseNothingDue" xml:space="preserve">
+    <value>Nothing due, the case is closed.</value>
+    <comment>Details of a pest case that is resolved.</comment>
+  </data>
+  <data name="CaseLast" xml:space="preserve">
+    <value>Last one</value>
+    <comment>Label in the details of a pest case, for the latest treatment or check.</comment>
+  </data>
+  <data name="CaseNoTreatments" xml:space="preserve">
+    <value>No treatments yet.</value>
+    <comment>Details of a pest case with nothing logged.</comment>
+  </data>
+  <data name="CaseCountStickyTrap" xml:space="preserve">
+    <value>Count a sticky trap</value>
+    <comment>Link on a pest case that opens the form for counting a sticky trap.</comment>
+  </data>
+  <data name="CaseStickyTrap" xml:space="preserve">
+    <value>Sticky trap</value>
+    <comment>Heading of the sticky trap card on a pest case.</comment>
+  </data>
+  <data name="CaseCountTrap" xml:space="preserve">
+    <value>Count trap</value>
+    <comment>Button on the sticky trap card that opens the form for counting.</comment>
+  </data>
+  <data name="CaseTrapIntro" xml:space="preserve">
+    <value>{0} get caught on a yellow or blue sticky trap. Count it now and then to see whether the treatment is working.</value>
+    <comment>Shown on the sticky trap card before anything is counted. {0} is the name of the pest, like 'Spider mites'.</comment>
+  </data>
+  <data name="CaseNewTrapUp" xml:space="preserve">
+    <value>A new trap is up. Count it next time you look.</value>
+    <comment>Shown on the sticky trap card after a new trap was put up and before it is counted.</comment>
+  </data>
+  <data name="CaseTreatAgainOne" xml:space="preserve">
+    <value>There's a new one on the trap. Start treating again?</value>
+    <comment>Question on the sticky trap card when one new pest is on the trap.</comment>
+  </data>
+  <data name="CaseTreatAgainMany" xml:space="preserve">
+    <value>There are new ones on the trap. Start treating again?</value>
+    <comment>Question on the sticky trap card when several new pests are on the trap.</comment>
+  </data>
+  <data name="CaseTreatAgain" xml:space="preserve">
+    <value>Treat again</value>
+    <comment>Button that starts treating a case again.</comment>
+  </data>
+  <data name="CaseNotNow" xml:space="preserve">
+    <value>Not now</value>
+    <comment>Button that dismisses the question about treating again.</comment>
+  </data>
+  <data name="CaseTreatmentsAndChecks" xml:space="preserve">
+    <value>Treatments and checks</value>
+    <comment>Heading of the list of what was logged on a pest case.</comment>
+  </data>
+  <data name="CaseTreatments" xml:space="preserve">
+    <value>Treatments</value>
+    <comment>Heading of the list of treatments logged on a pest case.</comment>
+  </data>
+  <data name="CaseNothingLogged" xml:space="preserve">
+    <value>Nothing logged yet. Once you log the first treatment, the next one is due after the interval.</value>
+    <comment>Empty state of the list of treatments on a pest case.</comment>
+  </data>
+  <data name="CasePlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Heading of the list of plants a pest case covers.</comment>
+  </data>
+  <data name="CaseNothingInRoom" xml:space="preserve">
+    <value>Nothing is in that room at the moment.</value>
+    <comment>Shown when a pest case covers a room with no plants in it.</comment>
+  </data>
+  <data name="CaseNoPlants" xml:space="preserve">
+    <value>No plants are covered at the moment.</value>
+    <comment>Shown when a pest case covers no plants.</comment>
+  </data>
+  <data name="CasePlantsHint" xml:space="preserve">
+    <value>Worked out from where the plants are now, so anything moved in while the case is open is covered too.</value>
+    <comment>Hint under the plants of a pest case that covers a room or all plants.</comment>
+  </data>
+  <data name="CaseNeighbours" xml:space="preserve">
+    <value>Check the neighbours</value>
+    <comment>Heading of the plants near the ones with pests.</comment>
+  </data>
+  <data name="CaseNeighboursHint" xml:space="preserve">
+    <value>Other plants in the same room. Pests spread to plants that stand close.</value>
+    <comment>Hint under the heading of the neighbours.</comment>
+  </data>
+  <data name="CaseChecked" xml:space="preserve">
+    <value>Checked {0}</value>
+    <comment>Under a neighbour plant. {0} is how long ago, like 'today' or '3 days ago'.</comment>
+  </data>
+  <data name="CaseNeverChecked" xml:space="preserve">
+    <value>Never checked</value>
+    <comment>Under a neighbour plant that was never checked.</comment>
+  </data>
+  <data name="CaseClean" xml:space="preserve">
+    <value>Clean</value>
+    <comment>Button that logs a neighbour plant as checked with no pests.</comment>
+  </data>
+  <data name="CaseAddToCase" xml:space="preserve">
+    <value>Add to case</value>
+    <comment>Button that adds a neighbour plant to the pest case.</comment>
+  </data>
+  <data name="CaseDeleteConfirm" xml:space="preserve">
+    <value>Delete this case and its treatments? If it is over, mark it resolved instead so what you did is kept.</value>
+    <comment>Asks before deleting a pest case.</comment>
+  </data>
+  <data name="CaseDelete" xml:space="preserve">
+    <value>Delete case</value>
+    <comment>Button that asks to delete a pest case.</comment>
+  </data>
+  <data name="CaseNeighbourChecked" xml:space="preserve">
+    <value>{0} checked, no signs.</value>
+    <comment>Shown after a neighbour plant is logged as checked. {0} is the name of the plant.</comment>
+  </data>
+  <data name="CaseNeighbourAdded" xml:space="preserve">
+    <value>{0} added to the case.</value>
+    <comment>Shown after a plant is added to the pest case. {0} is the name of the plant.</comment>
+  </data>
+  <data name="CaseResolved" xml:space="preserve">
+    <value>Case resolved.</value>
+    <comment>Shown after a pest case is marked as resolved.</comment>
+  </data>
+  <data name="CheckLogged" xml:space="preserve">
+    <value>Check logged.</value>
+    <comment>Shown after a check is saved on a pest case.</comment>
+  </data>
+  <data name="TreatmentLogged" xml:space="preserve">
+    <value>Treatment logged.</value>
+    <comment>Shown after a treatment is saved on a pest case.</comment>
+  </data>
+  <data name="CaseCaught" xml:space="preserve">
+    <value>{0} on the trap in {1}</value>
+    <comment>Part of a sentence about a sticky trap. {0} is a count of new pests, like '3 new ones'. {1} is a count of days, like '5 days'.</comment>
+  </data>
+  <data name="CaseNew_One" xml:space="preserve">
+    <value>{0} new one</value>
+    <comment>A count of new pests on a trap.</comment>
+  </data>
+  <data name="CaseNew_Other" xml:space="preserve">
+    <value>{0} new ones</value>
+  </data>
+  <data name="CaseDay_One" xml:space="preserve">
+    <value>{0} day</value>
+    <comment>A count of days.</comment>
+  </data>
+  <data name="CaseDay_Other" xml:space="preserve">
+    <value>{0} days</value>
+  </data>
+  <data name="CaseCaughtAbout" xml:space="preserve">
+    <value>{0}, about {1} a week.</value>
+    <comment>Sentence about a sticky trap. {0} is text like '3 new ones on the trap in 5 days'. {1} is a number.</comment>
+  </data>
+  <data name="CaseCaughtPlain" xml:space="preserve">
+    <value>{0}.</value>
+    <comment>Sentence about a sticky trap. {0} is text like '3 new ones on the trap in 5 days'.</comment>
+  </data>
+  <data name="CaseSkippedStep" xml:space="preserve">
+    <value>Skipped {0}</value>
+    <comment>In the list of what was logged on a pest case. {0} is the name of the step of the plan.</comment>
+  </data>
+  <data name="CaseSkippedAStep" xml:space="preserve">
+    <value>Skipped a step</value>
+    <comment>In the list of what was logged on a pest case.</comment>
+  </data>
+  <data name="CaseWhatChecked" xml:space="preserve">
+    <value>Checked</value>
+    <comment>In the list of what was logged on a pest case.</comment>
+  </data>
+  <data name="CaseCountedTrap" xml:space="preserve">
+    <value>Counted the trap: {0} on it</value>
+    <comment>In the list of what was logged on a pest case. {0} is the number of pests on the trap.</comment>
+  </data>
+  <data name="CaseCountedTrapThenNew" xml:space="preserve">
+    <value>Counted the trap: {0} on it, then put up a new one</value>
+    <comment>In the list of what was logged on a pest case. {0} is the number of pests on the trap.</comment>
+  </data>
+  <data name="CasePutUpTrap" xml:space="preserve">
+    <value>Put up a new trap</value>
+    <comment>In the list of what was logged on a pest case.</comment>
+  </data>
+  <data name="CaseWhatTreated" xml:space="preserve">
+    <value>Treated</value>
+    <comment>In the list of what was logged on a pest case.</comment>
+  </data>
+  <data name="CaseStep" xml:space="preserve">
+    <value>Step</value>
+    <comment>Name of a step of a treatment plan that has no name.</comment>
+  </data>
+  <data name="CaseStepSkipped" xml:space="preserve">
+    <value>Skipped</value>
+    <comment>Shown next to a step of a plan that was skipped.</comment>
+  </data>
+  <data name="CaseStepNotDone" xml:space="preserve">
+    <value>Not done</value>
+    <comment>Shown next to a step of a plan that has not been done and the plan is not running.</comment>
+  </data>
+  <data name="CaseStepStartDay" xml:space="preserve">
+    <value>On the start day</value>
+    <comment>Shown next to the first step of a plan.</comment>
+  </data>
+  <data name="CaseStepAfter_One" xml:space="preserve">
+    <value>{0} day after</value>
+    <comment>Shown next to a later step of a plan. {0} is the days after the step before.</comment>
+  </data>
+  <data name="CaseStepAfter_Other" xml:space="preserve">
+    <value>{0} days after</value>
+  </data>
+  <data name="CasePlanFuture" xml:space="preserve">
+    <value>The plan can't start in the future.</value>
+    <comment>Error when starting a treatment plan.</comment>
+  </data>
+  <data name="CasePlanBeforeCase" xml:space="preserve">
+    <value>The plan can't start before the case.</value>
+    <comment>Error when starting a treatment plan.</comment>
+  </data>
+  <data name="CaseFollowingMessage" xml:space="preserve">
+    <value>Following {0}.</value>
+    <comment>Shown after a treatment plan is started. {0} is the name of the plan.</comment>
+  </data>
+  <data name="CaseStepSkippedMessage" xml:space="preserve">
+    <value>Step skipped.</value>
+    <comment>Shown after a step of a plan is skipped.</comment>
+  </data>
+  <data name="CaseMoveTooEarly" xml:space="preserve">
+    <value>A step can only be moved to today or later.</value>
+    <comment>Error when moving a step of a plan.</comment>
+  </data>
+  <data name="CaseStepMoved" xml:space="preserve">
+    <value>Step moved to {0}.</value>
+    <comment>Shown after a step of a plan is moved. {0} is a date.</comment>
+  </data>
+  <data name="CasePlanStoppedMessage" xml:space="preserve">
+    <value>Plan stopped.</value>
+    <comment>Shown after a treatment plan is stopped.</comment>
+  </data>
+  <data name="ProblemTitle" xml:space="preserve">
+    <value>Problem</value>
+    <comment>Title of the browser tab on a problem page while it loads.</comment>
+  </data>
+  <data name="ProblemGone" xml:space="preserve">
+    <value>That problem doesn't exist or was deleted.</value>
+    <comment>Shown when the link to a problem points at one that is gone.</comment>
+  </data>
+  <data name="ProblemDay_One" xml:space="preserve">
+    <value>day</value>
+    <comment>Small word under the number of days a problem has lasted.</comment>
+  </data>
+  <data name="ProblemDay_Other" xml:space="preserve">
+    <value>days</value>
+  </data>
+  <data name="ProblemHowDoesItLook" xml:space="preserve">
+    <value>How does it look?</value>
+    <comment>Button on a problem page, and title of the form, for adding an update.</comment>
+  </data>
+  <data name="ProblemItsOver" xml:space="preserve">
+    <value>It's over</value>
+    <comment>Button on a problem page that ends the problem.</comment>
+  </data>
+  <data name="ProblemItCameBack" xml:space="preserve">
+    <value>It came back</value>
+    <comment>Button on a problem page that opens an ended problem again.</comment>
+  </data>
+  <data name="ProblemWhatHappenedHeading" xml:space="preserve">
+    <value>What happened</value>
+    <comment>Heading of the history of a problem.</comment>
+  </data>
+  <data name="ProblemLogStarted" xml:space="preserve">
+    <value>Started</value>
+    <comment>Small label on a line of a problem's history.</comment>
+  </data>
+  <data name="ProblemLogHowItLooked" xml:space="preserve">
+    <value>How it looked</value>
+    <comment>Small label on a line of a problem's history, for an update.</comment>
+  </data>
+  <data name="ProblemLogUpdated" xml:space="preserve">
+    <value>Updated</value>
+    <comment>Small label on a line of a problem's history that the app wrote when something was changed.</comment>
+  </data>
+  <data name="ProblemLogOver" xml:space="preserve">
+    <value>Over</value>
+    <comment>Small label on the last line of a problem's history, and the text when the outcome is not known.</comment>
+  </data>
+  <data name="ProblemChangeUpdate" xml:space="preserve">
+    <value>Change this update</value>
+    <comment>Name of the button that changes an update in a problem's history.</comment>
+  </data>
+  <data name="ProblemOpenPhoto" xml:space="preserve">
+    <value>Open photo</value>
+    <comment>Name of a photo button in a problem's history.</comment>
+  </data>
+  <data name="ProblemBefore" xml:space="preserve">
+    <value>Before, with {0}</value>
+    <comment>Heading of earlier problems on other plants. {0} is a sign in lower case like 'yellow leaves', or 'this'.</comment>
+  </data>
+  <data name="ProblemBeforeHint" xml:space="preserve">
+    <value>What you did then, and how it ended.</value>
+    <comment>Hint under the heading of earlier problems.</comment>
+  </data>
+  <data name="ProblemDeleteConfirm" xml:space="preserve">
+    <value>Delete this problem and its updates? The lines on the plant's history go too.</value>
+    <comment>Asks before deleting a problem.</comment>
+  </data>
+  <data name="ProblemDeleteConfirmPhotos" xml:space="preserve">
+    <value>Delete this problem and its updates? The lines on the plant's history go too, and any photos stay on it.</value>
+    <comment>Asks before deleting a problem that has photos. 'It' is the plant.</comment>
+  </data>
+  <data name="ProblemChangeWhatYouSaw" xml:space="preserve">
+    <value>Change what you saw</value>
+    <comment>Button that changes the signs of a problem.</comment>
+  </data>
+  <data name="ProblemDelete" xml:space="preserve">
+    <value>Delete problem</value>
+    <comment>Button that asks to delete a problem.</comment>
+  </data>
+  <data name="ProblemClosedOn" xml:space="preserve">
+    <value>On</value>
+    <comment>Label of the date field for when a problem ended.</comment>
+  </data>
+  <data name="ProblemGotBetterHint" xml:space="preserve">
+    <value>It looks healthy again</value>
+    <comment>Small text under the choice Got better when a problem ends.</comment>
+  </data>
+  <data name="ProblemWentAwayHint" xml:space="preserve">
+    <value>It cleared up without doing much</value>
+    <comment>Small text under the choice Went away by itself when a problem ends.</comment>
+  </data>
+  <data name="ProblemDidntHelpHint" xml:space="preserve">
+    <value>You're leaving it as it is</value>
+    <comment>Small text under the choice Nothing helped when a problem ends.</comment>
+  </data>
+  <data name="ProblemDiedHint" xml:space="preserve">
+    <value>The plant didn't make it</value>
+    <comment>Small text under the choice It died when a problem ends.</comment>
+  </data>
+  <data name="ProblemMarkDiedQuestion" xml:space="preserve">
+    <value>Mark the plant as died?</value>
+    <comment>Question after a problem ends with the plant dying.</comment>
+  </data>
+  <data name="ProblemWhatHappened" xml:space="preserve">
+    <value>What happened?</value>
+    <comment>Label of the field for why a plant died.</comment>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>(optional)</value>
+    <comment>Small text after a label for a field that can be left empty.</comment>
+  </data>
+  <data name="ProblemMarkDied" xml:space="preserve">
+    <value>Mark as died</value>
+    <comment>Button that marks the plant as died.</comment>
+  </data>
+  <data name="ProblemSomethingsWrong" xml:space="preserve">
+    <value>Something's wrong</value>
+    <comment>Title of the form for saying what is wrong with a plant.</comment>
+  </data>
+  <data name="ProblemHowDidItEnd" xml:space="preserve">
+    <value>How did it end?</value>
+    <comment>Title of the form for ending a problem.</comment>
+  </data>
+  <data name="ProblemItDied" xml:space="preserve">
+    <value>It died</value>
+    <comment>Title of the form that asks if the plant should be marked as died.</comment>
+  </data>
+  <data name="ProblemThis" xml:space="preserve">
+    <value>this</value>
+    <comment>Used in 'Before, with this' when none of the earlier problems has a sign in common.</comment>
+  </data>
+  <data name="ProblemDayToday" xml:space="preserve">
+    <value>Today</value>
+    <comment>Heading of a day in a problem's history.</comment>
+  </data>
+  <data name="ProblemDayYesterday" xml:space="preserve">
+    <value>Yesterday</value>
+    <comment>Heading of a day in a problem's history.</comment>
+  </data>
+  <data name="ProblemMarkedDied" xml:space="preserve">
+    <value>Marked as died.</value>
+    <comment>Shown after the plant is marked as died.</comment>
+  </data>
+  <data name="SheetWhatDoYouSee" xml:space="preserve">
+    <value>What do you see?</value>
+    <comment>Label above the signs of a problem to pick from.</comment>
+  </data>
+  <data name="SheetBugsQuestion" xml:space="preserve">
+    <value>Bugs or webbing? {0}</value>
+    <comment>Hint under the signs of a problem. {0} is a link, with the text 'Open a pest case instead'.</comment>
+  </data>
+  <data name="SheetOpenPestCase" xml:space="preserve">
+    <value>Open a pest case instead</value>
+    <comment>Text of the link in 'Bugs or webbing?'.</comment>
+  </data>
+  <data name="SheetSince" xml:space="preserve">
+    <value>Since</value>
+    <comment>Label of the date field for when a problem started.</comment>
+  </data>
+  <data name="SheetWhatDidYouDo" xml:space="preserve">
+    <value>What did you do?</value>
+    <comment>Label above the actions to pick from in an update of a problem.</comment>
+  </data>
+  <data name="SheetNote" xml:space="preserve">
+    <value>Note</value>
+    <comment>Label of the note field.</comment>
+  </data>
+  <data name="SheetPhotoToAdd" xml:space="preserve">
+    <value>Photo to add</value>
+    <comment>Description of a picked photo for a screen reader.</comment>
+  </data>
+  <data name="SheetRemovePhoto" xml:space="preserve">
+    <value>Remove photo</value>
+    <comment>Name of the button that removes a picked photo.</comment>
+  </data>
+  <data name="SheetCamera" xml:space="preserve">
+    <value>Camera</value>
+    <comment>Button that takes a photo with the camera.</comment>
+  </data>
+  <data name="SheetGallery" xml:space="preserve">
+    <value>Gallery</value>
+    <comment>Button that picks photos from the device.</comment>
+  </data>
+  <data name="SheetLookAgain" xml:space="preserve">
+    <value>Look again</value>
+    <comment>Label of the choice of when to look at the problem again.</comment>
+  </data>
+  <data name="SheetDeleteUpdatePhotos" xml:space="preserve">
+    <value>Delete this update? Its photos stay on the plant's history.</value>
+    <comment>Asks before deleting an update that has photos.</comment>
+  </data>
+  <data name="SheetDeleteUpdate" xml:space="preserve">
+    <value>Delete this update?</value>
+    <comment>Asks before deleting an update.</comment>
+  </data>
+  <data name="SheetDeleteUpdateButton" xml:space="preserve">
+    <value>Delete update</value>
+    <comment>Button that asks to delete an update.</comment>
+  </data>
+  <data name="SheetIn3Days" xml:space="preserve">
+    <value>In 3 days</value>
+    <comment>Choice of when to look at the problem again.</comment>
+  </data>
+  <data name="SheetInAWeek" xml:space="preserve">
+    <value>In a week</value>
+    <comment>Choice of when to look at the problem again.</comment>
+  </data>
+  <data name="SheetIn2Weeks" xml:space="preserve">
+    <value>In 2 weeks</value>
+    <comment>Choice of when to look at the problem again.</comment>
+  </data>
+  <data name="SheetSavingPhotos" xml:space="preserve">
+    <value>Saving photos…</value>
+    <comment>Shown while picked photos are being saved.</comment>
+  </data>
+  <data name="SheetPhotosFailed" xml:space="preserve">
+    <value>Couldn't save the photos: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="CouldntDelete" xml:space="preserve">
+    <value>Couldn't delete: {0}</value>
+    <comment>Error. {0} is the reason.</comment>
+  </data>
+  <data name="TreatStep" xml:space="preserve">
+    <value>Step {0} of {1} of {2}.</value>
+    <comment>Above the treatment form when a step of a plan is logged. {0} is the number of the step, {1} how many steps the plan has, {2} the name of the plan.</comment>
+  </data>
+  <data name="TreatOffPlan" xml:space="preserve">
+    <value>Not a step of the plan</value>
+    <comment>Switch that logs a treatment that is not part of the running plan.</comment>
+  </data>
+  <data name="TreatRecipe" xml:space="preserve">
+    <value>Recipe</value>
+    <comment>Label of the choice of treatment recipe.</comment>
+  </data>
+  <data name="TreatRecipes" xml:space="preserve">
+    <value>Recipes</value>
+    <comment>Name of the list of treatment recipes to pick from, read out by a screen reader.</comment>
+  </data>
+  <data name="TreatSomethingElse" xml:space="preserve">
+    <value>Something else</value>
+    <comment>Button that picks no recipe, so the person types what was used.</comment>
+  </data>
+  <data name="TreatWhatUsed" xml:space="preserve">
+    <value>What you used</value>
+    <comment>Label of the field for what was used in a treatment.</comment>
+  </data>
+  <data name="TreatWhatPlaceholder" xml:space="preserve">
+    <value>e.g. Alcohol spray, both sides</value>
+    <comment>Placeholder in the field for what was used in a treatment.</comment>
+  </data>
+  <data name="TreatNextDue" xml:space="preserve">
+    <value>Next one due</value>
+    <comment>Label of the date field for the next treatment.</comment>
+  </data>
+  <data name="TreatNextHint_One" xml:space="preserve">
+    <value>Every {0} day by default. Change it to leave a longer gap.</value>
+    <comment>Hint under the date of the next treatment. {0} is the days between treatments.</comment>
+  </data>
+  <data name="TreatNextHint_Other" xml:space="preserve">
+    <value>Every {0} days by default. Change it to leave a longer gap.</value>
+  </data>
+  <data name="TreatMakeRecipe" xml:space="preserve">
+    <value>Make up the same spray each time? Save it under {0} and pick it here.</value>
+    <comment>Hint in the treatment form when there are no recipes. {0} is a link with the text 'Treatment recipes'.</comment>
+  </data>
+  <data name="TreatRecipesLink" xml:space="preserve">
+    <value>Treatment recipes</value>
+    <comment>Text of the link in the hint about saving a recipe, and the name of the Treatment recipes page.</comment>
+  </data>
+  <data name="TreatCheckNotesPlaceholder" xml:space="preserve">
+    <value>e.g. Nothing under the leaves</value>
+    <comment>Placeholder in the notes field when logging a check.</comment>
+  </data>
+  <data name="TreatNotesPlaceholder" xml:space="preserve">
+    <value>e.g. Still webbing under the new leaf</value>
+    <comment>Placeholder in the notes field when logging a treatment.</comment>
+  </data>
+  <data name="PlansPageTitle" xml:space="preserve">
+    <value>Treatment plans · Stikling</value>
+    <comment>Title of the browser tab on the Treatment plans page.</comment>
+  </data>
+  <data name="PlansBackToSupplies" xml:space="preserve">
+    <value>Supplies</value>
+    <comment>Link back to the Supplies page, at the top of the Treatment plans and Treatment recipes pages.</comment>
+  </data>
+  <data name="PlansTitle" xml:space="preserve">
+    <value>Treatment plans</value>
+    <comment>Heading of the Treatment plans page.</comment>
+  </data>
+  <data name="PlansIntro" xml:space="preserve">
+    <value>A set of treatments in order, like a spray, the same spray again after 3 days, and predatory mites after 10 more. Start one on a pest case and the case is due each step in turn. A case keeps its own copy of the steps, so editing a plan here doesn't change one that's running.</value>
+    <comment>Intro on the Treatment plans page.</comment>
+  </data>
+  <data name="PlansEditPlan" xml:space="preserve">
+    <value>Edit plan</value>
+    <comment>Heading of the form when changing a treatment plan.</comment>
+  </data>
+  <data name="PlansAddAPlan" xml:space="preserve">
+    <value>Add a plan</value>
+    <comment>Heading of the form for a new treatment plan.</comment>
+  </data>
+  <data name="PlansName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Label of the name field on the treatment plan and recipe forms.</comment>
+  </data>
+  <data name="PlansNamePlaceholder" xml:space="preserve">
+    <value>e.g. Spider mites, three rounds</value>
+    <comment>Placeholder in the name field of a treatment plan.</comment>
+  </data>
+  <data name="PlansSteps" xml:space="preserve">
+    <value>Steps</value>
+    <comment>Label above the steps of a treatment plan.</comment>
+  </data>
+  <data name="PlansFirstStep" xml:space="preserve">
+    <value>First step</value>
+    <comment>Shown for the first step of a plan, which has no days after a step before.</comment>
+  </data>
+  <data name="PlansDaysAfter" xml:space="preserve">
+    <value>Days after the step before</value>
+    <comment>Label of the field for how many days after the step before a step comes.</comment>
+  </data>
+  <data name="PlansMoveUp" xml:space="preserve">
+    <value>Move step {0} up</value>
+    <comment>Name of a button that moves a step of a plan earlier. {0} is the number of the step.</comment>
+  </data>
+  <data name="PlansMoveDown" xml:space="preserve">
+    <value>Move step {0} down</value>
+    <comment>Name of a button that moves a step of a plan later. {0} is the number of the step.</comment>
+  </data>
+  <data name="PlansRemoveStep" xml:space="preserve">
+    <value>Remove step {0}</value>
+    <comment>Name of a button that removes a step from a plan. {0} is the number of the step.</comment>
+  </data>
+  <data name="PlansRecipesForStep" xml:space="preserve">
+    <value>Recipes for step {0}</value>
+    <comment>Name of the list of recipes to pick from for a step. {0} is the number of the step.</comment>
+  </data>
+  <data name="PlansWhat" xml:space="preserve">
+    <value>What</value>
+    <comment>Label of the field for what a step of a plan uses.</comment>
+  </data>
+  <data name="PlansWhatPlaceholder" xml:space="preserve">
+    <value>e.g. Release predatory mites</value>
+    <comment>Placeholder in the field for what a step uses.</comment>
+  </data>
+  <data name="PlansNotePlaceholder" xml:space="preserve">
+    <value>e.g. Hang the sachets near the worst plants</value>
+    <comment>Placeholder in the note field of a step.</comment>
+  </data>
+  <data name="PlansAddStep" xml:space="preserve">
+    <value>Add a step</value>
+    <comment>Button that adds a step to a treatment plan.</comment>
+  </data>
+  <data name="PlansNotesPlaceholder" xml:space="preserve">
+    <value>e.g. What this plan is for</value>
+    <comment>Placeholder in the notes field of a treatment plan.</comment>
+  </data>
+  <data name="PlansSaveChanges" xml:space="preserve">
+    <value>Save changes</value>
+    <comment>Button that saves a changed treatment plan.</comment>
+  </data>
+  <data name="PlansAddPlan" xml:space="preserve">
+    <value>Add plan</value>
+    <comment>Button that saves a new treatment plan.</comment>
+  </data>
+  <data name="PlansDeleteConfirm" xml:space="preserve">
+    <value>Delete {0}? Cases following it keep their steps.</value>
+    <comment>Asks before deleting a treatment plan. {0} is the name of the plan.</comment>
+  </data>
+  <data name="PlansNone" xml:space="preserve">
+    <value>No plans yet.</value>
+    <comment>Empty state of the Treatment plans page.</comment>
+  </data>
+  <data name="PlansNoneHint" xml:space="preserve">
+    <value>Treatments often come in a sequence: spray, spray again after 3 days, then release predatory mites after 10. Save it once as a plan and start it on a pest case.</value>
+    <comment>Empty state of the Treatment plans page.</comment>
+  </data>
+  <data name="PlansYourPlans" xml:space="preserve">
+    <value>Your plans</value>
+    <comment>Heading of the list of treatment plans.</comment>
+  </data>
+  <data name="PlansStepLater" xml:space="preserve">
+    <value>{0}, {1} later</value>
+    <comment>A step in the list of a plan. {0} is what it uses, {1} is the time after the step before, like '3 days'.</comment>
+  </data>
+  <data name="RecipesPageTitle" xml:space="preserve">
+    <value>Treatment recipes · Stikling</value>
+    <comment>Title of the browser tab on the Treatment recipes page.</comment>
+  </data>
+  <data name="RecipesIntro" xml:space="preserve">
+    <value>The sprays and drenches you make up yourself, saved under a name. Logging a treatment with one copies what's in it onto the treatment, so editing a recipe here doesn't change what you've already logged.</value>
+    <comment>Intro on the Treatment recipes page.</comment>
+  </data>
+  <data name="RecipesEdit" xml:space="preserve">
+    <value>Edit recipe</value>
+    <comment>Heading of the form when changing a treatment recipe.</comment>
+  </data>
+  <data name="RecipesAdd" xml:space="preserve">
+    <value>Add a recipe</value>
+    <comment>Heading of the form for a new treatment recipe.</comment>
+  </data>
+  <data name="RecipesNamePlaceholder" xml:space="preserve">
+    <value>e.g. Alcohol spray</value>
+    <comment>Placeholder in the name field of a treatment recipe.</comment>
+  </data>
+  <data name="RecipesWhatsInIt" xml:space="preserve">
+    <value>What's in it</value>
+    <comment>Label above the ingredients of a treatment recipe.</comment>
+  </data>
+  <data name="RecipesIngredientN" xml:space="preserve">
+    <value>Ingredient {0}</value>
+    <comment>Name of the field for an ingredient. {0} is its number in the list.</comment>
+  </data>
+  <data name="RecipesMoveUp" xml:space="preserve">
+    <value>Move {0} up</value>
+    <comment>Name of a button that moves an ingredient earlier. {0} is the name of the ingredient.</comment>
+  </data>
+  <data name="RecipesMoveDown" xml:space="preserve">
+    <value>Move {0} down</value>
+    <comment>Name of a button that moves an ingredient later. {0} is the name of the ingredient.</comment>
+  </data>
+  <data name="RecipesRemove" xml:space="preserve">
+    <value>Remove {0}</value>
+    <comment>Name of a button that removes an ingredient. {0} is the name of the ingredient.</comment>
+  </data>
+  <data name="RecipesAmountHint" xml:space="preserve">
+    <value>Each amount is for that much of the finished mix, and the rest is water. Leave it empty for something you don't measure.</value>
+    <comment>Hint under the ingredients of a treatment recipe.</comment>
+  </data>
+  <data name="RecipesIngredientsToAdd" xml:space="preserve">
+    <value>Ingredients to add</value>
+    <comment>Name of the list of suggested ingredients, read out by a screen reader.</comment>
+  </data>
+  <data name="RecipesHowToUse" xml:space="preserve">
+    <value>How to use it</value>
+    <comment>Label of the field for how a treatment recipe is used.</comment>
+  </data>
+  <data name="RecipesHowToUsePlaceholder" xml:space="preserve">
+    <value>e.g. Both sides of the leaves, then the top of the soil</value>
+    <comment>Placeholder in the field for how a treatment recipe is used.</comment>
+  </data>
+  <data name="RecipesAddButton" xml:space="preserve">
+    <value>Add recipe</value>
+    <comment>Button that saves a new treatment recipe.</comment>
+  </data>
+  <data name="RecipesNone" xml:space="preserve">
+    <value>No recipes yet.</value>
+    <comment>Empty state of the Treatment recipes page.</comment>
+  </data>
+  <data name="RecipesNoneHint" xml:space="preserve">
+    <value>Start with the spray you use most. Amounts are optional, so a recipe you mix by eye is still worth saving.</value>
+    <comment>Empty state of the Treatment recipes page.</comment>
+  </data>
+  <data name="RecipesYours" xml:space="preserve">
+    <value>Your recipes</value>
+    <comment>Heading of the list of treatment recipes.</comment>
+  </data>
+  <data name="RecipesBottle" xml:space="preserve">
+    <value>Bottle</value>
+    <comment>Label of the field for the size of the bottle when measuring out a recipe.</comment>
+  </data>
+  <data name="RecipesBottlePlaceholder" xml:space="preserve">
+    <value>e.g. 0.5</value>
+    <comment>Placeholder in the bottle size field. The size is in litres.</comment>
+  </data>
+  <data name="RecipesFillUp" xml:space="preserve">
+    <value>Then fill up to {0}.</value>
+    <comment>Shown when measuring out a recipe. {0} is an amount of water like '0.5 L'.</comment>
+  </data>
+  <data name="RecipesMixBatch" xml:space="preserve">
+    <value>Mix a batch</value>
+    <comment>Button that shows how much of each ingredient to measure out.</comment>
+  </data>
+  <data name="RecipesThisIngredient" xml:space="preserve">
+    <value>this ingredient</value>
+    <comment>Used in the names of the buttons of an ingredient that has no name yet, like 'Move this ingredient up'.</comment>
+  </data>
+  <data name="RecipesUsed" xml:space="preserve">
+    <value>Used {0}, last {1}</value>
+    <comment>Under a treatment recipe. {0} is how many times, like '3 times'. {1} is a date.</comment>
+  </data>
+  <data name="RecipesTime_One" xml:space="preserve">
+    <value>{0} time</value>
+    <comment>A count of how many times a recipe was used.</comment>
+  </data>
+  <data name="RecipesTime_Other" xml:space="preserve">
+    <value>{0} times</value>
+  </data>
+  <data name="RecipesNotUsed" xml:space="preserve">
+    <value>Not used yet</value>
+    <comment>Under a treatment recipe that was never used.</comment>
+  </data>
+  <data name="RecipesDelete" xml:space="preserve">
+    <value>Delete {0}?</value>
+    <comment>Asks before deleting a treatment recipe that was never used. {0} is the name.</comment>
+  </data>
+  <data name="RecipesDeleteUsed" xml:space="preserve">
+    <value>Delete {0}? It's been used {1}, and those treatments keep what was in it.</value>
+    <comment>Asks before deleting a treatment recipe that was used. {0} is the name, {1} how many times, like '3 times'.</comment>
+  </data>
+</root>

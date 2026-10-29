@@ -6,10 +6,10 @@
 @inject TimeProvider Time
 @inject NavigationManager Nav
 
-<PageTitle>Account · Stikling</PageTitle>
+<PageTitle>@Strings.Account.AccountPageTitle</PageTitle>
 
-<a class="back-link" href="settings?section=account">Settings</a>
-<h1>Account</h1>
+<a class="back-link" href="settings?section=account">@Strings.Account.BackToSettings</a>
+<h1>@Strings.Account.AccountTitle</h1>
 
 @if (!accountHintRead)
 {
@@ -22,20 +22,19 @@ else if (account is { SignedIn: true })
     <div class="settings-actions">
         <button type="button" class="btn btn-outline-primary" @onclick="Sync.SyncNowAsync"
                 disabled="@(Sync.Running || accountBusy)">
-            Sync now
+            @Strings.Account.AccountSyncNow
         </button>
         <button type="button" class="btn btn-outline-primary" @onclick="AskSignOutAsync"
                 disabled="@(accountBusy || signOut is not null || deleting)">
-            Sign out
+            @Strings.Account.AccountSignOut
         </button>
     </div>
     <p class="settings-hint">
-        Your plants, care, pests, photos and settings are kept the same on every device you sign in on.
-        Each device keeps a small copy of every photo, and fetches the full size when you open one.
+        @Strings.Account.AccountKeptSame
     </p>
     @if (photoUsage is { } usage && usage.UsedBytes >= 0.8 * usage.LimitBytes)
     {
-        <p class="settings-hint">Photos take @Labels.Bytes(usage.UsedBytes) of the @Labels.Bytes(usage.LimitBytes) they have on the server.</p>
+        <p class="settings-hint">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.AccountPhotoUsage, Labels.Bytes(usage.UsedBytes), Labels.Bytes(usage.LimitBytes))</p>
     }
     @if (SyncProblem is { } problem)
     {
@@ -46,39 +45,35 @@ else if (account is { SignedIn: true })
     {
         <div class="confirm-card">
             <p>
-                <strong>Sign out</strong><br />
-                What's synced stays on the Stikling server and comes back when you sign in again. You can
-                keep a copy on this device as well, or remove it from here.
+                <strong>@Strings.Account.AccountSignOutHeading</strong><br />
+                @Strings.Account.AccountSignOutExplain
             </p>
             @if (unsent.Checking)
             {
-                <p class="settings-hint" role="status">Sending your latest changes first…</p>
+                <p class="settings-hint" role="status">@Strings.Account.AccountSendingLatest</p>
             }
             else
             {
                 @if (unsent.Photos > 0)
                 {
                     <p class="settings-hint">
-                        @Labels.Count(unsent.Photos, "photo") added here @(unsent.Photos == 1 ? "hasn't" : "haven't")
-                        reached the server yet, and removing deletes @(unsent.Photos == 1 ? "it" : "them"). Save a
-                        backup first to keep @(unsent.Photos == 1 ? "it" : "them").
+                        @Plural.Of(unsent.Photos, Strings.Account.AccountUnsentPhotos_One, Strings.Account.AccountUnsentPhotos_Other)
                     </p>
                 }
                 @if (unsent.Pending > 0)
                 {
                     <p class="settings-hint">
-                        @Labels.Count(unsent.Pending, "change") made here @(unsent.Pending == 1 ? "hasn't" : "haven't")
-                        reached the server yet, and removing loses @(unsent.Pending == 1 ? "it" : "them").
+                        @Plural.Of(unsent.Pending, Strings.Account.AccountUnsentChanges_One, Strings.Account.AccountUnsentChanges_Other)
                     </p>
                 }
             }
             <div class="settings-actions">
                 <button type="button" class="btn btn-primary" disabled="@(accountBusy || unsent.Checking)"
-                        @onclick="() => SignOutAsync(keepData: true)">Keep and sign out</button>
+                        @onclick="() => SignOutAsync(keepData: true)">@Strings.Account.AccountKeepAndSignOut</button>
                 <button type="button" class="btn btn-danger" disabled="@(accountBusy || unsent.Checking)"
-                        @onclick="() => SignOutAsync(keepData: false)">Remove and sign out</button>
+                        @onclick="() => SignOutAsync(keepData: false)">@Strings.Account.AccountRemoveAndSignOut</button>
                 <button type="button" class="btn btn-link" disabled="@accountBusy"
-                        @onclick="() => signOut = null">Cancel</button>
+                        @onclick="() => signOut = null">@Strings.Common.Cancel</button>
             </div>
         </div>
     }
@@ -88,13 +83,11 @@ else if (account is { SignedIn: true })
         <div class="settings-actions">
             <button type="button" class="btn btn-outline-primary" @onclick="DownloadDataAsync"
                     disabled="@(accountBusy || downloading)">
-                Download your data
+                @Strings.Account.AccountDownload
             </button>
         </div>
         <p class="settings-hint" role="status">
-            @(downloading
-                ? "Getting your data ready. With a lot of photos this can take a while…"
-                : "A ZIP of everything the Stikling server holds about you, photos included, and what the sign-in service has.")
+            @(downloading ? Strings.Account.AccountDownloadPreparing : Strings.Account.AccountDownloadHint)
         </p>
     }
 
@@ -103,32 +96,29 @@ else if (account is { SignedIn: true })
     {
         <div class="confirm-card confirm-card-danger">
             <p>
-                <strong>Delete your account</strong><br />
-                This erases your plants, photos and settings from the Stikling server and deletes your
-                sign-in. It can't be undone.
+                <strong>@Strings.Account.AccountDeleteHeading</strong><br />
+                @Strings.Account.AccountDeleteExplain
             </p>
             <div class="form-check mt-2">
                 <input type="checkbox" class="form-check-input" id="delete-here-too" @bind="removeHereToo"
                        disabled="@accountBusy" />
-                <label class="form-check-label" for="delete-here-too">Remove everything from this device too</label>
+                <label class="form-check-label" for="delete-here-too">@Strings.Account.AccountRemoveHereToo</label>
             </div>
             <p class="settings-hint">
-                @(removeHereToo
-                    ? "This device will be empty afterwards, as if Stikling was just installed."
-                    : "This device keeps what it has, and the app carries on without an account.")
+                @(removeHereToo ? Strings.Account.AccountEmptyAfter : Strings.Account.AccountKeepsWhatItHas)
             </p>
             <div class="settings-actions">
                 <button type="button" class="btn btn-danger" disabled="@accountBusy"
-                        @onclick="DeleteAccountAsync">Delete account</button>
+                        @onclick="DeleteAccountAsync">@Strings.Account.AccountDeleteButton</button>
                 <button type="button" class="btn btn-link" disabled="@accountBusy"
-                        @onclick="() => deleting = false">Cancel</button>
+                        @onclick="() => deleting = false">@Strings.Common.Cancel</button>
             </div>
         </div>
     }
     else if (signOut is null)
     {
         <button type="button" class="btn btn-link text-danger px-0" disabled="@accountBusy"
-                @onclick="AskDeleteAccount">Delete account</button>
+                @onclick="AskDeleteAccount">@Strings.Account.AccountDeleteButton</button>
     }
 
     @if (accountMessage is not null)
@@ -138,22 +128,21 @@ else if (account is { SignedIn: true })
 }
 else if (accountChecking)
 {
-    <p class="settings-hint" role="status">Checking your account…</p>
+    <p class="settings-hint" role="status">@Strings.Account.AccountChecking</p>
 }
 else if (accountUnreachable)
 {
     <p class="settings-hint" role="status">
-        You're signed in on this device, but the sign-in service can't be reached right now. Everything
-        else works as usual.
+        @Strings.Account.AccountUnreachable
     </p>
 }
 else
 {
     <div class="room-row">
-        <span class="room-name">Not signed in</span>
-        <a class="btn btn-link btn-sm link-action" href="sign-in">Sign in</a>
+        <span class="room-name">@Strings.Account.AccountNotSignedIn</span>
+        <a class="btn btn-link btn-sm link-action" href="sign-in">@Strings.Account.AccountSignIn</a>
     </div>
-    <p class="settings-hint">An account is optional. Everything in the app works without one.</p>
+    <p class="settings-hint">@Strings.Account.AccountOptional</p>
     @if (accountMessage is not null)
     {
         <p class="settings-message" role="status">@accountMessage</p>
@@ -221,10 +210,10 @@ else
     /// <summary>"Synced at 14:32", for the line under the email.</summary>
     private string SyncLine => (Sync.Running, Sync.LastSynced) switch
     {
-        (true, _) => "Syncing…",
-        (_, { } at) when at.ToLocalTime().Date == Time.GetLocalNow().Date => $"Synced at {Labels.Time(at)}",
-        (_, { } at) => $"Synced on {Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))}",
-        _ => "Not synced yet"
+        (true, _) => Strings.Account.AccountSyncing,
+        (_, { } at) when at.ToLocalTime().Date == Time.GetLocalNow().Date => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.AccountSyncedAt, Labels.Time(at)),
+        (_, { } at) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.AccountSyncedOn, Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))),
+        _ => Strings.Account.AccountNotSynced
     };
 
     private string? SyncProblem
@@ -234,13 +223,13 @@ else
             if (Sync.Running)
                 return null;
             if (Sync.Problem is { } problem)
-                return Sync.Pending > 0 ? $"{problem} {Labels.Count(Sync.Pending, "change")} waiting." : problem;
+                return Sync.Pending > 0
+                    ? $"{problem} {Plural.Of(Sync.Pending, Strings.Account.AccountChangesWaiting_One, Strings.Account.AccountChangesWaiting_Other)}"
+                    : problem;
             if (Sync.Refused > 0)
-                return $"The server turned down {Labels.Count(Sync.Refused, "change")}, and {(Sync.Refused == 1 ? "it" : "they")} "
-                    + "will be tried again. If this keeps happening, check the date and time on this device.";
+                return Plural.Of(Sync.Refused, Strings.Account.AccountRefused_One, Strings.Account.AccountRefused_Other);
             if (Sync.PhotosFull)
-                return "Your photos have used all the space they have on the server, so new ones stay on this device "
-                    + "for now. Deleting photos you don't need makes room.";
+                return Strings.Account.AccountPhotosFull;
             return null;
         }
     }
@@ -279,7 +268,7 @@ else
         }
         catch (Exception e) when (e is HttpRequestException or JSException or TaskCanceledException)
         {
-            accountMessage = "Couldn't download your data. Check that you're online and try again.";
+            accountMessage = Strings.Account.AccountDownloadFailed;
         }
         finally
         {
@@ -310,11 +299,11 @@ else
 
             account = new AccountState(false, null);
             deleting = false;
-            accountMessage = "Your account is deleted. Everything on this device is still here.";
+            accountMessage = Strings.Account.AccountDeleted;
         }
         catch (Exception e) when (e is HttpRequestException or JSException or TaskCanceledException)
         {
-            accountMessage = "Couldn't delete your account. Check that you're online and try again.";
+            accountMessage = Strings.Account.AccountDeleteFailed;
         }
         finally
         {
@@ -354,7 +343,7 @@ else
         }
         catch (JSException)
         {
-            accountMessage = "Couldn't sign out. Check that you're online and try again.";
+            accountMessage = Strings.Account.AccountSignOutFailed;
         }
         finally
         {

@@ -9,6 +9,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Notifications;
 using Stikling.Core.Settings;
 using Stikling.Core.Today;
+using Strings = Stikling.Web.Resources;
 
 namespace Stikling.Web.Services;
 
@@ -202,9 +203,9 @@ public sealed class NotificationService(
     /// <summary>Sends a test notification to this device. If the server has lost the subscription, it is made again once.</summary>
     public async Task<TestOutcome> SendTestAsync()
     {
-        const string TryLater = "Couldn't send a test right now. Try again in a moment.";
-        const string TurnOffAndOn = "Couldn't send a test. Turn notifications off and on again.";
-        var sent = new TestOutcome(true, "Sent. It should arrive in a moment.");
+        var tryLater = Strings.Care.NotifyTestTryLater;
+        var turnOffAndOn = Strings.Care.NotifyTestTurnOffAndOn;
+        var sent = new TestOutcome(true, Strings.Care.NotifyTestSent);
 
         try
         {
@@ -215,19 +216,19 @@ public sealed class NotificationService(
             {
                 // Permission is already given, so this asks nothing. A fresh subscription, since the old one may be dead
                 if (await ResubscribeAsync() is not { } renewed)
-                    return new TestOutcome(false, TurnOffAndOn);
+                    return new TestOutcome(false, turnOffAndOn);
 
                 return await api.SendNotificationTestAsync(renewed) == HttpStatusCode.NoContent
                     ? sent
-                    : new TestOutcome(false, TurnOffAndOn);
+                    : new TestOutcome(false, turnOffAndOn);
             }
 
-            return status == HttpStatusCode.NoContent ? sent : new TestOutcome(false, TryLater);
+            return status == HttpStatusCode.NoContent ? sent : new TestOutcome(false, tryLater);
         }
         catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
         {
             logger.LogWarning(e, "Sending a test notification failed");
-            return new TestOutcome(false, TryLater);
+            return new TestOutcome(false, tryLater);
         }
     }
 

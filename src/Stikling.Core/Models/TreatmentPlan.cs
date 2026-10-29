@@ -1,3 +1,6 @@
+using Stikling.Core.Text;
+using Strings = Stikling.Core.Resources;
+
 namespace Stikling.Core.Models;
 
 /// <summary>
@@ -39,19 +42,19 @@ public sealed class TreatmentPlan : Entity
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add("Give the plan a name.");
+            errors.Add(Strings.Pests.PlanNeedsName);
 
         if (Steps.Count == 0)
         {
-            errors.Add("Add at least one step.");
+            errors.Add(Strings.Pests.PlanNeedsStep);
             return errors;
         }
 
         if (Steps[0].DaysAfter != 0 || Steps.Skip(1).Any(s => s.DaysAfter < 1))
-            errors.Add("A step after the first comes at least a day later.");
+            errors.Add(Strings.Pests.PlanStepsApart);
 
         if (Steps.Any(s => string.IsNullOrWhiteSpace(s.What) && s.RecipeId is null))
-            errors.Add("Say what each step uses.");
+            errors.Add(Strings.Pests.PlanStepNeedsWhat);
 
         return errors;
     }
@@ -60,8 +63,14 @@ public sealed class TreatmentPlan : Entity
     public string Summary()
     {
         var days = Steps.Sum(s => s.DaysAfter);
-        var steps = Steps.Count == 1 ? "1 step" : $"{Steps.Count} steps";
-        return days > 0 ? $"{steps} over {(days == 1 ? "1 day" : $"{days} days")}" : steps;
+        var steps = Plural.Of(Steps.Count, Strings.Pests.PlanSteps_One, Strings.Pests.PlanSteps_Other);
+        return days > 0
+            ? string.Format(
+                System.Globalization.CultureInfo.CurrentCulture,
+                Strings.Pests.PlanSummary,
+                steps,
+                Plural.Of(days, Strings.Pests.DurationDay_One, Strings.Pests.DurationDay_Other))
+            : steps;
     }
 }
 

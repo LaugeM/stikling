@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Pests;
 
@@ -33,13 +34,13 @@ public sealed record RecipeUse(TreatmentRecipe Recipe, int Times, DateOnly? Last
 /// </summary>
 public static class RecipeIngredients
 {
-    public static readonly IReadOnlyList<string> Common =
+    public static IReadOnlyList<string> Common =>
     [
-        "Isopropyl alcohol",
-        "Dish soap",
-        "Neem oil",
-        "Insecticidal soap",
-        "Hydrogen peroxide"
+        Strings.Pests.IngredientIsopropylAlcohol,
+        Strings.Pests.IngredientDishSoap,
+        Strings.Pests.IngredientNeemOil,
+        Strings.Pests.IngredientInsecticidalSoap,
+        Strings.Pests.IngredientHydrogenPeroxide
     ];
 
     /// <summary>The common ones plus anything already used in a recipe, without repeats.</summary>

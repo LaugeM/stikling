@@ -1,3 +1,5 @@
+using Strings = Stikling.Core.Resources;
+
 namespace Stikling.Core.Models;
 
 public static class PlantNames
@@ -70,9 +72,9 @@ public static class PlantNames
     public static IEnumerable<string> QualifierErrors(string? genus, string? species, NameQualifier? qualifier)
     {
         if (qualifier is NameQualifier.Cf or NameQualifier.Aff && string.IsNullOrWhiteSpace(species))
-            yield return "cf. and aff. go with a species name.";
+            yield return Strings.Plants.ErrQualifierNeedsSpecies;
         if (qualifier == NameQualifier.Sp && string.IsNullOrWhiteSpace(genus))
-            yield return "sp. goes with a genus.";
+            yield return Strings.Plants.ErrQualifierNeedsGenus;
     }
 
     /// <summary>"cf.", "aff.", "sp." or "name lost". Null when the name is sure.</summary>

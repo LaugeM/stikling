@@ -8,34 +8,34 @@
 @inject NavigationManager Navigation
 @inject ILogger<Received> Logger
 
-<PageTitle>Keep its history · Stikling</PageTitle>
+<PageTitle>@F(Strings.PlantDetail.PageTitle, Strings.Plants.ReceivedTitle)</PageTitle>
 
 @if (status is null)
 {
-    <p class="text-body-secondary">Getting its history…</p>
+    <p class="text-body-secondary">@Strings.Plants.ReceivedGetting</p>
 }
 else if (status == ShareCopyStatus.Unreachable)
 {
     <div class="empty-state">
-        <h1>Couldn't reach Stikling's server</h1>
-        <p>Keeping its history needs a connection once, to fetch it. After that it's kept on your device.</p>
-        <button type="button" class="btn btn-primary mt-3" @onclick="LoadAsync">Try again</button>
+        <h1>@Strings.Plants.ReceivedUnreachable</h1>
+        <p>@Strings.Plants.ReceivedUnreachableText</p>
+        <button type="button" class="btn btn-primary mt-3" @onclick="LoadAsync">@Strings.Plants.ReceivedTryAgain</button>
     </div>
 }
 else if (status == ShareCopyStatus.NotFound)
 {
     <div class="empty-state">
-        <h1>There's nothing to keep at this link</h1>
-        <p>It may be mistyped, or the plant hasn't been passed on yet. Ask whoever sent it to check.</p>
-        <a class="btn btn-primary mt-3" href="">Go to Today</a>
+        <h1>@Strings.Plants.ReceivedNotFound</h1>
+        <p>@Strings.Plants.ReceivedNotFoundText</p>
+        <a class="btn btn-primary mt-3" href="">@Strings.Plants.ReceivedGoToday</a>
     </div>
 }
 else if (status == ShareCopyStatus.Gone)
 {
     <div class="empty-state">
-        <h1>This link has been turned off</h1>
-        <p>Its owner turned it off, so its history can't be copied any more.</p>
-        <a class="btn btn-primary mt-3" href="">Go to Today</a>
+        <h1>@Strings.Plants.ReceivedGone</h1>
+        <p>@Strings.Plants.ReceivedGoneText</p>
+        <a class="btn btn-primary mt-3" href="">@Strings.Plants.ReceivedGoToday</a>
     </div>
 }
 else if (copy is not null && check is not null)
@@ -45,7 +45,7 @@ else if (copy is not null && check is not null)
     {
         <div class="detail-hero">
             <div class="received-cover">
-                <img src="@Copies.PhotoAddress(Token, coverId)" crossorigin="anonymous" alt="@($"Photo of {copy.Name}")" class="@(CoverFrame is null ? null : "framed")" style="@CoverFrame" />
+                <img src="@Copies.PhotoAddress(Token, coverId)" crossorigin="anonymous" alt="@F(Strings.PlantDetail.PhotoOf, copy.Name)" class="@(CoverFrame is null ? null : "framed")" style="@CoverFrame" />
             </div>
         </div>
     }
@@ -62,7 +62,7 @@ else if (copy is not null && check is not null)
 
     @if (strip.Count > 0)
     {
-        <ul class="received-strip" aria-label="Photos">
+        <ul class="received-strip" aria-label="@Strings.PlantEdit.Photos">
             @for (var i = 0; i < strip.Count; i++)
             {
                 var more = i == StripTiles - 1 && allPhotos.Count > StripTiles ? allPhotos.Count - (StripTiles - 1) : 0;
@@ -92,23 +92,23 @@ else if (copy is not null && check is not null)
 
     @if (check.State == ReceivedState.Here)
     {
-        <h2 class="received-heading">@(IsPlant ? "It's already in your plants" : "It's already in your propagations")</h2>
+        <h2 class="received-heading">@(IsPlant ? Strings.Plants.ReceivedAlreadyPlant : Strings.Plants.ReceivedAlreadyPropagation)</h2>
         @if (!busy)
         {
             <div class="form-actions">
-                <a class="btn btn-primary" href="@SubjectPath">Open it</a>
+                <a class="btn btn-primary" href="@SubjectPath">@Strings.Plants.ReceivedOpenIt</a>
             </div>
         }
         @if (check.MissingPhotos > 0)
         {
-            <p class="received-line received-missing">@(check.MissingPhotos == 1 ? "1 of its photos hasn't" : $"{check.MissingPhotos} of its photos haven't") been copied yet.</p>
+            <p class="received-line received-missing">@F(check.MissingPhotos, Strings.Plants.ReceivedMissing_One, Strings.Plants.ReceivedMissing_Other, check.MissingPhotos)</p>
             @if (busy)
             {
                 @Progress
             }
             else
             {
-                <button type="button" class="btn btn-outline-primary" @onclick="FetchMissingOnlyAsync">Fetch the missing photos</button>
+                <button type="button" class="btn btn-outline-primary" @onclick="FetchMissingOnlyAsync">@Strings.Plants.ReceivedFetchMissing</button>
             }
         }
         @if (error is not null)
@@ -118,7 +118,7 @@ else if (copy is not null && check is not null)
     }
     else if (failed > 0)
     {
-        <p class="received-line" role="alert">@(allPhotos.Count - failed) of @allPhotos.Count photos copied. @failed couldn't be fetched.</p>
+        <p class="received-line" role="alert">@F(Strings.Plants.ReceivedPartly, allPhotos.Count - failed, allPhotos.Count, failed)</p>
         @if (busy)
         {
             @Progress
@@ -126,8 +126,8 @@ else if (copy is not null && check is not null)
         else
         {
             <div class="form-actions">
-                <button type="button" class="btn btn-primary" @onclick="TryAgainAsync">Try again</button>
-                <button type="button" class="btn btn-link" @onclick="Arrive">Open it anyway</button>
+                <button type="button" class="btn btn-primary" @onclick="TryAgainAsync">@Strings.Plants.ReceivedTryAgain</button>
+                <button type="button" class="btn btn-link" @onclick="Arrive">@Strings.Plants.ReceivedOpenAnyway</button>
             </div>
         }
         @if (error is not null)
@@ -137,29 +137,29 @@ else if (copy is not null && check is not null)
     }
     else
     {
-        <h2 class="received-heading">Add it to Stikling</h2>
+        <h2 class="received-heading">@Strings.Plants.ReceivedAddHeading</h2>
         <p class="received-line">@(check.State == ReceivedState.Deleted
-            ? "You added this before and deleted it. Bringing it back copies its history again."
-            : "Its photos and history so far are copied to this device once. They won't change if the page does later.")</p>
+            ? Strings.Plants.ReceivedDeletedBefore
+            : Strings.Plants.ReceivedCopyOnce)</p>
 
         <form class="edit-form" @onsubmit="AddAsync">
             <fieldset disabled="@busy">
-                <legend>Make it yours</legend>
+                <legend>@Strings.Plants.ReceivedMakeYours</legend>
                 <div class="mb-3">
-                    <label class="form-label" for="received-nickname">Nickname</label>
+                    <label class="form-label" for="received-nickname">@Strings.PlantEdit.Nickname</label>
                     <input id="received-nickname" class="form-control" @bind="nickname"
-                           placeholder="@(string.IsNullOrWhiteSpace(copy.Genus) ? copy.Name : "e.g. Kitchen coleus")" />
-                    <div class="form-text">Optional. Leave it empty to call it by its name.</div>
+                           placeholder="@(string.IsNullOrWhiteSpace(copy.Genus) ? copy.Name : Strings.Plants.ReceivedNicknamePlaceholder)" />
+                    <div class="form-text">@Strings.Plants.ReceivedNicknameHint</div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="received-given-by">Who gave it to you?</label>
-                    <input id="received-given-by" class="form-control" @bind="givenBy" placeholder="e.g. Anna" />
-                    <div class="form-text">Kept with it. Never shown on a share link.</div>
+                    <label class="form-label" for="received-given-by">@Strings.Plants.ReceivedGivenBy</label>
+                    <input id="received-given-by" class="form-control" @bind="givenBy" placeholder="@Strings.Plants.ReceivedGivenByPlaceholder" />
+                    <div class="form-text">@Strings.Plants.ReceivedGivenByHint</div>
                 </div>
                 @if (!IsPlant)
                 {
                     <div class="mb-3">
-                        <label class="form-label" for="received-count">How many did you get?</label>
+                        <label class="form-label" for="received-count">@Strings.Plants.ReceivedHowMany</label>
                         <input id="received-count" type="number" min="1" class="form-control received-count" @bind="count" />
                     </div>
                 }
@@ -173,7 +173,7 @@ else if (copy is not null && check is not null)
             else
             {
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">@(check.State == ReceivedState.Deleted ? "Bring it back" : "Add it to Stikling")</button>
+                    <button type="submit" class="btn btn-primary">@(check.State == ReceivedState.Deleted ? Strings.Plants.ReceivedBringBack : Strings.Plants.ReceivedAddHeading)</button>
                 </div>
             }
             @if (error is not null)
@@ -186,6 +186,12 @@ else if (copy is not null && check is not null)
 
 @code {
     private const int StripTiles = 6;
+
+    private static string F(string format, params object?[] args) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
+
+    // Picks the one or other form by count, then fills in the rest
+    private static string F(int count, string one, string other, params object?[] args) => F(count == 1 ? one : other, args);
 
     [Parameter]
     public string Token { get; set; } = "";
@@ -204,7 +210,7 @@ else if (copy is not null && check is not null)
     private int count = 1;
 
     private bool busy;
-    private string waitingText = "Adding it…";
+    private string waitingText = Strings.Plants.ReceivedAdding;
     private ReceiveProgress? progress;
     private int failed;
     private string? error;
@@ -233,9 +239,9 @@ else if (copy is not null && check is not null)
             var notes = copy?.Items.Count(i => i.Kind == ShareItemKind.Note) ?? 0;
             var parts = new List<string>();
             if (allPhotos.Count > 0)
-                parts.Add(Labels.Count(allPhotos.Count, "photo"));
+                parts.Add(Plural.Of(allPhotos.Count, Strings.Plants.ReceivedPhotos_One, Strings.Plants.ReceivedPhotos_Other));
             if (notes > 0)
-                parts.Add(Labels.Count(notes, "note"));
+                parts.Add(Plural.Of(notes, Strings.Plants.ReceivedNotes_One, Strings.Plants.ReceivedNotes_Other));
             return parts.Count == 0 ? null : string.Join(" · ", parts);
         }
     }
@@ -280,7 +286,7 @@ else if (copy is not null && check is not null)
         if (copy is null || busy)
             return;
 
-        await RunAsync("Adding it…", async () =>
+        await RunAsync(Strings.Plants.ReceivedAdding, async () =>
         {
             var request = new ReceiveRequest(nickname, givenBy, await RoomService.PlaceIdAsync(location), IsPlant ? 1 : Math.Max(1, count));
             var result = await Receiving.AddAsync(Token, copy, request, new Progress<ReceiveProgress>(Report));
@@ -295,7 +301,7 @@ else if (copy is not null && check is not null)
         if (copy is null || busy)
             return;
 
-        await RunAsync("Fetching photos…", async () =>
+        await RunAsync(Strings.Plants.ReceivedFetching, async () =>
         {
             var result = await Receiving.FetchMissingAsync(Token, copy, new Progress<ReceiveProgress>(Report));
             failed = result.Failed;
@@ -309,7 +315,7 @@ else if (copy is not null && check is not null)
         if (copy is null || busy)
             return;
 
-        await RunAsync("Fetching photos…", async () =>
+        await RunAsync(Strings.Plants.ReceivedFetching, async () =>
         {
             await Receiving.FetchMissingAsync(Token, copy, new Progress<ReceiveProgress>(Report));
             check = await Receiving.CheckAsync(copy);
@@ -329,7 +335,7 @@ else if (copy is not null && check is not null)
         catch (Exception ex)
         {
             Logger.LogError(ex, "Keeping a received history failed");
-            error = $"Couldn't add it: {ex.Message}";
+            error = F(Strings.Plants.ReceivedFailed, ex.Message);
         }
         finally
         {
@@ -340,11 +346,11 @@ else if (copy is not null && check is not null)
     private void Arrive() => Navigation.NavigateTo($"{SubjectPath}?arrived=true", replace: true);
 
     private RenderFragment Progress => @<div class="received-progress">
-        <div class="received-bar" role="progressbar" aria-label="Copying"
+        <div class="received-bar" role="progressbar" aria-label="@Strings.Plants.ReceivedCopying"
              aria-valuemin="0" aria-valuemax="@(progress?.Total ?? 0)" aria-valuenow="@(progress?.Done ?? 0)">
             <span style="@BarStyle"></span>
         </div>
-        <p class="received-progress-text" aria-live="polite">@(progress is { Total: > 0 } p ? $"Copying photos, {p.Done} of {p.Total}" : waitingText)</p>
+        <p class="received-progress-text" aria-live="polite">@(progress is { Total: > 0 } p ? F(Strings.Plants.ReceivedCopyingPhotos, p.Done, p.Total) : waitingText)</p>
     </div>;
 
     private string? BarStyle => progress is { Total: > 0 } p

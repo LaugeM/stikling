@@ -1,7 +1,10 @@
 using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
+using System.Globalization;
+using Stikling.Core.Text;
 using Stikling.Core.Timeline;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Propagations;
 
@@ -191,23 +194,23 @@ public sealed class PropagationService(
         {
             into = await plants.GetAsync(intoId);
             if (into is not { InCollection: true })
-                throw new InvalidOperationException("The plant to pot them with isn't in the collection.");
+                throw new InvalidOperationException(Strings.Propagations.ErrPotWithMissing);
             if (request.Date > Today)
-                throw new InvalidOperationException("The date can't be in the future.");
+                throw new InvalidOperationException(Strings.Propagations.ErrDateCantBeFuture);
         }
         // One plant with several in the pot, or all of them in with another plant
         var oneRecord = (request.OnePot || into is not null) && request.Count > 1;
         var oneAny = request.OnePot || into is not null;
         // The day it was potted up also finishes the propagation when nothing is left
         if (request.Date < propagation.StartedOn)
-            throw new InvalidOperationException("The date can't be before the propagation started.");
+            throw new InvalidOperationException(Strings.Propagations.ErrDateBeforeStart);
         IReadOnlyList<string?> names = oneAny
             ? [string.IsNullOrWhiteSpace(request.Nickname) ? null : request.Nickname.Trim()]
             : PotUpNames(request.Nickname, request.Count, propagation.PottedUpCount);
         // Worked out from the count as it is now, so a retry gives the same ones
         var codes = CollectionNumbers.PottedUpCodes(propagation, request.Count);
         if (request.PlantIds is { } ids && ids.Count < names.Count)
-            throw new ArgumentException("There has to be an id for each new plant.", nameof(request));
+            throw new ArgumentException(Strings.Propagations.ErrIdForEachPlant, nameof(request));
         var newPlants = names.Select((name, i) => new Plant
         {
             Id = request.PlantIds is { } given ? given[i] : Guid.NewGuid(),
@@ -344,9 +347,9 @@ public sealed class PropagationService(
     {
         var day = date ?? Today;
         if (day > Today)
-            throw new InvalidOperationException("The date can't be in the future.");
+            throw new InvalidOperationException(Strings.Propagations.ErrDateCantBeFuture);
         if (day < propagation.StartedOn)
-            throw new InvalidOperationException("The date can't be before the propagation started.");
+            throw new InvalidOperationException(Strings.Propagations.ErrDateBeforeStart);
         await CountAsync(propagation, p => p.RecordFailed(count, day));
 
         var why = string.Join(", ", new[] { reason is { } picked ? FailReasons.Label(picked) : null, Clean(note) }.OfType<string>());
@@ -365,9 +368,9 @@ public sealed class PropagationService(
     {
         var day = date ?? Today;
         if (day > Today)
-            throw new InvalidOperationException("The date can't be in the future.");
+            throw new InvalidOperationException(Strings.Propagations.ErrDateCantBeFuture);
         if (day < propagation.StartedOn)
-            throw new InvalidOperationException("The date can't be before the propagation started.");
+            throw new InvalidOperationException(Strings.Propagations.ErrDateBeforeStart);
         await CountAsync(propagation, p => p.RecordGivenAway(count, day));
 
         var text = Clean(to) is { } who ? $"Gave {count} to {who}" : $"Gave {count} away";
@@ -419,21 +422,33 @@ public sealed class PropagationService(
     public static string Describe(Propagation propagation, Func<Enum, string> label) =>
         $"{propagation.InitialCount}× {label(propagation.Type).ToLowerInvariant()} in {label(propagation.Medium)}";
 
-    /// <summary>"2 potted up, 1 given away, 1 failed".</summary>
+    /// <summary>"2 potted up, 1 given away, 1 failed", for showing.</summary>
     public static string Outcome(Propagation propagation)
     {
-        var parts = new List<string>(2);
+        var parts = new List<string>(3);
+        if (propagation.PottedUpCount > 0)
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.OutcomePottedUp, propagation.PottedUpCount));
+        if (propagation.GivenAwayCount > 0)
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.OutcomeGivenAway, propagation.GivenAwayCount));
+        if (propagation.FailedCount > 0)
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.OutcomeFailed, propagation.FailedCount));
+        return parts.Count == 0 ? Strings.Propagations.OutcomeNothingYet : string.Join(", ", parts);
+    }
+
+    // The history line is saved as it is written, so it stays in English
+    private static string WithOutcome(string text, Propagation propagation)
+    {
+        if (propagation.IsActive)
+            return text;
+        var parts = new List<string>(3);
         if (propagation.PottedUpCount > 0)
             parts.Add($"{propagation.PottedUpCount} potted up");
         if (propagation.GivenAwayCount > 0)
             parts.Add($"{propagation.GivenAwayCount} given away");
         if (propagation.FailedCount > 0)
             parts.Add($"{propagation.FailedCount} failed");
-        return parts.Count == 0 ? "nothing yet" : string.Join(", ", parts);
+        return $"{text}\nFinished: {(parts.Count == 0 ? "nothing yet" : string.Join(", ", parts))}";
     }
-
-    private static string WithOutcome(string text, Propagation propagation) =>
-        propagation.IsActive ? text : $"{text}\nFinished: {Outcome(propagation)}";
 
     private Task AddChangeAsync(Propagation propagation, string text, DateTimeOffset? occurredAt = null, Guid? plantId = null, TimelineEvent? @event = null,
         FailReason? failReason = null, int? count = null) =>

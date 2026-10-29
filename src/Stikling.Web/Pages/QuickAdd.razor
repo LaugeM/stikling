@@ -6,17 +6,17 @@
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
-<PageTitle>Quick add · Stikling</PageTitle>
+<PageTitle>@F(Strings.PlantDetail.PageTitle, Strings.Plants.QuickAddTitle)</PageTitle>
 
-<a class="back-link" href="plants/new">Back</a>
-<h1>Quick add</h1>
+<a class="back-link" href="plants/new">@Strings.Common.Back</a>
+<h1>@Strings.Plants.QuickAddTitle</h1>
 
 <div class="mb-3">
-    <label class="form-label" for="names">Names</label>
+    <label class="form-label" for="names">@Strings.Plants.QuickAddNames</label>
     <textarea id="names" class="form-control" rows="5" value="@text" @oninput="Typed"
-              placeholder="Alocasia zebrina, snake plant, Monstera deliciosa 'Thai Constellation'"
+              placeholder="@Strings.Plants.QuickAddPlaceholder"
               autocapitalize="sentences" spellcheck="false"></textarea>
-    <div class="form-text">One plant per line, or separated by commas. Anything after a known name goes into the notes.</div>
+    <div class="form-text">@Strings.Plants.QuickAddHint</div>
 </div>
 
 @if (errors.Count > 0)
@@ -48,24 +48,27 @@
                     }
                     @if (PlantMatches.SameName(current, existing).Count > 0)
                     {
-                        <div class="form-text mt-0 already-have">You already have this</div>
+                        <div class="form-text mt-0 already-have">@Strings.Plants.QuickAddHaveThis</div>
                     }
                 </div>
                 <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => Remove(current)"
-                        aria-label="Remove @current.DisplayName" title="Remove"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                        aria-label="@F(Strings.Plants.QuickAddRemove, current.DisplayName)" title="@Strings.Common.Remove"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
             </li>
         }
     </ul>
 
     <div class="form-actions">
         <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SaveAsync">
-            @(drafts.Count == 1 ? "Add 1 plant" : $"Add {drafts.Count} plants")
+            @Plural.Of(drafts.Count, Strings.Plants.QuickAddAdd_One, Strings.Plants.QuickAddAdd_Other)
         </button>
-        <a class="btn btn-link" href="plants">Cancel</a>
+        <a class="btn btn-link" href="plants">@Strings.Common.Cancel</a>
     </div>
 }
 
 @code {
+    private static string F(string format, params object?[] args) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
+
     private string text = "";
     private PlantDictionary dictionary = PlantDictionary.Empty;
     private IReadOnlyList<Plant> existing = [];
@@ -106,7 +109,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the quick add failed");
-            errors = [$"Couldn't save: {ex.Message}"];
+            errors = [F(Strings.PlantDetail.CouldntSave, ex.Message)];
         }
         finally
         {

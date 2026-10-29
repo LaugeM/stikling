@@ -6,11 +6,11 @@
 @inject PotService PotService
 
 <div class="pot-picker">
-    <div class="form-label">@Label</div>
+    <div class="form-label">@LabelText</div>
 
-    <div class="chip-row" role="group" aria-label="@Label">
+    <div class="chip-row" role="group" aria-label="@LabelText">
         <button type="button" class="chip @Picked(Value is null && !adding)"
-                @onclick="() => PickAsync(null)">@NoneText</button>
+                @onclick="() => PickAsync(null)">@NoneTextShown</button>
         @foreach (var pot in Choices)
         {
             var cover = covers.GetValueOrDefault(pot.Id);
@@ -23,14 +23,14 @@
                 @pot.DisplayName
             </button>
         }
-        <button type="button" class="chip new @Picked(adding)" @onclick="StartAdding">+ New pot</button>
+        <button type="button" class="chip new @Picked(adding)" @onclick="StartAdding">@Strings.Shared.PotPickerNew</button>
     </div>
 
     @if (adding)
     {
         @if (Names.Count > 0)
         {
-            <div class="chip-row mt-2" role="group" aria-label="Pots you already have">
+            <div class="chip-row mt-2" role="group" aria-label="@Strings.Shared.PotPickerExisting">
                 @foreach (var name in Names)
                 {
                     <button type="button" class="chip @Picked(name == draftName)"
@@ -41,13 +41,13 @@
 
         <div class="row g-2 mt-2">
             <div class="col-8">
-                <input class="form-control" placeholder="e.g. Clear nursery pot" autocomplete="off"
-                       aria-label="Pot name" value="@draftName" @oninput="e => draftName = e.Value?.ToString()"
+                <input class="form-control" placeholder="@Strings.Shared.PotPickerNamePlaceholder" autocomplete="off"
+                       aria-label="@Strings.Shared.PotPickerNameLabel" value="@draftName" @oninput="e => draftName = e.Value?.ToString()"
                        @ref="draftInput" />
             </div>
             <div class="col-4">
                 <input class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
-                       placeholder="cm" aria-label="Across the top in centimetres" @bind="draftSize" />
+                       placeholder="@Strings.Shared.PotPickerSizePlaceholder" aria-label="@Strings.Shared.PotPickerSizeLabel" @bind="draftSize" />
             </div>
         </div>
 
@@ -57,10 +57,10 @@
         }
 
         <div class="care-actions mt-2">
-            <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="AddAsync">Add pot</button>
-            <button type="button" class="btn btn-link btn-sm" @onclick="StopAdding">Cancel</button>
+            <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="AddAsync">@Strings.Shared.PotPickerAdd</button>
+            <button type="button" class="btn btn-link btn-sm" @onclick="StopAdding">@Strings.Common.Cancel</button>
         </div>
-        <div class="form-text">It joins your pot library. The rest of its details can be filled in under Supplies, then Pots.</div>
+        <div class="form-text">@Strings.Shared.PotPickerHint</div>
     }
 </div>
 
@@ -81,10 +81,13 @@
     public IReadOnlyList<PotGroup> Groups { get; set; } = [PotGroup.Inner];
 
     [Parameter]
-    public string Label { get; set; } = "Pot";
+    public string? Label { get; set; }
 
     [Parameter]
-    public string NoneText { get; set; } = "No pot";
+    public string? NoneText { get; set; }
+
+    private string LabelText => Label ?? Strings.Shared.PotPickerPot;
+    private string NoneTextShown => NoneText ?? Strings.Shared.PotPickerNone;
 
     /// <summary>Raised when a pot is added here, so the page can put it in its own list.</summary>
     [Parameter]

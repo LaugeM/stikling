@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -108,43 +109,43 @@ public sealed class PestTreatment : Entity
         var errors = new List<string>();
 
         if (CaseId == Guid.Empty && PlantId is null)
-            errors.Add("A treatment has to belong to a case.");
+            errors.Add(Strings.Pests.TreatmentNeedsCase);
         else if (CaseId != Guid.Empty && PlantId is not null)
-            errors.Add("A check belongs to a case or a plant, not both.");
+            errors.Add(Strings.Pests.CheckCaseOrPlant);
         else if (PlantId is not null && Kind != PestTreatmentKind.Checked)
-            errors.Add("Only a check can be logged on a single plant.");
+            errors.Add(Strings.Pests.OnlyCheckOnPlant);
 
         if (OccurredOn > today)
-            errors.Add("That date is in the future.");
+            errors.Add(Strings.Pests.DateInFuture);
 
         if (NextDueOn is { } next && next < OccurredOn)
-            errors.Add("The next treatment can't be due before this one happened.");
+            errors.Add(Strings.Pests.NextTreatmentBeforeThis);
 
         var treated = What is not null || NextDueOn is not null || RecipeId is not null || Ingredients.Count > 0 || Method is not null;
         var trapped = OnTrap is not null || NewTrap;
 
         if (Kind == PestTreatmentKind.Checked && (treated || trapped))
-            errors.Add("A check only has a date and notes.");
+            errors.Add(Strings.Pests.CheckOnlyDateNotes);
 
         if (Kind == PestTreatmentKind.Treated && trapped)
-            errors.Add("A treatment doesn't have a trap count.");
+            errors.Add(Strings.Pests.TreatmentNoTrapCount);
 
         if (Kind == PestTreatmentKind.TrapCount)
         {
             if (treated)
-                errors.Add("A trap count only has the count, a new trap, a date and notes.");
+                errors.Add(Strings.Pests.TrapCountOnlyCount);
             else if (OnTrap is null && !NewTrap)
-                errors.Add("Fill in how many are on the trap, or that a new one went up.");
+                errors.Add(Strings.Pests.TrapCountFillIn);
 
             if (OnTrap < 0)
-                errors.Add("The count can't be below zero.");
+                errors.Add(Strings.Pests.TrapCountBelowZero);
         }
 
         if (Skipped && (PlanStepId is null || Kind != PestTreatmentKind.Treated || treated || trapped))
-            errors.Add("A skipped step only has a date and notes.");
+            errors.Add(Strings.Pests.SkippedStepOnlyDateNotes);
 
         if (PlanStepId is not null && Kind != PestTreatmentKind.Treated)
-            errors.Add("Only a treatment can be a step of a plan.");
+            errors.Add(Strings.Pests.OnlyTreatmentIsStep);
 
         errors.AddRange(RecipeIngredient.Validate(Ingredients));
 

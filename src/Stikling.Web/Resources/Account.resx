@@ -1,0 +1,828 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BackToSettings" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Back link at the top of the backup, account and sign-in pages. Same word as the Settings tab.</comment>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="Photo_One" xml:space="preserve">
+    <value>{0} photo</value>
+  </data>
+  <data name="Photo_Other" xml:space="preserve">
+    <value>{0} photos</value>
+  </data>
+  <data name="Propagation_One" xml:space="preserve">
+    <value>{0} propagation</value>
+  </data>
+  <data name="Propagation_Other" xml:space="preserve">
+    <value>{0} propagations</value>
+  </data>
+  <data name="Change_One" xml:space="preserve">
+    <value>{0} change</value>
+  </data>
+  <data name="Change_Other" xml:space="preserve">
+    <value>{0} changes</value>
+  </data>
+  <data name="Item_One" xml:space="preserve">
+    <value>{0} item</value>
+  </data>
+  <data name="Item_Other" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+  <data name="NewItem_One" xml:space="preserve">
+    <value>{0} new item</value>
+  </data>
+  <data name="NewItem_Other" xml:space="preserve">
+    <value>{0} new items</value>
+  </data>
+  <data name="ImportPageTitle" xml:space="preserve">
+    <value>Import plants · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="ImportTitle" xml:space="preserve">
+    <value>Import plants</value>
+    <comment>Heading of the page for bringing in plants from a spreadsheet.</comment>
+  </data>
+  <data name="ImportIntro" xml:space="preserve">
+    <value>Bring in plants from Excel, Google Sheets or a list you keep somewhere else. Save the sheet as CSV and choose the file, or copy the cells, headings included, and paste them.</value>
+  </data>
+  <data name="ImportChooseFile" xml:space="preserve">
+    <value>Choose a CSV file</value>
+  </data>
+  <data name="ImportPasteLabel" xml:space="preserve">
+    <value>Or paste cells</value>
+  </data>
+  <data name="ImportUseCells" xml:space="preserve">
+    <value>Use these cells</value>
+  </data>
+  <data name="ImportUndone_Plant" xml:space="preserve">
+    <value>Removed the plant again.</value>
+    <comment>Heading after Undo on the import page.</comment>
+  </data>
+  <data name="ImportUndone_PlantField" xml:space="preserve">
+    <value>Removed the plant and the field it made again.</value>
+    <comment>Heading after Undo on the import page. A field is one of the person's own fields.</comment>
+  </data>
+  <data name="ImportUndone_PlantFields" xml:space="preserve">
+    <value>Removed the plant and the {0} fields it made again.</value>
+    <comment>Heading after Undo on the import page. {0} is the number of fields.</comment>
+  </data>
+  <data name="ImportUndone_Plants" xml:space="preserve">
+    <value>Removed the {0} plants again.</value>
+    <comment>Heading after Undo on the import page. {0} is the number of plants.</comment>
+  </data>
+  <data name="ImportUndone_PlantsField" xml:space="preserve">
+    <value>Removed the {0} plants and the field it made again.</value>
+    <comment>Heading after Undo on the import page. {0} is the number of plants.</comment>
+  </data>
+  <data name="ImportUndone_PlantsFields" xml:space="preserve">
+    <value>Removed the {0} plants and the {1} fields it made again.</value>
+    <comment>Heading after Undo on the import page. {0} is the number of plants and {1} the number of fields.</comment>
+  </data>
+  <data name="ImportGoToPlants" xml:space="preserve">
+    <value>Go to Plants</value>
+    <comment>Plants is the name of the Plants tab.</comment>
+  </data>
+  <data name="ImportImportMore" xml:space="preserve">
+    <value>Import more plants</value>
+  </data>
+  <data name="ImportNoneAdded" xml:space="preserve">
+    <value>No plants added</value>
+  </data>
+  <data name="ImportAdded_One" xml:space="preserve">
+    <value>{0} plant added</value>
+  </data>
+  <data name="ImportAdded_Other" xml:space="preserve">
+    <value>{0} plants added</value>
+  </data>
+  <data name="ImportRoomMade_One" xml:space="preserve">
+    <value>{0} room made</value>
+    <comment>Shown after an import. {0} is a number.</comment>
+  </data>
+  <data name="ImportRoomMade_Other" xml:space="preserve">
+    <value>{0} rooms made</value>
+    <comment>Shown after an import. {0} is a number.</comment>
+  </data>
+  <data name="ImportFieldMade_One" xml:space="preserve">
+    <value>{0} field made</value>
+    <comment>Shown after an import. A field is one of the person's own fields.</comment>
+  </data>
+  <data name="ImportFieldMade_Other" xml:space="preserve">
+    <value>{0} fields made</value>
+    <comment>Shown after an import. A field is one of the person's own fields.</comment>
+  </data>
+  <data name="ImportCareLogged_One" xml:space="preserve">
+    <value>{0} care date logged</value>
+    <comment>Shown after an import.</comment>
+  </data>
+  <data name="ImportCareLogged_Other" xml:space="preserve">
+    <value>{0} care dates logged</value>
+    <comment>Shown after an import.</comment>
+  </data>
+  <data name="ImportNotAdded" xml:space="preserve">
+    <value>Not added</value>
+  </data>
+  <data name="ImportRowName" xml:space="preserve">
+    <value>Row {0} · {1}</value>
+    <comment>In the list of plants that weren't added. {0} is the row number in the spreadsheet and {1} the name of the plant.</comment>
+  </data>
+  <data name="ImportUndo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="ImportColumnsLabel" xml:space="preserve">
+    <value>Columns</value>
+    <comment>Read out by a screen reader for the part of the page about the columns of the spreadsheet.</comment>
+  </data>
+  <data name="ImportRow_One" xml:space="preserve">
+    <value>{0} row</value>
+  </data>
+  <data name="ImportRow_Other" xml:space="preserve">
+    <value>{0} rows</value>
+  </data>
+  <data name="ImportColumn_One" xml:space="preserve">
+    <value>{0} column</value>
+  </data>
+  <data name="ImportColumn_Other" xml:space="preserve">
+    <value>{0} columns</value>
+  </data>
+  <data name="ImportStartAgain" xml:space="preserve">
+    <value>Start again</value>
+  </data>
+  <data name="ImportFirstRowHeadings" xml:space="preserve">
+    <value>The first row is the headings</value>
+  </data>
+  <data name="ImportYourColumns" xml:space="preserve">
+    <value>Your columns</value>
+  </data>
+  <data name="ImportEmpty" xml:space="preserve">
+    <value>Empty</value>
+    <comment>Shown for a column of the spreadsheet that has no values.</comment>
+  </data>
+  <data name="ImportNewField" xml:space="preserve">
+    <value>New field: {0}</value>
+    <comment>An option in the list of what a column becomes. {0} is the heading of the column.</comment>
+  </data>
+  <data name="ImportKindOfField" xml:space="preserve">
+    <value>Kind of field</value>
+    <comment>Read out by a screen reader.</comment>
+  </data>
+  <data name="ImportKindText" xml:space="preserve">
+    <value>Text</value>
+    <comment>A kind of field of the person's own.</comment>
+  </data>
+  <data name="ImportKindNumber" xml:space="preserve">
+    <value>Number</value>
+    <comment>A kind of field of the person's own.</comment>
+  </data>
+  <data name="ImportKindDate" xml:space="preserve">
+    <value>Date</value>
+    <comment>A kind of field of the person's own.</comment>
+  </data>
+  <data name="ImportKindChoice" xml:space="preserve">
+    <value>Choice</value>
+    <comment>A kind of field of the person's own.</comment>
+  </data>
+  <data name="ImportYourFields" xml:space="preserve">
+    <value>Your fields</value>
+    <comment>Heading of a group in the list of what a column becomes.</comment>
+  </data>
+  <data name="ImportMakesField" xml:space="preserve">
+    <value>Makes a new field called {0}.</value>
+  </data>
+  <data name="ImportGoesIntoField" xml:space="preserve">
+    <value>Goes into your field {0}.</value>
+  </data>
+  <data name="ImportDatesInFile" xml:space="preserve">
+    <value>Dates in this file</value>
+  </data>
+  <data name="ImportDayFirst" xml:space="preserve">
+    <value>Day first</value>
+  </data>
+  <data name="ImportDayFirstExample" xml:space="preserve">
+    <value>03/04 is 3 April</value>
+  </data>
+  <data name="ImportMonthFirst" xml:space="preserve">
+    <value>Month first</value>
+  </data>
+  <data name="ImportMonthFirstExample" xml:space="preserve">
+    <value>03/04 is 4 March</value>
+  </data>
+  <data name="ImportNoNameColumn" xml:space="preserve">
+    <value>None of the columns is set to Name, Nickname or Genus, so the plants have no name to add them by.</value>
+  </data>
+  <data name="ImportNextCheck" xml:space="preserve">
+    <value>Next: check {0}</value>
+    <comment>Button. {0} is a number of plants, like 12 plants.</comment>
+  </data>
+  <data name="ImportPlantsLabel" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Read out by a screen reader for the part of the page with the list of plants.</comment>
+  </data>
+  <data name="ImportNoPlants" xml:space="preserve">
+    <value>There are no plants in this file. If the first row is a plant, untick the headings box.</value>
+  </data>
+  <data name="ImportPlantsHeading" xml:space="preserve">
+    <value>Plants</value>
+  </data>
+  <data name="ImportTicked" xml:space="preserve">
+    <value>{0} of {1} ticked</value>
+    <comment>Number of plants ticked in the list.</comment>
+  </data>
+  <data name="ImportLooksLike_One" xml:space="preserve">
+    <value>{0} looks like one you have</value>
+  </data>
+  <data name="ImportLooksLike_Other" xml:space="preserve">
+    <value>{0} look like ones you have</value>
+  </data>
+  <data name="ImportCantAddCount" xml:space="preserve">
+    <value>{0} can't be added</value>
+  </data>
+  <data name="ImportTickAll" xml:space="preserve">
+    <value>Tick all</value>
+  </data>
+  <data name="ImportUntickAll" xml:space="preserve">
+    <value>Untick all</value>
+  </data>
+  <data name="ImportFrom" xml:space="preserve">
+    <value>From “{0}”</value>
+    <comment>Under a plant in the list. {0} is the name as written in the spreadsheet.</comment>
+  </data>
+  <data name="ImportAboutIt" xml:space="preserve">
+    <value>About it: {0}</value>
+    <comment>Under a plant in the list. {0} is its notes.</comment>
+  </data>
+  <data name="ImportLooksLikeYours" xml:space="preserve">
+    <value>Looks like one you have</value>
+  </data>
+  <data name="ImportCantAdd" xml:space="preserve">
+    <value>Can't add it: {0}</value>
+    <comment>{0} is the reason, starting with a lower case letter.</comment>
+  </data>
+  <data name="ImportAdding" xml:space="preserve">
+    <value>Adding</value>
+    <comment>Read out by a screen reader for the progress bar.</comment>
+  </data>
+  <data name="ImportAddingProgress" xml:space="preserve">
+    <value>Adding {0} of {1}</value>
+  </data>
+  <data name="ImportTickToAdd" xml:space="preserve">
+    <value>Tick the plants to add</value>
+  </data>
+  <data name="ImportAddPlants" xml:space="preserve">
+    <value>Add {0}</value>
+    <comment>Button. {0} is a number of plants, like 12 plants.</comment>
+  </data>
+  <data name="ImportBackToColumns" xml:space="preserve">
+    <value>Back to columns</value>
+  </data>
+  <data name="ImportRowLine" xml:space="preserve">
+    <value>Row {0}</value>
+    <comment>Under a plant in the list. {0} is the row number in the spreadsheet.</comment>
+  </data>
+  <data name="ImportGot" xml:space="preserve">
+    <value>Got {0}</value>
+    <comment>Under a plant in the list. {0} is the date it was acquired.</comment>
+  </data>
+  <data name="ImportCareWatered" xml:space="preserve">
+    <value>Watered</value>
+    <comment>Followed by a date, like Watered 3 Oct 2026.</comment>
+  </data>
+  <data name="ImportCareFed" xml:space="preserve">
+    <value>Fed</value>
+    <comment>Followed by a date, like Fed 3 Oct 2026.</comment>
+  </data>
+  <data name="ImportCareRepotted" xml:space="preserve">
+    <value>Repotted</value>
+    <comment>Followed by a date, like Repotted 3 Oct 2026.</comment>
+  </data>
+  <data name="ImportCareDate" xml:space="preserve">
+    <value>{0} {1}</value>
+    <comment>Under a plant in the list. {0} is the kind of care, like Watered, and {1} a date.</comment>
+  </data>
+  <data name="ImportFileTooBig" xml:space="preserve">
+    <value>That file is over 5 MB. A list of plants is far smaller than that, so check it's the right file.</value>
+  </data>
+  <data name="ImportNoPlantsInFile" xml:space="preserve">
+    <value>There are no plants in that file.</value>
+  </data>
+  <data name="ImportCantRead" xml:space="preserve">
+    <value>Couldn't read that file.</value>
+  </data>
+  <data name="ImportPastedCells" xml:space="preserve">
+    <value>Pasted cells</value>
+    <comment>Name of the source of the columns when the cells were pasted, shown next to the number of rows.</comment>
+  </data>
+  <data name="ImportNoPlantsPasted" xml:space="preserve">
+    <value>There are no plants in what you pasted.</value>
+  </data>
+  <data name="ImportAddFailedSome" xml:space="preserve">
+    <value>Couldn't add the rest of them on this device. Undo takes out the ones added so far.</value>
+  </data>
+  <data name="ImportAddFailedNone" xml:space="preserve">
+    <value>Couldn't add the plants on this device. Nothing was added, so you can try again.</value>
+  </data>
+  <data name="ImportUndoFailed" xml:space="preserve">
+    <value>Couldn't undo it on this device. Try again, or remove the plants on Plants.</value>
+  </data>
+  <data name="BackupPageTitle" xml:space="preserve">
+    <value>Backup and storage · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="BackupTitle" xml:space="preserve">
+    <value>Backup and storage</value>
+    <comment>Heading of the page.</comment>
+  </data>
+  <data name="BackupSection" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="BackupIntroSignedIn" xml:space="preserve">
+    <value>A backup is a ZIP file with your plants and photos in it, which you can keep in cloud storage or move to another phone.</value>
+    <comment>Shown when the person is signed in.</comment>
+  </data>
+  <data name="BackupIntroLocal" xml:space="preserve">
+    <value>Everything you add stays on this device. A backup is a ZIP file with your plants and photos in it, which you can keep in cloud storage or move to another phone.</value>
+    <comment>Shown when the person is not signed in.</comment>
+  </data>
+  <data name="BackupSave" xml:space="preserve">
+    <value>Save a backup</value>
+  </data>
+  <data name="BackupRestore" xml:space="preserve">
+    <value>Restore a backup</value>
+  </data>
+  <data name="BackupLastTaken" xml:space="preserve">
+    <value>Last backup: {0} ({1}).</value>
+    <comment>{0} is a date and {1} how long ago, like 3 days ago.</comment>
+  </data>
+  <data name="BackupNoneYet" xml:space="preserve">
+    <value>No backup taken on this device yet.</value>
+  </data>
+  <data name="BackupMade" xml:space="preserve">
+    <value>Made {0}, holding {1}, {2} and {3}, along with their history, care, pots and rooms.</value>
+    <comment>Shown after choosing a backup file to restore. {0} is a date, {1} a number of plants, {2} of propagations and {3} of photos.</comment>
+  </data>
+  <data name="BackupRestoreExplain" xml:space="preserve">
+    <value>Restoring adds what's missing here and brings back anything you've deleted since. Where the backup has a newer version of something, it replaces the one here. Anything you've changed here since the backup stays.</value>
+  </data>
+  <data name="BackupRestoreExplainSaved" xml:space="preserve">
+    <value>Restoring adds what's missing here and brings back anything you've deleted since. Where the backup has a newer version of something, it replaces the one here. Anything you've changed here since the backup stays. A backup of what's here now is saved to your downloads first, so anything that gets replaced can be brought back by restoring that one.</value>
+    <comment>Same as the text before, with a sentence added at the end. Shown when there is something on the device to save first.</comment>
+  </data>
+  <data name="BackupRestoreButton" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="BackupRestoreWithoutSaving" xml:space="preserve">
+    <value>Restore without saving first</value>
+  </data>
+  <data name="BackupWithoutThat" xml:space="preserve">
+    <value>Without that backup, anything a newer version in the file replaces can't be brought back.</value>
+  </data>
+  <data name="BackupPhotosSection" xml:space="preserve">
+    <value>Your photos in folders</value>
+  </data>
+  <data name="BackupPhotosIntro" xml:space="preserve">
+    <value>Every photo, with a folder for each plant, propagation and pot, named by when it was taken. For keeping or looking through outside the app. To move your collection to another device, use a backup.</value>
+  </data>
+  <data name="BackupNoPhotos" xml:space="preserve">
+    <value>No photos yet.</value>
+  </data>
+  <data name="BackupIncludeGone" xml:space="preserve">
+    <value>Include plants that are gone and finished propagations</value>
+  </data>
+  <data name="BackupIncludeReferences" xml:space="preserve">
+    <value>Include reference photos, in a Reference folder of their own</value>
+    <comment>The folder is called Reference in the file, and the name stays in English.</comment>
+  </data>
+  <data name="BackupDownloadPhotos" xml:space="preserve">
+    <value>Download photos</value>
+  </data>
+  <data name="BackupGathering" xml:space="preserve">
+    <value>Gathering photos ({0} of {1})</value>
+  </data>
+  <data name="BackupSpreadsheetSection" xml:space="preserve">
+    <value>For a spreadsheet</value>
+  </data>
+  <data name="BackupSpreadsheetIntro" xml:space="preserve">
+    <value>A copy of your plants or propagations to open in Excel or Google Sheets, or a list of plants to bring in. A CSV isn't a backup: photos, history and care only come back from a backup.</value>
+  </data>
+  <data name="BackupPlantsCsv" xml:space="preserve">
+    <value>Plants as CSV</value>
+  </data>
+  <data name="BackupPropagationsCsv" xml:space="preserve">
+    <value>Propagations as CSV</value>
+  </data>
+  <data name="BackupImportPlants" xml:space="preserve">
+    <value>Import plants</value>
+  </data>
+  <data name="BackupStorageSection" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="BackupUsing" xml:space="preserve">
+    <value>Stikling is using {0} on this device.</value>
+    <comment>{0} is a size, like 12.4 MB.</comment>
+  </data>
+  <data name="BackupPersisted" xml:space="preserve">
+    <value>The browser has been asked to keep your data and agreed. It won't be cleared when space runs low.</value>
+  </data>
+  <data name="BackupNotPersisted" xml:space="preserve">
+    <value>The browser may clear your data if the device runs low on space. Installing Stikling to the home screen usually settles this, and you can ask directly:</value>
+  </data>
+  <data name="BackupAskToKeep" xml:space="preserve">
+    <value>Ask to keep my data</value>
+  </data>
+  <data name="BackupNoEstimate" xml:space="preserve">
+    <value>This browser doesn't say how much space is in use.</value>
+  </data>
+  <data name="BackupPacking" xml:space="preserve">
+    <value>Packing your plants and photos…</value>
+  </data>
+  <data name="BackupSaved" xml:space="preserve">
+    <value>Saved a backup with {0}, {1} and {2}. Check your downloads.</value>
+    <comment>{0} is a number of plants, {1} of propagations and {2} of photos.</comment>
+  </data>
+  <data name="BackupSaveFailed" xml:space="preserve">
+    <value>Couldn't save the backup. Check that the device has room, then try again.</value>
+  </data>
+  <data name="BackupNoPhotosToInclude" xml:space="preserve">
+    <value>No photos to include.</value>
+  </data>
+  <data name="BackupNoPhotosTick" xml:space="preserve">
+    <value>No photos to include. Tick the boxes above to include more.</value>
+  </data>
+  <data name="BackupPhotosSaved" xml:space="preserve">
+    <value>Saved {0}. Check your downloads.</value>
+    <comment>{0} is a number of photos.</comment>
+  </data>
+  <data name="BackupPhotosMissing_One" xml:space="preserve">
+    <value>{0} photo couldn't be found on this device and was left out.</value>
+  </data>
+  <data name="BackupPhotosMissing_Other" xml:space="preserve">
+    <value>{0} photos couldn't be found on this device and were left out.</value>
+  </data>
+  <data name="BackupPhotosFailed" xml:space="preserve">
+    <value>Couldn't download the photos. Check that the device has room, then try again.</value>
+  </data>
+  <data name="BackupReading" xml:space="preserve">
+    <value>Reading the backup…</value>
+  </data>
+  <data name="BackupReadFailed" xml:space="preserve">
+    <value>Couldn't read that file. It may not be a Stikling backup, or it may be damaged.</value>
+  </data>
+  <data name="BackupSavingFirst" xml:space="preserve">
+    <value>Saving what's here first…</value>
+  </data>
+  <data name="BackupSaveFirstFailed" xml:space="preserve">
+    <value>Couldn't save a backup of what's here, so nothing was restored.</value>
+  </data>
+  <data name="BackupRestoring" xml:space="preserve">
+    <value>Restoring…</value>
+  </data>
+  <data name="BackupRestored" xml:space="preserve">
+    <value>Restored {0} and {1} updated, including {2}.</value>
+    <comment>{0} is a number of new items, like 12 new items, {1} a number and {2} a number of photos.</comment>
+  </data>
+  <data name="BackupBroughtBack_One" xml:space="preserve">
+    <value>{0} item deleted here came back.</value>
+  </data>
+  <data name="BackupBroughtBack_Other" xml:space="preserve">
+    <value>{0} items deleted here came back.</value>
+  </data>
+  <data name="BackupUpToDate_One" xml:space="preserve">
+    <value>{0} item here was already up to date.</value>
+  </data>
+  <data name="BackupUpToDate_Other" xml:space="preserve">
+    <value>{0} items here were already up to date.</value>
+  </data>
+  <data name="BackupPicturesBack" xml:space="preserve">
+    <value>Put back the pictures for {0} that had lost them. Everything else was already here.</value>
+    <comment>{0} is a number of photos.</comment>
+  </data>
+  <data name="BackupAlreadyHere" xml:space="preserve">
+    <value>Everything in that backup was already here.</value>
+  </data>
+  <data name="BackupSavedAs" xml:space="preserve">
+    <value>What was here before is saved as {0}. Check your downloads.</value>
+    <comment>{0} is a file name.</comment>
+  </data>
+  <data name="BackupRestoreFailed" xml:space="preserve">
+    <value>Couldn't finish restoring that backup. What it did restore is kept, and restoring it again picks up the rest.</value>
+  </data>
+  <data name="BackupPersistGranted" xml:space="preserve">
+    <value>The browser agreed to keep your data.</value>
+  </data>
+  <data name="BackupPersistDenied" xml:space="preserve">
+    <value>The browser said no for now. Installing Stikling to the home screen usually changes that.</value>
+  </data>
+  <data name="AccountPageTitle" xml:space="preserve">
+    <value>Account · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="AccountTitle" xml:space="preserve">
+    <value>Account</value>
+    <comment>Heading of the page.</comment>
+  </data>
+  <data name="AccountSyncNow" xml:space="preserve">
+    <value>Sync now</value>
+  </data>
+  <data name="AccountSignOut" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="AccountKeptSame" xml:space="preserve">
+    <value>Your plants, care, pests, photos and settings are kept the same on every device you sign in on. Each device keeps a small copy of every photo, and fetches the full size when you open one.</value>
+  </data>
+  <data name="AccountPhotoUsage" xml:space="preserve">
+    <value>Photos take {0} of the {1} they have on the server.</value>
+    <comment>{0} and {1} are sizes, like 12.4 MB.</comment>
+  </data>
+  <data name="AccountSignOutHeading" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="AccountSignOutExplain" xml:space="preserve">
+    <value>What's synced stays on the Stikling server and comes back when you sign in again. You can keep a copy on this device as well, or remove it from here.</value>
+  </data>
+  <data name="AccountSendingLatest" xml:space="preserve">
+    <value>Sending your latest changes first…</value>
+  </data>
+  <data name="AccountUnsentPhotos_One" xml:space="preserve">
+    <value>{0} photo added here hasn't reached the server yet, and removing deletes it. Save a backup first to keep it.</value>
+  </data>
+  <data name="AccountUnsentPhotos_Other" xml:space="preserve">
+    <value>{0} photos added here haven't reached the server yet, and removing deletes them. Save a backup first to keep them.</value>
+  </data>
+  <data name="AccountUnsentChanges_One" xml:space="preserve">
+    <value>{0} change made here hasn't reached the server yet, and removing loses it.</value>
+  </data>
+  <data name="AccountUnsentChanges_Other" xml:space="preserve">
+    <value>{0} changes made here haven't reached the server yet, and removing loses them.</value>
+  </data>
+  <data name="AccountKeepAndSignOut" xml:space="preserve">
+    <value>Keep and sign out</value>
+  </data>
+  <data name="AccountRemoveAndSignOut" xml:space="preserve">
+    <value>Remove and sign out</value>
+  </data>
+  <data name="AccountDownload" xml:space="preserve">
+    <value>Download your data</value>
+  </data>
+  <data name="AccountDownloadPreparing" xml:space="preserve">
+    <value>Getting your data ready. With a lot of photos this can take a while…</value>
+  </data>
+  <data name="AccountDownloadHint" xml:space="preserve">
+    <value>A ZIP of everything the Stikling server holds about you, photos included, and what the sign-in service has.</value>
+  </data>
+  <data name="AccountDeleteHeading" xml:space="preserve">
+    <value>Delete your account</value>
+  </data>
+  <data name="AccountDeleteExplain" xml:space="preserve">
+    <value>This erases your plants, photos and settings from the Stikling server and deletes your sign-in. It can't be undone.</value>
+  </data>
+  <data name="AccountRemoveHereToo" xml:space="preserve">
+    <value>Remove everything from this device too</value>
+  </data>
+  <data name="AccountEmptyAfter" xml:space="preserve">
+    <value>This device will be empty afterwards, as if Stikling was just installed.</value>
+  </data>
+  <data name="AccountKeepsWhatItHas" xml:space="preserve">
+    <value>This device keeps what it has, and the app carries on without an account.</value>
+  </data>
+  <data name="AccountDeleteButton" xml:space="preserve">
+    <value>Delete account</value>
+  </data>
+  <data name="AccountChecking" xml:space="preserve">
+    <value>Checking your account…</value>
+  </data>
+  <data name="AccountUnreachable" xml:space="preserve">
+    <value>You're signed in on this device, but the sign-in service can't be reached right now. Everything else works as usual.</value>
+  </data>
+  <data name="AccountNotSignedIn" xml:space="preserve">
+    <value>Not signed in</value>
+  </data>
+  <data name="AccountSignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="AccountOptional" xml:space="preserve">
+    <value>An account is optional. Everything in the app works without one.</value>
+  </data>
+  <data name="AccountSyncing" xml:space="preserve">
+    <value>Syncing…</value>
+  </data>
+  <data name="AccountSyncedAt" xml:space="preserve">
+    <value>Synced at {0}</value>
+    <comment>{0} is a time.</comment>
+  </data>
+  <data name="AccountSyncedOn" xml:space="preserve">
+    <value>Synced on {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="AccountNotSynced" xml:space="preserve">
+    <value>Not synced yet</value>
+  </data>
+  <data name="AccountChangesWaiting_One" xml:space="preserve">
+    <value>{0} change waiting.</value>
+    <comment>Added after a sync problem.</comment>
+  </data>
+  <data name="AccountChangesWaiting_Other" xml:space="preserve">
+    <value>{0} changes waiting.</value>
+    <comment>Added after a sync problem.</comment>
+  </data>
+  <data name="AccountRefused_One" xml:space="preserve">
+    <value>The server turned down {0} change, and it will be tried again. If this keeps happening, check the date and time on this device.</value>
+  </data>
+  <data name="AccountRefused_Other" xml:space="preserve">
+    <value>The server turned down {0} changes, and they will be tried again. If this keeps happening, check the date and time on this device.</value>
+  </data>
+  <data name="AccountPhotosFull" xml:space="preserve">
+    <value>Your photos have used all the space they have on the server, so new ones stay on this device for now. Deleting photos you don't need makes room.</value>
+  </data>
+  <data name="AccountDownloadFailed" xml:space="preserve">
+    <value>Couldn't download your data. Check that you're online and try again.</value>
+  </data>
+  <data name="AccountDeleted" xml:space="preserve">
+    <value>Your account is deleted. Everything on this device is still here.</value>
+  </data>
+  <data name="AccountDeleteFailed" xml:space="preserve">
+    <value>Couldn't delete your account. Check that you're online and try again.</value>
+  </data>
+  <data name="AccountSignOutFailed" xml:space="preserve">
+    <value>Couldn't sign out. Check that you're online and try again.</value>
+  </data>
+  <data name="SignInPageTitle" xml:space="preserve">
+    <value>Sign in · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="SignInTitle" xml:space="preserve">
+    <value>Sign in</value>
+    <comment>Heading of the page.</comment>
+  </data>
+  <data name="SignInNotAvailable" xml:space="preserve">
+    <value>Signing in isn't available in this version of Stikling.</value>
+  </data>
+  <data name="SignInUnreachable" xml:space="preserve">
+    <value>The sign-in service can't be reached. Check that you're online and try again. Everything else in the app works without it.</value>
+  </data>
+  <data name="SignInTryAgain" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="SignInIntro" xml:space="preserve">
+    <value>Use an account you already have with Google, Facebook or Discord, or your email. With email you get a code to type in, so there's no password to remember. If you're new, this creates your Stikling account. The {0} says what is kept and where.</value>
+    <comment>{0} is a link with the text from the next key.</comment>
+  </data>
+  <data name="SignInPrivacyLink" xml:space="preserve">
+    <value>privacy page</value>
+    <comment>Text of the link to the Privacy page, put into the sentence before. In Danish it starts the sentence.</comment>
+  </data>
+  <data name="SyncSomethingWrong" xml:space="preserve">
+    <value>Something went wrong while syncing: {0}</value>
+    <comment>{0} is the technical reason.</comment>
+  </data>
+  <data name="SyncAccountDeleted" xml:space="preserve">
+    <value>This account has been deleted. Sign out to carry on without it.</value>
+  </data>
+  <data name="SyncSignInRanOut" xml:space="preserve">
+    <value>Your sign-in has run out. Sign out and in again to carry on syncing.</value>
+  </data>
+  <data name="SyncTooMany" xml:space="preserve">
+    <value>This account has sent a lot to the Stikling server in a short time. Syncing carries on in a few minutes.</value>
+  </data>
+  <data name="SyncUnreachable" xml:space="preserve">
+    <value>The Stikling server can't be reached right now. Your changes are kept here and sent once it can be.</value>
+  </data>
+  <data name="ShareEmptyAnswer" xml:space="preserve">
+    <value>The server sent an empty answer.</value>
+  </data>
+  <data name="ShareSignInRanOut" xml:space="preserve">
+    <value>Your sign-in has run out. Sign out and in again to carry on.</value>
+  </data>
+  <data name="ShareUnreachable" xml:space="preserve">
+    <value>The Stikling server can't be reached right now.</value>
+  </data>
+  <data name="ShareLinkGone" xml:space="preserve">
+    <value>That link isn't there any more. Close this and open Share again.</value>
+    <comment>Share is the name of a button.</comment>
+  </data>
+  <data name="ShareTurnedDown" xml:space="preserve">
+    <value>The server turned that down. Try again in a moment.</value>
+  </data>
+  <data name="SignInServiceUnreachable" xml:space="preserve">
+    <value>The sign-in service couldn't be reached.</value>
+  </data>
+  <data name="SignInNotSetUp" xml:space="preserve">
+    <value>Signing in isn't set up in this build.</value>
+  </data>
+  <data name="PrivacyPageTitle" xml:space="preserve">
+    <value>Privacy · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="PrivacyBack" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Back link.</comment>
+  </data>
+  <data name="PrivacyTitle" xml:space="preserve">
+    <value>Privacy</value>
+    <comment>Heading of the page. This page is a privacy statement and is translated as it is.</comment>
+  </data>
+  <data name="PrivacyUpdated" xml:space="preserve">
+    <value>Last changed 11 October 2026</value>
+    <comment>Update the date together with the English text.</comment>
+  </data>
+  <data name="PrivacyIntro" xml:space="preserve">
+    <value>Stikling is a free app that I make and run as a hobby project. I'm &lt;a href="https://github.com/LaugeM"&gt;LaugeM on GitHub&lt;/a&gt;, and you can reach me at &lt;a href="mailto:support@stikling.app"&gt;support@stikling.app&lt;/a&gt;. This page says what happens to what you put into the app.</value>
+    <comment>Contains HTML links. Keep the tags and the addresses.</comment>
+  </data>
+  <data name="PrivacyWithoutHeading" xml:space="preserve">
+    <value>Without an account</value>
+  </data>
+  <data name="PrivacyWithoutText" xml:space="preserve">
+    <value>Everything you add stays on your device, in the browser's own storage. None of it is sent anywhere, apart from error reports when something goes wrong. The app is served by GitHub Pages, which sees each visit the way any website host does, including your IP address. &lt;a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement"&gt;GitHub's privacy statement&lt;/a&gt; covers that.</value>
+    <comment>Contains an HTML link. Keep the tags and the address.</comment>
+  </data>
+  <data name="PrivacyWithHeading" xml:space="preserve">
+    <value>With an account</value>
+  </data>
+  <data name="PrivacyWithOptional" xml:space="preserve">
+    <value>An account is optional, and only needed to keep the same plants on several devices. You need to be 13 or older to make one.</value>
+  </data>
+  <data name="PrivacyWithSignIn" xml:space="preserve">
+    <value>&lt;strong&gt;Signing in&lt;/strong&gt; is handled by &lt;a href="https://clerk.com/legal/privacy"&gt;Clerk&lt;/a&gt;, a company in the United States. Clerk keeps your email address, and your name and profile picture if you sign in with Google, Facebook or Discord, along with when you signed in and, for each device you're signed in on, its browser, IP address and rough location. If you sign in with your email, Clerk sends the code to it.</value>
+    <comment>Contains HTML. Keep the tags and the address.</comment>
+  </data>
+  <data name="PrivacyWithData" xml:space="preserve">
+    <value>&lt;strong&gt;What you add in the app&lt;/strong&gt;, like plants, propagations, care, pests, photos and settings, is sent to the Stikling server so your other devices get it too. The server runs on Microsoft Azure in Poland. Only people in your collection can get at it through the app, and for now that is only you. As the one who runs the server I can technically reach the database, but I only look at it to fix a problem you've told me about.</value>
+    <comment>Contains HTML. Keep the tags.</comment>
+  </data>
+  <data name="PrivacyWithNotifications" xml:space="preserve">
+    <value>&lt;strong&gt;Notifications&lt;/strong&gt;, if you turn them on, send the server your time zone and the time you chose, the text of the next 30 days of notifications, which can name your plants, and your device's push address. The text is worked out on your device. The server keeps it so it can send each day's notification at your time without the app open. The message goes through the push service of your browser (Mozilla, Google or Apple), which carries it encrypted and can't read it. Turning notifications off on a device removes its push address from the server, and deleting your account removes everything.</value>
+    <comment>Contains HTML. Keep the tags.</comment>
+  </data>
+  <data name="PrivacyGoogleHeading" xml:space="preserve">
+    <value>Google Photos</value>
+  </data>
+  <data name="PrivacyGoogle1" xml:space="preserve">
+    <value>If you turn on Pick from Google Photos in Settings, Stikling can open Google Photos so you can choose photos from there. Stikling only gets the photos you pick, when you pick them. It can't see, change or delete anything else in your Google Photos.</value>
+  </data>
+  <data name="PrivacyGoogle2" xml:space="preserve">
+    <value>The photos go straight from Google to your device, never through Stikling's server. They're kept on your device like photos from the phone's gallery, and synced like any other photo if you have an account. Google gives the app access for an hour at a time. That access is only held by the open page. It's never saved and never sent anywhere.</value>
+  </data>
+  <data name="PrivacyGoogle3" xml:space="preserve">
+    <value>Stikling's use of information received from Google APIs adheres to the &lt;a href="https://developers.google.com/terms/api-services-user-data-policy"&gt;Google API Services User Data Policy&lt;/a&gt;, including the Limited Use requirements.</value>
+    <comment>Contains an HTML link. Keep the tags and the address. The name of the policy is Google's and stays in English.</comment>
+  </data>
+  <data name="PrivacyPublicHeading" xml:space="preserve">
+    <value>Public pages</value>
+  </data>
+  <data name="PrivacyPublic1" xml:space="preserve">
+    <value>If you're signed in, you can turn on a link for one plant or propagation. Anyone with the link can open its page, without an account. The page shows its name, the line under it, its photos and milestones, and your notes on it if you leave them on. The line starts as the one on the share card, which can name the plant it was taken from or say it was a gift, and you can change it. The page never shows the room, the price, the shop or person it came from, who it went to, its tags, pots or care. Photos you leave out aren't on it.</value>
+  </data>
+  <data name="PrivacyPublic2" xml:space="preserve">
+    <value>The page follows the plant, so new photos and notes show up on it after the next sync. Search engines are asked not to list it. When you turn the link off, or delete the plant, the page stops working within a few minutes, though a site that showed a preview of the link may keep its copy of the picture. To protect the server, it uses the IP address of someone opening a page for a moment to limit how often pages can be loaded, and doesn't keep it.</value>
+  </data>
+  <data name="PrivacyErrorsHeading" xml:space="preserve">
+    <value>Error reports</value>
+  </data>
+  <data name="PrivacyErrors1" xml:space="preserve">
+    <value>When something goes wrong in the app or on the server, a report of what failed is sent to &lt;a href="https://sentry.io/privacy/"&gt;Sentry&lt;/a&gt;, a company in the United States, which stores it in Germany. It's how problems get found and fixed when nobody has written in about them. A report has the kind of error and where in the code it happened, but not the error's own message. It also has the app's version, your browser and system, the address of the screen you were on, which only holds ids, and the screens you opened just before. It doesn't have your account or email address, or your plants, notes or photos. Sentry sees your IP address when a report arrives, the way any website does, and is set not to keep it. Reports are kept for 30 days.</value>
+    <comment>Contains an HTML link. Keep the tags and the address.</comment>
+  </data>
+  <data name="PrivacyErrors2" xml:space="preserve">
+    <value>You can turn off reports from the app with Send error reports, under Your data in Settings. The server's reports don't depend on that switch, since they're about the server and hold the same kind of information.</value>
+  </data>
+  <data name="PrivacyDoesntHeading" xml:space="preserve">
+    <value>What Stikling doesn't do</value>
+  </data>
+  <data name="PrivacyDoesntText" xml:space="preserve">
+    <value>There are no ads, no analytics and no tracking. Your data isn't sold or shared with anyone other than the services named on this page, and it's only used to run the app. Error reports are only used to fix problems. The app doesn't use cookies of its own. Clerk sets the cookies it needs to keep you signed in, and Google may set its own if you use Pick from Google Photos.</value>
+  </data>
+  <data name="PrivacyKeptHeading" xml:space="preserve">
+    <value>How long it's kept</value>
+  </data>
+  <data name="PrivacyKept1" xml:space="preserve">
+    <value>What you delete in the app, like a plant, a care log or a photo, is removed from the server as soon as the deletion syncs. Only its id and the dates it was added, changed and deleted are kept, so your other devices know to delete it too. A photo's images are deleted completely. The database's automatic backups still have the earlier version for up to 7 days. When you merge two rooms or spots, the one merged away is kept as it was, since the app still uses it to find where things went.</value>
+  </data>
+  <data name="PrivacyKept2" xml:space="preserve">
+    <value>Everything else is kept as long as you have the account. When you delete it on the Account page in Settings, your plants, photos and settings are erased from the server straight away, and Clerk deletes your sign-in. The database's automatic backups still hold a copy for up to 7 days, after which it's gone. The server keeps a note of the id your sign-in had at Clerk, so a device that is still signed in can't upload it all again. Once Clerk has deleted your sign-in, that id no longer leads to anything. The &lt;a href="deletion"&gt;deleting your data&lt;/a&gt; page has the steps.</value>
+    <comment>Contains an HTML link to another page of the app. Keep the tags and the address.</comment>
+  </data>
+  <data name="PrivacyKept3" xml:space="preserve">
+    <value>The server's logs are kept for 30 days. They note when the server starts and stops, the database commands it runs without the values in them, and what went wrong when something fails, which can include the id of a record. They don't hold your IP address, your email address, your plants or your photos.</value>
+  </data>
+  <data name="PrivacyRightsHeading" xml:space="preserve">
+    <value>Your rights</value>
+  </data>
+  <data name="PrivacyRights" xml:space="preserve">
+    <value>You can download everything the server holds about you with &lt;em&gt;Download your data&lt;/em&gt; on the Account page in Settings. It's a ZIP with your plants and everything else you added, deleted things as they are kept, your photos, your settings, and what Clerk has about you. A backup, under Backup and storage, has what is on the device you make it on. You can change anything in the app, and delete your account whenever you like. For anything else, like a question about what is kept, write to &lt;a href="mailto:support@stikling.app"&gt;support@stikling.app&lt;/a&gt;. If you think your data is handled wrongly, you can complain to the Danish Data Protection Agency, &lt;a href="https://www.datatilsynet.dk"&gt;Datatilsynet&lt;/a&gt;.</value>
+    <comment>Contains HTML. Keep the tags and the addresses. The Danish Data Protection Agency is Datatilsynet in Danish.</comment>
+  </data>
+</root>

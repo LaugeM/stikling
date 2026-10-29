@@ -1,3 +1,4 @@
+using Strings = Stikling.Web.Resources;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -43,7 +44,7 @@ public sealed record AccountState(bool SignedIn, string? Email);
 
 /// <summary>Clerk's scripts couldn't be loaded, usually because there is no connection.</summary>
 public sealed class AccountUnavailableException(Exception inner)
-    : Exception("The sign-in service couldn't be reached.", inner);
+    : Exception(Strings.Account.SignInServiceUnreachable, inner);
 
 /// <summary>
 /// Signing in and out. Clerk has no Blazor library, so it is behind wwwroot/js/account.js, and this
@@ -95,7 +96,7 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
     public async Task<AccountState> LoadAsync()
     {
         if (!IsAvailable)
-            throw new InvalidOperationException("Signing in isn't set up in this build.");
+            throw new InvalidOperationException(Strings.Account.SignInNotSetUp);
 
         self ??= DotNetObjectReference.Create(this);
         AccountState state;

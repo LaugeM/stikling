@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="NumbersOnePlant" xml:space="preserve">
+    <value>Numbers 1 plant, {0}</value>
+    <comment>{0} is the number it gets.</comment>
+  </data>
+  <data name="NumbersPlants" xml:space="preserve">
+    <value>Numbers {0} plants, {1} to {2}</value>
+    <comment>{0} is how many plants, {1} the first number, {2} the last.</comment>
+  </data>
+  <data name="GoingCuttingOne" xml:space="preserve">
+    <value>1 going cutting a letter</value>
+  </data>
+  <data name="GoingCuttings" xml:space="preserve">
+    <value>{0} going cuttings a letter</value>
+    <comment>{0} is a number.</comment>
+  </data>
+  <data name="NumberAllNone" xml:space="preserve">
+    <value>Every plant here has a number.</value>
+  </data>
+  <data name="NumberAllPlantsOnly" xml:space="preserve">
+    <value>{0}.</value>
+    <comment>{0} is the part about plants.</comment>
+  </data>
+  <data name="NumberAllCuttingsOnly" xml:space="preserve">
+    <value>Gives {0}.</value>
+    <comment>{0} is the part about cuttings.</comment>
+  </data>
+  <data name="NumberAllBoth" xml:space="preserve">
+    <value>{0}, and gives {1}.</value>
+    <comment>{0} is the part about plants, {1} the part about cuttings.</comment>
+  </data>
+  <data name="NumberNotValid" xml:space="preserve">
+    <value>Use a number, like 117.</value>
+  </data>
+  <data name="ClashHas" xml:space="preserve">
+    <value>{0} also has #{1}.</value>
+    <comment>{0} is a name or names, {1} a collection number.</comment>
+  </data>
+  <data name="ClashHave" xml:space="preserve">
+    <value>{0} also have #{1}.</value>
+    <comment>{0} is names, {1} a collection number.</comment>
+  </data>
+  <data name="LongestSince" xml:space="preserve">
+    <value>Since {0}, {1}</value>
+    <comment>{0} is a date, {1} how long, like 7 years.</comment>
+  </data>
+  <data name="LongestDayFormat" xml:space="preserve">
+    <value>d MMMM yyyy</value>
+    <comment>A .NET date pattern. Not text: change the order and the punctuation only.</comment>
+  </data>
+  <data name="LongestYears_One" xml:space="preserve">
+    <value>{0} year</value>
+  </data>
+  <data name="LongestYears_Other" xml:space="preserve">
+    <value>{0} years</value>
+  </data>
+  <data name="LongestMonths_One" xml:space="preserve">
+    <value>{0} month</value>
+  </data>
+  <data name="LongestMonths_Other" xml:space="preserve">
+    <value>{0} months</value>
+  </data>
+  <data name="LongestLessThanMonth" xml:space="preserve">
+    <value>less than a month</value>
+  </data>
+  <data name="HeaderName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Heading of a column in the table view of plants.</comment>
+  </data>
+  <data name="HeaderCultivar" xml:space="preserve">
+    <value>Cultivar</value>
+  </data>
+  <data name="HeaderWatered" xml:space="preserve">
+    <value>Watered</value>
+  </data>
+  <data name="HeaderFed" xml:space="preserve">
+    <value>Fed</value>
+  </data>
+  <data name="HeaderGenus" xml:space="preserve">
+    <value>Genus</value>
+  </data>
+  <data name="HeaderSpecies" xml:space="preserve">
+    <value>Species</value>
+  </data>
+  <data name="HeaderEverydayName" xml:space="preserve">
+    <value>Everyday name</value>
+  </data>
+  <data name="HeaderRoom" xml:space="preserve">
+    <value>Room</value>
+  </data>
+  <data name="HeaderGot" xml:space="preserve">
+    <value>Got</value>
+    <comment>The day the plant came.</comment>
+  </data>
+  <data name="HeaderOrigin" xml:space="preserve">
+    <value>Origin</value>
+  </data>
+  <data name="HeaderRaised" xml:space="preserve">
+    <value>Raised</value>
+    <comment>How it was raised.</comment>
+  </data>
+  <data name="HeaderSource" xml:space="preserve">
+    <value>From</value>
+    <comment>Where it came from.</comment>
+  </data>
+  <data name="HeaderPrice" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="HeaderMedium" xml:space="preserve">
+    <value>Medium</value>
+    <comment>What it grows in.</comment>
+  </data>
+  <data name="HeaderLikesLight" xml:space="preserve">
+    <value>Likes light</value>
+  </data>
+  <data name="HeaderLikesWater" xml:space="preserve">
+    <value>Water</value>
+  </data>
+  <data name="HeaderLikesHumidity" xml:space="preserve">
+    <value>Humidity</value>
+  </data>
+  <data name="HeaderSeason" xml:space="preserve">
+    <value>Season</value>
+  </data>
+  <data name="HeaderRepotted" xml:space="preserve">
+    <value>Repotted</value>
+  </data>
+  <data name="HeaderMoisture" xml:space="preserve">
+    <value>Moisture</value>
+  </data>
+  <data name="HeaderStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="HeaderTags" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="HeaderAdded" xml:space="preserve">
+    <value>Added</value>
+  </data>
+  <data name="HeaderNumber" xml:space="preserve">
+    <value>No.</value>
+    <comment>Short for number: the collection number.</comment>
+  </data>
+  <data name="PetsBoth" xml:space="preserve">
+    <value>Toxic to cats and dogs</value>
+  </data>
+  <data name="PetsNeither" xml:space="preserve">
+    <value>Not toxic to cats and dogs</value>
+  </data>
+  <data name="PetsCatsOnly" xml:space="preserve">
+    <value>Toxic to cats, not to dogs</value>
+  </data>
+  <data name="PetsDogsOnly" xml:space="preserve">
+    <value>Toxic to dogs, not to cats</value>
+  </data>
+  <data name="PetsCats" xml:space="preserve">
+    <value>Toxic to cats</value>
+  </data>
+  <data name="PetsNotCats" xml:space="preserve">
+    <value>Not toxic to cats</value>
+  </data>
+  <data name="PetsDogs" xml:space="preserve">
+    <value>Toxic to dogs</value>
+  </data>
+  <data name="PetsNotDogs" xml:space="preserve">
+    <value>Not toxic to dogs</value>
+  </data>
+  <data name="PetsUnknown" xml:space="preserve">
+    <value>Nothing known about pets</value>
+  </data>
+  <data name="PeopleToxic" xml:space="preserve">
+    <value>Toxic to people</value>
+  </data>
+  <data name="PeopleNotToxic" xml:space="preserve">
+    <value>Not toxic to people</value>
+  </data>
+  <data name="ParentLivesWith" xml:space="preserve">
+    <value>{0} · lives with {1}</value>
+    <comment>A plant in a parent picker. {0} is the plant, {1} a person.</comment>
+  </data>
+  <data name="ParentNotYours" xml:space="preserve">
+    <value>{0} · not yours</value>
+    <comment>A plant in a parent picker. {0} is the plant.</comment>
+  </data>
+  <data name="DateNotFuture" xml:space="preserve">
+    <value>The date can't be in the future.</value>
+  </data>
+  <data name="SomeFewer" xml:space="preserve">
+    <value>Some of them has to be fewer than all of them, and at least one.</value>
+  </data>
+  <data name="PotSelf" xml:space="preserve">
+    <value>A plant can't be potted with itself.</value>
+  </data>
+  <data name="PotTargetNotInCollection" xml:space="preserve">
+    <value>The plant to pot it with isn't in the collection.</value>
+  </data>
+  <data name="PotSourceNotInCollection" xml:space="preserve">
+    <value>Only a plant in the collection can be potted with another.</value>
+  </data>
+  <data name="NotPottedWith" xml:space="preserve">
+    <value>It isn't potted with another plant.</value>
+  </data>
+  <data name="DateBeforePotted" xml:space="preserve">
+    <value>The date can't be before it was potted together.</value>
+  </data>
+  <data name="NameUnknown" xml:space="preserve">
+    <value>Name unknown</value>
+  </data>
+  <data name="NameNone" xml:space="preserve">
+    <value>Unnamed plant</value>
+  </data>
+  <data name="DepartureSold" xml:space="preserve">
+    <value>Sold</value>
+  </data>
+  <data name="DepartureSoldTo" xml:space="preserve">
+    <value>Sold to {0}</value>
+  </data>
+  <data name="DepartureSoldFor" xml:space="preserve">
+    <value>Sold for {0}</value>
+  </data>
+  <data name="DepartureSoldToFor" xml:space="preserve">
+    <value>Sold to {0} for {1}</value>
+  </data>
+  <data name="DepartureSwappedFor" xml:space="preserve">
+    <value>Swapped for {0}</value>
+  </data>
+  <data name="DepartureGivenTo" xml:space="preserve">
+    <value>Given to {0}</value>
+  </data>
+  <data name="DepartureGivenToSwapped" xml:space="preserve">
+    <value>Given to {0} · swapped for {1}</value>
+  </data>
+  <data name="PurchasePaid" xml:space="preserve">
+    <value>Paid {0}</value>
+  </data>
+  <data name="PurchaseBoughtFrom" xml:space="preserve">
+    <value>Bought from {0} for {1}</value>
+  </data>
+  <data name="ErrNameNeeded" xml:space="preserve">
+    <value>Give the plant a nickname or a genus.</value>
+  </data>
+  <data name="ErrOwnParent" xml:space="preserve">
+    <value>A plant can't be its own parent.</value>
+  </data>
+  <data name="ErrPriceNegative" xml:space="preserve">
+    <value>The price paid can't be negative.</value>
+  </data>
+  <data name="ErrAcquiredFuture" xml:space="preserve">
+    <value>The date you got it can't be in the future.</value>
+  </data>
+  <data name="ErrSamePot" xml:space="preserve">
+    <value>A plant can't have the same pot inside and outside.</value>
+  </data>
+  <data name="ErrQuarantineFuture" xml:space="preserve">
+    <value>The quarantine can't start in the future.</value>
+  </data>
+  <data name="ErrQuarantineDays" xml:space="preserve">
+    <value>A quarantine has to last at least a day.</value>
+  </data>
+  <data name="ErrDormantFuture" xml:space="preserve">
+    <value>It can't go dormant in the future.</value>
+  </data>
+  <data name="ErrTransitionFuture" xml:space="preserve">
+    <value>The move to semi-hydro can't start in the future.</value>
+  </data>
+  <data name="ErrStepFuture" xml:space="preserve">
+    <value>A step can't be in the future.</value>
+  </data>
+  <data name="ErrStepBeforeStart" xml:space="preserve">
+    <value>A step can't come before the move started.</value>
+  </data>
+  <data name="ErrCheckWeeks" xml:space="preserve">
+    <value>Check after 1 to 52 weeks.</value>
+  </data>
+  <data name="ErrWaterAt" xml:space="preserve">
+    <value>The watering level goes from 1 to 10.</value>
+  </data>
+  <data name="ErrCount" xml:space="preserve">
+    <value>There's at least one plant in a pot.</value>
+  </data>
+  <data name="ErrPottedSelf" xml:space="preserve">
+    <value>A plant can't be potted with itself.</value>
+  </data>
+  <data name="ErrPotsTaken" xml:space="preserve">
+    <value>Only a plant that was given away or sold can take its pots with it.</value>
+  </data>
+  <data name="ProblemPests" xml:space="preserve">
+    <value>pests</value>
+    <comment>After an arrived in poor shape line: what was wrong.</comment>
+  </data>
+  <data name="ProblemDamaged" xml:space="preserve">
+    <value>damaged or broken</value>
+  </data>
+  <data name="ProblemRootRot" xml:space="preserve">
+    <value>root rot</value>
+  </data>
+  <data name="ProblemWrongPlant" xml:space="preserve">
+    <value>the wrong plant</value>
+  </data>
+  <data name="ProblemSmaller" xml:space="preserve">
+    <value>smaller than shown</value>
+  </data>
+  <data name="ArrivedPoor" xml:space="preserve">
+    <value>arrived in poor shape</value>
+  </data>
+  <data name="ArrivedPoorWith" xml:space="preserve">
+    <value>arrived in poor shape: {0}</value>
+    <comment>{0} is a list of what was wrong.</comment>
+  </data>
+  <data name="LooseDayFormat" xml:space="preserve">
+    <value>d MMM yyyy</value>
+    <comment>A .NET date pattern. Not text: change the order and the punctuation only.</comment>
+  </data>
+  <data name="ErrQualifierNeedsSpecies" xml:space="preserve">
+    <value>cf. and aff. go with a species name.</value>
+    <comment>Error when a name is marked cf. or aff. without a species. cf. and aff. are botanical abbreviations.</comment>
+  </data>
+  <data name="ErrQualifierNeedsGenus" xml:space="preserve">
+    <value>sp. goes with a genus.</value>
+    <comment>Error when a name is marked sp. without a genus. sp. is a botanical abbreviation.</comment>
+  </data>
+</root>

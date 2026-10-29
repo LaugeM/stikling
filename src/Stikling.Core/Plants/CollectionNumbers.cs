@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
 using Stikling.Core.Models;
+using Stikling.Core.Text;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Plants;
 
@@ -25,21 +27,21 @@ public sealed record NumberAllPlan(IReadOnlyList<NumberedPlant> Plants, IReadOnl
             var plants = Plants.Count switch
             {
                 0 => null,
-                1 => $"Numbers 1 plant, {Plants[0].Code}",
-                var n => $"Numbers {n} plants, {Plants[0].Code} to {Plants[^1].Code}"
+                1 => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumbersOnePlant, Plants[0].Code),
+                var n => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumbersPlants, n, Plants[0].Code, Plants[^1].Code)
             };
             var cuttings = Cuttings.Count switch
             {
                 0 => null,
-                1 => "1 going cutting a letter",
-                var n => $"{n} going cuttings a letter"
+                1 => Strings.Plants.GoingCuttingOne,
+                var n => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.GoingCuttings, n)
             };
             return (plants, cuttings) switch
             {
-                (null, null) => "Every plant here has a number.",
-                ({ } p, null) => $"{p}.",
-                (null, { } c) => $"Gives {c}.",
-                ({ } p, { } c) => $"{p}, and gives {c}."
+                (null, null) => Strings.Plants.NumberAllNone,
+                ({ } p, null) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumberAllPlantsOnly, p),
+                (null, { } c) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumberAllCuttingsOnly, c),
+                ({ } p, { } c) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumberAllBoth, p, c)
             };
         }
     }
@@ -62,7 +64,7 @@ public static partial class CollectionNumbers
     private const int MaxLength = 24;
 
     /// <summary>What the form says when a code isn't of a shape the app writes.</summary>
-    public const string NotValidText = "Use a number, like 117.";
+    public static string NotValidText => Strings.Plants.NumberNotValid;
 
     /// <summary>Trims, lower-cases and removes a leading #. Null when nothing is left.</summary>
     public static string? Normalize(string? code)
@@ -176,7 +178,9 @@ public static partial class CollectionNumbers
 
     /// <summary>"Big Monstera also has #117." or "Big Monstera, Small Monstera also have #117."</summary>
     public static string ClashNote(string code, IReadOnlyList<CodeClash> clashes) =>
-        $"{string.Join(", ", clashes.Select(c => c.Name))} also {(clashes.Count == 1 ? "has" : "have")} #{Normalize(code)}.";
+        string.Format(System.Globalization.CultureInfo.CurrentCulture,
+            clashes.Count == 1 ? Strings.Plants.ClashHas : Strings.Plants.ClashHave,
+            string.Join(", ", clashes.Select(c => c.Name)), Normalize(code));
 
     /// <summary>
     /// Whether a search word is a number or the start of one. The word may begin with #. Only digits,

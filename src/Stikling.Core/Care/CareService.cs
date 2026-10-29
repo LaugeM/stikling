@@ -4,6 +4,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Products;
 using Stikling.Core.Timeline;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Care;
 
@@ -162,7 +163,7 @@ public sealed class CareService(
             .SelectMany(p => p.Entry.Validate(Today).Concat(p.Extra?.Validate(Today) ?? []))
             .ToList();
         if (items.Any(i => !IsWatering(i.Kind)))
-            errors.Insert(0, "Only a watering or a topping up can be logged here.");
+            errors.Insert(0, Strings.Care.OnlyWateringHere);
         if (errors.FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
 
@@ -189,7 +190,7 @@ public sealed class CareService(
     public async Task UpdateAsync(CareLog entry, DateOnly today)
     {
         if (await logs.GetAsync(entry.Id) is not { IsDeleted: false } stored)
-            throw new InvalidOperationException("That entry is gone, so it can't be changed.");
+            throw new InvalidOperationException(Strings.Care.EntryGone);
 
         // Work on a copy, so an entry that doesn't pass leaves the stored one as it was
         var changed = stored.Copy();

@@ -10,14 +10,14 @@
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
-<PageTitle>@(IsNew ? "Open a case" : "Edit case") · Stikling</PageTitle>
+<PageTitle>@(IsNew ? Strings.Pests.OpenACase : Strings.Pests.CaseEditTitle) · Stikling</PageTitle>
 
-<a class="back-link" href="@BackUrl">Back</a>
-<h1>@(IsNew ? "Open a case" : "Edit case")</h1>
+<a class="back-link" href="@BackUrl">@Strings.Common.Back</a>
+<h1>@(IsNew ? Strings.Pests.OpenACase : Strings.Pests.CaseEditTitle)</h1>
 
 @if (item is null)
 {
-    <p class="text-body-secondary">@(notFound ? "That case doesn't exist." : "Loading…")</p>
+    <p class="text-body-secondary">@(notFound ? Strings.Pests.CaseNotFound : Strings.Pests.Loading)</p>
 }
 else
 {
@@ -33,10 +33,10 @@ else
         }
 
         <fieldset>
-            <legend>What you found</legend>
+            <legend>@Strings.Pests.CaseEditWhatFound</legend>
             <div class="row g-2 mb-3">
                 <div class="col-7">
-                    <label class="form-label" for="pest">Pest</label>
+                    <label class="form-label" for="pest">@Strings.Pests.CaseEditPest</label>
                     <InputSelect id="pest" class="form-select" @bind-Value="item.Pest">
                         @foreach (var pest in Enum.GetValues<Pest>())
                         {
@@ -45,14 +45,14 @@ else
                     </InputSelect>
                 </div>
                 <div class="col-5">
-                    <label class="form-label" for="started">Found on</label>
+                    <label class="form-label" for="started">@Strings.Pests.CaseEditFoundOn</label>
                     <InputDate id="started" class="form-control" @bind-Value="item.StartedOn" max="@Today.ToString("yyyy-MM-dd")" />
                 </div>
             </div>
             @if (!IsNew)
             {
                 <div class="mb-1">
-                    <label class="form-label" for="status">How it stands</label>
+                    <label class="form-label" for="status">@Strings.Pests.CaseEditHowItStands</label>
                     <InputSelect id="status" class="form-select" @bind-Value="item.Status" @bind-Value:after="StatusChanged">
                         @foreach (var status in Enum.GetValues<PestCaseStatus>())
                         {
@@ -60,14 +60,11 @@ else
                         }
                     </InputSelect>
                 </div>
-                <div class="form-text">
-                    Watching means the treatments have stopped but you are still checking. A resolved case
-                    stops showing up.
-                </div>
+                <div class="form-text">@Strings.Pests.CaseEditStatusHint</div>
                 @if (item.Status == PestCaseStatus.Resolved)
                 {
                     <div class="mt-3">
-                        <label class="form-label" for="resolved">Resolved on</label>
+                        <label class="form-label" for="resolved">@Strings.Pests.CaseEditResolvedOn</label>
                         <InputDate id="resolved" class="form-control" @bind-Value="item.ResolvedOn"
                                    min="@item.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                     </div>
@@ -76,8 +73,8 @@ else
         </fieldset>
 
         <fieldset>
-            <legend>What it covers</legend>
-            <div class="btn-group segmented mb-3" role="radiogroup" aria-label="What the case covers">
+            <legend>@Strings.Pests.CaseEditWhatCovers</legend>
+            <div class="btn-group segmented mb-3" role="radiogroup" aria-label="@Strings.Pests.CaseEditCoversLabel">
                 @foreach (var (value, label) in scopeOptions)
                 {
                     var id = $"scope-{value}";
@@ -90,7 +87,7 @@ else
             @if (item.Scope == PestScope.Room)
             {
                 <div class="mb-1">
-                    <RoomPicker @bind-Value="room" Rooms="rooms" Label="Room" />
+                    <RoomPicker @bind-Value="room" Rooms="rooms" Label="@Strings.Pests.CaseEditRoom" />
                 </div>
             }
             else if (item.Scope == PestScope.PickedPlants)
@@ -116,22 +113,20 @@ else
             }
             else
             {
-                <p class="text-body-secondary mb-0">
-                    Every plant in the collection, including ones added while the case is open.
-                </p>
+                <p class="text-body-secondary mb-0">@Strings.Pests.CaseEditEverywhere</p>
             }
         </fieldset>
 
         <fieldset>
-            <legend>Treatment</legend>
+            <legend>@Strings.Pests.CaseEditTreatment</legend>
             @if (IsNew && plans.Count > 0)
             {
                 <div class="mb-3">
-                    <div class="form-label">Treatment plan</div>
-                    <div class="chip-row" role="group" aria-label="Treatment plans">
+                    <div class="form-label">@Strings.Pests.CaseEditPlan</div>
+                    <div class="chip-row" role="group" aria-label="@Strings.Pests.CaseEditPlans">
                         <button type="button" class="chip @(pickedPlan is null ? "picked" : null)"
                                 aria-pressed="@(pickedPlan is null ? "true" : "false")"
-                                @onclick="() => pickedPlan = null">No plan</button>
+                                @onclick="() => pickedPlan = null">@Strings.Pests.CaseEditNoPlan</button>
                         @foreach (var plan in plans)
                         {
                             <button type="button" class="chip @(pickedPlan == plan.Id ? "picked" : null)"
@@ -139,38 +134,38 @@ else
                                     @onclick="() => pickedPlan = plan.Id">@plan.Name</button>
                         }
                     </div>
-                    <div class="form-text">Starts on the day you found it. @(pickedPlan is null ? "Without one, the case is treated at the interval below." : "")</div>
+                    <div class="form-text">@(pickedPlan is null ? Strings.Pests.CaseEditPlanStartsWithout : Strings.Pests.CaseEditPlanStarts)</div>
                 </div>
             }
             <div class="mb-1">
-                <label class="form-label" for="interval">Treat every</label>
+                <label class="form-label" for="interval">@Strings.Pests.CaseEditTreatEvery</label>
                 <div class="input-group">
                     <InputNumber id="interval" class="form-control" @bind-Value="item.IntervalDays" min="1" inputmode="numeric" />
-                    <span class="input-group-text">days</span>
+                    <span class="input-group-text">@Strings.Pests.CaseEditDays</span>
                 </div>
             </div>
             @if (pickedPlan is not null)
             {
-                <div class="form-text">Used once the plan is done.</div>
+                <div class="form-text">@Strings.Pests.CaseEditUsedAfterPlan</div>
             }
             else if (FollowingPlan)
             {
-                <div class="form-text">Following @item.PlanName. The interval is used if you stop the plan.</div>
+                <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseEditFollowing, item.PlanName)</div>
             }
             else
             {
-                <div class="form-text">Spider mites want 3 to 5 days, so the next round lands before the eggs hatch.</div>
+                <div class="form-text">@Strings.Pests.CaseEditSpiderMites</div>
             }
         </fieldset>
 
         <fieldset>
-            <legend>Notes</legend>
-            <InputTextArea class="form-control" rows="3" @bind-Value="item.Notes" aria-label="Notes" />
+            <legend>@Strings.Pests.CaseEditNotes</legend>
+            <InputTextArea class="form-control" rows="3" @bind-Value="item.Notes" aria-label="@Strings.Pests.CaseEditNotes" />
         </fieldset>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? "Open case" : "Save")</button>
-            <a class="btn btn-link" href="@BackUrl">Cancel</a>
+            <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? Strings.Pests.CaseEditOpen : Strings.Common.Save)</button>
+            <a class="btn btn-link" href="@BackUrl">@Strings.Common.Cancel</a>
         </div>
     </EditForm>
 }
@@ -185,9 +180,9 @@ else
 
     private static readonly (PestScope Value, string Label)[] scopeOptions =
     [
-        (PestScope.PickedPlants, "Pick plants"),
-        (PestScope.Room, "One room"),
-        (PestScope.Everywhere, "All plants")
+        (PestScope.PickedPlants, Strings.Pests.CaseEditPickPlants),
+        (PestScope.Room, Strings.Pests.CaseEditOneRoom),
+        (PestScope.Everywhere, Strings.Pests.CaseEditAllPlants)
     ];
 
     private PestCase? item;
@@ -307,7 +302,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the pest case failed");
-            errors = [$"Couldn't save: {ex.Message}"];
+            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntSave, ex.Message)];
         }
         finally
         {

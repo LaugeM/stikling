@@ -1,0 +1,891 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PestsPageTitle" xml:space="preserve">
+    <value>Skadedyr og problemer · Stikling</value>
+  </data>
+  <data name="PestsTitle" xml:space="preserve">
+    <value>Skadedyr og problemer</value>
+  </data>
+  <data name="OpenCase_One" xml:space="preserve">
+    <value>{0} åben sag</value>
+  </data>
+  <data name="OpenCase_Other" xml:space="preserve">
+    <value>{0} åbne sager</value>
+  </data>
+  <data name="OpenPestCase" xml:space="preserve">
+    <value>Åbn en skadedyrssag</value>
+  </data>
+  <data name="PestsEmpty" xml:space="preserve">
+    <value>Intet galt lige nu. Når du finder skadedyr, så åbn en sag for de planter, de sidder på. Til alt andet, som gule blade eller råd, brug Der er noget galt på plantens side.</value>
+  </data>
+  <data name="OpenACase" xml:space="preserve">
+    <value>Åbn en sag</value>
+  </data>
+  <data name="PestsDueNow" xml:space="preserve">
+    <value>Skal gøres nu</value>
+  </data>
+  <data name="PestsOpen" xml:space="preserve">
+    <value>Åbne</value>
+  </data>
+  <data name="PestsProblems" xml:space="preserve">
+    <value>Problemer</value>
+  </data>
+  <data name="PestsResolved" xml:space="preserve">
+    <value>Løste</value>
+  </data>
+  <data name="PestsCleanDays" xml:space="preserve">
+    <value>ren {0} af {1} dage</value>
+  </data>
+  <data name="PestsFoundDue" xml:space="preserve">
+    <value>fundet {0}</value>
+  </data>
+  <data name="PestsPlanDoneFound" xml:space="preserve">
+    <value>Plan færdig · fundet {0}</value>
+  </data>
+  <data name="PestsResolvedOn" xml:space="preserve">
+    <value>Løst {0}</value>
+  </data>
+  <data name="PestsFound" xml:space="preserve">
+    <value>Fundet {0}</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Henter…</value>
+  </data>
+  <data name="FloweringPageTitle" xml:space="preserve">
+    <value>Blomstring · Stikling</value>
+  </data>
+  <data name="FloweringTitle" xml:space="preserve">
+    <value>Blomstring</value>
+  </data>
+  <data name="FloweringBackToPlants" xml:space="preserve">
+    <value>Planter</value>
+  </data>
+  <data name="FloweringEmptyTitle" xml:space="preserve">
+    <value>Intet har blomstret endnu</value>
+  </data>
+  <data name="FloweringEmptyBody" xml:space="preserve">
+    <value>Marker en plante som blomstrende fra dens side, under Mere. Du kan også tilføje tidligere blomstringer der, så kalenderen har noget at gå ud fra.</value>
+  </data>
+  <data name="FloweringHelpLink" xml:space="preserve">
+    <value>Mere om blomstring i Hjælp</value>
+  </data>
+  <data name="FloweringInFlowerNow" xml:space="preserve">
+    <value>I blomst nu</value>
+  </data>
+  <data name="FloweringSince" xml:space="preserve">
+    <value>siden {0}</value>
+  </data>
+  <data name="FloweringUsuallyIn" xml:space="preserve">
+    <value>Blomstrer som regel i {0}</value>
+  </data>
+  <data name="FloweringThroughYear" xml:space="preserve">
+    <value>Gennem året</value>
+  </data>
+  <data name="FloweringNothingYet" xml:space="preserve">
+    <value>Intet endnu</value>
+  </data>
+  <data name="TrapChartCaption" xml:space="preserve">
+    <value>Fanget pr. uge, regnet ud fra hver optælling.</value>
+  </data>
+  <data name="TrapChartDescription" xml:space="preserve">
+    <value>Fanget pr. uge: {0}</value>
+  </data>
+  <data name="TrapChartPoint" xml:space="preserve">
+    <value>{0} pr. {1}</value>
+  </data>
+  <data name="TrapCountOnTrap" xml:space="preserve">
+    <value>På fælden</value>
+  </data>
+  <data name="TrapCountPlaceholder" xml:space="preserve">
+    <value>fx 12</value>
+  </data>
+  <data name="TrapCountWhen" xml:space="preserve">
+    <value>Hvornår</value>
+  </data>
+  <data name="TrapCountHint" xml:space="preserve">
+    <value>Tæl alt på den, ikke kun de nye. Appen regner ud, hvad der er nyt.</value>
+  </data>
+  <data name="TrapCountNewTrap" xml:space="preserve">
+    <value>Sæt en ny fælde op</value>
+  </data>
+  <data name="TrapCountNewTrapAfter" xml:space="preserve">
+    <value>Sæt en ny fælde op efter optælling</value>
+  </data>
+  <data name="TrapCountNotes" xml:space="preserve">
+    <value>Noter</value>
+  </data>
+  <data name="TrapCountNotesPlaceholder" xml:space="preserve">
+    <value>fx Gul fælde ved vinduet</value>
+  </data>
+  <data name="TrapCountLogNew" xml:space="preserve">
+    <value>Log ny fælde</value>
+  </data>
+  <data name="TrapCountLogCount" xml:space="preserve">
+    <value>Log optælling</value>
+  </data>
+  <data name="TrapCountFailed" xml:space="preserve">
+    <value>Kunne ikke logge det: {0}</value>
+  </data>
+  <data name="CaseEditTitle" xml:space="preserve">
+    <value>Rediger sag</value>
+  </data>
+  <data name="CaseNotFound" xml:space="preserve">
+    <value>Den sag findes ikke.</value>
+  </data>
+  <data name="CaseEditWhatFound" xml:space="preserve">
+    <value>Det du fandt</value>
+  </data>
+  <data name="CaseEditPest" xml:space="preserve">
+    <value>Skadedyr</value>
+  </data>
+  <data name="CaseEditFoundOn" xml:space="preserve">
+    <value>Fundet den</value>
+  </data>
+  <data name="CaseEditHowItStands" xml:space="preserve">
+    <value>Hvordan det står til</value>
+  </data>
+  <data name="CaseEditStatusHint" xml:space="preserve">
+    <value>Holder øje betyder, at behandlingerne er stoppet, men du stadig tjekker. En løst sag vises ikke mere.</value>
+  </data>
+  <data name="CaseEditResolvedOn" xml:space="preserve">
+    <value>Løst den</value>
+  </data>
+  <data name="CaseEditWhatCovers" xml:space="preserve">
+    <value>Det den dækker</value>
+  </data>
+  <data name="CaseEditCoversLabel" xml:space="preserve">
+    <value>Hvad sagen dækker</value>
+  </data>
+  <data name="CaseEditRoom" xml:space="preserve">
+    <value>Rum</value>
+  </data>
+  <data name="CaseEditEverywhere" xml:space="preserve">
+    <value>Alle planter i samlingen, også dem der kommer til, mens sagen er åben.</value>
+  </data>
+  <data name="CaseEditTreatment" xml:space="preserve">
+    <value>Behandling</value>
+  </data>
+  <data name="CaseEditPlan" xml:space="preserve">
+    <value>Behandlingsplan</value>
+  </data>
+  <data name="CaseEditPlans" xml:space="preserve">
+    <value>Behandlingsplaner</value>
+  </data>
+  <data name="CaseEditNoPlan" xml:space="preserve">
+    <value>Ingen plan</value>
+  </data>
+  <data name="CaseEditPlanStarts" xml:space="preserve">
+    <value>Starter den dag, du fandt det.</value>
+  </data>
+  <data name="CaseEditPlanStartsWithout" xml:space="preserve">
+    <value>Starter den dag, du fandt det. Uden en plan behandles sagen med intervallet nedenfor.</value>
+  </data>
+  <data name="CaseEditTreatEvery" xml:space="preserve">
+    <value>Behandl hver</value>
+  </data>
+  <data name="CaseEditDays" xml:space="preserve">
+    <value>dage</value>
+  </data>
+  <data name="CaseEditUsedAfterPlan" xml:space="preserve">
+    <value>Bruges, når planen er færdig.</value>
+  </data>
+  <data name="CaseEditFollowing" xml:space="preserve">
+    <value>Følger {0}. Intervallet bruges, hvis du stopper planen.</value>
+  </data>
+  <data name="CaseEditSpiderMites" xml:space="preserve">
+    <value>Spindemider kræver 3 til 5 dage, så næste runde kommer, før æggene klækker.</value>
+  </data>
+  <data name="CaseEditNotes" xml:space="preserve">
+    <value>Noter</value>
+  </data>
+  <data name="CaseEditOpen" xml:space="preserve">
+    <value>Åbn sag</value>
+  </data>
+  <data name="CaseEditPickPlants" xml:space="preserve">
+    <value>Vælg planter</value>
+  </data>
+  <data name="CaseEditOneRoom" xml:space="preserve">
+    <value>Ét rum</value>
+  </data>
+  <data name="CaseEditAllPlants" xml:space="preserve">
+    <value>Alle planter</value>
+  </data>
+  <data name="CouldntSave" xml:space="preserve">
+    <value>Kunne ikke gemme: {0}</value>
+  </data>
+  <data name="CasePageTitle" xml:space="preserve">
+    <value>Skadedyrssag</value>
+  </data>
+  <data name="CaseBackToPests" xml:space="preserve">
+    <value>Skadedyr</value>
+  </data>
+  <data name="CaseGone" xml:space="preserve">
+    <value>Den sag findes ikke eller er slettet.</value>
+  </data>
+  <data name="CaseScopeFound" xml:space="preserve">
+    <value>{0} · fundet {1}</value>
+  </data>
+  <data name="CaseCleanDays" xml:space="preserve">
+    <value>Ren {0} af {1} dage</value>
+  </data>
+  <data name="CaseLogCheck" xml:space="preserve">
+    <value>Log tjek</value>
+  </data>
+  <data name="CaseLogTreatment" xml:space="preserve">
+    <value>Log behandling</value>
+  </data>
+  <data name="CaseFoundSome" xml:space="preserve">
+    <value>Fandt nogle</value>
+  </data>
+  <data name="CaseFollowPlan" xml:space="preserve">
+    <value>Følg en plan</value>
+  </data>
+  <data name="CaseMakePlan" xml:space="preserve">
+    <value>Lav en behandlingsplan</value>
+  </data>
+  <data name="CaseCleanReady_One" xml:space="preserve">
+    <value>Ren i {0} uge. Klar til at blive løst.</value>
+  </data>
+  <data name="CaseCleanReady_Other" xml:space="preserve">
+    <value>Ren i {0} uger. Klar til at blive løst.</value>
+  </data>
+  <data name="CaseResolve" xml:space="preserve">
+    <value>Løs</value>
+  </data>
+  <data name="CaseCleanCheck_One" xml:space="preserve">
+    <value>Ren i {0} uge. Log et tjek for at løse den.</value>
+  </data>
+  <data name="CaseCleanCheck_Other" xml:space="preserve">
+    <value>Ren i {0} uger. Log et tjek for at løse den.</value>
+  </data>
+  <data name="CaseStartOn" xml:space="preserve">
+    <value>Start den</value>
+  </data>
+  <data name="CaseStartPlan" xml:space="preserve">
+    <value>Start planen</value>
+  </data>
+  <data name="CasePlanHeading" xml:space="preserve">
+    <value>Plan: {0}</value>
+  </data>
+  <data name="CaseMoveTo" xml:space="preserve">
+    <value>Flyt til</value>
+  </data>
+  <data name="CaseMove" xml:space="preserve">
+    <value>Flyt</value>
+  </data>
+  <data name="CaseLogStep" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="CaseSkip" xml:space="preserve">
+    <value>Spring over</value>
+  </data>
+  <data name="CaseLastStepToday" xml:space="preserve">
+    <value>Det var det sidste trin. I dag spørger, om du vil begynde at holde øje med sagen.</value>
+  </data>
+  <data name="CaseLastStepFrom" xml:space="preserve">
+    <value>Det var det sidste trin. Fra {0} spørger I dag, om du vil begynde at holde øje med sagen.</value>
+  </data>
+  <data name="CasePlanStopped" xml:space="preserve">
+    <value>Stoppet {0}. Sagen fortsætter med sit interval.</value>
+  </data>
+  <data name="CaseStopConfirm_One" xml:space="preserve">
+    <value>Stop planen? Sagen fortsætter med sit interval på {0} dag, og det loggede bliver.</value>
+  </data>
+  <data name="CaseStopConfirm_Other" xml:space="preserve">
+    <value>Stop planen? Sagen fortsætter med sit interval på {0} dage, og det loggede bliver.</value>
+  </data>
+  <data name="CaseStopPlan" xml:space="preserve">
+    <value>Stop planen</value>
+  </data>
+  <data name="CaseCovers" xml:space="preserve">
+    <value>Dækker</value>
+  </data>
+  <data name="CaseChecking" xml:space="preserve">
+    <value>Tjekker</value>
+  </data>
+  <data name="CaseEvery_One" xml:space="preserve">
+    <value>Hver dag</value>
+  </data>
+  <data name="CaseEvery_Other" xml:space="preserve">
+    <value>Hver {0}. dag</value>
+  </data>
+  <data name="CaseTreating" xml:space="preserve">
+    <value>Behandler</value>
+  </data>
+  <data name="CaseFollowing" xml:space="preserve">
+    <value>Følger {0}</value>
+  </data>
+  <data name="CaseNext" xml:space="preserve">
+    <value>Den næste</value>
+  </data>
+  <data name="CasePlanDone" xml:space="preserve">
+    <value>Planen er færdig, I dag spørger, hvad der skal ske nu.</value>
+  </data>
+  <data name="CaseNothingDue" xml:space="preserve">
+    <value>Intet at gøre, sagen er lukket.</value>
+  </data>
+  <data name="CaseLast" xml:space="preserve">
+    <value>Den seneste</value>
+  </data>
+  <data name="CaseNoTreatments" xml:space="preserve">
+    <value>Ingen behandlinger endnu.</value>
+  </data>
+  <data name="CaseCountStickyTrap" xml:space="preserve">
+    <value>Tæl en limfælde</value>
+  </data>
+  <data name="CaseStickyTrap" xml:space="preserve">
+    <value>Limfælde</value>
+  </data>
+  <data name="CaseCountTrap" xml:space="preserve">
+    <value>Tæl fælde</value>
+  </data>
+  <data name="CaseTrapIntro" xml:space="preserve">
+    <value>{0} fanges på en gul eller blå limfælde. Tæl den nu og da for at se, om behandlingen virker.</value>
+  </data>
+  <data name="CaseNewTrapUp" xml:space="preserve">
+    <value>Der er sat en ny fælde op. Tæl den næste gang, du kigger.</value>
+  </data>
+  <data name="CaseTreatAgainOne" xml:space="preserve">
+    <value>Der er en ny på fælden. Skal du begynde at behandle igen?</value>
+  </data>
+  <data name="CaseTreatAgainMany" xml:space="preserve">
+    <value>Der er nye på fælden. Skal du begynde at behandle igen?</value>
+  </data>
+  <data name="CaseTreatAgain" xml:space="preserve">
+    <value>Behandl igen</value>
+  </data>
+  <data name="CaseNotNow" xml:space="preserve">
+    <value>Ikke nu</value>
+  </data>
+  <data name="CaseTreatmentsAndChecks" xml:space="preserve">
+    <value>Behandlinger og tjek</value>
+  </data>
+  <data name="CaseTreatments" xml:space="preserve">
+    <value>Behandlinger</value>
+  </data>
+  <data name="CaseNothingLogged" xml:space="preserve">
+    <value>Intet logget endnu. Når du logger den første behandling, skal den næste gøres efter intervallet.</value>
+  </data>
+  <data name="CasePlants" xml:space="preserve">
+    <value>Planter</value>
+  </data>
+  <data name="CaseNothingInRoom" xml:space="preserve">
+    <value>Der er intet i det rum lige nu.</value>
+  </data>
+  <data name="CaseNoPlants" xml:space="preserve">
+    <value>Ingen planter er dækket lige nu.</value>
+  </data>
+  <data name="CasePlantsHint" xml:space="preserve">
+    <value>Regnet ud fra, hvor planterne står nu, så alt, der flyttes ind, mens sagen er åben, også er dækket.</value>
+  </data>
+  <data name="CaseNeighbours" xml:space="preserve">
+    <value>Tjek naboerne</value>
+  </data>
+  <data name="CaseNeighboursHint" xml:space="preserve">
+    <value>Andre planter i samme rum. Skadedyr spreder sig til planter, der står tæt.</value>
+  </data>
+  <data name="CaseChecked" xml:space="preserve">
+    <value>Tjekket {0}</value>
+  </data>
+  <data name="CaseNeverChecked" xml:space="preserve">
+    <value>Aldrig tjekket</value>
+  </data>
+  <data name="CaseClean" xml:space="preserve">
+    <value>Ren</value>
+  </data>
+  <data name="CaseAddToCase" xml:space="preserve">
+    <value>Føj til sagen</value>
+  </data>
+  <data name="CaseDeleteConfirm" xml:space="preserve">
+    <value>Slet denne sag og dens behandlinger? Hvis den er overstået, så marker den som løst i stedet, så det, du gjorde, bliver gemt.</value>
+  </data>
+  <data name="CaseDelete" xml:space="preserve">
+    <value>Slet sag</value>
+  </data>
+  <data name="CaseNeighbourChecked" xml:space="preserve">
+    <value>{0} tjekket, ingen tegn.</value>
+  </data>
+  <data name="CaseNeighbourAdded" xml:space="preserve">
+    <value>{0} føjet til sagen.</value>
+  </data>
+  <data name="CaseResolved" xml:space="preserve">
+    <value>Sagen er løst.</value>
+  </data>
+  <data name="CheckLogged" xml:space="preserve">
+    <value>Tjek logget.</value>
+  </data>
+  <data name="TreatmentLogged" xml:space="preserve">
+    <value>Behandling logget.</value>
+  </data>
+  <data name="CaseCaught" xml:space="preserve">
+    <value>{0} på fælden på {1}</value>
+  </data>
+  <data name="CaseNew_One" xml:space="preserve">
+    <value>{0} ny</value>
+  </data>
+  <data name="CaseNew_Other" xml:space="preserve">
+    <value>{0} nye</value>
+  </data>
+  <data name="CaseDay_One" xml:space="preserve">
+    <value>{0} dag</value>
+  </data>
+  <data name="CaseDay_Other" xml:space="preserve">
+    <value>{0} dage</value>
+  </data>
+  <data name="CaseCaughtAbout" xml:space="preserve">
+    <value>{0}, cirka {1} om ugen.</value>
+  </data>
+  <data name="CaseCaughtPlain" xml:space="preserve">
+    <value>{0}.</value>
+  </data>
+  <data name="CaseSkippedStep" xml:space="preserve">
+    <value>Sprang {0} over</value>
+  </data>
+  <data name="CaseSkippedAStep" xml:space="preserve">
+    <value>Sprang et trin over</value>
+  </data>
+  <data name="CaseWhatChecked" xml:space="preserve">
+    <value>Tjekket</value>
+  </data>
+  <data name="CaseCountedTrap" xml:space="preserve">
+    <value>Talte fælden: {0} på den</value>
+  </data>
+  <data name="CaseCountedTrapThenNew" xml:space="preserve">
+    <value>Talte fælden: {0} på den, og satte så en ny op</value>
+  </data>
+  <data name="CasePutUpTrap" xml:space="preserve">
+    <value>Satte en ny fælde op</value>
+  </data>
+  <data name="CaseWhatTreated" xml:space="preserve">
+    <value>Behandlet</value>
+  </data>
+  <data name="CaseStep" xml:space="preserve">
+    <value>Trin</value>
+  </data>
+  <data name="CaseStepSkipped" xml:space="preserve">
+    <value>Sprunget over</value>
+  </data>
+  <data name="CaseStepNotDone" xml:space="preserve">
+    <value>Ikke gjort</value>
+  </data>
+  <data name="CaseStepStartDay" xml:space="preserve">
+    <value>På startdagen</value>
+  </data>
+  <data name="CaseStepAfter_One" xml:space="preserve">
+    <value>{0} dag efter</value>
+  </data>
+  <data name="CaseStepAfter_Other" xml:space="preserve">
+    <value>{0} dage efter</value>
+  </data>
+  <data name="CasePlanFuture" xml:space="preserve">
+    <value>Planen kan ikke starte i fremtiden.</value>
+  </data>
+  <data name="CasePlanBeforeCase" xml:space="preserve">
+    <value>Planen kan ikke starte før sagen.</value>
+  </data>
+  <data name="CaseFollowingMessage" xml:space="preserve">
+    <value>Følger {0}.</value>
+  </data>
+  <data name="CaseStepSkippedMessage" xml:space="preserve">
+    <value>Trin sprunget over.</value>
+  </data>
+  <data name="CaseMoveTooEarly" xml:space="preserve">
+    <value>Et trin kan kun flyttes til i dag eller senere.</value>
+  </data>
+  <data name="CaseStepMoved" xml:space="preserve">
+    <value>Trin flyttet til {0}.</value>
+  </data>
+  <data name="CasePlanStoppedMessage" xml:space="preserve">
+    <value>Planen er stoppet.</value>
+  </data>
+  <data name="ProblemTitle" xml:space="preserve">
+    <value>Problem</value>
+  </data>
+  <data name="ProblemGone" xml:space="preserve">
+    <value>Det problem findes ikke eller er slettet.</value>
+  </data>
+  <data name="ProblemDay_One" xml:space="preserve">
+    <value>dag</value>
+  </data>
+  <data name="ProblemDay_Other" xml:space="preserve">
+    <value>dage</value>
+  </data>
+  <data name="ProblemHowDoesItLook" xml:space="preserve">
+    <value>Hvordan ser den ud?</value>
+  </data>
+  <data name="ProblemItsOver" xml:space="preserve">
+    <value>Det er overstået</value>
+  </data>
+  <data name="ProblemItCameBack" xml:space="preserve">
+    <value>Det kom tilbage</value>
+  </data>
+  <data name="ProblemWhatHappenedHeading" xml:space="preserve">
+    <value>Hvad skete der</value>
+  </data>
+  <data name="ProblemLogStarted" xml:space="preserve">
+    <value>Startet</value>
+  </data>
+  <data name="ProblemLogHowItLooked" xml:space="preserve">
+    <value>Sådan så den ud</value>
+  </data>
+  <data name="ProblemLogUpdated" xml:space="preserve">
+    <value>Opdateret</value>
+  </data>
+  <data name="ProblemLogOver" xml:space="preserve">
+    <value>Overstået</value>
+  </data>
+  <data name="ProblemChangeUpdate" xml:space="preserve">
+    <value>Ret denne opdatering</value>
+  </data>
+  <data name="ProblemOpenPhoto" xml:space="preserve">
+    <value>Åbn billede</value>
+  </data>
+  <data name="ProblemBefore" xml:space="preserve">
+    <value>Før, med {0}</value>
+  </data>
+  <data name="ProblemBeforeHint" xml:space="preserve">
+    <value>Hvad du gjorde dengang, og hvordan det endte.</value>
+  </data>
+  <data name="ProblemDeleteConfirm" xml:space="preserve">
+    <value>Slet dette problem og dets opdateringer? Linjerne i plantens historik forsvinder også.</value>
+  </data>
+  <data name="ProblemDeleteConfirmPhotos" xml:space="preserve">
+    <value>Slet dette problem og dets opdateringer? Linjerne i plantens historik forsvinder også, og eventuelle billeder bliver på den.</value>
+  </data>
+  <data name="ProblemChangeWhatYouSaw" xml:space="preserve">
+    <value>Ret det, du så</value>
+  </data>
+  <data name="ProblemDelete" xml:space="preserve">
+    <value>Slet problem</value>
+  </data>
+  <data name="ProblemClosedOn" xml:space="preserve">
+    <value>Den</value>
+  </data>
+  <data name="ProblemGotBetterHint" xml:space="preserve">
+    <value>Den ser sund ud igen</value>
+  </data>
+  <data name="ProblemWentAwayHint" xml:space="preserve">
+    <value>Det forsvandt uden den store indsats</value>
+  </data>
+  <data name="ProblemDidntHelpHint" xml:space="preserve">
+    <value>Du lader den være, som den er</value>
+  </data>
+  <data name="ProblemDiedHint" xml:space="preserve">
+    <value>Planten klarede den ikke</value>
+  </data>
+  <data name="ProblemMarkDiedQuestion" xml:space="preserve">
+    <value>Skal planten markeres som død?</value>
+  </data>
+  <data name="ProblemWhatHappened" xml:space="preserve">
+    <value>Hvad skete der?</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>(valgfrit)</value>
+  </data>
+  <data name="ProblemMarkDied" xml:space="preserve">
+    <value>Marker som død</value>
+  </data>
+  <data name="ProblemSomethingsWrong" xml:space="preserve">
+    <value>Der er noget galt</value>
+  </data>
+  <data name="ProblemHowDidItEnd" xml:space="preserve">
+    <value>Hvordan endte det?</value>
+  </data>
+  <data name="ProblemItDied" xml:space="preserve">
+    <value>Den døde</value>
+  </data>
+  <data name="ProblemThis" xml:space="preserve">
+    <value>dette</value>
+  </data>
+  <data name="ProblemDayToday" xml:space="preserve">
+    <value>I dag</value>
+  </data>
+  <data name="ProblemDayYesterday" xml:space="preserve">
+    <value>I går</value>
+  </data>
+  <data name="ProblemMarkedDied" xml:space="preserve">
+    <value>Markeret som død.</value>
+  </data>
+  <data name="SheetWhatDoYouSee" xml:space="preserve">
+    <value>Hvad ser du?</value>
+  </data>
+  <data name="SheetBugsQuestion" xml:space="preserve">
+    <value>Insekter eller spind? {0}</value>
+  </data>
+  <data name="SheetOpenPestCase" xml:space="preserve">
+    <value>Åbn en skadedyrssag i stedet</value>
+  </data>
+  <data name="SheetSince" xml:space="preserve">
+    <value>Siden</value>
+  </data>
+  <data name="SheetWhatDidYouDo" xml:space="preserve">
+    <value>Hvad gjorde du?</value>
+  </data>
+  <data name="SheetNote" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="SheetPhotoToAdd" xml:space="preserve">
+    <value>Billede der tilføjes</value>
+  </data>
+  <data name="SheetRemovePhoto" xml:space="preserve">
+    <value>Fjern billede</value>
+  </data>
+  <data name="SheetCamera" xml:space="preserve">
+    <value>Kamera</value>
+  </data>
+  <data name="SheetGallery" xml:space="preserve">
+    <value>Galleri</value>
+  </data>
+  <data name="SheetLookAgain" xml:space="preserve">
+    <value>Se igen</value>
+  </data>
+  <data name="SheetDeleteUpdatePhotos" xml:space="preserve">
+    <value>Slet denne opdatering? Billederne bliver i plantens historik.</value>
+  </data>
+  <data name="SheetDeleteUpdate" xml:space="preserve">
+    <value>Slet denne opdatering?</value>
+  </data>
+  <data name="SheetDeleteUpdateButton" xml:space="preserve">
+    <value>Slet opdatering</value>
+  </data>
+  <data name="SheetIn3Days" xml:space="preserve">
+    <value>Om 3 dage</value>
+  </data>
+  <data name="SheetInAWeek" xml:space="preserve">
+    <value>Om en uge</value>
+  </data>
+  <data name="SheetIn2Weeks" xml:space="preserve">
+    <value>Om 2 uger</value>
+  </data>
+  <data name="SheetSavingPhotos" xml:space="preserve">
+    <value>Gemmer billeder…</value>
+  </data>
+  <data name="SheetPhotosFailed" xml:space="preserve">
+    <value>Kunne ikke gemme billederne: {0}</value>
+  </data>
+  <data name="CouldntDelete" xml:space="preserve">
+    <value>Kunne ikke slette: {0}</value>
+  </data>
+  <data name="TreatStep" xml:space="preserve">
+    <value>Trin {0} af {1} i {2}.</value>
+  </data>
+  <data name="TreatOffPlan" xml:space="preserve">
+    <value>Ikke et trin i planen</value>
+  </data>
+  <data name="TreatRecipe" xml:space="preserve">
+    <value>Blanding</value>
+  </data>
+  <data name="TreatRecipes" xml:space="preserve">
+    <value>Blandinger</value>
+  </data>
+  <data name="TreatSomethingElse" xml:space="preserve">
+    <value>Noget andet</value>
+  </data>
+  <data name="TreatWhatUsed" xml:space="preserve">
+    <value>Det, du brugte</value>
+  </data>
+  <data name="TreatWhatPlaceholder" xml:space="preserve">
+    <value>fx Spritspray, begge sider</value>
+  </data>
+  <data name="TreatNextDue" xml:space="preserve">
+    <value>Næste skal gøres</value>
+  </data>
+  <data name="TreatNextHint_One" xml:space="preserve">
+    <value>Som standard hver dag. Ændr den for at lade der gå længere tid.</value>
+  </data>
+  <data name="TreatNextHint_Other" xml:space="preserve">
+    <value>Som standard hver {0}. dag. Ændr den for at lade der gå længere tid.</value>
+  </data>
+  <data name="TreatMakeRecipe" xml:space="preserve">
+    <value>Laver du den samme spray hver gang? Gem den under {0}, og vælg den her.</value>
+  </data>
+  <data name="TreatRecipesLink" xml:space="preserve">
+    <value>Blandinger</value>
+  </data>
+  <data name="TreatCheckNotesPlaceholder" xml:space="preserve">
+    <value>fx Intet under bladene</value>
+  </data>
+  <data name="TreatNotesPlaceholder" xml:space="preserve">
+    <value>fx Stadig spind under det nye blad</value>
+  </data>
+  <data name="PlansPageTitle" xml:space="preserve">
+    <value>Behandlingsplaner · Stikling</value>
+  </data>
+  <data name="PlansBackToSupplies" xml:space="preserve">
+    <value>Udstyr</value>
+  </data>
+  <data name="PlansTitle" xml:space="preserve">
+    <value>Behandlingsplaner</value>
+  </data>
+  <data name="PlansIntro" xml:space="preserve">
+    <value>En række behandlinger i rækkefølge, som en spray, samme spray igen efter 3 dage og rovmider efter 10 dage mere. Start en på en sag, så skal sagen gøres trin for trin. En sag beholder sin egen kopi af trinnene, så en plan, der kører, ikke ændres, når du redigerer den her.</value>
+  </data>
+  <data name="PlansEditPlan" xml:space="preserve">
+    <value>Rediger plan</value>
+  </data>
+  <data name="PlansAddAPlan" xml:space="preserve">
+    <value>Tilføj en plan</value>
+  </data>
+  <data name="PlansName" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="PlansNamePlaceholder" xml:space="preserve">
+    <value>fx Spindemider, tre runder</value>
+  </data>
+  <data name="PlansSteps" xml:space="preserve">
+    <value>Trin</value>
+  </data>
+  <data name="PlansFirstStep" xml:space="preserve">
+    <value>Første trin</value>
+  </data>
+  <data name="PlansDaysAfter" xml:space="preserve">
+    <value>Dage efter trinnet før</value>
+  </data>
+  <data name="PlansMoveUp" xml:space="preserve">
+    <value>Flyt trin {0} op</value>
+  </data>
+  <data name="PlansMoveDown" xml:space="preserve">
+    <value>Flyt trin {0} ned</value>
+  </data>
+  <data name="PlansRemoveStep" xml:space="preserve">
+    <value>Fjern trin {0}</value>
+  </data>
+  <data name="PlansRecipesForStep" xml:space="preserve">
+    <value>Blandinger til trin {0}</value>
+  </data>
+  <data name="PlansWhat" xml:space="preserve">
+    <value>Hvad</value>
+  </data>
+  <data name="PlansWhatPlaceholder" xml:space="preserve">
+    <value>fx Slip rovmider ud</value>
+  </data>
+  <data name="PlansNotePlaceholder" xml:space="preserve">
+    <value>fx Hæng poserne nær de værst angrebne planter</value>
+  </data>
+  <data name="PlansAddStep" xml:space="preserve">
+    <value>Tilføj et trin</value>
+  </data>
+  <data name="PlansNotesPlaceholder" xml:space="preserve">
+    <value>fx Hvad planen er til</value>
+  </data>
+  <data name="PlansSaveChanges" xml:space="preserve">
+    <value>Gem ændringer</value>
+  </data>
+  <data name="PlansAddPlan" xml:space="preserve">
+    <value>Tilføj plan</value>
+  </data>
+  <data name="PlansDeleteConfirm" xml:space="preserve">
+    <value>Slet {0}? Sager, der følger den, beholder deres trin.</value>
+  </data>
+  <data name="PlansNone" xml:space="preserve">
+    <value>Ingen planer endnu.</value>
+  </data>
+  <data name="PlansNoneHint" xml:space="preserve">
+    <value>Behandlinger kommer ofte i en rækkefølge: spray, spray igen efter 3 dage, og slip så rovmider ud efter 10. Gem den én gang som en plan, og start den på en sag.</value>
+  </data>
+  <data name="PlansYourPlans" xml:space="preserve">
+    <value>Dine planer</value>
+  </data>
+  <data name="PlansStepLater" xml:space="preserve">
+    <value>{0}, {1} senere</value>
+  </data>
+  <data name="RecipesPageTitle" xml:space="preserve">
+    <value>Blandinger · Stikling</value>
+  </data>
+  <data name="RecipesIntro" xml:space="preserve">
+    <value>De sprays og væsker, du blander selv, gemt under et navn. Når du logger en behandling med en, kopieres indholdet over på behandlingen, så en ændret blanding her ikke ændrer det, du allerede har logget.</value>
+  </data>
+  <data name="RecipesEdit" xml:space="preserve">
+    <value>Rediger blanding</value>
+  </data>
+  <data name="RecipesAdd" xml:space="preserve">
+    <value>Tilføj en blanding</value>
+  </data>
+  <data name="RecipesNamePlaceholder" xml:space="preserve">
+    <value>fx Spritspray</value>
+  </data>
+  <data name="RecipesWhatsInIt" xml:space="preserve">
+    <value>Hvad der er i den</value>
+  </data>
+  <data name="RecipesIngredientN" xml:space="preserve">
+    <value>Ingrediens {0}</value>
+  </data>
+  <data name="RecipesMoveUp" xml:space="preserve">
+    <value>Flyt {0} op</value>
+  </data>
+  <data name="RecipesMoveDown" xml:space="preserve">
+    <value>Flyt {0} ned</value>
+  </data>
+  <data name="RecipesRemove" xml:space="preserve">
+    <value>Fjern {0}</value>
+  </data>
+  <data name="RecipesAmountHint" xml:space="preserve">
+    <value>Hver mængde gælder for den mængde færdig blanding, og resten er vand. Lad den stå tom for noget, du ikke måler.</value>
+  </data>
+  <data name="RecipesIngredientsToAdd" xml:space="preserve">
+    <value>Ingredienser at tilføje</value>
+  </data>
+  <data name="RecipesHowToUse" xml:space="preserve">
+    <value>Sådan bruger du den</value>
+  </data>
+  <data name="RecipesHowToUsePlaceholder" xml:space="preserve">
+    <value>fx Begge sider af bladene, derefter jordoverfladen</value>
+  </data>
+  <data name="RecipesAddButton" xml:space="preserve">
+    <value>Tilføj blanding</value>
+  </data>
+  <data name="RecipesNone" xml:space="preserve">
+    <value>Ingen blandinger endnu.</value>
+  </data>
+  <data name="RecipesNoneHint" xml:space="preserve">
+    <value>Start med den spray, du bruger mest. Mængder er valgfrie, så en blanding, du blander på øjemål, stadig er værd at gemme.</value>
+  </data>
+  <data name="RecipesYours" xml:space="preserve">
+    <value>Dine blandinger</value>
+  </data>
+  <data name="RecipesBottle" xml:space="preserve">
+    <value>Flaske</value>
+  </data>
+  <data name="RecipesBottlePlaceholder" xml:space="preserve">
+    <value>fx 0,5</value>
+  </data>
+  <data name="RecipesFillUp" xml:space="preserve">
+    <value>Fyld så op til {0}.</value>
+  </data>
+  <data name="RecipesMixBatch" xml:space="preserve">
+    <value>Bland en batch</value>
+  </data>
+  <data name="RecipesThisIngredient" xml:space="preserve">
+    <value>denne ingrediens</value>
+  </data>
+  <data name="RecipesUsed" xml:space="preserve">
+    <value>Brugt {0}, sidst {1}</value>
+  </data>
+  <data name="RecipesTime_One" xml:space="preserve">
+    <value>{0} gang</value>
+  </data>
+  <data name="RecipesTime_Other" xml:space="preserve">
+    <value>{0} gange</value>
+  </data>
+  <data name="RecipesNotUsed" xml:space="preserve">
+    <value>Ikke brugt endnu</value>
+  </data>
+  <data name="RecipesDelete" xml:space="preserve">
+    <value>Slet {0}?</value>
+  </data>
+  <data name="RecipesDeleteUsed" xml:space="preserve">
+    <value>Slet {0}? Den er brugt {1}, og de behandlinger beholder det, der var i den.</value>
+  </data>
+</root>

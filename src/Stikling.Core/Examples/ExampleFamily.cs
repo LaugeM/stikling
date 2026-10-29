@@ -171,7 +171,7 @@ public static class ExampleFamily
 
         var entries = new List<TimelineEntry>
         {
-            Entry(MotherCreatedId, plant, MotherId, acquiredAt, TimelineKind.Created, $"Added to collection, {acquiredOn.Text()}"),
+            Entry(MotherCreatedId, plant, MotherId, acquiredAt, TimelineKind.Created, $"Added to collection, {acquiredOn.StoredText()}"),
             Entry(MotherFirstCuttingId, plant, MotherId, NoonOn(Ago(45)), TimelineKind.Propagated, batch, null, propagation, FirstCuttingId),
             Entry(MotherNoteId, plant, MotherId, NoonOn(Ago(12)), TimelineKind.Note,
                 "Pinched out the tips to keep it bushy. One of them went into water.", MotherPhotoId),

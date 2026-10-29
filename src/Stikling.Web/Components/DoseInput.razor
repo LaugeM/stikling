@@ -3,24 +3,24 @@
 
 <div class="input-group dose-input @(Small ? "input-group-sm" : null)">
     <input type="number" id="@Id" class="form-control dose-amount" min="0" step="any" inputmode="decimal"
-           placeholder="Dose" aria-label="@Label" @bind="AmountValue" />
+           placeholder="@Strings.Supplies.DosePlaceholder" aria-label="@Label" @bind="AmountValue" />
     @if (UnitChanged.HasDelegate)
     {
-        <select class="form-select dose-unit" aria-label="Millilitres, grams or drops" @bind="UnitValue">
+        <select class="form-select dose-unit" aria-label="@Strings.Supplies.DoseUnitLabel" @bind="UnitValue">
             @foreach (var unit in Enum.GetValues<DoseUnit>())
             {
                 <option value="@unit">@Doses.Symbol(unit)</option>
             }
         </select>
-        <span class="input-group-text">per</span>
+        <span class="input-group-text">@Strings.Supplies.DosePer</span>
     }
     else
     {
-        <span class="input-group-text">@Doses.Symbol(Unit) per</span>
+        <span class="input-group-text">@Doses.Symbol(Unit) @Strings.Supplies.DosePer</span>
     }
     <input type="number" class="form-control dose-per" min="0" step="any" inputmode="decimal"
-           aria-label="How much water @(Label is null ? "the dose" : Label.ToLowerInvariant()) is for" @bind="PerValue" />
-    <select class="form-select dose-per-unit" aria-label="Litres or millilitres" @bind="PerUnitValue">
+           aria-label="@PerLabel" @bind="PerValue" />
+    <select class="form-select dose-per-unit" aria-label="@Strings.Supplies.LitresOrMillilitres" @bind="PerUnitValue">
         @foreach (var unit in Enum.GetValues<WaterUnit>())
         {
             <option value="@unit">@Doses.Symbol(unit)</option>
@@ -64,6 +64,10 @@
 
     [Parameter]
     public bool Small { get; set; } = true;
+
+    private string PerLabel => Label is null
+        ? Strings.Supplies.DoseForWaterDefault
+        : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.DoseForWater, Label.ToLowerInvariant());
 
     private decimal? AmountValue
     {

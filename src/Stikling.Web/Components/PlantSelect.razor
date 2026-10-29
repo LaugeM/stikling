@@ -3,10 +3,10 @@
 
 <label class="form-label" for="@Id">@Label</label>
 <select id="@Id" class="form-select" value="@Value" @onchange="Changed">
-    <option value="">Pick a plant</option>
+    <option value="">@Strings.Plants.PlantSelectPick</option>
     @if (SameGenus.Count > 0)
     {
-        <optgroup label="Same genus">
+        <optgroup label="@Strings.Plants.PlantSelectSameGenus">
             @foreach (var plant in SameGenus)
             {
                 <option value="@plant.Id">@plant.DisplayName</option>
@@ -15,7 +15,7 @@
     }
     @if (Others.Count > 0)
     {
-        <optgroup label="Other plants">
+        <optgroup label="@Strings.Plants.PlantSelectOthers">
             @foreach (var plant in Others)
             {
                 <option value="@plant.Id">@plant.DisplayName</option>
@@ -47,7 +47,7 @@
     public string Id { get; set; } = "pot-with";
 
     [Parameter]
-    public string Label { get; set; } = "Which plant's pot";
+    public string Label { get; set; } = Strings.Plants.PlantSelectLabel;
 
     private IReadOnlyList<Plant> Choices => [.. Plants
         .Where(p => !p.IsDeleted && p.InCollection && p.Id != Except)

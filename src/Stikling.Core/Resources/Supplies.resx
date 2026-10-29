@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FeedOrderSilica" xml:space="preserve">
+    <value>Silica usually goes in first and gets stirred in before anything else.</value>
+    <comment>Shown under the products of a feed when silica is not first.</comment>
+  </data>
+  <data name="FeedOrderPh" xml:space="preserve">
+    <value>pH up or down usually goes in last, because everything else shifts the pH.</value>
+    <comment>Shown under the products of a feed when pH up or down is not last.</comment>
+  </data>
+  <data name="FeedNeedsName" xml:space="preserve">
+    <value>Give the feed a name.</value>
+    <comment>Error when saving a feed. A feed is a recipe of products to water with.</comment>
+  </data>
+  <data name="FeedNeedsProduct" xml:space="preserve">
+    <value>Add at least one product.</value>
+    <comment>Error when saving a feed.</comment>
+  </data>
+  <data name="FeedProductNeedsName" xml:space="preserve">
+    <value>A product in the feed needs a name.</value>
+    <comment>Error when saving a feed.</comment>
+  </data>
+  <data name="DoseNegative" xml:space="preserve">
+    <value>A dose can't be less than 0.</value>
+    <comment>Error when saving a product or a feed.</comment>
+  </data>
+  <data name="NoWater" xml:space="preserve">
+    <value>The water a dose is for has to be more than 0.</value>
+    <comment>Error when saving a dose. A dose is for an amount of water, like 5 ml per 4 L.</comment>
+  </data>
+  <data name="ProductNeedsName" xml:space="preserve">
+    <value>Give the product a name.</value>
+    <comment>Error when saving a product.</comment>
+  </data>
+  <data name="NutrientRange" xml:space="preserve">
+    <value>A nutrient can't be less than 0 or more than 100 %.</value>
+    <comment>Error when saving a product.</comment>
+  </data>
+  <data name="NutrientOnce" xml:space="preserve">
+    <value>Each nutrient can only be listed once.</value>
+    <comment>Error when saving a product.</comment>
+  </data>
+  <data name="MixNeedsName" xml:space="preserve">
+    <value>Give the mix a name.</value>
+    <comment>Error when saving a soil mix.</comment>
+  </data>
+  <data name="MixNeedsIngredient" xml:space="preserve">
+    <value>Add at least one ingredient.</value>
+    <comment>Error when saving a soil mix.</comment>
+  </data>
+  <data name="MixAmountNegative" xml:space="preserve">
+    <value>An amount can't be less than 0.</value>
+    <comment>Error when saving a soil mix.</comment>
+  </data>
+  <data name="PotDefaultName" xml:space="preserve">
+    <value>Pot</value>
+    <comment>Name shown for a pot that has no name.</comment>
+  </data>
+  <data name="PotNeedsNameContainer" xml:space="preserve">
+    <value>Give the container a name, like "Clear box with lid".</value>
+    <comment>Error when saving a container for propagation.</comment>
+  </data>
+  <data name="PotNeedsNamePot" xml:space="preserve">
+    <value>Give the pot a name, like "Clear nursery pot".</value>
+    <comment>Error when saving a pot.</comment>
+  </data>
+  <data name="PotNeedsOne" xml:space="preserve">
+    <value>You have to have at least one of it.</value>
+    <comment>Error when saving a pot. It is about how many of the pot the person owns.</comment>
+  </data>
+  <data name="PotMeasurement" xml:space="preserve">
+    <value>A measurement has to be more than 0.</value>
+    <comment>Error when saving a pot.</comment>
+  </data>
+  <data name="PotBottomWider" xml:space="preserve">
+    <value>The bottom can't be wider than the top.</value>
+    <comment>Error when saving a pot.</comment>
+  </data>
+  <data name="SellerNeedsName" xml:space="preserve">
+    <value>Give the seller a name.</value>
+    <comment>Error when saving a seller.</comment>
+  </data>
+  <data name="SellerGone" xml:space="preserve">
+    <value>That seller isn't there any more.</value>
+    <comment>Error on the seller page, when the seller was deleted meanwhile.</comment>
+  </data>
+  <data name="SellerPickAnother" xml:space="preserve">
+    <value>Pick another seller to merge into.</value>
+    <comment>Error when merging a seller into itself.</comment>
+  </data>
+  <data name="PotSizeFromTo" xml:space="preserve">
+    <value>From {0} cm to {1} cm across the top.</value>
+    <comment>Shown under the pot picker when potting up. {0} and {1} are widths in cm.</comment>
+  </data>
+  <data name="PotSizeWarn" xml:space="preserve">
+    <value>That's a lot bigger, so the soil will stay wet longer. Water less until the roots fill it.</value>
+    <comment>Added after the sentence about the sizes when the new pot is much wider.</comment>
+  </data>
+  <data name="DoseRate" xml:space="preserve">
+    <value>{0} per {1} {2}</value>
+    <comment>A dose as the bottle says it. {0} is the amount to measure out, like 5 ml, {1} the amount of water and {2} its unit, like L.</comment>
+  </data>
+  <data name="DropsSymbol" xml:space="preserve">
+    <value>drops</value>
+    <comment>The unit of a dose in drops. Shown in a list of units, like ml, g and drops.</comment>
+  </data>
+  <data name="DoseDrops_One" xml:space="preserve">
+    <value>{0} drop</value>
+    <comment>An amount to measure out, in drops. {0} is the number.</comment>
+  </data>
+  <data name="DoseDrops_Other" xml:space="preserve">
+    <value>{0} drops</value>
+    <comment>An amount to measure out, in drops. {0} is the number.</comment>
+  </data>
+  <data name="IngredientPottingSoil" xml:space="preserve">
+    <value>Potting soil</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="IngredientPerlite" xml:space="preserve">
+    <value>Perlite</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="IngredientLeca" xml:space="preserve">
+    <value>LECA</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="IngredientBark" xml:space="preserve">
+    <value>Bark</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="IngredientPumice" xml:space="preserve">
+    <value>Pumice</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="IngredientCocoCoir" xml:space="preserve">
+    <value>Coco coir</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="IngredientSphagnum" xml:space="preserve">
+    <value>Sphagnum</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="IngredientWormCastings" xml:space="preserve">
+    <value>Worm castings</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="IngredientSand" xml:space="preserve">
+    <value>Sand</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="IngredientCharcoal" xml:space="preserve">
+    <value>Charcoal</value>
+    <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+</root>

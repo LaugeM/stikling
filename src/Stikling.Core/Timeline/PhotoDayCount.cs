@@ -1,4 +1,7 @@
+using System.Globalization;
 using Stikling.Core.Models;
+using Stikling.Core.Text;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Timeline;
 
@@ -14,7 +17,7 @@ public static class PhotoDayCount
 
     /// <summary>"day 24" for a photo of a propagation, or null without a day.</summary>
     public static string? DayLabel(DateOnly? start, DateOnly taken) =>
-        Day(start, taken) is { } day ? $"day {day}" : null;
+        Day(start, taken) is { } day ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.PhotoDay, day) : null;
 
     /// <summary>What goes after the date, " · day 24" or " · 1 yr 2 mo", or nothing when there is no text.</summary>
     public static string Suffix(string? age) => age is null ? "" : $" · {age}";
@@ -46,10 +49,12 @@ public static class PhotoDayCount
             if (acquired.Precision != DatePrecision.Day)
                 return null;
             var days = taken.DayNumber - start.DayNumber;
-            return days == 0 ? "first day" : days == 1 ? "1 day" : $"{days} days";
+            return days == 0 ? Strings.Propagations.AgeFirstDay : Plural.Of(days, Strings.Propagations.AgeDays_One, Strings.Propagations.AgeDays_Other);
         }
         var years = months / 12;
         var rest = months % 12;
-        return years == 0 ? $"{rest} mo" : rest == 0 ? $"{years} yr" : $"{years} yr {rest} mo";
+        return years == 0 ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AgeMonths, rest)
+            : rest == 0 ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AgeYears, years)
+            : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AgeYearsMonths, years, rest);
     }
 }

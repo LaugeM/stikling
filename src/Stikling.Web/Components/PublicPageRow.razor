@@ -5,8 +5,8 @@
 
 @if (Links.For(SubjectId) is { } link)
 {
-    <dt>Public page</dt>
-    <dd><a class="link-action" href="@link.Url" target="_blank" rel="noopener">Open</a></dd>
+    <dt>@Strings.Plants.PublicPage</dt>
+    <dd><a class="link-action" href="@link.Url" target="_blank" rel="noopener">@Strings.PlantDetail.Open</a></dd>
 }
 
 @code {

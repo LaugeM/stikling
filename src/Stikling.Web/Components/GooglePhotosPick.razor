@@ -9,20 +9,20 @@
     <div class="google-pick">
         @if (state == PickState.Asking)
         {
-            <p class="composer-status" role="status">Waiting for Google…</p>
+            <p class="composer-status" role="status">@Strings.Shared.GoogleWaiting</p>
         }
         else if (state == PickState.Ready)
         {
-            <p class="composer-status" role="status">@(opened ? "Waiting for you to pick in Google Photos…" : "Pick your photos in Google Photos, then come back here.")</p>
+            <p class="composer-status" role="status">@(opened ? Strings.Shared.GoogleWaitingForPick : Strings.Shared.GooglePickThenReturn)</p>
             <div class="google-pick-actions">
                 <a class="btn btn-primary btn-sm" href="@pickerUri" target="_blank" rel="noopener"
-                   @onclick="() => opened = true">@(opened ? "Open Google Photos again" : "Open Google Photos")</a>
-                <button type="button" class="btn btn-link btn-sm" @onclick="CancelAsync">Cancel</button>
+                   @onclick="() => opened = true">@(opened ? Strings.Shared.GoogleOpenAgain : Strings.Shared.GoogleOpen)</a>
+                <button type="button" class="btn btn-link btn-sm" @onclick="CancelAsync">@Strings.Common.Cancel</button>
             </div>
         }
         else if (state == PickState.Fetching)
         {
-            <p class="composer-status" role="status">Fetching photo @fetching of @total…</p>
+            <p class="composer-status" role="status">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.GoogleFetching, fetching, total)</p>
         }
         else
         {
@@ -89,8 +89,8 @@
         if (started.Status != "ready" || started.PickerUri is null)
         {
             await FinishAsync(started.Status == "denied"
-                ? "Stikling didn't get access to Google Photos, so nothing was added."
-                : "Couldn't reach Google Photos. Check the connection and try again.");
+                ? Strings.Shared.GoogleDenied
+                : Strings.Shared.GoogleUnreachable);
             return;
         }
 
@@ -139,19 +139,19 @@
                     await OnSaved.InvokeAsync(saved);
                     break;
                 case "timedOut":
-                    await FinishAsync("Google Photos stopped waiting. Pick again to try once more.");
+                    await FinishAsync(Strings.Shared.GoogleTimedOut);
                     break;
                 case "cancelled":
                     await FinishAsync(null);
                     break;
                 default:
-                    await FinishAsync("Couldn't reach Google Photos. Check the connection and try again.");
+                    await FinishAsync(Strings.Shared.GoogleUnreachable);
                     break;
             }
         }
         catch (Exception ex) when (!disposed)
         {
-            await FinishAsync($"Couldn't save the photos: {ex.Message}");
+            await FinishAsync(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.GoogleSaveError, ex.Message));
         }
     }
 

@@ -10,8 +10,10 @@ using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
 using Stikling.Core.SoilMixes;
+using Stikling.Core.Text;
 using Stikling.Core.Timeline;
 using Stikling.Core.Wishlist;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Search;
 
@@ -69,7 +71,7 @@ public sealed class SearchService(
     private static string Names(params string?[] parts) =>
         SearchText.Fold(string.Join(' ', parts.Where(p => !string.IsNullOrWhiteSpace(p))));
 
-    private static SearchIndex.Extra InNotes(string? notes) => new(Has(notes), "in the notes", IsNotes: true);
+    private static SearchIndex.Extra InNotes(string? notes) => new(Has(notes), Strings.Shared.SearchInNotes, IsNotes: true);
 
     private static Func<string, bool> Has(string? text)
     {
@@ -91,15 +93,15 @@ public sealed class SearchService(
     private static SearchIndex.Doc PlantDoc(Plant plant, Func<string?, string?, string?, string?>? everyday, IReadOnlyList<OwnField> textFields)
     {
         var item = new SearchItem(SearchKind.Plant, plant.Id, plant.DisplayName, Subtitle(plant.Nickname, plant.BotanicalName),
-            plant.LivesElsewhere ? (plant.LivesWithName is { } whose ? $"lives with {whose}" : "not yours") : null,
+            plant.LivesElsewhere ? (plant.LivesWithName is { } whose ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchLivesWith, whose) : Strings.Shared.SearchNotYours) : null,
             !plant.InCollection && !plant.LivesElsewhere, $"plants/{plant.Id}");
         var names = Names(plant.DisplayName, plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameNote, plant.BotanicalName,
             everyday?.Invoke(plant.Genus, PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar));
 
         List<SearchIndex.Extra> before =
-            [.. PlantTags.Normalize(plant.Tags).Select(tag => new SearchIndex.Extra(Has(tag), $"tag {tag}"))];
+            [.. PlantTags.Normalize(plant.Tags).Select(tag => new SearchIndex.Extra(Has(tag), string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchTag, tag)))];
         if (CollectionNumbers.Normalize(plant.CollectionNumber) is { } code)
-            before.Add(new SearchIndex.Extra(word => CollectionNumbers.MatchesSearch(code, word), $"number {code}"));
+            before.Add(new SearchIndex.Extra(word => CollectionNumbers.MatchesSearch(code, word), string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchNumber, code)));
         foreach (var field in textFields)
             if (plant.OwnFields.TryGetValue(field.Id, out var value) && !string.IsNullOrWhiteSpace(value))
                 before.Add(new SearchIndex.Extra(Has(value), $"{field.Name} {value}"));
@@ -117,7 +119,7 @@ public sealed class SearchService(
 
         List<SearchIndex.Extra> before = [];
         if (CollectionNumbers.Normalize(propagation.CollectionNumber) is { } code)
-            before.Add(new SearchIndex.Extra(word => CollectionNumbers.MatchesSearch(code, word), $"number {code}"));
+            before.Add(new SearchIndex.Extra(word => CollectionNumbers.MatchesSearch(code, word), string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchNumber, code)));
         return new(item, names, Extras(propagation.Notes, [.. before]));
     }
 
@@ -134,7 +136,7 @@ public sealed class SearchService(
     private static SearchIndex.Doc MixDoc(SoilMix mix)
     {
         var recipe = string.IsNullOrWhiteSpace(mix.Recipe) ? null : mix.Recipe;
-        var title = string.IsNullOrWhiteSpace(mix.Name) ? "Unnamed mix" : mix.Name.Trim();
+        var title = string.IsNullOrWhiteSpace(mix.Name) ? Strings.Shared.SearchUnnamedMix : mix.Name.Trim();
         return new(new SearchItem(SearchKind.Mix, mix.Id, title, null, recipe, false, $"soil-mixes?show={mix.Id}"),
             Names(title, recipe),
             Extras(mix.Notes));
@@ -142,7 +144,7 @@ public sealed class SearchService(
 
     private static SearchIndex.Doc FeedDoc(Feed feed)
     {
-        var title = string.IsNullOrWhiteSpace(feed.Name) ? "Unnamed feed" : feed.Name.Trim();
+        var title = string.IsNullOrWhiteSpace(feed.Name) ? Strings.Shared.SearchUnnamedFeed : feed.Name.Trim();
         return new(new SearchItem(SearchKind.Feed, feed.Id, title, null, null, false, $"feeds?show={feed.Id}"),
             Names(title),
             Extras(feed.Notes));
@@ -150,7 +152,7 @@ public sealed class SearchService(
 
     private static SearchIndex.Doc ProductDoc(Product product)
     {
-        var title = string.IsNullOrWhiteSpace(product.Name) ? "Unnamed product" : product.Name.Trim();
+        var title = string.IsNullOrWhiteSpace(product.Name) ? Strings.Shared.SearchUnnamedProduct : product.Name.Trim();
         return new(new SearchItem(SearchKind.Product, product.Id, title, null, null, false, $"products?show={product.Id}"),
             Names(title),
             Extras(product.Notes));
@@ -158,14 +160,14 @@ public sealed class SearchService(
 
     private static SearchIndex.Doc RecipeDoc(TreatmentRecipe recipe)
     {
-        var title = string.IsNullOrWhiteSpace(recipe.Name) ? "Unnamed recipe" : recipe.Name.Trim();
+        var title = string.IsNullOrWhiteSpace(recipe.Name) ? Strings.Shared.SearchUnnamedRecipe : recipe.Name.Trim();
         return new(new SearchItem(SearchKind.TreatmentRecipe, recipe.Id, title, null, null, false, $"treatment-recipes?show={recipe.Id}"),
             Names(title, recipe.Method),
             []);
     }
 
     private static SearchIndex.Doc TagDoc(TagCount tag) =>
-        new(new SearchItem(SearchKind.Tag, Guid.Empty, tag.Name, null, tag.Plants == 1 ? "1 plant" : $"{tag.Plants} plants",
+        new(new SearchItem(SearchKind.Tag, Guid.Empty, tag.Name, null, Plural.Of(tag.Plants, Strings.Shared.SearchTagPlants_One, Strings.Shared.SearchTagPlants_Other),
                 false, $"plants?tag={Uri.EscapeDataString(tag.Name)}"),
             Names(tag.Name),
             []);
@@ -176,9 +178,9 @@ public sealed class SearchService(
         var docs = new List<SearchIndex.Doc>();
         foreach (var room in places.Rooms)
         {
-            docs.Add(PlaceDoc(room, room.IsSpot ? "Spot" : "Room"));
+            docs.Add(PlaceDoc(room, room.IsSpot ? Strings.Shared.SearchSpot : Strings.Shared.SearchRoom));
             foreach (var spot in places.SpotsIn(room.Id))
-                docs.Add(PlaceDoc(spot, $"Spot in {room.Name}"));
+                docs.Add(PlaceDoc(spot, string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchSpotIn, room.Name)));
         }
 
         return docs;
@@ -241,7 +243,7 @@ public sealed class SearchService(
 
             var route = owner.Type == SubjectType.Plant ? "plants" : "propagations";
             Add(entry.Id, $"{route}/{entry.SubjectId}?entry={entry.Id}", NoteSource.Timeline, entry.OccurredAt, owner.Type,
-                entry.SubjectId, owner.Name, entry.Kind == TimelineKind.Note ? "Note" : "Update", entry.Text);
+                entry.SubjectId, owner.Name, entry.Kind == TimelineKind.Note ? Strings.Shared.SearchLabelNote : Strings.Shared.SearchLabelUpdate, entry.Text);
         }
 
         var ownKinds = CareLabels.Lookup(await ownCareKinds.GetAllAsync());
@@ -267,14 +269,14 @@ public sealed class SearchService(
                 continue;
             liveProblems[problem.Id] = (problem, owner.Name, owner.Type);
             Add(problem.Id, $"problems/{problem.Id}", NoteSource.Problem, time.MomentOn(problem.StartedOn),
-                owner.Type, problem.SubjectId, owner.Name, "Problem", problem.Note);
+                owner.Type, problem.SubjectId, owner.Name, Strings.Shared.SearchLabelProblem, problem.Note);
         }
 
         foreach (var update in await problemUpdates.GetAllAsync())
         {
             if (!update.IsDeleted && liveProblems.TryGetValue(update.ProblemId, out var found))
                 Add(update.Id, $"problems/{update.ProblemId}?entry={update.Id}", NoteSource.ProblemUpdate,
-                    time.MomentOn(update.OccurredOn), found.Type, found.Problem.SubjectId, found.Name, "Problem", update.Note);
+                    time.MomentOn(update.OccurredOn), found.Type, found.Problem.SubjectId, found.Name, Strings.Shared.SearchLabelProblem, update.Note);
         }
 
         // A case with one plant is named for the plant, else for the pest
@@ -298,14 +300,14 @@ public sealed class SearchService(
             }
 
             liveCases[item.Id] = (item, type, ownerId, name);
-            Add(item.Id, $"pests/{item.Id}", NoteSource.PestCase, time.MomentOn(item.StartedOn), type, ownerId, name, "Pests", item.Notes);
+            Add(item.Id, $"pests/{item.Id}", NoteSource.PestCase, time.MomentOn(item.StartedOn), type, ownerId, name, Strings.Shared.SearchLabelPests, item.Notes);
         }
 
         foreach (var treatment in await pestTreatments.GetAllAsync())
         {
             if (!treatment.IsDeleted && liveCases.TryGetValue(treatment.CaseId, out var found))
                 Add(treatment.Id, $"pests/{treatment.CaseId}?entry={treatment.Id}", NoteSource.PestTreatment,
-                    time.MomentOn(treatment.OccurredOn), found.Type, found.OwnerId, found.Name, "Pests",
+                    time.MomentOn(treatment.OccurredOn), found.Type, found.OwnerId, found.Name, Strings.Shared.SearchLabelPests,
                     treatment.Notes, treatment.What, treatment.Method);
         }
 

@@ -21,27 +21,27 @@
 @inject NavigationManager Navigation
 @using CoreTable = Stikling.Core.Plants.PlantTable
 
-<PageTitle>Plants · Stikling</PageTitle>
+<PageTitle>@Strings.Plants.ListPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 <div class="page-heading">
-    <h1>Plants</h1>
+    <h1>@Strings.Plants.ListTitle</h1>
     @if (all is { Count: > 0 })
     {
         <div class="d-flex align-items-baseline justify-content-end flex-wrap gap-2">
-            <span class="text-body-secondary small">@visible.Count of @all.Count</span>
-            <a class="btn btn-outline-primary btn-sm" href="water?from=plants">Water plants</a>
-            <a class="btn btn-link btn-sm link-action" href="plants/flowering">Flowering</a>
-            <button type="button" class="btn btn-link btn-sm link-action" disabled="@(ShareCount == 0)" @onclick="OpenShare">Share as text</button>
-            <a class="btn btn-link btn-sm link-action" href="plants/collection">Collection</a>
-            <a class="btn btn-link btn-sm link-action" href="wishlist">Wishlist</a>
+            <span class="text-body-secondary small">@F(Strings.Plants.ListShown, visible.Count, all.Count)</span>
+            <a class="btn btn-outline-primary btn-sm" href="water?from=plants">@Strings.Plants.ListWaterPlants</a>
+            <a class="btn btn-link btn-sm link-action" href="plants/flowering">@Strings.Plants.ListFlowering</a>
+            <button type="button" class="btn btn-link btn-sm link-action" disabled="@(ShareCount == 0)" @onclick="OpenShare">@Strings.Plants.ListShareAsText</button>
+            <a class="btn btn-link btn-sm link-action" href="plants/collection">@Strings.Plants.ListCollection</a>
+            <a class="btn btn-link btn-sm link-action" href="wishlist">@Strings.Plants.ListWishlist</a>
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
-                @(selecting ? "Done" : "Select")
+                @(selecting ? Strings.Common.Done : Strings.Plants.ListSelect)
             </button>
             @* Takes over from the round add button on a wide screen *@
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="plants/new">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-                Add a plant
+                @Strings.Plants.AddAPlant
             </a>
         </div>
     }
@@ -49,7 +49,7 @@
 
 @if (all is null)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Plants.Loading</p>
 }
 else if (all.Count == 0)
 {
@@ -58,26 +58,26 @@ else if (all.Count == 0)
             <path class="pot" d="M18 36h28v6H18Z" /><path class="pot" d="M21 42h22l-3 16H24Z" />
             <path class="growth" d="M32 36V18" /><path class="growth" d="M32 28c0-8-6-13-14-13 0 8 6 13 14 13Z" /><path class="growth" d="M32 23c0-7 6-11 13-11 0 7-6 11-13 11Z" />
         </svg>
-        <h2>No plants yet</h2>
-        <p>Add the first one to start your collection. A name is enough, and the rest can wait.</p>
+        <h2>@Strings.Plants.ListEmptyTitle</h2>
+        <p>@Strings.Plants.ListEmptyText</p>
         <div class="first-run-actions">
-            <a class="btn btn-primary" href="plants/new">Add a plant</a>
+            <a class="btn btn-primary" href="plants/new">@Strings.Plants.AddAPlant</a>
         </div>
         <p class="first-run-more">
-            Keeping a list somewhere else? <a href="plants/import">Import it from a spreadsheet</a>.
-            Still looking for some? <a href="wishlist">Start a wishlist</a>.
+            @WithLink(Strings.Plants.ListEmptyImport, "plants/import", Strings.Plants.ListEmptyImportLink)
+            @WithLink(Strings.Plants.ListEmptyWishlist, "wishlist", Strings.Plants.ListEmptyWishlistLink)
         </p>
-        <a class="first-run-help" href="help#plants">More about plants in Help</a>
+        <a class="first-run-help" href="help#plants">@Strings.Plants.ListMoreInHelp</a>
     </div>
 }
 else
 {
     <div class="plant-filters">
-        <input type="search" class="form-control" placeholder="Search by name, genus, species…"
-               aria-label="Search plants" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
+        <input type="search" class="form-control" placeholder="@Strings.Plants.ListSearchPlaceholder"
+               aria-label="@Strings.Plants.ListSearchLabel" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
 
         <div class="d-flex flex-wrap gap-2">
-            <div class="btn-group segmented flex-grow-1" role="radiogroup" aria-label="Status">
+            <div class="btn-group segmented flex-grow-1" role="radiogroup" aria-label="@Strings.Plants.ListStatusLabel">
                 @foreach (var (value, label) in statusOptions)
                 {
                     var id = $"status-{value}";
@@ -89,7 +89,7 @@ else
 
             @if (status == StatusFilter.Gone)
             {
-                <div class="btn-group segmented w-100 gone-as" role="radiogroup" aria-label="How they left">
+                <div class="btn-group segmented w-100 gone-as" role="radiogroup" aria-label="@Strings.Plants.ListGoneAsLabel">
                     @foreach (var (value, label) in goneOptions)
                     {
                         var id = $"gone-{value?.ToString() ?? "all"}";
@@ -102,9 +102,9 @@ else
 
             @if (HasRoomChoice)
             {
-                <select class="form-select w-auto" aria-label="Room"
+                <select class="form-select w-auto" aria-label="@Strings.Plants.ListRoomLabel"
                         @bind="room" @bind:after="RoomPicked">
-                    <option value="">All rooms</option>
+                    <option value="">@Strings.Plants.ListAllRooms</option>
                     @foreach (var r in roomsInUse)
                     {
                         <option value="@r.Id">@r.Name</option>
@@ -112,35 +112,35 @@ else
                 </select>
                 @if (PickedRoom is { Spots.Count: 0 } && PickedPlace is { } roomPlace)
                 {
-                    <a class="btn btn-outline-primary go-round" href="round/@roomPlace?from=plants">Go round</a>
+                    <a class="btn btn-outline-primary go-round" href="round/@roomPlace?from=plants">@Strings.Plants.ListGoRound</a>
                 }
             }
 
             @if (HasLikesChoice || likes is not null)
             {
-                <select class="form-select w-auto" aria-label="What it likes"
+                <select class="form-select w-auto" aria-label="@Strings.Plants.ListLikesLabel"
                         @bind="likes" @bind:after="Refresh">
-                    <option value="">Any needs</option>
-                    <option value="@LikesFilter.HighHumidity">Likes high humidity</option>
-                    <option value="@LikesFilter.StaysMoist">Likes to stay moist</option>
-                    <option value="@LikesFilter.DriesOut">Likes to dry out</option>
-                    <option value="@LikesFilter.RestsInWinter">Rests in winter</option>
-                    <option value="@LikesFilter.RestsInSummer">Rests in summer</option>
-                    <option value="@LikesFilter.DarkerThanItLikes">Darker than it likes</option>
+                    <option value="">@Strings.Plants.ListAnyNeeds</option>
+                    <option value="@LikesFilter.HighHumidity">@Strings.Plants.ListLikesHumidity</option>
+                    <option value="@LikesFilter.StaysMoist">@Strings.Plants.ListLikesMoist</option>
+                    <option value="@LikesFilter.DriesOut">@Strings.Plants.ListLikesDry</option>
+                    <option value="@LikesFilter.RestsInWinter">@Strings.Plants.ListRestsWinter</option>
+                    <option value="@LikesFilter.RestsInSummer">@Strings.Plants.ListRestsSummer</option>
+                    <option value="@LikesFilter.DarkerThanItLikes">@Strings.Plants.ListDarker</option>
                 </select>
             }
 
             @if (HasFieldChoice)
             {
-                <select class="form-select w-auto" aria-label="Fields"
+                <select class="form-select w-auto" aria-label="@Strings.Plants.ListFieldsLabel"
                         @bind="fieldChoice" @bind:after="FieldPicked">
-                    <option value="">Any field</option>
-                    <optgroup label="How it was raised">
+                    <option value="">@Strings.Plants.ListAnyField</option>
+                    <optgroup label="@Strings.Plants.ListHowRaised">
                         @foreach (var value in Enum.GetValues<RaisedAs>())
                         {
                             <option value="raised:@value">@Labels.For(value)</option>
                         }
-                        <option value="raised:">Not set</option>
+                        <option value="raised:">@Strings.Plants.ListNotSet</option>
                     </optgroup>
                     @foreach (var field in choiceFields)
                     {
@@ -149,7 +149,7 @@ else
                             {
                                 <option value="field:@field.Id:@choice">@choice</option>
                             }
-                            <option value="field:@field.Id">Not set</option>
+                            <option value="field:@field.Id">@Strings.Plants.ListNotSet</option>
                         </optgroup>
                     }
                 </select>
@@ -157,7 +157,7 @@ else
 
             @if (view != PlantView.Table)
             {
-                <select class="form-select w-auto" aria-label="Sort by"
+                <select class="form-select w-auto" aria-label="@Strings.Plants.ListSortLabel"
                         @bind="sort" @bind:after="SortChangedAsync">
                     @foreach (var (value, label) in sortOptions)
                     {
@@ -167,20 +167,20 @@ else
             }
             else
             {
-                <button type="button" class="btn btn-outline-primary columns-button" @onclick="() => columnsOpen = true">Columns</button>
+                <button type="button" class="btn btn-outline-primary columns-button" @onclick="() => columnsOpen = true">@Strings.Plants.ListColumns</button>
             }
 
-            <div class="btn-group view-toggle" role="group" aria-label="View">
+            <div class="btn-group view-toggle" role="group" aria-label="@Strings.Plants.ListViewLabel">
                 <button type="button" class="btn btn-outline-primary @(view == PlantView.List ? "picked" : null)" aria-pressed="@(view == PlantView.List ? "true" : "false")"
-                        aria-label="List view" title="List view" @onclick="() => SetViewAsync(PlantView.List)">
+                        aria-label="@Strings.Plants.ListViewList" title="@Strings.Plants.ListViewList" @onclick="() => SetViewAsync(PlantView.List)">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>
                 </button>
                 <button type="button" class="btn btn-outline-primary @(view == PlantView.Grid ? "picked" : null)" aria-pressed="@(view == PlantView.Grid ? "true" : "false")"
-                        aria-label="Grid view" title="Grid view" @onclick="() => SetViewAsync(PlantView.Grid)">
+                        aria-label="@Strings.Plants.ListViewGrid" title="@Strings.Plants.ListViewGrid" @onclick="() => SetViewAsync(PlantView.Grid)">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></svg>
                 </button>
                 <button type="button" class="btn btn-outline-primary @(view == PlantView.Table ? "picked" : null)" aria-pressed="@(view == PlantView.Table ? "true" : "false")"
-                        aria-label="Table view" title="Table view" @onclick="() => SetViewAsync(PlantView.Table)">
+                        aria-label="@Strings.Plants.ListViewTable" title="@Strings.Plants.ListViewTable" @onclick="() => SetViewAsync(PlantView.Table)">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2" /><path d="M3.5 10h17M9.5 10v9" /></svg>
                 </button>
             </div>
@@ -188,9 +188,9 @@ else
 
         @if (PickedRoom is { Spots.Count: > 0 } picked)
         {
-            <div class="spot-filters" role="group" aria-label="Spot in @picked.Name">
+            <div class="spot-filters" role="group" aria-label="@F(Strings.Plants.ListSpotIn, picked.Name)">
                 <button type="button" class="room-chip @(spot is null ? "picked" : null)" aria-pressed="@(spot is null ? "true" : "false")"
-                        @onclick="() => PickSpot(null)">All of @picked.Name</button>
+                        @onclick="() => PickSpot(null)">@F(Strings.Plants.ListAllOf, picked.Name)</button>
                 @foreach (var s in picked.Spots)
                 {
                     <button type="button" class="room-chip @(s.Id == spot ? "picked" : null)" aria-pressed="@(s.Id == spot ? "true" : "false")"
@@ -198,28 +198,28 @@ else
                 }
                 @if (PickedPlace is { } spotPlace)
                 {
-                    <a class="btn btn-outline-primary btn-sm go-round" href="round/@spotPlace?from=plants">Go round</a>
+                    <a class="btn btn-outline-primary btn-sm go-round" href="round/@spotPlace?from=plants">@Strings.Plants.ListGoRound</a>
                 }
             </div>
         }
 
         @if (TagChoices.Count > 0 || all.Any(p => p.InQuarantine) || all.Any(p => p.IsDormant) || problemPlants.Count > 0)
         {
-            <div class="tag-filters" role="group" aria-label="Tags">
+            <div class="tag-filters" role="group" aria-label="@Strings.Plants.ListTagsLabel">
                 @if (all.Any(p => p.InQuarantine))
                 {
                     <button type="button" class="chip @(quarantine ? "picked" : null)"
-                            aria-pressed="@(quarantine ? "true" : "false")" @onclick="ToggleQuarantine">Quarantine</button>
+                            aria-pressed="@(quarantine ? "true" : "false")" @onclick="ToggleQuarantine">@Strings.Plants.ListQuarantine</button>
                 }
                 @if (problemPlants.Count > 0)
                 {
                     <button type="button" class="chip @(problem ? "picked" : null)"
-                            aria-pressed="@(problem ? "true" : "false")" @onclick="ToggleProblem">Problem</button>
+                            aria-pressed="@(problem ? "true" : "false")" @onclick="ToggleProblem">@Strings.Plants.ListProblem</button>
                 }
                 @if (all.Any(p => p.IsDormant))
                 {
                     <button type="button" class="chip @(dormant ? "picked" : null)"
-                            aria-pressed="@(dormant ? "true" : "false")" @onclick="ToggleDormant">Dormant</button>
+                            aria-pressed="@(dormant ? "true" : "false")" @onclick="ToggleDormant">@Strings.Plants.ListDormant</button>
                 }
                 @foreach (var t in TagChoices)
                 {
@@ -232,11 +232,11 @@ else
 
         @if (genus is not null || noGenus)
         {
-            <div class="tag-filters" role="group" aria-label="Genus filter">
-                <button type="button" class="chip picked" aria-pressed="true" title="Tap to remove" @onclick="ClearGenus">
+            <div class="tag-filters" role="group" aria-label="@Strings.Plants.ListGenusFilter">
+                <button type="button" class="chip picked" aria-pressed="true" title="@Strings.Plants.ListTapToRemove" @onclick="ClearGenus">
                     @if (noGenus)
                     {
-                        <text>No genus</text>
+                        <text>@Strings.Plants.ListNoGenus</text>
                     }
                     else
                     {
@@ -248,10 +248,10 @@ else
 
         @if (picks.Count > 0)
         {
-            <div class="tag-filters" role="group" aria-label="Field filters">
+            <div class="tag-filters" role="group" aria-label="@Strings.Plants.ListFieldFilters">
                 @foreach (var pick in picks)
                 {
-                    <button type="button" class="chip picked" aria-pressed="true" title="Tap to remove"
+                    <button type="button" class="chip picked" aria-pressed="true" title="@Strings.Plants.ListTapToRemove"
                             @onclick="() => RemovePick(pick)">@PickText(pick)</button>
                 }
             </div>
@@ -261,10 +261,10 @@ else
     @if (selecting)
     {
         <div class="select-all">
-            <button type="button" class="btn btn-link btn-sm link-action" @onclick="SelectAllVisible">Select all shown</button>
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="SelectAllVisible">@Strings.Plants.ListSelectAllShown</button>
             @if (selected.Count > 0)
             {
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => selected.Clear()">Clear</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => selected.Clear()">@Strings.Plants.ListClear</button>
             }
         </div>
     }
@@ -274,29 +274,29 @@ else
         <div class="empty-state">
             @if (Narrowed)
             {
-                <p>No plants match.</p>
-                <button type="button" class="btn btn-outline-primary mt-3" @onclick="ClearFilters">Clear filters</button>
+                <p>@Strings.Plants.ListNoMatch</p>
+                <button type="button" class="btn btn-outline-primary mt-3" @onclick="ClearFilters">@Strings.Plants.ListClearFilters</button>
             }
             else if (status == StatusFilter.Active)
             {
-                <p>None of your plants are in the collection now. The ones that died or left are under Gone.</p>
-                <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
+                <p>@Strings.Plants.ListNoneActive</p>
+                <a class="btn btn-primary mt-3" href="plants/new">@Strings.Plants.AddAPlant</a>
             }
             else if (status == StatusFilter.Gone && goneAs == PlantStatus.Died)
             {
-                <p>None of your plants have died.</p>
+                <p>@Strings.Plants.ListNoneDied</p>
             }
             else if (status == StatusFilter.Gone && goneAs == PlantStatus.GivenAway)
             {
-                <p>You haven't given any plants away.</p>
+                <p>@Strings.Plants.ListNoneGivenAway</p>
             }
             else if (status == StatusFilter.Gone && goneAs == PlantStatus.Sold)
             {
-                <p>You haven't sold any plants.</p>
+                <p>@Strings.Plants.ListNoneSold</p>
             }
             else
             {
-                <p>No plants here. A plant ends up under Gone when you mark it as died, given away or sold.</p>
+                <p>@Strings.Plants.ListNoneGone</p>
             }
         </div>
     }
@@ -361,7 +361,7 @@ else
 @if (wishMatches.Count > 0)
 {
     <section class="wish-matches" aria-labelledby="wish-matches-title">
-        <h2 id="wish-matches-title">On your wishlist</h2>
+        <h2 id="wish-matches-title">@Strings.Plants.ListOnWishlist</h2>
         <ul class="item-list">
             @foreach (var wish in wishMatches)
             {
@@ -386,8 +386,8 @@ else
     </section>
 }
 
-<Sheet Title="Columns" @bind-Open="columnsOpen">
-    <p class="text-body-secondary small">Pick what to show and drag to put them in order. This device remembers it.</p>
+<Sheet Title="@Strings.Plants.ListColumns" @bind-Open="columnsOpen">
+    <p class="text-body-secondary small">@Strings.Plants.ListColumnsHint</p>
     <ColumnOrder Columns="columns" Fields="fields" OnMove="MoveColumnAsync" OnToggle="ToggleColumnAsync" />
     @{
         var hidden = Enum.GetValues<PlantColumn>().Select(c => (TableColumn)c).Where(c => !columns.Contains(c)).ToList();
@@ -395,7 +395,7 @@ else
     }
     @if (hidden.Count > 0 || hiddenFields.Count > 0)
     {
-        <h3 class="section-label">Not shown</h3>
+        <h3 class="section-label">@Strings.Plants.ListNotShown</h3>
         @foreach (var tableColumn in hidden)
         {
             var id = $"column-{tableColumn.Builtin}";
@@ -406,7 +406,7 @@ else
         }
         @if (hiddenFields.Count > 0)
         {
-            <h3 class="section-label mt-3">Your fields</h3>
+            <h3 class="section-label mt-3">@Strings.Plants.ListYourFields</h3>
             @foreach (var tableColumn in hiddenFields)
             {
                 var id = $"column-field-{tableColumn.FieldId:N}";
@@ -419,21 +419,21 @@ else
     }
 </Sheet>
 
-<Sheet Title="Share as text" @bind-Open="shareOpen">
-    <p class="text-body-secondary small">@(selecting && selected.Count > 0 ? $"The {Labels.Plants(selected.Count)} you selected." : $"The {Labels.Plants(ShareCount)} shown now, with the search and filters.") Names only, never rooms, prices, where they came from or tags.</p>
+<Sheet Title="@Strings.Plants.ListShareAsText" @bind-Open="shareOpen">
+    <p class="text-body-secondary small">@(selecting && selected.Count > 0 ? F(Strings.Plants.ListShareSelected, Labels.Plants(selected.Count)) : F(Strings.Plants.ListShareShown, Labels.Plants(ShareCount)))</p>
     <div class="share-options">
         <div class="form-check form-switch">
             <input id="share-nicknames" type="checkbox" class="form-check-input" role="switch" @bind="shareNicknames" />
-            <label class="form-check-label" for="share-nicknames">Include your nicknames</label>
+            <label class="form-check-label" for="share-nicknames">@Strings.Plants.ListShareNicknames</label>
         </div>
         <div class="form-check form-switch">
             <input id="share-footer" type="checkbox" class="form-check-input" role="switch" @bind="shareFooter" />
-            <label class="form-check-label" for="share-footer">End with "Kept in Stikling, stikling.app"</label>
+            <label class="form-check-label" for="share-footer">@F(Strings.Plants.ListShareFooter, SwapLists.Footer)</label>
         </div>
     </div>
-    <pre class="share-preview" aria-label="What will be shared">@ShareText</pre>
+    <pre class="share-preview" aria-label="@Strings.Plants.ListSharePreview">@ShareText</pre>
     <div class="form-actions">
-        <button type="button" class="btn btn-primary" disabled="@(ShareCount == 0)" @onclick="ShareAsync">Share</button>
+        <button type="button" class="btn btn-primary" disabled="@(ShareCount == 0)" @onclick="ShareAsync">@Strings.Plants.ListShare</button>
         @if (shareStatus.Length > 0)
         {
             <span class="text-body-secondary small" role="status">@shareStatus</span>
@@ -443,26 +443,26 @@ else
 
 @if (selecting)
 {
-    <div class="bulk-bar" role="region" aria-label="Actions for selected plants">
+    <div class="bulk-bar" role="region" aria-label="@Strings.Plants.ListBulkLabel">
         @if (bulkCareOpen)
         {
             <CareSheet PlantIds="@selected.ToList()" OnLogged="AfterBulkCareAsync" OnCancel="() => bulkCareOpen = false" />
         }
         else if (bulkTagOpen)
         {
-            <TagPicker @bind-Value="bulkTags" Suggestions="@PlantTags.Suggestions(all ?? [])" Label="Tags to add" />
+            <TagPicker @bind-Value="bulkTags" Suggestions="@PlantTags.Suggestions(all ?? [])" Label="@Strings.Plants.ListTagsToAdd" />
             <div class="bulk-row">
                 <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || bulkTags.Count == 0)"
-                        @onclick="AddBulkTagsAsync">Add to @Labels.Plants(selected.Count)</button>
-                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkTagOpen = false">Cancel</button>
+                        @onclick="AddBulkTagsAsync">@F(Strings.Plants.ListAddTo, Labels.Plants(selected.Count))</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkTagOpen = false">@Strings.Common.Cancel</button>
             </div>
         }
         else if (bulkFieldOpen)
         {
             <div class="mb-2">
-                <label class="form-label" for="bulk-field">Field to set</label>
+                <label class="form-label" for="bulk-field">@Strings.Plants.ListFieldToSet</label>
                 <select id="bulk-field" class="form-select form-select-sm" @bind="bulkFieldKey" @bind:after="BulkFieldChanged">
-                    <option value="@RaisedKey">How it was raised</option>
+                    <option value="@RaisedKey">@Strings.Plants.ListHowRaised</option>
                     @foreach (var field in fields)
                     {
                         <option value="@field.Id">@field.Name</option>
@@ -472,9 +472,9 @@ else
             @if (bulkFieldKey == RaisedKey)
             {
                 <div class="mb-2">
-                    <label class="form-label" for="bulk-raised">How it was raised</label>
+                    <label class="form-label" for="bulk-raised">@Strings.Plants.ListHowRaised</label>
                     <select id="bulk-raised" class="form-select form-select-sm" @bind="bulkRaised">
-                        <option value="">Not said</option>
+                        <option value="">@Strings.Plants.ListNotSaid</option>
                         @foreach (var value in Enum.GetValues<RaisedAs>())
                         {
                             <option value="@value">@Labels.For(value)</option>
@@ -492,50 +492,50 @@ else
             }
             <div class="bulk-row">
                 <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || !BulkFieldHasValue)"
-                        @onclick="() => SetBulkFieldAsync(true)">Set on @Labels.Plants(selected.Count)</button>
+                        @onclick="() => SetBulkFieldAsync(true)">@F(Strings.Plants.ListSetOn, Labels.Plants(selected.Count))</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
-                        @onclick="() => SetBulkFieldAsync(false)">Clear on @Labels.Plants(selected.Count)</button>
-                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkFieldOpen = false">Cancel</button>
+                        @onclick="() => SetBulkFieldAsync(false)">@F(Strings.Plants.ListClearOn, Labels.Plants(selected.Count))</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkFieldOpen = false">@Strings.Common.Cancel</button>
             </div>
         }
         else if (bulkSwapOpen)
         {
             <div class="bulk-row">
-                <span class="bulk-count">Offer @Labels.Plants(selected.Count) for swap</span>
+                <span class="bulk-count">@F(Strings.Plants.ListOfferForSwap, Labels.Plants(selected.Count))</span>
             </div>
             <div class="bulk-row">
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
-                        @onclick="() => SetBulkSpareAsync(SpareMark.CuttingsToSpare)">Cuttings to spare</button>
+                        @onclick="() => SetBulkSpareAsync(SpareMark.CuttingsToSpare)">@Strings.Plants.ListCuttingsToSpare</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
-                        @onclick="() => SetBulkSpareAsync(SpareMark.UpForSwap)">Up for swap</button>
+                        @onclick="() => SetBulkSpareAsync(SpareMark.UpForSwap)">@Strings.Plants.ListUpForSwap</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
-                        @onclick="() => SetBulkSpareAsync(null)">Not offered</button>
-                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkSwapOpen = false">Cancel</button>
+                        @onclick="() => SetBulkSpareAsync(null)">@Strings.Plants.ListNotOffered</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkSwapOpen = false">@Strings.Common.Cancel</button>
             </div>
         }
         else if (bulkMoveOpen)
         {
-            <RoomPicker @bind-Value="bulkPlace" Rooms="rooms" Label="Move to" />
+            <RoomPicker @bind-Value="bulkPlace" Rooms="rooms" Label="@Strings.Plants.ListMoveTo" />
             <div class="bulk-row">
                 <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(bulkPlace))"
-                        @onclick="MoveBulkAsync">Move @Labels.Plants(selected.Count)</button>
-                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkMoveOpen = false">Cancel</button>
+                        @onclick="MoveBulkAsync">@F(Strings.Plants.ListMove, Labels.Plants(selected.Count))</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkMoveOpen = false">@Strings.Common.Cancel</button>
             </div>
         }
         else if (bulkNoteOpen)
         {
-            <textarea class="form-control form-control-sm" rows="2" placeholder="Note for all selected plants, e.g. Sprayed for thrips"
-                      aria-label="Note" @bind="bulkNote" @bind:event="oninput"></textarea>
+            <textarea class="form-control form-control-sm" rows="2" placeholder="@Strings.Plants.ListNotePlaceholder"
+                      aria-label="@Strings.Plants.ListNote" @bind="bulkNote" @bind:event="oninput"></textarea>
             <div class="bulk-row">
                 <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(bulkNote))"
-                        @onclick="AddBulkNoteAsync">Add to @Labels.Plants(selected.Count)</button>
-                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkNoteOpen = false">Cancel</button>
+                        @onclick="AddBulkNoteAsync">@F(Strings.Plants.ListAddTo, Labels.Plants(selected.Count))</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => bulkNoteOpen = false">@Strings.Common.Cancel</button>
             </div>
         }
         else if (leaving is { } status)
         {
             <div class="bulk-row">
-                <span class="bulk-count">@Labels.For(status): what went with @(selected.Count == 1 ? "it" : "them")?</span>
+                <span class="bulk-count">@F(selected.Count, Strings.Plants.ListWhatWentWith_One, Strings.Plants.ListWhatWentWith_Other, Labels.For(status))</span>
             </div>
             <div class="bulk-row">
                 @foreach (var (value, label) in Labels.PotsTakenChoices(SelectedPlants))
@@ -543,35 +543,35 @@ else
                     <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
                             @onclick="() => ApplyStatusAsync(status, value)">@label</button>
                 }
-                <button type="button" class="btn btn-link btn-sm" @onclick="() => leaving = null">Cancel</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => leaving = null">@Strings.Common.Cancel</button>
             </div>
         }
         else
         {
             <div class="bulk-row">
-                <span class="bulk-count">@selected.Count selected</span>
-                <select class="form-select form-select-sm w-auto" aria-label="Set status" disabled="@(busy || selected.Count == 0)"
+                <span class="bulk-count">@F(Strings.Plants.ListSelected, selected.Count)</span>
+                <select class="form-select form-select-sm w-auto" aria-label="@Strings.Plants.ListSetStatusLabel" disabled="@(busy || selected.Count == 0)"
                         @bind="bulkStatus" @bind:after="SetBulkStatusAsync">
-                    <option value="">Set status…</option>
+                    <option value="">@Strings.Plants.ListSetStatus</option>
                     @foreach (var s in Enum.GetValues<PlantStatus>())
                     {
                         <option value="@s">@Labels.For(s)</option>
                     }
                 </select>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
-                        @onclick="() => bulkCareOpen = true">Log care</button>
+                        @onclick="() => bulkCareOpen = true">@Strings.Plants.ListLogCare</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
-                        @onclick="() => bulkNoteOpen = true">Add note</button>
+                        @onclick="() => bulkNoteOpen = true">@Strings.Plants.ListAddNote</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
-                        @onclick="OpenBulkTags">Tag</button>
+                        @onclick="OpenBulkTags">@Strings.Plants.ListTag</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
-                        @onclick="OpenBulkMove">Move</button>
+                        @onclick="OpenBulkMove">@Strings.Plants.ListMoveButton</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
-                        @onclick="OpenBulkField">Set a field</button>
+                        @onclick="OpenBulkField">@Strings.Plants.ListSetAField</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
-                        @onclick="OpenBulkSwap">For swap</button>
+                        @onclick="OpenBulkSwap">@Strings.Plants.ListForSwap</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || selected.Count == 0)"
-                        @onclick="OpenLabels">Labels</button>
+                        @onclick="OpenLabels">@Strings.Plants.ListLabels</button>
             </div>
         }
         @if (bulkMessage is not null)
@@ -580,21 +580,21 @@ else
         }
         @if (cameInIds.Count > 0)
         {
-            <div class="bulk-message came-in" role="group" aria-label="Plants that came in from outside">
-                <p class="mb-2">@Labels.Plants(cameInIds.Count) came in from outside.</p>
+            <div class="bulk-message came-in" role="group" aria-label="@Strings.Plants.ListCameInGroup">
+                <p class="mb-2">@F(Strings.Plants.ListCameIn, Labels.Plants(cameInIds.Count))</p>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
-                        @onclick="QuarantineCameInAsync">Put in quarantine</button>
+                        @onclick="QuarantineCameInAsync">@Strings.Plants.ListPutInQuarantine</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
-                        @onclick="CheckCameInAsync">Checked, no signs</button>
+                        @onclick="CheckCameInAsync">@Strings.Plants.ListCheckedNoSigns</button>
                 <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
-                        @onclick="() => cameInIds = []">Not now</button>
+                        @onclick="() => cameInIds = []">@Strings.Plants.ListNotNow</button>
             </div>
         }
     </div>
 }
 else
 {
-    <a class="fab" href="plants/new" aria-label="Add a plant" title="Add a plant">
+    <a class="fab" href="plants/new" aria-label="@Strings.Plants.AddAPlant" title="@Strings.Plants.AddAPlant">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
     </a>
 }
@@ -612,28 +612,38 @@ else
     [SupplyParameterFromQuery(Name = "genus")]
     public string? GenusFilter { get; set; }
 
-    private static readonly (StatusFilter Value, string Label)[] statusOptions =
+    private static string F(string format, params object?[] args) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
+
+    // Picks the one or other form by count, then fills in the rest
+    private static string F(int count, string one, string other, params object?[] args) => F(count == 1 ? one : other, args);
+
+    // A sentence with a link in it: the link goes where {0} is
+    private static MarkupString WithLink(string format, string href, string text) =>
+        (MarkupString)F(format, $"<a href=\"{href}\">{System.Net.WebUtility.HtmlEncode(text)}</a>");
+
+    private static (StatusFilter Value, string Label)[] statusOptions =>
     [
-        (StatusFilter.Active, "In collection"),
-        (StatusFilter.Gone, "Gone"),
-        (StatusFilter.All, "All")
+        (StatusFilter.Active, Labels.For(PlantStatus.Active)),
+        (StatusFilter.Gone, Strings.Plants.ListStatusGone),
+        (StatusFilter.All, Strings.Plants.ListAll)
     ];
 
-    private static readonly (PlantStatus? Value, string Label)[] goneOptions =
+    private static (PlantStatus? Value, string Label)[] goneOptions =>
     [
-        (null, "All"),
-        (PlantStatus.Died, "Died"),
-        (PlantStatus.GivenAway, "Given away"),
-        (PlantStatus.Sold, "Sold")
+        (null, Strings.Plants.ListAll),
+        (PlantStatus.Died, Labels.For(PlantStatus.Died)),
+        (PlantStatus.GivenAway, Labels.For(PlantStatus.GivenAway)),
+        (PlantStatus.Sold, Labels.For(PlantStatus.Sold))
     ];
 
-    private static readonly (PlantSort Value, string Label)[] sortOptions =
+    private static (PlantSort Value, string Label)[] sortOptions =>
     [
-        (PlantSort.Name, "A to Z"),
-        (PlantSort.Newest, "Newest"),
-        (PlantSort.Room, "By room"),
-        (PlantSort.Genus, "By genus"),
-        (PlantSort.LastActivity, "Last activity")
+        (PlantSort.Name, Strings.Plants.ListSortName),
+        (PlantSort.Newest, Strings.Plants.ListSortNewest),
+        (PlantSort.Room, Strings.Plants.ListSortRoom),
+        (PlantSort.Genus, Strings.Plants.ListSortGenus),
+        (PlantSort.LastActivity, Strings.Plants.ListSortActivity)
     ];
 
     private IReadOnlyList<Plant>? all;
@@ -865,8 +875,8 @@ else
 
     private string PickText(FieldPick pick)
     {
-        var name = pick.FieldId is { } id ? fields.FirstOrDefault(f => f.Id == id)?.Name ?? "" : "Raised";
-        var value = pick.Value is null ? "not set"
+        var name = pick.FieldId is { } id ? fields.FirstOrDefault(f => f.Id == id)?.Name ?? "" : Strings.Plants.ListRaisedName;
+        var value = pick.Value is null ? Strings.Plants.ListPickNotSet
             : pick.FieldId is null && Enum.TryParse<RaisedAs>(pick.Value, out var raised) ? Labels.For(raised)
             : pick.Value;
         return $"{name}: {value}";
@@ -1014,7 +1024,7 @@ else
         <h2>
             @if (group.Name is null)
             {
-                <span class="group-none">@(sort == PlantSort.Genus ? "No genus" : "No room")</span>
+                <span class="group-none">@(sort == PlantSort.Genus ? Strings.Plants.ListNoGenus : Strings.Plants.ListNoRoom)</span>
             }
             else if (sort == PlantSort.Genus)
             {
@@ -1069,8 +1079,8 @@ else
             .Select(p => p.Id)];
         var moved = await PlantService.MoveAsync(plants, placeId, Labels.For, id => names.NameOf(id));
         bulkMessage = moved == plants.Count
-            ? $"Moved {Labels.Plants(moved)} to {bulkPlace}."
-            : $"Moved {Labels.Plants(moved)} to {bulkPlace}. {Labels.Plants(plants.Count - moved)} already there.";
+            ? F(Strings.Plants.ListMoved, Labels.Plants(moved), bulkPlace)
+            : F(Strings.Plants.ListMovedSome, Labels.Plants(moved), bulkPlace, Labels.Plants(plants.Count - moved));
         bulkMoveOpen = false;
         selected.Clear();
         await LoadAsync();
@@ -1086,7 +1096,7 @@ else
         var plants = (all ?? []).Where(p => cameInIds.Contains(p.Id) && !p.IsDeleted && !p.InQuarantine).ToList();
         foreach (var plant in plants)
             await PlantService.SetQuarantineAsync(plant, Time.Today(), Labels.For, days);
-        bulkMessage = $"Put {Labels.Plants(plants.Count)} in quarantine.";
+        bulkMessage = F(Strings.Plants.ListPutInQuarantineDone, Labels.Plants(plants.Count));
         cameInIds = [];
         await LoadAsync();
         busy = false;
@@ -1098,7 +1108,7 @@ else
         var plants = (all ?? []).Where(p => cameInIds.Contains(p.Id) && !p.IsDeleted).ToList();
         foreach (var plant in plants)
             await PestTreatmentRepository.SaveAsync(PestService.StartPlantCheck(plant, Time.Today()));
-        bulkMessage = $"Checked {Labels.Plants(plants.Count)} for pests.";
+        bulkMessage = F(Strings.Plants.ListCheckedForPests, Labels.Plants(plants.Count));
         cameInIds = [];
         busy = false;
     }
@@ -1142,13 +1152,13 @@ else
                 RaisedAs? value = set && Enum.TryParse<RaisedAs>(bulkRaised, out var raised) ? raised : null;
                 var changed = await PlantService.SetRaisedAsync(plants, value);
                 var leftAlone = plants.Count(p => !p.AsksHowRaised);
-                bulkMessage = $"{(set ? "Set" : "Cleared")} How it was raised on {Labels.Plants(changed)}."
-                    + (leftAlone > 0 ? $" {leftAlone} grown from seed or propagated {(leftAlone == 1 ? "was" : "were")} left as {(leftAlone == 1 ? "it is" : "they are")}." : "");
+                bulkMessage = F(set ? Strings.Plants.ListRaisedSet : Strings.Plants.ListRaisedCleared, Labels.Plants(changed))
+                    + (leftAlone > 0 ? " " + F(leftAlone, Strings.Plants.ListRaisedLeftAlone_One, Strings.Plants.ListRaisedLeftAlone_Other, leftAlone) : "");
             }
             else if (BulkField is { } field)
             {
                 var changed = await OwnFieldBook.SetValueAsync(plants.Select(p => p.Id), field.Id, set ? bulkFieldValue : null);
-                bulkMessage = $"{(set ? "Set" : "Cleared")} {field.Name} on {Labels.Plants(changed)}.";
+                bulkMessage = F(set ? Strings.Plants.ListFieldSet : Strings.Plants.ListFieldCleared, field.Name, Labels.Plants(changed));
             }
         }
         catch (InvalidOperationException e)
@@ -1174,12 +1184,12 @@ else
         busy = true;
         var plants = SelectedPlants;
         var changed = await PlantService.SetSpareAsync(plants, mark);
-        var what = mark is { } m ? SwapLists.MarkText(m).ToLowerInvariant() : "not offered";
+        var what = mark is { } m ? SwapLists.MarkText(m).ToLower(System.Globalization.CultureInfo.CurrentCulture) : Strings.Plants.ListMarkNotOffered;
         bulkMessage = changed == plants.Count
-            ? $"Marked {Labels.Plants(changed)} as {what}."
+            ? F(Strings.Plants.ListMarked, Labels.Plants(changed), what)
             : changed == 0
-                ? $"{Labels.Plants(plants.Count)} already {(plants.Count == 1 ? "was" : "were")} {what}."
-                : $"Marked {Labels.Plants(changed)} as {what}. {Labels.Plants(plants.Count - changed)} already {(plants.Count - changed == 1 ? "was" : "were")}.";
+                ? F(plants.Count, Strings.Plants.ListAlreadyMarked_One, Strings.Plants.ListAlreadyMarked_Other, Labels.Plants(plants.Count), what)
+                : F(plants.Count - changed, Strings.Plants.ListMarkedSome_One, Strings.Plants.ListMarkedSome_Other, Labels.Plants(changed), what, Labels.Plants(plants.Count - changed));
         bulkSwapOpen = false;
         selected.Clear();
         await LoadAsync();
@@ -1208,9 +1218,9 @@ else
     {
         shareStatus = await Sharer.ShareTextAsync(ShareText) switch
         {
-            "copied" => "Copied",
-            "failed" => "Couldn't share it",
-            "shared" => "Shared",
+            "copied" => Strings.Plants.ListShareCopied,
+            "failed" => Strings.Plants.ListShareFailed,
+            "shared" => Strings.Plants.ListShared,
             _ => ""
         };
         if (shareStatus.Length == 0)
@@ -1259,7 +1269,7 @@ else
     private async Task AfterBulkCareAsync()
     {
         var count = selected.Count;
-        bulkMessage = $"Care logged for {Labels.Plants(count)}.";
+        bulkMessage = F(Strings.Plants.ListCareLogged, Labels.Plants(count));
         bulkCareOpen = false;
         selected.Clear();
         await LoadAsync();
@@ -1291,7 +1301,7 @@ else
         leaving = null;
         var plants = SelectedPlants;
         await PlantService.SetStatusAsync(plants, newStatus, Labels.For, potsTaken);
-        bulkMessage = $"{Labels.For(newStatus)}: {Labels.Plants(plants.Count)} updated.";
+        bulkMessage = F(Strings.Plants.ListStatusUpdated, Labels.For(newStatus), Labels.Plants(plants.Count));
         selected.Clear();
         await LoadAsync();
         busy = false;
@@ -1303,8 +1313,8 @@ else
         var plants = SelectedPlants;
         var changed = await PlantService.AddTagsAsync(plants, bulkTags);
         bulkMessage = changed == plants.Count
-            ? $"Tagged {Labels.Plants(changed)}."
-            : $"Tagged {Labels.Plants(changed)}. {Labels.Plants(plants.Count - changed)} already had {(bulkTags.Count == 1 ? "it" : "them")}.";
+            ? F(Strings.Plants.ListTagged, Labels.Plants(changed))
+            : F(bulkTags.Count, Strings.Plants.ListTaggedSome_One, Strings.Plants.ListTaggedSome_Other, Labels.Plants(changed), Labels.Plants(plants.Count - changed));
         bulkTagOpen = false;
         selected.Clear();
         await LoadAsync();
@@ -1319,7 +1329,7 @@ else
         busy = true;
         var plants = SelectedPlants;
         await PlantService.AddNoteAsync(plants, bulkNote);
-        bulkMessage = $"Note added to {Labels.Plants(plants.Count)}.";
+        bulkMessage = F(Strings.Plants.ListNoteAdded, Labels.Plants(plants.Count));
         bulkNote = null;
         bulkNoteOpen = false;
         selected.Clear();

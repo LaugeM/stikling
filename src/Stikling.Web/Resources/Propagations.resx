@@ -1,0 +1,1735 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ListPageTitle" xml:space="preserve">
+    <value>Propagations · Stikling</value>
+    <comment>Title of the browser tab on the Propagations page.</comment>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Propagations</value>
+    <comment>Heading of the Propagations page.</comment>
+  </data>
+  <data name="ListShownOf" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>How many propagations the filters show out of all of them. {0} is the number shown and {1} the total.</comment>
+  </data>
+  <data name="ListSwapLink" xml:space="preserve">
+    <value>Available for swap</value>
+    <comment>Link to the page of things that can be swapped.</comment>
+  </data>
+  <data name="ListSelect" xml:space="preserve">
+    <value>Select</value>
+    <comment>Button that turns on picking several propagations from the list.</comment>
+  </data>
+  <data name="ListResultsLink" xml:space="preserve">
+    <value>Success rate and days to root</value>
+    <comment>Link to the page with statistics.</comment>
+  </data>
+  <data name="ListLoading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="ListEmptyTitle" xml:space="preserve">
+    <value>No propagations yet</value>
+    <comment>Heading of the empty list on the Propagations page.</comment>
+  </data>
+  <data name="ListEmptyWhat" xml:space="preserve">
+    <value>A propagation is a new plant grown from one you have, like a cutting in water or a few seeds.</value>
+  </data>
+  <data name="ListEmptyHow" xml:space="preserve">
+    <value>Open a plant and tap &lt;em&gt;Propagate&lt;/em&gt;, or start one without a parent plant, e.g. seeds.</value>
+    <comment>The em tags mark the name of the Propagate button on the plant page. Keep them.</comment>
+  </data>
+  <data name="ListHelpLink" xml:space="preserve">
+    <value>More about propagations in Help</value>
+    <comment>Link to the Help page.</comment>
+  </data>
+  <data name="ListSearchPlaceholder" xml:space="preserve">
+    <value>Search by name…</value>
+  </data>
+  <data name="ListSearchLabel" xml:space="preserve">
+    <value>Search propagations</value>
+  </data>
+  <data name="ListProgressLabel" xml:space="preserve">
+    <value>Progress</value>
+    <comment>Name of the choice between propagations in progress and finished ones.</comment>
+  </data>
+  <data name="ListSelectAll" xml:space="preserve">
+    <value>Select all shown</value>
+  </data>
+  <data name="ListClearSelection" xml:space="preserve">
+    <value>Clear</value>
+    <comment>Button that unticks every selected propagation.</comment>
+  </data>
+  <data name="ListNoMatch" xml:space="preserve">
+    <value>No propagations match.</value>
+  </data>
+  <data name="ListClearSearch" xml:space="preserve">
+    <value>Clear search</value>
+  </data>
+  <data name="ListNothingInProgress" xml:space="preserve">
+    <value>Nothing in progress. The ones that were potted up or failed are under Finished.</value>
+    <comment>Finished is the name of a choice above the list.</comment>
+  </data>
+  <data name="ListNoneFinished" xml:space="preserve">
+    <value>None finished yet. A propagation is finished once all of it has been potted up or has failed.</value>
+  </data>
+  <data name="ListBatches_One" xml:space="preserve">
+    <value>{0} batch</value>
+    <comment>How many batches an experiment has. 1 batch. A batch is one propagation in a test of several.</comment>
+  </data>
+  <data name="ListBatches_Other" xml:space="preserve">
+    <value>{0} batches</value>
+  </data>
+  <data name="ListRowLabel" xml:space="preserve">
+    <value>{0} in {1}</value>
+    <comment>Name read out for a batch in an experiment. {0} is the name of the propagation and {1} what it grows in.</comment>
+  </data>
+  <data name="ListRootedIn_One" xml:space="preserve">
+    <value>Rooted in {0} day</value>
+    <comment>How long a batch took to root. 1 day.</comment>
+  </data>
+  <data name="ListRootedIn_Other" xml:space="preserve">
+    <value>Rooted in {0} days</value>
+    <comment>How long a batch took to root.</comment>
+  </data>
+  <data name="ListSlow" xml:space="preserve">
+    <value>slow</value>
+    <comment>Said of a batch that is taking longer to root than the earlier ones did.</comment>
+  </data>
+  <data name="ListBulkLabel" xml:space="preserve">
+    <value>Actions for selected propagations</value>
+  </data>
+  <data name="ListSelectedCount" xml:space="preserve">
+    <value>{0} selected</value>
+    <comment>How many propagations are ticked.</comment>
+  </data>
+  <data name="ListLabels" xml:space="preserve">
+    <value>Labels</value>
+    <comment>Button that opens the page that prints labels for the selected propagations.</comment>
+  </data>
+  <data name="ListProgressActive" xml:space="preserve">
+    <value>In progress</value>
+    <comment>A choice above the list of propagations.</comment>
+  </data>
+  <data name="ListProgressFinished" xml:space="preserve">
+    <value>Finished</value>
+    <comment>A choice above the list of propagations.</comment>
+  </data>
+  <data name="ListProgressAll" xml:space="preserve">
+    <value>All</value>
+    <comment>A choice above the list of propagations.</comment>
+  </data>
+  <data name="ListMilestoneCorm" xml:space="preserve">
+    <value>corm {0} mm</value>
+    <comment>Part of a line about a batch. {0} is the size of the corm. The line starts with a capital.</comment>
+  </data>
+  <data name="ListMilestoneRoot" xml:space="preserve">
+    <value>first root day {0}</value>
+    <comment>Part of a line about a batch. {0} is the number of days from the start.</comment>
+  </data>
+  <data name="ListMilestoneLeaf" xml:space="preserve">
+    <value>first leaf day {0}</value>
+    <comment>Part of a line about a batch. {0} is the number of days from the start.</comment>
+  </data>
+  <data name="ListStart" xml:space="preserve">
+    <value>Start a propagation</value>
+    <comment>Button and link to start a propagation.</comment>
+  </data>
+  <data name="CardFrom" xml:space="preserve">
+    <value>from {0}</value>
+    <comment>Under the name of a propagation. {0} is the name of the plant it was taken from.</comment>
+  </data>
+  <data name="CardDormant" xml:space="preserve">
+    <value>Dormant</value>
+    <comment>Badge on a propagation that is resting.</comment>
+  </data>
+  <data name="CardToSwap" xml:space="preserve">
+    <value>{0} to swap</value>
+    <comment>Badge on a propagation. {0} is how many can be swapped.</comment>
+  </data>
+  <data name="CardLeft" xml:space="preserve">
+    <value>{0} left</value>
+    <comment>How many units of a propagation are left. {0} is the number.</comment>
+  </data>
+  <data name="CardSlow" xml:space="preserve">
+    <value>slower than usual</value>
+    <comment>Said of a propagation that is taking longer to root than the earlier ones did.</comment>
+  </data>
+  <data name="CardRootedIn_One" xml:space="preserve">
+    <value>rooted in {0} day</value>
+    <comment>How long a propagation took to root. 1 day.</comment>
+  </data>
+  <data name="CardRootedIn_Other" xml:space="preserve">
+    <value>rooted in {0} days</value>
+  </data>
+  <data name="ThumbDay_One" xml:space="preserve">
+    <value>day</value>
+    <comment>Unit under the number of days a propagation has been going. 1 day.</comment>
+  </data>
+  <data name="ThumbDay_Other" xml:space="preserve">
+    <value>days</value>
+    <comment>Unit under the number of days a propagation has been going.</comment>
+  </data>
+  <data name="Days_One" xml:space="preserve">
+    <value>{0} day</value>
+    <comment>A number of days. 1 day.</comment>
+  </data>
+  <data name="Days_Other" xml:space="preserve">
+    <value>{0} days</value>
+    <comment>A number of days.</comment>
+  </data>
+  <data name="MadeNoteSaved" xml:space="preserve">
+    <value>Saved.</value>
+    <comment>Said once above a propagation that was just started. A question follows it.</comment>
+  </data>
+  <data name="MadeNoteLabel" xml:space="preserve">
+    <value>Print a label for the jar?</value>
+    <comment>A link to the page that prints labels. It is a question.</comment>
+  </data>
+  <data name="ContainerYouHave" xml:space="preserve">
+    <value>Containers you have</value>
+    <comment>Name of the chips that offer the containers already in use.</comment>
+  </data>
+  <data name="ContainerWillBeAdded" xml:space="preserve">
+    <value>"{0}" will be added to your containers when you save.</value>
+    <comment>Under the container field. {0} is what was typed.</comment>
+  </data>
+  <data name="ContainerLabel" xml:space="preserve">
+    <value>Container</value>
+    <comment>Label of the field for what a propagation is in.</comment>
+  </data>
+  <data name="ContainerPlaceholder" xml:space="preserve">
+    <value>e.g. Clear box with lid</value>
+  </data>
+  <data name="StatsPageTitle" xml:space="preserve">
+    <value>Results · Stikling</value>
+    <comment>Title of the browser tab on the results page of propagations.</comment>
+  </data>
+  <data name="StatsTitle" xml:space="preserve">
+    <value>Results</value>
+    <comment>Heading of the results page of propagations.</comment>
+  </data>
+  <data name="StatsHint" xml:space="preserve">
+    <value>How each medium and each type has done.</value>
+    <comment>Medium is what the propagations grow in, like soil or water.</comment>
+  </data>
+  <data name="StatsYearLink" xml:space="preserve">
+    <value>Your year with your plants</value>
+    <comment>Link to the page that looks back on the year.</comment>
+  </data>
+  <data name="StatsHowTitle" xml:space="preserve">
+    <value>How this is counted</value>
+  </data>
+  <data name="StatsHow" xml:space="preserve">
+    <value>The success rate counts units, so a batch of 5 corms where 4 made it counts as 4 of 5. A unit has made it once it's potted up or its batch has rooted, and units still on their way aren't counted either way. Below {0} units the count is shown instead of a percentage, since 2 of 2 says more than 100%. Days to root only uses batches that were marked as rooted, so one that went straight to potted up isn't in it.</value>
+    <comment>Explains the numbers on the results page. {0} is the number of units below which a count is shown instead of a percentage. A unit is one cutting, corm or seed in a batch.</comment>
+  </data>
+  <data name="StatsEmptyTitle" xml:space="preserve">
+    <value>No propagations yet.</value>
+  </data>
+  <data name="StatsEmptyHow" xml:space="preserve">
+    <value>Once you've started some, this page shows how well each medium and each type does: how many made it, and how long they took to root.</value>
+  </data>
+  <data name="StatsAllHeading" xml:space="preserve">
+    <value>All propagations</value>
+  </data>
+  <data name="StatsByMedium" xml:space="preserve">
+    <value>By medium</value>
+  </data>
+  <data name="StatsByType" xml:space="preserve">
+    <value>By type</value>
+  </data>
+  <data name="StatsAidsHeading" xml:space="preserve">
+    <value>Rooting aids</value>
+  </data>
+  <data name="StatsAidsNone" xml:space="preserve">
+    <value>Pick the rooting aids you used when editing a propagation, and each one is compared here with the batches that went without it.</value>
+  </data>
+  <data name="StatsAidsHow" xml:space="preserve">
+    <value>Each aid next to every batch that went without it, whatever the type or medium.</value>
+  </data>
+  <data name="StatsAidsAllUsed" xml:space="preserve">
+    <value>Every batch used it, so there's nothing to compare with yet.</value>
+  </data>
+  <data name="StatsDryingHeading" xml:space="preserve">
+    <value>Drying the cut end</value>
+  </data>
+  <data name="StatsDryingHow" xml:space="preserve">
+    <value>Batches grouped by how long the cut end dried before it went in, whatever the type or medium.</value>
+  </data>
+  <data name="StatsBarLabel" xml:space="preserve">
+    <value>{0} made it</value>
+    <comment>Name of the bar. {0} is a percentage.</comment>
+  </data>
+  <data name="StatsMadeItSmall" xml:space="preserve">
+    <value>&lt;strong&gt;{0} of {1}&lt;/strong&gt; made it</value>
+    <comment>The strong tags make the numbers bold. Keep them. {0} is how many made it and {1} how many were decided.</comment>
+  </data>
+  <data name="StatsMadeItPercent" xml:space="preserve">
+    <value>&lt;strong&gt;{0}&lt;/strong&gt; made it · {1} of {2}</value>
+    <comment>The strong tags make the percentage bold. Keep them. {0} is the percentage, {1} how many made it and {2} how many were decided.</comment>
+  </data>
+  <data name="StatsStillGoing" xml:space="preserve">
+    <value>{0} still going</value>
+    <comment>How many units are still on their way. {0} is the number.</comment>
+  </data>
+  <data name="StatsNothingYet" xml:space="preserve">
+    <value>Nothing has made it or failed yet · {0} still going</value>
+  </data>
+  <data name="StatsRange" xml:space="preserve">
+    <value>{0} to {1} days over {2} batches</value>
+    <comment>The fastest and slowest days to root. {0} is the fewest days, {1} the most and {2} the number of batches, which is always two or more.</comment>
+  </data>
+  <data name="StatsNotRecorded" xml:space="preserve">
+    <value>not recorded</value>
+    <comment>In the list of what units were lost to, for the ones where no reason was noted. A number follows it.</comment>
+  </data>
+  <data name="StatsLostBefore" xml:space="preserve">
+    <value>Lost to: {0} · mostly before rooting</value>
+    <comment>Under a result. {0} is a list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="StatsLostWhile" xml:space="preserve">
+    <value>Lost to: {0} · mostly while rooting</value>
+    <comment>Under a result. {0} is a list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="StatsLostAfter" xml:space="preserve">
+    <value>Lost to: {0} · mostly after rooting</value>
+    <comment>Under a result. {0} is a list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="StatsLost" xml:space="preserve">
+    <value>Lost to: {0}</value>
+    <comment>Under a result. {0} is a list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="StatsAll" xml:space="preserve">
+    <value>All</value>
+    <comment>Name of the row that covers every propagation.</comment>
+  </data>
+  <data name="StatsWith" xml:space="preserve">
+    <value>With</value>
+    <comment>Row of the batches that used a rooting aid.</comment>
+  </data>
+  <data name="StatsWithout" xml:space="preserve">
+    <value>Without</value>
+    <comment>Row of the batches that went without a rooting aid.</comment>
+  </data>
+  <data name="StatsRooted_One" xml:space="preserve">
+    <value>Rooted in {0} day</value>
+    <comment>Days to root, for the batches of a type that roots. 1 day.</comment>
+  </data>
+  <data name="StatsRooted_Other" xml:space="preserve">
+    <value>Rooted in {0} days</value>
+    <comment>Days to root, for the batches of a type that roots.</comment>
+  </data>
+  <data name="StatsSprouted_One" xml:space="preserve">
+    <value>Sprouted in {0} day</value>
+    <comment>Days to sprout, for seeds. 1 day.</comment>
+  </data>
+  <data name="StatsSprouted_Other" xml:space="preserve">
+    <value>Sprouted in {0} days</value>
+    <comment>Days to sprout, for seeds.</comment>
+  </data>
+  <data name="StatsRootedAvg_One" xml:space="preserve">
+    <value>Rooted in {0} day on average</value>
+    <comment>Average days to root. 1 day.</comment>
+  </data>
+  <data name="StatsRootedAvg_Other" xml:space="preserve">
+    <value>Rooted in {0} days on average</value>
+    <comment>Average days to root.</comment>
+  </data>
+  <data name="StatsSproutedAvg_One" xml:space="preserve">
+    <value>Sprouted in {0} day on average</value>
+    <comment>Average days to sprout, for seeds. 1 day.</comment>
+  </data>
+  <data name="StatsSproutedAvg_Other" xml:space="preserve">
+    <value>Sprouted in {0} days on average</value>
+    <comment>Average days to sprout, for seeds.</comment>
+  </data>
+  <data name="StatsNoRootDates" xml:space="preserve">
+    <value>No rooted dates yet</value>
+    <comment>Shown when no batch has a date for when it rooted.</comment>
+  </data>
+  <data name="StatsNoSproutDates" xml:space="preserve">
+    <value>No sprouted dates yet</value>
+    <comment>Shown when no batch of seeds has a date for when it sprouted.</comment>
+  </data>
+  <data name="CareMoistureReading" xml:space="preserve">
+    <value>Moisture reading</value>
+    <comment>Label above the buttons 0 to 10 for a reading from a moisture meter.</comment>
+  </data>
+  <data name="CareAnotherDay" xml:space="preserve">
+    <value>Another day?</value>
+    <comment>Button that opens a date field, to log care on a day that was not today.</comment>
+  </data>
+  <data name="CareWhen" xml:space="preserve">
+    <value>When</value>
+  </data>
+  <data name="CareHistory" xml:space="preserve">
+    <value>History</value>
+    <comment>Heading above the care entries already logged.</comment>
+  </data>
+  <data name="CareChangedWaterToday" xml:space="preserve">
+    <value>Changed the water today</value>
+    <comment>Button that logs care on a propagation, for today.</comment>
+  </data>
+  <data name="CareChangedWaterOn" xml:space="preserve">
+    <value>Changed the water on {0}</value>
+    <comment>Button that logs care on a propagation. {0} is a date.</comment>
+  </data>
+  <data name="CareWateredToday" xml:space="preserve">
+    <value>Watered today</value>
+    <comment>Button that logs care on a propagation, for today.</comment>
+  </data>
+  <data name="CareWateredOn" xml:space="preserve">
+    <value>Watered on {0}</value>
+    <comment>Button that logs care on a propagation. {0} is a date.</comment>
+  </data>
+  <data name="CareSaveFailed" xml:space="preserve">
+    <value>Couldn't save that. Try again.</value>
+  </data>
+  <data name="BringSameDay" xml:space="preserve">
+    <value>Same day next year</value>
+  </data>
+  <data name="BringOnADay" xml:space="preserve">
+    <value>On a day…</value>
+  </data>
+  <data name="BringDayLabel" xml:space="preserve">
+    <value>Day it comes back</value>
+    <comment>Name of the date field for the day a note comes back on the Today page.</comment>
+  </data>
+  <data name="BringNo" xml:space="preserve">
+    <value>Don't bring it back</value>
+  </data>
+  <data name="BringPickDay" xml:space="preserve">
+    <value>Pick a day after today.</value>
+  </data>
+  <data name="BringLabel" xml:space="preserve">
+    <value>Bring it back</value>
+    <comment>Option on a note: it comes back on the Today page on a day. Used as a button and as the label of the choice.</comment>
+  </data>
+  <data name="PublicNoteHint" xml:space="preserve">
+    <value>This note will show on the public page.</value>
+    <comment>Under the note field, when the plant has a share link that shows notes.</comment>
+  </data>
+  <data name="PassOnNeedsAccount" xml:space="preserve">
+    <value>Sending its history needs an account, so the page can be shown from the server. Whoever got it doesn't need one.</value>
+    <comment>Shown after giving a cutting or plant away, when the person is not signed in.</comment>
+  </data>
+  <data name="PassOnSignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="PassOnIntro" xml:space="preserve">
+    <value>Send them a link to its photos and story so far. They can keep a copy in their own Stikling, without an account. It shows what a share link shows: the photos and milestones, and your notes if you leave them on. Never the room, prices or who got it.</value>
+    <comment>Shown after giving a cutting or plant away, when the person is signed in.</comment>
+  </data>
+  <data name="PassOnShowNotes" xml:space="preserve">
+    <value>Show my notes</value>
+  </data>
+  <data name="PassOnMaking" xml:space="preserve">
+    <value>Making the link…</value>
+  </data>
+  <data name="PassOnSend" xml:space="preserve">
+    <value>Send them its history</value>
+  </data>
+  <data name="PassOnChange" xml:space="preserve">
+    <value>Change what the page shows</value>
+  </data>
+  <data name="PassOnCopied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="PassOnMenuFailed" xml:space="preserve">
+    <value>The share menu couldn't be opened. Copy the link instead.</value>
+  </data>
+  <data name="PassOnCopyFailed" xml:space="preserve">
+    <value>The link couldn't be copied. Select it and copy it by hand.</value>
+  </data>
+  <data name="PassOnOffline" xml:space="preserve">
+    <value>Connect to the internet to make a link.</value>
+  </data>
+  <data name="PassOnNotNow" xml:space="preserve">
+    <value>Not now</value>
+  </data>
+  <data name="AttentionLabel" xml:space="preserve">
+    <value>Needs attention</value>
+    <comment>Name of the panel for flagging a plant or propagation as needing something.</comment>
+  </data>
+  <data name="AttentionWhat" xml:space="preserve">
+    <value>What does it need?</value>
+  </data>
+  <data name="AttentionPlaceholder" xml:space="preserve">
+    <value>e.g. {0}</value>
+    <comment>{0} is the first suggestion, like "repot soon".</comment>
+  </data>
+  <data name="AttentionSuggestions" xml:space="preserve">
+    <value>Suggestions</value>
+  </data>
+  <data name="AttentionLaterInfo" xml:space="preserve">
+    <value>The flag stays on the plant, but only shows on Today from the day you pick. If you use round days, it can wait for the next round day.</value>
+    <comment>Today is the name of the Today page.</comment>
+  </data>
+  <data name="AttentionNow" xml:space="preserve">
+    <value>Now</value>
+  </data>
+  <data name="AttentionLater" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="AttentionFrom" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="AttentionDay" xml:space="preserve">
+    <value>Day</value>
+  </data>
+  <data name="AttentionStaysOffUntil" xml:space="preserve">
+    <value>It stays off Today until then, and on it until you mark it done.</value>
+    <comment>Today is the name of the Today page.</comment>
+  </data>
+  <data name="AttentionStaysOn" xml:space="preserve">
+    <value>It stays on Today until you mark it done.</value>
+    <comment>Today is the name of the Today page.</comment>
+  </data>
+  <data name="AttentionFlagIt" xml:space="preserve">
+    <value>Flag it</value>
+    <comment>Button that flags a plant or propagation as needing something.</comment>
+  </data>
+  <data name="AttentionChange" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="AttentionReasonRepot" xml:space="preserve">
+    <value>Repot soon</value>
+    <comment>A suggested reason to flag a plant. Tapping it fills the field.</comment>
+  </data>
+  <data name="AttentionReasonLook" xml:space="preserve">
+    <value>Look closer</value>
+    <comment>A suggested reason to flag a plant or propagation.</comment>
+  </data>
+  <data name="AttentionReasonDivide" xml:space="preserve">
+    <value>Ready to divide</value>
+    <comment>A suggested reason to flag a plant.</comment>
+  </data>
+  <data name="AttentionReasonWater" xml:space="preserve">
+    <value>Change the water</value>
+    <comment>A suggested reason to flag a propagation.</comment>
+  </data>
+  <data name="AttentionReasonPotUp" xml:space="preserve">
+    <value>Ready to pot up</value>
+    <comment>A suggested reason to flag a propagation.</comment>
+  </data>
+  <data name="AttentionNextRoundDay" xml:space="preserve">
+    <value>Next round day, {0}</value>
+    <comment>A choice for when a flag starts to show. {0} is a weekday and date.</comment>
+  </data>
+  <data name="AttentionRoundDayFormat" xml:space="preserve">
+    <value>dddd d MMM</value>
+    <comment>A .NET date pattern, not text. d is the day, MMM the short month name and dddd the weekday name. Change the order and the punctuation, and leave the letters alone.</comment>
+  </data>
+  <data name="AttentionADay" xml:space="preserve">
+    <value>A day…</value>
+    <comment>A choice for when a flag starts to show: pick any day.</comment>
+  </data>
+  <data name="AttentionSince" xml:space="preserve">
+    <value>flagged {0}</value>
+    <comment>{0} is when, like "today" or "3 days ago".</comment>
+  </data>
+  <data name="AttentionTopic" xml:space="preserve">
+    <value>do it later</value>
+    <comment>Used in the label of the info button: What is do it later?</comment>
+  </data>
+  <data name="AttentionWhen" xml:space="preserve">
+    <value>When it starts to show</value>
+  </data>
+  <data name="TlReferencePlant" xml:space="preserve">
+    <value>Reference · not this plant</value>
+    <comment>Label over photos that show another plant of the same kind, not this one.</comment>
+  </data>
+  <data name="TlReferencePropagation" xml:space="preserve">
+    <value>Reference · not this propagation</value>
+    <comment>Label over photos that show another propagation of the same kind, not this one.</comment>
+  </data>
+  <data name="TlOpenReference" xml:space="preserve">
+    <value>Open reference photo</value>
+  </data>
+  <data name="TlLoading" xml:space="preserve">
+    <value>Loading history…</value>
+  </data>
+  <data name="TlHistory" xml:space="preserve">
+    <value>History</value>
+    <comment>Heading of the timeline, read out by a screen reader.</comment>
+  </data>
+  <data name="TlEdited" xml:space="preserve">
+    <value>edited</value>
+    <comment>Small button on a note that was changed. It shows the earlier versions.</comment>
+  </data>
+  <data name="TlAsCutting" xml:space="preserve">
+    <value>As a cutting</value>
+    <comment>Said of an entry from the time a plant was still a cutting.</comment>
+  </data>
+  <data name="TlCorrectedNote" xml:space="preserve">
+    <value>Corrected note</value>
+  </data>
+  <data name="TlHappenedOn" xml:space="preserve">
+    <value>Happened on</value>
+  </data>
+  <data name="TlComesBack" xml:space="preserve">
+    <value>Comes back on {0}</value>
+    <comment>Under a note that will come back on the Today page. {0} is a date.</comment>
+  </data>
+  <data name="TlEarlierVersions" xml:space="preserve">
+    <value>Earlier versions</value>
+  </data>
+  <data name="TlVersionMeta" xml:space="preserve">
+    <value>Dated {0} · changed {1}</value>
+    <comment>Under an earlier version of a note. {0} is the date it had and {1} the date it was changed.</comment>
+  </data>
+  <data name="TlNoText" xml:space="preserve">
+    <value>No text</value>
+  </data>
+  <data name="TlOpenPlant" xml:space="preserve">
+    <value>Open plant</value>
+    <comment>Link under an entry that points to a plant.</comment>
+  </data>
+  <data name="TlConfirmWithPhotos" xml:space="preserve">
+    <value>Delete this entry and its photos?</value>
+  </data>
+  <data name="TlConfirm" xml:space="preserve">
+    <value>Delete this entry?</value>
+  </data>
+  <data name="TlBefore" xml:space="preserve">
+    <value>Before you got it</value>
+    <comment>Divider over the history a plant had before it was given to the person.</comment>
+  </data>
+  <data name="TlEmpty" xml:space="preserve">
+    <value>No photos or notes yet.</value>
+    <comment>Shown on the timeline when it has nothing.</comment>
+  </data>
+  <data name="TlToday" xml:space="preserve">
+    <value>Today</value>
+    <comment>Heading of the entries made today on the timeline.</comment>
+  </data>
+  <data name="TlYesterday" xml:space="preserve">
+    <value>Yesterday</value>
+    <comment>Heading of the entries made yesterday on the timeline.</comment>
+  </data>
+  <data name="TlKindPottedUp" xml:space="preserve">
+    <value>Potted up</value>
+    <comment>Kind of an entry on the timeline.</comment>
+  </data>
+  <data name="TlKindFailed" xml:space="preserve">
+    <value>Didn't make it</value>
+    <comment>Kind of an entry on the timeline.</comment>
+  </data>
+  <data name="TlKindGaveAway" xml:space="preserve">
+    <value>Given away</value>
+    <comment>Kind of an entry on the timeline.</comment>
+  </data>
+  <data name="TlKindLookedOver" xml:space="preserve">
+    <value>Looked over</value>
+    <comment>Kind of an entry on the timeline: the person looked the plant over.</comment>
+  </data>
+  <data name="TlKindFlowering" xml:space="preserve">
+    <value>Flowering</value>
+    <comment>Kind of an entry on the timeline.</comment>
+  </data>
+  <data name="TlKindArrived" xml:space="preserve">
+    <value>Arrived</value>
+    <comment>Kind of an entry on the timeline: the plant arrived.</comment>
+  </data>
+  <data name="TlKindProblem" xml:space="preserve">
+    <value>Problem</value>
+    <comment>Kind of an entry on the timeline.</comment>
+  </data>
+  <data name="TlKindIdentified" xml:space="preserve">
+    <value>Identified</value>
+    <comment>Kind of an entry on the timeline: the plant was given a name.</comment>
+  </data>
+  <data name="TlKindAdded" xml:space="preserve">
+    <value>Added</value>
+    <comment>Kind of an entry on the timeline: the plant was added to the collection.</comment>
+  </data>
+  <data name="TlKindUpdated" xml:space="preserve">
+    <value>Updated</value>
+    <comment>Kind of an entry on the timeline: something about the plant was changed.</comment>
+  </data>
+  <data name="TlKindPropagated" xml:space="preserve">
+    <value>Propagated</value>
+    <comment>Kind of an entry on the timeline: a propagation was taken from the plant.</comment>
+  </data>
+  <data name="TlKindNote" xml:space="preserve">
+    <value>Note</value>
+    <comment>Kind of an entry on the timeline.</comment>
+  </data>
+  <data name="TlKindPhoto" xml:space="preserve">
+    <value>Photo</value>
+    <comment>Kind of an entry on the timeline.</comment>
+  </data>
+  <data name="TlCorrect" xml:space="preserve">
+    <value>Correct entry</value>
+    <comment>Name of the button that changes a note or photo on the timeline.</comment>
+  </data>
+  <data name="TlDelete" xml:space="preserve">
+    <value>Delete entry</value>
+    <comment>Name of the button that deletes an entry on the timeline.</comment>
+  </data>
+  <data name="TlOpenPropagation" xml:space="preserve">
+    <value>Open propagation</value>
+    <comment>Link under an entry that points to a propagation.</comment>
+  </data>
+  <data name="TlOpenPhoto" xml:space="preserve">
+    <value>Open photo</value>
+    <comment>Name of the button that shows a photo full screen.</comment>
+  </data>
+  <data name="ComposerPhotoToAdd" xml:space="preserve">
+    <value>Photo to add</value>
+    <comment>Description of a photo picked but not added yet.</comment>
+  </data>
+  <data name="ComposerPhotoNoteHint" xml:space="preserve">
+    <value>Add a note (optional)</value>
+  </data>
+  <data name="ComposerNoteHint" xml:space="preserve">
+    <value>New leaf, roots showing, repotted…</value>
+    <comment>Example of what to write in a note about a plant.</comment>
+  </data>
+  <data name="ComposerUsePhotoDates" xml:space="preserve">
+    <value>Use the photos' dates</value>
+  </data>
+  <data name="ComposerUseToday" xml:space="preserve">
+    <value>Use today</value>
+  </data>
+  <data name="ComposerEarlier" xml:space="preserve">
+    <value>Happened earlier?</value>
+  </data>
+  <data name="ComposerAddToHistory" xml:space="preserve">
+    <value>Add to history</value>
+  </data>
+  <data name="ComposerAddNote" xml:space="preserve">
+    <value>Add note</value>
+  </data>
+  <data name="ComposerAddMore" xml:space="preserve">
+    <value>Add more</value>
+  </data>
+  <data name="ComposerSaveFailed" xml:space="preserve">
+    <value>Couldn't save: {0}</value>
+    <comment>{0} is the reason, in English or the language of the app.</comment>
+  </data>
+  <data name="ComposerTitleNote" xml:space="preserve">
+    <value>Add a note</value>
+    <comment>Title of the sheet for adding to the timeline.</comment>
+  </data>
+  <data name="ComposerTitlePhoto" xml:space="preserve">
+    <value>Add a photo</value>
+  </data>
+  <data name="ComposerTitlePhotos" xml:space="preserve">
+    <value>Add {0} photos</value>
+    <comment>Title of the sheet when two or more photos were picked.</comment>
+  </data>
+  <data name="ComposerSaving" xml:space="preserve">
+    <value>Saving photos…</value>
+  </data>
+  <data name="ComposerTakenToday" xml:space="preserve">
+    <value>Taken today</value>
+  </data>
+  <data name="ComposerTakenYesterday" xml:space="preserve">
+    <value>Taken yesterday</value>
+  </data>
+  <data name="ComposerTakenOn" xml:space="preserve">
+    <value>Taken on {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="ComposerRemovePhoto" xml:space="preserve">
+    <value>Remove photo</value>
+    <comment>Name of the button that takes a picked photo out again.</comment>
+  </data>
+  <data name="ComposerGoogle" xml:space="preserve">
+    <value>Google Photos</value>
+    <comment>Button that picks photos from Google Photos.</comment>
+  </data>
+  <data name="ComposerSavePhotosFailed" xml:space="preserve">
+    <value>Couldn't save the photos: {0}</value>
+    <comment>{0} is the reason, in English or the language of the app.</comment>
+  </data>
+  <data name="EditPageTitleNew" xml:space="preserve">
+    <value>Start propagation · Stikling</value>
+    <comment>Title of the browser tab on the form for starting a propagation.</comment>
+  </data>
+  <data name="EditPageTitleEdit" xml:space="preserve">
+    <value>Edit propagation · Stikling</value>
+    <comment>Title of the browser tab on the form for changing a propagation.</comment>
+  </data>
+  <data name="EditTitleNew" xml:space="preserve">
+    <value>Start propagation</value>
+    <comment>Heading of the form for starting a propagation, and its save button.</comment>
+  </data>
+  <data name="EditTitleEdit" xml:space="preserve">
+    <value>Edit propagation</value>
+    <comment>Heading of the form for changing a propagation.</comment>
+  </data>
+  <data name="EditNotFound" xml:space="preserve">
+    <value>That propagation doesn't exist.</value>
+  </data>
+  <data name="EditIntro" xml:space="preserve">
+    <value>A cutting, corm, seeds or anything else you're growing into a new plant.</value>
+  </data>
+  <data name="EditWhatLegend" xml:space="preserve">
+    <value>What you're propagating</value>
+  </data>
+  <data name="EditTakenFrom" xml:space="preserve">
+    <value>Taken from</value>
+  </data>
+  <data name="EditNoParent" xml:space="preserve">
+    <value>No parent plant (e.g. bought seeds)</value>
+  </data>
+  <data name="EditParentNotMine" xml:space="preserve">
+    <value>The parent isn't mine</value>
+  </data>
+  <data name="EditSellerPlaceholder" xml:space="preserve">
+    <value>e.g. Seed shop, a friend</value>
+  </data>
+  <data name="EditCollectionNumber" xml:space="preserve">
+    <value>Collection number</value>
+  </data>
+  <data name="EditNumberPlaceholder" xml:space="preserve">
+    <value>e.g. 117a</value>
+  </data>
+  <data name="EditNumberHint" xml:space="preserve">
+    <value>The number on its label, like 117a for a cutting from plant 117. Optional.</value>
+  </data>
+  <data name="EditNameLegend" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="EditNamed" xml:space="preserve">
+    <value>Named &lt;b&gt;{0}&lt;/b&gt;</value>
+    <comment>The b tags make the name bold. Keep them. {0} is the name of the propagation.</comment>
+  </data>
+  <data name="EditChangeName" xml:space="preserve">
+    <value>Change name</value>
+  </data>
+  <data name="EditGenusPlaceholder" xml:space="preserve">
+    <value>e.g. Alocasia</value>
+    <comment>Example of a genus name. Botanical names stay as they are.</comment>
+  </data>
+  <data name="EditSpeciesPlaceholder" xml:space="preserve">
+    <value>e.g. zebrina</value>
+    <comment>Example of a species name. Botanical names stay as they are.</comment>
+  </data>
+  <data name="EditNickname" xml:space="preserve">
+    <value>Nickname</value>
+  </data>
+  <data name="EditNicknamePlaceholder" xml:space="preserve">
+    <value>e.g. Corm test: perlite</value>
+  </data>
+  <data name="EditNameHint" xml:space="preserve">
+    <value>Give it a genus, a nickname, or both.</value>
+  </data>
+  <data name="EditNameHintParent" xml:space="preserve">
+    <value>Filled in from the parent plant. Give it a genus, a nickname, or both.</value>
+  </data>
+  <data name="EditWishGot" xml:space="preserve">
+    <value>On your wishlist: mark it got</value>
+  </data>
+  <data name="EditLikeLast" xml:space="preserve">
+    <value>Like last time: {0}</value>
+    <comment>Offered when starting a propagation. {0} is how the last one was set up, like "cutting in water, clear box".</comment>
+  </data>
+  <data name="EditUse" xml:space="preserve">
+    <value>Use</value>
+    <comment>Button that fills in the form like the last propagation.</comment>
+  </data>
+  <data name="EditHowLegend" xml:space="preserve">
+    <value>How you started it</value>
+  </data>
+  <data name="EditType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="EditHowMany" xml:space="preserve">
+    <value>How many</value>
+  </data>
+  <data name="EditOwnRoots" xml:space="preserve">
+    <value>Has it got its own roots already? Then it's a plant. {0} instead.</value>
+    <comment>{0} is a link, with the text of the next text.</comment>
+  </data>
+  <data name="EditAddAsPlant" xml:space="preserve">
+    <value>Add it as a plant</value>
+    <comment>The text of a link to the form for a new plant.</comment>
+  </data>
+  <data name="EditStartedOn" xml:space="preserve">
+    <value>Started on</value>
+  </data>
+  <data name="EditFromPhotos" xml:space="preserve">
+    <value>Set to the day of the oldest photo, so the photos come after it in the history.</value>
+  </data>
+  <data name="EditKeepToday" xml:space="preserve">
+    <value>Use today instead</value>
+  </data>
+  <data name="EditPhotoAlt" xml:space="preserve">
+    <value>Photo of the new propagation</value>
+  </data>
+  <data name="EditCamera" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="EditGallery" xml:space="preserve">
+    <value>Gallery</value>
+  </data>
+  <data name="EditPhotoHint" xml:space="preserve">
+    <value>The newest photo becomes the cover. You can add more later on its page.</value>
+  </data>
+  <data name="EditMoreDetails" xml:space="preserve">
+    <value>More details</value>
+  </data>
+  <data name="EditWhere" xml:space="preserve">
+    <value>Where it is</value>
+  </data>
+  <data name="EditSpotPlaceholder" xml:space="preserve">
+    <value>e.g. Kitchen window</value>
+  </data>
+  <data name="EditArrived" xml:space="preserve">
+    <value>How it arrived</value>
+  </data>
+  <data name="EditSetup" xml:space="preserve">
+    <value>Setup</value>
+  </data>
+  <data name="EditGrowsIn" xml:space="preserve">
+    <value>Grows in</value>
+  </data>
+  <data name="EditAids" xml:space="preserve">
+    <value>Rooting aids</value>
+  </data>
+  <data name="EditAidsHint" xml:space="preserve">
+    <value>Optional. Pick what you used and the results page compares batches with and without it.</value>
+  </data>
+  <data name="EditDryFirst" xml:space="preserve">
+    <value>Let the cut end dry first</value>
+  </data>
+  <data name="EditDriedFor" xml:space="preserve">
+    <value>How long it dried</value>
+  </data>
+  <data name="EditHowLong" xml:space="preserve">
+    <value>How long</value>
+  </data>
+  <data name="EditUnit" xml:space="preserve">
+    <value>Unit</value>
+  </data>
+  <data name="EditHours" xml:space="preserve">
+    <value>hours</value>
+    <comment>Unit for how long a cut end dried.</comment>
+  </data>
+  <data name="EditDays" xml:space="preserve">
+    <value>days</value>
+    <comment>Unit for how long a cut end dried.</comment>
+  </data>
+  <data name="EditCormSize" xml:space="preserve">
+    <value>Corm size (mm)</value>
+  </data>
+  <data name="EditCormHint" xml:space="preserve">
+    <value>Measured across when you started it. Handy for comparing bigger and smaller corms in an experiment.</value>
+  </data>
+  <data name="EditExperiment" xml:space="preserve">
+    <value>Experiment</value>
+  </data>
+  <data name="EditExperimentPlaceholder" xml:space="preserve">
+    <value>e.g. Alocasia corm test</value>
+  </data>
+  <data name="EditExperimentHint" xml:space="preserve">
+    <value>Give batches you started together the same name and they're compared side by side.</value>
+  </data>
+  <data name="EditSitter" xml:space="preserve">
+    <value>For a plant-sitter</value>
+  </data>
+  <data name="EditSitterNote" xml:space="preserve">
+    <value>Note for a plant-sitter</value>
+  </data>
+  <data name="EditSitterHint" xml:space="preserve">
+    <value>Goes on the sheet for whoever looks after your plants while you're away.</value>
+  </data>
+  <data name="EditSwap" xml:space="preserve">
+    <value>For swap</value>
+  </data>
+  <data name="EditSpare" xml:space="preserve">
+    <value>Cuttings available for swap</value>
+  </data>
+  <data name="EditSpareHint" xml:space="preserve">
+    <value>How many you can spare. It shows on the Available for swap page, never more than what is left, and giving some away takes them off first.</value>
+    <comment>Available for swap is the name of a page.</comment>
+  </data>
+  <data name="EditProgress" xml:space="preserve">
+    <value>Progress</value>
+  </data>
+  <data name="EditHowFar" xml:space="preserve">
+    <value>How far along</value>
+  </data>
+  <data name="EditStageHint" xml:space="preserve">
+    <value>Already rooting when you write it down? Pick how far along it is.</value>
+  </data>
+  <data name="EditStageDone" xml:space="preserve">
+    <value>It's finished, since none are left.</value>
+  </data>
+  <data name="EditPottedUp" xml:space="preserve">
+    <value>Potted up</value>
+  </data>
+  <data name="EditGivenAway" xml:space="preserve">
+    <value>Given away</value>
+  </data>
+  <data name="EditFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="EditCorrectCounts" xml:space="preserve">
+    <value>Correct these if one was potted up, given away or marked failed by mistake. Any left over go back to growing.</value>
+  </data>
+  <data name="EditCorrectPlants" xml:space="preserve">
+    <value>Plants potted up from it stay in your collection.</value>
+  </data>
+  <data name="EditRootedOn" xml:space="preserve">
+    <value>Rooted on</value>
+  </data>
+  <data name="EditRootedHint" xml:space="preserve">
+    <value>Filled in by itself when you move it to rooted. Change it if it rooted earlier.</value>
+  </data>
+  <data name="EditCameUp" xml:space="preserve">
+    <value>Came up</value>
+  </data>
+  <data name="EditFirstOn" xml:space="preserve">
+    <value>First on</value>
+  </data>
+  <data name="EditSeedsHint" xml:space="preserve">
+    <value>How many seeds have come up so far, out of the number sown. Leave empty until the first one does.</value>
+  </data>
+  <data name="EditFirstRoot" xml:space="preserve">
+    <value>First root</value>
+  </data>
+  <data name="EditFirstLeaf" xml:space="preserve">
+    <value>First leaf</value>
+  </data>
+  <data name="EditSignsHint" xml:space="preserve">
+    <value>The day you first saw a root or a new leaf. Leave them empty until it happens.</value>
+  </data>
+  <data name="EditDried" xml:space="preserve">
+    <value>dried {0}</value>
+    <comment>Part of a line about a propagation. {0} is how long the cut end dried, like "2 days".</comment>
+  </data>
+  <data name="EditAboutHint" xml:space="preserve">
+    <value>For what stays true about it. Dated notes go on its history.</value>
+  </data>
+  <data name="EditSummaryFirstRoot" xml:space="preserve">
+    <value>first root {0}</value>
+    <comment>Part of a line about progress. {0} is a date.</comment>
+  </data>
+  <data name="EditSummaryFirstLeaf" xml:space="preserve">
+    <value>first leaf {0}</value>
+    <comment>Part of a line about progress. {0} is a date.</comment>
+  </data>
+  <data name="EditLastTypeIn" xml:space="preserve">
+    <value>{0} in {1}</value>
+    <comment>Part of the offer to set up like last time. {0} is the kind of propagation and {1} what it grows in, in lower case.</comment>
+  </data>
+  <data name="EditAbout" xml:space="preserve">
+    <value>About it</value>
+    <comment>Heading of the field for notes that stay true about a propagation.</comment>
+  </data>
+  <data name="DetFallbackTitle" xml:space="preserve">
+    <value>Propagation</value>
+    <comment>Part of the browser tab title while the propagation loads.</comment>
+  </data>
+  <data name="DetNotFound" xml:space="preserve">
+    <value>That propagation doesn't exist or was deleted.</value>
+  </data>
+  <data name="DetOpenCover" xml:space="preserve">
+    <value>Open the cover photo</value>
+  </data>
+  <data name="DetPhotoOf" xml:space="preserve">
+    <value>Photo of {0}</value>
+    <comment>{0} is the name of the propagation.</comment>
+  </data>
+  <data name="DetOutcomeTitle" xml:space="preserve">
+    <value>How it turned out</value>
+  </data>
+  <data name="DetRanFor" xml:space="preserve">
+    <value>Ran for</value>
+  </data>
+  <data name="DetFirstSeedling" xml:space="preserve">
+    <value>First seedling</value>
+  </data>
+  <data name="DetDayBold" xml:space="preserve">
+    <value>day &lt;b&gt;{0}&lt;/b&gt;</value>
+    <comment>The b tags make the number bold. Keep them. {0} is a day number.</comment>
+  </data>
+  <data name="DetPottedOfBold" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; of {1}</value>
+    <comment>The b tags make the first number bold. Keep them. {0} is how many were potted up and {1} how many were started.</comment>
+  </data>
+  <data name="DetOutcomeGiven" xml:space="preserve">
+    <value>{0} given away.</value>
+  </data>
+  <data name="DetOutcomeFailed" xml:space="preserve">
+    <value>{0} didn't make it.</value>
+  </data>
+  <data name="DetInCollection" xml:space="preserve">
+    <value>In the collection</value>
+  </data>
+  <data name="DetFromParent" xml:space="preserve">
+    <value>from {0}</value>
+    <comment>In the line under the name. {0} is a link with the name of the plant it was taken from.</comment>
+  </data>
+  <data name="DetPlantsFrom_One" xml:space="preserve">
+    <value>{0} plant potted up from it</value>
+    <comment>Link under the name. 1 plant.</comment>
+  </data>
+  <data name="DetPlantsFrom_Other" xml:space="preserve">
+    <value>{0} plants potted up from it</value>
+  </data>
+  <data name="DetPrintLabel" xml:space="preserve">
+    <value>Print a label</value>
+  </data>
+  <data name="DetPrintLabels" xml:space="preserve">
+    <value>Print labels</value>
+  </data>
+  <data name="DetDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="DetShare" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="DetCameFrom" xml:space="preserve">
+    <value>Came from</value>
+  </data>
+  <data name="DetNoParent" xml:space="preserve">
+    <value>No parent plant</value>
+  </data>
+  <data name="DetStarted" xml:space="preserve">
+    <value>Started</value>
+  </data>
+  <data name="DetTiming" xml:space="preserve">
+    <value>Timing</value>
+  </data>
+  <data name="DetSlower" xml:space="preserve">
+    <value>Slower than usual</value>
+  </data>
+  <data name="DetOnTime" xml:space="preserve">
+    <value>On time</value>
+  </data>
+  <data name="DetPace" xml:space="preserve">
+    <value>{0} earlier batches of {1} in {2} {3} in {4} on average.</value>
+    <comment>Under the timing of a propagation. At least 3 batches. {0} is the number of batches, {1} the kind of propagation in lower case, {2} what it grows in, {3} what happened, like "rooted" in lower case, and {4} the days, like "12 days".</comment>
+  </data>
+  <data name="DetCormSize" xml:space="preserve">
+    <value>Corm size</value>
+  </data>
+  <data name="DetMm" xml:space="preserve">
+    <value>{0} mm</value>
+    <comment>{0} is a size in millimetres.</comment>
+  </data>
+  <data name="DetSeeds" xml:space="preserve">
+    <value>Seeds</value>
+  </data>
+  <data name="DetSeedsUpRate" xml:space="preserve">
+    <value>{0} of {1} came up ({2}%)</value>
+    <comment>Seeds that came up. {0} is how many, {1} how many were sown and {2} the percentage.</comment>
+  </data>
+  <data name="DetSeedsUp" xml:space="preserve">
+    <value>{0} of {1} came up</value>
+    <comment>Seeds that came up. {0} is how many and {1} how many were sown.</comment>
+  </data>
+  <data name="DetFirstOn" xml:space="preserve">
+    <value>first on {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="DetCount" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="DetInMixRetired" xml:space="preserve">
+    <value>In {0} (no longer mixed)</value>
+    <comment>{0} is the name of the soil mix.</comment>
+  </data>
+  <data name="DetInMix" xml:space="preserve">
+    <value>In {0}</value>
+    <comment>{0} is the name of the soil mix.</comment>
+  </data>
+  <data name="DetPets" xml:space="preserve">
+    <value>Pets</value>
+  </data>
+  <data name="DetLastWatered" xml:space="preserve">
+    <value>Last watered</value>
+  </data>
+  <data name="DetWaterChanged" xml:space="preserve">
+    <value>Water changed</value>
+  </data>
+  <data name="DetCutEndDried" xml:space="preserve">
+    <value>Cut end dried</value>
+  </data>
+  <data name="DetLocation" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="DetNotSet" xml:space="preserve">
+    <value>Not set</value>
+  </data>
+  <data name="DetSinceToday" xml:space="preserve">
+    <value>Since today</value>
+  </data>
+  <data name="DetSinceDate" xml:space="preserve">
+    <value>Since {0} · {1}</value>
+    <comment>{0} is a date and {1} is how many days, like "12 days".</comment>
+  </data>
+  <data name="DetPlantsFromHeading" xml:space="preserve">
+    <value>Plants from it</value>
+  </data>
+  <data name="DetConfirmDelete" xml:space="preserve">
+    <value>Delete &lt;strong&gt;{0}&lt;/strong&gt;? Plants potted up from it are kept. If it didn't make it, &lt;em&gt;Mark failed&lt;/em&gt; under the stage button keeps its history instead.</value>
+    <comment>The strong and em tags make text bold or italic. Keep them. {0} is the name of the propagation. The em text is the name of a button.</comment>
+  </data>
+  <data name="DetDelete" xml:space="preserve">
+    <value>Delete propagation</value>
+  </data>
+  <data name="DetAddTo" xml:space="preserve">
+    <value>Add to {0}</value>
+    <comment>Name of the row of buttons for adding a photo or note. {0} is the name of the propagation.</comment>
+  </data>
+  <data name="DetStageButtonLabel" xml:space="preserve">
+    <value>Stage: {0}. Change stage</value>
+    <comment>Read out for the stage button. {0} is the name of the stage.</comment>
+  </data>
+  <data name="DetMoreLabel" xml:space="preserve">
+    <value>More for this propagation</value>
+  </data>
+  <data name="DetFromDevice" xml:space="preserve">
+    <value>From this device</value>
+  </data>
+  <data name="DetFromDeviceHint" xml:space="preserve">
+    <value>Camera or gallery</value>
+  </data>
+  <data name="DetFromGoogle" xml:space="preserve">
+    <value>From Google Photos</value>
+  </data>
+  <data name="DetFromGoogleHint" xml:space="preserve">
+    <value>Including photos only in the cloud</value>
+  </data>
+  <data name="DetStageHelpSeed" xml:space="preserve">
+    <value>Sown is the day the seeds went in. Germinating is once they start to sprout. Sprouted is when they are ready to pot up. Pot up and failing are separate actions.</value>
+    <comment>Sown, Germinating and Sprouted are the names of the stages of seeds.</comment>
+  </data>
+  <data name="DetStageHelp" xml:space="preserve">
+    <value>Started is the day it was cut or put in. Rooting is once roots start. Rooted is when the roots are long enough to pot up. Pot up and failing are separate actions.</value>
+    <comment>Started, Rooting and Rooted are the names of the stages.</comment>
+  </data>
+  <data name="DetDateDay" xml:space="preserve">
+    <value>{0} · day {1}</value>
+    <comment>A date and which day of the propagation it was. {0} is the date and {1} the day number.</comment>
+  </data>
+  <data name="DetFirstSeedlingUp" xml:space="preserve">
+    <value>First seedling up</value>
+  </data>
+  <data name="DetSawLeaf" xml:space="preserve">
+    <value>Saw a new leaf today</value>
+  </data>
+  <data name="DetWrongDate" xml:space="preserve">
+    <value>Wrong date? Change it under {0}.</value>
+    <comment>{0} is a link with the name of the Edit button.</comment>
+  </data>
+  <data name="DetMarkFailed" xml:space="preserve">
+    <value>Mark failed</value>
+  </data>
+  <data name="DetGaveIt" xml:space="preserve">
+    <value>Gave it away</value>
+  </data>
+  <data name="DetGaveSome" xml:space="preserve">
+    <value>Gave some away</value>
+    <comment>Button and sheet title.</comment>
+  </data>
+  <data name="DetCare" xml:space="preserve">
+    <value>Care</value>
+    <comment>Name of the Care button and sheet of a propagation.</comment>
+  </data>
+  <data name="DetStage" xml:space="preserve">
+    <value>Stage</value>
+    <comment>Label of the choice of stage.</comment>
+  </data>
+  <data name="DetTopicStage" xml:space="preserve">
+    <value>the stage</value>
+    <comment>Used in the label of the info button: What is the stage?</comment>
+  </data>
+  <data name="DetEmptyTimeline" xml:space="preserve">
+    <value>No photos or notes yet. Add the first one with Photo or Note.</value>
+    <comment>Shown on the timeline of a propagation when it has nothing. Photo and Note are the names of the buttons.</comment>
+  </data>
+  <data name="DetPotUpEachMedium" xml:space="preserve">
+    <value>Each one becomes a plant of its own, in the {0} they're in now.</value>
+    <comment>{0} is what it grows in, like "soil" or "LECA".</comment>
+  </data>
+  <data name="DetPotUpOneMedium" xml:space="preserve">
+    <value>It becomes a plant of its own, in the {0} it's in now.</value>
+    <comment>{0} is what it grows in, like "soil" or "LECA".</comment>
+  </data>
+  <data name="DetPotUpEach" xml:space="preserve">
+    <value>Each one you pot up becomes a plant of its own.</value>
+  </data>
+  <data name="DetPotUpOne" xml:space="preserve">
+    <value>It becomes a plant of its own.</value>
+  </data>
+  <data name="DetPotUpHelp" xml:space="preserve">
+    <value>Rooted ones become plants of their own. You can pot each in its own pot, put them all in one pot as one plant, or pot them into a plant you already have. The propagation keeps its history, and the new plants link back to it.</value>
+  </data>
+  <data name="DetEachOwnPot" xml:space="preserve">
+    <value>Each in its own pot</value>
+  </data>
+  <data name="DetAllOnePot" xml:space="preserve">
+    <value>All in one pot</value>
+  </data>
+  <data name="DetOwnPot" xml:space="preserve">
+    <value>In a pot of its own</value>
+  </data>
+  <data name="DetInto" xml:space="preserve">
+    <value>In with a plant you have</value>
+  </data>
+  <data name="DetNoPlantsToPotWith" xml:space="preserve">
+    <value>There are no plants to pot them with.</value>
+  </data>
+  <data name="DetIntoHint" xml:space="preserve">
+    <value>They take that plant's pot, medium and room, and are counted in it.</value>
+  </data>
+  <data name="DetNumbered" xml:space="preserve">
+    <value>Numbered when there are several, e.g. "{0} {1}".</value>
+    <comment>{0} is a name, like Coleus, and {1} a number.</comment>
+  </data>
+  <data name="DetMoved" xml:space="preserve">
+    <value>Moved it to something else?</value>
+  </data>
+  <data name="DetDate" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="DetWhereGoes" xml:space="preserve">
+    <value>Where it goes</value>
+  </data>
+  <data name="DetMakePlants" xml:space="preserve">
+    <value>Make {0} plants</value>
+  </data>
+  <data name="DetPotUpN" xml:space="preserve">
+    <value>Pot up {0}</value>
+  </data>
+  <data name="DetFailedHint" xml:space="preserve">
+    <value>It stays in the history and in the results. If it was a mistake, correct the count under Edit.</value>
+    <comment>Edit is the name of a button.</comment>
+  </data>
+  <data name="DetGaveHint" xml:space="preserve">
+    <value>It stays in the history and in the results.</value>
+  </data>
+  <data name="DetWhy" xml:space="preserve">
+    <value>Why?</value>
+  </data>
+  <data name="DetFailedNotePlaceholder" xml:space="preserve">
+    <value>e.g. left too wet</value>
+  </data>
+  <data name="DetMarkNFailed" xml:space="preserve">
+    <value>Mark {0} as failed</value>
+  </data>
+  <data name="DetWhoGot" xml:space="preserve">
+    <value>Who got it?</value>
+  </data>
+  <data name="DetMarkAsGiven" xml:space="preserve">
+    <value>Mark as given away</value>
+  </data>
+  <data name="DetMarkNGiven" xml:space="preserve">
+    <value>Mark {0} as given away</value>
+  </data>
+  <data name="DetFlagHint" xml:space="preserve">
+    <value>Keeps it on Today until it's done</value>
+    <comment>Today is the name of the Today page.</comment>
+  </data>
+  <data name="DetOffered" xml:space="preserve">
+    <value>{0} offered</value>
+  </data>
+  <data name="DetOfferSome" xml:space="preserve">
+    <value>Offer some of them</value>
+  </data>
+  <data name="DetPrintLabelMenu" xml:space="preserve">
+    <value>Print a label</value>
+  </data>
+  <data name="DetPrintLabelHint" xml:space="preserve">
+    <value>For its jar or pot</value>
+  </data>
+  <data name="DetWokenUp" xml:space="preserve">
+    <value>It's woken up</value>
+  </data>
+  <data name="DetDormantFor" xml:space="preserve">
+    <value>Dormant {0}</value>
+    <comment>{0} is how long, like "since today" or "for 12 days".</comment>
+  </data>
+  <data name="DetDormantHint" xml:space="preserve">
+    <value>Resting, like a corm waiting out the winter</value>
+  </data>
+  <data name="DetSwapHint" xml:space="preserve">
+    <value>Up to {0}, what is left. It shows on {1}, and giving some away takes them off first.</value>
+    <comment>{0} is a number and {1} is a link with the name of the Available for swap page.</comment>
+  </data>
+  <data name="DetSince" xml:space="preserve">
+    <value>Since</value>
+  </data>
+  <data name="DetDormantHelp" xml:space="preserve">
+    <value>Resting rather than stuck, e.g. a corm waiting out the winter. It won't come up on Today until it wakes up.</value>
+    <comment>Today is the name of the Today page.</comment>
+  </data>
+  <data name="DetMarkDormant" xml:space="preserve">
+    <value>Mark as dormant</value>
+  </data>
+  <data name="DetSendHistory" xml:space="preserve">
+    <value>Send its history</value>
+  </data>
+  <data name="DetPlantNow" xml:space="preserve">
+    <value>It's a plant now</value>
+  </data>
+  <data name="DetPotUp" xml:space="preserve">
+    <value>Pot up</value>
+  </data>
+  <data name="DetSinceTodayLower" xml:space="preserve">
+    <value>since today</value>
+  </data>
+  <data name="DetForDays_One" xml:space="preserve">
+    <value>for {0} day</value>
+    <comment>How long it has been dormant. 1 day.</comment>
+  </data>
+  <data name="DetForDays_Other" xml:space="preserve">
+    <value>for {0} days</value>
+  </data>
+  <data name="DetHowManyLeft" xml:space="preserve">
+    <value>How many ({0} left)</value>
+    <comment>{0} is the number left.</comment>
+  </data>
+  <data name="DetCountStarted" xml:space="preserve">
+    <value>{0} started</value>
+  </data>
+  <data name="DetCountPotted" xml:space="preserve">
+    <value>{0} potted up</value>
+  </data>
+  <data name="DetCountGiven" xml:space="preserve">
+    <value>{0} given away</value>
+  </data>
+  <data name="DetCountFailed" xml:space="preserve">
+    <value>{0} failed</value>
+  </data>
+  <data name="DetWateredAgo" xml:space="preserve">
+    <value>watered {0}</value>
+    <comment>In the line under the name. {0} is when, like "today" or "2 days ago".</comment>
+  </data>
+  <data name="DetChangedAgo" xml:space="preserve">
+    <value>water changed {0}</value>
+    <comment>In the line under the name. {0} is when, like "today" or "2 days ago".</comment>
+  </data>
+  <data name="DetPottedUpOne" xml:space="preserve">
+    <value>Potted up:</value>
+    <comment>Said after potting up, before the links to the new plants.</comment>
+  </data>
+  <data name="DetPottedUpMany" xml:space="preserve">
+    <value>Potted up {0}:</value>
+    <comment>Said after potting up, before the links to the new plants. {0} is how many.</comment>
+  </data>
+  <data name="DetPotUpFailed" xml:space="preserve">
+    <value>Couldn't pot up: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="DetMarkedFailedOne" xml:space="preserve">
+    <value>Marked 1 as failed.</value>
+  </data>
+  <data name="DetMarkedFailedMany" xml:space="preserve">
+    <value>Marked {0} as failed.</value>
+  </data>
+  <data name="DetMarkFailedFailed" xml:space="preserve">
+    <value>Couldn't mark as failed: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="DetMarkedGivenOne" xml:space="preserve">
+    <value>Marked 1 as given away.</value>
+  </data>
+  <data name="DetMarkedGivenMany" xml:space="preserve">
+    <value>Marked {0} as given away.</value>
+  </data>
+  <data name="DetMarkGivenFailed" xml:space="preserve">
+    <value>Couldn't mark as given away: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="DetKeepsHistory" xml:space="preserve">
+    <value>This propagation keeps its history.</value>
+  </data>
+  <data name="DetTopicPotUp" xml:space="preserve">
+    <value>pot up</value>
+    <comment>Used in the label of the info button: What is pot up?</comment>
+  </data>
+  <data name="DetHowPotted" xml:space="preserve">
+    <value>How they are potted</value>
+    <comment>Label of the choice of how rooted units become plants.</comment>
+  </data>
+  <data name="DetOptional" xml:space="preserve">
+    <value>(optional)</value>
+  </data>
+  <data name="DetFinishes" xml:space="preserve">
+    <value>This finishes the propagation.</value>
+  </data>
+  <data name="DetMarkAsFailed" xml:space="preserve">
+    <value>Mark as failed</value>
+    <comment>Button and sheet title.</comment>
+  </data>
+  <data name="DetChangeFlag" xml:space="preserve">
+    <value>Change the flag</value>
+    <comment>Option in the menu when a propagation already has a flag.</comment>
+  </data>
+  <data name="DetNotYet" xml:space="preserve">
+    <value>Not yet</value>
+  </data>
+  <data name="ShPhotos_One" xml:space="preserve">
+    <value>{0} photo</value>
+    <comment>How many photos are on the public page. 1 photo.</comment>
+  </data>
+  <data name="ShPhotos_Other" xml:space="preserve">
+    <value>{0} photos</value>
+  </data>
+  <data name="ShPreviewVideo" xml:space="preserve">
+    <value>Preview of the time-lapse for {0}</value>
+    <comment>{0} is the name on the card.</comment>
+  </data>
+  <data name="ShPreviewCard" xml:space="preserve">
+    <value>Preview of the card for {0}</value>
+    <comment>{0} is the name on the card.</comment>
+  </data>
+  <data name="ShStopPreview" xml:space="preserve">
+    <value>Stop preview</value>
+  </data>
+  <data name="ShPlayPreview" xml:space="preserve">
+    <value>Play preview</value>
+  </data>
+  <data name="ShCard" xml:space="preserve">
+    <value>Card</value>
+    <comment>Label of the choice between a card with one photo, before and after, a time-lapse and a link.</comment>
+  </data>
+  <data name="ShOnePhoto" xml:space="preserve">
+    <value>One photo</value>
+  </data>
+  <data name="ShBeforeAfter" xml:space="preserve">
+    <value>Before and after</value>
+  </data>
+  <data name="ShTimelapse" xml:space="preserve">
+    <value>Time-lapse</value>
+    <comment>A short video of the photos one after another.</comment>
+  </data>
+  <data name="ShLink" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="ShSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="ShSpeed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="ShPhotosInVideo" xml:space="preserve">
+    <value>Photos in the video</value>
+  </data>
+  <data name="ShInVideo" xml:space="preserve">
+    <value>{0} of {1} photos are in the video. Tap one to leave it out.</value>
+    <comment>{0} is how many are ticked and {1} how many there are.</comment>
+  </data>
+  <data name="ShTooLong" xml:space="preserve">
+    <value>It has {0} photos, and a time-lapse takes up to {1}, so {1} spread over them are picked.</value>
+    <comment>{0} is how many photos it has and {1} is the most a time-lapse takes.</comment>
+  </data>
+  <data name="ShShowOnly" xml:space="preserve">
+    <value>Show only the photos in the video</value>
+  </data>
+  <data name="ShShowAll" xml:space="preserve">
+    <value>Show all {0} photos</value>
+  </data>
+  <data name="ShMissing_One" xml:space="preserve">
+    <value>One photo isn't on this device yet, so it is left out of the video.</value>
+  </data>
+  <data name="ShMissing_Other" xml:space="preserve">
+    <value>{0} photos aren't on this device yet, so they are left out of the video.</value>
+  </data>
+  <data name="ShTooFew" xml:space="preserve">
+    <value>That leaves too few to make one.</value>
+  </data>
+  <data name="ShSmall_One" xml:space="preserve">
+    <value>One photo is only a small copy on this device. Making the video gets the full one first when it can, so the video is sharp.</value>
+  </data>
+  <data name="ShSmall_Other" xml:space="preserve">
+    <value>{0} photos are only a small copy on this device. Making the video gets the full ones first when it can, so the video is sharp.</value>
+  </data>
+  <data name="ShPairMissing" xml:space="preserve">
+    <value>One of those photos isn't on this device yet, so its place on the card is empty.</value>
+  </data>
+  <data name="ShGettingFullPair" xml:space="preserve">
+    <value>Getting the full photos, so the card is sharp.</value>
+  </data>
+  <data name="ShPairSmall" xml:space="preserve">
+    <value>Only a small copy of one of these photos is on this device, and the full one couldn't be fetched, so it may look blurry on the card. Try again when you're online and signed in, or pick another photo.</value>
+  </data>
+  <data name="ShPhotoN" xml:space="preserve">
+    <value>Photo {0}</value>
+    <comment>{0} is the number of the photo in the row.</comment>
+  </data>
+  <data name="ShNoPhoto" xml:space="preserve">
+    <value>No photo</value>
+  </data>
+  <data name="ShSingleMissing" xml:space="preserve">
+    <value>That photo isn't on this device yet, so the card uses the number instead.</value>
+  </data>
+  <data name="ShGettingFull" xml:space="preserve">
+    <value>Getting the full photo, so the card is sharp.</value>
+  </data>
+  <data name="ShSingleSmall" xml:space="preserve">
+    <value>Only a small copy of this photo is on this device, and the full one couldn't be fetched, so it may look blurry on the card. Try again when you're online and signed in, or pick another photo.</value>
+  </data>
+  <data name="ShMaking" xml:space="preserve">
+    <value>Making the video</value>
+  </data>
+  <data name="ShShareVideo" xml:space="preserve">
+    <value>Share video</value>
+  </data>
+  <data name="ShMakeVideo" xml:space="preserve">
+    <value>Make video</value>
+  </data>
+  <data name="ShSlow" xml:space="preserve">
+    <value>Slow</value>
+  </data>
+  <data name="ShNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="ShFast" xml:space="preserve">
+    <value>Fast</value>
+  </data>
+  <data name="ShVideoFailed" xml:space="preserve">
+    <value>The video couldn't be made. Try again, or leave out some photos.</value>
+  </data>
+  <data name="ShPhotoFrom" xml:space="preserve">
+    <value>Photo from {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="ShSaveOffline" xml:space="preserve">
+    <value>Couldn't save. Connect to the internet and try again.</value>
+  </data>
+  <data name="ShOffOffline" xml:space="preserve">
+    <value>Connect to the internet to turn off the link.</value>
+  </data>
+  <data name="ShLinkNoteSignedOutPropagation" xml:space="preserve">
+    <value>A link opens a page that anyone can see, with this propagation's photos. It needs an account, because the page is shown from the server.</value>
+  </data>
+  <data name="ShLinkNoteSignedOutPlant" xml:space="preserve">
+    <value>A link opens a page that anyone can see, with this plant's photos. It needs an account, because the page is shown from the server.</value>
+  </data>
+  <data name="ShLinkNotePropagation" xml:space="preserve">
+    <value>The page shows this propagation's photos and, if you leave it on, its notes. It never shows the room, prices or where it came from.</value>
+  </data>
+  <data name="ShLinkNotePlant" xml:space="preserve">
+    <value>The page shows this plant's photos and, if you leave it on, its notes. It never shows the room, prices or where it came from.</value>
+  </data>
+  <data name="ShMakeLink" xml:space="preserve">
+    <value>Make link</value>
+  </data>
+  <data name="ShTheLink" xml:space="preserve">
+    <value>The link</value>
+  </data>
+  <data name="ShShareLink" xml:space="preserve">
+    <value>Share link</value>
+  </data>
+  <data name="ShOpenPage" xml:space="preserve">
+    <value>Open the page</value>
+  </data>
+  <data name="ShPhotosOnPage" xml:space="preserve">
+    <value>Photos on the page</value>
+  </data>
+  <data name="ShOnPage" xml:space="preserve">
+    <value>{0} of {1} photos are on the page. Tap one to leave it off.</value>
+    <comment>{0} is how many are ticked and {1} how many there are.</comment>
+  </data>
+  <data name="ShConfirmOff" xml:space="preserve">
+    <value>Turn off the link? Anyone who opens it will see that the page is gone. Turning sharing on again makes a new link.</value>
+  </data>
+  <data name="ShTurnOff" xml:space="preserve">
+    <value>Turn off</value>
+  </data>
+  <data name="ShTurnOffLink" xml:space="preserve">
+    <value>Turn off the link</value>
+  </data>
+  <data name="ShUploading_One" xml:space="preserve">
+    <value>1 photo is still uploading. It shows on the page once it's up.</value>
+  </data>
+  <data name="ShUploading_Other" xml:space="preserve">
+    <value>{0} photos are still uploading. They show on the page once they're up.</value>
+  </data>
+  <data name="ShSaved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="ShName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="ShWhatItSays" xml:space="preserve">
+    <value>What it says</value>
+    <comment>Label of the field with the words on a share card or public page.</comment>
+  </data>
+  <data name="ShUseAppWords" xml:space="preserve">
+    <value>Use the app's words again</value>
+  </data>
+  <data name="ShTickMax" xml:space="preserve">
+    <value>A time-lapse takes up to {0} photos. Leave one out to add this one.</value>
+    <comment>{0} is the most photos a time-lapse takes.</comment>
+  </data>
+  <data name="ShTickMin" xml:space="preserve">
+    <value>A time-lapse needs at least 2 photos, so this one stays in.</value>
+  </data>
+  <data name="ShGettingReady" xml:space="preserve">
+    <value>Getting ready.</value>
+  </data>
+  <data name="ShGettingFullVideo" xml:space="preserve">
+    <value>Getting the full photos, so the video is sharp.</value>
+  </data>
+  <data name="ShTooFewOnDevice" xml:space="preserve">
+    <value>Too few of those photos are on this device to make a video.</value>
+  </data>
+  <data name="ShOfflineMaker" xml:space="preserve">
+    <value>The video maker couldn't be downloaded. Connect to the internet and try again. After that it works offline too.</value>
+  </data>
+  <data name="ShUnsupported" xml:space="preserve">
+    <value>This browser can't make videos.</value>
+  </data>
+  <data name="ShCancelling" xml:space="preserve">
+    <value>Cancelling.</value>
+  </data>
+  <data name="ShVideoSaved" xml:space="preserve">
+    <value>Saved as a video on this device. It's in your downloads.</value>
+  </data>
+  <data name="ShVideoShareFailed" xml:space="preserve">
+    <value>The video couldn't be shared. Make it again.</value>
+  </data>
+  <data name="ShPictureSaved" xml:space="preserve">
+    <value>Saved as a picture on this device. It's in your downloads.</value>
+  </data>
+  <data name="ShPictureFailed" xml:space="preserve">
+    <value>The picture couldn't be made. Try again, or pick another photo.</value>
+  </data>
+  <data name="ShBefore" xml:space="preserve">
+    <value>Before</value>
+    <comment>Label over the row of photos to pick the before photo.</comment>
+  </data>
+  <data name="ShAfter" xml:space="preserve">
+    <value>After</value>
+    <comment>Label over the row of photos to pick the after photo.</comment>
+  </data>
+  <data name="ShBeforePhotoFrom" xml:space="preserve">
+    <value>Before photo from {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="ShAfterPhotoFrom" xml:space="preserve">
+    <value>After photo from {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="ShSaveVideo" xml:space="preserve">
+    <value>Save video</value>
+  </data>
+  <data name="ShSaveImage" xml:space="preserve">
+    <value>Save image</value>
+  </data>
+  <data name="ShCopyLink" xml:space="preserve">
+    <value>Copy link</value>
+  </data>
+</root>

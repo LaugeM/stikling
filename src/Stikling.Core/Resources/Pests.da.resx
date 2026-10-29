@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="StartDateInFuture" xml:space="preserve">
+    <value>Startdatoen er i fremtiden.</value>
+  </data>
+  <data name="PestCaseIntervalTooShort" xml:space="preserve">
+    <value>Behandl mindst hver dag, så intervallet skal være 1 eller mere.</value>
+  </data>
+  <data name="PestCasePickRoom" xml:space="preserve">
+    <value>Vælg det rum, sagen dækker.</value>
+  </data>
+  <data name="PestCasePickPlant" xml:space="preserve">
+    <value>Vælg mindst én plante.</value>
+  </data>
+  <data name="PestCaseResolvedInFuture" xml:space="preserve">
+    <value>Datoen for løsning er i fremtiden.</value>
+  </data>
+  <data name="PestCaseResolvedBeforeStart" xml:space="preserve">
+    <value>En sag kan ikke løses, før den er begyndt.</value>
+  </data>
+  <data name="TreatmentNeedsCase" xml:space="preserve">
+    <value>En behandling skal høre til en sag.</value>
+  </data>
+  <data name="CheckCaseOrPlant" xml:space="preserve">
+    <value>Et tjek hører til en sag eller en plante, ikke begge dele.</value>
+  </data>
+  <data name="OnlyCheckOnPlant" xml:space="preserve">
+    <value>Kun et tjek kan logges på én plante.</value>
+  </data>
+  <data name="DateInFuture" xml:space="preserve">
+    <value>Datoen er i fremtiden.</value>
+  </data>
+  <data name="NextTreatmentBeforeThis" xml:space="preserve">
+    <value>Næste behandling kan ikke forfalde, før denne er sket.</value>
+  </data>
+  <data name="CheckOnlyDateNotes" xml:space="preserve">
+    <value>Et tjek har kun en dato og noter.</value>
+  </data>
+  <data name="TreatmentNoTrapCount" xml:space="preserve">
+    <value>En behandling har ingen fældeoptælling.</value>
+  </data>
+  <data name="TrapCountOnlyCount" xml:space="preserve">
+    <value>En fældeoptælling har kun antallet, en ny fælde, en dato og noter.</value>
+  </data>
+  <data name="TrapCountFillIn" xml:space="preserve">
+    <value>Skriv, hvor mange der sidder på fælden, eller at der er sat en ny op.</value>
+  </data>
+  <data name="TrapCountBelowZero" xml:space="preserve">
+    <value>Antallet kan ikke være under nul.</value>
+  </data>
+  <data name="SkippedStepOnlyDateNotes" xml:space="preserve">
+    <value>Et sprunget trin har kun en dato og noter.</value>
+  </data>
+  <data name="OnlyTreatmentIsStep" xml:space="preserve">
+    <value>Kun en behandling kan være et trin i en plan.</value>
+  </data>
+  <data name="ProblemNeedsPlant" xml:space="preserve">
+    <value>Et problem hører til en plante.</value>
+  </data>
+  <data name="ProblemPickSigns" xml:space="preserve">
+    <value>Vælg, hvad du ser.</value>
+  </data>
+  <data name="ProblemEndBeforeStart" xml:space="preserve">
+    <value>Et problem kan ikke slutte, før det er begyndt.</value>
+  </data>
+  <data name="ProblemSayOutcome" xml:space="preserve">
+    <value>Sig, hvordan det endte.</value>
+  </data>
+  <data name="ProblemLookAgainAfterStart" xml:space="preserve">
+    <value>Se igen efter startdatoen.</value>
+  </data>
+  <data name="UpdateNeedsProblem" xml:space="preserve">
+    <value>En opdatering hører til et problem.</value>
+  </data>
+  <data name="UpdateLookAgainAfter" xml:space="preserve">
+    <value>Se igen efter opdateringen.</value>
+  </data>
+  <data name="FloweringMarkNeedsPlant" xml:space="preserve">
+    <value>En blomstringsmarkering hører til en plante.</value>
+  </data>
+  <data name="FloweringMarkPickStage" xml:space="preserve">
+    <value>Vælg, hvor langt blomstringen er nået.</value>
+  </data>
+  <data name="PickDate" xml:space="preserve">
+    <value>Vælg en dato.</value>
+  </data>
+  <data name="FloweringInFuture" xml:space="preserve">
+    <value>En blomstring kan ikke have en dato i fremtiden.</value>
+  </data>
+  <data name="FloweringBudsBeforeFlowers" xml:space="preserve">
+    <value>Knopperne skal komme før blomsterne.</value>
+  </data>
+  <data name="FloweringEndBeforeBegin" xml:space="preserve">
+    <value>Blomstringen kan ikke slutte, før den begyndte.</value>
+  </data>
+  <data name="UpdateNeedsSomething" xml:space="preserve">
+    <value>Sig, hvordan det ser ud, hvad du gjorde, eller tilføj en note eller et billede.</value>
+  </data>
+  <data name="UpdateBeforeProblem" xml:space="preserve">
+    <value>En opdatering kan ikke ligge før problemets start.</value>
+  </data>
+  <data name="PlanNeedsName" xml:space="preserve">
+    <value>Giv planen et navn.</value>
+  </data>
+  <data name="PlanNeedsStep" xml:space="preserve">
+    <value>Tilføj mindst ét trin.</value>
+  </data>
+  <data name="PlanStepsApart" xml:space="preserve">
+    <value>Et trin efter det første kommer mindst en dag senere.</value>
+  </data>
+  <data name="PlanStepNeedsWhat" xml:space="preserve">
+    <value>Skriv, hvad hvert trin bruger.</value>
+  </data>
+  <data name="RecipeNeedsName" xml:space="preserve">
+    <value>Giv blandingen et navn.</value>
+  </data>
+  <data name="IngredientNeedsName" xml:space="preserve">
+    <value>Hver ingrediens skal have et navn.</value>
+  </data>
+  <data name="IngredientAmountBelowZero" xml:space="preserve">
+    <value>En mængde kan ikke være under 0.</value>
+  </data>
+  <data name="IngredientPerAboveZero" xml:space="preserve">
+    <value>Hvad mængden gælder for, skal være mere end 0.</value>
+  </data>
+  <data name="SignYellowLeaves" xml:space="preserve">
+    <value>Gule blade</value>
+  </data>
+  <data name="SignBrownTips" xml:space="preserve">
+    <value>Brune eller sprøde spidser</value>
+  </data>
+  <data name="SignDrooping" xml:space="preserve">
+    <value>Hængende</value>
+  </data>
+  <data name="SignSpots" xml:space="preserve">
+    <value>Pletter på bladene</value>
+  </data>
+  <data name="SignLeafDrop" xml:space="preserve">
+    <value>Taber blade</value>
+  </data>
+  <data name="SignRootRot" xml:space="preserve">
+    <value>Rodråd</value>
+  </data>
+  <data name="SignMushyStem" xml:space="preserve">
+    <value>Blød stilk</value>
+  </data>
+  <data name="SignSunburn" xml:space="preserve">
+    <value>Solskoldning</value>
+  </data>
+  <data name="SignLeggy" xml:space="preserve">
+    <value>Lang og bleg</value>
+  </data>
+  <data name="SignEdema" xml:space="preserve">
+    <value>Bump under bladene</value>
+  </data>
+  <data name="SignOther" xml:space="preserve">
+    <value>Noget andet</value>
+  </data>
+  <data name="ActionCutOffLeaves" xml:space="preserve">
+    <value>Klippede blade af</value>
+  </data>
+  <data name="ActionMovedIt" xml:space="preserve">
+    <value>Flyttede den</value>
+  </data>
+  <data name="ActionWateredLess" xml:space="preserve">
+    <value>Vandede mindre</value>
+  </data>
+  <data name="ActionWateredMore" xml:space="preserve">
+    <value>Vandede mere</value>
+  </data>
+  <data name="ActionRepotted" xml:space="preserve">
+    <value>Ompottede</value>
+  </data>
+  <data name="ActionCutAwayRoots" xml:space="preserve">
+    <value>Skar rødder af</value>
+  </data>
+  <data name="ActionMoreLight" xml:space="preserve">
+    <value>Mere lys</value>
+  </data>
+  <data name="ActionLessLight" xml:space="preserve">
+    <value>Mindre lys</value>
+  </data>
+  <data name="TrendBetter" xml:space="preserve">
+    <value>Bedre</value>
+  </data>
+  <data name="TrendSame" xml:space="preserve">
+    <value>Omtrent det samme</value>
+  </data>
+  <data name="TrendWorse" xml:space="preserve">
+    <value>Værre</value>
+  </data>
+  <data name="OutcomeGotBetter" xml:space="preserve">
+    <value>Blev bedre</value>
+  </data>
+  <data name="OutcomeWentAway" xml:space="preserve">
+    <value>Forsvandt af sig selv</value>
+  </data>
+  <data name="OutcomeDidntHelp" xml:space="preserve">
+    <value>Intet hjalp</value>
+  </data>
+  <data name="OutcomeDied" xml:space="preserve">
+    <value>Den døde</value>
+  </data>
+  <data name="OpenedLine" xml:space="preserve">
+    <value>Der er noget galt: {0}</value>
+  </data>
+  <data name="UpdateLineEmpty" xml:space="preserve">
+    <value>Opdatering om problemet</value>
+  </data>
+  <data name="ClosedLine" xml:space="preserve">
+    <value>Problem overstået: {0}</value>
+  </data>
+  <data name="ReopenedLine" xml:space="preserve">
+    <value>Problemet kom tilbage</value>
+  </data>
+  <data name="TrendWordBetter" xml:space="preserve">
+    <value>bedre</value>
+  </data>
+  <data name="TrendWordSame" xml:space="preserve">
+    <value>det samme</value>
+  </data>
+  <data name="TrendWordWorse" xml:space="preserve">
+    <value>værre</value>
+  </data>
+  <data name="TrendsLabel" xml:space="preserve">
+    <value>Opdateringer: {0}</value>
+  </data>
+  <data name="DayMonthFormat" xml:space="preserve">
+    <value>d. MMM</value>
+  </data>
+  <data name="ShortMonthYearFormat" xml:space="preserve">
+    <value>MMM yyyy</value>
+  </data>
+  <data name="MonthYearFormat" xml:space="preserve">
+    <value>MMMM yyyy</value>
+  </data>
+  <data name="DayMonthYearFormat" xml:space="preserve">
+    <value>d. MMM yyyy</value>
+  </data>
+  <data name="DurationDay_One" xml:space="preserve">
+    <value>{0} dag</value>
+  </data>
+  <data name="DurationDay_Other" xml:space="preserve">
+    <value>{0} dage</value>
+  </data>
+  <data name="DurationWeek_One" xml:space="preserve">
+    <value>{0} uge</value>
+  </data>
+  <data name="DurationWeek_Other" xml:space="preserve">
+    <value>{0} uger</value>
+  </data>
+  <data name="DurationMonth_One" xml:space="preserve">
+    <value>{0} måned</value>
+  </data>
+  <data name="DurationMonth_Other" xml:space="preserve">
+    <value>{0} måneder</value>
+  </data>
+  <data name="DurationYear_One" xml:space="preserve">
+    <value>{0} år</value>
+  </data>
+  <data name="DurationYear_Other" xml:space="preserve">
+    <value>{0} år</value>
+  </data>
+  <data name="OverAfter" xml:space="preserve">
+    <value>Overstået efter {0}</value>
+  </data>
+  <data name="OverAfterOutcome" xml:space="preserve">
+    <value>Overstået efter {0}: {1}</value>
+  </data>
+  <data name="ProblemFallbackTitle" xml:space="preserve">
+    <value>Et problem</value>
+  </data>
+  <data name="StageBuds" xml:space="preserve">
+    <value>Blomsterstilk eller knopper</value>
+  </data>
+  <data name="StageInFlower" xml:space="preserve">
+    <value>I blomst</value>
+  </data>
+  <data name="StageDone" xml:space="preserve">
+    <value>Færdig</value>
+  </data>
+  <data name="MarkedBuds" xml:space="preserve">
+    <value>Markeret som blomsterstilk eller knopper.</value>
+  </data>
+  <data name="MarkedInFlower" xml:space="preserve">
+    <value>Markeret som i blomst.</value>
+  </data>
+  <data name="MarkedDone" xml:space="preserve">
+    <value>Markeret som færdig med at blomstre.</value>
+  </data>
+  <data name="BadgeInBud" xml:space="preserve">
+    <value>I knop</value>
+  </data>
+  <data name="BadgeInFlower" xml:space="preserve">
+    <value>I blomst</value>
+  </data>
+  <data name="SinceInBud" xml:space="preserve">
+    <value>I knop siden {0}</value>
+  </data>
+  <data name="SinceInFlower" xml:space="preserve">
+    <value>I blomst siden {0}</value>
+  </data>
+  <data name="DescribeSpike" xml:space="preserve">
+    <value>blomsterstilk {0}</value>
+  </data>
+  <data name="DescribeInFlowerTo" xml:space="preserve">
+    <value>i blomst {0} til {1}</value>
+  </data>
+  <data name="DescribeInFlowerFrom" xml:space="preserve">
+    <value>i blomst fra {0}</value>
+  </data>
+  <data name="DescribeDoneFlowering" xml:space="preserve">
+    <value>færdig med at blomstre {0}</value>
+  </data>
+  <data name="DescribeDone" xml:space="preserve">
+    <value>færdig {0}</value>
+  </data>
+  <data name="MenuHintNone" xml:space="preserve">
+    <value>Blomsterstilk, knopper eller blomster</value>
+  </data>
+  <data name="InYearsOne" xml:space="preserve">
+    <value>i {0}</value>
+  </data>
+  <data name="InYearsMany" xml:space="preserve">
+    <value>i {0} og {1}</value>
+  </data>
+  <data name="PlanSteps_One" xml:space="preserve">
+    <value>{0} trin</value>
+  </data>
+  <data name="PlanSteps_Other" xml:space="preserve">
+    <value>{0} trin</value>
+  </data>
+  <data name="PlanSummary" xml:space="preserve">
+    <value>{0} over {1}</value>
+  </data>
+  <data name="IngredientIsopropylAlcohol" xml:space="preserve">
+    <value>Isopropylalkohol</value>
+  </data>
+  <data name="IngredientDishSoap" xml:space="preserve">
+    <value>Opvaskemiddel</value>
+  </data>
+  <data name="IngredientNeemOil" xml:space="preserve">
+    <value>Neemolie</value>
+  </data>
+  <data name="IngredientInsecticidalSoap" xml:space="preserve">
+    <value>Insektsæbe</value>
+  </data>
+  <data name="IngredientHydrogenPeroxide" xml:space="preserve">
+    <value>Hydrogenperoxid</value>
+  </data>
+</root>

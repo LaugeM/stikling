@@ -3,9 +3,9 @@
    serves as plain HTML at /deletion for Meta's check (see prepare-pages.py). *@
 @inject HttpClient Http
 
-<PageTitle>Deleting your data · Stikling</PageTitle>
+<PageTitle>@Strings.Supplies.DeletionPageTitle</PageTitle>
 
-<a class="back-link" href="privacy">Privacy</a>
+<a class="back-link" href="privacy">@Strings.Supplies.DeletionBack</a>
 
 @if (text is not null)
 {
@@ -13,7 +13,7 @@
 }
 else if (failed)
 {
-    <p>Couldn't load this page. Check that you're online and try again.</p>
+    <p>@Strings.Supplies.DeletionFailed</p>
 }
 
 @code {

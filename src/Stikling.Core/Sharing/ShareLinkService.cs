@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using Stikling.Core.Models;
 
 namespace Stikling.Core.Sharing;
@@ -101,7 +102,7 @@ public sealed class ShareLinkService(IShareLinkServer server)
     public async Task<ShareOutcome<ShareLinkInfo>> CreateAsync(SubjectType type, Guid subjectId, string? timeZone, bool showNotes = true)
     {
         if (collectionId is not { } collection)
-            return ShareOutcome<ShareLinkInfo>.Failure("It isn't on the server yet. Sync and try again.");
+            return ShareOutcome<ShareLinkInfo>.Failure(Strings.Propagations.ShareNotOnServer);
 
         var result = await server.CreateAsync(collection, new CreateShareLinkRequest(type, subjectId, timeZone, showNotes));
         if (result.Ok && result.Value is { } link)
@@ -114,7 +115,7 @@ public sealed class ShareLinkService(IShareLinkServer server)
         ShareLinkInfo link, bool showNotes, string? name, string? line, IReadOnlyList<Guid> leftOut, string? timeZone)
     {
         if (collectionId is not { } collection)
-            return ShareOutcome<ShareLinkInfo>.Failure("Sync and try again.");
+            return ShareOutcome<ShareLinkInfo>.Failure(Strings.Propagations.ShareSyncAndRetry);
 
         await saving.WaitAsync();
         try
@@ -135,7 +136,7 @@ public sealed class ShareLinkService(IShareLinkServer server)
     public async Task<ShareOutcome<bool>> TurnOffAsync(ShareLinkInfo link)
     {
         if (collectionId is not { } collection)
-            return ShareOutcome<bool>.Failure("Sync and try again.");
+            return ShareOutcome<bool>.Failure(Strings.Propagations.ShareSyncAndRetry);
 
         var result = await server.TurnOffAsync(collection, link.Id);
         if (result.Ok && links.GetValueOrDefault(link.SubjectId)?.Id == link.Id)

@@ -18,7 +18,7 @@
 @inject TimeProvider Time
 @inject ILogger<WaterPlants> Logger
 
-<PageTitle>Water plants · Stikling</PageTitle>
+<PageTitle>@Strings.Care.WaterPageTitle</PageTitle>
 
 @* Reads what is logged and the plants again. The rooms picked, the way of checking, the soil answers and the feeds someone changed stay *@
 <ReloadOnSync Reload="ReloadAsync" />
@@ -27,32 +27,32 @@
 <div class="page-full water-page @(check == WaterCheck.Meter ? "water-meter" : "water-soil")">
 <a class="back-link" href="@BackHref">@BackName</a>
 
-<h1>Water plants</h1>
+<h1>@Strings.Care.WaterTitle</h1>
 
 <div class="visually-hidden" role="status" aria-live="polite">@announcement</div>
 
 @if (!loaded)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Care.Loading</p>
 }
 else if (rooms.Count == 0)
 {
     <div class="empty-state">
-        <p>No plants yet. Add one on the Plants page.</p>
-        <a class="btn btn-primary mt-3" href="plants">Go to Plants</a>
+        <p>@Strings.Care.WaterEmpty</p>
+        <a class="btn btn-primary mt-3" href="plants">@Strings.Care.RoundGoToPlants</a>
     </div>
 }
 else if (stage == Stage.Rooms)
 {
-    <p class="pass-lead">Walk through every room, or pick the rooms in the order you walk them.</p>
+    <p class="pass-lead">@Strings.Care.WaterLead</p>
 
     <div class="pass-actions" data-tour="water">
-        <button type="button" class="btn btn-primary" @onclick="StartAll">All rooms</button>
+        <button type="button" class="btn btn-primary" @onclick="StartAll">@Strings.Care.WaterAllRooms</button>
     </div>
 
-    <h2 class="section-label">Or pick rooms</h2>
+    <h2 class="section-label">@Strings.Care.WaterPickRooms</h2>
 
-    <div class="chip-row" role="group" aria-label="Rooms">
+    <div class="chip-row" role="group" aria-label="@Strings.Care.WaterRooms">
         @foreach (var room in rooms)
         {
             var at = picked.IndexOf(room.Id);
@@ -61,7 +61,7 @@ else if (stage == Stage.Rooms)
                 <span class="pass-order @(at < 0 ? "unpicked" : null)" aria-hidden="true">@(at >= 0 ? at + 1 : null)</span>
                 @if (at >= 0)
                 {
-                    <span class="visually-hidden">Number @(at + 1): </span>
+                    <span class="visually-hidden">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterNumber, at + 1)) </span>
                 }
                 @room.Name
             </button>
@@ -69,7 +69,7 @@ else if (stage == Stage.Rooms)
     </div>
 
     <div class="pass-actions">
-        <button type="button" class="btn btn-outline-primary" disabled="@(picked.Count == 0)" @onclick="StartAsync">Start</button>
+        <button type="button" class="btn btn-outline-primary" disabled="@(picked.Count == 0)" @onclick="StartAsync">@Strings.Care.WaterStart</button>
     </div>
 }
 else if (showDone)
@@ -78,27 +78,27 @@ else if (showDone)
     var wateredCuttings = WateredCuttings().ToList();
 
     <div class="pass-summary" role="status">
-        <h2 tabindex="-1" @ref="doneHeading">Done for today</h2>
+        <h2 tabindex="-1" @ref="doneHeading">@Strings.Care.WaterDoneHeading</h2>
         @if (watered.Count == 0 && wateredCuttings.Count == 0)
         {
-            <p>Nothing watered this time.</p>
+            <p>@Strings.Care.WaterNothingWatered</p>
         }
         else
         {
             <ul>
                 @foreach (var row in watered)
                 {
-                    <li>@row.Plant.DisplayName, @DoneText(row).ToLowerInvariant()</li>
+                    <li>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterDoneLine, row.Plant.DisplayName, DoneText(row).ToLowerInvariant()))</li>
                 }
                 @foreach (var cutting in wateredCuttings)
                 {
-                    <li>@cutting.Propagation.DisplayName, watered</li>
+                    <li>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterDoneLine, cutting.Propagation.DisplayName, Strings.Care.WateringDoneWatered.ToLowerInvariant()))</li>
                 }
             </ul>
         }
         <div class="pass-summary-actions">
-            <a class="btn btn-primary" href="@BackHref">Back to @BackName</a>
-            <button type="button" class="btn btn-link link-action" @onclick="KeepGoing">Keep going</button>
+            <a class="btn btn-primary" href="@BackHref">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterBackTo, BackName))</a>
+            <button type="button" class="btn btn-link link-action" @onclick="KeepGoing">@Strings.Care.WaterKeepGoing</button>
         </div>
     </div>
 }
@@ -107,41 +107,41 @@ else
     @if (rooms.Count > 1)
     {
         <div class="pass-bar">
-            <button type="button" class="btn btn-link btn-sm link-action" @onclick="ChangeRooms">Change rooms</button>
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="ChangeRooms">@Strings.Care.WaterChangeRooms</button>
         </div>
     }
 
-    <div class="chip-row pass-mode" role="group" aria-label="How you check">
+    <div class="chip-row pass-mode" role="group" aria-label="@Strings.Care.WaterHowYouCheck">
         <button type="button" class="chip @(check == WaterCheck.Meter ? "picked" : null)" aria-pressed="@(check == WaterCheck.Meter ? "true" : "false")"
-                @onclick="() => SetCheckAsync(WaterCheck.Meter)">Meter</button>
+                @onclick="() => SetCheckAsync(WaterCheck.Meter)">@Strings.Care.WaterMeter</button>
         <button type="button" class="chip @(check == WaterCheck.Soil ? "picked" : null)" aria-pressed="@(check == WaterCheck.Soil ? "true" : "false")"
-                @onclick="() => SetCheckAsync(WaterCheck.Soil)">Feel the soil</button>
+                @onclick="() => SetCheckAsync(WaterCheck.Soil)">@Strings.Care.WaterFeelSoil</button>
     </div>
 
     <p class="pass-lead">
         @if (check == WaterCheck.Meter)
         {
-            <text>Tap what the meter reads, from 0 for dry to 10 for wet.</text>
+            <text>@Strings.Care.WaterLeadMeter</text>
         }
         else
         {
-            <text>Push a finger a few centimetres into the soil. Tap Dry or Still damp.</text>
+            <text>@Strings.Care.WaterLeadSoil</text>
         }
     </p>
 
     @if (feedOptions.Count > 0)
     {
         <div class="pass-round-feed">
-            <label class="form-label" for="round-feed">Feed this round</label>
+            <label class="form-label" for="round-feed">@Strings.Care.WaterRoundFeed</label>
             <select id="round-feed" class="form-select" aria-describedby="round-feed-help" value="@(roundFeed?.ToString() ?? "")"
                     @onchange="e => roundFeed = Guid.TryParse(e.Value?.ToString(), out var id) ? id : null">
-                <option value="">No feed</option>
+                <option value="">@Strings.Care.WaterNoFeed</option>
                 @foreach (var option in feedOptions)
                 {
                     <option value="@option.Id">@option.Name</option>
                 }
             </select>
-            <div class="form-text" id="round-feed-help">Goes with every watering you log here, unless a plant has its own feed due.</div>
+            <div class="form-text" id="round-feed-help">@Strings.Care.WaterRoundFeedHelp</div>
         </div>
     }
 
@@ -156,7 +156,7 @@ else
             }
             @if (group.Rows.Count == 0 && group.Cuttings.Count == 0)
             {
-                <p class="pass-none">No plants here.</p>
+                <p class="pass-none">@Strings.Care.WaterNoPlants</p>
             }
             @if (top.Count > 0)
             {
@@ -169,7 +169,7 @@ else
             }
             @if (topUp.Count > 0)
             {
-                <h3 class="pass-sub">Top up</h3>
+                <h3 class="pass-sub">@Strings.Care.WaterTopUp</h3>
                 <ul class="item-list">
                     @foreach (var row in topUp)
                     {
@@ -179,7 +179,7 @@ else
             }
             @if (group.Cuttings.Count > 0)
             {
-                <h3 class="pass-sub">Cuttings</h3>
+                <h3 class="pass-sub">@Strings.Care.WaterCuttings</h3>
                 <ul class="item-list">
                     @foreach (var cutting in group.Cuttings)
                     {
@@ -192,14 +192,14 @@ else
 
     <div class="pass-end"></div>
 
-    <div class="pass-progress" role="region" aria-label="Progress">
+    <div class="pass-progress" role="region" aria-label="@Strings.Care.WaterProgress">
         @if (status is not null)
         {
             <div class="alert alert-danger" role="alert">@status</div>
         }
         <div class="pass-progress-row">
             <span class="pass-progress-text">@ProgressText()</span>
-            <button type="button" class="btn btn-primary" @onclick="Finish">Done</button>
+            <button type="button" class="btn btn-primary" @onclick="Finish">@Strings.Common.Done</button>
         </div>
     </div>
 }
@@ -257,7 +257,7 @@ else
 
     private string BackHref => FromPlants ? "plants" : "";
 
-    private string BackName => FromPlants ? "Plants" : "Today";
+    private string BackName => FromPlants ? Strings.Care.RoundBackPlants : Strings.Care.RoundBackToday;
 
     protected override async Task OnInitializedAsync()
     {
@@ -387,7 +387,7 @@ else
         }
     }
 
-    private const string SaveFailed = "Couldn't save that. Try again.";
+    private static string SaveFailed => Strings.Care.WaterSaveFailed;
 
     // Runs one row's save with only that row disabled, and says what happened for a screen reader
     private async Task RowAsync(PassRow row, Func<Task<string>> save, string failure)
@@ -423,7 +423,7 @@ else
                 await PutOffService.PutOffAsync(key, Today);
                 putOffs.PutOff(key, Today);
             }
-            return $"{row.Plant.DisplayName}: reads {value}";
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterReads, row.Plant.DisplayName, value);
         }, "Saving a meter reading failed");
     }
 
@@ -444,7 +444,7 @@ else
                 putOffs.PutOff(key, Today);
             }
             dryByFeel.Add(row.Plant.Id);
-            return $"{row.Plant.DisplayName}: dry";
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterDryAnnounce, row.Plant.DisplayName);
         }, "Taking back a still damp answer failed");
     }
 
@@ -462,7 +462,7 @@ else
             if (await Answers.NotYetAsync(row.Plant, guess, null, logReading: false, Labels.For) is { } wait)
                 putOffs.PutOff(wait.Key, wait.Until);
             dryByFeel.Remove(row.Plant.Id);
-            return $"{row.Plant.DisplayName}: still damp";
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterDampAnnounce, row.Plant.DisplayName);
         }, "Putting a plant off as still damp failed");
     }
 
@@ -471,7 +471,7 @@ else
         {
             await Care.LogWateringsAsync(
                 [new PassWatering(row.Plant.Id, WateringForms.DoneKind(row.Form), FeedOf(row))], Labels.For);
-            return $"{row.Plant.DisplayName} {WateringText.DoneLabel(row.Form).ToLowerInvariant()}";
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterWateredAnnounce, row.Plant.DisplayName, WateringText.DoneLabel(row.Form).ToLowerInvariant());
         }, "Logging the watering failed");
 
     private Task UndoAsync(PassRow row)
@@ -481,7 +481,7 @@ else
         return RowAsync(row, async () =>
         {
             await Care.UndoWateringAsync(id);
-            return $"{row.Plant.DisplayName}: undone";
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterUndone, row.Plant.DisplayName);
         }, "Undoing a watering failed");
     }
 
@@ -532,10 +532,10 @@ else
             && !(check == WaterCheck.Soil && (row.StillDamp || dryByFeel.Contains(row.Plant.Id)));
         return (answer, byReading) switch
         {
-            (Answer.Dry, true) => $"reads {row.Reading!.Value}, dry by your reading",
-            (Answer.Dry, _) => "dry to the touch",
-            (Answer.Damp, true) => $"reads {row.Reading!.Value}, still damp",
-            _ => "still damp, check again later"
+            (Answer.Dry, true) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterMetaDryReading, row.Reading!.Value),
+            (Answer.Dry, _) => Strings.Care.WaterMetaDryTouch,
+            (Answer.Damp, true) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterMetaDampReading, row.Reading!.Value),
+            _ => Strings.Care.WaterMetaDamp
         };
     }
 
@@ -562,10 +562,10 @@ else
         var done = top.Count(IsChecked) + cuttings.Count(IsChecked);
         var watered = WateredRows().Count() + WateredCuttings().Count();
         if (total == 0)
-            return $"Nothing to check · {watered} watered";
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterNothingToCheck, watered);
         return done >= total
-            ? $"All checked today · {watered} watered"
-            : $"{done} of {total} checked · {watered} watered";
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterAllChecked, watered)
+            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterChecked, done, total, watered);
     }
 
     private void Finish()
@@ -596,7 +596,7 @@ else
 
     private string DoneText(PassRow row) =>
         DoneFeedName(row) is { } feed
-            ? $"{WateringText.DoneLabel(row.Form)} with {feed}"
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterDoneWithFeed, WateringText.DoneLabel(row.Form), feed)
             : WateringText.DoneLabel(row.Form);
 
     private RenderFragment RowTemplate(PassRow row) => __builder =>
@@ -620,13 +620,13 @@ else
                         <span>@DoneText(row)</span>
                         <span aria-hidden="true">·</span>
                         <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
-                                aria-label="@($"Undo {DoneText(row).ToLowerInvariant()} for {row.Plant.DisplayName}")"
-                                @onclick="() => UndoAsync(row)">Undo</button>
+                                aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.CardUndoFor, DoneText(row).ToLowerInvariant(), row.Plant.DisplayName))"
+                                @onclick="() => UndoAsync(row)">@Strings.Care.CardUndo</button>
                     </div>
                 }
                 else if (row.Form != WateringForm.TopWatered)
                 {
-                    <span class="pass-meta">@(row.Form == WateringForm.InWater ? "Check the water" : "Check the reservoir")@(lastWater is { } topped ? $" · {WateringText.LastWater(topped, row.Form)}" : null)</span>
+                    <span class="pass-meta">@(row.Form == WateringForm.InWater ? Strings.Care.WaterCheckWater : Strings.Care.WaterCheckReservoir)@(lastWater is { } topped ? $" · {WateringText.LastWater(topped, row.Form)}" : null)</span>
                     @FeedAndButton(row, WateringText.DoneLabel(row.Form), primary: true, busy, feed, open)
                 }
                 else
@@ -637,7 +637,7 @@ else
                     }
                     else if (check == WaterCheck.Meter && CareSummary.LatestMoisture(careLogs, plantId, Today) is { } latest)
                     {
-                        <span class="pass-meta">last reading @latest.Value, @Labels.DaysAgo(latest.DaysAgo)@(lastWater is { } was ? $" · {WateringText.LastWater(was, row.Form)}" : null)</span>
+                        <span class="pass-meta">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundLastReading, latest.Value, Labels.DaysAgo(latest.DaysAgo)))@(lastWater is { } was ? $" · {WateringText.LastWater(was, row.Form)}" : null)</span>
                     }
                     else if (lastWater is { } watered)
                     {
@@ -646,7 +646,7 @@ else
 
                     @if (check == WaterCheck.Meter)
                     {
-                        <div class="answer-grid" role="group" aria-label="@($"Meter reading for {row.Plant.DisplayName}")">
+                        <div class="answer-grid" role="group" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterMeterFor, row.Plant.DisplayName))">
                             @for (var n = 0; n <= 10; n++)
                             {
                                 var value = n;
@@ -658,25 +658,25 @@ else
                     }
                     else
                     {
-                        <div class="chip-row pass-soil" role="group" aria-label="@($"Soil of {row.Plant.DisplayName}")">
+                        <div class="chip-row pass-soil" role="group" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterSoilOf, row.Plant.DisplayName))">
                             <button type="button" class="chip @(answer == Answer.Dry ? "picked" : null)" aria-pressed="@(answer == Answer.Dry ? "true" : "false")"
-                                    disabled="@busy" @onclick="() => DryAsync(row)">Dry</button>
+                                    disabled="@busy" @onclick="() => DryAsync(row)">@Strings.Care.WaterDry</button>
                             <button type="button" class="chip @(answer == Answer.Damp ? "picked" : null)" aria-pressed="@(answer == Answer.Damp ? "true" : "false")"
-                                    disabled="@busy" @onclick="() => StillDampAsync(row)">Still damp</button>
+                                    disabled="@busy" @onclick="() => StillDampAsync(row)">@Strings.Care.WaterStillDamp</button>
                         </div>
                     }
 
                     @if (answer == Answer.Dry)
                     {
-                        @FeedAndButton(row, "Watered", primary: true, busy, feed, open)
+                        @FeedAndButton(row, Strings.Care.WateringDoneWatered, primary: true, busy, feed, open)
                     }
                     else if (answer == Answer.Damp)
                     {
-                        @FeedAndButton(row, "Watered anyway", primary: false, busy, feed, open)
+                        @FeedAndButton(row, Strings.Care.WaterWateredAnyway, primary: false, busy, feed, open)
                     }
                     else
                     {
-                        @FeedAndButton(row, "Watered", primary: false, busy, feed, open)
+                        @FeedAndButton(row, Strings.Care.WateringDoneWatered, primary: false, busy, feed, open)
                     }
                 }
             </div>
@@ -714,7 +714,7 @@ else
                 : null;
             if (corrected is null)
                 await CuttingCare.LogAsync(cutting.Propagation, PropagationCareKind.MoistureReading, Today, value);
-            return $"{cutting.Propagation.DisplayName}: reads {value}";
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterReads, cutting.Propagation.DisplayName, value);
         }, "Saving a meter reading for a cutting failed");
     }
 
@@ -725,7 +725,7 @@ else
             return Task.CompletedTask;
         dryByFeel.Add(id);
         cuttingDamp.Remove(id);
-        announcement = $"{cutting.Propagation.DisplayName}: dry";
+        announcement = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterDryAnnounce, cutting.Propagation.DisplayName);
         return Task.CompletedTask;
     }
 
@@ -736,7 +736,7 @@ else
             return Task.CompletedTask;
         cuttingDamp.Add(id);
         dryByFeel.Remove(id);
-        announcement = $"{cutting.Propagation.DisplayName}: still damp";
+        announcement = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterDampAnnounce, cutting.Propagation.DisplayName);
         return Task.CompletedTask;
     }
 
@@ -744,7 +744,7 @@ else
         CuttingAsync(cutting, async () =>
         {
             await CuttingCare.LogAsync(cutting.Propagation, PropagationCareKind.Watered, Today);
-            return $"{cutting.Propagation.DisplayName} watered";
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterCuttingWatered, cutting.Propagation.DisplayName);
         }, "Logging the watering of a cutting failed");
 
     private Task CuttingUndoAsync(PassCutting cutting)
@@ -754,7 +754,7 @@ else
         return CuttingAsync(cutting, async () =>
         {
             await CuttingCare.DeleteAsync(id);
-            return $"{cutting.Propagation.DisplayName}: undone";
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterUndone, cutting.Propagation.DisplayName);
         }, "Undoing the watering of a cutting failed");
     }
 
@@ -783,10 +783,10 @@ else
             && !(check == WaterCheck.Soil && (cuttingDamp.Contains(id) || dryByFeel.Contains(id)));
         return (answer, byReading) switch
         {
-            (Answer.Dry, true) => $"reads {cutting.Reading!.Value}, dry by your reading",
-            (Answer.Dry, _) => "dry to the touch",
-            (Answer.Damp, true) => $"reads {cutting.Reading!.Value}, still damp",
-            _ => "still damp, check again later"
+            (Answer.Dry, true) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterMetaDryReading, cutting.Reading!.Value),
+            (Answer.Dry, _) => Strings.Care.WaterMetaDryTouch,
+            (Answer.Damp, true) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterMetaDampReading, cutting.Reading!.Value),
+            _ => Strings.Care.WaterMetaDamp
         };
     }
 
@@ -807,11 +807,11 @@ else
                 @if (done)
                 {
                     <div class="pass-doneline">
-                        <span>Watered</span>
+                        <span>@Strings.Care.WateringDoneWatered</span>
                         <span aria-hidden="true">·</span>
                         <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
-                                aria-label="@($"Undo watered for {name}")"
-                                @onclick="() => CuttingUndoAsync(cutting)">Undo</button>
+                                aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterUndoWatered, name))"
+                                @onclick="() => CuttingUndoAsync(cutting)">@Strings.Care.CardUndo</button>
                     </div>
                 }
                 else
@@ -822,12 +822,12 @@ else
                     }
                     else if (last is { } was)
                     {
-                        <span class="pass-meta">watered @Labels.DaysAgo(was.DaysAgo)</span>
+                        <span class="pass-meta">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WateringWateredAgo, Labels.DaysAgo(was.DaysAgo)))</span>
                     }
 
                     @if (check == WaterCheck.Meter)
                     {
-                        <div class="answer-grid" role="group" aria-label="@($"Meter reading for {name}")">
+                        <div class="answer-grid" role="group" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterMeterFor, name))">
                             @for (var n = 0; n <= 10; n++)
                             {
                                 var value = n;
@@ -839,22 +839,22 @@ else
                     }
                     else
                     {
-                        <div class="chip-row pass-soil" role="group" aria-label="@($"Soil of {name}")">
+                        <div class="chip-row pass-soil" role="group" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterSoilOf, name))">
                             <button type="button" class="chip @(answer == Answer.Dry ? "picked" : null)" aria-pressed="@(answer == Answer.Dry ? "true" : "false")"
-                                    disabled="@busy" @onclick="() => CuttingDryAsync(cutting)">Dry</button>
+                                    disabled="@busy" @onclick="() => CuttingDryAsync(cutting)">@Strings.Care.WaterDry</button>
                             <button type="button" class="chip @(answer == Answer.Damp ? "picked" : null)" aria-pressed="@(answer == Answer.Damp ? "true" : "false")"
-                                    disabled="@busy" @onclick="() => CuttingDampAsync(cutting)">Still damp</button>
+                                    disabled="@busy" @onclick="() => CuttingDampAsync(cutting)">@Strings.Care.WaterStillDamp</button>
                         </div>
                     }
 
                     <div class="pass-act">
                         @if (answer == Answer.Dry)
                         {
-                            <button type="button" class="btn btn-primary pass-water" disabled="@busy" @onclick="() => CuttingWateredAsync(cutting)">Watered</button>
+                            <button type="button" class="btn btn-primary pass-water" disabled="@busy" @onclick="() => CuttingWateredAsync(cutting)">@Strings.Care.WateringDoneWatered</button>
                         }
                         else
                         {
-                            <button type="button" class="btn btn-link link-action pass-anyway" disabled="@busy" @onclick="() => CuttingWateredAsync(cutting)">@(answer == Answer.Damp ? "Watered anyway" : "Watered")</button>
+                            <button type="button" class="btn btn-link link-action pass-anyway" disabled="@busy" @onclick="() => CuttingWateredAsync(cutting)">@(answer == Answer.Damp ? Strings.Care.WaterWateredAnyway : Strings.Care.WateringDoneWatered)</button>
                         }
                     </div>
                 }
@@ -866,7 +866,7 @@ else
     private RenderFragment FeedAndButton(PassRow row, string label, bool primary, bool busy, Feed? feed, bool open) => __builder =>
     {
         var plantId = row.Plant.Id;
-        var text = feed is null ? label : $"{label} with {feed.Name}";
+        var text = feed is null ? label : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WaterDoneWithFeed, label, feed.Name);
         <div class="pass-act">
             @if (primary)
             {
@@ -879,17 +879,17 @@ else
             @if (feedOptions.Count > 0)
             {
                 <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(open ? "true" : "false")"
-                        aria-label="@($"{(feed is null ? "Add a feed" : "Change the feed")} for {row.Plant.DisplayName}")"
-                        @onclick="() => TogglePicker(row)">@(feed is null ? "add feed" : "change")</button>
+                        aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, feed is null ? Strings.Care.WaterAddFeedFor : Strings.Care.WaterChangeFeedFor, row.Plant.DisplayName))"
+                        @onclick="() => TogglePicker(row)">@(feed is null ? Strings.Care.WaterAddFeed : Strings.Care.WaterChange)</button>
             }
         </div>
         @if (open)
         {
             <div class="pass-feed">
-                <label class="pass-feed-label" for="@($"water-{plantId}-feed")">Feed</label>
+                <label class="pass-feed-label" for="@($"water-{plantId}-feed")">@Strings.Care.SheetFeed</label>
                 <select id="@($"water-{plantId}-feed")" class="form-select form-select-sm" value="@(feed?.Id.ToString() ?? "")"
                         @onchange="e => PickFeed(row, e.Value?.ToString())">
-                    <option value="">No feed</option>
+                    <option value="">@Strings.Care.WaterNoFeed</option>
                     @foreach (var option in feedOptions)
                     {
                         <option value="@option.Id">@option.Name</option>

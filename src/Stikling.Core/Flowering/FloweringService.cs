@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Flowering;
 
@@ -86,11 +87,11 @@ public sealed class FloweringService(IFloweringMarkRepository marks, ITimelineRe
         var errors = new List<string>();
         var today = Today;
         if (new[] { budsFrom, inFlowerFrom, until }.Any(d => d is not null && d.Start > today))
-            errors.Add("A flowering can't be dated in the future.");
+            errors.Add(Strings.Pests.FloweringInFuture);
         if (budsFrom is not null && budsFrom.Start > inFlowerFrom.Start)
-            errors.Add("The buds have to come before the flowers.");
+            errors.Add(Strings.Pests.FloweringBudsBeforeFlowers);
         if (until is not null && until.Start < inFlowerFrom.Start)
-            errors.Add("The flowering can't end before it began.");
+            errors.Add(Strings.Pests.FloweringEndBeforeBegin);
         return errors;
     }
 

@@ -1,0 +1,888 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ListPageTitle" xml:space="preserve">
+    <value>Planter · Stikling</value>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Planter</value>
+  </data>
+  <data name="ListShown" xml:space="preserve">
+    <value>{0} af {1}</value>
+  </data>
+  <data name="ListWaterPlants" xml:space="preserve">
+    <value>Vand planter</value>
+  </data>
+  <data name="ListFlowering" xml:space="preserve">
+    <value>Blomstring</value>
+  </data>
+  <data name="ListShareAsText" xml:space="preserve">
+    <value>Del som tekst</value>
+  </data>
+  <data name="ListCollection" xml:space="preserve">
+    <value>Samling</value>
+  </data>
+  <data name="ListWishlist" xml:space="preserve">
+    <value>Ønskeliste</value>
+  </data>
+  <data name="ListSelect" xml:space="preserve">
+    <value>Vælg</value>
+  </data>
+  <data name="AddAPlant" xml:space="preserve">
+    <value>Tilføj en plante</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Henter…</value>
+  </data>
+  <data name="ListEmptyTitle" xml:space="preserve">
+    <value>Ingen planter endnu</value>
+  </data>
+  <data name="ListEmptyText" xml:space="preserve">
+    <value>Tilføj den første for at starte din samling. Et navn er nok, og resten kan vente.</value>
+  </data>
+  <data name="ListEmptyImport" xml:space="preserve">
+    <value>Har du en liste et andet sted? {0}.</value>
+  </data>
+  <data name="ListEmptyImportLink" xml:space="preserve">
+    <value>Importér den fra et regneark</value>
+  </data>
+  <data name="ListEmptyWishlist" xml:space="preserve">
+    <value>Leder du stadig efter nogle? {0}.</value>
+  </data>
+  <data name="ListEmptyWishlistLink" xml:space="preserve">
+    <value>Start en ønskeliste</value>
+  </data>
+  <data name="ListMoreInHelp" xml:space="preserve">
+    <value>Mere om planter i Hjælp</value>
+  </data>
+  <data name="ListSearchPlaceholder" xml:space="preserve">
+    <value>Søg på navn, slægt, art…</value>
+  </data>
+  <data name="ListSearchLabel" xml:space="preserve">
+    <value>Søg i planter</value>
+  </data>
+  <data name="ListStatusLabel" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="ListGoneAsLabel" xml:space="preserve">
+    <value>Hvordan de forlod samlingen</value>
+  </data>
+  <data name="ListStatusGone" xml:space="preserve">
+    <value>Væk</value>
+  </data>
+  <data name="ListAll" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="ListRoomLabel" xml:space="preserve">
+    <value>Rum</value>
+  </data>
+  <data name="ListAllRooms" xml:space="preserve">
+    <value>Alle rum</value>
+  </data>
+  <data name="ListGoRound" xml:space="preserve">
+    <value>Gå runden</value>
+  </data>
+  <data name="ListLikesLabel" xml:space="preserve">
+    <value>Hvad den kan lide</value>
+  </data>
+  <data name="ListAnyNeeds" xml:space="preserve">
+    <value>Alle behov</value>
+  </data>
+  <data name="ListLikesHumidity" xml:space="preserve">
+    <value>Kan lide høj luftfugtighed</value>
+  </data>
+  <data name="ListLikesMoist" xml:space="preserve">
+    <value>Kan lide at holde sig fugtig</value>
+  </data>
+  <data name="ListLikesDry" xml:space="preserve">
+    <value>Kan lide at tørre ud</value>
+  </data>
+  <data name="ListRestsWinter" xml:space="preserve">
+    <value>Hviler om vinteren</value>
+  </data>
+  <data name="ListRestsSummer" xml:space="preserve">
+    <value>Hviler om sommeren</value>
+  </data>
+  <data name="ListDarker" xml:space="preserve">
+    <value>Mørkere, end den bryder sig om</value>
+  </data>
+  <data name="ListFieldsLabel" xml:space="preserve">
+    <value>Felter</value>
+  </data>
+  <data name="ListAnyField" xml:space="preserve">
+    <value>Alle felter</value>
+  </data>
+  <data name="ListHowRaised" xml:space="preserve">
+    <value>Hvordan den er dyrket</value>
+  </data>
+  <data name="ListNotSet" xml:space="preserve">
+    <value>Ikke angivet</value>
+  </data>
+  <data name="ListSortLabel" xml:space="preserve">
+    <value>Sortér efter</value>
+  </data>
+  <data name="ListSortName" xml:space="preserve">
+    <value>A til Å</value>
+  </data>
+  <data name="ListSortNewest" xml:space="preserve">
+    <value>Nyeste</value>
+  </data>
+  <data name="ListSortRoom" xml:space="preserve">
+    <value>Efter rum</value>
+  </data>
+  <data name="ListSortGenus" xml:space="preserve">
+    <value>Efter slægt</value>
+  </data>
+  <data name="ListSortActivity" xml:space="preserve">
+    <value>Seneste aktivitet</value>
+  </data>
+  <data name="ListColumns" xml:space="preserve">
+    <value>Kolonner</value>
+  </data>
+  <data name="ListViewLabel" xml:space="preserve">
+    <value>Visning</value>
+  </data>
+  <data name="ListViewList" xml:space="preserve">
+    <value>Listevisning</value>
+  </data>
+  <data name="ListViewGrid" xml:space="preserve">
+    <value>Gittervisning</value>
+  </data>
+  <data name="ListViewTable" xml:space="preserve">
+    <value>Tabelvisning</value>
+  </data>
+  <data name="ListSpotIn" xml:space="preserve">
+    <value>Plads i {0}</value>
+  </data>
+  <data name="ListAllOf" xml:space="preserve">
+    <value>Hele {0}</value>
+  </data>
+  <data name="ListTagsLabel" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="ListQuarantine" xml:space="preserve">
+    <value>Karantæne</value>
+  </data>
+  <data name="ListProblem" xml:space="preserve">
+    <value>Problem</value>
+  </data>
+  <data name="ListDormant" xml:space="preserve">
+    <value>Hviler</value>
+  </data>
+  <data name="ListGenusFilter" xml:space="preserve">
+    <value>Slægtsfilter</value>
+  </data>
+  <data name="ListTapToRemove" xml:space="preserve">
+    <value>Tryk for at fjerne</value>
+  </data>
+  <data name="ListNoGenus" xml:space="preserve">
+    <value>Ingen slægt</value>
+  </data>
+  <data name="ListNoRoom" xml:space="preserve">
+    <value>Intet rum</value>
+  </data>
+  <data name="ListFieldFilters" xml:space="preserve">
+    <value>Feltfiltre</value>
+  </data>
+  <data name="ListSelectAllShown" xml:space="preserve">
+    <value>Vælg alle viste</value>
+  </data>
+  <data name="ListClear" xml:space="preserve">
+    <value>Ryd</value>
+  </data>
+  <data name="ListNoMatch" xml:space="preserve">
+    <value>Ingen planter passer.</value>
+  </data>
+  <data name="ListClearFilters" xml:space="preserve">
+    <value>Ryd filtre</value>
+  </data>
+  <data name="ListNoneActive" xml:space="preserve">
+    <value>Ingen af dine planter er i samlingen nu. Dem, der er døde eller væk, ligger under Væk.</value>
+  </data>
+  <data name="ListNoneDied" xml:space="preserve">
+    <value>Ingen af dine planter er døde.</value>
+  </data>
+  <data name="ListNoneGivenAway" xml:space="preserve">
+    <value>Du har ikke givet nogen planter væk.</value>
+  </data>
+  <data name="ListNoneSold" xml:space="preserve">
+    <value>Du har ikke solgt nogen planter.</value>
+  </data>
+  <data name="ListNoneGone" xml:space="preserve">
+    <value>Ingen planter her. En plante havner under Væk, når du markerer den som død, givet væk eller solgt.</value>
+  </data>
+  <data name="ListOnWishlist" xml:space="preserve">
+    <value>På din ønskeliste</value>
+  </data>
+  <data name="ListColumnsHint" xml:space="preserve">
+    <value>Vælg, hvad der skal vises, og træk for at sætte dem i rækkefølge. Denne enhed husker det.</value>
+  </data>
+  <data name="ListNotShown" xml:space="preserve">
+    <value>Ikke vist</value>
+  </data>
+  <data name="ListYourFields" xml:space="preserve">
+    <value>Dine egne felter</value>
+  </data>
+  <data name="ListShareSelected" xml:space="preserve">
+    <value>De {0}, du valgte. Kun navne, aldrig rum, priser, hvor de kom fra eller tags.</value>
+  </data>
+  <data name="ListShareShown" xml:space="preserve">
+    <value>De {0}, der vises nu, med søgning og filtre. Kun navne, aldrig rum, priser, hvor de kom fra eller tags.</value>
+  </data>
+  <data name="ListShareNicknames" xml:space="preserve">
+    <value>Tag dine kælenavne med</value>
+  </data>
+  <data name="ListShareFooter" xml:space="preserve">
+    <value>Slut med "{0}"</value>
+  </data>
+  <data name="ListSharePreview" xml:space="preserve">
+    <value>Hvad der bliver delt</value>
+  </data>
+  <data name="ListShare" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="ListShareCopied" xml:space="preserve">
+    <value>Kopieret</value>
+  </data>
+  <data name="ListShareFailed" xml:space="preserve">
+    <value>Kunne ikke deles</value>
+  </data>
+  <data name="ListShared" xml:space="preserve">
+    <value>Delt</value>
+  </data>
+  <data name="ListBulkLabel" xml:space="preserve">
+    <value>Handlinger for valgte planter</value>
+  </data>
+  <data name="ListTagsToAdd" xml:space="preserve">
+    <value>Tags at tilføje</value>
+  </data>
+  <data name="ListAddTo" xml:space="preserve">
+    <value>Føj til {0}</value>
+  </data>
+  <data name="ListFieldToSet" xml:space="preserve">
+    <value>Felt at angive</value>
+  </data>
+  <data name="ListNotSaid" xml:space="preserve">
+    <value>Ikke oplyst</value>
+  </data>
+  <data name="ListSetOn" xml:space="preserve">
+    <value>Angiv på {0}</value>
+  </data>
+  <data name="ListClearOn" xml:space="preserve">
+    <value>Ryd på {0}</value>
+  </data>
+  <data name="ListOfferForSwap" xml:space="preserve">
+    <value>Tilbyd {0} til bytte</value>
+  </data>
+  <data name="ListCuttingsToSpare" xml:space="preserve">
+    <value>Stiklinger til overs</value>
+  </data>
+  <data name="ListUpForSwap" xml:space="preserve">
+    <value>Til bytte</value>
+  </data>
+  <data name="ListNotOffered" xml:space="preserve">
+    <value>Ikke tilbudt</value>
+  </data>
+  <data name="ListMoveTo" xml:space="preserve">
+    <value>Flyt til</value>
+  </data>
+  <data name="ListMove" xml:space="preserve">
+    <value>Flyt {0}</value>
+  </data>
+  <data name="ListNotePlaceholder" xml:space="preserve">
+    <value>Note til alle valgte planter, fx sprøjtet mod trips</value>
+  </data>
+  <data name="ListNote" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="ListWhatWentWith_One" xml:space="preserve">
+    <value>{0}: hvad fulgte med?</value>
+  </data>
+  <data name="ListWhatWentWith_Other" xml:space="preserve">
+    <value>{0}: hvad fulgte med?</value>
+  </data>
+  <data name="ListSelected" xml:space="preserve">
+    <value>{0} valgt</value>
+  </data>
+  <data name="ListSetStatus" xml:space="preserve">
+    <value>Sæt status…</value>
+  </data>
+  <data name="ListSetStatusLabel" xml:space="preserve">
+    <value>Sæt status</value>
+  </data>
+  <data name="ListLogCare" xml:space="preserve">
+    <value>Log pleje</value>
+  </data>
+  <data name="ListAddNote" xml:space="preserve">
+    <value>Tilføj note</value>
+  </data>
+  <data name="ListTag" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="ListMoveButton" xml:space="preserve">
+    <value>Flyt</value>
+  </data>
+  <data name="ListSetAField" xml:space="preserve">
+    <value>Angiv et felt</value>
+  </data>
+  <data name="ListForSwap" xml:space="preserve">
+    <value>Til bytte</value>
+  </data>
+  <data name="ListLabels" xml:space="preserve">
+    <value>Etiketter</value>
+  </data>
+  <data name="ListCameInGroup" xml:space="preserve">
+    <value>Planter, der kom ind udefra</value>
+  </data>
+  <data name="ListCameIn" xml:space="preserve">
+    <value>{0} kom ind udefra.</value>
+  </data>
+  <data name="ListPutInQuarantine" xml:space="preserve">
+    <value>Sæt i karantæne</value>
+  </data>
+  <data name="ListCheckedNoSigns" xml:space="preserve">
+    <value>Tjekket, ingen tegn</value>
+  </data>
+  <data name="ListNotNow" xml:space="preserve">
+    <value>Ikke nu</value>
+  </data>
+  <data name="ListMoved" xml:space="preserve">
+    <value>Flyttede {0} til {1}.</value>
+  </data>
+  <data name="ListMovedSome" xml:space="preserve">
+    <value>Flyttede {0} til {1}. {2} var der allerede.</value>
+  </data>
+  <data name="ListPutInQuarantineDone" xml:space="preserve">
+    <value>Satte {0} i karantæne.</value>
+  </data>
+  <data name="ListCheckedForPests" xml:space="preserve">
+    <value>Tjekkede {0} for skadedyr.</value>
+  </data>
+  <data name="ListRaisedSet" xml:space="preserve">
+    <value>Angav Hvordan den er dyrket på {0}.</value>
+  </data>
+  <data name="ListRaisedCleared" xml:space="preserve">
+    <value>Ryddede Hvordan den er dyrket på {0}.</value>
+  </data>
+  <data name="ListRaisedLeftAlone_One" xml:space="preserve">
+    <value>{0} dyrket fra frø eller formeret blev ikke ændret.</value>
+  </data>
+  <data name="ListRaisedLeftAlone_Other" xml:space="preserve">
+    <value>{0} dyrket fra frø eller formeret blev ikke ændret.</value>
+  </data>
+  <data name="ListFieldSet" xml:space="preserve">
+    <value>Angav {0} på {1}.</value>
+  </data>
+  <data name="ListFieldCleared" xml:space="preserve">
+    <value>Ryddede {0} på {1}.</value>
+  </data>
+  <data name="ListMarked" xml:space="preserve">
+    <value>Markerede {0} som {1}.</value>
+  </data>
+  <data name="ListAlreadyMarked_One" xml:space="preserve">
+    <value>{0} var allerede {1}.</value>
+  </data>
+  <data name="ListAlreadyMarked_Other" xml:space="preserve">
+    <value>{0} var allerede {1}.</value>
+  </data>
+  <data name="ListMarkedSome_One" xml:space="preserve">
+    <value>Markerede {0} som {1}. {2} var det allerede.</value>
+  </data>
+  <data name="ListMarkedSome_Other" xml:space="preserve">
+    <value>Markerede {0} som {1}. {2} var det allerede.</value>
+  </data>
+  <data name="ListMarkNotOffered" xml:space="preserve">
+    <value>ikke tilbudt</value>
+  </data>
+  <data name="ListStatusUpdated" xml:space="preserve">
+    <value>{0}: {1} opdateret.</value>
+  </data>
+  <data name="ListTagged" xml:space="preserve">
+    <value>Tagede {0}.</value>
+  </data>
+  <data name="ListTaggedSome_One" xml:space="preserve">
+    <value>Tagede {0}. {1} havde det allerede.</value>
+  </data>
+  <data name="ListTaggedSome_Other" xml:space="preserve">
+    <value>Tagede {0}. {1} havde dem allerede.</value>
+  </data>
+  <data name="ListNoteAdded" xml:space="preserve">
+    <value>Note tilføjet til {0}.</value>
+  </data>
+  <data name="ListCareLogged" xml:space="preserve">
+    <value>Pleje logget for {0}.</value>
+  </data>
+  <data name="ListRaisedName" xml:space="preserve">
+    <value>Dyrket</value>
+  </data>
+  <data name="ListPickNotSet" xml:space="preserve">
+    <value>ikke angivet</value>
+  </data>
+  <data name="FamilyTitle" xml:space="preserve">
+    <value>Familie</value>
+  </data>
+  <data name="FamilyTitleOf" xml:space="preserve">
+    <value>Familien til {0}</value>
+  </data>
+  <data name="FamilyCameFromLabel" xml:space="preserve">
+    <value>Hvor den kom fra</value>
+  </data>
+  <data name="FamilyEarlier" xml:space="preserve">
+    <value>Tidligere generationer</value>
+  </data>
+  <data name="FamilyOpenPlant" xml:space="preserve">
+    <value>Åbn plante</value>
+  </data>
+  <data name="FamilyEmpty" xml:space="preserve">
+    <value>Ingen familie endnu. Når du tager en stikling fra {0}, eller siger, hvilken plante den kom fra, vises det her.</value>
+  </data>
+  <data name="FamilyStartPropagation" xml:space="preserve">
+    <value>Start en formering</value>
+  </data>
+  <data name="FamilySetOrigin" xml:space="preserve">
+    <value>Angiv, hvor den kom fra</value>
+  </data>
+  <data name="FamilySiblings" xml:space="preserve">
+    <value>Søskende ({0})</value>
+  </data>
+  <data name="FamilyGrownFromIt" xml:space="preserve">
+    <value>Dyrket fra den ({0})</value>
+  </data>
+  <data name="FamilyBelow_One" xml:space="preserve">
+    <value>{0} plante nedenunder</value>
+  </data>
+  <data name="FamilyBelow_Other" xml:space="preserve">
+    <value>{0} planter nedenunder</value>
+  </data>
+  <data name="FamilyOnTheWay" xml:space="preserve">
+    <value>På vej ({0})</value>
+  </data>
+  <data name="QuickAddTitle" xml:space="preserve">
+    <value>Hurtig tilføjelse</value>
+  </data>
+  <data name="QuickAddNames" xml:space="preserve">
+    <value>Navne</value>
+  </data>
+  <data name="QuickAddPlaceholder" xml:space="preserve">
+    <value>Alocasia zebrina, snake plant, Monstera deliciosa 'Thai Constellation'</value>
+  </data>
+  <data name="QuickAddHint" xml:space="preserve">
+    <value>Én plante pr. linje eller adskilt af kommaer. Alt efter et kendt navn kommer i noterne.</value>
+  </data>
+  <data name="QuickAddHaveThis" xml:space="preserve">
+    <value>Du har allerede denne</value>
+  </data>
+  <data name="QuickAddRemove" xml:space="preserve">
+    <value>Fjern {0}</value>
+  </data>
+  <data name="QuickAddAdd_One" xml:space="preserve">
+    <value>Tilføj {0} plante</value>
+  </data>
+  <data name="QuickAddAdd_Other" xml:space="preserve">
+    <value>Tilføj {0} planter</value>
+  </data>
+  <data name="CollectionTitle" xml:space="preserve">
+    <value>Din samling</value>
+  </data>
+  <data name="CollectionEmpty" xml:space="preserve">
+    <value>Intet at tælle endnu. Tilføj en plante, så viser denne side, hvad din samling består af.</value>
+  </data>
+  <data name="CollectionImport" xml:space="preserve">
+    <value>eller importér en liste</value>
+  </data>
+  <data name="CollectionTotals" xml:space="preserve">
+    <value>Totaler</value>
+  </data>
+  <data name="CollectionPlant_One" xml:space="preserve">
+    <value>plante</value>
+  </data>
+  <data name="CollectionPlant_Other" xml:space="preserve">
+    <value>planter</value>
+  </data>
+  <data name="CollectionSpecies_One" xml:space="preserve">
+    <value>art</value>
+  </data>
+  <data name="CollectionSpecies_Other" xml:space="preserve">
+    <value>arter</value>
+  </data>
+  <data name="CollectionGenus_One" xml:space="preserve">
+    <value>slægt</value>
+  </data>
+  <data name="CollectionGenus_Other" xml:space="preserve">
+    <value>slægter</value>
+  </data>
+  <data name="CollectionLongest" xml:space="preserve">
+    <value>Har været hos dig længst</value>
+  </data>
+  <data name="CollectionPropagations" xml:space="preserve">
+    <value>Formeringer</value>
+  </data>
+  <data name="CollectionRootingNow" xml:space="preserve">
+    <value>slår rødder nu</value>
+  </data>
+  <data name="CollectionRootedThisYear" xml:space="preserve">
+    <value>har slået rødder i år</value>
+  </data>
+  <data name="ReceivedTitle" xml:space="preserve">
+    <value>Behold dens historik</value>
+  </data>
+  <data name="ReceivedGetting" xml:space="preserve">
+    <value>Henter dens historik…</value>
+  </data>
+  <data name="ReceivedUnreachable" xml:space="preserve">
+    <value>Kunne ikke nå Stiklings server</value>
+  </data>
+  <data name="ReceivedUnreachableText" xml:space="preserve">
+    <value>For at beholde historikken skal du have forbindelse én gang for at hente den. Derefter ligger den på din enhed.</value>
+  </data>
+  <data name="ReceivedTryAgain" xml:space="preserve">
+    <value>Prøv igen</value>
+  </data>
+  <data name="ReceivedNotFound" xml:space="preserve">
+    <value>Der er intet at beholde ved dette link</value>
+  </data>
+  <data name="ReceivedNotFoundText" xml:space="preserve">
+    <value>Det kan være tastet forkert, eller planten er ikke givet videre endnu. Bed afsenderen om at tjekke.</value>
+  </data>
+  <data name="ReceivedGoToday" xml:space="preserve">
+    <value>Gå til I dag</value>
+  </data>
+  <data name="ReceivedGone" xml:space="preserve">
+    <value>Dette link er slået fra</value>
+  </data>
+  <data name="ReceivedGoneText" xml:space="preserve">
+    <value>Ejeren har slået det fra, så dens historik ikke kan kopieres længere.</value>
+  </data>
+  <data name="ReceivedAlreadyPlant" xml:space="preserve">
+    <value>Den er allerede i dine planter</value>
+  </data>
+  <data name="ReceivedAlreadyPropagation" xml:space="preserve">
+    <value>Den er allerede i dine formeringer</value>
+  </data>
+  <data name="ReceivedOpenIt" xml:space="preserve">
+    <value>Åbn den</value>
+  </data>
+  <data name="ReceivedMissing_One" xml:space="preserve">
+    <value>{0} af dens billeder er ikke kopieret endnu.</value>
+  </data>
+  <data name="ReceivedMissing_Other" xml:space="preserve">
+    <value>{0} af dens billeder er ikke kopieret endnu.</value>
+  </data>
+  <data name="ReceivedFetchMissing" xml:space="preserve">
+    <value>Hent de manglende billeder</value>
+  </data>
+  <data name="ReceivedPartly" xml:space="preserve">
+    <value>{0} af {1} billeder kopieret. {2} kunne ikke hentes.</value>
+  </data>
+  <data name="ReceivedOpenAnyway" xml:space="preserve">
+    <value>Åbn den alligevel</value>
+  </data>
+  <data name="ReceivedAddHeading" xml:space="preserve">
+    <value>Føj den til Stikling</value>
+  </data>
+  <data name="ReceivedDeletedBefore" xml:space="preserve">
+    <value>Du føjede den til før og slettede den. Hvis du henter den tilbage, kopieres dens historik igen.</value>
+  </data>
+  <data name="ReceivedCopyOnce" xml:space="preserve">
+    <value>Dens billeder og historik indtil nu bliver kopieret til denne enhed én gang. De ændrer sig ikke, hvis siden senere gør.</value>
+  </data>
+  <data name="ReceivedMakeYours" xml:space="preserve">
+    <value>Gør den til din</value>
+  </data>
+  <data name="ReceivedNicknamePlaceholder" xml:space="preserve">
+    <value>fx Køkkencoleus</value>
+  </data>
+  <data name="ReceivedNicknameHint" xml:space="preserve">
+    <value>Valgfrit. Lad feltet stå tomt for at kalde den ved dens navn.</value>
+  </data>
+  <data name="ReceivedGivenBy" xml:space="preserve">
+    <value>Hvem gav dig den?</value>
+  </data>
+  <data name="ReceivedGivenByPlaceholder" xml:space="preserve">
+    <value>fx Anna</value>
+  </data>
+  <data name="ReceivedGivenByHint" xml:space="preserve">
+    <value>Gemmes sammen med den. Vises aldrig på et delingslink.</value>
+  </data>
+  <data name="ReceivedHowMany" xml:space="preserve">
+    <value>Hvor mange fik du?</value>
+  </data>
+  <data name="ReceivedBringBack" xml:space="preserve">
+    <value>Hent den tilbage</value>
+  </data>
+  <data name="ReceivedPhotos_One" xml:space="preserve">
+    <value>{0} billede</value>
+  </data>
+  <data name="ReceivedPhotos_Other" xml:space="preserve">
+    <value>{0} billeder</value>
+  </data>
+  <data name="ReceivedNotes_One" xml:space="preserve">
+    <value>{0} note</value>
+  </data>
+  <data name="ReceivedNotes_Other" xml:space="preserve">
+    <value>{0} noter</value>
+  </data>
+  <data name="ReceivedAdding" xml:space="preserve">
+    <value>Tilføjer den…</value>
+  </data>
+  <data name="ReceivedFetching" xml:space="preserve">
+    <value>Henter billeder…</value>
+  </data>
+  <data name="ReceivedFailed" xml:space="preserve">
+    <value>Kunne ikke tilføje den: {0}</value>
+  </data>
+  <data name="ReceivedCopying" xml:space="preserve">
+    <value>Kopierer</value>
+  </data>
+  <data name="ReceivedCopyingPhotos" xml:space="preserve">
+    <value>Kopierer billeder, {0} af {1}</value>
+  </data>
+  <data name="CardInPot" xml:space="preserve">
+    <value>{0} i potten</value>
+  </data>
+  <data name="TableSelected" xml:space="preserve">
+    <value>Valgt</value>
+  </data>
+  <data name="TableMoisture" xml:space="preserve">
+    <value>{0}/10, {1}</value>
+  </data>
+  <data name="ColumnAlwaysShown" xml:space="preserve">
+    <value>Vises altid</value>
+  </data>
+  <data name="ColumnMoveUp" xml:space="preserve">
+    <value>Flyt {0} op</value>
+  </data>
+  <data name="ColumnMoveDown" xml:space="preserve">
+    <value>Flyt {0} ned</value>
+  </data>
+  <data name="LetterJumpLabel" xml:space="preserve">
+    <value>Hop til bogstav</value>
+  </data>
+  <data name="LetterJumpTo" xml:space="preserve">
+    <value>Hop til {0}</value>
+  </data>
+  <data name="TagNew" xml:space="preserve">
+    <value>+ Nyt tag</value>
+  </data>
+  <data name="TagPlaceholder" xml:space="preserve">
+    <value>fx Broget</value>
+  </data>
+  <data name="TagNewLabel" xml:space="preserve">
+    <value>Nyt tag</value>
+  </data>
+  <data name="CareOfferFrom" xml:space="preserve">
+    <value>fra {0}</value>
+  </data>
+  <data name="CareOfferUse" xml:space="preserve">
+    <value>Brug</value>
+  </data>
+  <data name="CalendarMonthDays_One" xml:space="preserve">
+    <value>{0} {1}: {2} dag med pleje</value>
+  </data>
+  <data name="CalendarMonthDays_Other" xml:space="preserve">
+    <value>{0} {1}: {2} dage med pleje</value>
+  </data>
+  <data name="CalendarDayFormat" xml:space="preserve">
+    <value>d. MMM</value>
+  </data>
+  <data name="CalendarWatered" xml:space="preserve">
+    <value>Vandet</value>
+  </data>
+  <data name="CalendarFed" xml:space="preserve">
+    <value>Gødet</value>
+  </data>
+  <data name="CalendarReading" xml:space="preserve">
+    <value>Måling</value>
+  </data>
+  <data name="CalendarWateredDay" xml:space="preserve">
+    <value>vandet</value>
+  </data>
+  <data name="CalendarFedDay" xml:space="preserve">
+    <value>gødet</value>
+  </data>
+  <data name="CalendarReadingDay" xml:space="preserve">
+    <value>måling</value>
+  </data>
+  <data name="CalendarDayMark" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="CalendarHint" xml:space="preserve">
+    <value>Tryk på en måned for at se dens dage.</value>
+  </data>
+  <data name="DatePrecisionLabel" xml:space="preserve">
+    <value>Hvor meget af datoen du kender</value>
+  </data>
+  <data name="DateYearOnly" xml:space="preserve">
+    <value>Kun år</value>
+  </data>
+  <data name="DateMonth" xml:space="preserve">
+    <value>Måned</value>
+  </data>
+  <data name="DateExactDay" xml:space="preserve">
+    <value>Præcis dag</value>
+  </data>
+  <data name="DateYearPlaceholder" xml:space="preserve">
+    <value>fx 2024</value>
+  </data>
+  <data name="DateYearLabel" xml:space="preserve">
+    <value>{0}, år</value>
+  </data>
+  <data name="DateMonthLabel" xml:space="preserve">
+    <value>{0}, måned</value>
+  </data>
+  <data name="PotPhotos" xml:space="preserve">
+    <value>Billeder af {0}</value>
+  </data>
+  <data name="PlantSelectPick" xml:space="preserve">
+    <value>Vælg en plante</value>
+  </data>
+  <data name="PlantSelectSameGenus" xml:space="preserve">
+    <value>Samme slægt</value>
+  </data>
+  <data name="PlantSelectOthers" xml:space="preserve">
+    <value>Andre planter</value>
+  </data>
+  <data name="PlantSelectLabel" xml:space="preserve">
+    <value>Hvilken plantes potte</value>
+  </data>
+  <data name="ArrivalHow" xml:space="preserve">
+    <value>Hvordan den var</value>
+  </data>
+  <data name="ArrivalWrong" xml:space="preserve">
+    <value>Er der noget galt med den</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="ArrivalNotePlaceholder" xml:space="preserve">
+    <value>fx To blade knækket i posten</value>
+  </data>
+  <data name="ArrivalNoteHint" xml:space="preserve">
+    <value>Siden Sælgere lægger dem sammen, så du kan se, hvilke sælgere der sender planter i god stand.</value>
+  </data>
+  <data name="SellerWhereFrom" xml:space="preserve">
+    <value>Hvor fra</value>
+  </data>
+  <data name="SellerPlaceholder" xml:space="preserve">
+    <value>Butik, ven, plantebytte…</value>
+  </data>
+  <data name="SellerChips" xml:space="preserve">
+    <value>Sælgere, du har</value>
+  </data>
+  <data name="SellerNew" xml:space="preserve">
+    <value>"{0}" bliver føjet til dine sælgere, når du gemmer.</value>
+  </data>
+  <data name="ParentNotMineTitle" xml:space="preserve">
+    <value>En moderplante, der ikke er din</value>
+  </data>
+  <data name="ParentNotMineText" xml:space="preserve">
+    <value>Den holdes ude af din planteliste og I dag. Den er kun her, så en stikling kan vise, hvor den kom fra.</value>
+  </data>
+  <data name="ParentNicknamePlaceholder" xml:space="preserve">
+    <value>fx Mormors gyldenranke</value>
+  </data>
+  <data name="NameWhatPlant" xml:space="preserve">
+    <value>Hvilken plante er det?</value>
+  </data>
+  <data name="NameSearchPlaceholder" xml:space="preserve">
+    <value>fx snake plant eller Monstera deliciosa</value>
+  </data>
+  <data name="NameFound" xml:space="preserve">
+    <value>Fundne planter</value>
+  </data>
+  <data name="NameNow" xml:space="preserve">
+    <value>nu {0}</value>
+  </data>
+  <data name="NameNothing" xml:space="preserve">
+    <value>Intet med det navn i appens liste. Du kan stadig skrive det ind nedenfor.</value>
+  </data>
+  <data name="NameGenus" xml:space="preserve">
+    <value>Slægt</value>
+  </data>
+  <data name="NameSpecies" xml:space="preserve">
+    <value>Art</value>
+  </data>
+  <data name="NameCultivar" xml:space="preserve">
+    <value>Kultivar / sort</value>
+  </data>
+  <data name="NameGenusPlaceholder" xml:space="preserve">
+    <value>fx Monstera</value>
+  </data>
+  <data name="NameSpeciesPlaceholder" xml:space="preserve">
+    <value>fx deliciosa</value>
+  </data>
+  <data name="NameCultivarPlaceholder" xml:space="preserve">
+    <value>fx Thai Constellation</value>
+  </data>
+  <data name="NameEveryday" xml:space="preserve">
+    <value>Dagligt navn: {0}</value>
+  </data>
+  <data name="NameNotSure" xml:space="preserve">
+    <value>Usikker på navnet?</value>
+  </data>
+  <data name="NameHowSure" xml:space="preserve">
+    <value>Hvor sikker</value>
+  </data>
+  <data name="NameSure" xml:space="preserve">
+    <value>Sikker</value>
+  </data>
+  <data name="NameCf" xml:space="preserve">
+    <value>cf. (ligner denne art)</value>
+  </data>
+  <data name="NameAff" xml:space="preserve">
+    <value>aff. (tæt på denne art)</value>
+  </data>
+  <data name="NameSp" xml:space="preserve">
+    <value>sp. (arten er ikke kendt)</value>
+  </data>
+  <data name="NameLost" xml:space="preserve">
+    <value>Navnet er tabt</value>
+  </data>
+  <data name="NameLocality" xml:space="preserve">
+    <value>Lokalitet eller kode</value>
+  </data>
+  <data name="NameLocalityPlaceholder" xml:space="preserve">
+    <value>fx Sumatra, EPC 123</value>
+  </data>
+  <data name="NameSuggested" xml:space="preserve">
+    <value>Foreslåede navne</value>
+  </data>
+  <data name="MixNone" xml:space="preserve">
+    <value>Ingen blandinger endnu. Du kan tilføje dem under Udstyr og så Jordblandinger.</value>
+  </data>
+  <data name="MixNoMix" xml:space="preserve">
+    <value>Ingen blanding</value>
+  </data>
+  <data name="MixLabel" xml:space="preserve">
+    <value>Jordblanding</value>
+  </data>
+  <data name="ArrivedNote" xml:space="preserve">
+    <value>Dens historik fra før, du fik den, ligger under Før du fik den. Tilføj dine egne billeder og noter, mens den vokser, så kommer de over den. Alt ligger på denne enhed, og du behøver ikke en konto.</value>
+  </data>
+  <data name="NumberClashOne" xml:space="preserve">
+    <value>{0} har også #{1}.</value>
+  </data>
+  <data name="NumberClashMany" xml:space="preserve">
+    <value>{0} har også #{1}.</value>
+  </data>
+  <data name="PublicPage" xml:space="preserve">
+    <value>Offentlig side</value>
+  </data>
+  <data name="ReferencePhotoAdd" xml:space="preserve">
+    <value>Tilføj et referencebillede</value>
+  </data>
+  <data name="ReferencePhotoFailed" xml:space="preserve">
+    <value>Kunne ikke gemme billedet: {0}</value>
+  </data>
+</root>

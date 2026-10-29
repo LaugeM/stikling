@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CalendarSummary" xml:space="preserve">
+    <value>Seneste 12 måneder: vandet {0}, gødet {1}, {2}</value>
+  </data>
+  <data name="CalendarTimes_One" xml:space="preserve">
+    <value>{0} gang</value>
+  </data>
+  <data name="CalendarTimes_Other" xml:space="preserve">
+    <value>{0} gange</value>
+  </data>
+  <data name="CalendarReadings_One" xml:space="preserve">
+    <value>{0} fugtmåling</value>
+  </data>
+  <data name="CalendarReadings_Other" xml:space="preserve">
+    <value>{0} fugtmålinger</value>
+  </data>
+  <data name="DayMonthFormat" xml:space="preserve">
+    <value>d. MMM</value>
+  </data>
+  <data name="DayMonthYearFormat" xml:space="preserve">
+    <value>d. MMM yyyy</value>
+  </data>
+  <data name="LabelFertilise" xml:space="preserve">
+    <value>Gød</value>
+  </data>
+  <data name="LabelFlush" xml:space="preserve">
+    <value>Skyl</value>
+  </data>
+  <data name="LabelRepot" xml:space="preserve">
+    <value>Ompot</value>
+  </data>
+  <data name="LabelPrune" xml:space="preserve">
+    <value>Beskær</value>
+  </data>
+  <data name="LabelRotate" xml:space="preserve">
+    <value>Drej</value>
+  </data>
+  <data name="LabelCleanLeaves" xml:space="preserve">
+    <value>Rens bladene</value>
+  </data>
+  <data name="LabelHarvest" xml:space="preserve">
+    <value>Høst</value>
+  </data>
+  <data name="LabelCare" xml:space="preserve">
+    <value>Pleje</value>
+  </data>
+  <data name="LabelWithFeed" xml:space="preserve">
+    <value>{0} med {1}</value>
+  </data>
+  <data name="EveryDay" xml:space="preserve">
+    <value>hver dag</value>
+  </data>
+  <data name="EveryWeek" xml:space="preserve">
+    <value>hver uge</value>
+  </data>
+  <data name="EveryMonth" xml:space="preserve">
+    <value>hver måned</value>
+  </data>
+  <data name="EveryYear" xml:space="preserve">
+    <value>hvert år</value>
+  </data>
+  <data name="EveryDays" xml:space="preserve">
+    <value>hver {0}. dag</value>
+  </data>
+  <data name="EveryWeeks" xml:space="preserve">
+    <value>hver {0}. uge</value>
+  </data>
+  <data name="EveryMonths" xml:space="preserve">
+    <value>hver {0}. måned</value>
+  </data>
+  <data name="EveryYears" xml:space="preserve">
+    <value>hvert {0}. år</value>
+  </data>
+  <data name="MonthsFromTo" xml:space="preserve">
+    <value>{0} til {1}</value>
+  </data>
+  <data name="OnlyWateringHere" xml:space="preserve">
+    <value>Her kan du kun logge en vanding eller en påfyldning.</value>
+  </data>
+  <data name="EntryGone" xml:space="preserve">
+    <value>Posten er væk, så den kan ikke ændres.</value>
+  </data>
+  <data name="KindGone" xml:space="preserve">
+    <value>Plejetypen er væk.</value>
+  </data>
+  <data name="KindNeedsName" xml:space="preserve">
+    <value>Giv plejetypen et navn.</value>
+  </data>
+  <data name="KindNameTaken" xml:space="preserve">
+    <value>Du har allerede en plejetype, der hedder {0}.</value>
+  </data>
+  <data name="KindCountsAs" xml:space="preserve">
+    <value>En plejetype kan tælle som en vanding, en gødning eller ingen af dem.</value>
+  </data>
+  <data name="IntervalNotWatering" xml:space="preserve">
+    <value>Vanding hører til vandingspåmindelsen, så vælg en anden plejetype.</value>
+  </data>
+  <data name="IntervalFeedOnly" xml:space="preserve">
+    <value>Kun gødskning kan have en gødning.</value>
+  </data>
+  <data name="IntervalEveryAtLeastOne" xml:space="preserve">
+    <value>Gentag mindst hver 1., så tallet skal være 1 eller mere.</value>
+  </data>
+  <data name="IntervalBothMonths" xml:space="preserve">
+    <value>Vælg både første og sidste måned, eller ingen af dem.</value>
+  </data>
+  <data name="IntervalMonthRange" xml:space="preserve">
+    <value>Månederne går fra 1 til 12.</value>
+  </data>
+  <data name="IntervalPickRoom" xml:space="preserve">
+    <value>Vælg det rum, den dækker.</value>
+  </data>
+  <data name="IntervalPickTag" xml:space="preserve">
+    <value>Vælg det tag, den dækker.</value>
+  </data>
+  <data name="IntervalPickPlant" xml:space="preserve">
+    <value>Vælg mindst én plante.</value>
+  </data>
+  <data name="LogNeedsPlant" xml:space="preserve">
+    <value>En post i plejelogen skal høre til en plante.</value>
+  </data>
+  <data name="LogFuture" xml:space="preserve">
+    <value>Datoen ligger i fremtiden.</value>
+  </data>
+  <data name="LogOwnKindNeedsName" xml:space="preserve">
+    <value>En post med din egen plejetype skal have et navn.</value>
+  </data>
+  <data name="LogOwnKindCountsAs" xml:space="preserve">
+    <value>En plejetype, du selv har lavet, kan kun tælle som en vanding, en gødning eller ingen af dem.</value>
+  </data>
+  <data name="LogReadingNeedsNumber" xml:space="preserve">
+    <value>Giv fugtmålingen et tal fra 0 til 10.</value>
+  </data>
+  <data name="LogReadingRange" xml:space="preserve">
+    <value>Fugtmålingen går fra 0 til 10.</value>
+  </data>
+  <data name="LogOnlyReadingHasNumber" xml:space="preserve">
+    <value>Kun en fugtmåling har et tal.</value>
+  </data>
+  <data name="LogOnlyFeedingHasProduct" xml:space="preserve">
+    <value>Kun gødskning og påfyldning kan have et produkt.</value>
+  </data>
+  <data name="LogOnlyFeedingHasFeed" xml:space="preserve">
+    <value>Kun gødskning og påfyldning kan have en gødning.</value>
+  </data>
+  <data name="LogOnlyFeedingHasEcPh" xml:space="preserve">
+    <value>Kun gødskning og påfyldning kan have en EC- eller pH-måling.</value>
+  </data>
+  <data name="LogEcRange" xml:space="preserve">
+    <value>EC går fra 0 til 20 mS/cm.</value>
+  </data>
+  <data name="LogPhRange" xml:space="preserve">
+    <value>pH går fra 0 til 14.</value>
+  </data>
+  <data name="LogWaterAmount" xml:space="preserve">
+    <value>Mængden af vand skal være mere end 0.</value>
+  </data>
+  <data name="LogProductNeedsName" xml:space="preserve">
+    <value>Et produkt på posten skal have et navn.</value>
+  </data>
+  <data name="LogDoseNegative" xml:space="preserve">
+    <value>En dosis kan ikke være mindre end 0.</value>
+  </data>
+  <data name="AwayBackAfterFirst" xml:space="preserve">
+    <value>Dagen, du er tilbage, skal ligge efter den første dag.</value>
+  </data>
+  <data name="GrowLightNeedsName" xml:space="preserve">
+    <value>Giv plantelampen et navn.</value>
+  </data>
+  <data name="MemoryHalfYear" xml:space="preserve">
+    <value>For seks måneder siden i dag</value>
+  </data>
+  <data name="MemoryYear" xml:space="preserve">
+    <value>For et år siden i dag</value>
+  </data>
+  <data name="MemoryYears" xml:space="preserve">
+    <value>For {0} år siden i dag</value>
+  </data>
+  <data name="NoRoomName" xml:space="preserve">
+    <value>Intet rum</value>
+  </data>
+  <data name="TreatmentDue" xml:space="preserve">
+    <value>Behandling på tide</value>
+  </data>
+  <data name="CheckForPests" xml:space="preserve">
+    <value>Tjek for skadedyr</value>
+  </data>
+  <data name="NoticeBackToLookOver" xml:space="preserve">
+    <value>{0} at se til efter din tid ude</value>
+  </data>
+  <data name="NoticeGoRound" xml:space="preserve">
+    <value>Gå en runde i {0}</value>
+  </data>
+  <data name="NoticeTreatmentDue_One" xml:space="preserve">
+    <value>{0} behandling mod skadedyr på tide</value>
+  </data>
+  <data name="NoticeTreatmentDue_Other" xml:space="preserve">
+    <value>{0} behandlinger mod skadedyr på tide</value>
+  </data>
+  <data name="NoticeCheck_One" xml:space="preserve">
+    <value>{0} sag at tjekke</value>
+  </data>
+  <data name="NoticeCheck_Other" xml:space="preserve">
+    <value>{0} sager at tjekke</value>
+  </data>
+  <data name="NoticeReady_One" xml:space="preserve">
+    <value>{0} sag klar til at løses</value>
+  </data>
+  <data name="NoticeReady_Other" xml:space="preserve">
+    <value>{0} sager klar til at løses</value>
+  </data>
+  <data name="NoticePlanDone_One" xml:space="preserve">
+    <value>{0} behandlingsplan færdig</value>
+  </data>
+  <data name="NoticePlanDone_Other" xml:space="preserve">
+    <value>{0} behandlingsplaner færdige</value>
+  </data>
+  <data name="NoticeFlaggedOne" xml:space="preserve">
+    <value>{0} kræver opmærksomhed</value>
+  </data>
+  <data name="NoticeFlaggedMany" xml:space="preserve">
+    <value>{0} kræver opmærksomhed</value>
+  </data>
+  <data name="NoticeLookAgainOne" xml:space="preserve">
+    <value>Se igen på {0}</value>
+  </data>
+  <data name="NoticeLookAgainMany" xml:space="preserve">
+    <value>Se igen på {0} planter</value>
+  </data>
+  <data name="NoticeQuarantineOne" xml:space="preserve">
+    <value>Karantænen er slut for {0}</value>
+  </data>
+  <data name="NoticeQuarantineMany" xml:space="preserve">
+    <value>Karantænen er slut for {0} planter</value>
+  </data>
+  <data name="NoticeTransitionOne" xml:space="preserve">
+    <value>Tjek {0} i semi-hydro</value>
+  </data>
+  <data name="NoticeTransitionMany" xml:space="preserve">
+    <value>Tjek {0} planter på vej over i semi-hydro</value>
+  </data>
+  <data name="NoticeRestOne" xml:space="preserve">
+    <value>Hviler {0} nu?</value>
+  </data>
+  <data name="NoticeRestMany" xml:space="preserve">
+    <value>Hviler {0} planter nu?</value>
+  </data>
+  <data name="NoticeSoilOne" xml:space="preserve">
+    <value>Tjek jorden i {0}</value>
+  </data>
+  <data name="NoticeSoilMany" xml:space="preserve">
+    <value>Tjek jorden i {0} planter</value>
+  </data>
+  <data name="NoticeCareOne" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="NoticeCareMany" xml:space="preserve">
+    <value>{0}: {1} planter</value>
+  </data>
+  <data name="NoticeCheckOne" xml:space="preserve">
+    <value>Tjek {0}</value>
+  </data>
+  <data name="NoticeCheckMany" xml:space="preserve">
+    <value>Tjek {0} formeringer</value>
+  </data>
+  <data name="NoticePhoto_One" xml:space="preserve">
+    <value>Tag {0} billede</value>
+  </data>
+  <data name="NoticePhoto_Other" xml:space="preserve">
+    <value>Tag {0} billeder</value>
+  </data>
+  <data name="NoticeAndMore" xml:space="preserve">
+    <value>og {0} mere</value>
+  </data>
+  <data name="SitterTitle" xml:space="preserve">
+    <value>Pas på planterne</value>
+  </data>
+  <data name="SitterElsewhere" xml:space="preserve">
+    <value>Andre steder</value>
+  </data>
+  <data name="SitterEveryVisit" xml:space="preserve">
+    <value>Tjek den hver gang, du kommer forbi</value>
+  </data>
+  <data name="SitterFineUntilBack" xml:space="preserve">
+    <value>Burde klare sig, til du er tilbage</value>
+  </data>
+  <data name="SitterHeading" xml:space="preserve">
+    <value>Før du vander</value>
+  </data>
+  <data name="SitterStepsHeading" xml:space="preserve">
+    <value>Hvis den skal have vand</value>
+  </data>
+  <data name="SitterTopUpReservoir" xml:space="preserve">
+    <value>Fyld reservoiret op</value>
+  </data>
+  <data name="SitterTopUpWater" xml:space="preserve">
+    <value>Fyld op med vand</value>
+  </data>
+  <data name="SitterMeterAt" xml:space="preserve">
+    <value>Vand kun ved {0} eller lavere på fugtmåleren.</value>
+  </data>
+  <data name="SitterPaceInWater" xml:space="preserve">
+    <value>Tjek vandet hver gang.</value>
+  </data>
+  <data name="SitterPaceEveryVisit" xml:space="preserve">
+    <value>Tjek den hver gang.</value>
+  </data>
+  <data name="SitterPaceReservoir" xml:space="preserve">
+    <value>Skal som regel fyldes op cirka hver {0}. dag. Tjek niveauet først, og lad den være, hvis der stadig er vand i.</value>
+  </data>
+  <data name="SitterPaceKnown" xml:space="preserve">
+    <value>Er som regel tør nok til vand cirka hver {0}. dag. Tjek den først, og lad den være, hvis den stadig er fugtig.</value>
+  </data>
+  <data name="SitterPaceUnknown" xml:space="preserve">
+    <value>Ikke lært endnu, så tjek den hver gang.</value>
+  </data>
+  <data name="SitterMeter" xml:space="preserve">
+    <value>Der er en fugtmåler. Tryk den cirka halvvejs ned i jorden, og aflæs tallet. Vand kun, hvis den viser tallet på plantens kort eller lavere. Er tallet højere, så lad den være: den klarer sig til næste gang.</value>
+  </data>
+  <data name="SitterMeterIn" xml:space="preserve">
+    <value>Der er en fugtmåler, {0}. Tryk den cirka halvvejs ned i jorden, og aflæs tallet. Vand kun, hvis den viser tallet på plantens kort eller lavere. Er tallet højere, så lad den være: den klarer sig til næste gang.</value>
+  </data>
+  <data name="SitterNoReading" xml:space="preserve">
+    <value>Ingen måling? Tryk en finger 2 til 3 cm ned i jorden, og vand kun, hvis den er tør hele vejen ned.</value>
+  </data>
+  <data name="SitterFinger" xml:space="preserve">
+    <value>Tryk en finger 2 til 3 cm ned i jorden. Vand kun, hvis den er tør hele vejen ned. Er den fugtig, eller er du i tvivl, så lad den være. Det er trygt at vente til næste gang.</value>
+  </data>
+  <data name="SitterUsualWay" xml:space="preserve">
+    <value>Den sædvanlige måde</value>
+  </data>
+  <data name="SitterTopUpOnly" xml:space="preserve">
+    <value>Planter i vand eller på reservoir skal kun fyldes op.</value>
+  </data>
+  <data name="SitterDates" xml:space="preserve">
+    <value>{0} til {1}</value>
+  </data>
+  <data name="SitterPlants_One" xml:space="preserve">
+    <value>{0} plante</value>
+  </data>
+  <data name="SitterPlants_Other" xml:space="preserve">
+    <value>{0} planter</value>
+  </data>
+  <data name="SitterCuttings_One" xml:space="preserve">
+    <value>{0} stikling</value>
+  </data>
+  <data name="SitterCuttings_Other" xml:space="preserve">
+    <value>{0} stiklinger</value>
+  </data>
+  <data name="SitterPropagations_One" xml:space="preserve">
+    <value>{0} formering</value>
+  </data>
+  <data name="SitterPropagations_Other" xml:space="preserve">
+    <value>{0} formeringer</value>
+  </data>
+  <data name="SitterVisitEveryDay" xml:space="preserve">
+    <value>besøg hver dag</value>
+  </data>
+  <data name="SitterVisitEveryTwo" xml:space="preserve">
+    <value>besøg hver 2. dag</value>
+  </data>
+  <data name="SitterVisitEveryThree" xml:space="preserve">
+    <value>besøg hver 3. dag</value>
+  </data>
+  <data name="SitterVisitTwiceAWeek" xml:space="preserve">
+    <value>besøg to gange om ugen</value>
+  </data>
+  <data name="SitterVisitWeekly" xml:space="preserve">
+    <value>besøg en gang om ugen</value>
+  </data>
+  <data name="MethodTop" xml:space="preserve">
+    <value>Fra toppen</value>
+  </data>
+  <data name="MethodSoak" xml:space="preserve">
+    <value>Iblødsætning</value>
+  </data>
+  <data name="MethodBottom" xml:space="preserve">
+    <value>Fra bunden</value>
+  </data>
+  <data name="MethodHintNone" xml:space="preserve">
+    <value>Arket til plantesitteren bruger den måde, du vælger, når du laver det.</value>
+  </data>
+  <data name="MethodHintTop" xml:space="preserve">
+    <value>Hæld vand på jorden, til lidt løber ud i bunden.</value>
+  </data>
+  <data name="MethodHintSoak" xml:space="preserve">
+    <value>Sæt hele potten i en skål med vand et stykke tid, og lad den så dryppe af.</value>
+  </data>
+  <data name="MethodHintBottom" xml:space="preserve">
+    <value>Stil den i et underfad med vand, og lad den suge det op, den skal bruge.</value>
+  </data>
+  <data name="MethodStepsTop" xml:space="preserve">
+    <value>Vand fra toppen, til lidt løber ud i bunden. Kig i underfadet efter 15 til 30 minutter. Er det hele suget op, så giv lidt mere, og tjek igen. Hæld resten væk.</value>
+  </data>
+  <data name="MethodStepsSoak" xml:space="preserve">
+    <value>Sæt hele potten i en skål med vand i 15 til 30 minutter, og lad den så dryppe godt af.</value>
+  </data>
+  <data name="MethodStepsBottom" xml:space="preserve">
+    <value>Stil den i et underfad med vand. Se efter 15 til 30 minutter, om den har suget det hele op. Har den det, så giv den lidt mere, og tjek igen efter 15 til 30 minutter. Når den holder op med at suge, så hæld resten væk.</value>
+  </data>
+  <data name="SitterDayFormat" xml:space="preserve">
+    <value>d. MMMM</value>
+  </data>
+  <data name="SitterLongDayFormat" xml:space="preserve">
+    <value>dddd 'den' d. MMMM</value>
+  </data>
+  <data name="SitterShortDayFormat" xml:space="preserve">
+    <value>ddd d.</value>
+  </data>
+  <data name="SitterTextVisit" xml:space="preserve">
+    <value>{0}: tjek {1}</value>
+  </data>
+  <data name="SitterTextWhere" xml:space="preserve">
+    <value>Sted: {0}</value>
+  </data>
+  <data name="SitterTextHow" xml:space="preserve">
+    <value>Sådan: {0}</value>
+  </data>
+  <data name="SitterTextNote" xml:space="preserve">
+    <value>Note: {0}</value>
+  </data>
+  <data name="SitterTextCheckOn" xml:space="preserve">
+    <value>Tjek den: {0}</value>
+  </data>
+  <data name="TourTodayTitle" xml:space="preserve">
+    <value>I dag</value>
+  </data>
+  <data name="TourTodayText" xml:space="preserve">
+    <value>Det, der skal gøres, dukker op her. Coleussen og dens stiklinger er et eksempel, så prøv løs.</value>
+  </data>
+  <data name="TourPlantTitle" xml:space="preserve">
+    <value>En plantes side</value>
+  </data>
+  <data name="TourPlantText" xml:space="preserve">
+    <value>Hver plante åbner på sine billeder og noter, de nyeste først. De markerede knapper tilføjer et billede, en note eller pleje.</value>
+  </data>
+  <data name="TourCuttingTitle" xml:space="preserve">
+    <value>En stikling</value>
+  </data>
+  <data name="TourCuttingText" xml:space="preserve">
+    <value>En stikling, du får til at slå rødder, er en formering. Den husker, hvor den kom fra, hvad den slår rødder i, og hvor mange dage det har taget. Når den har slået rødder, bliver den en plante for sig selv.</value>
+  </data>
+  <data name="TourWateringTitle" xml:space="preserve">
+    <value>Vanding</value>
+  </data>
+  <data name="TourWateringText" xml:space="preserve">
+    <value>Sæt kryds ved det, du har vandet, mens du går runden. Stikling lærer af det, du logger, og beder dig tjekke en plante, når den nok er tør.</value>
+  </data>
+  <data name="TourDataTitle" xml:space="preserve">
+    <value>Dine data</value>
+  </data>
+  <data name="TourDataText" xml:space="preserve">
+    <value>Alt gemmes på denne enhed, og du behøver ikke en konto. Gem en sikkerhedskopi eller et regneark, når du vil, eller importer dit eget for at få dine planter ind.</value>
+  </data>
+  <data name="TourClosingTitle" xml:space="preserve">
+    <value>Det var rundvisningen</value>
+  </data>
+</root>

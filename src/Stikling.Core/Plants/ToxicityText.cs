@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Plants;
 
@@ -7,21 +8,21 @@ public static class ToxicityText
 {
     public static string Pets(PlantCare? care) => (care?.Cats, care?.Dogs) switch
     {
-        (Toxicity.Toxic, Toxicity.Toxic) => "Toxic to cats and dogs",
-        (Toxicity.NonToxic, Toxicity.NonToxic) => "Not toxic to cats and dogs",
-        (Toxicity.Toxic, Toxicity.NonToxic) => "Toxic to cats, not to dogs",
-        (Toxicity.NonToxic, Toxicity.Toxic) => "Toxic to dogs, not to cats",
-        (Toxicity.Toxic, null) => "Toxic to cats",
-        (Toxicity.NonToxic, null) => "Not toxic to cats",
-        (null, Toxicity.Toxic) => "Toxic to dogs",
-        (null, Toxicity.NonToxic) => "Not toxic to dogs",
-        _ => "Nothing known about pets"
+        (Toxicity.Toxic, Toxicity.Toxic) => Strings.Plants.PetsBoth,
+        (Toxicity.NonToxic, Toxicity.NonToxic) => Strings.Plants.PetsNeither,
+        (Toxicity.Toxic, Toxicity.NonToxic) => Strings.Plants.PetsCatsOnly,
+        (Toxicity.NonToxic, Toxicity.Toxic) => Strings.Plants.PetsDogsOnly,
+        (Toxicity.Toxic, null) => Strings.Plants.PetsCats,
+        (Toxicity.NonToxic, null) => Strings.Plants.PetsNotCats,
+        (null, Toxicity.Toxic) => Strings.Plants.PetsDogs,
+        (null, Toxicity.NonToxic) => Strings.Plants.PetsNotDogs,
+        _ => Strings.Plants.PetsUnknown
     };
 
     public static string? People(PlantCare? care) => care?.People switch
     {
-        Toxicity.Toxic => "Toxic to people",
-        Toxicity.NonToxic => "Not toxic to people",
+        Toxicity.Toxic => Strings.Plants.PeopleToxic,
+        Toxicity.NonToxic => Strings.Plants.PeopleNotToxic,
         _ => null
     };
 }

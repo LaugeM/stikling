@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -88,11 +89,11 @@ public static class Arrival
 {
     public static string Text(ArrivalProblem problem) => problem switch
     {
-        ArrivalProblem.Pests => "pests",
-        ArrivalProblem.Damaged => "damaged or broken",
-        ArrivalProblem.RootRot => "root rot",
-        ArrivalProblem.WrongPlant => "the wrong plant",
-        ArrivalProblem.SmallerThanShown => "smaller than shown",
+        ArrivalProblem.Pests => Strings.Plants.ProblemPests,
+        ArrivalProblem.Damaged => Strings.Plants.ProblemDamaged,
+        ArrivalProblem.RootRot => Strings.Plants.ProblemRootRot,
+        ArrivalProblem.WrongPlant => Strings.Plants.ProblemWrongPlant,
+        ArrivalProblem.SmallerThanShown => Strings.Plants.ProblemSmaller,
         _ => problem.ToString()
     };
 
@@ -102,6 +103,6 @@ public static class Arrival
         if (rating != ArrivalRating.Poor)
             return null;
         var list = problems.Select(Text).ToList();
-        return list.Count == 0 ? "arrived in poor shape" : $"arrived in poor shape: {string.Join(", ", list)}";
+        return list.Count == 0 ? Strings.Plants.ArrivedPoor : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.ArrivedPoorWith, string.Join(", ", list));
     }
 }

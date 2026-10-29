@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -170,7 +172,7 @@ public sealed class Propagation : Entity
 
     [JsonIgnore]
     public string DisplayName =>
-        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? (NameQualifier == Models.NameQualifier.Unknown ? "Name unknown" : "Unnamed propagation");
+        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? (NameQualifier == Models.NameQualifier.Unknown ? Strings.Propagations.NameUnknown : Strings.Propagations.UnnamedPropagation);
 
     /// <summary>
     /// The name where plants and propagations are listed together, so a propagation isn't
@@ -184,18 +186,33 @@ public sealed class Propagation : Entity
             if (!string.IsNullOrWhiteSpace(Nickname))
                 return Nickname.Trim();
 
-            var noun = Type switch
+            if (BotanicalName is { } botanical)
             {
-                PropagationType.Cutting => "Cutting",
-                PropagationType.Corm => "Corm",
-                PropagationType.Offset => "Offset",
-                PropagationType.Seed => "Seeds",
-                PropagationType.Division => "Division",
-                PropagationType.AirLayer => "Air layer",
-                PropagationType.Leaf => "Leaf cutting",
-                _ => "Propagation"
+                var of = Type switch
+                {
+                    PropagationType.Cutting => Strings.Propagations.ListOfCutting,
+                    PropagationType.Corm => Strings.Propagations.ListOfCorm,
+                    PropagationType.Offset => Strings.Propagations.ListOfOffset,
+                    PropagationType.Seed => Strings.Propagations.ListOfSeed,
+                    PropagationType.Division => Strings.Propagations.ListOfDivision,
+                    PropagationType.AirLayer => Strings.Propagations.ListOfAirLayer,
+                    PropagationType.Leaf => Strings.Propagations.ListOfLeaf,
+                    _ => Strings.Propagations.ListOfOther
+                };
+                return string.Format(CultureInfo.CurrentCulture, of, botanical);
+            }
+
+            return Type switch
+            {
+                PropagationType.Cutting => Strings.Propagations.ListUnnamedCutting,
+                PropagationType.Corm => Strings.Propagations.ListUnnamedCorm,
+                PropagationType.Offset => Strings.Propagations.ListUnnamedOffset,
+                PropagationType.Seed => Strings.Propagations.ListUnnamedSeed,
+                PropagationType.Division => Strings.Propagations.ListUnnamedDivision,
+                PropagationType.AirLayer => Strings.Propagations.ListUnnamedAirLayer,
+                PropagationType.Leaf => Strings.Propagations.ListUnnamedLeaf,
+                _ => Strings.Propagations.ListUnnamedOther
             };
-            return BotanicalName is { } botanical ? $"{noun} of {botanical}" : $"Unnamed {noun.ToLowerInvariant()}";
         }
     }
 
@@ -261,7 +278,7 @@ public sealed class Propagation : Entity
     public void RecordMilestone(Milestone milestone, DateOnly on)
     {
         if (!IsActive)
-            throw new InvalidOperationException("This propagation is finished.");
+            throw new InvalidOperationException(Strings.Propagations.ErrFinished);
         if (milestone == Milestone.FirstRoot)
             FirstRootOn = on;
         else
@@ -298,7 +315,7 @@ public sealed class Propagation : Entity
     public void SetStage(PropagationStage stage)
     {
         if (!IsActive)
-            throw new InvalidOperationException("This propagation is finished.");
+            throw new InvalidOperationException(Strings.Propagations.ErrFinished);
         if (stage is PropagationStage.Done or PropagationStage.Failed)
             throw new ArgumentException("Done and Failed are set by potting up or marking units as failed.", nameof(stage));
         Stage = stage;
@@ -337,9 +354,9 @@ public sealed class Propagation : Entity
     private void CheckCount(int count)
     {
         if (!IsActive)
-            throw new InvalidOperationException("This propagation is finished.");
+            throw new InvalidOperationException(Strings.Propagations.ErrFinished);
         if (!CanTake(count))
-            throw new ArgumentOutOfRangeException(nameof(count), count, $"Choose between 1 and {RemainingCount}.");
+            throw new ArgumentOutOfRangeException(nameof(count), count, string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ErrChooseBetween, RemainingCount));
     }
 
     /// <summary>
@@ -371,36 +388,36 @@ public sealed class Propagation : Entity
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus) && NameQualifier != Models.NameQualifier.Unknown)
-            errors.Add("Give the propagation a nickname or a genus.");
+            errors.Add(Strings.Propagations.ErrNeedName);
         errors.AddRange(PlantNames.QualifierErrors(Genus, Species, NameQualifier));
         if (Plants.CollectionNumbers.Normalize(CollectionNumber) is { } code && !Plants.CollectionNumbers.IsValid(code))
             errors.Add(Plants.CollectionNumbers.NotValidText);
         if (PottedUpCount < 0 || FailedCount < 0 || GivenAwayCount < 0)
-            errors.Add("The number potted up, given away or failed can't be negative.");
+            errors.Add(Strings.Propagations.ErrCountsNegative);
         if (InitialCount < 1)
-            errors.Add("Start with at least 1.");
+            errors.Add(Strings.Propagations.ErrStartWithOne);
         else if (InitialCount < PottedUpCount + FailedCount + GivenAwayCount)
-            errors.Add($"The count can't be lower than the {PottedUpCount + FailedCount + GivenAwayCount} already potted up, given away or failed.");
+            errors.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ErrCountLowerThanUsed, PottedUpCount + FailedCount + GivenAwayCount));
         if (RootedOn is { } rooted && rooted < StartedOn)
-            errors.Add("It can't have rooted before it was started.");
+            errors.Add(Strings.Propagations.ErrRootedBeforeStart);
         if (FirstRootOn < StartedOn || FirstLeafOn < StartedOn)
-            errors.Add("A root or leaf can't show before it was started.");
+            errors.Add(Strings.Propagations.ErrSignBeforeStart);
         if (FirstRootOn > today || FirstLeafOn > today)
-            errors.Add("A root or leaf can't show in the future.");
+            errors.Add(Strings.Propagations.ErrSignFuture);
         if (SeedsGerminated < 0)
-            errors.Add("The number that came up can't be negative.");
+            errors.Add(Strings.Propagations.ErrCameUpNegative);
         else if (SeedsGerminated > InitialCount)
-            errors.Add("More seeds can't have come up than were sown.");
+            errors.Add(Strings.Propagations.ErrCameUpMoreThanSown);
         if (FirstGerminatedOn < StartedOn)
-            errors.Add("A seed can't come up before it was sown.");
+            errors.Add(Strings.Propagations.ErrSeedBeforeSown);
         if (FirstGerminatedOn > today)
-            errors.Add("A seed can't come up in the future.");
+            errors.Add(Strings.Propagations.ErrSeedFuture);
         if (CormSizeMm is <= 0 or > 200)
-            errors.Add("The corm size must be more than 0 and at most 200 mm.");
+            errors.Add(Strings.Propagations.ErrCormSize);
         if (DormantSince > today)
-            errors.Add("It can't go dormant in the future.");
+            errors.Add(Strings.Propagations.ErrDormantFuture);
         if (SpareCount < 0)
-            errors.Add("The number for swap can't be negative.");
+            errors.Add(Strings.Propagations.ErrSwapNegative);
         return errors;
     }
 }

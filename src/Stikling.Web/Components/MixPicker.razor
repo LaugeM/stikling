@@ -6,12 +6,12 @@
 
     @if (Choices.Count == 0)
     {
-        <div class="form-text">No mixes yet. You can add them under Supplies, then Soil mixes.</div>
+        <div class="form-text">@Strings.Plants.MixNone</div>
     }
     else
     {
         <div class="chip-row" role="group" aria-label="@Label">
-            <button type="button" class="chip @Picked(Value is null)" @onclick="() => PickAsync(null)">No mix</button>
+            <button type="button" class="chip @Picked(Value is null)" @onclick="() => PickAsync(null)">@Strings.Plants.MixNoMix</button>
             @foreach (var mix in Choices)
             {
                 <button type="button" class="chip @Picked(Value == mix.Id)"
@@ -38,7 +38,7 @@
     public IReadOnlyList<SoilMix> Mixes { get; set; } = [];
 
     [Parameter]
-    public string Label { get; set; } = "Soil mix";
+    public string Label { get; set; } = Strings.Plants.MixLabel;
 
     private static string? Picked(bool picked) => picked ? "picked" : null;
 

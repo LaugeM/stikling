@@ -10,22 +10,22 @@
 @inject PutOffService PutOffService
 @inject TimeProvider Time
 
-<PageTitle>Pests and problems · Stikling</PageTitle>
+<PageTitle>@Strings.Pests.PestsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 <div class="page-heading">
-    <h1>Pests and problems</h1>
+    <h1>@Strings.Pests.PestsTitle</h1>
     <div class="d-flex align-items-baseline gap-2">
         @if (open.Count > 0)
         {
-            <span class="text-body-secondary small">@Labels.Count(open.Count, "open case")</span>
+            <span class="text-body-secondary small">@Plural.Of(open.Count, Strings.Pests.OpenCase_One, Strings.Pests.OpenCase_Other)</span>
         }
         @* Takes over from the round add button on a wide screen *@
         @if (views.Count > 0)
         {
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="pests/new">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-                Open a pest case
+                @Strings.Pests.OpenPestCase
             </a>
         }
     </div>
@@ -33,16 +33,13 @@
 
 @if (!loaded)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Pests.Loading</p>
 }
 else if (views.Count == 0 && problems.Count == 0)
 {
     <div class="empty-state">
-        <p>
-            Nothing wrong right now. When you find pests, open a case for the plants they're on.
-            For anything else, like yellow leaves or rot, use Something's wrong on the plant's page.
-        </p>
-        <a class="btn btn-primary mt-3" href="pests/new">Open a case</a>
+        <p>@Strings.Pests.PestsEmpty</p>
+        <a class="btn btn-primary mt-3" href="pests/new">@Strings.Pests.OpenACase</a>
     </div>
 }
 else
@@ -51,7 +48,7 @@ else
         @if (due.Count > 0)
         {
             <section class="stage-group">
-                <h2>Due now <span class="text-body-secondary">(@due.Count)</span></h2>
+                <h2>@Strings.Pests.PestsDueNow <span class="text-body-secondary">(@due.Count)</span></h2>
                 <ul class="item-list list-grid">
                     @foreach (var view in due)
                     {
@@ -64,7 +61,7 @@ else
         @if (waiting.Count > 0)
         {
             <section class="stage-group">
-                <h2>Open <span class="text-body-secondary">(@waiting.Count)</span></h2>
+                <h2>@Strings.Pests.PestsOpen <span class="text-body-secondary">(@waiting.Count)</span></h2>
                 <ul class="item-list list-grid">
                     @foreach (var view in waiting)
                     {
@@ -77,7 +74,7 @@ else
         @if (problems.Count > 0)
         {
             <section class="stage-group">
-                <h2>Problems <span class="text-body-secondary">(@problems.Count)</span></h2>
+                <h2>@Strings.Pests.PestsProblems <span class="text-body-secondary">(@problems.Count)</span></h2>
                 <ul class="item-list list-grid">
                     @foreach (var item in problems)
                     {
@@ -98,7 +95,7 @@ else
         @if (resolved.Count > 0)
         {
             <section class="stage-group">
-                <h2>Resolved <span class="text-body-secondary">(@resolved.Count)</span></h2>
+                <h2>@Strings.Pests.PestsResolved <span class="text-body-secondary">(@resolved.Count)</span></h2>
                 <ul class="item-list list-grid">
                     @foreach (var view in resolved)
                     {
@@ -110,7 +107,7 @@ else
     </div>
 }
 
-<a class="fab" href="pests/new" aria-label="Open a pest case" title="Open a pest case">
+<a class="fab" href="pests/new" aria-label="@Strings.Pests.OpenPestCase" title="@Strings.Pests.OpenPestCase">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
 </a>
 
@@ -176,26 +173,26 @@ else
                 <span>@Labels.ScopeAndCount(view)</span>
                 @if (view.CleanDays is { } cleanDays)
                 {
-                    <span>· clean @cleanDays of @view.CleanTarget days</span>
+                    <span>· @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsCleanDays, cleanDays, view.CleanTarget)</span>
                 }
             </div>
             <div class="item-meta">
                 @if (view.DaysUntilDue is not null)
                 {
                     <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(view)</span>
-                    <span>· found @Labels.Date(view.Case.StartedOn)</span>
+                    <span>· @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsFoundDue, Labels.Date(view.Case.StartedOn))</span>
                 }
                 else if (view.PlanDoneOn is not null)
                 {
-                    <span>Plan done · found @Labels.Date(view.Case.StartedOn)</span>
+                    <span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsPlanDoneFound, Labels.Date(view.Case.StartedOn))</span>
                 }
                 else if (view.Case.ResolvedOn is { } on)
                 {
-                    <span>Resolved @Labels.Date(on)</span>
+                    <span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsResolvedOn, Labels.Date(on))</span>
                 }
                 else
                 {
-                    <span>Found @Labels.Date(view.Case.StartedOn)</span>
+                    <span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsFound, Labels.Date(view.Case.StartedOn))</span>
                 }
             </div>
         </div>

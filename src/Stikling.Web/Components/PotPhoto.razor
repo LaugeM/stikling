@@ -2,7 +2,7 @@
    is. Tapping it opens the pot's photos to look at. They're managed on the Pots page. *@
 @inject PotService PotService
 
-<button type="button" class="pot-photo" @onclick="OpenAsync" aria-label="Photos of @Pot.DisplayName">
+<button type="button" class="pot-photo" @onclick="OpenAsync" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.PotPhotos, Pot.DisplayName)">
     <PhotoImage PhotoId="Cover.Id" />
 </button>
 

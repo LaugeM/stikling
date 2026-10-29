@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
+using Stikling.Core.Text;
 using Stikling.Core.Timeline;
+using Strings = Stikling.Web.Resources;
 
 namespace Stikling.Web.Services;
 
@@ -17,14 +19,10 @@ public sealed record PhotoSaveResult(IReadOnlyList<Photo> Saved, int Failed, int
         var lines = new List<string>();
 
         if (Failed > 0)
-            lines.Add(Failed == 1
-                ? "1 file couldn't be read as an image and was skipped."
-                : $"{Failed} files couldn't be read as images and were skipped.");
+            lines.Add(Plural.Of(Failed, Strings.Shared.PhotoSkipped_One, Strings.Shared.PhotoSkipped_Other));
 
         if (Undated > 0 && guessesMatter)
-            lines.Add(Undated == 1
-                ? "1 photo had no date saved in it, so its day is a guess. Check that it landed on the right day."
-                : $"{Undated} photos had no date saved in them, so their days are a guess. Check that they landed on the right days.");
+            lines.Add(Plural.Of(Undated, Strings.Shared.PhotoUndated_One, Strings.Shared.PhotoUndated_Other));
 
         return lines.Count == 0 ? null : string.Join(" ", lines);
     }

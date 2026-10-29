@@ -11,14 +11,14 @@
     }
 
     <div class="mb-2">
-        <label class="form-label" for="@(Prefix)-name">Name</label>
-        <input id="@(Prefix)-name" class="form-control" form="own-field-none" placeholder="e.g. Clone name" autocomplete="off"
+        <label class="form-label" for="@(Prefix)-name">@Strings.Shared.OwnFieldsName</label>
+        <input id="@(Prefix)-name" class="form-control" form="own-field-none" placeholder="@Strings.Shared.OwnFieldFormNamePlaceholder" autocomplete="off"
                maxlength="@OwnField.MaxNameLength" enterkeyhint="done" value="@name" @oninput="e => name = e.Value?.ToString() ?? string.Empty"
                @onkeydown="Key" />
     </div>
 
     <div class="mb-2">
-        <div class="form-label" id="@(Prefix)-kind">What it holds</div>
+        <div class="form-label" id="@(Prefix)-kind">@Strings.Shared.OwnFieldsWhatItHolds</div>
         <div class="chip-row" role="group" aria-labelledby="@(Prefix)-kind">
             @foreach (var (value, text) in kinds)
             {
@@ -32,15 +32,15 @@
     @if (kind == OwnFieldKind.Choice)
     {
         <div class="mb-2">
-            <label class="form-label" for="@(Prefix)-choices">Choices, one per line</label>
-            <textarea id="@(Prefix)-choices" class="form-control" form="own-field-none" rows="4" placeholder="Yes&#10;No&#10;Maybe"
+            <label class="form-label" for="@(Prefix)-choices">@Strings.Shared.OwnFieldFormChoices</label>
+            <textarea id="@(Prefix)-choices" class="form-control" form="own-field-none" rows="4" placeholder="@Strings.Shared.OwnFieldFormChoicesPlaceholder"
                       value="@choices" @oninput="e => choices = e.Value?.ToString() ?? string.Empty"></textarea>
         </div>
     }
 
     <div class="care-actions">
-        <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(name))" @onclick="AddAsync">Add field</button>
-        <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="Cancel">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(name))" @onclick="AddAsync">@Strings.Shared.OwnFieldFormAdd</button>
+        <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="Cancel">@Strings.Common.Cancel</button>
     </div>
 </div>
 
@@ -58,10 +58,10 @@
 
     private static readonly (OwnFieldKind Value, string Text)[] kinds =
     [
-        (OwnFieldKind.Text, "Text"),
-        (OwnFieldKind.Number, "Number"),
-        (OwnFieldKind.Date, "Date"),
-        (OwnFieldKind.Choice, "Choice")
+        (OwnFieldKind.Text, Strings.Shared.OwnFieldKindText),
+        (OwnFieldKind.Number, Strings.Shared.OwnFieldKindNumber),
+        (OwnFieldKind.Date, Strings.Shared.OwnFieldKindDate),
+        (OwnFieldKind.Choice, Strings.Shared.OwnFieldKindChoice)
     ];
 
     private string name = "";

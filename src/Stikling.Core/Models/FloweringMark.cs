@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -66,13 +67,13 @@ public sealed class FloweringMark : Entity
     {
         var errors = new List<string>();
         if (PlantId == Guid.Empty)
-            errors.Add("A flowering mark belongs to a plant.");
+            errors.Add(Strings.Pests.FloweringMarkNeedsPlant);
         if (Stage is null)
-            errors.Add("Pick how far the flowering has come.");
+            errors.Add(Strings.Pests.FloweringMarkPickStage);
         if (On is null)
-            errors.Add("Pick a date.");
+            errors.Add(Strings.Pests.PickDate);
         else if (On.Start > today)
-            errors.Add("A flowering can't be dated in the future.");
+            errors.Add(Strings.Pests.FloweringInFuture);
         return errors;
     }
 }

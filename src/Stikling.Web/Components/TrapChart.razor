@@ -14,11 +14,11 @@
                         <span class="trap-value">@Rounded(point)</span>
                     </span>
                 </div>
-                <span class="trap-date">@point.On.ToString("d MMM", CultureInfo.InvariantCulture)</span>
+                <span class="trap-date">@ProblemText.ShortDay(point.On)</span>
             </div>
         }
     </div>
-    <p class="trap-caption">Caught per week, worked out from each count.</p>
+    <p class="trap-caption">@Strings.Pests.TrapChartCaption</p>
 }
 
 @code {
@@ -43,5 +43,8 @@
         highest <= 0 ? "2%" : $"{Math.Max(2, point.PerWeek!.Value / highest * 100).ToString("0.#", CultureInfo.InvariantCulture)}%";
 
     private string Description =>
-        "Caught per week: " + string.Join(", ", points.Select(p => $"{Rounded(p)} by {Labels.Date(p.On)}"));
+        string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.Pests.TrapChartDescription,
+            string.Join(", ", points.Select(p => string.Format(CultureInfo.CurrentCulture, Strings.Pests.TrapChartPoint, Rounded(p), Labels.Date(p.On)))));
 }

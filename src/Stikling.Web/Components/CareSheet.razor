@@ -14,7 +14,7 @@
 
     <div class="row g-2">
         <div class="col-7">
-            <label class="form-label" for="care-kind">What you did</label>
+            <label class="form-label" for="care-kind">@Strings.Care.SheetWhatYouDid</label>
             <select id="care-kind" class="form-select form-select-sm" @bind="choice" @bind:after="ChoiceChanged">
                 @foreach (var value in Enum.GetValues<CareKind>())
                 {
@@ -22,18 +22,18 @@
                 }
                 @if (ownKinds.Count > 0)
                 {
-                    <optgroup label="Your own">
+                    <optgroup label="@Strings.Care.SheetYourOwn">
                         @foreach (var item in ownKinds)
                         {
                             <option value="@(OwnPrefix + item.Id)">@item.Name</option>
                         }
                     </optgroup>
                 }
-                <option value="@AddChoice">Add your own…</option>
+                <option value="@AddChoice">@Strings.Care.SheetAddYourOwn</option>
             </select>
         </div>
         <div class="col-5">
-            <label class="form-label" for="care-date">When</label>
+            <label class="form-label" for="care-date">@Strings.Care.CareWhen</label>
             <input type="date" id="care-date" class="form-control form-control-sm"
                    max="@Today.ToString("yyyy-MM-dd")" value="@occurredOn.ToString("yyyy-MM-dd")"
                    @onchange="DateChanged" />
@@ -45,8 +45,8 @@
         <div class="mt-2 own-kind-add">
             <OwnKindFields Prefix="care-own" @bind-Name="newName" @bind-CountsAs="newCountsAs" @bind-OnHistory="newOnHistory" />
             <div class="care-actions">
-                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(newName))" @onclick="AddKindAsync">Add</button>
-                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CancelAdd">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(newName))" @onclick="AddKindAsync">@Strings.Common.Add</button>
+                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CancelAdd">@Strings.Common.Cancel</button>
             </div>
         </div>
     }
@@ -54,7 +54,7 @@
     @if (kind == CareKind.MoistureReading)
     {
         <div class="mt-2">
-            <label class="form-label" for="care-moisture">Reading (0 to 10)</label>
+            <label class="form-label" for="care-moisture">@Strings.Care.CareReading</label>
             <input type="number" id="care-moisture" class="form-control form-control-sm"
                    min="0" max="10" inputmode="numeric" @bind="moisture" />
         </div>
@@ -65,8 +65,8 @@
         @if (feeds.Count > 0)
         {
             <div class="mt-2">
-                <div class="form-label">Feed</div>
-                <div class="chip-row" role="group" aria-label="Feeds">
+                <div class="form-label">@Strings.Care.SheetFeed</div>
+                <div class="chip-row" role="group" aria-label="@Strings.Care.SheetFeeds">
                     @foreach (var item in feeds)
                     {
                         <button type="button" class="chip @(feed?.Id == item.Id ? "picked" : null)"
@@ -78,39 +78,39 @@
         }
 
         <div class="mt-2 care-water">
-            <label class="form-label" for="care-water">Water</label>
-            <WaterInput Id="care-water" Placeholder="Optional" @bind-Litres="water" />
+            <label class="form-label" for="care-water">@Strings.Care.CareWater</label>
+            <WaterInput Id="care-water" Placeholder="@Strings.Care.CareOptional" @bind-Litres="water" />
         </div>
 
         @if (!showReadings && ec is null && ph is null)
         {
-            <button type="button" class="btn btn-link btn-sm p-0 mt-2" @onclick="() => showReadings = true">Add EC and pH</button>
+            <button type="button" class="btn btn-link btn-sm p-0 mt-2" @onclick="() => showReadings = true">@Strings.Care.SheetAddEcPh</button>
         }
         else
         {
             <div class="row g-2 mt-1">
                 <div class="col-6">
-                    <label class="form-label" for="care-ec">EC (mS/cm)</label>
+                    <label class="form-label" for="care-ec">@Strings.Care.CareEc</label>
                     <input type="number" id="care-ec" class="form-control form-control-sm"
-                           min="0" max="20" step="0.1" inputmode="decimal" placeholder="Optional" @bind="ec" />
+                           min="0" max="20" step="0.1" inputmode="decimal" placeholder="@Strings.Care.CareOptional" @bind="ec" />
                 </div>
                 <div class="col-6">
-                    <label class="form-label" for="care-ph">pH</label>
+                    <label class="form-label" for="care-ph">@Strings.Care.CarePh</label>
                     <input type="number" id="care-ph" class="form-control form-control-sm"
-                           min="0" max="14" step="0.1" inputmode="decimal" placeholder="Optional" @bind="ph" />
+                           min="0" max="14" step="0.1" inputmode="decimal" placeholder="@Strings.Care.CareOptional" @bind="ph" />
                 </div>
             </div>
         }
 
         <div class="mt-2">
-            <div class="form-label">What went in the water</div>
+            <div class="form-label">@Strings.Care.CareWhatWentIn</div>
             @if (products.Count == 0)
             {
-                <div class="form-text mt-0">No products yet. You can add your fertilisers under Supplies, then Products.</div>
+                <div class="form-text mt-0">@Strings.Care.SheetNoProducts</div>
             }
             else
             {
-                <div class="chip-row" role="group" aria-label="Products">
+                <div class="chip-row" role="group" aria-label="@Strings.Care.SheetProducts">
                     @foreach (var product in products)
                     {
                         <button type="button" class="chip @(IsPicked(product) ? "picked" : null)"
@@ -140,7 +140,7 @@
     }
 
     <div class="mt-2">
-        <label class="form-label" for="care-notes">Notes</label>
+        <label class="form-label" for="care-notes">@Strings.Care.CareNotes</label>
         <input type="text" id="care-notes" class="form-control form-control-sm"
                placeholder="@NotesHint" @bind="notes" @bind:event="oninput" />
     </div>
@@ -151,7 +151,7 @@
         </button>
         @if (OnCancel.HasDelegate)
         {
-            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OnCancel">Cancel</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OnCancel">@Strings.Common.Cancel</button>
         }
     </div>
 </div>
@@ -207,7 +207,7 @@
     private DateOnly Today => Time.Today();
 
     private string SubmitText =>
-        PlantIds.Count == 1 ? "Log it" : $"Log for {Labels.Plants(PlantIds.Count)}";
+        PlantIds.Count == 1 ? Strings.Care.SheetLogIt : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SheetLogFor, Labels.Plants(PlantIds.Count));
 
     // Topping up a reservoir is called refilling, the same as the tick on the watering screen
     private string KindLabel(CareKind value) =>
@@ -215,10 +215,10 @@
 
     private string NotesHint => kind switch
     {
-        CareKind.Fertilised => "e.g. Half strength",
-        CareKind.Repotted => "e.g. Into the big terracotta",
-        CareKind.Harvested => "e.g. A good handful of basil",
-        _ => "Optional"
+        CareKind.Fertilised => Strings.Care.SheetHintFertilised,
+        CareKind.Repotted => Strings.Care.SheetHintRepotted,
+        CareKind.Harvested => Strings.Care.SheetHintHarvested,
+        _ => Strings.Care.CareOptional
     };
 
     protected override async Task OnInitializedAsync()

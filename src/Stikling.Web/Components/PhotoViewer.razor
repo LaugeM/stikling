@@ -2,10 +2,10 @@
 
 @if (Current is { } photo)
 {
-    <div class="viewer" role="dialog" aria-modal="true" aria-label="Photo viewer" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
+    <div class="viewer" role="dialog" aria-modal="true" aria-label="@Strings.Shared.PhotoViewerLabel" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
         <div class="viewer-bar">
             <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))@PhotoDayCount.Suffix(PhotoAge?.Invoke(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime)))</span>
-            <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+            <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
         </div>
 
         @if (framing)
@@ -15,11 +15,11 @@
         else
         {
             <div class="viewer-stage">
-                <PhotoImage PhotoId="photo.Id" Thumbnail="false" Framed="false" Class="viewer-img" Alt="Photo" />
+                <PhotoImage PhotoId="photo.Id" Thumbnail="false" Framed="false" Class="viewer-img" Alt="@Strings.Shared.PhotoViewerAlt" />
                 @if (PhotoList.Count > 1)
                 {
-                    <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="Previous photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg></button>
-                    <button type="button" class="viewer-nav next" @onclick="() => Move(1)" aria-label="Next photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg></button>
+                    <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="@Strings.Shared.PhotoViewerPrevious"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg></button>
+                    <button type="button" class="viewer-nav next" @onclick="() => Move(1)" aria-label="@Strings.Shared.PhotoViewerNext"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg></button>
                 }
             </div>
 
@@ -28,9 +28,9 @@
                 <div class="viewer-actions">
                     @if (confirmDelete)
                     {
-                        <span>Delete this photo?</span>
-                        <button type="button" class="btn btn-danger btn-sm" @onclick="DeleteAsync">Delete</button>
-                        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = false">Cancel</button>
+                        <span>@Strings.Shared.PhotoViewerDeleteConfirm</span>
+                        <button type="button" class="btn btn-danger btn-sm" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+                        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
                     }
                     else
                     {
@@ -38,26 +38,26 @@
                         {
                             @if (photo.Id == CoverPhotoId)
                             {
-                                <span class="viewer-cover"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" /></svg>Cover photo</span>
+                                <span class="viewer-cover"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" /></svg>@Strings.Shared.PhotoViewerCover</span>
                             }
                             else
                             {
-                                <button type="button" class="btn btn-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)">Set as cover</button>
+                                <button type="button" class="btn btn-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)">@Strings.Shared.PhotoViewerSetCover</button>
                             }
                         }
                         @if (OnFrame.HasDelegate)
                         {
-                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">Frame</button>
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">@Strings.Shared.PhotoViewerFrame</button>
                         }
                         @* A photo from a received history stays in the history it came with *@
                         @if (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
                         {
-                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetReference.InvokeAsync(photo)">@(photo.IsReference ? "Move to history" : "Move to reference")</button>
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetReference.InvokeAsync(photo)">@(photo.IsReference ? Strings.Shared.PhotoViewerMoveToHistory : Strings.Shared.PhotoViewerMoveToReference)</button>
                         }
                         @* A photo copied from the history it had before stays as it was given *@
                         @if (OnDelete.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
                         {
-                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">Delete</button>
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">@Strings.Common.Delete</button>
                         }
                     }
                 </div>

@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Timeline;
 
@@ -85,10 +86,10 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
     public async Task<bool> CorrectAsync(TimelineEntry entry, string? text, DateOnly day)
     {
         if (!CanCorrect(entry))
-            throw new InvalidOperationException("Only notes and photos can be corrected.");
+            throw new InvalidOperationException(Strings.Propagations.ErrOnlyNotesCorrected);
 
         if (day > time.Today())
-            throw new ArgumentException("An entry can't be dated in the future.", nameof(day));
+            throw new ArgumentException(Strings.Propagations.ErrEntryFuture, nameof(day));
 
         var entryPhotos = new List<Photo>();
         foreach (var id in entry.PhotoIds)
@@ -99,7 +100,7 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
 
         var cleanText = string.IsNullOrWhiteSpace(text) ? null : text.Trim();
         if (cleanText is null && entryPhotos.Count == 0)
-            throw new ArgumentException("A note needs some text.", nameof(text));
+            throw new ArgumentException(Strings.Propagations.ErrNoteNeedsText, nameof(text));
 
         // The same day keeps the time it was recorded at
         var sameDay = time.LocalDay(entry.OccurredAt) == day;
@@ -137,13 +138,13 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
     public async Task SetComesBackAsync(TimelineEntry entry, DateOnly? day)
     {
         if (entry.IsDeleted)
-            throw new InvalidOperationException("The entry is deleted.");
+            throw new InvalidOperationException(Strings.Propagations.ErrEntryDeleted);
         if (entry.Kind != TimelineKind.Note)
             day = null;
         if (entry.ComesBackOn == day)
             return;
         if (day is { } d && d <= time.Today())
-            throw new ArgumentException("Pick a day after today.", nameof(day));
+            throw new ArgumentException(Strings.Propagations.ErrPickDayAfterToday, nameof(day));
 
         entry.ComesBackOn = day;
         entry.CameBackDoneOn = null;

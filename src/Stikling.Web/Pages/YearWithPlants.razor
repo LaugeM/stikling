@@ -15,18 +15,18 @@
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
-<PageTitle>Your year · Stikling</PageTitle>
+<PageTitle>@Strings.Shared.YearPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="">Today</a>
+<a class="back-link" href="">@Strings.Layout.Today</a>
 <div class="page-heading year-heading">
-    <h1>Your @year</h1>
+    <h1>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearHeading, year)</h1>
     @if (loaded && years.Count > 1)
     {
-        <select class="form-select year-picker" aria-label="Year" @onchange="PickYear">
+        <select class="form-select year-picker" aria-label="@Strings.Shared.YearPicker" @onchange="PickYear">
             @foreach (var option in years)
             {
-                <option value="@option" selected="@(option == year)">@(option == Time.Today().Year ? $"{option} so far" : option.ToString())</option>
+                <option value="@option" selected="@(option == year)">@(option == Time.Today().Year ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearSoFar, option) : option.ToString())</option>
             }
         </select>
     }
@@ -34,23 +34,20 @@
 
 @if (!loaded)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
 }
 else if (summary is null || summary.IsEmpty)
 {
     <div class="empty-state">
-        <p>Nothing to show for @year yet.</p>
-        <p class="text-body-secondary">
-            Your year fills up as you add plants, take photos and start propagations, which are cuttings
-            and other ways of growing new plants.
-        </p>
-        <a class="btn btn-primary mt-3" href="plants/new">Add a plant</a>
+        <p>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearNothing, year)</p>
+        <p class="text-body-secondary">@Strings.Shared.YearNothingHint</p>
+        <a class="btn btn-primary mt-3" href="plants/new">@Strings.Shared.YearAddPlant</a>
     </div>
 }
 else
 {
     <div class="year-size">
-        <div class="year-label" id="year-format-label">Size</div>
+        <div class="year-label" id="year-format-label">@Strings.Shared.YearSize</div>
         <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="year-format-label">
             @foreach (var (value, label) in ShareCardService.Formats)
             {
@@ -66,13 +63,13 @@ else
     var frontDrawn = drawn.GetValueOrDefault(front.Id);
     var remaining = Math.Min(2, cards.Count - 1 - index);
 
-    <div class="year-stage" tabindex="0" role="region" aria-label="Your @year cards" @ref="stage" @onkeydown="OnKeyAsync"
+    <div class="year-stage" tabindex="0" role="region" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearCardsLabel, year)" @ref="stage" @onkeydown="OnKeyAsync"
          style="@AspectStyle">
         <div class="year-row">
             <div class="year-slot">
                 @if (index > 0)
                 {
-                    <button type="button" class="year-arrow" aria-label="Previous card" @onclick="() => MoveAsync(-1)">
+                    <button type="button" class="year-arrow" aria-label="@Strings.Shared.YearPrevious" @onclick="() => MoveAsync(-1)">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
                     </button>
                 }
@@ -103,14 +100,14 @@ else
                         <img src="@frontDrawn.Url" alt="@front.AltText" draggable="false" />
                         @if (leftOut.Contains(front.Id))
                         {
-                            <span class="year-out-label">Left out</span>
+                            <span class="year-out-label">@Strings.Shared.YearLeftOut</span>
                         }
                         @if (CanSwap(front) && frontDrawn.Cells is { } cells)
                         {
                             @for (var i = 0; i < cells.Count; i++)
                             {
                                 var cell = i;
-                                <button type="button" class="year-swap" aria-label="Swap this photo" style="@CellStyle(cells[cell])"
+                                <button type="button" class="year-swap" aria-label="@Strings.Shared.YearSwapPhoto" style="@CellStyle(cells[cell])"
                                         @onclick="() => SwapAsync(cell)"></button>
                             }
                         }
@@ -120,7 +117,7 @@ else
             <div class="year-slot">
                 @if (index < cards.Count - 1)
                 {
-                    <button type="button" class="year-arrow" aria-label="Next card" @onclick="() => MoveAsync(1)">
+                    <button type="button" class="year-arrow" aria-label="@Strings.Shared.YearNext" @onclick="() => MoveAsync(1)">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
                     </button>
                 }
@@ -134,26 +131,26 @@ else
             <span class="year-dot @(i == index ? "current" : "")"></span>
         }
     </div>
-    <p class="year-count" aria-live="polite">@(index + 1) of @cards.Count</p>
+    <p class="year-count" aria-live="polite">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearCount, index + 1, cards.Count)</p>
     @if (CanSwap(front))
     {
-        <p class="year-hint">Tap a photo to swap it.</p>
+        <p class="year-hint">@Strings.Shared.YearTapToSwap</p>
     }
     @if (frontDrawn is { Missing: > 0 })
     {
-        <p class="year-hint">Some photos on this card aren't on this device yet.</p>
+        <p class="year-hint">@Strings.Shared.YearMissingPhotos</p>
     }
 
     <div class="year-actions">
-        <button type="button" class="btn btn-outline-primary" @onclick="ToggleLeftOut">@(leftOut.Contains(front.Id) ? "Put back" : "Leave out")</button>
-        <button type="button" class="btn btn-primary" disabled="@(busy || frontDrawn is null)" @onclick="ShareAsync">Share</button>
+        <button type="button" class="btn btn-outline-primary" @onclick="ToggleLeftOut">@(leftOut.Contains(front.Id) ? Strings.Shared.YearPutBack : Strings.Shared.YearLeaveOut)</button>
+        <button type="button" class="btn btn-primary" disabled="@(busy || frontDrawn is null)" @onclick="ShareAsync">@Strings.Shared.ShareButton</button>
     </div>
 
     @if (Included.Count > 0)
     {
         <div class="year-all">
             <button type="button" class="btn btn-link" disabled="@(busy || !AllDrawn)" @onclick="ShareAllAsync">
-                @(canShareAll ? "Share all" : "Save all") @Included.Count
+                @string.Format(System.Globalization.CultureInfo.CurrentCulture, canShareAll ? Strings.Shared.YearShareAll : Strings.Shared.YearSaveAll, Included.Count)
             </button>
         </div>
     }
@@ -167,8 +164,8 @@ else
 @if (summary is { Lost.Count: > 0 })
 {
     <section class="year-lost">
-        <h2>Lost this year</h2>
-        <p class="year-lost-note">Only shown here, never on the cards.</p>
+        <h2>@Strings.Shared.YearLost</h2>
+        <p class="year-lost-note">@Strings.Shared.YearLostNote</p>
         <ul class="year-lost-list">
             @foreach (var lost in summary.Lost)
             {
@@ -275,7 +272,7 @@ else
             .Concat(await PhotoRepository.GetOfKindAsync(SubjectType.Propagation)).ToList();
         var changes = await TimelineRepository.GetPlantChangesAsync();
 
-        summary = PlantYear.For(year, plants, propagations, photos, changes, today, Time.LocalDay, Labels.For(PlantStatus.Died));
+        summary = PlantYear.For(year, plants, propagations, photos, changes, today, Time.LocalDay, Labels.DiedInSavedLines());
         var found = PlantYear.Years(plants, propagations, photos, today, Time.LocalDay).ToList();
         if (!found.Contains(year))
         {
@@ -403,9 +400,9 @@ else
         {
             message = await action() switch
             {
-                "saved" when all => "Saved as pictures on this device. They're in your downloads.",
-                "saved" => "Saved as a picture on this device. It's in your downloads.",
-                "failed" => all ? "The pictures couldn't be made. Try again." : "The picture couldn't be made. Try again.",
+                "saved" when all => Strings.Shared.YearSavedAll,
+                "saved" => Strings.Shared.YearSavedOne,
+                "failed" => all ? Strings.Shared.YearFailedAll : Strings.Shared.YearFailedOne,
                 _ => null,
             };
         }
