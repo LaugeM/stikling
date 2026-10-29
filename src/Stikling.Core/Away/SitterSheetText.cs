@@ -1,6 +1,9 @@
 using System.Globalization;
 using System.Text;
+using Stikling.Core.Care;
 using Stikling.Core.Models;
+using Stikling.Core.Text;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Away;
 
@@ -10,42 +13,36 @@ public static class SitterSheetText
     /// <summary>"From the bottom", the short name on a card.</summary>
     public static string MethodName(WaterMethod method) => method switch
     {
-        WaterMethod.Top => "From the top",
-        WaterMethod.Soak => "Soak",
-        _ => "From the bottom"
+        WaterMethod.Top => Strings.Care.MethodTop,
+        WaterMethod.Soak => Strings.Care.MethodSoak,
+        _ => Strings.Care.MethodBottom
     };
 
     /// <summary>One line on what a way of watering means, for choosing it. Null is the plant with no way said.</summary>
     public static string MethodHint(WaterMethod? method) => method switch
     {
-        null => "The sheet for a plant-sitter uses the way you pick when you make it.",
-        WaterMethod.Top => "Pour water onto the soil until a little runs out below.",
-        WaterMethod.Soak => "Stand the whole pot in a bowl of water for a while, then let it drain.",
-        _ => "Stand it in a saucer of water and let it soak up what it needs."
+        null => Strings.Care.MethodHintNone,
+        WaterMethod.Top => Strings.Care.MethodHintTop,
+        WaterMethod.Soak => Strings.Care.MethodHintSoak,
+        _ => Strings.Care.MethodHintBottom
     };
 
     /// <summary>The steps for a way of watering. They only apply once the plant has been checked.</summary>
     public static string MethodSteps(WaterMethod method) => method switch
     {
-        WaterMethod.Top =>
-            "Water from the top until a little runs out below. After 15 to 30 minutes, look in the saucer. "
-            + "If it's all been taken up, give a bit more and check again. Pour away what's left.",
-        WaterMethod.Soak =>
-            "Stand the whole pot in a bowl of water for 15 to 30 minutes, then let it drain well.",
-        _ =>
-            "Stand it in a saucer of water. After 15 to 30 minutes, see if it has taken it all up. "
-            + "If it has, give it a little more and check again after another 15 to 30 minutes. "
-            + "Once it stops taking water up, pour away what's left."
+        WaterMethod.Top => Strings.Care.MethodStepsTop,
+        WaterMethod.Soak => Strings.Care.MethodStepsSoak,
+        _ => Strings.Care.MethodStepsBottom
     };
 
     /// <summary>"23 December".</summary>
-    public static string Day(DateOnly date) => date.ToString("d MMMM", CultureInfo.InvariantCulture);
+    public static string Day(DateOnly date) => date.ToString(Strings.Care.SitterDayFormat, TextCulture.ForDates);
 
     /// <summary>"Tuesday 23 December".</summary>
-    public static string LongDay(DateOnly date) => date.ToString("dddd d MMMM", CultureInfo.InvariantCulture);
+    public static string LongDay(DateOnly date) => date.ToString(Strings.Care.SitterLongDayFormat, TextCulture.ForDates);
 
     /// <summary>"Tue 23".</summary>
-    public static string ShortDay(DateOnly date) => date.ToString("ddd d", CultureInfo.InvariantCulture);
+    public static string ShortDay(DateOnly date) => date.ToString(Strings.Care.SitterShortDayFormat, TextCulture.ForDates);
 
     /// <summary>The sheet as plain text, in the order it is printed.</summary>
     public static string Write(SitterSheetView sheet)
@@ -79,7 +76,7 @@ public static class SitterSheetText
             foreach (var visit in sheet.ByVisit)
             {
                 text.AppendLine();
-                text.AppendLine($"{LongDay(visit.Date)}: check {visit.Count}");
+                text.AppendLine(CareText.F(Strings.Care.SitterTextVisit, LongDay(visit.Date), visit.Count));
                 foreach (var group in visit.Groups)
                 {
                     text.AppendLine(group.Heading);
@@ -98,20 +95,20 @@ public static class SitterSheetText
                 text.AppendLine();
                 text.AppendLine(subject.Species is { } species ? $"{subject.Label} ({species})" : subject.Label);
                 if (subject.Place is { } place)
-                    text.AppendLine($"Where: {place}");
+                    text.AppendLine(CareText.F(Strings.Care.SitterTextWhere, place));
                 if (subject.How is { } how)
-                    text.AppendLine($"How: {how}");
+                    text.AppendLine(CareText.F(Strings.Care.SitterTextHow, how));
                 if (subject.Meter is { } meter)
                     text.AppendLine(meter);
                 if (subject.Pace is { } pace)
                     text.AppendLine(pace);
                 if (subject.Note is { } subjectNote)
-                    text.AppendLine($"Note: {subjectNote}");
+                    text.AppendLine(CareText.F(Strings.Care.SitterTextNote, subjectNote));
 
                 if (subject.CheckNote is { } check)
                     text.AppendLine(check);
                 else if (sheet.Layout == SheetLayout.Labels)
-                    text.AppendLine($"Check on: {string.Join(", ", subject.Visits.Select(LongDay))}");
+                    text.AppendLine(CareText.F(Strings.Care.SitterTextCheckOn, string.Join(", ", subject.Visits.Select(LongDay))));
             }
         }
 

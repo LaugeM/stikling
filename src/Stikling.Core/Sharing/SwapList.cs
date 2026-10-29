@@ -1,6 +1,8 @@
 using System.Text;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
+using Stikling.Core.Text;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Sharing;
 
@@ -19,7 +21,7 @@ public sealed record SwapList(IReadOnlyList<SwapLine> Cuttings, IReadOnlyList<Sw
 /// <summary>Works out the swap list from the records, and writes lists of plants as text for sharing.</summary>
 public static class SwapLists
 {
-    public const string Footer = "Kept in Stikling, stikling.app";
+    public static string Footer => Strings.Shared.KeptInStikling;
 
     /// <summary>
     /// Only plants still here and propagations still going with something left count, so marks on
@@ -41,7 +43,7 @@ public static class SwapLists
     }
 
     /// <summary>"Cuttings to spare" or "Up for swap".</summary>
-    public static string MarkText(SpareMark mark) => mark == SpareMark.CuttingsToSpare ? "Cuttings to spare" : "Up for swap";
+    public static string MarkText(SpareMark mark) => mark == SpareMark.CuttingsToSpare ? Strings.Shared.SwapMarkCuttings : Strings.Shared.SwapMarkUpForSwap;
 
     /// <summary>The name shared for a plant: botanical with the everyday name, or the nickname when it has no botanical name.</summary>
     public static string ShareName(string? nickname, string? genus, string? species, string? cultivar, string? everyday, bool nicknames,
@@ -50,7 +52,7 @@ public static class SwapLists
         var botanical = PlantNames.Botanical(genus, species, cultivar, qualifier, note);
         var nick = string.IsNullOrWhiteSpace(nickname) ? null : nickname.Trim();
         if (botanical is null)
-            return nick ?? "Unnamed plant";
+            return nick ?? Strings.Shared.SwapUnnamedPlant;
 
         var name = string.IsNullOrWhiteSpace(everyday) ? botanical : $"{botanical} ({everyday.Trim()})";
         return nicknames && nick is not null ? $"{name} \"{nick}\"" : name;
@@ -61,9 +63,9 @@ public static class SwapLists
 
     internal static string StageText(PropagationStage stage) => stage switch
     {
-        PropagationStage.Rooted => "rooted",
-        PropagationStage.Rooting => "rooting",
-        _ => "just started"
+        PropagationStage.Rooted => Strings.Shared.SwapStageRooted,
+        PropagationStage.Rooting => Strings.Shared.SwapStageRooting,
+        _ => Strings.Shared.SwapStageStarted
     };
 
     /// <summary>
@@ -84,7 +86,7 @@ public static class SwapLists
         var cuttings = propagations.Where(p => p.SpareAvailable > 0)
             .GroupBy(p => (Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar, p.NameQualifier, p.NameNote), p.Stage))
             .OrderBy(g => g.Key.Name, byName).ThenBy(g => g.Key.Stage)
-            .Select(g => $"{g.Key.Name} ×{g.Sum(p => p.SpareAvailable)}, {StageText(g.Key.Stage)}")
+            .Select(g => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapCuttingLine, g.Key.Name, g.Sum(p => p.SpareAvailable), StageText(g.Key.Stage)))
             .ToList();
 
         var offered = plants.Where(p => p.IsOffered).ToList();
@@ -92,15 +94,15 @@ public static class SwapLists
         List<string> Counted(SpareMark mark) => [.. offered.Where(p => p.Spare == mark)
             .GroupBy(p => (Number: CollectionNumbers.Normalize(p.CollectionNumber), Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar, p.NameQualifier, p.NameNote)))
             .OrderBy(g => g.Key.Name, byName).ThenBy(g => g.Key.Number, StringComparer.Ordinal)
-            .Select(g => WithNumber(g.Key.Number, g.Count() > 1 ? $"{g.Key.Name} ×{g.Count()}" : g.Key.Name))];
+            .Select(g => WithNumber(g.Key.Number, g.Count() > 1 ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapPlantCount, g.Key.Name, g.Count()) : g.Key.Name))];
 
         var text = new StringBuilder();
-        text.AppendLine("Available for swap");
+        text.AppendLine(Strings.Shared.SwapListHeading);
         foreach (var (heading, lines) in new[]
         {
-            ("Cuttings", cuttings),
-            ("Cuttings on request", Counted(SpareMark.CuttingsToSpare)),
-            ("Plants", Counted(SpareMark.UpForSwap))
+            (Strings.Shared.SwapListCuttings, cuttings),
+            (Strings.Shared.SwapListOnRequest, Counted(SpareMark.CuttingsToSpare)),
+            (Strings.Shared.SwapListPlants, Counted(SpareMark.UpForSwap))
         })
         {
             if (lines.Count == 0)

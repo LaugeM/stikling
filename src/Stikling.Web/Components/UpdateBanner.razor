@@ -7,13 +7,13 @@
     <div class="update-banner" role="status">
         @if (updating)
         {
-            <span><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Updating Stikling. The page reloads when it's done.</span>
+            <span><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>@Strings.Shared.UpdateUpdating</span>
         }
         else
         {
-            <span>A new version of Stikling is ready.</span>
-            <button type="button" class="btn btn-primary btn-sm" @onclick="ReloadAsync">Reload</button>
-            <button type="button" class="btn btn-link btn-sm" @onclick="() => SetReadyAsync(false)">Later</button>
+            <span>@Strings.Shared.UpdateReady</span>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="ReloadAsync">@Strings.Shared.UpdateReload</button>
+            <button type="button" class="btn btn-link btn-sm" @onclick="() => SetReadyAsync(false)">@Strings.Shared.UpdateLater</button>
         }
     </div>
 }

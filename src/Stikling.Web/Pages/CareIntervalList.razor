@@ -6,30 +6,28 @@
 @inject OwnCareKindService OwnKindService
 @inject RoomService RoomService
 
-<PageTitle>Care intervals · Stikling</PageTitle>
+<PageTitle>@Strings.Care.IntervalListPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="settings?section=care">Settings</a>
-<h1>Care intervals</h1>
+<a class="back-link" href="settings?section=care">@Strings.Care.BackToSettings</a>
+<h1>@Strings.Care.IntervalListTitle</h1>
 
 <p class="settings-hint">
-    Care that comes back on Today. Watering isn't here: the watering reminder learns that from each plant.
+    @Strings.Care.IntervalListHint
 </p>
 
 @if (loading)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Care.Loading</p>
 }
 else if (rows.Count == 0)
 {
     <div class="empty-state">
-        <p>No intervals yet.</p>
+        <p>@Strings.Care.IntervalListEmptyTitle</p>
         <p class="text-body-secondary">
-            An interval is care that comes back by itself, like fertilise every 2 weeks from April to October,
-            or repot every 2 years. Today lists what is due, and one tap logs it. Watering stays with the
-            watering reminder.
+            @Strings.Care.IntervalListEmptyText
         </p>
-        <a class="btn btn-primary" href="care-intervals/new">Add an interval</a>
+        <a class="btn btn-primary" href="care-intervals/new">@Strings.Care.IntervalListAdd</a>
     </div>
 }
 else
@@ -42,7 +40,7 @@ else
     </div>
 
     <div class="form-actions mt-3">
-        <a class="btn btn-primary" href="care-intervals/new">Add an interval</a>
+        <a class="btn btn-primary" href="care-intervals/new">@Strings.Care.IntervalListAdd</a>
     </div>
 }
 
@@ -64,12 +62,12 @@ else
 
         rows = [.. intervals.OrderBy(i => i.CreatedAt).Select(interval =>
         {
-            var ownName = interval.OwnKindId is { } own ? (ownKinds.TryGetValue(own, out var kind) ? kind.Name : "Removed kind of care") : null;
+            var ownName = interval.OwnKindId is { } own ? (ownKinds.TryGetValue(own, out var kind) ? kind.Name : Strings.Care.IntervalRemovedKind) : null;
             var feed = interval.FeedId is { } feedId && feeds.TryGetValue(feedId, out var found) ? found.Name : null;
             var title = CareIntervals.Label(interval.Kind, ownName, feed);
 
             if (CareIntervals.CountsAsWatering(interval, CareLabels.Lookup(ownKinds.Values)))
-                return new Row(interval, title, $"Off: {ownName} now counts as a watering");
+                return new Row(interval, title, string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalOffCountsAsWatering, ownName));
 
             var every = CareIntervals.EveryText(interval);
             var parts = new List<string> { char.ToUpperInvariant(every[0]) + every[1..] };
@@ -87,9 +85,9 @@ else
         var count = CareIntervals.PlantsIn(interval, plants, places).Count;
         return interval.Scope switch
         {
-            CareScope.Everywhere => $"All plants ({count})",
-            CareScope.Room => $"{places.NameOf(interval.PlaceId) ?? "A room"} ({count})",
-            CareScope.Tag => $"{interval.Tag} tag ({Labels.Plants(count)})",
+            CareScope.Everywhere => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalCoversAll, count),
+            CareScope.Room => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalCoversRoom, places.NameOf(interval.PlaceId) ?? Strings.Care.IntervalCoversARoom, count),
+            CareScope.Tag => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalCoversTag, interval.Tag, Labels.Plants(count)),
             _ => Labels.Plants(count)
         };
     }

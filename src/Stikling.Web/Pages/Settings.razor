@@ -85,6 +85,10 @@
                     @Strings.Settings.LanguageRestartHint
                     <a href="https://github.com/LaugeM/stikling/blob/main/docs/dev/translating.md" target="_blank" rel="noopener">@Strings.Settings.HelpTranslate</a>
                 </p>
+                @if (Translators is { } translators)
+                {
+                    <p class="settings-hint">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.TranslatedBy, translators)</p>
+                }
             }
             <div class="theme-label @(Language.Offered.Count > 1 ? "mt-4" : null)" id="theme-label">@Strings.Settings.Theme</div>
             <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="theme-label">
@@ -421,6 +425,14 @@
 </Sheet>
 
 @code {
+    /// <summary>
+    /// The names of the people who translated the language the app is in, or null when the translation
+    /// still has the placeholder from the English file, or the app is in English.
+    /// </summary>
+    private static string? Translators =>
+        Strings.Settings.Translators is { } names && !string.IsNullOrWhiteSpace(names)
+            && names != Strings.Settings.ResourceManager.GetString(nameof(Strings.Settings.Translators), System.Globalization.CultureInfo.InvariantCulture)
+            ? names : null;
     private bool numberingOpen;
     private bool numberingBusy;
     private NumberAllPlan? numberingPlan;

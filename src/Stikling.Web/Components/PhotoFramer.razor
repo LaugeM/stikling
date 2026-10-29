@@ -6,10 +6,10 @@
 @inject IJSRuntime JS
 
 <div class="framer">
-    <p class="framer-hint">Drag it to move it, and pinch or use the slider to zoom. Cards and the top of the page show it like this.</p>
+    <p class="framer-hint">@Strings.Shared.PhotoFramerHint</p>
 
     <div class="framer-box" @ref="box" tabindex="0" role="img"
-         aria-label="Photo being framed. The arrow keys move it, plus and minus zoom.">
+         aria-label="@Strings.Shared.PhotoFramerBox">
         @if (url is not null)
         {
             <img @ref="img" src="@url" alt="" draggable="false" class="framed" style="@StartStyle" />
@@ -17,14 +17,14 @@
     </div>
 
     <label class="framer-zoom">
-        <span>Zoom</span>
+        <span>@Strings.Shared.PhotoFramerZoom</span>
         <input @ref="slider" type="range" min="1" max="@PhotoFrame.MaxZoom" step="0.01" value="1" />
     </label>
 
     <div class="framer-actions">
-        <button type="button" class="btn btn-light btn-sm" disabled="@(!attached)" @onclick="SaveAsync">Save</button>
-        <button type="button" class="btn btn-outline-light btn-sm" disabled="@(!attached)" @onclick="CentreAsync">Centre it</button>
-        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnCancel.InvokeAsync()">Cancel</button>
+        <button type="button" class="btn btn-light btn-sm" disabled="@(!attached)" @onclick="SaveAsync">@Strings.Common.Save</button>
+        <button type="button" class="btn btn-outline-light btn-sm" disabled="@(!attached)" @onclick="CentreAsync">@Strings.Shared.PhotoFramerCentre</button>
+        <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnCancel.InvokeAsync()">@Strings.Common.Cancel</button>
     </div>
 </div>
 

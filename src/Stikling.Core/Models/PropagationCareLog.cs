@@ -1,3 +1,5 @@
+using Strings = Stikling.Core.Resources;
+
 namespace Stikling.Core.Models;
 
 /// <summary>
@@ -24,18 +26,18 @@ public sealed class PropagationCareLog : Entity
         var errors = new List<string>();
 
         if (PropagationId == Guid.Empty)
-            errors.Add("A care entry has to belong to a propagation.");
+            errors.Add(Strings.Propagations.ErrCareNeedsPropagation);
 
         if (Kind == PropagationCareKind.MoistureReading)
         {
             if (Moisture is null)
-                errors.Add("Give the moisture reading a number from 0 to 10.");
+                errors.Add(Strings.Propagations.ErrReadingNeedsNumber);
             else if (Moisture is < 0 or > 10)
-                errors.Add("The moisture reading goes from 0 to 10.");
+                errors.Add(Strings.Propagations.ErrReadingRange);
         }
         else if (Moisture is not null)
         {
-            errors.Add("Only a moisture reading has a number.");
+            errors.Add(Strings.Propagations.ErrOnlyReadingHasNumber);
         }
 
         return errors;

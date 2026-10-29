@@ -104,6 +104,14 @@
     <value>Help translate Stikling</value>
     <comment>Link to a guide for people who want to translate the app.</comment>
   </data>
+  <data name="TranslatedBy" xml:space="preserve">
+    <value>Translated by {0}</value>
+    <comment>Under the choice of language, when the language has names in Translators. {0} is those names.</comment>
+  </data>
+  <data name="Translators" xml:space="preserve">
+    <value>Your name</value>
+    <comment>Not shown in English. In a translation, replace this with your name, or the names of everyone who translated this language, separated by commas, and it shows as "Translated by" under the choice of language. Leave it as it is to show no names.</comment>
+  </data>
   <data name="Theme" xml:space="preserve">
     <value>Theme</value>
     <comment>Label of the choice between light and dark colours.</comment>

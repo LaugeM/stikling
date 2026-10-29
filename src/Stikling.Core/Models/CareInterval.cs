@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -100,32 +101,32 @@ public sealed class CareInterval : Entity
         if (OwnKindId is null)
         {
             if (!AllowedKinds.Contains(Kind))
-                errors.Add("Watering stays with the watering reminder, so pick another kind of care.");
+                errors.Add(Strings.Care.IntervalNotWatering);
         }
         else if (Kind is not (CareKind.Fertilised or CareKind.Rotated))
         {
-            errors.Add("Watering stays with the watering reminder, so pick another kind of care.");
+            errors.Add(Strings.Care.IntervalNotWatering);
         }
 
         if (FeedId is not null && Kind != CareKind.Fertilised)
-            errors.Add("Only a feeding can have a feed.");
+            errors.Add(Strings.Care.IntervalFeedOnly);
 
         if (Every < 1)
-            errors.Add("Repeat at least every 1, so the number has to be 1 or more.");
+            errors.Add(Strings.Care.IntervalEveryAtLeastOne);
 
         if ((FromMonth is null) != (ToMonth is null))
-            errors.Add("Pick both the first and the last month, or neither.");
+            errors.Add(Strings.Care.IntervalBothMonths);
         else if (FromMonth is < 1 or > 12 || ToMonth is < 1 or > 12)
-            errors.Add("The months go from 1 to 12.");
+            errors.Add(Strings.Care.IntervalMonthRange);
 
         if (Scope == CareScope.Room && PlaceId is null)
-            errors.Add("Pick the room it covers.");
+            errors.Add(Strings.Care.IntervalPickRoom);
 
         if (Scope == CareScope.Tag && string.IsNullOrWhiteSpace(Tag))
-            errors.Add("Pick the tag it covers.");
+            errors.Add(Strings.Care.IntervalPickTag);
 
         if (Scope == CareScope.PickedPlants && PlantIds.Count == 0)
-            errors.Add("Pick at least one plant.");
+            errors.Add(Strings.Care.IntervalPickPlant);
 
         return errors;
     }

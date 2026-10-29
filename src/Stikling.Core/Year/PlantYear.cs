@@ -107,7 +107,7 @@ public static class PlantYear
         IEnumerable<TimelineEntry> plantChanges,
         DateOnly today,
         Func<DateTimeOffset, DateOnly> localDay,
-        string diedLabel)
+        params string[] diedLabels)
     {
         var allPlants = plants.Where(p => !p.IsDeleted && !p.LivesElsewhere).ToList();
         var allProps = propagations.Where(p => !p.IsDeleted).ToList();
@@ -162,7 +162,7 @@ public static class PlantYear
                 .Select(s => new CollageItem(s.Type, s.Id, s.Photos[0]))
                 .ToList(),
             inYear.Count,
-            Lost(year, allPlants, plantChanges, localDay, diedLabel));
+            Lost(year, allPlants, plantChanges, localDay, diedLabels));
     }
 
     /// <summary>
@@ -299,13 +299,14 @@ public static class PlantYear
         List<Plant> plants,
         IEnumerable<TimelineEntry> plantChanges,
         Func<DateTimeOffset, DateOnly> localDay,
-        string diedLabel)
+        string[] diedLabels)
     {
-        // The text PlantChanges.Describe writes when a status changes
-        var diedLine = $"Status: {diedLabel}";
+        // The text PlantChanges.Describe writes when a status changes. The label is in the language the line was
+        // saved in, so the caller passes the English one (older lines) and the current one.
+        var diedLines = diedLabels.Select(label => $"Status: {label}").ToArray();
         var newestDeath = plantChanges
             .Where(e => !e.IsDeleted && e.Text is not null
-                && e.Text.Split('\n').Any(line => line.StartsWith(diedLine, StringComparison.Ordinal)))
+                && e.Text.Split('\n').Any(line => diedLines.Any(d => line.StartsWith(d, StringComparison.Ordinal))))
             .GroupBy(e => e.SubjectId)
             .ToDictionary(g => g.Key, g => g.Max(e => e.OccurredAt));
 

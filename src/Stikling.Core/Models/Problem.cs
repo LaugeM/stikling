@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -170,24 +171,24 @@ public sealed class Problem : Entity
     {
         var errors = new List<string>();
         if (SubjectId == Guid.Empty)
-            errors.Add("A problem belongs to a plant.");
+            errors.Add(Strings.Pests.ProblemNeedsPlant);
         if (Signs.Count == 0)
-            errors.Add("Pick what you see.");
+            errors.Add(Strings.Pests.ProblemPickSigns);
         if (StartedOn > today)
-            errors.Add("That start date is in the future.");
+            errors.Add(Strings.Pests.StartDateInFuture);
         if (ClosedOn is { } closed)
         {
             if (closed > today)
-                errors.Add("That date is in the future.");
+                errors.Add(Strings.Pests.DateInFuture);
             if (closed < StartedOn)
-                errors.Add("A problem can't end before it started.");
+                errors.Add(Strings.Pests.ProblemEndBeforeStart);
         }
         // A closed problem can have no outcome here when a newer version wrote one this version
         // doesn't know, so only an outcome on an open problem is refused
         if (ClosedOn is null && Outcome is not null)
-            errors.Add("Say how it ended.");
+            errors.Add(Strings.Pests.ProblemSayOutcome);
         if (LookAgainOn is { } again && again < StartedOn)
-            errors.Add("Look again after it started.");
+            errors.Add(Strings.Pests.ProblemLookAgainAfterStart);
         return errors;
     }
 }

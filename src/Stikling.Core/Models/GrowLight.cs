@@ -1,3 +1,5 @@
+using Strings = Stikling.Core.Resources;
+
 namespace Stikling.Core.Models;
 
 /// <summary>
@@ -22,7 +24,7 @@ public sealed class GrowLight : Entity
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add("Give the grow light a name.");
+            errors.Add(Strings.Care.GrowLightNeedsName);
         return errors;
     }
 }

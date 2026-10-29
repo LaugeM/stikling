@@ -1,0 +1,1022 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ListPageTitle" xml:space="preserve">
+    <value>Plants · Stikling</value>
+    <comment>Title of the browser tab on the Plants page.</comment>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Heading of the Plants page, the list of the collection.</comment>
+  </data>
+  <data name="ListShown" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>Next to the heading: how many plants the filters show, out of how many there are. {0} is the shown count, {1} the total.</comment>
+  </data>
+  <data name="ListWaterPlants" xml:space="preserve">
+    <value>Water plants</value>
+    <comment>Link to the page for watering plants.</comment>
+  </data>
+  <data name="ListFlowering" xml:space="preserve">
+    <value>Flowering</value>
+    <comment>Link to the flowering log.</comment>
+  </data>
+  <data name="ListShareAsText" xml:space="preserve">
+    <value>Share as text</value>
+    <comment>Button and title of the sheet that shares the list of plants as plain text.</comment>
+  </data>
+  <data name="ListCollection" xml:space="preserve">
+    <value>Collection</value>
+    <comment>Link to the collection page.</comment>
+  </data>
+  <data name="ListWishlist" xml:space="preserve">
+    <value>Wishlist</value>
+    <comment>Link to the wishlist.</comment>
+  </data>
+  <data name="ListSelect" xml:space="preserve">
+    <value>Select</value>
+    <comment>Button that turns on select mode, to pick several plants and act on them together.</comment>
+  </data>
+  <data name="AddAPlant" xml:space="preserve">
+    <value>Add a plant</value>
+    <comment>Button and link that start adding a new plant.</comment>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+    <comment>Shown while a page loads its data.</comment>
+  </data>
+  <data name="ListEmptyTitle" xml:space="preserve">
+    <value>No plants yet</value>
+    <comment>Heading of the empty Plants page.</comment>
+  </data>
+  <data name="ListEmptyText" xml:space="preserve">
+    <value>Add the first one to start your collection. A name is enough, and the rest can wait.</value>
+  </data>
+  <data name="ListEmptyImport" xml:space="preserve">
+    <value>Keeping a list somewhere else? {0}.</value>
+    <comment>{0} is a link, the text of which is ListEmptyImportLink.</comment>
+  </data>
+  <data name="ListEmptyImportLink" xml:space="preserve">
+    <value>Import it from a spreadsheet</value>
+    <comment>Link text inside ListEmptyImport.</comment>
+  </data>
+  <data name="ListEmptyWishlist" xml:space="preserve">
+    <value>Still looking for some? {0}.</value>
+    <comment>{0} is a link, the text of which is ListEmptyWishlistLink.</comment>
+  </data>
+  <data name="ListEmptyWishlistLink" xml:space="preserve">
+    <value>Start a wishlist</value>
+    <comment>Link text inside ListEmptyWishlist.</comment>
+  </data>
+  <data name="ListMoreInHelp" xml:space="preserve">
+    <value>More about plants in Help</value>
+  </data>
+  <data name="ListSearchPlaceholder" xml:space="preserve">
+    <value>Search by name, genus, species…</value>
+  </data>
+  <data name="ListSearchLabel" xml:space="preserve">
+    <value>Search plants</value>
+    <comment>Name of the search box, read out by a screen reader.</comment>
+  </data>
+  <data name="ListStatusLabel" xml:space="preserve">
+    <value>Status</value>
+    <comment>Name of the group of status buttons, read out by a screen reader.</comment>
+  </data>
+  <data name="ListGoneAsLabel" xml:space="preserve">
+    <value>How they left</value>
+    <comment>Name of the group of buttons under Gone, read out by a screen reader.</comment>
+  </data>
+  <data name="ListStatusGone" xml:space="preserve">
+    <value>Gone</value>
+    <comment>Status filter: plants that died or left the collection. Also named in the empty states.</comment>
+  </data>
+  <data name="ListAll" xml:space="preserve">
+    <value>All</value>
+    <comment>Filter choice for everything.</comment>
+  </data>
+  <data name="ListRoomLabel" xml:space="preserve">
+    <value>Room</value>
+    <comment>Name of the room dropdown, read out by a screen reader.</comment>
+  </data>
+  <data name="ListAllRooms" xml:space="preserve">
+    <value>All rooms</value>
+  </data>
+  <data name="ListGoRound" xml:space="preserve">
+    <value>Go round</value>
+    <comment>Link that starts a round of the plants in the picked room or spot.</comment>
+  </data>
+  <data name="ListLikesLabel" xml:space="preserve">
+    <value>What it likes</value>
+    <comment>Name of the needs dropdown, read out by a screen reader.</comment>
+  </data>
+  <data name="ListAnyNeeds" xml:space="preserve">
+    <value>Any needs</value>
+  </data>
+  <data name="ListLikesHumidity" xml:space="preserve">
+    <value>Likes high humidity</value>
+  </data>
+  <data name="ListLikesMoist" xml:space="preserve">
+    <value>Likes to stay moist</value>
+  </data>
+  <data name="ListLikesDry" xml:space="preserve">
+    <value>Likes to dry out</value>
+  </data>
+  <data name="ListRestsWinter" xml:space="preserve">
+    <value>Rests in winter</value>
+  </data>
+  <data name="ListRestsSummer" xml:space="preserve">
+    <value>Rests in summer</value>
+  </data>
+  <data name="ListDarker" xml:space="preserve">
+    <value>Darker than it likes</value>
+  </data>
+  <data name="ListFieldsLabel" xml:space="preserve">
+    <value>Fields</value>
+    <comment>Name of the fields dropdown, read out by a screen reader.</comment>
+  </data>
+  <data name="ListAnyField" xml:space="preserve">
+    <value>Any field</value>
+  </data>
+  <data name="ListHowRaised" xml:space="preserve">
+    <value>How it was raised</value>
+    <comment>Name of a plant field, also a group in the fields dropdown.</comment>
+  </data>
+  <data name="ListNotSet" xml:space="preserve">
+    <value>Not set</value>
+    <comment>Choice for plants where a field has no value.</comment>
+  </data>
+  <data name="ListSortLabel" xml:space="preserve">
+    <value>Sort by</value>
+  </data>
+  <data name="ListSortName" xml:space="preserve">
+    <value>A to Z</value>
+  </data>
+  <data name="ListSortNewest" xml:space="preserve">
+    <value>Newest</value>
+  </data>
+  <data name="ListSortRoom" xml:space="preserve">
+    <value>By room</value>
+  </data>
+  <data name="ListSortGenus" xml:space="preserve">
+    <value>By genus</value>
+  </data>
+  <data name="ListSortActivity" xml:space="preserve">
+    <value>Last activity</value>
+  </data>
+  <data name="ListColumns" xml:space="preserve">
+    <value>Columns</value>
+    <comment>Button and title of the sheet that picks the columns of the table view.</comment>
+  </data>
+  <data name="ListViewLabel" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="ListViewList" xml:space="preserve">
+    <value>List view</value>
+  </data>
+  <data name="ListViewGrid" xml:space="preserve">
+    <value>Grid view</value>
+  </data>
+  <data name="ListViewTable" xml:space="preserve">
+    <value>Table view</value>
+  </data>
+  <data name="ListSpotIn" xml:space="preserve">
+    <value>Spot in {0}</value>
+    <comment>Name of the group of spot buttons. {0} is a room.</comment>
+  </data>
+  <data name="ListAllOf" xml:space="preserve">
+    <value>All of {0}</value>
+    <comment>Button that shows the whole room again. {0} is the room.</comment>
+  </data>
+  <data name="ListTagsLabel" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="ListQuarantine" xml:space="preserve">
+    <value>Quarantine</value>
+    <comment>Filter chip.</comment>
+  </data>
+  <data name="ListProblem" xml:space="preserve">
+    <value>Problem</value>
+    <comment>Filter chip.</comment>
+  </data>
+  <data name="ListDormant" xml:space="preserve">
+    <value>Dormant</value>
+    <comment>Filter chip for plants that are resting.</comment>
+  </data>
+  <data name="ListGenusFilter" xml:space="preserve">
+    <value>Genus filter</value>
+  </data>
+  <data name="ListTapToRemove" xml:space="preserve">
+    <value>Tap to remove</value>
+    <comment>Title of a filter chip that is on.</comment>
+  </data>
+  <data name="ListNoGenus" xml:space="preserve">
+    <value>No genus</value>
+    <comment>Filter chip and group heading for plants with no genus.</comment>
+  </data>
+  <data name="ListNoRoom" xml:space="preserve">
+    <value>No room</value>
+    <comment>Group heading for plants with no room.</comment>
+  </data>
+  <data name="ListFieldFilters" xml:space="preserve">
+    <value>Field filters</value>
+  </data>
+  <data name="ListSelectAllShown" xml:space="preserve">
+    <value>Select all shown</value>
+  </data>
+  <data name="ListClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="ListNoMatch" xml:space="preserve">
+    <value>No plants match.</value>
+  </data>
+  <data name="ListClearFilters" xml:space="preserve">
+    <value>Clear filters</value>
+  </data>
+  <data name="ListNoneActive" xml:space="preserve">
+    <value>None of your plants are in the collection now. The ones that died or left are under Gone.</value>
+    <comment>Gone is ListStatusGone.</comment>
+  </data>
+  <data name="ListNoneDied" xml:space="preserve">
+    <value>None of your plants have died.</value>
+  </data>
+  <data name="ListNoneGivenAway" xml:space="preserve">
+    <value>You haven't given any plants away.</value>
+  </data>
+  <data name="ListNoneSold" xml:space="preserve">
+    <value>You haven't sold any plants.</value>
+  </data>
+  <data name="ListNoneGone" xml:space="preserve">
+    <value>No plants here. A plant ends up under Gone when you mark it as died, given away or sold.</value>
+    <comment>Gone is ListStatusGone.</comment>
+  </data>
+  <data name="ListOnWishlist" xml:space="preserve">
+    <value>On your wishlist</value>
+    <comment>Heading above wishlist entries that match the search.</comment>
+  </data>
+  <data name="ListColumnsHint" xml:space="preserve">
+    <value>Pick what to show and drag to put them in order. This device remembers it.</value>
+  </data>
+  <data name="ListNotShown" xml:space="preserve">
+    <value>Not shown</value>
+    <comment>Heading above the columns that are turned off.</comment>
+  </data>
+  <data name="ListYourFields" xml:space="preserve">
+    <value>Your fields</value>
+  </data>
+  <data name="ListShareSelected" xml:space="preserve">
+    <value>The {0} you selected. Names only, never rooms, prices, where they came from or tags.</value>
+    <comment>{0} is a count of plants, like 3 plants.</comment>
+  </data>
+  <data name="ListShareShown" xml:space="preserve">
+    <value>The {0} shown now, with the search and filters. Names only, never rooms, prices, where they came from or tags.</value>
+    <comment>{0} is a count of plants, like 3 plants.</comment>
+  </data>
+  <data name="ListShareNicknames" xml:space="preserve">
+    <value>Include your nicknames</value>
+  </data>
+  <data name="ListShareFooter" xml:space="preserve">
+    <value>End with "{0}"</value>
+    <comment>{0} is the line the app adds at the end, which stays in English.</comment>
+  </data>
+  <data name="ListSharePreview" xml:space="preserve">
+    <value>What will be shared</value>
+  </data>
+  <data name="ListShare" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="ListShareCopied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="ListShareFailed" xml:space="preserve">
+    <value>Couldn't share it</value>
+  </data>
+  <data name="ListShared" xml:space="preserve">
+    <value>Shared</value>
+  </data>
+  <data name="ListBulkLabel" xml:space="preserve">
+    <value>Actions for selected plants</value>
+  </data>
+  <data name="ListTagsToAdd" xml:space="preserve">
+    <value>Tags to add</value>
+  </data>
+  <data name="ListAddTo" xml:space="preserve">
+    <value>Add to {0}</value>
+    <comment>{0} is a count of plants, like 3 plants.</comment>
+  </data>
+  <data name="ListFieldToSet" xml:space="preserve">
+    <value>Field to set</value>
+  </data>
+  <data name="ListNotSaid" xml:space="preserve">
+    <value>Not said</value>
+  </data>
+  <data name="ListSetOn" xml:space="preserve">
+    <value>Set on {0}</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListClearOn" xml:space="preserve">
+    <value>Clear on {0}</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListOfferForSwap" xml:space="preserve">
+    <value>Offer {0} for swap</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListCuttingsToSpare" xml:space="preserve">
+    <value>Cuttings to spare</value>
+  </data>
+  <data name="ListUpForSwap" xml:space="preserve">
+    <value>Up for swap</value>
+  </data>
+  <data name="ListNotOffered" xml:space="preserve">
+    <value>Not offered</value>
+  </data>
+  <data name="ListMoveTo" xml:space="preserve">
+    <value>Move to</value>
+    <comment>Label of the place picker.</comment>
+  </data>
+  <data name="ListMove" xml:space="preserve">
+    <value>Move {0}</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListNotePlaceholder" xml:space="preserve">
+    <value>Note for all selected plants, e.g. Sprayed for thrips</value>
+  </data>
+  <data name="ListNote" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="ListWhatWentWith_One" xml:space="preserve">
+    <value>{0}: what went with it?</value>
+    <comment>{0} is the status, like Given away.</comment>
+  </data>
+  <data name="ListWhatWentWith_Other" xml:space="preserve">
+    <value>{0}: what went with them?</value>
+    <comment>{0} is the status, like Given away.</comment>
+  </data>
+  <data name="ListSelected" xml:space="preserve">
+    <value>{0} selected</value>
+  </data>
+  <data name="ListSetStatus" xml:space="preserve">
+    <value>Set status…</value>
+  </data>
+  <data name="ListSetStatusLabel" xml:space="preserve">
+    <value>Set status</value>
+  </data>
+  <data name="ListLogCare" xml:space="preserve">
+    <value>Log care</value>
+  </data>
+  <data name="ListAddNote" xml:space="preserve">
+    <value>Add note</value>
+  </data>
+  <data name="ListTag" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="ListMoveButton" xml:space="preserve">
+    <value>Move</value>
+  </data>
+  <data name="ListSetAField" xml:space="preserve">
+    <value>Set a field</value>
+  </data>
+  <data name="ListForSwap" xml:space="preserve">
+    <value>For swap</value>
+  </data>
+  <data name="ListLabels" xml:space="preserve">
+    <value>Labels</value>
+    <comment>Button that opens the page that prints labels for the selected plants.</comment>
+  </data>
+  <data name="ListCameInGroup" xml:space="preserve">
+    <value>Plants that came in from outside</value>
+  </data>
+  <data name="ListCameIn" xml:space="preserve">
+    <value>{0} came in from outside.</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListPutInQuarantine" xml:space="preserve">
+    <value>Put in quarantine</value>
+  </data>
+  <data name="ListCheckedNoSigns" xml:space="preserve">
+    <value>Checked, no signs</value>
+  </data>
+  <data name="ListNotNow" xml:space="preserve">
+    <value>Not now</value>
+  </data>
+  <data name="ListMoved" xml:space="preserve">
+    <value>Moved {0} to {1}.</value>
+    <comment>{0} is a count of plants, {1} the place.</comment>
+  </data>
+  <data name="ListMovedSome" xml:space="preserve">
+    <value>Moved {0} to {1}. {2} already there.</value>
+    <comment>{0} and {2} are counts of plants, {1} the place.</comment>
+  </data>
+  <data name="ListPutInQuarantineDone" xml:space="preserve">
+    <value>Put {0} in quarantine.</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListCheckedForPests" xml:space="preserve">
+    <value>Checked {0} for pests.</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListRaisedSet" xml:space="preserve">
+    <value>Set How it was raised on {0}.</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListRaisedCleared" xml:space="preserve">
+    <value>Cleared How it was raised on {0}.</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListRaisedLeftAlone_One" xml:space="preserve">
+    <value>{0} grown from seed or propagated was left as it is.</value>
+    <comment>{0} is a number.</comment>
+  </data>
+  <data name="ListRaisedLeftAlone_Other" xml:space="preserve">
+    <value>{0} grown from seed or propagated were left as they are.</value>
+    <comment>{0} is a number.</comment>
+  </data>
+  <data name="ListFieldSet" xml:space="preserve">
+    <value>Set {0} on {1}.</value>
+    <comment>{0} is the name of a field, {1} a count of plants.</comment>
+  </data>
+  <data name="ListFieldCleared" xml:space="preserve">
+    <value>Cleared {0} on {1}.</value>
+    <comment>{0} is the name of a field, {1} a count of plants.</comment>
+  </data>
+  <data name="ListMarked" xml:space="preserve">
+    <value>Marked {0} as {1}.</value>
+    <comment>{0} is a count of plants, {1} the mark, like up for swap.</comment>
+  </data>
+  <data name="ListAlreadyMarked_One" xml:space="preserve">
+    <value>{0} already was {1}.</value>
+    <comment>{0} is a count of plants, {1} the mark.</comment>
+  </data>
+  <data name="ListAlreadyMarked_Other" xml:space="preserve">
+    <value>{0} already were {1}.</value>
+    <comment>{0} is a count of plants, {1} the mark.</comment>
+  </data>
+  <data name="ListMarkedSome_One" xml:space="preserve">
+    <value>Marked {0} as {1}. {2} already was.</value>
+    <comment>{0} and {2} are counts of plants, {1} the mark.</comment>
+  </data>
+  <data name="ListMarkedSome_Other" xml:space="preserve">
+    <value>Marked {0} as {1}. {2} already were.</value>
+    <comment>{0} and {2} are counts of plants, {1} the mark.</comment>
+  </data>
+  <data name="ListMarkNotOffered" xml:space="preserve">
+    <value>not offered</value>
+    <comment>Used in a sentence about the mark on plants, like Marked 3 plants as not offered.</comment>
+  </data>
+  <data name="ListStatusUpdated" xml:space="preserve">
+    <value>{0}: {1} updated.</value>
+    <comment>{0} is the status, {1} a count of plants.</comment>
+  </data>
+  <data name="ListTagged" xml:space="preserve">
+    <value>Tagged {0}.</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListTaggedSome_One" xml:space="preserve">
+    <value>Tagged {0}. {1} already had it.</value>
+    <comment>{0} and {1} are counts of plants. It is the one tag.</comment>
+  </data>
+  <data name="ListTaggedSome_Other" xml:space="preserve">
+    <value>Tagged {0}. {1} already had them.</value>
+    <comment>{0} and {1} are counts of plants. Them are the tags.</comment>
+  </data>
+  <data name="ListNoteAdded" xml:space="preserve">
+    <value>Note added to {0}.</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListCareLogged" xml:space="preserve">
+    <value>Care logged for {0}.</value>
+    <comment>{0} is a count of plants.</comment>
+  </data>
+  <data name="ListRaisedName" xml:space="preserve">
+    <value>Raised</value>
+    <comment>Name of the How it was raised field in a filter chip, followed by its value.</comment>
+  </data>
+  <data name="ListPickNotSet" xml:space="preserve">
+    <value>not set</value>
+    <comment>Value in a filter chip for plants where a field has no value.</comment>
+  </data>
+  <data name="FamilyTitle" xml:space="preserve">
+    <value>Family</value>
+    <comment>Browser tab title of the family tree page when the plant isn't loaded.</comment>
+  </data>
+  <data name="FamilyTitleOf" xml:space="preserve">
+    <value>{0}'s family</value>
+    <comment>Browser tab title of the family tree page. {0} is the plant's name.</comment>
+  </data>
+  <data name="FamilyCameFromLabel" xml:space="preserve">
+    <value>Where it came from</value>
+  </data>
+  <data name="FamilyEarlier" xml:space="preserve">
+    <value>Earlier generations</value>
+  </data>
+  <data name="FamilyOpenPlant" xml:space="preserve">
+    <value>Open plant</value>
+  </data>
+  <data name="FamilyEmpty" xml:space="preserve">
+    <value>No family yet. When you take a cutting from {0}, or say which plant it came from, it shows here.</value>
+    <comment>{0} is the plant's name.</comment>
+  </data>
+  <data name="FamilyStartPropagation" xml:space="preserve">
+    <value>Start a propagation</value>
+  </data>
+  <data name="FamilySetOrigin" xml:space="preserve">
+    <value>Set where it came from</value>
+  </data>
+  <data name="FamilySiblings" xml:space="preserve">
+    <value>Siblings ({0})</value>
+    <comment>{0} is a number.</comment>
+  </data>
+  <data name="FamilyGrownFromIt" xml:space="preserve">
+    <value>Grown from it ({0})</value>
+    <comment>{0} is a number.</comment>
+  </data>
+  <data name="FamilyBelow_One" xml:space="preserve">
+    <value>{0} plant below</value>
+    <comment>Under a plant in the family tree: how many are grown from it in turn.</comment>
+  </data>
+  <data name="FamilyBelow_Other" xml:space="preserve">
+    <value>{0} plants below</value>
+    <comment>Under a plant in the family tree: how many are grown from it in turn.</comment>
+  </data>
+  <data name="FamilyOnTheWay" xml:space="preserve">
+    <value>On the way ({0})</value>
+    <comment>Propagations that haven't become plants yet. {0} is a number.</comment>
+  </data>
+  <data name="QuickAddTitle" xml:space="preserve">
+    <value>Quick add</value>
+    <comment>Title of the page for adding several plants from a list of names.</comment>
+  </data>
+  <data name="QuickAddNames" xml:space="preserve">
+    <value>Names</value>
+  </data>
+  <data name="QuickAddPlaceholder" xml:space="preserve">
+    <value>Alocasia zebrina, snake plant, Monstera deliciosa 'Thai Constellation'</value>
+    <comment>An example of names. The plant names are matched against the app's name suggestions.</comment>
+  </data>
+  <data name="QuickAddHint" xml:space="preserve">
+    <value>One plant per line, or separated by commas. Anything after a known name goes into the notes.</value>
+  </data>
+  <data name="QuickAddHaveThis" xml:space="preserve">
+    <value>You already have this</value>
+  </data>
+  <data name="QuickAddRemove" xml:space="preserve">
+    <value>Remove {0}</value>
+    <comment>{0} is the plant's name.</comment>
+  </data>
+  <data name="QuickAddAdd_One" xml:space="preserve">
+    <value>Add {0} plant</value>
+  </data>
+  <data name="QuickAddAdd_Other" xml:space="preserve">
+    <value>Add {0} plants</value>
+  </data>
+  <data name="CollectionTitle" xml:space="preserve">
+    <value>Your collection</value>
+    <comment>Title of the collection page.</comment>
+  </data>
+  <data name="CollectionEmpty" xml:space="preserve">
+    <value>Nothing to count yet. Add a plant and this page shows what your collection is made of.</value>
+  </data>
+  <data name="CollectionImport" xml:space="preserve">
+    <value>or import a list</value>
+  </data>
+  <data name="CollectionTotals" xml:space="preserve">
+    <value>Totals</value>
+  </data>
+  <data name="CollectionPlant_One" xml:space="preserve">
+    <value>plant</value>
+    <comment>Word next to a big number on the collection page.</comment>
+  </data>
+  <data name="CollectionPlant_Other" xml:space="preserve">
+    <value>plants</value>
+    <comment>Word next to a big number on the collection page.</comment>
+  </data>
+  <data name="CollectionSpecies_One" xml:space="preserve">
+    <value>species</value>
+    <comment>Word next to a big number on the collection page.</comment>
+  </data>
+  <data name="CollectionSpecies_Other" xml:space="preserve">
+    <value>species</value>
+    <comment>Word next to a big number on the collection page.</comment>
+  </data>
+  <data name="CollectionGenus_One" xml:space="preserve">
+    <value>genus</value>
+    <comment>Word next to a big number on the collection page.</comment>
+  </data>
+  <data name="CollectionGenus_Other" xml:space="preserve">
+    <value>genera</value>
+    <comment>Word next to a big number on the collection page.</comment>
+  </data>
+  <data name="CollectionLongest" xml:space="preserve">
+    <value>With you longest</value>
+  </data>
+  <data name="CollectionPropagations" xml:space="preserve">
+    <value>Propagations</value>
+  </data>
+  <data name="CollectionRootingNow" xml:space="preserve">
+    <value>rooting now</value>
+    <comment>Word next to a number.</comment>
+  </data>
+  <data name="CollectionRootedThisYear" xml:space="preserve">
+    <value>rooted this year</value>
+    <comment>Word next to a number.</comment>
+  </data>
+  <data name="ReceivedTitle" xml:space="preserve">
+    <value>Keep its history</value>
+    <comment>Title of the page that opens from a link someone shared, to copy a plant or propagation with its history.</comment>
+  </data>
+  <data name="ReceivedGetting" xml:space="preserve">
+    <value>Getting its history…</value>
+  </data>
+  <data name="ReceivedUnreachable" xml:space="preserve">
+    <value>Couldn't reach Stikling's server</value>
+  </data>
+  <data name="ReceivedUnreachableText" xml:space="preserve">
+    <value>Keeping its history needs a connection once, to fetch it. After that it's kept on your device.</value>
+  </data>
+  <data name="ReceivedTryAgain" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="ReceivedNotFound" xml:space="preserve">
+    <value>There's nothing to keep at this link</value>
+  </data>
+  <data name="ReceivedNotFoundText" xml:space="preserve">
+    <value>It may be mistyped, or the plant hasn't been passed on yet. Ask whoever sent it to check.</value>
+  </data>
+  <data name="ReceivedGoToday" xml:space="preserve">
+    <value>Go to Today</value>
+    <comment>Today is the name of the Today page.</comment>
+  </data>
+  <data name="ReceivedGone" xml:space="preserve">
+    <value>This link has been turned off</value>
+  </data>
+  <data name="ReceivedGoneText" xml:space="preserve">
+    <value>Its owner turned it off, so its history can't be copied any more.</value>
+  </data>
+  <data name="ReceivedAlreadyPlant" xml:space="preserve">
+    <value>It's already in your plants</value>
+  </data>
+  <data name="ReceivedAlreadyPropagation" xml:space="preserve">
+    <value>It's already in your propagations</value>
+  </data>
+  <data name="ReceivedOpenIt" xml:space="preserve">
+    <value>Open it</value>
+  </data>
+  <data name="ReceivedMissing_One" xml:space="preserve">
+    <value>{0} of its photos hasn't been copied yet.</value>
+  </data>
+  <data name="ReceivedMissing_Other" xml:space="preserve">
+    <value>{0} of its photos haven't been copied yet.</value>
+  </data>
+  <data name="ReceivedFetchMissing" xml:space="preserve">
+    <value>Fetch the missing photos</value>
+  </data>
+  <data name="ReceivedPartly" xml:space="preserve">
+    <value>{0} of {1} photos copied. {2} couldn't be fetched.</value>
+  </data>
+  <data name="ReceivedOpenAnyway" xml:space="preserve">
+    <value>Open it anyway</value>
+  </data>
+  <data name="ReceivedAddHeading" xml:space="preserve">
+    <value>Add it to Stikling</value>
+  </data>
+  <data name="ReceivedDeletedBefore" xml:space="preserve">
+    <value>You added this before and deleted it. Bringing it back copies its history again.</value>
+  </data>
+  <data name="ReceivedCopyOnce" xml:space="preserve">
+    <value>Its photos and history so far are copied to this device once. They won't change if the page does later.</value>
+  </data>
+  <data name="ReceivedMakeYours" xml:space="preserve">
+    <value>Make it yours</value>
+  </data>
+  <data name="ReceivedNicknamePlaceholder" xml:space="preserve">
+    <value>e.g. Kitchen coleus</value>
+  </data>
+  <data name="ReceivedNicknameHint" xml:space="preserve">
+    <value>Optional. Leave it empty to call it by its name.</value>
+  </data>
+  <data name="ReceivedGivenBy" xml:space="preserve">
+    <value>Who gave it to you?</value>
+  </data>
+  <data name="ReceivedGivenByPlaceholder" xml:space="preserve">
+    <value>e.g. Anna</value>
+  </data>
+  <data name="ReceivedGivenByHint" xml:space="preserve">
+    <value>Kept with it. Never shown on a share link.</value>
+  </data>
+  <data name="ReceivedHowMany" xml:space="preserve">
+    <value>How many did you get?</value>
+  </data>
+  <data name="ReceivedBringBack" xml:space="preserve">
+    <value>Bring it back</value>
+  </data>
+  <data name="ReceivedPhotos_One" xml:space="preserve">
+    <value>{0} photo</value>
+  </data>
+  <data name="ReceivedPhotos_Other" xml:space="preserve">
+    <value>{0} photos</value>
+  </data>
+  <data name="ReceivedNotes_One" xml:space="preserve">
+    <value>{0} note</value>
+  </data>
+  <data name="ReceivedNotes_Other" xml:space="preserve">
+    <value>{0} notes</value>
+  </data>
+  <data name="ReceivedAdding" xml:space="preserve">
+    <value>Adding it…</value>
+  </data>
+  <data name="ReceivedFetching" xml:space="preserve">
+    <value>Fetching photos…</value>
+  </data>
+  <data name="ReceivedFailed" xml:space="preserve">
+    <value>Couldn't add it: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="ReceivedCopying" xml:space="preserve">
+    <value>Copying</value>
+    <comment>Name of the progress bar.</comment>
+  </data>
+  <data name="ReceivedCopyingPhotos" xml:space="preserve">
+    <value>Copying photos, {0} of {1}</value>
+  </data>
+  <data name="CardInPot" xml:space="preserve">
+    <value>{0} in the pot</value>
+    <comment>Tooltip on the count next to a plant's name. {0} is a number.</comment>
+  </data>
+  <data name="TableSelected" xml:space="preserve">
+    <value>Selected</value>
+    <comment>Hidden heading of the checkbox column in the table view, read out by a screen reader.</comment>
+  </data>
+  <data name="TableMoisture" xml:space="preserve">
+    <value>{0}/10, {1}</value>
+    <comment>A moisture reading in the table. {0} is the reading, {1} when it was taken, like 3 days ago.</comment>
+  </data>
+  <data name="ColumnAlwaysShown" xml:space="preserve">
+    <value>Always shown</value>
+    <comment>Next to the Name column in the list of columns, which can't be turned off.</comment>
+  </data>
+  <data name="ColumnMoveUp" xml:space="preserve">
+    <value>Move {0} up</value>
+    <comment>{0} is the name of a column.</comment>
+  </data>
+  <data name="ColumnMoveDown" xml:space="preserve">
+    <value>Move {0} down</value>
+    <comment>{0} is the name of a column.</comment>
+  </data>
+  <data name="LetterJumpLabel" xml:space="preserve">
+    <value>Jump to letter</value>
+    <comment>Name of the letter strip down the side of a long list.</comment>
+  </data>
+  <data name="LetterJumpTo" xml:space="preserve">
+    <value>Jump to {0}</value>
+    <comment>{0} is a letter.</comment>
+  </data>
+  <data name="TagNew" xml:space="preserve">
+    <value>+ New tag</value>
+  </data>
+  <data name="TagPlaceholder" xml:space="preserve">
+    <value>e.g. Variegated</value>
+  </data>
+  <data name="TagNewLabel" xml:space="preserve">
+    <value>New tag</value>
+    <comment>Name of the box where a new tag is typed.</comment>
+  </data>
+  <data name="CareOfferFrom" xml:space="preserve">
+    <value>from {0}</value>
+    <comment>After what the care file offers a plant. {0} is a link to the source.</comment>
+  </data>
+  <data name="CareOfferUse" xml:space="preserve">
+    <value>Use</value>
+    <comment>Button that fills the form or the plant with the offered care.</comment>
+  </data>
+  <data name="CalendarMonthDays_One" xml:space="preserve">
+    <value>{0} {1}: {2} day with care</value>
+    <comment>{0} is a month, {1} a year, {2} a number.</comment>
+  </data>
+  <data name="CalendarMonthDays_Other" xml:space="preserve">
+    <value>{0} {1}: {2} days with care</value>
+    <comment>{0} is a month, {1} a year, {2} a number.</comment>
+  </data>
+  <data name="CalendarDayFormat" xml:space="preserve">
+    <value>d MMM</value>
+    <comment>A .NET date pattern for a day and month, like 3 Sep. Not text: change the order and the punctuation only.</comment>
+  </data>
+  <data name="CalendarWatered" xml:space="preserve">
+    <value>Watered</value>
+    <comment>In the colour key of the care calendar.</comment>
+  </data>
+  <data name="CalendarFed" xml:space="preserve">
+    <value>Fed</value>
+    <comment>In the colour key of the care calendar.</comment>
+  </data>
+  <data name="CalendarReading" xml:space="preserve">
+    <value>Meter reading</value>
+    <comment>In the colour key of the care calendar.</comment>
+  </data>
+  <data name="CalendarWateredDay" xml:space="preserve">
+    <value>watered</value>
+    <comment>After a date in the care calendar, like 3 Sep: watered.</comment>
+  </data>
+  <data name="CalendarFedDay" xml:space="preserve">
+    <value>fed</value>
+    <comment>After a date in the care calendar, like 3 Sep: fed.</comment>
+  </data>
+  <data name="CalendarReadingDay" xml:space="preserve">
+    <value>meter reading</value>
+    <comment>After a date in the care calendar, like 3 Sep: meter reading.</comment>
+  </data>
+  <data name="CalendarDayMark" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>A date and what happened that day. {0} is the date, {1} what happened.</comment>
+  </data>
+  <data name="CalendarHint" xml:space="preserve">
+    <value>Tap a month to see its days.</value>
+  </data>
+  <data name="DatePrecisionLabel" xml:space="preserve">
+    <value>How much of the date you know</value>
+  </data>
+  <data name="DateYearOnly" xml:space="preserve">
+    <value>Year only</value>
+  </data>
+  <data name="DateMonth" xml:space="preserve">
+    <value>Month</value>
+  </data>
+  <data name="DateExactDay" xml:space="preserve">
+    <value>Exact day</value>
+  </data>
+  <data name="DateYearPlaceholder" xml:space="preserve">
+    <value>e.g. 2024</value>
+  </data>
+  <data name="DateYearLabel" xml:space="preserve">
+    <value>{0}, year</value>
+    <comment>Name of the year box. {0} is the label of the date.</comment>
+  </data>
+  <data name="DateMonthLabel" xml:space="preserve">
+    <value>{0}, month</value>
+    <comment>Name of the month box. {0} is the label of the date.</comment>
+  </data>
+  <data name="PotPhotos" xml:space="preserve">
+    <value>Photos of {0}</value>
+    <comment>Name of the button that opens a pot's photos. {0} is the pot.</comment>
+  </data>
+  <data name="PlantSelectPick" xml:space="preserve">
+    <value>Pick a plant</value>
+  </data>
+  <data name="PlantSelectSameGenus" xml:space="preserve">
+    <value>Same genus</value>
+  </data>
+  <data name="PlantSelectOthers" xml:space="preserve">
+    <value>Other plants</value>
+  </data>
+  <data name="PlantSelectLabel" xml:space="preserve">
+    <value>Which plant's pot</value>
+  </data>
+  <data name="ArrivalHow" xml:space="preserve">
+    <value>How it was</value>
+  </data>
+  <data name="ArrivalWrong" xml:space="preserve">
+    <value>Anything wrong with it</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="ArrivalNotePlaceholder" xml:space="preserve">
+    <value>e.g. Two leaves broken in the post</value>
+  </data>
+  <data name="ArrivalNoteHint" xml:space="preserve">
+    <value>The Sellers page adds these up, so you can see which sellers send plants in good shape.</value>
+    <comment>Sellers is the name of a page.</comment>
+  </data>
+  <data name="SellerWhereFrom" xml:space="preserve">
+    <value>Where from</value>
+  </data>
+  <data name="SellerPlaceholder" xml:space="preserve">
+    <value>Shop, friend, plant swap…</value>
+  </data>
+  <data name="SellerChips" xml:space="preserve">
+    <value>Sellers you have</value>
+  </data>
+  <data name="SellerNew" xml:space="preserve">
+    <value>"{0}" will be added to your sellers when you save.</value>
+    <comment>{0} is the name typed.</comment>
+  </data>
+  <data name="ParentNotMineTitle" xml:space="preserve">
+    <value>A parent that isn't yours</value>
+  </data>
+  <data name="ParentNotMineText" xml:space="preserve">
+    <value>It stays out of your plant list and Today. It is only here so a cutting can show where it came from.</value>
+  </data>
+  <data name="ParentNicknamePlaceholder" xml:space="preserve">
+    <value>e.g. Grandma's pothos</value>
+  </data>
+  <data name="NameWhatPlant" xml:space="preserve">
+    <value>What plant is it?</value>
+  </data>
+  <data name="NameSearchPlaceholder" xml:space="preserve">
+    <value>e.g. snake plant or Monstera deliciosa</value>
+    <comment>An example of what to type. The names are matched against the app's name suggestions.</comment>
+  </data>
+  <data name="NameFound" xml:space="preserve">
+    <value>Plants found</value>
+  </data>
+  <data name="NameNow" xml:space="preserve">
+    <value>now {0}</value>
+    <comment>After an old name, {0} is the name it goes by now.</comment>
+  </data>
+  <data name="NameNothing" xml:space="preserve">
+    <value>Nothing by that name in the app's list. You can still type it in below.</value>
+  </data>
+  <data name="NameGenus" xml:space="preserve">
+    <value>Genus</value>
+  </data>
+  <data name="NameSpecies" xml:space="preserve">
+    <value>Species</value>
+  </data>
+  <data name="NameCultivar" xml:space="preserve">
+    <value>Cultivar / variety</value>
+  </data>
+  <data name="NameGenusPlaceholder" xml:space="preserve">
+    <value>e.g. Monstera</value>
+  </data>
+  <data name="NameSpeciesPlaceholder" xml:space="preserve">
+    <value>e.g. deliciosa</value>
+  </data>
+  <data name="NameCultivarPlaceholder" xml:space="preserve">
+    <value>e.g. Thai Constellation</value>
+  </data>
+  <data name="NameEveryday" xml:space="preserve">
+    <value>Everyday name: {0}</value>
+  </data>
+  <data name="NameNotSure" xml:space="preserve">
+    <value>Not sure of the name?</value>
+  </data>
+  <data name="NameHowSure" xml:space="preserve">
+    <value>How sure</value>
+  </data>
+  <data name="NameSure" xml:space="preserve">
+    <value>Sure</value>
+  </data>
+  <data name="NameCf" xml:space="preserve">
+    <value>cf. (looks like this species)</value>
+  </data>
+  <data name="NameAff" xml:space="preserve">
+    <value>aff. (close to this species)</value>
+  </data>
+  <data name="NameSp" xml:space="preserve">
+    <value>sp. (species not known)</value>
+  </data>
+  <data name="NameLost" xml:space="preserve">
+    <value>Name lost</value>
+  </data>
+  <data name="NameLocality" xml:space="preserve">
+    <value>Locality or code</value>
+  </data>
+  <data name="NameLocalityPlaceholder" xml:space="preserve">
+    <value>e.g. Sumatra, EPC 123</value>
+  </data>
+  <data name="NameSuggested" xml:space="preserve">
+    <value>Suggested names</value>
+  </data>
+  <data name="MixNone" xml:space="preserve">
+    <value>No mixes yet. You can add them under Supplies, then Soil mixes.</value>
+    <comment>Supplies and Soil mixes are names of pages.</comment>
+  </data>
+  <data name="MixNoMix" xml:space="preserve">
+    <value>No mix</value>
+  </data>
+  <data name="MixLabel" xml:space="preserve">
+    <value>Soil mix</value>
+  </data>
+  <data name="ArrivedNote" xml:space="preserve">
+    <value>Its history from before you got it is kept under Before you got it. Add your own photos and notes as it grows, and they go above it. Everything is kept on this device, and you don't need an account.</value>
+    <comment>Before you got it is the name of a section of the history.</comment>
+  </data>
+  <data name="NumberClashOne" xml:space="preserve">
+    <value>{0} also has #{1}.</value>
+    <comment>{0} is a link to a plant or propagation, {1} a collection number.</comment>
+  </data>
+  <data name="NumberClashMany" xml:space="preserve">
+    <value>{0} also have #{1}.</value>
+    <comment>{0} is links to plants or propagations, {1} a collection number.</comment>
+  </data>
+  <data name="PublicPage" xml:space="preserve">
+    <value>Public page</value>
+  </data>
+  <data name="ReferencePhotoAdd" xml:space="preserve">
+    <value>Add a reference photo</value>
+  </data>
+  <data name="ReferencePhotoFailed" xml:space="preserve">
+    <value>Couldn't save the photo: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+</root>

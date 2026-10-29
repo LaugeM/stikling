@@ -13,18 +13,18 @@
                     @onclick="() => ToggleAsync(tag)">@tag</button>
         }
         <button type="button" class="chip new @(typing ? "picked" : null)" aria-expanded="@(typing ? "true" : "false")"
-                @onclick="ToggleTyping">+ New tag</button>
+                @onclick="ToggleTyping">@Strings.Plants.TagNew</button>
     </div>
 
     @if (typing)
     {
         @* form points at nothing, so Enter here adds the tag instead of submitting the page's form *@
         <div class="tag-draft">
-            <input class="form-control" form="tag-draft-none" placeholder="e.g. Variegated" autocomplete="off"
-                   aria-label="New tag" enterkeyhint="done" value="@draft" @oninput="TypeAsync" @onkeydown="Key"
+            <input class="form-control" form="tag-draft-none" placeholder="@Strings.Plants.TagPlaceholder" autocomplete="off"
+                   aria-label="@Strings.Plants.TagNewLabel" enterkeyhint="done" value="@draft" @oninput="TypeAsync" @onkeydown="Key"
                    @ref="draftInput" />
             <button type="button" class="btn btn-outline-primary" disabled="@(PlantTags.Clean(draft) is null)"
-                    @onclick="Commit">Add</button>
+                    @onclick="Commit">@Strings.Common.Add</button>
         </div>
     }
 </div>
@@ -41,7 +41,7 @@
     public IReadOnlyList<string> Suggestions { get; set; } = [];
 
     [Parameter]
-    public string Label { get; set; } = "Tags";
+    public string Label { get; set; } = Strings.Plants.ListTagsLabel;
 
     private bool typing;
     private string draft = "";

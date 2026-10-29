@@ -1,4 +1,5 @@
 @* One row in a propagation list: "3× corm · LECA · day 24". In select mode the card is a checkbox instead of a link. *@
+@using System.Globalization
 @inject TimeProvider Time
 @inject PlantNameService Names
 
@@ -57,7 +58,7 @@ else
         <div class="item-name"><NumberTag Code="@Propagation.CollectionNumber" />@Propagation.DisplayName</div>
         @if (ParentName is not null)
         {
-            <div class="item-sub">from @ParentName</div>
+            <div class="item-sub">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CardFrom, ParentName)</div>
         }
         else if (!string.IsNullOrWhiteSpace(Propagation.Nickname) && Propagation.BotanicalName is { } botanical)
         {
@@ -76,24 +77,24 @@ else
                 }
                 @if (Propagation.IsDormant)
                 {
-                    <span class="badge dormant-badge">Dormant</span>
+                    <span class="badge dormant-badge">@Strings.Propagations.CardDormant</span>
                 }
                 @if (Propagation.SpareAvailable > 0)
                 {
-                    <span class="badge swap-badge">@Propagation.SpareAvailable to swap</span>
+                    <span class="badge swap-badge">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CardToSwap, Propagation.SpareAvailable)</span>
                 }
                 <span>@Labels.Summary(Propagation)</span>
                 @if (Propagation.DaysToRoot is { } days)
                 {
-                    <span class="rooted-in">· rooted in @Labels.Count(days, "day")</span>
+                    <span class="rooted-in">· @Plural.Of(days, Strings.Propagations.CardRootedIn_One, Strings.Propagations.CardRootedIn_Other)</span>
                 }
                 @if (Propagation.RemainingCount != Propagation.InitialCount)
                 {
-                    <span>· @Propagation.RemainingCount left</span>
+                    <span>· @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CardLeft, Propagation.RemainingCount)</span>
                 }
                 @if (Pace is { IsSlow: true })
                 {
-                    <span class="pace-slow">· slower than usual</span>
+                    <span class="pace-slow">· @Strings.Propagations.CardSlow</span>
                 }
             }
             else
@@ -102,7 +103,7 @@ else
                 <span>@Labels.Summary(Propagation) · @PropagationService.Outcome(Propagation)</span>
                 @if (Propagation.DaysToRoot is { } days)
                 {
-                    <span class="rooted-in">· rooted in @Labels.Count(days, "day")</span>
+                    <span class="rooted-in">· @Plural.Of(days, Strings.Propagations.CardRootedIn_One, Strings.Propagations.CardRootedIn_Other)</span>
                 }
             }
         </div>

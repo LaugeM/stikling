@@ -17,7 +17,7 @@
 @inject NavigationManager Navigation
 @inject TimeProvider Time
 
-<Sheet Title="Share" Open="Open" OpenChanged="OpenChanged">
+<Sheet Title="@Strings.Propagations.DetShare" Open="Open" OpenChanged="OpenChanged">
     @if (ready)
     {
         @if (mode == ShareMode.Link)
@@ -48,7 +48,7 @@
                     {
                         <div class="share-page-line">@PreviewLine</div>
                     }
-                    <div class="share-page-count">@Labels.Count(PhotosOnPage, "photo")</div>
+                    <div class="share-page-count">@Plural.Of(PhotosOnPage, Strings.Propagations.ShPhotos_One, Strings.Propagations.ShPhotos_Other)</div>
                 </div>
             </div>
         }
@@ -56,41 +56,41 @@
         {
             <div class="share-preview">
                 <canvas @ref="canvas" width="1080" height="@PreviewHeight" role="img"
-                        aria-label="@($"Preview of the {(mode == ShareMode.Timelapse ? "time-lapse" : "card")} for {CardName}")"></canvas>
+                        aria-label="@string.Format(CultureInfo.CurrentCulture, mode == ShareMode.Timelapse ? Strings.Propagations.ShPreviewVideo : Strings.Propagations.ShPreviewCard, CardName)"></canvas>
             </div>
         }
         @if (mode == ShareMode.Timelapse && reducedMotion && UsablePhotos.Count >= 2 && videoState != VideoState.Making)
         {
             <div class="share-field">
-                <button type="button" class="btn btn-outline-primary" @onclick="TogglePlay">@(previewPlaying ? "Stop preview" : "Play preview")</button>
+                <button type="button" class="btn btn-outline-primary" @onclick="TogglePlay">@(previewPlaying ? Strings.Propagations.ShStopPreview : Strings.Propagations.ShPlayPreview)</button>
             </div>
         }
 
         @if (allPhotos.Count >= 2 || LinkAvailable)
         {
             <div class="share-field">
-                <div class="share-label" id="share-mode-label">Card</div>
+                <div class="share-label" id="share-mode-label">@Strings.Propagations.ShCard</div>
                 <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-mode-label">
                     <input type="radio" class="btn-check" name="share-mode" id="share-mode-one"
                            checked="@(mode == ShareMode.One)" @onchange="() => SetModeAsync(ShareMode.One)" disabled="@Making" />
-                    <label class="btn btn-outline-primary" for="share-mode-one">One photo</label>
+                    <label class="btn btn-outline-primary" for="share-mode-one">@Strings.Propagations.ShOnePhoto</label>
                     @if (allPhotos.Count >= 2)
                     {
                         <input type="radio" class="btn-check" name="share-mode" id="share-mode-pair"
                                checked="@(mode == ShareMode.Pair)" @onchange="() => SetModeAsync(ShareMode.Pair)" disabled="@Making" />
-                        <label class="btn btn-outline-primary" for="share-mode-pair">Before and after</label>
+                        <label class="btn btn-outline-primary" for="share-mode-pair">@Strings.Propagations.ShBeforeAfter</label>
                     }
                     @if (allPhotos.Count >= 3)
                     {
                         <input type="radio" class="btn-check" name="share-mode" id="share-mode-timelapse"
                                checked="@(mode == ShareMode.Timelapse)" @onchange="() => SetModeAsync(ShareMode.Timelapse)" disabled="@Making" />
-                        <label class="btn btn-outline-primary" for="share-mode-timelapse">Time-lapse</label>
+                        <label class="btn btn-outline-primary" for="share-mode-timelapse">@Strings.Propagations.ShTimelapse</label>
                     }
                     @if (LinkAvailable)
                     {
                         <input type="radio" class="btn-check" name="share-mode" id="share-mode-link"
                                checked="@(mode == ShareMode.Link)" @onchange="() => SetModeAsync(ShareMode.Link)" disabled="@Making" />
-                        <label class="btn btn-outline-primary" for="share-mode-link">Link</label>
+                        <label class="btn btn-outline-primary" for="share-mode-link">@Strings.Propagations.ShLink</label>
                     }
                 </div>
             </div>
@@ -99,7 +99,7 @@
         @if (mode != ShareMode.Link)
         {
             <div class="share-field">
-                <div class="share-label" id="share-format-label">Size</div>
+                <div class="share-label" id="share-format-label">@Strings.Propagations.ShSize</div>
                 <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-format-label">
                     @foreach (var (value, label) in ShareCardService.Formats)
                     {
@@ -119,7 +119,7 @@
         else if (mode == ShareMode.Timelapse)
         {
             <div class="share-field">
-                <div class="share-label" id="share-speed-label">Speed</div>
+                <div class="share-label" id="share-speed-label">@Strings.Propagations.ShSpeed</div>
                 <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="share-speed-label">
                     @foreach (var (value, label) in Speeds)
                     {
@@ -132,13 +132,13 @@
             </div>
 
             <div class="share-field">
-                <div class="share-label" id="share-ticks-label">Photos in the video</div>
+                <div class="share-label" id="share-ticks-label">@Strings.Propagations.ShPhotosInVideo</div>
                 <div class="share-photos" role="group" aria-labelledby="share-ticks-label">
                     @foreach (var photo in RowPhotos)
                     {
                         var ticked = !leftOut.Contains(photo.Id);
                         <button type="button" role="checkbox" aria-checked="@(ticked ? "true" : "false")"
-                                aria-label="@($"Photo from {DayText(photo)}")" class="share-photo @(ticked ? "ticked" : "left-out")"
+                                aria-label="@PhotoFrom(photo)" class="share-photo @(ticked ? "ticked" : "left-out")"
                                 @onclick="() => ToggleTick(photo.Id)" disabled="@Making">
                             <PhotoImage PhotoId="photo.Id" Framed="false" />
                             @if (ticked)
@@ -148,12 +148,12 @@
                         </button>
                     }
                 </div>
-                <p class="form-text mb-0">@TickedPhotos.Count of @allPhotos.Count photos are in the video. Tap one to leave it out.</p>
+                <p class="form-text mb-0">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ShInVideo, TickedPhotos.Count, allPhotos.Count)</p>
                 @if (TooLong)
                 {
-                    <p class="form-text mb-0">It has @allPhotos.Count photos, and a time-lapse takes up to @TimelapsePlan.MaxPhotos, so @TimelapsePlan.MaxPhotos spread over them are picked.</p>
+                    <p class="form-text mb-0">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ShTooLong, allPhotos.Count, TimelapsePlan.MaxPhotos)</p>
                     <button type="button" class="btn btn-link btn-sm link-action ps-0" aria-expanded="@(showAllPhotos ? "true" : "false")"
-                            @onclick="() => showAllPhotos = !showAllPhotos">@(showAllPhotos ? "Show only the photos in the video" : $"Show all {allPhotos.Count} photos")</button>
+                            @onclick="() => showAllPhotos = !showAllPhotos">@(showAllPhotos ? Strings.Propagations.ShShowOnly : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ShShowAll, allPhotos.Count))</button>
                 }
                 @if (tickNote is not null)
                 {
@@ -161,17 +161,17 @@
                 }
                 @if (MissingCount > 0)
                 {
-                    <p class="form-text mb-0">@(MissingCount == 1 ? "One photo isn't" : $"{MissingCount} photos aren't") on this device yet, so @(MissingCount == 1 ? "it is" : "they are") left out of the video.@(UsablePhotos.Count < 2 ? " That leaves too few to make one." : "")</p>
+                    <p class="form-text mb-0">@Plural.Of(MissingCount, Strings.Propagations.ShMissing_One, Strings.Propagations.ShMissing_Other)@(UsablePhotos.Count < 2 ? " " + Strings.Propagations.ShTooFew : "")</p>
                 }
                 @if (SmallCount > 0 && videoState != VideoState.Making)
                 {
-                    <p class="form-text mb-0">@(SmallCount == 1 ? "One photo is" : $"{SmallCount} photos are") only a small copy on this device. Making the video gets the full @(SmallCount == 1 ? "one" : "ones") first when it can, so the video is sharp.</p>
+                    <p class="form-text mb-0">@Plural.Of(SmallCount, Strings.Propagations.ShSmall_One, Strings.Propagations.ShSmall_Other)</p>
                 }
             </div>
         }
         else if (mode == ShareMode.Pair)
         {
-            @foreach (var (label, key, current) in new[] { ("Before", "before", beforeId), ("After", "after", afterId) })
+            @foreach (var (label, key, current) in new[] { (Strings.Propagations.ShBefore, "before", beforeId), (Strings.Propagations.ShAfter, "after", afterId) })
             {
                 <div class="share-field">
                     <div class="share-label" id="@($"share-{key}-label")">@label</div>
@@ -180,7 +180,7 @@
                         {
                             var picked = current == photo.Id;
                             <button type="button" role="radio" aria-checked="@(picked ? "true" : "false")"
-                                    aria-label="@($"{label} photo from {DayText(photo)}")" class="share-photo @(picked ? "picked" : null)"
+                                    aria-label="@string.Format(CultureInfo.CurrentCulture, key == "before" ? Strings.Propagations.ShBeforePhotoFrom : Strings.Propagations.ShAfterPhotoFrom, DayText(photo))" class="share-photo @(picked ? "picked" : null)"
                                     @onclick="() => PickPair(key, photo.Id)">
                                 <PhotoImage PhotoId="photo.Id" Framed="false" />
                             </button>
@@ -190,46 +190,46 @@
             }
             @if (photoMissing)
             {
-                <p class="form-text">One of those photos isn't on this device yet, so its place on the card is empty.</p>
+                <p class="form-text">@Strings.Propagations.ShPairMissing</p>
             }
             else if (photoSmall && gettingFull)
             {
-                <p class="form-text" role="status">Getting the full photos, so the card is sharp.</p>
+                <p class="form-text" role="status">@Strings.Propagations.ShGettingFullPair</p>
             }
             else if (photoSmall)
             {
-                <p class="form-text">Only a small copy of one of these photos is on this device, and the full one couldn't be fetched, so it may look blurry on the card. Try again when you're online and signed in, or pick another photo.</p>
+                <p class="form-text">@Strings.Propagations.ShPairSmall</p>
             }
         }
         else if (photos.Count > 0)
         {
             <div class="share-field">
-                <div class="share-label" id="share-photo-label">Photo</div>
+                <div class="share-label" id="share-photo-label">@Strings.Propagations.TlKindPhoto</div>
                 <div class="share-photos" role="radiogroup" aria-labelledby="share-photo-label">
                     @foreach (var (photo, number) in photos.Select((p, i) => (p, i + 1)))
                     {
                         <button type="button" role="radio" aria-checked="@(photoId == photo.Id ? "true" : "false")"
-                                aria-label="@($"Photo {number}")" class="share-photo @(photoId == photo.Id ? "picked" : null)"
+                                aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ShPhotoN, number)" class="share-photo @(photoId == photo.Id ? "picked" : null)"
                                 @onclick="() => photoId = photo.Id">
                             <PhotoImage PhotoId="photo.Id" Framed="false" />
                         </button>
                     }
                     <button type="button" role="radio" aria-checked="@(photoId is null ? "true" : "false")"
                             class="share-photo share-photo-none @(photoId is null ? "picked" : null)" @onclick="() => photoId = null">
-                        No photo
+                        @Strings.Propagations.ShNoPhoto
                     </button>
                 </div>
                 @if (photoMissing)
                 {
-                    <p class="form-text">That photo isn't on this device yet, so the card uses the number instead.</p>
+                    <p class="form-text">@Strings.Propagations.ShSingleMissing</p>
                 }
                 else if (photoSmall && gettingFull)
                 {
-                    <p class="form-text" role="status">Getting the full photo, so the card is sharp.</p>
+                    <p class="form-text" role="status">@Strings.Propagations.ShGettingFull</p>
                 }
                 else if (photoSmall)
                 {
-                    <p class="form-text">Only a small copy of this photo is on this device, and the full one couldn't be fetched, so it may look blurry on the card. Try again when you're online and signed in, or pick another photo.</p>
+                    <p class="form-text">@Strings.Propagations.ShSingleSmall</p>
                 }
             </div>
         }
@@ -249,10 +249,10 @@
             {
                 <div class="share-progress-box">
                     <p class="form-text mb-1" role="status">@phase</p>
-                    <progress class="share-progress" max="1" value="@ProgressValue" aria-label="Making the video"></progress>
+                    <progress class="share-progress" max="1" value="@ProgressValue" aria-label="@Strings.Propagations.ShMaking"></progress>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-outline-primary" disabled="@cancelRequested" @onclick="CancelVideoAsync">Cancel</button>
+                    <button type="button" class="btn btn-outline-primary" disabled="@cancelRequested" @onclick="CancelVideoAsync">@Strings.Common.Cancel</button>
                 </div>
             }
             else if (VideoIsReady)
@@ -260,19 +260,19 @@
                 <div class="form-actions">
                     @if (canShareVideo)
                     {
-                        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ShareVideoAsync">Share video</button>
-                        <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="SaveVideoAsync">Save video</button>
+                        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ShareVideoAsync">@Strings.Propagations.ShShareVideo</button>
+                        <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="SaveVideoAsync">@Strings.Propagations.ShSaveVideo</button>
                     }
                     else
                     {
-                        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveVideoAsync">Save video</button>
+                        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveVideoAsync">@Strings.Propagations.ShSaveVideo</button>
                     }
                 </div>
             }
             else
             {
                 <div class="form-actions">
-                    <button type="button" class="btn btn-primary" disabled="@(UsablePhotos.Count < 2)" @onclick="MakeVideoAsync">Make video</button>
+                    <button type="button" class="btn btn-primary" disabled="@(UsablePhotos.Count < 2)" @onclick="MakeVideoAsync">@Strings.Propagations.ShMakeVideo</button>
                 </div>
             }
         }
@@ -281,12 +281,12 @@
             <div class="form-actions">
                 @if (canShare)
                 {
-                    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ShareAsync">Share</button>
-                    <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="SaveAsync">Save image</button>
+                    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ShareAsync">@Strings.Propagations.DetShare</button>
+                    <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="SaveAsync">@Strings.Propagations.ShSaveImage</button>
                 }
                 else
                 {
-                    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">Save image</button>
+                    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">@Strings.Propagations.ShSaveImage</button>
                 }
             </div>
         }
@@ -353,12 +353,14 @@
 
     private static readonly (TimelapseSpeed Value, string Label)[] Speeds =
     [
-        (TimelapseSpeed.Slow, "Slow"),
-        (TimelapseSpeed.Normal, "Normal"),
-        (TimelapseSpeed.Fast, "Fast"),
+        (TimelapseSpeed.Slow, Strings.Propagations.ShSlow),
+        (TimelapseSpeed.Normal, Strings.Propagations.ShNormal),
+        (TimelapseSpeed.Fast, Strings.Propagations.ShFast),
     ];
 
-    private const string VideoFailed = "The video couldn't be made. Try again, or leave out some photos.";
+    private static string VideoFailed => Strings.Propagations.ShVideoFailed;
+
+    private string PhotoFrom(Photo photo) => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ShPhotoFrom, DayText(photo));
 
     private ElementReference canvas;
     private IReadOnlyList<Photo> photos = [];
@@ -793,7 +795,7 @@
             }
             else
             {
-                linkError = result.Offline ? "Connect to the internet to make a link." : result.Problem;
+                linkError = result.Offline ? Strings.Propagations.PassOnOffline : result.Problem;
             }
         }
         finally
@@ -816,7 +818,7 @@
         if (result.Ok)
             linkSaved = true;
         else
-            linkError = result.Offline ? "Couldn't save. Connect to the internet and try again." : result.Problem;
+            linkError = result.Offline ? Strings.Propagations.ShSaveOffline : result.Problem;
     }
 
     // The words are only saved to the link when they differ from the app's, so the page keeps following the app's as the plant changes
@@ -853,7 +855,7 @@
         copied = false;
         linkError = null;
         if (await Cards.ShareLinkAsync(PreviewName, link.Url) == "failed")
-            linkError = "The share menu couldn't be opened. Copy the link instead.";
+            linkError = Strings.Propagations.PassOnMenuFailed;
     }
 
     private async Task CopyLinkAsync()
@@ -864,7 +866,7 @@
         linkError = null;
         copied = await Cards.CopyTextAsync(link.Url);
         if (!copied)
-            linkError = "The link couldn't be copied. Select it and copy it by hand.";
+            linkError = Strings.Propagations.PassOnCopyFailed;
     }
 
     private async Task TurnOffLinkAsync()
@@ -875,7 +877,7 @@
         var result = await Links.TurnOffAsync(link);
         if (!result.Ok)
         {
-            linkError = result.Offline ? "Connect to the internet to turn off the link." : result.Problem;
+            linkError = result.Offline ? Strings.Propagations.ShOffOffline : result.Problem;
             return;
         }
 
@@ -899,60 +901,60 @@
     private RenderFragment LinkPanel => @<text>
         @if (!Sync.SignedIn)
         {
-            <p class="share-link-note">A link opens a page that anyone can see, with this @Tone's photos. It needs an account, because the page is shown from the server.</p>
+            <p class="share-link-note">@(Tone == "propagation" ? Strings.Propagations.ShLinkNoteSignedOutPropagation : Strings.Propagations.ShLinkNoteSignedOutPlant)</p>
             <div class="form-actions">
-                <button type="button" class="btn btn-primary" @onclick="SignInAsync">Sign in</button>
+                <button type="button" class="btn btn-primary" @onclick="SignInAsync">@Strings.Propagations.PassOnSignIn</button>
             </div>
         }
         else if (Link is not { } link)
         {
-            <p class="share-link-note">The page shows this @Tone's photos and, if you leave it on, its notes. It never shows the room, prices or where it came from.</p>
+            <p class="share-link-note">@(Tone == "propagation" ? Strings.Propagations.ShLinkNotePropagation : Strings.Propagations.ShLinkNotePlant)</p>
             <div class="form-check form-switch share-switch">
                 <input class="form-check-input" type="checkbox" role="switch" id="share-notes" checked="@showNotes" @onchange="e => showNotes = e.Value is true" disabled="@makingLink" />
-                <label class="form-check-label" for="share-notes">Show my notes</label>
+                <label class="form-check-label" for="share-notes">@Strings.Propagations.PassOnShowNotes</label>
             </div>
             @UploadingNote
             <div class="form-actions">
-                <button type="button" class="btn btn-primary" disabled="@makingLink" @onclick="MakeLinkAsync">@(makingLink ? "Making the link…" : "Make link")</button>
+                <button type="button" class="btn btn-primary" disabled="@makingLink" @onclick="MakeLinkAsync">@(makingLink ? Strings.Propagations.PassOnMaking : Strings.Propagations.ShMakeLink)</button>
             </div>
             @LinkMessages
         }
         else
         {
             <div class="share-field">
-                <div class="share-label" id="share-link-label">The link</div>
+                <div class="share-label" id="share-link-label">@Strings.Propagations.ShTheLink</div>
                 <p class="share-link-url" aria-labelledby="share-link-label">@link.Url</p>
                 <div class="form-actions">
                     @if (canShareLink)
                     {
-                        <button type="button" class="btn btn-primary" @onclick="ShareLinkAsync">Share link</button>
-                        <button type="button" class="btn btn-outline-primary" @onclick="CopyLinkAsync">Copy link</button>
+                        <button type="button" class="btn btn-primary" @onclick="ShareLinkAsync">@Strings.Propagations.ShShareLink</button>
+                        <button type="button" class="btn btn-outline-primary" @onclick="CopyLinkAsync">@Strings.Propagations.ShCopyLink</button>
                     }
                     else
                     {
-                        <button type="button" class="btn btn-primary" @onclick="CopyLinkAsync">Copy link</button>
+                        <button type="button" class="btn btn-primary" @onclick="CopyLinkAsync">@Strings.Propagations.ShCopyLink</button>
                     }
-                    <a class="btn btn-link link-action" href="@link.Url" target="_blank" rel="noopener">Open the page</a>
+                    <a class="btn btn-link link-action" href="@link.Url" target="_blank" rel="noopener">@Strings.Propagations.ShOpenPage</a>
                 </div>
                 @if (copied)
                 {
-                    <p class="form-text mb-0" role="status">Copied</p>
+                    <p class="form-text mb-0" role="status">@Strings.Propagations.PassOnCopied</p>
                 }
             </div>
 
             <div class="form-check form-switch share-switch">
                 <input class="form-check-input" type="checkbox" role="switch" id="share-notes" checked="@showNotes" @onchange="SetShowNotesAsync" />
-                <label class="form-check-label" for="share-notes">Show my notes</label>
+                <label class="form-check-label" for="share-notes">@Strings.Propagations.PassOnShowNotes</label>
             </div>
 
             <div class="share-field">
-                <div class="share-label" id="share-link-ticks-label">Photos on the page</div>
+                <div class="share-label" id="share-link-ticks-label">@Strings.Propagations.ShPhotosOnPage</div>
                 <div class="share-photos" role="group" aria-labelledby="share-link-ticks-label">
                     @foreach (var photo in linkPhotos)
                     {
                         var ticked = !linkLeftOut.Contains(photo.Id);
                         <button type="button" role="checkbox" aria-checked="@(ticked ? "true" : "false")"
-                                aria-label="@($"Photo from {DayText(photo)}")" class="share-photo @(ticked ? "ticked" : "left-out")"
+                                aria-label="@PhotoFrom(photo)" class="share-photo @(ticked ? "ticked" : "left-out")"
                                 @onclick="() => ToggleLinkTickAsync(photo.Id)">
                             <PhotoImage PhotoId="photo.Id" Framed="false" />
                             @if (ticked)
@@ -962,7 +964,7 @@
                         </button>
                     }
                 </div>
-                <p class="form-text mb-0">@PhotosOnPage of @linkPhotos.Count photos are on the page. Tap one to leave it off.</p>
+                <p class="form-text mb-0">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ShOnPage, PhotosOnPage, linkPhotos.Count)</p>
                 @UploadingNote
             </div>
 
@@ -973,16 +975,16 @@
             @if (confirmingOff)
             {
                 <div class="confirm-card confirm-card-danger">
-                    <p>Turn off the link? Anyone who opens it will see that the page is gone. Turning sharing on again makes a new link.</p>
+                    <p>@Strings.Propagations.ShConfirmOff</p>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-danger" @onclick="TurnOffLinkAsync">Turn off</button>
-                        <button type="button" class="btn btn-link" @onclick="() => confirmingOff = false">Cancel</button>
+                        <button type="button" class="btn btn-danger" @onclick="TurnOffLinkAsync">@Strings.Propagations.ShTurnOff</button>
+                        <button type="button" class="btn btn-link" @onclick="() => confirmingOff = false">@Strings.Common.Cancel</button>
                     </div>
                 </div>
             }
             else
             {
-                <button type="button" class="btn btn-link btn-sm text-danger link-action ps-0" @onclick="() => confirmingOff = true">Turn off the link</button>
+                <button type="button" class="btn btn-link btn-sm text-danger link-action ps-0" @onclick="() => confirmingOff = true">@Strings.Propagations.ShTurnOffLink</button>
             }
         }
     </text>;
@@ -990,7 +992,7 @@
     private RenderFragment UploadingNote => @<text>
         @if (waitingPhotos > 0)
         {
-            <p class="form-text">@(waitingPhotos == 1 ? "1 photo is" : $"{waitingPhotos} photos are") still uploading. @(waitingPhotos == 1 ? "It shows" : "They show") on the page once @(waitingPhotos == 1 ? "it's" : "they're") up.</p>
+            <p class="form-text">@Plural.Of(waitingPhotos, Strings.Propagations.ShUploading_One, Strings.Propagations.ShUploading_Other)</p>
         }
     </text>;
 
@@ -1001,22 +1003,22 @@
         }
         else if (linkSaved)
         {
-            <p class="action-message mb-0" role="status">Saved</p>
+            <p class="action-message mb-0" role="status">@Strings.Propagations.ShSaved</p>
         }
     </text>;
 
     private RenderFragment WordsFields => @<text>
         <div class="share-field">
-            <label class="share-label" for="share-name">Name</label>
+            <label class="share-label" for="share-name">@Strings.Propagations.ShName</label>
             <input id="share-name" class="form-control" maxlength="80" @bind="name" @bind:event="oninput" @onchange="WordsChangedAsync" disabled="@Making" />
         </div>
 
         <div class="share-field">
-            <label class="share-label" for="share-line">What it says</label>
+            <label class="share-label" for="share-line">@Strings.Propagations.ShWhatItSays</label>
             <textarea id="share-line" class="form-control" rows="3" maxlength="200" @bind="line" @bind:event="oninput" @onchange="WordsChangedAsync" disabled="@Making"></textarea>
             @if (Edited)
             {
-                <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="UseOriginalWords" disabled="@Making">Use the app's words again</button>
+                <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="UseOriginalWords" disabled="@Making">@Strings.Propagations.ShUseAppWords</button>
             }
         </div>
     </text>;
@@ -1080,7 +1082,7 @@
         {
             if (TickedPhotos.Count >= TimelapsePlan.MaxPhotos)
             {
-                tickNote = $"A time-lapse takes up to {TimelapsePlan.MaxPhotos} photos. Leave one out to add this one.";
+                tickNote = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ShTickMax, TimelapsePlan.MaxPhotos);
                 return;
             }
             leftOut.Remove(id);
@@ -1088,7 +1090,7 @@
         }
         else if (allPhotos.Count - leftOut.Count <= 2)
         {
-            tickNote = "A time-lapse needs at least 2 photos, so this one stays in.";
+            tickNote = Strings.Propagations.ShTickMin;
         }
         else
         {
@@ -1157,7 +1159,7 @@
         message = null;
         cancelRequested = false;
         progress = null;
-        phase = "Getting ready.";
+        phase = Strings.Propagations.ShGettingReady;
         videoState = VideoState.Making;
         previewKey = null;
         StateHasChanged();
@@ -1170,7 +1172,7 @@
             var found = await Timelapse.CheckAsync(TickedPhotos.Select(p => p.Id));
             if (found.Small.Count > 0)
             {
-                phase = "Getting the full photos, so the video is sharp.";
+                phase = Strings.Propagations.ShGettingFullVideo;
                 StateHasChanged();
                 foreach (var id in found.Small.Select(Guid.Parse))
                 {
@@ -1191,7 +1193,7 @@
             if (UsablePhotos.Count < 2)
             {
                 videoState = VideoState.Idle;
-                message = "Too few of those photos are on this device to make a video.";
+                message = Strings.Propagations.ShTooFewOnDevice;
                 return;
             }
 
@@ -1203,7 +1205,7 @@
             }
 
             var spec = VideoSpec();
-            phase = "Making the video.";
+            phase = Strings.Propagations.ShMaking + ".";
             progress = 0;
             StateHasChanged();
             var result = await Timelapse.MakeAsync(spec, fraction =>
@@ -1227,11 +1229,11 @@
                     break;
                 case "offline":
                     videoState = VideoState.Idle;
-                    message = "The video maker couldn't be downloaded. Connect to the internet and try again. After that it works offline too.";
+                    message = Strings.Propagations.ShOfflineMaker;
                     break;
                 case "unsupported":
                     videoState = VideoState.Idle;
-                    message = "This browser can't make videos.";
+                    message = Strings.Propagations.ShUnsupported;
                     break;
                 default:
                     videoState = VideoState.Idle;
@@ -1260,7 +1262,7 @@
     private async Task CancelVideoAsync()
     {
         cancelRequested = true;
-        phase = "Cancelling.";
+        phase = Strings.Propagations.ShCancelling;
         await Timelapse.CancelAsync();
     }
 
@@ -1276,8 +1278,8 @@
         {
             message = await action() switch
             {
-                "saved" => "Saved as a video on this device. It's in your downloads.",
-                "failed" => "The video couldn't be shared. Make it again.",
+                "saved" => Strings.Propagations.ShVideoSaved,
+                "failed" => Strings.Propagations.ShVideoShareFailed,
                 _ => null,
             };
         }
@@ -1334,8 +1336,8 @@
         {
             message = await action() switch
             {
-                "saved" => "Saved as a picture on this device. It's in your downloads.",
-                "failed" => "The picture couldn't be made. Try again, or pick another photo.",
+                "saved" => Strings.Propagations.ShPictureSaved,
+                "failed" => Strings.Propagations.ShPictureFailed,
                 _ => null,
             };
         }

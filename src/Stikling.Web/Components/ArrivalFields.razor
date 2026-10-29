@@ -1,7 +1,7 @@
 @* How a plant or cutting was when it arrived: a rating, what was wrong, and a short note. *@
 
 <div class="mb-3">
-    <span class="form-label d-block" id="@(Id)-rating-label">How it was</span>
+    <span class="form-label d-block" id="@(Id)-rating-label">@Strings.Plants.ArrivalHow</span>
     <div class="chip-row" role="group" aria-labelledby="@(Id)-rating-label">
         @foreach (var rating in Enum.GetValues<ArrivalRating>())
         {
@@ -13,7 +13,7 @@
 </div>
 
 <div class="mb-3">
-    <span class="form-label d-block" id="@(Id)-problems-label">Anything wrong with it</span>
+    <span class="form-label d-block" id="@(Id)-problems-label">@Strings.Plants.ArrivalWrong</span>
     <div class="chip-row" role="group" aria-labelledby="@(Id)-problems-label">
         @foreach (var problem in Enum.GetValues<ArrivalProblem>())
         {
@@ -25,10 +25,10 @@
 </div>
 
 <div class="mb-3">
-    <label class="form-label" for="@(Id)-note">Note</label>
-    <input id="@(Id)-note" class="form-control" autocomplete="off" placeholder="e.g. Two leaves broken in the post"
+    <label class="form-label" for="@(Id)-note">@Strings.Plants.Note</label>
+    <input id="@(Id)-note" class="form-control" autocomplete="off" placeholder="@Strings.Plants.ArrivalNotePlaceholder"
            value="@Note" @oninput="e => NoteChanged.InvokeAsync(e.Value?.ToString())" />
-    <div class="form-text">The Sellers page adds these up, so you can see which sellers send plants in good shape.</div>
+    <div class="form-text">@Strings.Plants.ArrivalNoteHint</div>
 </div>
 
 @code {

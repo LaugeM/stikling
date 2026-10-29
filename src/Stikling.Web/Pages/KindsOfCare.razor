@@ -2,16 +2,14 @@
 @inject OwnCareKindService KindService
 @inject ILogger<KindsOfCare> Logger
 
-<PageTitle>Kinds of care · Stikling</PageTitle>
+<PageTitle>@Strings.Care.KindsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="settings?section=care">Settings</a>
-<h1>Kinds of care</h1>
+<a class="back-link" href="settings?section=care">@Strings.Care.BackToSettings</a>
+<h1>@Strings.Care.KindsTitle</h1>
 
 <p class="settings-hint">
-    The kinds of care you added yourself. They are in the care sheet next to the built-in ones.
-    What a kind counts as decides what it reaches: a watering feeds the watering reminder, a feed
-    can have products.
+    @Strings.Care.KindsHint
 </p>
 
 @if (message is not null)
@@ -21,27 +19,26 @@
 
 @if (loading)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Care.Loading</p>
 }
 else if (kinds.Count == 0)
 {
     <div class="empty-state">
-        <p>No kinds of your own yet.</p>
+        <p>@Strings.Care.KindsEmptyTitle</p>
         <p class="text-body-secondary">
-            Add a kind of care the app doesn't have, like misted, bottom watered or refilled the humidifier,
-            and log it like the others.
+            @Strings.Care.KindsEmptyText
         </p>
-        <button type="button" class="btn btn-primary mt-2" @onclick="StartNew">Add a kind of care</button>
+        <button type="button" class="btn btn-primary mt-2" @onclick="StartNew">@Strings.Care.KindsAdd</button>
     </div>
 }
 else
 {
     <div class="form-actions mt-3 mb-3">
-        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a kind of care</button>
+        <button type="button" class="btn btn-primary" @onclick="StartNew">@Strings.Care.KindsAddPlus</button>
     </div>
 
     <section class="settings-section">
-        <h2>Your kinds</h2>
+        <h2>@Strings.Care.KindsYourKinds</h2>
 
         <ul class="kind-list">
             @foreach (var kind in kinds)
@@ -57,7 +54,7 @@ else
     </section>
 }
 
-<Sheet Title="@(editing is null ? "Add a kind of care" : "Edit kind of care")" Open="sheetOpen" OpenChanged="SheetOpenChanged">
+<Sheet Title="@(editing is null ? Strings.Care.KindsSheetAdd : Strings.Care.KindsSheetEdit)" Open="sheetOpen" OpenChanged="SheetOpenChanged">
     @if (error is not null)
     {
         <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
@@ -65,10 +62,10 @@ else
 
     @if (confirmingRemove && editing is not null)
     {
-        <p>Remove @editing.Name? Entries already logged keep their name.</p>
+        <p>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.KindsRemoveConfirm, editing.Name))</p>
         <div class="care-actions">
-            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">Remove</button>
-            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirmingRemove = false">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">@Strings.Common.Remove</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirmingRemove = false">@Strings.Common.Cancel</button>
         </div>
     }
     else
@@ -79,19 +76,19 @@ else
         {
             <div class="form-check mt-2">
                 <input class="form-check-input" type="checkbox" id="kind-edit-entries" @bind="alsoChange" />
-                <label class="form-check-label" for="kind-edit-entries">Also change the @Labels.Count(entryCount, "entry", "entries") already logged</label>
+                <label class="form-check-label" for="kind-edit-entries">@Plural.Of(entryCount, Strings.Care.KindsAlsoChange_One, Strings.Care.KindsAlsoChange_Other)</label>
             </div>
         }
 
         <div class="care-actions">
             <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(name))" @onclick="SaveAsync">
-                @(editing is null ? "Add" : "Save")
+                @(editing is null ? Strings.Common.Add : Strings.Common.Save)
             </button>
             @if (editing is not null)
             {
-                <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => confirmingRemove = true">Remove</button>
+                <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => confirmingRemove = true">@Strings.Common.Remove</button>
             }
-            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CloseSheet">Cancel</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CloseSheet">@Strings.Common.Cancel</button>
         </div>
     }
 </Sheet>
@@ -124,11 +121,11 @@ else
     {
         var counts = kind.CountsAs switch
         {
-            CareKind.Watered => "Counts as a watering",
-            CareKind.Fertilised => "Counts as a feed",
-            _ => "Counts as neither"
+            CareKind.Watered => Strings.Care.KindsUseWatered,
+            CareKind.Fertilised => Strings.Care.KindsUseFeed,
+            _ => Strings.Care.KindsUseNeither
         };
-        return kind.OnHistory ? $"{counts} · On the history" : counts;
+        return kind.OnHistory ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.KindsUseOnHistory, counts) : counts;
     }
 
     private void StartNew()
@@ -174,7 +171,7 @@ else
                 var trimmed = name.Trim();
                 if (kinds.FirstOrDefault(k => string.Equals(k.Name.Trim(), trimmed, StringComparison.CurrentCultureIgnoreCase)) is { } existing)
                 {
-                    error = $"You already have {existing.Name}. Tap it in the list to change it.";
+                    error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.KindsAlreadyHave, existing.Name);
                     return;
                 }
                 await KindService.AddAsync(name, countsAs, onHistory);
@@ -186,7 +183,7 @@ else
                 await KindService.SetOnHistoryAsync(editing.Id, onHistory);
                 var changed = await KindService.SetCountsAsAsync(editing.Id, countsAs, countsChanged && alsoChange);
                 if (countsChanged && alsoChange && changed < entryCount)
-                    message = $"Changed {changed} of the {Labels.Count(entryCount, "entry", "entries")}. The rest have products or a feed on them, so they stay as they were.";
+                    message = string.Format(System.Globalization.CultureInfo.CurrentCulture, entryCount == 1 ? Strings.Care.KindsChanged_One : Strings.Care.KindsChanged_Other, changed, entryCount);
             }
 
             sheetOpen = false;

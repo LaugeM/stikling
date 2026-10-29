@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
@@ -60,7 +61,7 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
         if (roomId is { } id)
         {
             if (all.Find(id) is not { } room)
-                throw new ArgumentException("That room isn't there any more.", nameof(roomId));
+                throw new ArgumentException(Strings.Shared.RoomGone, nameof(roomId));
             added.RoomId = room.Id;
             existing = all.SpotNamed(room.Id, added.Name);
         }
@@ -78,7 +79,7 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
     {
         var all = await places.GetPlacesAsync();
         if (all.Find(id) is not { } place)
-            throw new ArgumentException("That room isn't there any more.", nameof(id));
+            throw new ArgumentException(Strings.Shared.RoomGone, nameof(id));
 
         var renamed = new Place { Name = RoomName.Clean(name) ?? "", RoomId = place.RoomId };
         if (renamed.Validate().FirstOrDefault() is { } error)
@@ -119,7 +120,7 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
     {
         var all = await places.GetPlacesAsync();
         if (all.Find(id) is not { } place)
-            throw new ArgumentException("That room isn't there any more.", nameof(id));
+            throw new ArgumentException(Strings.Shared.RoomGone, nameof(id));
 
         if (place.Outdoors == on)
             return;
@@ -141,12 +142,12 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
     {
         var all = await places.GetPlacesAsync();
         if (all.Find(id) is not { } place)
-            throw new ArgumentException("That room isn't there any more.", nameof(id));
+            throw new ArgumentException(Strings.Shared.RoomGone, nameof(id));
 
         var held = (await plants.GetAllAsync()).Count(p => !p.IsDeleted && all.IsIn(p.PlaceId, place.Id))
             + (await propagations.GetAllAsync()).Count(p => !p.IsDeleted && all.IsIn(p.PlaceId, place.Id));
         if (held > 0)
-            throw new InvalidOperationException($"{place.Name} still has something in it.");
+            throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.PlaceNotEmpty, place.Name));
 
         if (!place.IsSpot)
         {

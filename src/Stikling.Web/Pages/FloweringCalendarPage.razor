@@ -4,22 +4,22 @@
 @inject IFloweringMarkRepository MarkRepository
 @inject TimeProvider Time
 
-<PageTitle>Flowering · Stikling</PageTitle>
+<PageTitle>@Strings.Pests.FloweringPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="plants">Plants</a>
-<h1>Flowering</h1>
+<a class="back-link" href="plants">@Strings.Pests.FloweringBackToPlants</a>
+<h1>@Strings.Pests.FloweringTitle</h1>
 
 @if (calendar is null)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Pests.Loading</p>
 }
 else if (calendar.IsEmpty && calendar.InFlowerNow.Count == 0 && calendar.BudsNow.Count == 0)
 {
     <div class="empty-state">
-        <p><strong>Nothing has flowered yet</strong></p>
-        <p>Mark a plant as flowering from its page, under More. You can add past flowerings there too, so this calendar has something to go on.</p>
-        <a class="btn btn-link link-action mt-2" href="help#flowering">More about flowering in Help</a>
+        <p><strong>@Strings.Pests.FloweringEmptyTitle</strong></p>
+        <p>@Strings.Pests.FloweringEmptyBody</p>
+        <a class="btn btn-link link-action mt-2" href="help#flowering">@Strings.Pests.FloweringHelpLink</a>
     </div>
 }
 else
@@ -27,13 +27,13 @@ else
     @if (calendar.InFlowerNow.Count > 0 || calendar.BudsNow.Count > 0)
     {
         <section class="flowering-section">
-            <h2>In flower now</h2>
+            <h2>@Strings.Pests.FloweringInFlowerNow</h2>
             <ul class="flowering-list flowering-grid">
                 @foreach (var item in calendar.InFlowerNow)
                 {
                     <li>
                         <a class="flowering-plant" href="plants/@item.Plant.Id">@item.Plant.DisplayName</a>
-                        <span class="flowering-when">since @FloweringText.Date(item.Since, Today.Year)</span>
+                        <span class="flowering-when">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.FloweringSince, FloweringText.Date(item.Since, Today.Year))</span>
                     </li>
                 }
                 @foreach (var item in calendar.BudsNow)
@@ -50,7 +50,7 @@ else
     @if (calendar.UsuallyNextMonth.Count > 0)
     {
         <section class="flowering-section">
-            <h2>Usually in flower in @FloweringText.MonthName(calendar.NextMonth)</h2>
+            <h2>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.FloweringUsuallyIn, FloweringText.MonthName(calendar.NextMonth))</h2>
             <ul class="flowering-list flowering-grid">
                 @foreach (var item in calendar.UsuallyNextMonth)
                 {
@@ -66,7 +66,7 @@ else
     @if (!calendar.IsEmpty)
     {
         <section class="flowering-section page-full">
-            <h2>Through the year</h2>
+            <h2>@Strings.Pests.FloweringThroughYear</h2>
             <div class="flowering-year">
                 @foreach (var month in calendar.Months)
                 {
@@ -74,7 +74,7 @@ else
                         <h3>@FloweringText.MonthName(month.Month)</h3>
                         @if (month.Plants.Count == 0)
                         {
-                            <p class="flowering-when mb-0">Nothing yet</p>
+                            <p class="flowering-when mb-0">@Strings.Pests.FloweringNothingYet</p>
                         }
                         else
                         {

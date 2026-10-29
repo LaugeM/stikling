@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -92,54 +93,54 @@ public sealed class CareLog : Entity
         var errors = new List<string>();
 
         if (PlantId == Guid.Empty)
-            errors.Add("A care entry has to belong to a plant.");
+            errors.Add(Strings.Care.LogNeedsPlant);
 
         if (OccurredOn > today)
-            errors.Add("That date is in the future.");
+            errors.Add(Strings.Care.LogFuture);
 
         if (OwnKindId is not null)
         {
             if (string.IsNullOrWhiteSpace(OwnKindName))
-                errors.Add("An entry of your own kind of care needs its name.");
+                errors.Add(Strings.Care.LogOwnKindNeedsName);
             if (Kind is not (CareKind.Rotated or CareKind.Watered or CareKind.Fertilised))
-                errors.Add("A kind of your own can only count as a watering, a feed or neither.");
+                errors.Add(Strings.Care.LogOwnKindCountsAs);
         }
 
         if (Kind == CareKind.MoistureReading)
         {
             if (Moisture is null)
-                errors.Add("Give the moisture reading a number from 0 to 10.");
+                errors.Add(Strings.Care.LogReadingNeedsNumber);
             else if (Moisture is < 0 or > 10)
-                errors.Add("The moisture reading goes from 0 to 10.");
+                errors.Add(Strings.Care.LogReadingRange);
         }
         else if (Moisture is not null)
         {
-            errors.Add("Only a moisture reading has a number.");
+            errors.Add(Strings.Care.LogOnlyReadingHasNumber);
         }
 
         if (Products.Count > 0 && !CareKinds.TakesProducts(Kind))
-            errors.Add("Only fertilising and topping up can have a product.");
+            errors.Add(Strings.Care.LogOnlyFeedingHasProduct);
 
         if ((FeedName is not null || WaterLitres is not null) && !CareKinds.TakesProducts(Kind))
-            errors.Add("Only fertilising and topping up can have a feed.");
+            errors.Add(Strings.Care.LogOnlyFeedingHasFeed);
 
         if ((Ec is not null || Ph is not null) && !CareKinds.TakesProducts(Kind))
-            errors.Add("Only fertilising and topping up can have an EC or pH reading.");
+            errors.Add(Strings.Care.LogOnlyFeedingHasEcPh);
 
         if (Ec is < 0 or > 20)
-            errors.Add("The EC goes from 0 to 20 mS/cm.");
+            errors.Add(Strings.Care.LogEcRange);
 
         if (Ph is < 0 or > 14)
-            errors.Add("The pH goes from 0 to 14.");
+            errors.Add(Strings.Care.LogPhRange);
 
         if (WaterLitres <= 0)
-            errors.Add("The amount of water has to be more than 0.");
+            errors.Add(Strings.Care.LogWaterAmount);
 
         if (Products.Any(p => string.IsNullOrWhiteSpace(p.Name)))
-            errors.Add("A product on the entry needs a name.");
+            errors.Add(Strings.Care.LogProductNeedsName);
 
         if (Products.Any(p => p.Amount < 0))
-            errors.Add("A dose can't be less than 0.");
+            errors.Add(Strings.Care.LogDoseNegative);
 
         if (Products.Any(p => p.Per <= 0))
             errors.Add(Doses.NoWater);

@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Problems;
 
@@ -339,9 +340,9 @@ public sealed class ProblemService(
         update.Did = update.Did.Distinct().ToList();
         update.Note = Clean(update.Note);
         if (update.Trend is null && update.Did.Count == 0 && update.Note is null && photoCount == 0)
-            throw new ArgumentException("Say how it looks, what you did, or add a note or a photo.");
+            throw new ArgumentException(Strings.Pests.UpdateNeedsSomething);
         if (update.OccurredOn < problem.StartedOn)
-            throw new ArgumentException("An update can't be before the problem started.");
+            throw new ArgumentException(Strings.Pests.UpdateBeforeProblem);
         if (update.Validate(Today).FirstOrDefault() is { } error)
             throw new ArgumentException(error);
     }

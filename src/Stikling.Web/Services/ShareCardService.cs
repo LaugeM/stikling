@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
 using Stikling.Core.Sharing;
+using Strings = Stikling.Web.Resources;
 
 namespace Stikling.Web.Services;
 
@@ -51,9 +52,9 @@ public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : IAsyncD
     internal const string ModulePath = "./js/sharecard.js";
     internal const string FormatKey = "share-format";
 
-    public static readonly IReadOnlyList<(string Value, string Label)> Formats =
+    public static IReadOnlyList<(string Value, string Label)> Formats =>
     [
-        ("square", "Square"),
+        ("square", Strings.Shared.ShareFormatSquare),
         ("portrait", "4:5"),
         ("story", "9:16"),
     ];

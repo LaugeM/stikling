@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Rooms;
@@ -453,13 +454,13 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     private void CheckDate(DateOnly date)
     {
         if (date > time.Today())
-            throw new InvalidOperationException("The date can't be in the future.");
+            throw new InvalidOperationException(Strings.Plants.DateNotFuture);
     }
 
     private static void CheckSome(Plant plant, int count)
     {
         if (count < 1 || count >= plant.HowMany)
-            throw new InvalidOperationException("Some of them has to be fewer than all of them, and at least one.");
+            throw new InvalidOperationException(Strings.Plants.SomeFewer);
     }
 
     /// <summary>
@@ -479,11 +480,11 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     {
         CheckDate(date);
         if (plant.Id == into.Id)
-            throw new InvalidOperationException("A plant can't be potted with itself.");
+            throw new InvalidOperationException(Strings.Plants.PotSelf);
         if (!into.InCollection)
-            throw new InvalidOperationException("The plant to pot it with isn't in the collection.");
+            throw new InvalidOperationException(Strings.Plants.PotTargetNotInCollection);
         if (!plant.InCollection)
-            throw new InvalidOperationException("Only a plant in the collection can be potted with another.");
+            throw new InvalidOperationException(Strings.Plants.PotSourceNotInCollection);
 
         var before = plant.Copy();
         plant.PottedWithPlantId = into.Id;
@@ -527,9 +528,9 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     {
         CheckDate(date);
         if (plant.PottedWithPlantId is not { } otherId)
-            throw new InvalidOperationException("It isn't potted with another plant.");
+            throw new InvalidOperationException(Strings.Plants.NotPottedWith);
         if (plant.PottedWithSince is { } since && date < since)
-            throw new InvalidOperationException("The date can't be before it was potted together.");
+            throw new InvalidOperationException(Strings.Plants.DateBeforePotted);
 
         // Only one step: a merge can leave two plants potted with each other
         var other = otherId == plant.Id ? null : await plants.GetAsync(otherId);
@@ -649,7 +650,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             return "Added as a plant that lives with someone else";
         var text = plant.Origin == PlantOrigin.Propagated ? "Added as a propagated plant" : "Added to collection";
         if (plant.AcquiredOn is { Precision: not DatePrecision.Day } acquired)
-            text = $"{text}, {acquired.Text()}";
+            text = $"{text}, {acquired.StoredText()}";
         return plant.InQuarantine ? $"{text}\nPut in quarantine" : text;
     }
 }

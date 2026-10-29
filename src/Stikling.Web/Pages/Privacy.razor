@@ -4,161 +4,97 @@
    to plain HTML (tools/static-pages/render.cs), so it can be read without running the app. *@
 @inject IJSRuntime JS
 
-<PageTitle>Privacy · Stikling</PageTitle>
+<PageTitle>@Strings.Account.PrivacyPageTitle</PageTitle>
 
-<a class="back-link" href="settings?section=about">Settings</a>
-<h1>Privacy</h1>
+<a class="back-link" href="settings?section=about">@Strings.Account.PrivacyBack</a>
+<h1>@Strings.Account.PrivacyTitle</h1>
 
-<p class="privacy-updated">Last changed 11 October 2026</p>
+<p class="privacy-updated">@Strings.Account.PrivacyUpdated</p>
 
 <p>
-    Stikling is a free app that I make and run as a hobby project. I'm
-    <a href="https://github.com/LaugeM">LaugeM on GitHub</a>, and you can reach me at
-    <a href="mailto:support@stikling.app">support@stikling.app</a>. This page says what happens to what you
-    put into the app.
-</p>
+        @((MarkupString)Strings.Account.PrivacyIntro)
+    </p>
 
 <section class="privacy-section">
-    <h2>Without an account</h2>
+    <h2>@Strings.Account.PrivacyWithoutHeading</h2>
     <p>
-        Everything you add stays on your device, in the browser's own storage. None of it is sent anywhere, apart from error reports when something goes wrong.
-        The app is served by GitHub Pages, which sees each visit the way any website host does, including
-        your IP address. <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>
-        covers that.
+        @((MarkupString)Strings.Account.PrivacyWithoutText)
     </p>
 </section>
 
 <section class="privacy-section">
-    <h2>With an account</h2>
+    <h2>@Strings.Account.PrivacyWithHeading</h2>
     <p>
-        An account is optional, and only needed to keep the same plants on several devices. You need to be
-        13 or older to make one.
+        @((MarkupString)Strings.Account.PrivacyWithOptional)
     </p>
     <p>
-        <strong>Signing in</strong> is handled by <a href="https://clerk.com/legal/privacy">Clerk</a>, a company
-        in the United States. Clerk keeps your email address, and your name and profile picture if you sign in
-        with Google, Facebook or Discord, along with when you signed in and, for each device you're signed in on, its
-        browser, IP address and rough location. If you sign in with your email, Clerk sends the code to it.
+        @((MarkupString)Strings.Account.PrivacyWithSignIn)
     </p>
     <p>
-        <strong>What you add in the app</strong>, like plants, propagations, care, pests, photos and settings, is
-        sent to the Stikling server so your other devices get it too. The server runs on Microsoft Azure in
-        Poland. Only people in your collection can get at it through the app, and for now that is only you.
-        As the one who runs the server I can technically reach the database, but I only look at it to fix a
-        problem you've told me about.
+        @((MarkupString)Strings.Account.PrivacyWithData)
     </p>
     <p>
-        <strong>Notifications</strong>, if you turn them on, send the server your time zone and the time you chose, the text of
-        the next 30 days of notifications, which can name your plants, and your device's push address. The text is worked out on
-        your device. The server keeps it so it can send each day's notification at your time without the app open. The message
-        goes through the push service of your browser (Mozilla, Google or Apple), which carries it encrypted and can't read it.
-        Turning notifications off on a device removes its push address from the server, and deleting your account removes everything.
+        @((MarkupString)Strings.Account.PrivacyWithNotifications)
     </p>
 </section>
 
 <section class="privacy-section">
-    <h2>Google Photos</h2>
+    <h2>@Strings.Account.PrivacyGoogleHeading</h2>
     <p>
-        If you turn on Pick from Google Photos in Settings, Stikling can open Google Photos so you can choose
-        photos from there. Stikling only gets the photos you pick, when you pick them. It can't see, change or
-        delete anything else in your Google Photos.
+        @((MarkupString)Strings.Account.PrivacyGoogle1)
     </p>
     <p>
-        The photos go straight from Google to your device, never through Stikling's server. They're kept on
-        your device like photos from the phone's gallery, and synced like any other photo if you have an
-        account. Google gives the app access for an hour at a time. That access is only held by the open page.
-        It's never saved and never sent anywhere.
+        @((MarkupString)Strings.Account.PrivacyGoogle2)
     </p>
     <p>
-        Stikling's use of information received from Google APIs adheres to the
-        <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
-        including the Limited Use requirements.
+        @((MarkupString)Strings.Account.PrivacyGoogle3)
     </p>
 </section>
 
 <section class="privacy-section">
-    <h2>Public pages</h2>
+    <h2>@Strings.Account.PrivacyPublicHeading</h2>
     <p>
-        If you're signed in, you can turn on a link for one plant or propagation. Anyone with the link can
-        open its page, without an account. The page shows its name, the line under it, its photos and
-        milestones, and your notes on it if you leave them on. The line starts as the one on the share card,
-        which can name the plant it was taken from or say it was a gift, and you can change it. The page never
-        shows the room, the price, the shop or person it came from, who it went to, its tags, pots or care.
-        Photos you leave out aren't on it.
+        @((MarkupString)Strings.Account.PrivacyPublic1)
     </p>
     <p>
-        The page follows the plant, so new photos and notes show up on it after the next sync. Search engines
-        are asked not to list it. When you turn the link off, or delete the plant, the page stops working
-        within a few minutes, though a site that showed a preview of the link may keep its copy of the picture.
-        To protect the server, it uses the IP address of someone opening a page for a moment to limit how often
-        pages can be loaded, and doesn't keep it.
+        @((MarkupString)Strings.Account.PrivacyPublic2)
     </p>
 </section>
 
 <section class="privacy-section" id="error-reports">
-    <h2>Error reports</h2>
+    <h2>@Strings.Account.PrivacyErrorsHeading</h2>
     <p>
-        When something goes wrong in the app or on the server, a report of what failed is sent to
-        <a href="https://sentry.io/privacy/">Sentry</a>, a company in the United States, which stores it in
-        Germany. It's how problems get found and fixed when nobody has written in about them. A report has the
-        kind of error and where in the code it happened, but not the error's own message. It also has the app's
-        version, your browser and system, the address of the screen you were on, which only holds ids, and the
-        screens you opened just before. It doesn't have your account or email address, or your plants, notes or
-        photos. Sentry sees your IP address when a report arrives, the way any website does, and is set not to
-        keep it. Reports are kept for 30 days.
+        @((MarkupString)Strings.Account.PrivacyErrors1)
     </p>
     <p>
-        You can turn off reports from the app with Send error reports, under Your data in Settings. The server's
-        reports don't depend on that switch, since they're about the server and hold the same kind of information.
+        @((MarkupString)Strings.Account.PrivacyErrors2)
     </p>
 </section>
 
 <section class="privacy-section">
-    <h2>What Stikling doesn't do</h2>
+    <h2>@Strings.Account.PrivacyDoesntHeading</h2>
     <p>
-        There are no ads, no analytics and no tracking. Your data isn't sold or shared with anyone other than
-        the services named on this page, and it's only used to run the app. Error reports are only used to fix
-        problems. The app doesn't use cookies of its own. Clerk sets the cookies it needs to keep you signed in, and Google may set its own if you use
-        Pick from Google Photos.
+        @((MarkupString)Strings.Account.PrivacyDoesntText)
     </p>
 </section>
 
 <section class="privacy-section">
-    <h2>How long it's kept</h2>
+    <h2>@Strings.Account.PrivacyKeptHeading</h2>
     <p>
-        What you delete in the app, like a plant, a care log or a photo, is removed from the server as soon as
-        the deletion syncs. Only its id and the dates it was added, changed and deleted are kept, so your other
-        devices know to delete it too. A photo's images are deleted completely. The database's automatic
-        backups still have the earlier version for up to 7 days. When you merge two rooms or spots,
-        the one merged away is kept as it was, since the app still uses it to find where things went.
+        @((MarkupString)Strings.Account.PrivacyKept1)
     </p>
     <p>
-        Everything else is kept as long as you have the account. When you delete it on the Account page in Settings, your plants, photos
-        and settings are erased from the server straight away, and Clerk deletes your sign-in. The database's
-        automatic backups still hold a copy for up to 7 days, after which it's gone. The server keeps a note
-        of the id your sign-in had at Clerk, so a device that is still signed in can't upload it all again.
-        Once Clerk has deleted your sign-in, that id no longer leads to anything. The
-        <a href="deletion">deleting your data</a> page has the steps.
+        @((MarkupString)Strings.Account.PrivacyKept2)
     </p>
     <p>
-        The server's logs are kept for 30 days. They note when the server starts and stops, the database
-        commands it runs without the values in them, and what went wrong when something fails, which can
-        include the id of a record. They don't hold your IP address, your email address, your plants or your
-        photos.
+        @((MarkupString)Strings.Account.PrivacyKept3)
     </p>
 </section>
 
 <section class="privacy-section">
-    <h2>Your rights</h2>
+    <h2>@Strings.Account.PrivacyRightsHeading</h2>
     <p>
-        You can download everything the server holds about you with <em>Download your data</em> on the
-        Account page in Settings. It's a ZIP with your plants and everything else you added, deleted things as
-        they are kept, your photos, your settings, and what Clerk has about you. A backup, under Backup and
-        storage, has what is on the device you make it on. You can change anything in the app, and delete
-        your account whenever you like. For anything else, like a question about what is kept,
-        write to <a href="mailto:support@stikling.app">support@stikling.app</a>. If you think your data is
-        handled wrongly, you can complain to the Danish Data Protection Agency,
-        <a href="https://www.datatilsynet.dk">Datatilsynet</a>.
+        @((MarkupString)Strings.Account.PrivacyRights)
     </p>
 </section>
 

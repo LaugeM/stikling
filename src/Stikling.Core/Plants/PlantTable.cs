@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using Stikling.Core.Care;
 using System.Globalization;
 using Stikling.Core.Fields;
@@ -80,13 +81,30 @@ public static class PlantTable
 
     public static string Header(PlantColumn column) => column switch
     {
-        PlantColumn.EverydayName => "Everyday name",
-        PlantColumn.Source => "From",
-        PlantColumn.Number => "No.",
-        PlantColumn.LikesLight => "Likes light",
-        PlantColumn.LikesWater => "Water",
-        PlantColumn.LikesHumidity => "Humidity",
-        PlantColumn.Season => "Season",
+        PlantColumn.Name => Strings.Plants.HeaderName,
+        PlantColumn.Cultivar => Strings.Plants.HeaderCultivar,
+        PlantColumn.Watered => Strings.Plants.HeaderWatered,
+        PlantColumn.Fed => Strings.Plants.HeaderFed,
+        PlantColumn.Genus => Strings.Plants.HeaderGenus,
+        PlantColumn.Species => Strings.Plants.HeaderSpecies,
+        PlantColumn.EverydayName => Strings.Plants.HeaderEverydayName,
+        PlantColumn.Room => Strings.Plants.HeaderRoom,
+        PlantColumn.Got => Strings.Plants.HeaderGot,
+        PlantColumn.Origin => Strings.Plants.HeaderOrigin,
+        PlantColumn.Raised => Strings.Plants.HeaderRaised,
+        PlantColumn.Source => Strings.Plants.HeaderSource,
+        PlantColumn.Price => Strings.Plants.HeaderPrice,
+        PlantColumn.Medium => Strings.Plants.HeaderMedium,
+        PlantColumn.LikesLight => Strings.Plants.HeaderLikesLight,
+        PlantColumn.LikesWater => Strings.Plants.HeaderLikesWater,
+        PlantColumn.LikesHumidity => Strings.Plants.HeaderLikesHumidity,
+        PlantColumn.Season => Strings.Plants.HeaderSeason,
+        PlantColumn.Repotted => Strings.Plants.HeaderRepotted,
+        PlantColumn.Moisture => Strings.Plants.HeaderMoisture,
+        PlantColumn.Status => Strings.Plants.HeaderStatus,
+        PlantColumn.Tags => Strings.Plants.HeaderTags,
+        PlantColumn.Added => Strings.Plants.HeaderAdded,
+        PlantColumn.Number => Strings.Plants.HeaderNumber,
         _ => column.ToString()
     };
 

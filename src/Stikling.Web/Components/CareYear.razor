@@ -25,7 +25,7 @@
                 else
                 {
                     <button type="button" class="cal-row cal-row-button" aria-expanded="@(open ? "true" : "false")"
-                            aria-label="@($"{MonthName(month)} {month.Year}: {marked.Count} {(marked.Count == 1 ? "day" : "days")} with care")"
+                            aria-label="@F(marked.Count, Strings.Plants.CalendarMonthDays_One, Strings.Plants.CalendarMonthDays_Other, MonthName(month), month.Year, marked.Count)"
                             @onclick="() => openMonth = open ? null : key">
                         <span class="cal-month">@MonthName(month)</span>
                         <span class="cal-days" aria-hidden="true">
@@ -40,7 +40,7 @@
                         <ul class="cal-entries">
                             @foreach (var day in marked)
                             {
-                                <li>@day.Date.ToString("d MMM", System.Globalization.CultureInfo.InvariantCulture): @MarkText(day.Mark)</li>
+                                <li>@F(Strings.Plants.CalendarDayMark, day.Date.ToString(Strings.Plants.CalendarDayFormat, TextCulture.ForDates), MarkText(day.Mark))</li>
                             }
                         </ul>
                     }
@@ -48,21 +48,26 @@
             </div>
         }
         <div class="cal-legend" aria-hidden="true">
-            <span><span class="cal-day cal-watered"></span> Watered</span>
-            <span><span class="cal-day cal-fed"></span> Fed</span>
-            <span><span class="cal-day cal-reading"></span> Meter reading</span>
+            <span><span class="cal-day cal-watered"></span> @Strings.Plants.CalendarWatered</span>
+            <span><span class="cal-day cal-fed"></span> @Strings.Plants.CalendarFed</span>
+            <span><span class="cal-day cal-reading"></span> @Strings.Plants.CalendarReading</span>
         </div>
-        <p class="cal-hint">Tap a month to see its days.</p>
+        <p class="cal-hint">@Strings.Plants.CalendarHint</p>
     </div>
 }
 
 @code {
     [Parameter] public CareCalendar? Calendar { get; set; }
 
+    private static string F(string format, params object?[] args) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
+
+    private static string F(int count, string one, string other, params object?[] args) => F(count == 1 ? one : other, args);
+
     private int? openMonth;
 
     private static string MonthName(CareCalendarMonth month) =>
-        new DateOnly(month.Year, month.Month, 1).ToString("MMM", System.Globalization.CultureInfo.InvariantCulture);
+        new DateOnly(month.Year, month.Month, 1).ToString("MMM", TextCulture.ForDates);
 
     private static string ClassFor(CareCalendarDay day) => day.Mark switch
     {
@@ -75,19 +80,19 @@
 
     private static string MarkText(CareDayMark mark) => mark switch
     {
-        CareDayMark.Fed => "fed",
-        CareDayMark.Watered => "watered",
-        _ => "meter reading"
+        CareDayMark.Fed => Strings.Plants.CalendarFedDay,
+        CareDayMark.Watered => Strings.Plants.CalendarWateredDay,
+        _ => Strings.Plants.CalendarReadingDay
     };
 
     private static string TitleFor(CareCalendarDay day)
     {
-        var date = day.Date.ToString("d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+        var date = Labels.Date(day.Date);
         return day.Mark switch
         {
-            CareDayMark.Fed => $"{date}: fed",
-            CareDayMark.Watered => $"{date}: watered",
-            CareDayMark.Reading => $"{date}: meter reading",
+            CareDayMark.Fed => F(Strings.Plants.CalendarDayMark, date, Strings.Plants.CalendarFedDay),
+            CareDayMark.Watered => F(Strings.Plants.CalendarDayMark, date, Strings.Plants.CalendarWateredDay),
+            CareDayMark.Reading => F(Strings.Plants.CalendarDayMark, date, Strings.Plants.CalendarReadingDay),
             _ => date
         };
     }

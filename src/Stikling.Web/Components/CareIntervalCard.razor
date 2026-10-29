@@ -8,9 +8,9 @@
             <span class="care-tile" aria-hidden="true">@Icon</span>
             <div class="care-head-text">
                 <div class="care-label">@Group.Label</div>
-                <div class="care-meta">Done for @Labels.Plants(all.Items.Count)</div>
+                <div class="care-meta">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.CardDoneFor, Labels.Plants(all.Items.Count)))</div>
             </div>
-            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => UndoAsync(all)">Undo</button>
+            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => UndoAsync(all)">@Strings.Care.CardUndo</button>
         </div>
     }
     else
@@ -23,7 +23,7 @@
             </div>
             @if (!Coming && Remaining.Count >= 2)
             {
-                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="DoneForAllAsync">Done for all</button>
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="DoneForAllAsync">@Strings.Care.CardDoneForAll</button>
             }
         </div>
         <ul class="care-rows">
@@ -33,15 +33,15 @@
                 {
                     <li @key="item.Plant.Id" class="care-row-done">
                         <span class="care-done-name">@item.Plant.DisplayName</span>
-                        <span class="care-done-text">Done</span>
+                        <span class="care-done-text">@Strings.Common.Done</span>
                         <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
-                                aria-label="@($"Undo {Group.Label} for {item.Plant.DisplayName}")"
-                                @onclick="() => UndoAsync(action)">Undo</button>
+                                aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.CardUndoFor, Group.Label, item.Plant.DisplayName))"
+                                @onclick="() => UndoAsync(action)">@Strings.Care.CardUndo</button>
                     </li>
                 }
                 else
                 {
-                    <TodayRow @key="item.Plant.Id" DoneLabel="@($"{Group.Label} done")" OnDone="() => DoneAsync(item)"
+                    <TodayRow @key="item.Plant.Id" DoneLabel="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.CardDoneLabel, Group.Label))" OnDone="() => DoneAsync(item)"
                               OnPutOff="days => PutOffAsync(item, days)">
                         <a class="item-card" href="plants/@item.Plant.Id">
                             <SubjectThumb Subject="item.Plant" />
@@ -58,7 +58,7 @@
         </ul>
         @if (Group.Items.Count > Preview && !showAll)
         {
-            <button type="button" class="btn btn-link btn-sm link-action care-show-all" @onclick="() => showAll = true">Show all @Group.Items.Count</button>
+            <button type="button" class="btn btn-link btn-sm link-action care-show-all" @onclick="() => showAll = true">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.CardShowAll, Group.Items.Count))</button>
         }
     }
 </section>
@@ -107,12 +107,12 @@
 
     private string RowMeta(IntervalItem item)
     {
-        var last = item.Last is { } day ? $"last {Labels.DaysAgo(Today.DayNumber - day.DayNumber)}" : "first time";
+        var last = item.Last is { } day ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.CardLast, Labels.DaysAgo(Today.DayNumber - day.DayNumber)) : Strings.Care.CardFirstTime;
         if (!Coming)
             return last;
 
         var days = item.Due.DayNumber - Today.DayNumber;
-        var due = days <= 0 ? "due today" : days == 1 ? "due tomorrow" : $"due in {days} days";
+        var due = days <= 0 ? Strings.Care.CardDueToday : days == 1 ? Strings.Care.CardDueTomorrow : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.CardDueIn, days);
         return $"{due} · {last}";
     }
 

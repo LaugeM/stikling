@@ -1,4 +1,5 @@
 using Stikling.Core.Away;
+using Strings = Stikling.Core.Resources;
 using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
@@ -57,7 +58,7 @@ public sealed record TodaySections
 
     /// <summary>Treatments first, then the cases only being watched, each under its own heading when there are any.</summary>
     public IReadOnlyList<DuePestGroup> DuePests =>
-        new[] { new DuePestGroup("Treatment due", DueTreatments), new DuePestGroup("Check for pests", DueChecks) }
+        new[] { new DuePestGroup(Strings.Care.TreatmentDue, DueTreatments), new DuePestGroup(Strings.Care.CheckForPests, DueChecks) }
             .Where(g => g.Cases.Count > 0).ToList();
 
     /// <summary>The sections for the day, worked out from the records the way Today shows them.</summary>

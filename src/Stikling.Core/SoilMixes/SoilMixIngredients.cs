@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.SoilMixes;
 
@@ -8,18 +9,18 @@ namespace Stikling.Core.SoilMixes;
 /// </summary>
 public static class SoilMixIngredients
 {
-    public static readonly IReadOnlyList<string> Common =
+    public static IReadOnlyList<string> Common =>
     [
-        "Potting soil",
-        "Perlite",
-        "LECA",
-        "Bark",
-        "Pumice",
-        "Coco coir",
-        "Sphagnum",
-        "Worm castings",
-        "Sand",
-        "Charcoal"
+        Strings.Supplies.IngredientPottingSoil,
+        Strings.Supplies.IngredientPerlite,
+        Strings.Supplies.IngredientLeca,
+        Strings.Supplies.IngredientBark,
+        Strings.Supplies.IngredientPumice,
+        Strings.Supplies.IngredientCocoCoir,
+        Strings.Supplies.IngredientSphagnum,
+        Strings.Supplies.IngredientWormCastings,
+        Strings.Supplies.IngredientSand,
+        Strings.Supplies.IngredientCharcoal
     ];
 
     /// <summary>The common ones plus anything already used in a mix, without repeats.</summary>

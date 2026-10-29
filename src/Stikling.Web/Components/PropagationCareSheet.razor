@@ -16,7 +16,7 @@
             @if (kind == PropagationCareKind.MoistureReading)
             {
                 <div>
-                    <div class="form-label" id="care-moisture-label">Moisture reading</div>
+                    <div class="form-label" id="care-moisture-label">@Strings.Propagations.CareMoistureReading</div>
                     <div class="chip-row moisture-row" role="group" aria-labelledby="care-moisture-label">
                         @for (var reading = 0; reading <= 10; reading++)
                         {
@@ -36,12 +36,12 @@
 
     @if (!showDate)
     {
-        <button type="button" class="btn btn-link btn-sm p-0 mt-2" @onclick="() => showDate = true">Another day?</button>
+        <button type="button" class="btn btn-link btn-sm p-0 mt-2" @onclick="() => showDate = true">@Strings.Propagations.CareAnotherDay</button>
     }
     else
     {
         <div class="mt-2">
-            <label class="form-label" for="care-date">When</label>
+            <label class="form-label" for="care-date">@Strings.Propagations.CareWhen</label>
             <input type="date" id="care-date" class="form-control form-control-sm"
                    min="@Propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")"
                    value="@occurredOn.ToString("yyyy-MM-dd")" @onchange="DateChanged" />
@@ -52,7 +52,7 @@
 @if (Logs.Count > 0)
 {
     <div class="sheet-section">
-        <h3 class="section-label">History</h3>
+        <h3 class="section-label">@Strings.Propagations.CareHistory</h3>
         <ul class="care-list">
             @foreach (var entry in Logs)
             {
@@ -60,7 +60,7 @@
                     <div class="care-entry care-removable">
                         <span class="care-what">@PropagationCareService.Describe(entry)</span>
                         <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
-                        <button type="button" class="care-remove" aria-label="Remove" disabled="@busy" @onclick="() => RemoveAsync(entry)">
+                        <button type="button" class="care-remove" aria-label="@Strings.Common.Remove" disabled="@busy" @onclick="() => RemoveAsync(entry)">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
                         </button>
                     </div>
@@ -97,12 +97,12 @@
 
     protected override void OnInitialized() => occurredOn = Today;
 
-    private string When => occurredOn == Today ? "today" : $"on {Labels.Date(occurredOn)}";
-
-    private string ButtonText(PropagationCareKind kind) => kind switch
+    private string ButtonText(PropagationCareKind kind) => (kind, occurredOn == Today) switch
     {
-        PropagationCareKind.ChangedWater => $"Changed the water {When}",
-        _ => $"Watered {When}"
+        (PropagationCareKind.ChangedWater, true) => Strings.Propagations.CareChangedWaterToday,
+        (PropagationCareKind.ChangedWater, false) => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CareChangedWaterOn, Labels.Date(occurredOn)),
+        (_, true) => Strings.Propagations.CareWateredToday,
+        _ => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CareWateredOn, Labels.Date(occurredOn))
     };
 
     private void DateChanged(ChangeEventArgs e)
@@ -128,7 +128,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Logging care on the propagation failed");
-            error = "Couldn't save that. Try again.";
+            error = Strings.Propagations.CareSaveFailed;
         }
         busy = false;
     }

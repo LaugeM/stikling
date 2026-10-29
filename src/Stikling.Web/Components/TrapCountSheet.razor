@@ -13,38 +13,38 @@
 
     <div class="row g-2">
         <div class="col-7">
-            <label class="form-label" for="trap-count">On the trap</label>
+            <label class="form-label" for="trap-count">@Strings.Pests.TrapCountOnTrap</label>
             <input type="number" id="trap-count" class="form-control form-control-sm" min="0" inputmode="numeric"
-                   placeholder="e.g. 12" @bind="onTrap" @bind:event="oninput" />
+                   placeholder="@Strings.Pests.TrapCountPlaceholder" @bind="onTrap" @bind:event="oninput" />
         </div>
         <div class="col-5">
-            <label class="form-label" for="trap-date">When</label>
+            <label class="form-label" for="trap-date">@Strings.Pests.TrapCountWhen</label>
             <input type="date" id="trap-date" class="form-control form-control-sm"
                    max="@Today.ToString("yyyy-MM-dd")" @bind="occurredOn" />
         </div>
     </div>
-    <div class="form-text">Count everything on it, not only the new ones. The app works out what's new.</div>
+    <div class="form-text">@Strings.Pests.TrapCountHint</div>
 
     <div class="form-check mt-2">
         <input class="form-check-input" type="checkbox" id="trap-new" @bind="newTrap" />
         <label class="form-check-label" for="trap-new">
-            @(onTrap is null ? "Put up a new trap" : "Put up a new trap after counting")
+            @(onTrap is null ? Strings.Pests.TrapCountNewTrap : Strings.Pests.TrapCountNewTrapAfter)
         </label>
     </div>
 
     <div class="mt-2">
-        <label class="form-label" for="trap-notes">Notes</label>
+        <label class="form-label" for="trap-notes">@Strings.Pests.TrapCountNotes</label>
         <input type="text" id="trap-notes" class="form-control form-control-sm"
-               placeholder="e.g. Yellow trap by the window" @bind="notes" @bind:event="oninput" />
+               placeholder="@Strings.Pests.TrapCountNotesPlaceholder" @bind="notes" @bind:event="oninput" />
     </div>
 
     <div class="care-actions">
         <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="LogAsync">
-            @(onTrap is null && newTrap ? "Log new trap" : "Log count")
+            @(onTrap is null && newTrap ? Strings.Pests.TrapCountLogNew : Strings.Pests.TrapCountLogCount)
         </button>
         @if (OnCancel.HasDelegate)
         {
-            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OnCancel">Cancel</button>
+            <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OnCancel">@Strings.Common.Cancel</button>
         }
     </div>
 </div>
@@ -94,7 +94,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the trap count failed");
-            error = $"Couldn't log that: {ex.Message}";
+            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.TrapCountFailed, ex.Message);
         }
         finally
         {

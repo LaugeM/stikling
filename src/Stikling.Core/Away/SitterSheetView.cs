@@ -1,5 +1,7 @@
 using Stikling.Core.Models;
 
+using Strings = Stikling.Core.Resources;
+
 namespace Stikling.Core.Away;
 
 /// <summary>One way of watering, and the steps for it.</summary>
@@ -15,9 +17,9 @@ public sealed record SitterStep(string? Name, string Text);
 /// <param name="TopUp">The line about plants in water or on a reservoir, when any card tops up.</param>
 public sealed record SitterBox(IReadOnlyList<string> Check, IReadOnlyList<SitterStep> Steps, string? TopUp)
 {
-    public const string Heading = "Before you water";
+    public static string Heading => Strings.Care.SitterHeading;
 
-    public const string StepsHeading = "If it needs water";
+    public static string StepsHeading => Strings.Care.SitterStepsHeading;
 }
 
 /// <summary>A plant or propagation on the sheet, with the lines for its card.</summary>

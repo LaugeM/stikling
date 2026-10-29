@@ -1,3 +1,5 @@
+using System.Globalization;
+using Strings = Stikling.Core.Resources;
 using System.Text.Json.Serialization;
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
@@ -86,7 +88,7 @@ public static class SharePage
 
         var milestones = new List<Mark>();
         if (plant.AcquiredOn is { Precision: DatePrecision.Day } acquired)
-            milestones.Add(new Mark(acquired.Start, 0, rooting is null ? "Got it" : "Potted up"));
+            milestones.Add(new Mark(acquired.Start, 0, rooting is null ? Strings.Propagations.MarkGotIt : Strings.Propagations.MarkPottedUp));
 
         var sections = new List<Section>();
         if (rooting is not null)
@@ -159,7 +161,7 @@ public static class SharePage
         if (history is null)
             return marks;
         marks = marks.Where(m => m.Day > history.ArrivedOn).ToList();
-        marks.Add(new Mark(history.ArrivedOn, 0, "Got it"));
+        marks.Add(new Mark(history.ArrivedOn, 0, Strings.Propagations.MarkGotIt));
         return marks;
     }
 
@@ -168,18 +170,18 @@ public static class SharePage
         var seed = p.Type == PropagationType.Seed;
         var milestones = new List<Mark>
         {
-            new(p.StartedOn, 0, $"{(seed ? "Sown" : "Started")}{ShareCardText.MediumPhrase(p.Medium)}")
+            new(p.StartedOn, 0, string.Format(CultureInfo.CurrentCulture, seed ? Strings.Propagations.MarkSown : Strings.Propagations.MarkStarted, ShareCardText.MediumPhrase(p.Medium)))
         };
         if (p.FirstRootOn is { } root)
-            milestones.Add(new Mark(root, 1, "First root"));
+            milestones.Add(new Mark(root, 1, Strings.Propagations.MarkFirstRoot));
         if (p.FirstLeafOn is { } leaf)
-            milestones.Add(new Mark(leaf, 2, "First leaf"));
+            milestones.Add(new Mark(leaf, 2, Strings.Propagations.MarkFirstLeaf));
         if (p.FirstGerminatedOn is { } up)
-            milestones.Add(new Mark(up, 3, "First seed germinated"));
+            milestones.Add(new Mark(up, 3, Strings.Propagations.MarkFirstGerminated));
         if (p.RootedOn is { } rooted)
-            milestones.Add(new Mark(rooted, 4, "Rooted"));
+            milestones.Add(new Mark(rooted, 4, Strings.Propagations.MarkRooted));
         if (includeFinish && p.FinishedOn is { } finished && p.Stage is PropagationStage.Done or PropagationStage.Failed)
-            milestones.Add(new Mark(finished, 5, p.Stage == PropagationStage.Done ? "Potted up" : "Didn't make it"));
+            milestones.Add(new Mark(finished, 5, p.Stage == PropagationStage.Done ? Strings.Propagations.MarkPottedUp : Strings.Propagations.MarkDidntMakeIt));
         return milestones;
     }
 
@@ -347,17 +349,17 @@ public static class SharePage
     private static string PropagatedText(TimelineEntry entry, IReadOnlyDictionary<Guid, Propagation> propagations)
     {
         if (entry.RelatedId is not { } id || !propagations.TryGetValue(id, out var propagation) || propagation.IsDeleted)
-            return "A propagation was started";
+            return Strings.Propagations.PropagatedOther;
         return propagation.Type switch
         {
-            PropagationType.Cutting => "A cutting was taken",
-            PropagationType.Corm => "A corm was taken",
-            PropagationType.Offset => "An offset was taken",
-            PropagationType.Seed => "Seeds were collected",
-            PropagationType.Division => "A division was made",
-            PropagationType.AirLayer => "An air layer was started",
-            PropagationType.Leaf => "A leaf cutting was taken",
-            _ => "A propagation was started"
+            PropagationType.Cutting => Strings.Propagations.PropagatedCutting,
+            PropagationType.Corm => Strings.Propagations.PropagatedCorm,
+            PropagationType.Offset => Strings.Propagations.PropagatedOffset,
+            PropagationType.Seed => Strings.Propagations.PropagatedSeed,
+            PropagationType.Division => Strings.Propagations.PropagatedDivision,
+            PropagationType.AirLayer => Strings.Propagations.PropagatedAirLayer,
+            PropagationType.Leaf => Strings.Propagations.PropagatedLeaf,
+            _ => Strings.Propagations.PropagatedOther
         };
     }
 }

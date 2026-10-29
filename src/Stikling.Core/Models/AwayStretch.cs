@@ -1,3 +1,5 @@
+using Strings = Stikling.Core.Resources;
+
 namespace Stikling.Core.Models;
 
 /// <summary>
@@ -18,5 +20,5 @@ public sealed class AwayStretch : Entity
     public bool IsOn(DateOnly day) => From <= day && day < Until;
 
     public IReadOnlyList<string> Validate() =>
-        Until > From ? [] : ["The day back has to be after the first day."];
+        Until > From ? [] : [Strings.Care.AwayBackAfterFirst];
 }

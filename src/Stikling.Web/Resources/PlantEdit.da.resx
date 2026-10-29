@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AddPlant" xml:space="preserve">
+    <value>Tilføj plante</value>
+  </data>
+  <data name="EditPlant" xml:space="preserve">
+    <value>Rediger plante</value>
+  </data>
+  <data name="AddingSeveral" xml:space="preserve">
+    <value>Tilføjer du flere? {0} eller {1}</value>
+  </data>
+  <data name="QuickAddLink" xml:space="preserve">
+    <value>Hurtig tilføjelse</value>
+  </data>
+  <data name="ImportLink" xml:space="preserve">
+    <value>importér et regneark</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Den plante findes ikke.</value>
+  </data>
+  <data name="LegendName" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="Nickname" xml:space="preserve">
+    <value>Kælenavn</value>
+  </data>
+  <data name="NicknamePlaceholder" xml:space="preserve">
+    <value>fx Stor monstera</value>
+  </data>
+  <data name="NameHint" xml:space="preserve">
+    <value>Giv den en slægt, et kælenavn eller begge dele.</value>
+  </data>
+  <data name="CollectionNumber" xml:space="preserve">
+    <value>Samlingsnummer</value>
+  </data>
+  <data name="CollectionNumberPlaceholder" xml:space="preserve">
+    <value>fx 117</value>
+  </data>
+  <data name="NumberHint" xml:space="preserve">
+    <value>Nummeret, du skriver på potten. Valgfrit.</value>
+  </data>
+  <data name="UseNumber" xml:space="preserve">
+    <value>Brug {0}</value>
+  </data>
+  <data name="WishMarkGot" xml:space="preserve">
+    <value>På din ønskeliste: markér den som fået</value>
+  </data>
+  <data name="DiedBeforeOne" xml:space="preserve">
+    <value>En som denne døde før: {0}.</value>
+  </data>
+  <data name="DiedBeforeSome" xml:space="preserve">
+    <value>Nogle som denne døde før: {0}.</value>
+  </data>
+  <data name="AlreadyHave" xml:space="preserve">
+    <value>Du har allerede {0}.</value>
+  </data>
+  <data name="AddingAgain" xml:space="preserve">
+    <value>Hvis du tilføjer den igen, får du en til.</value>
+  </data>
+  <data name="LegendCameFrom" xml:space="preserve">
+    <value>Hvor den kom fra</value>
+  </data>
+  <data name="HowYouGotIt" xml:space="preserve">
+    <value>Hvordan du fik den</value>
+  </data>
+  <data name="RaisedHelp" xml:space="preserve">
+    <value>Til et samlernummer eller en lokalitet, brug Lokalitet eller kode under navnet.</value>
+  </data>
+  <data name="WhenYouGotIt" xml:space="preserve">
+    <value>Hvornår du fik den</value>
+  </data>
+  <data name="DateHint" xml:space="preserve">
+    <value>Hvis du kun husker måneden eller året, så vælg det i stedet for at gætte på en dag.</value>
+  </data>
+  <data name="DateFromPhotos" xml:space="preserve">
+    <value>Sat til dagen for det ældste billede, så billederne kommer efter den i historikken.</value>
+  </data>
+  <data name="UseToday" xml:space="preserve">
+    <value>Brug i dag i stedet</value>
+  </data>
+  <data name="SameDateAs" xml:space="preserve">
+    <value>Samme dato som {0} ({1})</value>
+  </data>
+  <data name="ParentPlant" xml:space="preserve">
+    <value>Moderplante</value>
+  </data>
+  <data name="ParentNone" xml:space="preserve">
+    <value>Ikke en af mine / ukendt</value>
+  </data>
+  <data name="ParentNotMine" xml:space="preserve">
+    <value>Moderplanten er ikke min</value>
+  </data>
+  <data name="ParentStillRooting" xml:space="preserve">
+    <value>Det her er til en plante, der allerede vokser for sig selv. Slår den stadig rødder? {0}, og potte den op, når den er klar.</value>
+  </data>
+  <data name="ParentStillRootingLink" xml:space="preserve">
+    <value>Start en formering i stedet</value>
+  </data>
+  <data name="LivesElsewhere" xml:space="preserve">
+    <value>Ikke min, den bor hos en anden</value>
+  </data>
+  <data name="WhoseIsIt" xml:space="preserve">
+    <value>Hvis er den?</value>
+  </data>
+  <data name="WhosePlaceholder" xml:space="preserve">
+    <value>fx Mormor</value>
+  </data>
+  <data name="LivesElsewhereNote" xml:space="preserve">
+    <value>Den holdes ude af din planteliste og I dag. Fjern markeringen, når den bliver din.</value>
+  </data>
+  <data name="PricePaid" xml:space="preserve">
+    <value>Betalt pris</value>
+  </data>
+  <data name="MoreDetails" xml:space="preserve">
+    <value>Flere detaljer</value>
+  </data>
+  <data name="SectionArrival" xml:space="preserve">
+    <value>Hvordan den kom</value>
+  </data>
+  <data name="SectionLives" xml:space="preserve">
+    <value>Hvor den bor</value>
+  </data>
+  <data name="BackFromOutside" xml:space="preserve">
+    <value>Tilbage udefra</value>
+  </data>
+  <data name="BackFromOutsideNote" xml:space="preserve">
+    <value>Planter, der har været udenfor, tager ofte skadedyr med ind.</value>
+  </data>
+  <data name="BackQuarantine_One" xml:space="preserve">
+    <value>Sæt i karantæne i {0} dag</value>
+  </data>
+  <data name="BackQuarantine_Other" xml:space="preserve">
+    <value>Sæt i karantæne i {0} dage</value>
+  </data>
+  <data name="BackChecked" xml:space="preserve">
+    <value>Tjekket for skadedyr, ingen tegn</value>
+  </data>
+  <data name="LightWhereItStands" xml:space="preserve">
+    <value>Lys, hvor den står</value>
+  </data>
+  <data name="LightItLikes" xml:space="preserve">
+    <value>Lys, den kan lide</value>
+  </data>
+  <data name="Water" xml:space="preserve">
+    <value>Vand</value>
+  </data>
+  <data name="WaterDryOut" xml:space="preserve">
+    <value>Lad den tørre helt ud</value>
+  </data>
+  <data name="WaterDryPartly" xml:space="preserve">
+    <value>Lad den tørre delvist ud</value>
+  </data>
+  <data name="WaterEvenlyMoist" xml:space="preserve">
+    <value>Hold den jævnt fugtig</value>
+  </data>
+  <data name="Humidity" xml:space="preserve">
+    <value>Luftfugtighed</value>
+  </data>
+  <data name="HumidityLow" xml:space="preserve">
+    <value>Lav</value>
+  </data>
+  <data name="HumidityMedium" xml:space="preserve">
+    <value>Middel</value>
+  </data>
+  <data name="HumidityHigh" xml:space="preserve">
+    <value>Høj</value>
+  </data>
+  <data name="HumidityHelp" xml:space="preserve">
+    <value>Lav er et almindeligt rum, under cirka 40 %. Høj er 60 % eller mere, som i et skab eller ved siden af en luftfugter.</value>
+  </data>
+  <data name="GrowingSeason" xml:space="preserve">
+    <value>Vækstsæson</value>
+  </data>
+  <data name="GrowsAllYear" xml:space="preserve">
+    <value>Vokser hele året</value>
+  </data>
+  <data name="GrowsSummer" xml:space="preserve">
+    <value>Vokser om sommeren, hviler om vinteren</value>
+  </data>
+  <data name="GrowsWinter" xml:space="preserve">
+    <value>Vokser om vinteren, hviler om sommeren</value>
+  </data>
+  <data name="HowItRests" xml:space="preserve">
+    <value>Hvordan den hviler</value>
+  </data>
+  <data name="RestCooler" xml:space="preserve">
+    <value>Holdes køligere</value>
+  </data>
+  <data name="RestDrier" xml:space="preserve">
+    <value>Holdes tørrere</value>
+  </data>
+  <data name="RestCoolerAndDrier" xml:space="preserve">
+    <value>Holdes køligere og tørrere</value>
+  </data>
+  <data name="RestDiesBack" xml:space="preserve">
+    <value>Visner ned</value>
+  </data>
+  <data name="SectionPot" xml:space="preserve">
+    <value>Potte og jord</value>
+  </data>
+  <data name="TrackTransition" xml:space="preserve">
+    <value>Spor skiftet til semi-hydro</value>
+  </data>
+  <data name="TrackTransitionNote" xml:space="preserve">
+    <value>Tilføjer en tjekliste på dens side til vaskede rødder, den første vandrod og det første nye blad.</value>
+  </data>
+  <data name="OuterPot" xml:space="preserve">
+    <value>Yderpotte</value>
+  </data>
+  <data name="NoOuterPot" xml:space="preserve">
+    <value>Ingen yderpotte</value>
+  </data>
+  <data name="OuterWaterTopic" xml:space="preserve">
+    <value>at have vand i yderpotten</value>
+  </data>
+  <data name="OuterWater" xml:space="preserve">
+    <value>Hav vand i yderpotten</value>
+  </data>
+  <data name="OuterWaterInfo" xml:space="preserve">
+    <value>Yderpotten holder bevidst på vandet, og planten suger det op, som i en selvvandende potte. Lad den være slået fra til en almindelig yderpotte, som du tømmer efter vanding.</value>
+  </data>
+  <data name="HowManyInPot" xml:space="preserve">
+    <value>Hvor mange i potten</value>
+  </data>
+  <data name="HowManyInPotHint" xml:space="preserve">
+    <value>Til aflæggere eller stiklinger, der står sammen i én potte</value>
+  </data>
+  <data name="SectionWatering" xml:space="preserve">
+    <value>Vanding</value>
+  </data>
+  <data name="RemindToWater" xml:space="preserve">
+    <value>Mind mig om at vande</value>
+  </data>
+  <data name="RemindNote" xml:space="preserve">
+    <value>I dag beder dig tjekke den, når den sandsynligvis er tør, når den har fået vand nogle gange.</value>
+  </data>
+  <data name="RemindNoteOff" xml:space="preserve">
+    <value>I dag beder dig tjekke den, når den sandsynligvis er tør, når den har fået vand nogle gange. Påmindelsen slås til i Indstillinger, og den er slået fra der nu.</value>
+  </data>
+  <data name="WaterAt" xml:space="preserve">
+    <value>Vand ved</value>
+  </data>
+  <data name="WaterAtHelp" xml:space="preserve">
+    <value>Den måling på fugtmåleren, du vander ved, fra 1 til 10. 3 er toppen af den røde, tørre del på de fleste målere. Sæt den højere til en plante, der holdes mere fugtig, som en fredslilje.</value>
+  </data>
+  <data name="HowYouWater" xml:space="preserve">
+    <value>Hvordan du vander den</value>
+  </data>
+  <data name="WaterByHelp" xml:space="preserve">
+    <value>Kommer på arket til en plantesitter. Ikke oplyst betyder den måde, du vælger til arket.</value>
+  </data>
+  <data name="FeedNone" xml:space="preserve">
+    <value>Gem først en gødning under Gødninger, så kan den gives med vandet her.</value>
+  </data>
+  <data name="FeedsLink" xml:space="preserve">
+    <value>Gødninger</value>
+  </data>
+  <data name="FeedHowOften" xml:space="preserve">
+    <value>Hvor ofte</value>
+  </data>
+  <data name="FeedEvery" xml:space="preserve">
+    <value>Hver vanding</value>
+  </data>
+  <data name="FeedEverySecond" xml:space="preserve">
+    <value>Hver anden vanding</value>
+  </data>
+  <data name="FeedEveryThird" xml:space="preserve">
+    <value>Hver tredje vanding</value>
+  </data>
+  <data name="FeedHelp" xml:space="preserve">
+    <value>Når du sætter kryds ved Vandet eller Fyldt op, logges denne gødning og dens doser også.</value>
+  </data>
+  <data name="SectionSitter" xml:space="preserve">
+    <value>Til en plantesitter</value>
+  </data>
+  <data name="SitterNote" xml:space="preserve">
+    <value>Note til en plantesitter</value>
+  </data>
+  <data name="SitterNoteHelp" xml:space="preserve">
+    <value>Kommer på arket til den, der passer dine planter, mens du er væk.</value>
+  </data>
+  <data name="SpareHelp" xml:space="preserve">
+    <value>Vises på siden Til bytte, som du kan dele som tekst.</value>
+  </data>
+  <data name="InQuarantine" xml:space="preserve">
+    <value>I karantæne</value>
+  </data>
+  <data name="QuarantineLength" xml:space="preserve">
+    <value>Længde i dage</value>
+  </data>
+  <data name="QuarantineNote" xml:space="preserve">
+    <value>I dag fortæller, hvornår det er tid til at tjekke planten og lukke den ud.</value>
+  </data>
+  <data name="QuarantineHelp" xml:space="preserve">
+    <value>Holdes adskilt fra dine andre planter, fx mens en ny plante viser, at den ikke har skadedyr.</value>
+  </data>
+  <data name="AddOwnField" xml:space="preserve">
+    <value>Tilføj et felt af dine egne</value>
+  </data>
+  <data name="OwnFieldsHelp" xml:space="preserve">
+    <value>Omdøb eller fjern felter under Indstillinger, Dine egne felter.</value>
+  </data>
+  <data name="OfferTitle" xml:space="preserve">
+    <value>Også til dine andre {0}?</value>
+  </data>
+  <data name="OfferText_One" xml:space="preserve">
+    <value>Angiv {0} for {1} anden plante af samme art også?</value>
+  </data>
+  <data name="OfferText_Other" xml:space="preserve">
+    <value>Angiv {0} for {1} andre planter af samme art også?</value>
+  </data>
+  <data name="SetForAll" xml:space="preserve">
+    <value>Angiv for alle {0}</value>
+  </data>
+  <data name="OnlyThisOne" xml:space="preserve">
+    <value>Kun denne</value>
+  </data>
+  <data name="NoLightLikes" xml:space="preserve">
+    <value>intet lys, den kan lide</value>
+  </data>
+  <data name="NoWaterNeed" xml:space="preserve">
+    <value>intet vandbehov</value>
+  </data>
+  <data name="NoHumidityNeed" xml:space="preserve">
+    <value>intet behov for luftfugtighed</value>
+  </data>
+  <data name="NoSeason" xml:space="preserve">
+    <value>ingen vækstsæson</value>
+  </data>
+  <data name="NoRest" xml:space="preserve">
+    <value>ingen måde at hvile på</value>
+  </data>
+  <data name="NoReminder" xml:space="preserve">
+    <value>Ingen påmindelse</value>
+  </data>
+  <data name="WaterAtSummary" xml:space="preserve">
+    <value>Vand ved {0}</value>
+  </data>
+  <data name="FieldsEmpty" xml:space="preserve">
+    <value>Tilføj et felt, som appen ikke har</value>
+  </data>
+  <data name="FieldsNoneFilled" xml:space="preserve">
+    <value>Ingen udfyldt</value>
+  </data>
+  <data name="QuarantineSummary_One" xml:space="preserve">
+    <value>I karantæne i {0} dag</value>
+  </data>
+  <data name="QuarantineSummary_Other" xml:space="preserve">
+    <value>I karantæne i {0} dage</value>
+  </data>
+  <data name="NotInQuarantine" xml:space="preserve">
+    <value>Ikke i karantæne</value>
+  </data>
+  <data name="AboutHelp" xml:space="preserve">
+    <value>Til det, der altid gælder for planten, som hvordan den vil have sit vand. Noter med dato hører til i dens historik.</value>
+  </data>
+  <data name="Photo" xml:space="preserve">
+    <value>Billede</value>
+  </data>
+  <data name="Photos" xml:space="preserve">
+    <value>Billeder</value>
+  </data>
+  <data name="PhotosFromGallery" xml:space="preserve">
+    <value>Vælg billeder af denne plante fra dit galleri. Hvert billede kommer på dens historik på den dag, det blev taget, og det nyeste bliver profilbillede.</value>
+  </data>
+  <data name="PhotoOfNew" xml:space="preserve">
+    <value>Billede af den nye plante</value>
+  </data>
+  <data name="RemovePhoto" xml:space="preserve">
+    <value>Fjern billede</value>
+  </data>
+  <data name="Camera" xml:space="preserve">
+    <value>Kamera</value>
+  </data>
+  <data name="Gallery" xml:space="preserve">
+    <value>Galleri</value>
+  </data>
+  <data name="AddMore" xml:space="preserve">
+    <value>Tilføj flere</value>
+  </data>
+  <data name="PickPhotos" xml:space="preserve">
+    <value>Vælg billeder</value>
+  </data>
+  <data name="GooglePhotos" xml:space="preserve">
+    <value>Google Fotos</value>
+  </data>
+  <data name="PhotoCoverNote" xml:space="preserve">
+    <value>Det nyeste billede bliver profilbillede. Du kan tilføje flere senere på plantens side.</value>
+  </data>
+  <data name="SavingPhotos" xml:space="preserve">
+    <value>Gemmer billeder…</value>
+  </data>
+  <data name="PhotosFailed" xml:space="preserve">
+    <value>Kunne ikke gemme billederne: {0}</value>
+  </data>
+</root>

@@ -4,23 +4,23 @@
 @inject IPlantRepository Repository
 @inject IPropagationRepository PropagationRepository
 
-<PageTitle>@(plant is null ? "Family" : $"{plant.DisplayName}'s family") · Stikling</PageTitle>
+<PageTitle>@F(Strings.PlantDetail.PageTitle, plant is null ? Strings.Plants.FamilyTitle : F(Strings.Plants.FamilyTitleOf, plant.DisplayName))</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="plants/@Id">@(plant?.DisplayName ?? "Plant")</a>
+<a class="back-link" href="plants/@Id">@(plant?.DisplayName ?? Strings.PlantDetail.PlantFallback)</a>
 
 @if (plant is null || tree is null)
 {
-    <p class="text-body-secondary">@(loaded ? "That plant doesn't exist or was deleted." : "Loading…")</p>
+    <p class="text-body-secondary">@(loaded ? Strings.PlantDetail.NotFound : Strings.Plants.Loading)</p>
 }
 else
 {
     @if (tree.Ancestors.Count > 0)
     {
-        <section class="family-came-from" aria-label="Where it came from">
+        <section class="family-came-from" aria-label="@Strings.PlantEdit.LegendCameFrom">
             @if (tree.MoreAbove)
             {
-                <a class="link-action family-earlier" href="plants/@tree.Ancestors[0].Id/family">Earlier generations</a>
+                <a class="link-action family-earlier" href="plants/@tree.Ancestors[0].Id/family">@Strings.Plants.FamilyEarlier</a>
             }
             <ul class="family-chain">
                 @foreach (var ancestor in tree.Ancestors)
@@ -53,7 +53,7 @@ else
         <div class="family-focus-photo potted">
             @if (Covers.Shown(plant.CoverPhotoId) is { } focusCover)
             {
-                <PhotoImage PhotoId="focusCover" Thumbnail="false" Alt="@($"Photo of {plant.DisplayName}")" />
+                <PhotoImage PhotoId="focusCover" Thumbnail="false" Alt="@F(Strings.PlantDetail.PhotoOf, plant.DisplayName)" />
             }
             else
             {
@@ -78,16 +78,16 @@ else
         {
             <p class="profile-facts">@Labels.StatusOf(plant)</p>
         }
-        <a class="btn btn-outline-primary" href="plants/@plant.Id">Open plant</a>
+        <a class="btn btn-outline-primary" href="plants/@plant.Id">@Strings.Plants.FamilyOpenPlant</a>
     </section>
 
     @if (tree.IsEmpty)
     {
         <div class="empty-state family-empty">
-            <p>No family yet. When you take a cutting from @plant.DisplayName, or say which plant it came from, it shows here.</p>
+            <p>@F(Strings.Plants.FamilyEmpty, plant.DisplayName)</p>
             <div class="family-empty-actions">
-                <a class="btn btn-primary" href="propagations/new?parent=@plant.Id">Start a propagation</a>
-                <a class="btn btn-outline-primary" href="plants/@plant.Id/edit">Set where it came from</a>
+                <a class="btn btn-primary" href="propagations/new?parent=@plant.Id">@Strings.Plants.FamilyStartPropagation</a>
+                <a class="btn btn-outline-primary" href="plants/@plant.Id/edit">@Strings.Plants.FamilySetOrigin</a>
             </div>
         </div>
     }
@@ -95,7 +95,7 @@ else
     @if (tree.Siblings.Count > 0)
     {
         <section class="family-section">
-            <h2 class="section-label">Siblings (@tree.Siblings.Count)</h2>
+            <h2 class="section-label">@F(Strings.Plants.FamilySiblings, tree.Siblings.Count)</h2>
             <ul class="plant-grid family-siblings">
                 @foreach (var sibling in tree.Siblings)
                 {
@@ -110,7 +110,7 @@ else
     @if (tree.Children.Count > 0)
     {
         <section class="family-section">
-            <h2 class="section-label">Grown from it (@tree.Children.Count)</h2>
+            <h2 class="section-label">@F(Strings.Plants.FamilyGrownFromIt, tree.Children.Count)</h2>
             <ul class="plant-grid">
                 @foreach (var child in tree.Children)
                 {
@@ -118,7 +118,7 @@ else
                         <PlantTile Plant="child.Plant" Href="@($"plants/{child.Plant.Id}/family")" Faded="Left(child.Plant)">
                             @if (child.Below > 0)
                             {
-                                <text>@Labels.Count(child.Below, "plant") below</text>
+                                <text>@Plural.Of(child.Below, Strings.Plants.FamilyBelow_One, Strings.Plants.FamilyBelow_Other)</text>
                             }
                         </PlantTile>
                     </li>
@@ -130,7 +130,7 @@ else
     @if (tree.Growing.Count > 0)
     {
         <section class="family-section">
-            <h2 class="section-label">On the way (@tree.Growing.Count)</h2>
+            <h2 class="section-label">@F(Strings.Plants.FamilyOnTheWay, tree.Growing.Count)</h2>
             <ul class="item-list">
                 @foreach (var propagation in tree.Growing)
                 {
@@ -144,6 +144,9 @@ else
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    private static string F(string format, params object?[] args) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
 
     private Plant? plant;
     private FamilyTree? tree;

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -45,11 +46,11 @@ public sealed class ProblemUpdate : Entity
     {
         var errors = new List<string>();
         if (ProblemId == Guid.Empty)
-            errors.Add("An update belongs to a problem.");
+            errors.Add(Strings.Pests.UpdateNeedsProblem);
         if (OccurredOn > today)
-            errors.Add("That date is in the future.");
+            errors.Add(Strings.Pests.DateInFuture);
         if (LookAgainOn is { } again && again < OccurredOn)
-            errors.Add("Look again after the update.");
+            errors.Add(Strings.Pests.UpdateLookAgainAfter);
         return errors;
     }
 }

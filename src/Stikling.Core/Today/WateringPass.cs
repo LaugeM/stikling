@@ -2,6 +2,7 @@ using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Today;
 
@@ -45,7 +46,7 @@ public static class WateringPass
     public static readonly Guid NoRoom = Guid.Empty;
 
     /// <summary>The name shown for <see cref="NoRoom"/>.</summary>
-    public const string NoRoomName = "No room";
+    public static string NoRoomName => Strings.Care.NoRoomName;
 
     /// <summary>
     /// The rooms that have at least one active plant, in the order of the rooms, and <see cref="NoRoom"/>

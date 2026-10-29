@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DryingDays_One" xml:space="preserve">
+    <value>{0} dag</value>
+  </data>
+  <data name="DryingDays_Other" xml:space="preserve">
+    <value>{0} dage</value>
+  </data>
+  <data name="DryingHours_One" xml:space="preserve">
+    <value>{0} time</value>
+  </data>
+  <data name="DryingHours_Other" xml:space="preserve">
+    <value>{0} timer</value>
+  </data>
+  <data name="ChipRotted" xml:space="preserve">
+    <value>Rådnede</value>
+  </data>
+  <data name="ChipDriedOut" xml:space="preserve">
+    <value>Tørrede ud</value>
+  </data>
+  <data name="ChipPests" xml:space="preserve">
+    <value>Skadedyr</value>
+  </data>
+  <data name="ChipMould" xml:space="preserve">
+    <value>Skimmel</value>
+  </data>
+  <data name="ChipNeverRooted" xml:space="preserve">
+    <value>Slog aldrig rødder</value>
+  </data>
+  <data name="ChipUnknown" xml:space="preserve">
+    <value>Ved ikke</value>
+  </data>
+  <data name="LostToRotted" xml:space="preserve">
+    <value>råd</value>
+  </data>
+  <data name="LostToDriedOut" xml:space="preserve">
+    <value>udtørring</value>
+  </data>
+  <data name="LostToPests" xml:space="preserve">
+    <value>skadedyr</value>
+  </data>
+  <data name="LostToMould" xml:space="preserve">
+    <value>skimmel</value>
+  </data>
+  <data name="LostToNeverRooted" xml:space="preserve">
+    <value>aldrig rødder</value>
+  </data>
+  <data name="LostToUnknown" xml:space="preserve">
+    <value>ved ikke</value>
+  </data>
+  <data name="ErrFinished" xml:space="preserve">
+    <value>Formeringen er færdig.</value>
+  </data>
+  <data name="ErrDateFuture" xml:space="preserve">
+    <value>Den dato ligger i fremtiden.</value>
+  </data>
+  <data name="ErrDateCantBeFuture" xml:space="preserve">
+    <value>Datoen kan ikke ligge i fremtiden.</value>
+  </data>
+  <data name="ErrDateBeforeStart" xml:space="preserve">
+    <value>Datoen kan ikke være før formeringen blev startet.</value>
+  </data>
+  <data name="ErrPotWithMissing" xml:space="preserve">
+    <value>Planten, de skal i potte med, er ikke i samlingen.</value>
+  </data>
+  <data name="ErrIdForEachPlant" xml:space="preserve">
+    <value>Hver ny plante skal have et id.</value>
+  </data>
+  <data name="ErrChooseBetween" xml:space="preserve">
+    <value>Vælg mellem 1 og {0}.</value>
+  </data>
+  <data name="ErrNeedName" xml:space="preserve">
+    <value>Giv formeringen et kælenavn eller en slægt.</value>
+  </data>
+  <data name="ErrCountsNegative" xml:space="preserve">
+    <value>Antallet, der er pottet op, givet væk eller mislykkedes, kan ikke være negativt.</value>
+  </data>
+  <data name="ErrStartWithOne" xml:space="preserve">
+    <value>Start med mindst 1.</value>
+  </data>
+  <data name="ErrCountLowerThanUsed" xml:space="preserve">
+    <value>Antallet kan ikke være lavere end de {0}, der allerede er pottet op, givet væk eller mislykkedes.</value>
+  </data>
+  <data name="ErrRootedBeforeStart" xml:space="preserve">
+    <value>Den kan ikke have slået rødder, før den blev startet.</value>
+  </data>
+  <data name="ErrSignBeforeStart" xml:space="preserve">
+    <value>En rod eller et blad kan ikke vise sig, før den blev startet.</value>
+  </data>
+  <data name="ErrSignFuture" xml:space="preserve">
+    <value>En rod eller et blad kan ikke vise sig i fremtiden.</value>
+  </data>
+  <data name="ErrCameUpNegative" xml:space="preserve">
+    <value>Antallet, der er spiret, kan ikke være negativt.</value>
+  </data>
+  <data name="ErrCameUpMoreThanSown" xml:space="preserve">
+    <value>Der kan ikke være spiret flere frø, end der blev sået.</value>
+  </data>
+  <data name="ErrSeedBeforeSown" xml:space="preserve">
+    <value>Et frø kan ikke spire, før det blev sået.</value>
+  </data>
+  <data name="ErrSeedFuture" xml:space="preserve">
+    <value>Et frø kan ikke spire i fremtiden.</value>
+  </data>
+  <data name="ErrCormSize" xml:space="preserve">
+    <value>Knoldens størrelse skal være over 0 og højst 200 mm.</value>
+  </data>
+  <data name="ErrDormantFuture" xml:space="preserve">
+    <value>Den kan ikke gå i hvile i fremtiden.</value>
+  </data>
+  <data name="ErrSwapNegative" xml:space="preserve">
+    <value>Antallet til bytte kan ikke være negativt.</value>
+  </data>
+  <data name="ErrCareNeedsPropagation" xml:space="preserve">
+    <value>En plejepost skal høre til en formering.</value>
+  </data>
+  <data name="ErrReadingNeedsNumber" xml:space="preserve">
+    <value>Giv fugtmålingen et tal fra 0 til 10.</value>
+  </data>
+  <data name="ErrReadingRange" xml:space="preserve">
+    <value>Fugtmålingen går fra 0 til 10.</value>
+  </data>
+  <data name="ErrOnlyReadingHasNumber" xml:space="preserve">
+    <value>Kun en fugtmåling har et tal.</value>
+  </data>
+  <data name="CareWatered" xml:space="preserve">
+    <value>Vandet</value>
+  </data>
+  <data name="CareChangedWater" xml:space="preserve">
+    <value>Skiftede vandet</value>
+  </data>
+  <data name="CareMoisture" xml:space="preserve">
+    <value>Fugt {0}/10</value>
+  </data>
+  <data name="DryMessage" xml:space="preserve">
+    <value>Sig, hvor længe den tørrede, eller fjern fluebenet.</value>
+  </data>
+  <data name="PottedUpBelowPlants_One" xml:space="preserve">
+    <value>1 plante, der er pottet op fra den, er stadig i din samling, så antallet pottet op kan ikke være lavere.</value>
+  </data>
+  <data name="PottedUpBelowPlants_Other" xml:space="preserve">
+    <value>{0} planter, der er pottet op fra den, er stadig i din samling, så antallet pottet op kan ikke være lavere.</value>
+  </data>
+  <data name="NotDried" xml:space="preserve">
+    <value>Ikke tørret</value>
+  </data>
+  <data name="DriedUnderDay" xml:space="preserve">
+    <value>Tørret under et døgn</value>
+  </data>
+  <data name="DriedDayOrMore" xml:space="preserve">
+    <value>Tørret et døgn eller mere</value>
+  </data>
+  <data name="OutcomePottedUp" xml:space="preserve">
+    <value>{0} pottet op</value>
+  </data>
+  <data name="OutcomeGivenAway" xml:space="preserve">
+    <value>{0} givet væk</value>
+  </data>
+  <data name="OutcomeFailed" xml:space="preserve">
+    <value>{0} mislykkedes</value>
+  </data>
+  <data name="OutcomeNothingYet" xml:space="preserve">
+    <value>ikke noget endnu</value>
+  </data>
+  <data name="NameUnknown" xml:space="preserve">
+    <value>Navn ukendt</value>
+  </data>
+  <data name="UnnamedPropagation" xml:space="preserve">
+    <value>Unavngivet formering</value>
+  </data>
+  <data name="ListOfCutting" xml:space="preserve">
+    <value>Stikling af {0}</value>
+  </data>
+  <data name="ListOfCorm" xml:space="preserve">
+    <value>Knold af {0}</value>
+  </data>
+  <data name="ListOfOffset" xml:space="preserve">
+    <value>Aflægger af {0}</value>
+  </data>
+  <data name="ListOfSeed" xml:space="preserve">
+    <value>Frø af {0}</value>
+  </data>
+  <data name="ListOfDivision" xml:space="preserve">
+    <value>Deling af {0}</value>
+  </data>
+  <data name="ListOfAirLayer" xml:space="preserve">
+    <value>Luftaflægger af {0}</value>
+  </data>
+  <data name="ListOfLeaf" xml:space="preserve">
+    <value>Bladstikling af {0}</value>
+  </data>
+  <data name="ListOfOther" xml:space="preserve">
+    <value>Formering af {0}</value>
+  </data>
+  <data name="ListUnnamedCutting" xml:space="preserve">
+    <value>Unavngivet stikling</value>
+  </data>
+  <data name="ListUnnamedCorm" xml:space="preserve">
+    <value>Unavngivet knold</value>
+  </data>
+  <data name="ListUnnamedOffset" xml:space="preserve">
+    <value>Unavngivet aflægger</value>
+  </data>
+  <data name="ListUnnamedSeed" xml:space="preserve">
+    <value>Unavngivne frø</value>
+  </data>
+  <data name="ListUnnamedDivision" xml:space="preserve">
+    <value>Unavngivet deling</value>
+  </data>
+  <data name="ListUnnamedAirLayer" xml:space="preserve">
+    <value>Unavngivet luftaflægger</value>
+  </data>
+  <data name="ListUnnamedLeaf" xml:space="preserve">
+    <value>Unavngivet bladstikling</value>
+  </data>
+  <data name="ListUnnamedOther" xml:space="preserve">
+    <value>Unavngivet formering</value>
+  </data>
+  <data name="PhotoDay" xml:space="preserve">
+    <value>dag {0}</value>
+  </data>
+  <data name="AgeFirstDay" xml:space="preserve">
+    <value>første dag</value>
+  </data>
+  <data name="AgeDays_One" xml:space="preserve">
+    <value>{0} dag</value>
+  </data>
+  <data name="AgeDays_Other" xml:space="preserve">
+    <value>{0} dage</value>
+  </data>
+  <data name="AgeMonths" xml:space="preserve">
+    <value>{0} md.</value>
+  </data>
+  <data name="AgeYears" xml:space="preserve">
+    <value>{0} år</value>
+  </data>
+  <data name="AgeYearsMonths" xml:space="preserve">
+    <value>{0} år {1} md.</value>
+  </data>
+  <data name="ErrOnlyNotesCorrected" xml:space="preserve">
+    <value>Kun noter og billeder kan rettes.</value>
+  </data>
+  <data name="ErrEntryFuture" xml:space="preserve">
+    <value>En post kan ikke have en dato i fremtiden.</value>
+  </data>
+  <data name="ErrNoteNeedsText" xml:space="preserve">
+    <value>En note skal have noget tekst.</value>
+  </data>
+  <data name="ErrEntryDeleted" xml:space="preserve">
+    <value>Posten er slettet.</value>
+  </data>
+  <data name="ErrPickDayAfterToday" xml:space="preserve">
+    <value>Vælg en dag efter i dag.</value>
+  </data>
+  <data name="ShareTypeCutting" xml:space="preserve">
+    <value>Stikling</value>
+  </data>
+  <data name="ShareTypeCorm" xml:space="preserve">
+    <value>Knold</value>
+  </data>
+  <data name="ShareTypeOffset" xml:space="preserve">
+    <value>Aflægger</value>
+  </data>
+  <data name="ShareTypeSeed" xml:space="preserve">
+    <value>Frø</value>
+  </data>
+  <data name="ShareTypeDivision" xml:space="preserve">
+    <value>Deling</value>
+  </data>
+  <data name="ShareTypeAirLayer" xml:space="preserve">
+    <value>Luftaflægger</value>
+  </data>
+  <data name="ShareTypeLeaf" xml:space="preserve">
+    <value>Bladstikling</value>
+  </data>
+  <data name="ShareTypeOther" xml:space="preserve">
+    <value>Formering</value>
+  </data>
+  <data name="ShareTypeFromMy" xml:space="preserve">
+    <value>{0} fra {1}</value>
+  </data>
+  <data name="ShareLine" xml:space="preserve">
+    <value>{0}, {1}.</value>
+  </data>
+  <data name="ShareJoin" xml:space="preserve">
+    <value>{0}, {1}</value>
+  </data>
+  <data name="ShareFirstRoots" xml:space="preserve">
+    <value>første rødder på dag {0}{1}</value>
+  </data>
+  <data name="ShareFirstSeedling" xml:space="preserve">
+    <value>første kimplante på dag {0}{1}</value>
+  </data>
+  <data name="ShareRootedIn" xml:space="preserve">
+    <value>slog rødder på {0}{1}</value>
+  </data>
+  <data name="ShareCameUpIn" xml:space="preserve">
+    <value>spirede på {0}{1}</value>
+  </data>
+  <data name="ShareStartedToday" xml:space="preserve">
+    <value>startet i dag{0}</value>
+  </data>
+  <data name="ShareDayN" xml:space="preserve">
+    <value>dag {0}{1}</value>
+  </data>
+  <data name="ShareSomePottedUp" xml:space="preserve">
+    <value>. {0} af {1} er pottet op</value>
+  </data>
+  <data name="ShareItDidntMakeIt" xml:space="preserve">
+    <value>. Den klarede den ikke</value>
+  </data>
+  <data name="ShareDidntMakeItAfter" xml:space="preserve">
+    <value>klarede den ikke efter {0}{1}</value>
+  </data>
+  <data name="ShareDidntMakeIt" xml:space="preserve">
+    <value>klarede den ikke{0}</value>
+  </data>
+  <data name="SharePottedUpAfter" xml:space="preserve">
+    <value>pottet op efter {0}{1}</value>
+  </data>
+  <data name="SharePottedUp" xml:space="preserve">
+    <value>pottet op{0}</value>
+  </data>
+  <data name="ShareDays_One" xml:space="preserve">
+    <value>{0} dag</value>
+  </data>
+  <data name="ShareDays_Other" xml:space="preserve">
+    <value>{0} dage</value>
+  </data>
+  <data name="FigureToRoot_One" xml:space="preserve">
+    <value>dag til rødder</value>
+  </data>
+  <data name="FigureToRoot_Other" xml:space="preserve">
+    <value>dage til rødder</value>
+  </data>
+  <data name="FigureToComeUp_One" xml:space="preserve">
+    <value>dag til spiring</value>
+  </data>
+  <data name="FigureToComeUp_Other" xml:space="preserve">
+    <value>dage til spiring</value>
+  </data>
+  <data name="FigureToPotUp_One" xml:space="preserve">
+    <value>dag til at potte op</value>
+  </data>
+  <data name="FigureToPotUp_Other" xml:space="preserve">
+    <value>dage til at potte op</value>
+  </data>
+  <data name="FigureItRan_One" xml:space="preserve">
+    <value>dag varede den</value>
+  </data>
+  <data name="FigureItRan_Other" xml:space="preserve">
+    <value>dage varede den</value>
+  </data>
+  <data name="FigureSoFar_One" xml:space="preserve">
+    <value>dag indtil nu</value>
+  </data>
+  <data name="FigureSoFar_Other" xml:space="preserve">
+    <value>dage indtil nu</value>
+  </data>
+  <data name="FigurePropagation_One" xml:space="preserve">
+    <value>formering</value>
+  </data>
+  <data name="FigurePropagation_Other" xml:space="preserve">
+    <value>formeringer</value>
+  </data>
+  <data name="FigureDaysWithMe_One" xml:space="preserve">
+    <value>dag hos mig</value>
+  </data>
+  <data name="FigureDaysWithMe_Other" xml:space="preserve">
+    <value>dage hos mig</value>
+  </data>
+  <data name="FigureMonthsWithMe_One" xml:space="preserve">
+    <value>måned hos mig</value>
+  </data>
+  <data name="FigureMonthsWithMe_Other" xml:space="preserve">
+    <value>måneder hos mig</value>
+  </data>
+  <data name="FigureYearsWithMe_One" xml:space="preserve">
+    <value>år hos mig</value>
+  </data>
+  <data name="FigureYearsWithMe_Other" xml:space="preserve">
+    <value>år hos mig</value>
+  </data>
+  <data name="SharePropagatedFromMy" xml:space="preserve">
+    <value>Formeret fra {0}</value>
+  </data>
+  <data name="ShareGrownFromSeed" xml:space="preserve">
+    <value>Dyrket fra frø</value>
+  </data>
+  <data name="ShareAGift" xml:space="preserve">
+    <value>En gave</value>
+  </data>
+  <data name="ShareFromASwap" xml:space="preserve">
+    <value>Fra et bytte</value>
+  </data>
+  <data name="ShareWithMeSince" xml:space="preserve">
+    <value>Hos mig siden {0}</value>
+  </data>
+  <data name="ApartDays_One" xml:space="preserve">
+    <value>{0} dag imellem.</value>
+  </data>
+  <data name="ApartDays_Other" xml:space="preserve">
+    <value>{0} dage imellem.</value>
+  </data>
+  <data name="ApartMonths_One" xml:space="preserve">
+    <value>{0} måned imellem.</value>
+  </data>
+  <data name="ApartMonths_Other" xml:space="preserve">
+    <value>{0} måneder imellem.</value>
+  </data>
+  <data name="ApartYears_One" xml:space="preserve">
+    <value>{0} år imellem.</value>
+  </data>
+  <data name="ApartYears_Other" xml:space="preserve">
+    <value>{0} år imellem.</value>
+  </data>
+  <data name="MediumInSoil" xml:space="preserve">
+    <value> i jord</value>
+  </data>
+  <data name="MediumInOrchidBark" xml:space="preserve">
+    <value> i orkidébark</value>
+  </data>
+  <data name="MediumInLeca" xml:space="preserve">
+    <value> i LECA</value>
+  </data>
+  <data name="MediumInPon" xml:space="preserve">
+    <value> i PON</value>
+  </data>
+  <data name="MediumInPerlite" xml:space="preserve">
+    <value> i perlit</value>
+  </data>
+  <data name="MediumInSphagnum" xml:space="preserve">
+    <value> i sphagnummos</value>
+  </data>
+  <data name="MediumInWater" xml:space="preserve">
+    <value> i vand</value>
+  </data>
+  <data name="MediumOnCormRiser" xml:space="preserve">
+    <value> på et knoldstativ</value>
+  </data>
+  <data name="MarkGotIt" xml:space="preserve">
+    <value>Fik den</value>
+  </data>
+  <data name="MarkPottedUp" xml:space="preserve">
+    <value>Pottet op</value>
+  </data>
+  <data name="MarkSown" xml:space="preserve">
+    <value>Sået{0}</value>
+  </data>
+  <data name="MarkStarted" xml:space="preserve">
+    <value>Startet{0}</value>
+  </data>
+  <data name="MarkFirstRoot" xml:space="preserve">
+    <value>Første rod</value>
+  </data>
+  <data name="MarkFirstLeaf" xml:space="preserve">
+    <value>Første blad</value>
+  </data>
+  <data name="MarkFirstGerminated" xml:space="preserve">
+    <value>Første frø spirede</value>
+  </data>
+  <data name="MarkRooted" xml:space="preserve">
+    <value>Har slået rødder</value>
+  </data>
+  <data name="MarkDidntMakeIt" xml:space="preserve">
+    <value>Klarede den ikke</value>
+  </data>
+  <data name="PropagatedCutting" xml:space="preserve">
+    <value>Der blev taget en stikling</value>
+  </data>
+  <data name="PropagatedCorm" xml:space="preserve">
+    <value>Der blev taget en knold</value>
+  </data>
+  <data name="PropagatedOffset" xml:space="preserve">
+    <value>Der blev taget en aflægger</value>
+  </data>
+  <data name="PropagatedSeed" xml:space="preserve">
+    <value>Der blev samlet frø</value>
+  </data>
+  <data name="PropagatedDivision" xml:space="preserve">
+    <value>Der blev lavet en deling</value>
+  </data>
+  <data name="PropagatedAirLayer" xml:space="preserve">
+    <value>Der blev startet en luftaflægger</value>
+  </data>
+  <data name="PropagatedLeaf" xml:space="preserve">
+    <value>Der blev taget en bladstikling</value>
+  </data>
+  <data name="PropagatedOther" xml:space="preserve">
+    <value>Der blev startet en formering</value>
+  </data>
+  <data name="ShareNotOnServer" xml:space="preserve">
+    <value>Den er ikke på serveren endnu. Synkroniser og prøv igen.</value>
+  </data>
+  <data name="ShareSyncAndRetry" xml:space="preserve">
+    <value>Synkroniser og prøv igen.</value>
+  </data>
+</root>

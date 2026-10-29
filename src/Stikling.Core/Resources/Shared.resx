@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="KeptInStikling" xml:space="preserve">
+    <value>Kept in Stikling, stikling.app</value>
+    <comment>Last line of a shared wishlist, swap list or plant list.</comment>
+  </data>
+  <data name="WishlistTextHeading" xml:space="preserve">
+    <value>Plants I'm looking for</value>
+    <comment>First line of the wishlist when it is shared as text.</comment>
+  </data>
+  <data name="WishlistTextWouldPay" xml:space="preserve">
+    <value>Would pay up to {0}</value>
+    <comment>Line under a wish in the shared wishlist. {0} is the price.</comment>
+  </data>
+  <data name="WishHaveSame" xml:space="preserve">
+    <value>You have {0}</value>
+    <comment>Under a wish: how many plants of the same kind you already have. {0} is the number.</comment>
+  </data>
+  <data name="WishHaveAnother" xml:space="preserve">
+    <value>You have another {0}</value>
+    <comment>Under a wish: you have another cultivar of the same species. {0} is the species, like Monstera deliciosa.</comment>
+  </data>
+  <data name="WishNameUnknown" xml:space="preserve">
+    <value>Name unknown</value>
+    <comment>Name of a wish whose name is marked as unknown.</comment>
+  </data>
+  <data name="WishUnnamed" xml:space="preserve">
+    <value>Unnamed wish</value>
+    <comment>Name of a wish with no name.</comment>
+  </data>
+  <data name="WishNeedsName" xml:space="preserve">
+    <value>Give the wish a genus, or a name of your own.</value>
+    <comment>Error on the wish form.</comment>
+  </data>
+  <data name="WishPriceNegative" xml:space="preserve">
+    <value>The most you would pay can't be negative.</value>
+    <comment>Error on the wish form.</comment>
+  </data>
+  <data name="PlaceNeedsNameSpot" xml:space="preserve">
+    <value>Give the spot a name.</value>
+    <comment>Error when saving a spot without a name.</comment>
+  </data>
+  <data name="PlaceNeedsNameRoom" xml:space="preserve">
+    <value>Give the room a name.</value>
+    <comment>Error when saving a room without a name.</comment>
+  </data>
+  <data name="PlaceNameSlash" xml:space="preserve">
+    <value>A room's name can't have a / in it, since that's what goes between a room and a spot.</value>
+    <comment>Error when saving a room.</comment>
+  </data>
+  <data name="RoomGone" xml:space="preserve">
+    <value>That room isn't there any more.</value>
+    <comment>Error when a room was removed on another device while it was being edited.</comment>
+  </data>
+  <data name="PlaceNotEmpty" xml:space="preserve">
+    <value>{0} still has something in it.</value>
+    <comment>Error when removing a room or spot that still has plants. {0} is its name.</comment>
+  </data>
+  <data name="LabelGot" xml:space="preserve">
+    <value>Got {0}</value>
+    <comment>Date line on a printed label of a plant. {0} is a date like 3 Mar 2025.</comment>
+  </data>
+  <data name="LabelStarted" xml:space="preserve">
+    <value>Started {0}</value>
+    <comment>Date line on a printed label of a propagation. {0} is a date like 3 Oct 2026.</comment>
+  </data>
+  <data name="LabelDayFormat" xml:space="preserve">
+    <value>d MMM yyyy</value>
+    <comment>NOT TEXT: a .NET date pattern for a day with its year, like 3 Mar 2025.</comment>
+  </data>
+  <data name="LabelMonthFormat" xml:space="preserve">
+    <value>MMM yyyy</value>
+    <comment>NOT TEXT: a .NET date pattern for a month with its year, like Mar 2025.</comment>
+  </data>
+  <data name="LabelNoRoomTape" xml:space="preserve">
+    <value>No room on {0} mm tape.</value>
+    <comment>Note under the tick boxes on the Labels page. {0} is the tape width.</comment>
+  </data>
+  <data name="LabelNoRoomLow" xml:space="preserve">
+    <value>No room on a label this low.</value>
+    <comment>Note under the tick boxes on the Labels page.</comment>
+  </data>
+  <data name="FieldDuplicate" xml:space="preserve">
+    <value>You already have a field called {0}.</value>
+    <comment>Error when adding an own field. {0} is the name.</comment>
+  </data>
+  <data name="FieldChoiceEmpty" xml:space="preserve">
+    <value>A choice can't be empty.</value>
+    <comment>Error on an own field with choices.</comment>
+  </data>
+  <data name="FieldChoiceLong" xml:space="preserve">
+    <value>A choice can be at most {0} characters.</value>
+    <comment>Error on an own field with choices. {0} is a number.</comment>
+  </data>
+  <data name="FieldGone" xml:space="preserve">
+    <value>That field is gone.</value>
+    <comment>Error when an own field was removed on another device.</comment>
+  </data>
+  <data name="FieldNotNumber" xml:space="preserve">
+    <value>That isn't a number.</value>
+    <comment>Error under an own field of the kind Number.</comment>
+  </data>
+  <data name="FieldNotDate" xml:space="preserve">
+    <value>That isn't a date.</value>
+    <comment>Error under an own field of the kind Date.</comment>
+  </data>
+  <data name="FieldTextLong" xml:space="preserve">
+    <value>Keep it under {0} characters.</value>
+    <comment>Error under an own text field. {0} is a number.</comment>
+  </data>
+  <data name="FieldNameRequired" xml:space="preserve">
+    <value>Give the field a name.</value>
+    <comment>Error when saving an own field.</comment>
+  </data>
+  <data name="FieldNameLong" xml:space="preserve">
+    <value>A field name can be at most {0} characters.</value>
+    <comment>Error when saving an own field. {0} is a number.</comment>
+  </data>
+  <data name="FieldTooManyChoices" xml:space="preserve">
+    <value>A field can have at most {0} choices.</value>
+    <comment>Error when saving an own field. {0} is a number.</comment>
+  </data>
+  <data name="FieldChoiceTwice" xml:space="preserve">
+    <value>Each choice can only be there once.</value>
+    <comment>Error when saving an own field.</comment>
+  </data>
+  <data name="FieldDateFormat" xml:space="preserve">
+    <value>d MMM yyyy</value>
+    <comment>NOT TEXT: a .NET date pattern for a day with its year, used for the value of an own date field.</comment>
+  </data>
+  <data name="SearchInNotes" xml:space="preserve">
+    <value>in the notes</value>
+    <comment>Why a result matched, shown under it when the words were only found in its notes.</comment>
+  </data>
+  <data name="SearchTag" xml:space="preserve">
+    <value>tag {0}</value>
+    <comment>Why a plant matched a search: it has this tag. {0} is the tag.</comment>
+  </data>
+  <data name="SearchNumber" xml:space="preserve">
+    <value>number {0}</value>
+    <comment>Why a plant matched a search: its collection number. {0} is the number.</comment>
+  </data>
+  <data name="SearchLivesWith" xml:space="preserve">
+    <value>lives with {0}</value>
+    <comment>Under a plant in the results that lives with someone else. {0} is the person.</comment>
+  </data>
+  <data name="SearchNotYours" xml:space="preserve">
+    <value>not yours</value>
+    <comment>Under a plant in the results that lives with someone else, when the person isn't named.</comment>
+  </data>
+  <data name="SearchUnnamedMix" xml:space="preserve">
+    <value>Unnamed mix</value>
+    <comment>Title of a soil mix with no name, in the results.</comment>
+  </data>
+  <data name="SearchUnnamedFeed" xml:space="preserve">
+    <value>Unnamed feed</value>
+    <comment>Title of a feed with no name, in the results.</comment>
+  </data>
+  <data name="SearchUnnamedProduct" xml:space="preserve">
+    <value>Unnamed product</value>
+    <comment>Title of a product with no name, in the results.</comment>
+  </data>
+  <data name="SearchUnnamedRecipe" xml:space="preserve">
+    <value>Unnamed recipe</value>
+    <comment>Title of a treatment recipe with no name, in the results.</comment>
+  </data>
+  <data name="SearchTagPlants_One" xml:space="preserve">
+    <value>{0} plant</value>
+    <comment>Under a tag in the results: how many plants have it.</comment>
+  </data>
+  <data name="SearchTagPlants_Other" xml:space="preserve">
+    <value>{0} plants</value>
+    <comment>Under a tag in the results: how many plants have it.</comment>
+  </data>
+  <data name="SearchSpot" xml:space="preserve">
+    <value>Spot</value>
+    <comment>Under a spot in the results.</comment>
+  </data>
+  <data name="SearchRoom" xml:space="preserve">
+    <value>Room</value>
+    <comment>Under a room in the results.</comment>
+  </data>
+  <data name="SearchSpotIn" xml:space="preserve">
+    <value>Spot in {0}</value>
+    <comment>Under a spot in the results. {0} is the room.</comment>
+  </data>
+  <data name="SearchLabelNote" xml:space="preserve">
+    <value>Note</value>
+    <comment>Label on a note in the results.</comment>
+  </data>
+  <data name="SearchLabelUpdate" xml:space="preserve">
+    <value>Update</value>
+    <comment>Label on a history line in the results.</comment>
+  </data>
+  <data name="SearchLabelProblem" xml:space="preserve">
+    <value>Problem</value>
+    <comment>Label on a problem note in the results.</comment>
+  </data>
+  <data name="SearchLabelPests" xml:space="preserve">
+    <value>Pests</value>
+    <comment>Label on a pest case note in the results.</comment>
+  </data>
+  <data name="SwapMarkCuttings" xml:space="preserve">
+    <value>Cuttings to spare</value>
+    <comment>Mark on a plant that can spare cuttings.</comment>
+  </data>
+  <data name="SwapMarkUpForSwap" xml:space="preserve">
+    <value>Up for swap</value>
+    <comment>Mark on a plant that is up for swap.</comment>
+  </data>
+  <data name="SwapUnnamedPlant" xml:space="preserve">
+    <value>Unnamed plant</value>
+    <comment>Name of a plant with no name on the shared swap list.</comment>
+  </data>
+  <data name="SwapStageRooted" xml:space="preserve">
+    <value>rooted</value>
+    <comment>After a cutting's name on the swap list, like "Monstera ×2, rooted".</comment>
+  </data>
+  <data name="SwapStageRooting" xml:space="preserve">
+    <value>rooting</value>
+    <comment>After a cutting's name on the swap list.</comment>
+  </data>
+  <data name="SwapStageStarted" xml:space="preserve">
+    <value>just started</value>
+    <comment>After a cutting's name on the swap list.</comment>
+  </data>
+  <data name="SwapListHeading" xml:space="preserve">
+    <value>Available for swap</value>
+    <comment>First line of the swap list when it is shared as text.</comment>
+  </data>
+  <data name="SwapListCuttings" xml:space="preserve">
+    <value>Cuttings</value>
+    <comment>Heading of a group in the shared swap list.</comment>
+  </data>
+  <data name="SwapListOnRequest" xml:space="preserve">
+    <value>Cuttings on request</value>
+    <comment>Heading of a group in the shared swap list: plants that can spare cuttings, which aren't started yet. Also under a tile on the swap picture.</comment>
+  </data>
+  <data name="SwapListPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Heading of a group in the shared swap list.</comment>
+  </data>
+  <data name="SwapCuttingLine" xml:space="preserve">
+    <value>{0} ×{1}, {2}</value>
+    <comment>A cutting line in the shared swap list. {0} is the name, {1} how many, {2} its stage.</comment>
+  </data>
+  <data name="SwapPlantCount" xml:space="preserve">
+    <value>{0} ×{1}</value>
+    <comment>A plant line in the shared swap list. {0} is the name, {1} how many.</comment>
+  </data>
+  <data name="SwapTileCuttings_One" xml:space="preserve">
+    <value>{0} cutting, {1}</value>
+    <comment>Under a tile of the swap picture. {0} is the number, {1} the stage like "rooted".</comment>
+  </data>
+  <data name="SwapTileCuttings_Other" xml:space="preserve">
+    <value>{0} cuttings, {1}</value>
+    <comment>Under a tile of the swap picture. {0} is the number, {1} the stage like "rooted".</comment>
+  </data>
+  <data name="SwapTilePlants" xml:space="preserve">
+    <value>{0} plants</value>
+    <comment>Under a tile of the swap picture: several plants of the same name. {0} is the number.</comment>
+  </data>
+  <data name="SwapTilePlant" xml:space="preserve">
+    <value>Plant</value>
+    <comment>Under a tile of the swap picture: one plant.</comment>
+  </data>
+  <data name="YearFigureAdded_One" xml:space="preserve">
+    <value>plant added</value>
+    <comment>Caption under the number 1 on a card of the year picture.</comment>
+  </data>
+  <data name="YearFigureAdded_Other" xml:space="preserve">
+    <value>plants added</value>
+    <comment>Caption under a number on a card of the year picture.</comment>
+  </data>
+  <data name="YearFigureCutting_One" xml:space="preserve">
+    <value>cutting rooted</value>
+    <comment>Caption under the number 1 on a card of the year picture.</comment>
+  </data>
+  <data name="YearFigureCutting_Other" xml:space="preserve">
+    <value>cuttings rooted</value>
+    <comment>Caption under a number on a card of the year picture.</comment>
+  </data>
+  <data name="YearFigurePropagation_One" xml:space="preserve">
+    <value>propagation rooted</value>
+    <comment>Caption under the number 1 on a card of the year picture.</comment>
+  </data>
+  <data name="YearFigurePropagation_Other" xml:space="preserve">
+    <value>propagations rooted</value>
+    <comment>Caption under a number on a card of the year picture.</comment>
+  </data>
+  <data name="YearFigurePhoto_One" xml:space="preserve">
+    <value>photo</value>
+    <comment>Caption under the number 1 on a card of the year picture.</comment>
+  </data>
+  <data name="YearFigurePhoto_Other" xml:space="preserve">
+    <value>photos</value>
+    <comment>Caption under a number on a card of the year picture.</comment>
+  </data>
+  <data name="YearFigureDay_One" xml:space="preserve">
+    <value>day to root</value>
+    <comment>Caption under the number 1 on a card of the year picture.</comment>
+  </data>
+  <data name="YearFigureDay_Other" xml:space="preserve">
+    <value>days to root</value>
+    <comment>Caption under a number on a card of the year picture.</comment>
+  </data>
+  <data name="YearTitle" xml:space="preserve">
+    <value>My {0} with my plants</value>
+    <comment>Title on the first card of the year picture. {0} is the year.</comment>
+  </data>
+  <data name="YearKickerAdded" xml:space="preserve">
+    <value>Plants added in {0}</value>
+    <comment>Small heading on a card of the year picture. {0} is the year.</comment>
+  </data>
+  <data name="YearOriginBought" xml:space="preserve">
+    <value>{0} bought</value>
+    <comment>Part of a line on a card of the year picture. {0} is how many.</comment>
+  </data>
+  <data name="YearOriginPropagated" xml:space="preserve">
+    <value>{0} propagated</value>
+    <comment>Part of a line on a card of the year picture. {0} is how many.</comment>
+  </data>
+  <data name="YearOriginSeed" xml:space="preserve">
+    <value>{0} from seed</value>
+    <comment>Part of a line on a card of the year picture. {0} is how many.</comment>
+  </data>
+  <data name="YearOriginGift_One" xml:space="preserve">
+    <value>{0} gift</value>
+    <comment>Part of a line on a card of the year picture.</comment>
+  </data>
+  <data name="YearOriginGift_Other" xml:space="preserve">
+    <value>{0} gifts</value>
+    <comment>Part of a line on a card of the year picture.</comment>
+  </data>
+  <data name="YearOriginSwap_One" xml:space="preserve">
+    <value>{0} swap</value>
+    <comment>Part of a line on a card of the year picture.</comment>
+  </data>
+  <data name="YearOriginSwap_Other" xml:space="preserve">
+    <value>{0} swaps</value>
+    <comment>Part of a line on a card of the year picture.</comment>
+  </data>
+  <data name="YearOriginOther" xml:space="preserve">
+    <value>{0} other</value>
+    <comment>Part of a line on a card of the year picture. {0} is how many.</comment>
+  </data>
+  <data name="YearKickerCuttings" xml:space="preserve">
+    <value>Cuttings in {0}</value>
+    <comment>Small heading on a card of the year picture. {0} is the year.</comment>
+  </data>
+  <data name="YearKickerPropagations" xml:space="preserve">
+    <value>Propagations in {0}</value>
+    <comment>Small heading on a card of the year picture. {0} is the year.</comment>
+  </data>
+  <data name="YearMadeIt" xml:space="preserve">
+    <value>of {0} made it</value>
+    <comment>Caption under a number on a card of the year picture. {0} is how many were decided.</comment>
+  </data>
+  <data name="YearStarted" xml:space="preserve">
+    <value>started</value>
+    <comment>Caption under a number on a card of the year picture.</comment>
+  </data>
+  <data name="YearStartedRooted" xml:space="preserve">
+    <value>{0} started · {1} rooted</value>
+    <comment>Line on a card of the year picture. {0} and {1} are numbers.</comment>
+  </data>
+  <data name="YearPropagationsAlt" xml:space="preserve">
+    <value>{0}: {1} {2}. {3} started, {4} rooted.</value>
+    <comment>Description of a card of the year picture for a screen reader. {0} is the heading, {1} a number, {2} its caption, {3} and {4} numbers.</comment>
+  </data>
+  <data name="YearQuickest" xml:space="preserve">
+    <value>Quickest to root</value>
+    <comment>Small heading on a card of the year picture.</comment>
+  </data>
+  <data name="YearQuickestLine" xml:space="preserve">
+    <value>Rooted in {0} in {1}</value>
+    <comment>Line on a photo card of the year picture. {0} is a length of time like 12 days, {1} the medium like water.</comment>
+  </data>
+  <data name="YearQuickestAltPhoto" xml:space="preserve">
+    <value>{0}: {1}. Rooted in {2} in {3}. Photo of {1}.</value>
+    <comment>Description of a card of the year picture for a screen reader. {0} is the heading, {1} the name, {2} a length of time, {3} the medium.</comment>
+  </data>
+  <data name="YearQuickestLineNumber" xml:space="preserve">
+    <value>{0} rooted in {1}.</value>
+    <comment>Line on a card of the year picture. {0} is the name, {1} the medium like water.</comment>
+  </data>
+  <data name="YearQuickestAltNumber" xml:space="preserve">
+    <value>{0}: {1}, {2} to root in {3}.</value>
+    <comment>Description of a card of the year picture for a screen reader. {0} is the heading, {1} the name, {2} a length of time, {3} the medium.</comment>
+  </data>
+  <data name="YearDays_One" xml:space="preserve">
+    <value>{0} day</value>
+    <comment>A length of time on a card of the year picture.</comment>
+  </data>
+  <data name="YearDays_Other" xml:space="preserve">
+    <value>{0} days</value>
+    <comment>A length of time on a card of the year picture.</comment>
+  </data>
+  <data name="YearKickerBestMedium" xml:space="preserve">
+    <value>Best medium in {0}</value>
+    <comment>Small heading on a card of the year picture. {0} is the year. A medium is what a cutting roots in, like water or LECA.</comment>
+  </data>
+  <data name="YearKickerMyMedium" xml:space="preserve">
+    <value>My medium in {0}</value>
+    <comment>Small heading on a card of the year picture. {0} is the year.</comment>
+  </data>
+  <data name="YearMediumMadeIt" xml:space="preserve">
+    <value>of {0} made it in {1}</value>
+    <comment>Caption under a number on a card of the year picture. {0} is how many, {1} the medium like water.</comment>
+  </data>
+  <data name="YearMediumBest" xml:space="preserve">
+    <value>The best of the {0} I tried.</value>
+    <comment>Line on a card of the year picture. {0} is how many mediums were compared.</comment>
+  </data>
+  <data name="YearMediumAverage" xml:space="preserve">
+    <value>Rooted in {0} on average.</value>
+    <comment>Line on a card of the year picture. {0} is a length of time like 12 days.</comment>
+  </data>
+  <data name="YearMostPhotographed" xml:space="preserve">
+    <value>Most photographed</value>
+    <comment>Small heading on a card of the year picture.</comment>
+  </data>
+  <data name="YearMostLine_One" xml:space="preserve">
+    <value>{0} photo in {1}</value>
+    <comment>Line on a card of the year picture. {0} is how many photos, {1} the year.</comment>
+  </data>
+  <data name="YearMostLine_Other" xml:space="preserve">
+    <value>{0} photos in {1}</value>
+    <comment>Line on a card of the year picture. {0} is how many photos, {1} the year.</comment>
+  </data>
+  <data name="YearMostAlt" xml:space="preserve">
+    <value>{0}: {1}, {2}. Photo of {1}.</value>
+    <comment>Description of a card of the year picture for a screen reader. {0} is the heading, {1} the plant, {2} the line.</comment>
+  </data>
+  <data name="YearGrownSoFar" xml:space="preserve">
+    <value>Grown this year</value>
+    <comment>Small heading on a card of the year picture.</comment>
+  </data>
+  <data name="YearGrownIn" xml:space="preserve">
+    <value>Grown in {0}</value>
+    <comment>Small heading on a card of the year picture. {0} is the year.</comment>
+  </data>
+  <data name="YearGrownLine" xml:space="preserve">
+    <value>{0} days between these two photos</value>
+    <comment>Line on a card of the year picture.</comment>
+  </data>
+  <data name="YearGrownDayFormat" xml:space="preserve">
+    <value>d MMM</value>
+    <comment>NOT TEXT: a .NET date pattern for a day without its year, like 3 Mar.</comment>
+  </data>
+  <data name="YearGrownAlt" xml:space="preserve">
+    <value>{0}: {1}, {2} and {3}. {4}.</value>
+    <comment>Description of a card of the year picture for a screen reader. {0} is the heading, {1} the plant, {2} and {3} dates, {4} the line.</comment>
+  </data>
+  <data name="YearCollageKicker" xml:space="preserve">
+    <value>{0} in photos</value>
+    <comment>Small heading on the last card of the year picture. {0} is the year.</comment>
+  </data>
+  <data name="YearCollageTitle" xml:space="preserve">
+    <value>My {0} in photos</value>
+    <comment>Title on the last card of the year picture. {0} is the year.</comment>
+  </data>
+  <data name="YearCollageLine_One" xml:space="preserve">
+    <value>{0} photo taken</value>
+    <comment>Line on the last card of the year picture.</comment>
+  </data>
+  <data name="YearCollageLine_Other" xml:space="preserve">
+    <value>{0} photos taken</value>
+    <comment>Line on the last card of the year picture.</comment>
+  </data>
+  <data name="YearCollageAlt" xml:space="preserve">
+    <value>A collage of photos from {0}. {1}.</value>
+    <comment>Description of the last card of the year picture for a screen reader. {0} is the year, {1} the line.</comment>
+  </data>
+</root>

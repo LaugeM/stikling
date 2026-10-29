@@ -4,34 +4,33 @@
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
 
-<PageTitle>Sellers · Stikling</PageTitle>
+<PageTitle>@Strings.Supplies.SellersPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="supplies">Supplies</a>
-<h1>Sellers</h1>
+<a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
+<h1>@Strings.Supplies.SellersTitle</h1>
 
 <p class="settings-hint">
-    Everyone your plants came from: shops, online sellers, friends and swap events. Open one to see
-    how the plants from it have done since.
+    @Strings.Supplies.SellersIntro
 </p>
 
 @if (loading)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Supplies.Loading</p>
 }
 else if (rows.Count == 0)
 {
     <div class="empty-state">
-        <p>No sellers yet.</p>
+        <p>@Strings.Supplies.SellersEmptyTitle</p>
         <p class="text-body-secondary">
-            Where your plants came from shows up here once a plant has a seller. Pick one under Where from when adding a plant.
+            @Strings.Supplies.SellersEmptyHint
         </p>
     </div>
 }
 else
 {
     <section class="settings-section">
-        <h2>Your sellers</h2>
+        <h2>@Strings.Supplies.SellersYour</h2>
 
         <ul class="seller-list supply-grid">
             @foreach (var row in rows)
@@ -75,9 +74,10 @@ else
 
     private static string Used(Row row) => (row.Plants, row.Propagations) switch
     {
-        (0, 0) => "nothing from it yet",
-        (var plants, 0) => Labels.Count(plants, "plant"),
-        (0, var propagations) => Labels.Count(propagations, "propagation"),
-        var (plants, propagations) => $"{Labels.Count(plants, "plant")} and {Labels.Count(propagations, "propagation")}"
+        (0, 0) => Strings.Supplies.SellersNothingYet,
+        (var plants, 0) => Labels.Plants(plants),
+        (0, var propagations) => Plural.Of(propagations, Strings.Supplies.Propagation_One, Strings.Supplies.Propagation_Other),
+        var (plants, propagations) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.SellersPlantsAndPropagations,
+            Labels.Plants(plants), Plural.Of(propagations, Strings.Supplies.Propagation_One, Strings.Supplies.Propagation_Other))
     };
 }

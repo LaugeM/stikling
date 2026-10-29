@@ -6,7 +6,7 @@
 <div class="loose-date">
     <div class="form-label">@Label</div>
 
-    <div class="chip-row" role="group" aria-label="How much of the date you know">
+    <div class="chip-row" role="group" aria-label="@Strings.Plants.DatePrecisionLabel">
         @foreach (var option in new[] { DatePrecision.Day, DatePrecision.Month, DatePrecision.Year })
         {
             <button type="button" class="chip @(precision == option ? "picked" : null)"
@@ -19,12 +19,12 @@
     @if (precision == DatePrecision.Year)
     {
         <input class="form-control mt-2" type="number" inputmode="numeric" min="1900" max="@Today.Year"
-               step="1" placeholder="e.g. 2024" aria-label="@Label, year" @key="precision"
+               step="1" placeholder="@Strings.Plants.DateYearPlaceholder" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Plants.DateYearLabel, Label)" @key="precision"
                value="@Value?.Year" @onchange="SetAsync" />
     }
     else if (precision == DatePrecision.Month)
     {
-        <input class="form-control mt-2" type="month" max="@Text(Today, "yyyy-MM")" aria-label="@Label, month"
+        <input class="form-control mt-2" type="month" max="@Text(Today, "yyyy-MM")" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Plants.DateMonthLabel, Label)"
                @key="precision" value="@Value?.Start.ToString("yyyy-MM")" @onchange="SetAsync" />
     }
     else
@@ -47,7 +47,7 @@
     public DateOnly Today { get; set; }
 
     [Parameter]
-    public string Label { get; set; } = "Date";
+    public string Label { get; set; } = Strings.PlantDetail.Date;
 
     private DatePrecision precision = DatePrecision.Day;
 
@@ -59,9 +59,9 @@
 
     private static string Word(DatePrecision precision) => precision switch
     {
-        DatePrecision.Year => "Year only",
-        DatePrecision.Month => "Month",
-        _ => "Exact day"
+        DatePrecision.Year => Strings.Plants.DateYearOnly,
+        DatePrecision.Month => Strings.Plants.DateMonth,
+        _ => Strings.Plants.DateExactDay
     };
 
     private static string Text(DateOnly date, string format) =>

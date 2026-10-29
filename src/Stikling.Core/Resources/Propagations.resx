@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DryingDays_One" xml:space="preserve">
+    <value>{0} day</value>
+    <comment>How long a cut end dried, in days. 1 day.</comment>
+  </data>
+  <data name="DryingDays_Other" xml:space="preserve">
+    <value>{0} days</value>
+    <comment>How long a cut end dried, in days.</comment>
+  </data>
+  <data name="DryingHours_One" xml:space="preserve">
+    <value>{0} hour</value>
+    <comment>How long a cut end dried, in hours. 1 hour.</comment>
+  </data>
+  <data name="DryingHours_Other" xml:space="preserve">
+    <value>{0} hours</value>
+    <comment>How long a cut end dried, in hours.</comment>
+  </data>
+  <data name="ChipRotted" xml:space="preserve">
+    <value>Rotted</value>
+    <comment>Button for why units failed.</comment>
+  </data>
+  <data name="ChipDriedOut" xml:space="preserve">
+    <value>Dried out</value>
+    <comment>Button for why units failed.</comment>
+  </data>
+  <data name="ChipPests" xml:space="preserve">
+    <value>Pests</value>
+    <comment>Button for why units failed.</comment>
+  </data>
+  <data name="ChipMould" xml:space="preserve">
+    <value>Mould</value>
+    <comment>Button for why units failed.</comment>
+  </data>
+  <data name="ChipNeverRooted" xml:space="preserve">
+    <value>Never rooted</value>
+    <comment>Button for why units failed.</comment>
+  </data>
+  <data name="ChipUnknown" xml:space="preserve">
+    <value>Don't know</value>
+    <comment>Button for why units failed, when the reason isn't known.</comment>
+  </data>
+  <data name="LostToRotted" xml:space="preserve">
+    <value>rot</value>
+    <comment>What a medium loses cuttings to, in a short list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="LostToDriedOut" xml:space="preserve">
+    <value>dried out</value>
+    <comment>What a medium loses cuttings to, in a short list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="LostToPests" xml:space="preserve">
+    <value>pests</value>
+    <comment>What a medium loses cuttings to, in a short list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="LostToMould" xml:space="preserve">
+    <value>mould</value>
+    <comment>What a medium loses cuttings to, in a short list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="LostToNeverRooted" xml:space="preserve">
+    <value>never rooted</value>
+    <comment>What a medium loses cuttings to, in a short list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="LostToUnknown" xml:space="preserve">
+    <value>don't know</value>
+    <comment>What a medium loses cuttings to, in a short list like "rot 5, dried out 2".</comment>
+  </data>
+  <data name="ErrFinished" xml:space="preserve">
+    <value>This propagation is finished.</value>
+    <comment>Error shown when changing a propagation that is already finished.</comment>
+  </data>
+  <data name="ErrDateFuture" xml:space="preserve">
+    <value>That date is in the future.</value>
+    <comment>Error shown when the date of a care entry is after today.</comment>
+  </data>
+  <data name="ErrDateCantBeFuture" xml:space="preserve">
+    <value>The date can't be in the future.</value>
+    <comment>Error shown when a date is after today.</comment>
+  </data>
+  <data name="ErrDateBeforeStart" xml:space="preserve">
+    <value>The date can't be before the propagation started.</value>
+    <comment>Error shown when a date is before the propagation was started.</comment>
+  </data>
+  <data name="ErrPotWithMissing" xml:space="preserve">
+    <value>The plant to pot them with isn't in the collection.</value>
+    <comment>Error shown when potting up with a plant that has been removed from the collection.</comment>
+  </data>
+  <data name="ErrIdForEachPlant" xml:space="preserve">
+    <value>There has to be an id for each new plant.</value>
+    <comment>Error that comes from a fault in the app, not from something the person did.</comment>
+  </data>
+  <data name="ErrChooseBetween" xml:space="preserve">
+    <value>Choose between 1 and {0}.</value>
+    <comment>Error shown when the number of units to take is wrong. {0} is the most that can be taken.</comment>
+  </data>
+  <data name="ErrNeedName" xml:space="preserve">
+    <value>Give the propagation a nickname or a genus.</value>
+    <comment>Error on the form for a propagation without a name.</comment>
+  </data>
+  <data name="ErrCountsNegative" xml:space="preserve">
+    <value>The number potted up, given away or failed can't be negative.</value>
+    <comment>Error on the form for a propagation.</comment>
+  </data>
+  <data name="ErrStartWithOne" xml:space="preserve">
+    <value>Start with at least 1.</value>
+    <comment>Error on the form for a propagation.</comment>
+  </data>
+  <data name="ErrCountLowerThanUsed" xml:space="preserve">
+    <value>The count can't be lower than the {0} already potted up, given away or failed.</value>
+    <comment>Error on the form for a propagation. {0} is how many are already potted up, given away or failed.</comment>
+  </data>
+  <data name="ErrRootedBeforeStart" xml:space="preserve">
+    <value>It can't have rooted before it was started.</value>
+    <comment>Error on the form for a propagation.</comment>
+  </data>
+  <data name="ErrSignBeforeStart" xml:space="preserve">
+    <value>A root or leaf can't show before it was started.</value>
+    <comment>Error on the form for a propagation. A root or leaf is the first one to show.</comment>
+  </data>
+  <data name="ErrSignFuture" xml:space="preserve">
+    <value>A root or leaf can't show in the future.</value>
+    <comment>Error on the form for a propagation. A root or leaf is the first one to show.</comment>
+  </data>
+  <data name="ErrCameUpNegative" xml:space="preserve">
+    <value>The number that came up can't be negative.</value>
+    <comment>Error on the form for a propagation of seeds.</comment>
+  </data>
+  <data name="ErrCameUpMoreThanSown" xml:space="preserve">
+    <value>More seeds can't have come up than were sown.</value>
+    <comment>Error on the form for a propagation of seeds.</comment>
+  </data>
+  <data name="ErrSeedBeforeSown" xml:space="preserve">
+    <value>A seed can't come up before it was sown.</value>
+    <comment>Error on the form for a propagation of seeds.</comment>
+  </data>
+  <data name="ErrSeedFuture" xml:space="preserve">
+    <value>A seed can't come up in the future.</value>
+    <comment>Error on the form for a propagation of seeds.</comment>
+  </data>
+  <data name="ErrCormSize" xml:space="preserve">
+    <value>The corm size must be more than 0 and at most 200 mm.</value>
+    <comment>Error on the form for a propagation of a corm.</comment>
+  </data>
+  <data name="ErrDormantFuture" xml:space="preserve">
+    <value>It can't go dormant in the future.</value>
+    <comment>Error on the form for a propagation.</comment>
+  </data>
+  <data name="ErrSwapNegative" xml:space="preserve">
+    <value>The number for swap can't be negative.</value>
+    <comment>Error on the form for a propagation. The number meant for swapping.</comment>
+  </data>
+  <data name="ErrCareNeedsPropagation" xml:space="preserve">
+    <value>A care entry has to belong to a propagation.</value>
+    <comment>Error that comes from a fault in the app.</comment>
+  </data>
+  <data name="ErrReadingNeedsNumber" xml:space="preserve">
+    <value>Give the moisture reading a number from 0 to 10.</value>
+    <comment>Error when saving a moisture reading without a number.</comment>
+  </data>
+  <data name="ErrReadingRange" xml:space="preserve">
+    <value>The moisture reading goes from 0 to 10.</value>
+    <comment>Error when saving a moisture reading outside the range.</comment>
+  </data>
+  <data name="ErrOnlyReadingHasNumber" xml:space="preserve">
+    <value>Only a moisture reading has a number.</value>
+    <comment>Error that comes from a fault in the app.</comment>
+  </data>
+  <data name="CareWatered" xml:space="preserve">
+    <value>Watered</value>
+    <comment>A line in a propagation's care log.</comment>
+  </data>
+  <data name="CareChangedWater" xml:space="preserve">
+    <value>Changed the water</value>
+    <comment>A line in a propagation's care log.</comment>
+  </data>
+  <data name="CareMoisture" xml:space="preserve">
+    <value>Moisture {0}/10</value>
+    <comment>A line in a propagation's care log. {0} is the moisture meter reading, 0 to 10.</comment>
+  </data>
+  <data name="DryMessage" xml:space="preserve">
+    <value>Say how long it dried, or untick it.</value>
+    <comment>Shown under the drying time on the form when it is ticked but has no number.</comment>
+  </data>
+  <data name="PottedUpBelowPlants_One" xml:space="preserve">
+    <value>1 plant potted up from it is still in your collection, so the potted up count can't be lower.</value>
+    <comment>Error when lowering the potted up count of a propagation below the plants still in the collection. 1 plant.</comment>
+  </data>
+  <data name="PottedUpBelowPlants_Other" xml:space="preserve">
+    <value>{0} plants potted up from it are still in your collection, so the potted up count can't be lower.</value>
+    <comment>Error when lowering the potted up count of a propagation below the plants still in the collection. {0} is the number of plants.</comment>
+  </data>
+  <data name="NotDried" xml:space="preserve">
+    <value>Not dried</value>
+    <comment>A group in the statistics: batches whose cut end was not left to dry.</comment>
+  </data>
+  <data name="DriedUnderDay" xml:space="preserve">
+    <value>Dried under a day</value>
+    <comment>A group in the statistics: batches whose cut end dried for less than a day.</comment>
+  </data>
+  <data name="DriedDayOrMore" xml:space="preserve">
+    <value>Dried a day or more</value>
+    <comment>A group in the statistics: batches whose cut end dried for a day or more.</comment>
+  </data>
+  <data name="OutcomePottedUp" xml:space="preserve">
+    <value>{0} potted up</value>
+    <comment>Part of the outcome of a finished propagation, like "2 potted up, 1 given away, 1 failed".</comment>
+  </data>
+  <data name="OutcomeGivenAway" xml:space="preserve">
+    <value>{0} given away</value>
+    <comment>Part of the outcome of a finished propagation, like "2 potted up, 1 given away, 1 failed".</comment>
+  </data>
+  <data name="OutcomeFailed" xml:space="preserve">
+    <value>{0} failed</value>
+    <comment>Part of the outcome of a finished propagation, like "2 potted up, 1 given away, 1 failed".</comment>
+  </data>
+  <data name="OutcomeNothingYet" xml:space="preserve">
+    <value>nothing yet</value>
+    <comment>The outcome of a propagation where nothing has been potted up, given away or failed.</comment>
+  </data>
+  <data name="NameUnknown" xml:space="preserve">
+    <value>Name unknown</value>
+    <comment>Name of a propagation whose name is marked as unknown.</comment>
+  </data>
+  <data name="UnnamedPropagation" xml:space="preserve">
+    <value>Unnamed propagation</value>
+    <comment>Name of a propagation with no name.</comment>
+  </data>
+  <data name="ListOfCutting" xml:space="preserve">
+    <value>Cutting of {0}</value>
+    <comment>Name of a cutting in lists that also have plants. {0} is the botanical name.</comment>
+  </data>
+  <data name="ListOfCorm" xml:space="preserve">
+    <value>Corm of {0}</value>
+    <comment>Name of a corm in lists that also have plants. {0} is the botanical name.</comment>
+  </data>
+  <data name="ListOfOffset" xml:space="preserve">
+    <value>Offset of {0}</value>
+    <comment>Name of an offset in lists that also have plants. {0} is the botanical name.</comment>
+  </data>
+  <data name="ListOfSeed" xml:space="preserve">
+    <value>Seeds of {0}</value>
+    <comment>Name of seeds in lists that also have plants. {0} is the botanical name.</comment>
+  </data>
+  <data name="ListOfDivision" xml:space="preserve">
+    <value>Division of {0}</value>
+    <comment>Name of a division in lists that also have plants. {0} is the botanical name.</comment>
+  </data>
+  <data name="ListOfAirLayer" xml:space="preserve">
+    <value>Air layer of {0}</value>
+    <comment>Name of an air layer in lists that also have plants. {0} is the botanical name.</comment>
+  </data>
+  <data name="ListOfLeaf" xml:space="preserve">
+    <value>Leaf cutting of {0}</value>
+    <comment>Name of a leaf cutting in lists that also have plants. {0} is the botanical name.</comment>
+  </data>
+  <data name="ListOfOther" xml:space="preserve">
+    <value>Propagation of {0}</value>
+    <comment>Name of a propagation of another kind in lists that also have plants. {0} is the botanical name.</comment>
+  </data>
+  <data name="ListUnnamedCutting" xml:space="preserve">
+    <value>Unnamed cutting</value>
+    <comment>Name of a cutting with no name, in lists that also have plants.</comment>
+  </data>
+  <data name="ListUnnamedCorm" xml:space="preserve">
+    <value>Unnamed corm</value>
+    <comment>Name of a corm with no name, in lists that also have plants.</comment>
+  </data>
+  <data name="ListUnnamedOffset" xml:space="preserve">
+    <value>Unnamed offset</value>
+    <comment>Name of an offset with no name, in lists that also have plants.</comment>
+  </data>
+  <data name="ListUnnamedSeed" xml:space="preserve">
+    <value>Unnamed seeds</value>
+    <comment>Name of seeds with no name, in lists that also have plants.</comment>
+  </data>
+  <data name="ListUnnamedDivision" xml:space="preserve">
+    <value>Unnamed division</value>
+    <comment>Name of a division with no name, in lists that also have plants.</comment>
+  </data>
+  <data name="ListUnnamedAirLayer" xml:space="preserve">
+    <value>Unnamed air layer</value>
+    <comment>Name of an air layer with no name, in lists that also have plants.</comment>
+  </data>
+  <data name="ListUnnamedLeaf" xml:space="preserve">
+    <value>Unnamed leaf cutting</value>
+    <comment>Name of a leaf cutting with no name, in lists that also have plants.</comment>
+  </data>
+  <data name="ListUnnamedOther" xml:space="preserve">
+    <value>Unnamed propagation</value>
+    <comment>Name of a propagation of another kind with no name, in lists that also have plants.</comment>
+  </data>
+  <data name="PhotoDay" xml:space="preserve">
+    <value>day {0}</value>
+    <comment>Which day of a propagation a photo was taken on, counted from the start. {0} is the day number.</comment>
+  </data>
+  <data name="AgeFirstDay" xml:space="preserve">
+    <value>first day</value>
+    <comment>How long someone had a plant when a photo was taken. The first day.</comment>
+  </data>
+  <data name="AgeDays_One" xml:space="preserve">
+    <value>{0} day</value>
+    <comment>How long someone had a plant when a photo was taken. 1 day.</comment>
+  </data>
+  <data name="AgeDays_Other" xml:space="preserve">
+    <value>{0} days</value>
+    <comment>How long someone had a plant when a photo was taken.</comment>
+  </data>
+  <data name="AgeMonths" xml:space="preserve">
+    <value>{0} mo</value>
+    <comment>How long someone had a plant when a photo was taken. {0} is the number of whole months. "mo" is short for months.</comment>
+  </data>
+  <data name="AgeYears" xml:space="preserve">
+    <value>{0} yr</value>
+    <comment>How long someone had a plant when a photo was taken. {0} is the number of whole years. "yr" is short for years.</comment>
+  </data>
+  <data name="AgeYearsMonths" xml:space="preserve">
+    <value>{0} yr {1} mo</value>
+    <comment>How long someone had a plant when a photo was taken. {0} is whole years and {1} is months on top. "yr" and "mo" are short.</comment>
+  </data>
+  <data name="ErrOnlyNotesCorrected" xml:space="preserve">
+    <value>Only notes and photos can be corrected.</value>
+    <comment>Error when correcting an entry on the timeline that isn't a note or a photo.</comment>
+  </data>
+  <data name="ErrEntryFuture" xml:space="preserve">
+    <value>An entry can't be dated in the future.</value>
+    <comment>Error when an entry on the timeline gets a date after today.</comment>
+  </data>
+  <data name="ErrNoteNeedsText" xml:space="preserve">
+    <value>A note needs some text.</value>
+    <comment>Error when a note on the timeline is saved with no text.</comment>
+  </data>
+  <data name="ErrEntryDeleted" xml:space="preserve">
+    <value>The entry is deleted.</value>
+    <comment>Error that comes from a fault in the app.</comment>
+  </data>
+  <data name="ErrPickDayAfterToday" xml:space="preserve">
+    <value>Pick a day after today.</value>
+    <comment>Error when a note is set to come back on a day that isn't after today.</comment>
+  </data>
+  <data name="ShareTypeCutting" xml:space="preserve">
+    <value>Cutting</value>
+    <comment>Kind of propagation, as the start of a line on a share card.</comment>
+  </data>
+  <data name="ShareTypeCorm" xml:space="preserve">
+    <value>Corm</value>
+    <comment>Kind of propagation, as the start of a line on a share card.</comment>
+  </data>
+  <data name="ShareTypeOffset" xml:space="preserve">
+    <value>Offset</value>
+    <comment>Kind of propagation, as the start of a line on a share card.</comment>
+  </data>
+  <data name="ShareTypeSeed" xml:space="preserve">
+    <value>Seeds</value>
+    <comment>Kind of propagation, as the start of a line on a share card.</comment>
+  </data>
+  <data name="ShareTypeDivision" xml:space="preserve">
+    <value>Division</value>
+    <comment>Kind of propagation, as the start of a line on a share card.</comment>
+  </data>
+  <data name="ShareTypeAirLayer" xml:space="preserve">
+    <value>Air layer</value>
+    <comment>Kind of propagation, as the start of a line on a share card.</comment>
+  </data>
+  <data name="ShareTypeLeaf" xml:space="preserve">
+    <value>Leaf cutting</value>
+    <comment>Kind of propagation, as the start of a line on a share card.</comment>
+  </data>
+  <data name="ShareTypeOther" xml:space="preserve">
+    <value>Propagation</value>
+    <comment>Kind of propagation, as the start of a line on a share card.</comment>
+  </data>
+  <data name="ShareTypeFromMy" xml:space="preserve">
+    <value>{0} from my {1}</value>
+    <comment>Start of a line on a share card. {0} is the kind of propagation, like "Cutting", and {1} is the name of the plant it was taken from.</comment>
+  </data>
+  <data name="ShareLine" xml:space="preserve">
+    <value>{0}, {1}.</value>
+    <comment>A line on a share card. {0} is what it is or where it came from, {1} is how it went.</comment>
+  </data>
+  <data name="ShareJoin" xml:space="preserve">
+    <value>{0}, {1}</value>
+    <comment>Joins two parts of a line on a share card, like where a plant came from and how it rooted.</comment>
+  </data>
+  <data name="ShareFirstRoots" xml:space="preserve">
+    <value>first roots on day {0}{1}</value>
+    <comment>Part of a line on a share card. {0} is the day number and {1} is where it grows, like " in water", with a space first, or nothing.</comment>
+  </data>
+  <data name="ShareFirstSeedling" xml:space="preserve">
+    <value>first seedling on day {0}{1}</value>
+    <comment>Part of a line on a share card. {0} is the day number and {1} is where it grows, like " in water", with a space first, or nothing.</comment>
+  </data>
+  <data name="ShareRootedIn" xml:space="preserve">
+    <value>rooted in {0}{1}</value>
+    <comment>Part of a line on a share card. {0} is how long it took, like "18 days", and {1} is where it grows, like " in water", with a space first, or nothing.</comment>
+  </data>
+  <data name="ShareCameUpIn" xml:space="preserve">
+    <value>came up in {0}{1}</value>
+    <comment>Part of a line on a share card, for seeds. {0} is how long it took, like "9 days", and {1} is where it grows, like " in soil", with a space first, or nothing.</comment>
+  </data>
+  <data name="ShareStartedToday" xml:space="preserve">
+    <value>started today{0}</value>
+    <comment>Part of a line on a share card. {0} is where it grows, like " in water", with a space first, or nothing.</comment>
+  </data>
+  <data name="ShareDayN" xml:space="preserve">
+    <value>day {0}{1}</value>
+    <comment>Part of a line on a share card. {0} is the day number and {1} is where it grows, like " in water", with a space first, or nothing.</comment>
+  </data>
+  <data name="ShareSomePottedUp" xml:space="preserve">
+    <value>. {0} of {1} potted up</value>
+    <comment>Added after a line on a share card, as its own sentence. {0} is how many were potted up and {1} how many were started.</comment>
+  </data>
+  <data name="ShareItDidntMakeIt" xml:space="preserve">
+    <value>. It didn't make it</value>
+    <comment>Added after a line on a share card, as its own sentence.</comment>
+  </data>
+  <data name="ShareDidntMakeItAfter" xml:space="preserve">
+    <value>didn't make it after {0}{1}</value>
+    <comment>Part of a line on a share card. {0} is how long it ran, like "30 days", and {1} is where it grew, like " in soil", with a space first, or nothing.</comment>
+  </data>
+  <data name="ShareDidntMakeIt" xml:space="preserve">
+    <value>didn't make it{0}</value>
+    <comment>Part of a line on a share card. {0} is where it grew, like " in soil", with a space first, or nothing.</comment>
+  </data>
+  <data name="SharePottedUpAfter" xml:space="preserve">
+    <value>potted up after {0}{1}</value>
+    <comment>Part of a line on a share card. {0} is how long it ran, like "42 days", and {1} is where it grew, like " in water", with a space first, or nothing.</comment>
+  </data>
+  <data name="SharePottedUp" xml:space="preserve">
+    <value>potted up{0}</value>
+    <comment>Part of a line on a share card. {0} is where it grew, like " in water", with a space first, or nothing.</comment>
+  </data>
+  <data name="ShareDays_One" xml:space="preserve">
+    <value>{0} day</value>
+    <comment>A number of days inside a line on a share card. 1 day.</comment>
+  </data>
+  <data name="ShareDays_Other" xml:space="preserve">
+    <value>{0} days</value>
+    <comment>A number of days inside a line on a share card.</comment>
+  </data>
+  <data name="FigureToRoot_One" xml:space="preserve">
+    <value>day to root</value>
+    <comment>Words under the big number on a share card. 1 day to root.</comment>
+  </data>
+  <data name="FigureToRoot_Other" xml:space="preserve">
+    <value>days to root</value>
+    <comment>Words under the big number on a share card, like 18 days to root.</comment>
+  </data>
+  <data name="FigureToComeUp_One" xml:space="preserve">
+    <value>day to come up</value>
+    <comment>Words under the big number on a share card, for seeds. 1 day to come up.</comment>
+  </data>
+  <data name="FigureToComeUp_Other" xml:space="preserve">
+    <value>days to come up</value>
+    <comment>Words under the big number on a share card, for seeds.</comment>
+  </data>
+  <data name="FigureToPotUp_One" xml:space="preserve">
+    <value>day to pot up</value>
+    <comment>Words under the big number on a share card. 1 day to pot up.</comment>
+  </data>
+  <data name="FigureToPotUp_Other" xml:space="preserve">
+    <value>days to pot up</value>
+    <comment>Words under the big number on a share card.</comment>
+  </data>
+  <data name="FigureItRan_One" xml:space="preserve">
+    <value>day it ran</value>
+    <comment>Words under the big number on a share card, for a propagation that failed. How long it ran for. 1 day.</comment>
+  </data>
+  <data name="FigureItRan_Other" xml:space="preserve">
+    <value>days it ran</value>
+    <comment>Words under the big number on a share card, for a propagation that failed. How long it ran for.</comment>
+  </data>
+  <data name="FigureSoFar_One" xml:space="preserve">
+    <value>day so far</value>
+    <comment>Words under the big number on a share card, for a propagation still going. 1 day so far.</comment>
+  </data>
+  <data name="FigureSoFar_Other" xml:space="preserve">
+    <value>days so far</value>
+    <comment>Words under the big number on a share card, for a propagation still going.</comment>
+  </data>
+  <data name="FigurePropagation_One" xml:space="preserve">
+    <value>propagation</value>
+    <comment>Words under the big number on a share card for a plant. 1 propagation taken from it.</comment>
+  </data>
+  <data name="FigurePropagation_Other" xml:space="preserve">
+    <value>propagations</value>
+    <comment>Words under the big number on a share card for a plant. How many propagations were taken from it.</comment>
+  </data>
+  <data name="FigureDaysWithMe_One" xml:space="preserve">
+    <value>day with me</value>
+    <comment>Words under the big number on a share card for a plant. 1 day with me.</comment>
+  </data>
+  <data name="FigureDaysWithMe_Other" xml:space="preserve">
+    <value>days with me</value>
+    <comment>Words under the big number on a share card for a plant.</comment>
+  </data>
+  <data name="FigureMonthsWithMe_One" xml:space="preserve">
+    <value>month with me</value>
+    <comment>Words under the big number on a share card for a plant. 1 month with me.</comment>
+  </data>
+  <data name="FigureMonthsWithMe_Other" xml:space="preserve">
+    <value>months with me</value>
+    <comment>Words under the big number on a share card for a plant.</comment>
+  </data>
+  <data name="FigureYearsWithMe_One" xml:space="preserve">
+    <value>year with me</value>
+    <comment>Words under the big number on a share card for a plant. 1 year with me.</comment>
+  </data>
+  <data name="FigureYearsWithMe_Other" xml:space="preserve">
+    <value>years with me</value>
+    <comment>Words under the big number on a share card for a plant.</comment>
+  </data>
+  <data name="SharePropagatedFromMy" xml:space="preserve">
+    <value>Propagated from my {0}</value>
+    <comment>Part of a line on a share card for a plant. {0} is the name of the plant it was propagated from.</comment>
+  </data>
+  <data name="ShareGrownFromSeed" xml:space="preserve">
+    <value>Grown from seed</value>
+    <comment>Part of a line on a share card for a plant.</comment>
+  </data>
+  <data name="ShareAGift" xml:space="preserve">
+    <value>A gift</value>
+    <comment>Part of a line on a share card for a plant.</comment>
+  </data>
+  <data name="ShareFromASwap" xml:space="preserve">
+    <value>From a swap</value>
+    <comment>Part of a line on a share card for a plant.</comment>
+  </data>
+  <data name="ShareWithMeSince" xml:space="preserve">
+    <value>With me since {0}</value>
+    <comment>Part of a line on a share card for a plant. {0} is when it came, like "June 2024".</comment>
+  </data>
+  <data name="ApartDays_One" xml:space="preserve">
+    <value>{0} day apart.</value>
+    <comment>Said between two photos on a share card. 1 day apart.</comment>
+  </data>
+  <data name="ApartDays_Other" xml:space="preserve">
+    <value>{0} days apart.</value>
+    <comment>Said between two photos on a share card.</comment>
+  </data>
+  <data name="ApartMonths_One" xml:space="preserve">
+    <value>{0} month apart.</value>
+    <comment>Said between two photos on a share card. 1 month apart.</comment>
+  </data>
+  <data name="ApartMonths_Other" xml:space="preserve">
+    <value>{0} months apart.</value>
+    <comment>Said between two photos on a share card.</comment>
+  </data>
+  <data name="ApartYears_One" xml:space="preserve">
+    <value>{0} year apart.</value>
+    <comment>Said between two photos on a share card. 1 year apart.</comment>
+  </data>
+  <data name="ApartYears_Other" xml:space="preserve">
+    <value>{0} years apart.</value>
+    <comment>Said between two photos on a share card.</comment>
+  </data>
+  <data name="MediumInSoil" xml:space="preserve">
+    <value> in soil</value>
+    <comment>Where it grows, added after other words, so it starts with a space. It can be left out.</comment>
+  </data>
+  <data name="MediumInOrchidBark" xml:space="preserve">
+    <value> in orchid bark</value>
+    <comment>Where it grows, added after other words, so it starts with a space.</comment>
+  </data>
+  <data name="MediumInLeca" xml:space="preserve">
+    <value> in LECA</value>
+    <comment>Where it grows, added after other words, so it starts with a space.</comment>
+  </data>
+  <data name="MediumInPon" xml:space="preserve">
+    <value> in PON</value>
+    <comment>Where it grows, added after other words, so it starts with a space.</comment>
+  </data>
+  <data name="MediumInPerlite" xml:space="preserve">
+    <value> in perlite</value>
+    <comment>Where it grows, added after other words, so it starts with a space.</comment>
+  </data>
+  <data name="MediumInSphagnum" xml:space="preserve">
+    <value> in sphagnum moss</value>
+    <comment>Where it grows, added after other words, so it starts with a space.</comment>
+  </data>
+  <data name="MediumInWater" xml:space="preserve">
+    <value> in water</value>
+    <comment>Where it grows, added after other words, so it starts with a space.</comment>
+  </data>
+  <data name="MediumOnCormRiser" xml:space="preserve">
+    <value> on a corm riser</value>
+    <comment>Where it grows, added after other words, so it starts with a space.</comment>
+  </data>
+  <data name="MarkGotIt" xml:space="preserve">
+    <value>Got it</value>
+    <comment>A date on the public page of a plant or propagation. The day it arrived.</comment>
+  </data>
+  <data name="MarkPottedUp" xml:space="preserve">
+    <value>Potted up</value>
+    <comment>A date on the public page of a plant or propagation. The day it was potted up.</comment>
+  </data>
+  <data name="MarkSown" xml:space="preserve">
+    <value>Sown{0}</value>
+    <comment>A date on the public page. {0} is where it grows, like " in soil", with a space first, or nothing.</comment>
+  </data>
+  <data name="MarkStarted" xml:space="preserve">
+    <value>Started{0}</value>
+    <comment>A date on the public page. {0} is where it grows, like " in water", with a space first, or nothing.</comment>
+  </data>
+  <data name="MarkFirstRoot" xml:space="preserve">
+    <value>First root</value>
+    <comment>A date on the public page.</comment>
+  </data>
+  <data name="MarkFirstLeaf" xml:space="preserve">
+    <value>First leaf</value>
+    <comment>A date on the public page.</comment>
+  </data>
+  <data name="MarkFirstGerminated" xml:space="preserve">
+    <value>First seed germinated</value>
+    <comment>A date on the public page, for seeds.</comment>
+  </data>
+  <data name="MarkRooted" xml:space="preserve">
+    <value>Rooted</value>
+    <comment>A date on the public page.</comment>
+  </data>
+  <data name="MarkDidntMakeIt" xml:space="preserve">
+    <value>Didn't make it</value>
+    <comment>A date on the public page. The day a propagation failed.</comment>
+  </data>
+  <data name="PropagatedCutting" xml:space="preserve">
+    <value>A cutting was taken</value>
+    <comment>A line on the public page of a plant, saying a propagation was taken from it.</comment>
+  </data>
+  <data name="PropagatedCorm" xml:space="preserve">
+    <value>A corm was taken</value>
+    <comment>A line on the public page of a plant, saying a propagation was taken from it.</comment>
+  </data>
+  <data name="PropagatedOffset" xml:space="preserve">
+    <value>An offset was taken</value>
+    <comment>A line on the public page of a plant, saying a propagation was taken from it.</comment>
+  </data>
+  <data name="PropagatedSeed" xml:space="preserve">
+    <value>Seeds were collected</value>
+    <comment>A line on the public page of a plant, saying a propagation was taken from it.</comment>
+  </data>
+  <data name="PropagatedDivision" xml:space="preserve">
+    <value>A division was made</value>
+    <comment>A line on the public page of a plant, saying a propagation was taken from it.</comment>
+  </data>
+  <data name="PropagatedAirLayer" xml:space="preserve">
+    <value>An air layer was started</value>
+    <comment>A line on the public page of a plant, saying a propagation was taken from it.</comment>
+  </data>
+  <data name="PropagatedLeaf" xml:space="preserve">
+    <value>A leaf cutting was taken</value>
+    <comment>A line on the public page of a plant, saying a propagation was taken from it.</comment>
+  </data>
+  <data name="PropagatedOther" xml:space="preserve">
+    <value>A propagation was started</value>
+    <comment>A line on the public page of a plant, saying a propagation was taken from it.</comment>
+  </data>
+  <data name="ShareNotOnServer" xml:space="preserve">
+    <value>It isn't on the server yet. Sync and try again.</value>
+    <comment>Error when making a share link for something that has not been synced yet.</comment>
+  </data>
+  <data name="ShareSyncAndRetry" xml:space="preserve">
+    <value>Sync and try again.</value>
+    <comment>Error when making or stopping a share link.</comment>
+  </data>
+</root>

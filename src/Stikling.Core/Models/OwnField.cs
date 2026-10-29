@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -75,19 +76,19 @@ public sealed class OwnField : Entity
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add("Give the field a name.");
+            errors.Add(Strings.Shared.FieldNameRequired);
         else if (Name.Trim().Length > MaxNameLength)
-            errors.Add($"A field name can be at most {MaxNameLength} characters.");
+            errors.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldNameLong, MaxNameLength));
 
         var choices = Choices ?? [];
         if (choices.Any(c => string.IsNullOrWhiteSpace(c)))
-            errors.Add("A choice can't be empty.");
+            errors.Add(Strings.Shared.FieldChoiceEmpty);
         if (choices.Any(c => c.Trim().Length > MaxNameLength))
-            errors.Add($"A choice can be at most {MaxNameLength} characters.");
+            errors.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldChoiceLong, MaxNameLength));
         if (choices.Count > MaxChoices)
-            errors.Add($"A field can have at most {MaxChoices} choices.");
+            errors.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldTooManyChoices, MaxChoices));
         if (choices.Select(c => c.Trim()).Distinct(StringComparer.CurrentCultureIgnoreCase).Count() != choices.Count)
-            errors.Add("Each choice can only be there once.");
+            errors.Add(Strings.Shared.FieldChoiceTwice);
         return errors;
     }
 }

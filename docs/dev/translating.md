@@ -18,13 +18,17 @@ Each area has its own file: `Common` (words used on many screens), `Labels` (nam
 Each piece of text is a key with a value. The key says what the text is, like `EverydayNames` or `ThemeDark`. Never change a key, only the value.
 
 - **Placeholders** like `{0}` and `{1}` are filled in by the app with a name, a number or a date. Keep them in your translation, in whatever order the sentence needs. A test fails if one is missing or new.
-- **Counts** come in pairs: `Plant_One` is used for exactly one and `Plant_Other` for any other number, including none. `{0}` is the number. Translate both, even if your language uses the same word.
+- **Counts** come in pairs: `Plant_One` is used for exactly one and `Plant_Other` for any other number, including none. `{0}` is the number. Translate both, even if your language uses the same word. The `_One` text may leave out `{0}` when your language says it without the number, like "Hver dag" for "Every {0} day".
 - **Comments** on a key say where the text shows and what the placeholders are. Read them before translating.
 - **Date patterns** like `DateFormat` are not text. They are .NET date patterns: `d` is the day, `MMM` the short month name and `yyyy` the year. Change the order and the punctuation to how dates are written in your language, and leave the letters alone.
 - A few pieces of text have HTML in them, like `<i>`. Keep the tags where they are.
 - The name of the app, Stikling, and botanical names stay as they are.
 
 A translation that is the same as the English counts as translated. Some words are the same in your language.
+
+### Your name in the app
+
+`Settings` has a text called `Translators`. Put your name there, or the names of everyone who translated your language, separated by commas. The app then shows "Translated by" with the names under the choice of language. Left as it is in English, no names show.
 
 ### When a language goes live
 
@@ -66,6 +70,58 @@ Write in plain everyday Danish, with "du". Keep the text as short as the English
 | theme | tema |
 | light, dark | lyst, mørkt |
 | everyday names | daglige navne |
+| outer pot | yderpotte |
+| nursery pot | planteskolepotte |
+| tag | tag (plural tags) |
+| label (printed, the Labels page) | etiket (plural etiketter) |
+| node | knude (plural knuder) |
+| mother plant | moderplante |
+| example plant | eksempelplante |
+| round (the daily round) | runde |
+| Do it later | Gør det senere |
+| put off | udskudt |
+| away, quiet time | ude, pause |
+| plant sitter | plantesitter |
+| kind of care | plejetype |
+| care interval | plejeinterval |
+| moisture meter, reading | fugtmåler, måling |
+| growing season | vækstsæson |
+| rests, dormant | hviler |
+| grow light | plantelampe |
+| pest case | sag |
+| treatment, treatment plan | behandling, behandlingsplan |
+| sticky trap | limfælde |
+| problem | problem |
+| flowering | blomstring |
+| bud | knop |
+| seller | sælger |
+| product | produkt |
+| wish | ønske |
+| pass on (a cutting) | give videre |
+| history (on a plant) | historik |
+| note | note |
+| photo | billede |
+| share | del |
+| search | søg |
+| import | importere |
+| spreadsheet | regneark |
+| account | konto |
+| sign out | log ud |
+| own fields | egne felter |
+| genus | slægt |
+| species | art |
+| cultivar | kultivar |
+| supplies (the page with pots, products, soil mixes and feeds) | udstyr |
+| treatment recipe | blanding (plural blandinger) |
+| tour (the guided tour) | rundvisning |
+| looked over (Going round, the history) | tjekket |
+| frame (crop a photo) | beskær |
+| cover photo | profilbillede |
+| medium (what a cutting roots in) | vækstmedie |
+| batch | batch (plural batches) |
+| resolve, resolved (a pest case or problem) | løse, løst |
+| gone (a plant that left the collection) | væk |
+| flag it | markér den (noun: markering) |
 
 Keep "Stikling" as the name of the app.
 
@@ -85,6 +141,7 @@ Text people see never goes in a Razor page or a C# file. Add it to the file for 
 - Name the key for what the text is, in PascalCase, not for the English words of a long sentence. Add a `<comment>` in the English file when a translator needs to know where it shows or what `{0}` is.
 - Text with values uses placeholders and `string.Format(CultureInfo.CurrentCulture, Strings.X.Y, a, b)`. Never build a sentence out of pieces that are translated separately.
 - For a count, use two keys, `Thing_One` and `Thing_Other`, and `Plural.Of(count, Strings.X.Thing_One, Strings.X.Thing_Other)`.
+- Text made in `Stikling.Core`, like a care suggestion or a line of the plant-sitter sheet, goes in `src/Stikling.Core/Resources` the same way and is used through `using Strings = Stikling.Core.Resources;`. Counts use `Plural.Of` from `Stikling.Core.Text`. The Core tests run with English text, so a test can still check the English wording.
 - Dates go through `Labels.Date` and the other date methods in `Labels`, which pick the patterns from `Labels.resx`. English keeps its own look ("19 Sep 2026"), any other language uses its culture's names.
 - When a sentence has a link or an element inside it, put `{0}` where the element goes and fill it in on the page. Only text from the resource files may be shown as markup, never anything a person typed.
 - The app language is picked once, in `Program.cs`, before the app starts, so changing it restarts the app. A language that was chosen is saved in `UserSettings.Language` and `wwwroot/js/language.js` keeps a copy on the device for that first start.

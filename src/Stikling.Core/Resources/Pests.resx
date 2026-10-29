@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="StartDateInFuture" xml:space="preserve">
+    <value>That start date is in the future.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PestCaseIntervalTooShort" xml:space="preserve">
+    <value>Treat at least every day, so the interval has to be 1 or more.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PestCasePickRoom" xml:space="preserve">
+    <value>Pick the room the case covers.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PestCasePickPlant" xml:space="preserve">
+    <value>Pick at least one plant.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PestCaseResolvedInFuture" xml:space="preserve">
+    <value>That resolved date is in the future.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PestCaseResolvedBeforeStart" xml:space="preserve">
+    <value>A case can't be resolved before it started.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="TreatmentNeedsCase" xml:space="preserve">
+    <value>A treatment has to belong to a case.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="CheckCaseOrPlant" xml:space="preserve">
+    <value>A check belongs to a case or a plant, not both.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="OnlyCheckOnPlant" xml:space="preserve">
+    <value>Only a check can be logged on a single plant.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="DateInFuture" xml:space="preserve">
+    <value>That date is in the future.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="NextTreatmentBeforeThis" xml:space="preserve">
+    <value>The next treatment can't be due before this one happened.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="CheckOnlyDateNotes" xml:space="preserve">
+    <value>A check only has a date and notes.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="TreatmentNoTrapCount" xml:space="preserve">
+    <value>A treatment doesn't have a trap count.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="TrapCountOnlyCount" xml:space="preserve">
+    <value>A trap count only has the count, a new trap, a date and notes.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="TrapCountFillIn" xml:space="preserve">
+    <value>Fill in how many are on the trap, or that a new one went up.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="TrapCountBelowZero" xml:space="preserve">
+    <value>The count can't be below zero.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="SkippedStepOnlyDateNotes" xml:space="preserve">
+    <value>A skipped step only has a date and notes.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="OnlyTreatmentIsStep" xml:space="preserve">
+    <value>Only a treatment can be a step of a plan.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="ProblemNeedsPlant" xml:space="preserve">
+    <value>A problem belongs to a plant.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="ProblemPickSigns" xml:space="preserve">
+    <value>Pick what you see.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="ProblemEndBeforeStart" xml:space="preserve">
+    <value>A problem can't end before it started.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="ProblemSayOutcome" xml:space="preserve">
+    <value>Say how it ended.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="ProblemLookAgainAfterStart" xml:space="preserve">
+    <value>Look again after it started.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="UpdateNeedsProblem" xml:space="preserve">
+    <value>An update belongs to a problem.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="UpdateLookAgainAfter" xml:space="preserve">
+    <value>Look again after the update.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="FloweringMarkNeedsPlant" xml:space="preserve">
+    <value>A flowering mark belongs to a plant.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="FloweringMarkPickStage" xml:space="preserve">
+    <value>Pick how far the flowering has come.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PickDate" xml:space="preserve">
+    <value>Pick a date.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="FloweringInFuture" xml:space="preserve">
+    <value>A flowering can't be dated in the future.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="FloweringBudsBeforeFlowers" xml:space="preserve">
+    <value>The buds have to come before the flowers.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="FloweringEndBeforeBegin" xml:space="preserve">
+    <value>The flowering can't end before it began.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="UpdateNeedsSomething" xml:space="preserve">
+    <value>Say how it looks, what you did, or add a note or a photo.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="UpdateBeforeProblem" xml:space="preserve">
+    <value>An update can't be before the problem started.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PlanNeedsName" xml:space="preserve">
+    <value>Give the plan a name.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PlanNeedsStep" xml:space="preserve">
+    <value>Add at least one step.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PlanStepsApart" xml:space="preserve">
+    <value>A step after the first comes at least a day later.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PlanStepNeedsWhat" xml:space="preserve">
+    <value>Say what each step uses.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="RecipeNeedsName" xml:space="preserve">
+    <value>Give the recipe a name.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="IngredientNeedsName" xml:space="preserve">
+    <value>Every ingredient needs a name.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="IngredientAmountBelowZero" xml:space="preserve">
+    <value>An amount can't be less than 0.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="IngredientPerAboveZero" xml:space="preserve">
+    <value>What an amount is for has to be more than 0.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="SignYellowLeaves" xml:space="preserve">
+    <value>Yellow leaves</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignBrownTips" xml:space="preserve">
+    <value>Brown or crispy tips</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignDrooping" xml:space="preserve">
+    <value>Drooping</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignSpots" xml:space="preserve">
+    <value>Spots on leaves</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignLeafDrop" xml:space="preserve">
+    <value>Dropping leaves</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignRootRot" xml:space="preserve">
+    <value>Root rot</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignMushyStem" xml:space="preserve">
+    <value>Mushy stem</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignSunburn" xml:space="preserve">
+    <value>Sunburn</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignLeggy" xml:space="preserve">
+    <value>Leggy or pale</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignEdema" xml:space="preserve">
+    <value>Bumps under the leaves</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="SignOther" xml:space="preserve">
+    <value>Something else</value>
+    <comment>Name of a sign of a problem, as shown on screen. The first is written with a capital and later ones in a list in lower case.</comment>
+  </data>
+  <data name="ActionCutOffLeaves" xml:space="preserve">
+    <value>Cut off leaves</value>
+    <comment>Something the person did about a problem. In a list, later ones are written in lower case.</comment>
+  </data>
+  <data name="ActionMovedIt" xml:space="preserve">
+    <value>Moved it</value>
+    <comment>Something the person did about a problem. In a list, later ones are written in lower case.</comment>
+  </data>
+  <data name="ActionWateredLess" xml:space="preserve">
+    <value>Watered less</value>
+    <comment>Something the person did about a problem. In a list, later ones are written in lower case.</comment>
+  </data>
+  <data name="ActionWateredMore" xml:space="preserve">
+    <value>Watered more</value>
+    <comment>Something the person did about a problem. In a list, later ones are written in lower case.</comment>
+  </data>
+  <data name="ActionRepotted" xml:space="preserve">
+    <value>Repotted</value>
+    <comment>Something the person did about a problem. In a list, later ones are written in lower case.</comment>
+  </data>
+  <data name="ActionCutAwayRoots" xml:space="preserve">
+    <value>Cut away roots</value>
+    <comment>Something the person did about a problem. In a list, later ones are written in lower case.</comment>
+  </data>
+  <data name="ActionMoreLight" xml:space="preserve">
+    <value>More light</value>
+    <comment>Something the person did about a problem. In a list, later ones are written in lower case.</comment>
+  </data>
+  <data name="ActionLessLight" xml:space="preserve">
+    <value>Less light</value>
+    <comment>Something the person did about a problem. In a list, later ones are written in lower case.</comment>
+  </data>
+  <data name="TrendBetter" xml:space="preserve">
+    <value>Better</value>
+    <comment>How a problem is going after an update.</comment>
+  </data>
+  <data name="TrendSame" xml:space="preserve">
+    <value>About the same</value>
+    <comment>How a problem is going after an update.</comment>
+  </data>
+  <data name="TrendWorse" xml:space="preserve">
+    <value>Worse</value>
+    <comment>How a problem is going after an update.</comment>
+  </data>
+  <data name="OutcomeGotBetter" xml:space="preserve">
+    <value>Got better</value>
+    <comment>How a problem ended. Also used in lower case after other text.</comment>
+  </data>
+  <data name="OutcomeWentAway" xml:space="preserve">
+    <value>Went away by itself</value>
+    <comment>How a problem ended. Also used in lower case after other text.</comment>
+  </data>
+  <data name="OutcomeDidntHelp" xml:space="preserve">
+    <value>Nothing helped</value>
+    <comment>How a problem ended. Also used in lower case after other text.</comment>
+  </data>
+  <data name="OutcomeDied" xml:space="preserve">
+    <value>It died</value>
+    <comment>How a problem ended. Also used in lower case after other text.</comment>
+  </data>
+  <data name="OpenedLine" xml:space="preserve">
+    <value>Something's wrong: {0}</value>
+    <comment>Timeline line when a problem is opened. {0} is the signs in lower case. Saved lines are always written in English, so this is only used for that.</comment>
+  </data>
+  <data name="UpdateLineEmpty" xml:space="preserve">
+    <value>Update on the problem</value>
+    <comment>Timeline line for an update with nothing filled in. Saved lines are always written in English.</comment>
+  </data>
+  <data name="ClosedLine" xml:space="preserve">
+    <value>Problem over: {0}</value>
+    <comment>Timeline line when a problem ends. {0} is how it ended, in lower case. Saved lines are always written in English.</comment>
+  </data>
+  <data name="ReopenedLine" xml:space="preserve">
+    <value>The problem came back</value>
+    <comment>Timeline line when a problem is opened again. Saved lines are always written in English.</comment>
+  </data>
+  <data name="TrendWordBetter" xml:space="preserve">
+    <value>better</value>
+    <comment>One trend in a spoken list, like 'Updates: worse, the same, better'.</comment>
+  </data>
+  <data name="TrendWordSame" xml:space="preserve">
+    <value>the same</value>
+    <comment>One trend in a spoken list, like 'Updates: worse, the same, better'.</comment>
+  </data>
+  <data name="TrendWordWorse" xml:space="preserve">
+    <value>worse</value>
+    <comment>One trend in a spoken list, like 'Updates: worse, the same, better'.</comment>
+  </data>
+  <data name="TrendsLabel" xml:space="preserve">
+    <value>Updates: {0}</value>
+    <comment>Read out by a screen reader. {0} is a list of trends like 'worse, the same, better'.</comment>
+  </data>
+  <data name="DayMonthFormat" xml:space="preserve">
+    <value>d MMM</value>
+    <comment>Date pattern, not text. A day and a short month, like 12 Oct. Change the order and punctuation, keep the letters.</comment>
+  </data>
+  <data name="ShortMonthYearFormat" xml:space="preserve">
+    <value>MMM yyyy</value>
+    <comment>Date pattern, not text. A short month and a year, like Mar 2026.</comment>
+  </data>
+  <data name="MonthYearFormat" xml:space="preserve">
+    <value>MMMM yyyy</value>
+    <comment>Date pattern, not text. A month and a year, like June 2024.</comment>
+  </data>
+  <data name="DayMonthYearFormat" xml:space="preserve">
+    <value>d MMM yyyy</value>
+    <comment>Date pattern, not text. A whole date, like 12 Jun 2024.</comment>
+  </data>
+  <data name="DurationDay_One" xml:space="preserve">
+    <value>{0} day</value>
+    <comment>A length of time. {0} is the number.</comment>
+  </data>
+  <data name="DurationDay_Other" xml:space="preserve">
+    <value>{0} days</value>
+  </data>
+  <data name="DurationWeek_One" xml:space="preserve">
+    <value>{0} week</value>
+    <comment>A length of time. {0} is the number.</comment>
+  </data>
+  <data name="DurationWeek_Other" xml:space="preserve">
+    <value>{0} weeks</value>
+  </data>
+  <data name="DurationMonth_One" xml:space="preserve">
+    <value>{0} month</value>
+    <comment>A length of time. {0} is the number.</comment>
+  </data>
+  <data name="DurationMonth_Other" xml:space="preserve">
+    <value>{0} months</value>
+  </data>
+  <data name="DurationYear_One" xml:space="preserve">
+    <value>{0} year</value>
+    <comment>A length of time. {0} is the number.</comment>
+  </data>
+  <data name="DurationYear_Other" xml:space="preserve">
+    <value>{0} years</value>
+  </data>
+  <data name="OverAfter" xml:space="preserve">
+    <value>Over after {0}</value>
+    <comment>A problem that has ended. {0} is how long it lasted, like '3 weeks'.</comment>
+  </data>
+  <data name="OverAfterOutcome" xml:space="preserve">
+    <value>Over after {0}: {1}</value>
+    <comment>A problem that has ended. {0} is how long it lasted, like '3 weeks'. {1} is how it ended, in lower case.</comment>
+  </data>
+  <data name="ProblemFallbackTitle" xml:space="preserve">
+    <value>A problem</value>
+    <comment>Name of a problem when none of its signs are known to this version of the app.</comment>
+  </data>
+  <data name="StageBuds" xml:space="preserve">
+    <value>Spike or buds</value>
+    <comment>A stage of a flowering.</comment>
+  </data>
+  <data name="StageInFlower" xml:space="preserve">
+    <value>In flower</value>
+    <comment>A stage of a flowering.</comment>
+  </data>
+  <data name="StageDone" xml:space="preserve">
+    <value>Done</value>
+    <comment>A stage of a flowering.</comment>
+  </data>
+  <data name="MarkedBuds" xml:space="preserve">
+    <value>Marked as spike or buds.</value>
+    <comment>Shown after a flowering stage is saved.</comment>
+  </data>
+  <data name="MarkedInFlower" xml:space="preserve">
+    <value>Marked in flower.</value>
+    <comment>Shown after a flowering stage is saved.</comment>
+  </data>
+  <data name="MarkedDone" xml:space="preserve">
+    <value>Marked done flowering.</value>
+    <comment>Shown after a flowering stage is saved.</comment>
+  </data>
+  <data name="BadgeInBud" xml:space="preserve">
+    <value>In bud</value>
+    <comment>Badge on a plant that has buds.</comment>
+  </data>
+  <data name="BadgeInFlower" xml:space="preserve">
+    <value>In flower</value>
+    <comment>Badge on a plant that is in flower.</comment>
+  </data>
+  <data name="SinceInBud" xml:space="preserve">
+    <value>In bud since {0}</value>
+    <comment>{0} is a date like '3 Mar'.</comment>
+  </data>
+  <data name="SinceInFlower" xml:space="preserve">
+    <value>In flower since {0}</value>
+    <comment>{0} is a date like '10 Apr'.</comment>
+  </data>
+  <data name="DescribeSpike" xml:space="preserve">
+    <value>spike {0}</value>
+    <comment>Part of a flowering written out in lower case, joined by commas. {0} is a date.</comment>
+  </data>
+  <data name="DescribeInFlowerTo" xml:space="preserve">
+    <value>in flower {0} to {1}</value>
+    <comment>Part of a flowering written out in lower case, joined by commas. {0} and {1} are dates.</comment>
+  </data>
+  <data name="DescribeInFlowerFrom" xml:space="preserve">
+    <value>in flower from {0}</value>
+    <comment>Part of a flowering written out in lower case, joined by commas. {0} is a date.</comment>
+  </data>
+  <data name="DescribeDoneFlowering" xml:space="preserve">
+    <value>done flowering {0}</value>
+    <comment>Part of a flowering written out in lower case, joined by commas. {0} is a date.</comment>
+  </data>
+  <data name="DescribeDone" xml:space="preserve">
+    <value>done {0}</value>
+    <comment>Part of a flowering written out in lower case, joined by commas. {0} is a date.</comment>
+  </data>
+  <data name="MenuHintNone" xml:space="preserve">
+    <value>Spike, buds or flowers</value>
+    <comment>Small line under Flowering in the More menu of a plant.</comment>
+  </data>
+  <data name="InYearsOne" xml:space="preserve">
+    <value>in {0}</value>
+    <comment>{0} is a year, like 2024.</comment>
+  </data>
+  <data name="InYearsMany" xml:space="preserve">
+    <value>in {0} and {1}</value>
+    <comment>{0} is the earlier years separated by commas, like '2023, 2024'. {1} is the last year.</comment>
+  </data>
+  <data name="PlanSteps_One" xml:space="preserve">
+    <value>{0} step</value>
+    <comment>Part of a treatment plan summary like '3 steps over 13 days'.</comment>
+  </data>
+  <data name="PlanSteps_Other" xml:space="preserve">
+    <value>{0} steps</value>
+  </data>
+  <data name="PlanSummary" xml:space="preserve">
+    <value>{0} over {1}</value>
+    <comment>Summary of a treatment plan. {0} is the steps, like '3 steps'. {1} is the time, like '13 days'.</comment>
+  </data>
+  <data name="IngredientIsopropylAlcohol" xml:space="preserve">
+    <value>Isopropyl alcohol</value>
+    <comment>A suggested ingredient for a treatment recipe.</comment>
+  </data>
+  <data name="IngredientDishSoap" xml:space="preserve">
+    <value>Dish soap</value>
+    <comment>A suggested ingredient for a treatment recipe.</comment>
+  </data>
+  <data name="IngredientNeemOil" xml:space="preserve">
+    <value>Neem oil</value>
+    <comment>A suggested ingredient for a treatment recipe.</comment>
+  </data>
+  <data name="IngredientInsecticidalSoap" xml:space="preserve">
+    <value>Insecticidal soap</value>
+    <comment>A suggested ingredient for a treatment recipe.</comment>
+  </data>
+  <data name="IngredientHydrogenPeroxide" xml:space="preserve">
+    <value>Hydrogen peroxide</value>
+    <comment>A suggested ingredient for a treatment recipe.</comment>
+  </data>
+</root>
