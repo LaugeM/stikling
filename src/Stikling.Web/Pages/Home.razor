@@ -96,7 +96,7 @@ else
             }
             else
             {
-                <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayExampleIs, ExampleFamily.MotherNickname))</span>
+                <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayExampleIs, ExampleName))</span>
                 <button type="button" class="btn btn-outline-primary" @onclick="() => confirmingRemoval = true">@Strings.Common.Remove</button>
             }
         </div>
@@ -812,6 +812,10 @@ else
     private bool shareOpen;
     private bool showRound;
     private bool loaded;
+    // The name the example was made with, which stays when the language changes later
+    private string ExampleName =>
+        plants.FirstOrDefault(p => p.Id == ExampleFamily.MotherId)?.Nickname is { Length: > 0 } name ? name : ExampleFamily.MotherNickname;
+
     private bool exampleLoaded;
     private bool exampleBusy;
     private bool exampleFailed;
