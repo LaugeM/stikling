@@ -5,34 +5,35 @@
    to plain HTML for search engines and llms.txt (tools/static-pages/render.cs), without a browser, so
    calls into JavaScript stay in OnAfterRenderAsync. *@
 @implements IAsyncDisposable
+@using System.Globalization
+@using System.Net
 @inject IJSRuntime JS
 @inject AccountService Account
 
-<PageTitle>Help · Stikling</PageTitle>
+<PageTitle>@Strings.Help.PageTitle</PageTitle>
 
-<a class="back-link" href="settings?section=about">Settings</a>
-<h1>Help</h1>
+<a class="back-link" href="settings?section=about">@Strings.Help.BackToSettings</a>
+<h1>@Strings.Help.Title</h1>
 
 <div class="help-layout">
 
 <p class="help-intro">
-    Short answers to the questions that come up most. Tap a question to open it.
+    @Strings.Help.Intro
 </p>
 
 @* Only after the first render, since the search needs JavaScript and the plain HTML copy has none *@
 @if (searchReady)
 {
     <div class="help-search">
-        <input type="search" class="form-control" placeholder="Search the answers" aria-label="Search Help"
+        <input type="search" class="form-control" placeholder="@Strings.Help.SearchPlaceholder" aria-label="@Strings.Help.SearchLabel"
                autocomplete="off" @ref="searchInput" />
         <div class="help-no-match" @ref="noMatch" hidden>
-            No answers match that. Try another word, or
-            <button type="button" class="btn btn-link p-0 align-baseline" @onclick="ClearSearchAsync">clear the search</button>.
+            @NoMatchParts[0]<button type="button" class="btn btn-link p-0 align-baseline" @onclick="ClearSearchAsync">@Strings.Help.ClearSearch</button>@NoMatchParts[1]
         </div>
     </div>
 }
 
-<nav class="help-toc" aria-label="Topics">
+<nav class="help-toc" aria-label="@Strings.Help.TopicsNav">
     @foreach (var (id, title) in topics)
     {
         <a class="chip" href="help#@id">@title</a>
@@ -40,278 +41,145 @@
 </nav>
 
 <section class="help-section" id="start">
-    <h2>Getting started</h2>
+    <h2>@Strings.Help.SectionGettingStarted</h2>
 
     <details class="help-item">
-        <summary>What is Stikling for?</summary>
-        <p>
-            Keeping track of your houseplants and the new plants you grow from them, with a history of
-            notes and photos for each one. It also keeps a care log, pest treatments, and the pots, soil
-            mixes and fertilisers you use, but all of that is optional. A plant with just a name is fine.
-        </p>
+        <summary>@Strings.Help.StiklingForQ</summary>
+        <p>@Strings.Help.StiklingForA1</p>
     </details>
 
     <details class="help-item">
-        <summary>What is a propagation?</summary>
-        <p>
-            A new plant you are growing from one you already have, or from seeds. A cutting in a glass of
-            water is the usual example. Others are a corm, an offset or pup, a leaf, a division, an air
-            layer, and seeds. Stikling calls all of them propagations and keeps them apart from your plants
-            until they have rooted and you pot them up.
-        </p>
-        <p>
-            <em>Stikling</em> is the Danish word for a cutting.
-        </p>
+        <summary>@Strings.Help.PropagationQ</summary>
+        <p>@Strings.Help.PropagationA1</p>
+        <p>@((MarkupString)Strings.Help.PropagationA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>Where do I start?</summary>
-        <p>
-            Add a plant from Plants with the + button. A name is all it needs, and the rest
-            can be filled in later. A plant's page opens on its photos and notes, with buttons for <em>Photo</em>,
-            <em>Note</em> and <em>Care</em>. When you take a cutting from it, tap the
-            three dots next to them, then <em>Propagate</em>.
-        </p>
-        <p>
-            Have plants already? Before you've added anything, the Today page also offers to add several at once,
-            or to start a plant from old photos so its history goes back to when you got it.
-        </p>
+        <summary>@Strings.Help.WhereStartQ</summary>
+        <p>@((MarkupString)Strings.Help.WhereStartA1)</p>
+        <p>@Strings.Help.WhereStartA2</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I try it before adding my own plants?</summary>
-        <p>
-            When nothing has been added yet, Today has a <em>Show me around</em> button. It loads an example
-            coleus with a cutting in water and a young plant grown from an earlier cutting, with photos and notes,
-            and shows you around the app with it in five short steps. Skip the tour and the example stays to look at.
-            A row on Today removes it again, along with anything added to it. Plants made from it stay.
-        </p>
+        <summary>@Strings.Help.TryBeforeAddingOwnPlantsQ</summary>
+        <p>@((MarkupString)Strings.Help.TryBeforeAddingOwnPlantsA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I see the tour again?</summary>
-        <p>
-            Yes, at any time: Settings, then <em>Show me around</em>. It loads the example again if you removed it,
-            and asks at the end whether to keep it.
-        </p>
+        <summary>@Strings.Help.SeeTourAgainQ</summary>
+        <p>@((MarkupString)Strings.Help.SeeTourAgainA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Where are the settings?</summary>
-        <p>
-            Behind the gear at the top of the screen, or at the bottom of the menu on a wide screen. That is where you @(Account.IsAvailable ? "sign in, " : "")save a backup, pick light or dark, and add, rename or merge rooms and tags. The pots, soil mixes and products
-            you use are under Supplies.
-        </p>
+        <summary>@Strings.Help.WhereSettingsQ</summary>
+        <p>@(string.Format(CultureInfo.CurrentCulture, Strings.Help.WhereSettingsA1, Account.IsAvailable ? Strings.Help.WhereSettingsA1Variant : ""))</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I see how Stikling is made?</summary>
-        <p>
-            Yes, it is open source. <em>Source code</em> under About in Settings opens the code on GitHub, where you can
-            also report a problem or suggest something.
-        </p>
+        <summary>@Strings.Help.SeeStiklingMadeQ</summary>
+        <p>@((MarkupString)Strings.Help.SeeStiklingMadeA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I put it on my phone's home screen?</summary>
-        <p>
-            On an iPhone, open Stikling in Safari, tap the Share button, and pick
-            <em>Add to Home Screen</em>.
-        </p>
-        <p>
-            On Android, open it in Chrome, tap the menu with the three dots, and pick
-            <em>Install app</em> or <em>Add to home screen</em>.
-        </p>
-        <p>
-            It then opens like any other app, without the browser around it. It is still the same app and
-            the same data, so nothing has to be moved.
-        </p>
-        <p>
-            On Android, a long press on the icon gives shortcuts to add a plant, start a propagation,
-            water plants or open the pest cases.
-        </p>
+        <summary>@Strings.Help.PutOnPhoneSHomeQ</summary>
+        <p>@((MarkupString)Strings.Help.PutOnPhoneSHomeA1)</p>
+        <p>@((MarkupString)Strings.Help.PutOnPhoneSHomeA2)</p>
+        <p>@Strings.Help.PutOnPhoneSHomeA3</p>
+        <p>@Strings.Help.PutOnPhoneSHomeA4</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I use it on a computer?</summary>
-        <p>
-            Yes, in any browser, and on a tablet too. On a wide screen the tabs move to a menu down the left
-            side, with Help and Settings at the bottom of it. A plant or propagation page shows its details
-            next to its history, and the buttons that sit at the bottom of the page on a phone are above the
-            history instead. Today puts what needs doing in a wide column with the rest beside it, and Water
-            plants shows the plants side by side. In the lists, the round + button is a button next to the title.
-        </p>
-        <p>
-            @(Account.IsAvailable
-                ? "Each device keeps its own plants until you sign in on both, which keeps them the same."
-                : "Each device keeps its own plants. To move them, save a backup on one and restore it on the other.")
-        </p>
+        <summary>@Strings.Help.UseOnComputerQ</summary>
+        <p>@Strings.Help.UseOnComputerA1</p>
+        <p>@(string.Format(CultureInfo.CurrentCulture, Strings.Help.UseOnComputerA2, Account.IsAvailable ? Strings.Help.UseOnComputerA2Variant : Strings.Help.UseOnComputerA2Variant2))</p>
     </details>
 
     <details class="help-item">
-        <summary>Does it work without signal?</summary>
-        <p>
-            Yes. Once it has been opened, everything it needs is kept on the phone, including the plant
-            name suggestions. It only goes online to check for a new version@(Account.IsAvailable ? ", and to sync if you're signed in" : "").
-            When there is a new version, a banner at the bottom asks you to reload.
-        </p>
+        <summary>@Strings.Help.WorkWithoutSignalQ</summary>
+        <p>@(string.Format(CultureInfo.CurrentCulture, Strings.Help.WorkWithoutSignalA1, Account.IsAvailable ? Strings.Help.WorkWithoutSignalA1Variant : ""))</p>
     </details>
 
     <details class="help-item">
-        <summary>Why did it take a while to open the first time?</summary>
-        <p>
-            The first visit downloads the whole app, about 4&nbsp;MB, so it can work without signal afterwards. On
-            slow mobile data that can take half a minute. After that it opens from the phone in a moment.
-        </p>
+        <summary>@Strings.Help.WhyDidTakeWhileOpenQ</summary>
+        <p>@((MarkupString)Strings.Help.WhyDidTakeWhileOpenA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I search everything at once?</summary>
-        <p>
-            Tap the magnifier at the top, or <em>Search</em> in the menu on a computer, where the / key opens
-            it too. It looks through your plants, cuttings, wishes, pots, mixes, feeds, products, rooms and
-            tags, and the notes on every history, care log, problem and pest case. Tap a note to go to it.
-            Notes are searched once every word you type has at least two letters. The search boxes on the
-            Plants, Propagations and Wishlist pages still search just that list.
-        </p>
+        <summary>@Strings.Help.SearchEverythingAtOnceQ</summary>
+        <p>@((MarkupString)Strings.Help.SearchEverythingAtOnceA1)</p>
     </details>
 </section>
 
 <section class="help-section" id="data">
-    <h2>Your data and backups</h2>
+    <h2>@Strings.Help.SectionYourDataBackups</h2>
 
     <details class="help-item">
-        <summary>Where is my data kept?</summary>
+        <summary>@Strings.Help.WhereDataKeptQ</summary>
         @if (Account.IsAvailable)
         {
-            <p>
-                On this device, in the browser's own storage. If you sign in, it is also kept on the Stikling
-                server, photos included, so your other devices get it too. Without an account, nothing you add
-                leaves this device unless you save a backup and move it yourself.
-            </p>
+            <p>@Strings.Help.WhereDataKeptA1</p>
         }
         else
         {
-            <p>
-                On this device only, in the browser's own storage. There is no account and no server, so nothing
-                you add leaves this device unless you save a backup and move it yourself.
-            </p>
+            <p>@Strings.Help.WhereDataKeptA2</p>
         }
     </details>
 
     <details class="help-item">
-        <summary>Does the app send anything when something goes wrong?</summary>
-        <p>
-            Yes. When something fails, the app sends a short error report to Sentry, so it can be fixed without
-            anyone having to write in. It says what failed and where in the code. It never has your plants, notes
-            or photos, and has no IP address or account. You can turn it off with Send error reports in
-            Settings, and the <a href="privacy#error-reports">privacy page</a> says exactly what a report holds.
-        </p>
+        <summary>@Strings.Help.AppSendAnythingWhenSomethingQ</summary>
+        <p>@((MarkupString)Strings.Help.AppSendAnythingWhenSomethingA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What happens if I clear the browser or delete the app?</summary>
-        <p>
-            Your plants, propagations and photos go with it. Clearing the site data for Stikling, or
-            deleting the installed app, removes everything, and without a backup there is no way to get it
-            back.
-        </p>
-        <p>
-            Some browsers also clear data by themselves when the phone runs low on space, or when a site
-            hasn't been opened for a while. Installing Stikling to the home screen usually stops that. Under
-            Backup and storage in Settings you can see whether the browser has agreed to keep your data, and
-            ask it to.
-        </p>
+        <summary>@Strings.Help.HappensIfClearBrowserOrQ</summary>
+        <p>@Strings.Help.HappensIfClearBrowserOrA1</p>
+        <p>@Strings.Help.HappensIfClearBrowserOrA2</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I back up?</summary>
-        <p>
-            Open Settings, then <em>Backup and storage</em>, and tap <em>Save a backup</em>. You get
-            a ZIP file with everything in it,
-            photos included. Keep it somewhere other than the phone, like cloud storage or your computer.
-        </p>
+        <summary>@Strings.Help.BackUpQ</summary>
+        <p>@((MarkupString)Strings.Help.BackUpA1)</p>
         @if (Account.IsAvailable)
         {
-            <p>
-                If you're signed in, the backup fetches the full-size photos this device hasn't opened yet, so
-                it can take a while the first time.
-            </p>
+            <p>@Strings.Help.BackUpA2</p>
         }
-        <p>
-            Today reminds you when you haven't taken a backup, or when the last one is 30 days old.
-        </p>
+        <p>@Strings.Help.BackUpA3</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I get my photos out of the app?</summary>
-        <p>
-            Under Backup and storage in Settings, tap <em>Download photos</em>. You get a ZIP file with a folder for each
-            plant, propagation and pot, and every photo is named by the date it was taken. Reference photos go in a
-            Reference folder inside their plant's, or can be left out. The backup has the photos
-            too, but it is made for Stikling to read back, so use this one to keep them or look through them on a computer.
-        </p>
+        <summary>@Strings.Help.GetPhotosOutAppQ</summary>
+        <p>@((MarkupString)Strings.Help.GetPhotosOutAppA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I get my plants into a spreadsheet?</summary>
-        <p>
-            Under Backup and storage in Settings, tap <em>Plants as CSV</em> or <em>Propagations as CSV</em>. You get a
-            file that Excel and Google Sheets can open. It's a copy to read and sort, not a backup: importing the
-            plants file again brings back the plants and their details, but not their photos, history or care.
-        </p>
+        <summary>@Strings.Help.GetPlantsIntoSpreadsheetQ</summary>
+        <p>@((MarkupString)Strings.Help.GetPlantsIntoSpreadsheetA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I move to a new phone?</summary>
+        <summary>@Strings.Help.MoveNewPhoneQ</summary>
         @if (Account.IsAvailable)
         {
-            <p>
-                The easiest way is to sign in on the new phone with the same account. Everything that has synced
-                comes over by itself, photos included. A bar at the bottom shows while your things are being
-                fetched, and photos can take a little longer to appear. Check that the old phone has finished
-                syncing first, on the Account page in Settings.
-            </p>
-            <p>
-                Without an account, save a backup on the old phone, get the file over to the new one, open
-                Stikling there and tap <em>Restore a backup</em> under Backup and storage in Settings.
-            </p>
+            <p>@Strings.Help.MoveNewPhoneA1</p>
+            <p>@((MarkupString)Strings.Help.MoveNewPhoneA2)</p>
         }
         else
         {
-            <p>
-                Save a backup on the old phone, get the file over to the new one, open Stikling there and tap
-                <em>Restore a backup</em> under Backup and storage in Settings.
-            </p>
+            <p>@((MarkupString)Strings.Help.MoveNewPhoneA3)</p>
         }
-        <p>
-            A restore adds to what is already there instead of replacing it. Anything missing is added,
-            anything deleted since the backup comes back, and where the same thing was changed in both
-            places, the newer version wins, so a newer one in the backup replaces the one on the device. Restoring the same backup twice does no harm.
-        </p>
-        <p>
-            Before it restores, Stikling saves a backup of what is on the device now to your downloads, named
-            <em>stikling-before-restore</em> with the date. If the restore removed something you wanted, restore
-            that file to bring it back. It brings back what was deleted, but not edits the restore replaced with
-            newer ones.
-        </p>
+        <p>@Strings.Help.MoveNewPhoneA4</p>
+        <p>@((MarkupString)Strings.Help.MoveNewPhoneA5)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I use it on two devices?</summary>
+        <summary>@Strings.Help.UseOnTwoDevicesQ</summary>
         @if (Account.IsAvailable)
         {
-            <p>
-                Yes. Sign in with the same account on both, and what you add or change on one shows up on the
-                other, photos too.
-            </p>
+            <p>@Strings.Help.UseOnTwoDevicesA1</p>
         }
         else
         {
-            <p>
-                Not at the same time. Each device has its own copy and they don't sync. You can move your data
-                across with a backup and a restore whenever you switch.
-            </p>
+            <p>@Strings.Help.UseOnTwoDevicesA2</p>
         }
     </details>
 
@@ -319,218 +187,101 @@
     @if (Account.IsAvailable)
     {
         <details class="help-item">
-            <summary>Do I need an account?</summary>
-            <p>
-                No. An account is optional, and everything in Stikling works without one. To make one, open
-                Settings, then <em>Sign in</em>, and sign in with Google, Facebook or Discord, or with your
-                email.
-            </p>
-            <p>
-                With an account, your plants are kept the same on every device you sign in on. If the phone
-                already has plants on it when you sign in, they are added to what your account has, so nothing
-                is lost.
-            </p>
+            <summary>@Strings.Help.NeedAccountQ</summary>
+            <p>@((MarkupString)Strings.Help.NeedAccountA1)</p>
+            <p>@Strings.Help.NeedAccountA2</p>
         </details>
 
         <details class="help-item">
-            <summary>When does it sync?</summary>
-            <p>
-                When you open the app, a couple of seconds after you change something, when the connection
-                comes back, and every few minutes while the app is open. The Account page in Settings shows when
-                it last synced, and has <em>Sync now</em>. If something goes wrong, a dot shows on the Settings
-                gear.
-            </p>
-            <p>
-                Photos go up from the device they were added on. Every device keeps a small copy of each photo,
-                so lists look complete even offline, and fetches the full size when you open one. Once
-                fetched, it stays on the device. With a lot of photos, the first sync on a new device takes a
-                few minutes, and they fill in as they arrive.
-            </p>
-            <p>
-                Without a connection, everything works as usual and your changes wait on the phone until they
-                can be sent. If the same thing was changed on two devices, the newer change wins, the same as
-                when a backup is restored.
-            </p>
+            <summary>@Strings.Help.WhenSyncQ</summary>
+            <p>@((MarkupString)Strings.Help.WhenSyncA1)</p>
+            <p>@Strings.Help.WhenSyncA2</p>
+            <p>@Strings.Help.WhenSyncA3</p>
         </details>
 
         <details class="help-item">
-            <summary>Is there a limit on photos?</summary>
-            <p>
-                Each account has 1 GB for photos on the server, which is roughly 2,500 photos. When it is
-                nearly full, the Account page in Settings says how much is used. If it fills up, new photos
-                stay on the device they were added on, and
-                deleting photos you don't need makes room. The photos on your device aren't limited by this.
-            </p>
+            <summary>@Strings.Help.ThereLimitOnPhotosQ</summary>
+            <p>@Strings.Help.ThereLimitOnPhotosA1</p>
         </details>
 
         <details class="help-item">
-            <summary>What happens when I sign out?</summary>
-            <p>
-                You choose whether to keep a copy on this device or remove it. What has synced stays with your
-                account either way and comes back when you sign in again.
-            </p>
-            <p>
-                Signing out sends your latest changes first, and tells you if any changes or photos haven't
-                reached the server yet. Removing the data would delete those, so save a backup first if you
-                want to keep them.
-            </p>
+            <summary>@Strings.Help.HappensWhenSignOutQ</summary>
+            <p>@Strings.Help.HappensWhenSignOutA1</p>
+            <p>@Strings.Help.HappensWhenSignOutA2</p>
         </details>
 
         <details class="help-item">
-            <summary>Can I see what the server has about me?</summary>
-            <p>
-                Yes. On the Account page in Settings, tap <em>Download your data</em>. You get a ZIP with
-                everything the Stikling server holds about you: your plants and everything else you added, your
-                photos, your settings, and what the sign-in service has, like your email address. The files
-                inside are plain text and open in any text editor.
-            </p>
-            <p>
-                When you delete something, the server removes it and only keeps a note that it was deleted, so
-                your other devices delete it too.
-            </p>
+            <summary>@Strings.Help.SeeServerHasAboutMeQ</summary>
+            <p>@((MarkupString)Strings.Help.SeeServerHasAboutMeA1)</p>
+            <p>@Strings.Help.SeeServerHasAboutMeA2</p>
         </details>
 
         <details class="help-item">
-            <summary>How do I delete my account?</summary>
-            <p>
-                On the Account page in Settings, tap <em>Delete account</em> at the bottom. It erases everything
-                your account has on
-                the Stikling server, photos included, and deletes your sign-in. It can't be undone.
-            </p>
-            <p>
-                You choose whether this device keeps what it has. If it does, the app carries on without an
-                account, like before you signed in. Your other devices stop syncing and keep what is on them.
-            </p>
+            <summary>@Strings.Help.DeleteAccountQ</summary>
+            <p>@((MarkupString)Strings.Help.DeleteAccountA1)</p>
+            <p>@Strings.Help.DeleteAccountA2</p>
         </details>
     }
 
     <details class="help-item">
-        <summary>Who can see my plants?</summary>
-        <p>
-            @(Account.IsAvailable
-                ? "Without an account, nobody but you, since nothing leaves the device. With one, only the people in your collection, and for now that is only you."
-                : "Nobody but you, since nothing leaves the device.")
-            There are no ads and no tracking. The <a href="privacy">privacy page</a> has the details.
-        </p>
+        <summary>@Strings.Help.WhoSeePlantsQ</summary>
+        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.WhoSeePlantsA1, Account.IsAvailable ? Strings.Help.WhoSeePlantsA1Variant : Strings.Help.WhoSeePlantsA1Variant2))</p>
     </details>
 </section>
 
 <section class="help-section" id="plants">
-    <h2>Plants</h2>
+    <h2>@Strings.Help.SectionPlants</h2>
 
     <details class="help-item">
-        <summary>Can I add a lot of plants at once?</summary>
-        <p>
-            Yes. On the add plant page, or on Today before you've added anything, tap <em>Quick add</em> or
-            <em>Add several at once</em>, then type or paste a list of names, one per
-            line or separated by commas. Names the app knows, botanical or everyday ones like snake plant,
-            are filled in as genus, species and cultivar, and anything written after them goes into the
-            notes. A name it doesn't know becomes the nickname, and so does an everyday name that two plants
-            share, like money tree, so you can pick which one it is. Check the list, remove what you don't
-            want, and tap the button to add them all.
-        </p>
+        <summary>@Strings.Help.AddLotPlantsAtOnceQ</summary>
+        <p>@((MarkupString)Strings.Help.AddLotPlantsAtOnceA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I find a plant in a long list?</summary>
-        <p>
-            Sort the list by genus or by room to get a heading for each group, with how many plants are in it. With 30 or
-            more plants sorted A to Z or by genus, a column of letters down the right side jumps to a letter. You can also
-            slide a finger along it. Search works too, and finds a plant by any of its names.
-        </p>
+        <summary>@Strings.Help.FindPlantLongListQ</summary>
+        <p>@Strings.Help.FindPlantLongListA1</p>
     </details>
 
     <details class="help-item">
-        <summary>How many plants do I have of each kind?</summary>
-        <p>
-            <em>Collection</em> at the top of Plants shows how many plants, species and genera you have, the one you've had
-            longest, and how many there are of each genus and in each room. Tap a genus or a room to see those plants.
-        </p>
+        <summary>@Strings.Help.ManyPlantsHaveEachKindQ</summary>
+        <p>@((MarkupString)Strings.Help.ManyPlantsHaveEachKindA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I keep several plants in one pot?</summary>
-        <p>
-            Yes. Set how many are in the pot on the plant's edit page, for example five aloe pups kept as one plant.
-            The number shows after its name in the lists.
-        </p>
-        <p>
-            When some die, are given away or get a pot of their own, open the plant's three dots and tap <em>Some of them</em>.
-            The ones you pot up on their own become plants of their own, with this one as their parent.
-        </p>
-        <p>
-            When one plant goes into another plant's pot, tap <em>Pot together</em> on its page. It is then counted in the other
-            plant and leaves the lists, but it keeps its history and can be opened from the other plant's page.
-            <em>Take it out again</em> undoes it. Rooted cuttings can go straight into a plant's pot when you pot them up.
-        </p>
+        <summary>@Strings.Help.KeepSeveralPlantsOnePotQ</summary>
+        <p>@Strings.Help.KeepSeveralPlantsOnePotA1</p>
+        <p>@((MarkupString)Strings.Help.KeepSeveralPlantsOnePotA2)</p>
+        <p>@((MarkupString)Strings.Help.KeepSeveralPlantsOnePotA3)</p>
     </details>
 
     <details class="help-item">
-        <summary>Why does Pot up say the pot is much bigger?</summary>
-        <p>
-            A pot much wider than the last one keeps the soil wet for longer, which is a common cause of root rot.
-            When you pick a new pot, the app shows the old and new width across the top, and says so when the new one is
-            a lot wider. You can still use it, so water less until the roots fill it.
-            Under <em>Say when a new pot is much bigger</em> in Settings you can change how much wider counts as a lot, 5 cm to start with.
-            It needs the width set on both pots.
-        </p>
+        <summary>@Strings.Help.WhyPotUpSayPotQ</summary>
+        <p>@((MarkupString)Strings.Help.WhyPotUpSayPotA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I bring in my plants from a spreadsheet?</summary>
-        <p>
-            Yes. Save the sheet as CSV, or copy the cells with the headings, and open <em>import a spreadsheet</em> on the
-            add plant page or under Backup and storage in Settings. Each of your columns is matched to a field, like the
-            name, the room or the date you got it, and you can change any match. A column that matches no field becomes
-            a field of its own, named after the heading, with the kind of field guessed from what is in it. You can
-            switch it to a line in About it or leave it out, so nothing is lost, and dates for when a plant was last
-            watered, fed or repotted go into its care log. Then check the plants: a row that looks like a plant you already have is left out unless you tick it.
-            When it's done, Undo on the same screen removes everything the import added, the new fields too.
-        </p>
+        <summary>@Strings.Help.BringPlantsFromSpreadsheetQ</summary>
+        <p>@((MarkupString)Strings.Help.BringPlantsFromSpreadsheetA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I add a field the app doesn't have?</summary>
-        <p>
-            Yes. Open <em>Your fields</em> in Settings, or tap <em>Add a field of your own</em> under <em>More details</em>
-            on the plant form. A field can hold text, a number, a date or a choice from a list you set, like clone name,
-            awards or humidity. It shows on the plant's page once you've filled it in, the search finds the text and the
-            choices, and the spreadsheet export has a column for it. In the plant table each field can be a column and
-            sorted by. A choice field, and How it was raised, can narrow the plant list with the Fields menu next to the
-            filters. In Select, <em>Set a field</em> fills one in on several plants at once. Removing a field hides it.
-            The values stay on your plants and come back if you add a field with the same name again.
-        </p>
+        <summary>@Strings.Help.AddFieldAppDoesnTQ</summary>
+        <p>@((MarkupString)Strings.Help.AddFieldAppDoesnTA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Where do I note tissue culture, seed grown or a collector's number?</summary>
-        <p>
-            Pick <em>How it was raised</em> under <em>Where it came from</em> on the plant form. It has nursery grown,
-            tissue culture, from seed, from a cutting or division, and wild collected. It's asked for plants you bought,
-            got as a gift or swapped for, or don't know the origin of. A plant you grew from seed or propagated already
-            says so. A collector's number or a locality goes in <em>Locality or code</em>, next to the name.
-        </p>
+        <summary>@Strings.Help.WhereNoteTissueCultureSeedQ</summary>
+        <p>@((MarkupString)Strings.Help.WhereNoteTissueCultureSeedA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What are genus, species and cultivar?</summary>
-        <p>
-            The parts of a plant's botanical name. In <em>Monstera deliciosa</em> 'Thai Constellation',
-            Monstera is the genus, deliciosa the species, and Thai Constellation the cultivar, a named
-            variety. If you don't know them, type what you call the plant under <em>What plant is it?</em>,
-            like snake plant, and pick it from the list to fill them in. Suggestions come up as you type, but
-            anything can be typed, and all three can be left empty if you give the plant a nickname.
-        </p>
+        <summary>@Strings.Help.GenusSpeciesCultivarQ</summary>
+        <p>@((MarkupString)Strings.Help.GenusSpeciesCultivarA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I write down a name I'm not sure of?</summary>
-        <p>
-            Tap <em>Not sure of the name?</em> under the name fields, then pick <em>cf.</em>, <em>aff.</em>,
-            <em>sp.</em> or <em>Name lost</em> and add a locality or collector code, like Sumatra or EPC 123. The
-            name then shows that way everywhere, like Hoya sp. Sumatra EPC 123, and search finds the code. When you
-            find out what it is, set it to <em>Sure</em> and the plant's history notes when it was identified.
-        </p>
+        <summary>@Strings.Help.WriteDownNameMNotQ</summary>
+        <p>@((MarkupString)Strings.Help.WriteDownNameMNotA1)</p>
     </details>
 
     <details class="help-item" id="collection-numbers">
@@ -570,39 +321,18 @@
     </details>
 
     <details class="help-item">
-        <summary>What is the name under my plant's botanical name?</summary>
-        <p>
-            What it's called in everyday words, like Snake plant under <em>Dracaena trifasciata</em>. It
-            shows on plants without a nickname. The names come with the app, from Wikidata and from lists
-            kept by hand, and a plant the app has no everyday name for only shows its botanical one. Under
-            Everyday names in Settings you can switch between English and Danish names.
-        </p>
+        <summary>@Strings.Help.NameUnderPlantSBotanicalQ</summary>
+        <p>@((MarkupString)Strings.Help.NameUnderPlantSBotanicalA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do rooms and spots work?</summary>
-        <p>
-            A room is where a plant lives, and a spot is a place inside it, like "Living room / On top of
-            the PC". Pick one you have used before so the same room doesn't end up with two names.
-            Filtering the plant list by a room includes its spots. Under Rooms and tags in Settings you can add a
-            room or spot before any plant is in it, rename or merge them, remove one that is empty, and mark one as
-            having a grow light or as outdoors.
-        </p>
+        <summary>@Strings.Help.RoomsSpotsWorkQ</summary>
+        <p>@Strings.Help.RoomsSpotsWorkA1</p>
     </details>
 
     <details class="help-item">
-        <summary>What happens when a plant dies or I give it away?</summary>
-        <p>
-            Open the plant, tap the three dots next to <em>Photo</em> and <em>Note</em> and pick <em>It died</em> or
-            <em>Gave it away or sold it</em>. For several at once, use <em>Select</em> on the plant list. It leaves the list but keeps its history, and you can still find it under
-            <em>Gone</em>. When you mark a plant as died, you can add a note on what happened. It shows
-            on the plant and in the <em>Gone</em> list, so you can look it over before buying the same plant again. Under <em>Gone</em>, pick <em>Died</em> to see only the plants that died and why.
-            When you add a plant with the same name as one that died, the form reminds you of it and what went wrong.
-            For a plant you gave away or sold, you can note who got it and what it was sold or swapped for,
-            for example a price or the plant you got back. An offspring that was given away or sold shows who got it in the family list.
-            If it comes back, or you picked it by mistake, the same place has <em>Back in the collection</em>.
-            Deleting a plant removes it along with its history, so saying what happened is usually the better choice.
-        </p>
+        <summary>@Strings.Help.HappensWhenPlantDiesOrQ</summary>
+        <p>@((MarkupString)Strings.Help.HappensWhenPlantDiesOrA1)</p>
     </details>
 
     <details class="help-item" id="sellers">
@@ -620,55 +350,24 @@
     </details>
 
     <details class="help-item">
-        <summary>I have two of the same plant. Do I type it all in twice?</summary>
-        <p>
-            No. Open the first one, tap <em>Details</em> and use <em>Add another like this</em>. The add
-            form opens with the same names, room, origin, seller, price paid, medium, soil mix and tags. The nickname, pots,
-            notes and photos are left empty, since those belong to each plant on its own, and the date starts at today. If you got them together, a button under the date switches it to the first plant's date.
-        </p>
-        <p>
-            If you start a new plant from scratch with a name you already have, the form says so and links
-            to the one you have, in case you meant to open that instead.
-        </p>
+        <summary>@Strings.Help.HaveTwoSamePlantTypeQ</summary>
+        <p>@((MarkupString)Strings.Help.HaveTwoSamePlantTypeA1)</p>
+        <p>@Strings.Help.HaveTwoSamePlantTypeA2</p>
     </details>
 
     <details class="help-item">
-        <summary>What do dormant and quarantine mean?</summary>
-        <p>
-            Dormant is for a plant that is resting, like an alocasia dropping its leaves for the winter, so it
-            doesn't look dead. Quarantine is for a new or sick plant you are keeping apart from the rest.
-            Both are started and ended with the three dots next to <em>Photo</em> and <em>Note</em> on the plant's page. They show
-            as a badge, have a filter on the plant list, and are written on the plant's history when they
-            start and end. A new plant can go straight into quarantine under <em>More details</em> when you
-            add it. To have bought, swapped and gifted plants start there, turn on <em>Quarantine new plants</em> under
-            <em>Pests</em> in Settings, and untick it on the form when a plant doesn't need it. A quarantine lasts 14 days
-            unless you pick another length, and <em>Quarantine length</em> in Settings changes the one new quarantines start
-            with. When it is up, the plant shows on Today so you can check it and let it out.
-        </p>
+        <summary>@Strings.Help.DormantQuarantineMeanQ</summary>
+        <p>@((MarkupString)Strings.Help.DormantQuarantineMeanA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I log watering and feeding?</summary>
-        <p>
-            Open the plant and tap <em>Care</em>, next to <em>Photo</em> and <em>Note</em>. It shows when it was last watered, fed and
-            so on, and logging is a tap. Under that, <em>The last year</em> is a calendar with a row for each month, showing the days it was
-            watered, fed or had a meter reading, so gaps in the rhythm stand out. Tap a month to list the days in it. When it was last watered also shows under the plant's name, on the plant list and on the Water screen. A refill or top-up counts as water too, and a plant in a self-watering pot is logged as <em>Refilled</em> in Care. To log for several plants at once, tap <em>Select</em> on the plant list, pick
-            them and tap <em>Log care</em>. The same bar can also add a note or tags to all of them, and
-            <em>Move</em> puts them all in a room or spot. Plants already there are left alone. If you have
-            a meter, tap <em>Add EC and pH</em> when logging a feed to note the readings, and they show on
-            that line in the care history.
-        </p>
+        <summary>@Strings.Help.LogWateringFeedingQ</summary>
+        <p>@((MarkupString)Strings.Help.LogWateringFeedingA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>I logged care wrong. How do I fix it?</summary>
-        <p>
-            Open the plant, tap <em>Care</em> and tap the entry under <em>History</em>. You can change the date, the
-            meter reading, the water, EC and pH, or the note, and tap <em>Save</em>. <em>Delete</em> takes the entry out
-            of the history and the watering reminder. What was done and its products can't be changed, so delete the
-            entry and log it again. A line the entry added to the plant's history stays there until you delete it
-            on its own. A cutting's care entries work the same way from its own care sheet, where you can remove them.
-        </p>
+        <summary>@Strings.Help.LoggedCareWrongFixQ</summary>
+        <p>@((MarkupString)Strings.Help.LoggedCareWrongFixA1)</p>
     </details>
 
     <details class="help-item" id="own-kinds-of-care">
@@ -709,88 +408,39 @@
     </details>
 
     <details class="help-item">
-        <summary>How does the watering reminder work?</summary>
-        <p>
-            Turn it on under <em>Watering reminder</em> in Settings. It learns how often each plant gets water from what
-            you have logged, and asks you to check the plant on Today when it is probably dry. It never tells you to water,
-            and it never uses a care guide or a fixed number of days. It says nothing about a plant until it has seen a few
-            waterings, so the first weeks are quiet. Until then the plant's page says how many more it needs. Log
-            waterings as you do them and it gets better. It leans later when unsure, since a plant that is checked a day too
-            late is better off than one watered too soon. When a plant watered from the top is due a check, Today has a
-            <em>How to tell if it needs water</em> note under Water with a few ways to check.
-        </p>
-        <p>
-            If you log meter readings, it learns how long the plant takes to dry down to the level you water at, and that
-            works as soon as one watering has been followed by a dry reading. This is for plants you water from the top.
-            Semi-hydro (LECA and PON), corm risers, self-watering pots and plants with an outer pot you keep water in
-            count how long the reservoir lasts instead, and the row says <em>Refilled</em> when you tick it.
-            A plant in water is topped up, and the row says <em>Topped up</em>. When the way a plant gets water changes,
-            like moving from soil to LECA, it starts learning again, since the old waterings say nothing about the new way.
-            A gap across a trip or quiet time you have added under <em>Away and quiet time</em> isn't learned from either, unless a watering was logged during it.
-        </p>
+        <summary>@Strings.Help.WateringReminderWorkQ</summary>
+        <p>@((MarkupString)Strings.Help.WateringReminderWorkA1)</p>
+        <p>@((MarkupString)Strings.Help.WateringReminderWorkA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>Why does Today say to empty the outer pot?</summary>
-        <p>
-            A plant standing in an outer pot sits in the water that drains out after watering, and roots left in water for
-            days can rot. An hour after you log a watering, Today asks you to tip it out, for plants with an outer pot where
-            you don't keep water on purpose. Tap <em>Emptied</em> on the plant, or <em>All emptied</em> for the lot. Under
-            <em>Remind me to empty the outer pot</em> in Settings you can change the wait or turn it off.
-        </p>
+        <summary>@Strings.Help.WhyTodaySayEmptyOuterQ</summary>
+        <p>@((MarkupString)Strings.Help.WhyTodaySayEmptyOuterA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I keep track of a plant moving to LECA or PON?</summary>
-        <p>
-            Change <em>Grows in</em> on its edit page and leave <em>Track the move to semi-hydro</em> ticked, or pick
-            <em>Moving to semi-hydro</em> from the three dots on its page. Its page then has a checklist for washed roots,
-            the first new water root and the first new leaf. Tap a step when it happens, and tap it again to take it off.
-            Once a root and a leaf have both shown up, the page says it has settled in. If nothing new is ticked for 6 weeks,
-            or the weeks you chose, Today asks you to have a look at its roots and leaves.
-        </p>
+        <summary>@Strings.Help.KeepTrackPlantMovingLECAQ</summary>
+        <p>@((MarkupString)Strings.Help.KeepTrackPlantMovingLECAA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What do Still wet and No meter do on Today?</summary>
-        <p>
-            For a plant you water from the top, tap <em>Still wet</em> and pick what the meter reads, from 0 to 10. The reading
-            is saved with the plant's care, and the plant comes back later, once it has had time to dry. <em>No meter</em> puts it
-            off for a few days without a reading. For the other plants the button says <em>Not yet</em> and does the same. The tick logs the
-            watering, refill or top up for today. The clock puts the row off for a day or more, like the other rows.
-        </p>
+        <summary>@Strings.Help.StillWetNoMeterOnQ</summary>
+        <p>@((MarkupString)Strings.Help.StillWetNoMeterOnA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is the Water at reading?</summary>
-        <p>
-            It is the meter reading you water at, from 1 to 10, under <em>Watering</em> when you edit a plant that is watered
-            from the top. It is 3 unless you change it, which is the top of the red dry part on most meters. Set it higher
-            for a plant you keep moister, like a peace lily. To leave one plant out of the reminder, switch off <em>Remind me to water</em>
-            there. It stays out of Today until you switch it back on.
-        </p>
+        <summary>@Strings.Help.WaterAtReadingQ</summary>
+        <p>@((MarkupString)Strings.Help.WaterAtReadingA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Does the reminder know about the seasons and grow lights?</summary>
-        <p>
-            Yes. Plants drink less as the days get shorter, so when the days are shortening the reminder leans later for a plant
-            that has no light on it, and it uses the same weeks of earlier years when you have them. A plant
-            under a grow light doesn't slow down in winter, so mark the room or spot as having one under Rooms and tags in Settings.
-            Plants there are left out of the seasons. It also keeps the stretches a plant is dormant apart from the rest, so a
-            plant's slow winter doesn't make the reminder late in spring.
-        </p>
+        <summary>@Strings.Help.ReminderKnowAboutSeasonsGrowQ</summary>
+        <p>@Strings.Help.ReminderKnowAboutSeasonsGrowA1</p>
     </details>
 
     <details class="help-item">
-        <summary>What are tags for?</summary>
-        <p>
-            Your own labels, like "variegated", "rare" or "for swap". Picking tags on the plant list shows
-            the plants that have all of them, and tapping a tag on a plant's page does the same. You can make a tag under Rooms and tags in Settings by
-            picking the plants it goes on. There a tag can also be renamed, or merged into another one.
-            Adding or removing a tag is written on the plant's history, so a tag like "flowering" still shows when it
-            started and when you took it off.
-        </p>
+        <summary>@Strings.Help.TagsForQ</summary>
+        <p>@Strings.Help.TagsForA1</p>
     </details>
 
     <details class="help-item" id="swap">
@@ -829,42 +479,20 @@
         </p>
     </details>
     <details class="help-item">
-        <summary>How do I keep a plant at the top of the list?</summary>
-        <p>
-            Open the plant and tap the star next to its name. Starred plants stay at the top of the list
-            whichever way you sort it, and the sort you picked still applies within the starred plants and
-            within the rest. Tap the star again to take it off.
-        </p>
+        <summary>@Strings.Help.KeepPlantAtTopListQ</summary>
+        <p>@Strings.Help.KeepPlantAtTopListA1</p>
     </details>
     <details class="help-item">
-        <summary>Can I sort the plant list?</summary>
-        <p>
-            Yes, with the dropdown next to the filters. A to Z is the default. Newest puts the plants you
-            added last at the top, By room groups them by where they stand, and Last activity puts the
-            plants you last watered, fed or wrote something on first. The list keeps the sort you picked
-            the next time you open it on this device.
-        </p>
+        <summary>@Strings.Help.SortPlantListQ</summary>
+        <p>@Strings.Help.SortPlantListA1</p>
     </details>
     <details class="help-item">
-        <summary>Can I see my plants as photos or as a table?</summary>
-        <p>
-            Yes. The three buttons next to the sort switch between a list, a grid of photos and a table. The
-            grid shows each plant's cover photo, with its name underneath. The table has a column for each
-            detail, like a spreadsheet: when it was watered and fed, its room, what you paid and more. Tap a
-            column's heading to sort by it, and tap it again to turn the order round. In the table, a Columns
-            button takes the sort's place and picks which columns show. Drag them into your own order there, or use the arrows. Moisture is left empty once the plant has been watered since the reading, because the reading no longer says how the soil is. On a phone the table scrolls sideways with the name staying put. Each device remembers
-            its own view, columns and sort.
-        </p>
+        <summary>@Strings.Help.SeePlantsAsPhotosOrQ</summary>
+        <p>@Strings.Help.SeePlantsAsPhotosOrA1</p>
     </details>
     <details class="help-item">
-        <summary>What is the light setting for?</summary>
-        <p>
-            <em>Light where it stands</em> notes how much light the plant gets where it stands: low, medium, bright
-            indirect or some direct sun. It is optional, and you can set it under <em>More details</em> when you add or edit
-            the plant. Adding another plant
-            like one you already have copies it. The light the plant likes is a separate setting, under
-            <em>What it likes</em>.
-        </p>
+        <summary>@Strings.Help.LightSettingForQ</summary>
+        <p>@((MarkupString)Strings.Help.LightSettingForA1)</p>
     </details>
     <details class="help-item" id="what-it-likes">
         <summary>What is What it likes for?</summary>
@@ -915,13 +543,8 @@
         </p>
     </details>
     <details class="help-item">
-        <summary>What does the flowering calendar show?</summary>
-        <p>
-            Open it from the <em>Flowering</em> link on the Plants page. It shows what is in flower now, what
-            usually flowers next month going by your own records, and the whole year month by month. After two
-            years with flowerings, a plant's page says when it usually starts, like by April, and says so if
-            nothing has started yet this year. It never says what to do about it.
-        </p>
+        <summary>@Strings.Help.FloweringCalendarShowQ</summary>
+        <p>@((MarkupString)Strings.Help.FloweringCalendarShowA1)</p>
     </details>
     <details class="help-item" id="wishlist">
         <summary>How do I keep a list of plants I want?</summary>
@@ -934,427 +557,196 @@
         </p>
     </details>
     <details class="help-item">
-        <summary>What happens when I get a plant from my wishlist?</summary>
-        <p>
-            Tap <em>Got it</em> on the wish and choose a plant or a cutting. The add form opens filled in from the
-            wish. Once you save it, the wish moves to <em>Got</em> at the bottom of the wishlist, with a link to the
-            plant or cutting. If you add a plant or cutting with the same name some other way, the form offers to
-            mark the wish got. A wish in Got can be put back on the list.
-        </p>
+        <summary>@Strings.Help.HappensWhenGetPlantFromQ</summary>
+        <p>@((MarkupString)Strings.Help.HappensWhenGetPlantFromA1)</p>
     </details>
     <details class="help-item">
-        <summary>Can I check my wishlist while I'm out buying plants?</summary>
-        <p>
-            Yes. Search on the Plants page and the wishes that match show under the plants, in a group called
-            <em>On your wishlist</em>. The search on the Wishlist page does the same the other way round: it shows
-            the plants and cuttings you already have under the wishes. <em>Share as text</em> on the Wishlist page
-            sends the open wishes as a list. Notes and the most you would pay are left out unless you switch
-            them on.
-        </p>
+        <summary>@Strings.Help.CheckWishlistWhileMOutQ</summary>
+        <p>@((MarkupString)Strings.Help.CheckWishlistWhileMOutA1)</p>
     </details>
 </section>
 
 <section class="help-section" id="propagations">
-    <h2>Propagations</h2>
+    <h2>@Strings.Help.SectionPropagations</h2>
 
     <details class="help-item">
-        <summary>How do I start one?</summary>
-        <p>
-            Open the plant you took it from and tap <em>Propagate</em>, so the new plant stays linked to it.
-            For something without a parent plant, like bought seeds, use the + button on
-            Propagate.
-        </p>
-        <p>
-            Under <em>Setup</em> on the form, <em>Grows in</em> is what it sits in, like perlite, sphagnum, LECA or water, and
-            <em>Container</em> is the box or glass it is in. Container picks from your containers, shown as buttons under the box, and a new one you type is added when you save. They are kept with your pots under Supplies, then Pots, then Propagation, where you can say how many of each you have and see how many are free.
-        </p>
-        <p>
-            If you have started one from the same plant before, or another of the same genus, the form offers
-            <em>Like last time</em> with what you used then. Tap <em>Use</em> to fill in the type, medium, container,
-            rooting aids and drying, and change anything you like. Nothing is filled in until you tap it.
-        </p>
+        <summary>@Strings.Help.StartOneQ</summary>
+        <p>@((MarkupString)Strings.Help.StartOneA1)</p>
+        <p>@((MarkupString)Strings.Help.StartOneA2)</p>
+        <p>@((MarkupString)Strings.Help.StartOneA3)</p>
     </details>
 
     <details class="help-item">
-        <summary>My cutting came from someone else's plant. Can I show that?</summary>
-        <p>
-            Yes. Under the parent field, on the propagation form and on the plant form, tap <em>The parent isn't mine</em>.
-            Give the plant a name and say whose it is, like Grandma, and it is picked as the parent.
-        </p>
-        <p>
-            That plant has a page and shows in the family tree, but it stays out of your plant list, your counts and Today,
-            since it isn't yours to look after. If it ever becomes yours, edit it and untick <em>Not mine, it lives with someone else</em>.
-        </p>
+        <summary>@Strings.Help.CuttingCameFromSomeoneElseQ</summary>
+        <p>@((MarkupString)Strings.Help.CuttingCameFromSomeoneElseA1)</p>
+        <p>@((MarkupString)Strings.Help.CuttingCameFromSomeoneElseA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>What do the stages mean?</summary>
-        <p>
-            <strong>Started</strong> is the day you put it in water or a medium.
-            <strong>Rooting</strong> is when the first roots show.
-            <strong>Rooted</strong> is when it has roots enough to be potted up, or to be a plant if it is already in soil.
-            To move it on, tap the stage button next to <em>Photo</em> and <em>Note</em> on the propagation's page and pick the next
-            one. Moving it to Rooting there also notes today as the day of the first root, and the dates
-            can be changed with <em>Edit</em>. For seeds the same stages are called Sown, Germinating and
-            Sprouted.
-        </p>
-        <p>
-            A propagation is finished once all of it has been potted up, given away or has failed. It is then
-            <strong>Done</strong> if any of it was potted up or given away, and <strong>Failed</strong> if none was.
-        </p>
-        <p>
-            A finished propagation shows how it turned out: how many days it ran, the day of the first
-            root, how many were potted up, and the plants it became with the room each one is in now.
-        </p>
-        <p>
-            Marked one as failed or potted one up by mistake? Edit the propagation and correct the numbers
-            under <em>Progress</em>. Any left over go back to growing, and the history keeps a note of the
-            correction.
-        </p>
+        <summary>@Strings.Help.StagesMeanQ</summary>
+        <p>@((MarkupString)Strings.Help.StagesMeanA1)</p>
+        <p>@((MarkupString)Strings.Help.StagesMeanA2)</p>
+        <p>@Strings.Help.StagesMeanA3</p>
+        <p>@((MarkupString)Strings.Help.StagesMeanA4)</p>
     </details>
 
     <details class="help-item">
-        <summary>What if I have several cuttings in one glass?</summary>
-        <p>
-            Give the propagation a count, like 3 corms in LECA. They are tracked as one batch, and you can
-            pot up or mark failed one or a few at a time as each goes its own way.
-        </p>
+        <summary>@Strings.Help.IfHaveSeveralCuttingsOneQ</summary>
+        <p>@Strings.Help.IfHaveSeveralCuttingsOneA1</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I track seeds?</summary>
-        <p>
-            Yes. Pick Seed as the type and put the number of seeds you sowed in <em>How many</em>. The
-            sowing date is the day you started it. Moving it to Germinating notes the day the first one came
-            up. To say how many have come up, edit the propagation and fill it in under <em>Progress</em>. It then shows how many came up, as a percentage.
-        </p>
+        <summary>@Strings.Help.TrackSeedsQ</summary>
+        <p>@((MarkupString)Strings.Help.TrackSeedsA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What does Pot up do?</summary>
-        <p>
-            It turns one or more from the propagation into plants in your collection. You find it, and
-            <em>Mark failed</em>, behind the stage button on the propagation's page. Each new plant keeps
-            a link to the plant the propagation came from, so you can always see where it started.
-            It also takes the cutting's cover photo, and the plant's page shows the photos from when it was a cutting,
-            marked <em>As a cutting</em>, with a link back to the propagation. They stay on the propagation.
-            Both ask for a date, today unless you change it, so something you only found out a week later
-            is recorded on the right day. When you mark one as failed you can also pick why (rotted, dried out,
-            pests, mould, never rooted or don't know) and add a note. Both are optional, so it stays one tap.
-        </p>
-        <p>
-            A propagation that is already in soil, bark, LECA or PON has <em>It's a plant now</em> there instead
-            of Pot up. It makes the plant in the medium it is in, so there is no new medium to pick unless you
-            moved it.
-        </p>
+        <summary>@Strings.Help.PotUpQ</summary>
+        <p>@((MarkupString)Strings.Help.PotUpA1)</p>
+        <p>@((MarkupString)Strings.Help.PotUpA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>My pup already has roots. Is it a propagation?</summary>
-        <p>
-            No, a pup or division with its own roots is a plant already. Add it as a plant and pick the plant it came
-            from as its parent, so the family tree still shows where it started. <em>Start propagation</em> links to
-            this when the type is a pup or a division. One you already started as a propagation in soil, bark, LECA or
-            PON has <em>It's a plant now</em> under its stage button, which keeps the medium it is in.
-        </p>
+        <summary>@Strings.Help.PupAlreadyHasRootsPropagationQ</summary>
+        <p>@((MarkupString)Strings.Help.PupAlreadyHasRootsPropagationA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I log watering on a propagation?</summary>
-        <p>
-            Yes. Tap <em>Care</em> next to <em>Photo</em> and <em>Note</em> on its page. One in soil, bark, LECA or PON
-            can be watered or given a moisture reading from 0 to 10, and one in water or on a corm riser gets
-            <em>Changed the water</em>. The newest shows under its name, like "watered 2 days ago", and logging care counts
-            as looking at it, so it stays off the list of propagations nobody has looked at. When it is potted up, its last
-            watering goes with it to the new plant. A water change doesn't, since a plant in soil wasn't watered by it.
-        </p>
+        <summary>@Strings.Help.LogWateringOnPropagationQ</summary>
+        <p>@((MarkupString)Strings.Help.LogWateringOnPropagationA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I give away a cutting before it has rooted?</summary>
-        <p>
-            Yes. Open its stage and tap <em>Gave some away</em>. It counts as given away rather than potted up or
-            failed, stays in its history, and doesn't change its success rate. You can send whoever got it a link
-            to its story right after.
-        </p>
+        <summary>@Strings.Help.GiveAwayCuttingBeforeHasQ</summary>
+        <p>@((MarkupString)Strings.Help.GiveAwayCuttingBeforeHasA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How does the family tree work?</summary>
-        <p>
-            Under a plant's name you see what it came from and how many propagations and plants have come
-            from it. <em>Family tree</em> there, or in the Family section further down, opens a page with the plant
-            in the middle, up to three generations it came from above it, its siblings beside it, and what has grown
-            from it below, with the cuttings still on their way. Tap any plant there to move the tree to it, so a
-            big family never turns into one huge chart. It follows the links across generations, so a cutting of a
-            cutting still leads back to the first plant. Under the name, the plant also adds up what it has given:
-            how many cuttings were taken and how many rooted, how many plants were given away or sold, and how many
-            plants have come from those in turn.
-        </p>
+        <summary>@Strings.Help.FamilyTreeWorkQ</summary>
+        <p>@((MarkupString)Strings.Help.FamilyTreeWorkA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is the line about recent changes under a plant's name?</summary>
-        <p>
-            For a while after a plant arrived, was repotted or was moved to another place, its page says so under the name,
-            like "Repotted 6 days ago, moved to Hall 3 days ago". It only states what happened. Under
-            <em>Recent changes on a plant</em> in Settings you choose how long it shows: one, two or four weeks, or not at all.
-            An arrival only shows when the plant's date of getting it is known to the day.
-        </p>
+        <summary>@Strings.Help.LineAboutRecentChangesUnderQ</summary>
+        <p>@((MarkupString)Strings.Help.LineAboutRecentChangesUnderA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What do LECA, PON, sphagnum, corm riser and air layer mean?</summary>
-        <p><strong>LECA:</strong> @Labels.Explain(GrowingMedium.Leca)</p>
-        <p><strong>PON:</strong> @Labels.Explain(GrowingMedium.Pon)</p>
-        <p><strong>Sphagnum:</strong> @Labels.Explain(GrowingMedium.Sphagnum)</p>
-        <p><strong>Corm riser:</strong> @Labels.Explain(GrowingMedium.CormRiser)</p>
-        <p><strong>Air layer:</strong> @Labels.Explain(PropagationType.AirLayer)</p>
+        <summary>@Strings.Help.LECAPONSphagnumCormRiserQ</summary>
+        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA1, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.Leca))))</p>
+        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA2, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.Pon))))</p>
+        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA3, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.Sphagnum))))</p>
+        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA4, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.CormRiser))))</p>
+        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA5, WebUtility.HtmlEncode(Labels.Explain(PropagationType.AirLayer))))</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I compare mediums, like water and perlite?</summary>
-        <p>
-            Give the batches you started together the same name under Experiment, in <em>More details</em>
-            when you start or edit them. The
-            Propagations list then shows them side by side, with a bar for how long each took to root and
-            the dates of the first root and first leaf. For corms you can note the size when editing, and it
-            shows on each row, so bigger and smaller corms can be compared.
-        </p>
+        <summary>@Strings.Help.CompareMediumsLikeWaterPerliteQ</summary>
+        <p>@((MarkupString)Strings.Help.CompareMediumsLikeWaterPerliteA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is on the results page?</summary>
-        <p>
-            <em>Success rate and days to root</em> on the Propagations list shows how each medium, each type
-            and each rooting aid has done across everything you have propagated. Once three batches of the
-            same type in the same medium have rooted, a propagation still going also says whether it is on
-            time or slower than usual.
-        </p>
-        <p>
-            Where you picked a reason for failures, each medium also shows what it lost cuttings to, like rot or
-            drying out, and whether that was mostly before or after rooting. Failures with no reason picked show as not recorded.
-        </p>
+        <summary>@Strings.Help.OnResultsPageQ</summary>
+        <p>@((MarkupString)Strings.Help.OnResultsPageA1)</p>
+        <p>@Strings.Help.OnResultsPageA2</p>
     </details>
 
     <details class="help-item">
-        <summary>Should I let the cut end dry first?</summary>
-        <p>
-            Advice differs, so Stikling lets your own cuttings answer it. Under <em>Rooting aids</em> when you start or edit
-            a propagation, tick <em>Let the cut end dry first</em> and say for how long, in hours or days. Once you have
-            dried some, the results page compares the batches that were not dried with the ones dried for under a day and for a day or more,
-            with how many made it and how long they took to root.
-        </p>
+        <summary>@Strings.Help.ShouldLetCutEndDryQ</summary>
+        <p>@((MarkupString)Strings.Help.ShouldLetCutEndDryA1)</p>
     </details>
 </section>
 
 <section class="help-section" id="today">
-    <h2>Today</h2>
+    <h2>@Strings.Help.SectionToday</h2>
 
     <details class="help-item">
-        <summary>What shows up on Today?</summary>
-        <p>
-            Today's round if you have turned it on, pest treatments that are due, anything you have flagged that has started, plants whose quarantine is up, problems you asked to look at again, propagations nobody has looked at for
-            a week, plants to check for water, care you set to come back, and the monthly photo reminder if they are turned on, an old photo of a plant from this day in an earlier year, in December your year with your plants, and under Lately, what you wrote down in the last 30 days.
-            It also reminds you to back up. While you are away or in quiet time, and on the day you are back, it shows less. The next answers say how.
-        </p>
-        <p>
-            A propagation without a nickname is listed as, for example, <em>Cutting of Monstera deliciosa</em>, so it isn't mistaken for the plant it came from. The line at the top counts your plants and the propagations going. Once something has been potted up or has
-            failed this month, it also says how many of those units were potted up. On the installed app, the icon shows
-            the number of things due on Today. It is updated each time you open Today.
-        </p>
+        <summary>@Strings.Help.ShowsUpOnTodayQ</summary>
+        <p>@Strings.Help.ShowsUpOnTodayA1</p>
+        <p>@((MarkupString)Strings.Help.ShowsUpOnTodayA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I water a lot of plants at once?</summary>
-        <p>
-            Open <em>Water plants</em> from the top of the Plants list, or from the Water list on Today when plants are due. With several rooms,
-            tap <em>All rooms</em>, or pick the rooms in the order you walk them and tap <em>Start</em>. The order is kept for next time.
-            Pick <em>Meter</em> or <em>Feel the soil</em> at the top, then answer each plant: tap the meter's reading, from 0 to 10, or tap
-            <em>Dry</em> or <em>Still damp</em> after pushing a finger into the soil. A plant that is dry shows a <em>Watered</em> button, and
-            tapping it saves the watering at once. <em>Undo</em> on the row takes it back. A plant that is still damp only has a small
-            <em>Watered anyway</em>. Nothing is ticked for you. A plant's feed comes with the button when it is due by that plant's setting,
-            and <em>change</em> lets you pick another feed, or none. Plants in a reservoir or in water have a button to top up and
-            nothing to read. You can also tap <em>Watered</em> on a plant you haven't checked. <em>Feed this round</em> at the top gives one
-            feed with every watering there, unless a plant has its own feed due. Cuttings in soil or bark are listed under their room,
-            after its plants, with the meter or <em>Dry</em> and <em>Still damp</em> too. A cutting has no feed, and <em>Still damp</em> on a
-            cutting is only kept while the screen is open. <em>Done</em> shows what was watered.
-        </p>
+        <summary>@Strings.Help.WaterLotPlantsAtOnceQ</summary>
+        <p>@((MarkupString)Strings.Help.WaterLotPlantsAtOnceA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>I don't have a moisture meter</summary>
-        <p>
-            On <em>Water plants</em>, pick <em>Feel the soil</em>. Push a finger a few centimetres into the soil and tap <em>Dry</em> or
-            <em>Still damp</em> for each plant. <em>Still damp</em> puts the plant off on Today the same way <em>No meter</em> does, so it
-            comes back later. <em>Dry</em> isn't saved anywhere, only the watering you tap <em>Watered</em> for.
-        </p>
+        <summary>@Strings.Help.DonTHaveMoistureMeterQ</summary>
+        <p>@((MarkupString)Strings.Help.DonTHaveMoistureMeterA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What happens when I'm away?</summary>
-        <p>
-            Add your trip under <em>Away and quiet time</em> in Settings, with the day you leave and the day you are back.
-            From the day you leave, Today stops asking for anything until the day you are back: no pest treatments, flags, problems to look at again, watering checks,
-            propagations to look at or photo reminders, and the number on the app icon goes to zero. A year ago and Lately stay, and a bar
-            shows how far into the trip you are. A week before you leave, Today mentions it and links to the sheet for a plant-sitter. The link stays on Today while you are away.
-        </p>
-        <p>
-            The watering reminder doesn't learn from a gap across the trip, since nothing was meant to happen in it, unless a watering was
-            logged during it, say by whoever looked after your plants. If you are home early, tap <em>I'm back</em> on Today and it asks again at once.
-        </p>
+        <summary>@Strings.Help.HappensWhenMAwayQ</summary>
+        <p>@((MarkupString)Strings.Help.HappensWhenMAwayA1)</p>
+        <p>@((MarkupString)Strings.Help.HappensWhenMAwayA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is quiet time?</summary>
-        <p>
-            The same as being away, without the trip. Use it for a busy stretch or a break from the app, with an end date of a week,
-            two weeks, a month or a date you pick. Today stops asking for anything until then, and the watering reminder leaves those
-            days out of what it learns. Add it under <em>Away and quiet time</em> in Settings.
-        </p>
+        <summary>@Strings.Help.QuietTimeQ</summary>
+        <p>@((MarkupString)Strings.Help.QuietTimeA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I make a sheet for a plant-sitter?</summary>
-        <p>
-            Open <em>Sitter sheet</em> on Today before a trip or while you are away, or <em>Sheet for a plant-sitter</em> on the Away and quiet
-            time page. It makes one page for whoever looks after your plants: which plants to check on which visit, how to tell whether one needs
-            water, how to water it, where it is and a note from you. Pick how often they come by, how you usually water, whether you have a
-            moisture meter, and which plants and cuttings are on it. The plants are in the order you walk past them, room by room.
-        </p>
-        <p>
-            There are three layouts. <em>Plant labels</em> gives each plant a card with a box for each visit. <em>Visits first</em> lists what to check
-            on each visit, with the cards on a second page. <em>Chart</em> is a table for the fridge, plants down the side and visits across, also with
-            the cards on a second page.
-        </p>
-        <p>
-            The sheet says when to check a plant and never when to water it. A box means look at it that day. The plants you have watered a few times
-            are checked about when they usually need water, and the rest on every visit. The page also lists plants that are due for a look before you leave, which stays off the printed sheet.
-            The box at the top says what to do first: read the moisture meter if you have one, otherwise push a finger into the soil, and leave the plant
-            alone unless it is dry all the way down. Only then does it say how to water, and you can leave those steps off.
-        </p>
-        <p>
-            Each plant watered from the top can be set to <em>From the bottom</em>, <em>From the top</em> or <em>Soak</em>, in its edit form or in the list at the
-            bottom of the page, and the card only says so when it differs from your usual way. You can write the usual way in your own words instead.
-            Plants in water or on a reservoir are only topped up. A plant's edit form also has a note for a plant-sitter.
-        </p>
-        <p>
-            Tap <em>Print or save as PDF</em> to print it or keep a PDF, or <em>Share as text</em> to send it in a message. Nothing is put online.
-        </p>
+        <summary>@Strings.Help.MakeSheetForPlantSitterQ</summary>
+        <p>@((MarkupString)Strings.Help.MakeSheetForPlantSitterA1)</p>
+        <p>@((MarkupString)Strings.Help.MakeSheetForPlantSitterA2)</p>
+        <p>@Strings.Help.MakeSheetForPlantSitterA3</p>
+        <p>@((MarkupString)Strings.Help.MakeSheetForPlantSitterA4)</p>
+        <p>@((MarkupString)Strings.Help.MakeSheetForPlantSitterA5)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is Look at these first?</summary>
-        <p>
-            On the day you are back, Today opens with a short list of the plants and cuttings worth a look before anything else:
-            open pest cases, cuttings in water that nobody has looked at for a while, plants furthest past their usual pace, and ones you
-            flagged. It shows up to five. Tap the tick, <em>Looked at it</em>, on one to cross it off, or tap <em>Go round these</em> to go
-            through them one by one. It is a list to look at and never a list of what is overdue.
-        </p>
-        <p>
-            Water and Worth a look come back once you are through the list, or after three days. <em>Done with this list</em> puts it away
-            sooner. You can set the number to 3, 5, 10 or all of them on the Away and quiet time page.
-        </p>
+        <summary>@Strings.Help.LookAtTheseFirstQ</summary>
+        <p>@((MarkupString)Strings.Help.LookAtTheseFirstA1)</p>
+        <p>@((MarkupString)Strings.Help.LookAtTheseFirstA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is Your year?</summary>
-        <p>
-            A set of pictures of your year with your plants, ready to post: how many plants you added and where they came from,
-            how your propagations did, the quickest one to root, the medium that worked best, the plant you photographed most,
-            one plant's first and last photo of the year side by side, and a collage. Open it from the link at the bottom of Today
-            or from Success rate and days to root on the Propagations tab. In December it also shows up on Today by itself, until
-            the middle of January. Flick through the cards, leave out any you don't want to share, and share them one at a time or
-            all at once. Square and 4:5 fit a feed post, and 9:16 fits a story. Earlier years are there too. Plants that died that
-            year are listed under the cards, and never put on one.
-        </p>
+        <summary>@Strings.Help.YourYearQ</summary>
+        <p>@Strings.Help.YourYearA1</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I get a propagation off "Worth a look"?</summary>
-        <p>
-            Add a note or a photo to it, or move its stage. Anything on its history counts as looking at it.
-            If there is nothing to say yet, tap the clock on the row to put it off until tomorrow, for 3 days
-            or for a week. It comes back by itself after that.
-        </p>
+        <summary>@Strings.Help.GetPropagationOffWorthLookQ</summary>
+        <p>@Strings.Help.GetPropagationOffWorthLookA1</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I flag something to do later?</summary>
-        <p>
-            Tap the three dots next to <em>Photo</em> and <em>Note</em> on a plant or propagation, then <em>Flag it</em>, and say
-            what it needs, like "Repot soon". With <em>Now</em> it stays on Today under Needs attention until you tick it off
-            there or on its page.
-        </p>
-        <p>
-            Choose <em>Later</em> to hold it back. Pick a month, like March, or a day, or the next round day if you have set round days. It stays off Today until then, and works like any other flag from that day.
-            Until it starts, the page shows it greyed out with <em>Change</em> and <em>Remove</em>.
-        </p>
+        <summary>@Strings.Help.FlagSomethingLaterQ</summary>
+        <p>@((MarkupString)Strings.Help.FlagSomethingLaterA1)</p>
+        <p>@((MarkupString)Strings.Help.FlagSomethingLaterA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is the photo reminder?</summary>
-        <p>
-            Once a month, Today lists the plants and propagations that haven't had a photo that month, room
-            by room, with a camera button on each. It keeps every history growing. It is off until you turn
-            it on in Settings.
-        </p>
+        <summary>@Strings.Help.PhotoReminderQ</summary>
+        <p>@Strings.Help.PhotoReminderA1</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I go round a room?</summary>
-        <p>
-            Open a room from Today's round, tap <em>Go round these</em> under Water on Today, filter the Plants list to a room and
-            tap <em>Go round</em>, or tap <em>Go round</em> on a room under Rooms and tags. Each plant gets a card with a
-            meter reading, <em>Watered</em>, <em>Looked over</em>, a photo, or <em>Skip</em>. The propagations come after the plants.
-        </p>
-        <p>
-            <em>Looked over</em> goes on the plant's history, and tells the watering reminder that the plant isn't ready yet.
-            You can leave halfway. Opening the round again the same day starts at the first one with nothing logged.
-        </p>
+        <summary>@Strings.Help.GoRoundRoomQ</summary>
+        <p>@((MarkupString)Strings.Help.GoRoundRoomA1)</p>
+        <p>@((MarkupString)Strings.Help.GoRoundRoomA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is the daily round?</summary>
-        <p>
-            Turn it on under <em>Daily round</em> in Settings. Today then suggests the room that has gone longest without anything
-            logged on its plants and propagations, so you work round the home a room a day. Put it off to see another
-            room, or skip it for the day. A room you go round and skip every plant in stays suggested, since nothing was logged there.
-            If you have set round days, it only shows on those days.
-        </p>
+        <summary>@Strings.Help.DailyRoundQ</summary>
+        <p>@((MarkupString)Strings.Help.DailyRoundA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What are round days?</summary>
-        <p>
-            If you go round your plants on set days, like Sunday, or Wednesday and Sunday, pick them under <em>Round days</em> in Settings.
-            A watering check then comes up on the round day before it is due, so you see them all at once instead of each on its own day. After <em>Still wet</em> it waits for the next round day.
-            A check is not a watering, so looking a bit early does no harm. A plant that dries out faster than the time between your round days keeps its own days.
-        </p>
-        <p>
-            Propagations waiting for a look and care you set to come back are gathered the same way. Pest treatments, flags and quarantine keep their own days.
-            On the days in between, Today says how many plants and propagations wait for the next round, with <em>Go round now</em> to go round the plants early.
-        </p>
+        <summary>@Strings.Help.RoundDaysQ</summary>
+        <p>@((MarkupString)Strings.Help.RoundDaysA1)</p>
+        <p>@((MarkupString)Strings.Help.RoundDaysA2)</p>
     </details>
 
     <details class="help-item">
-        <summary>Why is there an old photo on Today?</summary>
-        <p>
-            When a plant has a photo taken on this day a year ago (or two or three), or six months ago,
-            Today shows it next to the plant's newest photo, so you can see how much it has grown. The
-            newest photo has to be at least 30 days newer, and only one plant is shown, the one with the
-            longest gap. Tap <em>Before and after</em> to make a card of the two to share. The card says how long ago it was, like <em>A year ago today</em>. It goes away
-            on its own tomorrow.
-        </p>
+        <summary>@Strings.Help.WhyThereOldPhotoOnQ</summary>
+        <p>@((MarkupString)Strings.Help.WhyThereOldPhotoOnA1)</p>
     </details>
     <details class="help-item">
-        <summary>Why does Today ask if a plant has gone dormant?</summary>
-        <p>
-            When a plant's growing season is set under <em>What it likes</em> on its form, Today asks around the time its rest usually starts.
-            That is from November for a plant that rests in winter (May in the southern hemisphere), and from June for one that rests in summer (December in the south).
-            If it went dormant earlier than that, Today asks earlier the next year. <em>Yes, it's dormant</em> marks it dormant, and <em>Not this year</em> stops
-            asking until next season. Plants without a season set are never asked, since most houseplants don't rest.
-        </p>
+        <summary>@Strings.Help.WhyTodayAskIfPlantQ</summary>
+        <p>@((MarkupString)Strings.Help.WhyTodayAskIfPlantA1)</p>
     </details>
 
     @* Notifications need an account, so they are only described where the app has one *@
@@ -1374,43 +766,28 @@
         </details>
 
         <details class="help-item">
-            <summary>Why didn't a notification come?</summary>
-            <p>
-                A day with nothing due sends nothing, and neither does a day you haven't picked. The list is worked out on your device, so it has to have opened Stikling
-                since things changed, or a plant that became due won't be in it. Notifications can also be blocked for Stikling in the browser or in the phone's settings,
-                and a battery saver can hold them back until you pick the phone up. <em>Send a test</em> in Settings shows whether a notification reaches this device at all.
-            </p>
+            <summary>@Strings.Help.WhyDidnTNotificationComeQ</summary>
+            <p>@((MarkupString)Strings.Help.WhyDidnTNotificationComeA1)</p>
         </details>
 
         <details class="help-item">
-            <summary>Notifications on iPhone</summary>
-            <p>
-                On an iPhone or iPad, add Stikling to your home screen first: tap Share, then <em>Add to Home Screen</em>. Open it from there,
-                sign in, and turn notifications on in Settings. In Safari itself the option isn't available.
-            </p>
+            <summary>@Strings.Help.NotificationsOnIPhoneQ</summary>
+            <p>@((MarkupString)Strings.Help.NotificationsOnIPhoneA1)</p>
         </details>
 
         <details class="help-item">
-            <summary>Will it tell me to water?</summary>
-            <p>
-                No. A notification never asks you to water. It can ask you to check the soil of a plant, the way Today does, but whether to water is for you to decide.
-            </p>
+            <summary>@Strings.Help.WillTellMeWaterQ</summary>
+            <p>@Strings.Help.WillTellMeWaterA1</p>
         </details>
     }
 </section>
 
 <section class="help-section" id="history">
-    <h2>Photos and history</h2>
+    <h2>@Strings.Help.SectionPhotosHistory</h2>
 
     <details class="help-item">
-        <summary>What is on a plant's page?</summary>
-        <p>
-            Its history, which is what the page opens on. Everything that happened to a plant or
-            propagation, newest first: your notes, your photos, and
-            changes the app wrote down by itself, like a new stage or a move to another room. Tap a photo to
-            see it full screen, choose which one is the cover and frame it. Where it came from, where it stands and
-            what it grows in are under <em>Details</em>, and <em>Edit</em> changes them.
-        </p>
+        <summary>@Strings.Help.OnPlantSPageQ</summary>
+        <p>@((MarkupString)Strings.Help.OnPlantSPageA1)</p>
     </details>
 
     <details class="help-item" id="reference-photos">
@@ -1426,381 +803,177 @@
     </details>
 
     <details class="help-item">
-        <summary>Can I add photos from Google Photos?</summary>
-        <p>
-            Yes. The phone's own gallery only shows photos stored on the phone, so turn on <em>Pick from Google
-            Photos</em> in Settings to reach the ones that are only in the cloud. Then <em>Photo</em> on a plant's
-            or propagation's page asks whether to take them from the phone or from Google Photos, and the add and
-            edit pages get a <em>Google Photos</em> button. Google Photos opens, you pick, and when you come back
-            to Stikling the photos are fetched and dated from the photo itself. Google asks you to allow it the
-            first time, and again after an hour.
-        </p>
+        <summary>@Strings.Help.AddPhotosFromGooglePhotosQ</summary>
+        <p>@((MarkupString)Strings.Help.AddPhotosFromGooglePhotosA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I change the photo at the top, or get the plant in frame?</summary>
-        <p>
-            Tap the photo at the top of the page, or any photo in the history, to see it full screen. There,
-            <em>Set as cover</em> makes it the one at the top and on the cards. <em>Frame</em> lets you drag
-            the photo and zoom in so the plant sits well where the photo is cropped, on cards, at the top of
-            the page and in the history. The photo itself isn't changed, and full screen always shows all of it.
-        </p>
+        <summary>@Strings.Help.ChangePhotoAtTopOrQ</summary>
+        <p>@((MarkupString)Strings.Help.ChangePhotoAtTopOrA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I add old photos from before I used the app?</summary>
-        <p>
-            Yes. Tap <em>Photo</em> on its page and choose them from your photos. Each photo lands on the day it was
-            taken, read from the photo itself, so the history starts from the beginning. If some photos
-            have no date of their own, the app says how many so you can check them.
-        </p>
-        <p>
-            For a plant you haven't added yet, pick them with <em>Gallery</em> when adding it, or tap
-            <em>start from old photos</em> on Today before you've added anything. <em>When you got it</em> then
-            moves back to the day of the oldest photo, unless you've already changed it.
-        </p>
-        <p>
-            Starting a propagation works the same way: add its photos with <em>Camera</em> or <em>Gallery</em> on the form.
-            The newest becomes the cover, and <em>Started on</em> moves back to the day of the oldest photo.
-        </p>
+        <summary>@Strings.Help.AddOldPhotosFromBeforeQ</summary>
+        <p>@((MarkupString)Strings.Help.AddOldPhotosFromBeforeA1)</p>
+        <p>@((MarkupString)Strings.Help.AddOldPhotosFromBeforeA2)</p>
+        <p>@((MarkupString)Strings.Help.AddOldPhotosFromBeforeA3)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I share a plant or a cutting?</summary>
-        <p>
-            Tap <em>Share</em> on its page. Stikling makes one picture with a photo, its name, a plain line about it
-            like "Cutting from my Monstera, rooted in 18 days in LECA", and stikling.app small in a corner. Choose
-            square, 4:5 or 9:16 to fit where you are posting, and pick which of its photos to use. On a phone,
-            <em>Share</em> opens the share menu, so the picture goes straight to Instagram, Messages or wherever you
-            choose. Where the browser can't do that, <em>Save image</em> keeps it as a picture you can post yourself.
-        </p>
-        <p>
-            The line is written from what the app has kept, and it only says what it knows. You can change the name
-            and the line before sharing. Nothing you change is saved, and nothing leaves your device until you
-            share the picture. With no photo, or by choosing <em>No photo</em>, you get a card built around the
-            biggest number, like how many days it took to root.
-        </p>
-        <p>
-            With two or more photos you can also make a before and after. Tap <em>Share</em>, then
-            <em>Before and after</em>. It puts two photos side by side with the date on each and how long
-            apart they were. It starts on the first and the newest photo, and you can change either one.
-        </p>
-        <p>
-            With three or more photos you can make a time-lapse video. Tap <em>Share</em>, then <em>Time-lapse</em>.
-            Each photo shows for a moment with its date and how long you had it, or the day count, in the order they were taken, and fades into
-            the next. Choose <em>Slow</em>, <em>Normal</em> or <em>Fast</em>, and the size, and the preview plays
-            on a loop. Tap a photo in the row to leave it out, and tap it again to put it back. At least two stay in, and a video takes up to 60
-            photos, so a longer history starts with 60 spread over it.
-            Then tap <em>Make video</em>. It is made on your phone, without sound, so it takes a little while, and
-            you can cancel it. When it is done, <em>Share video</em> opens the share menu and <em>Save video</em>
-            keeps it as an MP4 you can post on TikTok or Reels. If you change anything after that, you make it again.
-            Firefox on Android makes videos more slowly than other browsers.
-        </p>
-        <p>
-            A plant's photos show how long you had it when they were taken, like <em>3 May 2026 · 1 yr 2 mo</em>,
-            counted from the date you got it. That needs the month you got it, and a full date to count the days
-            in the first month. A propagation's photos show the day since it was started, like <em>3 May 2026 · day 24</em>.
-            Photos taken before that date get no count.
-        </p>
+        <summary>@Strings.Help.SharePlantOrCuttingQ</summary>
+        <p>@((MarkupString)Strings.Help.SharePlantOrCuttingA1)</p>
+        <p>@((MarkupString)Strings.Help.SharePlantOrCuttingA2)</p>
+        <p>@((MarkupString)Strings.Help.SharePlantOrCuttingA3)</p>
+        <p>@((MarkupString)Strings.Help.SharePlantOrCuttingA4)</p>
+        <p>@((MarkupString)Strings.Help.SharePlantOrCuttingA5)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I share a link to a plant's page?</summary>
-        <p>
-            Yes, if you're signed in. Tap <em>Share</em> on its page, then <em>Link</em>, then <em>Make link</em>.
-            You get a link to a page anyone can open, without the app or an account, with its photos, milestones
-            and notes from the first day to now. Post it with a cutting's progress, or send it to the friend who
-            gave it to you. The page follows the plant, so new photos and notes show up on it after the next sync.
-        </p>
-        <p>
-            You choose what is on it. Switch off <em>Show my notes</em> to keep your notes to yourself, tap a photo
-            to leave it out, and change the name and the line under it. The line starts as the one on the share
-            card, like "Cutting from my Monstera", so change it if that says more than you want. The page never
-            shows the room, the price, the shop or person it came from, who it went to, its tags, pots or care.
-            While notes are shown, the note box on that plant says so.
-        </p>
-        <p>
-            <em>Turn off the link</em> stops the page within a few minutes, and so does deleting the plant, and anyone who opens the link sees that it is
-            gone. Turning it on again makes a new link. A link needs an account because the page is shown from the
-            Stikling server, using the photos your device has uploaded.
-        </p>
-        <p>
-            A plant that was potted up from a propagation shows the rooting it came from at the start of its page,
-            up to the day it was potted up. After you mark a plant or a cutting as given away or sold, the app
-            offers to send the link, so whoever got it can see its story and keep a copy in their own Stikling.
-        </p>
+        <summary>@Strings.Help.ShareLinkPlantSPageQ</summary>
+        <p>@((MarkupString)Strings.Help.ShareLinkPlantSPageA1)</p>
+        <p>@((MarkupString)Strings.Help.ShareLinkPlantSPageA2)</p>
+        <p>@((MarkupString)Strings.Help.ShareLinkPlantSPageA3)</p>
+        <p>@Strings.Help.ShareLinkPlantSPageA4</p>
     </details>
 
     <details class="help-item">
-        <summary>Someone sent me a link to their plant. Can I keep its history?</summary>
-        <p>
-            Yes, once they have marked it as given away or sold. Open the link and tap <em>Keep its history in Stikling</em>.
-            Stikling opens, shows what will be copied, and asks for a nickname, who gave it to you, its room, and for
-            cuttings how many you got. The photos, milestones and the notes the page shows are copied to your device
-            once, and kept under <em>Before you got it</em> on its page. They don't change if the page changes later,
-            and they stay if the link is turned off. You don't need an account. If you delete it and open the link
-            again, you can bring it back.
-        </p>
+        <summary>@Strings.Help.SomeoneSentMeLinkTheirQ</summary>
+        <p>@((MarkupString)Strings.Help.SomeoneSentMeLinkTheirA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is Before you got it?</summary>
-        <p>
-            The history a plant or cutting had before it was given to you, copied from the link you were sent. It can't
-            be edited, but you can frame its photos and pick one as the cover. Your own history starts at <em>Arrived</em>,
-            above it. If you make a share link for it yourself, the page shows that history first, with its notes only
-            while <em>Show my notes</em> is on, so it carries on to whoever you pass it to.
-        </p>
+        <summary>@Strings.Help.BeforeYouGotQ</summary>
+        <p>@((MarkupString)Strings.Help.BeforeYouGotA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I fix a note with the wrong date?</summary>
-        <p>
-            Tap the pencil next to a note or photo in its history to change its text or date. The earlier version is kept and shown
-            under <em>edited</em>. To write something down that happened earlier, tap
-            <em>Happened earlier?</em> before adding the note or photo.
-        </p>
+        <summary>@Strings.Help.FixNoteWithWrongDateQ</summary>
+        <p>@((MarkupString)Strings.Help.FixNoteWithWrongDateA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can a note come back next year?</summary>
-        <p>
-            Yes. When you write a note, tap <em>Bring it back</em> and choose the same day next year or a day you pick. On that day the
-            note shows on Today under <em>Notes coming back</em>. Tap <em>Done</em> when you have dealt with it, or
-            <em>Again next year</em> to have it come back a year later. The pencil next to the note changes the day or takes it off.
-        </p>
+        <summary>@Strings.Help.NoteComeBackNextYearQ</summary>
+        <p>@((MarkupString)Strings.Help.NoteComeBackNextYearA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I speak a note instead of typing it?</summary>
-        <p>
-            Yes, with your keyboard's microphone key. On Android it is on the keyboard itself, or behind a long press on the
-            comma or the space bar, and on an iPhone it is next to the space bar. It works in every field in the app, and
-            the app never hears the recording.
-        </p>
+        <summary>@Strings.Help.SpeakNoteInsteadTypingQ</summary>
+        <p>@Strings.Help.SpeakNoteInsteadTypingA1</p>
     </details>
 </section>
 
 <section class="help-section" id="pests">
-    <h2>Pests and problems</h2>
+    <h2>@Strings.Help.SectionPestsProblems</h2>
 
     <details class="help-item">
-        <summary>What is a pest case?</summary>
-        <p>
-            One outbreak, like spider mites in the living room. A case covers the whole collection, one room,
-            or the plants you pick, because pests spread and are treated together. You say how often to
-            treat, and Today shows when the next round is due.
-        </p>
+        <summary>@Strings.Help.PestCaseQ</summary>
+        <p>@Strings.Help.PestCaseA1</p>
     </details>
 
     <details class="help-item">
-        <summary>Where is Pests when I have nothing open?</summary>
-        <p>
-            Pests only gets a tab while a case is being treated or watched, or a plant has a problem that isn't over. The rest of the
-            time the page, called <em>Pests and problems</em>, is under <em>Supplies</em>, with your old cases. To open a case for one plant, tap the
-            three dots next to <em>Photo</em> and <em>Note</em> on its page, then <em>Found pests</em>.
-        </p>
+        <summary>@Strings.Help.WherePestsWhenHaveNothingQ</summary>
+        <p>@((MarkupString)Strings.Help.WherePestsWhenHaveNothingA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Something's wrong with a plant. Where do I write it down?</summary>
-        <p>
-            Open the plant, tap More, then <em>Something's wrong</em>. Pick what you see, like yellow leaves or root rot, and add a note or a photo.
-            Later, tap <em>How does it look?</em> on the plant or the problem to say whether it's better, the same or worse and what you did.
-            When it's over, say how it ended.
-        </p>
+        <summary>@Strings.Help.SomethingSWrongWithPlantQ</summary>
+        <p>@((MarkupString)Strings.Help.SomethingSWrongWithPlantA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What's the difference between a problem and a pest case?</summary>
-        <p>
-            A pest case is for bugs, and can cover a whole room, with treatments on a schedule. A problem is for one plant and anything else that's wrong,
-            like rot, sunburn or brown tips. It keeps what you tried and whether it helped.
-        </p>
+        <summary>@Strings.Help.SDifferenceBetweenProblemPestQ</summary>
+        <p>@Strings.Help.SDifferenceBetweenProblemPestA1</p>
     </details>
 
     <details class="help-item">
-        <summary>What does Look again do?</summary>
-        <p>
-            When you log a problem or an update, you can ask to look again in a few days. On that day the plant shows on Today with <em>How does it look?</em>
-            Pick <em>No</em> and nothing comes up.
-        </p>
+        <summary>@Strings.Help.LookAgainQ</summary>
+        <p>@((MarkupString)Strings.Help.LookAgainA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Will the app tell me what's wrong or what to do?</summary>
-        <p>
-            No. It can't see the plant. When you log a problem, it shows what you did the last times one of your plants had the same, and how that ended,
-            so you can decide.
-        </p>
+        <summary>@Strings.Help.WillAppTellMeSQ</summary>
+        <p>@Strings.Help.WillAppTellMeSA1</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I check a plant without opening a case?</summary>
-        <p>
-            Yes. Tap the three dots on the plant's page, then <em>Check for pests</em>. <em>No signs</em> logs
-            that you looked it over, and the plant's page then shows when it was last checked. <em>Found some</em>
-            opens a case instead. A check on a case counts too.
-        </p>
+        <summary>@Strings.Help.CheckPlantWithoutOpeningCaseQ</summary>
+        <p>@((MarkupString)Strings.Help.CheckPlantWithoutOpeningCaseA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What about plants that were outside for the summer?</summary>
-        <p>
-            Mark the balcony or garden as outdoors under Rooms and tags in Settings. A spot in an outdoor room counts too.
-            When you move a plant from there to an indoor room, Stikling offers to put it in quarantine and to log a
-            check for pests. This works from the plant's edit page and when you move several plants at once from the
-            Plants list. It only asks when a plant moves, never on a date.
-        </p>
+        <summary>@Strings.Help.AboutPlantsThatWereOutsideQ</summary>
+        <p>@Strings.Help.AboutPlantsThatWereOutsideA1</p>
     </details>
 
     <details class="help-item">
-        <summary>What does "Check the neighbours" mean?</summary>
-        <p>
-            When a case is on plants you picked, the case lists the other plants in the same rooms, since pests
-            spread to plants that stand close. Each shows when it was last checked. <em>Clean</em> logs a check
-            on it, and <em>Add to case</em> puts it in the case.
-        </p>
+        <summary>@Strings.Help.CheckNeighboursMeanQ</summary>
+        <p>@((MarkupString)Strings.Help.CheckNeighboursMeanA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What is the difference between treating and watching?</summary>
-        <p>
-            While a case is <strong>Treating</strong>, each treatment you log moves the next one along by the
-            interval (or the next step, if it follows a treatment plan), and the case shows when the next one is due once the first is logged. Until then, Today
-            and the Pests and problems page show the case as having no treatment yet. Set it to <strong>Watching</strong> when the pests seem gone, and Today asks for a check
-            once a week instead. If a check finds some, <em>Found some</em> puts it back to treating.
-        </p>
+        <summary>@Strings.Help.DifferenceBetweenTreatingWatchingQ</summary>
+        <p>@((MarkupString)Strings.Help.DifferenceBetweenTreatingWatchingA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I know when a case is over?</summary>
-        <p>
-            A case being watched counts the days since its last treatment, like <em>Clean 12 of 28 days</em>. It
-            takes 4 weeks unless you change it under <em>Pests</em> in Settings. When the count is reached and
-            you have logged a check in the last week, the case says it is ready to resolve, and Today lists it
-            under <em>Ready to resolve</em>. It never resolves by itself, so tap <em>Resolve</em> when you
-            agree. Finding pests again starts the count over.
-        </p>
+        <summary>@Strings.Help.KnowWhenCaseOverQ</summary>
+        <p>@((MarkupString)Strings.Help.KnowWhenCaseOverA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What are sticky trap counts?</summary>
-        <p>
-            Count what is on a yellow or blue sticky trap now and then, and the app works out how many were
-            caught since last time. The chart of the catch per week shows whether the treatment is working.
-            Thrips, fungus gnats and whitefly fly into traps, so their cases show the trap straight away.
-            Other pests rarely end up on one, but if you have a trap up anyway, tap <em>Count a sticky trap</em>
-            on the case.
-        </p>
+        <summary>@Strings.Help.StickyTrapCountsQ</summary>
+        <p>@((MarkupString)Strings.Help.StickyTrapCountsA1)</p>
     </details>
 </section>
 
 <section class="help-section" id="supplies">
-    <h2>Pots, mixes and fertilisers</h2>
+    <h2>@Strings.Help.SectionPotsMixesFertilisers</h2>
 
     <details class="help-item">
-        <summary>Do I have to fill in pots, soil mixes and products?</summary>
-        <p>
-            No. They are all under Supplies for anyone who wants them. Once they are there, a plant can pick
-            its pot and mix from a list, and logging a feed says what went in the water without typing. A
-            propagation that grows in soil can pick a mix too, and it goes on to the plants when you pot up.
-        </p>
+        <summary>@Strings.Help.HaveFillPotsSoilMixesQ</summary>
+        <p>@Strings.Help.HaveFillPotsSoilMixesA1</p>
     </details>
 
     <details class="help-item">
-        <summary>What can I do with a soil mix?</summary>
-        <p>
-            Save it under a name with what is in it. On the Soil mixes page, tap the number of plants next
-            to a mix to see which plants are in it, and tap a plant to open it. If every ingredient has an
-            amount, tap Measure out, type how much mix you want, and the app says how much of each
-            ingredient to use.
-        </p>
+        <summary>@Strings.Help.WithSoilMixQ</summary>
+        <p>@Strings.Help.WithSoilMixA1</p>
     </details>
 
     <details class="help-item">
-        <summary>What is the difference between a product and a feed?</summary>
-        <p>
-            A product is one bottle or bag, like a fertiliser or silica, with the dose you usually use. A
-            feed is several products mixed into the water together, in the order they go in. Fill in how
-            much water you are mixing, and the app says how much of each to add. Tap the line saying how
-            many plants a feed has been given to, and it lists the plants and the days they got it.
-        </p>
+        <summary>@Strings.Help.DifferenceBetweenProductFeedQ</summary>
+        <p>@Strings.Help.DifferenceBetweenProductFeedA1</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I note what is in a product?</summary>
-        <p>
-            Yes. When you add or edit a product, you can fill in what it contains as printed on the label:
-            N, P and K for a fertiliser, and other nutrients like calcium, magnesium or silicon for any
-            product, under Add a nutrient. Type the numbers as the label gives them, in percent. Labels
-            usually give phosphorus and potassium as oxides, and the app doesn't convert them. What you
-            fill in shows under the product in the list, and next to its name when you pick products for a
-            feed, so bottles that look alike are easy to tell apart.
-        </p>
+        <summary>@Strings.Help.NoteProductQ</summary>
+        <p>@Strings.Help.NoteProductA1</p>
     </details>
 
     <details class="help-item">
-        <summary>Can a feed go with every watering?</summary>
-        <p>
-            Yes. Open the plant, tap <em>Edit</em> and look under <em>Watering</em> for <em>Feed with the
-            watering</em>. Pick a saved feed, then choose every watering, every second watering or every third.
-            After that, ticking Watered or Topped up logs the feed and its doses too, on the days it is due.
-            It is off until you set it, and a plant with no saved feed to pick has to wait until you have
-            saved one under Feeds.
-        </p>
+        <summary>@Strings.Help.FeedGoWithEveryWateringQ</summary>
+        <p>@((MarkupString)Strings.Help.FeedGoWithEveryWateringA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What are nursery pots and outer pots?</summary>
-        <p>
-            A nursery pot is the plain one the plant actually sits in, and an outer pot is the decorative one
-            without drainage that it goes inside. Some pots are neither and stand on their own. The Pots page
-            lists one kind at a time, and shows which of yours are in use and which are free. Containers for propagating, like a box with a lid, have their own tab. Picking a
-            self-watering pot for a plant sets "Grows in" to LECA, and you can change it after.
-        </p>
+        <summary>@Strings.Help.NurseryPotsOuterPotsQ</summary>
+        <p>@Strings.Help.NurseryPotsOuterPotsA1</p>
     </details>
 
     <details class="help-item">
-        <summary>How do I tell similar pots apart?</summary>
-        <p>
-            Give each one a photo. Tap <em>Photo</em> beside a pot on the Pots page, or add photos while
-            adding or editing it. The photo then shows beside the pot there, on the chips when you pick a pot
-            for a plant, and on the page of each plant that uses it, where tapping it shows the pot's photos.
-            The photos belong to the pot, not to a plant, so they stay with it when it moves to another plant.
-            Open a pot's photos on the Pots page to choose which one is shown, frame it or delete one.
-            Deleting a pot deletes its photos too.
-        </p>
+        <summary>@Strings.Help.TellSimilarPotsApartQ</summary>
+        <p>@((MarkupString)Strings.Help.TellSimilarPotsApartA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>What are treatment recipes?</summary>
-        <p>
-            Sprays and drenches you make up yourself against pests, like an alcohol spray. Save one under
-            Supplies, and logging a treatment is then a tap. <em>Mix a batch</em> works out the amounts for
-            any size of bottle.
-        </p>
+        <summary>@Strings.Help.TreatmentRecipesQ</summary>
+        <p>@((MarkupString)Strings.Help.TreatmentRecipesA1)</p>
     </details>
 
     <details class="help-item">
-        <summary>Can I follow a set of treatments, like spraying twice and then predatory mites?</summary>
-        <p>
-            Yes, with a treatment plan. Under <em>Supplies</em>, then <em>Treatment plans</em>, add the steps in order. Each step after
-            the first says how many days after the step before it comes, and what it uses: one of your treatment recipes, or whatever
-            you type. To use one, open a case and tap <em>Follow a plan</em>, or pick the plan when you open the case. The first step is
-            due on the day you start.
-        </p>
-        <p>
-            While the plan runs, Today and the case show the step that is up next. <em>Log</em> it when it's done, <em>Skip</em> it if
-            you won't do it, or <em>Move</em> it to a later day. The next step counts from the day the one before was done or skipped,
-            so a late spray moves the rest along. A treatment you log outside the plan, like an extra spray, doesn't move it on.
-            After the last step Today asks whether to start watching the case or keep treating. If you keep treating, the case goes
-            on at its interval. You can also stop a plan from the case at any time.
-        </p>
-        <p>
-            The case keeps its own copy of the steps, so changing or deleting the plan later doesn't change one that is running.
-            A case without a plan works as before, with a treatment every few days at the interval you set.
-        </p>
+        <summary>@Strings.Help.FollowSetTreatmentsLikeSprayingQ</summary>
+        <p>@((MarkupString)Strings.Help.FollowSetTreatmentsLikeSprayingA1)</p>
+        <p>@((MarkupString)Strings.Help.FollowSetTreatmentsLikeSprayingA2)</p>
+        <p>@Strings.Help.FollowSetTreatmentsLikeSprayingA3</p>
     </details>
 </section>
 
@@ -1810,6 +983,8 @@
     /// <summary>A search to start on, from the Search page.</summary>
     [SupplyParameterFromQuery(Name = "q")]
     public string? Query { get; set; }
+
+    private static string[] NoMatchParts => Strings.Help.NoMatch.Split("{0}", 2);
 
     private bool searchReady;
     private ElementReference searchInput;
@@ -1892,15 +1067,17 @@
         }
     }
 
-    private static readonly (string Id, string Title)[] topics =
+    private static (string Id, string Title)[] topics =>
     [
-        ("start", "Getting started"),
-        ("data", "Data and backups"),
-        ("plants", "Plants"),
-        ("propagations", "Propagations"),
-        ("today", "Today"),
-        ("history", "History"),
-        ("pests", "Pests and problems"),
-        ("supplies", "Supplies")
+        ("import", Strings.Help.TopicJsPageJs),
+        ("import", Strings.Help.TopicJsHelpJs),
+        ("start", Strings.Help.TopicGettingStarted),
+        ("data", Strings.Help.TopicDataBackups),
+        ("plants", Strings.Help.TopicPlants),
+        ("propagations", Strings.Help.TopicPropagations),
+        ("today", Strings.Help.TopicToday),
+        ("history", Strings.Help.TopicHistory),
+        ("pests", Strings.Help.TopicPestsProblems),
+        ("supplies", Strings.Help.TopicSupplies)
     ];
 }
