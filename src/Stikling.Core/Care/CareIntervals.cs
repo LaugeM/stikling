@@ -1,7 +1,9 @@
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Rooms;
+using Stikling.Core.Text;
 using Stikling.Core.Today;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Care;
 
@@ -97,7 +99,7 @@ public static class CareIntervals
 
     /// <summary>"18 Oct", or "18 Oct 2028" when it is not this year.</summary>
     public static string DayText(DateOnly day, DateOnly today) =>
-        day.ToString(day.Year == today.Year ? "d MMM" : "d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+        day.ToString(day.Year == today.Year ? Strings.Care.DayMonthFormat : Strings.Care.DayMonthYearFormat, TextCulture.ForDates);
 
     /// <summary>The day plus the interval. AddMonths stops at the end of a short month, so 31 January plus a month is 28 February.</summary>
     public static DateOnly Add(DateOnly day, int every, IntervalUnit unit) => unit switch
@@ -257,16 +259,16 @@ public static class CareIntervals
             ? ownKindName.Trim()
             : kind switch
             {
-                CareKind.Fertilised => "Fertilise",
-                CareKind.Flushed => "Flush",
-                CareKind.Repotted => "Repot",
-                CareKind.Pruned => "Prune",
-                CareKind.Rotated => "Rotate",
-                CareKind.LeavesCleaned => "Clean the leaves",
-                CareKind.Harvested => "Harvest",
-                _ => "Care"
+                CareKind.Fertilised => Strings.Care.LabelFertilise,
+                CareKind.Flushed => Strings.Care.LabelFlush,
+                CareKind.Repotted => Strings.Care.LabelRepot,
+                CareKind.Pruned => Strings.Care.LabelPrune,
+                CareKind.Rotated => Strings.Care.LabelRotate,
+                CareKind.LeavesCleaned => Strings.Care.LabelCleanLeaves,
+                CareKind.Harvested => Strings.Care.LabelHarvest,
+                _ => Strings.Care.LabelCare
             };
-        return feed is null ? what : $"{what} with {feed}";
+        return feed is null ? what : CareText.F(Strings.Care.LabelWithFeed, what, feed);
     }
 
     /// <summary>"every 2 weeks", "every week", "every day".</summary>
@@ -274,22 +276,22 @@ public static class CareIntervals
     {
         var (one, many) = interval.Unit switch
         {
-            IntervalUnit.Days => ("day", "days"),
-            IntervalUnit.Weeks => ("week", "weeks"),
-            IntervalUnit.Months => ("month", "months"),
-            _ => ("year", "years")
+            IntervalUnit.Days => (Strings.Care.EveryDay, Strings.Care.EveryDays),
+            IntervalUnit.Weeks => (Strings.Care.EveryWeek, Strings.Care.EveryWeeks),
+            IntervalUnit.Months => (Strings.Care.EveryMonth, Strings.Care.EveryMonths),
+            _ => (Strings.Care.EveryYear, Strings.Care.EveryYears)
         };
-        return interval.Every == 1 ? $"every {one}" : $"every {interval.Every} {many}";
+        return interval.Every == 1 ? one : CareText.F(many, interval.Every);
     }
 
     /// <summary>"April to October", or null for the whole year.</summary>
     public static string? MonthsText(CareInterval interval) =>
         interval is { FromMonth: { } from, ToMonth: { } to }
-            ? $"{MonthName(from)} to {MonthName(to)}"
+            ? CareText.F(Strings.Care.MonthsFromTo, MonthName(from), MonthName(to))
             : null;
 
     public static string MonthName(int month) =>
-        System.Globalization.CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(Math.Clamp(month, 1, 12));
+        TextCulture.ForDates.DateTimeFormat.GetMonthName(Math.Clamp(month, 1, 12));
 
     /// <summary>
     /// When the first plants are due: the earliest and the latest day among the plants it covers,

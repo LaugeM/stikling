@@ -1,3 +1,5 @@
+using Strings = Stikling.Core.Resources;
+
 namespace Stikling.Core.Models;
 
 /// <summary>
@@ -36,9 +38,9 @@ public sealed class OwnCareKind : Entity
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add("Give the kind of care a name.");
+            errors.Add(Strings.Care.KindNeedsName);
         if (CountsAs is not (null or CareKind.Watered or CareKind.Fertilised))
-            errors.Add("A kind of care can count as a watering, a feed or neither.");
+            errors.Add(Strings.Care.KindCountsAs);
         return errors;
     }
 }

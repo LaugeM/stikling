@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Care;
 
@@ -47,14 +48,14 @@ public sealed class OwnCareKindService(IOwnCareKindRepository kinds, ICareLogRep
     /// <summary>Renames a kind. It keeps its id, and entries logged before show the new name.</summary>
     public async Task RenameAsync(Guid id, string name)
     {
-        var kind = await kinds.GetAsync(id) ?? throw new InvalidOperationException("That kind of care is gone.");
+        var kind = await kinds.GetAsync(id) ?? throw new InvalidOperationException(Strings.Care.KindGone);
         var trimmed = (name ?? "").Trim();
         if (trimmed.Length == 0)
-            throw new InvalidOperationException("Give the kind of care a name.");
+            throw new InvalidOperationException(Strings.Care.KindNeedsName);
         if (kind.Name == trimmed)
             return;
         if ((await kinds.GetAllAsync()).Any(k => k.Id != id && SameName(k.Name, trimmed)))
-            throw new InvalidOperationException($"You already have a kind of care called {trimmed}.");
+            throw new InvalidOperationException(CareText.F(Strings.Care.KindNameTaken, trimmed));
 
         kind.Name = trimmed;
         await kinds.SaveAsync(kind);
@@ -62,7 +63,7 @@ public sealed class OwnCareKindService(IOwnCareKindRepository kinds, ICareLogRep
 
     public async Task SetOnHistoryAsync(Guid id, bool onHistory)
     {
-        var kind = await kinds.GetAsync(id) ?? throw new InvalidOperationException("That kind of care is gone.");
+        var kind = await kinds.GetAsync(id) ?? throw new InvalidOperationException(Strings.Care.KindGone);
         if (kind.OnHistory == onHistory)
             return;
         kind.OnHistory = onHistory;
@@ -77,7 +78,7 @@ public sealed class OwnCareKindService(IOwnCareKindRepository kinds, ICareLogRep
     /// </summary>
     public async Task<int> SetCountsAsAsync(Guid id, CareKind? countsAs, bool alsoChangeEntries)
     {
-        var kind = await kinds.GetAsync(id) ?? throw new InvalidOperationException("That kind of care is gone.");
+        var kind = await kinds.GetAsync(id) ?? throw new InvalidOperationException(Strings.Care.KindGone);
         var changedKind = kind.CountsAs != countsAs;
         kind.CountsAs = countsAs;
         if (kind.Validate().FirstOrDefault() is { } error)

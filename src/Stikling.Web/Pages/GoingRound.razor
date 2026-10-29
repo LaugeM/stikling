@@ -24,7 +24,7 @@
 @inject SubjectPhotos SubjectPhotos
 @inject TimeProvider Time
 
-<PageTitle>@Title · Stikling</PageTitle>
+<PageTitle>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundPageTitle, Title))</PageTitle>
 
 @* No ReloadOnSync: like an edit page, the cards stay put while someone is going round *@
 
@@ -32,14 +32,14 @@
 
 @if (!loaded)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Care.Loading</p>
 }
 else if (placeMissing)
 {
-    <h1>Going round</h1>
+    <h1>@Strings.Care.RoundGoingRound</h1>
     <div class="empty-state">
-        <p>This room isn't there any more.</p>
-        <a class="btn btn-primary mt-3" href="">Back to Today</a>
+        <p>@Strings.Care.RoundRoomGone</p>
+        <a class="btn btn-primary mt-3" href="">@Strings.Care.RoundBackToTodayButton</a>
     </div>
 }
 else if (cards.Count == 0)
@@ -48,23 +48,23 @@ else if (cards.Count == 0)
     <div class="empty-state">
         @if (IsBack)
         {
-            <p>Nothing is left to look at first.</p>
-            <a class="btn btn-primary mt-3" href="">Back to Today</a>
+            <p>@Strings.Care.RoundNothingBack</p>
+            <a class="btn btn-primary mt-3" href="">@Strings.Care.RoundBackToTodayButton</a>
         }
         else if (IsNext)
         {
-            <p>Nothing is waiting for the next round.</p>
-            <a class="btn btn-primary mt-3" href="">Back to Today</a>
+            <p>@Strings.Care.RoundNothingNext</p>
+            <a class="btn btn-primary mt-3" href="">@Strings.Care.RoundBackToTodayButton</a>
         }
         else if (IsDue)
         {
-            <p>Nothing is due for water right now.</p>
-            <a class="btn btn-primary mt-3" href="">Back to Today</a>
+            <p>@Strings.Care.RoundNothingDue</p>
+            <a class="btn btn-primary mt-3" href="">@Strings.Care.RoundBackToTodayButton</a>
         }
         else
         {
-            <p>Nothing in @Title to go round yet. Plants and propagations you put here show up in its round.</p>
-            <a class="btn btn-primary mt-3" href="plants">Go to Plants</a>
+            <p>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundNothingInRoom, Title))</p>
+            <a class="btn btn-primary mt-3" href="plants">@Strings.Care.RoundGoToPlants</a>
         }
     </div>
 }
@@ -72,28 +72,28 @@ else if (pos >= queue.Count)
 {
     var summary = GoingRoundLogic.Summarise(days);
     <div class="round-end">
-        <h1>@(IsDue || IsNext || IsBack ? "All done" : $"{Title} done")</h1>
+        <h1>@(IsDue || IsNext || IsBack ? Strings.Care.RoundAllDone : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundRoomDone, Title))</h1>
         <div class="round-tiles">
             @if (summary.Watered > 0)
             {
-                <div class="round-tile"><span class="round-count">@summary.Watered</span><span>Watered</span></div>
+                <div class="round-tile"><span class="round-count">@summary.Watered</span><span>@Strings.Care.WateringDoneWatered</span></div>
             }
             @if (summary.LookedOver > 0)
             {
-                <div class="round-tile"><span class="round-count">@summary.LookedOver</span><span>Looked over</span></div>
+                <div class="round-tile"><span class="round-count">@summary.LookedOver</span><span>@Strings.Care.RoundTileLookedOver</span></div>
             }
-            <div class="round-tile"><span class="round-count">@summary.Skipped</span><span>Skipped</span></div>
+            <div class="round-tile"><span class="round-count">@summary.Skipped</span><span>@Strings.Care.RoundTileSkipped</span></div>
         </div>
         @if (summary.Readings > 0 || summary.Photos > 0)
         {
             <p class="round-meta">@EndMeta(summary)</p>
         }
         <div class="round-end-actions">
-            <a class="btn btn-primary" href="">Back to Today</a>
+            <a class="btn btn-primary" href="">@Strings.Care.RoundBackToTodayButton</a>
             @if (summary.Skipped > 0)
             {
                 <button type="button" class="btn btn-outline-primary" @onclick="GoThroughSkipped">
-                    Go through the @summary.Skipped skipped
+                    @(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundGoThroughSkipped, summary.Skipped))
                 </button>
             }
         </div>
@@ -110,13 +110,13 @@ else
         <div class="round-head">
             <h1>@Title</h1>
             <div class="round-counter">
-                <span class="round-position">@(pos + 1) of @queue.Count</span>
+                <span class="round-position">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundPosition, pos + 1, queue.Count))</span>
                 <button type="button" class="round-back" disabled="@(pos == 0 || busy)" @onclick="Back">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
-                    Back
+                    @Strings.Common.Back
                 </button>
             </div>
-            <progress class="round-progress" max="@queue.Count" value="@pos" aria-label="Progress through the round"></progress>
+            <progress class="round-progress" max="@queue.Count" value="@pos" aria-label="@Strings.Care.RoundProgress"></progress>
         </div>
 
         @if (card.Heading is { } heading && (pos == 0 || index == 0 || cards[index - 1].Heading != heading))
@@ -128,7 +128,7 @@ else
             <div class="round-photo">
                 @if (CoverOf(card.Subject) is { } coverId)
                 {
-                    <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@($"Photo of {card.Name}")" />
+                    <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundPhotoOf, card.Name))" />
                 }
                 else
                 {
@@ -162,15 +162,15 @@ else
                     }
                     @if (card.Dormant)
                     {
-                        <span class="stage-badge badge">Dormant</span>
+                        <span class="stage-badge badge">@Strings.Care.RoundDormant</span>
                     }
                 </div>
 
                 <div class="round-controls">
                     @if (form == WateringForm.TopWatered)
                     {
-                        <div class="round-readings" role="group" aria-label="Meter reading">
-                            <span class="section-label">Meter reading</span>
+                        <div class="round-readings" role="group" aria-label="@Strings.Care.RoundMeterReading">
+                            <span class="section-label">@Strings.Care.RoundMeterReading</span>
                             <div class="answer-grid">
                                 @for (var n = 0; n <= 10; n++)
                                 {
@@ -201,7 +201,7 @@ else
                             {
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
                             }
-                            Looked over
+                            @Strings.Care.RoundTileLookedOver
                         </button>
                     </div>
 
@@ -215,16 +215,16 @@ else
                             {
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
                             }
-                            Photo
+                            @Strings.Care.RoundPhoto
                             @if (day.Photo)
                             {
-                                <span class="visually-hidden">(added today)</span>
+                                <span class="visually-hidden">@Strings.Care.RoundPhotoAdded</span>
                             }
                         </label>
                         <input id="round-photo-input" type="file" accept="image/*" capture="environment" class="visually-hidden"
                                @ref="photoInput" @onchange="PhotoAsync" disabled="@busy" />
                         <button type="button" class="round-text-btn" disabled="@busy" @onclick="Skip">
-                            Skip
+                            @Strings.Care.RoundSkip
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
                         </button>
                     </div>
@@ -237,7 +237,7 @@ else
             </div>
         </article>
 
-        <p class="round-keys">Keys: 1 to 0 for a reading, W watered, L looked over, S skip, arrows to move</p>
+        <p class="round-keys">@Strings.Care.RoundKeys</p>
     </div>
 }
 
@@ -262,9 +262,9 @@ else
 
     private string BackHref => From switch { "plants" => "plants", "rooms" => "rooms-and-tags", _ => "" };
 
-    private string BackLabel => From switch { "plants" => "Plants", "rooms" => "Rooms and tags", _ => "Today" };
+    private string BackLabel => From switch { "plants" => Strings.Care.RoundBackPlants, "rooms" => Strings.Care.RoundBackRooms, _ => Strings.Care.RoundBackToday };
 
-    private string Title => IsBack ? "Look at these first" : IsNext ? "Next round" : IsDue ? "Due for water" : places.NameOf(PlaceId) ?? "Going round";
+    private string Title => IsBack ? Strings.Care.AwayLookFirst : IsNext ? Strings.Care.RoundTitleNext : IsDue ? Strings.Care.RoundTitleDue : places.NameOf(PlaceId) ?? Strings.Care.RoundGoingRound;
 
     private DateOnly Today => Time.Today();
 
@@ -386,15 +386,26 @@ else
 
         var parts = new List<string>();
         var kind = WateringForms.DoneKind(form);
-        var verb = WateringText.DoneLabel(form).ToLowerInvariant();
+        var done = form switch
+        {
+            WateringForm.TopWatered => Strings.Care.RoundLastWatered,
+            WateringForm.Reservoir => Strings.Care.RoundLastRefilled,
+            _ => Strings.Care.RoundLastToppedUp
+        };
+        var notYet = form switch
+        {
+            WateringForm.TopWatered => Strings.Care.RoundNotWatered,
+            WateringForm.Reservoir => Strings.Care.RoundNotRefilled,
+            _ => Strings.Care.RoundNotToppedUp
+        };
         parts.Add(CareSummary.Latest(careLogs, card.Subject.Id, kind, Today) is { } last
-            ? $"{verb} {Labels.DaysAgo(last.DaysAgo)}"
-            : $"not {verb} yet");
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, done, Labels.DaysAgo(last.DaysAgo))
+            : notYet);
 
         if (day.Reading is { } reading)
-            parts.Add($"reads {reading.Value}");
+            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundReads, reading.Value));
         else if (CareSummary.LatestMoisture(careLogs, card.Subject.Id, Today) is { } latest)
-            parts.Add($"last reading {latest.Value}, {Labels.DaysAgo(latest.DaysAgo)}");
+            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundLastReading, latest.Value, Labels.DaysAgo(latest.DaysAgo)));
 
         return string.Join(" · ", parts);
     }
@@ -403,9 +414,9 @@ else
     {
         var parts = new List<string>();
         if (summary.Readings > 0)
-            parts.Add(Labels.Count(summary.Readings, "reading"));
+            parts.Add(Plural.Of(summary.Readings, Strings.Care.RoundReadings_One, Strings.Care.RoundReadings_Other));
         if (summary.Photos > 0)
-            parts.Add(Labels.Count(summary.Photos, "photo"));
+            parts.Add(Plural.Of(summary.Photos, Strings.Care.RoundPhotos_One, Strings.Care.RoundPhotos_Other));
         return string.Join(" · ", parts);
     }
 
@@ -433,7 +444,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "A step in the daily round failed");
-            status = $"Couldn't save that: {ex.Message}";
+            status = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundSaveFailed, ex.Message);
         }
         busy = false;
     }
@@ -491,7 +502,7 @@ else
         if (busy)
             return;
         busy = true;
-        status = "Saving the photo…";
+        status = Strings.Care.PhotoRowSaving;
         try
         {
             var (message, saved) = await SubjectPhotos.TakeAsync(photoInput, Current.Card.Subject);
@@ -502,7 +513,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding a photo in the daily round failed");
-            status = $"Couldn't save the photo: {ex.Message}";
+            status = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowFailed, ex.Message);
         }
         busy = false;
     }

@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Care;
 
@@ -24,7 +25,7 @@ public static class CareLabels
             if (!string.IsNullOrWhiteSpace(entry.OwnKindName))
                 return entry.OwnKindName.Trim();
             if (entry.Kind == CareKind.Rotated)
-                return "Care";
+                return Strings.Care.LabelCare;
         }
         return label(entry.Kind);
     }

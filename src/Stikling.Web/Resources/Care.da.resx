@@ -1,0 +1,1512 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Loading" xml:space="preserve">
+    <value>Indlæser…</value>
+  </data>
+  <data name="IntervalListPageTitle" xml:space="preserve">
+    <value>Plejeintervaller · Stikling</value>
+  </data>
+  <data name="IntervalListTitle" xml:space="preserve">
+    <value>Plejeintervaller</value>
+  </data>
+  <data name="IntervalListHint" xml:space="preserve">
+    <value>Pleje, der kommer igen på I dag. Vanding er ikke med her: vandingspåmindelsen lærer det af hver plante.</value>
+  </data>
+  <data name="IntervalListEmptyTitle" xml:space="preserve">
+    <value>Ingen intervaller endnu.</value>
+  </data>
+  <data name="IntervalListEmptyText" xml:space="preserve">
+    <value>Et interval er pleje, der kommer igen af sig selv, som at gøde hver 2. uge fra april til oktober eller at ompotte hvert 2. år. I dag viser, hvad der er på tide, og et tryk logger det. Vanding hører til vandingspåmindelsen.</value>
+  </data>
+  <data name="IntervalListAdd" xml:space="preserve">
+    <value>Tilføj et interval</value>
+  </data>
+  <data name="IntervalRemovedKind" xml:space="preserve">
+    <value>Fjernet plejetype</value>
+  </data>
+  <data name="IntervalOffCountsAsWatering" xml:space="preserve">
+    <value>Slået fra: {0} tæller nu som en vanding</value>
+  </data>
+  <data name="IntervalCoversAll" xml:space="preserve">
+    <value>Alle planter ({0})</value>
+  </data>
+  <data name="IntervalCoversARoom" xml:space="preserve">
+    <value>Et rum</value>
+  </data>
+  <data name="IntervalCoversRoom" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="IntervalCoversTag" xml:space="preserve">
+    <value>Tagget {0} ({1})</value>
+  </data>
+  <data name="OwnKindName" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="OwnKindNamePlaceholder" xml:space="preserve">
+    <value>fx Duggede</value>
+  </data>
+  <data name="OwnKindCountsAs" xml:space="preserve">
+    <value>Tæller som</value>
+  </data>
+  <data name="OwnKindNeither" xml:space="preserve">
+    <value>Ingen af dem</value>
+  </data>
+  <data name="OwnKindWatering" xml:space="preserve">
+    <value>Vanding</value>
+  </data>
+  <data name="OwnKindFeed" xml:space="preserve">
+    <value>Gødning</value>
+  </data>
+  <data name="OwnKindCountsAsHint" xml:space="preserve">
+    <value>En vanding tæller med i vandingspåmindelsen og sidst vandet. En gødning kan have produkter og en EC- eller pH-måling.</value>
+  </data>
+  <data name="OwnKindOnHistory" xml:space="preserve">
+    <value>Sæt den på plantens tidslinje</value>
+  </data>
+  <data name="PhotoRowTakePhoto" xml:space="preserve">
+    <value>Tag et billede</value>
+  </data>
+  <data name="PhotoRowTakePhotoOf" xml:space="preserve">
+    <value>Tag et billede af {0}</value>
+  </data>
+  <data name="PhotoRowLastPhoto" xml:space="preserve">
+    <value>seneste billede {0}</value>
+  </data>
+  <data name="PhotoRowNoPhotos" xml:space="preserve">
+    <value>ingen billeder endnu</value>
+  </data>
+  <data name="PhotoRowSaving" xml:space="preserve">
+    <value>Gemmer billedet…</value>
+  </data>
+  <data name="PhotoRowFailed" xml:space="preserve">
+    <value>Kunne ikke gemme billedet: {0}</value>
+  </data>
+  <data name="WateringLearning" xml:space="preserve">
+    <value>Lærer, hvor ofte den skal have vand: {0}, før den kan sige det.</value>
+  </data>
+  <data name="WateringsMore_One" xml:space="preserve">
+    <value>{0} vanding mere</value>
+  </data>
+  <data name="WateringsMore_Other" xml:space="preserve">
+    <value>{0} vandinger mere</value>
+  </data>
+  <data name="WateringDays_One" xml:space="preserve">
+    <value>{0} dag</value>
+  </data>
+  <data name="WateringDays_Other" xml:space="preserve">
+    <value>{0} dage</value>
+  </data>
+  <data name="WateringWaterings_One" xml:space="preserve">
+    <value>{0} vanding</value>
+  </data>
+  <data name="WateringWaterings_Other" xml:space="preserve">
+    <value>{0} vandinger</value>
+  </data>
+  <data name="WateringRefills_One" xml:space="preserve">
+    <value>{0} påfyldning</value>
+  </data>
+  <data name="WateringRefills_Other" xml:space="preserve">
+    <value>{0} påfyldninger</value>
+  </data>
+  <data name="WateringEveryDay" xml:space="preserve">
+    <value>hver dag</value>
+  </data>
+  <data name="WateringEveryDays" xml:space="preserve">
+    <value>hver {0}. dag</value>
+  </data>
+  <data name="WateringSummaryMeter" xml:space="preserve">
+    <value>Er som regel tør cirka {0} efter vanding, lært af {1}.</value>
+  </data>
+  <data name="WateringSummaryTop" xml:space="preserve">
+    <value>Vandes som regel cirka {0}, lært af {1}.</value>
+  </data>
+  <data name="WateringSummaryReservoir" xml:space="preserve">
+    <value>Reservoiret holder som regel cirka {0}, lært af {1}.</value>
+  </data>
+  <data name="WateringSummaryInWater" xml:space="preserve">
+    <value>Vandet fyldes som regel op cirka {0}, lært af {1}.</value>
+  </data>
+  <data name="WateringLonger" xml:space="preserve">
+    <value>Længere nu, hvor dagene er kortere.</value>
+  </data>
+  <data name="WateringRowTop" xml:space="preserve">
+    <value>Vandes som regel cirka {0}, der er gået {1}</value>
+  </data>
+  <data name="WateringRowReservoir" xml:space="preserve">
+    <value>Reservoiret holder som regel cirka {0}, der er gået {1}</value>
+  </data>
+  <data name="WateringRowInWater" xml:space="preserve">
+    <value>Vandet fyldes som regel op cirka {0}, der er gået {1}</value>
+  </data>
+  <data name="WateringDryNow" xml:space="preserve">
+    <value>Sandsynligvis tør nu, tjek med fugtmåleren</value>
+  </data>
+  <data name="WateringDryNowReading" xml:space="preserve">
+    <value>Sandsynligvis tør nu, tjek med fugtmåleren, seneste måling {0}, {1}</value>
+  </data>
+  <data name="WateringDryTomorrow" xml:space="preserve">
+    <value>Sandsynligvis tør i morgen</value>
+  </data>
+  <data name="WateringDryTomorrowReading" xml:space="preserve">
+    <value>Sandsynligvis tør i morgen, seneste måling {0}, {1}</value>
+  </data>
+  <data name="WateringDryIn" xml:space="preserve">
+    <value>Sandsynligvis tør om {0} dage</value>
+  </data>
+  <data name="WateringDryInReading" xml:space="preserve">
+    <value>Sandsynligvis tør om {0} dage, seneste måling {1}, {2}</value>
+  </data>
+  <data name="WateringRefilledAgo" xml:space="preserve">
+    <value>fyldt på {0}</value>
+  </data>
+  <data name="WateringToppedUpAgo" xml:space="preserve">
+    <value>fyldt op {0}</value>
+  </data>
+  <data name="WateringWateredAgo" xml:space="preserve">
+    <value>vandet {0}</value>
+  </data>
+  <data name="WateringDoneWatered" xml:space="preserve">
+    <value>Vandet</value>
+  </data>
+  <data name="WateringDoneRefilled" xml:space="preserve">
+    <value>Fyldt på</value>
+  </data>
+  <data name="WateringDoneToppedUp" xml:space="preserve">
+    <value>Fyldt op</value>
+  </data>
+  <data name="WateringStillWet" xml:space="preserve">
+    <value>Stadig fugtig</value>
+  </data>
+  <data name="WateringNotYet" xml:space="preserve">
+    <value>Ikke endnu</value>
+  </data>
+  <data name="NotifyTestTryLater" xml:space="preserve">
+    <value>Kunne ikke sende en test lige nu. Prøv igen om lidt.</value>
+  </data>
+  <data name="NotifyTestTurnOffAndOn" xml:space="preserve">
+    <value>Kunne ikke sende en test. Slå notifikationer fra og til igen.</value>
+  </data>
+  <data name="NotifyTestSent" xml:space="preserve">
+    <value>Sendt. Den burde komme om lidt.</value>
+  </data>
+  <data name="BackToSettings" xml:space="preserve">
+    <value>Indstillinger</value>
+  </data>
+  <data name="DayMonthLongFormat" xml:space="preserve">
+    <value>d. MMMM</value>
+  </data>
+  <data name="DayMonthYearLongFormat" xml:space="preserve">
+    <value>d. MMMM yyyy</value>
+  </data>
+  <data name="KindsPageTitle" xml:space="preserve">
+    <value>Plejetyper · Stikling</value>
+  </data>
+  <data name="KindsTitle" xml:space="preserve">
+    <value>Plejetyper</value>
+  </data>
+  <data name="KindsHint" xml:space="preserve">
+    <value>De plejetyper, du selv har lavet. De står i plejearket ved siden af de indbyggede. Hvad en type tæller som, afgør, hvad den når: en vanding tæller med i vandingspåmindelsen, en gødning kan have produkter.</value>
+  </data>
+  <data name="KindsEmptyTitle" xml:space="preserve">
+    <value>Ingen egne plejetyper endnu.</value>
+  </data>
+  <data name="KindsEmptyText" xml:space="preserve">
+    <value>Tilføj en plejetype, appen ikke har, som duggede, vandet i bunden eller fyldt luftfugteren op, og log den som de andre.</value>
+  </data>
+  <data name="KindsAdd" xml:space="preserve">
+    <value>Tilføj en plejetype</value>
+  </data>
+  <data name="KindsAddPlus" xml:space="preserve">
+    <value>+ Tilføj en plejetype</value>
+  </data>
+  <data name="KindsYourKinds" xml:space="preserve">
+    <value>Dine typer</value>
+  </data>
+  <data name="KindsSheetAdd" xml:space="preserve">
+    <value>Tilføj en plejetype</value>
+  </data>
+  <data name="KindsSheetEdit" xml:space="preserve">
+    <value>Rediger plejetype</value>
+  </data>
+  <data name="KindsRemoveConfirm" xml:space="preserve">
+    <value>Fjern {0}? Poster, der allerede er logget, beholder deres navn.</value>
+  </data>
+  <data name="KindsAlsoChange_One" xml:space="preserve">
+    <value>Ændr også {0} post, der allerede er logget</value>
+  </data>
+  <data name="KindsAlsoChange_Other" xml:space="preserve">
+    <value>Ændr også {0} poster, der allerede er logget</value>
+  </data>
+  <data name="KindsUseWatered" xml:space="preserve">
+    <value>Tæller som en vanding</value>
+  </data>
+  <data name="KindsUseFeed" xml:space="preserve">
+    <value>Tæller som en gødning</value>
+  </data>
+  <data name="KindsUseNeither" xml:space="preserve">
+    <value>Tæller som ingen af dem</value>
+  </data>
+  <data name="KindsUseOnHistory" xml:space="preserve">
+    <value>{0} · På tidslinjen</value>
+  </data>
+  <data name="KindsAlreadyHave" xml:space="preserve">
+    <value>Du har allerede {0}. Tryk på den på listen for at ændre den.</value>
+  </data>
+  <data name="KindsChanged_One" xml:space="preserve">
+    <value>Ændrede {0} af {1} post. Resten har produkter eller en gødning på sig, så de forbliver, som de var.</value>
+  </data>
+  <data name="KindsChanged_Other" xml:space="preserve">
+    <value>Ændrede {0} af {1} poster. Resten har produkter eller en gødning på sig, så de forbliver, som de var.</value>
+  </data>
+  <data name="AwayPageTitle" xml:space="preserve">
+    <value>Ude og pause · Stikling</value>
+  </data>
+  <data name="AwayTitle" xml:space="preserve">
+    <value>Ude og pause</value>
+  </data>
+  <data name="AwayHint" xml:space="preserve">
+    <value>Mens du er ude eller holder pause, holder I dag op med at spørge efter noget, og vandingspåmindelsen lærer ikke af hullet.</value>
+  </data>
+  <data name="AwaySitterSheet" xml:space="preserve">
+    <value>Ark til plantesitteren</value>
+  </data>
+  <data name="AwaySitterSheetMeta" xml:space="preserve">
+    <value>Hvad der skal tjekkes, og hvornår, til den, der passer dine planter</value>
+  </data>
+  <data name="AwayEmpty" xml:space="preserve">
+    <value>Intet planlagt. Tilføj en tur, så bliver I dag stille, mens du er væk, og der laves et ark til den, der passer dine planter.</value>
+  </data>
+  <data name="AwayKindAway" xml:space="preserve">
+    <value>Ude</value>
+  </data>
+  <data name="AwayKindQuiet" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="AwayRange" xml:space="preserve">
+    <value>{0} til {1}</value>
+  </data>
+  <data name="AwayOnNow" xml:space="preserve">
+    <value>· nu</value>
+  </data>
+  <data name="AwayComingUp" xml:space="preserve">
+    <value>· på vej</value>
+  </data>
+  <data name="AwayAfterBreak" xml:space="preserve">
+    <value>Efter en pause</value>
+  </data>
+  <data name="AwayLookFirst" xml:space="preserve">
+    <value>Se først på disse</value>
+  </data>
+  <data name="AwayAll" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="AwayAfterBreakHint" xml:space="preserve">
+    <value>Den dag, du er tilbage, viser I dag så mange planter og stiklinger at se på før alt andet.</value>
+  </data>
+  <data name="AwayAddLabel" xml:space="preserve">
+    <value>Tilføj ude eller pause</value>
+  </data>
+  <data name="AwayEditPageTitleNew" xml:space="preserve">
+    <value>Tilføj ude eller pause · Stikling</value>
+  </data>
+  <data name="AwayEditPageTitle" xml:space="preserve">
+    <value>Ude eller pause · Stikling</value>
+  </data>
+  <data name="AwayEditTitleNew" xml:space="preserve">
+    <value>Tilføj ude eller pause</value>
+  </data>
+  <data name="AwayEditTitle" xml:space="preserve">
+    <value>Ude eller pause</value>
+  </data>
+  <data name="AwayEditNotFound" xml:space="preserve">
+    <value>Den findes ikke.</value>
+  </data>
+  <data name="AwayEditWhatItIs" xml:space="preserve">
+    <value>Hvad det er</value>
+  </data>
+  <data name="AwayEditKind" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="AwayEditLeaving" xml:space="preserve">
+    <value>Afrejse</value>
+  </data>
+  <data name="AwayEditBackOn" xml:space="preserve">
+    <value>Tilbage den</value>
+  </data>
+  <data name="AwayEditAsksAgainFrom" xml:space="preserve">
+    <value>I dag spørger igen fra denne dag.</value>
+  </data>
+  <data name="AwayEditFrom" xml:space="preserve">
+    <value>Fra</value>
+  </data>
+  <data name="AwayEditFor" xml:space="preserve">
+    <value>Varighed</value>
+  </data>
+  <data name="AwayEditUntil" xml:space="preserve">
+    <value>Til</value>
+  </data>
+  <data name="AwayEditAsksAgainOn" xml:space="preserve">
+    <value>I dag spørger igen {0}.</value>
+  </data>
+  <data name="AwayEditWeek" xml:space="preserve">
+    <value>1 uge</value>
+  </data>
+  <data name="AwayEditTwoWeeks" xml:space="preserve">
+    <value>2 uger</value>
+  </data>
+  <data name="AwayEditMonth" xml:space="preserve">
+    <value>En måned</value>
+  </data>
+  <data name="AwayEditPickDate" xml:space="preserve">
+    <value>Vælg en dato</value>
+  </data>
+  <data name="AwayEditDeleteConfirm" xml:space="preserve">
+    <value>Slet den? I dag spørger igen efter ting på disse dage.</value>
+  </data>
+  <data name="AwayEditBackAfterLeave" xml:space="preserve">
+    <value>Tilbage-datoen skal ligge efter afrejsen.</value>
+  </data>
+  <data name="AwayEditEndAfterStart" xml:space="preserve">
+    <value>Slutningen skal ligge efter starten.</value>
+  </data>
+  <data name="AwayEditSaveFailed" xml:space="preserve">
+    <value>Kunne ikke gemme: {0}</value>
+  </data>
+  <data name="AwayEditDeleteFailed" xml:space="preserve">
+    <value>Kunne ikke slette: {0}</value>
+  </data>
+  <data name="TodayRowPutOff" xml:space="preserve">
+    <value>Udskyd</value>
+  </data>
+  <data name="TodayRowPutOffUntil" xml:space="preserve">
+    <value>Udskyd til</value>
+  </data>
+  <data name="TodayRowTomorrow" xml:space="preserve">
+    <value>I morgen</value>
+  </data>
+  <data name="TodayRowWeek" xml:space="preserve">
+    <value>En uge</value>
+  </data>
+  <data name="TodayRowDays" xml:space="preserve">
+    <value>{0} dage</value>
+  </data>
+  <data name="CardDoneFor" xml:space="preserve">
+    <value>Færdig for {0}</value>
+  </data>
+  <data name="CardUndo" xml:space="preserve">
+    <value>Fortryd</value>
+  </data>
+  <data name="CardDoneForAll" xml:space="preserve">
+    <value>Færdig for alle</value>
+  </data>
+  <data name="CardUndoFor" xml:space="preserve">
+    <value>Fortryd {0} for {1}</value>
+  </data>
+  <data name="CardDoneLabel" xml:space="preserve">
+    <value>{0} er gjort</value>
+  </data>
+  <data name="CardShowAll" xml:space="preserve">
+    <value>Vis alle {0}</value>
+  </data>
+  <data name="CardLast" xml:space="preserve">
+    <value>sidst {0}</value>
+  </data>
+  <data name="CardFirstTime" xml:space="preserve">
+    <value>første gang</value>
+  </data>
+  <data name="CardDueToday" xml:space="preserve">
+    <value>på tide i dag</value>
+  </data>
+  <data name="CardDueTomorrow" xml:space="preserve">
+    <value>på tide i morgen</value>
+  </data>
+  <data name="CardDueIn" xml:space="preserve">
+    <value>på tide om {0} dage</value>
+  </data>
+  <data name="TourRegion" xml:space="preserve">
+    <value>Rundvisning</value>
+  </data>
+  <data name="TourCount" xml:space="preserve">
+    <value>{0} af {1}</value>
+  </data>
+  <data name="TourMore" xml:space="preserve">
+    <value>Der er mere, når du vil have det: {0} til potter, blandinger og gødning, {1} og {2}.</value>
+  </data>
+  <data name="TourExampleStays" xml:space="preserve">
+    <value>Coleussen bliver som eksempel, til du fjerner den.</value>
+  </data>
+  <data name="TourRemoveIt" xml:space="preserve">
+    <value>Fjern den</value>
+  </data>
+  <data name="TourRemoveFailed" xml:space="preserve">
+    <value>Kunne ikke fjerne hele eksemplet. Prøv Fjern igen.</value>
+  </data>
+  <data name="TourAddPlant" xml:space="preserve">
+    <value>Tilføj en plante</value>
+  </data>
+  <data name="TourImport" xml:space="preserve">
+    <value>Importer et regneark</value>
+  </data>
+  <data name="TourSkip" xml:space="preserve">
+    <value>Spring rundvisningen over</value>
+  </data>
+  <data name="TourNext" xml:space="preserve">
+    <value>Næste</value>
+  </data>
+  <data name="SitterPageTitle" xml:space="preserve">
+    <value>Ark til plantesitteren · Stikling</value>
+  </data>
+  <data name="SitterIntro" xml:space="preserve">
+    <value>En side til at printe, gemme som PDF eller dele som tekst til den, der passer dine planter. Den siger, hvornår en plante skal tjekkes, aldrig hvornår den skal have vand.</value>
+  </data>
+  <data name="SitterOptionsLabel" xml:space="preserve">
+    <value>Indstillinger for arket</value>
+  </data>
+  <data name="SitterAway" xml:space="preserve">
+    <value>Ude {0} til {1}</value>
+  </data>
+  <data name="SitterChange" xml:space="preserve">
+    <value>Ændr</value>
+  </data>
+  <data name="SitterAddAway" xml:space="preserve">
+    <value>Tilføj, hvornår du er ude, for at sætte besøgsdatoer på.</value>
+  </data>
+  <data name="SitterLayout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="SitterLayoutLabels" xml:space="preserve">
+    <value>Planteetiketter</value>
+  </data>
+  <data name="SitterLayoutVisits" xml:space="preserve">
+    <value>Besøg først</value>
+  </data>
+  <data name="SitterLayoutChart" xml:space="preserve">
+    <value>Skema</value>
+  </data>
+  <data name="SitterVisits" xml:space="preserve">
+    <value>Besøg</value>
+  </data>
+  <data name="SitterVisitsEveryDay" xml:space="preserve">
+    <value>Hver dag</value>
+  </data>
+  <data name="SitterVisitsEveryTwo" xml:space="preserve">
+    <value>Hver 2. dag</value>
+  </data>
+  <data name="SitterVisitsEveryThree" xml:space="preserve">
+    <value>Hver 3. dag</value>
+  </data>
+  <data name="SitterVisitsTwiceAWeek" xml:space="preserve">
+    <value>To gange om ugen</value>
+  </data>
+  <data name="SitterVisitsWeekly" xml:space="preserve">
+    <value>En gang om ugen</value>
+  </data>
+  <data name="SitterVisitsNone" xml:space="preserve">
+    <value>Ingen besøg</value>
+  </data>
+  <data name="SitterUsualWayLabel" xml:space="preserve">
+    <value>Sædvanlig måde at vande på</value>
+  </data>
+  <data name="SitterOwnWords" xml:space="preserve">
+    <value>Med dine egne ord</value>
+  </data>
+  <data name="SitterOwnWordsLabel" xml:space="preserve">
+    <value>Sådan vander du en plante, der skal have vand</value>
+  </data>
+  <data name="SitterHasMeter" xml:space="preserve">
+    <value>Der er en fugtmåler</value>
+  </data>
+  <data name="SitterMeterWhere" xml:space="preserve">
+    <value>Hvor er den?</value>
+  </data>
+  <data name="SitterShow" xml:space="preserve">
+    <value>Vis</value>
+  </data>
+  <data name="SitterShowPhotos" xml:space="preserve">
+    <value>Billeder</value>
+  </data>
+  <data name="SitterShowPlaces" xml:space="preserve">
+    <value>Hvor den står</value>
+  </data>
+  <data name="SitterShowHow" xml:space="preserve">
+    <value>Hvordan den vandes</value>
+  </data>
+  <data name="SitterShowPace" xml:space="preserve">
+    <value>Hvor ofte</value>
+  </data>
+  <data name="SitterShowNotes" xml:space="preserve">
+    <value>Noter</value>
+  </data>
+  <data name="SitterGeneralNote" xml:space="preserve">
+    <value>En note til den, der passer dem</value>
+  </data>
+  <data name="SitterListTitle" xml:space="preserve">
+    <value>Planter på arket</value>
+  </data>
+  <data name="SitterListSummary" xml:space="preserve">
+    <value>{0} af {1} på arket</value>
+  </data>
+  <data name="SitterListEmpty" xml:space="preserve">
+    <value>Ingen planter eller formeringer endnu.</value>
+  </data>
+  <data name="SitterWateredHow" xml:space="preserve">
+    <value>Hvordan {0} vandes</value>
+  </data>
+  <data name="SitterNotSaid" xml:space="preserve">
+    <value>Ikke angivet</value>
+  </data>
+  <data name="SitterDueBeforeYouGo" xml:space="preserve">
+    <value>Se på disse, før du rejser: {0}.</value>
+  </data>
+  <data name="SitterNoPace" xml:space="preserve">
+    <value>Ingen af dem har en vandingsrytme endnu, så de er med ved hvert besøg. Hvis du logger vandinger i appen, lærer den det.</value>
+  </data>
+  <data name="SitterCopied" xml:space="preserve">
+    <value>Kopieret</value>
+  </data>
+  <data name="SitterShareFailed" xml:space="preserve">
+    <value>Kunne ikke dele den</value>
+  </data>
+  <data name="SitterPrint" xml:space="preserve">
+    <value>Print eller gem som PDF</value>
+  </data>
+  <data name="SitterShare" xml:space="preserve">
+    <value>Del som tekst</value>
+  </data>
+  <data name="SitterPaperLabel" xml:space="preserve">
+    <value>Arket</value>
+  </data>
+  <data name="SitterNoCheckNeeded" xml:space="preserve">
+    <value>(ingen tjek nødvendigt)</value>
+  </data>
+  <data name="SitterToCheck" xml:space="preserve">
+    <value>{0} at tjekke</value>
+  </data>
+  <data name="SitterNothingToCheck" xml:space="preserve">
+    <value>Intet at tjekke. Alt burde være i orden.</value>
+  </data>
+  <data name="SitterChartPlant" xml:space="preserve">
+    <value>Plante, i den rækkefølge du går forbi</value>
+  </data>
+  <data name="SitterChartHow" xml:space="preserve">
+    <value>Sådan</value>
+  </data>
+  <data name="SitterChartCheckIt" xml:space="preserve">
+    <value>Tjek den</value>
+  </data>
+  <data name="SitterChartNoCheck" xml:space="preserve">
+    <value>Ingen tjek nødvendigt</value>
+  </data>
+  <data name="SitterChartKey" xml:space="preserve">
+    <value>En rubrik betyder, at den skal tjekkes den dag, og sæt kryds, når du har gjort det, uanset om du har vandet eller ej. En prik betyder, at den ikke behøver et tjek den dag.</value>
+  </data>
+  <data name="SitterChartWeekdayFormat" xml:space="preserve">
+    <value>ddd</value>
+  </data>
+  <data name="SitterChartDateFormat" xml:space="preserve">
+    <value>d. MMM</value>
+  </data>
+  <data name="CareWhen" xml:space="preserve">
+    <value>Hvornår</value>
+  </data>
+  <data name="CareReading" xml:space="preserve">
+    <value>Måling (0 til 10)</value>
+  </data>
+  <data name="CareWhatWentIn" xml:space="preserve">
+    <value>Hvad der kom i vandet</value>
+  </data>
+  <data name="CareWater" xml:space="preserve">
+    <value>Vand</value>
+  </data>
+  <data name="CareOptional" xml:space="preserve">
+    <value>Valgfri</value>
+  </data>
+  <data name="CareEc" xml:space="preserve">
+    <value>EC (mS/cm)</value>
+  </data>
+  <data name="CarePh" xml:space="preserve">
+    <value>pH</value>
+  </data>
+  <data name="CareNotes" xml:space="preserve">
+    <value>Noter</value>
+  </data>
+  <data name="EditBackToHistory" xml:space="preserve">
+    <value>Tilbage til tidslinjen</value>
+  </data>
+  <data name="EditChangeHint" xml:space="preserve">
+    <value>Vil du ændre, hvad der blev gjort, så slet den og log den igen.</value>
+  </data>
+  <data name="EditDeleteConfirm" xml:space="preserve">
+    <value>Slet denne post? Den fjernes fra tidslinjen og vandingspåmindelsen.</value>
+  </data>
+  <data name="EditKeepIt" xml:space="preserve">
+    <value>Behold den</value>
+  </data>
+  <data name="SheetWhatYouDid" xml:space="preserve">
+    <value>Hvad du gjorde</value>
+  </data>
+  <data name="SheetYourOwn" xml:space="preserve">
+    <value>Dine egne</value>
+  </data>
+  <data name="SheetAddYourOwn" xml:space="preserve">
+    <value>Tilføj din egen…</value>
+  </data>
+  <data name="SheetFeed" xml:space="preserve">
+    <value>Gødning</value>
+  </data>
+  <data name="SheetFeeds" xml:space="preserve">
+    <value>Gødninger</value>
+  </data>
+  <data name="SheetAddEcPh" xml:space="preserve">
+    <value>Tilføj EC og pH</value>
+  </data>
+  <data name="SheetNoProducts" xml:space="preserve">
+    <value>Ingen produkter endnu. Du kan tilføje din gødning under Materialer og derefter Produkter.</value>
+  </data>
+  <data name="SheetProducts" xml:space="preserve">
+    <value>Produkter</value>
+  </data>
+  <data name="SheetLogIt" xml:space="preserve">
+    <value>Log den</value>
+  </data>
+  <data name="SheetLogFor" xml:space="preserve">
+    <value>Log for {0}</value>
+  </data>
+  <data name="SheetHintFertilised" xml:space="preserve">
+    <value>fx Halv styrke</value>
+  </data>
+  <data name="SheetHintRepotted" xml:space="preserve">
+    <value>fx Over i den store terrakottapotte</value>
+  </data>
+  <data name="SheetHintHarvested" xml:space="preserve">
+    <value>fx En god håndfuld basilikum</value>
+  </data>
+  <data name="IntervalEditPageTitleNew" xml:space="preserve">
+    <value>Tilføj et interval · Stikling</value>
+  </data>
+  <data name="IntervalEditPageTitle" xml:space="preserve">
+    <value>Rediger interval · Stikling</value>
+  </data>
+  <data name="IntervalEditTitle" xml:space="preserve">
+    <value>Rediger interval</value>
+  </data>
+  <data name="IntervalEditNotFound" xml:space="preserve">
+    <value>Intervallet findes ikke.</value>
+  </data>
+  <data name="IntervalEditWhat" xml:space="preserve">
+    <value>Hvad</value>
+  </data>
+  <data name="IntervalEditWhatComesBack" xml:space="preserve">
+    <value>Hvad der kommer igen</value>
+  </data>
+  <data name="IntervalEditNoWatering" xml:space="preserve">
+    <value>Vanding er ikke med her. Vandingspåmindelsen lærer det af hver plante.</value>
+  </data>
+  <data name="IntervalEditAnyFeed" xml:space="preserve">
+    <value>Enhver gødning</value>
+  </data>
+  <data name="IntervalEditHowOften" xml:space="preserve">
+    <value>Hvor ofte</value>
+  </data>
+  <data name="IntervalEditEvery" xml:space="preserve">
+    <value>Hver</value>
+  </data>
+  <data name="IntervalEditUnit" xml:space="preserve">
+    <value>Enhed</value>
+  </data>
+  <data name="IntervalEditUnitDays" xml:space="preserve">
+    <value>Dage</value>
+  </data>
+  <data name="IntervalEditUnitWeeks" xml:space="preserve">
+    <value>Uger</value>
+  </data>
+  <data name="IntervalEditUnitMonths" xml:space="preserve">
+    <value>Måneder</value>
+  </data>
+  <data name="IntervalEditUnitYears" xml:space="preserve">
+    <value>År</value>
+  </data>
+  <data name="IntervalEditWhenInYear" xml:space="preserve">
+    <value>Hvornår på året</value>
+  </data>
+  <data name="IntervalEditPartOfYear" xml:space="preserve">
+    <value>Kun en del af året</value>
+  </data>
+  <data name="IntervalEditFrom" xml:space="preserve">
+    <value>Fra</value>
+  </data>
+  <data name="IntervalEditTo" xml:space="preserve">
+    <value>Til</value>
+  </data>
+  <data name="IntervalEditMonths" xml:space="preserve">
+    <value>{0} til {1}</value>
+  </data>
+  <data name="IntervalEditMonthsOverNewYear" xml:space="preserve">
+    <value>{0} til {1}, over nytår</value>
+  </data>
+  <data name="IntervalEditAllYear" xml:space="preserve">
+    <value>Det kommer igen hele året.</value>
+  </data>
+  <data name="IntervalEditCovers" xml:space="preserve">
+    <value>Dækker</value>
+  </data>
+  <data name="IntervalEditWhatItCovers" xml:space="preserve">
+    <value>Hvad det dækker</value>
+  </data>
+  <data name="IntervalEditScopePick" xml:space="preserve">
+    <value>Vælg planter</value>
+  </data>
+  <data name="IntervalEditScopeRoom" xml:space="preserve">
+    <value>Et rum</value>
+  </data>
+  <data name="IntervalEditScopeTag" xml:space="preserve">
+    <value>Et tag</value>
+  </data>
+  <data name="IntervalEditScopeAll" xml:space="preserve">
+    <value>Alle planter</value>
+  </data>
+  <data name="IntervalEditRoom" xml:space="preserve">
+    <value>Rum</value>
+  </data>
+  <data name="IntervalEditNoTags" xml:space="preserve">
+    <value>Ingen plante har et tag endnu. Tilføj tags på en plantes side.</value>
+  </data>
+  <data name="IntervalEditTag" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="IntervalEditEveryPlant" xml:space="preserve">
+    <value>Alle planter i samlingen, også dem, der kommer til senere.</value>
+  </data>
+  <data name="IntervalEditCoversNow" xml:space="preserve">
+    <value>{0} nu</value>
+  </data>
+  <data name="IntervalEditFirstDue" xml:space="preserve">
+    <value>Første gang {0}</value>
+  </data>
+  <data name="IntervalEditFirstDueSameMonth" xml:space="preserve">
+    <value>Første gang mellem {0}. og {1}</value>
+  </data>
+  <data name="IntervalEditFirstDueRange" xml:space="preserve">
+    <value>Første gang mellem {0} og {1}</value>
+  </data>
+  <data name="IntervalEditOff" xml:space="preserve">
+    <value>Slået fra: {0} tæller nu som en vanding. Vanding hører til vandingspåmindelsen, så dette interval gør ingenting. Du kan slette det.</value>
+  </data>
+  <data name="IntervalEditDeleteConfirm" xml:space="preserve">
+    <value>Slet dette interval? Intet, der er logget, ændres.</value>
+  </data>
+  <data name="IntervalEditAdd" xml:space="preserve">
+    <value>Tilføj interval</value>
+  </data>
+  <data name="IntervalEditSaveFailed" xml:space="preserve">
+    <value>Kunne ikke gemme: {0}</value>
+  </data>
+  <data name="IntervalEditDeleteFailed" xml:space="preserve">
+    <value>Kunne ikke slette: {0}</value>
+  </data>
+  <data name="RoundPageTitle" xml:space="preserve">
+    <value>{0} · Stikling</value>
+  </data>
+  <data name="RoundBackToday" xml:space="preserve">
+    <value>I dag</value>
+  </data>
+  <data name="RoundBackPlants" xml:space="preserve">
+    <value>Planter</value>
+  </data>
+  <data name="RoundBackRooms" xml:space="preserve">
+    <value>Rum og tags</value>
+  </data>
+  <data name="RoundGoingRound" xml:space="preserve">
+    <value>Går runden</value>
+  </data>
+  <data name="RoundRoomGone" xml:space="preserve">
+    <value>Rummet findes ikke mere.</value>
+  </data>
+  <data name="RoundBackToTodayButton" xml:space="preserve">
+    <value>Tilbage til I dag</value>
+  </data>
+  <data name="RoundNothingBack" xml:space="preserve">
+    <value>Der er ikke mere at se på først.</value>
+  </data>
+  <data name="RoundNothingNext" xml:space="preserve">
+    <value>Intet venter på næste runde.</value>
+  </data>
+  <data name="RoundNothingDue" xml:space="preserve">
+    <value>Intet er på tide til vand lige nu.</value>
+  </data>
+  <data name="RoundNothingInRoom" xml:space="preserve">
+    <value>Intet i {0} at gå runde med endnu. Planter og formeringer, du sætter her, dukker op i dens runde.</value>
+  </data>
+  <data name="RoundGoToPlants" xml:space="preserve">
+    <value>Gå til Planter</value>
+  </data>
+  <data name="RoundTitleNext" xml:space="preserve">
+    <value>Næste runde</value>
+  </data>
+  <data name="RoundTitleDue" xml:space="preserve">
+    <value>På tide til vand</value>
+  </data>
+  <data name="RoundAllDone" xml:space="preserve">
+    <value>Alt er færdigt</value>
+  </data>
+  <data name="RoundRoomDone" xml:space="preserve">
+    <value>{0} er færdig</value>
+  </data>
+  <data name="RoundTileLookedOver" xml:space="preserve">
+    <value>Set til</value>
+  </data>
+  <data name="RoundTileSkipped" xml:space="preserve">
+    <value>Sprunget over</value>
+  </data>
+  <data name="RoundGoThroughSkipped" xml:space="preserve">
+    <value>Gennemgå de {0} sprunget over</value>
+  </data>
+  <data name="RoundReadings_One" xml:space="preserve">
+    <value>{0} måling</value>
+  </data>
+  <data name="RoundReadings_Other" xml:space="preserve">
+    <value>{0} målinger</value>
+  </data>
+  <data name="RoundPhotos_One" xml:space="preserve">
+    <value>{0} billede</value>
+  </data>
+  <data name="RoundPhotos_Other" xml:space="preserve">
+    <value>{0} billeder</value>
+  </data>
+  <data name="RoundPosition" xml:space="preserve">
+    <value>{0} af {1}</value>
+  </data>
+  <data name="RoundProgress" xml:space="preserve">
+    <value>Fremgang gennem runden</value>
+  </data>
+  <data name="RoundPhotoOf" xml:space="preserve">
+    <value>Billede af {0}</value>
+  </data>
+  <data name="RoundDormant" xml:space="preserve">
+    <value>Hviler</value>
+  </data>
+  <data name="RoundMeterReading" xml:space="preserve">
+    <value>Måling på fugtmåler</value>
+  </data>
+  <data name="RoundPhoto" xml:space="preserve">
+    <value>Billede</value>
+  </data>
+  <data name="RoundPhotoAdded" xml:space="preserve">
+    <value>(tilføjet i dag)</value>
+  </data>
+  <data name="RoundSkip" xml:space="preserve">
+    <value>Spring over</value>
+  </data>
+  <data name="RoundKeys" xml:space="preserve">
+    <value>Taster: 1 til 0 for en måling, W vandet, L set til, S spring over, piletaster for at bevæge dig</value>
+  </data>
+  <data name="RoundLastWatered" xml:space="preserve">
+    <value>vandet {0}</value>
+  </data>
+  <data name="RoundLastRefilled" xml:space="preserve">
+    <value>fyldt på {0}</value>
+  </data>
+  <data name="RoundLastToppedUp" xml:space="preserve">
+    <value>fyldt op {0}</value>
+  </data>
+  <data name="RoundNotWatered" xml:space="preserve">
+    <value>ikke vandet endnu</value>
+  </data>
+  <data name="RoundNotRefilled" xml:space="preserve">
+    <value>ikke fyldt på endnu</value>
+  </data>
+  <data name="RoundNotToppedUp" xml:space="preserve">
+    <value>ikke fyldt op endnu</value>
+  </data>
+  <data name="RoundReads" xml:space="preserve">
+    <value>viser {0}</value>
+  </data>
+  <data name="RoundLastReading" xml:space="preserve">
+    <value>seneste måling {0}, {1}</value>
+  </data>
+  <data name="RoundSaveFailed" xml:space="preserve">
+    <value>Kunne ikke gemme det: {0}</value>
+  </data>
+  <data name="WaterPageTitle" xml:space="preserve">
+    <value>Vand planter · Stikling</value>
+  </data>
+  <data name="WaterTitle" xml:space="preserve">
+    <value>Vand planter</value>
+  </data>
+  <data name="WaterEmpty" xml:space="preserve">
+    <value>Ingen planter endnu. Tilføj en på siden Planter.</value>
+  </data>
+  <data name="WaterLead" xml:space="preserve">
+    <value>Gå gennem alle rum, eller vælg rummene i den rækkefølge, du går dem.</value>
+  </data>
+  <data name="WaterAllRooms" xml:space="preserve">
+    <value>Alle rum</value>
+  </data>
+  <data name="WaterPickRooms" xml:space="preserve">
+    <value>Eller vælg rum</value>
+  </data>
+  <data name="WaterRooms" xml:space="preserve">
+    <value>Rum</value>
+  </data>
+  <data name="WaterNumber" xml:space="preserve">
+    <value>Nummer {0}:</value>
+  </data>
+  <data name="WaterStart" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="WaterDoneHeading" xml:space="preserve">
+    <value>Færdig for i dag</value>
+  </data>
+  <data name="WaterNothingWatered" xml:space="preserve">
+    <value>Intet vandet denne gang.</value>
+  </data>
+  <data name="WaterDoneLine" xml:space="preserve">
+    <value>{0}, {1}</value>
+  </data>
+  <data name="WaterBackTo" xml:space="preserve">
+    <value>Tilbage til {0}</value>
+  </data>
+  <data name="WaterKeepGoing" xml:space="preserve">
+    <value>Fortsæt</value>
+  </data>
+  <data name="WaterChangeRooms" xml:space="preserve">
+    <value>Skift rum</value>
+  </data>
+  <data name="WaterHowYouCheck" xml:space="preserve">
+    <value>Hvordan du tjekker</value>
+  </data>
+  <data name="WaterMeter" xml:space="preserve">
+    <value>Fugtmåler</value>
+  </data>
+  <data name="WaterFeelSoil" xml:space="preserve">
+    <value>Mærk på jorden</value>
+  </data>
+  <data name="WaterLeadMeter" xml:space="preserve">
+    <value>Tryk på det, fugtmåleren viser, fra 0 for tør til 10 for våd.</value>
+  </data>
+  <data name="WaterLeadSoil" xml:space="preserve">
+    <value>Tryk en finger et par centimeter ned i jorden. Tryk på Tør eller Stadig fugtig.</value>
+  </data>
+  <data name="WaterRoundFeed" xml:space="preserve">
+    <value>Gødning på denne runde</value>
+  </data>
+  <data name="WaterNoFeed" xml:space="preserve">
+    <value>Ingen gødning</value>
+  </data>
+  <data name="WaterRoundFeedHelp" xml:space="preserve">
+    <value>Følger med hver vanding, du logger her, medmindre en plante har sin egen gødning på tide.</value>
+  </data>
+  <data name="WaterNoPlants" xml:space="preserve">
+    <value>Ingen planter her.</value>
+  </data>
+  <data name="WaterTopUp" xml:space="preserve">
+    <value>Fyld op</value>
+  </data>
+  <data name="WaterCuttings" xml:space="preserve">
+    <value>Stiklinger</value>
+  </data>
+  <data name="WaterProgress" xml:space="preserve">
+    <value>Fremgang</value>
+  </data>
+  <data name="WaterSaveFailed" xml:space="preserve">
+    <value>Kunne ikke gemme det. Prøv igen.</value>
+  </data>
+  <data name="WaterReads" xml:space="preserve">
+    <value>{0}: viser {1}</value>
+  </data>
+  <data name="WaterDryAnnounce" xml:space="preserve">
+    <value>{0}: tør</value>
+  </data>
+  <data name="WaterDampAnnounce" xml:space="preserve">
+    <value>{0}: stadig fugtig</value>
+  </data>
+  <data name="WaterWateredAnnounce" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>
+  <data name="WaterUndone" xml:space="preserve">
+    <value>{0}: fortrudt</value>
+  </data>
+  <data name="WaterCuttingWatered" xml:space="preserve">
+    <value>{0} vandet</value>
+  </data>
+  <data name="WaterMetaDryReading" xml:space="preserve">
+    <value>viser {0}, tør efter din måling</value>
+  </data>
+  <data name="WaterMetaDryTouch" xml:space="preserve">
+    <value>tør at røre ved</value>
+  </data>
+  <data name="WaterMetaDampReading" xml:space="preserve">
+    <value>viser {0}, stadig fugtig</value>
+  </data>
+  <data name="WaterMetaDamp" xml:space="preserve">
+    <value>stadig fugtig, tjek igen senere</value>
+  </data>
+  <data name="WaterNothingToCheck" xml:space="preserve">
+    <value>Intet at tjekke · {0} vandet</value>
+  </data>
+  <data name="WaterAllChecked" xml:space="preserve">
+    <value>Alt tjekket i dag · {0} vandet</value>
+  </data>
+  <data name="WaterChecked" xml:space="preserve">
+    <value>{0} af {1} tjekket · {2} vandet</value>
+  </data>
+  <data name="WaterDoneWithFeed" xml:space="preserve">
+    <value>{0} med {1}</value>
+  </data>
+  <data name="WaterCheckWater" xml:space="preserve">
+    <value>Tjek vandet</value>
+  </data>
+  <data name="WaterCheckReservoir" xml:space="preserve">
+    <value>Tjek reservoiret</value>
+  </data>
+  <data name="WaterMeterFor" xml:space="preserve">
+    <value>Måling for {0}</value>
+  </data>
+  <data name="WaterSoilOf" xml:space="preserve">
+    <value>Jorden i {0}</value>
+  </data>
+  <data name="WaterDry" xml:space="preserve">
+    <value>Tør</value>
+  </data>
+  <data name="WaterStillDamp" xml:space="preserve">
+    <value>Stadig fugtig</value>
+  </data>
+  <data name="WaterWateredAnyway" xml:space="preserve">
+    <value>Vandet alligevel</value>
+  </data>
+  <data name="WaterUndoWatered" xml:space="preserve">
+    <value>Fortryd vandet for {0}</value>
+  </data>
+  <data name="WaterAddFeedFor" xml:space="preserve">
+    <value>Tilføj en gødning til {0}</value>
+  </data>
+  <data name="WaterChangeFeedFor" xml:space="preserve">
+    <value>Skift gødningen til {0}</value>
+  </data>
+  <data name="WaterAddFeed" xml:space="preserve">
+    <value>tilføj gødning</value>
+  </data>
+  <data name="WaterChange" xml:space="preserve">
+    <value>skift</value>
+  </data>
+  <data name="TodayLongDayFormat" xml:space="preserve">
+    <value>dddd 'den' d. MMMM</value>
+  </data>
+  <data name="TodayShortDayFormat" xml:space="preserve">
+    <value>ddd d. MMM</value>
+  </data>
+  <data name="TodayMonthFormat" xml:space="preserve">
+    <value>MMMM</value>
+  </data>
+  <data name="TodayPageTitle" xml:space="preserve">
+    <value>I dag · Stikling</value>
+  </data>
+  <data name="TodayTitle" xml:space="preserve">
+    <value>I dag</value>
+  </data>
+  <data name="TodayFirstTitle" xml:space="preserve">
+    <value>Start med en plante</value>
+  </data>
+  <data name="TodayFirstText" xml:space="preserve">
+    <value>Stikling holder styr på dine planter og de stiklinger, du får fra dem, med noter og billeder undervejs. Tilføj en plante, du har, så fyldes denne side med det, der skal gøres.</value>
+  </data>
+  <data name="TodayFirstAccount" xml:space="preserve">
+    <value>Alt bliver på denne enhed, og du behøver ikke en konto. Log ind fra Indstillinger, hvis du også vil have dine planter på dine andre enheder.</value>
+  </data>
+  <data name="TodayFirstNoAccount" xml:space="preserve">
+    <value>Alt bliver på denne enhed. Der er ingen konto at oprette.</value>
+  </data>
+  <data name="TodayFirstPropagation" xml:space="preserve">
+    <value>Start en formering</value>
+  </data>
+  <data name="TodayFirstLoading" xml:space="preserve">
+    <value>Indlæser eksemplet…</value>
+  </data>
+  <data name="TodayFirstMore" xml:space="preserve">
+    <value>Har du allerede planter? {0}, {1} eller {2}.</value>
+  </data>
+  <data name="TodayFirstQuickAdd" xml:space="preserve">
+    <value>Tilføj flere på én gang</value>
+  </data>
+  <data name="TodayFirstImport" xml:space="preserve">
+    <value>importer et regneark</value>
+  </data>
+  <data name="TodayFirstPhotos" xml:space="preserve">
+    <value>start fra gamle billeder</value>
+  </data>
+  <data name="TodayFirstHelp" xml:space="preserve">
+    <value>Sådan virker Stikling</value>
+  </data>
+  <data name="TodayPropagationsGoing_One" xml:space="preserve">
+    <value>{0} formering i gang</value>
+  </data>
+  <data name="TodayPropagationsGoing_Other" xml:space="preserve">
+    <value>{0} formeringer i gang</value>
+  </data>
+  <data name="TodayPottedUp" xml:space="preserve">
+    <value>{0} af {1} pottet op denne måned</value>
+  </data>
+  <data name="TodayExampleRemoveConfirm" xml:space="preserve">
+    <value>Fjern eksempelplanterne, deres stiklinger og alle noter, billeder og pleje, der er føjet til dem? Planter, du har lavet af dem, bliver.</value>
+  </data>
+  <data name="TodayExampleIs" xml:space="preserve">
+    <value>{0} og dens stiklinger er et eksempel.</value>
+  </data>
+  <data name="TodayAwayFrom" xml:space="preserve">
+    <value>Ude fra {0}.</value>
+  </data>
+  <data name="TodayAwayLeaveSheet" xml:space="preserve">
+    <value>Giv den, der passer dem, et ark med, hvad der skal tjekkes, og hvornår.</value>
+  </data>
+  <data name="TodaySitterSheet" xml:space="preserve">
+    <value>Plantesitterark</value>
+  </data>
+  <data name="TodayYoureAway" xml:space="preserve">
+    <value>Du er ude</value>
+  </data>
+  <data name="TodayDaysToGo_One" xml:space="preserve">
+    <value>{0} dag igen</value>
+  </data>
+  <data name="TodayDaysToGo_Other" xml:space="preserve">
+    <value>{0} dage igen</value>
+  </data>
+  <data name="TodayDotsKey" xml:space="preserve">
+    <value>Prikkerne er plantesitterens besøg</value>
+  </data>
+  <data name="TodayBack" xml:space="preserve">
+    <value>tilbage</value>
+  </data>
+  <data name="TodayUntil" xml:space="preserve">
+    <value>til</value>
+  </data>
+  <data name="TodayNothingAsksAway" xml:space="preserve">
+    <value>Intet her beder om noget, før du er tilbage.</value>
+  </data>
+  <data name="TodayNothingAsksQuiet" xml:space="preserve">
+    <value>Intet her beder om noget før {0}.</value>
+  </data>
+  <data name="TodayImBack" xml:space="preserve">
+    <value>Jeg er tilbage</value>
+  </data>
+  <data name="TodayBarLabel" xml:space="preserve">
+    <value>{0} til {1}, i dag er dag {2} af {3}</value>
+  </data>
+  <data name="TodayBarLabelVisits" xml:space="preserve">
+    <value>{0} til {1}, i dag er dag {2} af {3}, {4}</value>
+  </data>
+  <data name="TodayVisits_One" xml:space="preserve">
+    <value>{0} besøg</value>
+  </data>
+  <data name="TodayVisits_Other" xml:space="preserve">
+    <value>{0} besøg</value>
+  </data>
+  <data name="TodayWelcomeBack" xml:space="preserve">
+    <value>Velkommen tilbage</value>
+  </data>
+  <data name="TodayBackAway_One" xml:space="preserve">
+    <value>{0} dag ude.</value>
+  </data>
+  <data name="TodayBackAway_Other" xml:space="preserve">
+    <value>{0} dage ude.</value>
+  </data>
+  <data name="TodayBackQuiet_One" xml:space="preserve">
+    <value>{0} dags pause.</value>
+  </data>
+  <data name="TodayBackQuiet_Other" xml:space="preserve">
+    <value>{0} dages pause.</value>
+  </data>
+  <data name="TodayBackLead" xml:space="preserve">
+    <value>Disse først, i denne rækkefølge. Resten af I dag kommer tilbage, når du er igennem.</value>
+  </data>
+  <data name="TodayLookedAtIt" xml:space="preserve">
+    <value>Har set til den</value>
+  </data>
+  <data name="TodayGoRoundThese" xml:space="preserve">
+    <value>Gå runde med disse</value>
+  </data>
+  <data name="TodayDoneWithList" xml:space="preserve">
+    <value>Færdig med denne liste</value>
+  </data>
+  <data name="TodayBackCase" xml:space="preserve">
+    <value>sag åben siden {0}</value>
+  </data>
+  <data name="TodayBackInWater_One" xml:space="preserve">
+    <value>I vand · {0} dag, siden du kiggede</value>
+  </data>
+  <data name="TodayBackInWater_Other" xml:space="preserve">
+    <value>I vand · {0} dage, siden du kiggede</value>
+  </data>
+  <data name="TodayBackPace" xml:space="preserve">
+    <value>Som regel hver {0} · der er gået {1}</value>
+  </data>
+  <data name="TodayBackFlagged" xml:space="preserve">
+    <value>Markeret: {0} · {1}</value>
+  </data>
+  <data name="TodayDays_One" xml:space="preserve">
+    <value>{0} dag</value>
+  </data>
+  <data name="TodayDays_Other" xml:space="preserve">
+    <value>{0} dage</value>
+  </data>
+  <data name="TodayWeeks_One" xml:space="preserve">
+    <value>{0} uge</value>
+  </data>
+  <data name="TodayWeeks_Other" xml:space="preserve">
+    <value>{0} uger</value>
+  </data>
+  <data name="TodayBackUp" xml:space="preserve">
+    <value>Lav sikkerhedskopi</value>
+  </data>
+  <data name="TodayNoBackup" xml:space="preserve">
+    <value>Ingen sikkerhedskopi endnu. Dine planter findes kun på denne enhed.</value>
+  </data>
+  <data name="TodayLastBackup" xml:space="preserve">
+    <value>Seneste sikkerhedskopi var {0}.</value>
+  </data>
+  <data name="TodayRound" xml:space="preserve">
+    <value>Dagens runde</value>
+  </data>
+  <data name="TodaySkipToday" xml:space="preserve">
+    <value>Spring over i dag</value>
+  </data>
+  <data name="TodayPlants_One" xml:space="preserve">
+    <value>{0} plante</value>
+  </data>
+  <data name="TodayPlants_Other" xml:space="preserve">
+    <value>{0} planter</value>
+  </data>
+  <data name="TodayPropagations_One" xml:space="preserve">
+    <value>{0} formering</value>
+  </data>
+  <data name="TodayPropagations_Other" xml:space="preserve">
+    <value>{0} formeringer</value>
+  </data>
+  <data name="TodayRoundDue" xml:space="preserve">
+    <value>{0} på tide til vand</value>
+  </data>
+  <data name="TodayStep" xml:space="preserve">
+    <value>Trin {0} af {1}</value>
+  </data>
+  <data name="TodayReadyToResolve" xml:space="preserve">
+    <value>Klar til at afslutte</value>
+  </data>
+  <data name="TodayResolve" xml:space="preserve">
+    <value>Afslut</value>
+  </data>
+  <data name="TodayCleanFor_One" xml:space="preserve">
+    <value>Ren i {0} uge</value>
+  </data>
+  <data name="TodayCleanFor_Other" xml:space="preserve">
+    <value>Ren i {0} uger</value>
+  </data>
+  <data name="TodayPlanDone" xml:space="preserve">
+    <value>Plan færdig</value>
+  </data>
+  <data name="TodayStartWatching" xml:space="preserve">
+    <value>Begynd at holde øje</value>
+  </data>
+  <data name="TodayKeepTreating" xml:space="preserve">
+    <value>Fortsæt behandlingen</value>
+  </data>
+  <data name="TodayDoneWith" xml:space="preserve">
+    <value>Færdig med {0}</value>
+  </data>
+  <data name="TodayNeedsAttention" xml:space="preserve">
+    <value>Kræver opmærksomhed</value>
+  </data>
+  <data name="TodayLookAgain" xml:space="preserve">
+    <value>Se igen</value>
+  </data>
+  <data name="TodayHowDoesItLook" xml:space="preserve">
+    <value>Hvordan ser {0} ud?</value>
+  </data>
+  <data name="TodayTrendSame" xml:space="preserve">
+    <value>Det samme</value>
+  </data>
+  <data name="TodayHowDoesItLookTitle" xml:space="preserve">
+    <value>Hvordan ser den ud?</value>
+  </data>
+  <data name="TodayQuarantineUp" xml:space="preserve">
+    <value>Karantænen er slut</value>
+  </data>
+  <data name="TodayQuarantineDone" xml:space="preserve">
+    <value>Tjekket, luk den ud</value>
+  </data>
+  <data name="TodayQuarantineMeta" xml:space="preserve">
+    <value>Tid til at tjekke den og lukke den ud · i karantæne i {0}</value>
+  </data>
+  <data name="TodayMovingToSemiHydro" xml:space="preserve">
+    <value>På vej over i semi-hydro</value>
+  </data>
+  <data name="TodayLookedStillWaiting" xml:space="preserve">
+    <value>Set til, venter stadig</value>
+  </data>
+  <data name="TodayNothingNew" xml:space="preserve">
+    <value>Intet nyt i {0}</value>
+  </data>
+  <data name="TodayGoneDormant" xml:space="preserve">
+    <value>Hviler den nu?</value>
+  </data>
+  <data name="TodayYesDormant" xml:space="preserve">
+    <value>Ja, den hviler</value>
+  </data>
+  <data name="TodayNotThisYear" xml:space="preserve">
+    <value>Ikke i år</value>
+  </data>
+  <data name="TodayRestsWinter" xml:space="preserve">
+    <value>Hviler som regel om vinteren</value>
+  </data>
+  <data name="TodayRestsSummer" xml:space="preserve">
+    <value>Hviler som regel om sommeren</value>
+  </data>
+  <data name="TodayEmptyOuterPot" xml:space="preserve">
+    <value>Tøm yderpotten</value>
+  </data>
+  <data name="TodayAllEmptied" xml:space="preserve">
+    <value>Alle tømt</value>
+  </data>
+  <data name="TodayEmptied" xml:space="preserve">
+    <value>Tømt</value>
+  </data>
+  <data name="TodayWater" xml:space="preserve">
+    <value>Vand</value>
+  </data>
+  <data name="TodayGoRoundNow" xml:space="preserve">
+    <value>Gå runde nu</value>
+  </data>
+  <data name="TodayHowToTell" xml:space="preserve">
+    <value>Sådan kan du se, om den skal have vand</value>
+  </data>
+  <data name="TodayHintFinger" xml:space="preserve">
+    <value>Tryk en finger 2 til 3 cm ned i jorden, og mærk, om den er tør. Planter, der kan lide at tørre ud, vil måske have den tørrere længere nede.</value>
+  </data>
+  <data name="TodayHintSkewer" xml:space="preserve">
+    <value>I en dyb potte kan du stikke en træpind ned og trække den op igen. Hænger der jord på den, er den stadig våd.</value>
+  </data>
+  <data name="TodayHintLift" xml:space="preserve">
+    <value>Løft potten. En tør pot føles meget lettere end lige efter vanding.</value>
+  </data>
+  <data name="TodayHintMeter" xml:space="preserve">
+    <value>En fugtmåler giver et tal. Log målingen med Stadig fugtig, så lærer påmindelsen af den.</value>
+  </data>
+  <data name="TodayComingUp" xml:space="preserve">
+    <value>Kommer snart</value>
+  </data>
+  <data name="TodayCare" xml:space="preserve">
+    <value>Pleje</value>
+  </data>
+  <data name="TodayNoMeter" xml:space="preserve">
+    <value>Ingen fugtmåler</value>
+  </data>
+  <data name="TodayTomorrow" xml:space="preserve">
+    <value>i morgen</value>
+  </data>
+  <data name="TodayNextRoundPlants_One" xml:space="preserve">
+    <value>Næste runde {0} · {1} plante at tjekke</value>
+  </data>
+  <data name="TodayNextRoundPlants_Other" xml:space="preserve">
+    <value>Næste runde {0} · {1} planter at tjekke</value>
+  </data>
+  <data name="TodayNextRoundProps_One" xml:space="preserve">
+    <value>Næste runde {0} · {1} formering at se på</value>
+  </data>
+  <data name="TodayNextRoundProps_Other" xml:space="preserve">
+    <value>Næste runde {0} · {1} formeringer at se på</value>
+  </data>
+  <data name="TodayCareLogFailed" xml:space="preserve">
+    <value>Kunne ikke logge den: {0}</value>
+  </data>
+  <data name="TodayCareUndoFailed" xml:space="preserve">
+    <value>Kunne ikke fortryde det: {0}</value>
+  </data>
+  <data name="TodayMemoryAlt" xml:space="preserve">
+    <value>{0} den {1}</value>
+  </data>
+  <data name="TodayBeforeAfter" xml:space="preserve">
+    <value>Før og efter</value>
+  </data>
+  <data name="TodayNotesComingBack" xml:space="preserve">
+    <value>Noter, der kommer tilbage</value>
+  </data>
+  <data name="TodayWritten" xml:space="preserve">
+    <value>Skrevet {0}</value>
+  </data>
+  <data name="TodayAgainNextYear" xml:space="preserve">
+    <value>Igen næste år</value>
+  </data>
+  <data name="TodayYear" xml:space="preserve">
+    <value>Dit {0} med dine planter</value>
+  </data>
+  <data name="TodaySeeYear" xml:space="preserve">
+    <value>Se dit år</value>
+  </data>
+  <data name="TodayHideYear" xml:space="preserve">
+    <value>Skjul for denne sæson</value>
+  </data>
+  <data name="TodayWorthALook" xml:space="preserve">
+    <value>Værd at se på</value>
+  </data>
+  <data name="TodayNoPropagations" xml:space="preserve">
+    <value>Ingen formeringer i gang. Åbn en plante, og tryk på Formér for at starte en.</value>
+  </data>
+  <data name="TodayNothingElse" xml:space="preserve">
+    <value>Intet andet venter. Dem, du har udskudt, kommer tilbage af sig selv.</value>
+  </data>
+  <data name="TodayNothingWaiting" xml:space="preserve">
+    <value>Intet venter. Alle formeringer er set til den seneste uge.</value>
+  </data>
+  <data name="TodayPhotos" xml:space="preserve">
+    <value>Billeder</value>
+  </data>
+  <data name="TodaySkipMonth" xml:space="preserve">
+    <value>Spring over denne måned</value>
+  </data>
+  <data name="TodayPhotosToTake_One" xml:space="preserve">
+    <value>{0} billede at tage</value>
+  </data>
+  <data name="TodayPhotosToTake_Other" xml:space="preserve">
+    <value>{0} billeder at tage</value>
+  </data>
+  <data name="TodayPhotosFor" xml:space="preserve">
+    <value>For {0}</value>
+  </data>
+  <data name="TodayLately" xml:space="preserve">
+    <value>På det seneste</value>
+  </data>
+  <data name="TodayLatelyEmpty" xml:space="preserve">
+    <value>Intet skrevet ned de seneste 30 dage. Noter og billeder, du føjer til en plante eller formering, dukker op her.</value>
+  </data>
+  <data name="TodayLastSeen" xml:space="preserve">
+    <value>set {0}</value>
+  </data>
+  <data name="TodayNoNotes" xml:space="preserve">
+    <value>ingen noter endnu</value>
+  </data>
+  <data name="TodayYearSoFar" xml:space="preserve">
+    <value>Dit år indtil nu</value>
+  </data>
+  <data name="TodayPhotoAdded_One" xml:space="preserve">
+    <value>Billede tilføjet</value>
+  </data>
+  <data name="TodayPhotoAdded_Other" xml:space="preserve">
+    <value>{0} billeder tilføjet</value>
+  </data>
+  <data name="TodayDayToday" xml:space="preserve">
+    <value>i dag</value>
+  </data>
+  <data name="TodayDayYesterday" xml:space="preserve">
+    <value>i går</value>
+  </data>
+</root>

@@ -1,0 +1,1704 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+    <comment>Shown while a page loads its data.</comment>
+  </data>
+  <data name="IntervalListPageTitle" xml:space="preserve">
+    <value>Care intervals · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="IntervalListTitle" xml:space="preserve">
+    <value>Care intervals</value>
+    <comment>Heading of the Care intervals page.</comment>
+  </data>
+  <data name="IntervalListHint" xml:space="preserve">
+    <value>Care that comes back on Today. Watering isn't here: the watering reminder learns that from each plant.</value>
+  </data>
+  <data name="IntervalListEmptyTitle" xml:space="preserve">
+    <value>No intervals yet.</value>
+  </data>
+  <data name="IntervalListEmptyText" xml:space="preserve">
+    <value>An interval is care that comes back by itself, like fertilise every 2 weeks from April to October, or repot every 2 years. Today lists what is due, and one tap logs it. Watering stays with the watering reminder.</value>
+  </data>
+  <data name="IntervalListAdd" xml:space="preserve">
+    <value>Add an interval</value>
+  </data>
+  <data name="IntervalRemovedKind" xml:space="preserve">
+    <value>Removed kind of care</value>
+    <comment>Shown for an interval whose own kind of care has been removed.</comment>
+  </data>
+  <data name="IntervalOffCountsAsWatering" xml:space="preserve">
+    <value>Off: {0} now counts as a watering</value>
+    <comment>{0} is the name of one of your own kinds of care.</comment>
+  </data>
+  <data name="IntervalCoversAll" xml:space="preserve">
+    <value>All plants ({0})</value>
+    <comment>What an interval covers. {0} is a number of plants.</comment>
+  </data>
+  <data name="IntervalCoversARoom" xml:space="preserve">
+    <value>A room</value>
+  </data>
+  <data name="IntervalCoversRoom" xml:space="preserve">
+    <value>{0} ({1})</value>
+    <comment>A room an interval covers. {0} is the room, {1} a number of plants.</comment>
+  </data>
+  <data name="IntervalCoversTag" xml:space="preserve">
+    <value>{0} tag ({1})</value>
+    <comment>A tag an interval covers. {0} is the tag, {1} like "14 plants".</comment>
+  </data>
+  <data name="OwnKindName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Label of the name field for one of your own kinds of care.</comment>
+  </data>
+  <data name="OwnKindNamePlaceholder" xml:space="preserve">
+    <value>e.g. Misted</value>
+  </data>
+  <data name="OwnKindCountsAs" xml:space="preserve">
+    <value>Counts as</value>
+  </data>
+  <data name="OwnKindNeither" xml:space="preserve">
+    <value>Neither</value>
+    <comment>A choice for what an own kind of care counts as.</comment>
+  </data>
+  <data name="OwnKindWatering" xml:space="preserve">
+    <value>Watering</value>
+  </data>
+  <data name="OwnKindFeed" xml:space="preserve">
+    <value>Feed</value>
+  </data>
+  <data name="OwnKindCountsAsHint" xml:space="preserve">
+    <value>A watering counts for the watering reminder and last watered. A feed can have products and an EC or pH reading.</value>
+  </data>
+  <data name="OwnKindOnHistory" xml:space="preserve">
+    <value>Put it on the plant's history</value>
+  </data>
+  <data name="PhotoRowTakePhoto" xml:space="preserve">
+    <value>Take a photo</value>
+    <comment>Tooltip of the camera button.</comment>
+  </data>
+  <data name="PhotoRowTakePhotoOf" xml:space="preserve">
+    <value>Take a photo of {0}</value>
+    <comment>Read out for the camera button. {0} is the name of a plant.</comment>
+  </data>
+  <data name="PhotoRowLastPhoto" xml:space="preserve">
+    <value>last photo {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="PhotoRowNoPhotos" xml:space="preserve">
+    <value>no photos yet</value>
+  </data>
+  <data name="PhotoRowSaving" xml:space="preserve">
+    <value>Saving the photo…</value>
+  </data>
+  <data name="PhotoRowFailed" xml:space="preserve">
+    <value>Couldn't save the photo: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="WateringLearning" xml:space="preserve">
+    <value>Learning how often it needs water: {0} before it can say.</value>
+    <comment>{0} is a count like "2 more waterings".</comment>
+  </data>
+  <data name="WateringsMore_One" xml:space="preserve">
+    <value>{0} more watering</value>
+  </data>
+  <data name="WateringsMore_Other" xml:space="preserve">
+    <value>{0} more waterings</value>
+  </data>
+  <data name="WateringDays_One" xml:space="preserve">
+    <value>{0} day</value>
+  </data>
+  <data name="WateringDays_Other" xml:space="preserve">
+    <value>{0} days</value>
+  </data>
+  <data name="WateringWaterings_One" xml:space="preserve">
+    <value>{0} watering</value>
+  </data>
+  <data name="WateringWaterings_Other" xml:space="preserve">
+    <value>{0} waterings</value>
+  </data>
+  <data name="WateringRefills_One" xml:space="preserve">
+    <value>{0} refill</value>
+  </data>
+  <data name="WateringRefills_Other" xml:space="preserve">
+    <value>{0} refills</value>
+  </data>
+  <data name="WateringEveryDay" xml:space="preserve">
+    <value>every day</value>
+  </data>
+  <data name="WateringEveryDays" xml:space="preserve">
+    <value>every {0} days</value>
+  </data>
+  <data name="WateringSummaryMeter" xml:space="preserve">
+    <value>Usually dry about {0} after watering, learned from {1}.</value>
+    <comment>On a plant's page. {0} is a count of days, {1} a count of waterings.</comment>
+  </data>
+  <data name="WateringSummaryTop" xml:space="preserve">
+    <value>Usually watered about {0}, learned from {1}.</value>
+    <comment>{0} is how often, like "every 3 days", {1} a count of waterings.</comment>
+  </data>
+  <data name="WateringSummaryReservoir" xml:space="preserve">
+    <value>The reservoir usually lasts about {0}, learned from {1}.</value>
+    <comment>{0} is a count of days, {1} a count of refills.</comment>
+  </data>
+  <data name="WateringSummaryInWater" xml:space="preserve">
+    <value>The water is usually topped up about {0}, learned from {1}.</value>
+    <comment>{0} is how often, like "every 3 days", {1} a number.</comment>
+  </data>
+  <data name="WateringLonger" xml:space="preserve">
+    <value>Longer now the days are shorter.</value>
+  </data>
+  <data name="WateringRowTop" xml:space="preserve">
+    <value>Usually watered about {0}, it's been {1}</value>
+    <comment>Under a plant's name on Today. {0} is how often, {1} a count of days.</comment>
+  </data>
+  <data name="WateringRowReservoir" xml:space="preserve">
+    <value>The reservoir usually lasts about {0}, it's been {1}</value>
+    <comment>{0} and {1} are counts of days.</comment>
+  </data>
+  <data name="WateringRowInWater" xml:space="preserve">
+    <value>The water is usually topped up about {0}, it's been {1}</value>
+    <comment>{0} is how often, {1} a count of days.</comment>
+  </data>
+  <data name="WateringDryNow" xml:space="preserve">
+    <value>Probably dry by now, check with the meter</value>
+  </data>
+  <data name="WateringDryNowReading" xml:space="preserve">
+    <value>Probably dry by now, check with the meter, last reading {0}, {1}</value>
+    <comment>{0} is the reading from 0 to 10, {1} is when, like "3 days ago".</comment>
+  </data>
+  <data name="WateringDryTomorrow" xml:space="preserve">
+    <value>Probably dry tomorrow</value>
+  </data>
+  <data name="WateringDryTomorrowReading" xml:space="preserve">
+    <value>Probably dry tomorrow, last reading {0}, {1}</value>
+    <comment>{0} is the reading from 0 to 10, {1} is when.</comment>
+  </data>
+  <data name="WateringDryIn" xml:space="preserve">
+    <value>Probably dry in {0} days</value>
+    <comment>{0} is a number of 2 or more.</comment>
+  </data>
+  <data name="WateringDryInReading" xml:space="preserve">
+    <value>Probably dry in {0} days, last reading {1}, {2}</value>
+    <comment>{0} is a number of days, {1} the reading from 0 to 10, {2} is when.</comment>
+  </data>
+  <data name="WateringRefilledAgo" xml:space="preserve">
+    <value>refilled {0}</value>
+    <comment>When the plant last had water. {0} is when, like "3 days ago".</comment>
+  </data>
+  <data name="WateringToppedUpAgo" xml:space="preserve">
+    <value>topped up {0}</value>
+  </data>
+  <data name="WateringWateredAgo" xml:space="preserve">
+    <value>watered {0}</value>
+  </data>
+  <data name="WateringDoneWatered" xml:space="preserve">
+    <value>Watered</value>
+    <comment>The button on Today that says a plant was watered.</comment>
+  </data>
+  <data name="WateringDoneRefilled" xml:space="preserve">
+    <value>Refilled</value>
+  </data>
+  <data name="WateringDoneToppedUp" xml:space="preserve">
+    <value>Topped up</value>
+  </data>
+  <data name="WateringStillWet" xml:space="preserve">
+    <value>Still wet</value>
+    <comment>The button on Today that says the plant is still wet.</comment>
+  </data>
+  <data name="WateringNotYet" xml:space="preserve">
+    <value>Not yet</value>
+  </data>
+  <data name="NotifyTestTryLater" xml:space="preserve">
+    <value>Couldn't send a test right now. Try again in a moment.</value>
+  </data>
+  <data name="NotifyTestTurnOffAndOn" xml:space="preserve">
+    <value>Couldn't send a test. Turn notifications off and on again.</value>
+  </data>
+  <data name="NotifyTestSent" xml:space="preserve">
+    <value>Sent. It should arrive in a moment.</value>
+  </data>
+  <data name="BackToSettings" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Link back to the Settings page.</comment>
+  </data>
+  <data name="DayMonthLongFormat" xml:space="preserve">
+    <value>d MMMM</value>
+    <comment>A .NET date pattern, like 23 December.</comment>
+  </data>
+  <data name="DayMonthYearLongFormat" xml:space="preserve">
+    <value>d MMMM yyyy</value>
+    <comment>A .NET date pattern, like 23 December 2026.</comment>
+  </data>
+  <data name="KindsPageTitle" xml:space="preserve">
+    <value>Kinds of care · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="KindsTitle" xml:space="preserve">
+    <value>Kinds of care</value>
+    <comment>Heading of the page with your own kinds of care.</comment>
+  </data>
+  <data name="KindsHint" xml:space="preserve">
+    <value>The kinds of care you added yourself. They are in the care sheet next to the built-in ones. What a kind counts as decides what it reaches: a watering feeds the watering reminder, a feed can have products.</value>
+  </data>
+  <data name="KindsEmptyTitle" xml:space="preserve">
+    <value>No kinds of your own yet.</value>
+  </data>
+  <data name="KindsEmptyText" xml:space="preserve">
+    <value>Add a kind of care the app doesn't have, like misted, bottom watered or refilled the humidifier, and log it like the others.</value>
+  </data>
+  <data name="KindsAdd" xml:space="preserve">
+    <value>Add a kind of care</value>
+  </data>
+  <data name="KindsAddPlus" xml:space="preserve">
+    <value>+ Add a kind of care</value>
+  </data>
+  <data name="KindsYourKinds" xml:space="preserve">
+    <value>Your kinds</value>
+    <comment>Heading above the list of your own kinds of care.</comment>
+  </data>
+  <data name="KindsSheetAdd" xml:space="preserve">
+    <value>Add a kind of care</value>
+    <comment>Title of the sheet for a new kind of care.</comment>
+  </data>
+  <data name="KindsSheetEdit" xml:space="preserve">
+    <value>Edit kind of care</value>
+  </data>
+  <data name="KindsRemoveConfirm" xml:space="preserve">
+    <value>Remove {0}? Entries already logged keep their name.</value>
+    <comment>{0} is the name of the kind of care.</comment>
+  </data>
+  <data name="KindsAlsoChange_One" xml:space="preserve">
+    <value>Also change the {0} entry already logged</value>
+    <comment>A checkbox. {0} is a number of entries already logged with this kind.</comment>
+  </data>
+  <data name="KindsAlsoChange_Other" xml:space="preserve">
+    <value>Also change the {0} entries already logged</value>
+  </data>
+  <data name="KindsUseWatered" xml:space="preserve">
+    <value>Counts as a watering</value>
+  </data>
+  <data name="KindsUseFeed" xml:space="preserve">
+    <value>Counts as a feed</value>
+  </data>
+  <data name="KindsUseNeither" xml:space="preserve">
+    <value>Counts as neither</value>
+  </data>
+  <data name="KindsUseOnHistory" xml:space="preserve">
+    <value>{0} · On the history</value>
+    <comment>{0} is one of the lines above.</comment>
+  </data>
+  <data name="KindsAlreadyHave" xml:space="preserve">
+    <value>You already have {0}. Tap it in the list to change it.</value>
+    <comment>{0} is the name of the kind of care.</comment>
+  </data>
+  <data name="KindsChanged_One" xml:space="preserve">
+    <value>Changed {0} of the {1} entry. The rest have products or a feed on them, so they stay as they were.</value>
+    <comment>{0} is how many were changed, {1} how many were logged.</comment>
+  </data>
+  <data name="KindsChanged_Other" xml:space="preserve">
+    <value>Changed {0} of the {1} entries. The rest have products or a feed on them, so they stay as they were.</value>
+  </data>
+  <data name="AwayPageTitle" xml:space="preserve">
+    <value>Away and quiet time · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="AwayTitle" xml:space="preserve">
+    <value>Away and quiet time</value>
+    <comment>Heading of the Away and quiet time page.</comment>
+  </data>
+  <data name="AwayHint" xml:space="preserve">
+    <value>While you're away or taking a break, Today stops asking for anything, and the watering reminder doesn't learn from the gap.</value>
+  </data>
+  <data name="AwaySitterSheet" xml:space="preserve">
+    <value>Sheet for a plant-sitter</value>
+  </data>
+  <data name="AwaySitterSheetMeta" xml:space="preserve">
+    <value>What to check, and when, for whoever looks after your plants</value>
+  </data>
+  <data name="AwayEmpty" xml:space="preserve">
+    <value>Nothing planned. Add a trip, and Today goes quiet while you're gone and makes a sheet for whoever looks after your plants.</value>
+  </data>
+  <data name="AwayKindAway" xml:space="preserve">
+    <value>Away</value>
+    <comment>The name of a stretch of time away from home.</comment>
+  </data>
+  <data name="AwayKindQuiet" xml:space="preserve">
+    <value>Quiet time</value>
+    <comment>The name of a stretch of time as a break from the app.</comment>
+  </data>
+  <data name="AwayRange" xml:space="preserve">
+    <value>{0} to {1}</value>
+    <comment>The dates of a stretch. {0} and {1} are dates.</comment>
+  </data>
+  <data name="AwayOnNow" xml:space="preserve">
+    <value>· on now</value>
+  </data>
+  <data name="AwayComingUp" xml:space="preserve">
+    <value>· coming up</value>
+  </data>
+  <data name="AwayAfterBreak" xml:space="preserve">
+    <value>After a break</value>
+  </data>
+  <data name="AwayLookFirst" xml:space="preserve">
+    <value>Look at these first</value>
+  </data>
+  <data name="AwayAll" xml:space="preserve">
+    <value>All</value>
+    <comment>A choice for how many plants to look at first after a break, next to 3, 5 and 10.</comment>
+  </data>
+  <data name="AwayAfterBreakHint" xml:space="preserve">
+    <value>On the day you're back, Today lists this many plants and cuttings to look at before anything else.</value>
+  </data>
+  <data name="AwayAddLabel" xml:space="preserve">
+    <value>Add away or quiet time</value>
+    <comment>Name of the round add button.</comment>
+  </data>
+  <data name="AwayEditPageTitleNew" xml:space="preserve">
+    <value>Add away or quiet time · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="AwayEditPageTitle" xml:space="preserve">
+    <value>Away or quiet time · Stikling</value>
+  </data>
+  <data name="AwayEditTitleNew" xml:space="preserve">
+    <value>Add away or quiet time</value>
+    <comment>Heading of the page.</comment>
+  </data>
+  <data name="AwayEditTitle" xml:space="preserve">
+    <value>Away or quiet time</value>
+  </data>
+  <data name="AwayEditNotFound" xml:space="preserve">
+    <value>That one doesn't exist.</value>
+  </data>
+  <data name="AwayEditWhatItIs" xml:space="preserve">
+    <value>What it is</value>
+  </data>
+  <data name="AwayEditKind" xml:space="preserve">
+    <value>Kind</value>
+    <comment>Name of the choice between away and quiet time, read out by a screen reader.</comment>
+  </data>
+  <data name="AwayEditLeaving" xml:space="preserve">
+    <value>Leaving</value>
+  </data>
+  <data name="AwayEditBackOn" xml:space="preserve">
+    <value>Back on</value>
+  </data>
+  <data name="AwayEditAsksAgainFrom" xml:space="preserve">
+    <value>Today asks again from this day.</value>
+  </data>
+  <data name="AwayEditFrom" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="AwayEditFor" xml:space="preserve">
+    <value>For</value>
+    <comment>Label above the choice of how long quiet time lasts.</comment>
+  </data>
+  <data name="AwayEditUntil" xml:space="preserve">
+    <value>Until</value>
+  </data>
+  <data name="AwayEditAsksAgainOn" xml:space="preserve">
+    <value>Today asks again on {0}.</value>
+    <comment>{0} is a date like Tuesday 23 December.</comment>
+  </data>
+  <data name="AwayEditWeek" xml:space="preserve">
+    <value>1 week</value>
+  </data>
+  <data name="AwayEditTwoWeeks" xml:space="preserve">
+    <value>2 weeks</value>
+  </data>
+  <data name="AwayEditMonth" xml:space="preserve">
+    <value>A month</value>
+  </data>
+  <data name="AwayEditPickDate" xml:space="preserve">
+    <value>Pick a date</value>
+  </data>
+  <data name="AwayEditDeleteConfirm" xml:space="preserve">
+    <value>Delete this? Today goes back to asking for things on these days.</value>
+  </data>
+  <data name="AwayEditBackAfterLeave" xml:space="preserve">
+    <value>Back on has to be after you leave.</value>
+  </data>
+  <data name="AwayEditEndAfterStart" xml:space="preserve">
+    <value>The end has to be after the start.</value>
+  </data>
+  <data name="AwayEditSaveFailed" xml:space="preserve">
+    <value>Couldn't save: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="AwayEditDeleteFailed" xml:space="preserve">
+    <value>Couldn't delete: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="TodayRowPutOff" xml:space="preserve">
+    <value>Put off</value>
+    <comment>Title of the button on a row on Today that puts it off for a while, and the label above its choices.</comment>
+  </data>
+  <data name="TodayRowPutOffUntil" xml:space="preserve">
+    <value>Put off until</value>
+    <comment>Name of the group of choices for how long to put a row off, read out by a screen reader.</comment>
+  </data>
+  <data name="TodayRowTomorrow" xml:space="preserve">
+    <value>Tomorrow</value>
+    <comment>A choice for how long to put a row off.</comment>
+  </data>
+  <data name="TodayRowWeek" xml:space="preserve">
+    <value>A week</value>
+  </data>
+  <data name="TodayRowDays" xml:space="preserve">
+    <value>{0} days</value>
+    <comment>{0} is a number of days.</comment>
+  </data>
+  <data name="CardDoneFor" xml:space="preserve">
+    <value>Done for {0}</value>
+    <comment>{0} is a count like "3 plants".</comment>
+  </data>
+  <data name="CardUndo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="CardDoneForAll" xml:space="preserve">
+    <value>Done for all</value>
+  </data>
+  <data name="CardUndoFor" xml:space="preserve">
+    <value>Undo {0} for {1}</value>
+    <comment>Read out for a link. {0} is the kind of care, {1} the name of a plant.</comment>
+  </data>
+  <data name="CardDoneLabel" xml:space="preserve">
+    <value>{0} done</value>
+    <comment>Read out for the tick on a row. {0} is the kind of care, like Repot.</comment>
+  </data>
+  <data name="CardShowAll" xml:space="preserve">
+    <value>Show all {0}</value>
+    <comment>{0} is a number.</comment>
+  </data>
+  <data name="CardLast" xml:space="preserve">
+    <value>last {0}</value>
+    <comment>{0} is when, like "3 days ago".</comment>
+  </data>
+  <data name="CardFirstTime" xml:space="preserve">
+    <value>first time</value>
+  </data>
+  <data name="CardDueToday" xml:space="preserve">
+    <value>due today</value>
+  </data>
+  <data name="CardDueTomorrow" xml:space="preserve">
+    <value>due tomorrow</value>
+  </data>
+  <data name="CardDueIn" xml:space="preserve">
+    <value>due in {0} days</value>
+    <comment>{0} is a number of 2 or more.</comment>
+  </data>
+  <data name="TourRegion" xml:space="preserve">
+    <value>Tour</value>
+    <comment>Name of the card with the guided tour, read out by a screen reader.</comment>
+  </data>
+  <data name="TourCount" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>Which stop of the tour is showing. {0} is the number of the stop and {1} how many there are.</comment>
+  </data>
+  <data name="TourMore" xml:space="preserve">
+    <value>There's more when you want it: {0} for pots, mixes and feeds, {1}, and {2}.</value>
+    <comment>On the last card of the tour. {0}, {1} and {2} are links to the Supplies, Search and Help pages.</comment>
+  </data>
+  <data name="TourExampleStays" xml:space="preserve">
+    <value>The coleus stays as an example until you remove it.</value>
+  </data>
+  <data name="TourRemoveIt" xml:space="preserve">
+    <value>Remove it</value>
+  </data>
+  <data name="TourRemoveFailed" xml:space="preserve">
+    <value>Couldn't remove all of the example. Try Remove again.</value>
+  </data>
+  <data name="TourAddPlant" xml:space="preserve">
+    <value>Add a plant</value>
+  </data>
+  <data name="TourImport" xml:space="preserve">
+    <value>Import a spreadsheet</value>
+  </data>
+  <data name="TourSkip" xml:space="preserve">
+    <value>Skip tour</value>
+  </data>
+  <data name="TourNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="SitterPageTitle" xml:space="preserve">
+    <value>Sheet for a plant-sitter · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="SitterIntro" xml:space="preserve">
+    <value>A page to print, save as a PDF or share as text for whoever looks after your plants. It says when to check a plant, never when to water it.</value>
+  </data>
+  <data name="SitterOptionsLabel" xml:space="preserve">
+    <value>Sheet options</value>
+    <comment>Name of the group of options, read out by a screen reader.</comment>
+  </data>
+  <data name="SitterAway" xml:space="preserve">
+    <value>Away {0} to {1}</value>
+    <comment>{0} and {1} are dates like 23 December.</comment>
+  </data>
+  <data name="SitterChange" xml:space="preserve">
+    <value>Change</value>
+    <comment>Link to change the stretch of time away.</comment>
+  </data>
+  <data name="SitterAddAway" xml:space="preserve">
+    <value>Add when you're away to put visit dates on it.</value>
+  </data>
+  <data name="SitterLayout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="SitterLayoutLabels" xml:space="preserve">
+    <value>Plant labels</value>
+    <comment>A choice for how the sheet is laid out: a card for each plant.</comment>
+  </data>
+  <data name="SitterLayoutVisits" xml:space="preserve">
+    <value>Visits first</value>
+  </data>
+  <data name="SitterLayoutChart" xml:space="preserve">
+    <value>Chart</value>
+  </data>
+  <data name="SitterVisits" xml:space="preserve">
+    <value>Visits</value>
+    <comment>Label of the choice of how often the plants are visited, and the heading over the visit dates.</comment>
+  </data>
+  <data name="SitterVisitsEveryDay" xml:space="preserve">
+    <value>Every day</value>
+  </data>
+  <data name="SitterVisitsEveryTwo" xml:space="preserve">
+    <value>Every 2 days</value>
+  </data>
+  <data name="SitterVisitsEveryThree" xml:space="preserve">
+    <value>Every 3 days</value>
+  </data>
+  <data name="SitterVisitsTwiceAWeek" xml:space="preserve">
+    <value>Twice a week</value>
+  </data>
+  <data name="SitterVisitsWeekly" xml:space="preserve">
+    <value>Once a week</value>
+  </data>
+  <data name="SitterVisitsNone" xml:space="preserve">
+    <value>No visits</value>
+  </data>
+  <data name="SitterUsualWayLabel" xml:space="preserve">
+    <value>Usual way to water</value>
+  </data>
+  <data name="SitterOwnWords" xml:space="preserve">
+    <value>In your own words</value>
+  </data>
+  <data name="SitterOwnWordsLabel" xml:space="preserve">
+    <value>How to water a plant that needs it</value>
+  </data>
+  <data name="SitterHasMeter" xml:space="preserve">
+    <value>There's a moisture meter</value>
+  </data>
+  <data name="SitterMeterWhere" xml:space="preserve">
+    <value>Where is it?</value>
+  </data>
+  <data name="SitterShow" xml:space="preserve">
+    <value>Show</value>
+    <comment>Heading above the switches for what appears on the sheet.</comment>
+  </data>
+  <data name="SitterShowPhotos" xml:space="preserve">
+    <value>Photos</value>
+  </data>
+  <data name="SitterShowPlaces" xml:space="preserve">
+    <value>Where it is</value>
+  </data>
+  <data name="SitterShowHow" xml:space="preserve">
+    <value>How it's watered</value>
+  </data>
+  <data name="SitterShowPace" xml:space="preserve">
+    <value>How often</value>
+  </data>
+  <data name="SitterShowNotes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="SitterGeneralNote" xml:space="preserve">
+    <value>A note for whoever looks after them</value>
+  </data>
+  <data name="SitterListTitle" xml:space="preserve">
+    <value>Plants on the sheet</value>
+  </data>
+  <data name="SitterListSummary" xml:space="preserve">
+    <value>{0} of {1} on the sheet</value>
+    <comment>{0} is how many are on the sheet, {1} how many there are.</comment>
+  </data>
+  <data name="SitterListEmpty" xml:space="preserve">
+    <value>No plants or propagations yet.</value>
+  </data>
+  <data name="SitterWateredHow" xml:space="preserve">
+    <value>How {0} is watered</value>
+    <comment>Read out for a choice. {0} is the name of a plant.</comment>
+  </data>
+  <data name="SitterNotSaid" xml:space="preserve">
+    <value>Not said</value>
+  </data>
+  <data name="SitterDueBeforeYouGo" xml:space="preserve">
+    <value>Look at these before you go: {0}.</value>
+    <comment>{0} is a list of names.</comment>
+  </data>
+  <data name="SitterNoPace" xml:space="preserve">
+    <value>None of these have a watering pace yet, so they're on every visit. Logging waterings in the app teaches it.</value>
+  </data>
+  <data name="SitterCopied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="SitterShareFailed" xml:space="preserve">
+    <value>Couldn't share it</value>
+  </data>
+  <data name="SitterPrint" xml:space="preserve">
+    <value>Print or save as PDF</value>
+  </data>
+  <data name="SitterShare" xml:space="preserve">
+    <value>Share as text</value>
+  </data>
+  <data name="SitterPaperLabel" xml:space="preserve">
+    <value>The sheet</value>
+    <comment>Name of the printed sheet, read out by a screen reader.</comment>
+  </data>
+  <data name="SitterNoCheckNeeded" xml:space="preserve">
+    <value>(no check needed)</value>
+  </data>
+  <data name="SitterToCheck" xml:space="preserve">
+    <value>{0} to check</value>
+    <comment>Next to a visit date on the sheet. {0} is a number.</comment>
+  </data>
+  <data name="SitterNothingToCheck" xml:space="preserve">
+    <value>Nothing to check. Everything should be fine.</value>
+  </data>
+  <data name="SitterChartPlant" xml:space="preserve">
+    <value>Plant, in the order you walk past</value>
+    <comment>Column heading of the chart.</comment>
+  </data>
+  <data name="SitterChartHow" xml:space="preserve">
+    <value>How</value>
+    <comment>Column heading of the chart.</comment>
+  </data>
+  <data name="SitterChartCheckIt" xml:space="preserve">
+    <value>Check it</value>
+    <comment>Read out for a box in the chart.</comment>
+  </data>
+  <data name="SitterChartNoCheck" xml:space="preserve">
+    <value>No check needed</value>
+    <comment>Read out for a dot in the chart.</comment>
+  </data>
+  <data name="SitterChartKey" xml:space="preserve">
+    <value>A box means check it that day, and tick it once you have, watered or not. A dot means there's no need to check it that day.</value>
+  </data>
+  <data name="SitterChartWeekdayFormat" xml:space="preserve">
+    <value>ddd</value>
+    <comment>A .NET date pattern for the short weekday in the chart.</comment>
+  </data>
+  <data name="SitterChartDateFormat" xml:space="preserve">
+    <value>d MMM</value>
+    <comment>A .NET date pattern for the day under the weekday in the chart.</comment>
+  </data>
+  <data name="CareWhen" xml:space="preserve">
+    <value>When</value>
+    <comment>Label of the date field when logging care.</comment>
+  </data>
+  <data name="CareReading" xml:space="preserve">
+    <value>Reading (0 to 10)</value>
+    <comment>Label of the field for a moisture meter reading.</comment>
+  </data>
+  <data name="CareWhatWentIn" xml:space="preserve">
+    <value>What went in the water</value>
+  </data>
+  <data name="CareWater" xml:space="preserve">
+    <value>Water</value>
+    <comment>Label of the field for how much water was given.</comment>
+  </data>
+  <data name="CareOptional" xml:space="preserve">
+    <value>Optional</value>
+    <comment>Placeholder of a field that can be left empty.</comment>
+  </data>
+  <data name="CareEc" xml:space="preserve">
+    <value>EC (mS/cm)</value>
+  </data>
+  <data name="CarePh" xml:space="preserve">
+    <value>pH</value>
+  </data>
+  <data name="CareNotes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="EditBackToHistory" xml:space="preserve">
+    <value>Back to the history</value>
+    <comment>Button in the care sheet of a plant, back to the list of what was logged.</comment>
+  </data>
+  <data name="EditChangeHint" xml:space="preserve">
+    <value>To change what was done, delete this and log it again.</value>
+  </data>
+  <data name="EditDeleteConfirm" xml:space="preserve">
+    <value>Delete this entry? It's taken out of the history and the watering reminder.</value>
+  </data>
+  <data name="EditKeepIt" xml:space="preserve">
+    <value>Keep it</value>
+  </data>
+  <data name="SheetWhatYouDid" xml:space="preserve">
+    <value>What you did</value>
+  </data>
+  <data name="SheetYourOwn" xml:space="preserve">
+    <value>Your own</value>
+    <comment>Heading of the group of your own kinds of care in the list.</comment>
+  </data>
+  <data name="SheetAddYourOwn" xml:space="preserve">
+    <value>Add your own…</value>
+    <comment>The last choice in the list of kinds of care.</comment>
+  </data>
+  <data name="SheetFeed" xml:space="preserve">
+    <value>Feed</value>
+    <comment>Label above the feeds that can be picked.</comment>
+  </data>
+  <data name="SheetFeeds" xml:space="preserve">
+    <value>Feeds</value>
+    <comment>Name of the group of feeds, read out by a screen reader.</comment>
+  </data>
+  <data name="SheetAddEcPh" xml:space="preserve">
+    <value>Add EC and pH</value>
+  </data>
+  <data name="SheetNoProducts" xml:space="preserve">
+    <value>No products yet. You can add your fertilisers under Supplies, then Products.</value>
+  </data>
+  <data name="SheetProducts" xml:space="preserve">
+    <value>Products</value>
+    <comment>Name of the group of products, read out by a screen reader.</comment>
+  </data>
+  <data name="SheetLogIt" xml:space="preserve">
+    <value>Log it</value>
+  </data>
+  <data name="SheetLogFor" xml:space="preserve">
+    <value>Log for {0}</value>
+    <comment>{0} is a count like "3 plants".</comment>
+  </data>
+  <data name="SheetHintFertilised" xml:space="preserve">
+    <value>e.g. Half strength</value>
+    <comment>Placeholder of the notes field.</comment>
+  </data>
+  <data name="SheetHintRepotted" xml:space="preserve">
+    <value>e.g. Into the big terracotta</value>
+  </data>
+  <data name="SheetHintHarvested" xml:space="preserve">
+    <value>e.g. A good handful of basil</value>
+  </data>
+  <data name="IntervalEditPageTitleNew" xml:space="preserve">
+    <value>Add an interval · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="IntervalEditPageTitle" xml:space="preserve">
+    <value>Edit interval · Stikling</value>
+  </data>
+  <data name="IntervalEditTitle" xml:space="preserve">
+    <value>Edit interval</value>
+    <comment>Heading of the page for an existing care interval.</comment>
+  </data>
+  <data name="IntervalEditNotFound" xml:space="preserve">
+    <value>That interval doesn't exist.</value>
+  </data>
+  <data name="IntervalEditWhat" xml:space="preserve">
+    <value>What</value>
+    <comment>Heading of the part of the form where the kind of care is picked.</comment>
+  </data>
+  <data name="IntervalEditWhatComesBack" xml:space="preserve">
+    <value>What comes back</value>
+    <comment>Name of the group of kinds of care, read out by a screen reader.</comment>
+  </data>
+  <data name="IntervalEditNoWatering" xml:space="preserve">
+    <value>Watering isn't here. The watering reminder learns that from each plant.</value>
+  </data>
+  <data name="IntervalEditAnyFeed" xml:space="preserve">
+    <value>Any feed</value>
+  </data>
+  <data name="IntervalEditHowOften" xml:space="preserve">
+    <value>How often</value>
+    <comment>Heading of the part of the form where the repeat is set.</comment>
+  </data>
+  <data name="IntervalEditEvery" xml:space="preserve">
+    <value>Every</value>
+    <comment>Label of the number field in "Every 2 weeks".</comment>
+  </data>
+  <data name="IntervalEditUnit" xml:space="preserve">
+    <value>Unit</value>
+    <comment>Name of the choice between days, weeks, months and years.</comment>
+  </data>
+  <data name="IntervalEditUnitDays" xml:space="preserve">
+    <value>Days</value>
+  </data>
+  <data name="IntervalEditUnitWeeks" xml:space="preserve">
+    <value>Weeks</value>
+  </data>
+  <data name="IntervalEditUnitMonths" xml:space="preserve">
+    <value>Months</value>
+  </data>
+  <data name="IntervalEditUnitYears" xml:space="preserve">
+    <value>Years</value>
+  </data>
+  <data name="IntervalEditWhenInYear" xml:space="preserve">
+    <value>When in the year</value>
+  </data>
+  <data name="IntervalEditPartOfYear" xml:space="preserve">
+    <value>Only part of the year</value>
+  </data>
+  <data name="IntervalEditFrom" xml:space="preserve">
+    <value>From</value>
+    <comment>Label of the first month.</comment>
+  </data>
+  <data name="IntervalEditTo" xml:space="preserve">
+    <value>To</value>
+    <comment>Label of the last month.</comment>
+  </data>
+  <data name="IntervalEditMonths" xml:space="preserve">
+    <value>{0} to {1}</value>
+    <comment>The months it runs in. {0} and {1} are month names.</comment>
+  </data>
+  <data name="IntervalEditMonthsOverNewYear" xml:space="preserve">
+    <value>{0} to {1}, over the new year</value>
+    <comment>The months it runs in, when the last month is before the first. {0} and {1} are month names.</comment>
+  </data>
+  <data name="IntervalEditAllYear" xml:space="preserve">
+    <value>It comes back all year.</value>
+  </data>
+  <data name="IntervalEditCovers" xml:space="preserve">
+    <value>Covers</value>
+    <comment>Heading of the part of the form where the plants are picked.</comment>
+  </data>
+  <data name="IntervalEditWhatItCovers" xml:space="preserve">
+    <value>What it covers</value>
+    <comment>Name of the choice between picked plants, a room, a tag and all plants.</comment>
+  </data>
+  <data name="IntervalEditScopePick" xml:space="preserve">
+    <value>Pick plants</value>
+  </data>
+  <data name="IntervalEditScopeRoom" xml:space="preserve">
+    <value>A room</value>
+  </data>
+  <data name="IntervalEditScopeTag" xml:space="preserve">
+    <value>A tag</value>
+  </data>
+  <data name="IntervalEditScopeAll" xml:space="preserve">
+    <value>All plants</value>
+  </data>
+  <data name="IntervalEditRoom" xml:space="preserve">
+    <value>Room</value>
+  </data>
+  <data name="IntervalEditNoTags" xml:space="preserve">
+    <value>No plant has a tag yet. Add tags on a plant's page.</value>
+  </data>
+  <data name="IntervalEditTag" xml:space="preserve">
+    <value>Tag</value>
+    <comment>Name of the group of tags, read out by a screen reader.</comment>
+  </data>
+  <data name="IntervalEditEveryPlant" xml:space="preserve">
+    <value>Every plant in the collection, including ones added later.</value>
+  </data>
+  <data name="IntervalEditCoversNow" xml:space="preserve">
+    <value>{0} now</value>
+    <comment>{0} is a count like "3 plants".</comment>
+  </data>
+  <data name="IntervalEditFirstDue" xml:space="preserve">
+    <value>First due {0}</value>
+    <comment>{0} is a date like 1 November.</comment>
+  </data>
+  <data name="IntervalEditFirstDueSameMonth" xml:space="preserve">
+    <value>First due between {0} and {1}</value>
+    <comment>{0} is a day number, like 3. {1} is a date in the same month, like 5 November.</comment>
+  </data>
+  <data name="IntervalEditFirstDueRange" xml:space="preserve">
+    <value>First due between {0} and {1}</value>
+    <comment>{0} and {1} are dates like 3 November.</comment>
+  </data>
+  <data name="IntervalEditOff" xml:space="preserve">
+    <value>Off: {0} now counts as a watering. Watering stays with the watering reminder, so this interval does nothing. You can delete it.</value>
+    <comment>{0} is the name of one of your own kinds of care.</comment>
+  </data>
+  <data name="IntervalEditDeleteConfirm" xml:space="preserve">
+    <value>Delete this interval? Nothing logged is changed.</value>
+  </data>
+  <data name="IntervalEditAdd" xml:space="preserve">
+    <value>Add interval</value>
+  </data>
+  <data name="IntervalEditSaveFailed" xml:space="preserve">
+    <value>Couldn't save: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="IntervalEditDeleteFailed" xml:space="preserve">
+    <value>Couldn't delete: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="RoundPageTitle" xml:space="preserve">
+    <value>{0} · Stikling</value>
+    <comment>Title of the browser tab. {0} is the name of the round.</comment>
+  </data>
+  <data name="RoundBackToday" xml:space="preserve">
+    <value>Today</value>
+    <comment>Link back to Today.</comment>
+  </data>
+  <data name="RoundBackPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Link back to the Plants page.</comment>
+  </data>
+  <data name="RoundBackRooms" xml:space="preserve">
+    <value>Rooms and tags</value>
+    <comment>Link back to the Rooms and tags page.</comment>
+  </data>
+  <data name="RoundGoingRound" xml:space="preserve">
+    <value>Going round</value>
+    <comment>Heading when the room of a round is gone, and the title of a round without a name.</comment>
+  </data>
+  <data name="RoundRoomGone" xml:space="preserve">
+    <value>This room isn't there any more.</value>
+  </data>
+  <data name="RoundBackToTodayButton" xml:space="preserve">
+    <value>Back to Today</value>
+  </data>
+  <data name="RoundNothingBack" xml:space="preserve">
+    <value>Nothing is left to look at first.</value>
+  </data>
+  <data name="RoundNothingNext" xml:space="preserve">
+    <value>Nothing is waiting for the next round.</value>
+  </data>
+  <data name="RoundNothingDue" xml:space="preserve">
+    <value>Nothing is due for water right now.</value>
+  </data>
+  <data name="RoundNothingInRoom" xml:space="preserve">
+    <value>Nothing in {0} to go round yet. Plants and propagations you put here show up in its round.</value>
+    <comment>{0} is the name of a room.</comment>
+  </data>
+  <data name="RoundGoToPlants" xml:space="preserve">
+    <value>Go to Plants</value>
+  </data>
+  <data name="RoundTitleNext" xml:space="preserve">
+    <value>Next round</value>
+  </data>
+  <data name="RoundTitleDue" xml:space="preserve">
+    <value>Due for water</value>
+  </data>
+  <data name="RoundAllDone" xml:space="preserve">
+    <value>All done</value>
+  </data>
+  <data name="RoundRoomDone" xml:space="preserve">
+    <value>{0} done</value>
+    <comment>{0} is the name of a room.</comment>
+  </data>
+  <data name="RoundTileLookedOver" xml:space="preserve">
+    <value>Looked over</value>
+    <comment>A count of plants looked over, and the button that says a plant was looked over.</comment>
+  </data>
+  <data name="RoundTileSkipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="RoundGoThroughSkipped" xml:space="preserve">
+    <value>Go through the {0} skipped</value>
+  </data>
+  <data name="RoundReadings_One" xml:space="preserve">
+    <value>{0} reading</value>
+  </data>
+  <data name="RoundReadings_Other" xml:space="preserve">
+    <value>{0} readings</value>
+  </data>
+  <data name="RoundPhotos_One" xml:space="preserve">
+    <value>{0} photo</value>
+  </data>
+  <data name="RoundPhotos_Other" xml:space="preserve">
+    <value>{0} photos</value>
+  </data>
+  <data name="RoundPosition" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>Which card of the round is showing.</comment>
+  </data>
+  <data name="RoundProgress" xml:space="preserve">
+    <value>Progress through the round</value>
+  </data>
+  <data name="RoundPhotoOf" xml:space="preserve">
+    <value>Photo of {0}</value>
+    <comment>Alt text of the photo of a plant. {0} is its name.</comment>
+  </data>
+  <data name="RoundDormant" xml:space="preserve">
+    <value>Dormant</value>
+  </data>
+  <data name="RoundMeterReading" xml:space="preserve">
+    <value>Meter reading</value>
+  </data>
+  <data name="RoundPhoto" xml:space="preserve">
+    <value>Photo</value>
+  </data>
+  <data name="RoundPhotoAdded" xml:space="preserve">
+    <value>(added today)</value>
+  </data>
+  <data name="RoundSkip" xml:space="preserve">
+    <value>Skip</value>
+  </data>
+  <data name="RoundKeys" xml:space="preserve">
+    <value>Keys: 1 to 0 for a reading, W watered, L looked over, S skip, arrows to move</value>
+  </data>
+  <data name="RoundLastWatered" xml:space="preserve">
+    <value>watered {0}</value>
+    <comment>{0} is when, like "9 days ago".</comment>
+  </data>
+  <data name="RoundLastRefilled" xml:space="preserve">
+    <value>refilled {0}</value>
+  </data>
+  <data name="RoundLastToppedUp" xml:space="preserve">
+    <value>topped up {0}</value>
+  </data>
+  <data name="RoundNotWatered" xml:space="preserve">
+    <value>not watered yet</value>
+  </data>
+  <data name="RoundNotRefilled" xml:space="preserve">
+    <value>not refilled yet</value>
+  </data>
+  <data name="RoundNotToppedUp" xml:space="preserve">
+    <value>not topped up yet</value>
+  </data>
+  <data name="RoundReads" xml:space="preserve">
+    <value>reads {0}</value>
+    <comment>{0} is the meter reading from 0 to 10.</comment>
+  </data>
+  <data name="RoundLastReading" xml:space="preserve">
+    <value>last reading {0}, {1}</value>
+    <comment>{0} is the meter reading, {1} is when, like "3 days ago".</comment>
+  </data>
+  <data name="RoundSaveFailed" xml:space="preserve">
+    <value>Couldn't save that: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="WaterPageTitle" xml:space="preserve">
+    <value>Water plants · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="WaterTitle" xml:space="preserve">
+    <value>Water plants</value>
+    <comment>Heading of the watering screen.</comment>
+  </data>
+  <data name="WaterEmpty" xml:space="preserve">
+    <value>No plants yet. Add one on the Plants page.</value>
+  </data>
+  <data name="WaterLead" xml:space="preserve">
+    <value>Walk through every room, or pick the rooms in the order you walk them.</value>
+  </data>
+  <data name="WaterAllRooms" xml:space="preserve">
+    <value>All rooms</value>
+  </data>
+  <data name="WaterPickRooms" xml:space="preserve">
+    <value>Or pick rooms</value>
+  </data>
+  <data name="WaterRooms" xml:space="preserve">
+    <value>Rooms</value>
+    <comment>Name of the group of rooms, read out by a screen reader.</comment>
+  </data>
+  <data name="WaterNumber" xml:space="preserve">
+    <value>Number {0}:</value>
+    <comment>Read out before the name of a room that was picked. {0} is its place in the order.</comment>
+  </data>
+  <data name="WaterStart" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="WaterDoneHeading" xml:space="preserve">
+    <value>Done for today</value>
+  </data>
+  <data name="WaterNothingWatered" xml:space="preserve">
+    <value>Nothing watered this time.</value>
+  </data>
+  <data name="WaterDoneLine" xml:space="preserve">
+    <value>{0}, {1}</value>
+    <comment>A line of the summary. {0} is the name of a plant, {1} what was done, like "watered with Aroid feed".</comment>
+  </data>
+  <data name="WaterBackTo" xml:space="preserve">
+    <value>Back to {0}</value>
+    <comment>{0} is the place the screen was opened from, like Today or Plants.</comment>
+  </data>
+  <data name="WaterKeepGoing" xml:space="preserve">
+    <value>Keep going</value>
+  </data>
+  <data name="WaterChangeRooms" xml:space="preserve">
+    <value>Change rooms</value>
+  </data>
+  <data name="WaterHowYouCheck" xml:space="preserve">
+    <value>How you check</value>
+    <comment>Name of the choice between the meter and feeling the soil, read out by a screen reader.</comment>
+  </data>
+  <data name="WaterMeter" xml:space="preserve">
+    <value>Meter</value>
+  </data>
+  <data name="WaterFeelSoil" xml:space="preserve">
+    <value>Feel the soil</value>
+  </data>
+  <data name="WaterLeadMeter" xml:space="preserve">
+    <value>Tap what the meter reads, from 0 for dry to 10 for wet.</value>
+  </data>
+  <data name="WaterLeadSoil" xml:space="preserve">
+    <value>Push a finger a few centimetres into the soil. Tap Dry or Still damp.</value>
+  </data>
+  <data name="WaterRoundFeed" xml:space="preserve">
+    <value>Feed this round</value>
+  </data>
+  <data name="WaterNoFeed" xml:space="preserve">
+    <value>No feed</value>
+  </data>
+  <data name="WaterRoundFeedHelp" xml:space="preserve">
+    <value>Goes with every watering you log here, unless a plant has its own feed due.</value>
+  </data>
+  <data name="WaterNoPlants" xml:space="preserve">
+    <value>No plants here.</value>
+  </data>
+  <data name="WaterTopUp" xml:space="preserve">
+    <value>Top up</value>
+    <comment>Heading above the plants in water or on a reservoir.</comment>
+  </data>
+  <data name="WaterCuttings" xml:space="preserve">
+    <value>Cuttings</value>
+  </data>
+  <data name="WaterProgress" xml:space="preserve">
+    <value>Progress</value>
+    <comment>Name of the bar with the progress, read out by a screen reader.</comment>
+  </data>
+  <data name="WaterSaveFailed" xml:space="preserve">
+    <value>Couldn't save that. Try again.</value>
+  </data>
+  <data name="WaterReads" xml:space="preserve">
+    <value>{0}: reads {1}</value>
+    <comment>Read out after a meter reading. {0} is the name of a plant, {1} the reading.</comment>
+  </data>
+  <data name="WaterDryAnnounce" xml:space="preserve">
+    <value>{0}: dry</value>
+  </data>
+  <data name="WaterDampAnnounce" xml:space="preserve">
+    <value>{0}: still damp</value>
+  </data>
+  <data name="WaterWateredAnnounce" xml:space="preserve">
+    <value>{0} {1}</value>
+    <comment>Read out after a watering. {0} is the name of a plant, {1} what was done, like "watered".</comment>
+  </data>
+  <data name="WaterUndone" xml:space="preserve">
+    <value>{0}: undone</value>
+  </data>
+  <data name="WaterCuttingWatered" xml:space="preserve">
+    <value>{0} watered</value>
+  </data>
+  <data name="WaterMetaDryReading" xml:space="preserve">
+    <value>reads {0}, dry by your reading</value>
+    <comment>{0} is the meter reading.</comment>
+  </data>
+  <data name="WaterMetaDryTouch" xml:space="preserve">
+    <value>dry to the touch</value>
+  </data>
+  <data name="WaterMetaDampReading" xml:space="preserve">
+    <value>reads {0}, still damp</value>
+  </data>
+  <data name="WaterMetaDamp" xml:space="preserve">
+    <value>still damp, check again later</value>
+  </data>
+  <data name="WaterNothingToCheck" xml:space="preserve">
+    <value>Nothing to check · {0} watered</value>
+    <comment>At the bottom of the screen. {0} is a number.</comment>
+  </data>
+  <data name="WaterAllChecked" xml:space="preserve">
+    <value>All checked today · {0} watered</value>
+  </data>
+  <data name="WaterChecked" xml:space="preserve">
+    <value>{0} of {1} checked · {2} watered</value>
+    <comment>{0} and {2} are numbers of plants, {1} the total.</comment>
+  </data>
+  <data name="WaterDoneWithFeed" xml:space="preserve">
+    <value>{0} with {1}</value>
+    <comment>What was done and the feed it went with. {0} is like "Watered", {1} is the name of a feed.</comment>
+  </data>
+  <data name="WaterCheckWater" xml:space="preserve">
+    <value>Check the water</value>
+  </data>
+  <data name="WaterCheckReservoir" xml:space="preserve">
+    <value>Check the reservoir</value>
+  </data>
+  <data name="WaterMeterFor" xml:space="preserve">
+    <value>Meter reading for {0}</value>
+    <comment>Name of a group of buttons, read out by a screen reader. {0} is the name of a plant.</comment>
+  </data>
+  <data name="WaterSoilOf" xml:space="preserve">
+    <value>Soil of {0}</value>
+  </data>
+  <data name="WaterDry" xml:space="preserve">
+    <value>Dry</value>
+    <comment>A button for soil that is dry.</comment>
+  </data>
+  <data name="WaterStillDamp" xml:space="preserve">
+    <value>Still damp</value>
+    <comment>A button for soil that is still damp.</comment>
+  </data>
+  <data name="WaterWateredAnyway" xml:space="preserve">
+    <value>Watered anyway</value>
+  </data>
+  <data name="WaterUndoWatered" xml:space="preserve">
+    <value>Undo watered for {0}</value>
+    <comment>{0} is the name of a cutting.</comment>
+  </data>
+  <data name="WaterAddFeedFor" xml:space="preserve">
+    <value>Add a feed for {0}</value>
+    <comment>{0} is the name of a plant.</comment>
+  </data>
+  <data name="WaterChangeFeedFor" xml:space="preserve">
+    <value>Change the feed for {0}</value>
+  </data>
+  <data name="WaterAddFeed" xml:space="preserve">
+    <value>add feed</value>
+  </data>
+  <data name="WaterChange" xml:space="preserve">
+    <value>change</value>
+  </data>
+  <data name="TodayLongDayFormat" xml:space="preserve">
+    <value>dddd d MMMM</value>
+    <comment>A .NET date pattern, like Tuesday 23 December. Text in quotes is kept as it is.</comment>
+  </data>
+  <data name="TodayShortDayFormat" xml:space="preserve">
+    <value>ddd d MMM</value>
+    <comment>A .NET date pattern, like Tue 23 Dec.</comment>
+  </data>
+  <data name="TodayMonthFormat" xml:space="preserve">
+    <value>MMMM</value>
+    <comment>A .NET date pattern for the name of a month.</comment>
+  </data>
+  <data name="TodayPageTitle" xml:space="preserve">
+    <value>Today · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="TodayTitle" xml:space="preserve">
+    <value>Today</value>
+    <comment>Heading of the Today page.</comment>
+  </data>
+  <data name="TodayFirstTitle" xml:space="preserve">
+    <value>Start with a plant</value>
+  </data>
+  <data name="TodayFirstText" xml:space="preserve">
+    <value>Stikling keeps track of your plants and the cuttings you grow from them, with notes and photos as they go. Add a plant you have, and this page fills up with what needs doing.</value>
+  </data>
+  <data name="TodayFirstAccount" xml:space="preserve">
+    <value>Everything stays on this device, and you don't need an account. Sign in from Settings if you want your plants on your other devices too.</value>
+  </data>
+  <data name="TodayFirstNoAccount" xml:space="preserve">
+    <value>Everything stays on this device. There is no account to make.</value>
+  </data>
+  <data name="TodayFirstPropagation" xml:space="preserve">
+    <value>Start a propagation</value>
+  </data>
+  <data name="TodayFirstLoading" xml:space="preserve">
+    <value>Loading the example…</value>
+  </data>
+  <data name="TodayFirstMore" xml:space="preserve">
+    <value>Have plants already? {0}, {1}, or {2}.</value>
+    <comment>{0}, {1} and {2} are links: add several at once, import a spreadsheet, start from old photos.</comment>
+  </data>
+  <data name="TodayFirstQuickAdd" xml:space="preserve">
+    <value>Add several at once</value>
+  </data>
+  <data name="TodayFirstImport" xml:space="preserve">
+    <value>import a spreadsheet</value>
+  </data>
+  <data name="TodayFirstPhotos" xml:space="preserve">
+    <value>start from old photos</value>
+  </data>
+  <data name="TodayFirstHelp" xml:space="preserve">
+    <value>How Stikling works</value>
+  </data>
+  <data name="TodayPropagationsGoing_One" xml:space="preserve">
+    <value>{0} propagation going</value>
+    <comment>Under the heading of Today. {0} is a number.</comment>
+  </data>
+  <data name="TodayPropagationsGoing_Other" xml:space="preserve">
+    <value>{0} propagations going</value>
+  </data>
+  <data name="TodayPottedUp" xml:space="preserve">
+    <value>{0} of {1} potted up this month</value>
+    <comment>{0} and {1} are numbers.</comment>
+  </data>
+  <data name="TodayExampleRemoveConfirm" xml:space="preserve">
+    <value>Remove the example plants, their cuttings, and any notes, photos and care added to them? Plants you made from them stay.</value>
+  </data>
+  <data name="TodayExampleIs" xml:space="preserve">
+    <value>{0} and its cuttings are an example.</value>
+    <comment>{0} is the name of the example plant.</comment>
+  </data>
+  <data name="TodayAwayFrom" xml:space="preserve">
+    <value>Away from {0}.</value>
+    <comment>Bold text on Today. {0} is a date like Tuesday 23 December.</comment>
+  </data>
+  <data name="TodayAwayLeaveSheet" xml:space="preserve">
+    <value>Leave whoever looks after them a sheet of what to check and when.</value>
+  </data>
+  <data name="TodaySitterSheet" xml:space="preserve">
+    <value>Sitter sheet</value>
+    <comment>Button and link to the sheet for a plant-sitter.</comment>
+  </data>
+  <data name="TodayYoureAway" xml:space="preserve">
+    <value>You're away</value>
+  </data>
+  <data name="TodayDaysToGo_One" xml:space="preserve">
+    <value>{0} day to go</value>
+    <comment>{0} is a number of days.</comment>
+  </data>
+  <data name="TodayDaysToGo_Other" xml:space="preserve">
+    <value>{0} days to go</value>
+  </data>
+  <data name="TodayDotsKey" xml:space="preserve">
+    <value>Dots are the sitter's visits</value>
+  </data>
+  <data name="TodayBack" xml:space="preserve">
+    <value>back</value>
+    <comment>Before the date you are back, in the bar of the away block.</comment>
+  </data>
+  <data name="TodayUntil" xml:space="preserve">
+    <value>until</value>
+    <comment>Before the date quiet time ends, in the bar of the away block.</comment>
+  </data>
+  <data name="TodayNothingAsksAway" xml:space="preserve">
+    <value>Nothing here asks for anything until you're back.</value>
+  </data>
+  <data name="TodayNothingAsksQuiet" xml:space="preserve">
+    <value>Nothing here asks for anything until {0}.</value>
+    <comment>{0} is a date like Tuesday 23 December.</comment>
+  </data>
+  <data name="TodayImBack" xml:space="preserve">
+    <value>I'm back</value>
+  </data>
+  <data name="TodayBarLabel" xml:space="preserve">
+    <value>{0} to {1}, today is day {2} of {3}</value>
+    <comment>Read out for the bar that shows how far into the time away it is. {0} and {1} are dates, {2} and {3} numbers.</comment>
+  </data>
+  <data name="TodayBarLabelVisits" xml:space="preserve">
+    <value>{0} to {1}, today is day {2} of {3}, {4}</value>
+    <comment>As above, with a count of the sitter's visits in {4}.</comment>
+  </data>
+  <data name="TodayVisits_One" xml:space="preserve">
+    <value>{0} visit</value>
+  </data>
+  <data name="TodayVisits_Other" xml:space="preserve">
+    <value>{0} visits</value>
+  </data>
+  <data name="TodayWelcomeBack" xml:space="preserve">
+    <value>Welcome back</value>
+  </data>
+  <data name="TodayBackAway_One" xml:space="preserve">
+    <value>{0} day away.</value>
+  </data>
+  <data name="TodayBackAway_Other" xml:space="preserve">
+    <value>{0} days away.</value>
+  </data>
+  <data name="TodayBackQuiet_One" xml:space="preserve">
+    <value>{0} day of quiet time.</value>
+  </data>
+  <data name="TodayBackQuiet_Other" xml:space="preserve">
+    <value>{0} days of quiet time.</value>
+  </data>
+  <data name="TodayBackLead" xml:space="preserve">
+    <value>These first, in this order. The rest of Today comes back once you're through.</value>
+  </data>
+  <data name="TodayLookedAtIt" xml:space="preserve">
+    <value>Looked at it</value>
+    <comment>Title of the tick on a row of the list after a break.</comment>
+  </data>
+  <data name="TodayGoRoundThese" xml:space="preserve">
+    <value>Go round these</value>
+  </data>
+  <data name="TodayDoneWithList" xml:space="preserve">
+    <value>Done with this list</value>
+  </data>
+  <data name="TodayBackCase" xml:space="preserve">
+    <value>case open since {0}</value>
+    <comment>{0} is a date like 23 December.</comment>
+  </data>
+  <data name="TodayBackInWater_One" xml:space="preserve">
+    <value>In water · {0} day since you looked</value>
+  </data>
+  <data name="TodayBackInWater_Other" xml:space="preserve">
+    <value>In water · {0} days since you looked</value>
+  </data>
+  <data name="TodayBackPace" xml:space="preserve">
+    <value>Usually every {0} · it's been {1}</value>
+    <comment>{0} and {1} are counts of days.</comment>
+  </data>
+  <data name="TodayBackFlagged" xml:space="preserve">
+    <value>Flagged: {0} · {1}</value>
+    <comment>{0} is the reason typed, {1} is when, like "3 days ago".</comment>
+  </data>
+  <data name="TodayDays_One" xml:space="preserve">
+    <value>{0} day</value>
+  </data>
+  <data name="TodayDays_Other" xml:space="preserve">
+    <value>{0} days</value>
+  </data>
+  <data name="TodayWeeks_One" xml:space="preserve">
+    <value>{0} week</value>
+  </data>
+  <data name="TodayWeeks_Other" xml:space="preserve">
+    <value>{0} weeks</value>
+  </data>
+  <data name="TodayBackUp" xml:space="preserve">
+    <value>Back up</value>
+    <comment>Button on the reminder to take a backup.</comment>
+  </data>
+  <data name="TodayNoBackup" xml:space="preserve">
+    <value>No backup yet. Your plants live on this device only.</value>
+  </data>
+  <data name="TodayLastBackup" xml:space="preserve">
+    <value>Last backup was {0}.</value>
+    <comment>{0} is when, like "31 days ago".</comment>
+  </data>
+  <data name="TodayRound" xml:space="preserve">
+    <value>Today's round</value>
+  </data>
+  <data name="TodaySkipToday" xml:space="preserve">
+    <value>Skip today</value>
+  </data>
+  <data name="TodayPlants_One" xml:space="preserve">
+    <value>{0} plant</value>
+  </data>
+  <data name="TodayPlants_Other" xml:space="preserve">
+    <value>{0} plants</value>
+  </data>
+  <data name="TodayPropagations_One" xml:space="preserve">
+    <value>{0} propagation</value>
+  </data>
+  <data name="TodayPropagations_Other" xml:space="preserve">
+    <value>{0} propagations</value>
+  </data>
+  <data name="TodayRoundDue" xml:space="preserve">
+    <value>{0} due for water</value>
+    <comment>{0} is a number of plants.</comment>
+  </data>
+  <data name="TodayStep" xml:space="preserve">
+    <value>Step {0} of {1}</value>
+  </data>
+  <data name="TodayReadyToResolve" xml:space="preserve">
+    <value>Ready to resolve</value>
+  </data>
+  <data name="TodayResolve" xml:space="preserve">
+    <value>Resolve</value>
+  </data>
+  <data name="TodayCleanFor_One" xml:space="preserve">
+    <value>Clean for {0} week</value>
+  </data>
+  <data name="TodayCleanFor_Other" xml:space="preserve">
+    <value>Clean for {0} weeks</value>
+  </data>
+  <data name="TodayPlanDone" xml:space="preserve">
+    <value>Plan done</value>
+  </data>
+  <data name="TodayStartWatching" xml:space="preserve">
+    <value>Start watching</value>
+  </data>
+  <data name="TodayKeepTreating" xml:space="preserve">
+    <value>Keep treating</value>
+  </data>
+  <data name="TodayDoneWith" xml:space="preserve">
+    <value>Done with {0}</value>
+    <comment>{0} is the name of the treatment plan.</comment>
+  </data>
+  <data name="TodayNeedsAttention" xml:space="preserve">
+    <value>Needs attention</value>
+  </data>
+  <data name="TodayLookAgain" xml:space="preserve">
+    <value>Look again</value>
+  </data>
+  <data name="TodayHowDoesItLook" xml:space="preserve">
+    <value>How does {0} look?</value>
+    <comment>Name of the buttons Better, Same and Worse. {0} is the name of a plant.</comment>
+  </data>
+  <data name="TodayTrendSame" xml:space="preserve">
+    <value>Same</value>
+  </data>
+  <data name="TodayHowDoesItLookTitle" xml:space="preserve">
+    <value>How does it look?</value>
+    <comment>Title of the sheet.</comment>
+  </data>
+  <data name="TodayQuarantineUp" xml:space="preserve">
+    <value>Quarantine is up</value>
+  </data>
+  <data name="TodayQuarantineDone" xml:space="preserve">
+    <value>Checked, let it out</value>
+  </data>
+  <data name="TodayQuarantineMeta" xml:space="preserve">
+    <value>Time to check it and let it out · in quarantine {0}</value>
+    <comment>{0} is a count of days.</comment>
+  </data>
+  <data name="TodayMovingToSemiHydro" xml:space="preserve">
+    <value>Moving to semi-hydro</value>
+  </data>
+  <data name="TodayLookedStillWaiting" xml:space="preserve">
+    <value>Looked, still waiting</value>
+  </data>
+  <data name="TodayNothingNew" xml:space="preserve">
+    <value>Nothing new for {0}</value>
+    <comment>{0} is a count of weeks.</comment>
+  </data>
+  <data name="TodayGoneDormant" xml:space="preserve">
+    <value>Gone dormant?</value>
+  </data>
+  <data name="TodayYesDormant" xml:space="preserve">
+    <value>Yes, it's dormant</value>
+  </data>
+  <data name="TodayNotThisYear" xml:space="preserve">
+    <value>Not this year</value>
+  </data>
+  <data name="TodayRestsWinter" xml:space="preserve">
+    <value>Usually rests in winter</value>
+  </data>
+  <data name="TodayRestsSummer" xml:space="preserve">
+    <value>Usually rests in summer</value>
+  </data>
+  <data name="TodayEmptyOuterPot" xml:space="preserve">
+    <value>Empty the outer pot</value>
+  </data>
+  <data name="TodayAllEmptied" xml:space="preserve">
+    <value>All emptied</value>
+  </data>
+  <data name="TodayEmptied" xml:space="preserve">
+    <value>Emptied</value>
+  </data>
+  <data name="TodayWater" xml:space="preserve">
+    <value>Water</value>
+    <comment>Heading of the watering section on Today.</comment>
+  </data>
+  <data name="TodayGoRoundNow" xml:space="preserve">
+    <value>Go round now</value>
+  </data>
+  <data name="TodayHowToTell" xml:space="preserve">
+    <value>How to tell if it needs water</value>
+  </data>
+  <data name="TodayHintFinger" xml:space="preserve">
+    <value>Push a finger 2 to 3 cm into the soil and feel whether it's dry. Plants that like to dry out may want it drier further down.</value>
+  </data>
+  <data name="TodayHintSkewer" xml:space="preserve">
+    <value>For a deep pot, push in a wooden skewer and pull it out. Soil sticking to it means it's still wet.</value>
+  </data>
+  <data name="TodayHintLift" xml:space="preserve">
+    <value>Lift the pot. A dry one feels much lighter than right after watering.</value>
+  </data>
+  <data name="TodayHintMeter" xml:space="preserve">
+    <value>A moisture meter gives a number. Log the reading with Still wet, and the reminder learns from it.</value>
+  </data>
+  <data name="TodayComingUp" xml:space="preserve">
+    <value>Coming up</value>
+  </data>
+  <data name="TodayCare" xml:space="preserve">
+    <value>Care</value>
+    <comment>Heading of the section for care from intervals on Today.</comment>
+  </data>
+  <data name="TodayNoMeter" xml:space="preserve">
+    <value>No meter</value>
+    <comment>The last choice after the numbers 0 to 10, for someone with no moisture meter.</comment>
+  </data>
+  <data name="TodayTomorrow" xml:space="preserve">
+    <value>tomorrow</value>
+    <comment>Used in "Next round tomorrow".</comment>
+  </data>
+  <data name="TodayNextRoundPlants_One" xml:space="preserve">
+    <value>Next round {0} · {1} plant to check</value>
+    <comment>{0} is tomorrow or the name of a weekday, {1} a number.</comment>
+  </data>
+  <data name="TodayNextRoundPlants_Other" xml:space="preserve">
+    <value>Next round {0} · {1} plants to check</value>
+  </data>
+  <data name="TodayNextRoundProps_One" xml:space="preserve">
+    <value>Next round {0} · {1} propagation to look at</value>
+  </data>
+  <data name="TodayNextRoundProps_Other" xml:space="preserve">
+    <value>Next round {0} · {1} propagations to look at</value>
+  </data>
+  <data name="TodayCareLogFailed" xml:space="preserve">
+    <value>Couldn't log it: {0}</value>
+  </data>
+  <data name="TodayCareUndoFailed" xml:space="preserve">
+    <value>Couldn't undo it: {0}</value>
+  </data>
+  <data name="TodayMemoryAlt" xml:space="preserve">
+    <value>{0} on {1}</value>
+    <comment>Alt text of a photo. {0} is the name of a plant, {1} a date.</comment>
+  </data>
+  <data name="TodayBeforeAfter" xml:space="preserve">
+    <value>Before and after</value>
+  </data>
+  <data name="TodayNotesComingBack" xml:space="preserve">
+    <value>Notes coming back</value>
+  </data>
+  <data name="TodayWritten" xml:space="preserve">
+    <value>Written {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="TodayAgainNextYear" xml:space="preserve">
+    <value>Again next year</value>
+  </data>
+  <data name="TodayYear" xml:space="preserve">
+    <value>Your {0} with your plants</value>
+    <comment>{0} is a year like 2026.</comment>
+  </data>
+  <data name="TodaySeeYear" xml:space="preserve">
+    <value>See your year</value>
+  </data>
+  <data name="TodayHideYear" xml:space="preserve">
+    <value>Hide for this season</value>
+  </data>
+  <data name="TodayWorthALook" xml:space="preserve">
+    <value>Worth a look</value>
+  </data>
+  <data name="TodayNoPropagations" xml:space="preserve">
+    <value>No propagations on the go. Open a plant and tap Propagate to start one.</value>
+  </data>
+  <data name="TodayNothingElse" xml:space="preserve">
+    <value>Nothing else waiting. The ones you put off come back by themselves.</value>
+  </data>
+  <data name="TodayNothingWaiting" xml:space="preserve">
+    <value>Nothing waiting. Every propagation has been looked at in the last week.</value>
+  </data>
+  <data name="TodayPhotos" xml:space="preserve">
+    <value>Photos</value>
+  </data>
+  <data name="TodaySkipMonth" xml:space="preserve">
+    <value>Skip this month</value>
+  </data>
+  <data name="TodayPhotosToTake_One" xml:space="preserve">
+    <value>{0} photo to take</value>
+  </data>
+  <data name="TodayPhotosToTake_Other" xml:space="preserve">
+    <value>{0} photos to take</value>
+  </data>
+  <data name="TodayPhotosFor" xml:space="preserve">
+    <value>For {0}</value>
+    <comment>{0} is the name of a month.</comment>
+  </data>
+  <data name="TodayLately" xml:space="preserve">
+    <value>Lately</value>
+  </data>
+  <data name="TodayLatelyEmpty" xml:space="preserve">
+    <value>Nothing written down in the last 30 days. Notes and photos you add to a plant or propagation show up here.</value>
+  </data>
+  <data name="TodayLastSeen" xml:space="preserve">
+    <value>last seen {0}</value>
+    <comment>{0} is when, like "3 days ago".</comment>
+  </data>
+  <data name="TodayNoNotes" xml:space="preserve">
+    <value>no notes yet</value>
+  </data>
+  <data name="TodayYearSoFar" xml:space="preserve">
+    <value>Your year so far</value>
+  </data>
+  <data name="TodayPhotoAdded_One" xml:space="preserve">
+    <value>Photo added</value>
+  </data>
+  <data name="TodayPhotoAdded_Other" xml:space="preserve">
+    <value>{0} photos added</value>
+  </data>
+  <data name="TodayDayToday" xml:space="preserve">
+    <value>today</value>
+  </data>
+  <data name="TodayDayYesterday" xml:space="preserve">
+    <value>yesterday</value>
+  </data>
+</root>

@@ -1,4 +1,5 @@
 using Stikling.Core.Examples;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Tour;
 
@@ -14,22 +15,22 @@ public sealed record TourStep(string Route, string? Target, string Title, string
 /// </summary>
 public sealed class GuidedTour
 {
-    public static readonly IReadOnlyList<TourStep> Steps =
+    public static IReadOnlyList<TourStep> Steps =>
     [
-        new("", "today", "Today",
-            "What needs doing turns up here. The coleus and its cuttings are an example, so try anything on them."),
-        new($"plants/{ExampleFamily.MotherId}", "dock", "A plant's page",
-            "Each plant opens on its photos and notes, newest first. The marked buttons add a photo, a note or care."),
-        new($"propagations/{ExampleFamily.CurrentCuttingId}", "stage", "A cutting",
-            "A cutting you're rooting is a propagation. It keeps where it came from, what it's rooting in and how many days it has taken. When it has rooted, it becomes a plant of its own."),
-        new("water", "water", "Watering",
-            "Tick what you watered as you go round. Stikling learns from what you log and asks you to check a plant when it's probably dry."),
-        new("backup", "spreadsheet", "Your data",
-            "Everything is kept on this device, and you don't need an account. Save a backup or a spreadsheet whenever you like, or import yours to bring your plants in.")
+        new("", "today", Strings.Care.TourTodayTitle,
+            Strings.Care.TourTodayText),
+        new($"plants/{ExampleFamily.MotherId}", "dock", Strings.Care.TourPlantTitle,
+            Strings.Care.TourPlantText),
+        new($"propagations/{ExampleFamily.CurrentCuttingId}", "stage", Strings.Care.TourCuttingTitle,
+            Strings.Care.TourCuttingText),
+        new("water", "water", Strings.Care.TourWateringTitle,
+            Strings.Care.TourWateringText),
+        new("backup", "spreadsheet", Strings.Care.TourDataTitle,
+            Strings.Care.TourDataText)
     ];
 
     /// <summary>The card after the last stop. It has no count and marks nothing.</summary>
-    public static readonly TourStep Closing = new("", null, "That's the tour", "");
+    public static TourStep Closing => new("", null, Strings.Care.TourClosingTitle, "");
 
     private int index;
 
