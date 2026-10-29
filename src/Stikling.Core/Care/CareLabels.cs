@@ -15,7 +15,11 @@ public static class CareLabels
     /// entry, else the built-in label. An entry with an own kind is never called Rotated, which is
     /// only what it is stored as.
     /// </summary>
-    public static string For(CareLog entry, IReadOnlyDictionary<Guid, OwnCareKind>? ownKinds, Func<Enum, string> label)
+    public static string For(CareLog entry, IReadOnlyDictionary<Guid, OwnCareKind>? ownKinds, Func<Enum, string> label) =>
+        OwnName(entry, ownKinds) ?? label(entry.Kind);
+
+    /// <summary>What an entry with an own kind is called, by the rules of <see cref="For"/>. Null for an entry of a built-in kind.</summary>
+    public static string? OwnName(CareLog entry, IReadOnlyDictionary<Guid, OwnCareKind>? ownKinds)
     {
         if (entry.OwnKindId is { } id)
         {
@@ -27,6 +31,6 @@ public static class CareLabels
             if (entry.Kind == CareKind.Rotated)
                 return Strings.Care.LabelCare;
         }
-        return label(entry.Kind);
+        return null;
     }
 }

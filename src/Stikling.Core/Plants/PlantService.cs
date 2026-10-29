@@ -32,14 +32,15 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         List<TimelineEntry> history = again ? [.. (await timeline.GetForAsync(plant.Id)).Where(e => !e.IsDeleted)] : [];
         if (!history.Any(e => e.Kind == TimelineKind.Created))
         {
-            await timeline.AddAsync(new TimelineEntry
+            var first = new TimelineEntry
             {
                 SubjectType = SubjectType.Plant,
                 SubjectId = plant.Id,
                 Kind = TimelineKind.Created,
-                OccurredAt = AddedAt(plant, photos ?? []),
-                Text = FirstEntryText(plant)
-            });
+                OccurredAt = AddedAt(plant, photos ?? [])
+            };
+            HistoryText.Set(first, FirstEntryLines(plant));
+            await timeline.AddAsync(first);
         }
 
         var shown = history.SelectMany(e => e.PhotoIds).ToHashSet();
@@ -162,11 +163,11 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 
         await PartlySavedException.AfterSaveAsync(async () =>
         {
-            var changes = PlantChanges.Describe(before, after, label, potName, mixName, placeName, feedName);
+            var changes = PlantChanges.Lines(before, after, potName, mixName, placeName, feedName);
             if (changes.Count > 0)
-                await AddChangeAsync(after.Id, string.Join("\n", changes));
+                await AddChangeAsync(after.Id, changes, label);
             if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
-                await AddChangeAsync(after.Id, $"Identified as {after.BotanicalName ?? after.DisplayName}", TimelineEvent.Identified);
+                await AddChangeAsync(after.Id, [HistoryText.Line("IdentifiedAs", HistoryArg.Of(after.BotanicalName ?? after.DisplayName))], @event: TimelineEvent.Identified);
         });
     }
 
@@ -375,11 +376,11 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             if (updated.Count == PlantTags.Normalize(plant.Tags).Count)
                 continue;
 
-            var added = new List<string>();
+            var added = new List<HistoryLine>();
             PlantChanges.AddTags(added, plant.Tags, updated);
             plant.Tags = updated;
             await plants.SaveAsync(plant);
-            await AddChangeAsync(plant.Id, string.Join("\n", added));
+            await AddChangeAsync(plant.Id, added);
             changed++;
         }
 
@@ -510,8 +511,8 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         await plants.SaveAsync(into);
 
         var at = time.MomentOn(date);
-        await AddChangeAsync(plant.Id, $"Potted together with {into.DisplayName}", occurredAt: at, relatedPlantId: into.Id);
-        await AddChangeAsync(into.Id, $"{plant.DisplayName} potted in with it, {into.HowMany} in the pot now", occurredAt: at, relatedPlantId: plant.Id);
+        await AddChangeAsync(plant.Id, [HistoryText.Line("PottedTogetherWith", HistoryArg.Of(into.DisplayName))], occurredAt: at, relatedPlantId: into.Id);
+        await AddChangeAsync(into.Id, [HistoryText.Line("PottedInWithIt", HistoryArg.Of(plant.DisplayName), HistoryArg.Of(into.HowMany))], occurredAt: at, relatedPlantId: plant.Id);
     }
 
     /// <summary>
@@ -546,14 +547,14 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         var at = time.MomentOn(date);
         if (other is null)
         {
-            await AddChangeAsync(plant.Id, "Taken out of the pot it shared", occurredAt: at);
+            await AddChangeAsync(plant.Id, [HistoryText.Line("TakenOutOfSharedPot")], occurredAt: at);
             return;
         }
 
         other.Count = Stored(Math.Max(1, other.HowMany - plant.HowMany));
         await plants.SaveAsync(other);
-        await AddChangeAsync(plant.Id, $"Taken out of {other.DisplayName}'s pot", occurredAt: at, relatedPlantId: other.Id);
-        await AddChangeAsync(other.Id, $"{plant.DisplayName} taken out, {other.HowMany} in the pot now", occurredAt: at, relatedPlantId: plant.Id);
+        await AddChangeAsync(plant.Id, [HistoryText.Line("TakenOutOfPotOf", HistoryArg.Of(other.DisplayName))], occurredAt: at, relatedPlantId: other.Id);
+        await AddChangeAsync(other.Id, [HistoryText.Line("PlantTakenOut", HistoryArg.Of(plant.DisplayName), HistoryArg.Of(other.HowMany))], occurredAt: at, relatedPlantId: plant.Id);
     }
 
     /// <summary>Some of the plants in the pot died. At least one is left.</summary>
@@ -563,7 +564,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         CheckSome(plant, count);
         plant.Count = Stored(plant.HowMany - count);
         await plants.SaveAsync(plant);
-        await AddChangeAsync(plant.Id, $"{count} died, {plant.HowMany} left", occurredAt: time.MomentOn(date));
+        await AddChangeAsync(plant.Id, [HistoryText.Line("SomeDied", HistoryArg.Of(count), HistoryArg.Of(plant.HowMany))], occurredAt: time.MomentOn(date));
     }
 
     /// <summary>Some of the plants in the pot were given away. At least one is left.</summary>
@@ -573,10 +574,10 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         CheckSome(plant, count);
         plant.Count = Stored(plant.HowMany - count);
         await plants.SaveAsync(plant);
-        var text = string.IsNullOrWhiteSpace(to)
-            ? $"Gave {count} away, {plant.HowMany} left"
-            : $"Gave {count} to {to.Trim()}, {plant.HowMany} left";
-        await AddChangeAsync(plant.Id, text, occurredAt: time.MomentOn(date));
+        var line = string.IsNullOrWhiteSpace(to)
+            ? HistoryText.Line("GaveSomeAway", HistoryArg.Of(count), HistoryArg.Of(plant.HowMany))
+            : HistoryText.Line("GaveSomeTo", HistoryArg.Of(count), HistoryArg.Of(to.Trim()), HistoryArg.Of(plant.HowMany));
+        await AddChangeAsync(plant.Id, [line], occurredAt: time.MomentOn(date));
     }
 
     /// <summary>
@@ -604,37 +605,44 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         foreach (var split in newPlants)
         {
             await plants.SaveAsync(split);
-            await timeline.AddAsync(new TimelineEntry
+            var created = new TimelineEntry
             {
                 SubjectType = SubjectType.Plant,
                 SubjectId = split.Id,
                 Kind = TimelineKind.Created,
                 OccurredAt = at,
-                Text = $"Split off from {plant.DisplayName}",
                 RelatedType = SubjectType.Plant,
                 RelatedId = plant.Id
-            });
+            };
+            HistoryText.Set(created, [HistoryText.Line("SplitOffFrom", HistoryArg.Of(plant.DisplayName))]);
+            await timeline.AddAsync(created);
         }
 
         plant.Count = Stored(plant.HowMany - count);
         await plants.SaveAsync(plant);
-        await AddChangeAsync(plant.Id, $"Potted {count} up on their own: {string.Join(", ", newPlants.Select(p => p.DisplayName))}",
+        await AddChangeAsync(plant.Id,
+            [HistoryText.Line("PottedUpOnTheirOwn", HistoryArg.Of(count), HistoryArg.Of(string.Join(", ", newPlants.Select(p => p.DisplayName))))],
             occurredAt: at, relatedPlantId: newPlants.Count == 1 ? newPlants[0].Id : null);
         return newPlants;
     }
 
-    private Task AddChangeAsync(Guid plantId, string text, TimelineEvent? @event = null, DateTimeOffset? occurredAt = null, Guid? relatedPlantId = null) =>
-        timeline.AddAsync(new TimelineEntry
+    // The label turns the enums in the lines into the English words that are saved in Text
+    private Task AddChangeAsync(Guid plantId, IReadOnlyList<HistoryLine> lines, Func<Enum, string>? label = null, TimelineEvent? @event = null,
+        DateTimeOffset? occurredAt = null, Guid? relatedPlantId = null)
+    {
+        var entry = new TimelineEntry
         {
             SubjectType = SubjectType.Plant,
             SubjectId = plantId,
             Kind = TimelineKind.Change,
             OccurredAt = occurredAt ?? time.GetUtcNow(),
-            Text = text,
             Event = @event,
             RelatedType = relatedPlantId is null ? null : SubjectType.Plant,
             RelatedId = relatedPlantId
-        });
+        };
+        HistoryText.Set(entry, lines, label ?? (e => e.ToString()));
+        return timeline.AddAsync(entry);
+    }
 
     // A day without a time is recorded at noon, or now for today, so a photo from earlier that
     // day would come before the plant was added. The plant comes in just before its first photo
@@ -644,13 +652,17 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
 
     // A date that is only a month or a year cannot be read off the timeline's day headings,
     // so it is said in the text instead.
-    private static string FirstEntryText(Plant plant)
+    private static IReadOnlyList<HistoryLine> FirstEntryLines(Plant plant)
     {
         if (plant.LivesElsewhere)
-            return "Added as a plant that lives with someone else";
-        var text = plant.Origin == PlantOrigin.Propagated ? "Added as a propagated plant" : "Added to collection";
-        if (plant.AcquiredOn is { Precision: not DatePrecision.Day } acquired)
-            text = $"{text}, {acquired.StoredText()}";
-        return plant.InQuarantine ? $"{text}\nPut in quarantine" : text;
+            return [HistoryText.Line("AddedLivesElsewhere")];
+        var key = plant.Origin == PlantOrigin.Propagated ? "AddedPropagated" : "AddedToCollection";
+        var first = plant.AcquiredOn switch
+        {
+            { Precision: DatePrecision.Year } year => HistoryText.Line(key + "Year", HistoryArg.Of(year.Year)),
+            { Precision: DatePrecision.Month } month => HistoryText.Line(key + "Month", HistoryArg.Of(month.Start)),
+            _ => HistoryText.Line(key)
+        };
+        return plant.InQuarantine ? [first, HistoryText.Line("PutInQuarantine")] : [first];
     }
 }

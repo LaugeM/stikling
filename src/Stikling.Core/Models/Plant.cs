@@ -376,7 +376,31 @@ public sealed class Plant : Entity
     /// or "Sold to Anna for 150 kr". Only says what is filled in, and is null when nothing is.
     /// </summary>
     /// <summary>DescribeDeparture in English, for the line saved into the plant's history.</summary>
-    public string? DescribeDepartureForHistory() => Stikling.Core.Text.SavedText.InEnglish(DescribeDeparture);
+    public string? DescribeDepartureForHistory() =>
+        DepartureLine() is { } line ? Stikling.Core.Timeline.HistoryText.English(line, e => e.ToString()) : null;
+
+    /// <summary>The same as <see cref="DescribeDeparture"/>, as a history line that can be shown in any language.</summary>
+    public HistoryLine? DepartureLine()
+    {
+        var to = LeftTo?.Trim();
+        var forWhat = LeftFor?.Trim();
+        var hasTo = !string.IsNullOrEmpty(to);
+        var hasFor = !string.IsNullOrEmpty(forWhat);
+        if (!hasTo && !hasFor) return null;
+        static HistoryLine history(string key, params HistoryArg[] args) => Stikling.Core.Timeline.HistoryText.Line(key, args);
+        if (Status == PlantStatus.Sold)
+            return !hasTo ? history("DepartureSoldFor", HistoryArg.Of(forWhat!))
+                : hasFor ? history("DepartureSoldToFor", HistoryArg.Of(to!), HistoryArg.Of(forWhat!))
+                : history("DepartureSoldTo", HistoryArg.Of(to!));
+        if (Status == PlantStatus.GivenAway)
+        {
+            if (!hasTo) return history("DepartureSwappedFor", HistoryArg.Of(forWhat!));
+            return hasFor
+                ? history("DepartureGivenToSwapped", HistoryArg.Of(to!), HistoryArg.Of(forWhat!))
+                : history("DepartureGivenTo", HistoryArg.Of(to!));
+        }
+        return null;
+    }
 
     public string? DescribeDeparture()
     {

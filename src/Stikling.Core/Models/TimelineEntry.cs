@@ -143,7 +143,19 @@ public sealed class TimelineEntry : Entity
 
     public TimelineKind Kind { get; set; }
 
+    /// <summary>
+    /// What the entry says. For the lines the app writes itself this is always English, whatever language the
+    /// app was in, because other code reads it, older versions show it and it is the fallback for a line this
+    /// version can't read from <see cref="Lines"/>. Notes and photo captions are the person's own words.
+    /// </summary>
     public string? Text { get; set; }
+
+    /// <summary>
+    /// The same lines as <see cref="Text"/>, as a template name and its values, so each device can show them in
+    /// its own language. Null on notes, photos and every entry from before this was kept; those are read from
+    /// <see cref="Text"/> instead.
+    /// </summary>
+    public List<HistoryLine>? Lines { get; set; }
 
     /// <summary>
     /// What a change entry was about (a pot-up, a failure or a look over). Null on entries from before this was
@@ -180,6 +192,46 @@ public sealed class TimelineEntry : Entity
 
     /// <summary>Earlier versions of the entry, oldest first. Empty when it was never corrected.</summary>
     public List<TimelineEdit> Edits { get; set; } = [];
+}
+
+/// <summary>
+/// One automatic line of a history entry: the name of a line template (see <c>Timeline.HistoryText</c>) and the
+/// values that go in it. A key is never renamed once it has been saved, since entries on other devices and
+/// on the server keep it.
+/// </summary>
+public sealed class HistoryLine
+{
+    public string Key { get; set; } = "";
+    public List<HistoryArg> Args { get; set; } = [];
+}
+
+/// <summary>One value in a <see cref="HistoryLine"/>. Exactly one of the properties is set.</summary>
+public sealed class HistoryArg
+{
+    /// <summary>Shown as it is: a name a person typed, like a room, a pot, a feed, a tag or a plant.</summary>
+    public string? Text { get; set; }
+
+    /// <summary>An enum value as "TypeName.Value", like "PlantStatus.Died". Shown in the reader's language.</summary>
+    public string? Enum { get; set; }
+
+    /// <summary>Several enum values in the same form, shown with commas between them.</summary>
+    public List<string>? Enums { get; set; }
+
+    public decimal? Number { get; set; }
+
+    public DateOnly? Day { get; set; }
+
+    public static HistoryArg Of(string text) => new() { Text = text };
+    public static HistoryArg Of(decimal number) => new() { Number = number };
+    public static HistoryArg Of(DateOnly day) => new() { Day = day };
+    public static HistoryArg Of(System.Enum value) => new() { Enum = EnumText(value) };
+    public static HistoryArg OfAll<T>(IEnumerable<T> values) where T : struct, System.Enum =>
+        new() { Enums = [.. values.Select(v => EnumText(v))] };
+
+    /// <summary>A value with nothing in it, for a part of a line that isn't there this time.</summary>
+    public static HistoryArg None => new();
+
+    public static string EnumText(System.Enum value) => $"{value.GetType().Name}.{value}";
 }
 
 /// <summary>How a timeline entry read before it was corrected.</summary>

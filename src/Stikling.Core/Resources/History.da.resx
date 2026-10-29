@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="StatusChanged" xml:space="preserve">
+    <value>Status: {0} (var {1})</value>
+  </data>
+  <data name="WhatHappened" xml:space="preserve">
+    <value>Hvad skete der: {0}</value>
+  </data>
+  <data name="DepartureSoldToFor" xml:space="preserve">
+    <value>Solgt til {0} for {1}</value>
+  </data>
+  <data name="DepartureSoldTo" xml:space="preserve">
+    <value>Solgt til {0}</value>
+  </data>
+  <data name="DepartureSoldFor" xml:space="preserve">
+    <value>Solgt for {0}</value>
+  </data>
+  <data name="DepartureSwappedFor" xml:space="preserve">
+    <value>Byttet til {0}</value>
+  </data>
+  <data name="DepartureGivenToSwapped" xml:space="preserve">
+    <value>Givet til {0} · byttet til {1}</value>
+  </data>
+  <data name="DepartureGivenTo" xml:space="preserve">
+    <value>Givet til {0}</value>
+  </data>
+  <data name="RemovedFromRoom" xml:space="preserve">
+    <value>Fjernet fra sit rum</value>
+  </data>
+  <data name="RemovedFrom" xml:space="preserve">
+    <value>Fjernet fra {0}</value>
+  </data>
+  <data name="PlacedIn" xml:space="preserve">
+    <value>Placeret i {0}</value>
+  </data>
+  <data name="MovedTo" xml:space="preserve">
+    <value>Flyttet til {0}</value>
+  </data>
+  <data name="MovedFromTo" xml:space="preserve">
+    <value>Flyttet fra {0} til {1}</value>
+  </data>
+  <data name="MediumChanged" xml:space="preserve">
+    <value>Vokser nu i {0} (var {1})</value>
+  </data>
+  <data name="HowManyChanged" xml:space="preserve">
+    <value>Antal: {0} til {1}</value>
+  </data>
+  <data name="LightChangedFromUnset" xml:space="preserve">
+    <value>Lys: {0} (var ikke angivet)</value>
+  </data>
+  <data name="LightChanged" xml:space="preserve">
+    <value>Lys: {0} (var {1})</value>
+  </data>
+  <data name="LightCleared" xml:space="preserve">
+    <value>Lysindstilling fjernet</value>
+  </data>
+  <data name="PottedInto" xml:space="preserve">
+    <value>Sat i {0}</value>
+  </data>
+  <data name="TakenOutOfPot" xml:space="preserve">
+    <value>Taget ud af sin potte</value>
+  </data>
+  <data name="NowStandsIn" xml:space="preserve">
+    <value>Står nu i {0}</value>
+  </data>
+  <data name="OuterPotRemoved" xml:space="preserve">
+    <value>Står ikke længere i en yderpotte</value>
+  </data>
+  <data name="NowInMix" xml:space="preserve">
+    <value>Nu i {0}</value>
+  </data>
+  <data name="MixRemoved" xml:space="preserve">
+    <value>Ikke længere i en gemt jordblanding</value>
+  </data>
+  <data name="FedStopped" xml:space="preserve">
+    <value>Får ikke længere gødning med vandingen</value>
+  </data>
+  <data name="FedEverySecond" xml:space="preserve">
+    <value>Får gødning med vandingen: {0}, hver anden vanding</value>
+  </data>
+  <data name="FedEveryThird" xml:space="preserve">
+    <value>Får gødning med vandingen: {0}, hver tredje vanding</value>
+  </data>
+  <data name="FedEveryWatering" xml:space="preserve">
+    <value>Får gødning med vandingen: {0}, hver vanding</value>
+  </data>
+  <data name="PotWentWithIt" xml:space="preserve">
+    <value>Dens potte fulgte med</value>
+  </data>
+  <data name="OuterPotWentWithIt" xml:space="preserve">
+    <value>Dens yderpotte fulgte med</value>
+  </data>
+  <data name="PotsWentWithIt" xml:space="preserve">
+    <value>Dens potte og yderpotte fulgte med</value>
+  </data>
+  <data name="PotsStayed" xml:space="preserve">
+    <value>Dens potter blev her</value>
+  </data>
+  <data name="WateredInOuterPot" xml:space="preserve">
+    <value>Vandes nu i yderpotten</value>
+  </data>
+  <data name="NotWateredInOuterPot" xml:space="preserve">
+    <value>Vandes ikke længere i yderpotten</value>
+  </data>
+  <data name="Tagged" xml:space="preserve">
+    <value>Tagget med {0}</value>
+  </data>
+  <data name="Untagged" xml:space="preserve">
+    <value>Ikke længere tagget med {0}</value>
+  </data>
+  <data name="PutInQuarantine" xml:space="preserve">
+    <value>Sat i karantæne</value>
+  </data>
+  <data name="OutOfQuarantine" xml:space="preserve">
+    <value>Ude af karantæne</value>
+  </data>
+  <data name="WentDormant" xml:space="preserve">
+    <value>Gik i hvile</value>
+  </data>
+  <data name="WokeUp" xml:space="preserve">
+    <value>Vågnede af sin hvile</value>
+  </data>
+  <data name="StartedMoveToSemiHydro" xml:space="preserve">
+    <value>Begyndte flytningen til semi-hydro</value>
+  </data>
+  <data name="StartedMoveTo" xml:space="preserve">
+    <value>Begyndte flytningen til {0}</value>
+  </data>
+  <data name="RootsWashed" xml:space="preserve">
+    <value>Rødder vasket</value>
+  </data>
+  <data name="FirstWaterRoot" xml:space="preserve">
+    <value>Første nye vandrod</value>
+  </data>
+  <data name="FirstNewLeaf" xml:space="preserve">
+    <value>Første nye blad</value>
+  </data>
+  <data name="SettledInSemiHydro_One" xml:space="preserve">
+    <value>Har vænnet sig til semi-hydro efter {0} uge</value>
+  </data>
+  <data name="SettledInSemiHydro_Other" xml:space="preserve">
+    <value>Har vænnet sig til semi-hydro efter {0} uger</value>
+  </data>
+  <data name="SettledIn_One" xml:space="preserve">
+    <value>Har vænnet sig til {0} efter {1} uge</value>
+  </data>
+  <data name="SettledIn_Other" xml:space="preserve">
+    <value>Har vænnet sig til {0} efter {1} uger</value>
+  </data>
+  <data name="StoppedTrackingMoveSemiHydro" xml:space="preserve">
+    <value>Holdt op med at følge flytningen til semi-hydro</value>
+  </data>
+  <data name="StoppedTrackingMove" xml:space="preserve">
+    <value>Holdt op med at følge flytningen til {0}</value>
+  </data>
+  <data name="StageChanged" xml:space="preserve">
+    <value>Fase: {0} (var {1})</value>
+  </data>
+  <data name="CountChanged" xml:space="preserve">
+    <value>Antal: {0} (var {1})</value>
+  </data>
+  <data name="PottedUpChanged" xml:space="preserve">
+    <value>Pottet op: {0} (var {1})</value>
+  </data>
+  <data name="GivenAwayChanged" xml:space="preserve">
+    <value>Givet væk: {0} (var {1})</value>
+  </data>
+  <data name="FailedChanged" xml:space="preserve">
+    <value>Mislykkedes: {0} (var {1})</value>
+  </data>
+  <data name="NewSetup" xml:space="preserve">
+    <value>Ny opsætning: {0}</value>
+  </data>
+  <data name="FirstRootOnDay" xml:space="preserve">
+    <value>Første rod på dag {0}</value>
+  </data>
+  <data name="FirstRootCleared" xml:space="preserve">
+    <value>Datoen for første rod er fjernet</value>
+  </data>
+  <data name="FirstLeafOnDay" xml:space="preserve">
+    <value>Første blad på dag {0}</value>
+  </data>
+  <data name="FirstLeafCleared" xml:space="preserve">
+    <value>Datoen for første blad er fjernet</value>
+  </data>
+  <data name="SeedsCameUp" xml:space="preserve">
+    <value>Frø: {0} af {1} spirede</value>
+  </data>
+  <data name="SeedCountCleared" xml:space="preserve">
+    <value>Antal spirede frø er fjernet</value>
+  </data>
+  <data name="CormSize" xml:space="preserve">
+    <value>Størrelse på knold: {0} mm</value>
+  </data>
+  <data name="CormSizeCleared" xml:space="preserve">
+    <value>Størrelsen på knolden er fjernet</value>
+  </data>
+  <data name="NoRootingAids" xml:space="preserve">
+    <value>Ingen rodfremmere</value>
+  </data>
+  <data name="RootingAids" xml:space="preserve">
+    <value>Rodfremmere: {0}</value>
+  </data>
+  <data name="CutEndDriedDays_One" xml:space="preserve">
+    <value>Snitfladen tørret: {0} dag</value>
+  </data>
+  <data name="CutEndDriedDays_Other" xml:space="preserve">
+    <value>Snitfladen tørret: {0} dage</value>
+  </data>
+  <data name="CutEndDriedHours_One" xml:space="preserve">
+    <value>Snitfladen tørret: {0} time</value>
+  </data>
+  <data name="CutEndDriedHours_Other" xml:space="preserve">
+    <value>Snitfladen tørret: {0} timer</value>
+  </data>
+  <data name="CutEndNotDried" xml:space="preserve">
+    <value>Snitfladen tørres ikke længere først</value>
+  </data>
+  <data name="AddedLivesElsewhere" xml:space="preserve">
+    <value>Tilføjet som en plante, der bor hos en anden</value>
+  </data>
+  <data name="AddedToCollectionMonth" xml:space="preserve">
+    <value>Tilføjet til samlingen, {0}</value>
+  </data>
+  <data name="AddedToCollectionYear" xml:space="preserve">
+    <value>Tilføjet til samlingen, {0}</value>
+  </data>
+  <data name="AddedToCollection" xml:space="preserve">
+    <value>Tilføjet til samlingen</value>
+  </data>
+  <data name="AddedPropagatedMonth" xml:space="preserve">
+    <value>Tilføjet som en formeret plante, {0}</value>
+  </data>
+  <data name="AddedPropagatedYear" xml:space="preserve">
+    <value>Tilføjet som en formeret plante, {0}</value>
+  </data>
+  <data name="AddedPropagated" xml:space="preserve">
+    <value>Tilføjet som en formeret plante</value>
+  </data>
+  <data name="SplitOffFrom" xml:space="preserve">
+    <value>Delt fra {0}</value>
+  </data>
+  <data name="PottedUpFromPropagation" xml:space="preserve">
+    <value>Pottet op fra en formering</value>
+  </data>
+  <data name="IdentifiedAs" xml:space="preserve">
+    <value>Bestemt som {0}</value>
+  </data>
+  <data name="PottedTogetherWith" xml:space="preserve">
+    <value>Pottet sammen med {0}</value>
+  </data>
+  <data name="PottedInWithIt" xml:space="preserve">
+    <value>{0} er pottet ned hos den, nu {1} i potten</value>
+  </data>
+  <data name="TakenOutOfSharedPot" xml:space="preserve">
+    <value>Taget ud af den potte, den delte</value>
+  </data>
+  <data name="TakenOutOfPotOf" xml:space="preserve">
+    <value>Taget ud af {0}s potte</value>
+  </data>
+  <data name="PlantTakenOut" xml:space="preserve">
+    <value>{0} er taget ud, nu {1} i potten</value>
+  </data>
+  <data name="SomeDied" xml:space="preserve">
+    <value>{0} døde, {1} tilbage</value>
+  </data>
+  <data name="GaveSomeAway" xml:space="preserve">
+    <value>Gav {0} væk, {1} tilbage</value>
+  </data>
+  <data name="GaveSomeTo" xml:space="preserve">
+    <value>Gav {0} til {1}, {2} tilbage</value>
+  </data>
+  <data name="PottedUpOnTheirOwn" xml:space="preserve">
+    <value>Pottede {0} op hver for sig: {1}</value>
+  </data>
+  <data name="Started" xml:space="preserve">
+    <value>Startede {0}× {1} i {2}</value>
+  </data>
+  <data name="BatchOf" xml:space="preserve">
+    <value>{0}× {1} i {2}</value>
+  </data>
+  <data name="PottedUp" xml:space="preserve">
+    <value>Pottede {0} op: {1}</value>
+  </data>
+  <data name="FailedWithReasonNote" xml:space="preserve">
+    <value>{0} mislykkedes: {1}, {2}</value>
+  </data>
+  <data name="FailedWithReason" xml:space="preserve">
+    <value>{0} mislykkedes: {1}</value>
+  </data>
+  <data name="FailedWithNote" xml:space="preserve">
+    <value>{0} mislykkedes: {1}</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>{0} mislykkedes</value>
+  </data>
+  <data name="FinishedAll" xml:space="preserve">
+    <value>Færdig: {0} pottet op, {1} givet væk, {2} mislykkedes</value>
+  </data>
+  <data name="FinishedPottedGiven" xml:space="preserve">
+    <value>Færdig: {0} pottet op, {1} givet væk</value>
+  </data>
+  <data name="FinishedPottedFailed" xml:space="preserve">
+    <value>Færdig: {0} pottet op, {1} mislykkedes</value>
+  </data>
+  <data name="FinishedGivenFailed" xml:space="preserve">
+    <value>Færdig: {0} givet væk, {1} mislykkedes</value>
+  </data>
+  <data name="FinishedPotted" xml:space="preserve">
+    <value>Færdig: {0} pottet op</value>
+  </data>
+  <data name="FinishedGiven" xml:space="preserve">
+    <value>Færdig: {0} givet væk</value>
+  </data>
+  <data name="FinishedFailed" xml:space="preserve">
+    <value>Færdig: {0} mislykkedes</value>
+  </data>
+  <data name="FinishedNothing" xml:space="preserve">
+    <value>Færdig: ikke noget endnu</value>
+  </data>
+  <data name="GaveToWho" xml:space="preserve">
+    <value>Gav {0} til {1}</value>
+  </data>
+  <data name="GaveAway" xml:space="preserve">
+    <value>Gav {0} væk</value>
+  </data>
+  <data name="FloweringBuds" xml:space="preserve">
+    <value>Blomsterstand eller knopper</value>
+  </data>
+  <data name="FloweringInFlower" xml:space="preserve">
+    <value>I blomst</value>
+  </data>
+  <data name="FloweringDone" xml:space="preserve">
+    <value>Færdig med at blomstre</value>
+  </data>
+  <data name="ProblemOpened" xml:space="preserve">
+    <value>Der er noget galt: {0}</value>
+  </data>
+  <data name="ProblemUpdateTrendActions" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="ProblemUpdateTrend" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="ProblemUpdateActions" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="ProblemUpdateEmpty" xml:space="preserve">
+    <value>Opdatering om problemet</value>
+  </data>
+  <data name="ProblemClosed" xml:space="preserve">
+    <value>Problem overstået: {0}</value>
+  </data>
+  <data name="ProblemReopened" xml:space="preserve">
+    <value>Problemet kom tilbage</value>
+  </data>
+  <data name="LookedOver" xml:space="preserve">
+    <value>Tjekket</value>
+  </data>
+  <data name="ReceivedFrom" xml:space="preserve">
+    <value>Fra {0}</value>
+  </data>
+  <data name="TextLine" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="CareMoisture" xml:space="preserve">
+    <value>{0}: {1}/10</value>
+  </data>
+  <data name="CareWith" xml:space="preserve">
+    <value>{0} med {1}</value>
+  </data>
+  <data name="CareWater" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="CareTail" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="CareTailNotes" xml:space="preserve">
+    <value>{0}: {1} · {2}</value>
+  </data>
+  <data name="FailReasonRotted" xml:space="preserve">
+    <value>rådnede</value>
+  </data>
+  <data name="FailReasonDriedOut" xml:space="preserve">
+    <value>tørrede ud</value>
+  </data>
+  <data name="FailReasonPests" xml:space="preserve">
+    <value>skadedyr</value>
+  </data>
+  <data name="FailReasonMould" xml:space="preserve">
+    <value>skimmel</value>
+  </data>
+  <data name="FailReasonNeverRooted" xml:space="preserve">
+    <value>slog aldrig rod</value>
+  </data>
+  <data name="FailReasonDontKnow" xml:space="preserve">
+    <value>ved ikke</value>
+  </data>
+  <data name="DayFormat" xml:space="preserve">
+    <value>d. MMM yyyy</value>
+  </data>
+  <data name="MonthFormat" xml:space="preserve">
+    <value>MMMM yyyy</value>
+  </data>
+</root>

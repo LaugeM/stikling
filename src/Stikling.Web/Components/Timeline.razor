@@ -111,7 +111,7 @@ else
                             }
                             else if (!string.IsNullOrWhiteSpace(entry.Text) && TimelineEvents.Of(entry) != TimelineEvent.LookedOver)
                             {
-                                <p class="entry-text">@entry.Text</p>
+                                <p class="entry-text">@HistoryText.Show(entry, Labels.For, Labels.English, CultureInfo.CurrentUICulture)</p>
                             }
                             @if (editId != entry.Id && entry.Kind == TimelineKind.Note && entry.ComesBackOn is { } comesBack)
                             {

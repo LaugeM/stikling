@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="StatusChanged" xml:space="preserve">
+    <value>Status: {0} (was {1})</value>
+    <comment>A plant's status changed. {0} is the new status, {1} the old one.</comment>
+  </data>
+  <data name="WhatHappened" xml:space="preserve">
+    <value>What happened: {0}</value>
+    <comment>The cause of death a person wrote when a plant died. {0} is their text.</comment>
+  </data>
+  <data name="DepartureSoldToFor" xml:space="preserve">
+    <value>Sold to {0} for {1}</value>
+    <comment>A plant was sold. {0} is who bought it, {1} what it went for.</comment>
+  </data>
+  <data name="DepartureSoldTo" xml:space="preserve">
+    <value>Sold to {0}</value>
+    <comment>A plant was sold. {0} is who bought it.</comment>
+  </data>
+  <data name="DepartureSoldFor" xml:space="preserve">
+    <value>Sold for {0}</value>
+    <comment>A plant was sold. {0} is what it went for.</comment>
+  </data>
+  <data name="DepartureSwappedFor" xml:space="preserve">
+    <value>Swapped for {0}</value>
+    <comment>A plant was swapped. {0} is what it was swapped for.</comment>
+  </data>
+  <data name="DepartureGivenToSwapped" xml:space="preserve">
+    <value>Given to {0} · swapped for {1}</value>
+    <comment>A plant was given to someone in a swap. {0} is who got it, {1} what it was swapped for.</comment>
+  </data>
+  <data name="DepartureGivenTo" xml:space="preserve">
+    <value>Given to {0}</value>
+    <comment>A plant was given away. {0} is who got it.</comment>
+  </data>
+  <data name="RemovedFromRoom" xml:space="preserve">
+    <value>Removed from its room</value>
+    <comment>A plant or propagation was taken out of a room whose name is no longer known.</comment>
+  </data>
+  <data name="RemovedFrom" xml:space="preserve">
+    <value>Removed from {0}</value>
+    <comment>A plant or propagation was taken out of a room or spot. {0} is its name.</comment>
+  </data>
+  <data name="PlacedIn" xml:space="preserve">
+    <value>Placed in {0}</value>
+    <comment>A plant or propagation was put in a room or spot for the first time. {0} is its name.</comment>
+  </data>
+  <data name="MovedTo" xml:space="preserve">
+    <value>Moved to {0}</value>
+    <comment>A plant or propagation was moved to a room or spot whose old place isn't known. {0} is the new place.</comment>
+  </data>
+  <data name="MovedFromTo" xml:space="preserve">
+    <value>Moved from {0} to {1}</value>
+    <comment>A plant or propagation was moved. {0} is the old room or spot, {1} the new one.</comment>
+  </data>
+  <data name="MediumChanged" xml:space="preserve">
+    <value>Now grows in {0} (was {1})</value>
+    <comment>What a plant or propagation grows in changed. {0} is the new medium, {1} the old one.</comment>
+  </data>
+  <data name="HowManyChanged" xml:space="preserve">
+    <value>How many: {0} to {1}</value>
+    <comment>The number of plants in a pot changed. {0} is the old number, {1} the new one.</comment>
+  </data>
+  <data name="LightChangedFromUnset" xml:space="preserve">
+    <value>Light: {0} (was not set)</value>
+    <comment>The light level was set for the first time. {0} is the light level.</comment>
+  </data>
+  <data name="LightChanged" xml:space="preserve">
+    <value>Light: {0} (was {1})</value>
+    <comment>The light level changed. {0} is the new level, {1} the old one.</comment>
+  </data>
+  <data name="LightCleared" xml:space="preserve">
+    <value>Light setting cleared</value>
+    <comment>The light level was taken off a plant.</comment>
+  </data>
+  <data name="PottedInto" xml:space="preserve">
+    <value>Potted into {0}</value>
+    <comment>A plant went into a pot from the supplies. {0} is the name of the pot.</comment>
+  </data>
+  <data name="TakenOutOfPot" xml:space="preserve">
+    <value>Taken out of its pot</value>
+    <comment>A plant no longer has a pot from the supplies.</comment>
+  </data>
+  <data name="NowStandsIn" xml:space="preserve">
+    <value>Now stands in {0}</value>
+    <comment>A plant was put in an outer pot. {0} is the name of the pot.</comment>
+  </data>
+  <data name="OuterPotRemoved" xml:space="preserve">
+    <value>No longer in an outer pot</value>
+    <comment>A plant was taken out of its outer pot.</comment>
+  </data>
+  <data name="NowInMix" xml:space="preserve">
+    <value>Now in {0}</value>
+    <comment>A plant was put in a saved soil mix. {0} is the name of the mix.</comment>
+  </data>
+  <data name="MixRemoved" xml:space="preserve">
+    <value>No longer in a saved mix</value>
+    <comment>A plant no longer has a saved soil mix.</comment>
+  </data>
+  <data name="FedStopped" xml:space="preserve">
+    <value>No longer fed with the watering</value>
+    <comment>A plant stopped getting a feed with its watering.</comment>
+  </data>
+  <data name="FedEverySecond" xml:space="preserve">
+    <value>Fed with the watering: {0}, every second watering</value>
+    <comment>A plant gets a feed with every second watering. {0} is the name of the feed.</comment>
+  </data>
+  <data name="FedEveryThird" xml:space="preserve">
+    <value>Fed with the watering: {0}, every third watering</value>
+    <comment>A plant gets a feed with every third watering. {0} is the name of the feed.</comment>
+  </data>
+  <data name="FedEveryWatering" xml:space="preserve">
+    <value>Fed with the watering: {0}, every watering</value>
+    <comment>A plant gets a feed with every watering. {0} is the name of the feed.</comment>
+  </data>
+  <data name="PotWentWithIt" xml:space="preserve">
+    <value>Its pot went with it</value>
+    <comment>A plant left and took its pot.</comment>
+  </data>
+  <data name="OuterPotWentWithIt" xml:space="preserve">
+    <value>Its outer pot went with it</value>
+    <comment>A plant left and took its outer pot.</comment>
+  </data>
+  <data name="PotsWentWithIt" xml:space="preserve">
+    <value>Its pot and outer pot went with it</value>
+    <comment>A plant left and took its pot and outer pot.</comment>
+  </data>
+  <data name="PotsStayed" xml:space="preserve">
+    <value>Its pots stayed here</value>
+    <comment>A plant left and its pots stayed.</comment>
+  </data>
+  <data name="WateredInOuterPot" xml:space="preserve">
+    <value>Now watered in the outer pot</value>
+    <comment>The water now goes in the outer pot.</comment>
+  </data>
+  <data name="NotWateredInOuterPot" xml:space="preserve">
+    <value>No longer watered in the outer pot</value>
+    <comment>The water no longer goes in the outer pot.</comment>
+  </data>
+  <data name="Tagged" xml:space="preserve">
+    <value>Tagged {0}</value>
+    <comment>A tag was put on a plant. {0} is the tag.</comment>
+  </data>
+  <data name="Untagged" xml:space="preserve">
+    <value>No longer tagged {0}</value>
+    <comment>A tag was taken off a plant. {0} is the tag.</comment>
+  </data>
+  <data name="PutInQuarantine" xml:space="preserve">
+    <value>Put in quarantine</value>
+    <comment>A plant was put in quarantine.</comment>
+  </data>
+  <data name="OutOfQuarantine" xml:space="preserve">
+    <value>Out of quarantine</value>
+    <comment>A plant came out of quarantine.</comment>
+  </data>
+  <data name="WentDormant" xml:space="preserve">
+    <value>Went dormant</value>
+    <comment>A plant or propagation started resting.</comment>
+  </data>
+  <data name="WokeUp" xml:space="preserve">
+    <value>Woke up from dormancy</value>
+    <comment>A plant or propagation stopped resting.</comment>
+  </data>
+  <data name="StartedMoveToSemiHydro" xml:space="preserve">
+    <value>Started the move to semi-hydro</value>
+    <comment>A plant started the move to semi-hydro.</comment>
+  </data>
+  <data name="StartedMoveTo" xml:space="preserve">
+    <value>Started the move to {0}</value>
+    <comment>A plant started the move to another medium. {0} is the medium.</comment>
+  </data>
+  <data name="RootsWashed" xml:space="preserve">
+    <value>Roots washed</value>
+    <comment>A step in the move to semi-hydro.</comment>
+  </data>
+  <data name="FirstWaterRoot" xml:space="preserve">
+    <value>First new water root</value>
+    <comment>A step in the move to semi-hydro.</comment>
+  </data>
+  <data name="FirstNewLeaf" xml:space="preserve">
+    <value>First new leaf</value>
+    <comment>A step in the move to semi-hydro.</comment>
+  </data>
+  <data name="SettledInSemiHydro_One" xml:space="preserve">
+    <value>Settled in to semi-hydro after {0} week</value>
+    <comment>A plant settled in after a move to semi-hydro. {0} is the number of weeks it took.</comment>
+  </data>
+  <data name="SettledInSemiHydro_Other" xml:space="preserve">
+    <value>Settled in to semi-hydro after {0} weeks</value>
+  </data>
+  <data name="SettledIn_One" xml:space="preserve">
+    <value>Settled in to {0} after {1} week</value>
+    <comment>A plant settled in after a move to another medium. {0} is the medium, {1} the number of weeks it took.</comment>
+  </data>
+  <data name="SettledIn_Other" xml:space="preserve">
+    <value>Settled in to {0} after {1} weeks</value>
+  </data>
+  <data name="StoppedTrackingMoveSemiHydro" xml:space="preserve">
+    <value>Stopped tracking the move to semi-hydro</value>
+    <comment>The tracking of a move to semi-hydro was stopped.</comment>
+  </data>
+  <data name="StoppedTrackingMove" xml:space="preserve">
+    <value>Stopped tracking the move to {0}</value>
+    <comment>The tracking of a move to another medium was stopped. {0} is the medium.</comment>
+  </data>
+  <data name="StageChanged" xml:space="preserve">
+    <value>Stage: {0} (was {1})</value>
+    <comment>The stage of a propagation changed. {0} is the new stage, {1} the old one.</comment>
+  </data>
+  <data name="CountChanged" xml:space="preserve">
+    <value>Count: {0} (was {1})</value>
+    <comment>The number of units in a propagation changed. {0} is the new number, {1} the old one.</comment>
+  </data>
+  <data name="PottedUpChanged" xml:space="preserve">
+    <value>Potted up: {0} (was {1})</value>
+    <comment>The number of units potted up was corrected. {0} is the new number, {1} the old one.</comment>
+  </data>
+  <data name="GivenAwayChanged" xml:space="preserve">
+    <value>Given away: {0} (was {1})</value>
+    <comment>The number of units given away was corrected. {0} is the new number, {1} the old one.</comment>
+  </data>
+  <data name="FailedChanged" xml:space="preserve">
+    <value>Failed: {0} (was {1})</value>
+    <comment>The number of units that failed was corrected. {0} is the new number, {1} the old one.</comment>
+  </data>
+  <data name="NewSetup" xml:space="preserve">
+    <value>New setup: {0}</value>
+    <comment>The container of a propagation changed. {0} is what the person wrote, like Glass jar.</comment>
+  </data>
+  <data name="FirstRootOnDay" xml:space="preserve">
+    <value>First root on day {0}</value>
+    <comment>The first root showed. {0} is the number of days since the start.</comment>
+  </data>
+  <data name="FirstRootCleared" xml:space="preserve">
+    <value>First root date cleared</value>
+    <comment>The date of the first root was taken off.</comment>
+  </data>
+  <data name="FirstLeafOnDay" xml:space="preserve">
+    <value>First leaf on day {0}</value>
+    <comment>The first leaf showed. {0} is the number of days since the start.</comment>
+  </data>
+  <data name="FirstLeafCleared" xml:space="preserve">
+    <value>First leaf date cleared</value>
+    <comment>The date of the first leaf was taken off.</comment>
+  </data>
+  <data name="SeedsCameUp" xml:space="preserve">
+    <value>Seeds: {0} of {1} came up</value>
+    <comment>Seeds came up. {0} is how many, {1} how many were sown.</comment>
+  </data>
+  <data name="SeedCountCleared" xml:space="preserve">
+    <value>Seed count cleared</value>
+    <comment>The number of seeds that came up was taken off.</comment>
+  </data>
+  <data name="CormSize" xml:space="preserve">
+    <value>Corm size: {0} mm</value>
+    <comment>The size of a corm. {0} is the number of millimetres.</comment>
+  </data>
+  <data name="CormSizeCleared" xml:space="preserve">
+    <value>Corm size cleared</value>
+    <comment>The size of a corm was taken off.</comment>
+  </data>
+  <data name="NoRootingAids" xml:space="preserve">
+    <value>No rooting aids</value>
+    <comment>A propagation has no rooting aids any more.</comment>
+  </data>
+  <data name="RootingAids" xml:space="preserve">
+    <value>Rooting aids: {0}</value>
+    <comment>What was used to help a cutting root. {0} is a list like Honey, Rooting hormone.</comment>
+  </data>
+  <data name="CutEndDriedDays_One" xml:space="preserve">
+    <value>Cut end dried: {0} day</value>
+    <comment>How long the cut end dried before it went in. {0} is the number of days.</comment>
+  </data>
+  <data name="CutEndDriedDays_Other" xml:space="preserve">
+    <value>Cut end dried: {0} days</value>
+  </data>
+  <data name="CutEndDriedHours_One" xml:space="preserve">
+    <value>Cut end dried: {0} hour</value>
+    <comment>How long the cut end dried before it went in. {0} is the number of hours.</comment>
+  </data>
+  <data name="CutEndDriedHours_Other" xml:space="preserve">
+    <value>Cut end dried: {0} hours</value>
+  </data>
+  <data name="CutEndNotDried" xml:space="preserve">
+    <value>Cut end no longer dried first</value>
+    <comment>The cut end isn't dried before it goes in any more.</comment>
+  </data>
+  <data name="AddedLivesElsewhere" xml:space="preserve">
+    <value>Added as a plant that lives with someone else</value>
+    <comment>First line of a plant that belongs to someone else.</comment>
+  </data>
+  <data name="AddedToCollectionMonth" xml:space="preserve">
+    <value>Added to collection, {0}</value>
+    <comment>First line of the history, a plant was added. {0} is the month it was got, like June 2024.</comment>
+  </data>
+  <data name="AddedToCollectionYear" xml:space="preserve">
+    <value>Added to collection, {0}</value>
+    <comment>First line of the history, a plant was added. {0} is the year it was got, like 2024.</comment>
+  </data>
+  <data name="AddedToCollection" xml:space="preserve">
+    <value>Added to collection</value>
+    <comment>First line of the history, a plant was added.</comment>
+  </data>
+  <data name="AddedPropagatedMonth" xml:space="preserve">
+    <value>Added as a propagated plant, {0}</value>
+    <comment>First line of the history, a propagated plant was added. {0} is the month it was got, like June 2024.</comment>
+  </data>
+  <data name="AddedPropagatedYear" xml:space="preserve">
+    <value>Added as a propagated plant, {0}</value>
+    <comment>First line of the history, a propagated plant was added. {0} is the year it was got, like 2024.</comment>
+  </data>
+  <data name="AddedPropagated" xml:space="preserve">
+    <value>Added as a propagated plant</value>
+    <comment>First line of the history, a propagated plant was added.</comment>
+  </data>
+  <data name="SplitOffFrom" xml:space="preserve">
+    <value>Split off from {0}</value>
+    <comment>A plant was split off from another plant in the same pot. {0} is the name of that plant.</comment>
+  </data>
+  <data name="PottedUpFromPropagation" xml:space="preserve">
+    <value>Potted up from a propagation</value>
+    <comment>First line of a plant that was potted up from a propagation.</comment>
+  </data>
+  <data name="IdentifiedAs" xml:space="preserve">
+    <value>Identified as {0}</value>
+    <comment>A name that was unsure was found out. {0} is the name.</comment>
+  </data>
+  <data name="PottedTogetherWith" xml:space="preserve">
+    <value>Potted together with {0}</value>
+    <comment>A plant went into the pot of another plant. {0} is the name of that plant.</comment>
+  </data>
+  <data name="PottedInWithIt" xml:space="preserve">
+    <value>{0} potted in with it, {1} in the pot now</value>
+    <comment>A plant was potted in with this one. {0} is the name of the plant, {1} how many are in the pot now.</comment>
+  </data>
+  <data name="TakenOutOfSharedPot" xml:space="preserve">
+    <value>Taken out of the pot it shared</value>
+    <comment>A plant was taken out of a pot it shared with a plant that is gone.</comment>
+  </data>
+  <data name="TakenOutOfPotOf" xml:space="preserve">
+    <value>Taken out of {0}'s pot</value>
+    <comment>A plant was taken out of the pot it shared. {0} is the name of the other plant.</comment>
+  </data>
+  <data name="PlantTakenOut" xml:space="preserve">
+    <value>{0} taken out, {1} in the pot now</value>
+    <comment>A plant was taken out of this one's pot. {0} is the name of the plant, {1} how many are in the pot now.</comment>
+  </data>
+  <data name="SomeDied" xml:space="preserve">
+    <value>{0} died, {1} left</value>
+    <comment>Some of the plants in one pot died. {0} is how many, {1} how many are left.</comment>
+  </data>
+  <data name="GaveSomeAway" xml:space="preserve">
+    <value>Gave {0} away, {1} left</value>
+    <comment>Some of the plants in one pot were given away. {0} is how many, {1} how many are left.</comment>
+  </data>
+  <data name="GaveSomeTo" xml:space="preserve">
+    <value>Gave {0} to {1}, {2} left</value>
+    <comment>Some of the plants in one pot were given to someone. {0} is how many, {1} who got them, {2} how many are left.</comment>
+  </data>
+  <data name="PottedUpOnTheirOwn" xml:space="preserve">
+    <value>Potted {0} up on their own: {1}</value>
+    <comment>Plants in one pot got pots of their own. {0} is how many, {1} their names.</comment>
+  </data>
+  <data name="Started" xml:space="preserve">
+    <value>Started {0}× {1} in {2}</value>
+    <comment>First line of a propagation. {0} is the number of units, {1} the type in lower case, like cutting, and {2} what they are in.</comment>
+  </data>
+  <data name="BatchOf" xml:space="preserve">
+    <value>{0}× {1} in {2}</value>
+    <comment>On the plant a propagation was taken from. {0} is the number of units, {1} the type in lower case, like cutting, and {2} what they are in.</comment>
+  </data>
+  <data name="PottedUp" xml:space="preserve">
+    <value>Potted up {0}: {1}</value>
+    <comment>Units of a propagation were potted up. {0} is how many, {1} the names of the plants.</comment>
+  </data>
+  <data name="FailedWithReasonNote" xml:space="preserve">
+    <value>{0} failed: {1}, {2}</value>
+    <comment>Units of a propagation didn't make it. {0} is how many, {1} why and {2} a note the person wrote.</comment>
+  </data>
+  <data name="FailedWithReason" xml:space="preserve">
+    <value>{0} failed: {1}</value>
+    <comment>Units of a propagation didn't make it. {0} is how many and {1} why.</comment>
+  </data>
+  <data name="FailedWithNote" xml:space="preserve">
+    <value>{0} failed: {1}</value>
+    <comment>Units of a propagation didn't make it. {0} is how many and {1} a note the person wrote.</comment>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>{0} failed</value>
+    <comment>Units of a propagation didn't make it. {0} is how many.</comment>
+  </data>
+  <data name="FinishedAll" xml:space="preserve">
+    <value>Finished: {0} potted up, {1} given away, {2} failed</value>
+    <comment>A propagation ended. {0}, {1} and {2} are how many were potted up, given away and failed.</comment>
+  </data>
+  <data name="FinishedPottedGiven" xml:space="preserve">
+    <value>Finished: {0} potted up, {1} given away</value>
+    <comment>A propagation ended. {0} and {1} are how many were potted up and given away.</comment>
+  </data>
+  <data name="FinishedPottedFailed" xml:space="preserve">
+    <value>Finished: {0} potted up, {1} failed</value>
+    <comment>A propagation ended. {0} and {1} are how many were potted up and failed.</comment>
+  </data>
+  <data name="FinishedGivenFailed" xml:space="preserve">
+    <value>Finished: {0} given away, {1} failed</value>
+    <comment>A propagation ended. {0} and {1} are how many were given away and failed.</comment>
+  </data>
+  <data name="FinishedPotted" xml:space="preserve">
+    <value>Finished: {0} potted up</value>
+    <comment>A propagation ended. {0} is how many were potted up.</comment>
+  </data>
+  <data name="FinishedGiven" xml:space="preserve">
+    <value>Finished: {0} given away</value>
+    <comment>A propagation ended. {0} is how many were given away.</comment>
+  </data>
+  <data name="FinishedFailed" xml:space="preserve">
+    <value>Finished: {0} failed</value>
+    <comment>A propagation ended. {0} is how many failed.</comment>
+  </data>
+  <data name="FinishedNothing" xml:space="preserve">
+    <value>Finished: nothing yet</value>
+    <comment>A propagation ended with no units potted up, given away or failed.</comment>
+  </data>
+  <data name="GaveToWho" xml:space="preserve">
+    <value>Gave {0} to {1}</value>
+    <comment>Units of a propagation were given to someone. {0} is how many, {1} who got them.</comment>
+  </data>
+  <data name="GaveAway" xml:space="preserve">
+    <value>Gave {0} away</value>
+    <comment>Units of a propagation were given away. {0} is how many.</comment>
+  </data>
+  <data name="FloweringBuds" xml:space="preserve">
+    <value>Spike or buds</value>
+    <comment>A plant got a flower spike or buds.</comment>
+  </data>
+  <data name="FloweringInFlower" xml:space="preserve">
+    <value>In flower</value>
+    <comment>A plant came into flower.</comment>
+  </data>
+  <data name="FloweringDone" xml:space="preserve">
+    <value>Done flowering</value>
+    <comment>A plant finished flowering.</comment>
+  </data>
+  <data name="ProblemOpened" xml:space="preserve">
+    <value>Something's wrong: {0}</value>
+    <comment>A problem was opened on a plant. {0} is a list of what was seen, in lower case.</comment>
+  </data>
+  <data name="ProblemUpdateTrendActions" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>An update on a problem. {0} is how it is going and {1} what was done.</comment>
+  </data>
+  <data name="ProblemUpdateTrend" xml:space="preserve">
+    <value>{0}</value>
+    <comment>An update on a problem. {0} is how it is going.</comment>
+  </data>
+  <data name="ProblemUpdateActions" xml:space="preserve">
+    <value>{0}</value>
+    <comment>An update on a problem. {0} is what was done.</comment>
+  </data>
+  <data name="ProblemUpdateEmpty" xml:space="preserve">
+    <value>Update on the problem</value>
+    <comment>An update on a problem with nothing but a photo or a note.</comment>
+  </data>
+  <data name="ProblemClosed" xml:space="preserve">
+    <value>Problem over: {0}</value>
+    <comment>A problem ended. {0} is how, in lower case.</comment>
+  </data>
+  <data name="ProblemReopened" xml:space="preserve">
+    <value>The problem came back</value>
+    <comment>A problem that was over was opened again.</comment>
+  </data>
+  <data name="LookedOver" xml:space="preserve">
+    <value>Looked over</value>
+    <comment>A plant or propagation was looked over during a round.</comment>
+  </data>
+  <data name="ReceivedFrom" xml:space="preserve">
+    <value>From {0}</value>
+    <comment>First line of a plant that was given to you. {0} is who gave it.</comment>
+  </data>
+  <data name="TextLine" xml:space="preserve">
+    <value>{0}</value>
+    <comment>A line the person wrote themselves, like a note on a problem. {0} is their text.</comment>
+  </data>
+  <data name="CareMoisture" xml:space="preserve">
+    <value>{0}: {1}/10</value>
+    <comment>A care entry with a moisture reading. {0} is the kind of care, {1} the reading.</comment>
+  </data>
+  <data name="CareWith" xml:space="preserve">
+    <value>{0} with {1}</value>
+    <comment>A care entry with a feed. {0} is what came before, {1} is the name of the feed.</comment>
+  </data>
+  <data name="CareWater" xml:space="preserve">
+    <value>{0} ({1})</value>
+    <comment>A care entry with an amount of water. {0} is what came before, {1} the amount, like 2 L.</comment>
+  </data>
+  <data name="CareTail" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>A care entry with products or a note. {0} is what came before, {1} the products or the note.</comment>
+  </data>
+  <data name="CareTailNotes" xml:space="preserve">
+    <value>{0}: {1} · {2}</value>
+    <comment>A care entry with products and a note. {0} is what came before, {1} the products and {2} the note.</comment>
+  </data>
+  <data name="FailReasonRotted" xml:space="preserve">
+    <value>rotted</value>
+    <comment>Why units of a propagation failed, after a number and the word failed.</comment>
+  </data>
+  <data name="FailReasonDriedOut" xml:space="preserve">
+    <value>dried out</value>
+    <comment>Why units of a propagation failed.</comment>
+  </data>
+  <data name="FailReasonPests" xml:space="preserve">
+    <value>pests</value>
+    <comment>Why units of a propagation failed.</comment>
+  </data>
+  <data name="FailReasonMould" xml:space="preserve">
+    <value>mould</value>
+    <comment>Why units of a propagation failed.</comment>
+  </data>
+  <data name="FailReasonNeverRooted" xml:space="preserve">
+    <value>never rooted</value>
+    <comment>Why units of a propagation failed.</comment>
+  </data>
+  <data name="FailReasonDontKnow" xml:space="preserve">
+    <value>don't know</value>
+    <comment>Why units of a propagation failed.</comment>
+  </data>
+  <data name="DayFormat" xml:space="preserve">
+    <value>d MMM yyyy</value>
+    <comment>A .NET date pattern for a day in a history line, like 12 Jun 2024.</comment>
+  </data>
+  <data name="MonthFormat" xml:space="preserve">
+    <value>MMMM yyyy</value>
+    <comment>A .NET date pattern for a month in a history line, like June 2024.</comment>
+  </data>
+</root>

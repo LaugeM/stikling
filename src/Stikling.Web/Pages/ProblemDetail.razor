@@ -145,7 +145,7 @@ else
                                     }
                                     break;
                                 case ProblemLogKind.Change:
-                                    <p class="log-text">@item.Entry!.Text</p>
+                                    <p class="log-text">@HistoryText.Show(item.Entry!, Labels.For, Labels.English, System.Globalization.CultureInfo.CurrentUICulture)</p>
                                     break;
                                 default:
                                     <p class="log-text">@(problem.Outcome is { } outcome ? ProblemText.Outcome(outcome) : Strings.Pests.ProblemLogOver)</p>
