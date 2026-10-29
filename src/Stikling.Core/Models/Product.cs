@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -151,19 +152,19 @@ public sealed class Product : Entity
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add("Give the product a name.");
+            errors.Add(Strings.Supplies.ProductNeedsName);
 
         if (DefaultDose < 0)
-            errors.Add("A dose can't be less than 0.");
+            errors.Add(Strings.Supplies.DoseNegative);
 
         if (Per <= 0)
             errors.Add(Doses.NoWater);
 
         if (Nutrients.Any(n => n.Percent is < 0 or > 100))
-            errors.Add("A nutrient can't be less than 0 or more than 100 %.");
+            errors.Add(Strings.Supplies.NutrientRange);
 
         if (Nutrients.GroupBy(n => n.Nutrient).Any(g => g.Count() > 1))
-            errors.Add("Each nutrient can only be listed once.");
+            errors.Add(Strings.Supplies.NutrientOnce);
 
         return errors;
     }
@@ -237,13 +238,13 @@ public static class NutrientInfo
 
 public static class Doses
 {
-    public const string NoWater = "The water a dose is for has to be more than 0.";
+    public static string NoWater => Strings.Supplies.NoWater;
 
     /// <summary>"ml", "g", "drops". Symbols rather than prose, so they live here and not with the labels.</summary>
     public static string Symbol(DoseUnit unit) => unit switch
     {
         DoseUnit.Grams => "g",
-        DoseUnit.Drops => "drops",
+        DoseUnit.Drops => Strings.Supplies.DropsSymbol,
         _ => "ml"
     };
 
@@ -259,13 +260,13 @@ public static class Doses
     public static string Text(decimal amount, DoseUnit unit, decimal per = 1, WaterUnit perUnit = WaterUnit.Litres) =>
         per == 1 && perUnit == WaterUnit.Litres
             ? $"{Number(amount)} {Symbol(unit)}/L"
-            : $"{Measured(amount, unit)} per {Number(per)} {Symbol(perUnit)}";
+            : string.Format(CultureInfo.CurrentCulture, Strings.Supplies.DoseRate, Measured(amount, unit), Number(per), Symbol(perUnit));
 
     /// <summary>"4 ml", "1.5 g", "3 drops": an amount to measure out.</summary>
     public static string Measured(decimal amount, DoseUnit unit) => unit switch
     {
         DoseUnit.Grams => $"{Number(amount)} g",
-        DoseUnit.Drops => amount == 1 ? "1 drop" : $"{Number(amount)} drops",
+        DoseUnit.Drops => string.Format(CultureInfo.CurrentCulture, amount == 1 ? Strings.Supplies.DoseDrops_One : Strings.Supplies.DoseDrops_Other, Number(amount)),
         _ => $"{Number(amount)} ml"
     };
 

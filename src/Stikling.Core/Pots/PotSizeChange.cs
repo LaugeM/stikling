@@ -1,4 +1,6 @@
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
+using System.Globalization;
 
 namespace Stikling.Core.Pots;
 
@@ -20,6 +22,6 @@ public sealed record PotSizeChange(decimal FromCm, decimal ToCm, bool Warn)
 
     /// <summary>The note shown under the pot picker.</summary>
     public string Text =>
-        $"From {Pot.Size(FromCm)} cm to {Pot.Size(ToCm)} cm across the top."
-        + (Warn ? " That's a lot bigger, so the soil will stay wet longer. Water less until the roots fill it." : "");
+        string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PotSizeFromTo, Pot.Size(FromCm), Pot.Size(ToCm))
+        + (Warn ? " " + Strings.Supplies.PotSizeWarn : "");
 }

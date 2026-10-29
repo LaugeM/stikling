@@ -5,33 +5,30 @@
 @inject StiklingApi Api
 @inject NavigationManager Nav
 
-<PageTitle>Sign in · Stikling</PageTitle>
+<PageTitle>@Strings.Account.SignInPageTitle</PageTitle>
 
-<a class="back-link" href="settings?section=account">Settings</a>
-<h1>Sign in</h1>
+<a class="back-link" href="settings?section=account">@Strings.Account.BackToSettings</a>
+<h1>@Strings.Account.SignInTitle</h1>
 
 @if (!Account.IsAvailable)
 {
-    <p class="account-note">Signing in isn't available in this version of Stikling.</p>
+    <p class="account-note">@Strings.Account.SignInNotAvailable</p>
 }
 else if (unavailable)
 {
     <p class="account-note">
-        The sign-in service can't be reached. Check that you're online and try again. Everything else in
-        the app works without it.
+        @Strings.Account.SignInUnreachable
     </p>
-    <button type="button" class="btn btn-outline-primary" @onclick="LoadAsync">Try again</button>
+    <button type="button" class="btn btn-outline-primary" @onclick="LoadAsync">@Strings.Account.SignInTryAgain</button>
 }
 else
 {
     <p class="account-note">
-        Use an account you already have with Google, Facebook or Discord, or your email. With email you
-        get a code to type in, so there's no password to remember. If you're new, this creates your
-        Stikling account. The <a href="privacy">privacy page</a> says what is kept and where.
+        @((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.SignInIntro, $"<a href=\"privacy\">{Strings.Account.SignInPrivacyLink}</a>"))
     </p>
     @if (loading)
     {
-        <p class="account-note" role="status">Loading…</p>
+        <p class="account-note" role="status">@Strings.Account.Loading</p>
     }
 }
 

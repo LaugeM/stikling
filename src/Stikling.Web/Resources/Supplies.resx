@@ -1,0 +1,924 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="BackToSupplies" xml:space="preserve">
+    <value>Supplies</value>
+    <comment>Back link at the top of the supplies pages. Same word as the Supplies tab in the menu.</comment>
+  </data>
+  <data name="ProductsLink" xml:space="preserve">
+    <value>Products</value>
+    <comment>Text of a link to the Products page, put into a sentence.</comment>
+  </data>
+  <data name="WhatItIs" xml:space="preserve">
+    <value>What it is</value>
+  </data>
+  <data name="WhatsInIt" xml:space="preserve">
+    <value>What's in it</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="LitresOrMillilitres" xml:space="preserve">
+    <value>Litres or millilitres</value>
+    <comment>Read out by a screen reader for the unit of an amount of water.</comment>
+  </data>
+  <data name="PlantCountInUse" xml:space="preserve">
+    <value>{0} in it</value>
+    <comment>Under a soil mix, after the number of plants, like 4 plants in it.</comment>
+  </data>
+  <data name="Seller_One" xml:space="preserve">
+    <value>{0} seller</value>
+  </data>
+  <data name="Seller_Other" xml:space="preserve">
+    <value>{0} sellers</value>
+  </data>
+  <data name="Propagation_One" xml:space="preserve">
+    <value>{0} propagation</value>
+  </data>
+  <data name="Propagation_Other" xml:space="preserve">
+    <value>{0} propagations</value>
+  </data>
+  <data name="Pot_One" xml:space="preserve">
+    <value>{0} pot</value>
+  </data>
+  <data name="Pot_Other" xml:space="preserve">
+    <value>{0} pots</value>
+  </data>
+  <data name="Container_One" xml:space="preserve">
+    <value>{0} container</value>
+  </data>
+  <data name="Container_Other" xml:space="preserve">
+    <value>{0} containers</value>
+  </data>
+  <data name="Mix_One" xml:space="preserve">
+    <value>{0} mix</value>
+  </data>
+  <data name="Mix_Other" xml:space="preserve">
+    <value>{0} mixes</value>
+  </data>
+  <data name="Product_One" xml:space="preserve">
+    <value>{0} product</value>
+  </data>
+  <data name="Product_Other" xml:space="preserve">
+    <value>{0} products</value>
+  </data>
+  <data name="Feed_One" xml:space="preserve">
+    <value>{0} feed</value>
+  </data>
+  <data name="Feed_Other" xml:space="preserve">
+    <value>{0} feeds</value>
+  </data>
+  <data name="Recipe_One" xml:space="preserve">
+    <value>{0} recipe</value>
+  </data>
+  <data name="Recipe_Other" xml:space="preserve">
+    <value>{0} recipes</value>
+  </data>
+  <data name="Plan_One" xml:space="preserve">
+    <value>{0} plan</value>
+  </data>
+  <data name="Plan_Other" xml:space="preserve">
+    <value>{0} plans</value>
+  </data>
+  <data name="Problem_One" xml:space="preserve">
+    <value>{0} problem</value>
+  </data>
+  <data name="Problem_Other" xml:space="preserve">
+    <value>{0} problems</value>
+  </data>
+  <data name="PestCase_One" xml:space="preserve">
+    <value>{0} pest case</value>
+  </data>
+  <data name="PestCase_Other" xml:space="preserve">
+    <value>{0} pest cases</value>
+  </data>
+  <data name="SuppliesTitle" xml:space="preserve">
+    <value>Supplies</value>
+    <comment>Heading of the Supplies page.</comment>
+  </data>
+  <data name="SuppliesPageTitle" xml:space="preserve">
+    <value>Supplies · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="SuppliesIntro" xml:space="preserve">
+    <value>The sellers your plants came from, and the pots, mixes and products you use, so a plant or a treatment can point at them instead of you typing them again.</value>
+  </data>
+  <data name="SuppliesSellers" xml:space="preserve">
+    <value>Sellers</value>
+    <comment>A row on the Supplies page.</comment>
+  </data>
+  <data name="SuppliesPots" xml:space="preserve">
+    <value>Pots</value>
+    <comment>A row on the Supplies page.</comment>
+  </data>
+  <data name="SuppliesSoilMixes" xml:space="preserve">
+    <value>Soil mixes</value>
+    <comment>A row on the Supplies page.</comment>
+  </data>
+  <data name="SuppliesProducts" xml:space="preserve">
+    <value>Products</value>
+    <comment>A row on the Supplies page.</comment>
+  </data>
+  <data name="SuppliesFeeds" xml:space="preserve">
+    <value>Feeds</value>
+    <comment>A row on the Supplies page. A feed is a few products mixed into the water together.</comment>
+  </data>
+  <data name="SuppliesRecipes" xml:space="preserve">
+    <value>Treatment recipes</value>
+    <comment>A row on the Supplies page.</comment>
+  </data>
+  <data name="SuppliesPlans" xml:space="preserve">
+    <value>Treatment plans</value>
+    <comment>A row on the Supplies page.</comment>
+  </data>
+  <data name="SuppliesPestsHeading" xml:space="preserve">
+    <value>Pests and problems</value>
+  </data>
+  <data name="SuppliesPestsRow" xml:space="preserve">
+    <value>Pest cases and problems</value>
+    <comment>A row on the Supplies page, linking to the Pests page.</comment>
+  </data>
+  <data name="SellersNone" xml:space="preserve">
+    <value>Where your plants came from</value>
+    <comment>Under the Sellers row on the Supplies page, while there are none.</comment>
+  </data>
+  <data name="PotsNone" xml:space="preserve">
+    <value>The pots you own, nursery or decorative</value>
+    <comment>Under the Pots row on the Supplies page, while there are none.</comment>
+  </data>
+  <data name="PotsFree" xml:space="preserve">
+    <value>{0}, {1} free</value>
+    <comment>Under the Pots row. {0} is the number of pots, like 6 pots, and {1} the number that are free.</comment>
+  </data>
+  <data name="MixesNone" xml:space="preserve">
+    <value>Your own mixes and what goes in them</value>
+    <comment>Under the Soil mixes row on the Supplies page, while there are none.</comment>
+  </data>
+  <data name="MixesRetired" xml:space="preserve">
+    <value>{0}, {1} no longer mixed</value>
+    <comment>Under the Soil mixes row. {0} is the number of mixes, like 3 mixes, and {1} how many are no longer mixed.</comment>
+  </data>
+  <data name="ProductsNone" xml:space="preserve">
+    <value>Fertilisers, sprays and the rest you buy</value>
+    <comment>Under the Products row on the Supplies page, while there are none.</comment>
+  </data>
+  <data name="FeedsNone" xml:space="preserve">
+    <value>How you dilute a product to water with</value>
+    <comment>Under the Feeds row on the Supplies page, while there are none.</comment>
+  </data>
+  <data name="PlansNone" xml:space="preserve">
+    <value>Steps to follow on a pest case</value>
+    <comment>Under the Treatment plans row on the Supplies page, while there are none.</comment>
+  </data>
+  <data name="RecipesNone" xml:space="preserve">
+    <value>Sprays you mix the same way each time</value>
+    <comment>Under the Treatment recipes row on the Supplies page, while there are none.</comment>
+  </data>
+  <data name="PestsNoneOpenResolved" xml:space="preserve">
+    <value>None open, {0} resolved{1}</value>
+    <comment>Under the pest cases row. {0} is the number of resolved cases and {1} is empty or a comma and the number of open problems.</comment>
+  </data>
+  <data name="PestsNoCases" xml:space="preserve">
+    <value>No pest cases{0}</value>
+    <comment>Under the pest cases row. {0} is empty or a comma and the number of open problems.</comment>
+  </data>
+  <data name="PestsNeverOpen" xml:space="preserve">
+    <value>Open one when you find pests, to keep track of the treatments</value>
+  </data>
+  <data name="PestsOpen_One" xml:space="preserve">
+    <value>{0} open{1}</value>
+    <comment>Under the pest cases row. {0} is the number of open cases and {1} is empty or a comma and the number of open problems.</comment>
+  </data>
+  <data name="PestsOpen_Other" xml:space="preserve">
+    <value>{0} open{1}</value>
+    <comment>Under the pest cases row. {0} is the number of open cases and {1} is empty or a comma and the number of open problems.</comment>
+  </data>
+  <data name="ProblemsPart" xml:space="preserve">
+    <value>, {0}</value>
+    <comment>Added after the pest cases text. {0} is the number of open problems, like 1 problem.</comment>
+  </data>
+  <data name="SellersTitle" xml:space="preserve">
+    <value>Sellers</value>
+    <comment>Heading of the Sellers page.</comment>
+  </data>
+  <data name="SellersPageTitle" xml:space="preserve">
+    <value>Sellers · Stikling</value>
+  </data>
+  <data name="SellersIntro" xml:space="preserve">
+    <value>Everyone your plants came from: shops, online sellers, friends and swap events. Open one to see how the plants from it have done since.</value>
+  </data>
+  <data name="SellersEmptyTitle" xml:space="preserve">
+    <value>No sellers yet.</value>
+  </data>
+  <data name="SellersEmptyHint" xml:space="preserve">
+    <value>Where your plants came from shows up here once a plant has a seller. Pick one under Where from when adding a plant.</value>
+    <comment>Where from is the name of a field on the form for adding a plant.</comment>
+  </data>
+  <data name="SellersYour" xml:space="preserve">
+    <value>Your sellers</value>
+  </data>
+  <data name="SellersNothingYet" xml:space="preserve">
+    <value>nothing from it yet</value>
+    <comment>Shown on a seller in the list when no plant or propagation came from it. Follows a seller kind and a dot.</comment>
+  </data>
+  <data name="SellersPlantsAndPropagations" xml:space="preserve">
+    <value>{0} and {1}</value>
+    <comment>Shown on a seller in the list. {0} is a number of plants and {1} a number of propagations, like 3 plants and 2 propagations.</comment>
+  </data>
+  <data name="SellerPageTitle" xml:space="preserve">
+    <value>{0} · Stikling</value>
+    <comment>Title of the browser tab. {0} is the name of the seller.</comment>
+  </data>
+  <data name="SellerFallbackName" xml:space="preserve">
+    <value>Seller</value>
+    <comment>Used in the browser tab title while the seller is loading.</comment>
+  </data>
+  <data name="SellerBack" xml:space="preserve">
+    <value>Sellers</value>
+    <comment>Back link.</comment>
+  </data>
+  <data name="SellerMissing" xml:space="preserve">
+    <value>That seller doesn't exist.</value>
+  </data>
+  <data name="SellerHowTheyDid" xml:space="preserve">
+    <value>How they have done</value>
+    <comment>Heading of the section with numbers about the plants from a seller.</comment>
+  </data>
+  <data name="SellerNothingYet" xml:space="preserve">
+    <value>Nothing comes from this seller yet. Pick it under Where from on a plant.</value>
+    <comment>Where from is the name of a field on the form for a plant.</comment>
+  </data>
+  <data name="SellerPlants" xml:space="preserve">
+    <value>Plants</value>
+  </data>
+  <data name="SellerPropagations" xml:space="preserve">
+    <value>Propagations</value>
+  </data>
+  <data name="SellerPestsEarly" xml:space="preserve">
+    <value>Pests early on</value>
+  </data>
+  <data name="SellerHowArrived" xml:space="preserve">
+    <value>How they arrived</value>
+  </data>
+  <data name="SellerPaid" xml:space="preserve">
+    <value>Paid</value>
+  </data>
+  <data name="SellerAbout" xml:space="preserve">
+    <value>About this seller</value>
+  </data>
+  <data name="SellerRenameHint" xml:space="preserve">
+    <value>Renaming it also changes the name written on every plant and propagation from it.</value>
+  </data>
+  <data name="SellerTidy" xml:space="preserve">
+    <value>Tidy up</value>
+  </data>
+  <data name="SellerMergeInto" xml:space="preserve">
+    <value>Merge into</value>
+  </data>
+  <data name="SellerPick" xml:space="preserve">
+    <value>Pick a seller</value>
+  </data>
+  <data name="SellerMergeHint" xml:space="preserve">
+    <value>Everything from {0} moves to the one you pick, and {0} is taken off the list.</value>
+    <comment>{0} is the name of the seller.</comment>
+  </data>
+  <data name="SellerMerge" xml:space="preserve">
+    <value>Merge</value>
+  </data>
+  <data name="SellerMergeLink" xml:space="preserve">
+    <value>Merge into…</value>
+  </data>
+  <data name="SellerDeleteConfirm" xml:space="preserve">
+    <value>Delete {0}? Plants and propagations from it keep the name written on them, but no longer link to a seller.</value>
+    <comment>{0} is the name of the seller.</comment>
+  </data>
+  <data name="SellerNone" xml:space="preserve">
+    <value>None</value>
+    <comment>No plants from the seller.</comment>
+  </data>
+  <data name="SellerStillHere" xml:space="preserve">
+    <value>{0} still here</value>
+  </data>
+  <data name="SellerDied" xml:space="preserve">
+    <value>{0} died</value>
+  </data>
+  <data name="SellerGivenAway" xml:space="preserve">
+    <value>{0} given away</value>
+  </data>
+  <data name="SellerSold" xml:space="preserve">
+    <value>{0} sold</value>
+  </data>
+  <data name="SellerPlantsBreakdown" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>{0} is a number of plants and {1} is a list like 2 still here, 1 died.</comment>
+  </data>
+  <data name="SellerNoPestCases" xml:space="preserve">
+    <value>No pest cases in the first {0} days</value>
+    <comment>{0} is a number of days.</comment>
+  </data>
+  <data name="SellerPestCases" xml:space="preserve">
+    <value>{0} in the first {1} days, covering {2}</value>
+    <comment>{0} is a number of pest cases, {1} a number of days and {2} a number of plants.</comment>
+  </data>
+  <data name="SellerNotRated" xml:space="preserve">
+    <value>Not rated</value>
+  </data>
+  <data name="SellerArrivedGood" xml:space="preserve">
+    <value>{0} good</value>
+  </data>
+  <data name="SellerArrivedOk" xml:space="preserve">
+    <value>{0} OK</value>
+  </data>
+  <data name="SellerArrivedPoor" xml:space="preserve">
+    <value>{0} poor</value>
+  </data>
+  <data name="SellerPaidText" xml:space="preserve">
+    <value>{0} in total, {1} on average ({2} with a price)</value>
+    <comment>{0} and {1} are amounts of money. {2} is a number of plants.</comment>
+  </data>
+  <data name="DeletionPageTitle" xml:space="preserve">
+    <value>Deleting your data · Stikling</value>
+  </data>
+  <data name="DeletionBack" xml:space="preserve">
+    <value>Privacy</value>
+    <comment>Back link to the Privacy page.</comment>
+  </data>
+  <data name="DeletionFailed" xml:space="preserve">
+    <value>Couldn't load this page. Check that you're online and try again.</value>
+  </data>
+  <data name="DosePlaceholder" xml:space="preserve">
+    <value>Dose</value>
+  </data>
+  <data name="DoseUnitLabel" xml:space="preserve">
+    <value>Millilitres, grams or drops</value>
+    <comment>Read out by a screen reader for the unit of a dose.</comment>
+  </data>
+  <data name="DosePer" xml:space="preserve">
+    <value>per</value>
+    <comment>Between the amount of a product and the amount of water, like 5 ml per 4 L.</comment>
+  </data>
+  <data name="DoseForWater" xml:space="preserve">
+    <value>How much water {0} is for</value>
+    <comment>Read out by a screen reader. {0} is the name of the dose, in lower case, like the usual dose.</comment>
+  </data>
+  <data name="DoseForWaterDefault" xml:space="preserve">
+    <value>How much water the dose is for</value>
+    <comment>Read out by a screen reader.</comment>
+  </data>
+  <data name="ProductsTitle" xml:space="preserve">
+    <value>Products</value>
+    <comment>Heading of the Products page.</comment>
+  </data>
+  <data name="ProductsPageTitle" xml:space="preserve">
+    <value>Products · Stikling</value>
+  </data>
+  <data name="ProductsIntro" xml:space="preserve">
+    <value>Your fertilisers, stimulants, silica and anything else that goes in the water, each with the dose you usually use. Logging a feed fills the dose in, and you can change it for that one time. A care entry keeps the name and dose it was logged with, so editing a product here doesn't change what you've already logged.</value>
+  </data>
+  <data name="ProductEdit" xml:space="preserve">
+    <value>Edit product</value>
+  </data>
+  <data name="ProductAdd" xml:space="preserve">
+    <value>Add a product</value>
+  </data>
+  <data name="ProductNamePlaceholder" xml:space="preserve">
+    <value>e.g. Hydro fertiliser</value>
+  </data>
+  <data name="ProductKindHint" xml:space="preserve">
+    <value>A feed uses this to check that silica goes in first and pH last.</value>
+  </data>
+  <data name="ProductUsualDose" xml:space="preserve">
+    <value>Usual dose</value>
+  </data>
+  <data name="ProductMeasuredIn" xml:space="preserve">
+    <value>What the product is measured in</value>
+    <comment>Read out by a screen reader for the choice of unit.</comment>
+  </data>
+  <data name="ProductDoseHint" xml:space="preserve">
+    <value>The way the bottle puts it, e.g. 5 ml per 4 L. Leave the dose empty if you don't know it yet.</value>
+  </data>
+  <data name="ProductRemoveNutrient" xml:space="preserve">
+    <value>Remove {0}</value>
+    <comment>{0} is the name of a nutrient.</comment>
+  </data>
+  <data name="ProductNutrientsToAdd" xml:space="preserve">
+    <value>Nutrients to add</value>
+  </data>
+  <data name="ProductAddNutrient" xml:space="preserve">
+    <value>+ Add a nutrient</value>
+  </data>
+  <data name="ProductLabelHint" xml:space="preserve">
+    <value>As printed on the label, in %.</value>
+  </data>
+  <data name="ProductSubmitAdd" xml:space="preserve">
+    <value>Add product</value>
+  </data>
+  <data name="ProductAddButton" xml:space="preserve">
+    <value>+ Add a product</value>
+  </data>
+  <data name="ProductsEmptyTitle" xml:space="preserve">
+    <value>No products yet.</value>
+  </data>
+  <data name="ProductsEmptyHint" xml:space="preserve">
+    <value>A product is anything you add to the water, like a fertiliser, silica or a rooting stimulant. Start with the fertiliser you use most. A name is enough; the dose can wait until you next have the bottle in your hand.</value>
+  </data>
+  <data name="ProductsYour" xml:space="preserve">
+    <value>Your products</value>
+  </data>
+  <data name="ProductNoUsualDose" xml:space="preserve">
+    <value>no usual dose</value>
+  </data>
+  <data name="ProductNumberError" xml:space="preserve">
+    <value>{0} has to be a number.</value>
+    <comment>{0} is the name of a nutrient.</comment>
+  </data>
+  <data name="ProductUsed" xml:space="preserve">
+    <value>used on {0}, last {1}</value>
+    <comment>Under a product. {0} is a number of plants and {1} a date.</comment>
+  </data>
+  <data name="ProductNotLogged" xml:space="preserve">
+    <value>not logged yet</value>
+  </data>
+  <data name="ProductDeleteConfirm" xml:space="preserve">
+    <value>Delete {0}?</value>
+    <comment>{0} is the name of the product.</comment>
+  </data>
+  <data name="ProductDeleteLogged" xml:space="preserve">
+    <value>Delete {0}? It's been logged on {1}, and those entries keep its name and dose.</value>
+    <comment>{0} is the name of the product and {1} a number of plants.</comment>
+  </data>
+  <data name="PotsTitle" xml:space="preserve">
+    <value>Pots</value>
+    <comment>Heading of the Pots page.</comment>
+  </data>
+  <data name="PotsPageTitle" xml:space="preserve">
+    <value>Pots · Stikling</value>
+  </data>
+  <data name="PotsIntro" xml:space="preserve">
+    <value>The pots you own, so a plant can point at one instead of you typing it again. A nursery pot goes inside something, an outer pot has no drainage and holds a nursery pot, and some pots need nothing around them. Containers for propagating, like a box with a lid, have their own list.</value>
+  </data>
+  <data name="PotsWhichToShow" xml:space="preserve">
+    <value>Which pots to show</value>
+    <comment>Read out by a screen reader for the tabs above the list.</comment>
+  </data>
+  <data name="PotsAddContainer" xml:space="preserve">
+    <value>Add a container</value>
+  </data>
+  <data name="PotsAddPot" xml:space="preserve">
+    <value>Add a pot</value>
+  </data>
+  <data name="PotsEditContainer" xml:space="preserve">
+    <value>Edit container</value>
+  </data>
+  <data name="PotsEditPot" xml:space="preserve">
+    <value>Edit pot</value>
+  </data>
+  <data name="PotsWhatKind" xml:space="preserve">
+    <value>What kind</value>
+  </data>
+  <data name="PotsWhatKindOfPot" xml:space="preserve">
+    <value>What kind of pot</value>
+    <comment>Read out by a screen reader.</comment>
+  </data>
+  <data name="PotsNamesInUse" xml:space="preserve">
+    <value>Names you already use</value>
+    <comment>Read out by a screen reader for a row of names to pick from.</comment>
+  </data>
+  <data name="PotsContainerPlaceholder" xml:space="preserve">
+    <value>e.g. Clear box with lid</value>
+  </data>
+  <data name="PotsPotPlaceholder" xml:space="preserve">
+    <value>e.g. Clear nursery pot</value>
+  </data>
+  <data name="PotsContainerNameHint" xml:space="preserve">
+    <value>Identical containers are one entry. Say how many you have below.</value>
+  </data>
+  <data name="PotsPotNameHint" xml:space="preserve">
+    <value>Every size of the same pot shares a name, so they stay together in the list.</value>
+  </data>
+  <data name="PotsPhotos" xml:space="preserve">
+    <value>Photos</value>
+  </data>
+  <data name="PotsPhotoAlt" xml:space="preserve">
+    <value>Photo of the pot</value>
+  </data>
+  <data name="PotsRemovePhoto" xml:space="preserve">
+    <value>Remove photo</value>
+    <comment>Name and tooltip of the button that takes a photo off the form.</comment>
+  </data>
+  <data name="PotsCamera" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="PotsGallery" xml:space="preserve">
+    <value>Gallery</value>
+  </data>
+  <data name="PotsGooglePhotos" xml:space="preserve">
+    <value>Google Photos</value>
+    <comment>The name of Google's service.</comment>
+  </data>
+  <data name="PotsPhotoHint" xml:space="preserve">
+    <value>A photo tells this pot apart from similar ones, here and when you pick a pot for a plant.</value>
+  </data>
+  <data name="PotsMadeOf" xml:space="preserve">
+    <value>Made of</value>
+  </data>
+  <data name="PotsMadeOfLabel" xml:space="preserve">
+    <value>What the pot is made of</value>
+    <comment>Read out by a screen reader.</comment>
+  </data>
+  <data name="PotsAcrossTop" xml:space="preserve">
+    <value>Across the top (cm)</value>
+  </data>
+  <data name="PotsHowMany" xml:space="preserve">
+    <value>How many</value>
+  </data>
+  <data name="PotsMoreMeasurements" xml:space="preserve">
+    <value>More measurements</value>
+  </data>
+  <data name="PotsAcrossBottom" xml:space="preserve">
+    <value>Across the bottom (cm)</value>
+  </data>
+  <data name="PotsHeight" xml:space="preserve">
+    <value>Height (cm)</value>
+  </data>
+  <data name="PotsMeasurementsHint" xml:space="preserve">
+    <value>On an outer pot these mean the inside. The bottom is the one that decides whether a nursery pot really fits, since both usually taper.</value>
+  </data>
+  <data name="PotsRim" xml:space="preserve">
+    <value>Rim (mm)</value>
+  </data>
+  <data name="PotsRimHint" xml:space="preserve">
+    <value>A rim lets the pot hang on an outer pot instead of standing in it.</value>
+  </data>
+  <data name="PotsWatersItself" xml:space="preserve">
+    <value>Waters itself</value>
+  </data>
+  <data name="PotsHowWatersItself" xml:space="preserve">
+    <value>How it waters itself</value>
+    <comment>Read out by a screen reader.</comment>
+  </data>
+  <data name="PotsWateringHint" xml:space="preserve">
+    <value>A wick draws the water up. Submerged means the pot stands in it.</value>
+  </data>
+  <data name="PotsSubmitAddContainer" xml:space="preserve">
+    <value>Add container</value>
+  </data>
+  <data name="PotsSubmitAddPot" xml:space="preserve">
+    <value>Add pot</value>
+  </data>
+  <data name="PotsSaveAndAnother" xml:space="preserve">
+    <value>Save and add another size</value>
+  </data>
+  <data name="PotsAddNursery" xml:space="preserve">
+    <value>+ Add a nursery pot</value>
+  </data>
+  <data name="PotsAddOuter" xml:space="preserve">
+    <value>+ Add an outer pot</value>
+  </data>
+  <data name="PotsAddPropagation" xml:space="preserve">
+    <value>+ Add a container</value>
+  </data>
+  <data name="PotsAddStandalone" xml:space="preserve">
+    <value>+ Add a pot</value>
+  </data>
+  <data name="PotsEmptyNursery" xml:space="preserve">
+    <value>No nursery pots yet.</value>
+  </data>
+  <data name="PotsEmptyOuter" xml:space="preserve">
+    <value>No outer pots yet.</value>
+  </data>
+  <data name="PotsEmptyPropagation" xml:space="preserve">
+    <value>No containers for propagating yet.</value>
+  </data>
+  <data name="PotsEmptyStandalone" xml:space="preserve">
+    <value>No pots that stand on their own yet.</value>
+  </data>
+  <data name="PotsHintPropagation" xml:space="preserve">
+    <value>A box, jar or glass you root cuttings or corms in. Identical ones are one entry with how many you have, and Start propagation picks from them.</value>
+    <comment>Start propagation is the name of a button.</comment>
+  </data>
+  <data name="PotsHintNursery" xml:space="preserve">
+    <value>Add the ones you use most first. A set of nursery pots is one entry per size, with how many of that size you have.</value>
+  </data>
+  <data name="PotsHintOuter" xml:space="preserve">
+    <value>An outer pot has no hole in the bottom and holds a nursery pot. Give each one a photo, so similar ones are easy to tell apart when you pick one for a plant.</value>
+  </data>
+  <data name="PotsHintStandalone" xml:space="preserve">
+    <value>A pot with a hole and a saucer, or a self-watering pot, that needs nothing around it.</value>
+  </data>
+  <data name="PotsPhotosOf" xml:space="preserve">
+    <value>Photos of {0}</value>
+    <comment>Read out by a screen reader. {0} is the name of the pot.</comment>
+  </data>
+  <data name="PotsPhotoLink" xml:space="preserve">
+    <value>Photo</value>
+    <comment>A link on a pot in the list that adds a photo to it.</comment>
+  </data>
+  <data name="PotsNoSize" xml:space="preserve">
+    <value>No size</value>
+  </data>
+  <data name="PotsSizeCm" xml:space="preserve">
+    <value>{0} cm</value>
+    <comment>{0} is a width.</comment>
+  </data>
+  <data name="PotsSelfWatering" xml:space="preserve">
+    <value>self-watering ({0})</value>
+    <comment>{0} is how, like wick, in lower case.</comment>
+  </data>
+  <data name="PotsRimMm" xml:space="preserve">
+    <value>{0} mm rim</value>
+  </data>
+  <data name="PotsTallCm" xml:space="preserve">
+    <value>{0} cm tall</value>
+  </data>
+  <data name="PotsPhotosFailed" xml:space="preserve">
+    <value>Couldn't save the photos: {0}</value>
+    <comment>{0} is the reason, from the device.</comment>
+  </data>
+  <data name="PotsDeleteConfirm" xml:space="preserve">
+    <value>Delete {0}?</value>
+    <comment>{0} is the name of the pot.</comment>
+  </data>
+  <data name="PotsDeleteAndPhoto_One" xml:space="preserve">
+    <value>Delete {0} and its photo?</value>
+    <comment>{0} is the name of the pot and {1} the number of photos.</comment>
+  </data>
+  <data name="PotsDeleteAndPhoto_Other" xml:space="preserve">
+    <value>Delete {0} and its {1} photos?</value>
+    <comment>{0} is the name of the pot and {1} the number of photos.</comment>
+  </data>
+  <data name="PotsPhotosDeletedToo_One" xml:space="preserve">
+    <value>Its photo is deleted too.</value>
+    <comment>Added to a delete warning.</comment>
+  </data>
+  <data name="PotsPhotosDeletedToo_Other" xml:space="preserve">
+    <value>Its {0} photos are deleted too.</value>
+    <comment>Added to a delete warning. {0} is the number of photos.</comment>
+  </data>
+  <data name="PotsContainerInUse_One" xml:space="preserve">
+    <value>{0} propagation is using this container. Deleting it takes it off that propagation, and changes nothing else about it.</value>
+  </data>
+  <data name="PotsContainerInUse_Other" xml:space="preserve">
+    <value>{0} propagations are using this container. Deleting it takes it off them, and changes nothing else about them.</value>
+  </data>
+  <data name="PotsPotInUse_One" xml:space="preserve">
+    <value>{0} plant is using this pot. Deleting it takes the pot off that plant, and changes nothing else about it.</value>
+  </data>
+  <data name="PotsPotInUse_Other" xml:space="preserve">
+    <value>{0} plants are using this pot. Deleting it takes the pot off them, and changes nothing else about them.</value>
+  </data>
+  <data name="MixesTitle" xml:space="preserve">
+    <value>Soil mixes</value>
+    <comment>Heading of the Soil mixes page.</comment>
+  </data>
+  <data name="MixesPageTitle" xml:space="preserve">
+    <value>Soil mixes · Stikling</value>
+  </data>
+  <data name="MixesIntro" xml:space="preserve">
+    <value>The mixes you make yourself, saved under a name. Amounts are optional: a mix you mix by eye is still worth writing down. Put the ingredient there's most of first.</value>
+  </data>
+  <data name="MixesAdd" xml:space="preserve">
+    <value>Add a mix</value>
+  </data>
+  <data name="MixesEdit" xml:space="preserve">
+    <value>Edit mix</value>
+  </data>
+  <data name="MixesNamePlaceholder" xml:space="preserve">
+    <value>e.g. Chunky soil</value>
+  </data>
+  <data name="MixesAmounts" xml:space="preserve">
+    <value>Amounts</value>
+  </data>
+  <data name="MixesHowCounted" xml:space="preserve">
+    <value>How the amounts are counted</value>
+    <comment>Read out by a screen reader.</comment>
+  </data>
+  <data name="MixesIngredientPlaceholder" xml:space="preserve">
+    <value>e.g. perlite</value>
+  </data>
+  <data name="MixesIngredientN" xml:space="preserve">
+    <value>Ingredient {0}</value>
+    <comment>Read out by a screen reader. {0} is the position in the list.</comment>
+  </data>
+  <data name="MixesHowMuch" xml:space="preserve">
+    <value>How much {0}</value>
+    <comment>Read out by a screen reader. {0} is the name of an ingredient.</comment>
+  </data>
+  <data name="MixesMoveUp" xml:space="preserve">
+    <value>Move {0} up</value>
+    <comment>{0} is the name of an ingredient.</comment>
+  </data>
+  <data name="MixesMoveDown" xml:space="preserve">
+    <value>Move {0} down</value>
+    <comment>{0} is the name of an ingredient.</comment>
+  </data>
+  <data name="MixesRemove" xml:space="preserve">
+    <value>Remove {0}</value>
+    <comment>{0} is the name of an ingredient.</comment>
+  </data>
+  <data name="MixesThisIngredient" xml:space="preserve">
+    <value>this ingredient</value>
+    <comment>Stands for the name of an ingredient that hasn't been typed yet.</comment>
+  </data>
+  <data name="MixesFirstIsMost" xml:space="preserve">
+    <value>The first one is what there's most of.</value>
+  </data>
+  <data name="MixesIngredientsToAdd" xml:space="preserve">
+    <value>Ingredients to add</value>
+    <comment>Read out by a screen reader.</comment>
+  </data>
+  <data name="MixesSomethingElse" xml:space="preserve">
+    <value>+ Something else</value>
+  </data>
+  <data name="MixesEditWarning_One" xml:space="preserve">
+    <value>{0} plant is in this mix. Saving changes what it shows, because a plant points at the mix rather than keeping its own copy of the recipe.</value>
+  </data>
+  <data name="MixesEditWarning_Other" xml:space="preserve">
+    <value>{0} plants are in this mix. Saving changes what they all show, because a plant points at the mix rather than keeping its own copy of the recipe.</value>
+  </data>
+  <data name="MixesCopyHint_One" xml:space="preserve">
+    <value>Saving it as a new mix leaves that plant on the mix as it was, and the new one is there for what you pot from now on.</value>
+  </data>
+  <data name="MixesCopyHint_Other" xml:space="preserve">
+    <value>Saving it as a new mix leaves those plants on the mix as it was, and the new one is there for what you pot from now on.</value>
+  </data>
+  <data name="MixesSubmitAdd" xml:space="preserve">
+    <value>Add mix</value>
+  </data>
+  <data name="MixesSaveAsNew" xml:space="preserve">
+    <value>Save as a new mix</value>
+  </data>
+  <data name="MixesAddButton" xml:space="preserve">
+    <value>+ Add a mix</value>
+  </data>
+  <data name="MixesEmptyTitle" xml:space="preserve">
+    <value>No mixes yet.</value>
+  </data>
+  <data name="MixesEmptyHint" xml:space="preserve">
+    <value>Start with the one you use most. A name and a list of what's in it is enough; the amounts can wait until you next mix a batch and write them down.</value>
+  </data>
+  <data name="MixesNoLongerMixed" xml:space="preserve">
+    <value>No longer mixed</value>
+  </data>
+  <data name="MixesYour" xml:space="preserve">
+    <value>Your mixes</value>
+  </data>
+  <data name="MixesNoPlantsInIt" xml:space="preserve">
+    <value>no plants in it</value>
+  </data>
+  <data name="MixesNoneInCollection" xml:space="preserve">
+    <value>None of them are in the collection any more.</value>
+  </data>
+  <data name="MixesBatch" xml:space="preserve">
+    <value>Batch</value>
+    <comment>Label of the amount of soil to mix.</comment>
+  </data>
+  <data name="MixesBatchPlaceholder" xml:space="preserve">
+    <value>e.g. 5</value>
+  </data>
+  <data name="MixesLastMixed" xml:space="preserve">
+    <value>Last mixed {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="MixesMeasureOut" xml:space="preserve">
+    <value>Measure out</value>
+  </data>
+  <data name="MixesMixingAgain" xml:space="preserve">
+    <value>Mixing it again</value>
+  </data>
+  <data name="MixesNoLongerMixing" xml:space="preserve">
+    <value>No longer mixing it</value>
+  </data>
+  <data name="MixesDeleteConfirm" xml:space="preserve">
+    <value>Delete {0}?</value>
+    <comment>{0} is the name of the mix.</comment>
+  </data>
+  <data name="MixesDeleteInUse_One" xml:space="preserve">
+    <value>{0} plant in this mix. Deleting it takes the mix off them, and changes nothing else about them.</value>
+  </data>
+  <data name="MixesDeleteInUse_Other" xml:space="preserve">
+    <value>{0} plants in this mix. Deleting it takes the mix off them, and changes nothing else about them.</value>
+  </data>
+  <data name="FeedsTitle" xml:space="preserve">
+    <value>Feeds</value>
+    <comment>Heading of the Feeds page.</comment>
+  </data>
+  <data name="FeedsPageTitle" xml:space="preserve">
+    <value>Feeds · Stikling</value>
+  </data>
+  <data name="FeedsIntro" xml:space="preserve">
+    <value>The feeds you mix, saved under a name, with each product's dose in the order it goes in the water. Logging a feed copies what's in it onto the care entry, so editing a feed here doesn't change what you've already logged.</value>
+  </data>
+  <data name="FeedsEdit" xml:space="preserve">
+    <value>Edit feed</value>
+  </data>
+  <data name="FeedsAdd" xml:space="preserve">
+    <value>Add a feed</value>
+  </data>
+  <data name="FeedsNamePlaceholder" xml:space="preserve">
+    <value>e.g. Weekly aroid feed</value>
+  </data>
+  <data name="FeedsWhatGoesIn" xml:space="preserve">
+    <value>What goes in the water</value>
+  </data>
+  <data name="FeedsMoveUp" xml:space="preserve">
+    <value>Move {0} up</value>
+    <comment>{0} is the name of a product.</comment>
+  </data>
+  <data name="FeedsMoveDown" xml:space="preserve">
+    <value>Move {0} down</value>
+    <comment>{0} is the name of a product.</comment>
+  </data>
+  <data name="FeedsRemove" xml:space="preserve">
+    <value>Remove {0}</value>
+    <comment>{0} is the name of a product.</comment>
+  </data>
+  <data name="FeedsInOrder" xml:space="preserve">
+    <value>In the order they go in the water.</value>
+  </data>
+  <data name="FeedsNoProducts" xml:space="preserve">
+    <value>No products yet. Add your fertilisers and the rest under {0} first.</value>
+    <comment>{0} is a link to the Products page.</comment>
+  </data>
+  <data name="FeedsProductsToAdd" xml:space="preserve">
+    <value>Products to add</value>
+    <comment>Read out by a screen reader.</comment>
+  </data>
+  <data name="FeedsSomethingMissing" xml:space="preserve">
+    <value>Something missing? Add it under {0}.</value>
+    <comment>{0} is a link to the Products page.</comment>
+  </data>
+  <data name="FeedsNotesPlaceholder" xml:space="preserve">
+    <value>e.g. Stir for a minute after the silica</value>
+  </data>
+  <data name="FeedsSubmitAdd" xml:space="preserve">
+    <value>Add feed</value>
+  </data>
+  <data name="FeedsAddButton" xml:space="preserve">
+    <value>+ Add a feed</value>
+  </data>
+  <data name="FeedsEmptyTitle" xml:space="preserve">
+    <value>No feeds yet.</value>
+  </data>
+  <data name="FeedsEmptyHint" xml:space="preserve">
+    <value>A feed is a few products mixed into the water together, like a fertiliser with silica. Start with the one you mix most. Pick the products in the order they go in the water, and the doses start at each product's usual one.</value>
+  </data>
+  <data name="FeedsAddProductsFirst" xml:space="preserve">
+    <value>Add your products first</value>
+  </data>
+  <data name="FeedsYour" xml:space="preserve">
+    <value>Your feeds</value>
+  </data>
+  <data name="FeedsWater" xml:space="preserve">
+    <value>Water</value>
+    <comment>Label of the amount of water to mix a feed for.</comment>
+  </data>
+  <data name="FeedsWaterPlaceholder" xml:space="preserve">
+    <value>e.g. 2</value>
+  </data>
+  <data name="FeedsMixBatch" xml:space="preserve">
+    <value>Mix a batch</value>
+  </data>
+  <data name="FeedsNoDose" xml:space="preserve">
+    <value>no dose</value>
+  </data>
+  <data name="FeedsGiven" xml:space="preserve">
+    <value>Given to {0}, last {1}</value>
+    <comment>Under a feed. {0} is a number of plants and {1} a date.</comment>
+  </data>
+  <data name="FeedsNotGiven" xml:space="preserve">
+    <value>Not given yet</value>
+  </data>
+  <data name="FeedsDatesMore" xml:space="preserve">
+    <value>{0} and {1} more</value>
+    <comment>After the dates a feed was given to a plant. {0} is a list of dates and {1} a number.</comment>
+  </data>
+  <data name="FeedsDeleteConfirm" xml:space="preserve">
+    <value>Delete {0}?</value>
+    <comment>{0} is the name of the feed.</comment>
+  </data>
+  <data name="FeedsDeleteGiven" xml:space="preserve">
+    <value>Delete {0}? It's been given to {1}, and those entries keep what was in it.</value>
+    <comment>{0} is the name of the feed and {1} a number of plants.</comment>
+  </data>
+</root>

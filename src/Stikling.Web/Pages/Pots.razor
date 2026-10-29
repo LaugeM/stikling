@@ -8,17 +8,15 @@
 @inject DeviceFiles Device
 @implements IAsyncDisposable
 
-<PageTitle>Pots · Stikling</PageTitle>
+<PageTitle>@Strings.Supplies.PotsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 <ShowFound ElementId="@(Show is { } shown ? $"item-{shown}" : null)" />
 
-<a class="back-link" href="supplies">Supplies</a>
-<h1>Pots</h1>
+<a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
+<h1>@Strings.Supplies.PotsTitle</h1>
 
 <p class="settings-hint">
-    The pots you own, so a plant can point at one instead of you typing it again. A nursery pot goes
-    inside something, an outer pot has no drainage and holds a nursery pot, and some pots need nothing
-    around them. Containers for propagating, like a box with a lid, have their own list.
+    @Strings.Supplies.PotsIntro
 </p>
 
 @if (errors.Count > 0)
@@ -36,7 +34,7 @@
     <div class="alert alert-warning" role="status">@photoStatus</div>
 }
 
-<div class="btn-group segmented pot-kinds mb-3" role="radiogroup" aria-label="Which pots to show">
+<div class="btn-group segmented pot-kinds mb-3" role="radiogroup" aria-label="@Strings.Supplies.PotsWhichToShow">
     @foreach (var group in Enum.GetValues<PotKind>())
     {
         var id = $"pot-kind-{group}";
@@ -49,11 +47,11 @@
 @if (draft is not null)
 {
     <section class="settings-section supply-form">
-        <h2>@(editing is null ? (IsContainer ? "Add a container" : "Add a pot") : (IsContainer ? "Edit container" : "Edit pot"))</h2>
+        <h2>@(editing is null ? (IsContainer ? Strings.Supplies.PotsAddContainer : Strings.Supplies.PotsAddPot) : (IsContainer ? Strings.Supplies.PotsEditContainer : Strings.Supplies.PotsEditPot))</h2>
 
         <div class="mb-3">
-            <div class="form-label">What kind</div>
-            <div class="chip-row" role="group" aria-label="What kind of pot">
+            <div class="form-label">@Strings.Supplies.PotsWhatKind</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Supplies.PotsWhatKindOfPot">
                 @foreach (var group in OfferedKinds)
                 {
                     <button type="button" class="chip @Picked(draft.Kind == group)"
@@ -63,10 +61,10 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label" for="pot-name">Name</label>
+            <label class="form-label" for="pot-name">@Strings.Supplies.Name</label>
             @if (Names.Count > 0)
             {
-                <div class="chip-row mb-2" role="group" aria-label="Names you already use">
+                <div class="chip-row mb-2" role="group" aria-label="@Strings.Supplies.PotsNamesInUse">
                     @foreach (var name in Names)
                     {
                         <button type="button" class="chip @Picked(Same(name, draft.Name))"
@@ -74,29 +72,29 @@
                     }
                 </div>
             }
-            <input id="pot-name" class="form-control" placeholder="@(IsContainer ? "e.g. Clear box with lid" : "e.g. Clear nursery pot")" autocomplete="off"
+            <input id="pot-name" class="form-control" placeholder="@(IsContainer ? Strings.Supplies.PotsContainerPlaceholder : Strings.Supplies.PotsPotPlaceholder)" autocomplete="off"
                    value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
             @if (IsContainer)
             {
-                <div class="form-text">Identical containers are one entry. Say how many you have below.</div>
+                <div class="form-text">@Strings.Supplies.PotsContainerNameHint</div>
             }
             else
             {
-                <div class="form-text">Every size of the same pot shares a name, so they stay together in the list.</div>
+                <div class="form-text">@Strings.Supplies.PotsPotNameHint</div>
             }
         </div>
 
         <div class="mb-3">
-            <div class="form-label">Photos</div>
+            <div class="form-label">@Strings.Supplies.PotsPhotos</div>
             @if (formPhotos.Count > 0)
             {
                 <div class="photo-picks">
                     @foreach (var photo in formPhotos)
                     {
                         <div class="photo-pick">
-                            <PhotoImage PhotoId="photo.Id" Alt="Photo of the pot" />
+                            <PhotoImage PhotoId="photo.Id" Alt="@Strings.Supplies.PotsPhotoAlt" />
                             <button type="button" class="photo-remove" @onclick="() => RemoveFormPhoto(photo)"
-                                    aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                                    aria-label="@Strings.Supplies.PotsRemovePhoto" title="@Strings.Supplies.PotsRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                         </div>
                     }
                 </div>
@@ -104,13 +102,13 @@
             <div class="composer-row">
                 <label class="btn btn-outline-primary btn-sm icon-btn" for="pot-camera">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                    Camera
+                    @Strings.Supplies.PotsCamera
                 </label>
                 <input id="pot-camera" type="file" accept="image/*" capture="environment" class="visually-hidden"
                        @ref="cameraInput" @onchange="() => AddFormPhotosAsync(cameraInput)" disabled="@busy" />
                 <label class="btn btn-outline-primary btn-sm icon-btn" for="pot-gallery">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
-                    Gallery
+                    @Strings.Supplies.PotsGallery
                 </label>
                 <input id="pot-gallery" type="file" accept="image/*" multiple class="visually-hidden"
                        @ref="galleryInput" @onchange="() => AddFormPhotosAsync(galleryInput)" disabled="@busy" />
@@ -119,7 +117,7 @@
                     <button type="button" class="btn btn-outline-primary btn-sm icon-btn" @onclick="StartGoogleAsync"
                             disabled="@(busy || googleBusy)">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
-                        Google Photos
+                        @Strings.Supplies.PotsGooglePhotos
                     </button>
                 }
             </div>
@@ -127,12 +125,12 @@
             {
                 <GooglePhotosPick @ref="googlePick" SubjectType="SubjectType.Pot" SubjectId="draft!.Id" OnSaved="GoogleFormSavedAsync" BusyChanged="busy => googleBusy = busy" />
             }
-            <div class="form-text">A photo tells this pot apart from similar ones, here and when you pick a pot for a plant.</div>
+            <div class="form-text">@Strings.Supplies.PotsPhotoHint</div>
         </div>
 
         <div class="mb-3">
-            <div class="form-label">Made of</div>
-            <div class="chip-row" role="group" aria-label="What the pot is made of">
+            <div class="form-label">@Strings.Supplies.PotsMadeOf</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Supplies.PotsMadeOfLabel">
                 @foreach (var material in Enum.GetValues<PotMaterial>())
                 {
                     <button type="button" class="chip @Picked(draft.Material == material)"
@@ -143,44 +141,43 @@
 
         <div class="row g-2 mb-3">
             <div class="col-6">
-                <label class="form-label" for="pot-top">Across the top (cm)</label>
+                <label class="form-label" for="pot-top">@Strings.Supplies.PotsAcrossTop</label>
                 <input id="pot-top" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
                        @bind="draft.TopCm" />
             </div>
             <div class="col-6">
-                <label class="form-label" for="pot-owned">How many</label>
+                <label class="form-label" for="pot-owned">@Strings.Supplies.PotsHowMany</label>
                 <input id="pot-owned" class="form-control" type="number" inputmode="numeric" min="1" step="1"
                        @bind="draft.Owned" />
             </div>
         </div>
 
         <details class="more-measurements mb-3" open="@detailsOpen">
-            <summary>More measurements</summary>
+            <summary>@Strings.Supplies.PotsMoreMeasurements</summary>
 
             <div class="row g-2 mt-2">
                 <div class="col-6">
-                    <label class="form-label" for="pot-bottom">Across the bottom (cm)</label>
+                    <label class="form-label" for="pot-bottom">@Strings.Supplies.PotsAcrossBottom</label>
                     <input id="pot-bottom" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
                            @bind="draft.BottomCm" />
                 </div>
                 <div class="col-6">
-                    <label class="form-label" for="pot-height">Height (cm)</label>
+                    <label class="form-label" for="pot-height">@Strings.Supplies.PotsHeight</label>
                     <input id="pot-height" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
                            @bind="draft.HeightCm" />
                 </div>
             </div>
             <div class="form-text">
-                On an outer pot these mean the inside. The bottom is the one that decides whether a nursery
-                pot really fits, since both usually taper.
+                @Strings.Supplies.PotsMeasurementsHint
             </div>
 
             @if (!IsContainer)
             {
                 <div class="mt-3">
-                    <label class="form-label" for="pot-rim">Rim (mm)</label>
+                    <label class="form-label" for="pot-rim">@Strings.Supplies.PotsRim</label>
                     <input id="pot-rim" class="form-control" type="number" inputmode="decimal" min="0" step="0.5"
                            @bind="draft.RimMm" />
-                    <div class="form-text">A rim lets the pot hang on an outer pot instead of standing in it.</div>
+                    <div class="form-text">@Strings.Supplies.PotsRimHint</div>
                 </div>
 
                 <div class="mt-3">
@@ -188,39 +185,39 @@
                         <input class="form-check-input" type="checkbox" id="pot-self-watering"
                                checked="@(draft.SelfWatering is not null)"
                                @onchange="e => SetSelfWatering((bool?)e.Value == true)" />
-                        <label class="form-check-label" for="pot-self-watering">Waters itself</label>
+                        <label class="form-check-label" for="pot-self-watering">@Strings.Supplies.PotsWatersItself</label>
                     </div>
                     @if (draft.SelfWatering is { } watering)
                     {
-                        <div class="chip-row mt-2" role="group" aria-label="How it waters itself">
+                        <div class="chip-row mt-2" role="group" aria-label="@Strings.Supplies.PotsHowWatersItself">
                             @foreach (var option in Enum.GetValues<PotWatering>())
                             {
                                 <button type="button" class="chip @Picked(watering == option)"
                                         @onclick="() => draft.SelfWatering = option">@Labels.For(option)</button>
                             }
                         </div>
-                        <div class="form-text">A wick draws the water up. Submerged means the pot stands in it.</div>
+                        <div class="form-text">@Strings.Supplies.PotsWateringHint</div>
                     }
                 </div>
             }
 
             <div class="mt-3">
-                <label class="form-label" for="pot-notes">Notes</label>
+                <label class="form-label" for="pot-notes">@Strings.Supplies.Notes</label>
                 <textarea id="pot-notes" class="form-control" rows="2" @bind="draft.Notes"></textarea>
             </div>
         </details>
 
         <div class="form-actions">
             <button type="button" class="btn btn-primary" disabled="@(busy || googleBusy)" @onclick="() => SaveAsync(again: false)">
-                @(editing is null ? (IsContainer ? "Add container" : "Add pot") : "Save")
+                @(editing is null ? (IsContainer ? Strings.Supplies.PotsSubmitAddContainer : Strings.Supplies.PotsSubmitAddPot) : Strings.Common.Save)
             </button>
             @if (editing is null)
             {
                 <button type="button" class="btn btn-outline-primary" disabled="@(busy || googleBusy)" @onclick="() => SaveAsync(again: true)">
-                    Save and add another size
+                    @Strings.Supplies.PotsSaveAndAnother
                 </button>
             }
-            <button type="button" class="btn btn-link" @onclick="CancelAsync">Cancel</button>
+            <button type="button" class="btn btn-link" @onclick="CancelAsync">@Strings.Common.Cancel</button>
         </div>
     </section>
 }
@@ -237,7 +234,7 @@ else
 
 @if (loading)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Supplies.Loading</p>
 }
 else if (Shown.Count == 0)
 {
@@ -264,9 +261,9 @@ else
                                 <p>@DeleteWarning(use.Pot)</p>
                                 <div class="care-actions">
                                     <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
-                                            @onclick="() => DeleteAsync(use.Pot)">Delete</button>
+                                            @onclick="() => DeleteAsync(use.Pot)">@Strings.Common.Delete</button>
                                     <button type="button" class="btn btn-link btn-sm"
-                                            @onclick="() => confirming = null">Cancel</button>
+                                            @onclick="() => confirming = null">@Strings.Common.Cancel</button>
                                 </div>
                             </div>
                         }
@@ -276,7 +273,7 @@ else
                                 @if (covers.GetValueOrDefault(use.Pot.Id) is { } cover)
                                 {
                                     <button type="button" class="pot-thumb" @onclick="() => OpenPhotosAsync(use.Pot)"
-                                            aria-label="Photos of @use.Pot.DisplayName">
+                                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsPhotosOf, use.Pot.DisplayName)">
                                         <PhotoImage PhotoId="cover.Id" />
                                     </button>
                                 }
@@ -290,11 +287,11 @@ else
                                     <span class="pot-use">@Labels.Use(use)</span>
                                     <span class="pot-actions">
                                         <label class="btn btn-link btn-sm link-action" for="@RowInputId"
-                                               @onclick="() => photoTarget = use.Pot">Photo</label>
+                                               @onclick="() => photoTarget = use.Pot">@Strings.Supplies.PotsPhotoLink</label>
                                         <button type="button" class="btn btn-link btn-sm link-action"
-                                                @onclick="() => StartEditAsync(use.Pot)">Edit</button>
+                                                @onclick="() => StartEditAsync(use.Pot)">@Strings.Common.Edit</button>
                                         <button type="button" class="btn btn-link btn-sm link-action"
-                                                @onclick="() => ConfirmAsync(use.Pot)">Delete</button>
+                                                @onclick="() => ConfirmAsync(use.Pot)">@Strings.Common.Delete</button>
                                     </span>
                                 </div>
                             </div>
@@ -395,26 +392,26 @@ else
 
     private string AddText => kind switch
     {
-        PotKind.Inner => "+ Add a nursery pot",
-        PotKind.Outer => "+ Add an outer pot",
-        PotKind.Propagation => "+ Add a container",
-        _ => "+ Add a pot"
+        PotKind.Inner => Strings.Supplies.PotsAddNursery,
+        PotKind.Outer => Strings.Supplies.PotsAddOuter,
+        PotKind.Propagation => Strings.Supplies.PotsAddPropagation,
+        _ => Strings.Supplies.PotsAddStandalone
     };
 
     private string EmptyTitle => kind switch
     {
-        PotKind.Inner => "No nursery pots yet.",
-        PotKind.Outer => "No outer pots yet.",
-        PotKind.Propagation => "No containers for propagating yet.",
-        _ => "No pots that stand on their own yet."
+        PotKind.Inner => Strings.Supplies.PotsEmptyNursery,
+        PotKind.Outer => Strings.Supplies.PotsEmptyOuter,
+        PotKind.Propagation => Strings.Supplies.PotsEmptyPropagation,
+        _ => Strings.Supplies.PotsEmptyStandalone
     };
 
     private string EmptyHint => kind switch
     {
-        PotKind.Propagation => "A box, jar or glass you root cuttings or corms in. Identical ones are one entry with how many you have, and Start propagation picks from them.",
-        PotKind.Inner => "Add the ones you use most first. A set of nursery pots is one entry per size, with how many of that size you have.",
-        PotKind.Outer => "An outer pot has no hole in the bottom and holds a nursery pot. Give each one a photo, so similar ones are easy to tell apart when you pick one for a plant.",
-        _ => "A pot with a hole and a saucer, or a self-watering pot, that needs nothing around it."
+        PotKind.Propagation => Strings.Supplies.PotsHintPropagation,
+        PotKind.Inner => Strings.Supplies.PotsHintNursery,
+        PotKind.Outer => Strings.Supplies.PotsHintOuter,
+        _ => Strings.Supplies.PotsHintStandalone
     };
 
     private IReadOnlyList<string> Names => draft is null ? [] : PotUse.Names(all, draft.Kind);
@@ -447,18 +444,20 @@ else
     private static bool Same(string? a, string? b) =>
         string.Equals(a?.Trim(), b?.Trim(), StringComparison.OrdinalIgnoreCase);
 
-    private static string SizeText(Pot pot) => pot.TopCm is { } top ? $"{Pot.Size(top)} cm" : "No size";
+    private static string SizeText(Pot pot) => pot.TopCm is { } top
+        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsSizeCm, Pot.Size(top))
+        : Strings.Supplies.PotsNoSize;
 
     /// <summary>The muted line beside a pot: what it's made of, and anything unusual about it.</summary>
     private static string About(Pot pot)
     {
         var parts = new List<string> { Labels.For(pot.Material) };
         if (pot.SelfWatering is { } watering)
-            parts.Add($"self-watering ({Labels.For(watering).ToLowerInvariant()})");
+            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsSelfWatering, Labels.For(watering).ToLowerInvariant()));
         if (pot.HasRim)
-            parts.Add($"{Pot.Size(pot.RimMm!.Value)} mm rim");
+            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsRimMm, Pot.Size(pot.RimMm!.Value)));
         if (pot.HeightCm is { } height)
-            parts.Add($"{Pot.Size(height)} cm tall");
+            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsTallCm, Pot.Size(height)));
         return string.Join(" · ", parts);
     }
 
@@ -543,7 +542,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a new pot failed");
-            photoStatus = $"Couldn't save the photos: {ex.Message}";
+            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsPhotosFailed, ex.Message);
         }
         finally
         {
@@ -586,7 +585,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a pot failed");
-            photoStatus = $"Couldn't save the photos: {ex.Message}";
+            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsPhotosFailed, ex.Message);
         }
         finally
         {
@@ -689,36 +688,26 @@ else
     /// <summary>What deleting a pot does to the plants in it and to its photos, said before it happens.</summary>
     private string DeleteWarning(Pot pot)
     {
-        var photos = photoCount switch
-        {
-            0 => "",
-            1 => "its photo",
-            _ => $"its {photoCount} photos"
-        };
+        var culture = System.Globalization.CultureInfo.CurrentCulture;
+        var deleted = photoCount == 0
+            ? ""
+            : " " + string.Format(culture, photoCount == 1 ? Strings.Supplies.PotsPhotosDeletedToo_One : Strings.Supplies.PotsPhotosDeletedToo_Other, photoCount);
 
-        var deleted = photos == "" ? "" : $" {Capital(photos)} {(photoCount == 1 ? "is" : "are")} deleted too.";
+        var gone = photoCount == 0
+            ? string.Format(culture, Strings.Supplies.PotsDeleteConfirm, pot.DisplayName)
+            : string.Format(culture, photoCount == 1 ? Strings.Supplies.PotsDeleteAndPhoto_One : Strings.Supplies.PotsDeleteAndPhoto_Other, pot.DisplayName, photoCount);
 
         if (pot.ForPropagation)
         {
-            return inUse.Propagations switch
-            {
-                0 when photos == "" => $"Delete {pot.DisplayName}?",
-                0 => $"Delete {pot.DisplayName} and {photos}?",
-                1 => "1 propagation is using this container. Deleting it takes it off that propagation, and changes nothing else about it." + deleted,
-                _ => $"{inUse.Propagations} propagations are using this container. Deleting it takes it off them, and changes nothing else about them." + deleted
-            };
+            return inUse.Propagations == 0
+                ? gone
+                : Plural.Of(inUse.Propagations, Strings.Supplies.PotsContainerInUse_One, Strings.Supplies.PotsContainerInUse_Other) + deleted;
         }
 
-        return inUse.Plants switch
-        {
-            0 when photos == "" => $"Delete {pot.DisplayName}?",
-            0 => $"Delete {pot.DisplayName} and {photos}?",
-            1 => "1 plant is using this pot. Deleting it takes the pot off that plant, and changes nothing else about it." + deleted,
-            _ => $"{inUse.Plants} plants are using this pot. Deleting it takes the pot off them, and changes nothing else about them." + deleted
-        };
+        return inUse.Plants == 0
+            ? gone
+            : Plural.Of(inUse.Plants, Strings.Supplies.PotsPotInUse_One, Strings.Supplies.PotsPotInUse_Other) + deleted;
     }
-
-    private static string Capital(string text) => char.ToUpperInvariant(text[0]) + text[1..];
 
     private async Task ConfirmAsync(Pot pot)
     {

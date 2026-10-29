@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Stikling.Core.Backup;
 using Stikling.Core.Fields;
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Import;
 
@@ -62,44 +63,44 @@ public static class ImportFields
     /// <summary>What the picker shows. The wording follows the plant form where it has the same field.</summary>
     public static string Label(ImportField field) => field switch
     {
-        ImportField.Skip => "Leave out",
-        ImportField.AboutLine => "A line in About it",
-        ImportField.Name => "Name",
-        ImportField.Number => "Collection number",
-        ImportField.Nickname => "Nickname",
-        ImportField.Genus => "Genus",
-        ImportField.Species => "Species",
-        ImportField.Cultivar => "Cultivar",
-        ImportField.NameSure => "How sure the name is",
-        ImportField.NameNote => "Locality or code",
-        ImportField.Place => "Room",
-        ImportField.GotOn => "Date you got it",
-        ImportField.Origin => "How you got it",
-        ImportField.Raised => "How it was raised",
-        ImportField.Source => "Source",
-        ImportField.Price => "Price paid",
-        ImportField.HowMany => "How many",
-        ImportField.PottedWith => "Potted with (kept in About it)",
-        ImportField.Medium => "Grows in",
-        ImportField.Status => "Status",
-        ImportField.Tags => "Tags",
-        ImportField.AboutIt => "About it, the notes",
-        ImportField.LastWatered => "Last watered",
-        ImportField.LastFed => "Last fed",
-        ImportField.LastRepotted => "Last repotted",
-        ImportField.OwnField => "A field of its own",
+        ImportField.Skip => Strings.Account.FieldSkip,
+        ImportField.AboutLine => Strings.Account.FieldAboutLine,
+        ImportField.Name => Strings.Account.FieldName,
+        ImportField.Number => Strings.Account.FieldNumber,
+        ImportField.Nickname => Strings.Account.FieldNickname,
+        ImportField.Genus => Strings.Account.FieldGenus,
+        ImportField.Species => Strings.Account.FieldSpecies,
+        ImportField.Cultivar => Strings.Account.FieldCultivar,
+        ImportField.NameSure => Strings.Account.FieldNameSure,
+        ImportField.NameNote => Strings.Account.FieldNameNote,
+        ImportField.Place => Strings.Account.FieldPlace,
+        ImportField.GotOn => Strings.Account.FieldGotOn,
+        ImportField.Origin => Strings.Account.FieldOrigin,
+        ImportField.Raised => Strings.Account.FieldRaised,
+        ImportField.Source => Strings.Account.FieldSource,
+        ImportField.Price => Strings.Account.FieldPrice,
+        ImportField.HowMany => Strings.Account.FieldHowMany,
+        ImportField.PottedWith => Strings.Account.FieldPottedWith,
+        ImportField.Medium => Strings.Account.FieldMedium,
+        ImportField.Status => Strings.Account.FieldStatus,
+        ImportField.Tags => Strings.Account.FieldTags,
+        ImportField.AboutIt => Strings.Account.FieldAboutIt,
+        ImportField.LastWatered => Strings.Account.FieldLastWatered,
+        ImportField.LastFed => Strings.Account.FieldLastFed,
+        ImportField.LastRepotted => Strings.Account.FieldLastRepotted,
+        ImportField.OwnField => Strings.Account.FieldOwnField,
         _ => field.ToString()
     };
 
     /// <summary>The fields in the picker, grouped so the list reads in a few short parts. Every field is in one group.</summary>
-    public static IReadOnlyList<(string Group, ImportField[] Fields)> Groups { get; } =
+    public static IReadOnlyList<(string Group, ImportField[] Fields)> Groups =>
     [
-        ("Keep or leave out", [ImportField.AboutLine, ImportField.Skip]),
-        ("Name", [ImportField.Name, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote]),
-        ("Where and when", [ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source, ImportField.Price]),
-        ("Care", [ImportField.LastWatered, ImportField.LastFed, ImportField.LastRepotted]),
-        ("More about it", [ImportField.HowMany, ImportField.PottedWith, ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt]),
-        ("Your fields", [ImportField.OwnField])
+        (Strings.Account.GroupKeepOrLeaveOut, [ImportField.AboutLine, ImportField.Skip]),
+        (Strings.Account.GroupName, [ImportField.Name, ImportField.Number, ImportField.Nickname, ImportField.Genus, ImportField.Species, ImportField.Cultivar, ImportField.NameSure, ImportField.NameNote]),
+        (Strings.Account.GroupWhereAndWhen, [ImportField.Place, ImportField.GotOn, ImportField.Origin, ImportField.Raised, ImportField.Source, ImportField.Price]),
+        (Strings.Account.GroupCare, [ImportField.LastWatered, ImportField.LastFed, ImportField.LastRepotted]),
+        (Strings.Account.GroupMoreAboutIt, [ImportField.HowMany, ImportField.PottedWith, ImportField.Medium, ImportField.Status, ImportField.Tags, ImportField.AboutIt]),
+        (Strings.Account.GroupYourFields, [ImportField.OwnField])
     ];
 
     // Our own export, column by column. Name is the display name made from the others, and Added is when

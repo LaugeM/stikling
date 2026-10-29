@@ -4,17 +4,15 @@
 @inject FeedService FeedService
 @inject IProductRepository ProductRepository
 
-<PageTitle>Feeds · Stikling</PageTitle>
+<PageTitle>@Strings.Supplies.FeedsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 <ShowFound ElementId="@(Show is { } shown ? $"item-{shown}" : null)" />
 
-<a class="back-link" href="supplies">Supplies</a>
-<h1>Feeds</h1>
+<a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
+<h1>@Strings.Supplies.FeedsTitle</h1>
 
 <p class="settings-hint">
-    The feeds you mix, saved under a name, with each product's dose in the order it goes in the
-    water. Logging a feed copies what's in it onto the care entry, so editing a feed here
-    doesn't change what you've already logged.
+    @Strings.Supplies.FeedsIntro
 </p>
 
 @if (errors.Count > 0)
@@ -30,16 +28,16 @@
 @if (draft is not null)
 {
     <section class="settings-section supply-form">
-        <h2>@(editing ? "Edit feed" : "Add a feed")</h2>
+        <h2>@(editing ? Strings.Supplies.FeedsEdit : Strings.Supplies.FeedsAdd)</h2>
 
         <div class="mb-3">
-            <label class="form-label" for="feed-name">Name</label>
-            <input id="feed-name" class="form-control" placeholder="e.g. Weekly aroid feed" autocomplete="off"
+            <label class="form-label" for="feed-name">@Strings.Supplies.Name</label>
+            <input id="feed-name" class="form-control" placeholder="@Strings.Supplies.FeedsNamePlaceholder" autocomplete="off"
                    value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
         </div>
 
         <div class="mb-3">
-            <div class="form-label">What goes in the water</div>
+            <div class="form-label">@Strings.Supplies.FeedsWhatGoesIn</div>
 
             @if (draft.Products.Count > 0)
             {
@@ -56,12 +54,12 @@
                             </label>
                             <div class="feed-tools">
                                 <button type="button" class="feed-tool" disabled="@(index == 0)"
-                                        aria-label="Move @NameOf(dose) up"
+                                        aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsMoveUp, NameOf(dose))"
                                         @onclick="() => draft.MoveUp(index)">▲</button>
                                 <button type="button" class="feed-tool" disabled="@(index == draft.Products.Count - 1)"
-                                        aria-label="Move @NameOf(dose) down"
+                                        aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsMoveDown, NameOf(dose))"
                                         @onclick="() => draft.MoveDown(index)">▼</button>
-                                <button type="button" class="feed-tool remove" aria-label="Remove @NameOf(dose)"
+                                <button type="button" class="feed-tool remove" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsRemove, NameOf(dose))"
                                         @onclick="() => draft.Products.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                             </div>
                             <DoseInput Id="@id" Unit="dose.Unit"
@@ -76,19 +74,19 @@
                 }
                 else
                 {
-                    <div class="form-text">In the order they go in the water.</div>
+                    <div class="form-text">@Strings.Supplies.FeedsInOrder</div>
                 }
             }
 
             @if (products.Count == 0)
             {
                 <p class="form-text">
-                    No products yet. Add your fertilisers and the rest under <a href="products">Products</a> first.
+                    @((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsNoProducts, ProductsLink))
                 </p>
             }
             else if (Addable.Count > 0)
             {
-                <div class="chip-row mt-2" role="group" aria-label="Products to add">
+                <div class="chip-row mt-2" role="group" aria-label="@Strings.Supplies.FeedsProductsToAdd">
                     @foreach (var product in Addable)
                     {
                         <button type="button" class="chip" @onclick="() => draft.Products.Add(ProductDose.From(product))">
@@ -100,54 +98,52 @@
                         </button>
                     }
                 </div>
-                <div class="form-text">Something missing? Add it under <a href="products">Products</a>.</div>
+                <div class="form-text">@((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsSomethingMissing, ProductsLink))</div>
             }
         </div>
 
         <div class="mb-3">
-            <label class="form-label" for="feed-notes">Notes</label>
-            <textarea id="feed-notes" class="form-control" rows="2" placeholder="e.g. Stir for a minute after the silica"
+            <label class="form-label" for="feed-notes">@Strings.Supplies.Notes</label>
+            <textarea id="feed-notes" class="form-control" rows="2" placeholder="@Strings.Supplies.FeedsNotesPlaceholder"
                       @bind="draft.Notes"></textarea>
         </div>
 
         <div class="form-actions">
             <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">
-                @(editing ? "Save changes" : "Add feed")
+                @(editing ? Strings.Supplies.SaveChanges : Strings.Supplies.FeedsSubmitAdd)
             </button>
-            <button type="button" class="btn btn-link" @onclick="Cancel">Cancel</button>
+            <button type="button" class="btn btn-link" @onclick="Cancel">@Strings.Common.Cancel</button>
         </div>
     </section>
 }
 else
 {
     <div class="form-actions mb-3">
-        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a feed</button>
+        <button type="button" class="btn btn-primary" @onclick="StartNew">@Strings.Supplies.FeedsAddButton</button>
     </div>
 }
 
 @if (loading)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Supplies.Loading</p>
 }
 else if (uses.Count == 0)
 {
     <div class="empty-state">
-        <p>No feeds yet.</p>
+        <p>@Strings.Supplies.FeedsEmptyTitle</p>
         <p class="text-body-secondary">
-            A feed is a few products mixed into the water together, like a fertiliser with silica.
-            Start with the one you mix most. Pick the products in the order they go in the water, and
-            the doses start at each product's usual one.
+            @Strings.Supplies.FeedsEmptyHint
         </p>
         @if (products.Count == 0)
         {
-            <a class="btn btn-outline-primary mt-3" href="products">Add your products first</a>
+            <a class="btn btn-outline-primary mt-3" href="products">@Strings.Supplies.FeedsAddProductsFirst</a>
         }
     </div>
 }
 else
 {
     <section class="settings-section">
-        <h2>Your feeds</h2>
+        <h2>@Strings.Supplies.FeedsYour</h2>
 
         <ul class="feed-list supply-grid">
             @foreach (var use in uses)
@@ -159,9 +155,9 @@ else
                             <p>@DeleteWarning(use)</p>
                             <div class="care-actions">
                                 <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
-                                        @onclick="() => DeleteAsync(use.Feed)">Delete</button>
+                                        @onclick="() => DeleteAsync(use.Feed)">@Strings.Common.Delete</button>
                                 <button type="button" class="btn btn-link btn-sm"
-                                        @onclick="() => confirming = null">Cancel</button>
+                                        @onclick="() => confirming = null">@Strings.Common.Cancel</button>
                             </div>
                         </div>
                     }
@@ -202,8 +198,8 @@ else
                         {
                             var id = $"feed-water-{use.Feed.Id}";
                             <div class="feed-water">
-                                <label for="@id">Water</label>
-                                <WaterInput Id="@id" Placeholder="e.g. 2" @bind-Litres="litres" />
+                                <label for="@id">@Strings.Supplies.FeedsWater</label>
+                                <WaterInput Id="@id" Placeholder="@Strings.Supplies.FeedsWaterPlaceholder" @bind-Litres="litres" />
                             </div>
                         }
 
@@ -228,11 +224,11 @@ else
 
                         <div class="care-actions">
                             <button type="button" class="btn btn-link btn-sm link-action"
-                                    @onclick="() => ToggleMixing(use.Feed)">@(measuring ? "Done" : "Mix a batch")</button>
+                                    @onclick="() => ToggleMixing(use.Feed)">@(measuring ? Strings.Common.Done : Strings.Supplies.FeedsMixBatch)</button>
                             <button type="button" class="btn btn-link btn-sm link-action"
-                                    @onclick="() => StartEdit(use.Feed)">Edit</button>
+                                    @onclick="() => StartEdit(use.Feed)">@Strings.Common.Edit</button>
                             <button type="button" class="btn btn-link btn-sm link-action"
-                                    @onclick="() => { confirming = use.Feed.Id; mixing = null; }">Delete</button>
+                                    @onclick="() => { confirming = use.Feed.Id; mixing = null; }">@Strings.Common.Delete</button>
                         </div>
                     }
                 </li>
@@ -245,6 +241,8 @@ else
     /// <summary>An item to scroll to and mark. Set by Search.</summary>
     [SupplyParameterFromQuery(Name = "show")]
     public Guid? Show { get; set; }
+
+    private static string ProductsLink => $"<a href=\"products\">{Strings.Supplies.ProductsLink}</a>";
 
     private IReadOnlyList<FeedUse> uses = [];
     private IReadOnlyList<Product> products = [];
@@ -285,12 +283,12 @@ else
         products.FirstOrDefault(p => p.Id == dose.ProductId)?.Name ?? dose.Name;
 
     private static string DoseText(ProductDose dose) =>
-        dose.Amount is { } amount ? Doses.Text(amount, dose.Unit, dose.Per, dose.PerUnit) : "no dose";
+        dose.Amount is { } amount ? Doses.Text(amount, dose.Unit, dose.Per, dose.PerUnit) : Strings.Supplies.FeedsNoDose;
 
     /// <summary>"Given to 4 plants, last 12 Sep 2026".</summary>
     private static string Given(FeedUse use) => use.LastUsed is { } last
-        ? $"Given to {Labels.Plants(use.Plants)}, last {Labels.Date(last)}"
-        : "Not given yet";
+        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsGiven, Labels.Plants(use.Plants), Labels.Date(last))
+        : Strings.Supplies.FeedsNotGiven;
 
     private async Task TogglePlantsAsync(Feed feed)
     {
@@ -307,12 +305,12 @@ else
     private static string DatesText(FeedPlant fed)
     {
         var text = string.Join(", ", fed.Dates.Select(Labels.Date));
-        return fed.More > 0 ? $"{text} and {fed.More} more" : text;
+        return fed.More > 0 ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsDatesMore, text, fed.More) : text;
     }
 
     private static string DeleteWarning(FeedUse use) => use.Plants == 0
-        ? $"Delete {use.Feed.Name}?"
-        : $"Delete {use.Feed.Name}? It's been given to {Labels.Plants(use.Plants)}, and those entries keep what was in it.";
+        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsDeleteConfirm, use.Feed.Name)
+        : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsDeleteGiven, use.Feed.Name, Labels.Plants(use.Plants));
 
     private void ToggleMixing(Feed feed)
     {

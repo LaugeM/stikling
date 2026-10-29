@@ -1,6 +1,7 @@
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Sellers;
 
@@ -106,7 +107,7 @@ public sealed class SellerService(ISellerRepository sellers, IPlantRepository pl
     {
         var all = await sellers.GetSellersAsync();
         if (all.Find(id) is not { } seller || seller.Id != id)
-            throw new ArgumentException("That seller isn't there any more.", nameof(id));
+            throw new ArgumentException(Strings.Supplies.SellerGone, nameof(id));
 
         var cleaned = SellerName.Clean(name);
         var changed = new Seller { Name = cleaned ?? "" };
@@ -133,11 +134,11 @@ public sealed class SellerService(ISellerRepository sellers, IPlantRepository pl
     {
         var all = await sellers.GetSellersAsync();
         if (all.Find(fromId) is not { } from || from.Id != fromId)
-            throw new ArgumentException("That seller isn't there any more.", nameof(fromId));
+            throw new ArgumentException(Strings.Supplies.SellerGone, nameof(fromId));
         if (all.Find(intoId) is not { } into || into.Id != intoId)
-            throw new ArgumentException("That seller isn't there any more.", nameof(intoId));
+            throw new ArgumentException(Strings.Supplies.SellerGone, nameof(intoId));
         if (from.Id == into.Id)
-            throw new ArgumentException("Pick another seller to merge into.", nameof(intoId));
+            throw new ArgumentException(Strings.Supplies.SellerPickAnother, nameof(intoId));
 
         // What points at it (or at one merged into it) is worked out before it stops being live
         var (fromPlants, fromPropagations) = await FromAsync(all, from.Id);

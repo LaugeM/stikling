@@ -1,3 +1,4 @@
+using Strings = Stikling.Web.Resources;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -220,15 +221,15 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
                 return ShareOutcome<TResult>.Success(result(default!));
             return await response.Content.ReadFromJsonAsync<TBody>() is { } value
                 ? ShareOutcome<TResult>.Success(result(value))
-                : ShareOutcome<TResult>.Failure("The server sent an empty answer.");
+                : ShareOutcome<TResult>.Failure(Strings.Account.ShareEmptyAnswer);
         }
         catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
         {
-            return ShareOutcome<TResult>.Failure("Your sign-in has run out. Sign out and in again to carry on.");
+            return ShareOutcome<TResult>.Failure(Strings.Account.ShareSignInRanOut);
         }
         catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
         {
-            return ShareOutcome<TResult>.Failure("The Stikling server can't be reached right now.", offline: true);
+            return ShareOutcome<TResult>.Failure(Strings.Account.ShareUnreachable, offline: true);
         }
     }
 
@@ -256,8 +257,8 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
         }
 
         return response.StatusCode == HttpStatusCode.NotFound
-            ? "That link isn't there any more. Close this and open Share again."
-            : "The server turned that down. Try again in a moment.";
+            ? Strings.Account.ShareLinkGone
+            : Strings.Account.ShareTurnedDown;
     }
 
     // The images go between the device database and the API in photos.js, so they never pass through .NET

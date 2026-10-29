@@ -4,6 +4,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Stikling.Core.Plants;
 using Stikling.Core.Rooms;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Import;
 
@@ -98,7 +99,7 @@ public static class SpreadsheetImport
                 if (PlantNames.ParseQualifier(sure) is { } qualifier)
                     draft.NameQualifier = qualifier;
                 else
-                    CantRead(ImportField.NameSure, $"Didn't know \"{sure}\" as how sure the name is, kept in About it");
+                    CantRead(ImportField.NameSure, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemNameSure, sure));
             }
             draft.NameNote = PlantNames.Note(Get(ImportField.NameNote));
 
@@ -136,7 +137,7 @@ public static class SpreadsheetImport
                 if (CollectionNumbers.Normalize(number) is { } code && CollectionNumbers.IsValid(code))
                     draft.CollectionNumber = code;
                 else
-                    CantRead(ImportField.Number, $"Couldn't use \"{number}\" as a number, kept in About it");
+                    CantRead(ImportField.Number, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemNumber, number));
             }
 
             draft.Source = Get(ImportField.Source);
@@ -146,9 +147,9 @@ public static class SpreadsheetImport
             {
                 var date = ImportValues.ReadDate(gotOn, order, today);
                 if (date is null)
-                    CantRead(ImportField.GotOn, $"Couldn't read \"{gotOn}\" as a date, kept in About it");
+                    CantRead(ImportField.GotOn, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemDate, gotOn));
                 else if (date.Start > today)
-                    CantRead(ImportField.GotOn, $"\"{gotOn}\" is in the future, kept in About it");
+                    CantRead(ImportField.GotOn, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemFuture, gotOn));
                 else
                     draft.AcquiredOn = date;
             }
@@ -158,7 +159,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadOrigin(origin) is { } value)
                     draft.Origin = value;
                 else
-                    CantRead(ImportField.Origin, $"Didn't know \"{origin}\" as an origin, kept in About it");
+                    CantRead(ImportField.Origin, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOrigin, origin));
             }
 
             if (Get(ImportField.Raised) is { } raised)
@@ -166,7 +167,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadRaised(raised) is { } value)
                     draft.RaisedAs = value;
                 else
-                    CantRead(ImportField.Raised, $"Didn't know \"{raised}\" as how it was raised, kept in About it");
+                    CantRead(ImportField.Raised, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemRaised, raised));
             }
 
             if (Get(ImportField.Medium) is { } medium)
@@ -174,7 +175,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadMedium(medium) is { } value)
                     draft.Medium = value;
                 else
-                    CantRead(ImportField.Medium, $"Didn't know \"{medium}\" as a medium, kept in About it");
+                    CantRead(ImportField.Medium, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemMedium, medium));
             }
 
             if (Get(ImportField.Status) is { } status)
@@ -183,7 +184,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadStatus(status) is { } value)
                     draft.Status = value;
                 else
-                    CantRead(ImportField.Status, $"Didn't know \"{status}\" as a status, kept in About it");
+                    CantRead(ImportField.Status, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemStatus, status));
             }
 
             if (Get(ImportField.Price) is { } price)
@@ -191,7 +192,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadPrice(price) is { } value)
                     draft.PricePaid = value;
                 else
-                    CantRead(ImportField.Price, $"Couldn't read \"{price}\" as a price, kept in About it");
+                    CantRead(ImportField.Price, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemPrice, price));
             }
 
             if (Get(ImportField.HowMany) is { } howMany)
@@ -199,7 +200,7 @@ public static class SpreadsheetImport
                 if (int.TryParse(howMany.Trim(), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var howManyValue) && howManyValue >= 1)
                     draft.Count = howManyValue == 1 ? null : howManyValue;
                 else
-                    CantRead(ImportField.HowMany, $"Couldn't read \"{howMany}\" as a number of plants, kept in About it");
+                    CantRead(ImportField.HowMany, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemHowMany, howMany));
             }
 
             var care = new List<ImportCare>();
@@ -209,11 +210,11 @@ public static class SpreadsheetImport
                     continue;
                 var date = ImportValues.ReadDate(text, order, today);
                 if (date is null)
-                    CantRead(field, $"Couldn't read \"{text}\" as a date, kept in About it");
+                    CantRead(field, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemDate, text));
                 else if (date.Start > today)
-                    CantRead(field, $"\"{text}\" is in the future, kept in About it");
+                    CantRead(field, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemFuture, text));
                 else if (date.Precision != DatePrecision.Day)
-                    CantRead(field, $"\"{text}\" needs a whole day, kept in About it");
+                    CantRead(field, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemWholeDay, text));
                 else
                     care.Add(new ImportCare(kind, date.Start));
             }
@@ -247,7 +248,7 @@ public static class SpreadsheetImport
             draft.Notes = notes.Count == 0 ? null : string.Join('\n', notes);
 
             var cantAdd = string.IsNullOrWhiteSpace(draft.Nickname) && string.IsNullOrWhiteSpace(draft.Genus) && draft.NameQualifier != NameQualifier.Unknown
-                ? "No name"
+                ? Strings.Account.CantAddNoName
                 : draft.Validate(today).FirstOrDefault();
             var looksLikeYours = PlantMatches.SameNameEver(draft, existing).Any(p => p.AcquiredOn == draft.AcquiredOn);
 
@@ -276,24 +277,24 @@ public static class SpreadsheetImport
                 // "150 kr" reads too
                 if (ImportValues.ReadPrice(cell) is { } price)
                     return price.ToString("0.####", CultureInfo.InvariantCulture);
-                problem = $"Couldn't read \"{cell}\" as a number for {target.Name}, kept in About it";
+                problem = string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOwnNumber, cell, target.Name);
                 return null;
             case OwnFieldKind.Date:
                 if (ImportValues.ReadDate(cell, order, today) is not { } date)
                 {
-                    problem = $"Couldn't read \"{cell}\" as a date for {target.Name}, kept in About it";
+                    problem = string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOwnDate, cell, target.Name);
                     return null;
                 }
                 if (date.Precision != DatePrecision.Day)
                 {
-                    problem = $"\"{cell}\" needs a whole day for {target.Name}, kept in About it";
+                    problem = string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOwnWholeDay, cell, target.Name);
                     return null;
                 }
                 return date.Start.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             default:
                 if (cell.Length > OwnFieldValues.MaxTextLength)
                 {
-                    problem = $"\"{cell}\" is too long for {target.Name}, kept in About it";
+                    problem = string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOwnTooLong, cell, target.Name);
                     return null;
                 }
                 return cell;

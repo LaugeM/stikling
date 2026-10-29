@@ -5,18 +5,15 @@
 @inject ProductService ProductService
 @inject IJSRuntime JS
 
-<PageTitle>Products · Stikling</PageTitle>
+<PageTitle>@Strings.Supplies.ProductsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 <ShowFound ElementId="@(Show is { } shown ? $"item-{shown}" : null)" />
 
-<a class="back-link" href="supplies">Supplies</a>
-<h1>Products</h1>
+<a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
+<h1>@Strings.Supplies.ProductsTitle</h1>
 
 <p class="settings-hint">
-    Your fertilisers, stimulants, silica and anything else that goes in the water, each with the
-    dose you usually use. Logging a feed fills the dose in, and you can change it for that one time.
-    A care entry keeps the name and dose it was logged with, so editing a product here doesn't
-    change what you've already logged.
+    @Strings.Supplies.ProductsIntro
 </p>
 
 @if (errors.Count > 0)
@@ -32,17 +29,17 @@
 @if (draft is not null)
 {
     <section class="settings-section supply-form">
-        <h2>@(editing ? "Edit product" : "Add a product")</h2>
+        <h2>@(editing ? Strings.Supplies.ProductEdit : Strings.Supplies.ProductAdd)</h2>
 
         <div class="mb-3">
-            <label class="form-label" for="product-name">Name</label>
-            <input id="product-name" class="form-control" placeholder="e.g. Hydro fertiliser" autocomplete="off"
+            <label class="form-label" for="product-name">@Strings.Supplies.Name</label>
+            <input id="product-name" class="form-control" placeholder="@Strings.Supplies.ProductNamePlaceholder" autocomplete="off"
                    value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
         </div>
 
         <div class="mb-3">
-            <div class="form-label">What it is</div>
-            <div class="chip-row" role="group" aria-label="What it is">
+            <div class="form-label">@Strings.Supplies.WhatItIs</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Supplies.WhatItIs">
                 @foreach (var kind in Enum.GetValues<ProductKind>())
                 {
                     <button type="button" class="chip @Picked(draft.Kind == kind)"
@@ -50,14 +47,14 @@
                             @onclick="() => draft.Kind = kind">@Labels.For(kind)</button>
                 }
             </div>
-            <div class="form-text">A feed uses this to check that silica goes in first and pH last.</div>
+            <div class="form-text">@Strings.Supplies.ProductKindHint</div>
         </div>
 
         <div class="mb-3">
-            <label class="form-label" for="product-dose">Usual dose</label>
+            <label class="form-label" for="product-dose">@Strings.Supplies.ProductUsualDose</label>
             <DoseInput Id="product-dose" Small="false" Unit="draft.Unit"
                        @bind-Amount="draft.DefaultDose" @bind-Per="draft.Per" @bind-PerUnit="draft.PerUnit" />
-            <div class="chip-row mt-2" role="group" aria-label="What the product is measured in">
+            <div class="chip-row mt-2" role="group" aria-label="@Strings.Supplies.ProductMeasuredIn">
                 @foreach (var unit in Enum.GetValues<DoseUnit>())
                 {
                     <button type="button" class="chip @Picked(draft.Unit == unit)"
@@ -66,12 +63,12 @@
                 }
             </div>
             <div class="form-text">
-                The way the bottle puts it, e.g. 5 ml per 4 L. Leave the dose empty if you don't know it yet.
+                @Strings.Supplies.ProductDoseHint
             </div>
         </div>
 
         <div class="mb-3">
-            <div class="form-label">What's in it</div>
+            <div class="form-label">@Strings.Supplies.WhatsInIt</div>
             @if (draft.Kind == ProductKind.Fertiliser)
             {
                 <div class="nutrient-npk">
@@ -99,13 +96,13 @@
                                value="@TextOf(nutrient)" @oninput="e => texts[nutrient] = e.Value?.ToString() ?? string.Empty" />
                         <span class="input-group-text">%</span>
                     </div>
-                    <button type="button" class="nutrient-remove" aria-label="Remove @Labels.For(nutrient)"
+                    <button type="button" class="nutrient-remove" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.ProductRemoveNutrient, Labels.For(nutrient))"
                             @onclick="() => RemoveNutrient(nutrient)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                 </div>
             }
             @if (adding)
             {
-                <div class="chip-row mt-2" role="group" aria-label="Nutrients to add">
+                <div class="chip-row mt-2" role="group" aria-label="@Strings.Supplies.ProductNutrientsToAdd">
                     @foreach (var nutrient in Addable)
                     {
                         <button type="button" class="chip" @onclick="() => AddNutrient(nutrient)">
@@ -116,50 +113,48 @@
             }
             else if (Addable.Count > 0)
             {
-                <button type="button" class="btn btn-link px-0" @onclick="() => adding = true">+ Add a nutrient</button>
+                <button type="button" class="btn btn-link px-0" @onclick="() => adding = true">@Strings.Supplies.ProductAddNutrient</button>
             }
-            <div class="form-text">As printed on the label, in %.</div>
+            <div class="form-text">@Strings.Supplies.ProductLabelHint</div>
         </div>
 
         <div class="mb-3">
-            <label class="form-label" for="product-notes">Notes</label>
+            <label class="form-label" for="product-notes">@Strings.Supplies.Notes</label>
             <textarea id="product-notes" class="form-control" rows="2" @bind="draft.Notes"></textarea>
         </div>
 
         <div class="form-actions">
             <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">
-                @(editing ? "Save changes" : "Add product")
+                @(editing ? Strings.Supplies.SaveChanges : Strings.Supplies.ProductSubmitAdd)
             </button>
-            <button type="button" class="btn btn-link" @onclick="Cancel">Cancel</button>
+            <button type="button" class="btn btn-link" @onclick="Cancel">@Strings.Common.Cancel</button>
         </div>
     </section>
 }
 else
 {
     <div class="form-actions mb-3">
-        <button type="button" class="btn btn-primary" @onclick="StartNew">+ Add a product</button>
+        <button type="button" class="btn btn-primary" @onclick="StartNew">@Strings.Supplies.ProductAddButton</button>
     </div>
 }
 
 @if (loading)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Supplies.Loading</p>
 }
 else if (uses.Count == 0)
 {
     <div class="empty-state">
-        <p>No products yet.</p>
+        <p>@Strings.Supplies.ProductsEmptyTitle</p>
         <p class="text-body-secondary">
-            A product is anything you add to the water, like a fertiliser, silica or a rooting stimulant.
-            Start with the fertiliser you use most. A name is enough; the dose can wait until you
-            next have the bottle in your hand.
+            @Strings.Supplies.ProductsEmptyHint
         </p>
     </div>
 }
 else
 {
     <section class="settings-section">
-        <h2>Your products</h2>
+        <h2>@Strings.Supplies.ProductsYour</h2>
 
         <ul class="product-list supply-grid">
             @foreach (var use in uses)
@@ -171,9 +166,9 @@ else
                             <p>@DeleteWarning(use)</p>
                             <div class="care-actions">
                                 <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
-                                        @onclick="() => DeleteAsync(use.Product)">Delete</button>
+                                        @onclick="() => DeleteAsync(use.Product)">@Strings.Common.Delete</button>
                                 <button type="button" class="btn btn-link btn-sm"
-                                        @onclick="() => confirming = null">Cancel</button>
+                                        @onclick="() => confirming = null">@Strings.Common.Cancel</button>
                             </div>
                         </div>
                     }
@@ -181,7 +176,7 @@ else
                     {
                         <div class="product-head">
                             <span class="product-title">@use.Product.Name</span>
-                            <span class="product-dose-text">@(use.Product.DoseText ?? "no usual dose")</span>
+                            <span class="product-dose-text">@(use.Product.DoseText ?? Strings.Supplies.ProductNoUsualDose)</span>
                         </div>
                         <div class="product-use">@Labels.For(use.Product.Kind) · @Used(use)</div>
                         @if (use.Product.NutrientText is { } nutrientText)
@@ -194,9 +189,9 @@ else
                         }
                         <div class="care-actions">
                             <button type="button" class="btn btn-link btn-sm link-action"
-                                    @onclick="() => StartEdit(use.Product)">Edit</button>
+                                    @onclick="() => StartEdit(use.Product)">@Strings.Common.Edit</button>
                             <button type="button" class="btn btn-link btn-sm link-action"
-                                    @onclick="() => confirming = use.Product.Id">Delete</button>
+                                    @onclick="() => confirming = use.Product.Id">@Strings.Common.Delete</button>
                         </div>
                     }
                 </li>
@@ -305,7 +300,7 @@ else
                 continue;
             if (!decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var percent))
             {
-                errors = [$"{Labels.For(nutrient)} has to be a number."];
+                errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.ProductNumberError, Labels.For(nutrient))];
                 showErrors = true;
                 return false;
             }
@@ -317,12 +312,12 @@ else
 
     /// <summary>"used on 4 plants, last 12 Sep 2026".</summary>
     private static string Used(ProductUse use) => use.LastUsed is { } last
-        ? $"used on {Labels.Plants(use.Plants)}, last {Labels.Date(last)}"
-        : "not logged yet";
+        ? string.Format(CultureInfo.CurrentCulture, Strings.Supplies.ProductUsed, Labels.Plants(use.Plants), Labels.Date(last))
+        : Strings.Supplies.ProductNotLogged;
 
     private static string DeleteWarning(ProductUse use) => use.Plants == 0
-        ? $"Delete {use.Product.Name}?"
-        : $"Delete {use.Product.Name}? It's been logged on {Labels.Plants(use.Plants)}, and those entries keep its name and dose.";
+        ? string.Format(CultureInfo.CurrentCulture, Strings.Supplies.ProductDeleteConfirm, use.Product.Name)
+        : string.Format(CultureInfo.CurrentCulture, Strings.Supplies.ProductDeleteLogged, use.Product.Name, Labels.Plants(use.Plants));
 
     private void StartNew()
     {

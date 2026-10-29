@@ -1,0 +1,825 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Name" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Noter</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Henter…</value>
+  </data>
+  <data name="BackToSupplies" xml:space="preserve">
+    <value>Materialer</value>
+  </data>
+  <data name="ProductsLink" xml:space="preserve">
+    <value>Produkter</value>
+  </data>
+  <data name="WhatItIs" xml:space="preserve">
+    <value>Hvad det er</value>
+  </data>
+  <data name="WhatsInIt" xml:space="preserve">
+    <value>Hvad der er i</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Gem ændringer</value>
+  </data>
+  <data name="LitresOrMillilitres" xml:space="preserve">
+    <value>Liter eller milliliter</value>
+  </data>
+  <data name="PlantCountInUse" xml:space="preserve">
+    <value>{0} i den</value>
+  </data>
+  <data name="Seller_One" xml:space="preserve">
+    <value>{0} sælger</value>
+  </data>
+  <data name="Seller_Other" xml:space="preserve">
+    <value>{0} sælgere</value>
+  </data>
+  <data name="Propagation_One" xml:space="preserve">
+    <value>{0} formering</value>
+  </data>
+  <data name="Propagation_Other" xml:space="preserve">
+    <value>{0} formeringer</value>
+  </data>
+  <data name="Pot_One" xml:space="preserve">
+    <value>{0} potte</value>
+  </data>
+  <data name="Pot_Other" xml:space="preserve">
+    <value>{0} potter</value>
+  </data>
+  <data name="Container_One" xml:space="preserve">
+    <value>{0} beholder</value>
+  </data>
+  <data name="Container_Other" xml:space="preserve">
+    <value>{0} beholdere</value>
+  </data>
+  <data name="Mix_One" xml:space="preserve">
+    <value>{0} blanding</value>
+  </data>
+  <data name="Mix_Other" xml:space="preserve">
+    <value>{0} blandinger</value>
+  </data>
+  <data name="Product_One" xml:space="preserve">
+    <value>{0} produkt</value>
+  </data>
+  <data name="Product_Other" xml:space="preserve">
+    <value>{0} produkter</value>
+  </data>
+  <data name="Feed_One" xml:space="preserve">
+    <value>{0} gødning</value>
+  </data>
+  <data name="Feed_Other" xml:space="preserve">
+    <value>{0} gødninger</value>
+  </data>
+  <data name="Recipe_One" xml:space="preserve">
+    <value>{0} opskrift</value>
+  </data>
+  <data name="Recipe_Other" xml:space="preserve">
+    <value>{0} opskrifter</value>
+  </data>
+  <data name="Plan_One" xml:space="preserve">
+    <value>{0} plan</value>
+  </data>
+  <data name="Plan_Other" xml:space="preserve">
+    <value>{0} planer</value>
+  </data>
+  <data name="Problem_One" xml:space="preserve">
+    <value>{0} problem</value>
+  </data>
+  <data name="Problem_Other" xml:space="preserve">
+    <value>{0} problemer</value>
+  </data>
+  <data name="PestCase_One" xml:space="preserve">
+    <value>{0} sag</value>
+  </data>
+  <data name="PestCase_Other" xml:space="preserve">
+    <value>{0} sager</value>
+  </data>
+  <data name="SuppliesTitle" xml:space="preserve">
+    <value>Materialer</value>
+  </data>
+  <data name="SuppliesPageTitle" xml:space="preserve">
+    <value>Materialer · Stikling</value>
+  </data>
+  <data name="SuppliesIntro" xml:space="preserve">
+    <value>De sælgere, dine planter kommer fra, og de potter, blandinger og produkter, du bruger, så en plante eller en behandling kan pege på dem, i stedet for at du skriver dem igen.</value>
+  </data>
+  <data name="SuppliesSellers" xml:space="preserve">
+    <value>Sælgere</value>
+  </data>
+  <data name="SuppliesPots" xml:space="preserve">
+    <value>Potter</value>
+  </data>
+  <data name="SuppliesSoilMixes" xml:space="preserve">
+    <value>Jordblandinger</value>
+  </data>
+  <data name="SuppliesProducts" xml:space="preserve">
+    <value>Produkter</value>
+  </data>
+  <data name="SuppliesFeeds" xml:space="preserve">
+    <value>Gødninger</value>
+  </data>
+  <data name="SuppliesRecipes" xml:space="preserve">
+    <value>Behandlingsopskrifter</value>
+  </data>
+  <data name="SuppliesPlans" xml:space="preserve">
+    <value>Behandlingsplaner</value>
+  </data>
+  <data name="SuppliesPestsHeading" xml:space="preserve">
+    <value>Skadedyr og problemer</value>
+  </data>
+  <data name="SuppliesPestsRow" xml:space="preserve">
+    <value>Sager og problemer</value>
+  </data>
+  <data name="SellersNone" xml:space="preserve">
+    <value>Hvor dine planter kommer fra</value>
+  </data>
+  <data name="PotsNone" xml:space="preserve">
+    <value>De potter, du har, planteskolepotter eller pyntepotter</value>
+  </data>
+  <data name="PotsFree" xml:space="preserve">
+    <value>{0}, {1} ledige</value>
+  </data>
+  <data name="MixesNone" xml:space="preserve">
+    <value>Dine egne blandinger og hvad der er i dem</value>
+  </data>
+  <data name="MixesRetired" xml:space="preserve">
+    <value>{0}, {1} blandes ikke længere</value>
+  </data>
+  <data name="ProductsNone" xml:space="preserve">
+    <value>Gødning, sprays og andet, du køber</value>
+  </data>
+  <data name="FeedsNone" xml:space="preserve">
+    <value>Hvordan du fortynder et produkt til vanding</value>
+  </data>
+  <data name="PlansNone" xml:space="preserve">
+    <value>Trin at følge i en sag</value>
+  </data>
+  <data name="RecipesNone" xml:space="preserve">
+    <value>Sprays, du blander på samme måde hver gang</value>
+  </data>
+  <data name="PestsNoneOpenResolved" xml:space="preserve">
+    <value>Ingen åbne, {0} afsluttet{1}</value>
+  </data>
+  <data name="PestsNoCases" xml:space="preserve">
+    <value>Ingen sager{0}</value>
+  </data>
+  <data name="PestsNeverOpen" xml:space="preserve">
+    <value>Åbn en, når du finder skadedyr, så du kan følge behandlingerne</value>
+  </data>
+  <data name="PestsOpen_One" xml:space="preserve">
+    <value>{0} åben{1}</value>
+  </data>
+  <data name="PestsOpen_Other" xml:space="preserve">
+    <value>{0} åbne{1}</value>
+  </data>
+  <data name="ProblemsPart" xml:space="preserve">
+    <value>, {0}</value>
+  </data>
+  <data name="SellersTitle" xml:space="preserve">
+    <value>Sælgere</value>
+  </data>
+  <data name="SellersPageTitle" xml:space="preserve">
+    <value>Sælgere · Stikling</value>
+  </data>
+  <data name="SellersIntro" xml:space="preserve">
+    <value>Alle, dine planter kommer fra: butikker, webshops, venner og byttemarkeder. Åbn en for at se, hvordan planterne derfra har klaret sig siden.</value>
+  </data>
+  <data name="SellersEmptyTitle" xml:space="preserve">
+    <value>Ingen sælgere endnu.</value>
+  </data>
+  <data name="SellersEmptyHint" xml:space="preserve">
+    <value>Hvor dine planter kommer fra, vises her, når en plante har en sælger. Vælg en under Hvorfra, når du tilføjer en plante.</value>
+  </data>
+  <data name="SellersYour" xml:space="preserve">
+    <value>Dine sælgere</value>
+  </data>
+  <data name="SellersNothingYet" xml:space="preserve">
+    <value>intet derfra endnu</value>
+  </data>
+  <data name="SellersPlantsAndPropagations" xml:space="preserve">
+    <value>{0} og {1}</value>
+  </data>
+  <data name="SellerPageTitle" xml:space="preserve">
+    <value>{0} · Stikling</value>
+  </data>
+  <data name="SellerFallbackName" xml:space="preserve">
+    <value>Sælger</value>
+  </data>
+  <data name="SellerBack" xml:space="preserve">
+    <value>Sælgere</value>
+  </data>
+  <data name="SellerMissing" xml:space="preserve">
+    <value>Den sælger findes ikke.</value>
+  </data>
+  <data name="SellerHowTheyDid" xml:space="preserve">
+    <value>Hvordan det er gået</value>
+  </data>
+  <data name="SellerNothingYet" xml:space="preserve">
+    <value>Intet kommer fra denne sælger endnu. Vælg den under Hvorfra på en plante.</value>
+  </data>
+  <data name="SellerPlants" xml:space="preserve">
+    <value>Planter</value>
+  </data>
+  <data name="SellerPropagations" xml:space="preserve">
+    <value>Formeringer</value>
+  </data>
+  <data name="SellerPestsEarly" xml:space="preserve">
+    <value>Skadedyr i starten</value>
+  </data>
+  <data name="SellerHowArrived" xml:space="preserve">
+    <value>Hvordan de ankom</value>
+  </data>
+  <data name="SellerPaid" xml:space="preserve">
+    <value>Betalt</value>
+  </data>
+  <data name="SellerAbout" xml:space="preserve">
+    <value>Om sælgeren</value>
+  </data>
+  <data name="SellerRenameHint" xml:space="preserve">
+    <value>Hvis du omdøber den, ændres navnet også på hver plante og formering derfra.</value>
+  </data>
+  <data name="SellerTidy" xml:space="preserve">
+    <value>Ryd op</value>
+  </data>
+  <data name="SellerMergeInto" xml:space="preserve">
+    <value>Slå sammen med</value>
+  </data>
+  <data name="SellerPick" xml:space="preserve">
+    <value>Vælg en sælger</value>
+  </data>
+  <data name="SellerMergeHint" xml:space="preserve">
+    <value>Alt fra {0} flyttes til den, du vælger, og {0} fjernes fra listen.</value>
+  </data>
+  <data name="SellerMerge" xml:space="preserve">
+    <value>Slå sammen</value>
+  </data>
+  <data name="SellerMergeLink" xml:space="preserve">
+    <value>Slå sammen med…</value>
+  </data>
+  <data name="SellerDeleteConfirm" xml:space="preserve">
+    <value>Slet {0}? Planter og formeringer derfra beholder det navn, der står på dem, men er ikke længere knyttet til en sælger.</value>
+  </data>
+  <data name="SellerNone" xml:space="preserve">
+    <value>Ingen</value>
+  </data>
+  <data name="SellerStillHere" xml:space="preserve">
+    <value>{0} er her stadig</value>
+  </data>
+  <data name="SellerDied" xml:space="preserve">
+    <value>{0} døde</value>
+  </data>
+  <data name="SellerGivenAway" xml:space="preserve">
+    <value>{0} givet væk</value>
+  </data>
+  <data name="SellerSold" xml:space="preserve">
+    <value>{0} solgt</value>
+  </data>
+  <data name="SellerPlantsBreakdown" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="SellerNoPestCases" xml:space="preserve">
+    <value>Ingen sager i de første {0} dage</value>
+  </data>
+  <data name="SellerPestCases" xml:space="preserve">
+    <value>{0} i de første {1} dage, som omfatter {2}</value>
+  </data>
+  <data name="SellerNotRated" xml:space="preserve">
+    <value>Ikke bedømt</value>
+  </data>
+  <data name="SellerArrivedGood" xml:space="preserve">
+    <value>{0} gode</value>
+  </data>
+  <data name="SellerArrivedOk" xml:space="preserve">
+    <value>{0} OK</value>
+  </data>
+  <data name="SellerArrivedPoor" xml:space="preserve">
+    <value>{0} dårlige</value>
+  </data>
+  <data name="SellerPaidText" xml:space="preserve">
+    <value>{0} i alt, {1} i gennemsnit ({2} med en pris)</value>
+  </data>
+  <data name="DeletionPageTitle" xml:space="preserve">
+    <value>Sådan sletter du dine data · Stikling</value>
+  </data>
+  <data name="DeletionBack" xml:space="preserve">
+    <value>Privatliv</value>
+  </data>
+  <data name="DeletionFailed" xml:space="preserve">
+    <value>Kunne ikke hente siden. Tjek, at du er online, og prøv igen.</value>
+  </data>
+  <data name="DosePlaceholder" xml:space="preserve">
+    <value>Dosis</value>
+  </data>
+  <data name="DoseUnitLabel" xml:space="preserve">
+    <value>Milliliter, gram eller dråber</value>
+  </data>
+  <data name="DosePer" xml:space="preserve">
+    <value>pr.</value>
+  </data>
+  <data name="DoseForWater" xml:space="preserve">
+    <value>Hvor meget vand {0} er til</value>
+  </data>
+  <data name="DoseForWaterDefault" xml:space="preserve">
+    <value>Hvor meget vand dosen er til</value>
+  </data>
+  <data name="ProductsTitle" xml:space="preserve">
+    <value>Produkter</value>
+  </data>
+  <data name="ProductsPageTitle" xml:space="preserve">
+    <value>Produkter · Stikling</value>
+  </data>
+  <data name="ProductsIntro" xml:space="preserve">
+    <value>Din gødning, rodnings- og vækstmidler, silica og alt andet, der kommer i vandet, hver med den dosis, du plejer at bruge. Når du logger en gødning, bliver dosis udfyldt, og du kan ændre den lige den ene gang. En plejepost beholder det navn og den dosis, den blev logget med, så hvis du redigerer et produkt her, ændres det, du allerede har logget, ikke.</value>
+  </data>
+  <data name="ProductEdit" xml:space="preserve">
+    <value>Rediger produkt</value>
+  </data>
+  <data name="ProductAdd" xml:space="preserve">
+    <value>Tilføj et produkt</value>
+  </data>
+  <data name="ProductNamePlaceholder" xml:space="preserve">
+    <value>fx Hydrogødning</value>
+  </data>
+  <data name="ProductKindHint" xml:space="preserve">
+    <value>En gødning bruger det til at tjekke, at silica går i først og pH sidst.</value>
+  </data>
+  <data name="ProductUsualDose" xml:space="preserve">
+    <value>Sædvanlig dosis</value>
+  </data>
+  <data name="ProductMeasuredIn" xml:space="preserve">
+    <value>Hvad produktet måles i</value>
+  </data>
+  <data name="ProductDoseHint" xml:space="preserve">
+    <value>Som det står på flasken, fx 5 ml pr. 4 L. Lad dosis stå tom, hvis du ikke kender den endnu.</value>
+  </data>
+  <data name="ProductRemoveNutrient" xml:space="preserve">
+    <value>Fjern {0}</value>
+  </data>
+  <data name="ProductNutrientsToAdd" xml:space="preserve">
+    <value>Næringsstoffer at tilføje</value>
+  </data>
+  <data name="ProductAddNutrient" xml:space="preserve">
+    <value>+ Tilføj et næringsstof</value>
+  </data>
+  <data name="ProductLabelHint" xml:space="preserve">
+    <value>Som det står på etiketten, i %.</value>
+  </data>
+  <data name="ProductSubmitAdd" xml:space="preserve">
+    <value>Tilføj produkt</value>
+  </data>
+  <data name="ProductAddButton" xml:space="preserve">
+    <value>+ Tilføj et produkt</value>
+  </data>
+  <data name="ProductsEmptyTitle" xml:space="preserve">
+    <value>Ingen produkter endnu.</value>
+  </data>
+  <data name="ProductsEmptyHint" xml:space="preserve">
+    <value>Et produkt er alt, du putter i vandet, som gødning, silica eller et rodningsmiddel. Start med den gødning, du bruger mest. Et navn er nok. Dosis kan vente, til du næste gang har flasken i hånden.</value>
+  </data>
+  <data name="ProductsYour" xml:space="preserve">
+    <value>Dine produkter</value>
+  </data>
+  <data name="ProductNoUsualDose" xml:space="preserve">
+    <value>ingen sædvanlig dosis</value>
+  </data>
+  <data name="ProductNumberError" xml:space="preserve">
+    <value>{0} skal være et tal.</value>
+  </data>
+  <data name="ProductUsed" xml:space="preserve">
+    <value>brugt på {0}, sidst {1}</value>
+  </data>
+  <data name="ProductNotLogged" xml:space="preserve">
+    <value>ikke logget endnu</value>
+  </data>
+  <data name="ProductDeleteConfirm" xml:space="preserve">
+    <value>Slet {0}?</value>
+  </data>
+  <data name="ProductDeleteLogged" xml:space="preserve">
+    <value>Slet {0}? Det er logget på {1}, og de poster beholder dets navn og dosis.</value>
+  </data>
+  <data name="PotsTitle" xml:space="preserve">
+    <value>Potter</value>
+  </data>
+  <data name="PotsPageTitle" xml:space="preserve">
+    <value>Potter · Stikling</value>
+  </data>
+  <data name="PotsIntro" xml:space="preserve">
+    <value>De potter, du har, så en plante kan pege på en, i stedet for at du skriver den igen. En planteskolepotte går inde i noget, en yderpotte har ingen dræning og rummer en planteskolepotte, og nogle potter behøver ikke noget omkring sig. Beholdere til formering, som en boks med låg, har deres egen liste.</value>
+  </data>
+  <data name="PotsWhichToShow" xml:space="preserve">
+    <value>Hvilke potter der vises</value>
+  </data>
+  <data name="PotsAddContainer" xml:space="preserve">
+    <value>Tilføj en beholder</value>
+  </data>
+  <data name="PotsAddPot" xml:space="preserve">
+    <value>Tilføj en potte</value>
+  </data>
+  <data name="PotsEditContainer" xml:space="preserve">
+    <value>Rediger beholder</value>
+  </data>
+  <data name="PotsEditPot" xml:space="preserve">
+    <value>Rediger potte</value>
+  </data>
+  <data name="PotsWhatKind" xml:space="preserve">
+    <value>Hvilken slags</value>
+  </data>
+  <data name="PotsWhatKindOfPot" xml:space="preserve">
+    <value>Hvilken slags potte</value>
+  </data>
+  <data name="PotsNamesInUse" xml:space="preserve">
+    <value>Navne, du allerede bruger</value>
+  </data>
+  <data name="PotsContainerPlaceholder" xml:space="preserve">
+    <value>fx Klar boks med låg</value>
+  </data>
+  <data name="PotsPotPlaceholder" xml:space="preserve">
+    <value>fx Klar planteskolepotte</value>
+  </data>
+  <data name="PotsContainerNameHint" xml:space="preserve">
+    <value>Ens beholdere er én post. Skriv nedenfor, hvor mange du har.</value>
+  </data>
+  <data name="PotsPotNameHint" xml:space="preserve">
+    <value>Alle størrelser af den samme potte har samme navn, så de står sammen i listen.</value>
+  </data>
+  <data name="PotsPhotos" xml:space="preserve">
+    <value>Billeder</value>
+  </data>
+  <data name="PotsPhotoAlt" xml:space="preserve">
+    <value>Billede af potten</value>
+  </data>
+  <data name="PotsRemovePhoto" xml:space="preserve">
+    <value>Fjern billedet</value>
+  </data>
+  <data name="PotsCamera" xml:space="preserve">
+    <value>Kamera</value>
+  </data>
+  <data name="PotsGallery" xml:space="preserve">
+    <value>Galleri</value>
+  </data>
+  <data name="PotsGooglePhotos" xml:space="preserve">
+    <value>Google Fotos</value>
+  </data>
+  <data name="PotsPhotoHint" xml:space="preserve">
+    <value>Et billede gør det let at kende denne potte fra lignende, her og når du vælger en potte til en plante.</value>
+  </data>
+  <data name="PotsMadeOf" xml:space="preserve">
+    <value>Lavet af</value>
+  </data>
+  <data name="PotsMadeOfLabel" xml:space="preserve">
+    <value>Hvad potten er lavet af</value>
+  </data>
+  <data name="PotsAcrossTop" xml:space="preserve">
+    <value>Over toppen (cm)</value>
+  </data>
+  <data name="PotsHowMany" xml:space="preserve">
+    <value>Hvor mange</value>
+  </data>
+  <data name="PotsMoreMeasurements" xml:space="preserve">
+    <value>Flere mål</value>
+  </data>
+  <data name="PotsAcrossBottom" xml:space="preserve">
+    <value>Over bunden (cm)</value>
+  </data>
+  <data name="PotsHeight" xml:space="preserve">
+    <value>Højde (cm)</value>
+  </data>
+  <data name="PotsMeasurementsHint" xml:space="preserve">
+    <value>På en yderpotte er det målene indvendigt. Bunden afgør, om en planteskolepotte virkelig passer, da begge normalt er smallere i bunden.</value>
+  </data>
+  <data name="PotsRim" xml:space="preserve">
+    <value>Kant (mm)</value>
+  </data>
+  <data name="PotsRimHint" xml:space="preserve">
+    <value>En kant lader potten hænge på en yderpotte i stedet for at stå i den.</value>
+  </data>
+  <data name="PotsWatersItself" xml:space="preserve">
+    <value>Vander sig selv</value>
+  </data>
+  <data name="PotsHowWatersItself" xml:space="preserve">
+    <value>Hvordan den vander sig selv</value>
+  </data>
+  <data name="PotsWateringHint" xml:space="preserve">
+    <value>En væge trækker vandet op. Nedsænket betyder, at potten står i det.</value>
+  </data>
+  <data name="PotsSubmitAddContainer" xml:space="preserve">
+    <value>Tilføj beholder</value>
+  </data>
+  <data name="PotsSubmitAddPot" xml:space="preserve">
+    <value>Tilføj potte</value>
+  </data>
+  <data name="PotsSaveAndAnother" xml:space="preserve">
+    <value>Gem og tilføj en anden størrelse</value>
+  </data>
+  <data name="PotsAddNursery" xml:space="preserve">
+    <value>+ Tilføj en planteskolepotte</value>
+  </data>
+  <data name="PotsAddOuter" xml:space="preserve">
+    <value>+ Tilføj en yderpotte</value>
+  </data>
+  <data name="PotsAddPropagation" xml:space="preserve">
+    <value>+ Tilføj en beholder</value>
+  </data>
+  <data name="PotsAddStandalone" xml:space="preserve">
+    <value>+ Tilføj en potte</value>
+  </data>
+  <data name="PotsEmptyNursery" xml:space="preserve">
+    <value>Ingen planteskolepotter endnu.</value>
+  </data>
+  <data name="PotsEmptyOuter" xml:space="preserve">
+    <value>Ingen yderpotter endnu.</value>
+  </data>
+  <data name="PotsEmptyPropagation" xml:space="preserve">
+    <value>Ingen beholdere til formering endnu.</value>
+  </data>
+  <data name="PotsEmptyStandalone" xml:space="preserve">
+    <value>Ingen potte, der står for sig selv, endnu.</value>
+  </data>
+  <data name="PotsHintPropagation" xml:space="preserve">
+    <value>En boks, et syltetøjsglas eller et glas, du får stiklinger eller knolde til at slå rødder i. Ens beholdere er én post med, hvor mange du har, og Start formering vælger blandt dem.</value>
+  </data>
+  <data name="PotsHintNursery" xml:space="preserve">
+    <value>Tilføj dem, du bruger mest, først. Et sæt planteskolepotter er én post pr. størrelse, med hvor mange du har af den størrelse.</value>
+  </data>
+  <data name="PotsHintOuter" xml:space="preserve">
+    <value>En yderpotte har intet hul i bunden og rummer en planteskolepotte. Giv hver et billede, så lignende er lette at kende fra hinanden, når du vælger en til en plante.</value>
+  </data>
+  <data name="PotsHintStandalone" xml:space="preserve">
+    <value>En potte med hul og underskål, eller en selvvandende potte, der ikke behøver noget omkring sig.</value>
+  </data>
+  <data name="PotsPhotosOf" xml:space="preserve">
+    <value>Billeder af {0}</value>
+  </data>
+  <data name="PotsPhotoLink" xml:space="preserve">
+    <value>Billede</value>
+  </data>
+  <data name="PotsNoSize" xml:space="preserve">
+    <value>Ingen størrelse</value>
+  </data>
+  <data name="PotsSizeCm" xml:space="preserve">
+    <value>{0} cm</value>
+  </data>
+  <data name="PotsSelfWatering" xml:space="preserve">
+    <value>selvvandende ({0})</value>
+  </data>
+  <data name="PotsRimMm" xml:space="preserve">
+    <value>{0} mm kant</value>
+  </data>
+  <data name="PotsTallCm" xml:space="preserve">
+    <value>{0} cm høj</value>
+  </data>
+  <data name="PotsPhotosFailed" xml:space="preserve">
+    <value>Kunne ikke gemme billederne: {0}</value>
+  </data>
+  <data name="PotsDeleteConfirm" xml:space="preserve">
+    <value>Slet {0}?</value>
+  </data>
+  <data name="PotsDeleteAndPhoto_One" xml:space="preserve">
+    <value>Slet {0} og dens billede?</value>
+  </data>
+  <data name="PotsDeleteAndPhoto_Other" xml:space="preserve">
+    <value>Slet {0} og dens {1} billeder?</value>
+  </data>
+  <data name="PotsPhotosDeletedToo_One" xml:space="preserve">
+    <value>Dens billede slettes også.</value>
+  </data>
+  <data name="PotsPhotosDeletedToo_Other" xml:space="preserve">
+    <value>Dens {0} billeder slettes også.</value>
+  </data>
+  <data name="PotsContainerInUse_One" xml:space="preserve">
+    <value>{0} formering bruger denne beholder. Hvis du sletter den, fjernes den fra den formering, og intet andet ændres.</value>
+  </data>
+  <data name="PotsContainerInUse_Other" xml:space="preserve">
+    <value>{0} formeringer bruger denne beholder. Hvis du sletter den, fjernes den fra dem, og intet andet ændres.</value>
+  </data>
+  <data name="PotsPotInUse_One" xml:space="preserve">
+    <value>{0} plante bruger denne potte. Hvis du sletter den, fjernes potten fra den plante, og intet andet ændres.</value>
+  </data>
+  <data name="PotsPotInUse_Other" xml:space="preserve">
+    <value>{0} planter bruger denne potte. Hvis du sletter den, fjernes potten fra dem, og intet andet ændres.</value>
+  </data>
+  <data name="MixesTitle" xml:space="preserve">
+    <value>Jordblandinger</value>
+  </data>
+  <data name="MixesPageTitle" xml:space="preserve">
+    <value>Jordblandinger · Stikling</value>
+  </data>
+  <data name="MixesIntro" xml:space="preserve">
+    <value>De blandinger, du laver selv, gemt under et navn. Mængder er valgfrie. En blanding, du blander efter øjemål, er stadig værd at skrive ned. Sæt den ingrediens, der er mest af, først.</value>
+  </data>
+  <data name="MixesAdd" xml:space="preserve">
+    <value>Tilføj en blanding</value>
+  </data>
+  <data name="MixesEdit" xml:space="preserve">
+    <value>Rediger blanding</value>
+  </data>
+  <data name="MixesNamePlaceholder" xml:space="preserve">
+    <value>fx Grov jord</value>
+  </data>
+  <data name="MixesAmounts" xml:space="preserve">
+    <value>Mængder</value>
+  </data>
+  <data name="MixesHowCounted" xml:space="preserve">
+    <value>Hvordan mængderne tælles</value>
+  </data>
+  <data name="MixesIngredientPlaceholder" xml:space="preserve">
+    <value>fx perlit</value>
+  </data>
+  <data name="MixesIngredientN" xml:space="preserve">
+    <value>Ingrediens {0}</value>
+  </data>
+  <data name="MixesHowMuch" xml:space="preserve">
+    <value>Hvor meget {0}</value>
+  </data>
+  <data name="MixesMoveUp" xml:space="preserve">
+    <value>Flyt {0} op</value>
+  </data>
+  <data name="MixesMoveDown" xml:space="preserve">
+    <value>Flyt {0} ned</value>
+  </data>
+  <data name="MixesRemove" xml:space="preserve">
+    <value>Fjern {0}</value>
+  </data>
+  <data name="MixesThisIngredient" xml:space="preserve">
+    <value>denne ingrediens</value>
+  </data>
+  <data name="MixesFirstIsMost" xml:space="preserve">
+    <value>Den første er den, der er mest af.</value>
+  </data>
+  <data name="MixesIngredientsToAdd" xml:space="preserve">
+    <value>Ingredienser at tilføje</value>
+  </data>
+  <data name="MixesSomethingElse" xml:space="preserve">
+    <value>+ Noget andet</value>
+  </data>
+  <data name="MixesEditWarning_One" xml:space="preserve">
+    <value>{0} plante er i denne blanding. Når du gemmer, ændres det, den viser, fordi en plante peger på blandingen i stedet for at have sin egen kopi af opskriften.</value>
+  </data>
+  <data name="MixesEditWarning_Other" xml:space="preserve">
+    <value>{0} planter er i denne blanding. Når du gemmer, ændres det, de alle viser, fordi en plante peger på blandingen i stedet for at have sin egen kopi af opskriften.</value>
+  </data>
+  <data name="MixesCopyHint_One" xml:space="preserve">
+    <value>Hvis du gemmer den som en ny blanding, bliver den plante på blandingen, som den var, og den nye er der til det, du potter fra nu af.</value>
+  </data>
+  <data name="MixesCopyHint_Other" xml:space="preserve">
+    <value>Hvis du gemmer den som en ny blanding, bliver de planter på blandingen, som den var, og den nye er der til det, du potter fra nu af.</value>
+  </data>
+  <data name="MixesSubmitAdd" xml:space="preserve">
+    <value>Tilføj blanding</value>
+  </data>
+  <data name="MixesSaveAsNew" xml:space="preserve">
+    <value>Gem som en ny blanding</value>
+  </data>
+  <data name="MixesAddButton" xml:space="preserve">
+    <value>+ Tilføj en blanding</value>
+  </data>
+  <data name="MixesEmptyTitle" xml:space="preserve">
+    <value>Ingen blandinger endnu.</value>
+  </data>
+  <data name="MixesEmptyHint" xml:space="preserve">
+    <value>Start med den, du bruger mest. Et navn og en liste over, hvad der er i, er nok. Mængderne kan vente, til du næste gang blander en portion og skriver dem ned.</value>
+  </data>
+  <data name="MixesNoLongerMixed" xml:space="preserve">
+    <value>Blandes ikke længere</value>
+  </data>
+  <data name="MixesYour" xml:space="preserve">
+    <value>Dine blandinger</value>
+  </data>
+  <data name="MixesNoPlantsInIt" xml:space="preserve">
+    <value>ingen planter i den</value>
+  </data>
+  <data name="MixesNoneInCollection" xml:space="preserve">
+    <value>Ingen af dem er i samlingen længere.</value>
+  </data>
+  <data name="MixesBatch" xml:space="preserve">
+    <value>Portion</value>
+  </data>
+  <data name="MixesBatchPlaceholder" xml:space="preserve">
+    <value>fx 5</value>
+  </data>
+  <data name="MixesLastMixed" xml:space="preserve">
+    <value>Sidst blandet {0}</value>
+  </data>
+  <data name="MixesMeasureOut" xml:space="preserve">
+    <value>Mål op</value>
+  </data>
+  <data name="MixesMixingAgain" xml:space="preserve">
+    <value>Blander den igen</value>
+  </data>
+  <data name="MixesNoLongerMixing" xml:space="preserve">
+    <value>Blander den ikke længere</value>
+  </data>
+  <data name="MixesDeleteConfirm" xml:space="preserve">
+    <value>Slet {0}?</value>
+  </data>
+  <data name="MixesDeleteInUse_One" xml:space="preserve">
+    <value>{0} plante i denne blanding. Hvis du sletter den, fjernes blandingen fra dem, og intet andet ændres.</value>
+  </data>
+  <data name="MixesDeleteInUse_Other" xml:space="preserve">
+    <value>{0} planter i denne blanding. Hvis du sletter den, fjernes blandingen fra dem, og intet andet ændres.</value>
+  </data>
+  <data name="FeedsTitle" xml:space="preserve">
+    <value>Gødninger</value>
+  </data>
+  <data name="FeedsPageTitle" xml:space="preserve">
+    <value>Gødninger · Stikling</value>
+  </data>
+  <data name="FeedsIntro" xml:space="preserve">
+    <value>De gødninger, du blander, gemt under et navn, med hvert produkts dosis i den rækkefølge, det kommer i vandet. Når du logger en gødning, kopieres det, der er i den, over på plejeposten, så hvis du redigerer en gødning her, ændres det, du allerede har logget, ikke.</value>
+  </data>
+  <data name="FeedsEdit" xml:space="preserve">
+    <value>Rediger gødning</value>
+  </data>
+  <data name="FeedsAdd" xml:space="preserve">
+    <value>Tilføj en gødning</value>
+  </data>
+  <data name="FeedsNamePlaceholder" xml:space="preserve">
+    <value>fx Ugentlig gødning til aroider</value>
+  </data>
+  <data name="FeedsWhatGoesIn" xml:space="preserve">
+    <value>Hvad der kommer i vandet</value>
+  </data>
+  <data name="FeedsMoveUp" xml:space="preserve">
+    <value>Flyt {0} op</value>
+  </data>
+  <data name="FeedsMoveDown" xml:space="preserve">
+    <value>Flyt {0} ned</value>
+  </data>
+  <data name="FeedsRemove" xml:space="preserve">
+    <value>Fjern {0}</value>
+  </data>
+  <data name="FeedsInOrder" xml:space="preserve">
+    <value>I den rækkefølge, de kommer i vandet.</value>
+  </data>
+  <data name="FeedsNoProducts" xml:space="preserve">
+    <value>Ingen produkter endnu. Tilføj først din gødning og resten under {0}.</value>
+  </data>
+  <data name="FeedsProductsToAdd" xml:space="preserve">
+    <value>Produkter at tilføje</value>
+  </data>
+  <data name="FeedsSomethingMissing" xml:space="preserve">
+    <value>Mangler der noget? Tilføj det under {0}.</value>
+  </data>
+  <data name="FeedsNotesPlaceholder" xml:space="preserve">
+    <value>fx Rør i et minut efter silicaen</value>
+  </data>
+  <data name="FeedsSubmitAdd" xml:space="preserve">
+    <value>Tilføj gødning</value>
+  </data>
+  <data name="FeedsAddButton" xml:space="preserve">
+    <value>+ Tilføj en gødning</value>
+  </data>
+  <data name="FeedsEmptyTitle" xml:space="preserve">
+    <value>Ingen gødninger endnu.</value>
+  </data>
+  <data name="FeedsEmptyHint" xml:space="preserve">
+    <value>En gødning er et par produkter blandet i vandet sammen, som en gødning med silica. Start med den, du blander mest. Vælg produkterne i den rækkefølge, de kommer i vandet, og doserne starter ved hvert produkts sædvanlige.</value>
+  </data>
+  <data name="FeedsAddProductsFirst" xml:space="preserve">
+    <value>Tilføj dine produkter først</value>
+  </data>
+  <data name="FeedsYour" xml:space="preserve">
+    <value>Dine gødninger</value>
+  </data>
+  <data name="FeedsWater" xml:space="preserve">
+    <value>Vand</value>
+  </data>
+  <data name="FeedsWaterPlaceholder" xml:space="preserve">
+    <value>fx 2</value>
+  </data>
+  <data name="FeedsMixBatch" xml:space="preserve">
+    <value>Bland en portion</value>
+  </data>
+  <data name="FeedsNoDose" xml:space="preserve">
+    <value>ingen dosis</value>
+  </data>
+  <data name="FeedsGiven" xml:space="preserve">
+    <value>Givet til {0}, sidst {1}</value>
+  </data>
+  <data name="FeedsNotGiven" xml:space="preserve">
+    <value>Ikke givet endnu</value>
+  </data>
+  <data name="FeedsDatesMore" xml:space="preserve">
+    <value>{0} og {1} flere</value>
+  </data>
+  <data name="FeedsDeleteConfirm" xml:space="preserve">
+    <value>Slet {0}?</value>
+  </data>
+  <data name="FeedsDeleteGiven" xml:space="preserve">
+    <value>Slet {0}? Den er givet til {1}, og de poster beholder det, der var i den.</value>
+  </data>
+</root>
