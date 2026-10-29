@@ -73,10 +73,10 @@
     <value>Ingen er færdige endnu. En formering er færdig, når alt er pottet op eller mislykkedes.</value>
   </data>
   <data name="ListBatches_One" xml:space="preserve">
-    <value>{0} hold</value>
+    <value>{0} batch</value>
   </data>
   <data name="ListBatches_Other" xml:space="preserve">
-    <value>{0} hold</value>
+    <value>{0} batches</value>
   </data>
   <data name="ListRowLabel" xml:space="preserve">
     <value>{0} i {1}</value>
@@ -178,7 +178,7 @@
     <value>Resultater</value>
   </data>
   <data name="StatsHint" xml:space="preserve">
-    <value>Hvordan hvert medie og hver type er gået.</value>
+    <value>Hvordan hvert vækstmedie og hver type er gået.</value>
   </data>
   <data name="StatsYearLink" xml:space="preserve">
     <value>Dit år med dine planter</value>
@@ -187,19 +187,19 @@
     <value>Sådan tælles der</value>
   </data>
   <data name="StatsHow" xml:space="preserve">
-    <value>Succesraten tæller enheder, så et hold med 5 knolde, hvor 4 klarede den, tæller som 4 af 5. En enhed har klaret den, når den er pottet op, eller når dens hold har slået rødder. Enheder, der stadig er på vej, tæller hverken den ene eller den anden vej. Under {0} enheder vises antallet i stedet for en procent, fordi 2 af 2 siger mere end 100 %. Dage til rødder bruger kun hold, der er markeret som slået rødder, så et hold, der gik direkte til opponting, er ikke med.</value>
+    <value>Succesraten tæller enheder, så en batch med 5 knolde, hvor 4 klarede den, tæller som 4 af 5. En enhed har klaret den, når den er pottet op, eller når dens batch har slået rødder. Enheder, der stadig er på vej, tæller hverken den ene eller den anden vej. Under {0} enheder vises antallet i stedet for en procent, fordi 2 af 2 siger mere end 100 %. Dage til rødder bruger kun batches, der er markeret som slået rødder, så en batch, der gik direkte til opponting, er ikke med.</value>
   </data>
   <data name="StatsEmptyTitle" xml:space="preserve">
     <value>Ingen formeringer endnu.</value>
   </data>
   <data name="StatsEmptyHow" xml:space="preserve">
-    <value>Når du har startet nogle, viser siden, hvor godt hvert medie og hver type klarer sig: hvor mange der klarede den, og hvor lang tid de var om at slå rødder.</value>
+    <value>Når du har startet nogle, viser siden, hvor godt hvert vækstmedie og hver type klarer sig: hvor mange der klarede den, og hvor lang tid de var om at slå rødder.</value>
   </data>
   <data name="StatsAllHeading" xml:space="preserve">
     <value>Alle formeringer</value>
   </data>
   <data name="StatsByMedium" xml:space="preserve">
-    <value>Efter medie</value>
+    <value>Efter vækstmedie</value>
   </data>
   <data name="StatsByType" xml:space="preserve">
     <value>Efter type</value>
@@ -208,19 +208,19 @@
     <value>Rodhjælp</value>
   </data>
   <data name="StatsAidsNone" xml:space="preserve">
-    <value>Vælg de rodhjælpemidler, du brugte, når du redigerer en formering, så bliver hvert af dem sammenlignet her med de hold, der var uden.</value>
+    <value>Vælg de rodhjælpemidler, du brugte, når du redigerer en formering, så bliver hvert af dem sammenlignet her med de batches, der var uden.</value>
   </data>
   <data name="StatsAidsHow" xml:space="preserve">
-    <value>Hvert hjælpemiddel ved siden af alle hold, der var uden det, uanset type eller medie.</value>
+    <value>Hvert hjælpemiddel ved siden af alle batches, der var uden det, uanset type eller vækstmedie.</value>
   </data>
   <data name="StatsAidsAllUsed" xml:space="preserve">
-    <value>Alle hold brugte det, så der er ikke noget at sammenligne med endnu.</value>
+    <value>Alle batches brugte det, så der er ikke noget at sammenligne med endnu.</value>
   </data>
   <data name="StatsDryingHeading" xml:space="preserve">
     <value>At lade snitfladen tørre</value>
   </data>
   <data name="StatsDryingHow" xml:space="preserve">
-    <value>Hold grupperet efter, hvor længe snitfladen tørrede, før den kom i, uanset type eller medie.</value>
+    <value>Batches grupperet efter, hvor længe snitfladen tørrede, før den kom i, uanset type eller vækstmedie.</value>
   </data>
   <data name="StatsBarLabel" xml:space="preserve">
     <value>{0} klarede den</value>
@@ -238,7 +238,7 @@
     <value>Intet har klaret den eller mislykkedes endnu · {0} stadig i gang</value>
   </data>
   <data name="StatsRange" xml:space="preserve">
-    <value>{0} til {1} dage over {2} hold</value>
+    <value>{0} til {1} dage over {2} batches</value>
   </data>
   <data name="StatsNotRecorded" xml:space="preserve">
     <value>ikke noteret</value>
@@ -520,7 +520,7 @@
     <value>Givet væk</value>
   </data>
   <data name="TlKindLookedOver" xml:space="preserve">
-    <value>Set til</value>
+    <value>Tjekket</value>
   </data>
   <data name="TlKindFlowering" xml:space="preserve">
     <value>Blomstring</value>
@@ -733,7 +733,7 @@
     <value>Galleri</value>
   </data>
   <data name="EditPhotoHint" xml:space="preserve">
-    <value>Det nyeste billede bliver forsiden. Du kan tilføje flere senere på dens side.</value>
+    <value>Det nyeste billede bliver profilbillede. Du kan tilføje flere senere på dens side.</value>
   </data>
   <data name="EditMoreDetails" xml:space="preserve">
     <value>Flere detaljer</value>
@@ -757,7 +757,7 @@
     <value>Rodhjælp</value>
   </data>
   <data name="EditAidsHint" xml:space="preserve">
-    <value>Valgfrit. Vælg det, du brugte, så sammenligner resultatsiden hold med og uden det.</value>
+    <value>Valgfrit. Vælg det, du brugte, så sammenligner resultatsiden batches med og uden det.</value>
   </data>
   <data name="EditDryFirst" xml:space="preserve">
     <value>Lad snitfladen tørre først</value>
@@ -790,7 +790,7 @@
     <value>fx Alocasia-knoldtest</value>
   </data>
   <data name="EditExperimentHint" xml:space="preserve">
-    <value>Giv hold, du startede sammen, samme navn, så bliver de sammenlignet side om side.</value>
+    <value>Giv batches, du startede sammen, samme navn, så bliver de sammenlignet side om side.</value>
   </data>
   <data name="EditSitter" xml:space="preserve">
     <value>Til en plantesitter</value>
@@ -886,7 +886,7 @@
     <value>Den formering findes ikke eller blev slettet.</value>
   </data>
   <data name="DetOpenCover" xml:space="preserve">
-    <value>Åbn forsidebilledet</value>
+    <value>Åbn profilbilledet</value>
   </data>
   <data name="DetPhotoOf" xml:space="preserve">
     <value>Billede af {0}</value>
@@ -955,7 +955,7 @@
     <value>Til tiden</value>
   </data>
   <data name="DetPace" xml:space="preserve">
-    <value>{0} tidligere hold af {1} i {2} {3} på {4} i gennemsnit.</value>
+    <value>{0} tidligere batches af {1} i {2} {3} på {4} i gennemsnit.</value>
   </data>
   <data name="DetCormSize" xml:space="preserve">
     <value>Knoldens størrelse</value>
@@ -1108,7 +1108,7 @@
     <value>Der er ingen planter at potte dem sammen med.</value>
   </data>
   <data name="DetIntoHint" xml:space="preserve">
-    <value>De får den plantes potte, medie og rum og bliver talt med i den.</value>
+    <value>De får den plantes potte, vækstmedie og rum og bliver talt med i den.</value>
   </data>
   <data name="DetNumbered" xml:space="preserve">
     <value>Nummereret, når der er flere, fx "{0} {1}".</value>

@@ -73,7 +73,7 @@
     <value>En vanding tæller med i vandingspåmindelsen og sidst vandet. En gødning kan have produkter og en EC- eller pH-måling.</value>
   </data>
   <data name="OwnKindOnHistory" xml:space="preserve">
-    <value>Sæt den på plantens tidslinje</value>
+    <value>Sæt den på plantens historik</value>
   </data>
   <data name="PhotoRowTakePhoto" xml:space="preserve">
     <value>Tag et billede</value>
@@ -259,7 +259,7 @@
     <value>Tæller som ingen af dem</value>
   </data>
   <data name="KindsUseOnHistory" xml:space="preserve">
-    <value>{0} · På tidslinjen</value>
+    <value>{0} · I historikken</value>
   </data>
   <data name="KindsAlreadyHave" xml:space="preserve">
     <value>Du har allerede {0}. Tryk på den på listen for at ændre den.</value>
@@ -571,7 +571,7 @@
     <value>Se på disse, før du rejser: {0}.</value>
   </data>
   <data name="SitterNoPace" xml:space="preserve">
-    <value>Ingen af dem har en vandingsrytme endnu, så de er med ved hvert besøg. Hvis du logger vandinger i appen, lærer den det.</value>
+    <value>Appen ved endnu ikke, hvor tit de skal vandes, så de er med ved hvert besøg. Hvis du logger vandinger i appen, lærer den det.</value>
   </data>
   <data name="SitterCopied" xml:space="preserve">
     <value>Kopieret</value>
@@ -643,13 +643,13 @@
     <value>Noter</value>
   </data>
   <data name="EditBackToHistory" xml:space="preserve">
-    <value>Tilbage til tidslinjen</value>
+    <value>Tilbage til historikken</value>
   </data>
   <data name="EditChangeHint" xml:space="preserve">
     <value>Vil du ændre, hvad der blev gjort, så slet den og log den igen.</value>
   </data>
   <data name="EditDeleteConfirm" xml:space="preserve">
-    <value>Slet denne post? Den fjernes fra tidslinjen og vandingspåmindelsen.</value>
+    <value>Slet denne post? Den fjernes fra historikken og vandingspåmindelsen.</value>
   </data>
   <data name="EditKeepIt" xml:space="preserve">
     <value>Behold den</value>
@@ -673,7 +673,7 @@
     <value>Tilføj EC og pH</value>
   </data>
   <data name="SheetNoProducts" xml:space="preserve">
-    <value>Ingen produkter endnu. Du kan tilføje din gødning under Materialer og derefter Produkter.</value>
+    <value>Ingen produkter endnu. Du kan tilføje din gødning under Udstyr og derefter Produkter.</value>
   </data>
   <data name="SheetProducts" xml:space="preserve">
     <value>Produkter</value>
@@ -865,7 +865,7 @@
     <value>{0} er færdig</value>
   </data>
   <data name="RoundTileLookedOver" xml:space="preserve">
-    <value>Set til</value>
+    <value>Tjekket</value>
   </data>
   <data name="RoundTileSkipped" xml:space="preserve">
     <value>Sprunget over</value>
@@ -910,7 +910,7 @@
     <value>Spring over</value>
   </data>
   <data name="RoundKeys" xml:space="preserve">
-    <value>Taster: 1 til 0 for en måling, W vandet, L set til, S spring over, piletaster for at bevæge dig</value>
+    <value>Taster: 1 til 0 for en måling, W vandet, L tjekket, S spring over, piletaster for at bevæge dig</value>
   </data>
   <data name="RoundLastWatered" xml:space="preserve">
     <value>vandet {0}</value>
@@ -1231,7 +1231,7 @@
     <value>Disse først, i denne rækkefølge. Resten af I dag kommer tilbage, når du er igennem.</value>
   </data>
   <data name="TodayLookedAtIt" xml:space="preserve">
-    <value>Har set til den</value>
+    <value>Har tjekket den</value>
   </data>
   <data name="TodayGoRoundThese" xml:space="preserve">
     <value>Gå runde med disse</value>
@@ -1300,10 +1300,10 @@
     <value>Trin {0} af {1}</value>
   </data>
   <data name="TodayReadyToResolve" xml:space="preserve">
-    <value>Klar til at afslutte</value>
+    <value>Klar til at løses</value>
   </data>
   <data name="TodayResolve" xml:space="preserve">
-    <value>Afslut</value>
+    <value>Løs</value>
   </data>
   <data name="TodayCleanFor_One" xml:space="preserve">
     <value>Ren i {0} uge</value>
@@ -1351,7 +1351,7 @@
     <value>På vej over i semi-hydro</value>
   </data>
   <data name="TodayLookedStillWaiting" xml:space="preserve">
-    <value>Set til, venter stadig</value>
+    <value>Tjekket, venter stadig</value>
   </data>
   <data name="TodayNothingNew" xml:space="preserve">
     <value>Intet nyt i {0}</value>
@@ -1465,7 +1465,7 @@
     <value>Intet andet venter. Dem, du har udskudt, kommer tilbage af sig selv.</value>
   </data>
   <data name="TodayNothingWaiting" xml:space="preserve">
-    <value>Intet venter. Alle formeringer er set til den seneste uge.</value>
+    <value>Intet venter. Alle formeringer er tjekket den seneste uge.</value>
   </data>
   <data name="TodayPhotos" xml:space="preserve">
     <value>Billeder</value>

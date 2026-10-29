@@ -22,7 +22,7 @@
     <value>Henter…</value>
   </data>
   <data name="BackToSupplies" xml:space="preserve">
-    <value>Materialer</value>
+    <value>Udstyr</value>
   </data>
   <data name="ProductsLink" xml:space="preserve">
     <value>Produkter</value>
@@ -85,10 +85,10 @@
     <value>{0} gødninger</value>
   </data>
   <data name="Recipe_One" xml:space="preserve">
-    <value>{0} opskrift</value>
+    <value>{0} blanding</value>
   </data>
   <data name="Recipe_Other" xml:space="preserve">
-    <value>{0} opskrifter</value>
+    <value>{0} blandinger</value>
   </data>
   <data name="Plan_One" xml:space="preserve">
     <value>{0} plan</value>
@@ -109,10 +109,10 @@
     <value>{0} sager</value>
   </data>
   <data name="SuppliesTitle" xml:space="preserve">
-    <value>Materialer</value>
+    <value>Udstyr</value>
   </data>
   <data name="SuppliesPageTitle" xml:space="preserve">
-    <value>Materialer · Stikling</value>
+    <value>Udstyr · Stikling</value>
   </data>
   <data name="SuppliesIntro" xml:space="preserve">
     <value>De sælgere, dine planter kommer fra, og de potter, blandinger og produkter, du bruger, så en plante eller en behandling kan pege på dem, i stedet for at du skriver dem igen.</value>
@@ -133,7 +133,7 @@
     <value>Gødninger</value>
   </data>
   <data name="SuppliesRecipes" xml:space="preserve">
-    <value>Behandlingsopskrifter</value>
+    <value>Blandinger</value>
   </data>
   <data name="SuppliesPlans" xml:space="preserve">
     <value>Behandlingsplaner</value>
@@ -172,7 +172,7 @@
     <value>Sprays, du blander på samme måde hver gang</value>
   </data>
   <data name="PestsNoneOpenResolved" xml:space="preserve">
-    <value>Ingen åbne, {0} afsluttet{1}</value>
+    <value>Ingen åbne, {0} løst{1}</value>
   </data>
   <data name="PestsNoCases" xml:space="preserve">
     <value>Ingen sager{0}</value>
@@ -667,10 +667,10 @@
     <value>+ Noget andet</value>
   </data>
   <data name="MixesEditWarning_One" xml:space="preserve">
-    <value>{0} plante er i denne blanding. Når du gemmer, ændres det, den viser, fordi en plante peger på blandingen i stedet for at have sin egen kopi af opskriften.</value>
+    <value>{0} plante er i denne blanding. Når du gemmer, ændres det, den viser, fordi en plante peger på blandingen i stedet for at have sin egen kopi af blandingen.</value>
   </data>
   <data name="MixesEditWarning_Other" xml:space="preserve">
-    <value>{0} planter er i denne blanding. Når du gemmer, ændres det, de alle viser, fordi en plante peger på blandingen i stedet for at have sin egen kopi af opskriften.</value>
+    <value>{0} planter er i denne blanding. Når du gemmer, ændres det, de alle viser, fordi en plante peger på blandingen i stedet for at have sin egen kopi af blandingen.</value>
   </data>
   <data name="MixesCopyHint_One" xml:space="preserve">
     <value>Hvis du gemmer den som en ny blanding, bliver den plante på blandingen, som den var, og den nye er der til det, du potter fra nu af.</value>
@@ -691,7 +691,7 @@
     <value>Ingen blandinger endnu.</value>
   </data>
   <data name="MixesEmptyHint" xml:space="preserve">
-    <value>Start med den, du bruger mest. Et navn og en liste over, hvad der er i, er nok. Mængderne kan vente, til du næste gang blander en portion og skriver dem ned.</value>
+    <value>Start med den, du bruger mest. Et navn og en liste over, hvad der er i, er nok. Mængderne kan vente, til du næste gang blander en batch og skriver dem ned.</value>
   </data>
   <data name="MixesNoLongerMixed" xml:space="preserve">
     <value>Blandes ikke længere</value>
@@ -706,7 +706,7 @@
     <value>Ingen af dem er i samlingen længere.</value>
   </data>
   <data name="MixesBatch" xml:space="preserve">
-    <value>Portion</value>
+    <value>Batch</value>
   </data>
   <data name="MixesBatchPlaceholder" xml:space="preserve">
     <value>fx 5</value>
@@ -802,7 +802,7 @@
     <value>fx 2</value>
   </data>
   <data name="FeedsMixBatch" xml:space="preserve">
-    <value>Bland en portion</value>
+    <value>Bland en batch</value>
   </data>
   <data name="FeedsNoDose" xml:space="preserve">
     <value>ingen dosis</value>

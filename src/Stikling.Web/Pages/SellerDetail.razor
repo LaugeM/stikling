@@ -308,7 +308,7 @@ else
     private static System.Globalization.CultureInfo culture => System.Globalization.CultureInfo.CurrentCulture;
 
     private static string Money(decimal amount) =>
-        amount.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        amount.ToString("0.##", System.Globalization.CultureInfo.CurrentCulture);
 
     private string PlantsText
     {

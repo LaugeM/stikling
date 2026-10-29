@@ -1083,7 +1083,7 @@ else
 
         var photos = plantPhotos.Concat(await PhotoRepository.GetOfKindAsync(SubjectType.Propagation)).ToList();
         var summary = PlantYear.For(season, plants, propagations, photos, await Entries.GetPlantChangesAsync(),
-            Today, Time.LocalDay, Labels.For(PlantStatus.Died));
+            Today, Time.LocalDay, Labels.DiedInSavedLines());
         if (summary.CardCount < 2)
             return;
 

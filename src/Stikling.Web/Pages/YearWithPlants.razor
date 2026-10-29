@@ -272,7 +272,7 @@ else
             .Concat(await PhotoRepository.GetOfKindAsync(SubjectType.Propagation)).ToList();
         var changes = await TimelineRepository.GetPlantChangesAsync();
 
-        summary = PlantYear.For(year, plants, propagations, photos, changes, today, Time.LocalDay, Labels.For(PlantStatus.Died));
+        summary = PlantYear.For(year, plants, propagations, photos, changes, today, Time.LocalDay, Labels.DiedInSavedLines());
         var found = PlantYear.Years(plants, propagations, photos, today, Time.LocalDay).ToList();
         if (!found.Contains(year))
         {

@@ -324,4 +324,12 @@
     <value>d MMM yyyy</value>
     <comment>A .NET date pattern. Not text: change the order and the punctuation only.</comment>
   </data>
+  <data name="ErrQualifierNeedsSpecies" xml:space="preserve">
+    <value>cf. and aff. go with a species name.</value>
+    <comment>Error when a name is marked cf. or aff. without a species. cf. and aff. are botanical abbreviations.</comment>
+  </data>
+  <data name="ErrQualifierNeedsGenus" xml:space="preserve">
+    <value>sp. goes with a genus.</value>
+    <comment>Error when a name is marked sp. without a genus. sp. is a botanical abbreviation.</comment>
+  </data>
 </root>

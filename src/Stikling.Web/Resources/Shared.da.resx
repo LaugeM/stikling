@@ -46,7 +46,7 @@
     <value>Søg i ønskelisten og dine planter</value>
   </data>
   <data name="WishlistEmpty" xml:space="preserve">
-    <value>Saml de planter, du er ude efter, her: den du så på en markedsdag, sorten du bliver ved med at lede efter. Når du får en, så tryk på Jeg har den, og den bliver til en plante eller en stikling. Så flytter ønsket til Fået. Søg ovenfor for at se, om du allerede har noget.</value>
+    <value>Saml de planter, du er ude efter, her: den, du så på en markedsdag, eller den kultivar, du bliver ved med at lede efter. Når du får en, så tryk på Jeg har den, og den bliver til en plante eller en stikling. Så flytter ønsket til Fået. Søg ovenfor for at se, om du allerede har noget.</value>
   </data>
   <data name="WishlistHelpLink" xml:space="preserve">
     <value>Mere om ønskelisten i Hjælp</value>
@@ -346,7 +346,7 @@
     <value>Produkter</value>
   </data>
   <data name="SearchGroupRecipes" xml:space="preserve">
-    <value>Behandlingsopskrifter</value>
+    <value>Blandinger</value>
   </data>
   <data name="SearchGroupPlaces" xml:space="preserve">
     <value>Rum og pladser</value>
@@ -891,13 +891,13 @@ Måske</value>
     <value>Slet dette billede?</value>
   </data>
   <data name="PhotoViewerCover" xml:space="preserve">
-    <value>Forsidebillede</value>
+    <value>Profilbillede</value>
   </data>
   <data name="PhotoViewerSetCover" xml:space="preserve">
-    <value>Brug som forside</value>
+    <value>Brug som profilbillede</value>
   </data>
   <data name="PhotoViewerFrame" xml:space="preserve">
-    <value>Udsnit</value>
+    <value>Beskær</value>
   </data>
   <data name="PhotoViewerMoveToHistory" xml:space="preserve">
     <value>Flyt til historik</value>
@@ -909,7 +909,7 @@ Måske</value>
     <value>Træk i det for at flytte det, og knib sammen eller brug skyderen for at zoome. Kort og toppen af siden viser det sådan her.</value>
   </data>
   <data name="PhotoFramerBox" xml:space="preserve">
-    <value>Billedet, der tilpasses. Piletasterne flytter det, plus og minus zoomer.</value>
+    <value>Billedet, der beskæres. Piletasterne flytter det, plus og minus zoomer.</value>
   </data>
   <data name="PhotoFramerZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1011,6 +1011,21 @@ Måske</value>
     <value>Tilføj potte</value>
   </data>
   <data name="PotPickerHint" xml:space="preserve">
-    <value>Den kommer med i dit potte-bibliotek. Resten af detaljerne kan udfyldes under Materialer og så Potter.</value>
+    <value>Den kommer med i dit potte-bibliotek. Resten af detaljerne kan udfyldes under Udstyr og så Potter.</value>
+  </data>
+  <data name="ShareFormatSquare" xml:space="preserve">
+    <value>Kvadrat</value>
+  </data>
+  <data name="PhotoSkipped_One" xml:space="preserve">
+    <value>Én fil kunne ikke læses som et billede og blev sprunget over.</value>
+  </data>
+  <data name="PhotoSkipped_Other" xml:space="preserve">
+    <value>{0} filer kunne ikke læses som billeder og blev sprunget over.</value>
+  </data>
+  <data name="PhotoUndated_One" xml:space="preserve">
+    <value>Ét billede havde ingen dato gemt i sig, så dets dag er et gæt. Tjek, at det kom på den rigtige dag.</value>
+  </data>
+  <data name="PhotoUndated_Other" xml:space="preserve">
+    <value>{0} billeder havde ingen dato gemt i sig, så deres dage er et gæt. Tjek, at de kom på de rigtige dage.</value>
   </data>
 </root>

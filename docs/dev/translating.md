@@ -98,7 +98,7 @@ Write in plain everyday Danish, with "du". Keep the text as short as the English
 | product | produkt |
 | wish | ønske |
 | pass on (a cutting) | give videre |
-| timeline | tidslinje |
+| history (on a plant) | historik |
 | note | note |
 | photo | billede |
 | share | del |
@@ -108,6 +108,20 @@ Write in plain everyday Danish, with "du". Keep the text as short as the English
 | account | konto |
 | sign out | log ud |
 | own fields | egne felter |
+| genus | slægt |
+| species | art |
+| cultivar | kultivar |
+| supplies (the page with pots, products, soil mixes and feeds) | udstyr |
+| treatment recipe | blanding (plural blandinger) |
+| tour (the guided tour) | rundvisning |
+| looked over (Going round, the history) | tjekket |
+| frame (crop a photo) | beskær |
+| cover photo | profilbillede |
+| medium (what a cutting roots in) | vækstmedie |
+| batch | batch (plural batches) |
+| resolve, resolved (a pest case or problem) | løse, løst |
+| gone (a plant that left the collection) | væk |
+| flag it | markér den (noun: markering) |
 
 Keep "Stikling" as the name of the app.
 

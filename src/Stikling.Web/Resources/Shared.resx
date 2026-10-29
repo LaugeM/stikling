@@ -1346,4 +1346,24 @@ Maybe</value>
     <value>It joins your pot library. The rest of its details can be filled in under Supplies, then Pots.</value>
     <comment>Hint under the box for a new pot. Supplies and Pots are the names of a page and a list in the app.</comment>
   </data>
+  <data name="ShareFormatSquare" xml:space="preserve">
+    <value>Square</value>
+    <comment>Name of the square picture size, in the list of sizes when sharing a card. The other sizes are 4:5 and 9:16.</comment>
+  </data>
+  <data name="PhotoSkipped_One" xml:space="preserve">
+    <value>1 file couldn't be read as an image and was skipped.</value>
+    <comment>Shown after adding photos, when one file was not an image.</comment>
+  </data>
+  <data name="PhotoSkipped_Other" xml:space="preserve">
+    <value>{0} files couldn't be read as images and were skipped.</value>
+    <comment>Shown after adding photos. {0} is how many files could not be read.</comment>
+  </data>
+  <data name="PhotoUndated_One" xml:space="preserve">
+    <value>1 photo had no date saved in it, so its day is a guess. Check that it landed on the right day.</value>
+    <comment>Shown after adding photos, when one photo had no date.</comment>
+  </data>
+  <data name="PhotoUndated_Other" xml:space="preserve">
+    <value>{0} photos had no date saved in them, so their days are a guess. Check that they landed on the right days.</value>
+    <comment>Shown after adding photos. {0} is how many photos had no date.</comment>
+  </data>
 </root>
