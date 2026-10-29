@@ -1,17 +1,20 @@
 @page "/settings/whats-new"
+@using System.Globalization
 @* What has changed in the app, written by hand for the people using it, newest first. Add a line to the top of the
    current month when a change is worth telling someone about, and start a new month heading when the month changes.
-   Leave out what nobody would notice. No version or pull request numbers. *@
+   A new line is a key in Resources/WhatsNew.resx with its Danish in WhatsNew.da.resx, and goes in the list below with
+   Translated. The older lines stay English strings in the list, shown with lang="en". Leave out what nobody would
+   notice. No version or pull request numbers. *@
 
-<PageTitle>What's new · Stikling</PageTitle>
+<PageTitle>@Strings.WhatsNew.PageTitle</PageTitle>
 
-<a class="back-link" href="settings?section=about">Settings</a>
-<h1>What's new</h1>
+<a class="back-link" href="settings?section=about">@Strings.WhatsNew.BackToSettings</a>
+<h1>@Strings.WhatsNew.Heading</h1>
 
 <p class="whats-new-version">
     @if (AppVersion.Date is { } date)
     {
-        <text>You're on version @date.</text>
+        <text>@string.Format(CultureInfo.CurrentCulture, Strings.WhatsNew.YoureOnVersion, date)</text>
         @if (AppVersion.Commit is { } commit)
         {
             <text> </text><a class="whats-new-commit" href="https://github.com/LaugeM/stikling/commit/@commit" target="_blank" rel="noopener">(@AppVersion.ShortCommit)</a>
@@ -19,54 +22,94 @@
     }
     else
     {
-        <text>This is a development build, so it has no version.</text>
+        <text>@Strings.WhatsNew.DevelopmentBuild</text>
     }
 </p>
 
 @* What is planned, from Next up in docs/FEATURES.md, in the same order. Written for the people using the app: what
    they will be able to do, not what gets built. Drop a line when it ships and its What's new line goes in. No dates. *@
 <section class="whats-new-month coming-next">
-    <h2>Coming next</h2>
-    <p class="coming-next-hint">In the order they are planned. Plans can change, so there are no dates.</p>
+    <h2>@Strings.WhatsNew.ComingNextTitle</h2>
+    <p class="coming-next-hint">@Strings.WhatsNew.ComingNextHint</p>
     <ol>
-        @foreach (var item in ComingNext)
+        @foreach (var item in ComingNext())
         {
             <li>@item</li>
         }
     </ol>
 </section>
 
-@foreach (var month in Months)
+@{
+    // Older lines are only in English, so say so once, above the first, when the app isn't in English
+    var olderNoteShown = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
+}
+@foreach (var month in Months())
 {
     <section class="whats-new-month">
-        <h2>@month.Name</h2>
-        <ul>
-            @foreach (var entry in month.Entries)
+        <h2>@Labels.Date(month.Start)</h2>
+        @foreach (var run in Runs(month.Entries))
+        {
+            @if (run[0].English && !olderNoteShown)
             {
-                <li>@entry</li>
+                olderNoteShown = true;
+                <p class="whats-new-older">@Strings.WhatsNew.OlderEntriesEnglish</p>
             }
-        </ul>
+            <ul>
+                @foreach (var entry in run)
+                {
+                    <li lang="@(entry.English ? "en" : null)">@entry.Text</li>
+                }
+            </ul>
+        }
     </section>
 }
 
 @code {
-    private sealed record Month(string Name, string[] Entries);
+    // A line is either text from WhatsNew.resx, in the language of the app, or one of the older lines, which are
+    // only in English. A plain string in the lists below is an older line.
+    private readonly record struct Entry(string Text, bool English)
+    {
+        public static implicit operator Entry(string english) => new(english, true);
+    }
 
-    private static readonly string[] ComingNext =
+    private static Entry Translated(string text) => new(text, false);
+
+    private sealed record Month(LooseDate Start, Entry[] Entries);
+
+    // The lines that follow each other with the same language, so the note can go between the two kinds
+    private static List<Entry[]> Runs(Entry[] entries)
+    {
+        var runs = new List<Entry[]>();
+        var start = 0;
+        for (var i = 1; i <= entries.Length; i++)
+        {
+            if (i == entries.Length || entries[i].English != entries[start].English)
+            {
+                runs.Add(entries[start..i]);
+                start = i;
+            }
+        }
+
+        return runs;
+    }
+
+    // Made on each render, since the text depends on the language
+    private static string[] ComingNext() =>
     [
-        "Stikling in Danish, with a way to help translate it, and settings for units and how dates are written.",
-        "For collectors: more names to pick from, a log of each new leaf on a variegated plant, how many generations a cutting is from your oldest plant, and orders that brought several plants at once.",
-        "Photos: share a photo from your gallery straight to a plant on Android, line up a new photo with the last one, and mark the plants on a photo of a shelf.",
-        "Everyday shortcuts: water or add a note with a long press on a plant, reservoir and flushing for plants in LECA or PON, and which of your outer pots a nursery pot fits in.",
-        "Showing it off: a plant's anniversary on Today, an experiment's result as a picture to post, your year as a video, and a plant's story to print.",
-        "When something is wrong: a check of what you see on a plant with what to look at next, and short guides that work offline.",
-        "Naming a plant from a photo, a card with facts about its species, and a page to show your collection to others.",
+        Strings.WhatsNew.ComingNext1,
+        Strings.WhatsNew.ComingNext2,
+        Strings.WhatsNew.ComingNext3,
+        Strings.WhatsNew.ComingNext4,
+        Strings.WhatsNew.ComingNext5,
+        Strings.WhatsNew.ComingNext6,
+        Strings.WhatsNew.ComingNext7,
     ];
 
-    private static readonly Month[] Months =
+    private static Month[] Months() =>
     [
-        new("October 2026",
+        new(LooseDate.Of(2026, 10),
         [
+            Translated(Strings.WhatsNew.Oct2026Danish),
             "In Firefox, Reload on the new version bar no longer brings back the old version. It now waits until the new version is ready.",
             "On a computer, Settings shows its sections down the side, Help has its topics down the side, the Supplies lists use the whole width, and pest cases show their updates beside the case.",
             "A short tour of the app: Show me around on an empty Today, or in Settings at any time. It walks through an example plant in five steps.",
@@ -166,7 +209,7 @@
             "Edit lets you correct the counts of how many were potted up and how many failed.",
             "Coleus names are suggested, and Lately only shows the last 30 days."
         ]),
-        new("September 2026",
+        new(LooseDate.Of(2026, 9),
         [
             "Sign in with Google, Facebook or Discord and your plants, photos and notes follow you to your other devices. You can still use the app without an account.",
             "Delete your account from Settings when you want to, which erases what is stored for you on the server.",

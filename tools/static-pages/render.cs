@@ -1,19 +1,25 @@
-// Renders the app's Help and Privacy pages to plain HTML, so the live site can serve /help and /privacy as
-// pages that search engines, AI tools and sign-in providers can read without running the app. The deploy runs
-// it before prepare-pages.py, which puts the HTML into help.html, privacy.html and llms.txt.
+// Renders the app's Help, Privacy and Deletion pages and the front page to plain HTML, so the live site can serve
+// them as pages that search engines, AI tools and sign-in providers can read without running the app. It does so
+// once for each language that is ready, into <output folder>/<code>/: help.html, privacy.html, deletion.html and
+// front.html, plus text.json with the titles, descriptions and the text around the app in index.html. It also
+// writes <output folder>/languages.json, the ready languages in order. The deploy runs it before
+// prepare-pages.py, which puts the HTML into the pages of the site, the sitemap and llms.txt.
 // Run from the repository root: dotnet run tools/static-pages/render.cs -- <output folder>
 
 #:project ../../src/Stikling.Web/Stikling.Web.csproj
 #:property PublishAot=false
 
 using System.Globalization;
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
+using Stikling.Core.Settings;
 using Stikling.Web.Pages;
+using Stikling.Web.StaticPages;
 using Stikling.Web.Services;
 
 if (args.Length != 1)
@@ -21,9 +27,6 @@ if (args.Length != 1)
     Console.Error.WriteLine("Usage: dotnet run tools/static-pages/render.cs -- <output folder>");
     return 1;
 }
-
-// The pages are English for now, whatever language the machine running this is set to
-CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = new CultureInfo("en");
 
 // The live site's settings, so the answers about signing in read as they do there
 var config = new ConfigurationBuilder()
@@ -40,15 +43,33 @@ await using var provider = services.BuildServiceProvider();
 
 await using var renderer = new HtmlRenderer(provider, NullLoggerFactory.Instance);
 Directory.CreateDirectory(args[0]);
-await Render<Help>("help.html");
-await Render<Privacy>("privacy.html");
+
+// Each ready language, whatever language the machine running this is set to. Dates and numbers follow the
+// language's culture, as in the app (see SetCulture in Program.cs).
+var ready = AppLanguages.Offered(includeInProgress: false);
+foreach (var language in ready)
+{
+    var culture = new CultureInfo(AppLanguages.CultureOf(language.Code));
+    CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = culture;
+
+    var folder = Path.Combine(args[0], language.Code);
+    Directory.CreateDirectory(folder);
+    await Render<Help>(folder, "help.html");
+    await Render<Privacy>(folder, "privacy.html");
+    await Render<Deletion>(folder, "deletion.html");
+    await Render<FrontPage>(folder, "front.html");
+    File.WriteAllText(Path.Combine(folder, "text.json"), JsonSerializer.Serialize(StaticPageText.Current(), new JsonSerializerOptions { WriteIndented = true }));
+}
+
+File.WriteAllText(Path.Combine(args[0], "languages.json"),
+    JsonSerializer.Serialize(ready.Select(l => new { code = l.Code, name = l.NativeName }), new JsonSerializerOptions { WriteIndented = true }));
 return 0;
 
-async Task Render<TPage>(string name) where TPage : IComponent
+async Task Render<TPage>(string folder, string name) where TPage : IComponent
 {
     var html = await renderer.Dispatcher.InvokeAsync(async () =>
         (await renderer.RenderComponentAsync<TPage>()).ToHtmlString());
-    var path = Path.Combine(args[0], name);
+    var path = Path.Combine(folder, name);
     File.WriteAllText(path, html);
     Console.WriteLine($"Rendered {typeof(TPage).Name} to {path}");
 }

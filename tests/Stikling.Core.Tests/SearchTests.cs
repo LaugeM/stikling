@@ -1,7 +1,9 @@
+using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Search;
+using Stikling.Core.Timeline;
 
 namespace Stikling.Core.Tests;
 
@@ -30,7 +32,7 @@ public class SearchTests
     private async Task<SearchIndex> Index() =>
         await new SearchService(plants, propagations, timeline, careLogs, propagationCareLogs, problems, problemUpdates,
             pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FakeOwnCareKindRepository(), ownFields, new FixedTime(Now))
-            .LoadAsync(e => e.ToString());
+            .LoadAsync(e => e.ToString(), e => e.ToString());
 
     private async Task<SearchResults> Find(string? query) => (await Index()).Find(query);
 
@@ -110,14 +112,16 @@ public class SearchTests
     {
         var plant = AddPlant("Monstera");
         AddNote(plant.Id, "Found mealybugs on the stem", Now);
+        AddNote(plant.Id, "Gik i hvile", Now.AddDays(-1));
 
         var one = await Find("m");
         Assert.Single(one.Plants);
         Assert.Empty(one.Notes);
 
         Assert.Single((await Find("mealybugs")).Notes);
-        // One short word anywhere keeps notes out
-        Assert.Empty((await Find("mealybugs s")).Notes);
+        // Notes leave out words of one letter, so a phrase with "i" or "a" in it still finds them
+        Assert.Single((await Find("mealybugs s")).Notes);
+        Assert.Single((await Find("gik i hvile")).Notes);
     }
 
     [Fact]
@@ -154,7 +158,7 @@ public class SearchTests
         var plant = AddPlant(genus: "Dracaena", species: "trifasciata", set: p => p.CollectionNumber = "12");
         var index = await new SearchService(plants, propagations, timeline, careLogs, propagationCareLogs, problems,
             problemUpdates, pestCases, pestTreatments, recipes, wishes, pots, mixes, feeds, products, places, new FakeOwnCareKindRepository(), ownFields, new FixedTime(Now))
-            .LoadAsync(e => e.ToString(), (_, species, _) => species == "trifasciata" ? "Snake plant" : null);
+            .LoadAsync(e => e.ToString(), e => e.ToString(), (_, species, _) => species == "trifasciata" ? "Snake plant" : null);
 
         Assert.Equal([plant.Id], index.Find("snake").Plants.Select(i => i.Id));
         var byNumber = index.Find("12").Plants.Single();
@@ -367,6 +371,32 @@ public class SearchTests
         Assert.Equal(3, notes.Count);
         Assert.Equal(NoteSource.PlantCare, notes.First(n => n.Note!.Date.Day == 14 && n.Note.Source != NoteSource.Timeline).Note!.Source);
         Assert.Equal(2, notes.Count(n => n.Note!.Source == NoteSource.Timeline));
+    }
+
+    [Fact]
+    public async Task A_history_line_is_searched_in_the_language_of_the_app()
+    {
+        var plant = AddPlant("Monstera");
+        var entry = AddNote(plant.Id, "Went dormant", Now.AddDays(-1), kind: TimelineKind.Change);
+        entry.Lines = [HistoryText.Line("WentDormant")];
+
+        var before = CultureInfo.CurrentUICulture;
+        CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("da-DK");
+        try
+        {
+            var index = await Index();
+
+            Assert.Single(index.Find("hvile").Notes);
+            Assert.Contains("Gik i hvile", index.Find("hvile").Notes[0].Note!.Snippet);
+            Assert.Empty(index.Find("dormant").Notes);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = before;
+        }
+
+        Assert.Single((await Find("dormant")).Notes);
+        Assert.Empty((await Find("hvile")).Notes);
     }
 
     // Snippets

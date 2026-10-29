@@ -2,7 +2,7 @@
 
 All the text people see in the app lives in `.resx` files, one set per part of the app. English is the source. A translation sits next to it with the language in the name: `Settings.resx` is English and `Settings.da.resx` is Danish.
 
-The text that is still in the Razor pages and C# files is being moved over one area at a time. Until it is, a translated app shows a mix of the two languages. A language is only offered to everyone once most of the text is translated, see "When a language goes live".
+All the text people see has been moved into these files. The older lines on the What's new page are the one exception, and stay in English. A language is only offered to everyone once most of the text is translated, see "When a language goes live".
 
 ## For translators
 
@@ -11,7 +11,7 @@ The text that is still in the Razor pages and C# files is being moved over one a
 - `src/Stikling.Web/Resources` has the text for the pages and components.
 - `src/Stikling.Core/Resources` has the text that comes from the services in Core. It is added as those services are moved over.
 
-Each area has its own file: `Common` (words used on many screens), `Labels` (names of statuses, kinds and dates), `Layout` (the menu and header) and `Settings`. `History` has the lines the app writes into a plant's history, like "Moved from {0} to {1}", and `Examples` has the names and notes of the example plant. Translate the ones you can. A language doesn't have to have every file to work, text with no translation shows in English.
+Each area has its own file: `Common` (words used on many screens), `Labels` (names of statuses, kinds and dates), `Layout` (the menu and header) and `Settings`. `History` has the lines the app writes into a plant's history, like "Moved from {0} to {1}", and `Examples` has the names and notes of the example plant. `FrontPage` has the front page and the text around the app on the live site, and `WhatsNew` the lines on the What's new page. Translate the ones you can. A language doesn't have to have every file to work, text with no translation shows in English.
 
 ### Keys, placeholders and comments
 
@@ -163,13 +163,19 @@ The lines the app writes into a plant's or propagation's history ("Moved from Li
 
 Parallel pull requests should use their own area file so they don't edit the same one.
 
+### What's new and the front page
+
+A new line on the What's new page is a key in `WhatsNew.resx` and `WhatsNew.da.resx`, named for the month and what changed (like `Oct2026Danish`), and is listed in `Pages/WhatsNew.razor` with `Translated(...)`. The lines from before Danish stay as English strings in that list. They are shown with `lang="en"`, with a line above them saying so when the app isn't in English.
+
+The text of the front page is in `FrontPage.resx`, and the page is `StaticPages/FrontPage.razor`. The same file has the titles and descriptions of the pages the deploy serves as plain HTML (Help, Privacy, the deletion page) and the text around the app in `index.html`. The deploy renders them once for each ready language, so a language that is ready also gets its own copy of each of these pages under `/<code>/` (see `tools/static-pages/render.cs` and `.github/scripts/prepare-pages.py`).
+
 ## Setting up Weblate
 
 This is done once, by the owner of the repository.
 
 1. Apply for the free Libre plan on Hosted Weblate (hosted.weblate.org) for an open source project, and create the project Stikling.
 2. Connect the GitHub repository. Weblate needs access to push branches and to open pull requests.
-3. Use component discovery, so every English file becomes its own component. The file mask is written the way Weblate's discovery documents it, with the groups `component` and `language`, and has to match `src/<project>/Resources/<Area>.<language>.resx`, for example `src/Stikling.Web/Resources/Settings.da.resx`. The English file is `<Area>.resx` in the same folder. Run it once for each project that has a `Resources` folder (`Stikling.Web`, later `Stikling.Core`).
+3. Use component discovery, so every English file becomes its own component. The file mask is written the way Weblate's discovery documents it, with the groups `component` and `language`, and has to match `src/<project>/Resources/<Area>.<language>.resx`, for example `src/Stikling.Web/Resources/Settings.da.resx`. The English file is `<Area>.resx` in the same folder. Run it once for each project that has a `Resources` folder, `Stikling.Web` and `Stikling.Core`, with a component name prefix for each (like `web-` and `core-`), since both have areas with the same name.
 4. For each component, set English as the source language and the file format to ".NET resource file".
 5. Set it to push its changes as pull requests, not straight to `main`.
 6. Check that a new translation of one component opens a pull request, and that the tests pass on it.

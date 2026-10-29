@@ -25,7 +25,7 @@ public static class AppLanguages
     [
         // English keeps en-GB, so dates and numbers read the way they always have
         new("en", "English", Ready: true, CultureName: "en-GB"),
-        new("da", "Dansk", Ready: false, CultureName: "da-DK")
+        new("da", "Dansk", Ready: true, CultureName: "da-DK")
     ];
 
     /// <summary>The languages that can be used: the ready ones, and the ones still being translated when asked for.</summary>

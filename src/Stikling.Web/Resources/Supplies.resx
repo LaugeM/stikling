@@ -363,8 +363,53 @@
     <value>Privacy</value>
     <comment>Back link to the Privacy page.</comment>
   </data>
-  <data name="DeletionFailed" xml:space="preserve">
-    <value>Couldn't load this page. Check that you're online and try again.</value>
+  <data name="DeletionHeading" xml:space="preserve">
+    <value>Deleting your data</value>
+  </data>
+  <data name="DeletionWithAccountTitle" xml:space="preserve">
+    <value>With an account</value>
+  </data>
+  <data name="DeletionWithAccountIntro" xml:space="preserve">
+    <value>It works the same whether you signed in with Google, Facebook, Discord or your email.</value>
+  </data>
+  <data name="DeletionStep1" xml:space="preserve">
+    <value>Open Stikling at {0} and tap the gear at the top.</value>
+    <comment>{0} is a link to stikling.app. It is not translated.</comment>
+  </data>
+  <data name="DeletionStep2" xml:space="preserve">
+    <value>Tap your account at the top of Settings, the row with your email.</value>
+  </data>
+  <data name="DeletionStep3" xml:space="preserve">
+    <value>Tap {0} at the bottom, and confirm.</value>
+    <comment>{0} is the name of the button, in emphasis. It is the same text as the button in Settings.</comment>
+  </data>
+  <data name="DeletionDeleteAccountButton" xml:space="preserve">
+    <value>Delete account</value>
+    <comment>The name of the Delete account button in Settings, put into the step above.</comment>
+  </data>
+  <data name="DeletionErased" xml:space="preserve">
+    <value>Your plants, photos and settings are erased from the Stikling server straight away, and Clerk deletes your sign-in. The database's automatic backups still hold a copy for up to 7 days, after which it's gone. You choose whether the device you do it on keeps what it has.</value>
+  </data>
+  <data name="DeletionCantSignIn" xml:space="preserve">
+    <value>If you can't sign in any more, write to {0} from the email address on the account and ask for it to be deleted.</value>
+    <comment>{0} is a link to the support email address.</comment>
+  </data>
+  <data name="DeletionOtherApps" xml:space="preserve">
+    <value>Stikling also shows up in the list of apps your Facebook, Google or Discord account has signed in to. You can remove it from that list in the account's own settings.</value>
+  </data>
+  <data name="DeletionWithoutAccountTitle" xml:space="preserve">
+    <value>Without an account</value>
+  </data>
+  <data name="DeletionWithoutAccountText" xml:space="preserve">
+    <value>Everything is on your device and nothing is on the server. Clearing the site data for stikling.app in your browser, or deleting the installed app, removes all of it.</value>
+  </data>
+  <data name="DeletionMore" xml:space="preserve">
+    <value>The {0} says what is kept and where.</value>
+    <comment>{0} is a link, with the text of the next key.</comment>
+  </data>
+  <data name="DeletionPrivacyPage" xml:space="preserve">
+    <value>privacy page</value>
+    <comment>Text of the link in the sentence above.</comment>
   </data>
   <data name="DosePlaceholder" xml:space="preserve">
     <value>Dose</value>

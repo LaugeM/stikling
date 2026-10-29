@@ -56,15 +56,15 @@ Accounts and sync between devices are being added in steps, so people don't have
 
 ## Text people see
 
-All text people see goes in `Resources/*.resx`, English in `Name.resx` and Danish in `Name.da.resx`, and is used as `Strings.Name.Key`. Never write it inline in a Razor page or a C# file, and add the Danish with the English. Dates and counts have helpers for it. `docs/dev/translating.md` has the rules, the Danish word list and how to add an area file. Pages that haven't been moved yet still have inline English, and each later pull request moves its screens.
+All text people see goes in `Resources/*.resx`, English in `Name.resx` and Danish in `Name.da.resx`, and is used as `Strings.Name.Key`. Never write it inline in a Razor page or a C# file, and add the Danish with the English. Dates and counts have helpers for it. `docs/dev/translating.md` has the rules, the Danish word list and how to add an area file.
 
 ## The Help page
 
 `Pages/Help.razor` answers the questions someone new asks, and has a few answers for each part of the app. The text is in `Resources/Help.resx` and `Help.da.resx`, and the page lists the keys. It has to describe the app as it is. When a change adds or changes a feature, update the answers it affects in the same pull request, and add one when the feature raises a question of its own. Check the empty states on the screens involved too, since they tell a new user what to do next and go stale the same way.
 
-The deploy also renders the page to plain HTML for search engines, and into `llms.txt` for AI tools (`tools/static-pages/render.cs`), so it has to render without a browser: anything that calls JavaScript goes in `OnAfterRenderAsync`. The front page in `wwwroot/index.html` answers a few of the same questions, so check those too.
+The deploy also renders the page to plain HTML for search engines, and into `llms.txt` for AI tools (`tools/static-pages/render.cs`), so it has to render without a browser: anything that calls JavaScript goes in `OnAfterRenderAsync`. The front page answers a few of the same questions, so check those too. It is `StaticPages/FrontPage.razor`, with its text in `Resources/FrontPage.resx` and `FrontPage.da.resx`, and the deploy puts it into `index.html` (the `wwwroot/index.html` in the repository has no front page of its own).
 
-When a change is something people using the app would notice, add a line for it at the top of the current month in `Pages/WhatsNew.razor`, in the same pull request.
+When a change is something people using the app would notice, add a line for it at the top of the current month in `Pages/WhatsNew.razor`, in the same pull request. The line is a key in `Resources/WhatsNew.resx` with its Danish in `WhatsNew.da.resx`. The older lines stay English.
 
 ## The feature list
 

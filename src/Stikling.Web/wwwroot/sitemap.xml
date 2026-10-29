@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- The pages that are served as plain HTML (see .github/scripts/prepare-pages.py). Every other path loads the app. -->
+<!-- The pages that are served as plain HTML (see .github/scripts/prepare-pages.py). Every other path loads the app.
+     The deploy writes this file again with every page in every ready language. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://stikling.app/</loc></url>
   <url><loc>https://stikling.app/help</loc></url>

@@ -19,7 +19,7 @@ public partial class TranslationFileTests
     /// moved so far without being ready. The last of those pull requests sets this to true, and from then
     /// on any language that reaches the share has to be listed as ready.
     /// </summary>
-    private static readonly bool EveryScreenMoved = false;
+    private static readonly bool EveryScreenMoved = true;
 
     private sealed record Resx(string Area, string Language, string Path, Dictionary<string, string> Texts);
 
