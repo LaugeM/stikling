@@ -2270,7 +2270,7 @@ else
     {
         var test = plant!.Copy();
         SetStepDay(test, stepDay);
-        stepErrors = [.. test.Validate(Today).Where(e => e.Contains("step", StringComparison.OrdinalIgnoreCase))];
+        stepErrors = [.. test.Validate(Today).Where(Plant.IsStepError)];
         if (stepErrors.Count > 0)
             return;
         await ChangeAsync(() => PlantService.SetTransitionStepAsync(plant!, editingStep, stepDay, Labels.For));

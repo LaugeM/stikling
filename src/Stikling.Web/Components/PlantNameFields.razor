@@ -8,20 +8,20 @@
 @inject IJSRuntime JS
 
 <div class="mb-3">
-    <label class="form-label" for="@(IdPrefix)name-search">What plant is it?</label>
-    <input id="@(IdPrefix)name-search" type="search" class="form-control" value="@query" placeholder="e.g. snake plant or Monstera deliciosa"
+    <label class="form-label" for="@(IdPrefix)name-search">@Strings.Plants.NameWhatPlant</label>
+    <input id="@(IdPrefix)name-search" type="search" class="form-control" value="@query" placeholder="@Strings.Plants.NameSearchPlaceholder"
            autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="@(IdPrefix)name-results"
            @oninput="e => query = e.Value?.ToString()" @ref="searchInput" />
     @if (Found is { Count: > 0 } found)
     {
-        <div id="@(IdPrefix)name-results" class="name-results" role="group" aria-label="Plants found">
+        <div id="@(IdPrefix)name-results" class="name-results" role="group" aria-label="@Strings.Plants.NameFound">
             @foreach (var result in found)
             {
                 <button type="button" class="name-result" @onclick="() => PickFoundAsync(result)">
                     @if (result.Formerly is { } old)
                     {
                         <span class="name-result-main"><i>@old</i></span>
-                        <span class="name-result-sub">now <BotanicalName Genus="@result.Genus" Species="@result.Species" Cultivar="@result.Cultivar" /></span>
+                        <span class="name-result-sub">@Around(Strings.Plants.NameNow, Botanical(result))</span>
                     }
                     else if (result.Everyday is { } resultCalled)
                     {
@@ -38,12 +38,12 @@
     }
     else if (suggester is not null && NameKeyLength >= NameSuggester.MinLettersWithoutGenus)
     {
-        <div id="@(IdPrefix)name-results" class="form-text">Nothing by that name in the app's list. You can still type it in below.</div>
+        <div id="@(IdPrefix)name-results" class="form-text">@Strings.Plants.NameNothing</div>
     }
 </div>
 <div class="row g-2 mb-3">
     <div class="col-6">
-        <label class="form-label" for="@(IdPrefix)genus">Genus</label>
+        <label class="form-label" for="@(IdPrefix)genus">@Strings.Plants.NameGenus</label>
         <input id="@(IdPrefix)genus" class="form-control" value="@Genus" placeholder="@GenusPlaceholder"
                autocomplete="off" autocapitalize="words" spellcheck="false"
                @oninput="e => TypeAsync(NameField.Genus, e)" @onfocus="() => active = NameField.Genus" @onblur="Blur"
@@ -52,7 +52,7 @@
     @if (Qualifier is not (NameQualifier.Sp or NameQualifier.Unknown))
     {
         <div class="col-6">
-            <label class="form-label" for="@(IdPrefix)species">Species</label>
+            <label class="form-label" for="@(IdPrefix)species">@Strings.Plants.NameSpecies</label>
             <input id="@(IdPrefix)species" class="form-control" value="@Species" placeholder="@SpeciesPlaceholder"
                    autocomplete="off" autocapitalize="none" spellcheck="false"
                    @oninput="e => TypeAsync(NameField.Species, e)" @onfocus="() => active = NameField.Species" @onblur="Blur"
@@ -65,7 +65,7 @@
     }
 </div>
 <div class="mb-1">
-    <label class="form-label" for="@(IdPrefix)cultivar">Cultivar / variety</label>
+    <label class="form-label" for="@(IdPrefix)cultivar">@Strings.Plants.NameCultivar</label>
     <input id="@(IdPrefix)cultivar" class="form-control" value="@Cultivar" placeholder="@CultivarPlaceholder"
            autocomplete="off" autocapitalize="words" spellcheck="false"
            @oninput="e => TypeAsync(NameField.Cultivar, e)" @onfocus="() => active = NameField.Cultivar" @onblur="Blur"
@@ -76,31 +76,31 @@
     }
     @if (everyday?.For(Genus, PlantNames.SpeciesToLookUp(Species, Qualifier), Cultivar) is { } called)
     {
-        <div class="form-text">Everyday name: @called</div>
+        <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NameEveryday, called)</div>
     }
 </div>
 @if (!unsureOpen)
 {
     <div class="mb-1">
-        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => unsureOpen = true">Not sure of the name?</button>
+        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => unsureOpen = true">@Strings.Plants.NameNotSure</button>
     </div>
 }
 else
 {
     <div class="row g-2 mt-1">
         <div class="col-12 col-sm-6">
-            <label class="form-label" for="@(IdPrefix)name-sure">How sure</label>
+            <label class="form-label" for="@(IdPrefix)name-sure">@Strings.Plants.NameHowSure</label>
             <select id="@(IdPrefix)name-sure" class="form-select" @onchange="SetQualifierAsync">
-                <option value="" selected="@(Qualifier is null)">Sure</option>
-                <option value="@NameQualifier.Cf" selected="@(Qualifier == NameQualifier.Cf)">cf. (looks like this species)</option>
-                <option value="@NameQualifier.Aff" selected="@(Qualifier == NameQualifier.Aff)">aff. (close to this species)</option>
-                <option value="@NameQualifier.Sp" selected="@(Qualifier == NameQualifier.Sp)">sp. (species not known)</option>
-                <option value="@NameQualifier.Unknown" selected="@(Qualifier == NameQualifier.Unknown)">Name lost</option>
+                <option value="" selected="@(Qualifier is null)">@Strings.Plants.NameSure</option>
+                <option value="@NameQualifier.Cf" selected="@(Qualifier == NameQualifier.Cf)">@Strings.Plants.NameCf</option>
+                <option value="@NameQualifier.Aff" selected="@(Qualifier == NameQualifier.Aff)">@Strings.Plants.NameAff</option>
+                <option value="@NameQualifier.Sp" selected="@(Qualifier == NameQualifier.Sp)">@Strings.Plants.NameSp</option>
+                <option value="@NameQualifier.Unknown" selected="@(Qualifier == NameQualifier.Unknown)">@Strings.Plants.NameLost</option>
             </select>
         </div>
         <div class="col-12 col-sm-6">
-            <label class="form-label" for="@(IdPrefix)name-note">Locality or code</label>
-            <input id="@(IdPrefix)name-note" class="form-control" value="@Note" placeholder="e.g. Sumatra, EPC 123"
+            <label class="form-label" for="@(IdPrefix)name-note">@Strings.Plants.NameLocality</label>
+            <input id="@(IdPrefix)name-note" class="form-control" value="@Note" placeholder="@Strings.Plants.NameLocalityPlaceholder"
                    autocomplete="off" spellcheck="false" @oninput="e => NoteChanged.InvokeAsync(e.Value?.ToString())" />
         </div>
     </div>
@@ -145,13 +145,13 @@ else
     public EventCallback<string?> NoteChanged { get; set; }
 
     [Parameter]
-    public string GenusPlaceholder { get; set; } = "e.g. Monstera";
+    public string GenusPlaceholder { get; set; } = Strings.Plants.NameGenusPlaceholder;
 
     [Parameter]
-    public string SpeciesPlaceholder { get; set; } = "e.g. deliciosa";
+    public string SpeciesPlaceholder { get; set; } = Strings.Plants.NameSpeciesPlaceholder;
 
     [Parameter]
-    public string CultivarPlaceholder { get; set; } = "e.g. Thai Constellation";
+    public string CultivarPlaceholder { get; set; } = Strings.Plants.NameCultivarPlaceholder;
 
     // The unsure-name fields stay shut until used, and show open when the name already has them
     private bool unsureOpen;
@@ -216,7 +216,7 @@ else
     private RenderFragment Chips => @<text>
         @if (Suggestions is { Count: > 0 } suggestions)
         {
-            <div class="chip-row" role="group" aria-label="Suggested names">
+            <div class="chip-row" role="group" aria-label="@Strings.Plants.NameSuggested">
                 @foreach (var suggestion in suggestions)
                 {
                     <button type="button" class="chip name-chip" tabindex="-1"
@@ -233,16 +233,31 @@ else
     private RenderFragment ChipText(NameSuggestion s) => active switch
     {
         NameField.Genus when s.Formerly is { } old =>
-            @<text><i>@old</i> <span class="chip-note">now <i>@s.Genus</i></span></text>,
+            @<text><i>@old</i> <span class="chip-note">@Now(s.Genus)</span></text>,
         NameField.Genus => @<i>@s.Genus</i>,
         NameField.Species when s.Formerly is { } old =>
-            @<text><i>@(SameGenus(old.Split(' ', 2)[0]) ? old.Split(' ', 2)[1] : old)</i> <span class="chip-note">now <i>@s.Genus @s.Species</i></span></text>,
+            @<text><i>@(SameGenus(old.Split(' ', 2)[0]) ? old.Split(' ', 2)[1] : old)</i> <span class="chip-note">@Now(s.Genus + " " + s.Species)</span></text>,
         NameField.Species => SameGenus(s.Genus) ? @<i>@s.Species</i> : @<i>@s.Genus @s.Species</i>,
         _ when !SameGenus(s.Genus) =>
             @<text>'@s.Cultivar' <span class="chip-note"><i>@s.Genus @s.Species</i></span></text>,
         _ when s.Species is not null && string.IsNullOrWhiteSpace(Species) =>
             @<text>'@s.Cultivar' <span class="chip-note"><i>@s.Species</i></span></text>,
         _ => @<text>'@s.Cultivar'</text>
+    };
+
+    // "now <name>" after an old name, with the new name in italics
+    private static MarkupString Now(string name) =>
+        (MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NameNow, "<i>" + System.Net.WebUtility.HtmlEncode(name) + "</i>");
+
+    private RenderFragment Botanical(NameSuggestion r) => @<BotanicalName Genus="@r.Genus" Species="@r.Species" Cultivar="@r.Cultivar" />;
+
+    // A sentence with an element inside it: the element goes where {0} is
+    private static RenderFragment Around(string format, RenderFragment inner) => builder =>
+    {
+        var at = format.IndexOf("{0}", StringComparison.Ordinal);
+        builder.AddContent(0, format[..at]);
+        builder.AddContent(1, inner);
+        builder.AddContent(2, format[(at + 3)..]);
     };
 
     private bool SameGenus(string genus) => string.Equals(PlantNames.Genus(Genus), genus, StringComparison.OrdinalIgnoreCase);

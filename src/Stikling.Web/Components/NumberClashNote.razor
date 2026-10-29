@@ -3,18 +3,21 @@
 @if (Clashes.Count > 0)
 {
     <p class="number-clash">
-        @for (var i = 0; i < Clashes.Count; i++)
-        {
-            var clash = Clashes[i];
-            @(i == 0 ? "" : ", ")<a href="@(clash.IsPropagation ? "propagations" : "plants")/@clash.Id">@clash.Name</a>
-        }
-        also @(Clashes.Count == 1 ? "has" : "have") #@CollectionNumbers.Normalize(Code).
+        @Names()
     </p>
 }
 
 @code {
     [Parameter]
     public string? Code { get; set; }
+
+    private MarkupString Names()
+    {
+        var links = string.Join(", ", Clashes.Select(clash =>
+            $"<a href=\"{(clash.IsPropagation ? "propagations" : "plants")}/{clash.Id}\">{System.Net.WebUtility.HtmlEncode(clash.Name)}</a>"));
+        var format = Clashes.Count == 1 ? Strings.Plants.NumberClashOne : Strings.Plants.NumberClashMany;
+        return (MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, format, links, System.Net.WebUtility.HtmlEncode(CollectionNumbers.Normalize(Code) ?? ""));
+    }
 
     [Parameter]
     public IReadOnlyList<CodeClash> Clashes { get; set; } = [];

@@ -8,7 +8,7 @@
 
     @if (Matching.Count > 0)
     {
-        <div class="chip-row mt-2" role="group" aria-label="Sellers you have">
+        <div class="chip-row mt-2" role="group" aria-label="@Strings.Plants.SellerChips">
             @foreach (var name in Matching)
             {
                 <button type="button" class="chip" @onclick="() => SetAsync(name)">@name</button>
@@ -18,7 +18,7 @@
 
     @if (IsNew)
     {
-        <div class="form-text">"@SellerName.Clean(Value)" will be added to your sellers when you save.</div>
+        <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.SellerNew, SellerName.Clean(Value))</div>
     }
 </div>
 
@@ -34,10 +34,10 @@
     public IReadOnlyList<string> Names { get; set; } = [];
 
     [Parameter]
-    public string Label { get; set; } = "Where from";
+    public string Label { get; set; } = Strings.Plants.SellerWhereFrom;
 
     [Parameter]
-    public string Placeholder { get; set; } = "Shop, friend, plant swap…";
+    public string Placeholder { get; set; } = Strings.Plants.SellerPlaceholder;
 
     [Parameter]
     public string Id { get; set; } = "seller";

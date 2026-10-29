@@ -3,7 +3,7 @@
 @inject PhotoService Photos
 @inject ILogger<ReferencePhotoAdd> Logger
 
-<label class="btn btn-link btn-sm link-action reference-add" for="@inputId">Add a reference photo</label>
+<label class="btn btn-link btn-sm link-action reference-add" for="@inputId">@Strings.Plants.ReferencePhotoAdd</label>
 <input id="@inputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1"
        @ref="input" @onchange="AddAsync" disabled="@busy" />
 @if (message is not null)
@@ -41,7 +41,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding a reference photo failed");
-            message = $"Couldn't save the photo: {ex.Message}";
+            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.ReferencePhotoFailed, ex.Message);
         }
 
         busy = false;

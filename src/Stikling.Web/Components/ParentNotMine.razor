@@ -6,9 +6,9 @@
 @inject TimeProvider Time
 @inject ILogger<ParentNotMine> Logger
 
-<Sheet Title="A parent that isn't yours" Open="Open" OpenChanged="OpenChanged">
+<Sheet Title="@Strings.Plants.ParentNotMineTitle" Open="Open" OpenChanged="OpenChanged">
     <form @onsubmit="AddAsync" novalidate>
-        <p class="form-text">It stays out of your plant list and Today. It is only here so a cutting can show where it came from.</p>
+        <p class="form-text">@Strings.Plants.ParentNotMineText</p>
         @if (errors.Count > 0)
         {
             <div class="alert alert-danger" role="alert">
@@ -20,15 +20,15 @@
         }
         <PlantNameFields IdPrefix="@IdPrefix" @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar" />
         <div class="mb-3">
-            <label class="form-label" for="@(IdPrefix)nickname">Nickname</label>
-            <InputText id="@($"{IdPrefix}nickname")" class="form-control" @bind-Value="plant.Nickname" placeholder="e.g. Grandma's pothos" />
-            <div class="form-text">Give it a genus, a nickname, or both.</div>
+            <label class="form-label" for="@(IdPrefix)nickname">@Strings.PlantEdit.Nickname</label>
+            <InputText id="@($"{IdPrefix}nickname")" class="form-control" @bind-Value="plant.Nickname" placeholder="@Strings.Plants.ParentNicknamePlaceholder" />
+            <div class="form-text">@Strings.PlantEdit.NameHint</div>
         </div>
         <div class="mb-3">
-            <label class="form-label" for="@(IdPrefix)lives-with">Whose is it?</label>
-            <InputText id="@($"{IdPrefix}lives-with")" class="form-control" @bind-Value="plant.LivesWith" placeholder="e.g. Grandma" />
+            <label class="form-label" for="@(IdPrefix)lives-with">@Strings.PlantEdit.WhoseIsIt</label>
+            <InputText id="@($"{IdPrefix}lives-with")" class="form-control" @bind-Value="plant.LivesWith" placeholder="@Strings.PlantEdit.WhosePlaceholder" />
         </div>
-        <button type="submit" class="btn btn-primary" disabled="@saving">Add</button>
+        <button type="submit" class="btn btn-primary" disabled="@saving">@Strings.Common.Add</button>
     </form>
 </Sheet>
 
@@ -75,7 +75,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving a parent that isn't yours failed");
-            errors = [$"Couldn't save: {ex.Message}"];
+            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.PlantDetail.CouldntSave, ex.Message)];
         }
         finally
         {

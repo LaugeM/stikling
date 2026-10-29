@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -72,6 +73,14 @@ public sealed record LooseDate
 
     /// <summary>How it reads in the app: "2024", "June 2024" or "12 Jun 2024".</summary>
     public string Text() => Precision switch
+    {
+        DatePrecision.Year => Year.ToString("D4", CultureInfo.InvariantCulture),
+        DatePrecision.Month => Start.ToString("MMMM yyyy", Stikling.Core.Text.TextCulture.ForDates),
+        _ => Start.ToString(Strings.Plants.LooseDayFormat, Stikling.Core.Text.TextCulture.ForDates)
+    };
+
+    /// <summary>The same as <see cref="Text"/>, always in English. For text that is saved with a record.</summary>
+    public string StoredText() => Precision switch
     {
         DatePrecision.Year => Year.ToString("D4", CultureInfo.InvariantCulture),
         DatePrecision.Month => Start.ToString("MMMM yyyy", CultureInfo.InvariantCulture),

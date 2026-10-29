@@ -1,3 +1,4 @@
+using Strings = Stikling.Core.Resources;
 using System.Text.Json.Serialization;
 
 namespace Stikling.Core.Models;
@@ -368,7 +369,7 @@ public sealed class Plant : Entity
     /// <summary>The name to show in lists: the nickname, else the botanical name.</summary>
     [JsonIgnore]
     public string DisplayName =>
-        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? (NameQualifier == Models.NameQualifier.Unknown ? "Name unknown" : "Unnamed plant");
+        !string.IsNullOrWhiteSpace(Nickname) ? Nickname.Trim() : BotanicalName ?? (NameQualifier == Models.NameQualifier.Unknown ? Strings.Plants.NameUnknown : Strings.Plants.NameNone);
 
     /// <summary>
     /// Who a plant went to and what it went for, as one line: "Given to Anna · swapped for a Hoya carnosa"
@@ -382,11 +383,15 @@ public sealed class Plant : Entity
         var hasFor = !string.IsNullOrEmpty(forWhat);
         if (!hasTo && !hasFor) return null;
         if (Status == PlantStatus.Sold)
-            return "Sold" + (hasTo ? $" to {to}" : "") + (hasFor ? $" for {forWhat}" : "");
+            return !hasTo ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureSoldFor, forWhat)
+                : hasFor ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureSoldToFor, to, forWhat)
+                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureSoldTo, to);
         if (Status == PlantStatus.GivenAway)
         {
-            if (!hasTo) return $"Swapped for {forWhat}";
-            return $"Given to {to}" + (hasFor ? $" · swapped for {forWhat}" : "");
+            if (!hasTo) return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureSwappedFor, forWhat);
+            return hasFor
+                ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureGivenToSwapped, to, forWhat)
+                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureGivenTo, to);
         }
         return null;
     }
@@ -399,7 +404,9 @@ public sealed class Plant : Entity
     {
         if (PaidText is not { } amount)
             return null;
-        return string.IsNullOrWhiteSpace(Source) ? $"Paid {amount}" : $"Bought from {Source.Trim()} for {amount}";
+        return string.IsNullOrWhiteSpace(Source)
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.PurchasePaid, amount)
+            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.PurchaseBoughtFrom, Source.Trim(), amount);
     }
 
     /// <summary>The price as written in a line, "150" or "79.5". Null unless it was purchased and a price is set.</summary>
@@ -487,45 +494,49 @@ public sealed class Plant : Entity
     public int? DaysDormant(DateOnly today) =>
         DormantSince is { } since ? Math.Max(0, today.DayNumber - since.DayNumber) : null;
 
+    /// <summary>Whether a validation message is about the steps of the move to semi-hydro.</summary>
+    public static bool IsStepError(string message) =>
+        message == Strings.Plants.ErrStepFuture || message == Strings.Plants.ErrStepBeforeStart;
+
     /// <summary>Validation rules shared by every place a plant can be saved from.</summary>
     public IReadOnlyList<string> Validate(DateOnly today)
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Nickname) && string.IsNullOrWhiteSpace(Genus) && NameQualifier != Models.NameQualifier.Unknown)
-            errors.Add("Give the plant a nickname or a genus.");
+            errors.Add(Strings.Plants.ErrNameNeeded);
         errors.AddRange(PlantNames.QualifierErrors(Genus, Species, NameQualifier));
         if (ParentPlantId is not null && ParentPlantId == Id)
-            errors.Add("A plant can't be its own parent.");
+            errors.Add(Strings.Plants.ErrOwnParent);
         if (Plants.CollectionNumbers.Normalize(CollectionNumber) is { } code && !Plants.CollectionNumbers.IsValid(code))
             errors.Add(Plants.CollectionNumbers.NotValidText);
         if (PricePaid < 0)
-            errors.Add("The price paid can't be negative.");
+            errors.Add(Strings.Plants.ErrPriceNegative);
         if (AcquiredOn is { } acquired && acquired.Start > today)
-            errors.Add("The date you got it can't be in the future.");
+            errors.Add(Strings.Plants.ErrAcquiredFuture);
         if (InnerPotId is not null && InnerPotId == OuterPotId)
-            errors.Add("A plant can't have the same pot inside and outside.");
+            errors.Add(Strings.Plants.ErrSamePot);
         if (QuarantinedSince > today)
-            errors.Add("The quarantine can't start in the future.");
+            errors.Add(Strings.Plants.ErrQuarantineFuture);
         if (QuarantineDays < 1)
-            errors.Add("A quarantine has to last at least a day.");
+            errors.Add(Strings.Plants.ErrQuarantineDays);
         if (DormantSince > today)
-            errors.Add("It can't go dormant in the future.");
+            errors.Add(Strings.Plants.ErrDormantFuture);
         if (TransitionSince > today)
-            errors.Add("The move to semi-hydro can't start in the future.");
+            errors.Add(Strings.Plants.ErrTransitionFuture);
         if (RootsWashedOn > today || FirstWaterRootOn > today || FirstNewLeafOn > today)
-            errors.Add("A step can't be in the future.");
+            errors.Add(Strings.Plants.ErrStepFuture);
         if (TransitionSince is { } started && (RootsWashedOn < started || FirstWaterRootOn < started || FirstNewLeafOn < started))
-            errors.Add("A step can't come before the move started.");
+            errors.Add(Strings.Plants.ErrStepBeforeStart);
         if (TransitionCheckWeeks is < 1 or > 52)
-            errors.Add("Check after 1 to 52 weeks.");
+            errors.Add(Strings.Plants.ErrCheckWeeks);
         if (WaterAt is < 1 or > 10)
-            errors.Add("The watering level goes from 1 to 10.");
+            errors.Add(Strings.Plants.ErrWaterAt);
         if (Count < 1)
-            errors.Add("There's at least one plant in a pot.");
+            errors.Add(Strings.Plants.ErrCount);
         if (PottedWithPlantId is not null && PottedWithPlantId == Id)
-            errors.Add("A plant can't be potted with itself.");
+            errors.Add(Strings.Plants.ErrPottedSelf);
         if (PotsTaken != PotsTaken.None && !HasLeft)
-            errors.Add("Only a plant that was given away or sold can take its pots with it.");
+            errors.Add(Strings.Plants.ErrPotsTaken);
         return errors;
     }
 }
