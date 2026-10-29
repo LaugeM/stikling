@@ -60,7 +60,7 @@ All text people see goes in `Resources/*.resx`, English in `Name.resx` and Danis
 
 ## The Help page
 
-`Pages/Help.razor` answers the questions someone new asks, and has a few answers for each part of the app. It has to describe the app as it is. When a change adds or changes a feature, update the answers it affects in the same pull request, and add one when the feature raises a question of its own. Check the empty states on the screens involved too, since they tell a new user what to do next and go stale the same way.
+`Pages/Help.razor` answers the questions someone new asks, and has a few answers for each part of the app. The text is in `Resources/Help.resx` and `Help.da.resx`, and the page lists the keys. It has to describe the app as it is. When a change adds or changes a feature, update the answers it affects in the same pull request, and add one when the feature raises a question of its own. Check the empty states on the screens involved too, since they tell a new user what to do next and go stale the same way.
 
 The deploy also renders the page to plain HTML for search engines, and into `llms.txt` for AI tools (`tools/static-pages/render.cs`), so it has to render without a browser: anything that calls JavaScript goes in `OnAfterRenderAsync`. The front page in `wwwroot/index.html` answers a few of the same questions, so check those too.
 
