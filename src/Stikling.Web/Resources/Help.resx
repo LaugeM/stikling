@@ -1360,4 +1360,152 @@
     <value>clear the search</value>
     <comment>Button in the sentence shown when the search finds nothing. It clears the search.</comment>
   </data>
+  <data name="CollectionNumberQ" xml:space="preserve">
+    <value>What is a collection number?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="CollectionNumberA1" xml:space="preserve">
+    <value>The short number some people write on each pot, like 117. It is optional. Set it in the &lt;em&gt;Collection number&lt;/em&gt; field on the plant's edit form, where the next free number is one tap away. A cutting from plant 117 gets 117a, then 117b, so the label on the jar says where it came from. When a cutting is potted up, the plant keeps its number. If several are potted up together, they get 117c1, 117c2 and so on. To number the plants you already have, oldest first, open &lt;em&gt;Collection numbers&lt;/em&gt; in Settings. Two plants with the same number are pointed out, but Stikling never changes a number for you.</value>
+    <comment>Answer to "What is a collection number?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="PrintLabelsQ" xml:space="preserve">
+    <value>How do I print labels?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="PrintLabelsA1" xml:space="preserve">
+    <value>Pick the plants or cuttings first. On the Plants or Propagations page, tap &lt;em&gt;Select&lt;/em&gt;, tick them and tap &lt;em&gt;Labels&lt;/em&gt;. For one plant or cutting, open &lt;em&gt;More&lt;/em&gt; on its page and choose &lt;em&gt;Print a label&lt;/em&gt;. After you start a propagation or pot one up, the page offers a label too. Each label has the collection number, large, with the name beside it. You can add the botanical name and the date, and remove a label with the cross on its corner without touching the plant.</value>
+    <comment>Answer to "How do I print labels?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="PrintLabelsA2" xml:space="preserve">
+    <value>There are three ways to get them out. &lt;em&gt;Label maker app&lt;/em&gt; is for a phone label maker like a Niimbot or a Phomemo: pick its label size, and the labels go to the share menu as pictures, where you choose the maker's app. A browser that can't share pictures, like Firefox on Android, saves them instead, and you open them in the app. &lt;em&gt;Tape printer&lt;/em&gt; is for a tape printer like a Brother P-touch or a Dymo that is installed on a computer. Pick the tape and the length, tap Print and choose the printer in the print dialog. &lt;em&gt;Sheet&lt;/em&gt; is for a normal printer, on A4 or Letter paper, with small tags for pots or long strips for plant stakes, both with cut lines.</value>
+    <comment>Answer to "How do I print labels?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="PrintLabelsA3" xml:space="preserve">
+    <value>The size and what to show are remembered on this device. Nothing is saved on the plants themselves. On tape 12 mm wide or less there is room for the number and the name only.</value>
+    <comment>Answer to "How do I print labels?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="WhereKeepTrackWherePlantsQ" xml:space="preserve">
+    <value>Where do I keep track of where my plants came from?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="WhereKeepTrackWherePlantsA1" xml:space="preserve">
+    <value>On the plant form, &lt;em&gt;Where from&lt;/em&gt; picks a seller or adds one. Type a shop, a friend or a swap event, and the ones you have used before show up to tap, so the same shop doesn't end up written three ways. Under &lt;em&gt;More details&lt;/em&gt;, &lt;em&gt;How it arrived&lt;/em&gt; says whether it came in good, OK or poor shape, what was wrong (pests, damage, root rot, the wrong plant, smaller than shown) and a short note. Under Supplies, &lt;em&gt;Sellers&lt;/em&gt; lists them. Open one to see how many of its plants are still here, died or went to someone else, whether pests turned up within a month of getting a plant, what arrived with pests or damaged, and what you paid. There you can also rename a seller, or merge two that are the same one. Plants you added before keep the text you wrote in Source, and sellers were made from it the first time you opened this version.</value>
+    <comment>Answer to "Where do I keep track of where my plants came from?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="LogCareAppDoesnTQ" xml:space="preserve">
+    <value>Can I log care the app doesn't list?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="LogCareAppDoesnTA1" xml:space="preserve">
+    <value>Yes. In the care sheet, open &lt;em&gt;What you did&lt;/em&gt; and pick &lt;em&gt;Add your own…&lt;/em&gt; at the end, or go to &lt;em&gt;Settings&lt;/em&gt;, then &lt;em&gt;Kinds of care&lt;/em&gt;. Give it a name, like misted, bottom watered or refilled the humidifier. Your own kinds show under &lt;em&gt;Your own&lt;/em&gt; in the list, on one plant and on several at once. &lt;em&gt;Counts as&lt;/em&gt; says what it is: a &lt;em&gt;Watering&lt;/em&gt; counts as water, so a bottom watering is something the watering reminder learns from and shows as last watered, and a &lt;em&gt;Feed&lt;/em&gt; can have products, water and an EC or pH reading. &lt;em&gt;Neither&lt;/em&gt; only goes in the care log. &lt;em&gt;Put it on the plant's history&lt;/em&gt; also writes a line for it on the plant's page, which suits things you don't do often, like wiring a branch. In &lt;em&gt;Kinds of care&lt;/em&gt; you can rename a kind, change what it counts as and remove it. Entries already logged keep the name they had, and changing what a kind counts as only affects new entries unless you choose to change the old ones too.</value>
+    <comment>Answer to "Can I log care the app doesn't list?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="AppRemindMeFeedOrQ" xml:space="preserve">
+    <value>Can the app remind me to feed or repot?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="AppRemindMeFeedOrA1" xml:space="preserve">
+    <value>Yes, with a care interval. Go to &lt;em&gt;Settings&lt;/em&gt;, then &lt;em&gt;Care intervals&lt;/em&gt;, or tap &lt;em&gt;Set care to come back&lt;/em&gt; in a plant's Care. Pick what it is, like fertilise, repot, prune or a kind of your own, and how often: every so many days, weeks, months or years. &lt;em&gt;Only part of the year&lt;/em&gt; limits it, like April to October, or October to March over the new year. Then say who it covers: picked plants, a room, a tag like the one on your semi-hydro plants, or all of them. A room or a tag follows the plants, so one that is moved or tagged later is covered from then on.</value>
+    <comment>Answer to "Can the app remind me to feed or repot?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="AppRemindMeFeedOrA2" xml:space="preserve">
+    <value>Today then has a &lt;em&gt;Care&lt;/em&gt; section with what is due, grouped by what to do. Tap the tick to log one plant, or &lt;em&gt;Done for all&lt;/em&gt; to log the whole group, and &lt;em&gt;Undo&lt;/em&gt; takes it back. The put-off button hides one for a day, 3 days or a week. Each plant is due one interval after the last time you logged it. A plant with nothing logged yet first comes up one interval after you set the interval, so a new one is quiet at first. A plant whose last entry is already longer ago than the interval comes up straight away. Feeding stops while a plant is dormant and picks up when it wakes. If you have set round days, care comes up on the round day before it is due.</value>
+    <comment>Answer to "Can the app remind me to feed or repot?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="AppRemindMeFeedOrA3" xml:space="preserve">
+    <value>Watering is never on an interval. The watering reminder learns how often each plant needs water from the waterings you log, and a fixed schedule would water a plant that isn't ready.</value>
+    <comment>Answer to "Can the app remind me to feed or repot?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="MarkSwapQ" xml:space="preserve">
+    <value>How do I mark what I can swap?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="MarkSwapA1" xml:space="preserve">
+    <value>On a plant's page, tap More and choose For swap, then pick &lt;em&gt;Cuttings&lt;/em&gt; if you can spare cuttings from it or &lt;em&gt;The plant&lt;/em&gt; if the plant itself is up for swap. The same choice is in the plant's edit form, and in Select on the Plants page you can mark several plants at once. For a propagation, choose For swap from More or in its edit form and say how many of its cuttings you can spare. That is never more than what is left, and when you record cuttings as given away they come off the number first. The mark shows as a small label on the plant or propagation. A plant that has left isn't listed, and its mark is kept in case it comes back.</value>
+    <comment>Answer to "How do I mark what I can swap?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="AvailableForSwapPageQ" xml:space="preserve">
+    <value>What is the Available for swap page?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="AvailableForSwapPageA1" xml:space="preserve">
+    <value>One list of what you can swap, before a plant swap or when a friend asks. It is linked from Propagations and from the label on a plant or propagation. Cuttings that exist come first, with how many and how far along they are, then plants you can take cuttings from, then plants that are up for swap. Tap a row to open it. If you tagged plants "For swap" before, the page offers to mark them, and the tag stays on them. Share makes pictures of the list to post in a group: a grid of photos with names and counts, in square, 4:5 or 9:16, split over several pictures when there is a lot on it. Under Text it is a message to send instead.</value>
+    <comment>Answer to "What is the Available for swap page?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="SharePlantListQ" xml:space="preserve">
+    <value>How do I share my plant list?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="SharePlantListA1" xml:space="preserve">
+    <value>On the Plants page, tap Share as text. It shares what is shown, so the search and filters apply, or only the plants you selected in Select. Each plant is written with its botanical name and its everyday name in brackets, the same plant twice is written once with ×2, and a plant marked for swap says so. A plant without a botanical name uses its nickname, and other nicknames are left out unless you switch them on. Rooms, prices, where a plant came from and tags are never in it. The last line, "Kept in Stikling, stikling.app", can be switched off before you share. On a phone the text goes to the share menu, and on a computer it is copied.</value>
+    <comment>Answer to "How do I share my plant list?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="LikesForQ" xml:space="preserve">
+    <value>What is What it likes for?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="LikesForA1" xml:space="preserve">
+    <value>It notes what a plant wants: the light it likes, how it likes its water, how much humidity, and whether it rests in winter or summer and how. The light where it stands and the light it likes are two things, so set what it likes under &lt;em&gt;What it likes&lt;/em&gt; on the plant's form, under &lt;em&gt;More details&lt;/em&gt;. When the two differ, the plant's page says it stands somewhere darker or brighter than it likes. The plant list can be filtered by it, for example to find the plants that want high humidity, and the table view has columns for it. When you change it on one plant, the app offers to change the others of the same species too, and leaves them alone if you say no.</value>
+    <comment>Answer to "What is What it likes for?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="LikesForA2" xml:space="preserve">
+    <value>For many common houseplants, the form offers what the plant usually likes, with where that comes from. &lt;em&gt;Use&lt;/em&gt; only fills in what is still empty.</value>
+    <comment>Answer to "What is What it likes for?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="LikesForA3" xml:space="preserve">
+    <value>When you set a growing season, Today asks whether the plant has gone dormant when its rest comes round.</value>
+    <comment>Answer to "What is What it likes for?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="WhereSuggestionsForPlantLikesQ" xml:space="preserve">
+    <value>Where do the suggestions for what a plant likes come from?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="WhereSuggestionsForPlantLikesA1" xml:space="preserve">
+    <value>From a list of about 70 common houseplants that comes with the app. Each value is taken from a named source: NC State Extension, the Missouri Botanical Garden or the RHS for care, and is only what the source says about growing it indoors. A season is only suggested when the source says the plant goes dormant. Anything no source gives is left empty. &lt;em&gt;Use&lt;/em&gt; never changes what you have set, and a plant can like something else than usual, so change it if yours does.</value>
+    <comment>Answer to "Where do the suggestions for what a plant likes come from?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="PlantToxicCatOrDogQ" xml:space="preserve">
+    <value>Is my plant toxic to my cat or dog?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="PlantToxicCatOrDogA1" xml:space="preserve">
+    <value>A plant's page, and a propagation's, says under &lt;em&gt;Details&lt;/em&gt; whether it is toxic to cats and dogs, from the ASPCA, and to people when NC State Extension says, with a link to the source. It goes by the genus and species, so set those. &lt;em&gt;Nothing known about pets&lt;/em&gt; means the app has no source for that plant, not that it is safe. If a pet has eaten part of a plant, call your vet.</value>
+    <comment>Answer to "Is my plant toxic to my cat or dog?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="KeepTrackWhenPlantFlowersQ" xml:space="preserve">
+    <value>How do I keep track of when a plant flowers?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="KeepTrackWhenPlantFlowersA1" xml:space="preserve">
+    <value>Open the plant's page, tap the three dots and choose &lt;em&gt;Flowering&lt;/em&gt;. Mark that it has a spike or buds, that it is in flower, or that it is done, on the day or on an earlier one. Each stage goes on its history, and you can add a photo right after. A flowering from before you used the app can be added with just a month, under &lt;em&gt;Add a past flowering&lt;/em&gt;. While a plant is in bud or in flower, a badge shows on it in your list.</value>
+    <comment>Answer to "How do I keep track of when a plant flowers?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="KeepListPlantsWantQ" xml:space="preserve">
+    <value>How do I keep a list of plants I want?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="KeepListPlantsWantA1" xml:space="preserve">
+    <value>Open the &lt;em&gt;Wishlist&lt;/em&gt; link on the Plants page and tap &lt;em&gt;Add a wish&lt;/em&gt;. Search for the plant like when you add one, or just write a name of your own, like "that pink syngonium". You can add where to find it, the most you would pay and what you liked about it. A wish says when you already have the plant, like "You have 2", or another of the same species. A wish can have photos too, like the plant at a shop or a listing. When you get the plant, they move to it as reference photos.</value>
+    <comment>Answer to "How do I keep a list of plants I want?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="GetNotificationEachDayQ" xml:space="preserve">
+    <value>How do I get a notification each day?</value>
+    <comment>Question in the "Today" part of the Help page.</comment>
+  </data>
+  <data name="GetNotificationEachDayA1" xml:space="preserve">
+    <value>Sign in, then open Settings and find &lt;em&gt;Notifications&lt;/em&gt;. Tap &lt;em&gt;Turn on&lt;/em&gt; and allow notifications when the browser asks. You get one notification a day with what Today asks for, like pest treatments that are due or plants to check, at the time you pick. You can have it every day, only on your round days, or only on the weekdays you choose.</value>
+    <comment>Answer to "How do I get a notification each day?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="GetNotificationEachDayA2" xml:space="preserve">
+    <value>Each device is turned on by itself, so turn it on on the phone and leave the computer off if you like. The time and the days are yours and are the same on every device.</value>
+    <comment>Answer to "How do I get a notification each day?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="ReferencePhotoQ" xml:space="preserve">
+    <value>What is a reference photo?</value>
+    <comment>Question in the "Photos and history" part of the Help page.</comment>
+  </data>
+  <data name="ReferencePhotoA1" xml:space="preserve">
+    <value>A photo that isn't of your own plant, like the seller's listing or the plant fully grown. It stays out of the history and is never the cover, so it doesn't count as a photo of the plant, and it is left out of shared pages, the time-lapse and your year. It is kept as a record of what you bought, in case a label goes missing. Add one with &lt;em&gt;Add a reference photo&lt;/em&gt; under &lt;em&gt;Details&lt;/em&gt;, or open a photo and tap &lt;em&gt;Move to reference&lt;/em&gt;. Reference photos show in a row under the history, and &lt;em&gt;Move to history&lt;/em&gt; puts one back where it was.</value>
+    <comment>Answer to "What is a reference photo?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
 </root>
