@@ -1,4 +1,6 @@
+using System.Globalization;
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Propagations;
 
@@ -17,11 +19,11 @@ public sealed class PropagationCareService(IPropagationCareLogRepository logs, T
         Propagation propagation, PropagationCareKind kind, DateOnly on, int? moisture = null)
     {
         if (!propagation.IsActive)
-            throw new InvalidOperationException("This propagation is finished.");
+            throw new InvalidOperationException(Strings.Propagations.ErrFinished);
         if (on > Today)
-            throw new InvalidOperationException("That date is in the future.");
+            throw new InvalidOperationException(Strings.Propagations.ErrDateFuture);
         if (on < propagation.StartedOn)
-            throw new InvalidOperationException("The date can't be before the propagation started.");
+            throw new InvalidOperationException(Strings.Propagations.ErrDateBeforeStart);
 
         var entry = new PropagationCareLog
         {
@@ -92,9 +94,9 @@ public sealed class PropagationCareService(IPropagationCareLogRepository logs, T
     /// <summary>"Watered", "Changed the water" or "Moisture 4/10".</summary>
     public static string Describe(PropagationCareLog entry) => entry.Kind switch
     {
-        PropagationCareKind.Watered => "Watered",
-        PropagationCareKind.ChangedWater => "Changed the water",
-        PropagationCareKind.MoistureReading => $"Moisture {entry.Moisture}/10",
+        PropagationCareKind.Watered => Strings.Propagations.CareWatered,
+        PropagationCareKind.ChangedWater => Strings.Propagations.CareChangedWater,
+        PropagationCareKind.MoistureReading => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CareMoisture, entry.Moisture),
         _ => entry.Kind.ToString()
     };
 }

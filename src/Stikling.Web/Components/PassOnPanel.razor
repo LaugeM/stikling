@@ -11,20 +11,20 @@
 
 @if (!Sync.SignedIn)
 {
-    <p class="pass-on-note">Sending its history needs an account, so the page can be shown from the server. Whoever got it doesn't need one.</p>
+    <p class="pass-on-note">@Strings.Propagations.PassOnNeedsAccount</p>
     <div class="form-actions">
-        <button type="button" class="btn btn-primary" @onclick="SignInAsync">Sign in</button>
-        <button type="button" class="btn btn-link" @onclick="OnDone">Not now</button>
+        <button type="button" class="btn btn-primary" @onclick="SignInAsync">@Strings.Propagations.PassOnSignIn</button>
+        <button type="button" class="btn btn-link" @onclick="OnDone">@Strings.Propagations.PassOnNotNow</button>
     </div>
 }
 else
 {
-    <p class="pass-on-note">Send them a link to its photos and story so far. They can keep a copy in their own Stikling, without an account. It shows what a share link shows: the photos and milestones, and your notes if you leave them on. Never the room, prices or who got it.</p>
+    <p class="pass-on-note">@Strings.Propagations.PassOnIntro</p>
     @if (Link is null)
     {
         <div class="form-check form-switch pass-on-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="pass-on-notes" checked="@showNotes" @onchange="e => showNotes = e.Value is true" disabled="@busy" />
-            <label class="form-check-label" for="pass-on-notes">Show my notes</label>
+            <label class="form-check-label" for="pass-on-notes">@Strings.Propagations.PassOnShowNotes</label>
         </div>
     }
     @if (error is not null)
@@ -32,16 +32,16 @@ else
         <p class="pass-on-error" role="alert">@error</p>
     }
     <div class="form-actions">
-        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SendAsync">@(busy ? "Making the link…" : "Send them its history")</button>
+        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SendAsync">@(busy ? Strings.Propagations.PassOnMaking : Strings.Propagations.PassOnSend)</button>
         @if (Link is not null)
         {
-            <button type="button" class="btn btn-link link-action" @onclick="OnChangePage">Change what the page shows</button>
+            <button type="button" class="btn btn-link link-action" @onclick="OnChangePage">@Strings.Propagations.PassOnChange</button>
         }
-        <button type="button" class="btn btn-link" @onclick="OnDone">Not now</button>
+        <button type="button" class="btn btn-link" @onclick="OnDone">@Strings.Propagations.PassOnNotNow</button>
     </div>
     @if (copied)
     {
-        <p class="form-text mt-2 mb-0" role="status">Copied</p>
+        <p class="form-text mt-2 mb-0" role="status">@Strings.Propagations.PassOnCopied</p>
     }
 }
 
@@ -87,7 +87,7 @@ else
         if (canShareLink)
         {
             if (await Cards.ShareLinkAsync(Name, link.Url) == "failed")
-                error = "The share menu couldn't be opened. Copy the link instead.";
+                error = Strings.Propagations.PassOnMenuFailed;
             else
                 await OnDone.InvokeAsync();
             if (error is null)
@@ -96,7 +96,7 @@ else
 
         copied = await Cards.CopyTextAsync(link.Url);
         if (!copied)
-            error = "The link couldn't be copied. Select it and copy it by hand.";
+            error = Strings.Propagations.PassOnCopyFailed;
         else
             error = null;
     }
@@ -111,7 +111,7 @@ else
             await Sync.SyncNowAsync();
             var result = await Links.CreateAsync(SubjectType, SubjectId, TimeZoneInfo.Local.Id, showNotes);
             if (!result.Ok)
-                error = result.Offline ? "Connect to the internet to make a link." : result.Problem;
+                error = result.Offline ? Strings.Propagations.PassOnOffline : result.Problem;
             return result.Ok;
         }
         finally

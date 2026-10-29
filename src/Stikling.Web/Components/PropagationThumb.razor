@@ -18,7 +18,7 @@ else if (Days is { } days)
 {
     <div class="item-thumb day-thumb">
         <b>@days</b>
-        <small>@(days == 1 ? "day" : "days")</small>
+        <small>@Plural.Of(days, Strings.Propagations.ThumbDay_One, Strings.Propagations.ThumbDay_Other)</small>
     </div>
 }
 else
@@ -36,5 +36,5 @@ else
     [Parameter]
     public int? Days { get; set; }
 
-    private static string DaysText(int days) => days == 1 ? "1 day" : $"{days} days";
+    private static string DaysText(int days) => Plural.Of(days, Strings.Propagations.Days_One, Strings.Propagations.Days_Other);
 }
