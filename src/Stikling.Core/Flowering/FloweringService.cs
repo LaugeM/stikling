@@ -27,14 +27,14 @@ public sealed class FloweringService(IFloweringMarkRepository marks, ITimelineRe
             SubjectId = plant.Id,
             Kind = TimelineKind.Change,
             Event = TimelineEvent.Flowering,
-            Text = stage switch
-            {
-                FloweringStage.Buds => "Spike or buds",
-                FloweringStage.InFlower => "In flower",
-                _ => "Done flowering"
-            },
             OccurredAt = time.MomentOn(day)
         };
+        HistoryText.Set(entry, [HistoryText.Line(stage switch
+        {
+            FloweringStage.Buds => "FloweringBuds",
+            FloweringStage.InFlower => "FloweringInFlower",
+            _ => "FloweringDone"
+        })]);
         await timeline.AddAsync(entry);
 
         mark.TimelineEntryId = entry.Id;

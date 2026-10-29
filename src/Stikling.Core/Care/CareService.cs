@@ -3,6 +3,7 @@ using Stikling.Core.Feeds;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Products;
+using Stikling.Core.Text;
 using Stikling.Core.Timeline;
 using Strings = Stikling.Core.Resources;
 
@@ -300,38 +301,10 @@ public sealed class CareService(
     /// or "Fertilised with Aroid feed (2 L): Silica, 0.5 ml/L + Hydro fertiliser, 2 ml/L".
     /// </summary>
     public static string Describe(CareLog entry, Func<Enum, string> label,
-        IReadOnlyDictionary<Guid, OwnCareKind>? ownKinds = null)
-    {
-        var what = CareLabels.For(entry, ownKinds, label);
-        if (entry.Kind == CareKind.MoistureReading && entry.Moisture is { } moisture)
-            what = $"{what}: {moisture}/10";
-        if (Clean(entry.FeedName) is { } feed)
-            what = $"{what} with {feed}";
-        if (entry.WaterLitres is { } litres)
-            what = $"{what} ({Doses.Water(litres)})";
-
-        var notes = Clean(entry.Notes);
-        var readings = Readings(entry);
-        if (entry.Products.Count == 0)
-            return Join(notes is null ? what : $"{what}: {notes}", readings);
-
-        var products = string.Join(" + ", entry.Products);
-        return Join(notes is null ? $"{what}: {products}" : $"{what}: {products} · {notes}", readings);
-    }
-
-    /// <summary>"EC 1.2 · pH 6.0", or nothing when neither was measured.</summary>
-    private static string? Readings(CareLog entry)
-    {
-        var parts = new List<string>();
-        if (entry.Ec is { } ec)
-            parts.Add($"EC {ec.ToString("0.0#", CultureInfo.InvariantCulture)}");
-        if (entry.Ph is { } ph)
-            parts.Add($"pH {ph.ToString("0.0#", CultureInfo.InvariantCulture)}");
-        return parts.Count == 0 ? null : string.Join(" · ", parts);
-    }
-
-    private static string Join(string line, string? readings) =>
-        readings is null ? line : $"{line} · {readings}";
+        IReadOnlyDictionary<Guid, OwnCareKind>? ownKinds = null) =>
+        HistoryText.Render(
+            HistoryText.CareLine(entry, CareLabels.OwnName(entry, ownKinds), entry.Products.Count == 0 ? null : string.Join(" + ", entry.Products)),
+            label, CultureInfo.CurrentUICulture);
 
     private async Task RecordAsync(CareLog entry, Func<Enum, string> label)
     {
@@ -346,14 +319,18 @@ public sealed class CareService(
         if (!CareKinds.IsNotable(entry.Kind) && !onHistory)
             return;
 
-        await timeline.AddAsync(new TimelineEntry
+        // Saved in English, so the words in the product doses and the name of a built-in kind are the English ones
+        var line = SavedText.InEnglish(() => HistoryText.CareLine(
+            entry, CareLabels.OwnName(entry, own), entry.Products.Count == 0 ? null : string.Join(" + ", entry.Products)));
+        var recorded = new TimelineEntry
         {
             SubjectType = SubjectType.Plant,
             SubjectId = entry.PlantId,
             Kind = TimelineKind.Change,
-            OccurredAt = time.MomentOn(entry.OccurredOn),
-            Text = Describe(entry, label, own)
-        });
+            OccurredAt = time.MomentOn(entry.OccurredOn)
+        };
+        HistoryText.Set(recorded, [line], label);
+        await timeline.AddAsync(recorded);
     }
 
     private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();

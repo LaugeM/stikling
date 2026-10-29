@@ -69,18 +69,19 @@ public sealed class PropagationService(
         await propagations.SaveAsync(propagation);
 
         IReadOnlyList<TimelineEntry> history = again ? await timeline.GetForAsync(propagation.Id) : [];
-        var what = Describe(propagation, label);
+        var batch = BatchLine(propagation);
         var occurredAt = time.MomentOn(propagation.StartedOn);
         if (!history.Any(e => !e.IsDeleted && e.Kind == TimelineKind.Created))
         {
-            await timeline.AddAsync(new TimelineEntry
+            var started = new TimelineEntry
             {
                 SubjectType = SubjectType.Propagation,
                 SubjectId = propagation.Id,
                 Kind = TimelineKind.Created,
-                OccurredAt = PhotoEntries.StartedAt(occurredAt, photos ?? [], time),
-                Text = $"Started {what}"
-            });
+                OccurredAt = PhotoEntries.StartedAt(occurredAt, photos ?? [], time)
+            };
+            HistoryText.Set(started, [HistoryText.Line("Started", [.. batch.Args])], label);
+            await timeline.AddAsync(started);
         }
 
         var shown = history.Where(e => !e.IsDeleted).SelectMany(e => e.PhotoIds).ToHashSet();
@@ -93,16 +94,17 @@ public sealed class PropagationService(
         if (propagation.ParentPlantId is { } parentId && await plants.GetAsync(parentId) is not null
             && !(again && (await timeline.GetForAsync(parentId)).Any(e => !e.IsDeleted && e.Kind == TimelineKind.Propagated && e.RelatedId == propagation.Id)))
         {
-            await timeline.AddAsync(new TimelineEntry
+            var taken = new TimelineEntry
             {
                 SubjectType = SubjectType.Plant,
                 SubjectId = parentId,
                 Kind = TimelineKind.Propagated,
                 OccurredAt = occurredAt,
-                Text = what,
                 RelatedType = SubjectType.Propagation,
                 RelatedId = propagation.Id
-            });
+            };
+            HistoryText.Set(taken, [batch], label);
+            await timeline.AddAsync(taken);
         }
     }
 
@@ -126,11 +128,11 @@ public sealed class PropagationService(
 
         await PartlySavedException.AfterSaveAsync(async () =>
         {
-            var changes = PropagationChanges.Describe(before, after, label, placeName);
+            var changes = PropagationChanges.Lines(before, after, placeName);
             if (changes.Count > 0)
-                await AddChangeAsync(after, string.Join("\n", changes));
+                await AddChangeAsync(after, changes, label: label);
             if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
-                await AddChangeAsync(after, $"Identified as {after.BotanicalName ?? after.DisplayName}", @event: TimelineEvent.Identified);
+                await AddChangeAsync(after, [HistoryText.Line("IdentifiedAs", HistoryArg.Of(after.BotanicalName ?? after.DisplayName))], @event: TimelineEvent.Identified);
         });
     }
 
@@ -259,16 +261,17 @@ public sealed class PropagationService(
             await plants.SaveAsync(plant);
             if (again && (await timeline.GetForAsync(plant.Id)).Any(e => !e.IsDeleted && e.Kind == TimelineKind.Created))
                 continue;
-            await timeline.AddAsync(new TimelineEntry
+            var created = new TimelineEntry
             {
                 SubjectType = SubjectType.Plant,
                 SubjectId = plant.Id,
                 Kind = TimelineKind.Created,
                 OccurredAt = occurredAt,
-                Text = "Potted up from a propagation",
                 RelatedType = SubjectType.Propagation,
                 RelatedId = propagation.Id
-            });
+            };
+            HistoryText.Set(created, [HistoryText.Line("PottedUpFromPropagation")]);
+            await timeline.AddAsync(created);
         }
 
         await CountAsync(propagation, p => p.RecordPottedUp(request.Count, request.Date));
@@ -280,8 +283,8 @@ public sealed class PropagationService(
             if (into is not null)
                 await new PlantService(plants, timeline, time).PotTogetherAsync(newPlants[0], into, request.Date, label);
 
-            var text = $"Potted up {request.Count}: {string.Join(", ", newPlants.Select(p => p.DisplayName))}";
-            await AddChangeAsync(propagation, WithOutcome(text, propagation), occurredAt,
+            var line = HistoryText.Line("PottedUp", HistoryArg.Of(request.Count), HistoryArg.Of(string.Join(", ", newPlants.Select(p => p.DisplayName))));
+            await AddChangeAsync(propagation, WithOutcome(line, propagation), occurredAt,
                 newPlants.Count == 1 ? newPlants[0].Id : null, TimelineEvent.PottedUp);
         });
 
@@ -352,9 +355,14 @@ public sealed class PropagationService(
             throw new InvalidOperationException(Strings.Propagations.ErrDateBeforeStart);
         await CountAsync(propagation, p => p.RecordFailed(count, day));
 
-        var why = string.Join(", ", new[] { reason is { } picked ? FailReasons.Label(picked) : null, Clean(note) }.OfType<string>());
-        var text = why.Length > 0 ? $"{count} failed: {why}" : $"{count} failed";
-        await PartlySavedException.AfterSaveAsync(() => AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null,
+        var line = (reason, Clean(note)) switch
+        {
+            ({ } picked, { } said) => HistoryText.Line("FailedWithReasonNote", HistoryArg.Of(count), HistoryArg.Of(picked), HistoryArg.Of(said)),
+            ({ } picked, null) => HistoryText.Line("FailedWithReason", HistoryArg.Of(count), HistoryArg.Of(picked)),
+            (null, { } said) => HistoryText.Line("FailedWithNote", HistoryArg.Of(count), HistoryArg.Of(said)),
+            _ => HistoryText.Line("Failed", HistoryArg.Of(count))
+        };
+        await PartlySavedException.AfterSaveAsync(() => AddChangeAsync(propagation, WithOutcome(line, propagation), time.MomentOn(day), null,
             TimelineEvent.Failed, failReason: reason, count: count));
     }
 
@@ -373,9 +381,11 @@ public sealed class PropagationService(
             throw new InvalidOperationException(Strings.Propagations.ErrDateBeforeStart);
         await CountAsync(propagation, p => p.RecordGivenAway(count, day));
 
-        var text = Clean(to) is { } who ? $"Gave {count} to {who}" : $"Gave {count} away";
+        var line = Clean(to) is { } who
+            ? HistoryText.Line("GaveToWho", HistoryArg.Of(count), HistoryArg.Of(who))
+            : HistoryText.Line("GaveAway", HistoryArg.Of(count));
         await PartlySavedException.AfterSaveAsync(() =>
-            AddChangeAsync(propagation, WithOutcome(text, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway));
+            AddChangeAsync(propagation, WithOutcome(line, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway));
     }
 
     // Records the count on a copy and saves that, then the same on the caller's propagation, so it only
@@ -435,36 +445,51 @@ public sealed class PropagationService(
         return parts.Count == 0 ? Strings.Propagations.OutcomeNothingYet : string.Join(", ", parts);
     }
 
-    // The history line is saved as it is written, so it stays in English
-    private static string WithOutcome(string text, Propagation propagation)
+    /// <summary>The batch as a history line: "3× corm in LECA".</summary>
+    private static HistoryLine BatchLine(Propagation propagation) =>
+        HistoryText.Line("BatchOf", HistoryArg.Of(propagation.InitialCount), HistoryArg.Of(propagation.Type), HistoryArg.Of(propagation.Medium));
+
+    // A finished propagation adds a line with what became of the units
+    private static IReadOnlyList<HistoryLine> WithOutcome(HistoryLine line, Propagation propagation)
     {
         if (propagation.IsActive)
-            return text;
-        var parts = new List<string>(3);
-        if (propagation.PottedUpCount > 0)
-            parts.Add($"{propagation.PottedUpCount} potted up");
-        if (propagation.GivenAwayCount > 0)
-            parts.Add($"{propagation.GivenAwayCount} given away");
-        if (propagation.FailedCount > 0)
-            parts.Add($"{propagation.FailedCount} failed");
-        return $"{text}\nFinished: {(parts.Count == 0 ? "nothing yet" : string.Join(", ", parts))}";
+            return [line];
+
+        var (potted, given, failed) = (propagation.PottedUpCount, propagation.GivenAwayCount, propagation.FailedCount);
+        HistoryArg[] Counts(params int[] counts) => [.. counts.Select(c => HistoryArg.Of(c))];
+        var finished = (potted > 0, given > 0, failed > 0) switch
+        {
+            (true, true, true) => HistoryText.Line("FinishedAll", Counts(potted, given, failed)),
+            (true, true, false) => HistoryText.Line("FinishedPottedGiven", Counts(potted, given)),
+            (true, false, true) => HistoryText.Line("FinishedPottedFailed", Counts(potted, failed)),
+            (false, true, true) => HistoryText.Line("FinishedGivenFailed", Counts(given, failed)),
+            (true, false, false) => HistoryText.Line("FinishedPotted", Counts(potted)),
+            (false, true, false) => HistoryText.Line("FinishedGiven", Counts(given)),
+            (false, false, true) => HistoryText.Line("FinishedFailed", Counts(failed)),
+            _ => HistoryText.Line("FinishedNothing")
+        };
+        return [line, finished];
     }
 
-    private Task AddChangeAsync(Propagation propagation, string text, DateTimeOffset? occurredAt = null, Guid? plantId = null, TimelineEvent? @event = null,
-        FailReason? failReason = null, int? count = null) =>
-        timeline.AddAsync(new TimelineEntry
+    // The label turns the enums in the lines into the English words that are saved in Text
+    private Task AddChangeAsync(Propagation propagation, IReadOnlyList<HistoryLine> lines, DateTimeOffset? occurredAt = null, Guid? plantId = null, TimelineEvent? @event = null,
+        FailReason? failReason = null, int? count = null, Func<Enum, string>? label = null)
+    {
+        var entry = new TimelineEntry
         {
             SubjectType = SubjectType.Propagation,
             SubjectId = propagation.Id,
             Kind = TimelineKind.Change,
             OccurredAt = occurredAt ?? time.GetUtcNow(),
-            Text = text,
             Event = @event,
             FailReason = failReason,
             Count = count,
             RelatedType = plantId is null ? null : SubjectType.Plant,
             RelatedId = plantId
-        });
+        };
+        HistoryText.Set(entry, lines, label ?? (e => e.ToString()));
+        return timeline.AddAsync(entry);
+    }
 
     private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 }

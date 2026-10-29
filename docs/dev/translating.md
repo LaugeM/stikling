@@ -11,7 +11,7 @@ The text that is still in the Razor pages and C# files is being moved over one a
 - `src/Stikling.Web/Resources` has the text for the pages and components.
 - `src/Stikling.Core/Resources` has the text that comes from the services in Core. It is added as those services are moved over.
 
-Each area has its own file: `Common` (words used on many screens), `Labels` (names of statuses, kinds and dates), `Layout` (the menu and header) and `Settings`. Translate the ones you can. A language doesn't have to have every file to work, text with no translation shows in English.
+Each area has its own file: `Common` (words used on many screens), `Labels` (names of statuses, kinds and dates), `Layout` (the menu and header) and `Settings`. `History` has the lines the app writes into a plant's history, like "Moved from {0} to {1}", and `Examples` has the names and notes of the example plant. Translate the ones you can. A language doesn't have to have every file to work, text with no translation shows in English.
 
 ### Keys, placeholders and comments
 
@@ -145,6 +145,15 @@ Text people see never goes in a Razor page or a C# file. Add it to the file for 
 - Dates go through `Labels.Date` and the other date methods in `Labels`, which pick the patterns from `Labels.resx`. English keeps its own look ("19 Sep 2026"), any other language uses its culture's names.
 - When a sentence has a link or an element inside it, put `{0}` where the element goes and fill it in on the page. Only text from the resource files may be shown as markup, never anything a person typed.
 - The app language is picked once, in `Program.cs`, before the app starts, so changing it restarts the app. A language that was chosen is saved in `UserSettings.Language` and `wwwroot/js/language.js` keeps a copy on the device for that first start.
+
+### Lines in a plant's history
+
+The lines the app writes into a plant's or propagation's history ("Moved from Living room to Bedroom", "Status: Died (was Active)") are not saved as text in the language of the device. They are saved as `HistoryLine`s on the `TimelineEntry`: the key of a template and the values that go in it. Each device shows them in its own language through `HistoryText.Show`. The same lines are also written in English into `TimelineEntry.Text`, since other code reads that text, older versions show it and it is what a device shows for a key it doesn't know. Entries from before this have only the text, and `HistoryText.Parse` reads their English back into lines when they are shown.
+
+- A new line needs a key in `History.resx` and `History.da.resx` and in the catalog in `Timeline/HistoryCatalog.cs`, which says what each value is (a name a person typed, a number, a day, an enum or a list of enums). Build it with `HistoryText.Line` and save it with `HistoryText.Set`, so `Lines` and `Text` always agree. A test checks that every key has its wording in both files.
+- Never rename a key, since entries on other devices and on the server keep it. Never change the English wording of a template without keeping the old wording readable: add the old wording as a template of its own (an alias) so `Parse` still reads old entries.
+- When two templates could read the same English text, the more specific one goes first in the catalog.
+- Names people typed (rooms, pots, tags, plants, notes) are saved as they are and never translated. Words the app wrote itself (a kind of care, a medium, a reason) are enums, so they follow the language.
 
 ### Adding an area file
 

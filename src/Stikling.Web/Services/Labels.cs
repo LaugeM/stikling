@@ -308,6 +308,29 @@ public static class Labels
         _ => value.ToString()
     };
 
+    /// <summary>
+    /// <see cref="For(Enum)"/> in English, whatever language the app is in. The History text saved with an entry
+    /// and read back by <c>HistoryText.Parse</c> is in English. The app runs on one thread, so the language
+    /// can be switched around the call.
+    /// </summary>
+    public static string English(Enum value)
+    {
+        var ui = CultureInfo.CurrentUICulture;
+        var culture = CultureInfo.CurrentCulture;
+        var english = CultureInfo.GetCultureInfo("en-GB");
+        CultureInfo.CurrentUICulture = english;
+        CultureInfo.CurrentCulture = english;
+        try
+        {
+            return For(value);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = ui;
+            CultureInfo.CurrentCulture = culture;
+        }
+    }
+
     /// <summary>Like <see cref="For(Enum)"/>, with stage names that fit the propagation's type.</summary>
     public static Func<Enum, string> For(Propagation propagation) =>
         value => value is PropagationStage stage ? Stage(stage, propagation.Type) : For(value);

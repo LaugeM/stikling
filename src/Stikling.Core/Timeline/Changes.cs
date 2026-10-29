@@ -1,5 +1,7 @@
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
+using Stikling.Core.Propagations;
+using static Stikling.Core.Timeline.HistoryText;
 
 namespace Stikling.Core.Timeline;
 
@@ -9,6 +11,7 @@ namespace Stikling.Core.Timeline;
 /// </summary>
 public static class PlantChanges
 {
+    /// <summary>The changes as lines in English, one text for each line.</summary>
     /// <param name="label">Turns enum values into display text, e.g. Leca becomes "LECA".</param>
     /// <param name="potName">Turns a pot id into its name. Pots the caller can't name are left unsaid.</param>
     /// <param name="mixName">The same for a soil mix.</param>
@@ -21,104 +24,124 @@ public static class PlantChanges
         Func<Guid, string?>? potName = null,
         Func<Guid, string?>? mixName = null,
         Func<Guid, string?>? placeName = null,
+        Func<Guid, string?>? feedName = null) =>
+        [.. Lines(before, after, potName, mixName, placeName, feedName).Select(line => English(line, label))];
+
+    /// <summary>The same changes as history lines, which can be shown in any language.</summary>
+    public static IReadOnlyList<HistoryLine> Lines(
+        Plant before,
+        Plant after,
+        Func<Guid, string?>? potName = null,
+        Func<Guid, string?>? mixName = null,
+        Func<Guid, string?>? placeName = null,
         Func<Guid, string?>? feedName = null)
     {
-        var changes = new List<string>();
+        var changes = new List<HistoryLine>();
 
         if (before.Status != after.Status)
-            changes.Add($"Status: {label(after.Status)} (was {label(before.Status)})");
+            changes.Add(Line("StatusChanged", HistoryArg.Of(after.Status), HistoryArg.Of(before.Status)));
 
         if (after.CauseOfDeath is { } cause && before.CauseOfDeath != cause)
-            changes.Add($"What happened: {cause}");
+            changes.Add(Line("WhatHappened", HistoryArg.Of(cause)));
 
         if ((after.LeftTo != before.LeftTo || after.LeftFor != before.LeftFor
-                || before.Status != after.Status) && after.DescribeDepartureForHistory() is { } departure)
+                || before.Status != after.Status) && after.DepartureLine() is { } departure)
             changes.Add(departure);
 
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
-        ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
+        ChangeText.AddMedium(changes, before.Medium, after.Medium);
 
         if (before.HowMany != after.HowMany)
-            changes.Add($"How many: {before.HowMany} to {after.HowMany}");
+            changes.Add(Line("HowManyChanged", HistoryArg.Of(before.HowMany), HistoryArg.Of(after.HowMany)));
 
         if (before.Light != after.Light)
             changes.Add(after.Light is { } light
-                ? $"Light: {label(light)} (was {(before.Light is { } was ? label(was) : "not set")})"
-                : "Light setting cleared");
+                ? before.Light is { } was
+                    ? Line("LightChanged", HistoryArg.Of(light), HistoryArg.Of(was))
+                    : Line("LightChangedFromUnset", HistoryArg.Of(light))
+                : Line("LightCleared"));
 
         var name = potName ?? (_ => null);
-        ChangeText.AddPot(changes, before.InnerPotId, after.InnerPotId, name, "Potted into", "Taken out of its pot");
-        ChangeText.AddPot(changes, before.OuterPotId, after.OuterPotId, name, "Now stands in", "No longer in an outer pot");
-        ChangeText.AddPot(changes, before.SoilMixId, after.SoilMixId, mixName ?? (_ => null), "Now in", "No longer in a saved mix");
+        ChangeText.AddPot(changes, before.InnerPotId, after.InnerPotId, name, "PottedInto", "TakenOutOfPot");
+        ChangeText.AddPot(changes, before.OuterPotId, after.OuterPotId, name, "NowStandsIn", "OuterPotRemoved");
+        ChangeText.AddPot(changes, before.SoilMixId, after.SoilMixId, mixName ?? (_ => null), "NowInMix", "MixRemoved");
 
         ChangeText.AddWateringFeed(changes, before, after, feedName ?? (_ => null));
 
         if (before.PotsTaken != after.PotsTaken && after.HasLeft)
-            changes.Add(PotsTakenText(after));
+            changes.Add(PotsTakenLine(after));
 
         if (before.WaterInOuterPot != after.WaterInOuterPot)
-            changes.Add(after.WaterInOuterPot ? "Now watered in the outer pot" : "No longer watered in the outer pot");
+            changes.Add(Line(after.WaterInOuterPot ? "WateredInOuterPot" : "NotWateredInOuterPot"));
 
         AddTags(changes, before.Tags, after.Tags);
 
         if (before.InQuarantine != after.InQuarantine)
-            changes.Add(after.InQuarantine ? "Put in quarantine" : "Out of quarantine");
+            changes.Add(Line(after.InQuarantine ? "PutInQuarantine" : "OutOfQuarantine"));
 
         // A plant that died or left stops being dormant, and the status change already says so
         if (before.IsDormant != after.IsDormant && after.Status == PlantStatus.Active)
-            changes.Add(DormancyText(after.IsDormant));
+            changes.Add(DormancyLine(after.IsDormant));
 
-        AddTransition(changes, before, after, label);
+        AddTransition(changes, before, after);
 
         return changes;
     }
 
-    private static void AddTransition(List<string> changes, Plant before, Plant after, Func<Enum, string> label)
+    private static void AddTransition(List<HistoryLine> changes, Plant before, Plant after)
     {
         var medium = after.TransitionTo ?? before.TransitionTo;
-        var mediumText = medium is { } m ? label(m) : "semi-hydro";
+
+        // Without a medium the line says semi-hydro, which is what the move is for
+        HistoryLine Move(string key, string semiHydroKey) => medium is { } m
+            ? Line(key, HistoryArg.Of(m))
+            : Line(semiHydroKey);
 
         // A second move after a settled one has a new start day too
         if (after.TransitionSince is not null && before.TransitionSince != after.TransitionSince)
-            changes.Add($"Started the move to {mediumText}");
+            changes.Add(Move("StartedMoveTo", "StartedMoveToSemiHydro"));
         if (before.RootsWashedOn is null && after.RootsWashedOn is not null)
-            changes.Add("Roots washed");
+            changes.Add(Line("RootsWashed"));
         if (before.FirstWaterRootOn is null && after.FirstWaterRootOn is not null)
-            changes.Add("First new water root");
+            changes.Add(Line("FirstWaterRoot"));
         if (before.FirstNewLeafOn is null && after.FirstNewLeafOn is not null)
-            changes.Add("First new leaf");
+            changes.Add(Line("FirstNewLeaf"));
         if (!before.TransitionSettled && after.TransitionSettled
             && after.TransitionSince is { } since && after.TransitionSettledOn is { } settled)
         {
             var weeks = Math.Max(1, (settled.DayNumber - since.DayNumber) / 7);
-            changes.Add($"Settled in to {mediumText} after {weeks} {(weeks == 1 ? "week" : "weeks")}");
+            changes.Add(medium is { } m
+                ? Line("SettledIn", HistoryArg.Of(m), HistoryArg.Of(weeks))
+                : Line("SettledInSemiHydro", HistoryArg.Of(weeks)));
         }
         if (before.TransitionSince is not null && after.TransitionSince is null && !before.TransitionSettled)
-            changes.Add($"Stopped tracking the move to {mediumText}");
+            changes.Add(Move("StoppedTrackingMove", "StoppedTrackingMoveSemiHydro"));
     }
 
     /// <summary>
     /// "Tagged flowering" and "No longer tagged flowering", so a tag used for something the plant
     /// is going through still says when it started and ended after the tag is taken off.
     /// </summary>
-    internal static void AddTags(List<string> changes, IEnumerable<string> before, IEnumerable<string> after)
+    internal static void AddTags(List<HistoryLine> changes, IEnumerable<string> before, IEnumerable<string> after)
     {
         var was = PlantTags.Normalize(before);
         var now = PlantTags.Normalize(after);
 
-        changes.AddRange(now.Where(tag => !was.Any(t => PlantTags.Same(t, tag))).Select(tag => $"Tagged {tag}"));
-        changes.AddRange(was.Where(tag => !now.Any(t => PlantTags.Same(t, tag))).Select(tag => $"No longer tagged {tag}"));
+        changes.AddRange(now.Where(tag => !was.Any(t => PlantTags.Same(t, tag))).Select(tag => Line("Tagged", HistoryArg.Of(tag))));
+        changes.AddRange(was.Where(tag => !now.Any(t => PlantTags.Same(t, tag))).Select(tag => Line("Untagged", HistoryArg.Of(tag))));
     }
+
+    internal static HistoryLine DormancyLine(bool dormant) => Line(dormant ? "WentDormant" : "WokeUp");
 
     internal static string DormancyText(bool dormant) => dormant ? "Went dormant" : "Woke up from dormancy";
 
-    private static string PotsTakenText(Plant plant) => plant.PotsTaken switch
+    private static HistoryLine PotsTakenLine(Plant plant) => Line(plant.PotsTaken switch
     {
-        PotsTaken.Inner => "Its pot went with it",
-        PotsTaken.All when plant.InnerPotId is null => "Its outer pot went with it",
-        PotsTaken.All => "Its pot and outer pot went with it",
-        _ => "Its pots stayed here"
-    };
+        PotsTaken.Inner => "PotWentWithIt",
+        PotsTaken.All when plant.InnerPotId is null => "OuterPotWentWithIt",
+        PotsTaken.All => "PotsWentWithIt",
+        _ => "PotsStayed"
+    });
 }
 
 /// <summary>The same kind of description for propagations ("Stage: Rooting (was Started)").</summary>
@@ -128,61 +151,77 @@ public static class PropagationChanges
         Propagation before,
         Propagation after,
         Func<Enum, string> label,
+        Func<Guid, string?>? placeName = null) =>
+        [.. Lines(before, after, placeName).Select(line => English(line, label))];
+
+    public static IReadOnlyList<HistoryLine> Lines(
+        Propagation before,
+        Propagation after,
         Func<Guid, string?>? placeName = null)
     {
-        var changes = new List<string>();
+        var changes = new List<HistoryLine>();
 
         if (before.Stage != after.Stage)
-            changes.Add($"Stage: {label(after.Stage)} (was {label(before.Stage)})");
+            changes.Add(Line("StageChanged", HistoryArg.Of(after.Stage), HistoryArg.Of(before.Stage)));
 
         if (before.InitialCount != after.InitialCount)
-            changes.Add($"Count: {after.InitialCount} (was {before.InitialCount})");
+            changes.Add(Line("CountChanged", HistoryArg.Of(after.InitialCount), HistoryArg.Of(before.InitialCount)));
 
         // Only a correction made when editing changes these without a pot up or failure of its own
         if (before.PottedUpCount != after.PottedUpCount)
-            changes.Add($"Potted up: {after.PottedUpCount} (was {before.PottedUpCount})");
+            changes.Add(Line("PottedUpChanged", HistoryArg.Of(after.PottedUpCount), HistoryArg.Of(before.PottedUpCount)));
 
         if (before.GivenAwayCount != after.GivenAwayCount)
-            changes.Add($"Given away: {after.GivenAwayCount} (was {before.GivenAwayCount})");
+            changes.Add(Line("GivenAwayChanged", HistoryArg.Of(after.GivenAwayCount), HistoryArg.Of(before.GivenAwayCount)));
 
         if (before.FailedCount != after.FailedCount)
-            changes.Add($"Failed: {after.FailedCount} (was {before.FailedCount})");
+            changes.Add(Line("FailedChanged", HistoryArg.Of(after.FailedCount), HistoryArg.Of(before.FailedCount)));
 
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);
-        ChangeText.AddMedium(changes, before.Medium, after.Medium, label);
-        ChangeText.AddContainer(changes, before.Container, after.Container, "New setup");
-        AddMilestone(changes, before.FirstRootOn, after.FirstRootOn, after.DaysToFirstRoot, "First root");
-        AddMilestone(changes, before.FirstLeafOn, after.FirstLeafOn, after.DaysToFirstLeaf, "First leaf");
+        ChangeText.AddMedium(changes, before.Medium, after.Medium);
+        ChangeText.AddContainer(changes, before.Container, after.Container, "NewSetup");
+        AddMilestone(changes, before.FirstRootOn, after.FirstRootOn, after.DaysToFirstRoot, "FirstRootOnDay", "FirstRootCleared");
+        AddMilestone(changes, before.FirstLeafOn, after.FirstLeafOn, after.DaysToFirstLeaf, "FirstLeafOnDay", "FirstLeafCleared");
 
         if (before.SeedsGerminated != after.SeedsGerminated)
             changes.Add(after.SeedsGerminated is { } up
-                ? $"Seeds: {up} of {after.InitialCount} came up"
-                : "Seed count cleared");
+                ? Line("SeedsCameUp", HistoryArg.Of(up), HistoryArg.Of(after.InitialCount))
+                : Line("SeedCountCleared"));
 
         if (before.CormSizeMm != after.CormSizeMm)
-            changes.Add(after.CormSizeMm is { } size ? $"Corm size: {size:0.##} mm" : "Corm size cleared");
+            changes.Add(after.CormSizeMm is { } size ? Line("CormSize", HistoryArg.Of(size)) : Line("CormSizeCleared"));
 
         if (!before.RootingAids.Order().SequenceEqual(after.RootingAids.Order()))
             changes.Add(after.RootingAids.Count == 0
-                ? "No rooting aids"
-                : $"Rooting aids: {string.Join(", ", after.RootingAids.Order().Select(aid => label(aid)))}");
+                ? Line("NoRootingAids")
+                : Line("RootingAids", HistoryArg.OfAll(after.RootingAids.Order())));
 
         if (before.DriedForHours != after.DriedForHours)
-            changes.Add(after.DriedForHours is { } dried ? $"Cut end dried: {Propagations.Drying.Text(dried)}" : "Cut end no longer dried first");
+        {
+            if (after.DriedForHours is { } dried)
+            {
+                var (amount, inDays) = Drying.Split(dried);
+                changes.Add(Line(inDays ? "CutEndDriedDays" : "CutEndDriedHours", HistoryArg.Of(amount)));
+            }
+            else
+            {
+                changes.Add(Line("CutEndNotDried"));
+            }
+        }
 
         // Finishing ends dormancy too, and the stage change already says so
         if (before.IsDormant != after.IsDormant && after.IsActive)
-            changes.Add(PlantChanges.DormancyText(after.IsDormant));
+            changes.Add(PlantChanges.DormancyLine(after.IsDormant));
 
         return changes;
     }
 
     // "First root on day 12"
-    private static void AddMilestone(List<string> changes, DateOnly? before, DateOnly? after, int? days, string name)
+    private static void AddMilestone(List<HistoryLine> changes, DateOnly? before, DateOnly? after, int? days, string onDay, string cleared)
     {
         if (before == after)
             return;
-        changes.Add(days is { } d ? $"{name} on day {d}" : $"{name} date cleared");
+        changes.Add(days is { } d ? Line(onDay, HistoryArg.Of(d)) : Line(cleared));
     }
 }
 
@@ -190,7 +229,7 @@ internal static class ChangeText
 {
     /// <param name="name">Turns a place id into "Living room / Windowsill". A move to a place
     /// it can't name is left unsaid.</param>
-    public static void AddLocation(List<string> changes, Guid? before, Guid? after, Func<Guid, string?>? name)
+    public static void AddLocation(List<HistoryLine> changes, Guid? before, Guid? after, Func<Guid, string?>? name)
     {
         if (before == after)
             return;
@@ -204,27 +243,27 @@ internal static class ChangeText
 
         changes.Add((from, to) switch
         {
-            (_, null) => $"Removed from {from ?? "its room"}",
-            (null, _) when before is null => $"Placed in {to}",
-            (null, _) => $"Moved to {to}",
-            _ => $"Moved from {from} to {to}"
+            (_, null) => from is null ? Line("RemovedFromRoom") : Line("RemovedFrom", HistoryArg.Of(from)),
+            (null, _) when before is null => Line("PlacedIn", HistoryArg.Of(to!)),
+            (null, _) => Line("MovedTo", HistoryArg.Of(to!)),
+            _ => Line("MovedFromTo", HistoryArg.Of(from!), HistoryArg.Of(to!))
         });
     }
 
-    public static void AddMedium(List<string> changes, GrowingMedium before, GrowingMedium after, Func<Enum, string> label)
+    public static void AddMedium(List<HistoryLine> changes, GrowingMedium before, GrowingMedium after)
     {
         if (before != after)
-            changes.Add($"Now grows in {label(after)} (was {label(before)})");
+            changes.Add(Line("MediumChanged", HistoryArg.Of(after), HistoryArg.Of(before)));
     }
 
-    public static void AddContainer(List<string> changes, string? before, string? after, string prefix)
+    public static void AddContainer(List<HistoryLine> changes, string? before, string? after, string key)
     {
         if (!SameText(before, after) && Clean(after) is { } container)
-            changes.Add($"{prefix}: {container}");
+            changes.Add(Line(key, HistoryArg.Of(container)));
     }
 
     public static void AddPot(
-        List<string> changes,
+        List<HistoryLine> changes,
         Guid? before,
         Guid? after,
         Func<Guid, string?> name,
@@ -235,13 +274,13 @@ internal static class ChangeText
             return;
 
         if (after is null)
-            changes.Add(outOf);
+            changes.Add(Line(outOf));
         else if (name(after.Value) is { } pot)
-            changes.Add($"{into} {pot}");
+            changes.Add(Line(into, HistoryArg.Of(pot)));
     }
 
     /// <summary>"Fed with the watering: Aroid feed, every second watering", or that it stopped.</summary>
-    public static void AddWateringFeed(List<string> changes, Plant before, Plant after, Func<Guid, string?> feedName)
+    public static void AddWateringFeed(List<HistoryLine> changes, Plant before, Plant after, Func<Guid, string?> feedName)
     {
         int? every = after.WateringFeedId is null ? null : Math.Clamp(after.WateringFeedEvery ?? 1, 1, 3);
         int? wasEvery = before.WateringFeedId is null ? null : Math.Clamp(before.WateringFeedEvery ?? 1, 1, 3);
@@ -249,14 +288,14 @@ internal static class ChangeText
             return;
 
         if (after.WateringFeedId is not { } feed)
-            changes.Add("No longer fed with the watering");
+            changes.Add(Line("FedStopped"));
         else if (feedName(feed) is { } name)
-            changes.Add($"Fed with the watering: {name}, " + every switch
+            changes.Add(Line(every switch
             {
-                2 => "every second watering",
-                3 => "every third watering",
-                _ => "every watering"
-            });
+                2 => "FedEverySecond",
+                3 => "FedEveryThird",
+                _ => "FedEveryWatering"
+            }, HistoryArg.Of(name)));
     }
 
     private static bool SameText(string? a, string? b) =>

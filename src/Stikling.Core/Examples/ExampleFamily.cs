@@ -1,4 +1,6 @@
 using Stikling.Core.Models;
+using Stikling.Core.Timeline;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Examples;
 
@@ -14,7 +16,8 @@ public sealed record ExampleRecords(
 /// potted up from an earlier cutting, and a tip cutting rooting in water now. Coleus roots in about
 /// a week, so the whole story fits in the last couple of months. Every record has a fixed id, so
 /// devices that load it never end up with two copies, and the dates count back from the day it is
-/// loaded.
+/// loaded. The names and notes are in the language of the app when it is loaded, and what the example
+/// writes in the history comes as lines, like the lines the app writes itself.
 /// </summary>
 public static class ExampleFamily
 {
@@ -53,8 +56,16 @@ public static class ExampleFamily
         (YoungPlantPhotoId, "young-plant.jpg")
     ];
 
-    /// <summary>The mother plant's nickname, which Today uses while the example is loaded.</summary>
-    public const string MotherNickname = "Big Coleus";
+    /// <summary>The mother plant's nickname in the language of the app, which Today uses while the example is loaded.</summary>
+    public static string MotherNickname => Strings.Examples.MotherNickname;
+
+    // The English words of the two enums the example writes in its history, which is saved as English
+    private static string ExampleLabel(Enum value) => value switch
+    {
+        PropagationType.Cutting => "Cutting",
+        GrowingMedium.Water => "Water",
+        _ => value.ToString()
+    };
 
     public static readonly IReadOnlyList<Guid> PlantIds = [MotherId, YoungPlantId];
     public static readonly IReadOnlyList<Guid> PropagationIds = [FirstCuttingId, CurrentCuttingId];
@@ -79,7 +90,8 @@ public static class ExampleFamily
         DateOnly Ago(int days) => today.AddDays(-days);
         DateTimeOffset NoonOn(DateOnly day) => time.MomentAt(day.ToDateTime(new TimeOnly(12, 0)));
 
-        const string batch = "1× cutting in Water";
+        var batch = HistoryText.Line("BatchOf", HistoryArg.Of(1), HistoryArg.Of(PropagationType.Cutting), HistoryArg.Of(GrowingMedium.Water));
+        var started = HistoryText.Line("Started", [.. batch.Args]);
         var acquired = today.AddMonths(-5);
         var acquiredOn = LooseDate.Of(acquired.Year, acquired.Month);
         var acquiredAt = NoonOn(acquiredOn.Start);
@@ -93,26 +105,26 @@ public static class ExampleFamily
             Origin = PlantOrigin.Purchased,
             AcquiredOn = acquiredOn,
             Medium = GrowingMedium.Soil,
-            Tags = ["example"],
+            Tags = [Strings.Examples.Tag],
             CoverPhotoId = MotherPhotoId,
             CreatedAt = acquiredAt,
-            Notes = "An example plant, here so you can see what Stikling looks like with a plant and its cuttings in it. Remove it from Today when you've seen enough."
+            Notes = Strings.Examples.MotherNotes
         };
         var young = new Plant
         {
             Id = YoungPlantId,
-            Nickname = "Little Coleus",
+            Nickname = Strings.Examples.YoungNickname,
             Genus = "Coleus",
             Species = "scutellarioides",
             Origin = PlantOrigin.Propagated,
             AcquiredOn = LooseDate.Of(Ago(28)),
             Medium = GrowingMedium.Soil,
-            Tags = ["example"],
+            Tags = [Strings.Examples.Tag],
             ParentPlantId = MotherId,
             FromPropagationId = FirstCuttingId,
             CoverPhotoId = YoungPlantPhotoId,
             CreatedAt = NoonOn(Ago(28)),
-            Notes = $"Potted up from the first cutting of {MotherNickname}. An example plant, like the others."
+            Notes = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Examples.YoungNotes, MotherNickname)
         };
 
         Propagation Cutting(Guid id, string nickname, int startedAgo) => new()
@@ -124,23 +136,23 @@ public static class ExampleFamily
             ParentPlantId = MotherId,
             Type = PropagationType.Cutting,
             Medium = GrowingMedium.Water,
-            Container = "Glass jar",
+            Container = Strings.Examples.Container,
             InitialCount = 1,
             StartedOn = Ago(startedAgo),
             CreatedAt = NoonOn(Ago(startedAgo))
         };
-        var first = Cutting(FirstCuttingId, "First coleus cutting", 45);
+        var first = Cutting(FirstCuttingId, Strings.Examples.FirstCuttingNickname, 45);
         first.FirstRootOn = Ago(39);
         first.RootedOn = Ago(35);
         first.FirstLeafOn = Ago(33);
         first.PottedUpCount = 1;
         first.Stage = PropagationStage.Done;
         first.FinishedOn = Ago(28);
-        var current = Cutting(CurrentCuttingId, "Coleus tip cutting", 12);
+        var current = Cutting(CurrentCuttingId, Strings.Examples.CurrentCuttingNickname, 12);
         current.FirstRootOn = Ago(6);
         current.Stage = PropagationStage.Rooting;
         current.CoverPhotoId = FirstRootsPhotoId;
-        current.Notes = "A tip pinched off the mother plant, with the lowest leaves taken off, in water on a bright windowsill.";
+        current.Notes = Strings.Examples.CurrentCuttingNotes;
 
         Photo ShotOf(Guid id, SubjectType type, Guid subject, int daysAgo)
         {
@@ -161,9 +173,11 @@ public static class ExampleFamily
         };
 
         TimelineEntry Entry(Guid id, SubjectType type, Guid subject, DateTimeOffset at, TimelineKind kind, string? text,
-            Guid? photo = null, SubjectType? relatedType = null, Guid? relatedId = null, TimelineEvent? @event = null) => new()
+            Guid? photo = null, SubjectType? relatedType = null, Guid? relatedId = null, TimelineEvent? @event = null,
+            IReadOnlyList<HistoryLine>? lines = null) => new()
         {
-            Id = id, SubjectType = type, SubjectId = subject, OccurredAt = at, CreatedAt = at, Kind = kind, Text = text,
+            Id = id, SubjectType = type, SubjectId = subject, OccurredAt = at, CreatedAt = at, Kind = kind,
+            Text = lines is null ? text : HistoryText.English(lines, ExampleLabel), Lines = lines is null ? null : [.. lines],
             PhotoIds = photo is { } p ? [p] : [], RelatedType = relatedType, RelatedId = relatedId, Event = @event
         };
         var plant = SubjectType.Plant;
@@ -171,29 +185,25 @@ public static class ExampleFamily
 
         var entries = new List<TimelineEntry>
         {
-            Entry(MotherCreatedId, plant, MotherId, acquiredAt, TimelineKind.Created, $"Added to collection, {acquiredOn.StoredText()}"),
-            Entry(MotherFirstCuttingId, plant, MotherId, NoonOn(Ago(45)), TimelineKind.Propagated, batch, null, propagation, FirstCuttingId),
-            Entry(MotherNoteId, plant, MotherId, NoonOn(Ago(12)), TimelineKind.Note,
-                "Pinched out the tips to keep it bushy. One of them went into water.", MotherPhotoId),
-            Entry(MotherCurrentCuttingId, plant, MotherId, NoonOn(Ago(12)), TimelineKind.Propagated, batch, null, propagation, CurrentCuttingId),
+            Entry(MotherCreatedId, plant, MotherId, acquiredAt, TimelineKind.Created, null,
+                lines: [HistoryText.Line("AddedToCollectionMonth", HistoryArg.Of(acquiredOn.Start))]),
+            Entry(MotherFirstCuttingId, plant, MotherId, NoonOn(Ago(45)), TimelineKind.Propagated, null, null, propagation, FirstCuttingId, lines: [batch]),
+            Entry(MotherNoteId, plant, MotherId, NoonOn(Ago(12)), TimelineKind.Note, Strings.Examples.MotherNote, MotherPhotoId),
+            Entry(MotherCurrentCuttingId, plant, MotherId, NoonOn(Ago(12)), TimelineKind.Propagated, null, null, propagation, CurrentCuttingId, lines: [batch]),
 
-            Entry(FirstCuttingCreatedId, propagation, FirstCuttingId, NoonOn(Ago(45)), TimelineKind.Created, $"Started {batch}"),
-            Entry(FirstCuttingPottedUpId, propagation, FirstCuttingId, NoonOn(Ago(28)), TimelineKind.Change,
-                "Potted up 1: Little Coleus\nFinished: 1 potted up", null, plant, YoungPlantId, TimelineEvent.PottedUp),
+            Entry(FirstCuttingCreatedId, propagation, FirstCuttingId, NoonOn(Ago(45)), TimelineKind.Created, null, lines: [started]),
+            Entry(FirstCuttingPottedUpId, propagation, FirstCuttingId, NoonOn(Ago(28)), TimelineKind.Change, null, null, plant, YoungPlantId, TimelineEvent.PottedUp,
+                lines: [HistoryText.Line("PottedUp", HistoryArg.Of(1), HistoryArg.Of(young.Nickname!)), HistoryText.Line("FinishedPotted", HistoryArg.Of(1))]),
 
-            Entry(YoungCreatedId, plant, YoungPlantId, NoonOn(Ago(28)), TimelineKind.Created, "Potted up from a propagation",
-                null, propagation, FirstCuttingId),
+            Entry(YoungCreatedId, plant, YoungPlantId, NoonOn(Ago(28)), TimelineKind.Created, null,
+                null, propagation, FirstCuttingId, lines: [HistoryText.Line("PottedUpFromPropagation")]),
             Entry(YoungPhotoEntryId, plant, YoungPlantId, NoonOn(Ago(28)), TimelineKind.Photo, null, PottedUpPhotoId),
-            Entry(YoungNoteId, plant, YoungPlantId, NoonOn(Ago(2)), TimelineKind.Note,
-                "Pinched the top for the first time, and it's branching out below.", YoungPlantPhotoId),
+            Entry(YoungNoteId, plant, YoungPlantId, NoonOn(Ago(2)), TimelineKind.Note, Strings.Examples.YoungNote, YoungPlantPhotoId),
 
-            Entry(CurrentCreatedId, propagation, CurrentCuttingId, NoonOn(Ago(12)), TimelineKind.Created, $"Started {batch}"),
-            Entry(CurrentDayOneId, propagation, CurrentCuttingId, NoonOn(Ago(12)), TimelineKind.Note,
-                "Day 1. Cut just below a pair of leaves and took the lowest ones off.", DayOnePhotoId),
-            Entry(CurrentFirstRootId, propagation, CurrentCuttingId, NoonOn(Ago(6)), TimelineKind.Note,
-                "A week in, and the roots are coming fast.", FirstRootsPhotoId),
-            Entry(CurrentRootsNoteId, propagation, CurrentCuttingId, NoonOn(Ago(2)), TimelineKind.Note,
-                "Changed the water. The roots are long enough to pot it up soon.")
+            Entry(CurrentCreatedId, propagation, CurrentCuttingId, NoonOn(Ago(12)), TimelineKind.Created, null, lines: [started]),
+            Entry(CurrentDayOneId, propagation, CurrentCuttingId, NoonOn(Ago(12)), TimelineKind.Note, Strings.Examples.DayOneNote, DayOnePhotoId),
+            Entry(CurrentFirstRootId, propagation, CurrentCuttingId, NoonOn(Ago(6)), TimelineKind.Note, Strings.Examples.FirstRootNote, FirstRootsPhotoId),
+            Entry(CurrentRootsNoteId, propagation, CurrentCuttingId, NoonOn(Ago(2)), TimelineKind.Note, Strings.Examples.RootsNote)
         };
 
         return new ExampleRecords([mother, young], [first, current], photos, entries);

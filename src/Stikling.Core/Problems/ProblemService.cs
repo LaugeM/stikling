@@ -61,7 +61,7 @@ public sealed class ProblemService(
         draft.Note = Clean(draft.Note);
         Check(draft);
 
-        var entry = NewEntry(draft, ProblemText.OpenedLine(draft), draft.StartedOn, photoIds);
+        var entry = NewEntry(draft, ProblemText.OpenedLines(draft), draft.StartedOn, photoIds);
         await timeline.AddAsync(entry);
 
         draft.TimelineEntryId = entry.Id;
@@ -74,7 +74,7 @@ public sealed class ProblemService(
     {
         Prepare(problem, draft, photoIds.Count);
 
-        var entry = NewEntry(problem, ProblemText.UpdateLine(draft), draft.OccurredOn, photoIds);
+        var entry = NewEntry(problem, ProblemText.UpdateLines(draft), draft.OccurredOn, photoIds);
         await timeline.AddAsync(entry);
 
         draft.TimelineEntryId = entry.Id;
@@ -89,7 +89,7 @@ public sealed class ProblemService(
         problem.Note = Clean(problem.Note);
         Check(problem);
 
-        await Rewrite(problem, problem.TimelineEntryId, ProblemText.OpenedLine(problem), problem.StartedOn);
+        await Rewrite(problem, problem.TimelineEntryId, ProblemText.OpenedLines(problem), problem.StartedOn);
         await problems.SaveAsync(problem);
     }
 
@@ -101,7 +101,7 @@ public sealed class ProblemService(
             : null;
         Prepare(problem, update, line?.PhotoIds.Count ?? 0);
 
-        await Rewrite(problem, update.TimelineEntryId, ProblemText.UpdateLine(update), update.OccurredOn);
+        await Rewrite(problem, update.TimelineEntryId, ProblemText.UpdateLines(update), update.OccurredOn);
         await updates.SaveAsync(update);
     }
 
@@ -124,7 +124,7 @@ public sealed class ProblemService(
         closed.Outcome = outcome;
         Check(closed);
 
-        var entry = NewEntry(problem, ProblemText.ClosedLine(outcome), day, []);
+        var entry = NewEntry(problem, ProblemText.ClosedLines(outcome), day, []);
         await timeline.AddAsync(entry);
 
         problem.ClosedOn = day;
@@ -139,7 +139,7 @@ public sealed class ProblemService(
     /// </summary>
     public async Task ReopenAsync(Problem problem)
     {
-        await timeline.AddAsync(NewEntry(problem, ProblemText.ReopenedLine, Today, []));
+        await timeline.AddAsync(NewEntry(problem, ProblemText.ReopenedLines, Today, []));
 
         problem.ClosedOn = null;
         problem.Outcome = null;
@@ -194,6 +194,7 @@ public sealed class ProblemService(
             entry.Kind = TimelineKind.Photo;
             entry.Event = null;
             entry.Text = null;
+            entry.Lines = null;
             await timeline.UpdateAsync(entry);
         }
         else
@@ -353,26 +354,30 @@ public sealed class ProblemService(
             throw new ArgumentException(error);
     }
 
-    private TimelineEntry NewEntry(Problem problem, string text, DateOnly day, IReadOnlyList<Guid> photoIds) => new()
+    private TimelineEntry NewEntry(Problem problem, IReadOnlyList<HistoryLine> lines, DateOnly day, IReadOnlyList<Guid> photoIds)
     {
-        SubjectType = problem.SubjectType,
-        SubjectId = problem.SubjectId,
-        Kind = TimelineKind.Change,
-        Event = TimelineEvent.Problem,
-        Text = text,
-        OccurredAt = time.MomentOn(day),
-        PhotoIds = [.. photoIds]
-    };
+        var entry = new TimelineEntry
+        {
+            SubjectType = problem.SubjectType,
+            SubjectId = problem.SubjectId,
+            Kind = TimelineKind.Change,
+            Event = TimelineEvent.Problem,
+            OccurredAt = time.MomentOn(day),
+            PhotoIds = [.. photoIds]
+        };
+        HistoryText.Set(entry, lines);
+        return entry;
+    }
 
     /// <summary>Changes the text and day of a line already on the history. A line that is gone is left.</summary>
-    private async Task Rewrite(Problem problem, Guid? entryId, string text, DateOnly day)
+    private async Task Rewrite(Problem problem, Guid? entryId, IReadOnlyList<HistoryLine> lines, DateOnly day)
     {
         if (entryId is not { } id)
             return;
         var entry = (await timeline.GetForAsync(problem.SubjectId)).FirstOrDefault(e => e.Id == id);
         if (entry is null)
             return;
-        entry.Text = text;
+        HistoryText.Set(entry, lines);
         entry.OccurredAt = time.MomentOn(day);
         await timeline.UpdateAsync(entry);
     }

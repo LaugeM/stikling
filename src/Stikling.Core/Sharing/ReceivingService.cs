@@ -143,16 +143,18 @@ public sealed class ReceivingService(
             await propagations.SaveAsync(PropagationOf(copy, subjectId, nickname, givenBy, request, today));
         }
 
-        await timeline.AddAsync(new TimelineEntry
+        var arrived = new TimelineEntry
         {
             Id = ArrivedEntryIdOf(copy),
             SubjectType = copy.SubjectType,
             SubjectId = subjectId,
             Kind = TimelineKind.Created,
             Event = TimelineEvent.Arrived,
-            OccurredAt = time.GetLocalNow(),
-            Text = givenBy is null ? null : $"From {givenBy}"
-        });
+            OccurredAt = time.GetLocalNow()
+        };
+        if (givenBy is not null)
+            HistoryText.Set(arrived, [HistoryText.Line("ReceivedFrom", HistoryArg.Of(givenBy))]);
+        await timeline.AddAsync(arrived);
 
         var historyId = HistoryIdOf(copy);
         await histories.SaveAsync(new ReceivedHistory

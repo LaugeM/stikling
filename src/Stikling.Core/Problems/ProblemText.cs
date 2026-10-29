@@ -1,6 +1,7 @@
 using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
+using Stikling.Core.Timeline;
 using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Problems;
@@ -62,30 +63,41 @@ public static class ProblemText
     /// <summary>What to fill in for why a plant died, when a problem ends that way.</summary>
     public static string CauseOfDeath(Problem problem) => Signs(problem.KnownSigns);
 
-    // The history lines below are saved in the timeline, so they are always written in English.
-    // Text saved as data stays the same whichever language the device that wrote it was using.
+    // The history lines below are saved in the timeline as lines that any language can show (see HistoryText),
+    // and as English text. Text saved as data stays the same whichever language the device that wrote it was using.
+
+    private static string English(IEnumerable<HistoryLine> lines) => HistoryText.English(lines, e => e.ToString());
 
     /// <summary>The history line for a problem being opened.</summary>
-    public static string OpenedLine(Problem problem) => SavedText.InEnglish(() =>
-        WithNote(string.Format(CultureInfo.CurrentCulture, Strings.Pests.OpenedLine, LowerFirst(Signs(problem.KnownSigns))), problem.Note));
+    public static string OpenedLine(Problem problem) => English(OpenedLines(problem));
 
     /// <summary>The history line for an update.</summary>
-    public static string UpdateLine(ProblemUpdate update) => SavedText.InEnglish(() =>
+    public static string UpdateLine(ProblemUpdate update) => English(UpdateLines(update));
+
+    public static string ClosedLine(ProblemOutcome outcome) => English(ClosedLines(outcome));
+
+    public static string ReopenedLine => English(ReopenedLines);
+
+    public static IReadOnlyList<HistoryLine> OpenedLines(Problem problem) =>
+        WithNote(HistoryText.Line("ProblemOpened", HistoryArg.OfAll(problem.KnownSigns)), problem.Note);
+
+    public static IReadOnlyList<HistoryLine> UpdateLines(ProblemUpdate update)
     {
-        var parts = new List<string>();
-        if (update.Trend is { } trend)
-            parts.Add(Trend(trend));
-        var did = Actions(update.KnownDid);
-        if (did.Length > 0)
-            parts.Add(did);
-        var text = parts.Count == 0 ? Strings.Pests.UpdateLineEmpty : string.Join(" · ", parts);
-        return WithNote(text, update.Note);
-    });
+        var did = update.KnownDid;
+        var line = (update.Trend, did.Count) switch
+        {
+            ({ } trend, > 0) => HistoryText.Line("ProblemUpdateTrendActions", HistoryArg.Of(trend), HistoryArg.OfAll(did)),
+            ({ } trend, _) => HistoryText.Line("ProblemUpdateTrend", HistoryArg.Of(trend)),
+            (null, > 0) => HistoryText.Line("ProblemUpdateActions", HistoryArg.OfAll(did)),
+            _ => HistoryText.Line("ProblemUpdateEmpty")
+        };
+        return WithNote(line, update.Note);
+    }
 
-    public static string ClosedLine(ProblemOutcome outcome) => SavedText.InEnglish(() =>
-        string.Format(CultureInfo.CurrentCulture, Strings.Pests.ClosedLine, LowerFirst(Outcome(outcome))));
+    public static IReadOnlyList<HistoryLine> ClosedLines(ProblemOutcome outcome) =>
+        [HistoryText.Line("ProblemClosed", HistoryArg.Of(outcome))];
 
-    public static string ReopenedLine => SavedText.InEnglish(() => Strings.Pests.ReopenedLine);
+    public static IReadOnlyList<HistoryLine> ReopenedLines => [HistoryText.Line("ProblemReopened")];
 
     /// <summary>"better", "the same", "worse", for reading a row of trends aloud.</summary>
     public static string TrendWord(ProblemTrend trend) => trend switch
@@ -151,8 +163,8 @@ public static class ProblemText
     private static string LowerFirst(string text) =>
         text.Length == 0 ? text : char.ToLowerInvariant(text[0]) + text[1..];
 
-    private static string WithNote(string text, string? note) =>
-        string.IsNullOrWhiteSpace(note) ? text : text + "\n" + note.Trim();
+    private static IReadOnlyList<HistoryLine> WithNote(HistoryLine line, string? note) =>
+        string.IsNullOrWhiteSpace(note) ? [line] : [line, HistoryText.Line("TextLine", HistoryArg.Of(note.Trim()))];
 
 
 }

@@ -62,9 +62,9 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
             SubjectId = subjectId,
             Kind = TimelineKind.Change,
             Event = TimelineEvent.LookedOver,
-            Text = "Looked over",
             OccurredAt = time.GetLocalNow()
         };
+        HistoryText.Set(entry, [HistoryText.Line("LookedOver")]);
         await timeline.AddAsync(entry);
         return entry;
     }
