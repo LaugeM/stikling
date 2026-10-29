@@ -1,5 +1,8 @@
+using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Propagations;
+using Stikling.Core.Text;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Sharing;
 
@@ -55,11 +58,10 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
     private static string? PropagationLine(Propagation p, Plant? parent, DateOnly today)
     {
         var seed = p.Type == PropagationType.Seed;
-        var origin = parent is null ? TypeWord(p.Type) : $"{TypeWord(p.Type)} from my {parent.DisplayName}";
+        var origin = parent is null ? TypeWord(p.Type) : Format(Strings.Propagations.ShareTypeFromMy, TypeWord(p.Type), parent.DisplayName);
         var medium = MediumPhrase(p.Medium);
         var sign = PropagationOutcome.DaysToFirstSign(p);
         var ran = p.FinishedOn is { } end ? Math.Max(0, end.DayNumber - p.StartedOn.DayNumber) : (int?)null;
-        var ranText = ran is { } n ? $" after {Days(n)}" : "";
 
         string what;
         if (p.IsActive)
@@ -69,64 +71,68 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
             var first = seed ? p.FirstGerminatedOn : p.FirstRootOn;
             var started = p.DaysSinceStart(today);
             if (first is { } day)
-                what = $"{(seed ? "first seedling" : "first roots")} on day {Math.Max(0, day.DayNumber - p.StartedOn.DayNumber)}{medium}";
+                what = Format(seed ? Strings.Propagations.ShareFirstSeedling : Strings.Propagations.ShareFirstRoots, Math.Max(0, day.DayNumber - p.StartedOn.DayNumber), medium);
             else if (sign is { } rooted)
-                what = $"{(seed ? "came up" : "rooted")} in {Days(rooted)}{medium}";
+                what = Format(seed ? Strings.Propagations.ShareCameUpIn : Strings.Propagations.ShareRootedIn, Days(rooted), medium);
             else
-                what = (started == 0 ? "started today" : $"day {started}") + medium;
+                what = started == 0 ? Format(Strings.Propagations.ShareStartedToday, medium) : Format(Strings.Propagations.ShareDayN, started, medium);
         }
         else if (sign is { } d)
         {
-            what = $"{(seed ? "came up" : "rooted")} in {Days(d)}{medium}";
+            what = Format(seed ? Strings.Propagations.ShareCameUpIn : Strings.Propagations.ShareRootedIn, Days(d), medium);
             if (p.PottedUpCount > 0 && p.InitialCount > 1)
-                what += $". {p.PottedUpCount} of {p.InitialCount} potted up";
+                what += Format(Strings.Propagations.ShareSomePottedUp, p.PottedUpCount, p.InitialCount);
             else if (p.Stage == PropagationStage.Failed)
-                what += ". It didn't make it";
+                what += Strings.Propagations.ShareItDidntMakeIt;
         }
         else if (p.Stage == PropagationStage.Failed)
-            what = "didn't make it" + ranText + medium;
+            what = ran is { } n ? Format(Strings.Propagations.ShareDidntMakeItAfter, Days(n), medium) : Format(Strings.Propagations.ShareDidntMakeIt, medium);
         else
-            what = "potted up" + ranText + medium;
+            what = ran is { } n2 ? Format(Strings.Propagations.SharePottedUpAfter, Days(n2), medium) : Format(Strings.Propagations.SharePottedUp, medium);
 
-        return $"{origin}, {what}.";
+        return Format(Strings.Propagations.ShareLine, origin, what);
     }
 
     private static ShareFigure? PropagationFigure(Propagation p, DateOnly today)
     {
         var seed = p.Type == PropagationType.Seed;
         if (PropagationOutcome.DaysToFirstSign(p) is { } sign)
-            return Counted(sign, seed ? "to come up" : "to root");
+            return seed ? Counted(sign, Strings.Propagations.FigureToComeUp_One, Strings.Propagations.FigureToComeUp_Other)
+                : Counted(sign, Strings.Propagations.FigureToRoot_One, Strings.Propagations.FigureToRoot_Other);
 
         if (!p.IsActive)
         {
             if (p.FinishedOn is not { } end)
                 return null;
-            return Counted(Math.Max(0, end.DayNumber - p.StartedOn.DayNumber), p.Stage == PropagationStage.Done ? "to pot up" : "it ran");
+            var ranDays = Math.Max(0, end.DayNumber - p.StartedOn.DayNumber);
+            return p.Stage == PropagationStage.Done
+                ? Counted(ranDays, Strings.Propagations.FigureToPotUp_One, Strings.Propagations.FigureToPotUp_Other)
+                : Counted(ranDays, Strings.Propagations.FigureItRan_One, Strings.Propagations.FigureItRan_Other);
         }
 
         var started = p.DaysSinceStart(today);
-        return started == 0 ? null : Counted(started, "so far");
+        return started == 0 ? null : Counted(started, Strings.Propagations.FigureSoFar_One, Strings.Propagations.FigureSoFar_Other);
     }
 
     private static string? PlantLine(Plant plant, Plant? parent, Propagation? from, DateOnly today)
     {
-        var origin = parent is not null ? $"Propagated from my {parent.DisplayName}"
+        var origin = parent is not null ? Format(Strings.Propagations.SharePropagatedFromMy, parent.DisplayName)
             : plant.Origin switch
             {
-                PlantOrigin.GrownFromSeed => "Grown from seed",
-                PlantOrigin.Gift => "A gift",
-                PlantOrigin.Swap => "From a swap",
+                PlantOrigin.GrownFromSeed => Strings.Propagations.ShareGrownFromSeed,
+                PlantOrigin.Gift => Strings.Propagations.ShareAGift,
+                PlantOrigin.Swap => Strings.Propagations.ShareFromASwap,
                 _ => null
             };
 
         string? rooted = null;
         if (from is not null && PropagationOutcome.DaysToFirstSign(from) is { } days)
-            rooted = $"{(from.Type == PropagationType.Seed ? "came up" : "rooted")} in {Days(days)}{MediumPhrase(from.Medium)}";
+            rooted = Format(from.Type == PropagationType.Seed ? Strings.Propagations.ShareCameUpIn : Strings.Propagations.ShareRootedIn, Days(days), MediumPhrase(from.Medium));
 
-        var first = origin is null ? Capital(rooted) : rooted is null ? origin : $"{origin}, {rooted}";
+        var first = origin is null ? Capital(rooted) : rooted is null ? origin : Format(Strings.Propagations.ShareJoin, origin, rooted);
 
         // Only a plant that is still here has been "with me" until now, since the day it left isn't kept
-        var since = plant.InCollection && plant.AcquiredOn is { } acquired ? $"With me since {acquired.Text()}" : null;
+        var since = plant.InCollection && plant.AcquiredOn is { } acquired ? Format(Strings.Propagations.ShareWithMeSince, acquired.Text()) : null;
 
         var sentences = new[] { first, since }.OfType<string>().Select(s => s + ".").ToList();
         return sentences.Count == 0 ? null : string.Join(' ', sentences);
@@ -135,10 +141,12 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
     private static ShareFigure? PlantFigure(Plant plant, Propagation? from, IReadOnlyCollection<Propagation> taken, DateOnly today)
     {
         if (taken.Count > 0)
-            return new ShareFigure(taken.Count, taken.Count == 1 ? "propagation" : "propagations");
+            return new ShareFigure(taken.Count, taken.Count == 1 ? Strings.Propagations.FigurePropagation_One : Strings.Propagations.FigurePropagation_Other);
 
         if (from is not null && PropagationOutcome.DaysToFirstSign(from) is { } sign)
-            return Counted(sign, from.Type == PropagationType.Seed ? "to come up" : "to root");
+            return from.Type == PropagationType.Seed
+                ? Counted(sign, Strings.Propagations.FigureToComeUp_One, Strings.Propagations.FigureToComeUp_Other)
+                : Counted(sign, Strings.Propagations.FigureToRoot_One, Strings.Propagations.FigureToRoot_Other);
 
         // Only a day that was entered whole can be counted from; a month or a year would be a guess
         if (plant.InCollection && plant.AcquiredOn is { Precision: DatePrecision.Day } acquired)
@@ -148,9 +156,9 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
             if (days < 0)
                 return null;
             var months = WholeMonths(date, today);
-            return days < 60 ? Counted(days, "with me", unit: "day")
-                : months < 24 ? Counted(months, "with me", unit: "month")
-                : Counted(months / 12, "with me", unit: "year");
+            return days < 60 ? Counted(days, Strings.Propagations.FigureDaysWithMe_One, Strings.Propagations.FigureDaysWithMe_Other)
+                : months < 24 ? Counted(months, Strings.Propagations.FigureMonthsWithMe_One, Strings.Propagations.FigureMonthsWithMe_Other)
+                : Counted(months / 12, Strings.Propagations.FigureYearsWithMe_One, Strings.Propagations.FigureYearsWithMe_Other);
         }
 
         return null;
@@ -170,42 +178,45 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
         if (days <= 0)
             return null;
         var months = WholeMonths(before, after);
-        var (value, unit) = days < 60 ? (days, "day") : months < 24 ? (months, "month") : (months / 12, "year");
-        return $"{value} {unit}{(value == 1 ? "" : "s")} apart.";
+        return days < 60 ? Plural.Of(days, Strings.Propagations.ApartDays_One, Strings.Propagations.ApartDays_Other)
+            : months < 24 ? Plural.Of(months, Strings.Propagations.ApartMonths_One, Strings.Propagations.ApartMonths_Other)
+            : Plural.Of(months / 12, Strings.Propagations.ApartYears_One, Strings.Propagations.ApartYears_Other);
     }
 
     // "18" and "days to root"
-    private static ShareFigure Counted(int value, string rest, string unit = "day") =>
-        new(value, $"{(value == 1 ? unit : unit + "s")} {rest}");
+    private static ShareFigure Counted(int value, string one, string other) =>
+        new(value, value == 1 ? one : other);
 
-    private static string Days(int days) => days == 1 ? "1 day" : $"{days} days";
+    private static string Days(int days) => Plural.Of(days, Strings.Propagations.ShareDays_One, Strings.Propagations.ShareDays_Other);
+
+    private static string Format(string format, params object[] args) => string.Format(CultureInfo.CurrentCulture, format, args);
 
     private static string? Capital(string? text) =>
         string.IsNullOrEmpty(text) ? null : char.ToUpperInvariant(text[0]) + text[1..];
 
     private static string TypeWord(PropagationType type) => type switch
     {
-        PropagationType.Cutting => "Cutting",
-        PropagationType.Corm => "Corm",
-        PropagationType.Offset => "Offset",
-        PropagationType.Seed => "Seeds",
-        PropagationType.Division => "Division",
-        PropagationType.AirLayer => "Air layer",
-        PropagationType.Leaf => "Leaf cutting",
-        _ => "Propagation"
+        PropagationType.Cutting => Strings.Propagations.ShareTypeCutting,
+        PropagationType.Corm => Strings.Propagations.ShareTypeCorm,
+        PropagationType.Offset => Strings.Propagations.ShareTypeOffset,
+        PropagationType.Seed => Strings.Propagations.ShareTypeSeed,
+        PropagationType.Division => Strings.Propagations.ShareTypeDivision,
+        PropagationType.AirLayer => Strings.Propagations.ShareTypeAirLayer,
+        PropagationType.Leaf => Strings.Propagations.ShareTypeLeaf,
+        _ => Strings.Propagations.ShareTypeOther
     };
 
     // " in water", with a leading space so a medium the app can't name leaves nothing behind
     internal static string MediumPhrase(GrowingMedium medium) => medium switch
     {
-        GrowingMedium.Soil => " in soil",
-        GrowingMedium.OrchidBark => " in orchid bark",
-        GrowingMedium.Leca => " in LECA",
-        GrowingMedium.Pon => " in PON",
-        GrowingMedium.Perlite => " in perlite",
-        GrowingMedium.Sphagnum => " in sphagnum moss",
-        GrowingMedium.Water => " in water",
-        GrowingMedium.CormRiser => " on a corm riser",
+        GrowingMedium.Soil => Strings.Propagations.MediumInSoil,
+        GrowingMedium.OrchidBark => Strings.Propagations.MediumInOrchidBark,
+        GrowingMedium.Leca => Strings.Propagations.MediumInLeca,
+        GrowingMedium.Pon => Strings.Propagations.MediumInPon,
+        GrowingMedium.Perlite => Strings.Propagations.MediumInPerlite,
+        GrowingMedium.Sphagnum => Strings.Propagations.MediumInSphagnum,
+        GrowingMedium.Water => Strings.Propagations.MediumInWater,
+        GrowingMedium.CormRiser => Strings.Propagations.MediumOnCormRiser,
         _ => ""
     };
 }

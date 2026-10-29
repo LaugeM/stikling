@@ -1,6 +1,8 @@
 @* What a propagation is in. A text box with the containers you have as chips under it, because a
    datalist is invisible on a phone. A name that isn't a container yet becomes one when the form is saved. *@
 
+@using System.Globalization
+
 <div class="container-picker">
     <label class="form-label" for="@Id">@Label</label>
     <input id="@Id" class="form-control" autocomplete="off" placeholder="@Placeholder"
@@ -8,7 +10,7 @@
 
     @if (Matching.Count > 0)
     {
-        <div class="chip-row mt-2" role="group" aria-label="Containers you have">
+        <div class="chip-row mt-2" role="group" aria-label="@Strings.Propagations.ContainerYouHave">
             @foreach (var use in Matching)
             {
                 <button type="button" class="chip" @onclick="() => SetAsync(use.Pot.Name)">@use.Pot.Name</button>
@@ -25,7 +27,7 @@
     }
     else if (ContainerName.Clean(Value) is { } typed)
     {
-        <div class="form-text">"@typed" will be added to your containers when you save.</div>
+        <div class="form-text">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ContainerWillBeAdded, typed)</div>
     }
 </div>
 
@@ -41,10 +43,10 @@
     public IReadOnlyList<PotUse> Containers { get; set; } = [];
 
     [Parameter]
-    public string Label { get; set; } = "Container";
+    public string Label { get; set; } = Strings.Propagations.ContainerLabel;
 
     [Parameter]
-    public string Placeholder { get; set; } = "e.g. Clear box with lid";
+    public string Placeholder { get; set; } = Strings.Propagations.ContainerPlaceholder;
 
     [Parameter]
     public string Id { get; set; } = "container";

@@ -5,18 +5,18 @@
 <div class="bring-back">
     @if (Choice.Mode == BringBackMode.No)
     {
-        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => Set(BringBackMode.SameDayNextYear)">Bring it back</button>
+        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => Set(BringBackMode.SameDayNextYear)">@Strings.Propagations.BringLabel</button>
     }
     else
     {
-        <label for="@selectId">Bring it back</label>
+        <label for="@selectId">@Strings.Propagations.BringLabel</label>
         <select id="@selectId" class="form-select form-select-sm" value="@Choice.Mode" @onchange="ModeChangedAsync">
-            <option value="@BringBackMode.SameDayNextYear">Same day next year</option>
-            <option value="@BringBackMode.OnADay">On a day…</option>
+            <option value="@BringBackMode.SameDayNextYear">@Strings.Propagations.BringSameDay</option>
+            <option value="@BringBackMode.OnADay">@Strings.Propagations.BringOnADay</option>
         </select>
         @if (Choice.Mode == BringBackMode.OnADay)
         {
-            <input type="date" class="form-control form-control-sm" aria-label="Day it comes back"
+            <input type="date" class="form-control form-control-sm" aria-label="@Strings.Propagations.BringDayLabel"
                    value="@(Choice.Picked?.ToString("yyyy-MM-dd"))" min="@((Stored is { } kept && kept <= Today ? kept : Today.AddDays(1)).ToString("yyyy-MM-dd"))"
                    @onchange="DayChangedAsync" />
         }
@@ -24,10 +24,10 @@
         {
             <span class="bring-back-day">@(Choice.Resolve(NoteDay, Today) is { } day ? Labels.Date(day) : "")</span>
         }
-        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => Set(BringBackMode.No)">Don't bring it back</button>
+        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => Set(BringBackMode.No)">@Strings.Propagations.BringNo</button>
         @if (!Choice.IsValid(NoteDay, Today, Stored))
         {
-            <p class="bring-back-error" role="alert">Pick a day after today.</p>
+            <p class="bring-back-error" role="alert">@Strings.Propagations.BringPickDay</p>
         }
     }
 </div>

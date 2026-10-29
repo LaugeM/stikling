@@ -4,7 +4,7 @@
 
 @if (Links.For(SubjectId) is { ShowNotes: true })
 {
-    <p class="form-text mb-0">This note will show on the public page.</p>
+    <p class="form-text mb-0">@Strings.Propagations.PublicNoteHint</p>
 }
 
 @code {

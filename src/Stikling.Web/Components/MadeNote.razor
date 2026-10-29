@@ -5,8 +5,8 @@
 @if (show)
 {
     <div class="made-note" role="status">
-        <p>Saved. <a href="labels?cuttings=@PropagationId">Print a label for the jar?</a></p>
-        <button type="button" class="made-close" aria-label="Close" @onclick="Close">
+        <p>@Strings.Propagations.MadeNoteSaved <a href="labels?cuttings=@PropagationId">@Strings.Propagations.MadeNoteLabel</a></p>
+        <button type="button" class="made-close" aria-label="@Strings.Common.Close" @onclick="Close">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
         </button>
     </div>

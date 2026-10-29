@@ -5,6 +5,7 @@
 @inject IReceivedHistoryRepository ReceivedHistories
 @inject PhotoService Photos
 @inject TimeProvider Time
+@using System.Globalization
 @using Stikling.Core.Sharing
 @using Stikling.Core.Propagations
 
@@ -13,11 +14,11 @@
 @if (references.Count > 0)
 {
     <section class="reference-photos" aria-labelledby="@referenceId">
-        <p class="reference-label" id="@referenceId">Reference · not this @(SubjectType == SubjectType.Plant ? "plant" : "propagation")</p>
+        <p class="reference-label" id="@referenceId">@(SubjectType == SubjectType.Plant ? Strings.Propagations.TlReferencePlant : Strings.Propagations.TlReferencePropagation)</p>
         <div class="reference-row">
             @foreach (var photo in references)
             {
-                <button type="button" class="reference-photo" @onclick="() => viewerIndex = photoIndex[photo.Id]" aria-label="Open reference photo">
+                <button type="button" class="reference-photo" @onclick="() => viewerIndex = photoIndex[photo.Id]" aria-label="@Strings.Propagations.TlOpenReference">
                     <PhotoImage PhotoId="photo.Id" />
                 </button>
             }
@@ -27,7 +28,7 @@
 
 @if (days is null)
 {
-    <p class="text-body-secondary">Loading history…</p>
+    <p class="text-body-secondary">@Strings.Propagations.TlLoading</p>
 }
 else if (days.Count == 0)
 {
@@ -35,7 +36,7 @@ else if (days.Count == 0)
 }
 else
 {
-    <h2 class="visually-hidden">History</h2>
+    <h2 class="visually-hidden">@Strings.Propagations.TlHistory</h2>
     <ol class="timeline">
         @foreach (var (day, entries) in days)
         {
@@ -59,11 +60,11 @@ else
                                     @if (entry.Edits.Count > 0)
                                     {
                                         <button type="button" class="entry-edited" aria-expanded="@(versionsId == entry.Id ? "true" : "false")"
-                                                @onclick="() => versionsId = versionsId == entry.Id ? null : entry.Id">edited</button>
+                                                @onclick="() => versionsId = versionsId == entry.Id ? null : entry.Id">@Strings.Propagations.TlEdited</button>
                                     }
                                     @if (earlierIds.Contains(entry.Id))
                                     {
-                                        <span class="entry-day">As a cutting</span>
+                                        <span class="entry-day">@Strings.Propagations.TlAsCutting</span>
                                     }
                                     else
                                     {
@@ -71,12 +72,12 @@ else
                                         @if (TimelineService.CanCorrect(entry) && editId != entry.Id)
                                         {
                                             <button type="button" class="entry-action" @onclick="() => StartEdit(entry)"
-                                                    aria-label="Correct entry" title="Correct entry">
+                                                    aria-label="@Strings.Propagations.TlCorrect" title="@Strings.Propagations.TlCorrect">
                                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
                                             </button>
                                         }
                                         <button type="button" class="entry-action" @onclick="() => confirmDeleteId = entry.Id"
-                                                aria-label="Delete entry" title="Delete entry">
+                                                aria-label="@Strings.Propagations.TlDelete" title="@Strings.Propagations.TlDelete">
                                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
                                         </button>
                                     </span>
@@ -87,9 +88,9 @@ else
                             @if (editId == entry.Id)
                             {
                                 <div class="entry-editor">
-                                    <textarea class="form-control" rows="2" aria-label="Corrected note" @bind="editText" @bind:event="oninput"></textarea>
+                                    <textarea class="form-control" rows="2" aria-label="@Strings.Propagations.TlCorrectedNote" @bind="editText" @bind:event="oninput"></textarea>
                                     <div class="entry-editor-row">
-                                        <label for="@editDateId">Happened on</label>
+                                        <label for="@editDateId">@Strings.Propagations.TlHappenedOn</label>
                                         <input id="@editDateId" type="date" class="form-control form-control-sm" @bind="editDay"
                                                max="@Today.ToString("yyyy-MM-dd")" />
                                     </div>
@@ -103,8 +104,8 @@ else
                                     }
                                     <div class="entry-editor-row">
                                         <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveEditAsync(entry)"
-                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)) || (entry.Kind == TimelineKind.Note && !editBringBack.IsValid(editDay, Today, entry.ComesBackOn)))">Save</button>
-                                        <button type="button" class="btn btn-link btn-sm" @onclick="CancelEdit">Cancel</button>
+                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)) || (entry.Kind == TimelineKind.Note && !editBringBack.IsValid(editDay, Today, entry.ComesBackOn)))">@Strings.Common.Save</button>
+                                        <button type="button" class="btn btn-link btn-sm" @onclick="CancelEdit">@Strings.Common.Cancel</button>
                                     </div>
                                 </div>
                             }
@@ -114,23 +115,23 @@ else
                             }
                             @if (editId != entry.Id && entry.Kind == TimelineKind.Note && entry.ComesBackOn is { } comesBack)
                             {
-                                <p class="entry-comes-back">Comes back on @Labels.Date(comesBack)</p>
+                                <p class="entry-comes-back">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.TlComesBack, Labels.Date(comesBack))</p>
                             }
 
                             @if (versionsId == entry.Id)
                             {
                                 <div class="entry-versions">
-                                    <p class="entry-versions-title">Earlier versions</p>
+                                    <p class="entry-versions-title">@Strings.Propagations.TlEarlierVersions</p>
                                     <ol>
                                         @foreach (var version in Enumerable.Reverse(entry.Edits))
                                         {
                                             <li>
                                                 <span class="entry-versions-meta">
-                                                    Dated @Labels.Date(LocalDay(version.OccurredAt)) · changed @Labels.Date(LocalDay(version.ReplacedAt))
+                                                    @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.TlVersionMeta, Labels.Date(LocalDay(version.OccurredAt)), Labels.Date(LocalDay(version.ReplacedAt)))
                                                 </span>
                                                 @if (string.IsNullOrWhiteSpace(version.Text))
                                                 {
-                                                    <span class="entry-versions-empty">No text</span>
+                                                    <span class="entry-versions-empty">@Strings.Propagations.TlNoText</span>
                                                 }
                                                 else
                                                 {
@@ -145,14 +146,14 @@ else
                             @if (earlierIds.Contains(entry.Id) && EarlierPropagationId is { } cuttingId)
                             {
                                 <a class="entry-link link-action" href="propagations/@cuttingId">
-                                    Open propagation
+                                    @Strings.Propagations.TlOpenPropagation
                                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
                                 </a>
                             }
                             else if (entry.RelatedId is { } relatedId)
                             {
                                 <a class="entry-link link-action" href="@(entry.RelatedType == SubjectType.Plant ? "plants" : "propagations")/@relatedId">
-                                    @(entry.RelatedType == SubjectType.Plant ? "Open plant" : "Open propagation")
+                                    @(entry.RelatedType == SubjectType.Plant ? Strings.Propagations.TlOpenPlant : Strings.Propagations.TlOpenPropagation)
                                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
                                 </a>
                             }
@@ -163,7 +164,7 @@ else
                                     @foreach (var photoId in entryPhotos)
                                     {
                                         <button type="button" class="entry-photo" @onclick="() => viewerIndex = photoIndex[photoId]"
-                                                aria-label="Open photo">
+                                                aria-label="@Strings.Propagations.TlOpenPhoto">
                                             <PhotoImage PhotoId="photoId" />
                                         </button>
                                     }
@@ -173,9 +174,9 @@ else
                             @if (confirmDeleteId == entry.Id)
                             {
                                 <div class="entry-confirm">
-                                    <span>@(entryPhotos.Count > 0 ? "Delete this entry and its photos?" : "Delete this entry?")</span>
-                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteEntryAsync(entry)">Delete</button>
-                                    <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmDeleteId = null">Cancel</button>
+                                    <span>@(entryPhotos.Count > 0 ? Strings.Propagations.TlConfirmWithPhotos : Strings.Propagations.TlConfirm)</span>
+                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteEntryAsync(entry)">@Strings.Common.Delete</button>
+                                    <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmDeleteId = null">@Strings.Common.Cancel</button>
                                 </div>
                             }
                         </li>
@@ -190,7 +191,7 @@ else
 {
     @* What it had before it came here, frozen as the giver's page showed it. Nothing on it can be changed. *@
     <section class="before-history" aria-labelledby="@beforeId">
-        <div class="before-divider"><span id="@beforeId">Before you got it</span></div>
+        <div class="before-divider"><span id="@beforeId">@Strings.Propagations.TlBefore</span></div>
         <h3 class="before-name">@received.Name</h3>
         <ol class="timeline">
             @foreach (var (day, items) in beforeDays)
@@ -203,7 +204,7 @@ else
                             var itemPhotos = item.PhotoIds.Where(photoIndex.ContainsKey).ToList();
                             <li class="timeline-entry kind-@BeforeClass(item)">
                                 <div class="entry-head">
-                                    <span class="entry-kind">@BeforeIcon(item.Kind)@(item.Kind == ShareItemKind.Milestone ? item.Text : item.Kind == ShareItemKind.Note ? "Note" : "Photo")</span>
+                                    <span class="entry-kind">@BeforeIcon(item.Kind)@(item.Kind == ShareItemKind.Milestone ? item.Text : item.Kind == ShareItemKind.Note ? Strings.Propagations.TlKindNote : Strings.Propagations.TlKindPhoto)</span>
                                     @if (!string.IsNullOrWhiteSpace(item.DayCount))
                                     {
                                         <span class="entry-day">@item.DayCount</span>
@@ -219,7 +220,7 @@ else
                                         @foreach (var photoId in itemPhotos)
                                         {
                                             <button type="button" class="entry-photo" @onclick="() => viewerIndex = photoIndex[photoId]"
-                                                    aria-label="Open photo">
+                                                    aria-label="@Strings.Propagations.TlOpenPhoto">
                                                 <PhotoImage PhotoId="photoId" />
                                             </button>
                                         }
@@ -253,7 +254,7 @@ else
 
     /// <summary>What to say while there is nothing yet.</summary>
     [Parameter]
-    public string EmptyText { get; set; } = "No photos or notes yet.";
+    public string EmptyText { get; set; } = Strings.Propagations.TlEmpty;
 
     /// <summary>
     /// On a plant potted up from a propagation: the propagation, whose entries with photos show on
@@ -471,20 +472,20 @@ else
     }
 
     private string DayLabel(DateOnly day) =>
-        day == Today ? "Today"
-        : day == Today.AddDays(-1) ? "Yesterday"
+        day == Today ? Strings.Propagations.TlToday
+        : day == Today.AddDays(-1) ? Strings.Propagations.TlYesterday
         : Labels.Date(day);
 
     private static string KindLabel(TimelineEntry entry) => TimelineEvents.Of(entry) switch
     {
-        TimelineEvent.PottedUp => "Potted up",
-        TimelineEvent.Failed => "Didn't make it",
-        TimelineEvent.GaveAway => "Given away",
-        TimelineEvent.LookedOver => "Looked over",
-        TimelineEvent.Flowering => "Flowering",
-        TimelineEvent.Arrived => "Arrived",
-        TimelineEvent.Problem => "Problem",
-        TimelineEvent.Identified => "Identified",
+        TimelineEvent.PottedUp => Strings.Propagations.TlKindPottedUp,
+        TimelineEvent.Failed => Strings.Propagations.TlKindFailed,
+        TimelineEvent.GaveAway => Strings.Propagations.TlKindGaveAway,
+        TimelineEvent.LookedOver => Strings.Propagations.TlKindLookedOver,
+        TimelineEvent.Flowering => Strings.Propagations.TlKindFlowering,
+        TimelineEvent.Arrived => Strings.Propagations.TlKindArrived,
+        TimelineEvent.Problem => Strings.Propagations.TlKindProblem,
+        TimelineEvent.Identified => Strings.Propagations.TlKindIdentified,
         _ => KindLabel(entry.Kind)
     };
 
@@ -517,11 +518,11 @@ else
 
     private static string KindLabel(TimelineKind kind) => kind switch
     {
-        TimelineKind.Created => "Added",
-        TimelineKind.Note => "Note",
-        TimelineKind.Photo => "Photo",
-        TimelineKind.Change => "Updated",
-        TimelineKind.Propagated => "Propagated",
+        TimelineKind.Created => Strings.Propagations.TlKindAdded,
+        TimelineKind.Note => Strings.Propagations.TlKindNote,
+        TimelineKind.Photo => Strings.Propagations.TlKindPhoto,
+        TimelineKind.Change => Strings.Propagations.TlKindUpdated,
+        TimelineKind.Propagated => Strings.Propagations.TlKindPropagated,
         _ => kind.ToString()
     };
 

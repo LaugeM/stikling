@@ -7,23 +7,23 @@
 @inject PlantNameService Names
 @inject NavigationManager Navigation
 
-<PageTitle>Propagations · Stikling</PageTitle>
+<PageTitle>@Strings.Propagations.ListPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 <div class="page-heading">
-    <h1>Propagations</h1>
+    <h1>@Strings.Propagations.ListTitle</h1>
     @if (all is { Count: > 0 })
     {
         <div class="d-flex align-items-baseline gap-2">
-            <span class="text-body-secondary small">@visible.Count of @all.Count</span>
-            <a class="btn btn-link btn-sm link-action" href="swap">Available for swap</a>
+            <span class="text-body-secondary small">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListShownOf, visible.Count, all.Count)</span>
+            <a class="btn btn-link btn-sm link-action" href="swap">@Strings.Propagations.ListSwapLink</a>
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
-                @(selecting ? "Done" : "Select")
+                @(selecting ? Strings.Common.Done : Strings.Propagations.ListSelect)
             </button>
             @* Takes over from the round add button on a wide screen *@
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="propagations/new">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-                Start a propagation
+                @Strings.Propagations.ListStart
             </a>
         </div>
     }
@@ -31,12 +31,12 @@
 
 @if (all is { Count: > 0 })
 {
-    <a class="results-link" href="propagations/results">Success rate and days to root</a>
+    <a class="results-link" href="propagations/results">@Strings.Propagations.ListResultsLink</a>
 }
 
 @if (all is null)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Propagations.ListLoading</p>
 }
 else if (all.Count == 0)
 {
@@ -46,22 +46,22 @@ else if (all.Count == 0)
             <path class="growth" d="M32 53V14" /><path class="growth" d="M32 25c0-7-5-11-12-11 0 7 5 11 12 11Z" /><path class="growth" d="M32 20c0-6 5-10 12-10 0 6-5 10-12 10Z" />
             <path class="growth" d="M32 53c-2 0-5-1-6-3M32 53c2 0 5-1 6-3M32 49c-2 0-4-1-5-2M32 49c2 0 4-1 5-2" />
         </svg>
-        <h2>No propagations yet</h2>
-        <p>A propagation is a new plant grown from one you have, like a cutting in water or a few seeds.</p>
-        <p>Open a plant and tap <em>Propagate</em>, or start one without a parent plant, e.g. seeds.</p>
+        <h2>@Strings.Propagations.ListEmptyTitle</h2>
+        <p>@Strings.Propagations.ListEmptyWhat</p>
+        <p>@((MarkupString)Strings.Propagations.ListEmptyHow)</p>
         <div class="first-run-actions">
-            <a class="btn btn-primary" href="propagations/new">Start a propagation</a>
+            <a class="btn btn-primary" href="propagations/new">@Strings.Propagations.ListStart</a>
         </div>
-        <a class="first-run-help" href="help#propagations">More about propagations in Help</a>
+        <a class="first-run-help" href="help#propagations">@Strings.Propagations.ListHelpLink</a>
     </div>
 }
 else
 {
     <div class="list-filters">
-        <input type="search" class="form-control" placeholder="Search by name…"
-               aria-label="Search propagations" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
+        <input type="search" class="form-control" placeholder="@Strings.Propagations.ListSearchPlaceholder"
+               aria-label="@Strings.Propagations.ListSearchLabel" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
 
-        <div class="btn-group segmented" role="radiogroup" aria-label="Progress">
+        <div class="btn-group segmented" role="radiogroup" aria-label="@Strings.Propagations.ListProgressLabel">
             @foreach (var (value, label) in progressOptions)
             {
                 var id = $"progress-{value}";
@@ -75,10 +75,10 @@ else
     @if (selecting)
     {
         <div class="select-all">
-            <button type="button" class="btn btn-link btn-sm link-action" @onclick="SelectAllShown">Select all shown</button>
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="SelectAllShown">@Strings.Propagations.ListSelectAll</button>
             @if (selected.Count > 0)
             {
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => selected.Clear()">Clear</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => selected.Clear()">@Strings.Propagations.ListClearSelection</button>
             }
         </div>
     }
@@ -89,17 +89,17 @@ else
         <div class="empty-state">
             @if (!string.IsNullOrWhiteSpace(search))
             {
-                <p>No propagations match.</p>
-                <button type="button" class="btn btn-outline-primary mt-3" @onclick="ClearSearch">Clear search</button>
+                <p>@Strings.Propagations.ListNoMatch</p>
+                <button type="button" class="btn btn-outline-primary mt-3" @onclick="ClearSearch">@Strings.Propagations.ListClearSearch</button>
             }
             else if (progress == ProgressFilter.Active)
             {
-                <p>Nothing in progress. The ones that were potted up or failed are under Finished.</p>
-                <a class="btn btn-primary mt-3" href="propagations/new">Start a propagation</a>
+                <p>@Strings.Propagations.ListNothingInProgress</p>
+                <a class="btn btn-primary mt-3" href="propagations/new">@Strings.Propagations.ListStart</a>
             }
             else
             {
-                <p>None finished yet. A propagation is finished once all of it has been potted up or has failed.</p>
+                <p>@Strings.Propagations.ListNoneFinished</p>
             }
         </div>
     }
@@ -109,25 +109,25 @@ else
     {
         var longest = Math.Max(1, experiment.Entries.Max(e => BarDays(e) ?? 0));
         <section class="stage-group">
-            <h2>@experiment.Name <span class="text-body-secondary">(@Labels.Count(experiment.Entries.Count, "batch", "batches"))</span></h2>
+            <h2>@experiment.Name <span class="text-body-secondary">(@Plural.Of(experiment.Entries.Count, Strings.Propagations.ListBatches_One, Strings.Propagations.ListBatches_Other))</span></h2>
             <ul class="item-list experiment-list">
                 @foreach (var entry in experiment.Entries)
                 {
                     <li>
                         <a class="experiment-row" href="propagations/@entry.Propagation.Id"
-                           aria-label="@entry.Propagation.DisplayName in @Labels.For(entry.Propagation.Medium)">
+                           aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListRowLabel, entry.Propagation.DisplayName, Labels.For(entry.Propagation.Medium))">
                             <span class="experiment-medium">@Labels.For(entry.Propagation.Medium)</span>
                             @if (entry.DaysToRoot is { } days)
                             {
-                                <span class="experiment-result rooted">Rooted in @Labels.Count(days, "day")</span>
+                                <span class="experiment-result rooted">@Plural.Of(days, Strings.Propagations.ListRootedIn_One, Strings.Propagations.ListRootedIn_Other)</span>
                             }
                             else
                             {
                                 <span class="experiment-result">
-                                    @(Labels.Stage(entry.Propagation.Stage, entry.Propagation.Type)) · day @entry.DaysRunning
+                                    @(Labels.Stage(entry.Propagation.Stage, entry.Propagation.Type)) · @string.Format(CultureInfo.CurrentCulture, Strings.Labels.AgeDay, entry.DaysRunning)
                                     @if (Pace(entry.Propagation) is { IsSlow: true })
                                     {
-                                        <span class="pace-slow"> · slow</span>
+                                        <span class="pace-slow"> · @Strings.Propagations.ListSlow</span>
                                     }
                                 </span>
                             }
@@ -201,17 +201,17 @@ else
 
 @if (selecting)
 {
-    <div class="bulk-bar" role="region" aria-label="Actions for selected propagations">
+    <div class="bulk-bar" role="region" aria-label="@Strings.Propagations.ListBulkLabel">
         <div class="bulk-row">
-            <span class="bulk-count">@selected.Count selected</span>
+            <span class="bulk-count">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListSelectedCount, selected.Count)</span>
             <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(selected.Count == 0)"
-                    @onclick="OpenLabels">Labels</button>
+                    @onclick="OpenLabels">@Strings.Propagations.ListLabels</button>
         </div>
     </div>
 }
 else
 {
-    <a class="fab" href="propagations/new" aria-label="Start a propagation" title="Start a propagation">
+    <a class="fab" href="propagations/new" aria-label="@Strings.Propagations.ListStart" title="@Strings.Propagations.ListStart">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
     </a>
 }
@@ -219,9 +219,9 @@ else
 @code {
     private static readonly (ProgressFilter Value, string Label)[] progressOptions =
     [
-        (ProgressFilter.Active, "In progress"),
-        (ProgressFilter.Finished, "Finished"),
-        (ProgressFilter.All, "All")
+        (ProgressFilter.Active, Strings.Propagations.ListProgressActive),
+        (ProgressFilter.Finished, Strings.Propagations.ListProgressFinished),
+        (ProgressFilter.All, Strings.Propagations.ListProgressAll)
     ];
 
     private IReadOnlyList<Propagation>? all;
@@ -307,11 +307,11 @@ else
     {
         var parts = new List<string>(3);
         if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } size)
-            parts.Add($"corm {size:0.##} mm");
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListMilestoneCorm, size.ToString("0.##", CultureInfo.CurrentCulture)));
         if (propagation.DaysToFirstRoot is { } root)
-            parts.Add($"first root day {root}");
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListMilestoneRoot, root));
         if (propagation.DaysToFirstLeaf is { } leaf)
-            parts.Add($"first leaf day {leaf}");
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListMilestoneLeaf, leaf));
         if (parts.Count == 0)
             return null;
         var text = string.Join(" · ", parts);

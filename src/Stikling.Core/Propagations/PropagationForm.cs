@@ -1,3 +1,5 @@
+using Stikling.Core.Text;
+using Strings = Stikling.Core.Resources;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Stikling.Core.Plants;
@@ -31,7 +33,7 @@ public sealed record PropagationFormResult(
 public sealed class PropagationForm
 {
     /// <summary>Shown when the cut end is ticked as dried but the time isn't a number.</summary>
-    public const string DryMessage = "Say how long it dried, or untick it.";
+    public static string DryMessage => Strings.Propagations.DryMessage;
 
     private readonly PropagationForms deps;
     private readonly Func<Propagation, Func<Enum, string>> label;
@@ -278,7 +280,7 @@ public sealed class PropagationForm
         if (DryInvalid)
             errors.Add(DryMessage);
         if (!IsNew && Propagation.PottedUpCount < PlantsFromIt)
-            errors.Add($"{PlantCount(PlantsFromIt)} potted up from it {(PlantsFromIt == 1 ? "is" : "are")} still in your collection, so the potted up count can't be lower.");
+            errors.Add(Plural.Of(PlantsFromIt, Strings.Propagations.PottedUpBelowPlants_One, Strings.Propagations.PottedUpBelowPlants_Other));
         if (errors.Count > 0)
             return new PropagationFormResult(errors);
 
@@ -353,7 +355,4 @@ public sealed class PropagationForm
 
         return new PropagationFormResult([], created, laterError);
     }
-
-    // "1 plant", "2 plants"
-    private static string PlantCount(int count) => count == 1 ? "1 plant" : $"{count} plants";
 }

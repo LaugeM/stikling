@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Propagations;
 
@@ -86,9 +87,9 @@ public static class PropagationResults
             return [];
         return new[]
             {
-                ("Not dried", counted.Where(p => p.DriedForHours is null or <= 0)),
-                ("Dried under a day", counted.Where(p => p.DriedForHours is > 0 and < 24)),
-                ("Dried a day or more", counted.Where(p => p.DriedForHours >= 24))
+                (Strings.Propagations.NotDried, counted.Where(p => p.DriedForHours is null or <= 0)),
+                (Strings.Propagations.DriedUnderDay, counted.Where(p => p.DriedForHours is > 0 and < 24)),
+                (Strings.Propagations.DriedDayOrMore, counted.Where(p => p.DriedForHours >= 24))
             }
             .Select(g => (g.Item1, Batches: g.Item2.ToList()))
             .Where(g => g.Batches.Count > 0)

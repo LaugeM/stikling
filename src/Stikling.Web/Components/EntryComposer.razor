@@ -1,6 +1,7 @@
 @* Adding a photo or a note to a plant's or propagation's history, from the buttons at the bottom
    of its page. Photo opens the device's own choice of camera or gallery straight away, then this
    sheet asks for an optional note and the day. *@
+@using System.Globalization
 @inject ITimelineRepository Entries
 @inject ILogger<EntryComposer> Logger
 @inject TimelineService TimelineService
@@ -22,34 +23,34 @@
                 @foreach (var photo in photos)
                 {
                     <div class="photo-pick">
-                        <PhotoImage PhotoId="photo.Id" Alt="Photo to add" />
+                        <PhotoImage PhotoId="photo.Id" Alt="@Strings.Propagations.ComposerPhotoToAdd" />
                         <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
-                                aria-label="Remove photo" title="Remove photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                                aria-label="@Strings.Propagations.ComposerRemovePhoto" title="@Strings.Propagations.ComposerRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                     </div>
                 }
             </div>
         }
 
         @* A dialog focuses what has autofocus when it opens: the note box for a note, nothing typed for a photo *@
-        <textarea class="form-control" rows="3" aria-label="Note" autofocus="@forNote"
-                  placeholder="@(photos.Count > 0 ? "Add a note (optional)" : "New leaf, roots showing, repotted…")"
+        <textarea class="form-control" rows="3" aria-label="@Strings.Propagations.TlKindNote" autofocus="@forNote"
+                  placeholder="@(photos.Count > 0 ? Strings.Propagations.ComposerPhotoNoteHint : Strings.Propagations.ComposerNoteHint)"
                   @bind="noteText" @bind:event="oninput"></textarea>
         <PublicNoteHint SubjectId="SubjectId" />
 
         <div class="composer-date">
             @if (pickDate)
             {
-                <label for="@dateId">Happened on</label>
+                <label for="@dateId">@Strings.Propagations.TlHappenedOn</label>
                 <input id="@dateId" type="date" class="form-control form-control-sm" @bind="occurredOn" max="@Today.ToString("yyyy-MM-dd")" />
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="ResetDate">@(photos.Count > 0 ? "Use the photos' dates" : "Use today")</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="ResetDate">@(photos.Count > 0 ? Strings.Propagations.ComposerUsePhotoDates : Strings.Propagations.ComposerUseToday)</button>
             }
             else
             {
                 @if (PhotoDay is { } day)
                 {
-                    <span class="composer-when">Taken @DayLabel(day).ToLowerInvariant()</span>
+                    <span class="composer-when">@TakenText(day)</span>
                 }
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => pickDate = true">Happened earlier?</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => pickDate = true">@Strings.Propagations.ComposerEarlier</button>
             }
         </div>
 
@@ -71,11 +72,11 @@
         <div class="form-actions">
             <button type="button" class="btn btn-primary" @onclick="SaveAsync"
                     disabled="@(busy || googleBusy || (photos.Count == 0 && (string.IsNullOrWhiteSpace(noteText) || !bringBack.IsValid(NoteDay, Today))))">
-                @(photos.Count > 0 ? "Add to history" : "Add note")
+                @(photos.Count > 0 ? Strings.Propagations.ComposerAddToHistory : Strings.Propagations.ComposerAddNote)
             </button>
             <label class="btn btn-outline-primary icon-btn" for="@sheetInputId">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                @(photos.Count > 0 ? "Add more" : "Photo")
+                @(photos.Count > 0 ? Strings.Propagations.ComposerAddMore : Strings.Propagations.TlKindPhoto)
             </label>
             <input id="@sheetInputId" type="file" accept="image/*" multiple class="visually-hidden"
                    @ref="sheetInput" @onchange="() => AddPhotosAsync(sheetInput)" disabled="@busy" />
@@ -84,10 +85,10 @@
                 <button type="button" class="btn btn-outline-primary icon-btn" @onclick="StartGoogleAsync"
                         disabled="@(busy || googleBusy)">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
-                    Google Photos
+                    @Strings.Propagations.ComposerGoogle
                 </button>
             }
-            <button type="button" class="btn btn-link ms-auto" @onclick="DiscardAsync">Cancel</button>
+            <button type="button" class="btn btn-link ms-auto" @onclick="DiscardAsync">@Strings.Common.Cancel</button>
         </div>
     </div>
 </Sheet>
@@ -186,9 +187,9 @@
 
     private string SheetTitle => photos.Count switch
     {
-        0 => "Add a note",
-        1 => "Add a photo",
-        var n => $"Add {n} photos"
+        0 => Strings.Propagations.ComposerTitleNote,
+        1 => Strings.Propagations.ComposerTitlePhoto,
+        var n => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerTitlePhotos, n)
     };
 
     // The one day the picked photos were taken on, when it's the same for all of them
@@ -196,7 +197,7 @@
         photos.Select(p => Time.LocalDay(p.TakenAt)).Distinct().ToList() is [var only] ? only : null;
 
     private string? Status =>
-        busy ? "Saving photos…"
+        busy ? Strings.Propagations.ComposerSaving
         : error ?? new PhotoSaveResult([], failed, undated).Message(guessesMatter: occurredOn is null);
 
     /// <summary>Opens the sheet for a note, from the page's Note button.</summary>
@@ -223,7 +224,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to an entry failed");
-            error = $"Couldn't save the photos: {ex.Message}";
+            error = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
         }
 
         busy = false;
@@ -257,7 +258,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving photos picked from Google Photos failed");
-            error = $"Couldn't save the photos: {ex.Message}";
+            error = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
         }
         CloseIfEmpty();
     }
@@ -322,7 +323,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the entry failed");
-            error = $"Couldn't save: {ex.Message}";
+            error = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSaveFailed, ex.Message);
         }
         busy = false;
     }
@@ -366,10 +367,11 @@
         await RememberDraftAsync();
     }
 
-    private string DayLabel(DateOnly day) =>
-        day == Today ? "Today"
-        : day == Today.AddDays(-1) ? "Yesterday"
-        : $"on {Labels.Date(day)}";
+    // "Taken today", for the one day all the picked photos were taken on
+    private string TakenText(DateOnly day) =>
+        day == Today ? Strings.Propagations.ComposerTakenToday
+        : day == Today.AddDays(-1) ? Strings.Propagations.ComposerTakenYesterday
+        : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerTakenOn, Labels.Date(day));
 
     /// <summary>Photos picked but never added belong to nothing, so they go when the page does.</summary>
     public async ValueTask DisposeAsync()

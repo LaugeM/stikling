@@ -1,94 +1,90 @@
 @page "/propagations/results"
+@using System.Globalization
 @inject IPropagationRepository Repository
 @inject ITimelineRepository Timeline
 @inject TimeProvider Time
 
-<PageTitle>Results · Stikling</PageTitle>
+<PageTitle>@Strings.Propagations.StatsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="propagations">Propagations</a>
-<h1>Results</h1>
+<a class="back-link" href="propagations">@Strings.Propagations.ListTitle</a>
+<h1>@Strings.Propagations.StatsTitle</h1>
 
-<p class="results-hint">How each medium and each type has done.</p>
-<a class="year-link" href="year">Your year with your plants</a>
+<p class="results-hint">@Strings.Propagations.StatsHint</p>
+<a class="year-link" href="year">@Strings.Propagations.StatsYearLink</a>
 
 <details class="results-how">
-    <summary>How this is counted</summary>
+    <summary>@Strings.Propagations.StatsHowTitle</summary>
     <p>
-        The success rate counts units, so a batch of 5 corms where 4 made it counts as 4 of 5. A unit
-        has made it once it's potted up or its batch has rooted, and units still on their way aren't
-        counted either way. Below @SmallSample units the count is shown instead of a percentage,
-        since 2 of 2 says more than 100%. Days to root only uses batches that were marked as rooted,
-        so one that went straight to potted up isn't in it.
+        @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsHow, SmallSample)
     </p>
 </details>
 
 @if (all is null)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Propagations.ListLoading</p>
 }
 else if (overall is null)
 {
     <div class="empty-state">
-        <p>No propagations yet.</p>
+        <p>@Strings.Propagations.StatsEmptyTitle</p>
         <p class="text-body-secondary">
-            Once you've started some, this page shows how well each medium and each type does: how many
-            made it, and how long they took to root.
+            @Strings.Propagations.StatsEmptyHow
         </p>
-        <a class="btn btn-primary mt-3" href="propagations/new">Start a propagation</a>
+        <a class="btn btn-primary mt-3" href="propagations/new">@Strings.Propagations.ListStart</a>
     </div>
 }
 else
 {
     <section class="results-section">
-        <h2>All propagations</h2>
+        <h2>@Strings.Propagations.StatsAllHeading</h2>
         <ul class="results-list">
-            <li>@Row("All", overall, "Rooted", overallLost)</li>
+            <li>@Row(Strings.Propagations.StatsAll, overall, false, overallLost)</li>
         </ul>
     </section>
 
     <section class="results-section">
-        <h2>By medium</h2>
+        <h2>@Strings.Propagations.StatsByMedium</h2>
         <ul class="results-list">
             @foreach (var result in byMedium)
             {
-                <li>@Row(Labels.For(result.Key), result, "Rooted", lostByMedium.GetValueOrDefault(result.Key))</li>
+                <li>@Row(Labels.For(result.Key), result, false, lostByMedium.GetValueOrDefault(result.Key))</li>
             }
         </ul>
     </section>
 
     <section class="results-section">
-        <h2>By type</h2>
+        <h2>@Strings.Propagations.StatsByType</h2>
         <ul class="results-list">
             @foreach (var result in byType)
             {
-                <li>@Row(Labels.For(result.Key), result, Labels.Stage(PropagationStage.Rooted, result.Key))</li>
+                <li>@Row(Labels.For(result.Key), result, result.Key == PropagationType.Seed)</li>
             }
         </ul>
     </section>
 
     <section class="results-section">
-        <h2>Rooting aids</h2>
+        <h2>@Strings.Propagations.StatsAidsHeading</h2>
         @if (byAid.Count == 0)
         {
-            <p class="aid-note">Pick the rooting aids you used when editing a propagation, and each one is compared here with the batches that went without it.</p>
+            <p class="aid-note">@Strings.Propagations.StatsAidsNone</p>
         }
         else
         {
-            <p class="aid-note">Each aid next to every batch that went without it, whatever the type or medium.</p>
+            <p class="aid-note">@Strings.Propagations.StatsAidsHow</p>
             <ul class="results-list">
                 @foreach (var result in byAid)
                 {
                     <li>
                         <div class="aid-name">@Labels.For(result.Aid)</div>
-                        @Row("With", result.With, "Rooted")
+                        @Row(Strings.Propagations.StatsWith, result.With, false)
                         @if (result.Without.Batches == 0)
                         {
-                            <div class="result-row result-line text-body-secondary">Every batch used it, so there's nothing to compare with yet.</div>
+                            <div class="result-row result-line text-body-secondary">@Strings.Propagations.StatsAidsAllUsed</div>
                         }
                         else
                         {
-                            @Row("Without", result.Without, "Rooted")
+                            @Row(Strings.Propagations.StatsWithout, result.Without, false)
                         }
                     </li>
                 }
@@ -99,12 +95,12 @@ else
     @if (byDrying.Count > 0)
     {
         <section class="results-section">
-            <h2>Drying the cut end</h2>
-            <p class="aid-note">Batches grouped by how long the cut end dried before it went in, whatever the type or medium.</p>
+            <h2>@Strings.Propagations.StatsDryingHeading</h2>
+            <p class="aid-note">@Strings.Propagations.StatsDryingHow</p>
             <ul class="results-list">
                 @foreach (var group in byDrying)
                 {
-                    <li>@Row(group.Name, group.Result, "Rooted")</li>
+                    <li>@Row(group.Name, group.Result, false)</li>
                 }
             </ul>
         </section>
@@ -139,12 +135,13 @@ else
         overallLost = FailureResults.Overall(all, entries, Time);
     }
 
-    private static RenderFragment Row<TKey>(string name, PropagationResult<TKey> result, string rooted, FailureSummary? lost = null) => __builder =>
+    // Seeds come up and sprout where the rest root, so their rows use other words
+    private static RenderFragment Row<TKey>(string name, PropagationResult<TKey> result, bool seeds, FailureSummary? lost = null) => __builder =>
     {
         <div class="result-row">
             <div class="result-head">
                 <span class="result-name">@name</span>
-                <span class="result-batches">@Labels.Count(result.Batches, "batch", "batches")</span>
+                <span class="result-batches">@Plural.Of(result.Batches, Strings.Propagations.ListBatches_One, Strings.Propagations.ListBatches_Other)</span>
             </div>
 
             @if (result.SuccessRate is { } rate)
@@ -152,29 +149,29 @@ else
                 @* A full bar for 2 of 2 says the same thing a percentage would *@
                 @if (result.Decided >= SmallSample)
                 {
-                    <div class="result-bar" role="img" aria-label="@Percent(rate) made it">
+                    <div class="result-bar" role="img" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsBarLabel, Percent(rate))">
                         <span style="width: @(Percent(rate))"></span>
                     </div>
                 }
                 <div class="result-line">
                     @if (result.Decided < SmallSample)
                     {
-                        <strong>@result.Succeeded of @result.Decided</strong> <text>made it</text>
+                        @((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsMadeItSmall, result.Succeeded, result.Decided))
                     }
                     else
                     {
-                        <strong>@Percent(rate)</strong> <text>made it · @result.Succeeded of @result.Decided</text>
+                        @((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsMadeItPercent, Percent(rate), result.Succeeded, result.Decided))
                     }
                     @if (result.Growing > 0)
                     {
-                        <span class="text-body-secondary"> · @result.Growing still going</span>
+                        <span class="text-body-secondary"> · @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsStillGoing, result.Growing)</span>
                     }
                 </div>
             }
             else
             {
                 <div class="result-line text-body-secondary">
-                    Nothing has made it or failed yet · @result.Growing still going
+                    @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsNothingYet, result.Growing)
                 </div>
             }
 
@@ -183,19 +180,19 @@ else
                 {
                     @if (result.DaysToRoot.Count == 1)
                     {
-                        <span>@rooted in @Labels.Count(result.FastestDaysToRoot!.Value, "day")</span>
+                        <span>@(seeds ? Plural.Of(result.FastestDaysToRoot!.Value, Strings.Propagations.StatsSprouted_One, Strings.Propagations.StatsSprouted_Other) : Plural.Of(result.FastestDaysToRoot!.Value, Strings.Propagations.StatsRooted_One, Strings.Propagations.StatsRooted_Other))</span>
                     }
                     else
                     {
-                        <span>@rooted in @Labels.Count(Days(average), "day") on average</span>
+                        <span>@(seeds ? Plural.Of(Days(average), Strings.Propagations.StatsSproutedAvg_One, Strings.Propagations.StatsSproutedAvg_Other) : Plural.Of(Days(average), Strings.Propagations.StatsRootedAvg_One, Strings.Propagations.StatsRootedAvg_Other))</span>
                         <span class="text-body-secondary">
-                            · @result.FastestDaysToRoot to @result.SlowestDaysToRoot days over @Labels.Count(result.DaysToRoot.Count, "batch", "batches")
+                            · @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsRange, result.FastestDaysToRoot, result.SlowestDaysToRoot, result.DaysToRoot.Count)
                         </span>
                     }
                 }
                 else
                 {
-                    <span class="text-body-secondary">No @rooted.ToLowerInvariant() dates yet</span>
+                    <span class="text-body-secondary">@(seeds ? Strings.Propagations.StatsNoSproutDates : Strings.Propagations.StatsNoRootDates)</span>
                 }
             </div>
 
@@ -209,15 +206,15 @@ else
     private static string LostText(FailureSummary lost)
     {
         var reasons = string.Join(", ", lost.Reasons.Select(r =>
-            $"{(r.Reason is { } reason ? FailReasons.LostTo(reason) : "not recorded")} {r.Units}"));
-        var stage = lost.MostlyAt switch
+            $"{(r.Reason is { } reason ? FailReasons.LostTo(reason) : Strings.Propagations.StatsNotRecorded)} {r.Units}"));
+        var format = lost.MostlyAt switch
         {
-            FailureStage.BeforeRooting => " · mostly before rooting",
-            FailureStage.WhileRooting => " · mostly while rooting",
-            FailureStage.AfterRooting => " · mostly after rooting",
-            _ => ""
+            FailureStage.BeforeRooting => Strings.Propagations.StatsLostBefore,
+            FailureStage.WhileRooting => Strings.Propagations.StatsLostWhile,
+            FailureStage.AfterRooting => Strings.Propagations.StatsLostAfter,
+            _ => Strings.Propagations.StatsLost
         };
-        return $"Lost to: {reasons}{stage}";
+        return string.Format(CultureInfo.CurrentCulture, format, reasons);
     }
 
     // Below this many units a percentage looks more certain than it is
