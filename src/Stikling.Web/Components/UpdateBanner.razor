@@ -72,15 +72,21 @@
         // The new version takes a moment to switch on, so say it's happening
         updating = true;
         StateHasChanged();
+        bool switched;
         try
         {
-            if (module is not null)
-                await module.InvokeVoidAsync(ApplyMethod);
+            switched = module is not null && await module.InvokeAsync<bool>(ApplyMethod);
         }
         catch (JSException)
         {
-            // Couldn't switch over, so offer the buttons again
+            switched = false;
+        }
+
+        if (!switched)
+        {
+            // The new version didn't take over, so offer the buttons again
             updating = false;
+            StateHasChanged();
         }
     }
 

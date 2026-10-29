@@ -12,6 +12,8 @@ const ON_UPDATE_READY = "OnUpdateReady";
 const PENDING_KEY = "stikling-update-pending";
 // Reloads allowed while an update is pending, so a worker that never takes over can't loop the page
 const MAX_TRIES = 3;
+// How long to wait for the new worker before offering Reload and Later again
+const GIVE_UP_AFTER_MS = 30000;
 
 async function registration() {
     return navigator.serviceWorker ? navigator.serviceWorker.getRegistration() : null;
@@ -60,7 +62,7 @@ export async function watch(dotNetRef) {
         if (incoming(reg) && pendingTries() < MAX_TRIES) {
             // Reloaded while the update was still switching over: keep "Updating…" up and carry on
             await notify(dotNetRef, true);
-            await apply();
+            if (!(await apply())) await notify(dotNetRef, false);
             return;
         }
         setPendingTries(0);
@@ -84,30 +86,41 @@ export async function watch(dotNetRef) {
     }
 }
 
-/// Switches to the new version and reloads once it has taken over.
+/// Switches to the new version and reloads once it has taken over. Returns false if it still hasn't
+/// after a while, so the bar can offer its buttons again rather than reload into the old version.
 export async function apply() {
     const reg = await registration();
     const worker = reg && incoming(reg);
     if (!worker) {
         setPendingTries(0);
         location.reload();
-        return;
+        return true;
     }
 
     setPendingTries(pendingTries() + 1);
-    let reloading = false;
-    const reload = () => {
-        if (reloading) return;
-        reloading = true;
-        location.reload();
-    };
+    return new Promise(resolve => {
+        let done = false;
+        const reload = () => {
+            if (done) return;
+            done = true;
+            location.reload();
+            resolve(true);
+        };
 
-    navigator.serviceWorker.addEventListener("controllerchange", reload, { once: true });
-    // Also reload if the worker finishes activating without this page hearing about the switch,
-    // or is replaced by an even newer one
-    worker.addEventListener("statechange", () => {
-        if (worker.state === "activated" || worker.state === "redundant") reload();
+        navigator.serviceWorker.addEventListener("controllerchange", reload, { once: true });
+        // Also reload if the worker finishes activating without this page hearing about the switch,
+        // or is replaced by an even newer one
+        worker.addEventListener("statechange", () => {
+            if (worker.state === "activated" || worker.state === "redundant") reload();
+        });
+        setTimeout(() => {
+            if (done) return;
+            done = true;
+            setPendingTries(0);
+            resolve(false);
+        }, GIVE_UP_AFTER_MS);
+
+        if (worker.state === "activated") reload();
+        else if (worker === reg.waiting) worker.postMessage(SKIP_WAITING);
     });
-    if (worker.state === "activated") reload();
-    else if (worker === reg.waiting) worker.postMessage(SKIP_WAITING);
 }
