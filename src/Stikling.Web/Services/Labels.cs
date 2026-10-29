@@ -130,6 +130,9 @@ public static class Labels
         GrowingMedium.Pon => Strings.Labels.MediumPon,
         GrowingMedium.Sphagnum => Strings.Labels.MediumSphagnum,
         GrowingMedium.CormRiser => Strings.Labels.MediumCormRiser,
+        GrowingMedium.Soil => Strings.Labels.MediumSoil,
+        GrowingMedium.Perlite => Strings.Labels.MediumPerlite,
+        GrowingMedium.Water => Strings.Labels.MediumWater,
         _ => medium.ToString()
     };
 

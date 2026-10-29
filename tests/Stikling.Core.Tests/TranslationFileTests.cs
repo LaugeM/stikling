@@ -95,7 +95,7 @@ public partial class TranslationFileTests
                     continue;
                 // The singular may leave the number out, as in "Hver dag" for "Every {0} day"
                 if (key.EndsWith("_One", StringComparison.Ordinal)
-                    && Placeholders(text).Split(',', StringSplitOptions.RemoveEmptyEntries).All(Placeholders(original).Split(',').Contains))
+                    && Placeholders(original).Split(',').Where(p => p != "0").SequenceEqual(Placeholders(text).Split(',', StringSplitOptions.RemoveEmptyEntries).Where(p => p != "0")))
                     continue;
                 Assert.True(Placeholders(original) == Placeholders(text),
                     $"{file.Path}, {key}: has placeholders [{Placeholders(text)}] where English has [{Placeholders(original)}].");

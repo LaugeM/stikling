@@ -66,11 +66,11 @@ public static class ProblemText
     // Text saved as data stays the same whichever language the device that wrote it was using.
 
     /// <summary>The history line for a problem being opened.</summary>
-    public static string OpenedLine(Problem problem) => InEnglish(() =>
+    public static string OpenedLine(Problem problem) => SavedText.InEnglish(() =>
         WithNote(string.Format(CultureInfo.CurrentCulture, Strings.Pests.OpenedLine, LowerFirst(Signs(problem.KnownSigns))), problem.Note));
 
     /// <summary>The history line for an update.</summary>
-    public static string UpdateLine(ProblemUpdate update) => InEnglish(() =>
+    public static string UpdateLine(ProblemUpdate update) => SavedText.InEnglish(() =>
     {
         var parts = new List<string>();
         if (update.Trend is { } trend)
@@ -82,10 +82,10 @@ public static class ProblemText
         return WithNote(text, update.Note);
     });
 
-    public static string ClosedLine(ProblemOutcome outcome) => InEnglish(() =>
+    public static string ClosedLine(ProblemOutcome outcome) => SavedText.InEnglish(() =>
         string.Format(CultureInfo.CurrentCulture, Strings.Pests.ClosedLine, LowerFirst(Outcome(outcome))));
 
-    public static string ReopenedLine => InEnglish(() => Strings.Pests.ReopenedLine);
+    public static string ReopenedLine => SavedText.InEnglish(() => Strings.Pests.ReopenedLine);
 
     /// <summary>"better", "the same", "worse", for reading a row of trends aloud.</summary>
     public static string TrendWord(ProblemTrend trend) => trend switch
@@ -154,18 +154,5 @@ public static class ProblemText
     private static string WithNote(string text, string? note) =>
         string.IsNullOrWhiteSpace(note) ? text : text + "\n" + note.Trim();
 
-    /// <summary>Makes the text with the English words, whatever language the app is in.</summary>
-    private static string InEnglish(Func<string> make)
-    {
-        var was = CultureInfo.CurrentUICulture;
-        CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-        try
-        {
-            return make();
-        }
-        finally
-        {
-            CultureInfo.CurrentUICulture = was;
-        }
-    }
+
 }

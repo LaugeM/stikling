@@ -32,7 +32,7 @@ public static class PlantChanges
             changes.Add($"What happened: {cause}");
 
         if ((after.LeftTo != before.LeftTo || after.LeftFor != before.LeftFor
-                || before.Status != after.Status) && after.DescribeDeparture() is { } departure)
+                || before.Status != after.Status) && after.DescribeDepartureForHistory() is { } departure)
             changes.Add(departure);
 
         ChangeText.AddLocation(changes, before.PlaceId, after.PlaceId, placeName);

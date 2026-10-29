@@ -375,6 +375,9 @@ public sealed class Plant : Entity
     /// Who a plant went to and what it went for, as one line: "Given to Anna · swapped for a Hoya carnosa"
     /// or "Sold to Anna for 150 kr". Only says what is filled in, and is null when nothing is.
     /// </summary>
+    /// <summary>DescribeDeparture in English, for the line saved into the plant's history.</summary>
+    public string? DescribeDepartureForHistory() => Stikling.Core.Text.SavedText.InEnglish(DescribeDeparture);
+
     public string? DescribeDeparture()
     {
         var to = LeftTo?.Trim();
