@@ -15,32 +15,31 @@
 @inject TimeProvider Time
 @inject AccountService Account
 
-<PageTitle>Backup and storage · Stikling</PageTitle>
+<PageTitle>@Strings.Account.BackupPageTitle</PageTitle>
 
-<a class="back-link" href="settings?section=data">Settings</a>
-<h1>Backup and storage</h1>
+<a class="back-link" href="settings?section=data">@Strings.Account.BackToSettings</a>
+<h1>@Strings.Account.BackupTitle</h1>
 
 <section class="settings-section">
-    <h2 class="section-label">Backup</h2>
+    <h2 class="section-label">@Strings.Account.BackupSection</h2>
     <p class="settings-hint">
-        @(signedIn ? "" : "Everything you add stays on this device. ")A backup is a ZIP file with your plants and photos in it,
-        which you can keep in cloud storage or move to another phone.
+        @(signedIn ? Strings.Account.BackupIntroSignedIn : Strings.Account.BackupIntroLocal)
     </p>
 
     <div class="settings-actions">
-        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ExportAsync">Save a backup</button>
-        <label class="btn btn-outline-primary @(busy ? "disabled" : null)" for="restore-file">Restore a backup</label>
+        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ExportAsync">@Strings.Account.BackupSave</button>
+        <label class="btn btn-outline-primary @(busy ? "disabled" : null)" for="restore-file">@Strings.Account.BackupRestore</label>
         <InputFile id="restore-file" class="visually-hidden" accept=".zip" OnChange="ChooseFileAsync" disabled="@busy" />
     </div>
 
     <p class="settings-hint">
         @if (lastBackup is { } date)
         {
-            <text>Last backup: @Labels.Date(date) (@Labels.DaysAgo(TodayDate.DayNumber - date.DayNumber)).</text>
+            <text>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupLastTaken, Labels.Date(date), Labels.DaysAgo(TodayDate.DayNumber - date.DayNumber))</text>
         }
         else
         {
-            <text>No backup taken on this device yet.</text>
+            <text>@Strings.Account.BackupNoneYet</text>
         }
     </p>
 
@@ -49,29 +48,25 @@
         <div class="confirm-card">
             <p>
                 <strong>@file.Name</strong><br />
-                Made @Labels.Date(DateOnly.FromDateTime(file.Data.ExportedAt.LocalDateTime)), holding
-                @Labels.Plants(file.Data.Counts.Plants), @Labels.Count(file.Data.Counts.Propagations, "propagation")
-                and @Labels.Count(file.Data.Counts.Photos, "photo"), along with their history, care, pots and rooms.
+                @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupMade, Labels.Date(DateOnly.FromDateTime(file.Data.ExportedAt.LocalDateTime)),
+                    Labels.Plants(file.Data.Counts.Plants),
+                    Plural.Of(file.Data.Counts.Propagations, Strings.Account.Propagation_One, Strings.Account.Propagation_Other),
+                    Plural.Of(file.Data.Counts.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other))
             </p>
             <p class="settings-hint">
-                Restoring adds what's missing here and brings back anything you've deleted since. Where the backup has a
-                newer version of something, it replaces the one here. Anything you've changed here since the backup stays.@if (hasData)
-                {
-                    <text> A backup of what's here now is saved to your downloads first, so anything that gets
-                    replaced can be brought back by restoring that one.</text>
-                }
+                @(hasData ? Strings.Account.BackupRestoreExplainSaved : Strings.Account.BackupRestoreExplain)
             </p>
             <div class="settings-actions">
-                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => RestoreAsync(saveFirst: true)">Restore</button>
-                <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => pending = null">Cancel</button>
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => RestoreAsync(saveFirst: true)">@Strings.Account.BackupRestoreButton</button>
+                <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => pending = null">@Strings.Common.Cancel</button>
                 @if (saveFailed)
                 {
-                    <button type="button" class="btn btn-outline-primary" @ref="fallbackButton" disabled="@busy" @onclick="() => RestoreAsync(saveFirst: false)">Restore without saving first</button>
+                    <button type="button" class="btn btn-outline-primary" @ref="fallbackButton" disabled="@busy" @onclick="() => RestoreAsync(saveFirst: false)">@Strings.Account.BackupRestoreWithoutSaving</button>
                 }
             </div>
             @if (saveFailed)
             {
-                <p class="settings-hint">Without that backup, anything a newer version in the file replaces can't be brought back.</p>
+                <p class="settings-hint">@Strings.Account.BackupWithoutThat</p>
             }
         </div>
     }
@@ -83,26 +78,25 @@
 </section>
 
 <section class="settings-section">
-    <h2 class="section-label">Your photos in folders</h2>
+    <h2 class="section-label">@Strings.Account.BackupPhotosSection</h2>
     <p class="settings-hint">
-        Every photo, with a folder for each plant, propagation and pot, named by when it was taken. For keeping or looking
-        through outside the app. To move your collection to another device, use a backup.
+        @Strings.Account.BackupPhotosIntro
     </p>
     @if (photoCount == 0)
     {
-        <p class="settings-hint">No photos yet.</p>
+        <p class="settings-hint">@Strings.Account.BackupNoPhotos</p>
     }
     <label class="form-check">
         <input type="checkbox" class="form-check-input" @bind="includeGone" disabled="@(busy || photoCount == 0)" />
-        <span class="form-check-label">Include plants that are gone and finished propagations</span>
+        <span class="form-check-label">@Strings.Account.BackupIncludeGone</span>
     </label>
     <label class="form-check">
         <input type="checkbox" class="form-check-input" @bind="includeReferences" disabled="@(busy || photoCount == 0)" />
-        <span class="form-check-label">Include reference photos, in a Reference folder of their own</span>
+        <span class="form-check-label">@Strings.Account.BackupIncludeReferences</span>
     </label>
     <div class="settings-actions">
         <button type="button" class="btn btn-outline-primary" disabled="@(busy || photoCount == 0)" @onclick="DownloadPhotosAsync">
-            @(gathering is { } g ? $"Gathering photos ({g.Done} of {g.Total})" : "Download photos")
+            @(gathering is { } g ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupGathering, g.Done, g.Total) : Strings.Account.BackupDownloadPhotos)
         </button>
     </div>
     @if (photoMessage is not null)
@@ -112,38 +106,37 @@
 </section>
 
 <section class="settings-section" data-tour="spreadsheet">
-    <h2 class="section-label">For a spreadsheet</h2>
-    <p class="settings-hint">A copy of your plants or propagations to open in Excel or Google Sheets, or a list of plants to bring in. A CSV isn't a backup: photos, history and care only come back from a backup.</p>
+    <h2 class="section-label">@Strings.Account.BackupSpreadsheetSection</h2>
+    <p class="settings-hint">@Strings.Account.BackupSpreadsheetIntro</p>
     <div class="settings-actions">
-        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPlantsCsvAsync">Plants as CSV</button>
-        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPropagationsCsvAsync">Propagations as CSV</button>
-        <a class="btn btn-outline-primary btn-sm" href="plants/import">Import plants</a>
+        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPlantsCsvAsync">@Strings.Account.BackupPlantsCsv</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ExportPropagationsCsvAsync">@Strings.Account.BackupPropagationsCsv</button>
+        <a class="btn btn-outline-primary btn-sm" href="plants/import">@Strings.Account.BackupImportPlants</a>
     </div>
 </section>
 
 <section class="settings-section">
-    <h2 class="section-label">Storage</h2>
+    <h2 class="section-label">@Strings.Account.BackupStorageSection</h2>
     @if (storage is { } estimate)
     {
         <p class="settings-hint">
-            Stikling is using @Labels.Bytes(estimate.Usage) on this device.
+            @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupUsing, Labels.Bytes(estimate.Usage))
         </p>
         @if (estimate.Persisted)
         {
-            <p class="settings-hint">The browser has been asked to keep your data and agreed. It won't be cleared when space runs low.</p>
+            <p class="settings-hint">@Strings.Account.BackupPersisted</p>
         }
         else
         {
             <p class="settings-hint">
-                The browser may clear your data if the device runs low on space. Installing Stikling to the home screen usually
-                settles this, and you can ask directly:
+                @Strings.Account.BackupNotPersisted
             </p>
-            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="RequestPersistenceAsync">Ask to keep my data</button>
+            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="RequestPersistenceAsync">@Strings.Account.BackupAskToKeep</button>
         }
     }
     else
     {
-        <p class="settings-hint">This browser doesn't say how much space is in use.</p>
+        <p class="settings-hint">@Strings.Account.BackupNoEstimate</p>
     }
 </section>
 
@@ -205,20 +198,21 @@
     private async Task ExportAsync()
     {
         busy = true;
-        message = "Packing your plants and photos…";
+        message = Strings.Account.BackupPacking;
         StateHasChanged();
 
         try
         {
             var counts = await Backup.ExportAsync();
             lastBackup = TodayDate;
-            message = $"Saved a backup with {Labels.Plants(counts.Plants)}, {Labels.Count(counts.Propagations, "propagation")} "
-                + $"and {Labels.Count(counts.Photos, "photo")}. Check your downloads.";
+            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupSaved, Labels.Plants(counts.Plants),
+                Plural.Of(counts.Propagations, Strings.Account.Propagation_One, Strings.Account.Propagation_Other),
+                Plural.Of(counts.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other));
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the backup failed");
-            message = "Couldn't save the backup. Check that the device has room, then try again.";
+            message = Strings.Account.BackupSaveFailed;
         }
 
         storage = await Db.EstimateAsync();
@@ -243,16 +237,16 @@
             });
             var summary = await Backup.DownloadPhotoFoldersAsync(new PhotoFolderOptions(includeGone, includeReferences), progress);
             photoMessage = summary.Added + summary.Skipped == 0
-                ? (includeGone && includeReferences ? "No photos to include." : "No photos to include. Tick the boxes above to include more.")
-                : $"Saved {Labels.Count(summary.Added, "photo")}. Check your downloads."
+                ? (includeGone && includeReferences ? Strings.Account.BackupNoPhotosToInclude : Strings.Account.BackupNoPhotosTick)
+                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupPhotosSaved, Plural.Of(summary.Added, Strings.Account.Photo_One, Strings.Account.Photo_Other))
                 + (summary.Skipped > 0
-                    ? $" {Labels.Count(summary.Skipped, "photo")} couldn't be found on this device and {(summary.Skipped == 1 ? "was" : "were")} left out."
+                    ? " " + Plural.Of(summary.Skipped, Strings.Account.BackupPhotosMissing_One, Strings.Account.BackupPhotosMissing_Other)
                     : "");
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Downloading the photos failed");
-            photoMessage = "Couldn't download the photos. Check that the device has room, then try again.";
+            photoMessage = Strings.Account.BackupPhotosFailed;
         }
 
         busy = false;
@@ -262,7 +256,7 @@
     private async Task ChooseFileAsync(InputFileChangeEventArgs e)
     {
         busy = true;
-        message = "Reading the backup…";
+        message = Strings.Account.BackupReading;
         pending = null;
         saveFailed = false;
         StateHasChanged();
@@ -283,7 +277,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Reading the backup file failed");
-            message = "Couldn't read that file. It may not be a Stikling backup, or it may be damaged.";
+            message = Strings.Account.BackupReadFailed;
         }
 
         busy = false;
@@ -299,7 +293,7 @@
 
         if (saveFirst)
         {
-            message = "Saving what's here first…";
+            message = Strings.Account.BackupSavingFirst;
             StateHasChanged();
 
             try
@@ -314,7 +308,7 @@
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Saving a backup before restoring failed");
-                message = "Couldn't save a backup of what's here, so nothing was restored.";
+                message = Strings.Account.BackupSaveFirstFailed;
                 saveFailed = true;
                 focusFallback = true;
                 busy = false;
@@ -322,7 +316,7 @@
             }
         }
 
-        message = "Restoring…";
+        message = Strings.Account.BackupRestoring;
         StateHasChanged();
 
         try
@@ -336,19 +330,21 @@
             message = summary switch
             {
                 { ChangedRecords: true } =>
-                    $"Restored {Labels.Count(summary.Added, "new item")} and {summary.Updated} updated, including {Labels.Count(summary.Photos, "photo")}."
-                    + (summary.BroughtBack > 0 ? $" {Labels.Count(summary.BroughtBack, "item")} deleted here came back." : "")
-                    + (summary.Kept > 0 ? $" {Labels.Count(summary.Kept, "item")} here {(summary.Kept == 1 ? "was" : "were")} already up to date." : ""),
-                { Photos: > 0 } => $"Put back the pictures for {Labels.Count(summary.Photos, "photo")} that had lost them. Everything else was already here.",
-                _ => "Everything in that backup was already here."
+                    string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupRestored,
+                        Plural.Of(summary.Added, Strings.Account.NewItem_One, Strings.Account.NewItem_Other), summary.Updated,
+                        Plural.Of(summary.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other))
+                    + (summary.BroughtBack > 0 ? " " + Plural.Of(summary.BroughtBack, Strings.Account.BackupBroughtBack_One, Strings.Account.BackupBroughtBack_Other) : "")
+                    + (summary.Kept > 0 ? " " + Plural.Of(summary.Kept, Strings.Account.BackupUpToDate_One, Strings.Account.BackupUpToDate_Other) : ""),
+                { Photos: > 0 } => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupPicturesBack, Plural.Of(summary.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other)),
+                _ => Strings.Account.BackupAlreadyHere
             };
             if (savedAs is not null)
-                message += $" What was here before is saved as {savedAs}. Check your downloads.";
+                message += " " + string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupSavedAs, savedAs);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Restoring the backup failed");
-            message = "Couldn't finish restoring that backup. What it did restore is kept, and restoring it again picks up the rest.";
+            message = Strings.Account.BackupRestoreFailed;
         }
 
         await file.Zip.DisposeAsync();
@@ -363,8 +359,8 @@
         busy = true;
         var granted = await Db.RequestPersistenceAsync();
         message = granted
-            ? "The browser agreed to keep your data."
-            : "The browser said no for now. Installing Stikling to the home screen usually changes that.";
+            ? Strings.Account.BackupPersistGranted
+            : Strings.Account.BackupPersistDenied;
         storage = await Db.EstimateAsync();
         busy = false;
     }

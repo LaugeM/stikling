@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -117,7 +118,7 @@ public sealed class Pot : Entity
     {
         get
         {
-            var name = string.IsNullOrWhiteSpace(Name) ? "Pot" : Name.Trim();
+            var name = string.IsNullOrWhiteSpace(Name) ? Strings.Supplies.PotDefaultName : Name.Trim();
             return TopCm is { } top ? $"{name}, {Size(top)} cm" : name;
         }
     }
@@ -133,17 +134,17 @@ public sealed class Pot : Entity
 
         if (string.IsNullOrWhiteSpace(Name))
             errors.Add(ForPropagation
-                ? "Give the container a name, like \"Clear box with lid\"."
-                : "Give the pot a name, like \"Clear nursery pot\".");
+                ? Strings.Supplies.PotNeedsNameContainer
+                : Strings.Supplies.PotNeedsNamePot);
 
         if (Owned < 1)
-            errors.Add("You have to have at least one of it.");
+            errors.Add(Strings.Supplies.PotNeedsOne);
 
         if (new[] { TopCm, BottomCm, HeightCm, RimMm }.Any(m => m <= 0))
-            errors.Add("A measurement has to be more than 0.");
+            errors.Add(Strings.Supplies.PotMeasurement);
 
         if (BottomCm > TopCm)
-            errors.Add("The bottom can't be wider than the top.");
+            errors.Add(Strings.Supplies.PotBottomWider);
 
         return errors;
     }

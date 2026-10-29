@@ -7,46 +7,47 @@
 @inject ITreatmentPlanRepository PlanRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject IPlantRepository PlantRepository
+@using System.Globalization
 @inject ProblemService ProblemService
 @inject SellerService SellerService
 
-<PageTitle>Supplies · Stikling</PageTitle>
+<PageTitle>@Strings.Supplies.SuppliesPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
 
-<h1>Supplies</h1>
+<h1>@Strings.Supplies.SuppliesTitle</h1>
 
 <p class="settings-hint">
-    The sellers your plants came from, and the pots, mixes and products you use, so a plant or a treatment can point at them instead of you typing them again.
+    @Strings.Supplies.SuppliesIntro
 </p>
 
 <div class="settings-rows">
-    <SettingsRow Href="sellers" Title="Sellers" Detail="@SellersDetail">
+    <SettingsRow Href="sellers" Title="@Strings.Supplies.SuppliesSellers" Detail="@SellersDetail">
         <Icon><path d="M4 9.5 5.5 4h13L20 9.5" /><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0" /><path d="M5.5 12.5V20h13v-7.5" /></Icon>
     </SettingsRow>
-    <SettingsRow Href="pots" Title="Pots" Detail="@PotSummary">
+    <SettingsRow Href="pots" Title="@Strings.Supplies.SuppliesPots" Detail="@PotSummary">
         <Icon><path d="M4.5 4.5h15v3.5h-15Z" /><path d="M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8" /></Icon>
     </SettingsRow>
-    <SettingsRow Href="soil-mixes" Title="Soil mixes" Detail="@MixSummary">
+    <SettingsRow Href="soil-mixes" Title="@Strings.Supplies.SuppliesSoilMixes" Detail="@MixSummary">
         <Icon><path d="M7 3.5h10l1.5 3.5v12.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5V7Z" /><path d="M5.5 7h13" /><path d="M9 13.5h6M9 17h4" /></Icon>
     </SettingsRow>
-    <SettingsRow Href="products" Title="Products" Detail="@ProductSummary">
+    <SettingsRow Href="products" Title="@Strings.Supplies.SuppliesProducts" Detail="@ProductSummary">
         <Icon><path d="M10 3h4v3l1.5 2.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1V8.5L10 6Z" /><path d="M8.5 13h7" /></Icon>
     </SettingsRow>
-    <SettingsRow Href="feeds" Title="Feeds" Detail="@FeedSummary">
+    <SettingsRow Href="feeds" Title="@Strings.Supplies.SuppliesFeeds" Detail="@FeedSummary">
         <Icon><path d="M4.5 10h11v8.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1Z" /><path d="M8 10V8.5a2.25 2.25 0 0 1 4.5 0V10" /><path d="M15.5 13.5 21 9.5" /><path d="M4.5 12.5H3" /></Icon>
     </SettingsRow>
-    <SettingsRow Href="treatment-recipes" Title="Treatment recipes" Detail="@RecipeSummary">
+    <SettingsRow Href="treatment-recipes" Title="@Strings.Supplies.SuppliesRecipes" Detail="@RecipeSummary">
         <Icon><path d="M8.5 21h6a1 1 0 0 0 1-1v-7l-2-2h-4l-2 2v7a1 1 0 0 0 1 1Z" /><path d="M10.5 11V8h5.5l2.5-1.5" /><path d="M13 8V5.5" /><path d="M20.5 9.5H22M20 12h1.5" /></Icon>
     </SettingsRow>
-    <SettingsRow Href="treatment-plans" Title="Treatment plans" Detail="@PlanSummary">
+    <SettingsRow Href="treatment-plans" Title="@Strings.Supplies.SuppliesPlans" Detail="@PlanSummary">
         <Icon><circle cx="6" cy="6" r="2" /><circle cx="6" cy="12" r="2" /><circle cx="6" cy="18" r="2" /><path d="M11 6h9M11 12h9M11 18h6" /></Icon>
     </SettingsRow>
 </div>
 
 @* Pests has its own tab only while a case or a problem is open, so this is the way in the rest of the time *@
-<h2 class="section-label mt-4">Pests and problems</h2>
+<h2 class="section-label mt-4">@Strings.Supplies.SuppliesPestsHeading</h2>
 <div class="settings-rows">
-    <SettingsRow Href="pests" Title="Pest cases and problems" Detail="@PestSummary">
+    <SettingsRow Href="pests" Title="@Strings.Supplies.SuppliesPestsRow" Detail="@PestSummary">
         <Icon><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></Icon>
     </SettingsRow>
 </div>
@@ -80,7 +81,7 @@
     }
 
     private string SellersDetail =>
-        sellers == 0 ? "Where your plants came from" : Labels.Count(sellers, "seller");
+        sellers == 0 ? Strings.Supplies.SellersNone : Plural.Of(sellers, Strings.Supplies.Seller_One, Strings.Supplies.Seller_Other);
 
     /// <summary>"6 pots, 2 free", or what pots are when there are none.</summary>
     private string PotSummary
@@ -90,13 +91,14 @@
             var plain = pots.Where(p => p.Pot.Kind != PotKind.Propagation).ToList();
             var boxes = pots.Where(p => p.Pot.Kind == PotKind.Propagation).Sum(p => p.Here);
             if (plain.Count == 0 && boxes == 0)
-                return "The pots you own, nursery or decorative";
+                return Strings.Supplies.PotsNone;
 
             var parts = new List<string>();
             if (plain.Count > 0)
-                parts.Add($"{Labels.Count(plain.Sum(p => p.Here), "pot")}, {plain.Sum(p => p.Free)} free");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PotsFree,
+                    Plural.Of(plain.Sum(p => p.Here), Strings.Supplies.Pot_One, Strings.Supplies.Pot_Other), plain.Sum(p => p.Free)));
             if (boxes > 0)
-                parts.Add(Labels.Count(boxes, "container"));
+                parts.Add(Plural.Of(boxes, Strings.Supplies.Container_One, Strings.Supplies.Container_Other));
             return string.Join(", ", parts);
         }
     }
@@ -104,32 +106,34 @@
     /// <summary>"3 mixes, 1 no longer mixed", or what mixes are when there are none.</summary>
     private string MixSummary => mixes.Count switch
     {
-        0 => "Your own mixes and what goes in them",
+        0 => Strings.Supplies.MixesNone,
         _ when mixes.Any(m => m.Mix.IsRetired) =>
-            $"{Labels.Count(mixes.Count, "mix", "mixes")}, {mixes.Count(m => m.Mix.IsRetired)} no longer mixed",
-        var count => Labels.Count(count, "mix", "mixes")
+            string.Format(CultureInfo.CurrentCulture, Strings.Supplies.MixesRetired,
+                Plural.Of(mixes.Count, Strings.Supplies.Mix_One, Strings.Supplies.Mix_Other), mixes.Count(m => m.Mix.IsRetired)),
+        var count => Plural.Of(count, Strings.Supplies.Mix_One, Strings.Supplies.Mix_Other)
     };
 
     private string ProductSummary =>
-        products.Count == 0 ? "Fertilisers, sprays and the rest you buy" : Labels.Count(products.Count, "product");
+        products.Count == 0 ? Strings.Supplies.ProductsNone : Plural.Of(products.Count, Strings.Supplies.Product_One, Strings.Supplies.Product_Other);
 
-    private string FeedSummary => feeds == 0 ? "How you dilute a product to water with" : Labels.Count(feeds, "feed");
+    private string FeedSummary => feeds == 0 ? Strings.Supplies.FeedsNone : Plural.Of(feeds, Strings.Supplies.Feed_One, Strings.Supplies.Feed_Other);
 
     /// <summary>"2 open", or what a case is for when none are open, and "1 problem" for the open problems.</summary>
     private string PestSummary => pestCases.Count(c => c.IsOpen) switch
     {
-        0 when openProblems > 0 && pestCases.Count > 0 => $"None open, {pestCases.Count} resolved{ProblemsPart}",
-        0 when openProblems > 0 => $"No pest cases{ProblemsPart}",
-        0 when pestCases.Count > 0 => $"None open, {pestCases.Count} resolved",
-        0 => "Open one when you find pests, to keep track of the treatments",
-        var open => $"{open} open{ProblemsPart}"
+        0 when openProblems > 0 && pestCases.Count > 0 => string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PestsNoneOpenResolved, pestCases.Count, ProblemsPart),
+        0 when openProblems > 0 => string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PestsNoCases, ProblemsPart),
+        0 when pestCases.Count > 0 => string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PestsNoneOpenResolved, pestCases.Count, ""),
+        0 => Strings.Supplies.PestsNeverOpen,
+        var open => string.Format(CultureInfo.CurrentCulture, open == 1 ? Strings.Supplies.PestsOpen_One : Strings.Supplies.PestsOpen_Other, open, ProblemsPart)
     };
 
-    private string ProblemsPart => openProblems == 0 ? "" : $", {Labels.Count(openProblems, "problem")}";
+    private string ProblemsPart => openProblems == 0 ? "" : string.Format(CultureInfo.CurrentCulture, Strings.Supplies.ProblemsPart,
+        Plural.Of(openProblems, Strings.Supplies.Problem_One, Strings.Supplies.Problem_Other));
 
     private string PlanSummary =>
-        treatmentPlans == 0 ? "Steps to follow on a pest case" : Labels.Count(treatmentPlans, "plan");
+        treatmentPlans == 0 ? Strings.Supplies.PlansNone : Plural.Of(treatmentPlans, Strings.Supplies.Plan_One, Strings.Supplies.Plan_Other);
 
     private string RecipeSummary =>
-        recipes == 0 ? "Sprays you mix the same way each time" : Labels.Count(recipes, "recipe");
+        recipes == 0 ? Strings.Supplies.RecipesNone : Plural.Of(recipes, Strings.Supplies.Recipe_One, Strings.Supplies.Recipe_Other);
 }

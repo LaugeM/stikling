@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -157,13 +158,13 @@ public sealed class SoilMix : Entity
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add("Give the mix a name.");
+            errors.Add(Strings.Supplies.MixNeedsName);
 
         if (!Named().Any())
-            errors.Add("Add at least one ingredient.");
+            errors.Add(Strings.Supplies.MixNeedsIngredient);
 
         if (Ingredients.Any(i => i.Amount < 0))
-            errors.Add("An amount can't be less than 0.");
+            errors.Add(Strings.Supplies.MixAmountNegative);
 
         // Percentages that don't reach 100 are said out loud, not refused: a mix you only half
         // remember is still worth writing down.

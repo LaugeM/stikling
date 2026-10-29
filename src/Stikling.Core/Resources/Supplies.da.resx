@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FeedOrderSilica" xml:space="preserve">
+    <value>Silica går som regel i først og røres i før alt andet.</value>
+  </data>
+  <data name="FeedOrderPh" xml:space="preserve">
+    <value>pH op eller ned går som regel i sidst, fordi alt andet ændrer pH.</value>
+  </data>
+  <data name="FeedNeedsName" xml:space="preserve">
+    <value>Giv gødningen et navn.</value>
+  </data>
+  <data name="FeedNeedsProduct" xml:space="preserve">
+    <value>Tilføj mindst et produkt.</value>
+  </data>
+  <data name="FeedProductNeedsName" xml:space="preserve">
+    <value>Et produkt i gødningen skal have et navn.</value>
+  </data>
+  <data name="DoseNegative" xml:space="preserve">
+    <value>En dosis kan ikke være under 0.</value>
+  </data>
+  <data name="NoWater" xml:space="preserve">
+    <value>Vandet, en dosis er til, skal være mere end 0.</value>
+  </data>
+  <data name="ProductNeedsName" xml:space="preserve">
+    <value>Giv produktet et navn.</value>
+  </data>
+  <data name="NutrientRange" xml:space="preserve">
+    <value>Et næringsstof kan ikke være under 0 eller over 100 %.</value>
+  </data>
+  <data name="NutrientOnce" xml:space="preserve">
+    <value>Hvert næringsstof kan kun stå en gang.</value>
+  </data>
+  <data name="MixNeedsName" xml:space="preserve">
+    <value>Giv blandingen et navn.</value>
+  </data>
+  <data name="MixNeedsIngredient" xml:space="preserve">
+    <value>Tilføj mindst en ingrediens.</value>
+  </data>
+  <data name="MixAmountNegative" xml:space="preserve">
+    <value>En mængde kan ikke være under 0.</value>
+  </data>
+  <data name="PotDefaultName" xml:space="preserve">
+    <value>Potte</value>
+  </data>
+  <data name="PotNeedsNameContainer" xml:space="preserve">
+    <value>Giv beholderen et navn, fx "Klar boks med låg".</value>
+  </data>
+  <data name="PotNeedsNamePot" xml:space="preserve">
+    <value>Giv potten et navn, fx "Klar planteskolepotte".</value>
+  </data>
+  <data name="PotNeedsOne" xml:space="preserve">
+    <value>Du skal have mindst en af den.</value>
+  </data>
+  <data name="PotMeasurement" xml:space="preserve">
+    <value>Et mål skal være over 0.</value>
+  </data>
+  <data name="PotBottomWider" xml:space="preserve">
+    <value>Bunden kan ikke være bredere end toppen.</value>
+  </data>
+  <data name="SellerNeedsName" xml:space="preserve">
+    <value>Giv sælgeren et navn.</value>
+  </data>
+  <data name="SellerGone" xml:space="preserve">
+    <value>Den sælger findes ikke mere.</value>
+  </data>
+  <data name="SellerPickAnother" xml:space="preserve">
+    <value>Vælg en anden sælger at slå sammen med.</value>
+  </data>
+  <data name="PotSizeFromTo" xml:space="preserve">
+    <value>Fra {0} cm til {1} cm over toppen.</value>
+  </data>
+  <data name="PotSizeWarn" xml:space="preserve">
+    <value>Det er meget større, så jorden bliver våd i længere tid. Vand mindre, til rødderne fylder den.</value>
+  </data>
+  <data name="DoseRate" xml:space="preserve">
+    <value>{0} pr. {1} {2}</value>
+  </data>
+  <data name="DropsSymbol" xml:space="preserve">
+    <value>dråber</value>
+  </data>
+  <data name="DoseDrops_One" xml:space="preserve">
+    <value>{0} dråbe</value>
+  </data>
+  <data name="DoseDrops_Other" xml:space="preserve">
+    <value>{0} dråber</value>
+  </data>
+  <data name="IngredientPottingSoil" xml:space="preserve">
+    <value>Pottemuld</value>
+  </data>
+  <data name="IngredientPerlite" xml:space="preserve">
+    <value>Perlit</value>
+  </data>
+  <data name="IngredientLeca" xml:space="preserve">
+    <value>LECA</value>
+  </data>
+  <data name="IngredientBark" xml:space="preserve">
+    <value>Bark</value>
+  </data>
+  <data name="IngredientPumice" xml:space="preserve">
+    <value>Pimpsten</value>
+  </data>
+  <data name="IngredientCocoCoir" xml:space="preserve">
+    <value>Kokosfiber</value>
+  </data>
+  <data name="IngredientSphagnum" xml:space="preserve">
+    <value>Sphagnum</value>
+  </data>
+  <data name="IngredientWormCastings" xml:space="preserve">
+    <value>Ormekompost</value>
+  </data>
+  <data name="IngredientSand" xml:space="preserve">
+    <value>Sand</value>
+  </data>
+  <data name="IngredientCharcoal" xml:space="preserve">
+    <value>Trækul</value>
+  </data>
+</root>

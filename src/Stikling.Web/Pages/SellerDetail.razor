@@ -5,18 +5,18 @@
 @inject IPestCaseRepository PestCaseRepository
 @inject NavigationManager Navigation
 
-<PageTitle>@(seller?.Name ?? "Seller") · Stikling</PageTitle>
+<PageTitle>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.SellerPageTitle, seller?.Name ?? Strings.Supplies.SellerFallbackName)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="sellers">Sellers</a>
+<a class="back-link" href="sellers">@Strings.Supplies.SellerBack</a>
 
 @if (loading)
 {
-    <p class="text-body-secondary">Loading…</p>
+    <p class="text-body-secondary">@Strings.Supplies.Loading</p>
 }
 else if (seller is null || summary is null)
 {
-    <p class="text-body-secondary">That seller doesn't exist.</p>
+    <p class="text-body-secondary">@Strings.Supplies.SellerMissing</p>
 }
 else
 {
@@ -34,28 +34,28 @@ else
     }
 
     <section class="settings-section">
-        <h2>How they have done</h2>
+        <h2>@Strings.Supplies.SellerHowTheyDid</h2>
 
         @if (summary.Total == 0)
         {
-            <p class="text-body-secondary">Nothing comes from this seller yet. Pick it under Where from on a plant.</p>
+            <p class="text-body-secondary">@Strings.Supplies.SellerNothingYet</p>
         }
         else
         {
             <dl class="detail-list">
-                <dt>Plants</dt>
+                <dt>@Strings.Supplies.SellerPlants</dt>
                 <dd>@PlantsText</dd>
 
                 @if (summary.Propagations.Count > 0)
                 {
-                    <dt>Propagations</dt>
-                    <dd>@Labels.Count(summary.Propagations.Count, "propagation")</dd>
+                    <dt>@Strings.Supplies.SellerPropagations</dt>
+                    <dd>@Plural.Of(summary.Propagations.Count, Strings.Supplies.Propagation_One, Strings.Supplies.Propagation_Other)</dd>
                 }
 
-                <dt>Pests early on</dt>
+                <dt>@Strings.Supplies.SellerPestsEarly</dt>
                 <dd>@PestsText</dd>
 
-                <dt>How they arrived</dt>
+                <dt>@Strings.Supplies.SellerHowArrived</dt>
                 <dd>
                     @ArrivalText
                     @if (summary.Problems.Count > 0)
@@ -66,14 +66,14 @@ else
 
                 @if (summary.PaidCount > 0)
                 {
-                    <dt>Paid</dt>
+                    <dt>@Strings.Supplies.SellerPaid</dt>
                     <dd>@PaidText</dd>
                 }
             </dl>
 
             @if (summary.Plants.Count > 0)
             {
-                <h3 class="seller-list-title">Plants</h3>
+                <h3 class="seller-list-title">@Strings.Supplies.SellerPlants</h3>
                 <ul class="seller-things">
                     @foreach (var plant in summary.Plants)
                     {
@@ -89,7 +89,7 @@ else
 
             @if (summary.Propagations.Count > 0)
             {
-                <h3 class="seller-list-title">Propagations</h3>
+                <h3 class="seller-list-title">@Strings.Supplies.SellerPropagations</h3>
                 <ul class="seller-things">
                     @foreach (var propagation in summary.Propagations)
                     {
@@ -106,16 +106,16 @@ else
     </section>
 
     <section class="settings-section">
-        <h2>About this seller</h2>
+        <h2>@Strings.Supplies.SellerAbout</h2>
 
         <div class="mb-3">
-            <label class="form-label" for="seller-name">Name</label>
+            <label class="form-label" for="seller-name">@Strings.Supplies.Name</label>
             <input id="seller-name" class="form-control" autocomplete="off" @bind="name" @bind:event="oninput" />
-            <div class="form-text">Renaming it also changes the name written on every plant and propagation from it.</div>
+            <div class="form-text">@Strings.Supplies.SellerRenameHint</div>
         </div>
 
         <div class="mb-3">
-            <div class="form-label" id="seller-kind-label">What it is</div>
+            <div class="form-label" id="seller-kind-label">@Strings.Supplies.WhatItIs</div>
             <div class="chip-row" role="group" aria-labelledby="seller-kind-label">
                 @foreach (var option in Enum.GetValues<SellerKind>())
                 {
@@ -127,47 +127,46 @@ else
         </div>
 
         <div class="mb-3">
-            <label class="form-label" for="seller-notes">Notes</label>
+            <label class="form-label" for="seller-notes">@Strings.Supplies.Notes</label>
             <textarea id="seller-notes" class="form-control" rows="2" @bind="notes"></textarea>
         </div>
 
         <div class="form-actions">
-            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">Save changes</button>
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">@Strings.Supplies.SaveChanges</button>
         </div>
     </section>
 
     <section class="settings-section">
-        <h2>Tidy up</h2>
+        <h2>@Strings.Supplies.SellerTidy</h2>
 
         @if (mode == Mode.Merging)
         {
             <div class="mb-3">
-                <label class="form-label" for="seller-merge">Merge into</label>
+                <label class="form-label" for="seller-merge">@Strings.Supplies.SellerMergeInto</label>
                 <select id="seller-merge" class="form-select" @bind="mergeTarget">
-                    <option value="">Pick a seller</option>
+                    <option value="">@Strings.Supplies.SellerPick</option>
                     @foreach (var other in others)
                     {
                         <option value="@other.Id">@other.Name</option>
                     }
                 </select>
                 <div class="form-text">
-                    Everything from @seller.Name moves to the one you pick, and @seller.Name is taken off the list.
+                    @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.SellerMergeHint, seller.Name)
                 </div>
             </div>
             <div class="care-actions">
-                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || mergeTarget is null)" @onclick="MergeAsync">Merge</button>
-                <button type="button" class="btn btn-link btn-sm" @onclick="() => mode = Mode.None">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || mergeTarget is null)" @onclick="MergeAsync">@Strings.Supplies.SellerMerge</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => mode = Mode.None">@Strings.Common.Cancel</button>
             </div>
         }
         else if (mode == Mode.Deleting)
         {
             <p>
-                Delete @seller.Name? Plants and propagations from it keep the name written on them,
-                but no longer link to a seller.
+                @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.SellerDeleteConfirm, seller.Name)
             </p>
             <div class="care-actions">
-                <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">Delete</button>
-                <button type="button" class="btn btn-link btn-sm" @onclick="() => mode = Mode.None">Cancel</button>
+                <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => mode = Mode.None">@Strings.Common.Cancel</button>
             </div>
         }
         else
@@ -175,9 +174,9 @@ else
             <div class="care-actions">
                 @if (others.Count > 0)
                 {
-                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="StartMerge">Merge into…</button>
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="StartMerge">@Strings.Supplies.SellerMergeLink</button>
                 }
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => mode = Mode.Deleting">Delete</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => mode = Mode.Deleting">@Strings.Common.Delete</button>
             </div>
         }
     </section>
@@ -306,6 +305,8 @@ else
         }
     }
 
+    private static System.Globalization.CultureInfo culture => System.Globalization.CultureInfo.CurrentCulture;
+
     private static string Money(decimal amount) =>
         amount.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 
@@ -314,36 +315,38 @@ else
         get
         {
             if (summary!.Plants.Count == 0)
-                return "None";
+                return Strings.Supplies.SellerNone;
             var parts = new List<string>();
-            if (summary.StillHere > 0) parts.Add($"{summary.StillHere} still here");
-            if (summary.Died > 0) parts.Add($"{summary.Died} died");
-            if (summary.GivenAway > 0) parts.Add($"{summary.GivenAway} given away");
-            if (summary.Sold > 0) parts.Add($"{summary.Sold} sold");
-            return $"{Labels.Count(summary.Plants.Count, "plant")}: {string.Join(", ", parts)}";
+            if (summary.StillHere > 0) parts.Add(string.Format(culture, Strings.Supplies.SellerStillHere, summary.StillHere));
+            if (summary.Died > 0) parts.Add(string.Format(culture, Strings.Supplies.SellerDied, summary.Died));
+            if (summary.GivenAway > 0) parts.Add(string.Format(culture, Strings.Supplies.SellerGivenAway, summary.GivenAway));
+            if (summary.Sold > 0) parts.Add(string.Format(culture, Strings.Supplies.SellerSold, summary.Sold));
+            return string.Format(culture, Strings.Supplies.SellerPlantsBreakdown, Labels.Plants(summary.Plants.Count), string.Join(", ", parts));
         }
     }
 
     private string PestsText => summary!.PestCases == 0
-        ? $"No pest cases in the first {SellerSummary.PestWindowDays} days"
-        : $"{Labels.Count(summary.PestCases, "pest case")} in the first {SellerSummary.PestWindowDays} days, covering {Labels.Count(summary.PlantsWithPests, "plant")}";
+        ? string.Format(culture, Strings.Supplies.SellerNoPestCases, SellerSummary.PestWindowDays)
+        : string.Format(culture, Strings.Supplies.SellerPestCases,
+            Plural.Of(summary.PestCases, Strings.Supplies.PestCase_One, Strings.Supplies.PestCase_Other),
+            SellerSummary.PestWindowDays, Labels.Plants(summary.PlantsWithPests));
 
     private string ArrivalText
     {
         get
         {
             if (!summary!.HasArrivals)
-                return "Not rated";
+                return Strings.Supplies.SellerNotRated;
             var parts = new List<string>();
-            if (summary.ArrivedGood > 0) parts.Add($"{summary.ArrivedGood} good");
-            if (summary.ArrivedOk > 0) parts.Add($"{summary.ArrivedOk} OK");
-            if (summary.ArrivedPoor > 0) parts.Add($"{summary.ArrivedPoor} poor");
+            if (summary.ArrivedGood > 0) parts.Add(string.Format(culture, Strings.Supplies.SellerArrivedGood, summary.ArrivedGood));
+            if (summary.ArrivedOk > 0) parts.Add(string.Format(culture, Strings.Supplies.SellerArrivedOk, summary.ArrivedOk));
+            if (summary.ArrivedPoor > 0) parts.Add(string.Format(culture, Strings.Supplies.SellerArrivedPoor, summary.ArrivedPoor));
             return string.Join(", ", parts);
         }
     }
 
     private string PaidText =>
-        $"{Money(summary!.PaidTotal)} in total, {Money(summary.PaidAverage ?? 0)} on average ({Labels.Count(summary.PaidCount, "plant")} with a price)";
+        string.Format(culture, Strings.Supplies.SellerPaidText, Money(summary!.PaidTotal), Money(summary.PaidAverage ?? 0), Labels.Plants(summary.PaidCount));
 
     private static string ThingNote(Plant plant) =>
         string.Join(" · ", new[]

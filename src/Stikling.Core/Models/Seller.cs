@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
 
@@ -52,5 +53,5 @@ public sealed class Seller : Entity
     public Guid? MergedIntoId { get; set; }
 
     public IReadOnlyList<string> Validate() =>
-        string.IsNullOrWhiteSpace(Name) ? ["Give the seller a name."] : [];
+        string.IsNullOrWhiteSpace(Name) ? [Strings.Supplies.SellerNeedsName] : [];
 }

@@ -1,3 +1,4 @@
+using Strings = Stikling.Web.Resources;
 using System.Net;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
@@ -310,7 +311,7 @@ public sealed class SyncRunner(
         {
             // Nothing else may stop the app, since nothing waits for a sync that runs by itself
             logger.LogError(e, "Syncing failed");
-            Problem = $"Something went wrong while syncing: {e.Message}";
+            Problem = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.SyncSomethingWrong, e.Message);
             if (LastSynced is null)
                 firstSyncFailed = true;
         }
@@ -373,24 +374,24 @@ public sealed class SyncRunner(
         catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Gone)
         {
             // Deleted on another device, which ends this sign-in within a minute or so
-            Problem = "This account has been deleted. Sign out to carry on without it.";
+            Problem = Strings.Account.SyncAccountDeleted;
         }
         catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
         {
             // Clerk had no session to give a token for, or the API didn't accept it
-            Problem = "Your sign-in has run out. Sign out and in again to carry on syncing.";
+            Problem = Strings.Account.SyncSignInRanOut;
         }
         catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.TooManyRequests)
         {
             // More than the server takes from one account in a short time. The next sync picks up where this one stopped
-            Problem = "This account has sent a lot to the Stikling server in a short time. Syncing carries on in a few minutes.";
+            Problem = Strings.Account.SyncTooMany;
         }
         catch (Exception e) when (e is AccountUnavailableException or HttpRequestException or TaskCanceledException)
         {
             // Not being able to reach the server is expected. The server answering with an error is not.
             if (e is HttpRequestException { StatusCode: >= HttpStatusCode.InternalServerError })
                 logger.LogError(e, "The server answered a sync with an error");
-            Problem = "The Stikling server can't be reached right now. Your changes are kept here and sent once it can be.";
+            Problem = Strings.Account.SyncUnreachable;
         }
     }
 

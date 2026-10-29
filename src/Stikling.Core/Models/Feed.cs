@@ -1,3 +1,5 @@
+using Strings = Stikling.Core.Resources;
+
 namespace Stikling.Core.Models;
 
 /// <summary>
@@ -67,11 +69,11 @@ public sealed class Feed : Entity
 
         var lastSilica = order.LastIndexOf(ProductKind.Silica);
         if (lastSilica >= 0 && order.Take(lastSilica).Any(kind => kind != ProductKind.Silica))
-            return "Silica usually goes in first and gets stirred in before anything else.";
+            return Strings.Supplies.FeedOrderSilica;
 
         var firstPh = order.IndexOf(ProductKind.Ph);
         if (firstPh >= 0 && order.Skip(firstPh).Any(kind => kind != ProductKind.Ph))
-            return "pH up or down usually goes in last, because everything else shifts the pH.";
+            return Strings.Supplies.FeedOrderPh;
 
         return null;
     }
@@ -81,16 +83,16 @@ public sealed class Feed : Entity
         var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(Name))
-            errors.Add("Give the feed a name.");
+            errors.Add(Strings.Supplies.FeedNeedsName);
 
         if (Products.Count == 0)
-            errors.Add("Add at least one product.");
+            errors.Add(Strings.Supplies.FeedNeedsProduct);
 
         if (Products.Any(p => string.IsNullOrWhiteSpace(p.Name)))
-            errors.Add("A product in the feed needs a name.");
+            errors.Add(Strings.Supplies.FeedProductNeedsName);
 
         if (Products.Any(p => p.Amount < 0))
-            errors.Add("A dose can't be less than 0.");
+            errors.Add(Strings.Supplies.DoseNegative);
 
         if (Products.Any(p => p.Per <= 0))
             errors.Add(Models.Doses.NoWater);
