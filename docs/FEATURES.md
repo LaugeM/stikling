@@ -375,7 +375,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | Backup reminder ("last backup 30 days ago") | 2 | S | M5 |
 | ✅ | Rooms and tags page in Settings: rename a room or a spot everywhere at once, and merge two names for the same room | 2 | M | v1.x |
 | ✅ | **Settings behind a gear** at the top, as a short list: the account, the theme and photo reminder, then pages for rooms and tags, backup and storage, and the about pages. The last tab is **Supplies**, with the pots, soil mixes, products, feeds and treatment recipes, each saying what it holds or what it's for | 2 | M | v2 |
-| ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version | 1 | S | M5 |
+| ✅ | **"New version available" banner** with a Reload button, so the installed app never stays stuck on an old version. Reload waits until the new version has taken over, which Firefox only allows once the old one has no requests in progress, and the service worker handles only the app's own requests so API, Clerk and Sentry calls don't hold it up | 1 | S | M5 |
 | ✅ | "What's new" page and app version in Settings. The deploy sets the version to the publish date and the commit, and the page shows both. Entries are written by hand in plain language for the people using the app, grouped by month, not generated from commit or pull request titles | 5 | S | v1.x |
 | ✅ | A link to the source code on GitHub under About in Settings | 5 | S | v1.x |
 | ✅ | A title, description and picture for links to the app shared on Facebook and other sites | 5 | S | v1.x |
