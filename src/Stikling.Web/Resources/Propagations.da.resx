@@ -37,10 +37,10 @@
     <value>Ingen formeringer endnu</value>
   </data>
   <data name="ListEmptyWhat" xml:space="preserve">
-    <value>En formering er en ny plante, der gror ud af en, du har, som en stikling i vand eller nogle frø.</value>
+    <value>En formering er en ny plante du laver ud fra en du har, fx en stikling i vand eller nogle frø.</value>
   </data>
   <data name="ListEmptyHow" xml:space="preserve">
-    <value>Åbn en plante og tryk på &lt;em&gt;Formér&lt;/em&gt;, eller start en uden moderplante, fx frø.</value>
+    <value>Åbn en plante og tryk på &lt;em&gt;Formér&lt;/em&gt;, eller start en uden moderplante, fx med frø.</value>
   </data>
   <data name="ListHelpLink" xml:space="preserve">
     <value>Mere om formeringer i Hjælp</value>
@@ -67,10 +67,10 @@
     <value>Ryd søgning</value>
   </data>
   <data name="ListNothingInProgress" xml:space="preserve">
-    <value>Intet i gang. De, der blev pottet op eller mislykkedes, ligger under Færdige.</value>
+    <value>Ingen er i gang. Dem der er pottet op eller mislykkedes, ligger under "Færdige".</value>
   </data>
   <data name="ListNoneFinished" xml:space="preserve">
-    <value>Ingen er færdige endnu. En formering er færdig, når alt er pottet op eller mislykkedes.</value>
+    <value>Ingen er færdige endnu. En formering er færdig når det hele er pottet op eller mislykkedes.</value>
   </data>
   <data name="ListBatches_One" xml:space="preserve">
     <value>{0} batch</value>
@@ -112,10 +112,10 @@
     <value>knold {0} mm</value>
   </data>
   <data name="ListMilestoneRoot" xml:space="preserve">
-    <value>første rod dag {0}</value>
+    <value>første rod på dag {0}</value>
   </data>
   <data name="ListMilestoneLeaf" xml:space="preserve">
-    <value>første blad dag {0}</value>
+    <value>første blad på dag {0}</value>
   </data>
   <data name="ListStart" xml:space="preserve">
     <value>Start en formering</value>
@@ -157,19 +157,19 @@
     <value>Gemt.</value>
   </data>
   <data name="MadeNoteLabel" xml:space="preserve">
-    <value>Print en etiket til glasset?</value>
+    <value>Vil du printe en etiket til glasset?</value>
   </data>
   <data name="ContainerYouHave" xml:space="preserve">
-    <value>Beholdere, du har</value>
+    <value>Beholdere du har</value>
   </data>
   <data name="ContainerWillBeAdded" xml:space="preserve">
-    <value>"{0}" bliver føjet til dine beholdere, når du gemmer.</value>
+    <value>"{0}" bliver føjet til dine beholdere når du gemmer.</value>
   </data>
   <data name="ContainerLabel" xml:space="preserve">
     <value>Beholder</value>
   </data>
   <data name="ContainerPlaceholder" xml:space="preserve">
-    <value>fx klar boks med låg</value>
+    <value>fx gennemsigtig boks med låg</value>
   </data>
   <data name="StatsPageTitle" xml:space="preserve">
     <value>Resultater · Stikling</value>
@@ -178,7 +178,7 @@
     <value>Resultater</value>
   </data>
   <data name="StatsHint" xml:space="preserve">
-    <value>Hvordan hvert vækstmedie og hver type er gået.</value>
+    <value>Sådan er det gået med hvert vækstmedie og hver type.</value>
   </data>
   <data name="StatsYearLink" xml:space="preserve">
     <value>Dit år med dine planter</value>
@@ -187,13 +187,13 @@
     <value>Sådan tælles der</value>
   </data>
   <data name="StatsHow" xml:space="preserve">
-    <value>Succesraten tæller enheder, så en batch med 5 knolde, hvor 4 klarede den, tæller som 4 af 5. En enhed har klaret den, når den er pottet op, eller når dens batch har slået rødder. Enheder, der stadig er på vej, tæller hverken den ene eller den anden vej. Under {0} enheder vises antallet i stedet for en procent, fordi 2 af 2 siger mere end 100 %. Dage til rødder bruger kun batches, der er markeret som slået rødder, så en batch, der gik direkte til opponting, er ikke med.</value>
+    <value>Succesraten tæller enheder, så en batch med 5 knolde hvor 4 klarede den, tæller som 4 af 5. En enhed har klaret den når den er pottet op, eller når dens batch har slået rødder. Enheder der stadig er på vej, tæller hverken med eller imod. Under {0} enheder vises antallet i stedet for en procent, fordi 2 af 2 siger mere end 100 %. Dage til rødder bruger kun batches der er markeret som har slået rødder, så en batch der blev pottet op med det samme, er ikke med.</value>
   </data>
   <data name="StatsEmptyTitle" xml:space="preserve">
     <value>Ingen formeringer endnu.</value>
   </data>
   <data name="StatsEmptyHow" xml:space="preserve">
-    <value>Når du har startet nogle, viser siden, hvor godt hvert vækstmedie og hver type klarer sig: hvor mange der klarede den, og hvor lang tid de var om at slå rødder.</value>
+    <value>Når du har startet nogle, kan du se her hvor godt hvert vækstmedie og hver type klarer sig: hvor mange der klarede den, og hvor længe de var om at slå rødder.</value>
   </data>
   <data name="StatsAllHeading" xml:space="preserve">
     <value>Alle formeringer</value>
@@ -208,19 +208,19 @@
     <value>Rodhjælp</value>
   </data>
   <data name="StatsAidsNone" xml:space="preserve">
-    <value>Vælg de rodhjælpemidler, du brugte, når du redigerer en formering, så bliver hvert af dem sammenlignet her med de batches, der var uden.</value>
+    <value>Vælg den rodhjælp du brugte, når du redigerer en formering. Så bliver hver slags sammenlignet her med de batches der var uden.</value>
   </data>
   <data name="StatsAidsHow" xml:space="preserve">
-    <value>Hvert hjælpemiddel ved siden af alle batches, der var uden det, uanset type eller vækstmedie.</value>
+    <value>Hver slags rodhjælp sammenlignet med alle batches der var uden, uanset type eller vækstmedie.</value>
   </data>
   <data name="StatsAidsAllUsed" xml:space="preserve">
-    <value>Alle batches brugte det, så der er ikke noget at sammenligne med endnu.</value>
+    <value>Alle batches har fået det, så der er ikke noget at sammenligne med endnu.</value>
   </data>
   <data name="StatsDryingHeading" xml:space="preserve">
-    <value>At lade snitfladen tørre</value>
+    <value>Tørring af snitfladen</value>
   </data>
   <data name="StatsDryingHow" xml:space="preserve">
-    <value>Batches grupperet efter, hvor længe snitfladen tørrede, før den kom i, uanset type eller vækstmedie.</value>
+    <value>Batches delt op efter hvor længe snitfladen tørrede før den blev sat i, uanset type eller vækstmedie.</value>
   </data>
   <data name="StatsBarLabel" xml:space="preserve">
     <value>{0} klarede den</value>
@@ -232,28 +232,28 @@
     <value>&lt;strong&gt;{0}&lt;/strong&gt; klarede den · {1} af {2}</value>
   </data>
   <data name="StatsStillGoing" xml:space="preserve">
-    <value>{0} stadig i gang</value>
+    <value>{0} er stadig i gang</value>
   </data>
   <data name="StatsNothingYet" xml:space="preserve">
-    <value>Intet har klaret den eller mislykkedes endnu · {0} stadig i gang</value>
+    <value>Intet resultat endnu · {0} er stadig i gang</value>
   </data>
   <data name="StatsRange" xml:space="preserve">
-    <value>{0} til {1} dage over {2} batches</value>
+    <value>{0} til {1} dage i {2} batches</value>
   </data>
   <data name="StatsNotRecorded" xml:space="preserve">
     <value>ikke noteret</value>
   </data>
   <data name="StatsLostBefore" xml:space="preserve">
-    <value>Tabt til: {0} · mest før de slog rødder</value>
+    <value>Gik tabt: {0} · mest før de slog rødder</value>
   </data>
   <data name="StatsLostWhile" xml:space="preserve">
-    <value>Tabt til: {0} · mest mens de slog rødder</value>
+    <value>Gik tabt: {0} · mest mens de slog rødder</value>
   </data>
   <data name="StatsLostAfter" xml:space="preserve">
-    <value>Tabt til: {0} · mest efter de slog rødder</value>
+    <value>Gik tabt: {0} · mest efter de havde slået rødder</value>
   </data>
   <data name="StatsLost" xml:space="preserve">
-    <value>Tabt til: {0}</value>
+    <value>Gik tabt: {0}</value>
   </data>
   <data name="StatsAll" xml:space="preserve">
     <value>Alle</value>
@@ -325,31 +325,31 @@
     <value>Samme dag næste år</value>
   </data>
   <data name="BringOnADay" xml:space="preserve">
-    <value>På en dag…</value>
+    <value>En bestemt dag…</value>
   </data>
   <data name="BringDayLabel" xml:space="preserve">
-    <value>Dag den kommer tilbage</value>
+    <value>Dagen den vises igen</value>
   </data>
   <data name="BringNo" xml:space="preserve">
-    <value>Bring den ikke tilbage</value>
+    <value>Vis den ikke igen</value>
   </data>
   <data name="BringPickDay" xml:space="preserve">
     <value>Vælg en dag efter i dag.</value>
   </data>
   <data name="BringLabel" xml:space="preserve">
-    <value>Bring den tilbage</value>
+    <value>Vis den igen</value>
   </data>
   <data name="PublicNoteHint" xml:space="preserve">
     <value>Denne note vises på den offentlige side.</value>
   </data>
   <data name="PassOnNeedsAccount" xml:space="preserve">
-    <value>For at sende dens historie skal du have en konto, så siden kan vises fra serveren. Den, der fik den, behøver ikke en.</value>
+    <value>Du skal have en konto for at sende dens historik, så siden kan vises fra serveren. Den der får den, behøver ikke en.</value>
   </data>
   <data name="PassOnSignIn" xml:space="preserve">
     <value>Log ind</value>
   </data>
   <data name="PassOnIntro" xml:space="preserve">
-    <value>Send dem et link til dens billeder og historie indtil nu. De kan beholde en kopi i deres egen Stikling, uden en konto. Det viser det, et delingslink viser: billederne og milepælene og dine noter, hvis du lader dem være slået til. Aldrig rummet, priser eller hvem der fik den.</value>
+    <value>Send dem et link til dens billeder og historik indtil nu. De kan gemme en kopi i deres egen Stikling, uden en konto. Siden viser det samme som et delingslink: billederne, milepælene og dine noter, hvis du lader dem være med. Aldrig rummet, priser eller hvem der fik den.</value>
   </data>
   <data name="PassOnShowNotes" xml:space="preserve">
     <value>Vis mine noter</value>
@@ -358,10 +358,10 @@
     <value>Laver linket…</value>
   </data>
   <data name="PassOnSend" xml:space="preserve">
-    <value>Send dem dens historie</value>
+    <value>Send dem dens historik</value>
   </data>
   <data name="PassOnChange" xml:space="preserve">
-    <value>Ændr, hvad siden viser</value>
+    <value>Ændr hvad siden viser</value>
   </data>
   <data name="PassOnCopied" xml:space="preserve">
     <value>Kopieret</value>
@@ -391,7 +391,7 @@
     <value>Forslag</value>
   </data>
   <data name="AttentionLaterInfo" xml:space="preserve">
-    <value>Markeringen bliver på planten, men vises først på I dag fra den dag, du vælger. Hvis du bruger rundedage, kan den vente til næste rundedag.</value>
+    <value>Markeringen bliver på planten, men dukker først op på "I dag" den dag du vælger. Bruger du rundedage, kan den vente til næste rundedag.</value>
   </data>
   <data name="AttentionNow" xml:space="preserve">
     <value>Nu</value>
@@ -406,10 +406,10 @@
     <value>Dag</value>
   </data>
   <data name="AttentionStaysOffUntil" xml:space="preserve">
-    <value>Den holder sig væk fra I dag til da, og på den, til du markerer den som færdig.</value>
+    <value>Den vises først på "I dag" fra da, og bliver der til du markerer den som færdig.</value>
   </data>
   <data name="AttentionStaysOn" xml:space="preserve">
-    <value>Den bliver på I dag, til du markerer den som færdig.</value>
+    <value>Den bliver på "I dag" til du markerer den som færdig.</value>
   </data>
   <data name="AttentionFlagIt" xml:space="preserve">
     <value>Markér den</value>
@@ -445,10 +445,10 @@
     <value>markeret {0}</value>
   </data>
   <data name="AttentionTopic" xml:space="preserve">
-    <value>gør det senere</value>
+    <value>"Gør det senere"</value>
   </data>
   <data name="AttentionWhen" xml:space="preserve">
-    <value>Hvornår den begynder at vise sig</value>
+    <value>Hvornår den skal vises</value>
   </data>
   <data name="TlReferencePlant" xml:space="preserve">
     <value>Reference · ikke denne plante</value>
@@ -478,7 +478,7 @@
     <value>Skete den</value>
   </data>
   <data name="TlComesBack" xml:space="preserve">
-    <value>Kommer tilbage den {0}</value>
+    <value>Vises igen den {0}</value>
   </data>
   <data name="TlEarlierVersions" xml:space="preserve">
     <value>Tidligere versioner</value>
@@ -568,7 +568,7 @@
     <value>Tilføj en note (valgfrit)</value>
   </data>
   <data name="ComposerNoteHint" xml:space="preserve">
-    <value>Nyt blad, rødder kan ses, ompottet…</value>
+    <value>Nyt blad, synlige rødder, ompottet…</value>
   </data>
   <data name="ComposerUsePhotoDates" xml:space="preserve">
     <value>Brug billedernes datoer</value>
@@ -637,7 +637,7 @@
     <value>Den formering findes ikke.</value>
   </data>
   <data name="EditIntro" xml:space="preserve">
-    <value>En stikling, en knold, frø eller noget andet, du gør til en ny plante.</value>
+    <value>En stikling, en knold, frø eller noget andet der skal blive til en ny plante.</value>
   </data>
   <data name="EditWhatLegend" xml:space="preserve">
     <value>Hvad du formerer</value>
@@ -661,7 +661,7 @@
     <value>fx 117a</value>
   </data>
   <data name="EditNumberHint" xml:space="preserve">
-    <value>Nummeret på dens etiket, som 117a for en stikling fra plante 117. Valgfrit.</value>
+    <value>Nummeret på dens etiket, fx 117a for en stikling fra plante 117. Valgfrit.</value>
   </data>
   <data name="EditNameLegend" xml:space="preserve">
     <value>Navn</value>
@@ -691,7 +691,7 @@
     <value>Udfyldt fra moderplanten. Giv den en slægt, et kælenavn eller begge dele.</value>
   </data>
   <data name="EditWishGot" xml:space="preserve">
-    <value>På din ønskeliste: markér den som fået</value>
+    <value>Står på din ønskeliste: markér at du har fået den</value>
   </data>
   <data name="EditLikeLast" xml:space="preserve">
     <value>Som sidst: {0}</value>
@@ -709,7 +709,7 @@
     <value>Hvor mange</value>
   </data>
   <data name="EditOwnRoots" xml:space="preserve">
-    <value>Har den allerede sine egne rødder? Så er det en plante. {0} i stedet.</value>
+    <value>Har den allerede egne rødder? Så er den en plante. {0} i stedet.</value>
   </data>
   <data name="EditAddAsPlant" xml:space="preserve">
     <value>Tilføj den som plante</value>
@@ -718,7 +718,7 @@
     <value>Startet den</value>
   </data>
   <data name="EditFromPhotos" xml:space="preserve">
-    <value>Sat til dagen for det ældste billede, så billederne kommer efter den i historikken.</value>
+    <value>Sat til dagen for det ældste billede, så billederne kommer efter starten i historikken.</value>
   </data>
   <data name="EditKeepToday" xml:space="preserve">
     <value>Brug i dag i stedet</value>
@@ -739,13 +739,13 @@
     <value>Flere detaljer</value>
   </data>
   <data name="EditWhere" xml:space="preserve">
-    <value>Hvor den er</value>
+    <value>Hvor den står</value>
   </data>
   <data name="EditSpotPlaceholder" xml:space="preserve">
     <value>fx køkkenvindue</value>
   </data>
   <data name="EditArrived" xml:space="preserve">
-    <value>Hvordan den ankom</value>
+    <value>Hvordan du fik den</value>
   </data>
   <data name="EditSetup" xml:space="preserve">
     <value>Opsætning</value>
@@ -757,7 +757,7 @@
     <value>Rodhjælp</value>
   </data>
   <data name="EditAidsHint" xml:space="preserve">
-    <value>Valgfrit. Vælg det, du brugte, så sammenligner resultatsiden batches med og uden det.</value>
+    <value>Valgfrit. Vælg det du brugte, så sammenligner resultatsiden batches med og uden.</value>
   </data>
   <data name="EditDryFirst" xml:space="preserve">
     <value>Lad snitfladen tørre først</value>
@@ -781,7 +781,7 @@
     <value>Knoldens størrelse (mm)</value>
   </data>
   <data name="EditCormHint" xml:space="preserve">
-    <value>Målt på tværs, da du startede den. Praktisk, når du sammenligner større og mindre knolde i et eksperiment.</value>
+    <value>Målt på tværs da du startede den. Praktisk når du vil sammenligne store og små knolde i et eksperiment.</value>
   </data>
   <data name="EditExperiment" xml:space="preserve">
     <value>Eksperiment</value>
@@ -790,7 +790,7 @@
     <value>fx Alocasia-knoldtest</value>
   </data>
   <data name="EditExperimentHint" xml:space="preserve">
-    <value>Giv batches, du startede sammen, samme navn, så bliver de sammenlignet side om side.</value>
+    <value>Giv de batches du startede sammen, samme navn, så bliver de sammenlignet side om side.</value>
   </data>
   <data name="EditSitter" xml:space="preserve">
     <value>Til en plantesitter</value>
@@ -799,16 +799,16 @@
     <value>Note til en plantesitter</value>
   </data>
   <data name="EditSitterHint" xml:space="preserve">
-    <value>Kommer på arket til den, der passer dine planter, mens du er væk.</value>
+    <value>Kommer med på arket til den der passer dine planter mens du er væk.</value>
   </data>
   <data name="EditSwap" xml:space="preserve">
     <value>Til bytte</value>
   </data>
   <data name="EditSpare" xml:space="preserve">
-    <value>Stiklinger tilgængelige til bytte</value>
+    <value>Stiklinger til bytte</value>
   </data>
   <data name="EditSpareHint" xml:space="preserve">
-    <value>Hvor mange du kan undvære. Det vises på siden Tilgængelig til bytte, aldrig mere end det, der er tilbage, og når du giver nogle væk, trækkes de fra først.</value>
+    <value>Hvor mange du kan undvære. De vises på siden "Tilgængelig til bytte", aldrig flere end der er tilbage, og når du giver nogle væk, bliver de trukket fra her først.</value>
   </data>
   <data name="EditProgress" xml:space="preserve">
     <value>Fremgang</value>
@@ -817,10 +817,10 @@
     <value>Hvor langt den er nået</value>
   </data>
   <data name="EditStageHint" xml:space="preserve">
-    <value>Er den allerede ved at slå rødder, når du skriver den ind? Vælg, hvor langt den er nået.</value>
+    <value>Er den allerede i gang med at slå rødder når du skriver den ind? Vælg hvor langt den er nået.</value>
   </data>
   <data name="EditStageDone" xml:space="preserve">
-    <value>Den er færdig, for der er ingen tilbage.</value>
+    <value>Den er færdig, da der ikke er flere tilbage.</value>
   </data>
   <data name="EditPottedUp" xml:space="preserve">
     <value>Pottet op</value>
@@ -832,25 +832,25 @@
     <value>Mislykkedes</value>
   </data>
   <data name="EditCorrectCounts" xml:space="preserve">
-    <value>Ret disse, hvis en blev pottet op, givet væk eller markeret som mislykket ved en fejl. Dem, der er tilbage, går tilbage til at gro.</value>
+    <value>Ret tallene hvis en ved en fejl blev pottet op, givet væk eller markeret som mislykket. Dem der bliver tilovers, går tilbage til at gro.</value>
   </data>
   <data name="EditCorrectPlants" xml:space="preserve">
-    <value>Planter, der er pottet op fra den, bliver i din samling.</value>
+    <value>Planter der er pottet op fra den, bliver i din samling.</value>
   </data>
   <data name="EditRootedOn" xml:space="preserve">
     <value>Slog rødder den</value>
   </data>
   <data name="EditRootedHint" xml:space="preserve">
-    <value>Udfyldes af sig selv, når du flytter den til har slået rødder. Ret den, hvis den slog rødder tidligere.</value>
+    <value>Udfyldes af sig selv når du flytter den til "Har slået rødder". Ret datoen hvis den slog rødder før.</value>
   </data>
   <data name="EditCameUp" xml:space="preserve">
     <value>Spiret</value>
   </data>
   <data name="EditFirstOn" xml:space="preserve">
-    <value>Første den</value>
+    <value>Første gang</value>
   </data>
   <data name="EditSeedsHint" xml:space="preserve">
-    <value>Hvor mange frø der er spiret indtil nu, ud af antallet sået. Lad den stå tom, til det første spirer.</value>
+    <value>Hvor mange frø der er spiret indtil nu, ud af dem du såede. Lad feltet stå tomt til det første spirer.</value>
   </data>
   <data name="EditFirstRoot" xml:space="preserve">
     <value>Første rod</value>
@@ -859,13 +859,13 @@
     <value>Første blad</value>
   </data>
   <data name="EditSignsHint" xml:space="preserve">
-    <value>Dagen, du første gang så en rod eller et nyt blad. Lad dem stå tomme, til det sker.</value>
+    <value>Dagen hvor du først så en rod eller et nyt blad. Lad felterne stå tomme til det sker.</value>
   </data>
   <data name="EditDried" xml:space="preserve">
     <value>tørret {0}</value>
   </data>
   <data name="EditAboutHint" xml:space="preserve">
-    <value>Til det, der bliver ved med at passe om den. Noter med dato kommer i dens historik.</value>
+    <value>Til det der altid gælder om den. Noter med dato skal i dens historik.</value>
   </data>
   <data name="EditSummaryFirstRoot" xml:space="preserve">
     <value>første rod {0}</value>
@@ -892,7 +892,7 @@
     <value>Billede af {0}</value>
   </data>
   <data name="DetOutcomeTitle" xml:space="preserve">
-    <value>Hvordan det gik</value>
+    <value>Sådan gik det</value>
   </data>
   <data name="DetRanFor" xml:space="preserve">
     <value>Varede i</value>
@@ -979,7 +979,7 @@
     <value>Antal</value>
   </data>
   <data name="DetInMixRetired" xml:space="preserve">
-    <value>I {0} (blandes ikke mere)</value>
+    <value>I {0} (blandes ikke længere)</value>
   </data>
   <data name="DetInMix" xml:space="preserve">
     <value>I {0}</value>
@@ -1000,7 +1000,7 @@
     <value>Placering</value>
   </data>
   <data name="DetNotSet" xml:space="preserve">
-    <value>Ikke sat</value>
+    <value>Ikke angivet</value>
   </data>
   <data name="DetSinceToday" xml:space="preserve">
     <value>Siden i dag</value>
@@ -1012,7 +1012,7 @@
     <value>Planter fra den</value>
   </data>
   <data name="DetConfirmDelete" xml:space="preserve">
-    <value>Slet &lt;strong&gt;{0}&lt;/strong&gt;? Planter, der er pottet op fra den, bliver. Hvis den ikke klarede den, beholder &lt;em&gt;Markér som mislykket&lt;/em&gt; under trinknappen dens historik i stedet.</value>
+    <value>Slet &lt;strong&gt;{0}&lt;/strong&gt;? Planter der er pottet op fra den, bliver. Hvis den ikke klarede den, kan du i stedet bruge &lt;em&gt;Markér som mislykket&lt;/em&gt; under trinknappen, så beholder den sin historik.</value>
   </data>
   <data name="DetDelete" xml:space="preserve">
     <value>Slet formering</value>
@@ -1024,7 +1024,7 @@
     <value>Trin: {0}. Skift trin</value>
   </data>
   <data name="DetMoreLabel" xml:space="preserve">
-    <value>Mere til denne formering</value>
+    <value>Flere valg for denne formering</value>
   </data>
   <data name="DetFromDevice" xml:space="preserve">
     <value>Fra denne enhed</value>
@@ -1036,13 +1036,13 @@
     <value>Fra Google Fotos</value>
   </data>
   <data name="DetFromGoogleHint" xml:space="preserve">
-    <value>Også billeder, der kun er i skyen</value>
+    <value>Også billeder der kun ligger i skyen</value>
   </data>
   <data name="DetStageHelpSeed" xml:space="preserve">
-    <value>Sået er dagen, frøene kom i. Spirer er, når de begynder at spire. Spiret er, når de er klar til at blive potte op. At potte op og at mislykkes er særskilte handlinger.</value>
+    <value>"Sået" er dagen frøene kom i jorden. "Spirer" er når de begynder at spire. "Spiret" er når de er klar til at blive pottet op. At potte op og at markere som mislykket gør du med hver sin knap.</value>
   </data>
   <data name="DetStageHelp" xml:space="preserve">
-    <value>Startet er dagen, den blev skåret eller sat i. Slår rødder er, når rødderne begynder at komme. Har slået rødder er, når rødderne er lange nok til at potte op. At potte op og at mislykkes er særskilte handlinger.</value>
+    <value>"Startet" er dagen den blev skåret eller sat i. "Slår rødder" er når rødderne begynder at komme. "Har slået rødder" er når rødderne er lange nok til at potte op. At potte op og at markere som mislykket gør du med hver sin knap.</value>
   </data>
   <data name="DetDateDay" xml:space="preserve">
     <value>{0} · dag {1}</value>
@@ -1075,22 +1075,22 @@
     <value>trinnet</value>
   </data>
   <data name="DetEmptyTimeline" xml:space="preserve">
-    <value>Ingen billeder eller noter endnu. Tilføj den første med Billede eller Note.</value>
+    <value>Ingen billeder eller noter endnu. Brug "Billede" eller "Note" til at tilføje noget.</value>
   </data>
   <data name="DetPotUpEachMedium" xml:space="preserve">
-    <value>Hver af dem bliver til en plante for sig selv, i {0}, som de står i nu.</value>
+    <value>Hver af dem bliver en plante for sig, stadig i {0}.</value>
   </data>
   <data name="DetPotUpOneMedium" xml:space="preserve">
-    <value>Den bliver til en plante for sig selv, i {0}, som den står i nu.</value>
+    <value>Den bliver en plante for sig, stadig i {0}.</value>
   </data>
   <data name="DetPotUpEach" xml:space="preserve">
-    <value>Hver af dem, du potter op, bliver til en plante for sig selv.</value>
+    <value>Hver af dem du potter op, bliver en plante for sig.</value>
   </data>
   <data name="DetPotUpOne" xml:space="preserve">
-    <value>Den bliver til en plante for sig selv.</value>
+    <value>Den bliver en plante for sig.</value>
   </data>
   <data name="DetPotUpHelp" xml:space="preserve">
-    <value>Dem, der har slået rødder, bliver til planter for sig selv. Du kan potte hver i sin egen potte, sætte dem alle i én potte som én plante eller potte dem i en plante, du allerede har. Formeringen beholder sin historik, og de nye planter peger tilbage på den.</value>
+    <value>Dem der har slået rødder, bliver planter for sig. Du kan give hver sin egen potte, sætte dem alle i én potte som én plante eller potte dem sammen med en plante du allerede har. Formeringen beholder sin historik, og de nye planter peger tilbage på den.</value>
   </data>
   <data name="DetEachOwnPot" xml:space="preserve">
     <value>Hver i sin egen potte</value>
@@ -1099,22 +1099,22 @@
     <value>Alle i én potte</value>
   </data>
   <data name="DetOwnPot" xml:space="preserve">
-    <value>I en potte for sig selv</value>
+    <value>I sin egen potte</value>
   </data>
   <data name="DetInto" xml:space="preserve">
-    <value>Sammen med en plante, du har</value>
+    <value>Sammen med en plante du har</value>
   </data>
   <data name="DetNoPlantsToPotWith" xml:space="preserve">
-    <value>Der er ingen planter at potte dem sammen med.</value>
+    <value>Du har ingen planter at potte dem sammen med.</value>
   </data>
   <data name="DetIntoHint" xml:space="preserve">
-    <value>De får den plantes potte, vækstmedie og rum og bliver talt med i den.</value>
+    <value>De får den plantes potte, vækstmedie og rum og tælles med i den.</value>
   </data>
   <data name="DetNumbered" xml:space="preserve">
-    <value>Nummereret, når der er flere, fx "{0} {1}".</value>
+    <value>Nummereret når der er flere, fx "{0} {1}".</value>
   </data>
   <data name="DetMoved" xml:space="preserve">
-    <value>Flyttet den til noget andet?</value>
+    <value>Står den i noget andet nu?</value>
   </data>
   <data name="DetDate" xml:space="preserve">
     <value>Dato</value>
@@ -1129,7 +1129,7 @@
     <value>Potte {0} op</value>
   </data>
   <data name="DetFailedHint" xml:space="preserve">
-    <value>Den bliver i historikken og i resultaterne. Hvis det var en fejl, ret antallet under Rediger.</value>
+    <value>Den bliver i historikken og i resultaterne. Hvis det var en fejl, kan du rette antallet under Rediger.</value>
   </data>
   <data name="DetGaveHint" xml:space="preserve">
     <value>Den bliver i historikken og i resultaterne.</value>
@@ -1153,7 +1153,7 @@
     <value>Markér {0} som givet væk</value>
   </data>
   <data name="DetFlagHint" xml:space="preserve">
-    <value>Holder den på I dag, til den er færdig</value>
+    <value>Holder den på "I dag" til det er gjort</value>
   </data>
   <data name="DetOffered" xml:space="preserve">
     <value>{0} tilbudt</value>
@@ -1177,19 +1177,19 @@
     <value>Hviler, som en knold der venter vinteren ud</value>
   </data>
   <data name="DetSwapHint" xml:space="preserve">
-    <value>Op til {0}, det der er tilbage. Det vises på {1}, og når du giver nogle væk, trækkes de fra først.</value>
+    <value>Op til {0}, så mange som der er tilbage. De vises på {1}, og når du giver nogle væk, bliver de trukket fra her først.</value>
   </data>
   <data name="DetSince" xml:space="preserve">
     <value>Siden</value>
   </data>
   <data name="DetDormantHelp" xml:space="preserve">
-    <value>Hviler frem for at sidde fast, fx en knold der venter vinteren ud. Den kommer ikke op på I dag, før den vågner.</value>
+    <value>Den hviler og sidder altså ikke fast, fx en knold der venter vinteren ud. Den dukker ikke op på "I dag" før den vågner.</value>
   </data>
   <data name="DetMarkDormant" xml:space="preserve">
     <value>Markér som hvilende</value>
   </data>
   <data name="DetSendHistory" xml:space="preserve">
-    <value>Send dens historie</value>
+    <value>Send dens historik</value>
   </data>
   <data name="DetPlantNow" xml:space="preserve">
     <value>Den er en plante nu</value>
@@ -1231,10 +1231,10 @@
     <value>Pottet op:</value>
   </data>
   <data name="DetPottedUpMany" xml:space="preserve">
-    <value>Pottet op: {0}</value>
+    <value>Pottede {0} op:</value>
   </data>
   <data name="DetPotUpFailed" xml:space="preserve">
-    <value>Det kunne ikke potte op: {0}</value>
+    <value>Kunne ikke potte op: {0}</value>
   </data>
   <data name="DetMarkedFailedOne" xml:space="preserve">
     <value>Markerede 1 som mislykket.</value>
@@ -1243,7 +1243,7 @@
     <value>Markerede {0} som mislykkede.</value>
   </data>
   <data name="DetMarkFailedFailed" xml:space="preserve">
-    <value>Det kunne ikke markeres som mislykket: {0}</value>
+    <value>Kunne ikke markere som mislykket: {0}</value>
   </data>
   <data name="DetMarkedGivenOne" xml:space="preserve">
     <value>Markerede 1 som givet væk.</value>
@@ -1252,22 +1252,22 @@
     <value>Markerede {0} som givet væk.</value>
   </data>
   <data name="DetMarkGivenFailed" xml:space="preserve">
-    <value>Det kunne ikke markeres som givet væk: {0}</value>
+    <value>Kunne ikke markere som givet væk: {0}</value>
   </data>
   <data name="DetKeepsHistory" xml:space="preserve">
     <value>Formeringen beholder sin historik.</value>
   </data>
   <data name="DetTopicPotUp" xml:space="preserve">
-    <value>at potte op</value>
+    <value>"Potte op"</value>
   </data>
   <data name="DetHowPotted" xml:space="preserve">
-    <value>Hvordan de bliver potte</value>
+    <value>Sådan bliver de pottet</value>
   </data>
   <data name="DetOptional" xml:space="preserve">
     <value>(valgfrit)</value>
   </data>
   <data name="DetFinishes" xml:space="preserve">
-    <value>Det afslutter formeringen.</value>
+    <value>Så er formeringen færdig.</value>
   </data>
   <data name="DetMarkAsFailed" xml:space="preserve">
     <value>Markér som mislykket</value>
@@ -1321,10 +1321,10 @@
     <value>Billeder i videoen</value>
   </data>
   <data name="ShInVideo" xml:space="preserve">
-    <value>{0} af {1} billeder er med i videoen. Tryk på et for at lade det ude.</value>
+    <value>{0} af {1} billeder er med i videoen. Tryk på et for at tage det ud.</value>
   </data>
   <data name="ShTooLong" xml:space="preserve">
-    <value>Den har {0} billeder, og et tidsforløb kan have op til {1}, så {1} spredt over dem er valgt.</value>
+    <value>Den har {0} billeder, og et tidsforløb kan have op til {1}, så der er valgt {1} spredt ud over dem.</value>
   </data>
   <data name="ShShowOnly" xml:space="preserve">
     <value>Vis kun billederne i videoen</value>
@@ -1333,28 +1333,28 @@
     <value>Vis alle {0} billeder</value>
   </data>
   <data name="ShMissing_One" xml:space="preserve">
-    <value>Ét billede er ikke på denne enhed endnu, så det er udeladt af videoen.</value>
+    <value>Ét billede er ikke på denne enhed endnu, så det kommer ikke med i videoen.</value>
   </data>
   <data name="ShMissing_Other" xml:space="preserve">
-    <value>{0} billeder er ikke på denne enhed endnu, så de er udeladt af videoen.</value>
+    <value>{0} billeder er ikke på denne enhed endnu, så de kommer ikke med i videoen.</value>
   </data>
   <data name="ShTooFew" xml:space="preserve">
-    <value>Det efterlader for få til at lave en.</value>
+    <value>Så er der for få til at lave en video.</value>
   </data>
   <data name="ShSmall_One" xml:space="preserve">
-    <value>Ét billede er kun en lille kopi på denne enhed. Når videoen laves, hentes den fulde først, hvis det kan lade sig gøre, så videoen bliver skarp.</value>
+    <value>Ét billede findes kun som en lille kopi på denne enhed. Når videoen laves, hentes det fulde billede først hvis det kan lade sig gøre, så videoen bliver skarp.</value>
   </data>
   <data name="ShSmall_Other" xml:space="preserve">
-    <value>{0} billeder er kun en lille kopi på denne enhed. Når videoen laves, hentes de fulde først, hvis det kan lade sig gøre, så videoen bliver skarp.</value>
+    <value>{0} billeder findes kun som små kopier på denne enhed. Når videoen laves, hentes de fulde billeder først hvis det kan lade sig gøre, så videoen bliver skarp.</value>
   </data>
   <data name="ShPairMissing" xml:space="preserve">
-    <value>Et af de billeder er ikke på denne enhed endnu, så dets plads på kortet er tom.</value>
+    <value>Et af billederne er ikke på denne enhed endnu, så dets plads på kortet er tom.</value>
   </data>
   <data name="ShGettingFullPair" xml:space="preserve">
     <value>Henter de fulde billeder, så kortet bliver skarpt.</value>
   </data>
   <data name="ShPairSmall" xml:space="preserve">
-    <value>Kun en lille kopi af et af disse billeder er på denne enhed, og det fulde kunne ikke hentes, så det kan se sløret ud på kortet. Prøv igen, når du er online og logget ind, eller vælg et andet billede.</value>
+    <value>Der er kun en lille kopi af et af billederne på denne enhed, og det fulde kunne ikke hentes, så det kan se sløret ud på kortet. Prøv igen når du er online og logget ind, eller vælg et andet billede.</value>
   </data>
   <data name="ShPhotoN" xml:space="preserve">
     <value>Billede {0}</value>
@@ -1369,7 +1369,7 @@
     <value>Henter det fulde billede, så kortet bliver skarpt.</value>
   </data>
   <data name="ShSingleSmall" xml:space="preserve">
-    <value>Kun en lille kopi af dette billede er på denne enhed, og det fulde kunne ikke hentes, så det kan se sløret ud på kortet. Prøv igen, når du er online og logget ind, eller vælg et andet billede.</value>
+    <value>Der er kun en lille kopi af billedet på denne enhed, og det fulde kunne ikke hentes, så det kan se sløret ud på kortet. Prøv igen når du er online og logget ind, eller vælg et andet billede.</value>
   </data>
   <data name="ShMaking" xml:space="preserve">
     <value>Laver videoen</value>
@@ -1402,16 +1402,16 @@
     <value>Opret forbindelse til internettet for at slå linket fra.</value>
   </data>
   <data name="ShLinkNoteSignedOutPropagation" xml:space="preserve">
-    <value>Et link åbner en side, som alle kan se, med denne formerings billeder. Det kræver en konto, fordi siden vises fra serveren.</value>
+    <value>Et link åbner en side som alle kan se, med denne formerings billeder. Det kræver en konto, fordi siden vises fra serveren.</value>
   </data>
   <data name="ShLinkNoteSignedOutPlant" xml:space="preserve">
-    <value>Et link åbner en side, som alle kan se, med denne plantes billeder. Det kræver en konto, fordi siden vises fra serveren.</value>
+    <value>Et link åbner en side som alle kan se, med denne plantes billeder. Det kræver en konto, fordi siden vises fra serveren.</value>
   </data>
   <data name="ShLinkNotePropagation" xml:space="preserve">
-    <value>Siden viser denne formerings billeder og, hvis du lader det være slået til, dens noter. Den viser aldrig rummet, priser eller hvor den kom fra.</value>
+    <value>Siden viser denne formerings billeder og dens noter, hvis du lader dem være med. Den viser aldrig rummet, priser eller hvor den kom fra.</value>
   </data>
   <data name="ShLinkNotePlant" xml:space="preserve">
-    <value>Siden viser denne plantes billeder og, hvis du lader det være slået til, dens noter. Den viser aldrig rummet, priser eller hvor den kom fra.</value>
+    <value>Siden viser denne plantes billeder og dens noter, hvis du lader dem være med. Den viser aldrig rummet, priser eller hvor den kom fra.</value>
   </data>
   <data name="ShMakeLink" xml:space="preserve">
     <value>Lav link</value>
@@ -1429,10 +1429,10 @@
     <value>Billeder på siden</value>
   </data>
   <data name="ShOnPage" xml:space="preserve">
-    <value>{0} af {1} billeder er på siden. Tryk på et for at lade det ude.</value>
+    <value>{0} af {1} billeder er på siden. Tryk på et for at fjerne det.</value>
   </data>
   <data name="ShConfirmOff" xml:space="preserve">
-    <value>Slå linket fra? Alle, der åbner det, kan se, at siden er væk. Hvis du slår deling til igen, laves der et nyt link.</value>
+    <value>Slå linket fra? Alle der åbner det, vil se at siden er væk. Slår du deling til igen, laves der et nyt link.</value>
   </data>
   <data name="ShTurnOff" xml:space="preserve">
     <value>Slå fra</value>
@@ -1441,10 +1441,10 @@
     <value>Slå linket fra</value>
   </data>
   <data name="ShUploading_One" xml:space="preserve">
-    <value>1 billede bliver stadig uploadet. Det vises på siden, når det er oppe.</value>
+    <value>1 billede uploades stadig. Det vises på siden når det er oppe.</value>
   </data>
   <data name="ShUploading_Other" xml:space="preserve">
-    <value>{0} billeder bliver stadig uploadet. De vises på siden, når de er oppe.</value>
+    <value>{0} billeder uploades stadig. De vises på siden når de er oppe.</value>
   </data>
   <data name="ShSaved" xml:space="preserve">
     <value>Gemt</value>
@@ -1453,13 +1453,13 @@
     <value>Navn</value>
   </data>
   <data name="ShWhatItSays" xml:space="preserve">
-    <value>Hvad der står</value>
+    <value>Tekst</value>
   </data>
   <data name="ShUseAppWords" xml:space="preserve">
     <value>Brug appens ord igen</value>
   </data>
   <data name="ShTickMax" xml:space="preserve">
-    <value>Et tidsforløb kan have op til {0} billeder. Udelad et for at tilføje dette.</value>
+    <value>Et tidsforløb kan have op til {0} billeder. Tag et ud for at tilføje dette.</value>
   </data>
   <data name="ShTickMin" xml:space="preserve">
     <value>Et tidsforløb skal have mindst 2 billeder, så dette bliver med.</value>
@@ -1471,7 +1471,7 @@
     <value>Henter de fulde billeder, så videoen bliver skarp.</value>
   </data>
   <data name="ShTooFewOnDevice" xml:space="preserve">
-    <value>For få af de billeder er på denne enhed til at lave en video.</value>
+    <value>Der er for få af billederne på denne enhed til at lave en video.</value>
   </data>
   <data name="ShOfflineMaker" xml:space="preserve">
     <value>Videoværktøjet kunne ikke hentes. Opret forbindelse til internettet og prøv igen. Bagefter virker det også offline.</value>
