@@ -16,7 +16,7 @@
     <value>Status: {0} (var {1})</value>
   </data>
   <data name="WhatHappened" xml:space="preserve">
-    <value>Hvad skete der: {0}</value>
+    <value>Hvad der skete: {0}</value>
   </data>
   <data name="DepartureSoldToFor" xml:space="preserve">
     <value>Solgt til {0} for {1}</value>
@@ -97,16 +97,16 @@
     <value>Får gødning med vandingen: {0}, hver vanding</value>
   </data>
   <data name="PotWentWithIt" xml:space="preserve">
-    <value>Dens potte fulgte med</value>
+    <value>Potten fulgte med</value>
   </data>
   <data name="OuterPotWentWithIt" xml:space="preserve">
-    <value>Dens yderpotte fulgte med</value>
+    <value>Yderpotten fulgte med</value>
   </data>
   <data name="PotsWentWithIt" xml:space="preserve">
-    <value>Dens potte og yderpotte fulgte med</value>
+    <value>Potten og yderpotten fulgte med</value>
   </data>
   <data name="PotsStayed" xml:space="preserve">
-    <value>Dens potter blev her</value>
+    <value>Potterne blev her</value>
   </data>
   <data name="WateredInOuterPot" xml:space="preserve">
     <value>Vandes nu i yderpotten</value>
@@ -115,10 +115,10 @@
     <value>Vandes ikke længere i yderpotten</value>
   </data>
   <data name="Tagged" xml:space="preserve">
-    <value>Tagget med {0}</value>
+    <value>Tagget {0}</value>
   </data>
   <data name="Untagged" xml:space="preserve">
-    <value>Ikke længere tagget med {0}</value>
+    <value>Tagget {0} er fjernet</value>
   </data>
   <data name="PutInQuarantine" xml:space="preserve">
     <value>Sat i karantæne</value>
@@ -130,13 +130,13 @@
     <value>Gik i hvile</value>
   </data>
   <data name="WokeUp" xml:space="preserve">
-    <value>Vågnede af sin hvile</value>
+    <value>Vågnede af hvilen</value>
   </data>
   <data name="StartedMoveToSemiHydro" xml:space="preserve">
-    <value>Begyndte flytningen til semi-hydro</value>
+    <value>Begyndte skiftet til semi-hydro</value>
   </data>
   <data name="StartedMoveTo" xml:space="preserve">
-    <value>Begyndte flytningen til {0}</value>
+    <value>Begyndte skiftet til {0}</value>
   </data>
   <data name="RootsWashed" xml:space="preserve">
     <value>Rødder vasket</value>
@@ -148,22 +148,22 @@
     <value>Første nye blad</value>
   </data>
   <data name="SettledInSemiHydro_One" xml:space="preserve">
-    <value>Har vænnet sig til semi-hydro efter {0} uge</value>
+    <value>Faldt til i semi-hydro efter {0} uge</value>
   </data>
   <data name="SettledInSemiHydro_Other" xml:space="preserve">
-    <value>Har vænnet sig til semi-hydro efter {0} uger</value>
+    <value>Faldt til i semi-hydro efter {0} uger</value>
   </data>
   <data name="SettledIn_One" xml:space="preserve">
-    <value>Har vænnet sig til {0} efter {1} uge</value>
+    <value>Faldt til i {0} efter {1} uge</value>
   </data>
   <data name="SettledIn_Other" xml:space="preserve">
-    <value>Har vænnet sig til {0} efter {1} uger</value>
+    <value>Faldt til i {0} efter {1} uger</value>
   </data>
   <data name="StoppedTrackingMoveSemiHydro" xml:space="preserve">
-    <value>Holdt op med at følge flytningen til semi-hydro</value>
+    <value>Holdt op med at følge skiftet til semi-hydro</value>
   </data>
   <data name="StoppedTrackingMove" xml:space="preserve">
-    <value>Holdt op med at følge flytningen til {0}</value>
+    <value>Holdt op med at følge skiftet til {0}</value>
   </data>
   <data name="StageChanged" xml:space="preserve">
     <value>Fase: {0} (var {1})</value>
@@ -199,13 +199,13 @@
     <value>Frø: {0} af {1} spirede</value>
   </data>
   <data name="SeedCountCleared" xml:space="preserve">
-    <value>Antal spirede frø er fjernet</value>
+    <value>Antal spirede frø fjernet</value>
   </data>
   <data name="CormSize" xml:space="preserve">
-    <value>Størrelse på knold: {0} mm</value>
+    <value>Knoldstørrelse: {0} mm</value>
   </data>
   <data name="CormSizeCleared" xml:space="preserve">
-    <value>Størrelsen på knolden er fjernet</value>
+    <value>Knoldstørrelse fjernet</value>
   </data>
   <data name="NoRootingAids" xml:space="preserve">
     <value>Ingen rodfremmere</value>
@@ -229,7 +229,7 @@
     <value>Snitfladen tørres ikke længere først</value>
   </data>
   <data name="AddedLivesElsewhere" xml:space="preserve">
-    <value>Tilføjet som en plante, der bor hos en anden</value>
+    <value>Tilføjet som en plante der bor hos en anden</value>
   </data>
   <data name="AddedToCollectionMonth" xml:space="preserve">
     <value>Tilføjet til samlingen, {0}</value>
@@ -262,16 +262,16 @@
     <value>Pottet sammen med {0}</value>
   </data>
   <data name="PottedInWithIt" xml:space="preserve">
-    <value>{0} er pottet ned hos den, nu {1} i potten</value>
+    <value>{0} kom med i potten, nu er der {1}</value>
   </data>
   <data name="TakenOutOfSharedPot" xml:space="preserve">
-    <value>Taget ud af den potte, den delte</value>
+    <value>Taget ud af den potte den delte</value>
   </data>
   <data name="TakenOutOfPotOf" xml:space="preserve">
     <value>Taget ud af {0}s potte</value>
   </data>
   <data name="PlantTakenOut" xml:space="preserve">
-    <value>{0} er taget ud, nu {1} i potten</value>
+    <value>{0} taget ud, nu er der {1} i potten</value>
   </data>
   <data name="SomeDied" xml:space="preserve">
     <value>{0} døde, {1} tilbage</value>
@@ -337,13 +337,13 @@
     <value>Gav {0} væk</value>
   </data>
   <data name="FloweringBuds" xml:space="preserve">
-    <value>Blomsterstand eller knopper</value>
+    <value>Blomsterstilk eller knopper</value>
   </data>
   <data name="FloweringInFlower" xml:space="preserve">
     <value>I blomst</value>
   </data>
   <data name="FloweringDone" xml:space="preserve">
-    <value>Færdig med at blomstre</value>
+    <value>Afblomstret</value>
   </data>
   <data name="ProblemOpened" xml:space="preserve">
     <value>Der er noget galt: {0}</value>
@@ -358,10 +358,10 @@
     <value>{0}</value>
   </data>
   <data name="ProblemUpdateEmpty" xml:space="preserve">
-    <value>Opdatering om problemet</value>
+    <value>Nyt om problemet</value>
   </data>
   <data name="ProblemClosed" xml:space="preserve">
-    <value>Problem overstået: {0}</value>
+    <value>Problemet er overstået: {0}</value>
   </data>
   <data name="ProblemReopened" xml:space="preserve">
     <value>Problemet kom tilbage</value>

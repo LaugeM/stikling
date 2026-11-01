@@ -40,7 +40,18 @@ New languages are added on Weblate. Start a translation there and it opens a pul
 
 ### Danish
 
-Write in plain everyday Danish, with "du". Keep the text as short as the English, with a capital only at the start of a sentence.
+Write in plain everyday Danish, with "du". Keep the text about as short as the English, with a capital only at the start of a sentence.
+
+Read the English for what it means, then write the sentence the way a Dane would say it to a friend who keeps plants. Never translate word for word. If the Danish sounds like it came from English, start the sentence over.
+
+- **Friendly and calm.** The app should feel welcoming to someone who just found it. Small words like "bare", "roligt" and "lige" are fine where a Dane would use them, but not in every sentence. No sales talk and no exclamation marks.
+- **Active, with "du".** "Du kan tilføje" rather than "Der kan tilføjes". Use the passive only where nobody does it, like "Alt gemmes på denne enhed".
+- **Verbs Danish uses.** English verbs often don't carry over. A page "starter med" its photos, it doesn't "åbne på" them. A care entry "er gødet med" a feed, it doesn't "have en gødning på sig".
+- **Comma.** Write without a comma before a subordinate clause ("uden startkomma"): "Det der skal gøres, dukker op her", "Du kan se at den har slået rødder". Keep the comma between two main clauses and after a clause that comes first.
+- **Names of screens and buttons** in a sentence are written as they are on the button, in quotes when the sentence would read wrong without them: Hvad er "Værd at se på"?
+- **Counts** agree with the number. Use the `_One` and `_Other` texts, and never put a plural noun after a placeholder that can be 1, or the other way round.
+- **Den and det.** En plante, stikling, formering, potte: den. Et billede, regneark, eksempel: det. Check which word a "den" or "det" points back to.
+- **Buttons** are short commands ("Gem", "Tilføj plante"). Headings have no full stop.
 
 | English | Danish |
 | --- | --- |
@@ -71,7 +82,7 @@ Write in plain everyday Danish, with "du". Keep the text as short as the English
 | light, dark | lyst, mørkt |
 | everyday names | daglige navne |
 | outer pot | yderpotte |
-| nursery pot | planteskolepotte |
+| nursery pot | inderpotte |
 | tag | tag (plural tags) |
 | label (printed, the Labels page) | etiket (plural etiketter) |
 | node | knude (plural knuder) |
