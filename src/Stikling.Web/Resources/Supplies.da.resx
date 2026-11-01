@@ -148,7 +148,7 @@
     <value>Hvor dine planter kommer fra</value>
   </data>
   <data name="PotsNone" xml:space="preserve">
-    <value>De potter du har, både planteskolepotter og pyntepotter</value>
+    <value>De potter du har, både inderpotter og yderpotter</value>
   </data>
   <data name="PotsFree" xml:space="preserve">
     <value>{0}, {1} ledige</value>
@@ -166,7 +166,7 @@
     <value>Sådan fortynder du et produkt i vandet</value>
   </data>
   <data name="PlansNone" xml:space="preserve">
-    <value>Trin du følger i en sag</value>
+    <value>Trin du følger når du behandler skadedyr</value>
   </data>
   <data name="RecipesNone" xml:space="preserve">
     <value>Sprays du blander på samme måde hver gang</value>
@@ -382,7 +382,7 @@
     <value>Produkter · Stikling</value>
   </data>
   <data name="ProductsIntro" xml:space="preserve">
-    <value>Din gødning, rodnings- og vækstmidler, silica og alt andet der kommer i vandet, hver med den dosis du plejer at bruge. Når du logger en gødning, bliver dosis udfyldt, og du kan ændre den lige den ene gang. En plejepost beholder det navn og den dosis den blev logget med, så når du retter et produkt her, ændrer det ikke det du allerede har logget.</value>
+    <value>Din gødning, rodnings- og vækstmidler, silica og alt andet du kommer i vandet, hver med den dosis du plejer at bruge. Når du logger gødning, er dosis udfyldt, og du kan ændre den for den ene gang. Det du har logget, beholder navn og dosis fra dengang, så det ændrer sig ikke når du retter et produkt her.</value>
   </data>
   <data name="ProductEdit" xml:space="preserve">
     <value>Rediger produkt</value>
@@ -457,7 +457,7 @@
     <value>Potter · Stikling</value>
   </data>
   <data name="PotsIntro" xml:space="preserve">
-    <value>De potter du har, så en plante kan pege på en i stedet for at du skal skrive den igen. En planteskolepotte står inde i noget, en yderpotte har intet hul i bunden og rummer en planteskolepotte, og nogle potter klarer sig uden noget omkring. Beholdere til formering, som en boks med låg, har deres egen liste.</value>
+    <value>De potter du har, så du kan vælge en til en plante i stedet for at skrive den igen. En inderpotte står inde i noget, en yderpotte har intet hul i bunden og har en inderpotte i sig, og nogle potter klarer sig uden noget omkring. Beholdere til formering, som en boks med låg, har deres egen liste.</value>
   </data>
   <data name="PotsWhichToShow" xml:space="preserve">
     <value>Hvilke potter der vises</value>
@@ -487,7 +487,7 @@
     <value>fx Klar boks med låg</value>
   </data>
   <data name="PotsPotPlaceholder" xml:space="preserve">
-    <value>fx Klar planteskolepotte</value>
+    <value>fx Klar inderpotte</value>
   </data>
   <data name="PotsContainerNameHint" xml:space="preserve">
     <value>Ens beholdere er én post. Skriv nedenfor hvor mange du har.</value>
@@ -538,13 +538,13 @@
     <value>Højde (cm)</value>
   </data>
   <data name="PotsMeasurementsHint" xml:space="preserve">
-    <value>På en yderpotte er det de indvendige mål. Det er bunden der afgør om en planteskolepotte passer, for begge bliver som regel smallere nedad.</value>
+    <value>På en yderpotte er det de indvendige mål. Det er bunden der afgør om en inderpotte passer, for begge bliver som regel smallere nedad.</value>
   </data>
   <data name="PotsRim" xml:space="preserve">
     <value>Kant (mm)</value>
   </data>
   <data name="PotsRimHint" xml:space="preserve">
-    <value>Med en kant kan potten hænge i en yderpotte i stedet for at stå i den.</value>
+    <value>Har inderpotten en kant, kan den hænge i yderpotten i stedet for at stå på bunden.</value>
   </data>
   <data name="PotsWatersItself" xml:space="preserve">
     <value>Vander sig selv</value>
@@ -565,7 +565,7 @@
     <value>Gem og tilføj en anden størrelse</value>
   </data>
   <data name="PotsAddNursery" xml:space="preserve">
-    <value>+ Tilføj en planteskolepotte</value>
+    <value>+ Tilføj en inderpotte</value>
   </data>
   <data name="PotsAddOuter" xml:space="preserve">
     <value>+ Tilføj en yderpotte</value>
@@ -577,7 +577,7 @@
     <value>+ Tilføj en potte</value>
   </data>
   <data name="PotsEmptyNursery" xml:space="preserve">
-    <value>Ingen planteskolepotter endnu.</value>
+    <value>Ingen inderpotter endnu.</value>
   </data>
   <data name="PotsEmptyOuter" xml:space="preserve">
     <value>Ingen yderpotter endnu.</value>
@@ -586,16 +586,16 @@
     <value>Ingen beholdere til formering endnu.</value>
   </data>
   <data name="PotsEmptyStandalone" xml:space="preserve">
-    <value>Ingen potter der står for sig selv endnu.</value>
+    <value>Ingen potter uden yderpotte endnu.</value>
   </data>
   <data name="PotsHintPropagation" xml:space="preserve">
     <value>En boks, en krukke eller et glas hvor stiklinger eller knolde kan slå rødder. Ens beholdere er én post med det antal du har, og når du trykker på "Start formering", kan du vælge mellem dem.</value>
   </data>
   <data name="PotsHintNursery" xml:space="preserve">
-    <value>Tilføj først dem du bruger mest. Et sæt planteskolepotter er én post pr. størrelse, med hvor mange du har af hver.</value>
+    <value>Tilføj først dem du bruger mest. Et sæt inderpotter er én post pr. størrelse, med hvor mange du har af hver.</value>
   </data>
   <data name="PotsHintOuter" xml:space="preserve">
-    <value>En yderpotte har intet hul i bunden og rummer en planteskolepotte. Giv hver af dem et billede, så er de lette at kende fra hinanden når du vælger en til en plante.</value>
+    <value>En yderpotte har intet hul i bunden og rummer en inderpotte. Giv hver af dem et billede, så er de lette at kende fra hinanden når du vælger en til en plante.</value>
   </data>
   <data name="PotsHintStandalone" xml:space="preserve">
     <value>En potte med hul og underskål eller en selvvandende potte, som ikke skal stå i noget.</value>

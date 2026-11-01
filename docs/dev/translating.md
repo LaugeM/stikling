@@ -82,7 +82,7 @@ Read the English for what it means, then write the sentence the way a Dane would
 | light, dark | lyst, mørkt |
 | everyday names | daglige navne |
 | outer pot | yderpotte |
-| nursery pot | planteskolepotte |
+| nursery pot | inderpotte |
 | tag | tag (plural tags) |
 | label (printed, the Labels page) | etiket (plural etiketter) |
 | node | knude (plural knuder) |
