@@ -3723,15 +3723,17 @@ main.app-content:has(.pass-progress) ~ .tour-card {
 
 .tour-actions .btn {
     min-height: 2.75rem;
+    white-space: nowrap;
 }
 
 .tour-closing-actions {
     justify-content: flex-start;
 }
 
+/* Back and Next stay together, so when the row is too narrow Skip drops to its own line instead of splitting them */
 .tour-steps {
     display: inline-flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-end;
     gap: 0.5rem;
@@ -3746,24 +3748,27 @@ main.app-content:has(.pass-progress) ~ .tour-card {
     margin-inline-start: 0.25rem;
 }
 
+/* The update bar and the first-sync notice would sit on top of the card and its buttons, so they wait until the
+   tour ends. MainLayout leaves with-banner off while the tour is on, so these padding rules are all that apply. */
+body:has(.tour-card) .update-banner,
+body:has(.tour-card) .first-sync-banner {
+    display: none;
+}
+
 /* Room at the end of the page so the card never hides it */
-main.app-content.with-tour,
-main.app-content.with-banner.with-tour {
+main.app-content.with-tour {
     padding-bottom: calc(var(--pa-nav-bottom) + 16rem);
 }
 
-main.app-content.with-tour:has(.page-dock),
-main.app-content.with-banner.with-tour:has(.page-dock) {
+main.app-content.with-tour:has(.page-dock) {
     padding-bottom: calc(var(--pa-nav-bottom) + 20rem);
 }
 
-main.app-content.with-tour:has(.pass-progress),
-main.app-content.with-banner.with-tour:has(.pass-progress) {
+main.app-content.with-tour:has(.pass-progress) {
     padding-bottom: calc(var(--pa-nav-bottom) + 20rem);
 }
 
-main.app-content.with-tour.tour-closing,
-main.app-content.with-banner.with-tour.tour-closing {
+main.app-content.with-tour.tour-closing {
     padding-bottom: calc(var(--pa-nav-bottom) + 24rem);
 }
 

@@ -18,8 +18,41 @@
         }
     }
 
+    // The language part of a code, like "da" for "da-DK"
+    function primary(code) {
+        return String(code || "").split("-")[0].toLowerCase();
+    }
+
+    // The languages the browser is set to, most preferred first, as the browser reports them
+    function browserList() {
+        try {
+            return navigator.languages && navigator.languages.length
+                ? Array.from(navigator.languages)
+                : navigator.language ? [navigator.language] : [];
+        } catch {
+            return [];
+        }
+    }
+
+    // Browser translation (Chrome's, for one) rewrites the page's text, which breaks Blazor's updates to it, and
+    // makes nonsense of text already in the reader's language ("I dag" becomes "Jeg dag"). So when the app is in a
+    // language the person chose or their browser is set to, the browser is told not to translate it. When the app is
+    // in English only because it lacks their language, translation is left on for them to use.
+    function protect(code) {
+        const root = document.documentElement;
+        const theirs = !!code && (get() === code || browserList().some(l => primary(l) === primary(code)));
+        if (theirs) {
+            root.setAttribute("translate", "no");
+            root.classList.add("notranslate");
+        } else {
+            root.removeAttribute("translate");
+            root.classList.remove("notranslate");
+        }
+    }
+
     function apply(code) {
         if (code) document.documentElement.lang = code;
+        protect(code || document.documentElement.lang);
     }
 
     function set(code) {
@@ -71,6 +104,28 @@
             return pageLanguage && !get() ? [pageLanguage] : [];
         }
     }
+
+    // The static pages have a hidden bar for each other language, like "Se siden på dansk". With no language chosen,
+    // the one for the first language in the browser's list that has a bar is shown, unless that list starts with the
+    // page's own language. Nothing is stored and nothing redirects.
+    function suggest() {
+        try {
+            if (get()) return;
+            const list = browserList().map(primary);
+            if (!list.length || list[0] === (pageLanguage || "en")) return;
+            const bars = Array.from(document.querySelectorAll(".language-suggest[data-lang]"));
+            for (const code of list) {
+                const bar = bars.find(b => primary(b.getAttribute("data-lang")) === code);
+                if (bar) {
+                    bar.hidden = false;
+                    return;
+                }
+            }
+        } catch { /* the bar just stays hidden */ }
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", suggest);
+    else suggest();
 
     window.stiklingLanguage = { get, set, browser, page, show: apply };
     apply(get());
