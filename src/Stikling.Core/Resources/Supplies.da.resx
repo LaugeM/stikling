@@ -13,10 +13,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FeedOrderSilica" xml:space="preserve">
-    <value>Silica går som regel i først og røres i før alt andet.</value>
+    <value>Silica kommer som regel i først og bliver rørt ud før resten.</value>
   </data>
   <data name="FeedOrderPh" xml:space="preserve">
-    <value>pH op eller ned går som regel i sidst, fordi alt andet ændrer pH.</value>
+    <value>pH op eller ned kommer som regel i til sidst fordi alt det andet flytter pH.</value>
   </data>
   <data name="FeedNeedsName" xml:space="preserve">
     <value>Giv gødningen et navn.</value>
@@ -31,7 +31,7 @@
     <value>En dosis kan ikke være under 0.</value>
   </data>
   <data name="NoWater" xml:space="preserve">
-    <value>Vandet, en dosis er til, skal være mere end 0.</value>
+    <value>Vandmængden en dosis er til, skal være over 0.</value>
   </data>
   <data name="ProductNeedsName" xml:space="preserve">
     <value>Giv produktet et navn.</value>
@@ -40,7 +40,7 @@
     <value>Et næringsstof kan ikke være under 0 eller over 100 %.</value>
   </data>
   <data name="NutrientOnce" xml:space="preserve">
-    <value>Hvert næringsstof kan kun stå en gang.</value>
+    <value>Hvert næringsstof må kun stå der én gang.</value>
   </data>
   <data name="MixNeedsName" xml:space="preserve">
     <value>Giv blandingen et navn.</value>
@@ -61,7 +61,7 @@
     <value>Giv potten et navn, fx "Klar planteskolepotte".</value>
   </data>
   <data name="PotNeedsOne" xml:space="preserve">
-    <value>Du skal have mindst en af den.</value>
+    <value>Du skal have mindst én.</value>
   </data>
   <data name="PotMeasurement" xml:space="preserve">
     <value>Et mål skal være over 0.</value>
@@ -79,10 +79,10 @@
     <value>Vælg en anden sælger at slå sammen med.</value>
   </data>
   <data name="PotSizeFromTo" xml:space="preserve">
-    <value>Fra {0} cm til {1} cm over toppen.</value>
+    <value>Fra {0} cm til {1} cm målt over toppen.</value>
   </data>
   <data name="PotSizeWarn" xml:space="preserve">
-    <value>Det er meget større, så jorden bliver våd i længere tid. Vand mindre, til rødderne fylder den.</value>
+    <value>Den er en del større, så jorden holder længere på vandet. Vand mindre til rødderne fylder den ud.</value>
   </data>
   <data name="DoseRate" xml:space="preserve">
     <value>{0} pr. {1} {2}</value>

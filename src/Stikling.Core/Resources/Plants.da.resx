@@ -13,28 +13,28 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="NumbersOnePlant" xml:space="preserve">
-    <value>Nummererer 1 plante, {0}</value>
+    <value>Giver 1 plante nummer {0}</value>
   </data>
   <data name="NumbersPlants" xml:space="preserve">
-    <value>Nummererer {0} planter, {1} til {2}</value>
+    <value>Giver {0} planter numrene {1} til {2}</value>
   </data>
   <data name="GoingCuttingOne" xml:space="preserve">
-    <value>1 stikling, der skal have et bogstav</value>
+    <value>1 stikling i gang</value>
   </data>
   <data name="GoingCuttings" xml:space="preserve">
-    <value>{0} stiklinger, der skal have et bogstav</value>
+    <value>{0} stiklinger i gang</value>
   </data>
   <data name="NumberAllNone" xml:space="preserve">
-    <value>Hver plante her har et nummer.</value>
+    <value>Alle planterne her har et nummer.</value>
   </data>
   <data name="NumberAllPlantsOnly" xml:space="preserve">
     <value>{0}.</value>
   </data>
   <data name="NumberAllCuttingsOnly" xml:space="preserve">
-    <value>Giver {0}.</value>
+    <value>Giver {0} et bogstav.</value>
   </data>
   <data name="NumberAllBoth" xml:space="preserve">
-    <value>{0}, og giver {1}.</value>
+    <value>{0}, og {1} får et bogstav.</value>
   </data>
   <data name="NumberNotValid" xml:space="preserve">
     <value>Brug et tal, fx 117.</value>
@@ -163,7 +163,7 @@
     <value>Ikke giftig for hunde</value>
   </data>
   <data name="PetsUnknown" xml:space="preserve">
-    <value>Intet kendt om kæledyr</value>
+    <value>Ved ikke om den er giftig for kæledyr</value>
   </data>
   <data name="PeopleToxic" xml:space="preserve">
     <value>Giftig for mennesker</value>
@@ -181,22 +181,22 @@
     <value>Datoen kan ikke være i fremtiden.</value>
   </data>
   <data name="SomeFewer" xml:space="preserve">
-    <value>Nogle af dem skal være færre end alle, og mindst én.</value>
+    <value>Det skal være mindst én og færre end alle.</value>
   </data>
   <data name="PotSelf" xml:space="preserve">
-    <value>En plante kan ikke stå i samme potte som sig selv.</value>
+    <value>En plante kan ikke dele potte med sig selv.</value>
   </data>
   <data name="PotTargetNotInCollection" xml:space="preserve">
-    <value>Planten, den skal i potte med, er ikke i samlingen.</value>
+    <value>Planten den skal dele potte med, er ikke i samlingen.</value>
   </data>
   <data name="PotSourceNotInCollection" xml:space="preserve">
-    <value>Kun en plante i samlingen kan stå i samme potte som en anden.</value>
+    <value>Kun en plante i samlingen kan dele potte med en anden.</value>
   </data>
   <data name="NotPottedWith" xml:space="preserve">
-    <value>Den står ikke i samme potte som en anden plante.</value>
+    <value>Den deler ikke potte med en anden plante.</value>
   </data>
   <data name="DateBeforePotted" xml:space="preserve">
-    <value>Datoen kan ikke ligge før, de kom i samme potte.</value>
+    <value>Datoen kan ikke ligge før de kom i samme potte.</value>
   </data>
   <data name="NameUnknown" xml:space="preserve">
     <value>Navn ukendt</value>
@@ -241,10 +241,10 @@
     <value>Den betalte pris kan ikke være negativ.</value>
   </data>
   <data name="ErrAcquiredFuture" xml:space="preserve">
-    <value>Datoen, du fik den, kan ikke være i fremtiden.</value>
+    <value>Datoen du fik den, kan ikke ligge i fremtiden.</value>
   </data>
   <data name="ErrSamePot" xml:space="preserve">
-    <value>En plante kan ikke have den samme potte indeni og udenpå.</value>
+    <value>En plante kan ikke have den samme potte som inderpotte og yderpotte.</value>
   </data>
   <data name="ErrQuarantineFuture" xml:space="preserve">
     <value>Karantænen kan ikke starte i fremtiden.</value>
@@ -271,13 +271,13 @@
     <value>Vandingsniveauet går fra 1 til 10.</value>
   </data>
   <data name="ErrCount" xml:space="preserve">
-    <value>Der er mindst én plante i en potte.</value>
+    <value>Der skal være mindst én plante i en potte.</value>
   </data>
   <data name="ErrPottedSelf" xml:space="preserve">
-    <value>En plante kan ikke stå i samme potte som sig selv.</value>
+    <value>En plante kan ikke dele potte med sig selv.</value>
   </data>
   <data name="ErrPotsTaken" xml:space="preserve">
-    <value>Kun en plante, der er givet væk eller solgt, kan tage sine potter med.</value>
+    <value>Kun en plante der er givet væk eller solgt, kan tage sine potter med.</value>
   </data>
   <data name="ProblemPests" xml:space="preserve">
     <value>skadedyr</value>

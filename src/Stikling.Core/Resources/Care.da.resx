@@ -91,28 +91,28 @@
     <value>Her kan du kun logge en vanding eller en påfyldning.</value>
   </data>
   <data name="EntryGone" xml:space="preserve">
-    <value>Posten er væk, så den kan ikke ændres.</value>
+    <value>Posten findes ikke længere, så du kan ikke ændre den.</value>
   </data>
   <data name="KindGone" xml:space="preserve">
-    <value>Plejetypen er væk.</value>
+    <value>Plejetypen findes ikke længere.</value>
   </data>
   <data name="KindNeedsName" xml:space="preserve">
     <value>Giv plejetypen et navn.</value>
   </data>
   <data name="KindNameTaken" xml:space="preserve">
-    <value>Du har allerede en plejetype, der hedder {0}.</value>
+    <value>Du har allerede en plejetype der hedder {0}.</value>
   </data>
   <data name="KindCountsAs" xml:space="preserve">
-    <value>En plejetype kan tælle som en vanding, en gødning eller ingen af dem.</value>
+    <value>En plejetype kan tælle som vanding, gødskning eller ingen af delene.</value>
   </data>
   <data name="IntervalNotWatering" xml:space="preserve">
-    <value>Vanding hører til vandingspåmindelsen, så vælg en anden plejetype.</value>
+    <value>Vanding styres af vandingspåmindelsen, så vælg en anden plejetype.</value>
   </data>
   <data name="IntervalFeedOnly" xml:space="preserve">
     <value>Kun gødskning kan have en gødning.</value>
   </data>
   <data name="IntervalEveryAtLeastOne" xml:space="preserve">
-    <value>Gentag mindst hver 1., så tallet skal være 1 eller mere.</value>
+    <value>Tallet skal være mindst 1.</value>
   </data>
   <data name="IntervalBothMonths" xml:space="preserve">
     <value>Vælg både første og sidste måned, eller ingen af dem.</value>
@@ -121,10 +121,10 @@
     <value>Månederne går fra 1 til 12.</value>
   </data>
   <data name="IntervalPickRoom" xml:space="preserve">
-    <value>Vælg det rum, den dækker.</value>
+    <value>Vælg hvilket rum det gælder.</value>
   </data>
   <data name="IntervalPickTag" xml:space="preserve">
-    <value>Vælg det tag, den dækker.</value>
+    <value>Vælg hvilket tag det gælder.</value>
   </data>
   <data name="IntervalPickPlant" xml:space="preserve">
     <value>Vælg mindst én plante.</value>
@@ -136,10 +136,10 @@
     <value>Datoen ligger i fremtiden.</value>
   </data>
   <data name="LogOwnKindNeedsName" xml:space="preserve">
-    <value>En post med din egen plejetype skal have et navn.</value>
+    <value>En post med en af dine egne plejetyper skal have plejetypens navn.</value>
   </data>
   <data name="LogOwnKindCountsAs" xml:space="preserve">
-    <value>En plejetype, du selv har lavet, kan kun tælle som en vanding, en gødning eller ingen af dem.</value>
+    <value>En plejetype du selv har lavet, kan kun tælle som vanding, gødskning eller ingen af delene.</value>
   </data>
   <data name="LogReadingNeedsNumber" xml:space="preserve">
     <value>Giv fugtmålingen et tal fra 0 til 10.</value>
@@ -166,22 +166,22 @@
     <value>pH går fra 0 til 14.</value>
   </data>
   <data name="LogWaterAmount" xml:space="preserve">
-    <value>Mængden af vand skal være mere end 0.</value>
+    <value>Vandmængden skal være over 0.</value>
   </data>
   <data name="LogProductNeedsName" xml:space="preserve">
     <value>Et produkt på posten skal have et navn.</value>
   </data>
   <data name="LogDoseNegative" xml:space="preserve">
-    <value>En dosis kan ikke være mindre end 0.</value>
+    <value>En dosis kan ikke være under 0.</value>
   </data>
   <data name="AwayBackAfterFirst" xml:space="preserve">
-    <value>Dagen, du er tilbage, skal ligge efter den første dag.</value>
+    <value>Dagen du er tilbage, skal ligge efter den første dag.</value>
   </data>
   <data name="GrowLightNeedsName" xml:space="preserve">
     <value>Giv plantelampen et navn.</value>
   </data>
   <data name="MemoryHalfYear" xml:space="preserve">
-    <value>For seks måneder siden i dag</value>
+    <value>For et halvt år siden i dag</value>
   </data>
   <data name="MemoryYear" xml:space="preserve">
     <value>For et år siden i dag</value>
@@ -193,22 +193,22 @@
     <value>Intet rum</value>
   </data>
   <data name="TreatmentDue" xml:space="preserve">
-    <value>Behandling på tide</value>
+    <value>Tid til behandling</value>
   </data>
   <data name="CheckForPests" xml:space="preserve">
     <value>Tjek for skadedyr</value>
   </data>
   <data name="NoticeBackToLookOver" xml:space="preserve">
-    <value>{0} at se til efter din tid ude</value>
+    <value>{0} at se til nu du er tilbage</value>
   </data>
   <data name="NoticeGoRound" xml:space="preserve">
     <value>Gå en runde i {0}</value>
   </data>
   <data name="NoticeTreatmentDue_One" xml:space="preserve">
-    <value>{0} behandling mod skadedyr på tide</value>
+    <value>{0} behandling mod skadedyr venter</value>
   </data>
   <data name="NoticeTreatmentDue_Other" xml:space="preserve">
-    <value>{0} behandlinger mod skadedyr på tide</value>
+    <value>{0} behandlinger mod skadedyr venter</value>
   </data>
   <data name="NoticeCheck_One" xml:space="preserve">
     <value>{0} sag at tjekke</value>
@@ -229,16 +229,16 @@
     <value>{0} behandlingsplaner færdige</value>
   </data>
   <data name="NoticeFlaggedOne" xml:space="preserve">
-    <value>{0} kræver opmærksomhed</value>
+    <value>{0} skal ses på</value>
   </data>
   <data name="NoticeFlaggedMany" xml:space="preserve">
-    <value>{0} kræver opmærksomhed</value>
+    <value>{0} skal ses på</value>
   </data>
   <data name="NoticeLookAgainOne" xml:space="preserve">
-    <value>Se igen på {0}</value>
+    <value>Se på {0} igen</value>
   </data>
   <data name="NoticeLookAgainMany" xml:space="preserve">
-    <value>Se igen på {0} planter</value>
+    <value>Se på {0} planter igen</value>
   </data>
   <data name="NoticeQuarantineOne" xml:space="preserve">
     <value>Karantænen er slut for {0}</value>
@@ -253,10 +253,10 @@
     <value>Tjek {0} planter på vej over i semi-hydro</value>
   </data>
   <data name="NoticeRestOne" xml:space="preserve">
-    <value>Hviler {0} nu?</value>
+    <value>Er {0} gået i hvile?</value>
   </data>
   <data name="NoticeRestMany" xml:space="preserve">
-    <value>Hviler {0} planter nu?</value>
+    <value>Er {0} planter gået i hvile?</value>
   </data>
   <data name="NoticeSoilOne" xml:space="preserve">
     <value>Tjek jorden i {0}</value>
@@ -283,19 +283,19 @@
     <value>Tag {0} billeder</value>
   </data>
   <data name="NoticeAndMore" xml:space="preserve">
-    <value>og {0} mere</value>
+    <value>og {0} til</value>
   </data>
   <data name="SitterTitle" xml:space="preserve">
-    <value>Pas på planterne</value>
+    <value>Pasning af planterne</value>
   </data>
   <data name="SitterElsewhere" xml:space="preserve">
     <value>Andre steder</value>
   </data>
   <data name="SitterEveryVisit" xml:space="preserve">
-    <value>Tjek den hver gang, du kommer forbi</value>
+    <value>Tjek den hver gang du kommer</value>
   </data>
   <data name="SitterFineUntilBack" xml:space="preserve">
-    <value>Burde klare sig, til du er tilbage</value>
+    <value>Klarer sig fint til du er tilbage</value>
   </data>
   <data name="SitterHeading" xml:space="preserve">
     <value>Før du vander</value>
@@ -307,10 +307,10 @@
     <value>Fyld reservoiret op</value>
   </data>
   <data name="SitterTopUpWater" xml:space="preserve">
-    <value>Fyld op med vand</value>
+    <value>Fyld vand på</value>
   </data>
   <data name="SitterMeterAt" xml:space="preserve">
-    <value>Vand kun ved {0} eller lavere på fugtmåleren.</value>
+    <value>Vand kun hvis fugtmåleren viser {0} eller lavere.</value>
   </data>
   <data name="SitterPaceInWater" xml:space="preserve">
     <value>Tjek vandet hver gang.</value>
@@ -319,31 +319,31 @@
     <value>Tjek den hver gang.</value>
   </data>
   <data name="SitterPaceReservoir" xml:space="preserve">
-    <value>Skal som regel fyldes op cirka hver {0}. dag. Tjek niveauet først, og lad den være, hvis der stadig er vand i.</value>
+    <value>Skal som regel fyldes op cirka hver {0}. dag. Tjek først hvor meget vand der er, og lad den være hvis der stadig er vand i.</value>
   </data>
   <data name="SitterPaceKnown" xml:space="preserve">
-    <value>Er som regel tør nok til vand cirka hver {0}. dag. Tjek den først, og lad den være, hvis den stadig er fugtig.</value>
+    <value>Trænger som regel til vand cirka hver {0}. dag. Tjek den først, og lad den være hvis den stadig er fugtig.</value>
   </data>
   <data name="SitterPaceUnknown" xml:space="preserve">
-    <value>Ikke lært endnu, så tjek den hver gang.</value>
+    <value>Rytmen kendes ikke endnu, så tjek den hver gang.</value>
   </data>
   <data name="SitterMeter" xml:space="preserve">
-    <value>Der er en fugtmåler. Tryk den cirka halvvejs ned i jorden, og aflæs tallet. Vand kun, hvis den viser tallet på plantens kort eller lavere. Er tallet højere, så lad den være: den klarer sig til næste gang.</value>
+    <value>Der er en fugtmåler. Stik den cirka halvvejs ned i jorden, og aflæs tallet. Vand kun hvis den viser tallet på plantens kort eller lavere. Viser den mere, så lad planten være: den klarer sig til næste gang.</value>
   </data>
   <data name="SitterMeterIn" xml:space="preserve">
-    <value>Der er en fugtmåler, {0}. Tryk den cirka halvvejs ned i jorden, og aflæs tallet. Vand kun, hvis den viser tallet på plantens kort eller lavere. Er tallet højere, så lad den være: den klarer sig til næste gang.</value>
+    <value>Der er en fugtmåler, {0}. Stik den cirka halvvejs ned i jorden, og aflæs tallet. Vand kun hvis den viser tallet på plantens kort eller lavere. Viser den mere, så lad planten være: den klarer sig til næste gang.</value>
   </data>
   <data name="SitterNoReading" xml:space="preserve">
-    <value>Ingen måling? Tryk en finger 2 til 3 cm ned i jorden, og vand kun, hvis den er tør hele vejen ned.</value>
+    <value>Ingen måling? Stik en finger 2 til 3 cm ned i jorden, og vand kun hvis den er tør hele vejen ned.</value>
   </data>
   <data name="SitterFinger" xml:space="preserve">
-    <value>Tryk en finger 2 til 3 cm ned i jorden. Vand kun, hvis den er tør hele vejen ned. Er den fugtig, eller er du i tvivl, så lad den være. Det er trygt at vente til næste gang.</value>
+    <value>Stik en finger 2 til 3 cm ned i jorden. Vand kun hvis den er tør hele vejen ned. Er den fugtig, eller er du i tvivl, så lad den være. Det skader ikke at vente til næste gang.</value>
   </data>
   <data name="SitterUsualWay" xml:space="preserve">
     <value>Den sædvanlige måde</value>
   </data>
   <data name="SitterTopUpOnly" xml:space="preserve">
-    <value>Planter i vand eller på reservoir skal kun fyldes op.</value>
+    <value>Planter i vand eller med reservoir skal bare have fyldt op.</value>
   </data>
   <data name="SitterDates" xml:space="preserve">
     <value>{0} til {1}</value>
@@ -385,31 +385,31 @@
     <value>Fra toppen</value>
   </data>
   <data name="MethodSoak" xml:space="preserve">
-    <value>Iblødsætning</value>
+    <value>I blød</value>
   </data>
   <data name="MethodBottom" xml:space="preserve">
     <value>Fra bunden</value>
   </data>
   <data name="MethodHintNone" xml:space="preserve">
-    <value>Arket til plantesitteren bruger den måde, du vælger, når du laver det.</value>
+    <value>Arket til plantesitteren bruger den måde du vælger når du laver det.</value>
   </data>
   <data name="MethodHintTop" xml:space="preserve">
-    <value>Hæld vand på jorden, til lidt løber ud i bunden.</value>
+    <value>Hæld vand på jorden til der løber lidt ud i bunden.</value>
   </data>
   <data name="MethodHintSoak" xml:space="preserve">
     <value>Sæt hele potten i en skål med vand et stykke tid, og lad den så dryppe af.</value>
   </data>
   <data name="MethodHintBottom" xml:space="preserve">
-    <value>Stil den i et underfad med vand, og lad den suge det op, den skal bruge.</value>
+    <value>Stil den i et underfad med vand, og lad den suge det den skal bruge.</value>
   </data>
   <data name="MethodStepsTop" xml:space="preserve">
-    <value>Vand fra toppen, til lidt løber ud i bunden. Kig i underfadet efter 15 til 30 minutter. Er det hele suget op, så giv lidt mere, og tjek igen. Hæld resten væk.</value>
+    <value>Vand fra toppen til der løber lidt ud i bunden. Kig i underfadet efter 15 til 30 minutter. Er det hele suget op, så giv lidt mere og tjek igen. Hæld resten væk.</value>
   </data>
   <data name="MethodStepsSoak" xml:space="preserve">
     <value>Sæt hele potten i en skål med vand i 15 til 30 minutter, og lad den så dryppe godt af.</value>
   </data>
   <data name="MethodStepsBottom" xml:space="preserve">
-    <value>Stil den i et underfad med vand. Se efter 15 til 30 minutter, om den har suget det hele op. Har den det, så giv den lidt mere, og tjek igen efter 15 til 30 minutter. Når den holder op med at suge, så hæld resten væk.</value>
+    <value>Stil den i et underfad med vand. Se efter 15 til 30 minutter om den har suget det hele op. Har den det, så giv lidt mere, og tjek igen efter endnu 15 til 30 minutter. Når den holder op med at suge vand, så hæld resten væk.</value>
   </data>
   <data name="SitterDayFormat" xml:space="preserve">
     <value>d. MMMM</value>
