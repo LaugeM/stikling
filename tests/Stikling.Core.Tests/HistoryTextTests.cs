@@ -397,7 +397,7 @@ public class HistoryTextTests
         Assert.Equal("Status: Died (was Active)\nTagged Rare", change.Text);
         Assert.Equal(["StatusChanged", "Tagged"], change.Lines!.Select(l => l.Key));
         Assert.Equal("PlantStatus.Died", change.Lines![0].Args[0].Enum);
-        Assert.Equal("Status: Død (var Aktiv)\nFik tagget Rare", HistoryText.Show(change, DanishLabel, Label, Danish));
+        Assert.Equal("Status: Død (var Aktiv)\nTagget Rare", HistoryText.Show(change, DanishLabel, Label, Danish));
     }
 
     [Fact]
