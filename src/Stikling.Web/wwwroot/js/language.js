@@ -127,6 +127,27 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", suggest);
     else suggest();
 
+    // The language the app will start in when none is chosen: the first in the browser's list that the site has a
+    // page for (the hreflang links, which only the live site has), or null
+    function expected() {
+        try {
+            const codes = Array.from(document.querySelectorAll('link[rel="alternate"][hreflang]'))
+                .map(link => primary(link.getAttribute("hreflang")))
+                .filter(code => code && code !== "x-default");
+            return browser().map(primary).find(code => codes.includes(code)) || null;
+        } catch {
+            return null;
+        }
+    }
+
     window.stiklingLanguage = { get, set, browser, page, show: apply };
     apply(get());
+
+    // On a first visit to the English front page with a Danish browser, the app starts in Danish a moment later.
+    // Telling the browser now keeps it from translating the page before then, which is when the text and the tour
+    // broke. The bar offers the front page in Danish instead.
+    if (!get()) {
+        const coming = expected();
+        if (coming && coming !== primary(document.documentElement.lang)) protect(coming);
+    }
 })();
