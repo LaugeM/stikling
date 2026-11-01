@@ -79,7 +79,7 @@
     <value>Fra en stikling eller deling</value>
   </data>
   <data name="RaisedWildCollected" xml:space="preserve">
-    <value>Samlet i naturen</value>
+    <value>Indsamlet i naturen</value>
   </data>
   <data name="SellerShop" xml:space="preserve">
     <value>Butik</value>
@@ -124,19 +124,19 @@
     <value>Lidt lys</value>
   </data>
   <data name="LightMedium" xml:space="preserve">
-    <value>Middel lys</value>
+    <value>Moderat lys</value>
   </data>
   <data name="LightBrightIndirect" xml:space="preserve">
-    <value>Kraftigt indirekte lys</value>
+    <value>Lyst uden direkte sol</value>
   </data>
   <data name="LightDirectSun" xml:space="preserve">
-    <value>Noget direkte sol</value>
+    <value>Lidt direkte sol</value>
   </data>
   <data name="WaterDryOut" xml:space="preserve">
-    <value>Tør helt ud</value>
+    <value>Må tørre helt ud</value>
   </data>
   <data name="WaterDryPartly" xml:space="preserve">
-    <value>Tør delvist ud</value>
+    <value>Må tørre lidt ud</value>
   </data>
   <data name="WaterEvenlyMoist" xml:space="preserve">
     <value>Jævnt fugtig</value>
@@ -145,7 +145,7 @@
     <value>Lav luftfugtighed</value>
   </data>
   <data name="HumidityMedium" xml:space="preserve">
-    <value>Middel luftfugtighed</value>
+    <value>Moderat luftfugtighed</value>
   </data>
   <data name="HumidityHigh" xml:space="preserve">
     <value>Høj luftfugtighed</value>
@@ -172,7 +172,7 @@
     <value>visner ned</value>
   </data>
   <data name="UsuallyLikes" xml:space="preserve">
-    <value>Kan som regel lide {0}</value>
+    <value>Har det som regel bedst med: {0}</value>
   </data>
   <data name="MediumOrchidBark" xml:space="preserve">
     <value>Orkidébark</value>
@@ -199,19 +199,19 @@
     <value>Vand</value>
   </data>
   <data name="ExplainLeca" xml:space="preserve">
-    <value>Brændte lerkugler. Med vand i bunden af potten suger de det op til rødderne, helt uden jord. Det kaldes semi-hydro.</value>
+    <value>Brændte lerkugler. Med vand i bunden af potten suger de vandet op til rødderne, helt uden jord. Det kaldes semi-hydro.</value>
   </data>
   <data name="ExplainPon" xml:space="preserve">
-    <value>En færdig blanding af mineralkorn som pimpsten, zeolit og lavasten, brugt til semi-hydro i stedet for jord.</value>
+    <value>En færdig blanding af mineralkorn som pimpsten, zeolit og lavasten, der bruges til semi-hydro i stedet for jord.</value>
   </data>
   <data name="ExplainSphagnum" xml:space="preserve">
-    <value>Langfibret mos, der holder på meget vand og stadig lukker luft ind. Bruges ofte til at få stiklinger til at slå rødder.</value>
+    <value>Langfibret mos der holder på meget vand og alligevel lukker luft ind. Bruges tit til at få stiklinger til at slå rødder.</value>
   </data>
   <data name="ExplainCormRiser" xml:space="preserve">
-    <value>Knolden sidder på et hævet lag over vandet i en lukket boks, så den holder sig fugtig uden at stå i vand.</value>
+    <value>Knolden ligger på et hævet lag over vand i en lukket boks, så den holder sig fugtig uden at stå i vand.</value>
   </data>
   <data name="ExplainAirLayer" xml:space="preserve">
-    <value>Der gror rødder på en stilk, mens den stadig sidder på planten, i fugtigt mos viklet rundt om den. Når rødderne er der, skæres den af.</value>
+    <value>Stilken får rødder mens den stadig sidder på planten, i fugtigt mos der er viklet om den. Når rødderne er der, skærer du den af.</value>
   </data>
   <data name="AidRootingPowder" xml:space="preserve">
     <value>Rodpulver</value>
@@ -361,22 +361,22 @@
     <value>ingen behandling endnu</value>
   </data>
   <data name="DueToday" xml:space="preserve">
-    <value>skal gøres i dag</value>
+    <value>behandles i dag</value>
   </data>
   <data name="CheckDueToday" xml:space="preserve">
     <value>tjek i dag</value>
   </data>
   <data name="DueOverdue_One" xml:space="preserve">
-    <value>forsinket med {0} dag</value>
+    <value>{0} dag for sent</value>
   </data>
   <data name="DueOverdue_Other" xml:space="preserve">
-    <value>forsinket med {0} dage</value>
+    <value>{0} dage for sent</value>
   </data>
   <data name="CheckOverdue_One" xml:space="preserve">
-    <value>tjek forsinket med {0} dag</value>
+    <value>tjek {0} dag for sent</value>
   </data>
   <data name="CheckOverdue_Other" xml:space="preserve">
-    <value>tjek forsinket med {0} dage</value>
+    <value>tjek {0} dage for sent</value>
   </data>
   <data name="DueTomorrow" xml:space="preserve">
     <value>næste i morgen</value>
@@ -439,7 +439,7 @@
     <value>Beholdere til formering</value>
   </data>
   <data name="HeadingStandalone" xml:space="preserve">
-    <value>Potter, der står for sig selv</value>
+    <value>Potter der står for sig selv</value>
   </data>
   <data name="MaterialTerracotta" xml:space="preserve">
     <value>Terrakotta</value>
@@ -505,7 +505,7 @@
     <value>Med dens yderpotte</value>
   </data>
   <data name="TakenWithOuterPots" xml:space="preserve">
-    <value>Med yderpotter også</value>
+    <value>Også med yderpotter</value>
   </data>
   <data name="MixParts" xml:space="preserve">
     <value>Dele</value>
@@ -517,13 +517,13 @@
     <value>Ingen mængder</value>
   </data>
   <data name="PercentTotal" xml:space="preserve">
-    <value>Det giver {0} %, ikke 100 %. Du kan stadig gemme det.</value>
+    <value>Det giver {0} %, ikke 100 %. Du kan godt gemme det alligevel.</value>
   </data>
   <data name="ProductFertiliser" xml:space="preserve">
     <value>Gødning</value>
   </data>
   <data name="ProductStimulant" xml:space="preserve">
-    <value>Rodnings- eller vækstmiddel</value>
+    <value>Rod- eller vækstmiddel</value>
   </data>
   <data name="ProductSilica" xml:space="preserve">
     <value>Silica</value>
