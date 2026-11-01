@@ -55,7 +55,7 @@
     <value>skimmel</value>
   </data>
   <data name="LostToNeverRooted" xml:space="preserve">
-    <value>aldrig rødder</value>
+    <value>slog aldrig rod</value>
   </data>
   <data name="LostToUnknown" xml:space="preserve">
     <value>ved ikke</value>
@@ -64,16 +64,16 @@
     <value>Formeringen er færdig.</value>
   </data>
   <data name="ErrDateFuture" xml:space="preserve">
-    <value>Den dato ligger i fremtiden.</value>
+    <value>Datoen ligger i fremtiden.</value>
   </data>
   <data name="ErrDateCantBeFuture" xml:space="preserve">
     <value>Datoen kan ikke ligge i fremtiden.</value>
   </data>
   <data name="ErrDateBeforeStart" xml:space="preserve">
-    <value>Datoen kan ikke være før formeringen blev startet.</value>
+    <value>Datoen kan ikke ligge før formeringen startede.</value>
   </data>
   <data name="ErrPotWithMissing" xml:space="preserve">
-    <value>Planten, de skal i potte med, er ikke i samlingen.</value>
+    <value>Planten de skal dele potte med, er ikke i samlingen.</value>
   </data>
   <data name="ErrIdForEachPlant" xml:space="preserve">
     <value>Hver ny plante skal have et id.</value>
@@ -85,31 +85,31 @@
     <value>Giv formeringen et kælenavn eller en slægt.</value>
   </data>
   <data name="ErrCountsNegative" xml:space="preserve">
-    <value>Antallet, der er pottet op, givet væk eller mislykkedes, kan ikke være negativt.</value>
+    <value>Antal pottet op, givet væk eller mislykket kan ikke være negativt.</value>
   </data>
   <data name="ErrStartWithOne" xml:space="preserve">
     <value>Start med mindst 1.</value>
   </data>
   <data name="ErrCountLowerThanUsed" xml:space="preserve">
-    <value>Antallet kan ikke være lavere end de {0}, der allerede er pottet op, givet væk eller mislykkedes.</value>
+    <value>Antallet kan ikke være lavere end de {0} der allerede er pottet op, givet væk eller mislykket.</value>
   </data>
   <data name="ErrRootedBeforeStart" xml:space="preserve">
-    <value>Den kan ikke have slået rødder, før den blev startet.</value>
+    <value>Den kan ikke have slået rødder før den blev startet.</value>
   </data>
   <data name="ErrSignBeforeStart" xml:space="preserve">
-    <value>En rod eller et blad kan ikke vise sig, før den blev startet.</value>
+    <value>Der kan ikke komme en rod eller et blad før formeringen startede.</value>
   </data>
   <data name="ErrSignFuture" xml:space="preserve">
-    <value>En rod eller et blad kan ikke vise sig i fremtiden.</value>
+    <value>En rod eller et blad kan ikke have en dato i fremtiden.</value>
   </data>
   <data name="ErrCameUpNegative" xml:space="preserve">
-    <value>Antallet, der er spiret, kan ikke være negativt.</value>
+    <value>Antallet der er spiret, kan ikke være negativt.</value>
   </data>
   <data name="ErrCameUpMoreThanSown" xml:space="preserve">
-    <value>Der kan ikke være spiret flere frø, end der blev sået.</value>
+    <value>Der kan ikke være spiret flere frø end der blev sået.</value>
   </data>
   <data name="ErrSeedBeforeSown" xml:space="preserve">
-    <value>Et frø kan ikke spire, før det blev sået.</value>
+    <value>Et frø kan ikke spire før det er sået.</value>
   </data>
   <data name="ErrSeedFuture" xml:space="preserve">
     <value>Et frø kan ikke spire i fremtiden.</value>
@@ -145,13 +145,13 @@
     <value>Fugt {0}/10</value>
   </data>
   <data name="DryMessage" xml:space="preserve">
-    <value>Sig, hvor længe den tørrede, eller fjern fluebenet.</value>
+    <value>Skriv hvor længe den tørrede, eller fjern fluebenet.</value>
   </data>
   <data name="PottedUpBelowPlants_One" xml:space="preserve">
-    <value>1 plante, der er pottet op fra den, er stadig i din samling, så antallet pottet op kan ikke være lavere.</value>
+    <value>1 plante der er pottet op fra den, er stadig i din samling, så antallet pottet op kan ikke være lavere.</value>
   </data>
   <data name="PottedUpBelowPlants_Other" xml:space="preserve">
-    <value>{0} planter, der er pottet op fra den, er stadig i din samling, så antallet pottet op kan ikke være lavere.</value>
+    <value>{0} planter der er pottet op fra den, er stadig i din samling, så antallet pottet op kan ikke være lavere.</value>
   </data>
   <data name="NotDried" xml:space="preserve">
     <value>Ikke tørret</value>
@@ -178,7 +178,7 @@
     <value>Navn ukendt</value>
   </data>
   <data name="UnnamedPropagation" xml:space="preserve">
-    <value>Unavngivet formering</value>
+    <value>Formering uden navn</value>
   </data>
   <data name="ListOfCutting" xml:space="preserve">
     <value>Stikling af {0}</value>
@@ -205,28 +205,28 @@
     <value>Formering af {0}</value>
   </data>
   <data name="ListUnnamedCutting" xml:space="preserve">
-    <value>Unavngivet stikling</value>
+    <value>Stikling uden navn</value>
   </data>
   <data name="ListUnnamedCorm" xml:space="preserve">
-    <value>Unavngivet knold</value>
+    <value>Knold uden navn</value>
   </data>
   <data name="ListUnnamedOffset" xml:space="preserve">
-    <value>Unavngivet aflægger</value>
+    <value>Aflægger uden navn</value>
   </data>
   <data name="ListUnnamedSeed" xml:space="preserve">
-    <value>Unavngivne frø</value>
+    <value>Frø uden navn</value>
   </data>
   <data name="ListUnnamedDivision" xml:space="preserve">
-    <value>Unavngivet deling</value>
+    <value>Deling uden navn</value>
   </data>
   <data name="ListUnnamedAirLayer" xml:space="preserve">
-    <value>Unavngivet luftaflægger</value>
+    <value>Luftaflægger uden navn</value>
   </data>
   <data name="ListUnnamedLeaf" xml:space="preserve">
-    <value>Unavngivet bladstikling</value>
+    <value>Bladstikling uden navn</value>
   </data>
   <data name="ListUnnamedOther" xml:space="preserve">
-    <value>Unavngivet formering</value>
+    <value>Formering uden navn</value>
   </data>
   <data name="PhotoDay" xml:space="preserve">
     <value>dag {0}</value>
@@ -340,28 +340,28 @@
     <value>{0} dage</value>
   </data>
   <data name="FigureToRoot_One" xml:space="preserve">
-    <value>dag til rødder</value>
+    <value>dag om at slå rødder</value>
   </data>
   <data name="FigureToRoot_Other" xml:space="preserve">
-    <value>dage til rødder</value>
+    <value>dage om at slå rødder</value>
   </data>
   <data name="FigureToComeUp_One" xml:space="preserve">
-    <value>dag til spiring</value>
+    <value>dag om at spire</value>
   </data>
   <data name="FigureToComeUp_Other" xml:space="preserve">
-    <value>dage til spiring</value>
+    <value>dage om at spire</value>
   </data>
   <data name="FigureToPotUp_One" xml:space="preserve">
-    <value>dag til at potte op</value>
+    <value>dag til den blev pottet op</value>
   </data>
   <data name="FigureToPotUp_Other" xml:space="preserve">
-    <value>dage til at potte op</value>
+    <value>dage til den blev pottet op</value>
   </data>
   <data name="FigureItRan_One" xml:space="preserve">
-    <value>dag varede den</value>
+    <value>dag den klarede sig</value>
   </data>
   <data name="FigureItRan_Other" xml:space="preserve">
-    <value>dage varede den</value>
+    <value>dage den klarede sig</value>
   </data>
   <data name="FigureSoFar_One" xml:space="preserve">
     <value>dag indtil nu</value>

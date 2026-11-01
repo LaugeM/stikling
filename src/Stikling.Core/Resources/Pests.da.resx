@@ -13,22 +13,22 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="StartDateInFuture" xml:space="preserve">
-    <value>Startdatoen er i fremtiden.</value>
+    <value>Startdatoen ligger i fremtiden.</value>
   </data>
   <data name="PestCaseIntervalTooShort" xml:space="preserve">
-    <value>Behandl mindst hver dag, så intervallet skal være 1 eller mere.</value>
+    <value>Intervallet skal være mindst 1 dag.</value>
   </data>
   <data name="PestCasePickRoom" xml:space="preserve">
-    <value>Vælg det rum, sagen dækker.</value>
+    <value>Vælg hvilket rum sagen gælder.</value>
   </data>
   <data name="PestCasePickPlant" xml:space="preserve">
     <value>Vælg mindst én plante.</value>
   </data>
   <data name="PestCaseResolvedInFuture" xml:space="preserve">
-    <value>Datoen for løsning er i fremtiden.</value>
+    <value>Datoen hvor sagen blev løst, ligger i fremtiden.</value>
   </data>
   <data name="PestCaseResolvedBeforeStart" xml:space="preserve">
-    <value>En sag kan ikke løses, før den er begyndt.</value>
+    <value>En sag kan ikke være løst før den er begyndt.</value>
   </data>
   <data name="TreatmentNeedsCase" xml:space="preserve">
     <value>En behandling skal høre til en sag.</value>
@@ -37,13 +37,13 @@
     <value>Et tjek hører til en sag eller en plante, ikke begge dele.</value>
   </data>
   <data name="OnlyCheckOnPlant" xml:space="preserve">
-    <value>Kun et tjek kan logges på én plante.</value>
+    <value>Kun et tjek kan logges på en enkelt plante.</value>
   </data>
   <data name="DateInFuture" xml:space="preserve">
-    <value>Datoen er i fremtiden.</value>
+    <value>Datoen ligger i fremtiden.</value>
   </data>
   <data name="NextTreatmentBeforeThis" xml:space="preserve">
-    <value>Næste behandling kan ikke forfalde, før denne er sket.</value>
+    <value>Næste behandling kan ikke ligge før denne.</value>
   </data>
   <data name="CheckOnlyDateNotes" xml:space="preserve">
     <value>Et tjek har kun en dato og noter.</value>
@@ -55,13 +55,13 @@
     <value>En fældeoptælling har kun antallet, en ny fælde, en dato og noter.</value>
   </data>
   <data name="TrapCountFillIn" xml:space="preserve">
-    <value>Skriv, hvor mange der sidder på fælden, eller at der er sat en ny op.</value>
+    <value>Skriv hvor mange der sidder på fælden, eller at du har sat en ny op.</value>
   </data>
   <data name="TrapCountBelowZero" xml:space="preserve">
     <value>Antallet kan ikke være under nul.</value>
   </data>
   <data name="SkippedStepOnlyDateNotes" xml:space="preserve">
-    <value>Et sprunget trin har kun en dato og noter.</value>
+    <value>Et trin du har sprunget over, har kun en dato og noter.</value>
   </data>
   <data name="OnlyTreatmentIsStep" xml:space="preserve">
     <value>Kun en behandling kan være et trin i en plan.</value>
@@ -70,28 +70,28 @@
     <value>Et problem hører til en plante.</value>
   </data>
   <data name="ProblemPickSigns" xml:space="preserve">
-    <value>Vælg, hvad du ser.</value>
+    <value>Vælg hvad du ser.</value>
   </data>
   <data name="ProblemEndBeforeStart" xml:space="preserve">
-    <value>Et problem kan ikke slutte, før det er begyndt.</value>
+    <value>Et problem kan ikke slutte før det er begyndt.</value>
   </data>
   <data name="ProblemSayOutcome" xml:space="preserve">
-    <value>Sig, hvordan det endte.</value>
+    <value>Vælg hvordan det endte.</value>
   </data>
   <data name="ProblemLookAgainAfterStart" xml:space="preserve">
-    <value>Se igen efter startdatoen.</value>
+    <value>Dagen du vil se igen, skal ligge efter starten.</value>
   </data>
   <data name="UpdateNeedsProblem" xml:space="preserve">
     <value>En opdatering hører til et problem.</value>
   </data>
   <data name="UpdateLookAgainAfter" xml:space="preserve">
-    <value>Se igen efter opdateringen.</value>
+    <value>Dagen du vil se igen, skal ligge efter opdateringen.</value>
   </data>
   <data name="FloweringMarkNeedsPlant" xml:space="preserve">
     <value>En blomstringsmarkering hører til en plante.</value>
   </data>
   <data name="FloweringMarkPickStage" xml:space="preserve">
-    <value>Vælg, hvor langt blomstringen er nået.</value>
+    <value>Vælg hvor langt blomstringen er.</value>
   </data>
   <data name="PickDate" xml:space="preserve">
     <value>Vælg en dato.</value>
@@ -103,13 +103,13 @@
     <value>Knopperne skal komme før blomsterne.</value>
   </data>
   <data name="FloweringEndBeforeBegin" xml:space="preserve">
-    <value>Blomstringen kan ikke slutte, før den begyndte.</value>
+    <value>Blomstringen kan ikke slutte før den begyndte.</value>
   </data>
   <data name="UpdateNeedsSomething" xml:space="preserve">
-    <value>Sig, hvordan det ser ud, hvad du gjorde, eller tilføj en note eller et billede.</value>
+    <value>Vælg hvordan det går eller hvad du gjorde, eller tilføj en note eller et billede.</value>
   </data>
   <data name="UpdateBeforeProblem" xml:space="preserve">
-    <value>En opdatering kan ikke ligge før problemets start.</value>
+    <value>En opdatering kan ikke ligge før problemet begyndte.</value>
   </data>
   <data name="PlanNeedsName" xml:space="preserve">
     <value>Giv planen et navn.</value>
@@ -118,10 +118,10 @@
     <value>Tilføj mindst ét trin.</value>
   </data>
   <data name="PlanStepsApart" xml:space="preserve">
-    <value>Et trin efter det første kommer mindst en dag senere.</value>
+    <value>Hvert trin efter det første skal ligge mindst en dag senere.</value>
   </data>
   <data name="PlanStepNeedsWhat" xml:space="preserve">
-    <value>Skriv, hvad hvert trin bruger.</value>
+    <value>Skriv hvad hvert trin bruger.</value>
   </data>
   <data name="RecipeNeedsName" xml:space="preserve">
     <value>Giv blandingen et navn.</value>
@@ -133,7 +133,7 @@
     <value>En mængde kan ikke være under 0.</value>
   </data>
   <data name="IngredientPerAboveZero" xml:space="preserve">
-    <value>Hvad mængden gælder for, skal være mere end 0.</value>
+    <value>Det mængden gælder for, skal være over 0.</value>
   </data>
   <data name="SignYellowLeaves" xml:space="preserve">
     <value>Gule blade</value>
@@ -160,10 +160,10 @@
     <value>Solskoldning</value>
   </data>
   <data name="SignLeggy" xml:space="preserve">
-    <value>Lang og bleg</value>
+    <value>Ranglet eller bleg</value>
   </data>
   <data name="SignEdema" xml:space="preserve">
-    <value>Bump under bladene</value>
+    <value>Buler under bladene</value>
   </data>
   <data name="SignOther" xml:space="preserve">
     <value>Noget andet</value>
@@ -196,7 +196,7 @@
     <value>Bedre</value>
   </data>
   <data name="TrendSame" xml:space="preserve">
-    <value>Omtrent det samme</value>
+    <value>Nogenlunde det samme</value>
   </data>
   <data name="TrendWorse" xml:space="preserve">
     <value>Værre</value>
@@ -217,10 +217,10 @@
     <value>Der er noget galt: {0}</value>
   </data>
   <data name="UpdateLineEmpty" xml:space="preserve">
-    <value>Opdatering om problemet</value>
+    <value>Nyt om problemet</value>
   </data>
   <data name="ClosedLine" xml:space="preserve">
-    <value>Problem overstået: {0}</value>
+    <value>Problemet er overstået: {0}</value>
   </data>
   <data name="ReopenedLine" xml:space="preserve">
     <value>Problemet kom tilbage</value>
@@ -295,10 +295,10 @@
     <value>Markeret som blomsterstilk eller knopper.</value>
   </data>
   <data name="MarkedInFlower" xml:space="preserve">
-    <value>Markeret som i blomst.</value>
+    <value>Markeret som blomstrende.</value>
   </data>
   <data name="MarkedDone" xml:space="preserve">
-    <value>Markeret som færdig med at blomstre.</value>
+    <value>Markeret som afblomstret.</value>
   </data>
   <data name="BadgeInBud" xml:space="preserve">
     <value>I knop</value>
@@ -322,7 +322,7 @@
     <value>i blomst fra {0}</value>
   </data>
   <data name="DescribeDoneFlowering" xml:space="preserve">
-    <value>færdig med at blomstre {0}</value>
+    <value>afblomstret {0}</value>
   </data>
   <data name="DescribeDone" xml:space="preserve">
     <value>færdig {0}</value>

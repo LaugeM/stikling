@@ -247,8 +247,8 @@ public class HistoryTextTests
     public void A_line_is_shown_in_the_language_asked_for()
     {
         Assert.Equal("Status: Død (var Aktiv)", HistoryText.Render(L("StatusChanged", PlantStatus.Died, PlantStatus.Active), DanishLabel, Danish));
-        Assert.Equal("Har vænnet sig til LECA efter 1 uge", HistoryText.Render(L("SettledIn", GrowingMedium.Leca, 1), DanishLabel, Danish));
-        Assert.Equal("Har vænnet sig til LECA efter 3 uger", HistoryText.Render(L("SettledIn", GrowingMedium.Leca, 3), DanishLabel, Danish));
+        Assert.Equal("Faldt til i LECA efter 1 uge", HistoryText.Render(L("SettledIn", GrowingMedium.Leca, 1), DanishLabel, Danish));
+        Assert.Equal("Faldt til i LECA efter 3 uger", HistoryText.Render(L("SettledIn", GrowingMedium.Leca, 3), DanishLabel, Danish));
         Assert.Equal("Startede 3× knold i LECA", HistoryText.Render(L("Started", 3, PropagationType.Corm, GrowingMedium.Leca), DanishLabel, Danish));
         Assert.Equal("Tilføjet til samlingen, juni 2024", HistoryText.Render(L("AddedToCollectionMonth", new DateOnly(2024, 6, 1)), DanishLabel, Danish));
         Assert.Equal("Vandet med Aroid feed (2 L)",
@@ -397,7 +397,7 @@ public class HistoryTextTests
         Assert.Equal("Status: Died (was Active)\nTagged Rare", change.Text);
         Assert.Equal(["StatusChanged", "Tagged"], change.Lines!.Select(l => l.Key));
         Assert.Equal("PlantStatus.Died", change.Lines![0].Args[0].Enum);
-        Assert.Equal("Status: Død (var Aktiv)\nTagget med Rare", HistoryText.Show(change, DanishLabel, Label, Danish));
+        Assert.Equal("Status: Død (var Aktiv)\nFik tagget Rare", HistoryText.Show(change, DanishLabel, Label, Danish));
     }
 
     [Fact]
@@ -478,7 +478,7 @@ public class HistoryTextTests
         try
         {
             danish = ExampleFamily.Build(time);
-            Assert.Equal("Stor coleus", ExampleFamily.MotherNickname);
+            Assert.Equal("Store coleus", ExampleFamily.MotherNickname);
         }
         finally
         {
@@ -487,7 +487,7 @@ public class HistoryTextTests
 
         Assert.Equal("Big Coleus", ExampleFamily.MotherNickname);
         Assert.Equal("Big Coleus", english.Plants[0].Nickname);
-        Assert.Equal("Stor coleus", danish.Plants[0].Nickname);
+        Assert.Equal("Store coleus", danish.Plants[0].Nickname);
         // The same ids, so devices never end up with two copies
         Assert.Equal(english.Plants.Select(p => p.Id), danish.Plants.Select(p => p.Id));
         Assert.Equal(english.Entries.Select(e => e.Id), danish.Entries.Select(e => e.Id));
