@@ -64,7 +64,7 @@ public class GuidedTourTests
         Assert.True(tour.Back());
 
         Assert.Equal(5, tour.Number);
-        Assert.Equal("Your data", tour.Current.Title);
+        Assert.Equal("Your data stays yours", tour.Current.Title);
     }
 
     [Fact]

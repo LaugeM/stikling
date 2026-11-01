@@ -39,7 +39,7 @@
         </div>
     </header>
 
-    <main class="app-content @(updateReady || FirstSyncNotice ? "with-banner" : null) @(Tour.Active ? "with-tour" : null) @(Tour.State.IsClosing ? "tour-closing" : null)">
+    <main class="app-content @((updateReady || FirstSyncNotice) && !Tour.Active ? "with-banner" : null) @(Tour.Active ? "with-tour" : null) @(Tour.State.IsClosing ? "tour-closing" : null)">
         @Body
     </main>
 
@@ -50,7 +50,7 @@
 
     @* On a device where someone just signed in, the lists stay empty until the first sync brings
        their things in, which would otherwise look like the account had lost them *@
-    @if (FirstSyncNotice)
+    @if (FirstSyncNotice && !Tour.Active)
     {
         <div class="first-sync-banner" role="status">@Strings.Layout.FetchingAccount</div>
     }

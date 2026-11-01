@@ -112,6 +112,19 @@ def language_links(code, name):
     return f'<p class="language-links">{links}</p>' if links else ""
 
 
+# One hidden bar for each other language, like "Se siden på dansk", in that language and linking to the same page. The
+# script in language.js shows the one that matches the browser's language, when no language has been chosen. Nothing
+# redirects, so the person decides.
+def language_suggestions(code, name):
+    return "".join(
+        f'<p class="language-suggest" lang="{other["code"]}" data-lang="{other["code"]}" hidden>'
+        f'<a href="{local_href(other["code"], name)}" hreflang="{other["code"]}">'
+        f'{htmllib.escape(texts[other["code"]]["languageSuggest"])}</a></p>'
+        for other in languages
+        if other["code"] != code
+    )
+
+
 # One page of the site: the template with a language's head tags, shell text and hreflang links. name is "" for
 # the front page. title and description are the page's own, in that language, and body is its rendered HTML.
 def make_page(code, name, title, description, body):
@@ -146,6 +159,13 @@ def make_page(code, name, title, description, body):
     if name == "":
         # What a first visit sees while the app downloads, with the other languages in the footer
         body = body.replace("</footer>", language_links(code, name) + "</footer>", 1)
+        # The intro says which language it is in, since the <html> element can say another once a language is in use.
+        # The bars come first, at the top of the page.
+        body, count = re.subn(r'<div class="intro" id="intro">',
+                              lambda m: f'<div class="intro" id="intro" lang="{code}">' + language_suggestions(code, name),
+                              body, count=1)
+        if count != 1:
+            sys.exit("Expected the intro element in front.html")
         page, count = re.subn(r"<!-- intro:.*?<!-- /intro -->", lambda m: body, page, count=1, flags=re.S)
         if count != 1:
             sys.exit("Expected exactly one <!-- intro: --> ... <!-- /intro --> block in index.html")
@@ -163,7 +183,7 @@ def make_page(code, name, title, description, body):
         page, count = re.subn(r"\s*<!-- intro:.*?<!-- /intro -->", "", page, flags=re.S)
         if count != 1:
             sys.exit("Expected exactly one <!-- intro: --> ... <!-- /intro --> block in index.html")
-        main = f'\n<main class="static-page">\n{language_links(code, name)}\n{strip_back_link(body)}</main>\n'
+        main = f'\n<main class="static-page" lang="{code}">\n{language_suggestions(code, name)}{language_links(code, name)}\n{strip_back_link(body)}</main>\n'
         page, count = re.subn(
             r'(<div id="app">).*?(</div>\s*<div id="blazor-error-ui"[^>]*>)',
             lambda m: m.group(1) + main + m.group(2),

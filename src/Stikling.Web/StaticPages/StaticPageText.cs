@@ -19,6 +19,7 @@ public static class StaticPageText
         ["shellError"] = Strings.FrontPage.ShellError,
         ["shellReload"] = Strings.FrontPage.ShellReload,
         ["shellClose"] = Strings.FrontPage.ShellClose,
+        ["languageSuggest"] = Strings.FrontPage.LanguageSuggest,
         ["noJavaScript"] = Strings.FrontPage.NoJavaScript,
         ["deletionTitle"] = Strings.FrontPage.StaticDeletionTitle,
         ["deletionDescription"] = Strings.FrontPage.StaticDeletionDescription,

@@ -506,6 +506,34 @@
             color: var(--intro-moss);
         }
 
+        /* A line at the very top suggesting the page in the reader's own language. Hidden until language.js finds
+           a match for the browser's language, and a strip the width of the intro with room to tap */
+        p.language-suggest {
+            max-width: none;
+            margin: 0 -1rem;
+            padding: 0 1rem;
+            background: var(--intro-tint);
+            color: var(--intro-ink);
+            font-size: 0.9375rem;
+            text-align: center;
+        }
+
+        p.language-suggest[hidden] {
+            display: none;
+        }
+
+        .language-suggest a {
+            display: inline-flex;
+            align-items: center;
+            min-height: 2.75rem;
+            color: var(--intro-moss);
+            font-weight: 600;
+        }
+
+        .static-page > p.language-suggest {
+            margin: 0 -1rem 0.5rem;
+        }
+
         .intro-foot .language-links {
             margin-left: auto;
         }
