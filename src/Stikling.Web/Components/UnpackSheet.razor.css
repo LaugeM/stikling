@@ -49,3 +49,25 @@
     margin-top: 0.15rem;
     color: var(--pa-muted);
 }
+
+/* Everything that is tapped here is at least 44px tall */
+.unpack-pick .form-check-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+}
+
+.unpack-row .chip,
+.unpack-row ::deep .chip,
+.unpack-stays .chip {
+    min-height: 2.75rem;
+}
+
+.unpack-row .segmented .btn {
+    min-height: 2.75rem;
+}
+
+.form-actions .btn {
+    min-height: 2.75rem;
+}

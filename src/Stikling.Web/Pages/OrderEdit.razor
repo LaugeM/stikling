@@ -151,6 +151,7 @@ else
 
     private Order? order;
     private readonly List<OrderItem> items = [];
+    private readonly HashSet<Guid> removed = [];
     private readonly Dictionary<Guid, OrderItemName?> names = [];
     private IReadOnlyDictionary<Guid, Plant> plants = new Dictionary<Guid, Plant>();
     private IReadOnlyList<Plant> allPlants = [];
@@ -183,6 +184,7 @@ else
         confirmDelete = false;
         pickingPlant = false;
         items.Clear();
+        removed.Clear();
         names.Clear();
         order = null;
 
@@ -258,6 +260,7 @@ else
     private void Remove(OrderItem item)
     {
         items.Remove(item);
+        removed.Add(item.Id);
         names.Remove(item.Id);
     }
 
@@ -295,7 +298,7 @@ else
             if (errors.Count > 0)
                 return;
 
-            await OrderService.SaveAsync(order, kept);
+            await OrderService.SaveAsync(order, kept, removed);
             Navigation.NavigateTo($"orders/{order.Id}");
         }
         catch (Exception ex)

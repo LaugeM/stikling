@@ -37,7 +37,7 @@ else
     {
         <section class="stage-group">
             <h2>@Strings.Orders.GroupOnTheWay</h2>
-            <ul class="item-list list-grid">
+            <ul class="item-list list-grid order-grid">
                 @foreach (var order in onTheWay)
                 {
                     <li>@Row(order)</li>
@@ -50,7 +50,7 @@ else
     {
         <section class="stage-group">
             <h2>@Strings.Orders.GroupArrived</h2>
-            <ul class="item-list list-grid">
+            <ul class="item-list list-grid order-grid">
                 @foreach (var order in arrived)
                 {
                     <li>@Row(order)</li>

@@ -16,6 +16,7 @@ public sealed class OrderService(
     IOrderItemRepository items,
     ISellerRepository sellers,
     IPlantRepository plants,
+    IPropagationRepository propagations,
     PlantService plantService,
     PropagationService propagationService,
     IWishRepository wishes,
@@ -74,7 +75,9 @@ public sealed class OrderService(
     /// since the plant's price is the one truth once it is a plant. The plant is only touched when the
     /// price on the item changed, so saving an order never overwrites a price changed on the plant.
     /// </summary>
-    public async Task SaveAsync(Order order, IReadOnlyList<OrderItem> orderItems)
+    /// <param name="removedItemIds">The items the form removed. Only these are deleted: an item the form never
+    /// loaded, like one added on another device meanwhile, stays.</param>
+    public async Task SaveAsync(Order order, IReadOnlyList<OrderItem> orderItems, IReadOnlyCollection<Guid>? removedItemIds = null)
     {
         // Validate everything first, so a bad item doesn't leave the order half saved
         foreach (var item in orderItems)
@@ -86,7 +89,7 @@ public sealed class OrderService(
         await orders.SaveAsync(order);
 
         var stored = (await items.GetAllAsync()).Where(i => i.OrderId == order.Id).ToDictionary(i => i.Id);
-        foreach (var gone in stored.Values.Where(s => orderItems.All(i => i.Id != s.Id)))
+        foreach (var gone in stored.Values.Where(s => removedItemIds?.Contains(s.Id) == true && orderItems.All(i => i.Id != s.Id)))
             await items.DeleteAsync(gone.Id);
 
         foreach (var item in orderItems)
@@ -200,9 +203,21 @@ public sealed class OrderService(
 
             if (choice.UnpackAs == UnpackAs.Plant)
             {
+                var plantId = NameBasedId.For("order-item-plant:" + item.Id);
+                // Already made by an earlier run, here or on another device: it is linked, not made or overwritten again
+                if (await plants.GetAsync(plantId) is not null)
+                {
+                    item.PlantId = plantId;
+                    item.ArrivedOn = arrivedOn;
+                    await items.SaveAsync(item);
+                    if (item.WishId is { } linkedWish)
+                        await wishService.MarkGotAsync(linkedWish, item.PlantId, item.PropagationId);
+                    continue;
+                }
+
                 var plant = new Plant
                 {
-                    Id = NameBasedId.For("order-item-plant:" + item.Id),
+                    Id = plantId,
                     Nickname = nickname,
                     Genus = item.Genus,
                     Species = item.Species,
@@ -223,9 +238,20 @@ public sealed class OrderService(
             }
             else
             {
+                var cuttingId = NameBasedId.For("order-item-cutting:" + item.Id);
+                if (await propagations.GetAsync(cuttingId) is not null)
+                {
+                    item.PropagationId = cuttingId;
+                    item.ArrivedOn = arrivedOn;
+                    await items.SaveAsync(item);
+                    if (item.WishId is { } linkedWish)
+                        await wishService.MarkGotAsync(linkedWish, item.PlantId, item.PropagationId);
+                    continue;
+                }
+
                 var cutting = new Propagation
                 {
-                    Id = NameBasedId.For("order-item-cutting:" + item.Id),
+                    Id = cuttingId,
                     Nickname = nickname,
                     Genus = item.Genus,
                     Species = item.Species,

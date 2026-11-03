@@ -54,7 +54,8 @@ public sealed class OrderItem : Entity
     public IReadOnlyList<string> Validate()
     {
         var errors = new List<string>();
-        if (string.IsNullOrWhiteSpace(Name) && string.IsNullOrWhiteSpace(Genus))
+        // A plant or cutting it became or links to has its own name, which may be none
+        if (string.IsNullOrWhiteSpace(Name) && string.IsNullOrWhiteSpace(Genus) && PlantId is null && PropagationId is null)
             errors.Add(Strings.Orders.OrderItemNeedsName);
         if (Price < 0)
             errors.Add(Strings.Orders.OrderItemPriceNegative);

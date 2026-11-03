@@ -1,9 +1,11 @@
 @page "/orders/{Id:guid}"
+@layout WideLayout
 @using System.Globalization
 @using Stikling.Core.Orders
 @inject OrderService OrderService
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
+@inject NavigationManager Navigation
 
 <PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.Orders.DetailPageTitle, view?.SellerName ?? "")</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -20,6 +22,7 @@ else if (view is null)
 }
 else
 {
+    <div class="case-layout">
     <div class="page-heading">
         <h1>@Around(Strings.Orders.DetailTitle, SellerLink)</h1>
         @if (view.IsOnTheWay)
@@ -34,7 +37,7 @@ else
 
     @if (view.Items.Count > 0)
     {
-        <ul class="order-items">
+        <ul class="order-items case-side">
             @foreach (var item in view.Items)
             {
                 <li class="order-item">
@@ -84,6 +87,7 @@ else
             <button type="button" class="btn btn-primary" @onclick="() => unpackOpen = true">@Strings.Orders.Unpack</button>
         </div>
     }
+    </div>
 
     <UnpackSheet View="view" @bind-Open="unpackOpen" Done="LoadAsync" />
 }
@@ -107,7 +111,13 @@ else
     {
         await LoadAsync();
         if (Unpack == 1 && view is { IsOnTheWay: true } && openedFor != Id)
+        {
             unpackOpen = true;
+            // So a reload or the back button doesn't open it again
+            openedFor = Id;
+            Navigation.NavigateTo($"orders/{Id}", replace: true);
+            return;
+        }
         openedFor = Id;
     }
 
@@ -153,14 +163,16 @@ else
     {
         if (item.PlantId is { } plantId)
         {
+            // Added from the order, or a plant that was already there
+            var text = item.ArrivedOn is null ? Strings.Orders.StateAPlantYouHave : Strings.Orders.StateNowPlant;
             return plants.TryGetValue(plantId, out var plant) && !plant.IsDeleted
-                ? @<a class="order-became" href="plants/@plant.Id"><span class="order-thumb" aria-hidden="true"><SubjectThumb Subject="plant" /></span>@plant.DisplayName</a>
+                ? @<a class="order-became" href="plants/@plant.Id"><span class="order-thumb" aria-hidden="true"><SubjectThumb Subject="plant" /></span>@text</a>
                 : @<text>@Strings.Orders.StateBecamePlantGone</text>;
         }
         if (item.PropagationId is { } propagationId)
         {
             return propagations.TryGetValue(propagationId, out var propagation) && !propagation.IsDeleted
-                ? @<a class="order-became" href="propagations/@propagation.Id"><span class="order-thumb" aria-hidden="true"><PropagationThumb Propagation="propagation" /></span>@propagation.ListName</a>
+                ? @<a class="order-became" href="propagations/@propagation.Id"><span class="order-thumb" aria-hidden="true"><PropagationThumb Propagation="propagation" /></span>@Strings.Orders.StateNowCutting</a>
                 : @<text>@Strings.Orders.StateBecameCuttingGone</text>;
         }
         if (item.DidNotCome)

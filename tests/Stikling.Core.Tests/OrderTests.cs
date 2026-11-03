@@ -27,7 +27,7 @@ public class OrderTests
     {
         var plantService = new PlantService(plants, timeline, Time);
         var propagationService = new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), new FakePhotoRepository(), Time);
-        service = new OrderService(orders, items, sellers, plants, plantService, propagationService, wishes, new WishService(wishes, new FakePhotoRepository(), Time));
+        service = new OrderService(orders, items, sellers, plants, propagations, plantService, propagationService, wishes, new WishService(wishes, new FakePhotoRepository(), Time));
     }
 
     private static string Label(Enum value) => value.ToString();
@@ -385,10 +385,61 @@ public class OrderTests
     {
         var (order, list) = await OrderAsync(null, null, null, Item("A"), Item("B"));
 
-        await service.SaveAsync(order, [list[0]]);
+        await service.SaveAsync(order, [list[0]], [list[1].Id]);
 
         Assert.Equal(["A"], (await ViewAsync(order)).Items.Select(i => i.Name));
         Assert.True(items.Items[list[1].Id].IsDeleted);
+    }
+
+    [Fact]
+    public async Task Saving_an_order_keeps_an_item_the_form_never_loaded()
+    {
+        var (order, list) = await OrderAsync(null, null, null, Item("A"));
+        // Added on another device after the form was opened
+        var elsewhere = Item("Elsewhere");
+        elsewhere.OrderId = order.Id;
+        await items.SaveAsync(elsewhere);
+
+        await service.SaveAsync(order, list);
+
+        Assert.False(items.Items[elsewhere.Id].IsDeleted);
+        Assert.Equal(2, (await ViewAsync(order)).ItemCount);
+    }
+
+    [Fact]
+    public void A_plant_item_needs_no_name_of_its_own()
+    {
+        Assert.Empty(new OrderItem { PlantId = Guid.NewGuid() }.Validate());
+        Assert.Empty(new OrderItem { PropagationId = Guid.NewGuid() }.Validate());
+    }
+
+    [Fact]
+    public async Task Unpacking_links_a_plant_that_already_exists_instead_of_making_it_again()
+    {
+        var (order, list) = await OrderAsync(null, null, null, Item("A", 10m));
+        var existing = new Plant { Nickname = "Already here", PricePaid = 99m, Id = NameBasedId.For("order-item-plant:" + list[0].Id) };
+        plants.Plants[existing.Id] = existing;
+
+        var result = await service.UnpackAsync(order.Id, Day, null, [new UnpackChoice { ItemId = list[0].Id }], Label);
+
+        Assert.Empty(result.PlantIds);
+        Assert.Equal(("Already here", 99m), (existing.Nickname, existing.PricePaid));
+        Assert.Equal((existing.Id, Day), (items.Items[list[0].Id].PlantId, items.Items[list[0].Id].ArrivedOn));
+        Assert.Single(plants.Plants);
+    }
+
+    [Fact]
+    public async Task Unpacking_links_a_cutting_that_already_exists_instead_of_making_it_again()
+    {
+        var (order, list) = await OrderAsync(null, null, null, Item("A"));
+        var existing = new Propagation { Nickname = "Already here", Id = NameBasedId.For("order-item-cutting:" + list[0].Id) };
+        propagations.Propagations[existing.Id] = existing;
+
+        var result = await service.UnpackAsync(order.Id, Day, null, [new UnpackChoice { ItemId = list[0].Id, UnpackAs = UnpackAs.Cutting }], Label);
+
+        Assert.Empty(result.PropagationIds);
+        Assert.Equal(existing.Id, items.Items[list[0].Id].PropagationId);
+        Assert.Single(propagations.Propagations);
     }
 
     [Fact]
