@@ -1,5 +1,7 @@
 @* How a plant or cutting was when it arrived: a rating, what was wrong, and a short note. *@
 
+@if (ShowRating)
+{
 <div class="mb-3">
     <span class="form-label d-block" id="@(Id)-rating-label">@Strings.Plants.ArrivalHow</span>
     <div class="chip-row" role="group" aria-labelledby="@(Id)-rating-label">
@@ -11,6 +13,7 @@
         }
     </div>
 </div>
+}
 
 <div class="mb-3">
     <span class="form-label d-block" id="@(Id)-problems-label">@Strings.Plants.ArrivalWrong</span>
@@ -49,6 +52,10 @@
 
     [Parameter]
     public string Id { get; set; } = "arrival";
+
+    /// <summary>Leave the rating chips out, when the page shows them somewhere else.</summary>
+    [Parameter]
+    public bool ShowRating { get; set; } = true;
 
     // Tapping the one that's picked puts it back to not said
     private Task PickRatingAsync(ArrivalRating rating)

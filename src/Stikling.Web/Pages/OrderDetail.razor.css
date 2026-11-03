@@ -1,0 +1,107 @@
+.order-meta {
+    margin: 0.25rem 0 0.75rem;
+    color: var(--pa-muted);
+}
+
+/* The items in one bordered block, divided by hairlines */
+.order-items {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.order-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 0.85rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.order-item:first-child {
+    border-top: 0;
+}
+
+.order-item-main {
+    min-width: 0;
+}
+
+.order-item .item-name {
+    white-space: normal;
+}
+
+.order-item-state {
+    margin-top: 0.15rem;
+    font-size: 0.8125rem;
+    color: var(--pa-muted);
+}
+
+.order-price {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+}
+
+.order-price.faded {
+    opacity: 0.5;
+}
+
+/* The plant or cutting an item became, with a small photo */
+.order-became {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.order-became:hover,
+.order-became:focus-visible {
+    text-decoration: underline;
+}
+
+.order-thumb ::deep .item-thumb {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.4rem;
+}
+
+.order-thumb ::deep .item-thumb svg {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.order-thumb ::deep .thumb-days {
+    display: none;
+}
+
+.order-totals {
+    margin: 1rem 0 0;
+    padding: 0 0.85rem;
+}
+
+.order-totals dd {
+    text-align: right;
+}
+
+.order-each {
+    margin: 0.4rem 0.85rem 0;
+    font-size: 0.8125rem;
+    color: var(--pa-muted);
+    text-align: right;
+}
+
+.detail-notes {
+    margin-top: 1rem;
+}
+
+/* A computer has the button next to the title, so the bar at the bottom is only for a phone */
+@media (min-width: 64rem) {
+    .unpack-dock {
+        display: none;
+    }
+}

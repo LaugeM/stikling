@@ -5,6 +5,8 @@
 @inject IPropagationRepository PropagationRepository
 @inject PlantNameService Names
 @inject SitterSheetActions Sharing
+@inject Stikling.Core.Orders.OrderService OrderService
+@inject NavigationManager Navigation
 @implements IDisposable
 
 <PageTitle>@Strings.Shared.WishlistPageTitle</PageTitle>
@@ -88,7 +90,32 @@ else
                             <span class="wish-choice-label">@Strings.Shared.WishlistGotItAs</span>
                             <a class="btn btn-primary btn-sm" href="plants/new?wish=@wish.Id">@Strings.Shared.WishlistAPlant</a>
                             <a class="btn btn-primary btn-sm" href="propagations/new?wish=@wish.Id">@Strings.Shared.WishlistACutting</a>
-                            <button type="button" class="btn btn-link btn-sm" @onclick="() => choosing = null">@Strings.Common.Cancel</button>
+                            @if (ordersOnTheWay.Count == 0)
+                            {
+                                <a class="btn btn-primary btn-sm" href="orders/new?wish=@wish.Id">@Strings.Orders.WishOnAnOrder</a>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-primary btn-sm" aria-expanded="@(pickingOrder == wish.Id ? "true" : "false")"
+                                        @onclick="() => pickingOrder = pickingOrder == wish.Id ? null : wish.Id">@Strings.Orders.WishOnAnOrder</button>
+                            }
+                            <button type="button" class="btn btn-link btn-sm" @onclick="() => { choosing = null; pickingOrder = null; }">@Strings.Common.Cancel</button>
+                        </div>
+                        @if (pickingOrder == wish.Id)
+                        {
+                            <div class="wish-choice" role="group" aria-label="@Strings.Orders.WishOnAnOrder">
+                                @foreach (var order in ordersOnTheWay)
+                                {
+                                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => AddToOrderAsync(wish, order)">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Orders.WishOrderFrom, order.SellerName)</button>
+                                }
+                                <a class="btn btn-outline-primary btn-sm" href="orders/new?wish=@wish.Id">@Strings.Orders.ListNew</a>
+                            </div>
+                        }
+                    }
+                    else if (onOrder.TryGetValue(wish.Id, out var wishOrder))
+                    {
+                        <div class="wish-actions">
+                            <a class="btn btn-link btn-sm wish-on-order" href="orders/@wishOrder.OrderId">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Orders.WishOnOrderFrom, wishOrder.SellerName)</a>
                         </div>
                     }
                     else
@@ -210,6 +237,9 @@ else
     private IReadOnlyList<Propagation> havePropagations = [];
     private string? search;
     private Guid? choosing;
+    private Guid? pickingOrder;
+    private IReadOnlyDictionary<Guid, Stikling.Core.Orders.WishOnOrder> onOrder = new Dictionary<Guid, Stikling.Core.Orders.WishOnOrder>();
+    private IReadOnlyList<Stikling.Core.Orders.OrderView> ordersOnTheWay = [];
     private bool shareOpen;
     private bool shareNotes;
     private bool sharePrice;
@@ -234,6 +264,8 @@ else
         propagations = await PropagationRepository.GetAllAsync();
         var all = await WishService.GetAllAsync();
         photos = await WishService.GetNewestPhotosAsync();
+        onOrder = await OrderService.WishesOnTheWayAsync();
+        ordersOnTheWay = [.. (await OrderService.GetAllAsync()).Where(o => o.IsOnTheWay)];
         open = [.. all.Where(w => !w.IsGot).OrderBy(w => w.CreatedAt)];
         got = [.. all.Where(w => w.IsGot).OrderByDescending(w => w.GotOn)];
         wishes = all;
@@ -293,6 +325,13 @@ else
         if (wish.PropagationId is { } propagationId && propagations.FirstOrDefault(p => p.Id == propagationId) is { } propagation)
             return ($"propagations/{propagation.Id}", propagation.ListName, Strings.Shared.WishlistSeeCutting);
         return null;
+    }
+
+    // The wish joins the order, which opens to edit so the price can be typed
+    private async Task AddToOrderAsync(Wish wish, Stikling.Core.Orders.OrderView order)
+    {
+        await OrderService.AddWishAsync(order.Order.Id, wish.Id);
+        Navigation.NavigateTo($"orders/{order.Order.Id}/edit");
     }
 
     private async Task PutBackAsync(Wish wish)

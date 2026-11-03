@@ -1,0 +1,334 @@
+@page "/orders/new"
+@page "/orders/{Id:guid}/edit"
+@using System.Globalization
+@using Stikling.Core.Orders
+@inject OrderService OrderService
+@inject SellerService SellerService
+@inject IPlantRepository PlantRepository
+@inject IWishRepository WishRepository
+@inject ILogger<OrderEdit> Logger
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+
+<PageTitle>@(IsNew ? Strings.Orders.FormNewTitle : Strings.Orders.FormEditTitle) · Stikling</PageTitle>
+
+@* No ReloadOnSync: like other edit pages, nothing changes under someone filling in the form *@
+
+<a class="back-link" href="@(IsNew ? "orders" : $"orders/{Id}")">@(IsNew ? Strings.Orders.DetailBack : Strings.Orders.FormBackToOrder)</a>
+<h1>@(IsNew ? Strings.Orders.FormNewTitle : Strings.Orders.FormEditTitle)</h1>
+
+@if (order is null)
+{
+    <p class="text-body-secondary">@(notFound ? Strings.Orders.DetailMissing : Strings.Supplies.Loading)</p>
+}
+else
+{
+    <EditForm Model="order" OnSubmit="SaveAsync" class="edit-form" novalidate>
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        <fieldset>
+            <legend>@Strings.Orders.FormTheOrder</legend>
+            <div class="mb-3">
+                <SellerPicker @bind-Value="sellerText" Names="sellerNames" Label="@Strings.Orders.FormSeller" Placeholder="@Strings.Orders.FormSellerPlaceholder" />
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label" for="ordered-on">@Strings.Orders.FormOrderedOn</label>
+                    <InputDate id="ordered-on" class="form-control" @bind-Value="order.OrderedOn" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="expected-on">@Strings.Orders.FormExpected</label>
+                    <InputDate id="expected-on" class="form-control" @bind-Value="order.ExpectedOn" aria-describedby="expected-help" />
+                </div>
+                <div class="col-12 form-text" id="expected-help">@Strings.Orders.FormExpectedHint</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="shipping">@Strings.Orders.FormShipping</label>
+                <InputNumber id="shipping" class="form-control" @bind-Value="order.Shipping" min="0" step="any" inputmode="decimal" />
+            </div>
+            <div class="mb-1">
+                <label class="form-label" for="order-notes">@Strings.Orders.FormNote</label>
+                <InputTextArea id="order-notes" class="form-control" rows="2" @bind-Value="order.Notes" />
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>@Strings.Orders.FormItems</legend>
+            <ul class="order-form-items">
+                @foreach (var item in items)
+                {
+                    var itemId = $"item-{item.Id:N}";
+                    var linked = item.PlantId is not null;
+                    var settled = item.PropagationId is not null || item.DidNotCome;
+                    <li class="order-form-item">
+                        <div class="order-form-name">
+                            @if (linked && plants.TryGetValue(item.PlantId!.Value, out var plant))
+                            {
+                                <a class="order-became" href="plants/@plant.Id"><span class="order-thumb" aria-hidden="true"><SubjectThumb Subject="plant" /></span>@plant.DisplayName</a>
+                            }
+                            else
+                            {
+                                <OrderItemName @ref="names[item.Id]" Item="item" Id="@itemId" ReadOnly="@(settled || linked)" Changed="StateHasChanged" />
+                                @if (item.PropagationId is not null)
+                                {
+                                    <div class="form-text">@Strings.Orders.FormBecameCutting</div>
+                                }
+                                else if (item.DidNotCome)
+                                {
+                                    <div class="form-text">@Strings.Orders.DidNotCome</div>
+                                }
+                            }
+                        </div>
+                        <div class="order-form-price">
+                            <input class="form-control" inputmode="decimal" autocomplete="off" aria-label="@Strings.Orders.FormItemPrice" placeholder="@Strings.Orders.FormItemPrice"
+                                   value="@PriceText(item)" @onchange="e => SetPrice(item, e.Value?.ToString())" disabled="@(item.DidNotCome)" />
+                        </div>
+                        <button type="button" class="order-remove" @onclick="() => Remove(item)"
+                                aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Orders.FormRemoveItem, item.DisplayName)"
+                                title="@Strings.Orders.FormRemoveItemShort"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                    </li>
+                }
+            </ul>
+
+            <div class="order-form-add">
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="AddItem">@Strings.Orders.FormAddItem</button>
+                @if (PickablePlants.Count > 0)
+                {
+                    <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(pickingPlant ? "true" : "false")"
+                            @onclick="() => pickingPlant = !pickingPlant">@Strings.Orders.FormAddPlant</button>
+                }
+            </div>
+            @if (pickingPlant)
+            {
+                <div class="mt-2">
+                    <PlantSelect Plants="PickablePlants" Value="null" ValueChanged="AddPlant" Label="@Strings.Orders.FormPickPlant" Id="order-pick-plant" />
+                </div>
+            }
+        </fieldset>
+
+        <div class="form-actions form-bar">
+            <button type="submit" class="btn btn-primary" disabled="@saving">@Strings.Common.Save</button>
+            <a class="btn btn-link" href="@(IsNew ? "orders" : $"orders/{Id}")">@Strings.Common.Cancel</a>
+        </div>
+    </EditForm>
+
+    @if (!IsNew)
+    {
+        <section class="danger-zone">
+            @if (confirmDelete)
+            {
+                <p class="mb-2">@Strings.Orders.FormDeleteConfirm</p>
+                <button class="btn btn-danger btn-sm" disabled="@saving" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+                <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
+            }
+            else
+            {
+                <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">@Strings.Orders.FormDelete</button>
+            }
+        </section>
+    }
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    /// <summary>Starts with this seller filled in, from the seller's page.</summary>
+    [SupplyParameterFromQuery(Name = "seller")]
+    public Guid? SellerId { get; set; }
+
+    /// <summary>Starts with this wish as an item, from Got it on the wishlist.</summary>
+    [SupplyParameterFromQuery(Name = "wish")]
+    public Guid? WishId { get; set; }
+
+    private Order? order;
+    private readonly List<OrderItem> items = [];
+    private readonly Dictionary<Guid, OrderItemName?> names = [];
+    private IReadOnlyDictionary<Guid, Plant> plants = new Dictionary<Guid, Plant>();
+    private IReadOnlyList<Plant> allPlants = [];
+    private IReadOnlyList<string> sellerNames = [];
+    private string? sellerText;
+    private bool notFound;
+    private bool saving;
+    private bool confirmDelete;
+    private bool pickingPlant;
+    private Guid? focusItem;
+    private Guid? loadedFor;
+    private bool loadedOnce;
+    private List<string> errors = [];
+
+    private bool IsNew => Id is null;
+
+    // Plants already on this order are left out
+    private IReadOnlyList<Plant> PickablePlants =>
+        [.. allPlants.Where(p => items.All(i => i.PlantId != p.Id))];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        notFound = false;
+        if (loadedOnce && loadedFor == Id)
+            return;
+        loadedOnce = true;
+        loadedFor = Id;
+
+        errors = [];
+        confirmDelete = false;
+        pickingPlant = false;
+        items.Clear();
+        names.Clear();
+        order = null;
+
+        var sellers = await SellerService.GetSellersAsync();
+        sellerNames = [.. sellers.Live.Select(s => s.Name).OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase)];
+        allPlants = await PlantRepository.GetAllAsync();
+        plants = allPlants.ToDictionary(p => p.Id);
+
+        if (IsNew)
+        {
+            order = new Order { OrderedOn = Time.Today() };
+            sellerText = sellers.Find(SellerId)?.Name;
+            if (WishId is { } wishId && await WishRepository.GetAsync(wishId) is { IsGot: false } wish)
+            {
+                items.Add(new OrderItem { WishId = wish.Id, Name = wish.Name, Genus = wish.Genus, Species = wish.Species, Cultivar = wish.Cultivar });
+            }
+            return;
+        }
+
+        var view = await OrderService.GetAsync(Id!.Value);
+        if (view is null)
+        {
+            notFound = true;
+            return;
+        }
+
+        order = view.Order;
+        sellerText = view.SellerName;
+        foreach (var item in view.Items)
+        {
+            // A plant's own price is the one shown, and saving a changed one writes it to the plant
+            if (item.PlantId is not null && view.PriceOf(item) is { } price)
+                item.Price = price;
+            items.Add(item);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusItem is { } id)
+        {
+            focusItem = null;
+            if (names.TryGetValue(id, out var name) && name is not null)
+                await name.FocusAsync();
+        }
+    }
+
+    private static string PriceText(OrderItem item) =>
+        item.Price is { } price ? price.ToString("0.##", CultureInfo.CurrentCulture) : "";
+
+    private static void SetPrice(OrderItem item, string? text)
+    {
+        item.Price = decimal.TryParse(text?.Trim().Replace(',', '.'), NumberStyles.Number, CultureInfo.InvariantCulture, out var price) ? price : null;
+    }
+
+    private void AddItem()
+    {
+        var item = new OrderItem();
+        items.Add(item);
+        focusItem = item.Id;
+    }
+
+    private Task AddPlant(Guid? plantId)
+    {
+        if (plantId is { } id && plants.TryGetValue(id, out var plant) && items.All(i => i.PlantId != id))
+        {
+            items.Add(new OrderItem { PlantId = id, Name = plant.Nickname, Genus = plant.Genus, Species = plant.Species, Cultivar = plant.Cultivar, Price = plant.PricePaid });
+            pickingPlant = false;
+        }
+        return Task.CompletedTask;
+    }
+
+    private void Remove(OrderItem item)
+    {
+        items.Remove(item);
+        names.Remove(item.Id);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (order is null)
+            return;
+
+        // Rows nobody typed anything into are not items
+        var kept = items.Where(i => i.PlantId is not null || i.PropagationId is not null || !string.IsNullOrWhiteSpace(i.Name) || !string.IsNullOrWhiteSpace(i.Genus)).ToList();
+        // The seller is made when the order is saved. Until then the name typed is what says there is one.
+        order.SellerName = SellerName.Clean(sellerText);
+        if (order.SellerName is null)
+            order.SellerId = null;
+        errors = [.. order.Validate(Time.Today())];
+        foreach (var item in kept)
+        {
+            foreach (var error in item.Validate())
+            {
+                if (!errors.Contains(error))
+                    errors.Add(error);
+            }
+        }
+        if (errors.Count > 0)
+            return;
+
+        saving = true;
+        try
+        {
+            var choice = await SellerService.ChooseAsync(sellerText, SellerKind.OnlineShop, order.SellerId);
+            order.SellerId = choice.SellerId;
+            order.SellerName = choice.Source;
+            order.Notes = string.IsNullOrWhiteSpace(order.Notes) ? null : order.Notes.Trim();
+            errors = [.. order.Validate(Time.Today())];
+            if (errors.Count > 0)
+                return;
+
+            await OrderService.SaveAsync(order, kept);
+            Navigation.NavigateTo($"orders/{order.Id}");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the order failed");
+            errors = [string.Format(CultureInfo.CurrentCulture, Strings.Orders.FormSaveError, ex.Message)];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (order is null)
+            return;
+
+        saving = true;
+        try
+        {
+            await OrderService.DeleteAsync(order.Id);
+            Navigation.NavigateTo("orders");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Deleting the order failed");
+            errors = [string.Format(CultureInfo.CurrentCulture, Strings.Orders.FormDeleteError, ex.Message)];
+            confirmDelete = false;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+}

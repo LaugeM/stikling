@@ -1,0 +1,8 @@
+/* The total with shipping, at the end of an order's row */
+.order-total {
+    flex: none;
+    margin-left: auto;
+    padding-left: 0.5rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}

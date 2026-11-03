@@ -41,6 +41,8 @@ public static class SyncKinds
         "ownFields",
         "careIntervals",
         "treatmentPlans",
+        "orders",
+        "orderItems",
     ];
 
     public static readonly IReadOnlyList<string> All = [.. Collection, Settings];

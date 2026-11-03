@@ -30,6 +30,8 @@ public static class Stores
     public const string CareIntervals = "careIntervals";
     public const string TreatmentPlans = "treatmentPlans";
     public const string OwnFields = "ownFields";
+    public const string Orders = "orders";
+    public const string OrderItems = "orderItems";
     public const string PropagationCareLogs = "propagationCareLogs";
     public const string Settings = "settings";
     public const string PutOffs = "putOffs";

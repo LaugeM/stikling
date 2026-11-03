@@ -4,6 +4,7 @@
 @inject IPropagationRepository PropagationRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject NavigationManager Navigation
+@inject Stikling.Core.Orders.OrderService OrderService
 
 <PageTitle>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.SellerPageTitle, seller?.Name ?? Strings.Supplies.SellerFallbackName)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -106,6 +107,30 @@ else
     </section>
 
     <section class="settings-section">
+        <h2>@Strings.Orders.SellerOrders</h2>
+
+        @if (orders.Count == 0)
+        {
+            <p class="text-body-secondary">@Strings.Orders.SellerNoOrders</p>
+        }
+        else
+        {
+            <ul class="seller-things">
+                @foreach (var order in orders)
+                {
+                    <li>
+                        <a class="seller-thing" href="orders/@order.Order.Id">
+                            <span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, order.IsOnTheWay ? Strings.Orders.SellerOrderOnTheWay : Strings.Orders.SellerOrderArrived, Labels.Date(order.Order.OrderedOn))</span>
+                            <span class="seller-thing-note">@Labels.Plants(order.ItemCount)</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+        <a class="btn btn-outline-primary btn-sm mt-2" href="orders/new?seller=@seller.Id">@Strings.Orders.ListNew</a>
+    </section>
+
+    <section class="settings-section">
         <h2>@Strings.Supplies.SellerAbout</h2>
 
         <div class="mb-3">
@@ -190,6 +215,7 @@ else
 
     private Seller? seller;
     private SellerSummary? summary;
+    private IReadOnlyList<Stikling.Core.Orders.OrderView> orders = [];
     private IReadOnlyList<Seller> others = [];
     private bool loading = true;
     private bool busy;
@@ -231,6 +257,7 @@ else
                 await PlantRepository.GetAllAsync(),
                 await PropagationRepository.GetAllAsync(),
                 await PestCaseRepository.GetAllAsync());
+            orders = await OrderService.ForSellerAsync(found.Id);
             others = sellers.Live.Where(s => s.Id != found.Id).OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
 
             if (loadedFor != found.Id)

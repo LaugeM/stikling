@@ -8,6 +8,7 @@ using Stikling.Core.Wishlist;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
+using Stikling.Core.Orders;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
@@ -1271,3 +1272,67 @@ internal sealed class FakeWishRepository : IWishRepository
         return Task.CompletedTask;
     }
 }
+
+internal sealed class FakeOrderRepository : IOrderRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Order> Orders { get; } = [];
+
+    public Task<IReadOnlyList<Order>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Order>>(Orders.Values.Where(o => !o.IsDeleted).ToList());
+
+    public Task<Order?> GetAsync(Guid id) =>
+        Task.FromResult(Orders.TryGetValue(id, out var order) && !order.IsDeleted ? order : null);
+
+    public Task SaveAsync(Order order)
+    {
+        if (order.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid order");
+        if (order.CreatedAt == default)
+            order.CreatedAt = clock;
+        order.UpdatedAt = clock = clock.AddSeconds(1);
+        Orders[order.Id] = order;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Orders.TryGetValue(id, out var order))
+            order.DeletedAt = order.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeOrderItemRepository : IOrderItemRepository
+{
+    // Each item is a second newer than the last, so "in the order they were made" can be told apart
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, OrderItem> Items { get; } = [];
+
+    public Task<IReadOnlyList<OrderItem>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<OrderItem>>(Items.Values.Where(i => !i.IsDeleted).ToList());
+
+    public Task<OrderItem?> GetAsync(Guid id) =>
+        Task.FromResult(Items.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
+
+    public Task SaveAsync(OrderItem item)
+    {
+        if (item.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid order item");
+        if (item.CreatedAt == default)
+            item.CreatedAt = clock = clock.AddSeconds(1);
+        item.UpdatedAt = clock.AddSeconds(1);
+        Items[item.Id] = item;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Items.TryGetValue(id, out var item))
+            item.DeletedAt = item.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
