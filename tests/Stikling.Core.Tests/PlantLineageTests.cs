@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
+using Stikling.Core.Text;
 
 namespace Stikling.Core.Tests;
 
@@ -200,5 +201,123 @@ public class PlantLineageTests
         Assert.Empty(tree.Ancestors);
         Assert.Empty(tree.Siblings);
         Assert.True(tree.IsEmpty);
+    }
+
+    [Fact]
+    public void A_plant_without_a_parent_has_no_generation()
+    {
+        Assert.Null(PlantLineage.GenerationOf(mother, all));
+        Assert.Null(PlantLineage.GenerationOf(stranger, all));
+    }
+
+    [Fact]
+    public void A_chain_of_three_counts_its_ancestors_and_names_the_oldest()
+    {
+        var first = PlantLineage.GenerationOf(childA, all);
+        var second = PlantLineage.GenerationOf(grandchild, all);
+
+        Assert.Equal(1, first!.Number);
+        Assert.Equal(2, second!.Number);
+        Assert.Same(mother, second.Oldest);
+    }
+
+    [Fact]
+    public void A_deleted_ancestor_ends_the_chain()
+    {
+        childA.DeletedAt = DateTimeOffset.UnixEpoch;
+
+        Assert.Null(PlantLineage.GenerationOf(grandchild, all));
+    }
+
+    [Fact]
+    public void Ancestors_that_died_or_live_elsewhere_still_count()
+    {
+        mother.Status = PlantStatus.Died;
+        childA.LivesElsewhere = true;
+
+        var generation = PlantLineage.GenerationOf(grandchild, all);
+
+        Assert.Equal(2, generation!.Number);
+        Assert.Same(mother, generation.Oldest);
+    }
+
+    [Fact]
+    public void A_cycle_gives_a_generation_instead_of_hanging()
+    {
+        mother.ParentPlantId = grandchild.Id;
+
+        Assert.Equal(2, PlantLineage.GenerationOf(grandchild, all)!.Number);
+    }
+
+    [Fact]
+    public void A_propagation_is_one_generation_below_its_parent()
+    {
+        var fromMother = new Propagation { ParentPlantId = mother.Id };
+        var fromGrandchild = new Propagation { ParentPlantId = grandchild.Id };
+
+        var first = PlantLineage.GenerationOf(fromMother, all);
+        var third = PlantLineage.GenerationOf(fromGrandchild, all);
+
+        Assert.Equal(1, first!.Number);
+        Assert.Same(mother, first.Oldest);
+        Assert.Equal(3, third!.Number);
+        Assert.Same(mother, third.Oldest);
+    }
+
+    [Fact]
+    public void A_propagation_without_a_live_parent_has_no_generation()
+    {
+        Assert.Null(PlantLineage.GenerationOf(new Propagation(), all));
+        Assert.Null(PlantLineage.GenerationOf(new Propagation { ParentPlantId = Guid.NewGuid() }, all));
+
+        mother.DeletedAt = DateTimeOffset.UnixEpoch;
+        Assert.Null(PlantLineage.GenerationOf(new Propagation { ParentPlantId = mother.Id }, all));
+    }
+
+    [Theory]
+    [InlineData(1, "1st")]
+    [InlineData(2, "2nd")]
+    [InlineData(3, "3rd")]
+    [InlineData(4, "4th")]
+    [InlineData(11, "11th")]
+    [InlineData(12, "12th")]
+    [InlineData(13, "13th")]
+    [InlineData(21, "21st")]
+    [InlineData(22, "22nd")]
+    [InlineData(101, "101st")]
+    [InlineData(111, "111th")]
+    public void Ordinals_in_English(int number, string expected) =>
+        Assert.Equal(expected, Ordinal.Of(number));
+
+    [Fact]
+    public void Ordinals_in_Danish_take_a_dot()
+    {
+        var before = System.Globalization.CultureInfo.CurrentUICulture;
+        try
+        {
+            System.Globalization.CultureInfo.CurrentUICulture = System.Globalization.CultureInfo.GetCultureInfo("da-DK");
+            Assert.Equal("1.", Ordinal.Of(1));
+            Assert.Equal("3.", Ordinal.Of(3));
+            Assert.Equal("12.", Ordinal.Of(12));
+            Assert.Equal("111.", Ordinal.Of(111));
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentUICulture = before;
+        }
+    }
+
+    [Fact]
+    public void The_generation_column_sorts_by_number_with_blanks_last()
+    {
+        var rows = PlantTable.Rows(all, [], new DateOnly(2026, 11, 3), _ => null, _ => null, null, all);
+
+        var up = PlantTable.Sort(rows, new PlantTableSort(PlantColumn.Generation));
+        var down = PlantTable.Sort(rows, new PlantTableSort(PlantColumn.Generation, true));
+
+        Assert.Equal([childA, childB, grandchild], up.Take(3).Select(r => r.Plant));
+        Assert.Equal(grandchild, down[0].Plant);
+        Assert.All(up.TakeLast(2), r => Assert.Null(r.Generation));
+        Assert.All(down.TakeLast(2), r => Assert.Null(r.Generation));
     }
 }

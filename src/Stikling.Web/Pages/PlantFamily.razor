@@ -38,6 +38,10 @@ else
                                 }
                             </span>
                             <span class="item-name">@ancestor.DisplayName</span>
+                            @if (GenText(ancestor) is { } ancestorGen)
+                            {
+                                <span class="text-body-secondary small">@ancestorGen</span>
+                            }
                             @if (!ancestor.InCollection)
                             {
                                 <span class="badge text-bg-secondary">@Labels.StatusOf(ancestor)</span>
@@ -78,6 +82,10 @@ else
         {
             <p class="profile-facts">@Labels.StatusOf(plant)</p>
         }
+        @if (GenText(plant) is { } focusGen)
+        {
+            <p class="profile-facts">@focusGen</p>
+        }
         <a class="btn btn-outline-primary" href="plants/@plant.Id">@Strings.Plants.FamilyOpenPlant</a>
     </section>
 
@@ -100,7 +108,7 @@ else
                 @foreach (var sibling in tree.Siblings)
                 {
                     <li>
-                        <PlantTile Plant="sibling" Href="@($"plants/{sibling.Id}/family")" Faded="Left(sibling)" />
+                        <PlantTile Plant="sibling" Href="@($"plants/{sibling.Id}/family")" Faded="Left(sibling)">@GenText(sibling)</PlantTile>
                     </li>
                 }
             </ul>
@@ -116,9 +124,10 @@ else
                 {
                     <li>
                         <PlantTile Plant="child.Plant" Href="@($"plants/{child.Plant.Id}/family")" Faded="Left(child.Plant)">
+                            @GenText(child.Plant)
                             @if (child.Below > 0)
                             {
-                                <text>@Plural.Of(child.Below, Strings.Plants.FamilyBelow_One, Strings.Plants.FamilyBelow_Other)</text>
+                                @(GenText(child.Plant) is null ? "" : " · ")<text>@Plural.Of(child.Below, Strings.Plants.FamilyBelow_One, Strings.Plants.FamilyBelow_Other)</text>
                             }
                         </PlantTile>
                     </li>
@@ -151,6 +160,7 @@ else
     private Plant? plant;
     private FamilyTree? tree;
     private bool loaded;
+    private IReadOnlyList<Plant> everyPlant = [];
 
     // Moving the tree is a navigation to this page with another id
     protected override async Task OnParametersSetAsync()
@@ -159,11 +169,16 @@ else
         loaded = true;
     }
 
+    // "3rd gen" for a plant that has a parent in the family, nothing for the oldest
+    private string? GenText(Plant p) =>
+        PlantLineage.GenerationOf(p, everyPlant) is { } generation ? F(Strings.Plants.TreeGeneration, Ordinal.Of(generation.Number)) : null;
+
     private static bool Left(Plant p) => !p.InCollection;
 
     private async Task LoadAsync()
     {
         var all = await Repository.GetAllAsync();
+        everyPlant = all;
         plant = all.FirstOrDefault(p => p.Id == Id);
         tree = plant is null
             ? null

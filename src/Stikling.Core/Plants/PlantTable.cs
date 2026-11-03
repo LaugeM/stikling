@@ -33,7 +33,8 @@ public enum PlantColumn
     Status,
     Tags,
     Added,
-    Number
+    Number,
+    Generation
 }
 
 /// <summary>A column of the table: one the app has, or a field of the person's own.</summary>
@@ -66,7 +67,8 @@ public sealed record PlantRow(
     MoistureReading? Moisture,
     string? Room,
     string? EverydayName,
-    FloweringNow? Flowering = null);
+    FloweringNow? Flowering = null,
+    int? Generation = null);
 
 /// <summary>The table view of the plant list: which columns, how they are stored and how they sort.</summary>
 public static class PlantTable
@@ -105,6 +107,7 @@ public static class PlantTable
         PlantColumn.Tags => Strings.Plants.HeaderTags,
         PlantColumn.Added => Strings.Plants.HeaderAdded,
         PlantColumn.Number => Strings.Plants.HeaderNumber,
+        PlantColumn.Generation => Strings.Plants.HeaderGeneration,
         _ => column.ToString()
     };
 
@@ -223,8 +226,11 @@ public static class PlantTable
         DateOnly today,
         Func<Guid?, string?> placeName,
         Func<Plant, string?> everydayName,
-        Func<Plant, FloweringNow?>? floweringOf = null)
+        Func<Plant, FloweringNow?>? floweringOf = null,
+        IEnumerable<Plant>? everyPlant = null)
     {
+        // Generations are counted over every plant, gone ones too, and worked out once
+        var family = everyPlant?.ToList();
         var byPlant = careLogs.Where(l => !l.IsDeleted).ToLookup(l => l.PlantId);
 
         return plants.Select(plant =>
@@ -238,7 +244,8 @@ public static class PlantTable
                 CurrentReading(byPlant[plant.Id], today),
                 placeName(plant.PlaceId),
                 everydayName(plant),
-                floweringOf?.Invoke(plant));
+                floweringOf?.Invoke(plant),
+                family is null ? null : PlantLineage.GenerationOf(plant, family)?.Number);
         }).ToList();
     }
 
@@ -359,6 +366,7 @@ public static class PlantTable
             PlantColumn.Tags => Text(string.Join(", ", plant.Tags)),
             PlantColumn.Added => plant.CreatedAt,
             PlantColumn.Number => CollectionNumbers.SortKey(plant.CollectionNumber),
+            PlantColumn.Generation => row.Generation,
             _ => null
         };
     }
