@@ -267,6 +267,22 @@
   <data name="LikesBrighter" xml:space="preserve">
     <value>Står et sted der er lysere end den bryder sig om</value>
   </data>
+  <data name="BotanicalFamily" xml:space="preserve">
+    <value>Plantefamilie</value>
+    <comment>Label in the details list on a plant's page, before its botanical family (Araceae).</comment>
+  </data>
+  <data name="NativeTo" xml:space="preserve">
+    <value>Vokser vildt i</value>
+    <comment>Label in the details list on a plant's page, before the countries and regions it grows wild in.</comment>
+  </data>
+  <data name="NativeMore_One" xml:space="preserve">
+    <value>og {0} mere</value>
+    <comment>Button after the first areas it grows wild in, when there are many. Shows all of them. {0} is the number left.</comment>
+  </data>
+  <data name="NativeMore_Other" xml:space="preserve">
+    <value>og {0} mere</value>
+    <comment>Button after the first areas it grows wild in, when there are many. Shows all of them. {0} is the number left.</comment>
+  </data>
   <data name="Pets" xml:space="preserve">
     <value>Kæledyr</value>
   </data>

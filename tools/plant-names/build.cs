@@ -1,5 +1,6 @@
 // Builds the plant names the app suggests: src/Stikling.Web/wwwroot/data/plant-names.json with the
 // botanical names, and everyday-names.en.json and everyday-names.da.json next to it with what people call them.
+// Also plant-regions.json, with each genus's family and where each species grows wild, for the plant page.
 // Run from the repository root: dotnet run tools/plant-names/build.cs
 // See README.md next to this file for where the names come from and how to add more.
 
@@ -7,6 +8,8 @@
 #:property PublishAot=false
 
 using System.Collections;
+using System.Collections.Concurrent;
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -15,6 +18,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Stikling.Core.Names;
 
 // Families or genera whose genera, species and old names are all included
@@ -22,13 +26,15 @@ string[] include =
 [
     // Families
     "Araceae", "Begoniaceae", "Droseraceae", "Marantaceae", "Musaceae", "Nepenthaceae", "Sarraceniaceae", "Strelitziaceae",
+    // Cacti and succulents
+    "Aizoaceae", "Cactaceae", "Crassulaceae",
     // Genera
     "Adiantum", "Aeschynanthus", "Aloe", "Aphelandra", "Asparagus", "Aspidistra", "Beaucarnea", "Callisia", "Ceropegia",
-    "Chamaedorea", "Chlorophytum", "Chrysalidocarpus", "Codiaeum", "Coleus", "Crassula", "Curio", "Cycas", "Cymbidium", "Dischidia", "Dracaena",
-    "Dypsis", "Echeveria", "Epiphyllum", "Episcia", "Fatsia", "Fittonia", "Gasteria", "Guzmania", "Haworthia", "Haworthiopsis",
-    "Hedera", "Howea", "Hoya", "Hypoestes", "Kalanchoe", "Lithops", "Ludisia", "Miltoniopsis", "Nematanthus", "Nephrolepis",
-    "Pachira", "Paphiopedilum", "Peperomia", "Phalaenopsis", "Pilea", "Platycerium", "Plectranthus", "Rhapis", "Rhipsalis",
-    "Schefflera", "Schlumbergera", "Sinningia", "Streptocarpus", "Tillandsia", "Tradescantia", "Vanda", "Vriesea", "Yucca", "Zamia"
+    "Chamaedorea", "Chlorophytum", "Chrysalidocarpus", "Codiaeum", "Coleus", "Curio", "Cycas", "Cymbidium", "Dischidia", "Dracaena",
+    "Dypsis", "Episcia", "Fatsia", "Fittonia", "Gasteria", "Guzmania", "Haworthia", "Haworthiopsis",
+    "Hedera", "Howea", "Hoya", "Hypoestes", "Ludisia", "Miltoniopsis", "Nematanthus", "Nephrolepis",
+    "Pachira", "Paphiopedilum", "Peperomia", "Phalaenopsis", "Pilea", "Platycerium", "Plectranthus", "Rhapis",
+    "Schefflera", "Sinningia", "Streptocarpus", "Tillandsia", "Tradescantia", "Vanda", "Vriesea", "Yucca", "Zamia"
 ];
 
 // Genera too big to include in full, where most of the species are never grown indoors. Only the species
@@ -36,7 +42,7 @@ string[] include =
 string[] namedOnly =
 [
     "Aechmea", "Asplenium", "Cattleya", "Cissus", "Davallia", "Dendrobium", "Euphorbia", "Ficus", "Heptapleurum", "Livistona",
-    "Mammillaria", "Microsorum", "Neoregelia", "Oncidium", "Opuntia", "Oxalis", "Phoenix", "Polyscias", "Pteris", "Sedum"
+    "Microsorum", "Neoregelia", "Oncidium", "Oxalis", "Phoenix", "Polyscias", "Pteris"
 ];
 
 // Genera offered by name only, without their species
@@ -114,7 +120,10 @@ foreach (var name in everything)
         foreach (var usage in await AllAsync(ids[name], rank, "accepted"))
         {
             if (SpeciesPart(Name(usage)) is { } species && genera.TryGetValue(Name(usage)["genus"]!.ToString(), out var genus))
+            {
                 genus.Species.Add(species);
+                genus.Ids[species] = (string)usage["id"]!;
+            }
         }
     }
 
@@ -253,7 +262,7 @@ foreach (var genus in genera.Values)
     }
 }
 
-var colSource = new NameSource("Catalogue of Life", "Genera, species and old names, from the World Checklist of Vascular Plants by Royal Botanic Gardens, Kew",
+var colSource = new NameSource("Catalogue of Life", "Genera, species, old names, families and native regions, from the World Checklist of Vascular Plants by Royal Botanic Gardens, Kew",
     "CC BY 4.0", "https://www.catalogueoflife.org", colVersion);
 var data = new PlantNameData
 {
@@ -302,6 +311,148 @@ foreach (var language in languages)
     Console.WriteLine(
         $"Wrote {Path.GetRelativePath(root, file)}: {plants.Count} plants, {everydayByHand[language]} names by hand and " +
         $"{everydayFromWikidata[language]} from Wikidata, {new FileInfo(file).Length / 1024} KB");
+}
+
+// Where each species grows wild, as Kew's level 3 areas, native only. A subspecies or variety is only
+// listed when its areas differ from the species'. The plant page reads this file, so it also carries each
+// genus's family and the name an old genus goes by now, and the page doesn't need the bigger file of names.
+var regionsFile = Path.Combine(dataFolder, "plant-regions.json");
+var areaNames = Path.Combine(root, "src", "Stikling.Web", "Resources", "Regions.resx");
+var knownAreas = File.Exists(areaNames)
+    ? XDocument.Load(areaNames).Root!.Elements("data").Select(e => (string)e.Attribute("name")!).ToHashSet()
+    : null;
+// For species whose distribution is text instead of area codes, like "Mexico (Oaxaca, Chiapas); Cuba [I]"
+var placeAreas = File.ReadLines(Path.Combine(tools, "areas.txt"))
+    .Where(l => l.Length > 0 && !l.StartsWith('#'))
+    .Select(l => l.Split('=', 2, StringSplitOptions.TrimEntries))
+    .ToDictionary(p => p[0], p => p[1].Split(' ', StringSplitOptions.RemoveEmptyEntries));
+var unknownPlaces = new ConcurrentDictionary<string, int>();
+var taxa = genera.Values.Where(g => g.Now is null).SelectMany(g => g.Species.Select(s => (Genus: g, Species: s))).ToList();
+Console.WriteLine($"Catalogue of Life: fetching where {taxa.Count} species grow wild");
+var areas = new ConcurrentDictionary<(string, string), string[]>();
+var unknownAreas = new ConcurrentDictionary<string, string>();
+var fetched = 0;
+await Parallel.ForEachAsync(taxa, new ParallelOptions { MaxDegreeOfParallelism = 8 }, async (taxon, _) =>
+{
+    if (!taxon.Genus.Ids.TryGetValue(taxon.Species, out var id))
+        return;
+    var url = $"{Col}/taxon/{id}/distribution";
+    JsonArray? found = null;
+    for (var attempt = 1; found is null; attempt++)
+    {
+        try
+        {
+            found = await http.GetFromJsonAsync<JsonArray>(url) ?? [];
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException && attempt < 4)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5 * attempt));
+        }
+    }
+    var codes = found
+        // Native ones have no establishment means. Introduced, doubtful and the like are left out.
+        .Where(d => (string?)d!["area"]?["gazetteer"] == "tdwg" && (string?)d["establishmentMeans"] is null or "native")
+        // A level 4 area, like BZS-RJ, counts as the level 3 area it is part of
+        .Select(d => (Code: ((string)d!["area"]!["id"]!).Split('-')[0], Name: (string?)d["area"]!["name"]))
+        .Where(a => a.Code.Length == 3)
+        .Concat(found
+            .Where(d => (string?)d!["area"]?["gazetteer"] == "text")
+            .SelectMany(d => TextAreas((string?)d!["area"]!["name"] ?? ""))
+            .Select(code => (Code: code, Name: (string?)null)))
+        .ToList();
+    foreach (var (code, name) in codes.Where(a => knownAreas is not null && !knownAreas.Contains(a.Code)))
+        unknownAreas.TryAdd(code, name ?? "");
+    var list = codes.Select(a => a.Code).Distinct().Order(StringComparer.Ordinal).ToArray();
+    if (list.Length > 0)
+        areas[(taxon.Genus.Name, taxon.Species)] = list;
+    if (Interlocked.Increment(ref fetched) % 2000 == 0)
+        Console.WriteLine($"  {fetched} of {taxa.Count}");
+});
+foreach (var (code, name) in unknownAreas.OrderBy(a => a.Key))
+    Console.WriteLine($"warning: area {code} ({name}) isn't in Resources/Regions.resx");
+var unplaced = unknownPlaces.OrderByDescending(p => p.Value).ToList();
+if (unplaced.Count > 0)
+{
+    Console.WriteLine($"warning: {unplaced.Sum(p => p.Value)} places in text distributions aren't in areas.txt, the most common:");
+    foreach (var (place, count) in unplaced.Take(25))
+        Console.WriteLine($"  {place} ({count})");
+}
+
+var regionLines = genera.Values.Select(g =>
+{
+    var species = new SortedDictionary<string, string>(StringComparer.Ordinal);
+    foreach (var name in g.Species)
+    {
+        if (!areas.TryGetValue((g.Name, name), out var codes))
+            continue;
+        // "hederaceum var. oxycardium" is left out when it grows where "hederaceum" does
+        var parts = name.Split(' ');
+        var whole = parts.Length > 2 ? string.Join(' ', parts[..^2]) : null;
+        if (whole is not null && areas.TryGetValue((g.Name, whole), out var ofSpecies) && ofSpecies.SequenceEqual(codes))
+            continue;
+        species[name] = string.Join(' ', codes);
+    }
+    return new GenusRegions(g.Name, g.Now is null ? g.Family : null, g.Now, species);
+}).ToList();
+var regionSource = colSource with { Covers = "Families and native regions, from the World Checklist of Vascular Plants by Royal Botanic Gardens, Kew" };
+await File.WriteAllTextAsync(regionsFile, Lines(("sources", (IEnumerable<NameSource>)[regionSource]), ("genera", regionLines)));
+Console.WriteLine(
+    $"Wrote {Path.GetRelativePath(root, regionsFile)}: {regionLines.Count(g => g.Family is not null)} families of genera, " +
+    $"{regionLines.Sum(g => g.Species.Count)} species with native regions, {new FileInfo(regionsFile).Length / 1024} KB");
+
+// The areas in a text distribution like "Mexico (Oaxaca, Chiapas); Guatemala; Cuba [I]", leaving out the
+// places marked [I] for introduced. A place that is one area is enough. A country split into several
+// areas, like Mexico, needs the states it names, and is left out when it names none.
+IEnumerable<string> TextAreas(string text)
+{
+    foreach (var part in text.Split(';'))
+    {
+        if (part.Contains("[I]"))
+            continue;
+        var item = Regex.Replace(part, @"\s*\[[^\]]*\]", "").Trim().Trim('?').Trim();
+        var within = Regex.Match(item, @"^(.*?)\s*\((.*)\)\s*$");
+        var place = within.Success ? within.Groups[1].Value : item;
+        if (place.Length == 0)
+            continue;
+        if (PlaceAreas(place) is { } whole)
+        {
+            foreach (var code in whole)
+                yield return code;
+            continue;
+        }
+        var placed = false;
+        foreach (var sub in within.Success ? within.Groups[2].Value.Split(',') : [])
+        {
+            // "Sabah: Mt. Kinabalu" is in Sabah, and "?KwaZulu-Natal" is a guess, which is left out
+            var name = sub.Split(':')[0].Trim();
+            if (name.Length == 0 || name.StartsWith('?'))
+                continue;
+            if ((PlaceAreas($"{place} {name}") ?? PlaceAreas(name)) is { } codes)
+            {
+                placed = true;
+                foreach (var code in codes)
+                    yield return code;
+            }
+        }
+        if (!placed)
+            unknownPlaces.AddOrUpdate(place, 1, (_, n) => n + 1);
+    }
+}
+
+// A place by its name in areas.txt, or else without a direction in front, so "NW-Yunnan" is Yunnan
+string[]? PlaceAreas(string name)
+{
+    var key = PlaceKey(name);
+    return placeAreas.TryGetValue(key, out var codes) ? codes
+        : placeAreas.GetValueOrDefault(Regex.Replace(key, @"^(?:(?:and|n|s|e|w|ne|nw|se|sw|c|central|northern|southern|eastern|western|north|south|east|west|peninsular|mainland) )+", ""));
+}
+
+// "São Paulo" as "sao paulo" and "Canary Isl." as "canary islands", the way areas.txt writes names
+static string PlaceKey(string name)
+{
+    var plain = new string([.. name.Normalize(NormalizationForm.FormD).Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)]);
+    plain = plain.ToLowerInvariant().Replace("isl.", "islands").Replace("is.", "islands").Replace("prov.", "province").Replace("&", "and");
+    return Regex.Replace(Regex.Replace(plain, "[^a-z0-9 ]", " "), @"\s+", " ").Trim();
 }
 
 Genus GenusFor(string name, string? family)
@@ -570,7 +721,13 @@ sealed class Genus(string name, string? family)
     public HashSet<string> Species { get; } = new(StringComparer.Ordinal);
     public Dictionary<string, string> Synonyms { get; } = new(StringComparer.Ordinal);
     public HashSet<CultivarName> Cultivars { get; } = [];
+
+    /// <summary>The Catalogue of Life id of each species, subspecies and variety, to fetch where it grows wild.</summary>
+    public Dictionary<string, string> Ids { get; } = new(StringComparer.Ordinal);
 }
+
+/// <summary>A line of plant-regions.json: a genus's family, or the name it goes by now, and its species' native areas.</summary>
+sealed record GenusRegions(string Name, string? Family, string? Now, SortedDictionary<string, string> Species);
 
 /// <summary>What an everyday name is for: a genus, a species, or a cultivar.</summary>
 sealed record Target(string Genus, string? Species, string? Cultivar);
