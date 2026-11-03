@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DayMonthFormat" xml:space="preserve">
+    <value>d MMM</value>
+    <comment>NOT TEXT: a .NET date pattern for a day and month without the year or weekday, like 6 Nov. d is the day, MMM the short month name.</comment>
+  </data>
+  <data name="SuppliesOrders" xml:space="preserve">
+    <value>Orders</value>
+    <comment>Row on the Supplies page that opens the list of orders.</comment>
+  </data>
+  <data name="SuppliesOrdersNone" xml:space="preserve">
+    <value>Plants you've bought, until they arrive</value>
+    <comment>Line under Orders on the Supplies page when none are on the way.</comment>
+  </data>
+  <data name="SuppliesOrdersOnTheWay" xml:space="preserve">
+    <value>{0} on the way</value>
+    <comment>Line under Orders on the Supplies page. {0} is how many orders are on the way.</comment>
+  </data>
+  <data name="ListPageTitle" xml:space="preserve">
+    <value>Orders · Stikling</value>
+    <comment>Title of the Orders page in the browser tab.</comment>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Orders</value>
+    <comment>Heading of the Orders page.</comment>
+  </data>
+  <data name="ListIntro" xml:space="preserve">
+    <value>Plants you've bought, until the box arrives.</value>
+    <comment>One line under the heading of the Orders page.</comment>
+  </data>
+  <data name="ListNew" xml:space="preserve">
+    <value>New order</value>
+    <comment>Button that starts a new order.</comment>
+  </data>
+  <data name="ListEmpty" xml:space="preserve">
+    <value>Keep track of plants you've bought until they arrive. When the box comes, unpack it and each plant is added for you.</value>
+    <comment>Shown on the Orders page when there are no orders.</comment>
+  </data>
+  <data name="GroupOnTheWay" xml:space="preserve">
+    <value>On the way</value>
+    <comment>Heading over the orders that haven't arrived.</comment>
+  </data>
+  <data name="GroupArrived" xml:space="preserve">
+    <value>Arrived</value>
+    <comment>Heading over the orders that have arrived.</comment>
+  </data>
+  <data name="MetaExpected" xml:space="preserve">
+    <value>{0} · expected {1}</value>
+    <comment>Line under an order on the list. {0} is the number of plants, like 5 plants, {1} the expected day, like Thu 6 Nov.</comment>
+  </data>
+  <data name="MetaOrdered" xml:space="preserve">
+    <value>{0} · ordered {1}</value>
+    <comment>Line under an order on the list with no expected day. {0} is the number of plants, {1} the day it was ordered, like 1 Nov.</comment>
+  </data>
+  <data name="MetaArrived" xml:space="preserve">
+    <value>Arrived {0} · {1}</value>
+    <comment>Line under an order that arrived and everything came. {0} is the day, like 3 Nov, {1} the number of plants.</comment>
+  </data>
+  <data name="MetaArrivedSome" xml:space="preserve">
+    <value>Arrived {0} · {1} of {2} came</value>
+    <comment>Line under an order that arrived with something missing. {0} is the day, {1} how many came, {2} how many were ordered.</comment>
+  </data>
+  <data name="DetailPageTitle" xml:space="preserve">
+    <value>Order from {0} · Stikling</value>
+    <comment>Title of an order's page in the browser tab. {0} is the seller.</comment>
+  </data>
+  <data name="DetailTitle" xml:space="preserve">
+    <value>Order from {0}</value>
+    <comment>Heading of an order's page. {0} is the seller's name, which is a link.</comment>
+  </data>
+  <data name="DetailBack" xml:space="preserve">
+    <value>Orders</value>
+    <comment>Link back to the list of orders.</comment>
+  </data>
+  <data name="DetailMissing" xml:space="preserve">
+    <value>That order isn't here any more.</value>
+    <comment>Shown when an order can't be found.</comment>
+  </data>
+  <data name="DetailOrdered" xml:space="preserve">
+    <value>Ordered {0}</value>
+    <comment>Line under the heading of an order. {0} is the day, like 1 Nov.</comment>
+  </data>
+  <data name="DetailOrderedExpected" xml:space="preserve">
+    <value>Ordered {0} · expected {1}</value>
+    <comment>Line under the heading of an order on the way. {0} is the day it was ordered, {1} the expected day, like Thu 6 Nov.</comment>
+  </data>
+  <data name="DetailOrderedArrived" xml:space="preserve">
+    <value>Ordered {0} · arrived {1}</value>
+    <comment>Line under the heading of an order that arrived. {0} is the day it was ordered, {1} the day it arrived.</comment>
+  </data>
+  <data name="Unpack" xml:space="preserve">
+    <value>Unpack</value>
+    <comment>Button on an order that still has things on the way. It opens the sheet for unpacking the box.</comment>
+  </data>
+  <data name="StateOnTheWay" xml:space="preserve">
+    <value>On the way</value>
+    <comment>Under an item on an order that hasn't arrived.</comment>
+  </data>
+  <data name="StateFromWishlist" xml:space="preserve">
+    <value>From your wishlist</value>
+    <comment>Under an item on an order that was bought for a wish.</comment>
+  </data>
+  <data name="StateNowPlant" xml:space="preserve">
+    <value>Now a plant</value>
+    <comment>Link under an item on an order that was unpacked as a plant.</comment>
+  </data>
+  <data name="StateNowCutting" xml:space="preserve">
+    <value>Now a cutting</value>
+    <comment>Link under an item on an order that was unpacked as a cutting.</comment>
+  </data>
+  <data name="StateAPlantYouHave" xml:space="preserve">
+    <value>A plant you have</value>
+    <comment>Link under an item on an order that is a plant already in the app.</comment>
+  </data>
+  <data name="StateBecamePlantGone" xml:space="preserve">
+    <value>Added as a plant that is gone now</value>
+    <comment>Under an item that became a plant which has since been deleted.</comment>
+  </data>
+  <data name="StateBecameCuttingGone" xml:space="preserve">
+    <value>Added as a cutting that is gone now</value>
+    <comment>Under an item that became a cutting which has since been deleted.</comment>
+  </data>
+  <data name="DidNotCome" xml:space="preserve">
+    <value>Didn't come</value>
+    <comment>Under an item that was in the order but not in the box, and the name of the chip that marks it.</comment>
+  </data>
+  <data name="TotalPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Label for the sum of the prices on an order.</comment>
+  </data>
+  <data name="TotalShipping" xml:space="preserve">
+    <value>Shipping</value>
+    <comment>Label for what shipping cost on an order.</comment>
+  </data>
+  <data name="TotalTotal" xml:space="preserve">
+    <value>Total</value>
+    <comment>Label for the plants and the shipping added together.</comment>
+  </data>
+  <data name="ShippingEach" xml:space="preserve">
+    <value>{0} shipping per plant</value>
+    <comment>Small line under the totals of an order. {0} is the amount.</comment>
+  </data>
+  <data name="FormNewTitle" xml:space="preserve">
+    <value>New order</value>
+    <comment>Heading of the form for a new order.</comment>
+  </data>
+  <data name="FormEditTitle" xml:space="preserve">
+    <value>Edit order</value>
+    <comment>Heading of the form for changing an order.</comment>
+  </data>
+  <data name="FormBackToOrder" xml:space="preserve">
+    <value>Back to the order</value>
+    <comment>Link at the top of the form for changing an order.</comment>
+  </data>
+  <data name="FormTheOrder" xml:space="preserve">
+    <value>The order</value>
+    <comment>Heading over the first part of the order form.</comment>
+  </data>
+  <data name="FormSeller" xml:space="preserve">
+    <value>Seller</value>
+    <comment>Label of the seller field on the order form.</comment>
+  </data>
+  <data name="FormSellerPlaceholder" xml:space="preserve">
+    <value>Shop or seller, like Plantorama</value>
+    <comment>Placeholder of the seller field on the order form.</comment>
+  </data>
+  <data name="FormOrderedOn" xml:space="preserve">
+    <value>Ordered on</value>
+    <comment>Label of the date the order was made.</comment>
+  </data>
+  <data name="FormExpected" xml:space="preserve">
+    <value>Expected</value>
+    <comment>Label of the day the order is expected.</comment>
+  </data>
+  <data name="FormExpectedHint" xml:space="preserve">
+    <value>Shows on Today from that day</value>
+    <comment>Hint under the expected day on the order form.</comment>
+  </data>
+  <data name="FormShipping" xml:space="preserve">
+    <value>Shipping</value>
+    <comment>Label of the shipping cost on the order form.</comment>
+  </data>
+  <data name="FormNote" xml:space="preserve">
+    <value>Note</value>
+    <comment>Label of the note on the order form.</comment>
+  </data>
+  <data name="FormItems" xml:space="preserve">
+    <value>What's in the order</value>
+    <comment>Heading over the items on the order form.</comment>
+  </data>
+  <data name="FormItemName" xml:space="preserve">
+    <value>Name of the plant or cutting</value>
+    <comment>Label read out for the name of an item on the order form.</comment>
+  </data>
+  <data name="FormItemNamePlaceholder" xml:space="preserve">
+    <value>Name, like Monstera deliciosa</value>
+    <comment>Placeholder of the name of an item on the order form.</comment>
+  </data>
+  <data name="FormItemPrice" xml:space="preserve">
+    <value>Price</value>
+    <comment>Label and placeholder of the price of an item on the order form.</comment>
+  </data>
+  <data name="FormRemoveItem" xml:space="preserve">
+    <value>Remove {0} from the order</value>
+    <comment>Label read out for the button that removes an item. {0} is the item's name.</comment>
+  </data>
+  <data name="FormRemoveItemShort" xml:space="preserve">
+    <value>Remove</value>
+    <comment>Tooltip of the button that removes an item from the order form.</comment>
+  </data>
+  <data name="FormBecameCutting" xml:space="preserve">
+    <value>Became a cutting</value>
+    <comment>Under an item on the order form that was unpacked as a cutting.</comment>
+  </data>
+  <data name="FormAddItem" xml:space="preserve">
+    <value>Add item</value>
+    <comment>Button on the order form that adds an empty row for another item.</comment>
+  </data>
+  <data name="FormAddPlant" xml:space="preserve">
+    <value>Add a plant you have</value>
+    <comment>Button on the order form that adds a plant already in the app to the order.</comment>
+  </data>
+  <data name="FormPickPlant" xml:space="preserve">
+    <value>Which plant?</value>
+    <comment>Label of the choice of a plant to add to the order.</comment>
+  </data>
+  <data name="FormDelete" xml:space="preserve">
+    <value>Delete order</value>
+    <comment>Button at the bottom of the form for changing an order.</comment>
+  </data>
+  <data name="FormDeleteConfirm" xml:space="preserve">
+    <value>Delete this order? The plants and cuttings made from it stay.</value>
+    <comment>Asked before an order is deleted.</comment>
+  </data>
+  <data name="FormSaveError" xml:space="preserve">
+    <value>Couldn't save the order: {0}</value>
+    <comment>Error when saving an order fails. {0} is the reason.</comment>
+  </data>
+  <data name="FormDeleteError" xml:space="preserve">
+    <value>Couldn't delete the order: {0}</value>
+    <comment>Error when deleting an order fails. {0} is the reason.</comment>
+  </data>
+  <data name="UnpackTitle" xml:space="preserve">
+    <value>Unpack order from {0}</value>
+    <comment>Heading of the sheet for unpacking an order. {0} is the seller.</comment>
+  </data>
+  <data name="UnpackArrivedOn" xml:space="preserve">
+    <value>Arrived on</value>
+    <comment>Label of the day the box arrived.</comment>
+  </data>
+  <data name="UnpackBecomes" xml:space="preserve">
+    <value>What {0} becomes</value>
+    <comment>Name of the choice between plant and cutting, read out. {0} is the item's name.</comment>
+  </data>
+  <data name="UnpackPlant" xml:space="preserve">
+    <value>Plant</value>
+    <comment>Choice for an unpacked item: it becomes a plant.</comment>
+  </data>
+  <data name="UnpackCutting" xml:space="preserve">
+    <value>Cutting</value>
+    <comment>Choice for an unpacked item: it becomes a cutting.</comment>
+  </data>
+  <data name="UnpackMore" xml:space="preserve">
+    <value>More about how it arrived</value>
+    <comment>Link that opens what was wrong and a note, for an item being unpacked.</comment>
+  </data>
+  <data name="UnpackTidy" xml:space="preserve">
+    <value>Tidy the name</value>
+    <comment>Link that opens the name fields, for an item with a name written freely.</comment>
+  </data>
+  <data name="UnpackStays" xml:space="preserve">
+    <value>Stays on the way</value>
+    <comment>Shown on an item that isn't ticked when unpacking.</comment>
+  </data>
+  <data name="UnpackPutIn" xml:space="preserve">
+    <value>Put them all in</value>
+    <comment>Label of the choice of a room for everything being unpacked.</comment>
+  </data>
+  <data name="UnpackButton_One" xml:space="preserve">
+    <value>Unpack {0} item</value>
+    <comment>Button that unpacks the ticked items, when exactly one is ticked. {0} is the number.</comment>
+  </data>
+  <data name="UnpackButton_Other" xml:space="preserve">
+    <value>Unpack {0} items</value>
+    <comment>Button that unpacks the ticked items. {0} is the number.</comment>
+  </data>
+  <data name="UnpackError" xml:space="preserve">
+    <value>Couldn't unpack the order: {0}</value>
+    <comment>Error when unpacking fails. {0} is the reason.</comment>
+  </data>
+  <data name="TodayHeading" xml:space="preserve">
+    <value>Orders on the way</value>
+    <comment>Heading on Today over the orders that are expected.</comment>
+  </data>
+  <data name="TodayArriving" xml:space="preserve">
+    <value>Order from {0} arriving</value>
+    <comment>Row on Today on the day an order is expected. {0} is the seller.</comment>
+  </data>
+  <data name="TodayExpected" xml:space="preserve">
+    <value>Order from {0}, expected {1}</value>
+    <comment>Row on Today for an order that hasn't come on the day it was expected. {0} is the seller, {1} the expected day.</comment>
+  </data>
+  <data name="SellerOrders" xml:space="preserve">
+    <value>Orders</value>
+    <comment>Heading on a seller's page over the orders from them.</comment>
+  </data>
+  <data name="SellerNoOrders" xml:space="preserve">
+    <value>No orders from here yet.</value>
+    <comment>Shown on a seller's page when there are no orders.</comment>
+  </data>
+  <data name="SellerOrderOnTheWay" xml:space="preserve">
+    <value>{0} · on the way</value>
+    <comment>Row on a seller's page for an order on the way. {0} is the day it was ordered.</comment>
+  </data>
+  <data name="SellerOrderArrived" xml:space="preserve">
+    <value>{0} · arrived</value>
+    <comment>Row on a seller's page for an order that arrived. {0} is the day it was ordered.</comment>
+  </data>
+  <data name="WishOnAnOrder" xml:space="preserve">
+    <value>On an order</value>
+    <comment>Button on the wishlist: the wish was bought on an order.</comment>
+  </data>
+  <data name="WishOrderFrom" xml:space="preserve">
+    <value>Order from {0}</value>
+    <comment>Button on the wishlist that adds the wish to an order on the way. {0} is the seller.</comment>
+  </data>
+  <data name="WishOnOrderFrom" xml:space="preserve">
+    <value>On order from {0}</value>
+    <comment>Shown on a wish that is on an order on the way, and links to the order. {0} is the seller.</comment>
+  </data>
+</root>

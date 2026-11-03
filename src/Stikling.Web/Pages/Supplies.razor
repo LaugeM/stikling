@@ -10,6 +10,7 @@
 @using System.Globalization
 @inject ProblemService ProblemService
 @inject SellerService SellerService
+@inject Stikling.Core.Orders.OrderService OrderService
 
 <PageTitle>@Strings.Supplies.SuppliesPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -23,6 +24,9 @@
 <div class="settings-rows">
     <SettingsRow Href="sellers" Title="@Strings.Supplies.SuppliesSellers" Detail="@SellersDetail">
         <Icon><path d="M4 9.5 5.5 4h13L20 9.5" /><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0" /><path d="M5.5 12.5V20h13v-7.5" /></Icon>
+    </SettingsRow>
+    <SettingsRow Href="orders" Title="@Strings.Orders.SuppliesOrders" Detail="@OrdersDetail">
+        <Icon><ParcelIcon /></Icon>
     </SettingsRow>
     <SettingsRow Href="pots" Title="@Strings.Supplies.SuppliesPots" Detail="@PotSummary">
         <Icon><path d="M4.5 4.5h15v3.5h-15Z" /><path d="M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8" /></Icon>
@@ -57,6 +61,7 @@
     private IReadOnlyList<MixUse> mixes = [];
     private IReadOnlyList<ProductUse> products = [];
     private int sellers;
+    private int ordersOnTheWay;
     private int feeds;
     private int recipes;
     private int treatmentPlans;
@@ -71,6 +76,7 @@
         mixes = await MixService.GetAllAsync();
         products = await ProductService.GetAllAsync();
         sellers = (await SellerService.GetSellersAsync()).Live.Count();
+        ordersOnTheWay = await OrderService.OnTheWayCountAsync();
         feeds = (await FeedRepository.GetAllAsync()).Count;
         recipes = (await RecipeRepository.GetAllAsync()).Count;
         treatmentPlans = (await PlanRepository.GetAllAsync()).Count;
@@ -79,6 +85,10 @@
         openProblems = (await ProblemService.AllAsync())
             .Count(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.InCollection));
     }
+
+    private string OrdersDetail => ordersOnTheWay == 0
+        ? Strings.Orders.SuppliesOrdersNone
+        : string.Format(CultureInfo.CurrentCulture, Strings.Orders.SuppliesOrdersOnTheWay, ordersOnTheWay);
 
     private string SellersDetail =>
         sellers == 0 ? Strings.Supplies.SellersNone : Plural.Of(sellers, Strings.Supplies.Seller_One, Strings.Supplies.Seller_Other);

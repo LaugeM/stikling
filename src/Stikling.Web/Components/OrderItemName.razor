@@ -1,0 +1,90 @@
+@* The name of one thing on an order: one line that suggests from the plant dictionary as you type. Picking a
+   suggestion fills the genus, species and cultivar and shows the botanical name in the field. Typing again goes
+   back to free text, as typed. *@
+@inject PlantNameService Names
+
+<input @ref="input" id="@Id" class="form-control" value="@Shown" placeholder="@Strings.Orders.FormItemNamePlaceholder"
+       aria-label="@Strings.Orders.FormItemName" autocomplete="off" spellcheck="false" autocapitalize="words"
+       aria-controls="@(Id)-results" disabled="@ReadOnly" @oninput="TypeAsync" />
+@if (Found is { Count: > 0 } found && !ReadOnly)
+{
+    <div id="@(Id)-results" class="name-results" role="group" aria-label="@Strings.Plants.NameFound">
+        @foreach (var result in found)
+        {
+            <button type="button" class="name-result" @onclick="() => PickAsync(result)">
+                @if (result.Formerly is { } old)
+                {
+                    <span class="name-result-main"><i>@old</i></span>
+                    <span class="name-result-sub"><BotanicalName Genus="@result.Genus" Species="@result.Species" Cultivar="@result.Cultivar" /></span>
+                }
+                else if (result.Everyday is { } called)
+                {
+                    <span class="name-result-main">@called</span>
+                    <span class="name-result-sub"><BotanicalName Genus="@result.Genus" Species="@result.Species" Cultivar="@result.Cultivar" /></span>
+                }
+                else
+                {
+                    <span class="name-result-main"><BotanicalName Genus="@result.Genus" Species="@result.Species" Cultivar="@result.Cultivar" /></span>
+                }
+            </button>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required OrderItem Item { get; set; }
+
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    [Parameter]
+    public string Id { get; set; } = "item-name";
+
+    /// <summary>For an item that already became something, whose name is not changed here.</summary>
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    private ElementReference input;
+    private NameSuggester? suggester;
+    private string? query;
+    private (NameSuggester? Suggester, string? Query, IReadOnlyList<NameSuggestion> Results) found = (null, null, []);
+
+    // The botanical name once one was picked, else what was typed
+    private string Shown => PlantNames.Botanical(Item.Genus, Item.Species, Item.Cultivar) ?? Item.Name ?? "";
+
+    protected override async Task OnInitializedAsync() => suggester = await Names.GetSuggesterAsync();
+
+    private IReadOnlyList<NameSuggestion> Found
+    {
+        get
+        {
+            if (found.Suggester != suggester || found.Query != query)
+                found = (suggester, query, suggester?.Search(query) ?? []);
+            return found.Results;
+        }
+    }
+
+    public ValueTask FocusAsync() => input.FocusAsync();
+
+    private Task TypeAsync(ChangeEventArgs e)
+    {
+        // Typing goes back to free text
+        query = e.Value?.ToString();
+        Item.Name = query;
+        Item.Genus = null;
+        Item.Species = null;
+        Item.Cultivar = null;
+        return Changed.InvokeAsync();
+    }
+
+    private Task PickAsync(NameSuggestion result)
+    {
+        query = null;
+        Item.Genus = result.Genus;
+        Item.Species = result.Species;
+        Item.Cultivar = result.Cultivar;
+        Item.Name = null;
+        return Changed.InvokeAsync();
+    }
+}

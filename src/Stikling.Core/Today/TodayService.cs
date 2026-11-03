@@ -3,6 +3,7 @@ using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
+using Stikling.Core.Orders;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
@@ -34,6 +35,7 @@ public sealed class TodayService(
     OwnCareKindService ownKinds,
     ProblemService problems,
     RoomService rooms,
+    OrderService orders,
     TimeProvider time)
 {
     /// <param name="days">How many days from today the list on the day back is read for.</param>
@@ -75,6 +77,7 @@ public sealed class TodayService(
             PotsById = (await pots.GetAllAsync()).ToDictionary(p => p.Id),
             PestCases = await pestCases.GetAllAsync(),
             PestTreatments = await pestTreatments.GetAllAsync(),
+            Orders = await orders.GetAllAsync(),
             BackTimelines = backTimelines
         };
     }

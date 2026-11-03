@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="OrderNeedsSeller" xml:space="preserve">
+    <value>Say who the order is from.</value>
+    <comment>Error when saving an order. An order is plants bought online and on the way.</comment>
+  </data>
+  <data name="OrderShippingNegative" xml:space="preserve">
+    <value>Shipping can't be below zero.</value>
+    <comment>Error when saving an order.</comment>
+  </data>
+  <data name="OrderExpectedBeforeOrdered" xml:space="preserve">
+    <value>The order can't be expected before the day it was made.</value>
+    <comment>Error when saving an order with an expected day earlier than the day it was ordered.</comment>
+  </data>
+  <data name="OrderItemNeedsName" xml:space="preserve">
+    <value>Give each item a genus or a name.</value>
+    <comment>Error when saving an item on an order.</comment>
+  </data>
+  <data name="OrderItemPriceNegative" xml:space="preserve">
+    <value>A price can't be below zero.</value>
+    <comment>Error when saving an item on an order.</comment>
+  </data>
+  <data name="OrderItemUnnamed" xml:space="preserve">
+    <value>Unnamed item</value>
+    <comment>What an item on an order is called when it has no name.</comment>
+  </data>
+</root>

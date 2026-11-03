@@ -4,6 +4,7 @@ using Stikling.Core.Feeds;
 using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
 using Stikling.Core.Lights;
+using Stikling.Core.Orders;
 using Stikling.Core.Models;
 using Stikling.Core.Pests;
 using Stikling.Core.Problems;
@@ -177,6 +178,18 @@ public sealed class IndexedDbOwnFieldRepository(IndexedDb db, TimeProvider time)
     async Task<IReadOnlyList<OwnField>> IOwnFieldRepository.GetStoredAsync() => await GetStoredAsync();
 
     protected override IReadOnlyList<string> Validate(OwnField field) => field.Validate();
+}
+
+public sealed class IndexedDbOrderRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Order>(db, time, Stores.Orders), IOrderRepository
+{
+    protected override IReadOnlyList<string> Validate(Order order) => order.Validate(Today);
+}
+
+public sealed class IndexedDbOrderItemRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<OrderItem>(db, time, Stores.OrderItems), IOrderItemRepository
+{
+    protected override IReadOnlyList<string> Validate(OrderItem item) => item.Validate();
 }
 
 public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)

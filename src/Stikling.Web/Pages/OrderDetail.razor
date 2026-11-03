@@ -1,0 +1,184 @@
+@page "/orders/{Id:guid}"
+@layout WideLayout
+@using System.Globalization
+@using Stikling.Core.Orders
+@inject OrderService OrderService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject NavigationManager Navigation
+
+<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.Orders.DetailPageTitle, view?.SellerName ?? "")</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="orders">@Strings.Orders.DetailBack</a>
+
+@if (loading)
+{
+    <p class="text-body-secondary">@Strings.Supplies.Loading</p>
+}
+else if (view is null)
+{
+    <p class="text-body-secondary">@Strings.Orders.DetailMissing</p>
+}
+else
+{
+    <div class="case-layout">
+    <div class="page-heading">
+        <h1>@Around(Strings.Orders.DetailTitle, SellerLink)</h1>
+        @if (view.IsOnTheWay)
+        {
+            @* On a phone the button is in the bar at the bottom *@
+            <button type="button" class="btn btn-primary btn-sm heading-add" @onclick="() => unpackOpen = true">@Strings.Orders.Unpack</button>
+        }
+    </div>
+
+    <p class="order-meta">@Meta</p>
+    <p><a class="btn btn-outline-primary btn-sm" href="orders/@view.Order.Id/edit">@Strings.Common.Edit</a></p>
+
+    @if (view.Items.Count > 0)
+    {
+        <ul class="order-items case-side">
+            @foreach (var item in view.Items)
+            {
+                <li class="order-item">
+                    <div class="order-item-main">
+                        <div class="item-name">@ItemName(item)</div>
+                        <div class="order-item-state">@State(item)</div>
+                    </div>
+                    @if (view.PriceOf(item) is { } price)
+                    {
+                        <span class="order-price @(item.DidNotCome ? "faded" : null)">@Labels.Money(price)</span>
+                    }
+                </li>
+            }
+        </ul>
+
+        @if (view.ItemsTotal > 0 || view.Order.Shipping > 0)
+        {
+            <dl class="detail-list order-totals">
+                @if (view.ItemsTotal > 0)
+                {
+                    <dt>@Strings.Orders.TotalPlants</dt>
+                    <dd class="order-price">@Labels.Money(view.ItemsTotal)</dd>
+                }
+                @if (view.Order.Shipping > 0)
+                {
+                    <dt>@Strings.Orders.TotalShipping</dt>
+                    <dd class="order-price">@Labels.Money(view.Order.Shipping.Value)</dd>
+                }
+                <dt>@Strings.Orders.TotalTotal</dt>
+                <dd class="order-price"><b>@Labels.Money(view.Total)</b></dd>
+            </dl>
+            @if (view.ShippingEach is { } each)
+            {
+                <p class="order-each">@string.Format(CultureInfo.CurrentCulture, Strings.Orders.ShippingEach, Labels.Money(each))</p>
+            }
+        }
+    }
+
+    @if (!string.IsNullOrWhiteSpace(view.Order.Notes))
+    {
+        <p class="detail-notes">@view.Order.Notes</p>
+    }
+
+    @if (view.IsOnTheWay)
+    {
+        <div class="page-dock unpack-dock" role="group" aria-label="@Strings.Orders.Unpack">
+            <button type="button" class="btn btn-primary" @onclick="() => unpackOpen = true">@Strings.Orders.Unpack</button>
+        </div>
+    }
+    </div>
+
+    <UnpackSheet View="view" @bind-Open="unpackOpen" Done="LoadAsync" />
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    /// <summary>Opens the unpack sheet at once, from the row on Today.</summary>
+    [SupplyParameterFromQuery(Name = "unpack")]
+    public int? Unpack { get; set; }
+
+    private OrderView? view;
+    private IReadOnlyDictionary<Guid, Plant> plants = new Dictionary<Guid, Plant>();
+    private IReadOnlyDictionary<Guid, Propagation> propagations = new Dictionary<Guid, Propagation>();
+    private bool loading = true;
+    private bool unpackOpen;
+    private Guid? openedFor;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+        if (Unpack == 1 && view is { IsOnTheWay: true } && openedFor != Id)
+        {
+            unpackOpen = true;
+            // So a reload or the back button doesn't open it again
+            openedFor = Id;
+            Navigation.NavigateTo($"orders/{Id}", replace: true);
+            return;
+        }
+        openedFor = Id;
+    }
+
+    private async Task LoadAsync()
+    {
+        view = await OrderService.GetAsync(Id);
+        plants = (await PlantRepository.GetAllAsync()).ToDictionary(p => p.Id);
+        propagations = (await PropagationRepository.GetAllAsync()).ToDictionary(p => p.Id);
+        loading = false;
+    }
+
+    private string Meta
+    {
+        get
+        {
+            var ordered = Labels.DayMonth(view!.Order.OrderedOn);
+            if (view.IsOnTheWay && view.Order.ExpectedOn is { } expected)
+                return string.Format(CultureInfo.CurrentCulture, Strings.Orders.DetailOrderedExpected, ordered, Labels.Day(expected));
+            if (!view.IsOnTheWay && view.ArrivedOn is { } arrivedOn)
+                return string.Format(CultureInfo.CurrentCulture, Strings.Orders.DetailOrderedArrived, ordered, Labels.DayMonth(arrivedOn));
+            return string.Format(CultureInfo.CurrentCulture, Strings.Orders.DetailOrdered, ordered);
+        }
+    }
+
+    private RenderFragment SellerLink => view!.SellerId is { } sellerId
+        ? @<a href="sellers/@sellerId">@view.SellerName</a>
+        : @<text>@view.SellerName</text>;
+
+    private static RenderFragment Around(string format, RenderFragment inner) => builder =>
+    {
+        var at = format.IndexOf("{0}", StringComparison.Ordinal);
+        builder.AddContent(0, format[..at]);
+        builder.AddContent(1, inner);
+        builder.AddContent(2, format[(at + 3)..]);
+    };
+
+    private static RenderFragment ItemName(OrderItem item) => item.Genus is { Length: > 0 }
+        ? @<BotanicalName Genus="@item.Genus" Species="@item.Species" Cultivar="@item.Cultivar" />
+        : @<text>@item.DisplayName</text>;
+
+    // Where the item is now: on the way, the plant or cutting it became, or not coming
+    private RenderFragment State(OrderItem item)
+    {
+        if (item.PlantId is { } plantId)
+        {
+            // Added from the order, or a plant that was already there
+            var text = item.ArrivedOn is null ? Strings.Orders.StateAPlantYouHave : Strings.Orders.StateNowPlant;
+            return plants.TryGetValue(plantId, out var plant) && !plant.IsDeleted
+                ? @<a class="order-became" href="plants/@plant.Id"><span class="order-thumb" aria-hidden="true"><SubjectThumb Subject="plant" /></span>@text</a>
+                : @<text>@Strings.Orders.StateBecamePlantGone</text>;
+        }
+        if (item.PropagationId is { } propagationId)
+        {
+            return propagations.TryGetValue(propagationId, out var propagation) && !propagation.IsDeleted
+                ? @<a class="order-became" href="propagations/@propagation.Id"><span class="order-thumb" aria-hidden="true"><PropagationThumb Propagation="propagation" /></span>@Strings.Orders.StateNowCutting</a>
+                : @<text>@Strings.Orders.StateBecameCuttingGone</text>;
+        }
+        if (item.DidNotCome)
+            return @<text>@Strings.Orders.DidNotCome</text>;
+        return item.WishId is not null
+            ? @<text>@Strings.Orders.StateOnTheWay · @Strings.Orders.StateFromWishlist</text>
+            : @<text>@Strings.Orders.StateOnTheWay</text>;
+    }
+}

@@ -1,0 +1,33 @@
+/* The intro line gets the same room above the first heading as on the other lists */
+.settings-hint + .stage-group {
+    margin-top: 1.25rem;
+}
+
+/* Rows flow into cards in columns at least 20rem wide on a wide screen, like the Sellers list */
+@media (min-width: 64rem) {
+    .order-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        gap: 0.6rem 0.75rem;
+        align-items: start;
+    }
+
+    .order-grid > li {
+        display: flex;
+        min-width: 0;
+    }
+
+    .order-grid > li > * {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+/* The total with shipping, at the end of an order's row */
+.order-total {
+    flex: none;
+    margin-left: auto;
+    padding-left: 0.5rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}

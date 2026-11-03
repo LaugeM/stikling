@@ -1,0 +1,82 @@
+.order-form-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* A name and a narrow price side by side, with the remove button after them */
+.order-form-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+}
+
+.order-form-name {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.order-form-price {
+    flex: 0 0 5.5rem;
+}
+
+.order-form-price .form-control {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.order-remove {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--pa-muted);
+}
+
+.order-remove svg {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0.4rem;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.55);
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.order-form-add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.order-became {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.order-thumb ::deep .item-thumb {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.4rem;
+}
+
+.order-thumb ::deep .item-thumb svg {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.order-thumb ::deep .thumb-days {
+    display: none;
+}
