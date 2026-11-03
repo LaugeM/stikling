@@ -404,6 +404,15 @@ public static class Labels
     // English reads "19 Sep 2026" (en-GB would write "Sept"), see TextCulture
     public static string Date(DateOnly date) => Format(date, Strings.Labels.DateFormat);
 
+    /// <summary>An amount of money as a number with no currency, like 12.5.</summary>
+    public static string Money(decimal amount) => amount.ToString("0.##", CultureInfo.CurrentCulture);
+
+    /// <summary>"Thu 6 Nov", a weekday and day without the year.</summary>
+    public static string Day(DateOnly date) => Format(date, Strings.Labels.DayFormat);
+
+    /// <summary>"6 Nov", a day without the year or the weekday.</summary>
+    public static string DayMonth(DateOnly date) => Format(date, Strings.Orders.DayMonthFormat);
+
     /// <summary>"2024", "June 2024" or "12 Jun 2024", depending on how much is known.</summary>
     public static string Date(LooseDate date) => date.Precision switch
     {

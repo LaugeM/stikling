@@ -617,7 +617,7 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="HappensWhenGetPlantFromA1" xml:space="preserve">
-    <value>Tap &lt;em&gt;Got it&lt;/em&gt; on the wish and choose a plant or a cutting. The add form opens filled in from the wish. Once you save it, the wish moves to &lt;em&gt;Got&lt;/em&gt; at the bottom of the wishlist, with a link to the plant or cutting. If you add a plant or cutting with the same name some other way, the form offers to mark the wish got. A wish in Got can be put back on the list.</value>
+    <value>Tap &lt;em&gt;Got it&lt;/em&gt; on the wish and choose a plant or a cutting. If you bought it online, choose &lt;em&gt;On an order&lt;/em&gt; to put it on an order that is on the way, and it says so on the wishlist until the box is unpacked. The add form opens filled in from the wish. Once you save it, the wish moves to &lt;em&gt;Got&lt;/em&gt; at the bottom of the wishlist, with a link to the plant or cutting. If you add a plant or cutting with the same name some other way, the form offers to mark the wish got. A wish in Got can be put back on the list.</value>
     <comment>Answer to "What happens when I get a plant from my wishlist?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="CheckWishlistWhileMOutQ" xml:space="preserve">
@@ -627,6 +627,22 @@
   <data name="CheckWishlistWhileMOutA1" xml:space="preserve">
     <value>Yes. Search on the Plants page and the wishes that match show under the plants, in a group called &lt;em&gt;On your wishlist&lt;/em&gt;. The search on the Wishlist page does the same the other way round: it shows the plants and cuttings you already have under the wishes. &lt;em&gt;Share as text&lt;/em&gt; on the Wishlist page sends the open wishes as a list. Notes and the most you would pay are left out unless you switch them on.</value>
     <comment>Answer to "Can I check my wishlist while I'm out buying plants?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="KeepTrackPlantsOrderedQ" xml:space="preserve">
+    <value>How do I keep track of plants I've ordered?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="KeepTrackPlantsOrderedA1" xml:space="preserve">
+    <value>Under Supplies, open &lt;em&gt;Orders&lt;/em&gt; and tap &lt;em&gt;New order&lt;/em&gt;. Pick the seller, the day you ordered and the shipping, then add what you bought as a name and a price. Names suggest from the plant names like on the plant form, and you can also add a plant you already have. Pots and supplies don't go on an order. If you know when the box should come, put in the expected day, and the order shows on Today from that day until you unpack it.</value>
+    <comment>Answer to "How do I keep track of plants I've ordered?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="HappensWhenUnpackOrderQ" xml:space="preserve">
+    <value>What happens when I unpack an order?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="HappensWhenUnpackOrderA1" xml:space="preserve">
+    <value>Tap &lt;em&gt;Unpack&lt;/em&gt; on the order and tick what came. For each one, choose whether it is a plant or a cutting and how it arrived, and say which room they go in. Each one is added with the seller, the price and the day it arrived. What didn't come can be marked &lt;em&gt;Didn't come&lt;/em&gt;, or left on the way until it does. The order says it has arrived once everything is unpacked or marked. Shipping stays on the order and isn't added to the price of the plants. Deleting an order keeps the plants that were made from it.</value>
+    <comment>Answer to "What happens when I unpack an order?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="SectionPropagations" xml:space="preserve">
     <value>Propagations</value>

@@ -1,0 +1,112 @@
+@page "/orders"
+@layout WideLayout
+@using System.Globalization
+@using Stikling.Core.Orders
+@inject OrderService OrderService
+
+<PageTitle>@Strings.Orders.ListPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
+
+<div class="page-heading">
+    <h1>@Strings.Orders.ListTitle</h1>
+    @* Takes over from the round add button on a wide screen *@
+    <a class="btn btn-primary btn-sm icon-btn heading-add" href="orders/new">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        @Strings.Orders.ListNew
+    </a>
+</div>
+
+<p class="settings-hint">@Strings.Orders.ListIntro</p>
+
+@if (orders is null)
+{
+    <p class="text-body-secondary">@Strings.Supplies.Loading</p>
+}
+else if (orders.Count == 0)
+{
+    <div class="empty-state">
+        <p>@Strings.Orders.ListEmpty</p>
+        <a class="btn btn-primary mt-3" href="orders/new">@Strings.Orders.ListNew</a>
+    </div>
+}
+else
+{
+    @if (onTheWay.Count > 0)
+    {
+        <section class="stage-group">
+            <h2>@Strings.Orders.GroupOnTheWay</h2>
+            <ul class="item-list list-grid order-grid">
+                @foreach (var order in onTheWay)
+                {
+                    <li>@Row(order)</li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (arrived.Count > 0)
+    {
+        <section class="stage-group">
+            <h2>@Strings.Orders.GroupArrived</h2>
+            <ul class="item-list list-grid order-grid">
+                @foreach (var order in arrived)
+                {
+                    <li>@Row(order)</li>
+                }
+            </ul>
+        </section>
+    }
+
+    <a class="fab" href="orders/new" aria-label="@Strings.Orders.ListNew" title="@Strings.Orders.ListNew">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+    </a>
+}
+
+@code {
+    private IReadOnlyList<OrderView>? orders;
+    private List<OrderView> onTheWay = [];
+    private List<OrderView> arrived = [];
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var all = await OrderService.GetAllAsync();
+        // An order with nothing on it yet is waiting for its items, so it is listed with the ones on the way
+        onTheWay = [.. all.Where(o => o.IsOnTheWay || o.ItemCount == 0)
+            .OrderBy(o => o.Order.ExpectedOn is null).ThenBy(o => o.Order.ExpectedOn).ThenBy(o => o.Order.OrderedOn)];
+        arrived = [.. all.Where(o => !o.IsOnTheWay && o.ItemCount > 0)
+            .OrderByDescending(o => o.ArrivedOn).ThenByDescending(o => o.Order.OrderedOn)];
+        orders = all;
+    }
+
+    private RenderFragment Row(OrderView order) => @<a class="item-card" href="orders/@order.Order.Id">
+        <div class="item-thumb" aria-hidden="true"><svg viewBox="0 0 24 24"><ParcelIcon /></svg></div>
+        <div class="item-text">
+            <div class="item-name">@order.SellerName</div>
+            <div class="item-meta">@Meta(order)</div>
+        </div>
+        @if (order.ItemsTotal > 0 || order.Order.Shipping > 0)
+        {
+            <span class="order-total">@Labels.Money(order.Total)</span>
+        }
+    </a>;
+
+    private static string Meta(OrderView order)
+    {
+        var culture = CultureInfo.CurrentCulture;
+        if (order.IsOnTheWay || order.ItemCount == 0)
+        {
+            return order.Order.ExpectedOn is { } expected
+                ? string.Format(culture, Strings.Orders.MetaExpected, Labels.Plants(order.ItemCount), Labels.Day(expected))
+                : string.Format(culture, Strings.Orders.MetaOrdered, Labels.Plants(order.ItemCount), Labels.DayMonth(order.Order.OrderedOn));
+        }
+
+        var arrivedOn = Labels.DayMonth(order.ArrivedOn ?? order.Order.OrderedOn);
+        return order.CameCount == order.ItemCount
+            ? string.Format(culture, Strings.Orders.MetaArrived, arrivedOn, Labels.Plants(order.ItemCount))
+            : string.Format(culture, Strings.Orders.MetaArrivedSome, arrivedOn, order.CameCount, order.ItemCount);
+    }
+}

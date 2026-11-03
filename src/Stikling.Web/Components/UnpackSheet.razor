@@ -1,0 +1,224 @@
+@* Unpacking a box: tick what came, say whether each is a plant or a cutting and how it arrived, and the
+   order's items become plants and cuttings. What isn't ticked stays on the way, or is marked as not coming. *@
+@using System.Globalization
+@using Stikling.Core.Orders
+@inject OrderService OrderService
+@inject RoomService RoomService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject TimeProvider Time
+@inject ILogger<UnpackSheet> Logger
+
+<Sheet Title="@Title" Open="Open" OpenChanged="OpenChangedAsync">
+    <div class="unpack">
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        <div class="mb-3">
+            <label class="form-label" for="unpack-date">@Strings.Orders.UnpackArrivedOn</label>
+            <InputDate id="unpack-date" class="form-control" @bind-Value="arrivedOn" max="@Time.Today().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" />
+        </div>
+
+        <ul class="unpack-rows">
+            @foreach (var row in rows)
+            {
+                var id = $"unpack-{row.Item.Id:N}";
+                <li class="unpack-row @(row.Ticked ? null : "off")">
+                    <div class="form-check unpack-pick">
+                        <input type="checkbox" class="form-check-input" id="@id" checked="@row.Ticked" @onchange="() => Toggle(row)" />
+                        <label class="form-check-label" for="@id">@ItemName(row.Item)</label>
+                    </div>
+
+                    @if (row.Ticked)
+                    {
+                        <div class="btn-group segmented w-100 mt-2" role="radiogroup" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Orders.UnpackBecomes, row.Item.DisplayName)">
+                            <input type="radio" class="btn-check" name="@(id)-as" id="@(id)-plant" checked="@(row.As == UnpackAs.Plant)" @onchange="() => row.As = UnpackAs.Plant" />
+                            <label class="btn btn-outline-primary" for="@(id)-plant">@Strings.Orders.UnpackPlant</label>
+                            <input type="radio" class="btn-check" name="@(id)-as" id="@(id)-cutting" checked="@(row.As == UnpackAs.Cutting)" @onchange="() => row.As = UnpackAs.Cutting" />
+                            <label class="btn btn-outline-primary" for="@(id)-cutting">@Strings.Orders.UnpackCutting</label>
+                        </div>
+
+                        <div class="mt-2">
+                            <span class="form-label d-block" id="@(id)-rating">@Strings.Plants.ArrivalHow</span>
+                            <div class="chip-row" role="group" aria-labelledby="@(id)-rating">
+                                @foreach (var rating in Enum.GetValues<ArrivalRating>())
+                                {
+                                    var picked = row.Rating == rating;
+                                    <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                                            @onclick="() => row.Rating = picked ? null : rating">@Labels.For(rating)</button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="unpack-links">
+                            <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(row.MoreOpen ? "true" : "false")"
+                                    @onclick="() => row.MoreOpen = !row.MoreOpen">@Strings.Orders.UnpackMore</button>
+                            @if (string.IsNullOrWhiteSpace(row.Item.Genus))
+                            {
+                                <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(row.TidyOpen ? "true" : "false")"
+                                        @onclick="() => row.TidyOpen = !row.TidyOpen">@Strings.Orders.UnpackTidy</button>
+                            }
+                        </div>
+
+                        @if (row.MoreOpen)
+                        {
+                            <ArrivalFields ShowRating="false" Id="@($"{id}-more")" Problems="row.Problems" @bind-Note="row.Note" />
+                        }
+                        @if (row.TidyOpen)
+                        {
+                            <PlantNameFields IdPrefix="@($"{id}-")" @bind-Genus="row.Genus" @bind-Species="row.Species" @bind-Cultivar="row.Cultivar" />
+                        }
+                    }
+                    else
+                    {
+                        <div class="unpack-stays">
+                            <span>@Strings.Orders.UnpackStays</span>
+                            <button type="button" class="chip @(row.DidNotCome ? "picked" : null)" aria-pressed="@(row.DidNotCome ? "true" : "false")"
+                                    @onclick="() => row.DidNotCome = !row.DidNotCome">@Strings.Orders.DidNotCome</button>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+
+        @if (rows.Any(r => r.Ticked))
+        {
+            <div class="mb-3">
+                <RoomPicker @bind-Value="location" Rooms="rooms" Label="@Strings.Orders.UnpackPutIn" />
+            </div>
+        }
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(busy || !CanSave)" @onclick="SaveAsync">@ButtonText</button>
+        </div>
+    </div>
+</Sheet>
+
+@code {
+    private sealed class Row(OrderItem item)
+    {
+        public OrderItem Item { get; } = item;
+        public bool Ticked { get; set; } = true;
+        public UnpackAs As { get; set; } = UnpackAs.Plant;
+        public ArrivalRating? Rating { get; set; }
+        public List<ArrivalProblem> Problems { get; set; } = [];
+        public string? Note { get; set; }
+        public bool MoreOpen { get; set; }
+        public bool TidyOpen { get; set; }
+        public string? Genus { get; set; }
+        public string? Species { get; set; }
+        public string? Cultivar { get; set; }
+        public bool DidNotCome { get; set; }
+    }
+
+    [Parameter, EditorRequired]
+    public required OrderView View { get; set; }
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>Called after the items were unpacked or marked, so the page can load them again.</summary>
+    [Parameter]
+    public EventCallback Done { get; set; }
+
+    private List<Row> rows = [];
+    private IReadOnlyList<Room> rooms = [];
+    private DateOnly arrivedOn;
+    private string? location;
+    private bool wasOpen;
+    private bool busy;
+    private List<string> errors = [];
+
+    private string Title => string.Format(CultureInfo.CurrentCulture, Strings.Orders.UnpackTitle, View.SellerName);
+
+    private int TickedCount => rows.Count(r => r.Ticked);
+
+    private bool CanSave => TickedCount > 0 || rows.Any(r => r.DidNotCome);
+
+    private string ButtonText => TickedCount == 0 && CanSave
+        ? Strings.Common.Save
+        : string.Format(CultureInfo.CurrentCulture, Plural.Of(TickedCount, Strings.Orders.UnpackButton_One, Strings.Orders.UnpackButton_Other), TickedCount);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Every time it opens it starts again from what is on the way now
+        if (Open && !wasOpen)
+        {
+            rows = [.. View.Items.Where(i => i.IsOnTheWay).Select(i => new Row(i))];
+            arrivedOn = Time.Today();
+            location = null;
+            errors = [];
+            rooms = Room.List(await RoomService.GetPlacesAsync(), await PlantRepository.GetAllAsync(), await PropagationRepository.GetAllAsync());
+        }
+        wasOpen = Open;
+    }
+
+    private static void Toggle(Row row)
+    {
+        row.Ticked = !row.Ticked;
+        // Ticking a row again takes the mark off
+        if (row.Ticked)
+            row.DidNotCome = false;
+    }
+
+    private static RenderFragment ItemName(OrderItem item) => item.Genus is { Length: > 0 }
+        ? @<BotanicalName Genus="@item.Genus" Species="@item.Species" Cultivar="@item.Cultivar" />
+        : @<text>@item.DisplayName</text>;
+
+    private Task OpenChangedAsync(bool open)
+    {
+        Open = open;
+        return OpenChanged.InvokeAsync(open);
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        errors = [];
+        try
+        {
+            foreach (var row in rows.Where(r => !r.Ticked && r.DidNotCome))
+                await OrderService.SetDidNotComeAsync(row.Item.Id, true);
+
+            var choices = rows.Where(r => r.Ticked).Select(r => new UnpackChoice
+            {
+                ItemId = r.Item.Id,
+                UnpackAs = r.As,
+                Rating = r.Rating,
+                Problems = [.. r.Problems],
+                ArrivalNote = r.Note,
+                Genus = r.Genus,
+                Species = r.Species,
+                Cultivar = r.Cultivar
+            }).ToList();
+
+            if (choices.Count > 0)
+            {
+                var placeId = await RoomService.PlaceIdAsync(location);
+                await OrderService.UnpackAsync(View.Order.Id, arrivedOn, placeId, choices, Labels.For);
+            }
+
+            await OpenChangedAsync(false);
+            await Done.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unpacking an order failed");
+            errors = [string.Format(CultureInfo.CurrentCulture, Strings.Orders.UnpackError, ex.Message)];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

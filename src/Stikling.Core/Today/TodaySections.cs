@@ -2,6 +2,7 @@ using Stikling.Core.Away;
 using Strings = Stikling.Core.Resources;
 using Stikling.Core.Care;
 using Stikling.Core.Models;
+using Stikling.Core.Orders;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Problems;
@@ -45,6 +46,7 @@ public sealed record TodaySections
     public IReadOnlyList<IntervalGroup> CareNow { get; init; } = [];
     public IReadOnlyList<IntervalGroup> CareComing { get; init; } = [];
     public NextRoundCount? CareNextRound { get; init; }
+    public IReadOnlyList<OrderArriving> OrdersArriving { get; init; } = [];
     public IReadOnlyList<PropagationCheck> Checks { get; init; } = [];
     public IReadOnlyList<PropagationCheck> ChecksNow { get; init; } = [];
     public NextRoundCount? NextRoundChecks { get; init; }
@@ -122,6 +124,13 @@ public sealed record TodaySections
             backRows = BackList.Of(backOn, plants, propagations, data.CareLogs, timeline, data.PestCases,
                 PotOf, data.Lights, places, data.Stretches, hemisphere, clock, settings.BackListLength);
         }
+        // Orders still on the way, from the day they were expected. Nothing is asked for while away or quiet.
+        var ordersArriving = awayNow is not null ? [] : data.Orders
+            .Where(o => o.IsOnTheWay && o.Order.ExpectedOn is { } expected && expected <= day)
+            .OrderBy(o => o.Order.ExpectedOn).ThenBy(o => o.Order.CreatedAt)
+            .Select(o => new OrderArriving(o.Order.Id, o.SellerName, o.Order.ExpectedOn!.Value, o.Order.ExpectedOn == day))
+            .ToList();
+
         var holding = BackList.IsHolding(backDay, backRows, putOffs, day);
 
         var quarantineNow = TodayBoard.QuarantineUp(plants, day)
@@ -203,6 +212,7 @@ public sealed record TodaySections
             CareNow = careNow,
             CareComing = careComing,
             CareNextRound = careNextRound,
+            OrdersArriving = ordersArriving,
             Checks = checks,
             ChecksNow = checksNow,
             NextRoundChecks = checksNextRound,

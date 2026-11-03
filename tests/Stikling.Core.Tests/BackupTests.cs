@@ -145,12 +145,14 @@ public class BackupTests
             OwnCareKinds = [new OwnCareKind { Name = "Misted" }, new OwnCareKind { Name = "Old", DeletedAt = Now }],
             CareIntervals = [new CareInterval(), new CareInterval { DeletedAt = Now }],
             TreatmentPlans = [new TreatmentPlan { Name = "Mites" }, new TreatmentPlan { Name = "Old", DeletedAt = Now }],
-            OwnFields = [new OwnField { Name = "Clone name" }, new OwnField { Name = "Old", DeletedAt = Now }]
+            OwnFields = [new OwnField { Name = "Clone name" }, new OwnField { Name = "Old", DeletedAt = Now }],
+            Orders = [new Order { SellerName = "Plantorama" }, new Order { DeletedAt = Now }],
+            OrderItems = [new OrderItem { Name = "Monstera" }, new OrderItem { Name = "Old", DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -174,6 +176,8 @@ public class BackupTests
         Assert.Empty(data.OwnCareKinds);
         Assert.Empty(data.OwnFields);
         Assert.Empty(data.CareIntervals);
+        Assert.Empty(data.Orders);
+        Assert.Empty(data.OrderItems);
     }
 
     [Fact]
@@ -281,6 +285,36 @@ public class BackupTests
         Assert.Equal([ArrivalProblem.Pests, ArrivalProblem.RootRot], restored.ArrivalProblems);
         Assert.Equal(2, BackupMerge.Merge<Seller>([], back.Sellers).Added);
         Assert.Equal(0, BackupMerge.Merge([seller, merged], back.Sellers).Added);
+    }
+
+    [Fact]
+    public void Orders_and_their_items_survive_a_backup_and_a_restore_merges_them()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var order = new Order
+        {
+            SellerName = "Plantorama", OrderedOn = new DateOnly(2026, 11, 1), ExpectedOn = new DateOnly(2026, 11, 5),
+            Shipping = 9.5m, Notes = "Heat pack", UpdatedAt = Now
+        };
+        var item = new OrderItem
+        {
+            OrderId = order.Id, Name = "Monstera", Genus = "Monstera", Price = 20m, ArrivedOn = new DateOnly(2026, 11, 5),
+            PlantId = Guid.NewGuid(), DidNotCome = false, UpdatedAt = Now
+        };
+        var gone = new OrderItem { OrderId = order.Id, Name = "Old", DeletedAt = Now, UpdatedAt = Now };
+
+        var json = JsonSerializer.Serialize(new BackupData { Orders = [order], OrderItems = [item, gone] }, options);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        var restoredOrder = Assert.Single(back.Orders);
+        Assert.Equal((order.OrderedOn, order.ExpectedOn, 9.5m, "Heat pack"), (restoredOrder.OrderedOn, restoredOrder.ExpectedOn, restoredOrder.Shipping, restoredOrder.Notes));
+        Assert.Equal(2, back.OrderItems.Count);
+        Assert.Equal((item.PlantId, 20m, item.ArrivedOn), (back.OrderItems[0].PlantId, back.OrderItems[0].Price, back.OrderItems[0].ArrivedOn));
+        Assert.Equal(1, back.Counts.Orders);
+        Assert.Equal(1, back.Counts.OrderItems);
+        Assert.Equal(1, BackupMerge.Merge<Order>([], back.Orders).Added);
+        Assert.Equal(2, BackupMerge.Merge<OrderItem>([], back.OrderItems).Added);
+        Assert.Equal(0, BackupMerge.Merge([order], back.Orders).Added);
     }
 
     [Fact]

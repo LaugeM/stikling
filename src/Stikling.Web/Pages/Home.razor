@@ -367,6 +367,26 @@ else
         </section>
     }
 
+    @if (!sections.Away && sections.OrdersArriving.Count > 0)
+    {
+        <section class="today-section">
+            <h2>@Strings.Orders.TodayHeading</h2>
+            <ul class="item-list">
+                @foreach (var arriving in sections.OrdersArriving)
+                {
+                    <li @key="arriving.OrderId">
+                        <a class="item-card" href="orders/@arriving.OrderId?unpack=1">
+                            <div class="item-thumb" aria-hidden="true"><svg viewBox="0 0 24 24"><ParcelIcon /></svg></div>
+                            <div class="item-text">
+                                <div class="item-name">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, arriving.IsToday ? Strings.Orders.TodayArriving : Strings.Orders.TodayExpected, arriving.SellerName, Labels.Day(arriving.ExpectedOn)))</div>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
     @if (!sections.Away && sections.QuarantineNow.Count > 0)
     {
         <section class="today-section">

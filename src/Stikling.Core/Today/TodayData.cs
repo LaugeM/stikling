@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Stikling.Core.Orders;
 using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Today;
@@ -31,6 +32,7 @@ public sealed record TodayData
     public IReadOnlyDictionary<Guid, Pot> PotsById { get; init; } = new Dictionary<Guid, Pot>();
     public IReadOnlyList<PestCase> PestCases { get; init; } = [];
     public IReadOnlyList<PestTreatment> PestTreatments { get; init; } = [];
+    public IReadOnlyList<OrderView> Orders { get; init; } = [];
 
     /// <summary>The timeline the list on the day back reads, for each day back that is within reach.</summary>
     public IReadOnlyDictionary<DateOnly, IReadOnlyList<TimelineEntry>> BackTimelines { get; init; } =
