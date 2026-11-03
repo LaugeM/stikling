@@ -4,6 +4,7 @@ The names the app suggests come from three files in `src/Stikling.Web/wwwroot/da
 
 - `plant-names.json`: the botanical names, for the genus, species and cultivar fields and the "What plant is it?" box.
 - `everyday-names.en.json` and `everyday-names.da.json`: what people call the plants, like "Snake plant" for Dracaena trifasciata. The box finds plants by them, and a plant with no nickname shows one under its botanical name.
+- `plant-regions.json`: the family of each genus and where each species grows wild, which a plant's page shows. Only the plant page reads it, so it is its own file and the page doesn't need the bigger file of names.
 
 The service worker caches the botanical names and the English everyday names with the rest of the app, so they work offline. Another language is only downloaded on a device that uses it, and cached then.
 
@@ -19,7 +20,8 @@ It takes a few minutes and needs an internet connection. Commit the new files al
 
 | What | Source | Licence |
 |---|---|---|
-| Genera, species, subspecies, varieties and old names | [Catalogue of Life](https://www.catalogueoflife.org), which takes its plants from Kew's World Checklist of Vascular Plants, through the [ChecklistBank API](https://api.checklistbank.org) | CC BY 4.0, credited in Settings |
+| Genera, species, subspecies, varieties, old names and families | [Catalogue of Life](https://www.catalogueoflife.org), which takes its plants from Kew's World Checklist of Vascular Plants, through the [ChecklistBank API](https://api.checklistbank.org) | CC BY 4.0, credited in Settings |
+| Where a species grows wild | Catalogue of Life's distributions, which also come from Kew's checklist | CC BY 4.0, credited in Settings |
 | Cultivars | [Wikidata](https://www.wikidata.org), items that are a cultivar of something included | CC0 |
 | Everyday names | Wikidata's common names (P1843) in English and Danish, and the Danish labels | CC0 |
 | Cultivars and trade names | `cultivars.txt` in this folder, kept by hand | |
@@ -31,11 +33,17 @@ Wikidata has an everyday name for many species, but often not the one on the lab
 
 ## What is included
 
-- **Families and genera with all their species**, in `include` at the top of `build.cs`: the aroids (Araceae), prayer plants (Marantaceae), begonias, the carnivorous plant families, bananas and birds of paradise, and the genera of most common houseplants. Each family adds roughly 50 to 100 KB.
+- **Families and genera with all their species**, in `include` at the top of `build.cs`: the aroids (Araceae), prayer plants (Marantaceae), begonias, the carnivorous plant families, bananas and birds of paradise, the cacti (Cactaceae), the succulent families Crassulaceae and Aizoaceae, and the genera of most common houseplants. Each family adds roughly 50 to 100 KB.
 - **Big genera with only their named species**, in `namedOnly`: genera like Ficus, Euphorbia and Dendrobium, with hundreds of species of which only a few are grown indoors. A species is kept when it has an everyday name or a cultivar.
 - **Genera by name only**, in `genusOnly`: the herbs.
 
 `plant-names.json` is around 1 MB, about 270 KB once compressed, which is what a phone downloads. It is written one genus to a line, which is a third smaller than indenting every name and still shows in a pull request which genera changed.
+
+## Where plants grow wild
+
+`plant-regions.json` has, for each species, the areas it is native to, as Kew's level 3 areas from the World Geographical Scheme for Recording Plant Distributions: mostly countries, with the biggest countries split into states or regions and the islands on their own. Places a plant has been brought to and gone wild in are left out. A subspecies or variety is only listed when its areas differ from its species'. The file also has each genus's family and the name an old genus goes by now.
+
+The names of the areas are in `src/Stikling.Web/Resources/Regions.resx` and `Regions.da.resx`, keyed by the area's code, so they are translated like the rest of the app. The build warns about a code that isn't there.
 
 ## Adding more
 

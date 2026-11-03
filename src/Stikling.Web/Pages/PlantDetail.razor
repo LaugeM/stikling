@@ -24,6 +24,7 @@
 @inject IJSRuntime JS
 @inject PlantNameService Names
 @inject PlantCareService CommonCare
+@inject PlantRegionService Regions
 @inject ITimelineRepository TimelineRepository
 @inject GrowLightService LightService
 @inject AwayService AwayService
@@ -411,6 +412,23 @@ else
                         {
                             <dt>@Strings.PlantDetail.Likes</dt>
                             <dd><CareOffer Care="careFor" Fills="offered" Book="careBook" Inline="true" OnUse="UseCareAsync" /></dd>
+                        }
+
+                        @if (origin?.Family is { Length: > 0 } family)
+                        {
+                            <dt>@Strings.PlantDetail.BotanicalFamily</dt>
+                            <dd>@family</dd>
+                        }
+                        @if (origin is { Areas.Count: > 0 } wild)
+                        {
+                            var areaNames = RegionNames.Of(wild.Areas);
+                            <dt>@Strings.PlantDetail.NativeTo</dt>
+                            <dd>
+                                @string.Join(", ", showAllAreas || areaNames.Count <= 6 ? areaNames : areaNames.Take(6))@if (!showAllAreas && areaNames.Count > 6)
+                                {
+                                    <text> </text><button type="button" class="btn btn-link btn-sm link-action" @onclick="() => showAllAreas = true">@Plural.Of(areaNames.Count - 6, Strings.PlantDetail.NativeMore_One, Strings.PlantDetail.NativeMore_Other)</button>
+                                }
+                            </dd>
                         }
 
                         @if (careBook.IsEmpty is false && !string.IsNullOrWhiteSpace(plant.Genus))
@@ -1681,6 +1699,8 @@ else
     // What common plants usually like, and so what to offer. Empty if it couldn't be read.
     private PlantCareBook careBook = PlantCareBook.Empty;
     private PlantCare? careFor;
+    private PlantRegionInfo? origin;
+    private bool showAllAreas;
 
     // Fills in only what is empty, like the form. It isn't a change worth a line on the timeline.
     private async Task UseCareAsync()
@@ -1693,6 +1713,23 @@ else
     }
 
     private IReadOnlyList<OwnField> ownFields = [];
+
+    /// <summary>
+    /// The family and native areas. An old species name isn't in the file, so it is looked up again by
+    /// the name it goes by now, which loads the big names file only for those.
+    /// </summary>
+    private async Task<PlantRegionInfo?> FindOriginAsync()
+    {
+        var regionBook = await Regions.GetBookAsync();
+        var found = regionBook.Find(plant!.Genus, plant.Species, plant.NameQualifier);
+        if (found is { SpeciesFound: false })
+        {
+            var (genus, species) = (await Names.GetDictionaryAsync()).Current(plant.Genus, plant.Species);
+            if (!string.Equals(genus, plant.Genus, StringComparison.OrdinalIgnoreCase) || !string.Equals(species, plant.Species, StringComparison.OrdinalIgnoreCase))
+                found = regionBook.Find(genus, species, plant.NameQualifier) ?? found;
+        }
+        return found;
+    }
 
     private async Task LoadAsync()
     {
@@ -1722,6 +1759,7 @@ else
             earlierUntil = fromPropagation is null ? null : CarriedPhotos.PotUpDay(plant, await TimelineRepository.GetForAsync(plant.Id), Time);
 
             careFor = careBook.Find(plant.Genus, plant.Species, plant.NameQualifier);
+            origin = await FindOriginAsync();
             places = await RoomService.GetPlacesAsync();
             sellers = await SellerService.GetSellersAsync();
             ownFields = await OwnFieldBook.GetAllAsync();
