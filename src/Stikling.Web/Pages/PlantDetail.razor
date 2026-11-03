@@ -620,6 +620,10 @@ else
                                 </li>
                             }
                         </ul>
+                        @if (generation is { Number: >= 2 } there)
+                        {
+                            <p class="family-hint">@GenerationLine(there)</p>
+                        }
                     }
                     @if (propagations.Count > 0)
                     {
@@ -1521,6 +1525,12 @@ else
 
     private WateringForm WaterForm => WateringForms.Of(plant!, id => pots.FirstOrDefault(p => p.Id == id));
 
+    private Generation? generation;
+
+    // "3rd generation from the kitchen Monstera", the oldest one linking to its page
+    private MarkupString GenerationLine(Generation g) =>
+        Html(Strings.PlantDetail.FamilyGeneration, H(Ordinal.Of(g.Number)), Link($"plants/{g.Oldest.Id}", g.Oldest.DisplayName, "link-action"));
+
     private bool HasFamily => ancestors.Count > 0 || fromPropagation is not null || propagations.Count > 0 || offspring.Count > 0;
 
     // The one line under the name: where it is, what it grows in, and when it was last watered
@@ -1533,6 +1543,8 @@ else
             yield return PotName(plant.InnerPotId) is { } pot ? F(Strings.PlantDetail.FactMediumInPot, Labels.For(plant.Medium), pot) : F(Strings.PlantDetail.FactInMedium, MediumWord(plant.Medium));
             if (plant.InCollection && lastWater is { } water)
                 yield return WateringText.LastWater(water, WaterForm);
+            if (generation is { Number: >= 2 } line)
+                yield return F(Strings.PlantDetail.FactGeneration, Ordinal.Of(line.Number));
         }
     }
 
@@ -1697,6 +1709,7 @@ else
             pottedInHere = [.. all.Where(p => p.PottedWithPlantId == plant.Id && p.Id != plant.Id)
                                   .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
             ancestors = PlantLineage.Ancestors(plant, all);
+            generation = PlantLineage.GenerationOf(plant, all);
             offspring = PlantLineage.Offspring(plant, all);
 
             var allPropagations = await PropagationRepository.GetAllAsync();

@@ -31,6 +31,26 @@ public static class PlantLineage
     }
 
     /// <summary>
+    /// How many generations a plant is from the oldest ancestor in its line: the number of ancestors,
+    /// counting those that died, left or live elsewhere. Null when it has no parent.
+    /// </summary>
+    public static Generation? GenerationOf(Plant plant, IEnumerable<Plant> all)
+    {
+        var above = Ancestors(plant, all);
+        return above.Count == 0 ? null : new Generation(above.Count, above[^1]);
+    }
+
+    /// <summary>A propagation is one generation below its parent plant. Null when the parent is not there.</summary>
+    public static Generation? GenerationOf(Propagation propagation, IEnumerable<Plant> all)
+    {
+        var list = all.Where(p => !p.IsDeleted).ToList();
+        if (propagation.ParentPlantId is not { } parentId || list.FirstOrDefault(p => p.Id == parentId) is not { } parent)
+            return null;
+        var above = Ancestors(parent, list);
+        return new Generation(above.Count + 1, above.Count == 0 ? parent : above[^1]);
+    }
+
+    /// <summary>
     /// The family around one plant: up to three generations above it (oldest first), its siblings,
     /// its offspring with how many plants descend from each, and its cuttings still going.
     /// </summary>
@@ -157,6 +177,10 @@ public static class PlantLineage
             further);
     }
 }
+
+/// <param name="Number">1 for a direct child of the oldest ancestor, 2 for its grandchild and so on.</param>
+/// <param name="Oldest">The oldest ancestor you have.</param>
+public sealed record Generation(int Number, Plant Oldest);
 
 /// <param name="TakenByType">Units taken from the plant per propagation type, the most first.</param>
 /// <param name="Rooted">Units that rooted, by the same rule as the propagation results.</param>

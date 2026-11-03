@@ -802,7 +802,8 @@ else
         everyday = await Names.GetEverydayNamesAsync();
         dictionary = await Names.GetDictionaryAsync();
         wishes = await WishService.GetAllAsync();
-        all = [.. (await Repository.GetAllAsync()).Where(p => !p.LivesElsewhere)];  // ones that live with someone else are only parents, not in this list
+        var everyPlant = await Repository.GetAllAsync();
+        all = [.. everyPlant.Where(p => !p.LivesElsewhere)];  // ones that live with someone else are only parents, not in this list
         places = await RoomService.GetPlacesAsync();
         rooms = Room.List(places, all, []);
         roomsInUse = Room.InUse(rooms);
@@ -818,7 +819,7 @@ else
             .Where(f => f.Now is not null)
             .ToDictionary(f => f.Id, f => f.Now!);
         tableValues = CoreTable.Rows(all, careLogs, today, places.NameOf,
-                p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), FloweringFor)
+                p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), FloweringFor, everyPlant)
             .ToDictionary(r => r.Plant.Id);
         lastActivity = PlantActivity.Latest(await Entries.GetLatestPerSubjectAsync(), careLogs);
         Refresh();

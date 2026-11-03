@@ -183,6 +183,10 @@ else
                 {
                     <text> · @propagation.Source</text>
                 }
+                @if (generation is { Number: >= 2 } line)
+                {
+                    <text> · @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.FactGeneration, Ordinal.Of(line.Number))</text>
+                }
                 @if (Pace is { IsSlow: true })
                 {
                     <text> · </text><span class="pace-slow">@Strings.Propagations.CardSlow</span>
@@ -234,6 +238,10 @@ else
                             @if (parent is not null)
                             {
                                 <a href="plants/@parent.Id">@parent.DisplayName</a>
+                                @if (generation is { Number: >= 2 } here)
+                                {
+                                    <div class="text-body-secondary small">@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.FamilyGeneration, System.Net.WebUtility.HtmlEncode(Ordinal.Of(here.Number)), $"<a class=\"link-action\" href=\"plants/{here.Oldest.Id}\">{System.Net.WebUtility.HtmlEncode(here.Oldest.DisplayName)}</a>"))</div>
+                                }
                             }
                             else if (sellers.For(propagation.SellerId, propagation.Source) is { } seller)
                             {
@@ -925,6 +933,7 @@ else
     private Propagation? propagation;
     private IReadOnlyList<Propagation> allPropagations = [];
     private Plant? parent;
+    private Generation? generation;
     private IReadOnlyList<Plant> offspring = [];
     private IReadOnlyList<CodeClash> numberClashes = [];
     private IReadOnlyList<Room> rooms = [];
@@ -1100,6 +1109,7 @@ else
         allPlants = plants;
         var propagations = allPropagations = await Repository.GetAllAsync();
         parent = propagation?.ParentPlantId is { } parentId ? plants.FirstOrDefault(p => p.Id == parentId) : null;
+        generation = propagation is null ? null : PlantLineage.GenerationOf(propagation, plants);
         offspring = plants.Where(p => p.FromPropagationId == Id)
                           .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                           .ToList();
