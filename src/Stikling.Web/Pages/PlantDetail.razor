@@ -1760,6 +1760,7 @@ else
 
             careFor = careBook.Find(plant.Genus, plant.Species, plant.NameQualifier);
             origin = await FindOriginAsync();
+            showAllAreas = false;
             places = await RoomService.GetPlacesAsync();
             sellers = await SellerService.GetSellersAsync();
             ownFields = await OwnFieldBook.GetAllAsync();

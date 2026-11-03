@@ -4,7 +4,7 @@ The names the app suggests come from three files in `src/Stikling.Web/wwwroot/da
 
 - `plant-names.json`: the botanical names, for the genus, species and cultivar fields and the "What plant is it?" box.
 - `everyday-names.en.json` and `everyday-names.da.json`: what people call the plants, like "Snake plant" for Dracaena trifasciata. The box finds plants by them, and a plant with no nickname shows one under its botanical name.
-- `plant-regions.json`: the family of each genus and where each species grows wild, which a plant's page shows. Only the plant page reads it, so it is its own file and the page doesn't need the bigger file of names.
+- `plant-regions.json`: the family of each genus and where each species grows wild, which a plant's page shows. Only the plant page reads it, and it is its own file so the page doesn't need the bigger file of names.
 
 The service worker caches the botanical names and the English everyday names with the rest of the app, so they work offline. Another language is only downloaded on a device that uses it, and cached then.
 
@@ -38,7 +38,7 @@ Wikidata has an everyday name for many species, but often not the one on the lab
 - **Big genera with only their named species**, in `namedOnly`: genera like Ficus, Euphorbia and Dendrobium, with hundreds of species of which only a few are grown indoors. A species is kept when it has an everyday name or a cultivar.
 - **Genera by name only**, in `genusOnly`: the herbs.
 
-`plant-names.json` is around 1.8 MB, about 450 KB once compressed, which is what a phone downloads. The cacti and succulents are more than a third of that, most of it their many old names. `plant-regions.json` is about 700 KB, 210 KB compressed, and is only downloaded by the plant page. It is written one genus to a line, which is a third smaller than indenting every name and still shows in a pull request which genera changed.
+`plant-names.json` is around 1.8 MB, about 450 KB once compressed, which is what a phone downloads. The cacti and succulents are more than a third of that, most of it their many old names. `plant-regions.json` is about 700 KB, 210 KB compressed. Only the plant page reads it, and the service worker caches it with the rest of the app so the page works offline. It is written one genus to a line, which is a third smaller than indenting every name and still shows in a pull request which genera changed.
 
 ## Where plants grow wild
 
