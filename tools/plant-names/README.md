@@ -22,6 +22,7 @@ It takes a few minutes and needs an internet connection. Commit the new files al
 |---|---|---|
 | Genera, species, subspecies, varieties, old names and families | [Catalogue of Life](https://www.catalogueoflife.org), which takes its plants from Kew's World Checklist of Vascular Plants, through the [ChecklistBank API](https://api.checklistbank.org) | CC BY 4.0, credited in Settings |
 | Where a species grows wild | Catalogue of Life's distributions, which also come from Kew's checklist | CC BY 4.0, credited in Settings |
+| Area names and codes | Kew's [World Geographical Scheme for Recording Plant Distributions](https://github.com/tdwg/wgsrpd), with the place names in `areas.txt` added by hand | |
 | Cultivars | [Wikidata](https://www.wikidata.org), items that are a cultivar of something included | CC0 |
 | Everyday names | Wikidata's common names (P1843) in English and Danish, and the Danish labels | CC0 |
 | Cultivars and trade names | `cultivars.txt` in this folder, kept by hand | |
@@ -37,11 +38,13 @@ Wikidata has an everyday name for many species, but often not the one on the lab
 - **Big genera with only their named species**, in `namedOnly`: genera like Ficus, Euphorbia and Dendrobium, with hundreds of species of which only a few are grown indoors. A species is kept when it has an everyday name or a cultivar.
 - **Genera by name only**, in `genusOnly`: the herbs.
 
-`plant-names.json` is around 1 MB, about 270 KB once compressed, which is what a phone downloads. It is written one genus to a line, which is a third smaller than indenting every name and still shows in a pull request which genera changed.
+`plant-names.json` is around 1.8 MB, about 450 KB once compressed, which is what a phone downloads. The cacti and succulents are more than a third of that, most of it their many old names. `plant-regions.json` is about 700 KB, 210 KB compressed, and is only downloaded by the plant page. It is written one genus to a line, which is a third smaller than indenting every name and still shows in a pull request which genera changed.
 
 ## Where plants grow wild
 
 `plant-regions.json` has, for each species, the areas it is native to, as Kew's level 3 areas from the World Geographical Scheme for Recording Plant Distributions: mostly countries, with the biggest countries split into states or regions and the islands on their own. Places a plant has been brought to and gone wild in are left out. A subspecies or variety is only listed when its areas differ from its species'. The file also has each genus's family and the name an old genus goes by now.
+
+For many species, among them most cacti, succulents, begonias and peperomias, the Catalogue of Life gives the distribution as text, like "Mexico (Oaxaca, Chiapas); Cuba [I]", instead of area codes. `areas.txt` in this folder says which area each place name in that text is in. It started from Kew's level 3 and level 4 area names, with the spellings the text uses added by hand. A place marked [I] was brought there and is left out. A country split into several areas, like Mexico or Brazil, needs the states it names, and is left out when the text names none. The build lists the place names it couldn't place, so a common one can be added to `areas.txt`.
 
 The names of the areas are in `src/Stikling.Web/Resources/Regions.resx` and `Regions.da.resx`, keyed by the area's code, so they are translated like the rest of the app. The build warns about a code that isn't there.
 

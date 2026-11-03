@@ -426,7 +426,7 @@ else
                             <dd>
                                 @string.Join(", ", showAllAreas || areaNames.Count <= 6 ? areaNames : areaNames.Take(6))@if (!showAllAreas && areaNames.Count > 6)
                                 {
-                                    <text> </text><button type="button" class="btn btn-link btn-sm link-action" @onclick="() => showAllAreas = true">@Plural.Of(areaNames.Count - 6, Strings.PlantDetail.NativeMore_One, Strings.PlantDetail.NativeMore_Other)</button>
+                                    @(" ")<button type="button" class="btn btn-link btn-sm link-action" @onclick="() => showAllAreas = true">@Plural.Of(areaNames.Count - 6, Strings.PlantDetail.NativeMore_One, Strings.PlantDetail.NativeMore_Other)</button>
                                 }
                             </dd>
                         }

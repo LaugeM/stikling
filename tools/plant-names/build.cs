@@ -9,6 +9,7 @@
 
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -320,6 +321,12 @@ var areaNames = Path.Combine(root, "src", "Stikling.Web", "Resources", "Regions.
 var knownAreas = File.Exists(areaNames)
     ? XDocument.Load(areaNames).Root!.Elements("data").Select(e => (string)e.Attribute("name")!).ToHashSet()
     : null;
+// For species whose distribution is text instead of area codes, like "Mexico (Oaxaca, Chiapas); Cuba [I]"
+var placeAreas = File.ReadLines(Path.Combine(tools, "areas.txt"))
+    .Where(l => l.Length > 0 && !l.StartsWith('#'))
+    .Select(l => l.Split('=', 2, StringSplitOptions.TrimEntries))
+    .ToDictionary(p => p[0], p => p[1].Split(' ', StringSplitOptions.RemoveEmptyEntries));
+var unknownPlaces = new ConcurrentDictionary<string, int>();
 var taxa = genera.Values.Where(g => g.Now is null).SelectMany(g => g.Species.Select(s => (Genus: g, Species: s))).ToList();
 Console.WriteLine($"Catalogue of Life: fetching where {taxa.Count} species grow wild");
 var areas = new ConcurrentDictionary<(string, string), string[]>();
@@ -348,6 +355,10 @@ await Parallel.ForEachAsync(taxa, new ParallelOptions { MaxDegreeOfParallelism =
         // A level 4 area, like BZS-RJ, counts as the level 3 area it is part of
         .Select(d => (Code: ((string)d!["area"]!["id"]!).Split('-')[0], Name: (string?)d["area"]!["name"]))
         .Where(a => a.Code.Length == 3)
+        .Concat(found
+            .Where(d => (string?)d!["area"]?["gazetteer"] == "text")
+            .SelectMany(d => TextAreas((string?)d!["area"]!["name"] ?? ""))
+            .Select(code => (Code: code, Name: (string?)null)))
         .ToList();
     foreach (var (code, name) in codes.Where(a => knownAreas is not null && !knownAreas.Contains(a.Code)))
         unknownAreas.TryAdd(code, name ?? "");
@@ -359,6 +370,13 @@ await Parallel.ForEachAsync(taxa, new ParallelOptions { MaxDegreeOfParallelism =
 });
 foreach (var (code, name) in unknownAreas.OrderBy(a => a.Key))
     Console.WriteLine($"warning: area {code} ({name}) isn't in Resources/Regions.resx");
+var unplaced = unknownPlaces.OrderByDescending(p => p.Value).ToList();
+if (unplaced.Count > 0)
+{
+    Console.WriteLine($"warning: {unplaced.Sum(p => p.Value)} places in text distributions aren't in areas.txt, the most common:");
+    foreach (var (place, count) in unplaced.Take(25))
+        Console.WriteLine($"  {place} ({count})");
+}
 
 var regionLines = genera.Values.Select(g =>
 {
@@ -381,6 +399,61 @@ await File.WriteAllTextAsync(regionsFile, Lines(("sources", (IEnumerable<NameSou
 Console.WriteLine(
     $"Wrote {Path.GetRelativePath(root, regionsFile)}: {regionLines.Count(g => g.Family is not null)} families of genera, " +
     $"{regionLines.Sum(g => g.Species.Count)} species with native regions, {new FileInfo(regionsFile).Length / 1024} KB");
+
+// The areas in a text distribution like "Mexico (Oaxaca, Chiapas); Guatemala; Cuba [I]", leaving out the
+// places marked [I] for introduced. A place that is one area is enough. A country split into several
+// areas, like Mexico, needs the states it names, and is left out when it names none.
+IEnumerable<string> TextAreas(string text)
+{
+    foreach (var part in text.Split(';'))
+    {
+        if (part.Contains("[I]"))
+            continue;
+        var item = Regex.Replace(part, @"\s*\[[^\]]*\]", "").Trim().Trim('?').Trim();
+        var within = Regex.Match(item, @"^(.*?)\s*\((.*)\)\s*$");
+        var place = within.Success ? within.Groups[1].Value : item;
+        if (place.Length == 0)
+            continue;
+        if (PlaceAreas(place) is { } whole)
+        {
+            foreach (var code in whole)
+                yield return code;
+            continue;
+        }
+        var placed = false;
+        foreach (var sub in within.Success ? within.Groups[2].Value.Split(',') : [])
+        {
+            // "Sabah: Mt. Kinabalu" is in Sabah, and "?KwaZulu-Natal" is a guess, which is left out
+            var name = sub.Split(':')[0].Trim();
+            if (name.Length == 0 || name.StartsWith('?'))
+                continue;
+            if ((PlaceAreas($"{place} {name}") ?? PlaceAreas(name)) is { } codes)
+            {
+                placed = true;
+                foreach (var code in codes)
+                    yield return code;
+            }
+        }
+        if (!placed)
+            unknownPlaces.AddOrUpdate(place, 1, (_, n) => n + 1);
+    }
+}
+
+// A place by its name in areas.txt, or else without a direction in front, so "NW-Yunnan" is Yunnan
+string[]? PlaceAreas(string name)
+{
+    var key = PlaceKey(name);
+    return placeAreas.TryGetValue(key, out var codes) ? codes
+        : placeAreas.GetValueOrDefault(Regex.Replace(key, @"^(?:(?:and|n|s|e|w|ne|nw|se|sw|c|central|northern|southern|eastern|western|north|south|east|west|peninsular|mainland) )+", ""));
+}
+
+// "São Paulo" as "sao paulo" and "Canary Isl." as "canary islands", the way areas.txt writes names
+static string PlaceKey(string name)
+{
+    var plain = new string([.. name.Normalize(NormalizationForm.FormD).Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)]);
+    plain = plain.ToLowerInvariant().Replace("isl.", "islands").Replace("is.", "islands").Replace("prov.", "province").Replace("&", "and");
+    return Regex.Replace(Regex.Replace(plain, "[^a-z0-9 ]", " "), @"\s+", " ").Trim();
+}
 
 Genus GenusFor(string name, string? family)
 {
