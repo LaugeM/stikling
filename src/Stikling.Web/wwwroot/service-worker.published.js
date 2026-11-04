@@ -71,12 +71,47 @@ async function onInstall(event) {
 
     // Fetch and cache all matching items from the assets manifest
     const used = await onDemandInUse();
-    const assetsRequests = self.assetsManifest.assets
+    const assets = self.assetsManifest.assets
         .filter(asset => offlineAssetsInclude.some(pattern => pattern.test(asset.url)))
         .filter(asset => !offlineAssetsExclude.some(pattern => pattern.test(asset.url)))
-        .filter(asset => !isOnDemand(asset.url) || used.has(asset.url))
-        .map(asset => new Request(asset.url, { integrity: asset.hash, cache: 'no-cache' }));
-    await caches.open(cacheName).then(cache => cache.addAll(assetsRequests));
+        .filter(asset => !isOnDemand(asset.url) || used.has(asset.url));
+    const index = assets.find(asset => asset.url === 'index.html');
+    const cache = await caches.open(cacheName);
+    // index.html first, so a copy from another version stops the install before anything else is stored
+    if (index) await cacheIndexHtml(cache, index);
+    await cache.addAll(assets
+        .filter(asset => asset !== index)
+        .map(asset => new Request(asset.url, { integrity: asset.hash, cache: 'no-cache' })));
+}
+
+// Brave on Android has handed over an index.html that didn't match its hash, and since one failed file
+// fails the whole install, that phone stayed on its old version for weeks. So index.html gets a second
+// try past the browser's own cache. If that doesn't match either, the copy is kept as long as every
+// fingerprinted _framework file it loads belongs to this version, so it can't start an older app:
+// dotnet.js lists every assembly by its fingerprint, so any change to the app's code renames it.
+// What this lets through is a copy whose markup or inline scripts differ while the app is the same,
+// such as the browser's own change or index.html from a deploy that only touched index.html. That
+// copy stays until the next update, which is better than never updating at all.
+async function cacheIndexHtml(cache, asset) {
+    for (const mode of ['no-cache', 'reload']) {
+        try {
+            await cache.add(new Request(asset.url, { integrity: asset.hash, cache: mode }));
+            return;
+        } catch (error) {
+            console.warn(`Service worker: index.html failed its hash check (${mode})`, error);
+        }
+    }
+
+    const response = await fetch(new Request(asset.url, { cache: 'reload' }));
+    const html = await response.clone().text();
+    const known = new Set(self.assetsManifest.assets.map(a => a.url));
+    const fingerprinted = (html.match(/_framework\/[^"'\s?#)]+/g) || []).filter(url => /\.[a-z0-9]{10}\.[a-z]+$/.test(url));
+    // A redirected response can't be served for a navigation, so it would break opening the app
+    if (!response.ok || response.redirected || !fingerprinted.length || !fingerprinted.every(url => known.has(url)))
+        throw new Error('Service worker: index.html is not from this version');
+
+    console.warn('Service worker: keeping an index.html that differs from its hash but loads this version');
+    await cache.put(asset.url, response);
 }
 
 // The on-demand files an earlier version of the app has cached, as paths like "data/everyday-names.da.json"
