@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Planteordbog</value>
+  </data>
+  <data name="BackToSettings" xml:space="preserve">
+    <value>Indstillinger</value>
+  </data>
+  <data name="Intro" xml:space="preserve">
+    <value>Alle slægter og arter i grupperne herunder, og hvor de vokser vildt.</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Søg i ordbogen</value>
+  </data>
+  <data name="GroupsHeading" xml:space="preserve">
+    <value>Grupper</value>
+  </data>
+  <data name="FamiliesHeading" xml:space="preserve">
+    <value>Alle familier</value>
+  </data>
+  <data name="GroupAroids" xml:space="preserve">
+    <value>Aroider</value>
+  </data>
+  <data name="GroupPrayerPlants" xml:space="preserve">
+    <value>Bønneplanter</value>
+  </data>
+  <data name="GroupBegonias" xml:space="preserve">
+    <value>Begonier</value>
+  </data>
+  <data name="GroupCarnivorous" xml:space="preserve">
+    <value>Kødædende planter</value>
+  </data>
+  <data name="GroupCacti" xml:space="preserve">
+    <value>Kaktus</value>
+  </data>
+  <data name="GroupSucculents" xml:space="preserve">
+    <value>Sukkulenter</value>
+  </data>
+  <data name="GroupOrchids" xml:space="preserve">
+    <value>Orkidéer</value>
+  </data>
+  <data name="GroupBromeliads" xml:space="preserve">
+    <value>Bromelier</value>
+  </data>
+  <data name="GroupOther" xml:space="preserve">
+    <value>Andre stueplanter</value>
+  </data>
+  <data name="Genus_One" xml:space="preserve">
+    <value>{0:N0} slægt</value>
+  </data>
+  <data name="Genus_Other" xml:space="preserve">
+    <value>{0:N0} slægter</value>
+  </data>
+  <data name="Species_One" xml:space="preserve">
+    <value>{0:N0} art</value>
+  </data>
+  <data name="Species_Other" xml:space="preserve">
+    <value>{0:N0} arter</value>
+  </data>
+  <data name="Cultivar_One" xml:space="preserve">
+    <value>{0:N0} kultivar</value>
+  </data>
+  <data name="Cultivar_Other" xml:space="preserve">
+    <value>{0:N0} kultivarer</value>
+  </data>
+  <data name="CountsLine" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="YouHave" xml:space="preserve">
+    <value>Du har {0}</value>
+  </data>
+  <data name="YouHaveShort" xml:space="preserve">
+    <value>du har {0}</value>
+  </data>
+  <data name="SearchNothing" xml:space="preserve">
+    <value>Intet i ordbogen passer til “{0}”.</value>
+  </data>
+  <data name="SearchClear" xml:space="preserve">
+    <value>Ryd søgning</value>
+  </data>
+  <data name="CouldNotLoad" xml:space="preserve">
+    <value>Planteordbogen kunne ikke hentes. Prøv igen, når du er på nettet.</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Ordbogen har ingen side med det navn.</value>
+  </data>
+  <data name="BackToDictionary" xml:space="preserve">
+    <value>Gå til planteordbogen</value>
+  </data>
+  <data name="GroupEmpty" xml:space="preserve">
+    <value>Der er ikke noget i denne gruppe endnu.</value>
+  </data>
+  <data name="PartOf" xml:space="preserve">
+    <value>Hører til {0}</value>
+  </data>
+  <data name="OldGenus" xml:space="preserve">
+    <value>{0} er et gammelt navn. Det er nu en del af {1}.</value>
+  </data>
+  <data name="OldIsNow" xml:space="preserve">
+    <value>{0} hedder nu {1}</value>
+  </data>
+  <data name="OldNamesHeading" xml:space="preserve">
+    <value>Gamle navne</value>
+  </data>
+  <data name="FactFamily" xml:space="preserve">
+    <value>Familie</value>
+  </data>
+  <data name="FactGroup" xml:space="preserve">
+    <value>Gruppe</value>
+  </data>
+  <data name="FactSpecies" xml:space="preserve">
+    <value>Arter</value>
+  </data>
+  <data name="FactCultivars" xml:space="preserve">
+    <value>Kultivarer</value>
+  </data>
+  <data name="FactGrowsWild" xml:space="preserve">
+    <value>Vokser vildt i</value>
+  </data>
+  <data name="FactAlsoKnownAs" xml:space="preserve">
+    <value>Kendes også som</value>
+  </data>
+  <data name="SpeciesHeading" xml:space="preserve">
+    <value>Arter · {0:N0}</value>
+  </data>
+  <data name="CultivarsHeading" xml:space="preserve">
+    <value>Kultivarer · {0:N0}</value>
+  </data>
+  <data name="FilterSpecies" xml:space="preserve">
+    <value>Filtrér arterne</value>
+  </data>
+  <data name="FilterNothing" xml:space="preserve">
+    <value>Ingen arter passer til “{0}”.</value>
+  </data>
+  <data name="RangeShort" xml:space="preserve">
+    <value>{0} +{1}</value>
+  </data>
+  <data name="AddAsPlant" xml:space="preserve">
+    <value>Tilføj som plante</value>
+  </data>
+  <data name="AddToWishlist" xml:space="preserve">
+    <value>Tilføj til ønskelisten</value>
+  </data>
+  <data name="DockLabel" xml:space="preserve">
+    <value>Tilføj {0}</value>
+  </data>
+  <data name="YouHaveHeading" xml:space="preserve">
+    <value>Du har</value>
+  </data>
+  <data name="OnWishlist" xml:space="preserve">
+    <value>På ønskelisten</value>
+  </data>
+  <data name="SeeInDictionary" xml:space="preserve">
+    <value>Se den i planteordbogen</value>
+  </data>
+  <data name="BrowseLink" xml:space="preserve">
+    <value>Gennemse planteordbogen</value>
+  </data>
+  <data name="SettingsRowDetail" xml:space="preserve">
+    <value>Gennemse alle slægter og arter, og hvor de vokser vildt</value>
+  </data>
+  <data name="SearchRowDetail" xml:space="preserve">
+    <value>Gennemse alle slægter og arter</value>
+  </data>
+  <data name="SearchGroup" xml:space="preserve">
+    <value>I ordbogen</value>
+  </data>
+</root>

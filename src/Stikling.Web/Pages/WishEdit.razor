@@ -115,6 +115,16 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
+    /// <summary>The names to start a new wish with, from the plant dictionary.</summary>
+    [SupplyParameterFromQuery(Name = "genus")]
+    public string? GenusName { get; set; }
+
+    [SupplyParameterFromQuery(Name = "species")]
+    public string? SpeciesName { get; set; }
+
+    [SupplyParameterFromQuery(Name = "cultivar")]
+    public string? CultivarName { get; set; }
+
     private Wish? wish;
     private bool notFound;
     private bool saving;
@@ -155,7 +165,12 @@ else
 
         if (IsNew)
         {
-            wish ??= new Wish();
+            wish ??= new Wish
+            {
+                Genus = string.IsNullOrWhiteSpace(GenusName) ? null : GenusName.Trim(),
+                Species = string.IsNullOrWhiteSpace(GenusName) || string.IsNullOrWhiteSpace(SpeciesName) ? null : SpeciesName.Trim(),
+                Cultivar = string.IsNullOrWhiteSpace(GenusName) || string.IsNullOrWhiteSpace(CultivarName) ? null : CultivarName.Trim()
+            };
             return;
         }
 

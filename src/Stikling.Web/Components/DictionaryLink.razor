@@ -1,0 +1,39 @@
+@* A row for a details list on a plant or propagation page: a link to the most specific page the plant dictionary
+   has for the name. It shows nothing when the genus isn't in the dictionary. An old name is followed to the one it
+   goes by now first. The dictionary is read after the page is on screen, so the link turns up a moment later. *@
+@inject DictionaryService Dictionary
+@inject PlantNameService Names
+
+@if (href is not null)
+{
+    <dd class="dict-link-row"><a class="link-action" href="@href">@Strings.Dictionary.SeeInDictionary</a></dd>
+}
+
+@code {
+    [Parameter]
+    public string? Genus { get; set; }
+
+    [Parameter]
+    public string? Species { get; set; }
+
+    [Parameter]
+    public string? Cultivar { get; set; }
+
+    [Parameter]
+    public NameQualifier? Qualifier { get; set; }
+
+    private string? href;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Genus))
+        {
+            href = null;
+            return;
+        }
+
+        var dictionary = await Names.GetDictionaryAsync();
+        var (genus, species) = dictionary.Current(Genus, PlantNames.SpeciesToLookUp(Species, Qualifier));
+        href = DictionaryLinks.MostSpecific(await Dictionary.GetBrowserAsync(), genus, species, Cultivar);
+    }
+}
