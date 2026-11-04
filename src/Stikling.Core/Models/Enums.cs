@@ -242,7 +242,7 @@ public enum WaterMethod
     /// <summary>Poured onto the soil.</summary>
     Top,
 
-    /// <summary>The pot stands in water for a while.</summary>
+    /// <summary>The pot is lowered into water up to the soil, so the whole root ball gets wet at once.</summary>
     Soak
 }
 
