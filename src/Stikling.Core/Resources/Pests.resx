@@ -471,4 +471,36 @@
     <value>Hydrogen peroxide</value>
     <comment>A suggested ingredient for a treatment recipe.</comment>
   </data>
+  <data name="LeafNeedsSubject" xml:space="preserve">
+    <value>A leaf needs a plant or cutting.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="LeafPickRating" xml:space="preserve">
+    <value>Pick how variegated the leaf is.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="LeafInFuture" xml:space="preserve">
+    <value>The day can't be in the future.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="VariegationReverted" xml:space="preserve">
+    <value>Reverted</value>
+    <comment>How variegated a new leaf is: gone plain green again.</comment>
+  </data>
+  <data name="VariegationLow" xml:space="preserve">
+    <value>Low</value>
+    <comment>How variegated a new leaf is: a little.</comment>
+  </data>
+  <data name="VariegationMedium" xml:space="preserve">
+    <value>Medium</value>
+    <comment>How variegated a new leaf is: about half.</comment>
+  </data>
+  <data name="VariegationHigh" xml:space="preserve">
+    <value>High</value>
+    <comment>How variegated a new leaf is: a lot.</comment>
+  </data>
+  <data name="VariegationAllWhite" xml:space="preserve">
+    <value>All white</value>
+    <comment>How variegated a new leaf is: no green at all.</comment>
+  </data>
 </root>

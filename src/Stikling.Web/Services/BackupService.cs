@@ -45,7 +45,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             Stores.Feeds, Stores.TreatmentRecipes, Stores.Places, Stores.GrowLights,
             Stores.ReceivedHistories, Stores.AwayStretches, Stores.PropagationCareLogs, Stores.FloweringMarks,
             Stores.Problems, Stores.ProblemUpdates, Stores.Wishes, Stores.Sellers, Stores.OwnCareKinds, Stores.CareIntervals,
-            Stores.TreatmentPlans, Stores.OwnFields, Stores.Orders, Stores.OrderItems
+            Stores.TreatmentPlans, Stores.OwnFields, Stores.Orders, Stores.OrderItems, Stores.Leaves
         ];
         foreach (var store in stores)
         {
@@ -92,7 +92,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             TreatmentPlans = await db.GetAllAsync<TreatmentPlan>(Stores.TreatmentPlans),
             OwnFields = await db.GetAllAsync<OwnField>(Stores.OwnFields),
             Orders = await db.GetAllAsync<Order>(Stores.Orders),
-            OrderItems = await db.GetAllAsync<OrderItem>(Stores.OrderItems)
+            OrderItems = await db.GetAllAsync<OrderItem>(Stores.OrderItems),
+            Leaves = await db.GetAllAsync<Leaf>(Stores.Leaves)
         };
 
         using var buffer = new MemoryStream();
@@ -244,6 +245,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         await Restore(Stores.OwnFields, data.OwnFields);
         await Restore(Stores.Orders, data.Orders);
         await Restore(Stores.OrderItems, data.OrderItems);
+        await Restore(Stores.Leaves, data.Leaves);
 
         // A delete carried over from the backup frees the image too
         foreach (var photo in photoMeta.ToSave.Where(p => p.IsDeleted))

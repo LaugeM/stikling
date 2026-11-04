@@ -41,7 +41,7 @@ public static partial class HistoryText
     {
         typeof(PlantStatus), typeof(GrowingMedium), typeof(LightLevel), typeof(PropagationStage), typeof(PropagationType),
         typeof(RootingAid), typeof(CareKind), typeof(FailReason), typeof(ProblemSign), typeof(ProblemAction),
-        typeof(ProblemTrend), typeof(ProblemOutcome)
+        typeof(ProblemTrend), typeof(ProblemOutcome), typeof(Variegation)
     }.ToDictionary(t => t.Name);
 
     /// <summary>The keys of the templates, for checking them against the resource files.</summary>
@@ -114,7 +114,7 @@ public static partial class HistoryText
         }
 
         // The note under a problem is the person's own, so only its first line is read
-        var read = entry.Event == TimelineEvent.Problem ? 1 : stored.Length;
+        var read = entry.Event is TimelineEvent.Problem or TimelineEvent.NewLeaf ? 1 : stored.Length;
         var parsed = Parse(string.Join("\n", stored.Take(read)), englishLabel);
         var result = new string[stored.Length];
         for (var i = 0; i < stored.Length; i++)
@@ -238,6 +238,7 @@ public static partial class HistoryText
         ProblemAction action => ProblemText.Action(action),
         ProblemTrend trend => ProblemText.Trend(trend),
         ProblemOutcome outcome => ProblemText.Outcome(outcome),
+        Variegation rating => Leaves.LeafText.Rating(rating),
         _ => label(value)
     };
 

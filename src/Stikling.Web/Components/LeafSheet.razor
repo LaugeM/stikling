@@ -1,0 +1,310 @@
+@* The form for a new leaf, for the inside of a Sheet, or for changing one already logged. The page
+   that shows it owns the Sheet and its title. Photos are stored when they're picked and deleted
+   again if the form goes away without saving, so closing the Sheet by any means clears them. A
+   leaf that is being changed keeps the photos on its history line. *@
+@inject LeafService Leaves
+@inject PhotoService Photos
+@inject DeviceFiles Device
+@inject ILogger<LeafSheet> Logger
+@inject TimeProvider Time
+@implements IAsyncDisposable
+
+<div class="leaf-sheet">
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-3" role="alert">@error</div>
+    }
+
+    @if (Leaf is null)
+    {
+        <div class="mb-3">
+            @if (photos.Count > 0)
+            {
+                <div class="photo-picks">
+                    @foreach (var photo in photos)
+                    {
+                        <div class="photo-pick">
+                            <PhotoImage PhotoId="photo.Id" Alt="@Strings.Pests.SheetPhotoToAdd" />
+                            <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
+                                    aria-label="@Strings.Pests.SheetRemovePhoto" title="@Strings.Pests.SheetRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                        </div>
+                    }
+                </div>
+            }
+            <div class="composer-row">
+                <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                    @Strings.Pests.SheetCamera
+                </label>
+                <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                       @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
+                <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                    @Strings.Pests.SheetGallery
+                </label>
+                <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
+                       @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+            </div>
+            @if (photoStatus is not null)
+            {
+                <p class="form-text mb-0" role="status">@photoStatus</p>
+            }
+            else
+            {
+                <p class="form-text mb-0">@Strings.Shared.LeafPhotoHint</p>
+            }
+        </div>
+    }
+
+    <div class="mb-3" role="group" aria-labelledby="@ratingLabelId">
+        <span class="form-label d-block" id="@ratingLabelId">@Strings.Shared.LeafHowVariegated</span>
+        <div class="chip-row">
+            @foreach (var choice in Enum.GetValues<Variegation>())
+            {
+                var option = choice;
+                var on = rating == option;
+                <button type="button" class="chip @(on ? "picked" : null)" aria-pressed="@(on ? "true" : "false")"
+                        @onclick="() => rating = option">@LeafText.Rating(option)</button>
+            }
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="@dateId">@Strings.Shared.LeafDay</label>
+        <input id="@dateId" type="date" class="form-control" @bind="day" max="@Today.ToString("yyyy-MM-dd")" />
+        @if (day > Today)
+        {
+            <div class="form-text text-danger" role="alert">@Strings.Shared.LeafDayInFuture</div>
+        }
+    </div>
+
+    <div class="mb-3">
+        @if (noteOpen)
+        {
+            <label class="form-label" for="@noteId">@Strings.Shared.LeafNote</label>
+            <textarea id="@noteId" class="form-control" rows="2" @bind="note" @bind:event="oninput"></textarea>
+        }
+        else
+        {
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => noteOpen = true">@Strings.Shared.LeafAddNote</button>
+        }
+    </div>
+
+    @if (confirmRemove)
+    {
+        <div class="problem-confirm mb-3">
+            <span>@Strings.Shared.LeafRemoveConfirm</span>
+            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">@Strings.Common.Remove</button>
+            <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmRemove = false">@Strings.Common.Cancel</button>
+        </div>
+    }
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" disabled="@(busy || rating is null || day > Today)" @onclick="SaveAsync">@Strings.Common.Save</button>
+        @if (BackLabel is not null)
+        {
+            <button type="button" class="btn btn-link" @onclick="() => OnBack.InvokeAsync()">@BackLabel</button>
+        }
+        @if (Leaf is not null && !confirmRemove)
+        {
+            <button type="button" class="btn btn-link text-danger ms-auto" disabled="@busy" @onclick="() => confirmRemove = true">@Strings.Common.Remove</button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SubjectType SubjectType { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    /// <summary>A leaf being changed. Without it a new one is logged.</summary>
+    [Parameter]
+    public Leaf? Leaf { get; set; }
+
+    /// <summary>The text of the link back, e.g. to the page's menu. None is shown without it.</summary>
+    [Parameter]
+    public string? BackLabel { get; set; }
+
+    [Parameter]
+    public EventCallback OnBack { get; set; }
+
+    /// <summary>Raised after a leaf was saved or removed, so the page can close the Sheet and show it.</summary>
+    [Parameter]
+    public EventCallback OnSaved { get; set; }
+
+    private const string DraftKey = "leaf-draft-photos";
+
+    private readonly string ratingLabelId = $"leaf-rating-{Guid.NewGuid():N}";
+    private readonly string dateId = $"leaf-date-{Guid.NewGuid():N}";
+    private readonly string noteId = $"leaf-note-{Guid.NewGuid():N}";
+    private readonly string cameraId = $"leaf-camera-{Guid.NewGuid():N}";
+    private readonly string galleryId = $"leaf-gallery-{Guid.NewGuid():N}";
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    private Variegation? rating;
+    private DateOnly day;
+    private string? note;
+    private bool noteOpen;
+    private readonly List<Photo> photos = [];
+    private string? photoStatus;
+    private string? error;
+    private bool busy;
+    private bool confirmRemove;
+
+    private DateOnly Today => Time.Today();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (await Device.GetAsync(DraftKey) is { Length: > 0 } left)
+            {
+                foreach (var id in left.Split(',').Select(Guid.Parse))
+                    await Photos.DeleteAsync(id);
+                await Device.SetAsync(DraftKey, null);
+            }
+        }
+        catch (Exception ex) when (ex is FormatException or JSException)
+        {
+            // Nothing to clear up
+        }
+
+        if (Leaf is { } leaf)
+        {
+            rating = leaf.Rating;
+            day = leaf.On;
+            note = leaf.Note;
+            noteOpen = !string.IsNullOrWhiteSpace(leaf.Note);
+        }
+        else
+        {
+            day = Today;
+        }
+    }
+
+    private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
+    {
+        busy = true;
+        photoStatus = Strings.Pests.SheetSavingPhotos;
+        StateHasChanged();
+
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType, SubjectId);
+            photos.AddRange(result.Saved);
+            await RememberDraftAsync();
+            photoStatus = result.Message(guessesMatter: !fromCamera);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding photos to a leaf failed");
+            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetPhotosFailed, ex.Message);
+        }
+
+        busy = false;
+    }
+
+    private async Task RemovePhotoAsync(Photo photo)
+    {
+        await Photos.DeleteAsync(photo.Id);
+        photos.Remove(photo);
+        photoStatus = null;
+        await RememberDraftAsync();
+    }
+
+    // Kept on the device too, so photos left by a reload or a closed tab are cleared next time
+    private Task RememberDraftAsync() =>
+        Device.SetAsync(DraftKey, photos.Count == 0 ? null : string.Join(",", photos.Select(p => p.Id)));
+
+    private async Task SaveAsync()
+    {
+        if (rating is not { } picked)
+            return;
+
+        busy = true;
+        error = null;
+        var before = Leaf is { } existing ? (existing.Rating, existing.On, existing.Note) : default;
+        try
+        {
+            if (Leaf is { } leaf)
+            {
+                leaf.Rating = picked;
+                leaf.On = day;
+                leaf.Note = note;
+                await Leaves.EditAsync(leaf);
+            }
+            else
+            {
+                await Leaves.AddAsync(SubjectType, SubjectId, picked, day, note, [.. photos.Select(p => p.Id)]);
+            }
+
+            photos.Clear(); // they belong to the history line now
+            await RememberDraftAsync();
+            await OnSaved.InvokeAsync();
+        }
+        catch (ArgumentException ex)
+        {
+            Restore(before);
+            // The rule's own message, without " (Parameter 'x')"
+            error = ex.Message.Split(" (Parameter")[0];
+        }
+        catch (Exception ex)
+        {
+            Restore(before);
+            Logger.LogError(ex, "Saving a leaf failed");
+            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntSave, ex.Message);
+        }
+        busy = false;
+    }
+
+    // The leaf the page holds is the one edited, so a failed save puts its values back
+    private void Restore((Variegation? Rating, DateOnly On, string? Note) before)
+    {
+        if (Leaf is not { } leaf)
+            return;
+        leaf.Rating = before.Rating;
+        leaf.On = before.On;
+        leaf.Note = before.Note;
+    }
+
+    private async Task RemoveAsync()
+    {
+        if (Leaf is not { } leaf)
+            return;
+
+        busy = true;
+        try
+        {
+            await Leaves.RemoveAsync(leaf);
+            await OnSaved.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Removing a leaf failed");
+            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntDelete, ex.Message);
+        }
+        busy = false;
+    }
+
+    /// <summary>Photos picked but never saved belong to nothing, so they go when the form does.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        if (photos.Count == 0)
+            return;
+
+        try
+        {
+            foreach (var photo in photos)
+                await Photos.DeleteAsync(photo.Id);
+            photos.Clear();
+            await RememberDraftAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away; the photos go with it
+        }
+    }
+}

@@ -138,6 +138,7 @@ public static partial class HistoryText
         Add("ProblemUpdateEmpty");
         Add("ProblemClosed", EnLowerFirst(typeof(ProblemOutcome)));
         Add("ProblemReopened");
+        Add("NewLeaf", En(typeof(Variegation)));
         Add("LookedOver");
         Add("ReceivedFrom", Txt());
         NoParse("TextLine", Txt());

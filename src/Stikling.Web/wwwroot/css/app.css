@@ -3452,6 +3452,36 @@ main.app-content:has(.form-bar) {
     font-size: 0.9rem;
 }
 
+/* The leaf log: the form's choices and the Leaves card's rows */
+.leaf-sheet .chip {
+    min-height: 2.75rem;
+}
+
+.leaf-trend {
+    margin: 0 0 0.5rem;
+}
+
+.leaf-row {
+    align-items: center;
+}
+
+.leaf-thumb {
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.4rem;
+    overflow: hidden;
+    background: var(--pa-green-soft);
+}
+
+.leaf-thumb img,
+.leaf-thumb .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 /* Better, Same and Worse under a row on Today */
 .look-again-buttons {
     display: flex;

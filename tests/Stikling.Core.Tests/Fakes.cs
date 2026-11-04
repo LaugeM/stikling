@@ -8,6 +8,7 @@ using Stikling.Core.Wishlist;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
+using Stikling.Core.Leaves;
 using Stikling.Core.Orders;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
@@ -1176,6 +1177,37 @@ internal sealed class FakeFloweringMarkRepository : IFloweringMarkRepository
     {
         if (Marks.TryGetValue(id, out var mark))
             mark.DeletedAt = mark.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeLeafRepository : ILeafRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Leaf> Leaves { get; } = [];
+
+    public Task<IReadOnlyList<Leaf>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Leaf>>(Leaves.Values.Where(l => !l.IsDeleted).ToList());
+
+    public Task<Leaf?> GetAsync(Guid id) =>
+        Task.FromResult(Leaves.TryGetValue(id, out var leaf) && !leaf.IsDeleted ? leaf : null);
+
+    public Task SaveAsync(Leaf leaf)
+    {
+        if (leaf.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid leaf");
+        if (leaf.CreatedAt == default)
+            leaf.CreatedAt = clock;
+        leaf.UpdatedAt = clock = clock.AddSeconds(1);
+        Leaves[leaf.Id] = leaf;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Leaves.TryGetValue(id, out var leaf))
+            leaf.DeletedAt = leaf.UpdatedAt = clock = clock.AddSeconds(1);
         return Task.CompletedTask;
     }
 }

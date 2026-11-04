@@ -10,6 +10,7 @@
 @inject IPestCaseRepository PestCaseRepository
 @inject IPestTreatmentRepository PestTreatmentRepository
 @inject FloweringService FloweringService
+@inject LeafService LeafBook
 @inject ProblemService ProblemService
 @inject IPotRepository PotRepository
 @inject PotService PotService
@@ -586,6 +587,8 @@ else
                     </section>
                 }
 
+                <LeafCard Leaves="leaves" PhotoOf="LeafPhoto" OnOpen="OpenLeaf" />
+
                 @if (closedProblems.Count > 0)
                 {
                     <section class="detail-card">
@@ -912,6 +915,12 @@ else
                             <button type="button" class="sheet-action" @onclick="OpenFlowering">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.2" /><path d="M12 9.800C10.600 7.500 10.600 5 12 3.500c1.400 1.500 1.400 4 0 6.300Z" /><path d="M12 14.200c1.400 2.300 1.400 4.800 0 6.300-1.400-1.500-1.400-4 0-6.300Z" /><path d="M9.800 12C7.500 10.600 5 10.600 3.500 12c1.500 1.400 4 1.400 6.300 0Z" /><path d="M14.200 12c2.300 1.400 4.800 1.400 6.300 0-1.500-1.400-4-1.400-6.300 0Z" /></svg>
                                 <span class="sheet-action-text"><b>@Strings.Plants.ListFlowering</b><small>@FloweringText.MenuHint(floweringNow, Today.Year)</small></span>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="sheet-action" @onclick="() => more = More.Leaf">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9" /><path d="M12 12C6 12 4 8 4 4c6 0 8 3.500 8 8Z" /><path d="M12 15c5 0 8-3 8-7-5 0-8 3-8 7Z" /></svg>
+                                <span class="sheet-action-text"><b>@Strings.Shared.LeafMenuTitle</b><small>@Strings.Shared.LeafMenuHint</small></span>
                             </button>
                         </li>
                         <li>
@@ -1252,6 +1261,14 @@ else
                 </div>
                 break;
 
+            case More.Leaf:
+                <LeafSheet SubjectType="SubjectType.Plant" SubjectId="plant.Id" BackLabel="@Strings.Common.Back" OnBack="() => more = More.Menu" OnSaved="LeafSavedAsync" />
+                break;
+
+            case More.ThisLeaf when editingLeaf is not null:
+                <LeafSheet @key="editingLeaf.Id" SubjectType="editingLeaf.SubjectType" SubjectId="editingLeaf.SubjectId" Leaf="editingLeaf" OnSaved="LeafSavedAsync" />
+                break;
+
             case More.Problem:
                 <ProblemSheet Plant="plant" Mode="ProblemSheetMode.Open" BackLabel="@Strings.Common.Back" OnBack="() => more = More.Menu" OnSaved="ProblemSavedAsync" />
                 break;
@@ -1411,7 +1428,7 @@ else
     [SupplyParameterFromQuery(Name = "entry")]
     public Guid? Entry { get; set; }
 
-    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, Transition, TransitionStep, PestCheck, Status, PassOn, Flowering, ThisFlowering, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
+    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, Transition, TransitionStep, PestCheck, Status, PassOn, Flowering, ThisFlowering, Leaf, ThisLeaf, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
     private bool shareOpen;
     private bool shareOnLink;
 
@@ -1597,6 +1614,8 @@ else
         More.Flowering when floweringPast && floweringSaved is null => Strings.PlantDetail.AddPastFlowering,
         More.Flowering => Strings.Plants.ListFlowering,
         More.ThisFlowering => Strings.PlantDetail.ThisFlowering,
+        More.Leaf => Strings.Shared.LeafMenuTitle,
+        More.ThisLeaf => Strings.Shared.LeafThisLeaf,
         More.Quarantine => Strings.Plants.ListQuarantine,
         More.Transition => Strings.PlantDetail.MovingToSemiHydro,
         More.TransitionStep => Strings.PlantDetail.ChangeDay,
@@ -1774,6 +1793,7 @@ else
 
             await ReloadCareAsync();
             await ReloadFloweringAsync();
+            await ReloadLeavesAsync();
             await ReloadProblemsAsync();
         }
     }
@@ -1811,6 +1831,54 @@ else
     private async Task ProblemSavedAsync()
     {
         more = More.None;
+        historyVersion++;
+        await LoadAsync();
+    }
+
+    // The Leaves card: the plant's own leaves and those of the cutting it came from
+    private IReadOnlyList<LoggedLeaf> leaves = [];
+    private Dictionary<Guid, Guid> leafPhotos = [];
+    private Leaf? editingLeaf;
+
+    private Guid? LeafPhoto(Leaf leaf) =>
+        leaf.TimelineEntryId is { } entryId && leafPhotos.TryGetValue(entryId, out var photoId) ? photoId : null;
+
+    private async Task ReloadLeavesAsync()
+    {
+        if (plant is null)
+            return;
+
+        leaves = await LeafBook.ForPlantAsync(plant);
+        var photos = new Dictionary<Guid, Guid>();
+        foreach (var subjectId in leaves.Select(l => l.Leaf.SubjectId).Distinct())
+        {
+            foreach (var entry in await TimelineRepository.GetForAsync(subjectId))
+            {
+                if (entry.PhotoIds.Count > 0)
+                    photos[entry.Id] = entry.PhotoIds[0];
+            }
+        }
+        leafPhotos = photos;
+
+        // The sheet for a leaf follows it, and goes if it is gone
+        if (editingLeaf is not null)
+        {
+            editingLeaf = leaves.Select(l => l.Leaf).FirstOrDefault(l => l.Id == editingLeaf.Id);
+            if (editingLeaf is null && more == More.ThisLeaf)
+                more = More.None;
+        }
+    }
+
+    private void OpenLeaf(Leaf leaf)
+    {
+        editingLeaf = leaf;
+        more = More.ThisLeaf;
+    }
+
+    private async Task LeafSavedAsync()
+    {
+        more = More.None;
+        editingLeaf = null;
         historyVersion++;
         await LoadAsync();
     }
