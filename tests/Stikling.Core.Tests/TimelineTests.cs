@@ -157,13 +157,13 @@ public class PlantChangesTests
     }
 
     [Fact]
-    public void Turning_the_outer_pot_water_on_with_a_wick_is_one_line()
+    public void Turning_the_outer_pot_water_on_with_a_wick_says_both()
     {
         var edited = Original.Copy();
         edited.WaterInOuterPot = true;
         edited.OuterPotWatering = PotWatering.Wick;
 
-        Assert.Equal(["Now watered in the outer pot"], PlantChanges.Describe(Original, edited, Label));
+        Assert.Equal(["Now watered in the outer pot", "Now has a wick into the outer pot's water"], PlantChanges.Describe(Original, edited, Label));
     }
 
     [Fact]
