@@ -135,13 +135,13 @@ else
             <label class="form-label" for="round-feed">@Strings.Care.WaterRoundFeed</label>
             <select id="round-feed" class="form-select" aria-describedby="round-feed-help" value="@(roundFeed?.ToString() ?? "")"
                     @onchange="e => roundFeed = Guid.TryParse(e.Value?.ToString(), out var id) ? id : null">
-                <option value="">@Strings.Care.WaterNoFeed</option>
+                <option value="">@Strings.Care.WaterRoundNoFeed</option>
                 @foreach (var option in feedOptions)
                 {
                     <option value="@option.Id">@option.Name</option>
                 }
             </select>
-            <div class="form-text" id="round-feed-help">@Strings.Care.WaterRoundFeedHelp</div>
+            <div class="form-text" id="round-feed-help">@RoundFeedHelp()</div>
         </div>
     }
 
@@ -491,6 +491,21 @@ else
         // A pick on the row wins (even "No feed"), then the plant's own due feed, then the round's
         var id = feedPicks.TryGetValue(row.Plant.Id, out var pick) ? pick : row.DefaultFeed?.Id ?? roundFeed;
         return feedOptions.FirstOrDefault(f => f.Id == id);
+    }
+
+    // Says how many plants keep their own feed, so "None" at the top isn't read as no feed for anyone
+    private string RoundFeedHelp()
+    {
+        // Plants already watered today have no feed due, so they count on neither side
+        var rows = AllRows().Where(r => r.DoneTodayId is null).ToList();
+        var own = rows.Count(r => r.DefaultFeed is not null);
+        var rest = rows.Count - own;
+        if (own == 0)
+            return Strings.Care.WaterRoundFeedHelp;
+        if (rest == 0)
+            return Strings.Care.WaterRoundFeedAllOwn;
+        return Plural.Of(own, Strings.Care.WaterRoundFeedOwn_One, Strings.Care.WaterRoundFeedOwn_Other) + " "
+            + Plural.Of(rest, Strings.Care.WaterRoundFeedRest_One, Strings.Care.WaterRoundFeedRest_Other);
     }
 
     private void TogglePicker(PassRow row)

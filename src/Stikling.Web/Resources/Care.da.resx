@@ -1000,13 +1000,31 @@
     <value>Stik en finger et par centimeter ned i jorden. Tryk på "Tør" eller "Stadig fugtig".</value>
   </data>
   <data name="WaterRoundFeed" xml:space="preserve">
-    <value>Gødning på runden</value>
+    <value>Gødning til de andre</value>
   </data>
   <data name="WaterNoFeed" xml:space="preserve">
     <value>Ingen gødning</value>
   </data>
+  <data name="WaterRoundNoFeed" xml:space="preserve">
+    <value>Ingen</value>
+  </data>
   <data name="WaterRoundFeedHelp" xml:space="preserve">
-    <value>Kommer med i hver vanding du logger her, medmindre en plante skal have sin egen gødning nu.</value>
+    <value>Kommer med i hver vanding du logger her.</value>
+  </data>
+  <data name="WaterRoundFeedOwn_One" xml:space="preserve">
+    <value>{0} plante her får sin egen gødning.</value>
+  </data>
+  <data name="WaterRoundFeedOwn_Other" xml:space="preserve">
+    <value>{0} planter her får deres egen gødning.</value>
+  </data>
+  <data name="WaterRoundFeedRest_One" xml:space="preserve">
+    <value>Gødningen du vælger, kommer med til den anden plante.</value>
+  </data>
+  <data name="WaterRoundFeedRest_Other" xml:space="preserve">
+    <value>Gødningen du vælger, kommer med til de {0} andre.</value>
+  </data>
+  <data name="WaterRoundFeedAllOwn" xml:space="preserve">
+    <value>Alle planter her får allerede deres egen gødning.</value>
   </data>
   <data name="WaterNoPlants" xml:space="preserve">
     <value>Ingen planter her.</value>
