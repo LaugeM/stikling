@@ -52,6 +52,10 @@
                 }
                 <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => pickDate = true">@Strings.Propagations.ComposerEarlier</button>
             }
+            @if (photos.Any(p => fromCamera.Contains(p.Id)))
+            {
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="RetakeAsync" disabled="@busy">@Strings.Camera.Retake</button>
+            }
         </div>
 
         @if (photos.Count == 0)
@@ -119,6 +123,10 @@
     [Parameter]
     public EventCallback OnAdded { get; set; }
 
+    /// <summary>Raised when a photo from the camera was taken out again to take another, so the page can reopen the camera.</summary>
+    [Parameter]
+    public EventCallback OnRetake { get; set; }
+
     private readonly string sheetInputId = $"composer-photo-{Guid.NewGuid():N}";
     private readonly string dateId = $"composer-date-{Guid.NewGuid():N}";
     private ElementReference pageInput;
@@ -138,6 +146,9 @@
     // Closing the sheet or leaving the page deletes them again. Their ids are also kept on the
     // device, so a draft cut short by a reload or a closed tab is cleared the next time.
     private readonly List<Photo> photos = [];
+
+    // The ones among them that were taken with Stikling's own camera, which Retake takes again
+    private readonly HashSet<Guid> fromCamera = [];
     private string? noteText;
     private DateOnly? occurredOn;
     private bool pickDate;
@@ -231,6 +242,55 @@
         CloseIfEmpty();
     }
 
+    /// <summary>Puts a photo from Stikling's own camera in the sheet, the same as one picked from the phone.</summary>
+    public async Task AddTakenAsync(PhotoSaveResult result)
+    {
+        error = null;
+        forNote = false;
+        open = true;
+
+        try
+        {
+            await AddedAsync(result);
+            foreach (var photo in result.Saved)
+                fromCamera.Add(photo.Id);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding a photo from the camera to an entry failed");
+            error = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
+        }
+
+        CloseIfEmpty();
+
+        // The page called this, so nothing else draws the sheet with the shot in it
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Opens the sheet again after the camera was closed without a shot, when Retake had put it
+    /// out of the way and there is still something in it.
+    /// </summary>
+    public void Resume()
+    {
+        if (open || (photos.Count == 0 && string.IsNullOrWhiteSpace(noteText)))
+            return;
+
+        open = true;
+        StateHasChanged();
+    }
+
+    // Takes the photos from the camera out again and hands over to the camera. The sheet steps aside
+    // because the camera can't be seen over an open dialog; what else is in it stays for when it's back.
+    private async Task RetakeAsync()
+    {
+        foreach (var photo in photos.Where(p => fromCamera.Contains(p.Id)).ToList())
+            await RemovePhotoAsync(photo);
+
+        open = false;
+        await OnRetake.InvokeAsync();
+    }
+
     /// <summary>
     /// Opens the sheet for photos and starts picking from Google Photos, from the page's Photo
     /// choice. It is still part of the same tap, so Google's popup is allowed.
@@ -283,6 +343,7 @@
     {
         await Photos.DeleteAsync(photo.Id);
         photos.Remove(photo);
+        fromCamera.Remove(photo.Id);
         await RememberDraftAsync();
         if (photos.Count == 0)
             undated = 0;
@@ -314,6 +375,7 @@
             }
 
             photos.Clear(); // they belong to the entry now
+            fromCamera.Clear();
             await RememberDraftAsync();
             Reset();
             open = false;
@@ -364,6 +426,7 @@
         foreach (var photo in photos)
             await Photos.DeleteAsync(photo.Id);
         photos.Clear();
+        fromCamera.Clear();
         await RememberDraftAsync();
     }
 

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DialogLabel" xml:space="preserve">
+    <value>Camera</value>
+    <comment>Label of the full-screen camera for screen readers.</comment>
+  </data>
+  <data name="Starting" xml:space="preserve">
+    <value>Starting the camera</value>
+    <comment>Shown over the dark picture while the camera starts.</comment>
+  </data>
+  <data name="Denied" xml:space="preserve">
+    <value>Camera access is off for Stikling. You can allow it in the browser's site settings.</value>
+    <comment>Shown when the browser or the person refused access to the camera.</comment>
+  </data>
+  <data name="Unavailable" xml:space="preserve">
+    <value>The camera couldn't start.</value>
+    <comment>Shown when there is no camera or it failed to start.</comment>
+  </data>
+  <data name="TryAgain" xml:space="preserve">
+    <value>Try again</value>
+    <comment>Button that asks for the camera again.</comment>
+  </data>
+  <data name="UsePicker" xml:space="preserve">
+    <value>Use the normal picker</value>
+    <comment>Button that closes the camera and opens the phone's own choice of camera or gallery.</comment>
+  </data>
+  <data name="Ghost" xml:space="preserve">
+    <value>Ghost</value>
+    <comment>Label of the button that shows or hides the faint copy of the earlier photo over the live picture.</comment>
+  </data>
+  <data name="GhostStrength" xml:space="preserve">
+    <value>Ghost strength</value>
+    <comment>Label of the slider for how strongly the earlier photo shows, for screen readers.</comment>
+  </data>
+  <data name="EarlierPhotos" xml:space="preserve">
+    <value>Photos to line up with</value>
+    <comment>Label of the strip of earlier photos, for screen readers.</comment>
+  </data>
+  <data name="EarlierPhoto" xml:space="preserve">
+    <value>Photo from {0}</value>
+    <comment>Label of one earlier photo in the strip. {0} is the day it was taken, like 19 Sep 2026.</comment>
+  </data>
+  <data name="Shutter" xml:space="preserve">
+    <value>Take photo</value>
+    <comment>Label of the round shutter button.</comment>
+  </data>
+  <data name="SaveFailed" xml:space="preserve">
+    <value>The photo couldn't be saved. Try again.</value>
+    <comment>Shown in the camera when saving the shot failed.</comment>
+  </data>
+  <data name="SameAngle" xml:space="preserve">
+    <value>Same angle</value>
+    <comment>Label and tooltip of the button on a plant or propagation page, and on a round, that opens the camera with an earlier photo over the picture.</comment>
+  </data>
+  <data name="SameAngleOf" xml:space="preserve">
+    <value>Take a photo of {0} from the same angle</value>
+    <comment>Hidden label of the Same angle button on a row of the monthly photo round. {0} is the name of the plant or propagation.</comment>
+  </data>
+  <data name="Retake" xml:space="preserve">
+    <value>Retake</value>
+    <comment>Button in the sheet that adds a photo, when the photo came from the camera. Removes it and opens the camera again.</comment>
+  </data>
+</root>

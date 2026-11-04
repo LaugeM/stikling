@@ -1,0 +1,290 @@
+/* The camera stays dark in both themes, like the photo viewer, so the colours are written here
+   as the viewer has them, with the dark values of the green accent. */
+.camera {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    background: #0b0f0c;
+    color: #f1f4f1;
+    outline: none;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.camera-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    /* Rows and columns of a set size, so the picture shrinks to fit instead of pushing the controls */
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.camera-video {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #0b0f0c;
+}
+
+/* In the same box as the picture and fitted the same way, so a photo of the same shape lies right over it */
+.camera-ghost {
+    grid-area: 1 / 1;
+    opacity: var(--ghost, 0.35);
+    pointer-events: none;
+}
+
+.camera-ghost ::deep img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.camera-ghost ::deep .photo-placeholder {
+    display: none;
+}
+
+.camera-starting {
+    grid-area: 1 / 1;
+    align-self: center;
+    justify-self: center;
+    margin: 0;
+    font-size: 0.9rem;
+    color: #b8c2bb;
+}
+
+.camera-close {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.45);
+    color: #f1f4f1;
+}
+
+.camera-close svg {
+    width: 1.4rem;
+    height: 1.4rem;
+}
+
+.camera-close svg,
+.camera-toggle svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.camera-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem 1rem;
+}
+
+.camera-strip {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.2rem 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.camera-strip li {
+    flex: none;
+}
+
+.camera-choice {
+    display: block;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    background: #1a221d;
+    overflow: hidden;
+    /* The tap area reaches 44px without the tile growing */
+    position: relative;
+}
+
+.camera-choice::after {
+    content: "";
+    position: absolute;
+    inset: -0.2rem;
+}
+
+.camera-choice.current {
+    border-color: #5fb883;
+}
+
+.camera-choice ::deep img,
+.camera-choice ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.camera-ghost-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.camera-toggle {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0 0.85rem;
+    border: 1px solid rgb(241 244 241 / 0.35);
+    border-radius: 999px;
+    background: transparent;
+    color: #f1f4f1;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.camera-toggle svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    stroke-width: 1.9;
+}
+
+.camera-toggle svg circle {
+    fill: currentColor;
+}
+
+.camera-toggle[aria-pressed="true"] {
+    border-color: #5fb883;
+    color: #86d1a4;
+}
+
+.camera-slider {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.75rem;
+    accent-color: #5fb883;
+}
+
+.camera-slider:disabled {
+    opacity: 0.4;
+}
+
+.camera-shutter {
+    align-self: center;
+    flex: none;
+    width: 4.5rem;
+    height: 4.5rem;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 2px solid #f1f4f1;
+    border-radius: 50%;
+    background: transparent;
+}
+
+.camera-shutter span {
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 50%;
+    background: #f1f4f1;
+}
+
+.camera-shutter:disabled {
+    opacity: 0.5;
+}
+
+.camera-message {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: #f1f4f1;
+}
+
+.camera-message-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.camera-btn {
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: 0.6rem;
+    border: 1px solid transparent;
+    font-weight: 600;
+}
+
+.camera-btn-primary {
+    background: #5fb883;
+    color: #0f1a13;
+}
+
+.camera-btn-outline {
+    background: transparent;
+    border-color: rgb(241 244 241 / 0.45);
+    color: #f1f4f1;
+}
+
+.camera button:focus-visible,
+.camera input:focus-visible {
+    outline: 2px solid #86d1a4;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .camera-btn,
+    .camera-toggle,
+    .camera-shutter span {
+        transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .camera-shutter:active:not(:disabled) span {
+        transform: scale(0.9);
+    }
+}
+
+/* On a wide screen the picture takes the width and the controls sit in a column beside it,
+   with the shutter at the bottom of that column */
+@media (min-width: 64rem) {
+    .camera {
+        flex-direction: row;
+    }
+
+    .camera-stage {
+        flex: 1;
+    }
+
+    .camera-panel {
+        flex: 0 0 20rem;
+        width: 20rem;
+        justify-content: flex-end;
+        padding: 1rem 1.25rem 1.5rem;
+        border-left: 1px solid #2c3830;
+    }
+
+    .camera-strip {
+        flex-wrap: wrap;
+        overflow: visible;
+        margin-bottom: auto;
+    }
+
+    .camera-message-actions {
+        flex-direction: column;
+    }
+}

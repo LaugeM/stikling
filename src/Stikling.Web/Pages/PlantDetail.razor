@@ -32,6 +32,8 @@
 @inject SettingsService SettingsService
 @inject GooglePhotosService Google
 @inject AccountService Account
+@inject CameraService Camera
+@inject IPhotoRepository PhotoRepository
 
 <PageTitle>@F(Strings.PlantDetail.PageTitle, plant?.DisplayName ?? Strings.PlantDetail.PlantFallback)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -722,6 +724,12 @@ else
                         @Strings.PlantDetail.DockPhoto
                     </label>
                 }
+                @if (cameraAvailable && hasGhostPhotos)
+                {
+                    <button type="button" class="btn btn-outline-primary icon-btn dock-angle" aria-label="@Strings.Camera.SameAngle" title="@Strings.Camera.SameAngle" @onclick="() => cameraOpen = true">
+                        <SameAngleIcon />
+                    </button>
+                }
                 <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
                     @Strings.PlantDetail.DockNote
@@ -751,7 +759,10 @@ else
     </div>
 
     <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId" OnPicked="() => { photoChoice = false; more = More.None; }"
-                   CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
+                   CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="AddedAsync" OnRetake="() => cameraOpen = true" />
+
+    <GhostCamera SubjectType="SubjectType.Plant" SubjectId="plant.Id" Open="cameraOpen" PickerInputId="@photoInputId"
+                 OnClosed="CameraClosed" OnTaken="CameraTakenAsync" />
 
     @if (googleOn)
     {
@@ -1474,6 +1485,36 @@ else
     private Timeline? timeline;
     private readonly string photoInputId = $"plant-photo-{Guid.NewGuid():N}";
 
+    // The Same angle button needs a camera and an earlier photo to line up with
+    private bool cameraAvailable;
+    private bool hasGhostPhotos;
+    private bool cameraOpen;
+
+    private async Task RefreshGhostAsync()
+    {
+        hasGhostPhotos = plant is not null && PhotoKinds.GhostChoices(await PhotoRepository.GetForAsync(plant.Id)).Count > 0;
+    }
+
+    private async Task AddedAsync()
+    {
+        historyVersion++;
+        await RefreshGhostAsync();
+    }
+
+    // Closed without a shot: a sheet that was waiting for a retake comes back
+    private void CameraClosed()
+    {
+        cameraOpen = false;
+        composer?.Resume();
+    }
+
+    private async Task CameraTakenAsync(PhotoSaveResult shot)
+    {
+        cameraOpen = false;
+        if (composer is not null)
+            await composer.AddTakenAsync(shot);
+    }
+
     // The small forms in the More sheet
     private DateOnly since;
     private int? quarantineDays;
@@ -1645,6 +1686,7 @@ else
     protected override async Task OnParametersSetAsync()
     {
         googleOn = await Google.IsEnabledAsync();
+        cameraAvailable = await Camera.IsAvailableAsync();
         if (plant?.Id != Id)
         {
             confirmDelete = false;
@@ -1656,6 +1698,7 @@ else
         scrollToFamily |= Tab == "props";
         careOpen |= Tab == "care";
         await LoadAsync();
+        await RefreshGhostAsync();
         loaded = true;
     }
 

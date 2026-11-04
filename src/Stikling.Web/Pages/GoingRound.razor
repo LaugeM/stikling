@@ -22,6 +22,8 @@
 @inject CareService Care
 @inject TimelineService TimelineService
 @inject SubjectPhotos SubjectPhotos
+@inject CameraService Camera
+@inject IPhotoRepository PhotoRepository
 @inject TimeProvider Time
 
 <PageTitle>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundPageTitle, Title))</PageTitle>
@@ -223,6 +225,13 @@ else
                         </label>
                         <input id="round-photo-input" type="file" accept="image/*" capture="environment" class="visually-hidden"
                                @ref="photoInput" @onchange="PhotoAsync" disabled="@busy" />
+                        @if (cameraAvailable && hasPhoto.Contains(card.Subject.Id))
+                        {
+                            <button type="button" class="round-text-btn" disabled="@busy" @onclick="() => cameraOpen = true">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="17" rx="3" stroke-dasharray="2.5 3" opacity="0.7" /><path d="M7 10.5h2l1-1.5h4l1 1.5h2V16H7Z" /><circle cx="12" cy="13" r="1.7" /></svg>
+                                @Strings.Camera.SameAngle
+                            </button>
+                        }
                         <button type="button" class="round-text-btn" disabled="@busy" @onclick="Skip">
                             @Strings.Care.RoundSkip
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
@@ -239,6 +248,10 @@ else
 
         <p class="round-keys">@Strings.Care.RoundKeys</p>
     </div>
+
+    @* Outside the round, so its keys don't act on the camera's *@
+    <GhostCamera SubjectType="card.Subject is Plant ? SubjectType.Plant : SubjectType.Propagation" SubjectId="card.Subject.Id" Open="cameraOpen"
+                 PickerInputId="round-photo-input" OnClosed="() => cameraOpen = false" OnTaken="CameraTakenAsync" />
 }
 
 @code {
@@ -284,12 +297,19 @@ else
     private int pos;
     private ElementReference wrapper;
     private ElementReference photoInput;
+    private bool cameraAvailable;
+    private bool cameraOpen;
+
+    // The plants and cuttings that have a photo of their own to line up with
+    private HashSet<Guid> hasPhoto = [];
 
     private string MoveClass => moveForward ? "from-right" : "from-left";
 
     protected override async Task OnInitializedAsync()
     {
         places = await RoomService.GetPlacesAsync();
+        cameraAvailable = await Camera.IsAvailableAsync();
+        hasPhoto = [.. (await PhotoRepository.GetNewestPerSubjectAsync()).Keys];
         if (PlaceId != Guid.Empty && places.Find(PlaceId) is null)
         {
             placeMissing = true;
@@ -509,6 +529,33 @@ else
             status = message;
             if (saved)
                 await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding a photo in the daily round failed");
+            status = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowFailed, ex.Message);
+        }
+        busy = false;
+    }
+
+    // The camera has stored the photo already, so it only goes onto the history
+    private async Task CameraTakenAsync(PhotoSaveResult shot)
+    {
+        cameraOpen = false;
+        // The shot is stored already, so it is never dropped: it waits for what is running
+        while (busy)
+            await Task.Delay(50);
+        busy = true;
+        status = Strings.Care.PhotoRowSaving;
+        try
+        {
+            var (message, saved) = await SubjectPhotos.FinishAsync(Current.Card.Subject, shot);
+            status = message;
+            if (saved)
+            {
+                hasPhoto.Add(Current.Card.Subject.Id);
+                await RefreshAsync();
+            }
         }
         catch (Exception ex)
         {
