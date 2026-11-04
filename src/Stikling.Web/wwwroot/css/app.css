@@ -337,6 +337,26 @@ main.app-content.with-banner .fab {
     color: #0f1a13;
 }
 
+/* A smaller round button stacked above the add button, for the thing done second most: its centre
+   lines up with the add button's, and it rides above a banner the same way */
+.fab.fab-small {
+    right: calc(var(--pa-column-inset) + 0.375rem);
+    bottom: calc(var(--pa-nav-bottom) + 5.25rem);
+    width: 2.75rem;
+    height: 2.75rem;
+}
+
+main.app-content.with-banner .fab.fab-small {
+    bottom: calc(var(--pa-nav-bottom) + 8.75rem);
+}
+
+.fab.fab-small svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    stroke-width: 2;
+    stroke-linejoin: round;
+}
+
 /* A row in the plant and propagation lists: thumbnail, names and a short status line */
 .item-card {
     display: flex;

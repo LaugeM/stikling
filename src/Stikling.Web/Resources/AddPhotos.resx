@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Add photos · Stikling</value>
+    <comment>Title of the browser tab on the Add photos page.</comment>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Add photos</value>
+    <comment>Heading of the Add photos page.</comment>
+  </data>
+  <data name="EntryLabel" xml:space="preserve">
+    <value>Add photos</value>
+    <comment>Labelled button on the Plants page, and the label of the round camera button, that opens the Add photos page.</comment>
+  </data>
+  <data name="EmptyText" xml:space="preserve">
+    <value>Photos from your gallery can go to a plant or propagation from here. Choose them, then pick where they belong.</value>
+    <comment>Empty state on the Add photos page when no photos are waiting.</comment>
+  </data>
+  <data name="ChooseFromGallery" xml:space="preserve">
+    <value>Choose from gallery</value>
+    <comment>Button that opens the phone's gallery to choose photos.</comment>
+  </data>
+  <data name="ShareMenuNote" xml:space="preserve">
+    <value>When the app is installed from Chrome, Edge or Samsung Internet, it also shows up in your phone's share menu. {0}</value>
+    <comment>Small line under the empty state. {0} is the link to the Help page.</comment>
+  </data>
+  <data name="ShareMenuNoteLink" xml:space="preserve">
+    <value>More in Help</value>
+    <comment>Link text at the end of the share menu note, {0} in it.</comment>
+  </data>
+  <data name="Waiting_One" xml:space="preserve">
+    <value>{0} photo waiting</value>
+    <comment>Heading over the waiting photos. {0} is the number, here exactly one.</comment>
+  </data>
+  <data name="Waiting_Other" xml:space="preserve">
+    <value>{0} photos waiting</value>
+    <comment>Heading over the waiting photos. {0} is the number.</comment>
+  </data>
+  <data name="ChooseMore" xml:space="preserve">
+    <value>Choose more</value>
+    <comment>Outline button that adds more photos to the waiting ones.</comment>
+  </data>
+  <data name="TileLabel" xml:space="preserve">
+    <value>Photo {0}</value>
+    <comment>Name of a waiting photo for screen readers. {0} is its place in the list.</comment>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+    <comment>Shown while the waiting photos are read.</comment>
+  </data>
+  <data name="WhereLabel" xml:space="preserve">
+    <value>Where do they go?</value>
+    <comment>Label over the list of plants and propagations the photos can go to.</comment>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search your plants and propagations</value>
+    <comment>Placeholder and label of the search field above the list of destinations.</comment>
+  </data>
+  <data name="NewPlant" xml:space="preserve">
+    <value>New plant</value>
+    <comment>Outline button that starts a new plant with the ticked photos.</comment>
+  </data>
+  <data name="NewPropagation" xml:space="preserve">
+    <value>New propagation</value>
+    <comment>Outline button that starts a new propagation with the ticked photos.</comment>
+  </data>
+  <data name="KindPlant" xml:space="preserve">
+    <value>Plant</value>
+    <comment>Small line under a name in the list of destinations.</comment>
+  </data>
+  <data name="KindPropagation" xml:space="preserve">
+    <value>Propagation</value>
+    <comment>Small line under a name in the list of destinations.</comment>
+  </data>
+  <data name="NoDestinations" xml:space="preserve">
+    <value>You have no plants or propagations to send them to yet. Start one with the buttons above and the ticked photos come along.</value>
+    <comment>Empty state in the list of destinations when there is nothing to send photos to.</comment>
+  </data>
+  <data name="NoMatch" xml:space="preserve">
+    <value>Nothing matches that. Clear the search, or start a new plant or propagation with the ticked photos.</value>
+    <comment>Empty state in the list of destinations when the search finds nothing.</comment>
+  </data>
+  <data name="Add_None" xml:space="preserve">
+    <value>Add photos</value>
+    <comment>Primary button when no photo is ticked or no destination is chosen.</comment>
+  </data>
+  <data name="Add_One" xml:space="preserve">
+    <value>Add {0} photo</value>
+    <comment>Primary button. {0} is the number of ticked photos, here exactly one.</comment>
+  </data>
+  <data name="Add_Other" xml:space="preserve">
+    <value>Add {0} photos</value>
+    <comment>Primary button. {0} is the number of ticked photos.</comment>
+  </data>
+  <data name="Adding" xml:space="preserve">
+    <value>Adding photos…</value>
+    <comment>Shown while the ticked photos are saved.</comment>
+  </data>
+  <data name="Added_One" xml:space="preserve">
+    <value>{0} photo added to {1}.</value>
+    <comment>Status after adding. {0} is the number, here exactly one. {1} is the name of the plant or propagation, as a link.</comment>
+  </data>
+  <data name="Added_Other" xml:space="preserve">
+    <value>{0} photos added to {1}.</value>
+    <comment>Status after adding. {0} is the number. {1} is the name of the plant or propagation, as a link.</comment>
+  </data>
+  <data name="AllSorted" xml:space="preserve">
+    <value>All sorted</value>
+    <comment>Heading when no photos are waiting any more after sending them.</comment>
+  </data>
+  <data name="GoToSubject" xml:space="preserve">
+    <value>Open {0}</value>
+    <comment>Link to the plant or propagation the photos were added to. {0} is its name.</comment>
+  </data>
+  <data name="GoToToday" xml:space="preserve">
+    <value>Go to Today</value>
+    <comment>Link to the Today page.</comment>
+  </data>
+  <data name="Discard" xml:space="preserve">
+    <value>Discard</value>
+    <comment>Link style button that takes the ticked photos off the waiting list.</comment>
+  </data>
+  <data name="DiscardConfirm_One" xml:space="preserve">
+    <value>Take the ticked photo off this list? The original is still in your gallery.</value>
+    <comment>Asked before discarding. Exactly one photo is ticked.</comment>
+  </data>
+  <data name="DiscardConfirm_Other" xml:space="preserve">
+    <value>Take the {0} ticked photos off this list? The originals are still in your gallery.</value>
+    <comment>Asked before discarding. {0} is the number of ticked photos.</comment>
+  </data>
+  <data name="ReadFailed" xml:space="preserve">
+    <value>Couldn't read the waiting photos: {0}</value>
+    <comment>Error when the waiting photos can't be read. {0} is the reason.</comment>
+  </data>
+  <data name="ChooseFailed" xml:space="preserve">
+    <value>Couldn't keep all the photos: {0}</value>
+    <comment>Error when the browser can't store the chosen photos. {0} is the reason.</comment>
+  </data>
+  <data name="SaveFailed" xml:space="preserve">
+    <value>Couldn't add the photos ({0}). They are still waiting.</value>
+    <comment>Error when saving to a plant fails. {0} is the reason. Nothing was lost.</comment>
+  </data>
+  <data name="DiscardFailed" xml:space="preserve">
+    <value>Couldn't discard the photos: {0}</value>
+    <comment>Error when discarding fails. {0} is the reason.</comment>
+  </data>
+  <data name="TodayWaiting_One" xml:space="preserve">
+    <value>{0} photo to sort</value>
+    <comment>Reminder on Today. {0} is the number of photos waiting, here exactly one.</comment>
+  </data>
+  <data name="TodayWaiting_Other" xml:space="preserve">
+    <value>{0} photos to sort</value>
+    <comment>Reminder on Today. {0} is the number of photos waiting.</comment>
+  </data>
+  <data name="TodaySort" xml:space="preserve">
+    <value>Sort</value>
+    <comment>Button on the reminder on Today that opens the Add photos page.</comment>
+  </data>
+</root>
