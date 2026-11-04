@@ -1,6 +1,7 @@
 @* One plant or propagation in the monthly photo round, with a camera button that puts the photo
    straight on its history without leaving Today. *@
 @inject SubjectPhotos Photos
+@inject CameraService Camera
 @inject ILogger<PhotoRoundRow> Logger
 
 <li class="today-row">
@@ -16,6 +17,13 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
             <span class="visually-hidden">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowTakePhotoOf, Due.Name)</span>
         </label>
+        @if (cameraAvailable && Due.LastPhoto is not null)
+        {
+            <button type="button" class="row-btn" title="@Strings.Camera.SameAngle" disabled="@busy" @onclick="() => cameraOpen = true">
+                <SameAngleIcon />
+                <span class="visually-hidden">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Camera.SameAngleOf, Due.Name)</span>
+            </button>
+        }
         <input id="@inputId" type="file" accept="image/*" capture="environment" class="visually-hidden"
                @ref="input" @onchange="SaveAsync" disabled="@busy" />
     </div>
@@ -23,6 +31,8 @@
     {
         <p class="today-row-status" role="status">@status</p>
     }
+    <GhostCamera SubjectType="Due.Subject is Plant ? SubjectType.Plant : SubjectType.Propagation" SubjectId="Due.Subject.Id" Open="cameraOpen"
+                 PickerInputId="@inputId" OnClosed="() => cameraOpen = false" OnTaken="CameraTakenAsync" />
 </li>
 
 @code {
@@ -36,7 +46,12 @@
     private readonly string inputId = $"round-{Guid.NewGuid():N}";
     private ElementReference input;
     private bool busy;
+    private bool cameraAvailable;
+    private bool cameraOpen;
     private string? status;
+
+    protected override async Task OnInitializedAsync() =>
+        cameraAvailable = await Camera.IsAvailableAsync();
 
     private string Meta
     {
@@ -45,6 +60,29 @@
             var last = Due.LastPhoto is { } day ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowLastPhoto, Labels.Date(day)) : Strings.Care.PhotoRowNoPhotos;
             return string.IsNullOrWhiteSpace(Due.Location) ? last : $"{Due.Location} · {last}";
         }
+    }
+
+    // The camera has stored the photo already, so it only goes onto the history
+    private async Task CameraTakenAsync(PhotoSaveResult shot)
+    {
+        cameraOpen = false;
+        busy = true;
+        status = Strings.Care.PhotoRowSaving;
+
+        try
+        {
+            var (message, saved) = await Photos.FinishAsync(Due.Subject, shot);
+            status = message;
+            if (saved)
+                await OnTaken.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the monthly photo failed");
+            status = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowFailed, ex.Message);
+        }
+
+        busy = false;
     }
 
     private async Task SaveAsync()
