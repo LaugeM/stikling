@@ -17,7 +17,7 @@
 <a class="back-link" href="@(RouteNew ? "plants" : $"plants/{Id}")">@Strings.Common.Back</a>
 <h1>@(RouteNew ? Strings.PlantEdit.AddPlant : Strings.PlantEdit.EditPlant)</h1>
 
-@if (IsNew && CopyOfId is null && ParentId is null && !FromPhotos)
+@if (IsNew && CopyOfId is null && ParentId is null && !FromPhotos && string.IsNullOrWhiteSpace(GenusName))
 {
     <p class="form-text">@Html(Strings.PlantEdit.AddingSeveral, Link("plants/quick-add", Strings.PlantEdit.QuickAddLink, "link-action"), Link("plants/import", Strings.PlantEdit.ImportLink, "link-action"))</p>
 }
@@ -611,8 +611,18 @@ else
     [SupplyParameterFromQuery(Name = "wish")]
     public Guid? WishId { get; set; }
 
+    /// <summary>The names to start a new plant with, from the plant dictionary.</summary>
+    [SupplyParameterFromQuery(Name = "genus")]
+    public string? GenusName { get; set; }
+
+    [SupplyParameterFromQuery(Name = "species")]
+    public string? SpeciesName { get; set; }
+
+    [SupplyParameterFromQuery(Name = "cultivar")]
+    public string? CultivarName { get; set; }
+
     private PlantForm? form;
-    private (Guid? Id, Guid? CopyOfId, Guid? WishId, Guid? ParentId) formFor;
+    private (Guid? Id, Guid? CopyOfId, Guid? WishId, Guid? ParentId, string? Genus, string? Species, string? Cultivar) formFor;
 
     /// <summary>"photos" starts from old photos, from the first screen, with the photos first.</summary>
     [SupplyParameterFromQuery(Name = "from")]
@@ -804,7 +814,7 @@ else
         careBook = await CommonCare.GetBookAsync();
 
         // A new form only when the page was opened for something else, so a re-render never resets a draft
-        var key = (Id, CopyOfId, WishId, ParentId);
+        var key = (Id, CopyOfId, WishId, ParentId, GenusName, SpeciesName, CultivarName);
         if (form is not null && formFor == key)
             return;
 
@@ -814,6 +824,14 @@ else
         notFound = form is null;
         if (form is null || plant is null)
             return;
+
+        // Names from the plant dictionary fill a new plant, unless it started from a copy, a wish or a parent
+        if (form.IsNew && CopyOfId is null && WishId is null && ParentId is null && !string.IsNullOrWhiteSpace(GenusName))
+        {
+            plant.Genus = GenusName.Trim();
+            plant.Species = string.IsNullOrWhiteSpace(SpeciesName) ? null : SpeciesName.Trim();
+            plant.Cultivar = string.IsNullOrWhiteSpace(CultivarName) ? null : CultivarName.Trim();
+        }
 
         var all = form.Plants;
         rooms = Room.List(form.Places, all, form.Propagations);

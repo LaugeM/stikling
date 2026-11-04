@@ -1,0 +1,77 @@
+.dict-search {
+    margin-top: 1rem;
+}
+
+.dict-families-section {
+    margin-top: 1.75rem;
+}
+
+/* The families close up into one bordered block, divided by hairlines like the Settings rows. On a wide
+   screen the rows flow into columns at least 20rem wide. The list sits 1px high so the first row's
+   hairline in each column is clipped by the block's own border. */
+.dict-families-block {
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.dict-families {
+    list-style: none;
+    margin: -1px 0 0;
+    padding: 0;
+    columns: 20rem;
+    column-gap: 0;
+    column-rule: 1px solid var(--pa-border);
+}
+
+.dict-families li {
+    break-inside: avoid;
+}
+
+.dict-family {
+    display: block;
+    padding: 0.7rem 0.85rem;
+    min-height: 3rem;
+    border-top: 1px solid var(--pa-border);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.15s ease-out;
+}
+
+.dict-family:hover,
+.dict-family:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+.dict-family:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+}
+
+.dict-family-name,
+.dict-family-line {
+    display: block;
+}
+
+.dict-family-name {
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+.dict-family-line {
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+/* The group and family rows of a search */
+.item-text {
+    min-width: 0;
+}
+
+.item-text .item-name,
+.item-text .item-meta {
+    display: block;
+}

@@ -104,6 +104,7 @@ builder.Services.AddScoped<PropagationService>();
 builder.Services.AddScoped<PlantNameService>();
 builder.Services.AddScoped<PlantCareService>();
 builder.Services.AddScoped<PlantRegionService>();
+builder.Services.AddScoped<DictionaryService>();
 builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<SellerService>();
 builder.Services.AddScoped<OwnCareKindService>();

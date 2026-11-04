@@ -69,6 +69,11 @@
     display: none;
 }
 
+/* Links that are only in the side menu on a wide screen */
+.app-nav ::deep .app-nav-link.app-nav-wide {
+    display: none;
+}
+
 .app-nav ::deep .app-nav-link {
     flex: 1;
     display: flex;
@@ -305,6 +310,10 @@
         font-weight: 500;
         color: var(--pa-muted);
         transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .app-nav ::deep .app-nav-link.app-nav-wide {
+        display: flex;
     }
 
     .app-nav ::deep .app-nav-link:hover {

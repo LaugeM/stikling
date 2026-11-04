@@ -1,0 +1,75 @@
+@* The genera of a group or a family as rows, A to Z, with a letter strip down the side when the list is long.
+   Used by the group page and the family page. *@
+@using System.Globalization
+
+<ul class="item-list list-grid dict-genera @(showLetters ? "has-letters" : null)">
+    @foreach (var genus in Genera)
+    {
+        var have = Owned.Genus(genus.Name);
+        <li id="@(anchors.GetValueOrDefault(genus.Name))">
+            <a class="item-card" href="@DictionaryLinks.Genus(genus.Name)">
+                <span class="item-text">
+                    <span class="item-name"><i class="dict-genus">@genus.Name</i></span>
+                    <span class="item-meta">@Line(genus)</span>
+                </span>
+                @if (have > 0)
+                {
+                    <span class="dict-have">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.YouHave, have)</span>
+                }
+            </a>
+        </li>
+    }
+</ul>
+
+@if (showLetters)
+{
+    <LetterJump Letters="letters" />
+}
+
+@code {
+    /// <summary>More genera than this get the letter strip.</summary>
+    private const int LettersFrom = 40;
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<GenusSummary> Genera { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public OwnedCounts Owned { get; set; } = new();
+
+    /// <summary>Left out on a family's page, where every row has the same family.</summary>
+    [Parameter]
+    public bool ShowFamily { get; set; } = true;
+
+    private bool showLetters;
+    private IReadOnlyList<LetterTarget> letters = [];
+    private Dictionary<string, string> anchors = [];
+
+    protected override void OnParametersSet()
+    {
+        showLetters = Genera.Count > LettersFrom;
+        anchors = [];
+        var targets = new Dictionary<char, string>();
+        if (showLetters)
+        {
+            foreach (var genus in Genera)
+            {
+                if (PlantGroups.LetterOf(genus.Name) is { } letter && targets.TryAdd(letter, letter == '#' ? "dict-letter-hash" : $"dict-letter-{letter}"))
+                    anchors[genus.Name] = targets[letter];
+            }
+        }
+        letters = [.. "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".Select(c => new LetterTarget(c, targets.GetValueOrDefault(c)))];
+    }
+
+    private string Line(GenusSummary genus)
+    {
+        var parts = new List<string>();
+        if (genus.Everyday is not null)
+            parts.Add(genus.Everyday);
+        if (ShowFamily && genus.Family is not null)
+            parts.Add(genus.Family);
+        parts.Add(Plural.Of(genus.Species, Strings.Dictionary.Species_One, Strings.Dictionary.Species_Other));
+        if (genus.Cultivars > 0)
+            parts.Add(Plural.Of(genus.Cultivars, Strings.Dictionary.Cultivar_One, Strings.Dictionary.Cultivar_Other));
+        return string.Join(" · ", parts);
+    }
+}

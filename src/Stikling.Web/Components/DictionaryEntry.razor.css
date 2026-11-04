@@ -1,0 +1,43 @@
+/* What goes under the name on the right: lists of species, cultivars and old names */
+.profile-history ::deep .dict-section {
+    margin-bottom: 1.75rem;
+}
+
+/* Names in these rows are botanical names, which are italic, so they use the system font that has an italic */
+.profile-history ::deep .dict-name {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+}
+
+/* One fixed height for every row, so the list can be drawn a screenful at a time. 4.5rem and the
+   0.6rem under it make up the row size in the code of the pages. */
+.profile-history ::deep .dict-row {
+    height: 4.5rem;
+    margin-bottom: 0.6rem;
+}
+
+.profile-history ::deep .dict-row .item-text,
+.profile-history ::deep .dict-row .item-name,
+.profile-history ::deep .dict-row .item-meta {
+    display: block;
+}
+
+.profile-history ::deep .dict-row .item-text {
+    min-width: 0;
+}
+
+.profile-history ::deep .dict-have {
+    flex: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
+
+.profile-history ::deep .dict-old-names {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
