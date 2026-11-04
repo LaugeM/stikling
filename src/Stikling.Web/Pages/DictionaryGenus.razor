@@ -53,6 +53,7 @@ else
 {
     <a class="back-link" href="@DictionaryLinks.Group(entry.Group)">@DictionaryLinks.Label(entry.Group)</a>
 
+    <div class="page-full">
     <DictionaryEntry Name="@entry.Name" Genus="@entry.Name" Yours="yours">
         <Title><i>@entry.Name</i></Title>
         <Subtitle>
@@ -96,7 +97,8 @@ else
                     else
                     {
                         <div class="dict-rows">
-                            <Virtualize Items="shownSpecies" ItemSize="RowSize" Context="species">
+                            <VirtualGrid Items="shownSpecies" RowSize="RowSize">
+<ItemTemplate Context="species">
                                 <a class="item-card dict-row" href="@DictionaryLinks.Species(entry.Name, species.Name)" @key="species.Name">
                                     <span class="item-text">
                                         <span class="item-name dict-name"><BotanicalName Genus="@entry.Name" Species="@species.Name" /></span>
@@ -110,7 +112,8 @@ else
                                         <span class="dict-have">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.YouHave, have)</span>
                                     }
                                 </a>
-                            </Virtualize>
+                            </ItemTemplate>
+</VirtualGrid>
                         </div>
                     }
                 </section>
@@ -121,7 +124,8 @@ else
                 <section class="dict-section" aria-labelledby="dict-cultivars">
                     <h2 class="section-label" id="dict-cultivars">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CultivarsHeading, entry.Cultivars.Count)</h2>
                     <div class="dict-rows">
-                        <Virtualize Items="cultivars" ItemSize="RowSize" Context="cultivar">
+                        <VirtualGrid Items="cultivars" RowSize="RowSize">
+<ItemTemplate Context="cultivar">
                             <a class="item-card dict-row" href="@DictionaryLinks.Cultivar(entry.Name, cultivar.Name, cultivar.Species)">
                                 <span class="item-text">
                                     <span class="item-name dict-name"><BotanicalName Cultivar="@cultivar.Name" /></span>
@@ -141,7 +145,8 @@ else
                                     }
                                 </span>
                             </a>
-                        </Virtualize>
+                        </ItemTemplate>
+</VirtualGrid>
                     </div>
                 </section>
             }
@@ -160,6 +165,7 @@ else
             }
         </ChildContent>
     </DictionaryEntry>
+    </div>
 }
 
 @code {

@@ -2,6 +2,46 @@
     margin-top: 1rem;
 }
 
+/* The groups close up into one bordered block like the Settings rows (.settings-rows), and like the
+   families under them flow into columns at least 20rem wide on a wide screen. The rows are not direct
+   children of the block here, so they get the Settings row look from this file. */
+.dict-groups-block {
+    margin-top: 1rem;
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.dict-groups {
+    margin-top: -1px;
+    columns: 20rem;
+    column-gap: 0;
+    column-rule: 1px solid var(--pa-border);
+}
+
+.dict-groups ::deep a.item-card {
+    break-inside: avoid;
+    border: 0;
+    border-top: 1px solid var(--pa-border);
+    border-radius: 0;
+    transition: background-color 0.15s ease-out;
+}
+
+.dict-groups ::deep a.item-card:hover,
+.dict-groups ::deep a.item-card:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+.dict-groups ::deep a.item-card:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+}
+
+.dict-groups ::deep a.item-card:active {
+    transform: none;
+}
+
 .dict-families-section {
     margin-top: 1.75rem;
 }

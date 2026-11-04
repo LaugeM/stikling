@@ -34,13 +34,15 @@ else
     {
         <section aria-labelledby="dict-groups">
             <h2 class="section-label" id="dict-groups">@Strings.Dictionary.GroupsHeading</h2>
-            <div class="settings-rows">
-                @foreach (var group in browser.Groups)
-                {
-                    <SettingsRow Href="@DictionaryLinks.Group(group.Group)" Title="@DictionaryLinks.Label(group.Group)" Detail="@GroupLine(group)">
-                        <Icon><GroupIcon Group="group.Group" /></Icon>
-                    </SettingsRow>
-                }
+            <div class="dict-groups-block">
+                <div class="dict-groups">
+                    @foreach (var group in browser.Groups)
+                    {
+                        <SettingsRow Href="@DictionaryLinks.Group(group.Group)" Title="@DictionaryLinks.Label(group.Group)" Detail="@GroupLine(group)">
+                            <Icon><GroupIcon Group="group.Group" /></Icon>
+                        </SettingsRow>
+                    }
+                </div>
             </div>
         </section>
 
