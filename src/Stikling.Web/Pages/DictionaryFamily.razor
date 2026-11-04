@@ -6,6 +6,9 @@
 <PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, found?.Name ?? Strings.Dictionary.Title)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
+@* page-full: on a wide screen the page takes the whole width beside the menu *@
+<div class="page-full">
+
 <a class="back-link" href="@DictionaryLinks.Index">@Strings.Dictionary.Title</a>
 
 @if (browser is null)
@@ -43,6 +46,8 @@ else
 
     <DictionaryGenusList Genera="genera" Owned="owned" ShowFamily="false" />
 }
+
+</div>
 
 @code {
     [Parameter]

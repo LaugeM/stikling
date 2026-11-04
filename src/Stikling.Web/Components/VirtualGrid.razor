@@ -1,0 +1,110 @@
+@* A long list drawn a screenful of rows at a time, with as many items side by side as fit. Every row of
+   items has the same height, which RowSize says, since the list is virtualized. The width is watched in
+   js/virtualgrid.js. Until it has run, and on a phone, there is one column. *@
+@implements IAsyncDisposable
+@typeparam TItem
+@inject IJSRuntime JS
+
+<div class="virtual-grid" @ref="element">
+    <Virtualize Items="rows" ItemSize="RowSize" Context="row">
+        <div class="virtual-grid-row" style="grid-template-columns: repeat(@columns, minmax(0, 1fr))">
+            @foreach (var item in row)
+            {
+                @ItemTemplate(item)
+            }
+        </div>
+    </Virtualize>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<TItem> Items { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public RenderFragment<TItem> ItemTemplate { get; set; } = default!;
+
+    /// <summary>The height of one row of items and the space under it, in pixels.</summary>
+    [Parameter, EditorRequired]
+    public float RowSize { get; set; }
+
+    /// <summary>The least width of a column in rem.</summary>
+    [Parameter]
+    public double MinColumnWidth { get; set; } = 20;
+
+    private ElementReference element;
+    private DotNetObjectReference<VirtualGrid<TItem>>? self;
+    private IJSObjectReference? module;
+    private bool observing;
+    private bool disposed;
+
+    private int columns = 1;
+
+    // Virtualize needs a list it can count and index, so the rows are kept until the items or the columns change
+    private List<List<TItem>> rows = [];
+    private IReadOnlyList<TItem>? rowsOf;
+    private int rowsColumns;
+
+    protected override void OnParametersSet() => BuildRows();
+
+    private void BuildRows()
+    {
+        if (ReferenceEquals(rowsOf, Items) && rowsColumns == columns)
+            return;
+
+        rowsOf = Items;
+        rowsColumns = columns;
+        rows = [.. Items.Chunk(columns).Select(chunk => new List<TItem>(chunk))];
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            self = DotNetObjectReference.Create(this);
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/virtualgrid.js");
+            // The page may have been left while the module loaded, and then there is nothing to watch
+            if (disposed)
+            {
+                await module.DisposeAsync();
+                return;
+            }
+            await module.InvokeVoidAsync("observe", element, self, MinColumnWidth);
+            observing = true;
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+    }
+
+    [JSInvokable]
+    public void SetColumns(int n)
+    {
+        if (n == columns)
+            return;
+
+        columns = n;
+        BuildRows();
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        try
+        {
+            if (module is not null && observing)
+                await module.InvokeVoidAsync("unobserve", element);
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+        self?.Dispose();
+    }
+}

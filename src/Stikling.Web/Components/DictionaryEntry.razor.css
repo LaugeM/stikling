@@ -10,7 +10,8 @@
 }
 
 /* One fixed height for every row, so the list can be drawn a screenful at a time. 4.5rem and the
-   0.6rem under it make up the row size in the code of the pages. */
+   0.6rem under it make up the row size in the code of the pages. On a wide screen the rows can sit
+   side by side (VirtualGrid), and each keeps this height. */
 .profile-history ::deep .dict-row {
     height: 4.5rem;
     margin-bottom: 0.6rem;

@@ -42,6 +42,7 @@ else
     var full = $"{entry.Genus} {entry.Name}";
     <a class="back-link" href="@DictionaryLinks.Genus(entry.Genus)"><i>@entry.Genus</i></a>
 
+    <div class="page-full">
     <DictionaryEntry Name="@full" Genus="@entry.Genus" Species="@entry.Name" Yours="yours">
         <Title><i>@full</i></Title>
         <Subtitle>
@@ -80,7 +81,8 @@ else
                 <section class="dict-section" aria-labelledby="dict-cultivars">
                     <h2 class="section-label" id="dict-cultivars">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CultivarsHeading, entry.Cultivars.Count)</h2>
                     <div class="dict-rows">
-                        <Virtualize Items="cultivars" ItemSize="RowSize" Context="cultivar">
+                        <VirtualGrid Items="cultivars" RowSize="RowSize">
+<ItemTemplate Context="cultivar">
                             <a class="item-card dict-row" href="@DictionaryLinks.Cultivar(entry.Genus, cultivar.Name, cultivar.Species)">
                                 <span class="item-text">
                                     <span class="item-name dict-name"><BotanicalName Cultivar="@cultivar.Name" /></span>
@@ -90,12 +92,14 @@ else
                                     }
                                 </span>
                             </a>
-                        </Virtualize>
+                        </ItemTemplate>
+</VirtualGrid>
                     </div>
                 </section>
             }
         </ChildContent>
     </DictionaryEntry>
+    </div>
 }
 
 @code {
