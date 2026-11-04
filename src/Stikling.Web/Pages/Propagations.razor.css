@@ -69,3 +69,17 @@
     font-weight: 600;
     margin-right: auto;
 }
+
+/* From 80rem the search and the progress choice are stacked in the column beside the list */
+@media (min-width: 80rem) {
+    .list-filters {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+
+    .list-filters > input[type="search"],
+    .list-filters > .segmented {
+        flex: none;
+    }
+}

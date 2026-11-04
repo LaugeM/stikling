@@ -546,21 +546,23 @@
 /* A computer or a tablet held sideways: what needs doing in a wide column, the rest beside it.
    The markup keeps the phone order, so nothing here changes below 64rem. */
 @media (min-width: 64rem) {
-    /* Nothing asks for anything: the rest is the one column it is on a phone */
-    .today-columns:not(:has(.today-todo .today-section)) {
+    /* Nothing asks for anything and there is no Worth a look: the rest is the one column it is on a phone */
+    .today-columns:not(:has(.today-todo .today-section)):not(:has(.worth-a-look)) {
         display: block;
         max-width: 48rem;
     }
 
     /* Rows flow into as many columns as fit. Headings, hints and next-round lines span the column. */
-    .today-todo .item-list {
+    .today-todo .item-list,
+    .worth-a-look .item-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(min(24rem, 100%), 1fr));
         gap: 0.6rem 0.75rem;
         align-items: start;
     }
 
-    .today-todo .item-list > ::deep li {
+    .today-todo .item-list > ::deep li,
+    .worth-a-look .item-list > ::deep li {
         min-width: 0;
     }
 
@@ -589,6 +591,31 @@
         grid-template-columns: minmax(0, 1fr) minmax(22rem, 28rem);
         gap: 0 2rem;
         align-items: start;
+    }
+
+    /* Nothing asks for anything but Worth a look shows: it takes the main column, so the page keeps its
+       shape. The rest still sits in the side column. The rest's wrapper steps aside so its sections
+       can be placed beside Worth a look, which spans the rows. The last, flexible row takes whatever
+       height Worth a look needs, so a long list doesn't spread the side column's sections apart. */
+    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) {
+        grid-template-rows: repeat(20, auto) 1fr;
+    }
+
+    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) > .today-todo {
+        display: none;
+    }
+
+    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) > .today-rest {
+        display: contents;
+    }
+
+    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) > .today-rest > ::deep * {
+        grid-column: 2;
+    }
+
+    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) > .today-rest > ::deep .worth-a-look {
+        grid-column: 1;
+        grid-row: 1 / -1;
     }
 }
 

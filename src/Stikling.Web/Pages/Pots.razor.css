@@ -20,6 +20,30 @@
     border-top: 0;
 }
 
+/* On a wide screen each name is a card in a grid, with its sizes as rows inside. A single outer pot
+   and a set of nursery pots both make one card. */
+@media (min-width: 64rem) {
+    .pot-families {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        gap: 0.6rem 0.75rem;
+        align-items: start;
+        margin-top: 0.9rem;
+    }
+
+    .pot-family-card {
+        min-width: 0;
+        padding: 0.7rem 0.85rem;
+        background: var(--pa-surface);
+        border: 1px solid var(--pa-border);
+        border-radius: 0.75rem;
+    }
+
+    .pot-family-card > .pot-family {
+        margin: 0;
+    }
+}
+
 /* One kind at a time. On a wide screen it keeps the width of its three words instead of stretching */
 .pot-kinds {
     display: flex;

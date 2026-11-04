@@ -222,3 +222,34 @@
 .plant-grid.has-letters {
     padding-right: 1.75rem;
 }
+
+/* From 80rem the filters are stacked in the column beside the list. Everything is the column's width,
+   and the sort and the view buttons share a row. */
+@media (min-width: 80rem) {
+    .plant-filters {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+    }
+
+    .plant-filters > input[type="search"],
+    .plant-filters > .d-flex,
+    .plant-filters > .spot-filters,
+    .plant-filters > .tag-filters {
+        flex: none;
+    }
+
+    .plant-filters > .d-flex > * {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .plant-filters > .d-flex > .sort-select,
+    .plant-filters > .d-flex > .columns-button {
+        flex: 1 1 0;
+    }
+
+    .plant-filters > .d-flex > .view-toggle {
+        flex: none;
+    }
+}

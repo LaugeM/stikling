@@ -10,14 +10,14 @@
 <PageTitle>@Strings.Propagations.ListPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<div class="page-heading">
+<div class="page-heading page-full">
     <h1>@Strings.Propagations.ListTitle</h1>
     @if (all is { Count: > 0 })
     {
         <div class="d-flex align-items-baseline gap-2">
             <span class="text-body-secondary small">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListShownOf, visible.Count, all.Count)</span>
-            <a class="btn btn-link btn-sm link-action" href="swap">@Strings.Propagations.ListSwapLink</a>
-            <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
+            <a class="btn btn-link btn-sm link-action phone-link" href="swap">@Strings.Propagations.ListSwapLink</a>
+            <button type="button" class="btn btn-link btn-sm link-action phone-link" @onclick="ToggleSelectMode">
                 @(selecting ? Strings.Common.Done : Strings.Propagations.ListSelect)
             </button>
             @* Takes over from the round add button on a wide screen *@
@@ -31,7 +31,7 @@
 
 @if (all is { Count: > 0 })
 {
-    <a class="results-link" href="propagations/results">@Strings.Propagations.ListResultsLink</a>
+    <a class="results-link phone-link" href="propagations/results">@Strings.Propagations.ListResultsLink</a>
 }
 
 @if (all is null)
@@ -57,6 +57,24 @@ else if (all.Count == 0)
 }
 else
 {
+    <div class="list-layout">
+    <div class="list-side">
+        @* The page's links: a row under the title from 64rem, quiet rows at the top of the filter column from 80rem. A phone has them in the heading above. *@
+        <div class="list-side-links">
+            <a class="btn btn-link btn-sm link-action list-side-link" href="swap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4" /></svg>
+                @Strings.Propagations.ListSwapLink
+            </a>
+            <a class="btn btn-link btn-sm link-action list-side-link" href="propagations/results">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20v-9" /></svg>
+                @Strings.Propagations.ListResultsLink
+            </a>
+            <button type="button" class="btn btn-link btn-sm link-action list-side-link" @onclick="ToggleSelectMode">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="m8.5 12.2 2.4 2.4 4.6-5" /></svg>
+                @(selecting ? Strings.Common.Done : Strings.Propagations.ListSelect)
+            </button>
+        </div>
+
     <div class="list-filters">
         <input type="search" class="form-control" placeholder="@Strings.Propagations.ListSearchPlaceholder"
                aria-label="@Strings.Propagations.ListSearchLabel" @bind="search" @bind:event="oninput" @bind:after="Refresh" />
@@ -72,6 +90,13 @@ else
         </div>
     </div>
 
+    @if (Narrowed)
+    {
+        <button type="button" class="btn btn-link btn-sm link-action list-side-clear" @onclick="ClearFilters">@Strings.Propagations.ListClearFilters</button>
+    }
+    </div>
+
+    <div class="list-main">
     @if (selecting)
     {
         <div class="select-all">
@@ -197,6 +222,8 @@ else
         </ul>
     }
     </div>
+    </div>
+    </div>
 }
 
 @if (selecting)
@@ -282,6 +309,16 @@ else
     private void ClearSearch()
     {
         search = null;
+        Refresh();
+    }
+
+    // True while the list shows less than the page opens with: a search, or Finished or All picked
+    private bool Narrowed => !string.IsNullOrWhiteSpace(search) || progress != ProgressFilter.Active;
+
+    private void ClearFilters()
+    {
+        search = null;
+        progress = ProgressFilter.Active;
         Refresh();
     }
 
