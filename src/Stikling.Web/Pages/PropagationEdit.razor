@@ -453,8 +453,8 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-            await TakeInboxPhotosAsync();
+        // Not only the first render: that one comes at the first await in OnParametersSetAsync, before the form exists
+        await TakeInboxPhotosAsync();
 
         if (!showErrors)
             return;
@@ -469,11 +469,13 @@ else
 
     // The inbox photos that were saved with the form. They leave the inbox once the propagation is saved
     private List<string> inboxSaved = [];
+    private bool inboxTaken;
 
     private async Task TakeInboxPhotosAsync()
     {
-        if (!IsNew || propagation is null || string.IsNullOrWhiteSpace(InboxIds))
+        if (inboxTaken || !IsNew || propagation is null || string.IsNullOrWhiteSpace(InboxIds))
             return;
+        inboxTaken = true;
 
         busy = true;
         photoStatus = Strings.Propagations.ComposerSaving;
@@ -485,6 +487,8 @@ else
             var saved = await Inbox.SaveAsync(ids, SubjectType.Propagation, propagation.Id);
             photos.AddRange(saved.Result.Saved);
             inboxSaved.AddRange(saved.SavedIds);
+            if (saved.Result.Failed > 0 || saved.Result.Saved.Count != ids.Length)
+                Logger.LogWarning("Waiting photos for a new propagation: asked for {Asked}, saved {Saved}, failed {Failed}", ids.Length, saved.Result.Saved.Count, saved.Result.Failed);
             photoStatus = saved.Result.Message(guessesMatter: true);
             FollowPhotoDates();
         }
