@@ -31,7 +31,7 @@ else
     var ratio = FormattableString.Invariant($"{aspect:0.####}");
 
     @* A tap anywhere that isn't a dot closes the label that is open *@
-    <div class="shelf-page" @onclick="CloseLabel">
+    <div class="shelf-page page-full" @onclick="CloseLabel">
         <h1>@placeName</h1>
         <p class="shelf-date">@Labels.Date(Time.LocalDay(photo.TakenAt))</p>
 

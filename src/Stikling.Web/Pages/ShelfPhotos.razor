@@ -43,7 +43,7 @@ else if (Shown.Count == 0)
 {
     <div class="empty-state">
         <p>@(PlaceFilter is null ? Strings.Shelf.EmptyAll : Strings.Shelf.EmptyPlace)</p>
-        <button type="button" class="btn btn-primary mt-3" @onclick="OpenAdd">@Strings.Shelf.AddPhoto</button>
+        <button type="button" class="btn btn-primary mt-3 shelf-empty-add" @onclick="OpenAdd">@Strings.Shelf.AddPhoto</button>
     </div>
 }
 else
