@@ -84,17 +84,21 @@ public sealed class Pot : Entity
 
     public PotMaterial Material { get; set; } = PotMaterial.Plastic;
 
-    /// <summary>Across the top, not counting the rim. On an outer pot, the inside.</summary>
+    /// <summary>
+    /// Across the top on the outside, outer edge to outer edge, the way pots are sold. Sizes saved before
+    /// the form said so can be measured another way, and nothing can tell which, so they stay as typed.
+    /// </summary>
     public decimal? TopCm { get; set; }
 
-    /// <summary>Across the bottom, which is the measurement that decides whether a pot fits inside another.</summary>
+    /// <summary>Across the bottom on the outside.</summary>
     public decimal? BottomCm { get; set; }
 
     public decimal? HeightCm { get; set; }
 
     /// <summary>
-    /// How far the rim sticks out, in millimetres. A rimmed nursery pot can hang on an outer pot
-    /// instead of standing in it, which is how a plain ceramic becomes a self-watering setup.
+    /// How wide the rim or wall is seen from above, outer edge to inner edge, in millimetres. A rim that
+    /// sticks out lets a nursery pot hang on an outer pot instead of standing in it, which is how a plain
+    /// ceramic becomes a self-watering setup.
     /// </summary>
     public decimal? RimMm { get; set; }
 
@@ -111,6 +115,12 @@ public sealed class Pot : Entity
 
     [JsonIgnore]
     public bool HasRim => RimMm > 0;
+
+    /// <summary>The width inside the top, worked out from the size and the rim. Null when either is missing or the rim leaves nothing.</summary>
+    [JsonIgnore]
+    public decimal? InsideTopCm => TopCm is { } top && RimMm is { } rim && top - rim / 5 is > 0 and var inside
+        ? inside
+        : null;
 
     /// <summary>"Clear nursery pot, 13 cm".</summary>
     [JsonIgnore]
@@ -145,6 +155,9 @@ public sealed class Pot : Entity
 
         if (BottomCm > TopCm)
             errors.Add(Strings.Supplies.PotBottomWider);
+
+        if (TopCm > 0 && RimMm > 0 && InsideTopCm is null)
+            errors.Add(Strings.Supplies.PotRimTooWide);
 
         return errors;
     }

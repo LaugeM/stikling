@@ -139,7 +139,7 @@
             </div>
         </div>
 
-        <div class="row g-2 mb-3">
+        <div class="row g-2 mb-3 align-items-end">
             <div class="col-6">
                 <label class="form-label" for="pot-top">@Strings.Supplies.PotsAcrossTop</label>
                 <input id="pot-top" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
@@ -155,7 +155,7 @@
         <details class="more-measurements mb-3" open="@detailsOpen">
             <summary>@Strings.Supplies.PotsMoreMeasurements</summary>
 
-            <div class="row g-2 mt-2">
+            <div class="row g-2 mt-2 align-items-end">
                 <div class="col-6">
                     <label class="form-label" for="pot-bottom">@Strings.Supplies.PotsAcrossBottom</label>
                     <input id="pot-bottom" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
@@ -177,6 +177,10 @@
                     <label class="form-label" for="pot-rim">@Strings.Supplies.PotsRim</label>
                     <input id="pot-rim" class="form-control" type="number" inputmode="decimal" min="0" step="0.5"
                            @bind="draft.RimMm" />
+                    @if (draft.InsideTopCm is { } inside)
+                    {
+                        <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsInsideResult, Pot.Size(inside))</div>
+                    }
                     <div class="form-text">@Strings.Supplies.PotsRimHint</div>
                 </div>
 
@@ -456,6 +460,8 @@ else
             parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsSelfWatering, Labels.For(watering).ToLowerInvariant()));
         if (pot.HasRim)
             parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsRimMm, Pot.Size(pot.RimMm!.Value)));
+        if (pot.InsideTopCm is { } inside)
+            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsInsideCm, Pot.Size(inside)));
         if (pot.HeightCm is { } height)
             parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsTallCm, Pot.Size(height)));
         return string.Join(" · ", parts);
