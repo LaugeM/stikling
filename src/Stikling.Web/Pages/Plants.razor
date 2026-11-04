@@ -18,6 +18,7 @@
 @inject DeviceFiles Device
 @inject SitterSheetActions Sharer
 @inject WishService WishService
+@inject ShelfService ShelfService
 @inject NavigationManager Navigation
 @using CoreTable = Stikling.Core.Plants.PlantTable
 
@@ -205,6 +206,12 @@ else
                     <a class="btn btn-outline-primary btn-sm go-round" href="round/@spotPlace?from=plants">@Strings.Plants.ListGoRound</a>
                 }
             </div>
+        }
+
+        @if (PickedPlace is { } shelfPlace)
+        {
+            var shelfCount = shelfPlaceIds.Count(id => places.IsIn(id, shelfPlace));
+            <p class="shelf-link"><a href="shelf?place=@shelfPlace">@(shelfCount > 0 ? F(Strings.Shelf.PlantsLinkCount, shelfCount) : Strings.Shelf.PlantsLinkNone)</a></p>
         }
 
         @if (TagChoices.Count > 0 || all.Any(p => p.InQuarantine) || all.Any(p => p.IsDormant) || problemPlants.Count > 0)
@@ -780,6 +787,7 @@ else
 
     private EverydayNameBook? everyday;
     private IReadOnlyList<Wish> wishes = [];
+    private IReadOnlyList<Guid> shelfPlaceIds = [];
     private IReadOnlyList<Wish> wishMatches = [];
     private PlantDictionary? dictionary;
 
@@ -809,6 +817,7 @@ else
         everyday = await Names.GetEverydayNamesAsync();
         dictionary = await Names.GetDictionaryAsync();
         wishes = await WishService.GetAllAsync();
+        shelfPlaceIds = await ShelfService.PhotoPlaceIdsAsync();
         var everyPlant = await Repository.GetAllAsync();
         all = [.. everyPlant.Where(p => !p.LivesElsewhere)];  // ones that live with someone else are only parents, not in this list
         places = await RoomService.GetPlacesAsync();

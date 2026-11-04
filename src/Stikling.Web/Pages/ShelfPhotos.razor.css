@@ -1,0 +1,68 @@
+/* The round add button is a button here, not a link */
+.fab {
+    border: 0;
+    padding: 0;
+}
+
+.shelf-group {
+    margin-top: 1.25rem;
+}
+
+.shelf-group .section-label {
+    margin-bottom: 0.5rem;
+}
+
+/* Tiles flow into as many columns as fit */
+.shelf-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: 0.75rem;
+}
+
+.shelf-tile {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.shelf-tile:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+}
+
+.shelf-tile-photo {
+    display: block;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--pa-green-soft);
+}
+
+.shelf-tile-photo ::deep img,
+.shelf-tile-photo ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.shelf-tile-meta {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+@media (min-width: 64rem) {
+    .shelf-grid {
+        grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    }
+}
+
+.shelf-empty-add {
+    min-height: 2.75rem;
+}

@@ -40,11 +40,10 @@ In the order I would build them, with the ones that belong together built togeth
 The first group was for the people a post brings in, and it is built, so the posts on Reddit (r/propagation, r/houseplants and the collector subreddits) can go up. Those who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. Danish is in, so every feature from now on is written in both languages from the start, and the Danish Facebook groups can be asked. The group for collectors is built too: the larger plant dictionary with a page to browse it, the leaf log for variegated plants, generation and orders.
 
 1. **Translating and units**: a way for others to help translate Stikling, and settings for units and date format.
-2. **Photos**: Share into Stikling, the ghost overlay, and a photo of a shelf or spot with the plants marked on it.
-3. **Everyday shortcuts and details**: quick actions, semi-hydro details and Does it fit?
-4. **Showing it off**: anniversaries and small celebrations, an experiment's result as an image, your year as a video, and a plant's story to print.
-5. **When something is wrong**: the symptom check, and built-in guides that open from the place they are about.
-6. **On the server**: plant identification from a photo, the plant facts card and a public read-only collection page. Identification services name the species, not the cultivar, so a variegated or lab-made cultivar still has to be picked by hand, from the dictionary. Check that Trefle is still kept up before planning the facts card.
+2. **Everyday shortcuts and details**: quick actions, semi-hydro details and Does it fit?
+3. **Showing it off**: anniversaries and small celebrations, an experiment's result as an image, your year as a video, and a plant's story to print.
+4. **When something is wrong**: the symptom check, and built-in guides that open from the place they are about.
+5. **On the server**: plant identification from a photo, the plant facts card and a public read-only collection page. Identification services name the species, not the cultivar, so a variegated or lab-made cultivar still has to be picked by hand, from the dictionary. Check that Trefle is still kept up before planning the facts card.
 
 ---
 
@@ -144,7 +143,7 @@ Every plant and propagation gets its own history. Entries are only ever added, a
 | ✅ | **Day count on photos**: each photo of a propagation shows the day it was taken on, e.g. "day 24", in its history, the photo viewer and Before and after. Photos of a plant count from the day you got it, when that is a full date. The time-lapse has it too | 3 | S | v1.x |
 | ☐ | **Mark up a photo**: draw a circle or an arrow on a photo and add a short label, like "new node" or "mealybugs here". The marks are saved on their own, so the photo itself is never changed | 5 | M | v1.x |
 | ☐ | **Link to another plant in a note**: type @ and pick a plant, propagation or pot, and the note links to it. The other one's page shows the notes that mention it | 6 | M | v1.x |
-| ☐ | **A photo of a shelf or spot with the plants marked on it**: tap a plant in the photo to open it. The photo also shows on the history of each plant marked in it | 4 | L | v1.x |
+| ✅ | **A photo of a shelf or spot with the plants marked on it**: Shelf photos is a row on Supplies, and the Plants list links to the ones of a picked room or spot. A photo is added to a room or spot, from the camera or the gallery, and one photo opens ready for marking. Mark plants, then tap a plant in the photo and pick which one it is, from the plants in that place first and the ones marked in the last photo of it next. Each plant is a dot. Tap a dot to see its name and open it, or remove it while marking. Show names puts all the names on the photo, and a list under it (beside it on a wide screen) has the plants marked. A plant that died, was given away or sold stays on the photo, faded, and a deleted plant's dot is hidden and comes back if the plant is restored. A place keeps its photos, newest first, also after the place is merged into another or removed. The photo also shows on the history of each plant marked in it, cropped around the plant, and opens at its dot. Marks are their own records, so they sync and are in backups | 4 | L | v1.x |
 
 ## 3. Propagations
 

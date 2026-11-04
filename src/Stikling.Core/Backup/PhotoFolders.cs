@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using Stikling.Core.Models;
+using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Backup;
 
@@ -17,6 +18,7 @@ public static class PhotoFolders
 {
     private const int MaxNameLength = 80;
     private const string Unnamed = "Unnamed";
+    private const string RemovedPlace = "Place removed";
 
     private static readonly HashSet<string> ReservedOnWindows = new(
         ["CON", "PRN", "AUX", "NUL", .. Enumerable.Range(1, 9).SelectMany(n => new[] { $"COM{n}", $"LPT{n}" })],
@@ -25,8 +27,22 @@ public static class PhotoFolders
     /// <summary>The photos to include with the path each gets, without an extension, in a stable order.</summary>
     public static IReadOnlyList<(Guid PhotoId, string Path)> Plan(
         IEnumerable<Plant> plants, IEnumerable<Propagation> propagations, IEnumerable<Pot> pots,
-        IEnumerable<Photo> photos, PhotoFolderOptions options, TimeZoneInfo zone)
+        IEnumerable<Photo> photos, PhotoFolderOptions options, TimeZoneInfo zone, Places? places = null)
     {
+        places ??= Places.None;
+        var photoList = photos.ToList();
+
+        // Shelf photos go in a folder for each place, by the place's whole name, following a merged place to
+        // where it went. Photos of a place that was removed share one folder.
+        Guid PlaceKey(Photo photo) => places.Find(photo.SubjectId)?.Id ?? Guid.Empty;
+        var placeSubjects = photoList
+            .Where(p => !p.IsDeleted && p.SubjectType == SubjectType.Place)
+            .Select(PlaceKey).Distinct()
+            .Select(id => id == Guid.Empty
+                ? (Id: id, CreatedAt: DateTimeOffset.MaxValue, Name: RemovedPlace)
+                : (Id: id, places.Find(id)!.CreatedAt, Name: places.NameOf(id) ?? RemovedPlace))
+            .ToList();
+
         var folders = new Dictionary<(SubjectType, Guid), string>();
         AddFolders(folders, SubjectType.Plant, "Plants", plants
             .Where(p => !p.IsDeleted && (options.IncludeGone || p.InCollection))
@@ -38,15 +54,18 @@ public static class PhotoFolders
             .Where(p => !p.IsDeleted)
             .Select(p => (p.Id, p.CreatedAt, Name: p.FamilyName)));
 
+        AddFolders(folders, SubjectType.Place, "Shelf photos", placeSubjects);
+
         var result = new List<(Guid, string)>();
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var ordered = photos
-            .Where(p => !p.IsDeleted && folders.ContainsKey((p.SubjectType, p.SubjectId)))
+        (SubjectType, Guid) KeyOf(Photo p) => p.SubjectType == SubjectType.Place ? (p.SubjectType, PlaceKey(p)) : (p.SubjectType, p.SubjectId);
+        var ordered = photoList
+            .Where(p => !p.IsDeleted && folders.ContainsKey(KeyOf(p)))
             .Where(p => options.IncludeReferences || !p.IsReference)
             .OrderBy(p => p.TakenAt).ThenBy(p => p.CreatedAt).ThenBy(p => p.Id);
         foreach (var photo in ordered)
         {
-            var folder = folders[(photo.SubjectType, photo.SubjectId)] + (photo.IsReference ? "/Reference" : "");
+            var folder = folders[KeyOf(photo)] + (photo.IsReference ? "/Reference" : "");
             var local = TimeZoneInfo.ConvertTime(photo.TakenAt, zone);
             var stem = $"{folder}/{local.ToString("yyyy-MM-dd HH-mm", CultureInfo.InvariantCulture)}";
             var path = stem;

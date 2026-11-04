@@ -166,7 +166,7 @@
     <value>Kan jeg få mine billeder ud af appen?</value>
   </data>
   <data name="GetPhotosOutAppA1" xml:space="preserve">
-    <value>Tryk på &lt;em&gt;Download billeder&lt;/em&gt; under Sikkerhedskopi og lager i Indstillinger. Du får en ZIP-fil med en mappe for hver plante, formering og potte, og hvert billede er navngivet efter den dag det blev taget. Referencebilleder ligger i en mappe, Reference, inde i plantens mappe, eller du kan lade dem være ude. Sikkerhedskopien har også billederne, men den er lavet til at Stikling kan læse den igen, så brug den her hvis du vil gemme billederne eller kigge dem igennem på en computer.</value>
+    <value>Tryk på &lt;em&gt;Download billeder&lt;/em&gt; under Sikkerhedskopi og lager i Indstillinger. Du får en ZIP-fil med en mappe for hver plante, formering og potte, og en mappe, Shelf photos, med en for hver plads, og hvert billede er navngivet efter den dag det blev taget. Referencebilleder ligger i en mappe, Reference, inde i plantens mappe, eller du kan lade dem være ude. Sikkerhedskopien har også billederne, men den er lavet til at Stikling kan læse den igen, så brug den her hvis du vil gemme billederne eller kigge dem igennem på en computer.</value>
   </data>
   <data name="GetPlantsIntoSpreadsheetQ" xml:space="preserve">
     <value>Kan jeg få mine planter ind i et regneark?</value>
@@ -1208,5 +1208,23 @@
   </data>
   <data name="FollowVariegatedPlantA1" xml:space="preserve">
     <value>Åbn Mere på planten eller stiklingen og vælg &lt;em&gt;Nyt blad&lt;/em&gt; hver gang et blad folder sig ud. Tilføj et billede hvis du vil, og vælg hvor broget det er, fra Grønt igen til Helt hvidt. Kortet Blade på siden viser dem, og siger til når det nyeste blad er helt grønt, eller de to sidste blade var mindre brogede hver gang. En stiklings blade følger med over på den plante, den bliver til.</value>
+  </data>
+  <data name="WhatShelfPhotoQ" xml:space="preserve">
+    <value>Hvad er et hyldebillede?</value>
+  </data>
+  <data name="WhatShelfPhotoA1" xml:space="preserve">
+    <value>Et billede af en hylde, en vindueskarm eller et rum med en prik på hver plante på det. Tryk på en prik for at se planten og åbne dens side. Tilføj et under &lt;a href="shelf"&gt;Hyldebilleder&lt;/a&gt;, som er en række på Udstyr, eller fra plantelisten når du har valgt et rum eller en plads der. En plads beholder alle sine billeder, så du kan se hvordan en hylde har ændret sig, og hvert billede står også i historikken for alle planter markeret på det.</value>
+  </data>
+  <data name="MarkPlantsInShelfPhotoQ" xml:space="preserve">
+    <value>Hvordan markerer jeg planterne på et hyldebillede?</value>
+  </data>
+  <data name="MarkPlantsInShelfPhotoA1" xml:space="preserve">
+    <value>Åbn billedet og tryk på &lt;em&gt;Markér planter&lt;/em&gt;. Tryk så på en plante i billedet og vælg hvilken plante det er. Dem på den plads står først. Tryk på &lt;em&gt;Færdig&lt;/em&gt; når du er færdig. Vil du fjerne en prik, så tryk på Markér planter, tryk på prikken og vælg Fjern. Vil du flytte en, så fjern den og markér planten igen. At markere en plante ændrer aldrig hvor planten står.</value>
+  </data>
+  <data name="ShelfPhotoPlantGoneQ" xml:space="preserve">
+    <value>Hvad sker der med en prik når planten dør eller bliver slettet?</value>
+  </data>
+  <data name="ShelfPhotoPlantGoneA1" xml:space="preserve">
+    <value>En plante der er død, givet væk eller solgt bliver på billedet med en svag prik, og prikken åbner stadig dens side. En slettet plantes prik er skjult og kommer tilbage hvis planten gendannes fra en sikkerhedskopi. Når du sletter et hyldebillede, forsvinder dets prikker med, og planterne bliver ikke berørt.</value>
   </data>
 </root>

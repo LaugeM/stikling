@@ -4,6 +4,7 @@
 @inject IPhotoRepository PhotoRepository
 @inject IReceivedHistoryRepository ReceivedHistories
 @inject PhotoService Photos
+@inject ShelfService Shelf
 @inject TimeProvider Time
 @using System.Globalization
 @using Stikling.Core.Sharing
@@ -43,8 +44,28 @@ else
             <li class="timeline-day">
                 <h3>@DayLabel(day)</h3>
                 <ol>
-                    @foreach (var entry in entries)
+                    @foreach (var row in RowsOf(day, entries))
                     {
+                        @if (row.Shelf is { } shot)
+                        {
+                            @* A photo of a shelf this one is marked in. It is read from the marks, not saved as an entry, so nothing in it can be changed here. *@
+                            <li class="timeline-entry kind-shelf">
+                                <div class="entry-head">
+                                    <span class="entry-kind">@KindIcon(TimelineKind.Photo)@Strings.Shelf.HistoryLabel</span>
+                                    <time datetime="@shot.Photo.TakenAt.ToString("o")">@Labels.Time(shot.Photo.TakenAt)</time>
+                                </div>
+                                @if (shot.PlaceName is { } shotPlace)
+                                {
+                                    <p class="entry-text">@shotPlace</p>
+                                }
+                                <a class="shelf-history-photo" href="shelf/@shot.Photo.Id?mark=@SubjectId"
+                                   aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Shelf.HistoryOpen, Labels.Date(LocalDay(shot.Photo.TakenAt)))">
+                                    <PhotoImage PhotoId="shot.Photo.Id" Thumbnail="false" FrameOverride="PhotoFrame.From(shot.X, shot.Y, 2.5)" />
+                                </a>
+                            </li>
+                            continue;
+                        }
+                        var entry = row.Entry!;
                         var entryPhotos = entry.PhotoIds.Where(id => photoIndex.ContainsKey(id) && !referenceIds.Contains(id)).ToList();
                         <li id="entry-@entry.Id" class="timeline-entry kind-@entry.Kind.ToString().ToLowerInvariant()">
                             <div class="entry-head">
@@ -284,6 +305,7 @@ else
     private HashSet<Guid> earlierIds = [];
     private HashSet<Guid> earlierPhotoIds = [];
     private Dictionary<Guid, int> photoIndex = [];
+    private Dictionary<DateOnly, List<ShelfHistoryItem>> shelfByDay = [];
 
     private bool busy;
     private Guid? confirmDeleteId;
@@ -361,7 +383,7 @@ else
         // The reference photos come last, so the row under the history opens the viewer on them
         photos = [.. photos, .. references];
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
-        days = TimelineOrder.ByDay(entries.Concat(earlier), Time);
+        days = WithShelfPhotos(TimelineOrder.ByDay(entries.Concat(earlier), Time), await Shelf.HistoryForAsync(SubjectId));
 
         // A photo tapped before the photos were here opens as soon as they are
         if (openWhenLoaded is { } waiting)
@@ -369,6 +391,32 @@ else
             openWhenLoaded = null;
             OpenPhoto(waiting);
         }
+    }
+
+    private sealed record Row(DateTimeOffset At, TimelineEntry? Entry, ShelfHistoryItem? Shelf);
+
+    // The days of the history, with the days of the shelf photos this is marked in added. A shelf photo
+    // is not an entry, so it stays out of the viewer, the cover and everything else that goes by entries.
+    private IReadOnlyList<(DateOnly Day, IReadOnlyList<TimelineEntry> Entries)> WithShelfPhotos(
+        IReadOnlyList<(DateOnly Day, IReadOnlyList<TimelineEntry> Entries)> own, IReadOnlyList<ShelfHistoryItem> shots)
+    {
+        shelfByDay = shots.GroupBy(s => LocalDay(s.Photo.TakenAt)).ToDictionary(g => g.Key, g => g.ToList());
+        if (shelfByDay.Count == 0)
+            return own;
+
+        var merged = own.ToList();
+        foreach (var day in shelfByDay.Keys.Where(d => own.All(o => o.Day != d)))
+            merged.Add((day, []));
+        return [.. merged.OrderByDescending(d => d.Day)];
+    }
+
+    // The day's entries and shelf photos, newest first. At the same moment an entry comes before a shelf photo.
+    private IEnumerable<Row> RowsOf(DateOnly day, IReadOnlyList<TimelineEntry> entries)
+    {
+        var rows = entries.Select(e => new Row(e.OccurredAt, e, null));
+        if (shelfByDay.TryGetValue(day, out var shots))
+            rows = rows.Concat(shots.Select(s => new Row(s.Photo.TakenAt, null, s)));
+        return rows.OrderByDescending(r => r.At);
     }
 
     private async Task DeleteEntryAsync(TimelineEntry entry)

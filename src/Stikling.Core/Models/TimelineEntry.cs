@@ -14,7 +14,10 @@ public enum SubjectType
     Pot,
 
     /// <summary>A wish on the wishlist. Only photos belong to one, never a timeline entry.</summary>
-    Wish
+    Wish,
+
+    /// <summary>A room or spot. Only photos belong to one, never a timeline entry.</summary>
+    Place
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter<TimelineKind>))]

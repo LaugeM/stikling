@@ -203,6 +203,28 @@
     object-fit: cover;
 }
 
+/* A shelf photo cropped around where this plant is in it. It opens the photo, not the viewer. */
+.shelf-history-photo {
+    display: block;
+    width: 6rem;
+    margin-top: 0.5rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: var(--pa-green-soft);
+}
+
+.shelf-history-photo:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.shelf-history-photo ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
 .entry-confirm {
     display: flex;
     flex-wrap: wrap;
