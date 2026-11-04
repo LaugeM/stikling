@@ -40,6 +40,22 @@ public enum PotMaterial
     Other
 }
 
+/// <summary>The colour of a pot, so pots with no name can still be told apart.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<PotColour>))]
+public enum PotColour
+{
+    White,
+    Black,
+    Grey,
+    Clear,
+    Beige,
+    Brown,
+    Green,
+    Blue,
+    Pink,
+    Patterned
+}
+
 /// <summary>How a self-watering pot gets the water up: a wick, or the pot standing in it.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<PotWatering>))]
 public enum PotWatering
@@ -79,10 +95,16 @@ public sealed class Pot : Entity
             _ => PotKind.Standalone
         };
 
-    /// <summary>The family name, shared by every size of the same pot.</summary>
+    /// <summary>
+    /// The family name, shared by every size of the same pot. Optional, except on a container for
+    /// propagating, since propagations point at those by name. See <see cref="FamilyName"/>.
+    /// </summary>
     public string? Name { get; set; }
 
     public PotMaterial Material { get; set; } = PotMaterial.Plastic;
+
+    /// <summary>The colour, or null when it hasn't been set. Part of the generated name of a pot without one.</summary>
+    public PotColour? Colour { get; set; }
 
     /// <summary>Across the top, not counting the rim. On an outer pot, the inside.</summary>
     public decimal? TopCm { get; set; }
@@ -112,16 +134,67 @@ public sealed class Pot : Entity
     [JsonIgnore]
     public bool HasRim => RimMm > 0;
 
+    /// <summary>
+    /// The name shared by every size of the same pot: the name when there is one, otherwise one made
+    /// from the colour, material and kind, like "White ceramic outer pot".
+    /// </summary>
+    [JsonIgnore]
+    public string FamilyName => string.IsNullOrWhiteSpace(Name) ? Generated() : Name.Trim();
+
     /// <summary>"Clear nursery pot, 13 cm".</summary>
     [JsonIgnore]
-    public string DisplayName
+    public string DisplayName => TopCm is { } top ? $"{FamilyName}, {Size(top)} cm" : FamilyName;
+
+    /// <summary>
+    /// The words go in a format of their own for each combination, because the Danish order differs
+    /// ("Hvid yderpotte i keramik"), so nothing is joined by hand.
+    /// </summary>
+    private string Generated()
     {
-        get
+        var culture = CultureInfo.CurrentUICulture;
+        var colour = Colour is { } c ? ColourLabel(c) : null;
+        var material = Material switch
         {
-            var name = string.IsNullOrWhiteSpace(Name) ? Strings.Supplies.PotDefaultName : Name.Trim();
-            return TopCm is { } top ? $"{name}, {Size(top)} cm" : name;
-        }
+            PotMaterial.Plastic => Strings.Supplies.MaterialPlasticName,
+            PotMaterial.Ceramic => Strings.Supplies.MaterialCeramicName,
+            PotMaterial.Terracotta => Strings.Supplies.MaterialTerracottaName,
+            PotMaterial.Glass => Strings.Supplies.MaterialGlassName,
+            PotMaterial.Metal => Strings.Supplies.MaterialMetalName,
+            _ => null
+        };
+        var kind = Group switch
+        {
+            PotGroup.Inner => Strings.Supplies.PotKindInnerName,
+            PotGroup.Outer => Strings.Supplies.PotKindOuterName,
+            _ => Strings.Supplies.PotKindStandaloneName
+        };
+
+        var format = (colour is not null, material is not null) switch
+        {
+            (true, true) => Strings.Supplies.PotNameColourMaterial,
+            (true, false) => Strings.Supplies.PotNameColour,
+            (false, true) => Strings.Supplies.PotNameMaterial,
+            _ => Strings.Supplies.PotNameKind
+        };
+
+        var name = string.Format(culture, format, colour, material, kind);
+        return char.ToUpper(name[0], culture) + name[1..];
     }
+
+    /// <summary>"White", "Hvid".</summary>
+    public static string ColourLabel(PotColour colour) => colour switch
+    {
+        PotColour.White => Strings.Supplies.PotColourWhite,
+        PotColour.Black => Strings.Supplies.PotColourBlack,
+        PotColour.Grey => Strings.Supplies.PotColourGrey,
+        PotColour.Clear => Strings.Supplies.PotColourClear,
+        PotColour.Beige => Strings.Supplies.PotColourBeige,
+        PotColour.Brown => Strings.Supplies.PotColourBrown,
+        PotColour.Green => Strings.Supplies.PotColourGreen,
+        PotColour.Blue => Strings.Supplies.PotColourBlue,
+        PotColour.Pink => Strings.Supplies.PotColourPink,
+        _ => Strings.Supplies.PotColourPatterned
+    };
 
     /// <summary>A number without trailing zeros, so 13 stays "13" and 5.8 stays "5.8".</summary>
     public static string Size(decimal value) => value.ToString("0.##", CultureInfo.InvariantCulture);
@@ -132,10 +205,9 @@ public sealed class Pot : Entity
     {
         var errors = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(Name))
-            errors.Add(ForPropagation
-                ? Strings.Supplies.PotNeedsNameContainer
-                : Strings.Supplies.PotNeedsNamePot);
+        // Propagations point at a container by name, so only a container has to have one
+        if (ForPropagation && string.IsNullOrWhiteSpace(Name))
+            errors.Add(Strings.Supplies.PotNeedsNameContainer);
 
         if (Owned < 1)
             errors.Add(Strings.Supplies.PotNeedsOne);

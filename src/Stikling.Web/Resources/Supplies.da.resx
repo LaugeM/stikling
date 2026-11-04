@@ -493,7 +493,7 @@
     <value>Ens beholdere er én post. Skriv nedenfor hvor mange du har.</value>
   </data>
   <data name="PotsPotNameHint" xml:space="preserve">
-    <value>Alle størrelser af samme potte har samme navn, så de står samlet i listen.</value>
+    <value>Alle størrelser af samme potte har samme navn, så de står samlet i listen. Lader du det stå tomt, får potten et navn ud fra farve og materiale, fx "Hvid yderpotte i keramik".</value>
   </data>
   <data name="PotsPhotos" xml:space="preserve">
     <value>Billeder</value>
@@ -595,7 +595,7 @@
     <value>Tilføj først dem du bruger mest. Et sæt inderpotter er én post pr. størrelse, med hvor mange du har af hver.</value>
   </data>
   <data name="PotsHintOuter" xml:space="preserve">
-    <value>En yderpotte har intet hul i bunden og rummer en inderpotte. Giv hver af dem et billede, så er de lette at kende fra hinanden når du vælger en til en plante.</value>
+    <value>En yderpotte har intet hul i bunden og rummer en inderpotte. Giv hver af dem et billede eller en farve, så er de lette at kende fra hinanden når du vælger en til en plante.</value>
   </data>
   <data name="PotsHintStandalone" xml:space="preserve">
     <value>En potte med hul og underskål eller en selvvandende potte, som ikke skal stå i noget.</value>
@@ -860,5 +860,20 @@
   </data>
   <data name="FeedsDeleteGiven" xml:space="preserve">
     <value>Vil du slette {0}? Den er givet til {1}, og plejeposterne beholder det der var i den.</value>
+  </data>
+  <data name="PotsNameOptional" xml:space="preserve">
+    <value>Navn (valgfrit)</value>
+  </data>
+  <data name="PotsOuterPlaceholder" xml:space="preserve">
+    <value>fx Blå glaseret</value>
+  </data>
+  <data name="PotsStandalonePlaceholder" xml:space="preserve">
+    <value>fx Terrakotta med fad</value>
+  </data>
+  <data name="PotsColour" xml:space="preserve">
+    <value>Farve</value>
+  </data>
+  <data name="PotsColourLabel" xml:space="preserve">
+    <value>Potens farve</value>
   </data>
 </root>

@@ -65,7 +65,7 @@
     <comment>Part of a line about what changed lately. {0} is a time like 6 days ago.</comment>
   </data>
   <data name="StillInBud" xml:space="preserve">
-    <value>Still in bud? Last marked on {0}.</value>
+    <value>Does it still have buds? Last marked on {0}.</value>
     <comment>{0} is a date.</comment>
   </data>
   <data name="StillInFlower" xml:space="preserve">
@@ -898,5 +898,9 @@
   <data name="FamilyGeneration" xml:space="preserve">
     <value>{0} generation from {1}</value>
     <comment>Which generation from the oldest plant you have in its line. {0} is an ordinal like 3rd, {1} a link to the oldest plant.</comment>
+  </data>
+  <data name="StandingInWithWick" xml:space="preserve">
+    <value>Standing in {0}, with a wick into the water</value>
+    <comment>{0} is a pot with its photo and name. The plant takes up water kept in the outer pot through a wick.</comment>
   </data>
 </root>

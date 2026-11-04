@@ -537,7 +537,7 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="WhyTodaySayEmptyOuterA1" xml:space="preserve">
-    <value>A plant standing in an outer pot sits in the water that drains out after watering, and roots left in water for days can rot. An hour after you log a watering, Today asks you to tip it out, for plants with an outer pot where you don't keep water on purpose. Tap &lt;em&gt;Emptied&lt;/em&gt; on the plant, or &lt;em&gt;All emptied&lt;/em&gt; for the lot. Under &lt;em&gt;Remind me to empty the outer pot&lt;/em&gt; in Settings you can change the wait or turn it off.</value>
+    <value>A plant standing in an outer pot sits in the water that drains out after watering, and roots left in water for days can rot. An hour after you log a watering, Today asks you to tip it out, for plants with an outer pot where you don't keep water on purpose (standing in it or with a wick). Tap &lt;em&gt;Emptied&lt;/em&gt; on the plant, or &lt;em&gt;All emptied&lt;/em&gt; for the lot. Under &lt;em&gt;Remind me to empty the outer pot&lt;/em&gt; in Settings you can change the wait or turn it off.</value>
     <comment>Answer to "Why does Today say to empty the outer pot?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="KeepTrackPlantMovingLECAQ" xml:space="preserve">
@@ -1297,7 +1297,7 @@
     <comment>Question in the "Pots, mixes and fertilisers" part of the Help page.</comment>
   </data>
   <data name="NurseryPotsOuterPotsA1" xml:space="preserve">
-    <value>A nursery pot is the plain one the plant actually sits in, and an outer pot is the decorative one without drainage that it goes inside. Some pots are neither and stand on their own. The Pots page lists one kind at a time, and shows which of yours are in use and which are free. Containers for propagating, like a box with a lid, have their own tab. Picking a self-watering pot for a plant sets "Grows in" to LECA, and you can change it after.</value>
+    <value>A nursery pot is the plain one the plant actually sits in, and an outer pot is the decorative one without drainage that it goes inside. Some pots are neither and stand on their own. The Pots page lists one kind at a time, and shows which of yours are in use and which are free. Containers for propagating, like a box with a lid, have their own tab. Picking a self-watering pot for a plant sets "Grows in" to LECA, and you can change it after. A pot only needs a name if it is a container for propagating. For the others you can pick a colour instead, and the app names it for you, like "White ceramic outer pot". If you keep water in an outer pot on purpose, whether the pot stands in it or a wick runs down into it, tick that on the plant and pick which.</value>
     <comment>Answer to "What are nursery pots and outer pots?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="TellSimilarPotsApartQ" xml:space="preserve">
@@ -1405,7 +1405,7 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="CollectionNumberA1" xml:space="preserve">
-    <value>The short number some people write on each pot, like 117. It is optional. Set it in the &lt;em&gt;Collection number&lt;/em&gt; field on the plant's edit form, where the next free number is one tap away. A cutting from plant 117 gets 117a, then 117b, so the label on the jar says where it came from. When a cutting is potted up, the plant keeps its number. If several are potted up together, they get 117c1, 117c2 and so on. To number the plants you already have, oldest first, open &lt;em&gt;Collection numbers&lt;/em&gt; in Settings. Two plants with the same number are pointed out, but Stikling never changes a number for you.</value>
+    <value>The short number some people write on each pot, like 117. It is optional. Set it in the &lt;em&gt;Collection number&lt;/em&gt; field on the plant's edit form, where the next free number is one tap away. A cutting from plant 117 gets 117a, then 117b, so its label says where it came from. When a cutting is potted up, the plant keeps its number. If several are potted up together, they get 117c1, 117c2 and so on. To number the plants you already have, oldest first, open &lt;em&gt;Collection numbers&lt;/em&gt; in Settings. Two plants with the same number are pointed out, but Stikling never changes a number for you.</value>
     <comment>Answer to "What is a collection number?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="PrintLabelsQ" xml:space="preserve">

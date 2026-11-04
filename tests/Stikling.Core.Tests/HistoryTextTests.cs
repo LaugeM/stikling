@@ -92,6 +92,8 @@ public class HistoryTextTests
         (L("PotsStayed"), "Its pots stayed here"),
         (L("WateredInOuterPot"), "Now watered in the outer pot"),
         (L("NotWateredInOuterPot"), "No longer watered in the outer pot"),
+        (L("OuterPotWick"), "Now has a wick into the outer pot's water"),
+        (L("OuterPotSubmerged"), "Now sits in the outer pot's water"),
         (L("Tagged", "Variegated"), "Tagged Variegated"),
         (L("Untagged", "Flowering"), "No longer tagged Flowering"),
         (L("PutInQuarantine"), "Put in quarantine"),

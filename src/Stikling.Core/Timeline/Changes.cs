@@ -73,6 +73,8 @@ public static class PlantChanges
 
         if (before.WaterInOuterPot != after.WaterInOuterPot)
             changes.Add(Line(after.WaterInOuterPot ? "WateredInOuterPot" : "NotWateredInOuterPot"));
+        else if (before.OuterPotWateringShown != after.OuterPotWateringShown && after.OuterPotWateringShown is { } shown)
+            changes.Add(Line(shown == PotWatering.Wick ? "OuterPotWick" : "OuterPotSubmerged"));
 
         AddTags(changes, before.Tags, after.Tags);
 

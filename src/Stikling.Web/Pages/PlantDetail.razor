@@ -2132,7 +2132,13 @@ else
     private RenderFragment StandingIn(string outer)
     {
         RenderFragment inner = @<text>@PotPhotoFor(plant!.OuterPotId)@outer</text>;
-        return Around(plant!.WaterInOuterPot ? Strings.PlantDetail.StandingInWithWater : Strings.PlantDetail.StandingIn, inner);
+        var format = plant!.OuterPotWateringShown switch
+        {
+            PotWatering.Wick => Strings.PlantDetail.StandingInWithWick,
+            PotWatering.Submerged => Strings.PlantDetail.StandingInWithWater,
+            _ => Strings.PlantDetail.StandingIn
+        };
+        return Around(format, inner);
     }
 
     // A sentence with an element inside it: the element goes where {0} is
