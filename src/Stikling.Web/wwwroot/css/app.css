@@ -4060,3 +4060,34 @@ main.app-content.with-tour.tour-closing {
         display: inline-block;
     }
 }
+
+/* The plant and propagation forms are long, so on a large screen More details sits beside the main fields. Opening a section only makes the right column taller. */
+@media (min-width: 80rem) {
+    :root:has(.form-split) {
+        --pa-column: 72rem;
+    }
+
+    .form-split {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        column-gap: 2.5rem;
+        align-items: start;
+    }
+
+    /* The errors and the Save bar span both columns */
+    .form-split > .alert,
+    .form-split > .form-bar {
+        grid-column: 1 / -1;
+    }
+
+    .form-split-main,
+    .form-split-more {
+        min-width: 0;
+        align-self: start;
+    }
+
+    /* The More details heading lines up with the top of the first fieldset */
+    .form-split-more > .section-label {
+        margin-top: 0;
+    }
+}
