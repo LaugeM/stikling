@@ -303,7 +303,10 @@ public sealed class PlantForm
     {
         Plant.OuterPotId = id;
         if (id is null)
+        {
             Plant.WaterInOuterPot = false;
+            Plant.OuterPotWatering = null;
+        }
     }
 
     /// <summary>

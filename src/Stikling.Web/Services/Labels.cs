@@ -302,6 +302,7 @@ public static class Labels
         PotKind g => For(g),
         PotMaterial m => For(m),
         PotWatering w => For(w),
+        PotColour c => For(c),
         MixUnit u => For(u),
         DoseUnit u => For(u),
         ProductKind k => For(k),
@@ -462,6 +463,8 @@ public static class Labels
         PotMaterial.Other => Strings.Labels.MaterialOther,
         _ => Strings.Labels.MaterialPlastic
     };
+
+    public static string For(PotColour colour) => Pot.ColourLabel(colour);
 
     public static string For(PotWatering watering) =>
         watering == PotWatering.Wick ? Strings.Labels.WateringWick : Strings.Labels.WateringSubmerged;

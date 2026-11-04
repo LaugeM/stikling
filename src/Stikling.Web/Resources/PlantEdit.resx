@@ -240,7 +240,7 @@
     <value>Keep water in the outer pot</value>
   </data>
   <data name="OuterWaterInfo" xml:space="preserve">
-    <value>The outer pot holds water on purpose and the plant wicks it up, like a self-watering pot. Leave it off for an ordinary outer pot that you tip out after watering.</value>
+    <value>The outer pot holds water on purpose. The pot can stand in it, or hang above it with a wick running down into the water. The plant takes it up either way, like a self-watering pot. Leave it off for an ordinary outer pot that you tip out after watering.</value>
   </data>
   <data name="HowManyInPot" xml:space="preserve">
     <value>How many in the pot</value>
@@ -423,5 +423,17 @@
   <data name="PhotosFailed" xml:space="preserve">
     <value>Couldn't save the photos: {0}</value>
     <comment>{0} is the reason.</comment>
+  </data>
+  <data name="OuterWateringHow" xml:space="preserve">
+    <value>How the plant gets the water</value>
+    <comment>Name of the group of choices under the checkbox, read out by a screen reader.</comment>
+  </data>
+  <data name="OuterWateringSubmerged" xml:space="preserve">
+    <value>Stands in the water</value>
+    <comment>Choice for how a plant takes up water kept in the outer pot: the pot stands in it.</comment>
+  </data>
+  <data name="OuterWateringWick" xml:space="preserve">
+    <value>With a wick</value>
+    <comment>Choice for how a plant takes up water kept in the outer pot: a wick runs down into it.</comment>
   </data>
 </root>

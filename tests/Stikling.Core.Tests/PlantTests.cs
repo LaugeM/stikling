@@ -143,6 +143,24 @@ public class PlantTests
     }
 
     [Fact]
+    public void Water_in_the_outer_pot_reads_as_submerged_until_a_wick_is_chosen()
+    {
+        Assert.Null(new Plant().OuterPotWateringShown);
+        Assert.Null(new Plant { OuterPotWatering = PotWatering.Wick }.OuterPotWateringShown);
+        Assert.Equal(PotWatering.Submerged, new Plant { WaterInOuterPot = true }.OuterPotWateringShown);
+        Assert.Equal(PotWatering.Wick, new Plant { WaterInOuterPot = true, OuterPotWatering = PotWatering.Wick }.OuterPotWateringShown);
+    }
+
+    [Fact]
+    public void A_plant_saved_before_the_outer_pot_wick_existed_still_reads()
+    {
+        var plant = System.Text.Json.JsonSerializer.Deserialize<Plant>("{\"WaterInOuterPot\":true}")!;
+
+        Assert.Null(plant.OuterPotWatering);
+        Assert.Equal(PotWatering.Submerged, plant.OuterPotWateringShown);
+    }
+
+    [Fact]
     public void Duplicate_leaves_what_belongs_to_the_one_plant()
     {
         var plant = new Plant

@@ -370,6 +370,15 @@ else
                                 @Strings.PlantEdit.OuterWaterInfo
                             </ChildContent>
                         </InfoButton>
+                        @if (plant.OuterPotWateringShown is { } outerWatering)
+                        {
+                            <div class="chip-row mt-2" role="group" aria-label="@Strings.PlantEdit.OuterWateringHow">
+                                <button type="button" class="chip @(outerWatering == PotWatering.Submerged ? "picked" : null)"
+                                        @onclick="() => plant.OuterPotWatering = PotWatering.Submerged">@Strings.PlantEdit.OuterWateringSubmerged</button>
+                                <button type="button" class="chip @(outerWatering == PotWatering.Wick ? "picked" : null)"
+                                        @onclick="() => plant.OuterPotWatering = PotWatering.Wick">@Strings.PlantEdit.OuterWateringWick</button>
+                            </div>
+                        }
                     }
                 </div>
 
