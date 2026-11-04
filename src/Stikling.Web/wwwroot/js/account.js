@@ -154,6 +154,109 @@ export async function profile() {
     };
 }
 
+// Passkeys. createPasskey and deletePasskey return { passkeys, problem }, where problem is null or
+// one of "cancelled" (the person closed the browser's prompt), "exists" (this device already has a
+// passkey for Stikling), "again" (the person confirmed it's them, and has to tap Add once more),
+// "reverify" (Clerk wanted the person to confirm it's them and couldn't ask) or "failed".
+// AccountService turns it into PasskeyResult.
+
+export function passkeysSupported() {
+    return !!window.PublicKeyCredential;
+}
+
+function listPasskeys() {
+    return (window.Clerk?.user?.passkeys ?? []).map(p => ({
+        id: p.id,
+        name: p.name ?? null,
+        createdAt: p.createdAt ? new Date(p.createdAt).toISOString() : null,
+        lastUsedAt: p.lastUsedAt ? new Date(p.lastUsedAt).toISOString() : null,
+    }));
+}
+
+export function passkeys() {
+    return listPasskeys();
+}
+
+function errorCodes(e) {
+    return [e?.errors?.[0]?.code, e?.code, e?.name].filter(Boolean).map(String);
+}
+
+// Clerk refuses changes to a passkey when the sign-in is older than about ten minutes
+function needsReverification(e) {
+    return (e?.errors ?? []).some(x => x?.code === "session_reverification_required")
+        || e?.code === "session_reverification_required";
+}
+
+// Runs the action, and if Clerk asks for the person to confirm it's them, shows Clerk's modal for
+// that and runs it once more. This is the same internal call Clerk's React hook useReverification
+// makes, since clerk-js has no public one. The script is pinned to major version 6 in load(), so
+// it can't change under us without a look.
+//
+// With retry false it stops after the confirmation instead. Browsers only open their passkey prompt
+// right after a tap, and the tap that started this was used up by Clerk's modal.
+async function withReverification(action, retry = true) {
+    try {
+        return await action();
+    } catch (e) {
+        if (!needsReverification(e)) throw e;
+        if (typeof window.Clerk.__internal_openReverification !== "function") {
+            const unavailable = new Error("Reverification can't be shown");
+            unavailable.reverify = true;
+            throw unavailable;
+        }
+
+        const confirmed = await new Promise(resolve => {
+            window.Clerk.__internal_openReverification({
+                afterVerification: () => resolve(true),
+                afterVerificationCancelled: () => resolve(false),
+            });
+        });
+        if (!confirmed) {
+            const cancelled = new Error("Reverification cancelled");
+            cancelled.code = "cancelled";
+            throw cancelled;
+        }
+        if (!retry) {
+            const again = new Error("Confirmed, tap again");
+            again.again = true;
+            throw again;
+        }
+        return await action();
+    }
+}
+
+function problemOf(e) {
+    if (e?.reverify) return "reverify";
+    if (e?.again) return "again";
+    const codes = errorCodes(e);
+    if (e?.name === "NotAllowedError" || codes.some(c => c.includes("cancelled"))) return "cancelled";
+    if (e?.name === "InvalidStateError" || codes.includes("passkey_already_exists")) return "exists";
+    console.error("Passkey change failed", e);
+    return "failed";
+}
+
+async function change(action, retry = true) {
+    try {
+        await withReverification(action, retry);
+        await window.Clerk.user.reload();
+        return { passkeys: listPasskeys(), problem: null };
+    } catch (e) {
+        return { passkeys: listPasskeys(), problem: problemOf(e) };
+    }
+}
+
+export function createPasskey() {
+    return change(() => window.Clerk.user.createPasskey(), false);
+}
+
+export function deletePasskey(id) {
+    return change(() => {
+        const passkey = window.Clerk.user.passkeys?.find(p => p.id === id);
+        if (!passkey) throw new Error(`No passkey ${id}`);
+        return passkey.delete();
+    });
+}
+
 // A short-lived session token for the API, or null when signed out
 export async function getToken() {
     return (await window.Clerk.session?.getToken()) ?? null;

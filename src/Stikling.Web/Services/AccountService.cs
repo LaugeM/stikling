@@ -42,6 +42,37 @@ public sealed record GoogleSettings(string? ClientId)
 /// <summary>Who is signed in on this device, as Clerk reports it.</summary>
 public sealed record AccountState(bool SignedIn, string? Email);
 
+/// <summary>A passkey the signed-in person has added, as Clerk reports it.</summary>
+public sealed record PasskeyInfo(string Id, string? Name, DateTimeOffset? CreatedAt, DateTimeOffset? LastUsedAt);
+
+/// <summary>Why adding or removing a passkey didn't happen. JavaScript sends it as lower case text.</summary>
+public enum PasskeyProblem
+{
+    /// <summary>The person closed the browser's passkey prompt or Clerk's confirmation.</summary>
+    Cancelled,
+    /// <summary>This device already has a passkey for Stikling.</summary>
+    Exists,
+    /// <summary>The person confirmed it's them, and has to tap Add once more for the browser's prompt.</summary>
+    Again,
+    /// <summary>Clerk wanted the person to confirm it's them and couldn't ask.</summary>
+    Reverify,
+    Failed,
+}
+
+/// <summary>The passkeys after a change, and why the change didn't happen (null when it did).</summary>
+public sealed record PasskeyResult(IReadOnlyList<PasskeyInfo> Passkeys, string? Problem)
+{
+    public PasskeyProblem? ProblemKind => Problem switch
+    {
+        null => null,
+        "cancelled" => PasskeyProblem.Cancelled,
+        "exists" => PasskeyProblem.Exists,
+        "again" => PasskeyProblem.Again,
+        "reverify" => PasskeyProblem.Reverify,
+        _ => PasskeyProblem.Failed,
+    };
+}
+
 /// <summary>Clerk's scripts couldn't be loaded, usually because there is no connection.</summary>
 public sealed class AccountUnavailableException(Exception inner)
     : Exception(Strings.Account.SignInServiceUnreachable, inner);
@@ -179,6 +210,25 @@ public sealed class AccountService(IJSRuntime js, NavigationManager nav, DeviceF
     /// <summary>What Clerk has about the signed-in person, for the download of their data. Null when nobody is signed in.</summary>
     public async Task<JsonElement?> GetProfileAsync() =>
         await (await Module).InvokeAsync<JsonElement?>("profile");
+
+    /// <summary>Whether this browser can make passkeys at all.</summary>
+    public async Task<bool> PasskeysSupportedAsync() =>
+        await (await Module).InvokeAsync<bool>("passkeysSupported");
+
+    /// <summary>The passkeys the signed-in person has added. Empty when nobody is signed in.</summary>
+    public async Task<IReadOnlyList<PasskeyInfo>> GetPasskeysAsync() =>
+        await (await Module).InvokeAsync<PasskeyInfo[]>("passkeys");
+
+    /// <summary>
+    /// Makes a passkey on this device through the browser's own prompt. Clerk may first ask the
+    /// person to confirm it's them.
+    /// </summary>
+    public async Task<PasskeyResult> CreatePasskeyAsync() =>
+        await (await Module).InvokeAsync<PasskeyResult>("createPasskey");
+
+    /// <summary>Removes a passkey from the account. The copy in the device's password manager stays until the person removes it there.</summary>
+    public async Task<PasskeyResult> DeletePasskeyAsync(string id) =>
+        await (await Module).InvokeAsync<PasskeyResult>("deletePasskey", id);
 
     /// <summary>A short-lived token that proves to the API who is signed in, or null when nobody is.</summary>
     public async Task<string?> GetTokenAsync() =>

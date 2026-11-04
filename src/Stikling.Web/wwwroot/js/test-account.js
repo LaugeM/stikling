@@ -21,6 +21,7 @@ export async function load(name, signingKey, dotnet) {
     const raw = Uint8Array.from(atob(signingKey), c => c.charCodeAt(0));
     const key = await crypto.subtle.importKey("raw", raw, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
     person = { name, key };
+    testPasskeys = [];
     return state();
 }
 
@@ -48,6 +49,27 @@ export function deleteUser() {
 export function profile() {
     if (!person) return null;
     return { id: `test_${person.name}`, username: person.name, primaryEmailAddress: state().email };
+}
+
+// Passkeys are kept in memory for the person loaded, in the same shape as account.js returns
+let testPasskeys = [];
+
+export function passkeysSupported() {
+    return true;
+}
+
+export function passkeys() {
+    return testPasskeys.map(p => ({ ...p }));
+}
+
+export function createPasskey() {
+    testPasskeys.push({ id: crypto.randomUUID(), name: "Test passkey", createdAt: new Date().toISOString(), lastUsedAt: null });
+    return { passkeys: passkeys(), problem: null };
+}
+
+export function deletePasskey(id) {
+    testPasskeys = testPasskeys.filter(p => p.id !== id);
+    return { passkeys: passkeys(), problem: null };
 }
 
 // A token shaped like Clerk's session tokens, and like them valid for a minute
