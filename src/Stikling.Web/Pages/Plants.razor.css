@@ -61,6 +61,13 @@
     padding-bottom: 5rem;
 }
 
+/* On a phone the small camera button stacks above the add button, so the last row needs 3.5rem more to clear both */
+@media (max-width: 63.98rem) {
+    .plant-list {
+        padding-bottom: 8.5rem;
+    }
+}
+
 /* Narrowing to a spot once a room is picked */
 .spot-filters {
     display: flex;

@@ -39,7 +39,11 @@
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="ToggleSelectMode">
                 @(selecting ? Strings.Common.Done : Strings.Plants.ListSelect)
             </button>
-            @* Takes over from the round add button on a wide screen *@
+            @* These two take over from the round buttons on a wide screen *@
+            <a class="btn btn-outline-primary btn-sm icon-btn heading-add" href="add-photos">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                @Strings.AddPhotos.EntryLabel
+            </a>
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="plants/new">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
                 @Strings.Plants.AddAPlant
@@ -601,6 +605,9 @@ else
 }
 else
 {
+    <a class="fab fab-small" href="add-photos" aria-label="@Strings.AddPhotos.EntryLabel" title="@Strings.AddPhotos.EntryLabel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+    </a>
     <a class="fab" href="plants/new" aria-label="@Strings.Plants.AddAPlant" title="@Strings.Plants.AddAPlant">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
     </a>

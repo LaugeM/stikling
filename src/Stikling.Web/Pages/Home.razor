@@ -25,6 +25,7 @@
 @inject ExampleService Example
 @inject TourService Tour
 @inject TimeProvider Time
+@inject ShareInbox ShareInbox
 @inject YearCardService YearCardsService
 @using Stikling.Core.Year
 @implements IAsyncDisposable
@@ -194,6 +195,14 @@ else
         <div class="reminder">
             <span>@reminder</span>
             <a class="btn btn-outline-primary" href="backup">@Strings.Care.TodayBackUp</a>
+        </div>
+    }
+
+    @if (!sections.Away && waitingPhotos > 0)
+    {
+        <div class="reminder">
+            <span>@Plural.Of(waitingPhotos, Strings.AddPhotos.TodayWaiting_One, Strings.AddPhotos.TodayWaiting_Other)</span>
+            <a class="btn btn-outline-primary reminder-btn" href="add-photos">@Strings.AddPhotos.TodaySort</a>
         </div>
     }
 
@@ -827,6 +836,7 @@ else
     private Dictionary<Guid, string> names = [];
     private MonthResult? monthResult;
     private string? backupReminder;
+    private int waitingPhotos;
     private Memory? memory;
     private IReadOnlyList<NoteComingBack> comingBack = [];
     private bool shareOpen;
@@ -1088,6 +1098,7 @@ else
 
         monthResult = TodayBoard.FinishedThisMonth(propagations, Time);
         backupReminder = await BackupReminderAsync();
+        waitingPhotos = await WaitingPhotosAsync();
         loaded = true;
         await Badge.SetAsync(DueCount);
     }
@@ -1341,6 +1352,21 @@ else
         else if (item.Subject is Propagation propagation)
             await PropagationService.SetAttentionAsync(propagation, null);
         Recompute();
+    }
+
+    // Photos shared to the app or chosen on the Add photos page that haven't been sorted. Not worth
+    // failing Today for, so a browser that can't read the inbox just shows none
+    private async Task<int> WaitingPhotosAsync()
+    {
+        try
+        {
+            return await ShareInbox.CountAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Counting the waiting photos failed");
+            return 0;
+        }
     }
 
     // Nagging once a month is enough, and only when there's something to lose
