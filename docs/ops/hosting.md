@@ -38,6 +38,8 @@ The Bicep isn't deployed by the workflow, since that would need the right to han
 az deployment sub create --location polandcentral --template-file infra/main.bicep --parameters infra/main.bicepparam
 ```
 
+Changes to the subscription need Microsoft's own multi-factor sign-in, not the school's. The Windows sign-in broker hands out a token without it, so use `az login --use-device-code` in a browser that is already signed in to the portal with it. In Git Bash, set `MSYS_NO_PATHCONV=1` before a command with `--scope /subscriptions/...`, or the path gets rewritten.
+
 ## Setting it up from nothing
 
 This is also the way to move it to another subscription or region. For another region, change `location` in `infra/main.bicep` and delete `rg-stikling` first, since a resource group can't move and the storage and SQL names would clash with the old ones.
