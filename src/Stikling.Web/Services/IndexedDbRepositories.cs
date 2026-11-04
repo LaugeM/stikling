@@ -3,6 +3,7 @@ using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
+using Stikling.Core.Leaves;
 using Stikling.Core.Lights;
 using Stikling.Core.Orders;
 using Stikling.Core.Models;
@@ -190,6 +191,12 @@ public sealed class IndexedDbOrderItemRepository(IndexedDb db, TimeProvider time
     : IndexedDbEntityRepository<OrderItem>(db, time, Stores.OrderItems), IOrderItemRepository
 {
     protected override IReadOnlyList<string> Validate(OrderItem item) => item.Validate();
+}
+
+public sealed class IndexedDbLeafRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Leaf>(db, time, Stores.Leaves), ILeafRepository
+{
+    protected override IReadOnlyList<string> Validate(Leaf leaf) => leaf.Validate(Today);
 }
 
 public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)
