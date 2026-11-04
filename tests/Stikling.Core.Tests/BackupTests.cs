@@ -556,6 +556,7 @@ public class BackupTests
         Assert.False(sheet.HidePhotos || sheet.HidePlaces || sheet.HideHowWatered || sheet.HidePace || sheet.HideNotes);
         Assert.Empty(sheet.LeftOff);
         Assert.Null(settings.BackListLength);
+        Assert.Null(settings.GhostOpacity);
     }
 
     [Fact]

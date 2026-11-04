@@ -121,4 +121,13 @@ public sealed class UserSettings : Entity
     /// picked nothing is sent. Null or empty means none. Older settings without it read as null.
     /// </summary>
     public List<Weekday>? NotifyWeekdays { get; set; }
+
+    /// <summary>The ghost opacity the camera starts with when none is chosen, in percent.</summary>
+    public const int DefaultGhostOpacity = 35;
+
+    /// <summary>
+    /// How strongly the earlier photo shows over the live picture in Stikling's own camera, in
+    /// percent. Null means <see cref="DefaultGhostOpacity"/>. Older settings without it read as null.
+    /// </summary>
+    public int? GhostOpacity { get; set; }
 }

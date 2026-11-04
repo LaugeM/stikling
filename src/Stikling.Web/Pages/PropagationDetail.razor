@@ -20,6 +20,8 @@
 @inject PlantCareService CommonCare
 @inject GooglePhotosService Google
 @inject AccountService Account
+@inject CameraService Camera
+@inject IPhotoRepository PhotoRepository
 @inject SettingsService SettingsService
 @using System.Globalization
 @using Stikling.Core.Propagations
@@ -448,6 +450,12 @@ else
                         @Strings.Propagations.TlKindPhoto
                     </label>
                 }
+                @if (cameraAvailable && hasGhostPhotos)
+                {
+                    <button type="button" class="btn btn-outline-primary icon-btn dock-angle" aria-label="@Strings.Camera.SameAngle" title="@Strings.Camera.SameAngle" @onclick="() => cameraOpen = true">
+                        <SameAngleIcon />
+                    </button>
+                }
                 <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
                     @Strings.Propagations.TlKindNote
@@ -489,7 +497,10 @@ else
                 CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
     <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId" OnPicked="() => photoChoice = false"
-                   CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="() => historyVersion++" />
+                   CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="AddedAsync" OnRetake="() => cameraOpen = true" />
+
+    <GhostCamera SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" Open="cameraOpen" PickerInputId="@photoInputId"
+                 OnClosed="CameraClosed" OnTaken="CameraTakenAsync" />
 
     @if (googleOn)
     {
@@ -982,6 +993,36 @@ else
     private Guid? ShownCover => Covers.Shown(propagation?.CoverPhotoId);
     private EntryComposer? composer;
     private bool googleOn;
+
+    // The Same angle button needs a camera and an earlier photo to line up with
+    private bool cameraAvailable;
+    private bool hasGhostPhotos;
+    private bool cameraOpen;
+
+    private async Task RefreshGhostAsync()
+    {
+        hasGhostPhotos = propagation is not null && PhotoKinds.GhostChoices(await PhotoRepository.GetForAsync(propagation.Id)).Count > 0;
+    }
+
+    private async Task AddedAsync()
+    {
+        historyVersion++;
+        await RefreshGhostAsync();
+    }
+
+    // Closed without a shot: a sheet that was waiting for a retake comes back
+    private void CameraClosed()
+    {
+        cameraOpen = false;
+        composer?.Resume();
+    }
+
+    private async Task CameraTakenAsync(PhotoSaveResult shot)
+    {
+        cameraOpen = false;
+        if (composer is not null)
+            await composer.AddTakenAsync(shot);
+    }
     private bool photoChoice;
     private Timeline? timeline;
     private readonly string photoInputId = $"propagation-photo-{Guid.NewGuid():N}";
@@ -1086,6 +1127,7 @@ else
     protected override async Task OnParametersSetAsync()
     {
         googleOn = await Google.IsEnabledAsync();
+        cameraAvailable = await Camera.IsAvailableAsync();
         if (propagation?.Id != Id)
         {
             confirmDelete = false;
@@ -1098,6 +1140,7 @@ else
             gave = null;
         }
         await LoadAsync();
+        await RefreshGhostAsync();
         // A care entry lives in the care sheet, so that opens to show it
         if (Entry is { } entryId && propagation?.IsActive == true && careLogs.Any(l => l.Id == entryId))
             careOpen = true;

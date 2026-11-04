@@ -162,6 +162,14 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    /// <summary>Sets how strongly the camera shows the earlier photo, in percent, within what the slider offers.</summary>
+    public async Task SetGhostOpacityAsync(int percent)
+    {
+        var current = await GetAsync();
+        current.GhostOpacity = Math.Clamp(percent, 10, 70);
+        await settings.SaveAsync(current);
+    }
+
     /// <summary>Sets how the Water plants screen asks about each plant.</summary>
     public async Task SetWaterCheckAsync(WaterCheck check)
     {

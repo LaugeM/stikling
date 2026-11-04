@@ -12,6 +12,13 @@ public static class PhotoKinds
     public static IEnumerable<Photo> Own(IEnumerable<Photo> photos) =>
         photos.Where(p => !p.IsDeleted && !p.IsReference);
 
+    /// <summary>
+    /// The photos the camera can show faintly over the live picture: the subject's own, newest first.
+    /// Reference photos are left out, since they show something else than the plant's angle.
+    /// </summary>
+    public static IReadOnlyList<Photo> GhostChoices(IEnumerable<Photo> photos) =>
+        Own(photos).OrderByDescending(p => p.TakenAt).ToList();
+
     /// <summary>The reference photos that aren't deleted, newest first.</summary>
     public static IReadOnlyList<Photo> References(IEnumerable<Photo> photos) =>
         photos.Where(p => !p.IsDeleted && p.IsReference).OrderByDescending(p => p.TakenAt).ToList();
