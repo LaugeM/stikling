@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SuppliesRow" xml:space="preserve">
+    <value>Shelf photos</value>
+    <comment>Row on the Supplies page that opens the shelf photos.</comment>
+  </data>
+  <data name="SuppliesNone" xml:space="preserve">
+    <value>A photo of a shelf with a dot on each plant</value>
+    <comment>Line under Shelf photos on the Supplies page when there are none. Says what a shelf photo is for.</comment>
+  </data>
+  <data name="SuppliesCount_One" xml:space="preserve">
+    <value>{0} shelf photo</value>
+    <comment>Line under Shelf photos on the Supplies page. {0} is how many there are.</comment>
+  </data>
+  <data name="SuppliesCount_Other" xml:space="preserve">
+    <value>{0} shelf photos</value>
+    <comment>Line under Shelf photos on the Supplies page. {0} is how many there are.</comment>
+  </data>
+  <data name="ListPageTitle" xml:space="preserve">
+    <value>Shelf photos · Stikling</value>
+    <comment>Title of the Shelf photos page in the browser tab.</comment>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Shelf photos</value>
+    <comment>Heading of the Shelf photos page.</comment>
+  </data>
+  <data name="ListIntro" xml:space="preserve">
+    <value>Photos of a shelf or a room, with a dot on each plant. Tap a dot to see which plant it is. A place keeps its photos, so you can see how a shelf changed.</value>
+    <comment>Lead line under the heading of the Shelf photos page.</comment>
+  </data>
+  <data name="AddPhoto" xml:space="preserve">
+    <value>Add a photo</value>
+    <comment>Button on the Shelf photos page that opens the sheet for a new shelf photo.</comment>
+  </data>
+  <data name="ShowAll" xml:space="preserve">
+    <value>Show all</value>
+    <comment>Link on the Shelf photos page when it shows one place only. Shows the photos of every place.</comment>
+  </data>
+  <data name="PlaceRemoved" xml:space="preserve">
+    <value>Place removed</value>
+    <comment>Heading over shelf photos whose room or spot was removed.</comment>
+  </data>
+  <data name="TileMarked_One" xml:space="preserve">
+    <value>{0} plant marked</value>
+    <comment>Under a shelf photo in the list. {0} is how many plants are marked on it.</comment>
+  </data>
+  <data name="TileMarked_Other" xml:space="preserve">
+    <value>{0} plants marked</value>
+    <comment>Under a shelf photo in the list. {0} is how many plants are marked on it.</comment>
+  </data>
+  <data name="TileNoneMarked" xml:space="preserve">
+    <value>None marked</value>
+    <comment>Under a shelf photo in the list when no plant is marked on it.</comment>
+  </data>
+  <data name="TileLabel" xml:space="preserve">
+    <value>Shelf photo from {0}</value>
+    <comment>Name of a shelf photo for screen readers. {0} is the day it was taken.</comment>
+  </data>
+  <data name="EmptyAll" xml:space="preserve">
+    <value>A shelf photo is a picture of a shelf or a room with a dot on each plant, so you can see which is which and how the shelf changed.</value>
+    <comment>Empty state on the Shelf photos page. Says what a shelf photo is for.</comment>
+  </data>
+  <data name="EmptyPlace" xml:space="preserve">
+    <value>No shelf photos of this place yet. A shelf photo is a picture of it with a dot on each plant.</value>
+    <comment>Empty state on the Shelf photos page when it shows one place.</comment>
+  </data>
+  <data name="AddTitle" xml:space="preserve">
+    <value>Add a shelf photo</value>
+    <comment>Title of the sheet where a shelf photo is added.</comment>
+  </data>
+  <data name="AddPlaceLabel" xml:space="preserve">
+    <value>What is in the photo?</value>
+    <comment>Label over the choice of room or spot in the sheet where a shelf photo is added.</comment>
+  </data>
+  <data name="AddPlaceHint" xml:space="preserve">
+    <value>Pick the room or spot the photo is of first.</value>
+    <comment>Shown in the add sheet until a room or spot is picked.</comment>
+  </data>
+  <data name="AddCamera" xml:space="preserve">
+    <value>Take a photo</value>
+    <comment>Button in the add sheet that opens the camera.</comment>
+  </data>
+  <data name="AddGallery" xml:space="preserve">
+    <value>Choose photos</value>
+    <comment>Button in the add sheet that opens the gallery. More than one photo can be picked.</comment>
+  </data>
+  <data name="AddSaving" xml:space="preserve">
+    <value>Saving…</value>
+    <comment>Shown in the add sheet while the photos are saved.</comment>
+  </data>
+  <data name="PhotoPageTitle" xml:space="preserve">
+    <value>Shelf photo · Stikling</value>
+    <comment>Title of a shelf photo's page in the browser tab.</comment>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Shelf photos</value>
+    <comment>Back link at the top of a shelf photo's page.</comment>
+  </data>
+  <data name="Gone" xml:space="preserve">
+    <value>This shelf photo isn't here any more.</value>
+    <comment>Shown on a shelf photo's page when the photo was deleted, on this device or another.</comment>
+  </data>
+  <data name="PhotoAlt" xml:space="preserve">
+    <value>Shelf photo of {0}</value>
+    <comment>Description of the photo for screen readers. {0} is the room or spot.</comment>
+  </data>
+  <data name="ShowNames" xml:space="preserve">
+    <value>Show names</value>
+    <comment>Switch under a shelf photo that shows the name of every marked plant at once.</comment>
+  </data>
+  <data name="LabelOpen" xml:space="preserve">
+    <value>Open</value>
+    <comment>Link in the small label beside a dot. Opens the plant's page.</comment>
+  </data>
+  <data name="LabelRemove" xml:space="preserve">
+    <value>Remove</value>
+    <comment>Button in the small label beside a dot while marking. Removes the mark. The plant is not touched.</comment>
+  </data>
+  <data name="MarkPlants" xml:space="preserve">
+    <value>Mark plants</value>
+    <comment>Button on a shelf photo's page that starts marking plants in the photo.</comment>
+  </data>
+  <data name="MarkHint" xml:space="preserve">
+    <value>Tap a plant in the photo</value>
+    <comment>Shown in the bar at the bottom of a shelf photo's page while marking.</comment>
+  </data>
+  <data name="MarkedHeading" xml:space="preserve">
+    <value>Marked in this photo</value>
+    <comment>Heading over the list of plants marked on a shelf photo.</comment>
+  </data>
+  <data name="NoneMarked" xml:space="preserve">
+    <value>No plants marked yet</value>
+    <comment>Shown under a shelf photo when no plant is marked on it.</comment>
+  </data>
+  <data name="NoneMarkedHint" xml:space="preserve">
+    <value>Tap Mark plants, then tap each plant in the photo.</value>
+    <comment>Under "No plants marked yet". Mark plants is the name of a button.</comment>
+  </data>
+  <data name="PickTitle" xml:space="preserve">
+    <value>Which plant is it?</value>
+    <comment>Title of the sheet that opens when a spot in a shelf photo is tapped while marking.</comment>
+  </data>
+  <data name="PickSearch" xml:space="preserve">
+    <value>Search your plants</value>
+    <comment>Placeholder and label of the search field in that sheet.</comment>
+  </data>
+  <data name="PickNone" xml:space="preserve">
+    <value>No plants or cuttings to pick from.</value>
+    <comment>Shown in that sheet when nothing is left to pick, or nothing matches the search.</comment>
+  </data>
+  <data name="PickMore" xml:space="preserve">
+    <value>Showing the first {0}. Type to narrow it down.</value>
+    <comment>Shown at the end of the long list in that sheet. {0} is how many are shown.</comment>
+  </data>
+  <data name="DeletePhoto" xml:space="preserve">
+    <value>Delete photo</value>
+    <comment>Link at the bottom of a shelf photo's page.</comment>
+  </data>
+  <data name="DeleteConfirm" xml:space="preserve">
+    <value>Delete this photo? The marks on it go with it. The plants aren't affected.</value>
+    <comment>Asked before a shelf photo is deleted.</comment>
+  </data>
+  <data name="HistoryLabel" xml:space="preserve">
+    <value>In a shelf photo</value>
+    <comment>Heading of an entry on a plant's history that shows it in a shelf photo.</comment>
+  </data>
+  <data name="HistoryOpen" xml:space="preserve">
+    <value>Open the shelf photo from {0}</value>
+    <comment>Name of the link on that entry for screen readers. {0} is the day the photo was taken.</comment>
+  </data>
+  <data name="PlantsLinkCount" xml:space="preserve">
+    <value>Shelf photos of this place ({0})</value>
+    <comment>Quiet link on the Plants page when the list is filtered on a room or spot. {0} is how many shelf photos it has.</comment>
+  </data>
+  <data name="PlantsLinkNone" xml:space="preserve">
+    <value>Take a photo of this place</value>
+    <comment>Quiet link on the Plants page when the list is filtered on a room or spot that has no shelf photos.</comment>
+  </data>
+</root>

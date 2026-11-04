@@ -1,0 +1,355 @@
+@page "/shelf/{PhotoId:guid}"
+@layout WideLayout
+@inject ShelfService Shelf
+@inject PhotoService Photos
+@inject ShelfPage Page
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+@using System.Globalization
+
+<PageTitle>@Strings.Shelf.PhotoPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="shelf">@Strings.Shelf.BackToList</a>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (view is null)
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Shelf.Gone</p>
+        <a class="btn btn-primary mt-3" href="shelf">@Strings.Shelf.BackToList</a>
+    </div>
+}
+else
+{
+    var photo = view.Photo;
+    var placeName = view.PlaceName ?? Strings.Shelf.PlaceRemoved;
+    var aspect = photo.Width > 0 && photo.Height > 0 ? (double)photo.Width / photo.Height : 4.0 / 3;
+    var ratio = FormattableString.Invariant($"{aspect:0.####}");
+
+    @* A tap anywhere that isn't a dot closes the label that is open *@
+    <div class="shelf-page" @onclick="CloseLabel">
+        <h1>@placeName</h1>
+        <p class="shelf-date">@Labels.Date(Time.LocalDay(photo.TakenAt))</p>
+
+        <div class="shelf-layout">
+            <div class="shelf-photo-col">
+                <div class="shelf-scroll">
+                    <div class="shelf-box @(aspect >= 1 ? "landscape" : "portrait") @(markMode ? "marking" : null)"
+                         style="--ar:@ratio" @ref="box" @onclick="TapPhotoAsync">
+                        <PhotoImage PhotoId="photo.Id" Thumbnail="false" Framed="false" Class="shelf-image"
+                                    Alt="@string.Format(CultureInfo.CurrentCulture, Strings.Shelf.PhotoAlt, placeName)" />
+
+                        @foreach (var m in view.Marks)
+                        {
+                            var isOpen = openMarkId == m.Mark.Id;
+                            var picked = MarkSubject == m.Subject.Id;
+                            <div class="shelf-mark @(m.Faded ? "faded" : null) @(isOpen ? "open" : null)"
+                                 style="left:@Percent(m.Mark.X)%;top:@Percent(m.Mark.Y)%">
+                                <button type="button" id="@MarkId(m)" class="shelf-dot @(picked ? "picked" : null)" aria-label="@m.Name"
+                                        aria-expanded="@(isOpen ? "true" : "false")" @onclick="() => ToggleLabel(m)" @onclick:stopPropagation>
+                                    <span class="shelf-dot-ring"></span>
+                                </button>
+                                @if (isOpen)
+                                {
+                                    <div class="shelf-label @LabelSide(m)" role="group" aria-label="@m.Name" @onclick:stopPropagation>
+                                        <span class="shelf-label-name">@m.Name</span>
+                                        @if (markMode)
+                                        {
+                                            <button type="button" class="shelf-label-action" @onclick="() => RemoveMarkAsync(m)">@Strings.Shelf.LabelRemove</button>
+                                        }
+                                        else
+                                        {
+                                            <a class="shelf-label-action" href="@SubjectThumb.LinkTo(m.Subject)">@Strings.Shelf.LabelOpen</a>
+                                        }
+                                    </div>
+                                }
+                                else if (showNames)
+                                {
+                                    <div class="shelf-label names-only @LabelSide(m)" aria-hidden="true">
+                                        <span class="shelf-label-name">@m.Name</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @if (provisional is { } spot)
+                        {
+                            <span class="shelf-provisional" style="left:@Percent(spot.X)%;top:@Percent(spot.Y)%" aria-hidden="true"></span>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-check form-switch shelf-names-switch">
+                    <input type="checkbox" class="form-check-input" id="shelf-names" role="switch" @bind="showNames" />
+                    <label class="form-check-label" for="shelf-names">@Strings.Shelf.ShowNames</label>
+                </div>
+            </div>
+
+            <div class="shelf-side">
+                <div class="shelf-bar">
+                    @if (markMode)
+                    {
+                        <span class="shelf-bar-hint" role="status">@Strings.Shelf.MarkHint</span>
+                        <button type="button" class="btn btn-primary" @onclick="StopMarking">@Strings.Common.Done</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="StartMarking">@Strings.Shelf.MarkPlants</button>
+                    }
+                </div>
+
+                <h2 class="section-label shelf-list-heading">@Strings.Shelf.MarkedHeading</h2>
+                @if (listed.Count == 0)
+                {
+                    <div class="empty-state shelf-empty">
+                        <p>@Strings.Shelf.NoneMarked</p>
+                        <p class="small">@Strings.Shelf.NoneMarkedHint</p>
+                        @if (!markMode)
+                        {
+                            <button type="button" class="btn btn-primary mt-3" @onclick="StartMarking">@Strings.Shelf.MarkPlants</button>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="settings-rows shelf-list">
+                        @foreach (var m in listed)
+                        {
+                            <a class="item-card" href="@SubjectThumb.LinkTo(m.Subject)">
+                                <SubjectThumb Subject="m.Subject" />
+                                <span class="item-text">
+                                    <span class="item-name d-block">@m.Name</span>
+                                    @if (m.Faded)
+                                    {
+                                        <span class="item-meta">@FadedText(m)</span>
+                                    }
+                                </span>
+                            </a>
+                        }
+                    </div>
+                }
+
+                <section class="danger-zone">
+                    @if (confirmDelete)
+                    {
+                        <p class="mb-2">@Strings.Shelf.DeleteConfirm</p>
+                        <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+                        <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">@Strings.Shelf.DeletePhoto</button>
+                    }
+                </section>
+            </div>
+        </div>
+    </div>
+}
+
+<Sheet Title="@Strings.Shelf.PickTitle" Open="pickOpen" OpenChanged="PickOpenChanged">
+    <input type="search" class="form-control" placeholder="@Strings.Shelf.PickSearch" aria-label="@Strings.Shelf.PickSearch"
+           autocomplete="off" @bind="search" @bind:event="oninput" @bind:after="LoadPickAsync" />
+    @if (pickItems.Count == 0)
+    {
+        <p class="text-body-secondary mt-3">@Strings.Shelf.PickNone</p>
+    }
+    else
+    {
+        <ul class="shelf-pick">
+            @foreach (var item in pickItems)
+            {
+                <li>
+                    <button type="button" class="shelf-pick-row" @onclick="() => PickAsync(item)">
+                        <SubjectThumb Subject="item.Subject" />
+                        <span class="shelf-pick-name">@item.Name</span>
+                    </button>
+                </li>
+            }
+        </ul>
+        @if (pickTotal > pickItems.Count)
+        {
+            <p class="text-body-secondary small">@string.Format(CultureInfo.CurrentCulture, Strings.Shelf.PickMore, pickItems.Count)</p>
+        }
+    }
+    <button type="button" class="btn btn-link mt-2" @onclick="() => PickOpenChanged(false)">@Strings.Common.Cancel</button>
+</Sheet>
+
+@code {
+    private const int PickShown = 60;
+
+    [Parameter]
+    public Guid PhotoId { get; set; }
+
+    /// <summary>A plant or propagation to point out in the photo: its dots get a thicker ring and one of them is open.</summary>
+    [SupplyParameterFromQuery(Name = "mark")]
+    public Guid? MarkSubject { get; set; }
+
+    /// <summary>Opens ready for marking, for a photo that was just added.</summary>
+    [SupplyParameterFromQuery(Name = "marking")]
+    public bool Marking { get; set; }
+
+    private ShelfPhotoView? view;
+    private bool loaded;
+    private Guid loadedFor;
+    private bool markMode;
+    private bool showNames;
+    private Guid? openMarkId;
+    private bool focusPending;
+    private (double X, double Y)? provisional;
+    private ElementReference box;
+    private bool pickOpen;
+    private string? search;
+    private IReadOnlyList<PickItem> pickItems = [];
+    private int pickTotal;
+    private bool confirmDelete;
+    private bool busy;
+
+    // One row for each plant or propagation, even when it is marked twice
+    private IReadOnlyList<ShownMark> listed =>
+        view is null ? [] : [.. view.Marks.GroupBy(m => m.Subject.Id).Select(g => g.First()).OrderBy(m => m.Name, StringComparer.CurrentCultureIgnoreCase)];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor == PhotoId)
+            return;
+
+        loadedFor = PhotoId;
+        await LoadAsync();
+        markMode = Marking;
+        if (MarkSubject is { } subject && view?.Marks.FirstOrDefault(m => m.Subject.Id == subject) is { } shown)
+        {
+            openMarkId = shown.Mark.Id;
+            focusPending = true;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!focusPending || view is null || openMarkId is not { } id || view.Marks.FirstOrDefault(m => m.Mark.Id == id) is not { } shown)
+            return;
+
+        focusPending = false;
+        try
+        {
+            await Page.BringIntoViewAsync(MarkId(shown));
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        view = await Shelf.GetPhotoAsync(PhotoId);
+        loaded = true;
+        if (openMarkId is { } open && view?.Marks.All(m => m.Mark.Id != open) != false)
+            openMarkId = null;
+    }
+
+    private static string MarkId(ShownMark m) => $"shelf-mark-{m.Mark.Id:N}";
+
+    private static string Percent(double share) => FormattableString.Invariant($"{share * 100:0.##}");
+
+    // The label opens on the side with room: to the left of a dot in the right half, and clear of the top and bottom edges
+    private static string LabelSide(ShownMark m) =>
+        $"{(m.Mark.X > 0.55 ? "to-left" : null)} {(m.Mark.Y < 0.1 ? "at-top" : m.Mark.Y > 0.9 ? "at-bottom" : null)}".Trim();
+
+    private static string? FadedText(ShownMark m) => m.Subject switch
+    {
+        Plant plant => Labels.StatusOf(plant),
+        Propagation cutting => Labels.Stage(cutting.Stage, cutting.Type),
+        _ => null
+    };
+
+    private void ToggleLabel(ShownMark m) => openMarkId = openMarkId == m.Mark.Id ? null : m.Mark.Id;
+
+    private void CloseLabel() => openMarkId = null;
+
+    private void StartMarking()
+    {
+        markMode = true;
+        openMarkId = null;
+    }
+
+    private void StopMarking()
+    {
+        markMode = false;
+        provisional = null;
+        openMarkId = null;
+    }
+
+    private async Task RemoveMarkAsync(ShownMark m)
+    {
+        openMarkId = null;
+        await Shelf.RemoveMarkAsync(m.Mark.Id);
+        await LoadAsync();
+    }
+
+    // While marking, a tap on the photo says where the plant is. The place is read from the photo's own
+    // box, which is right while it is scrolled sideways.
+    private async Task TapPhotoAsync(MouseEventArgs e)
+    {
+        if (!markMode || view is null)
+            return;
+
+        if (await Page.PointInAsync(box, e.ClientX, e.ClientY) is not { } point)
+            return;
+
+        provisional = (point.X, point.Y);
+        search = null;
+        await LoadPickAsync();
+        pickOpen = true;
+    }
+
+    private async Task LoadPickAsync()
+    {
+        if (view is null)
+            return;
+
+        var all = await Shelf.PickListAsync(view, search);
+        pickTotal = all.Count;
+        pickItems = [.. all.Take(PickShown)];
+    }
+
+    private void PickOpenChanged(bool open)
+    {
+        pickOpen = open;
+        if (!open)
+            provisional = null;
+    }
+
+    private async Task PickAsync(PickItem item)
+    {
+        if (view is null || provisional is not { } spot)
+            return;
+
+        pickOpen = false;
+        provisional = null;
+        try
+        {
+            await Shelf.MarkAsync(view.Photo.Id, item.SubjectType, item.Subject.Id, spot.X, spot.Y);
+        }
+        catch (ArgumentException)
+        {
+            // The plant or the photo was deleted on another device meanwhile. The reload shows what is left.
+        }
+        await LoadAsync();
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (view is null)
+            return;
+
+        busy = true;
+        // The marks go first, so none is left pointing at a photo that is gone
+        await Shelf.RemoveMarksOfPhotoAsync(view.Photo.Id);
+        await Photos.DeleteAsync(view.Photo.Id);
+        Navigation.NavigateTo("shelf");
+    }
+}

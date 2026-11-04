@@ -1,0 +1,189 @@
+@page "/shelf"
+@layout WideLayout
+@inject ShelfService Shelf
+@inject RoomService RoomService
+@inject PhotoService Photos
+@inject NavigationManager Navigation
+@inject TimeProvider Time
+
+<PageTitle>@Strings.Shelf.ListPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+@if (PlaceFilter is not null)
+{
+    <a class="back-link" href="plants?room=@PlaceFilter">@Strings.Shared.BackToPlants</a>
+}
+else
+{
+    <a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
+}
+
+<div class="page-heading">
+    <h1>@Strings.Shelf.ListTitle</h1>
+    <div class="d-flex align-items-baseline justify-content-end flex-wrap gap-2">
+        @if (PlaceFilter is not null)
+        {
+            <a class="btn btn-link btn-sm link-action" href="shelf">@Strings.Shelf.ShowAll</a>
+        }
+        @* Takes over from the round add button on a wide screen *@
+        <button type="button" class="btn btn-primary btn-sm icon-btn heading-add" @onclick="OpenAdd">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            @Strings.Shelf.AddPhoto
+        </button>
+    </div>
+</div>
+
+<p class="settings-hint">@Strings.Shelf.ListIntro</p>
+
+@if (groups is null)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (Shown.Count == 0)
+{
+    <div class="empty-state">
+        <p>@(PlaceFilter is null ? Strings.Shelf.EmptyAll : Strings.Shelf.EmptyPlace)</p>
+        <button type="button" class="btn btn-primary mt-3" @onclick="OpenAdd">@Strings.Shelf.AddPhoto</button>
+    </div>
+}
+else
+{
+    @foreach (var (group, index) in Shown.Select((g, i) => (g, i)))
+    {
+        var headingId = $"shelf-group-{index}";
+        <section class="shelf-group" aria-labelledby="@headingId">
+            <h2 class="section-label" id="@headingId">@(group.Name ?? Strings.Shelf.PlaceRemoved)</h2>
+            <ul class="shelf-grid">
+                @foreach (var tile in group.Tiles)
+                {
+                    var day = Labels.Date(Time.LocalDay(tile.Photo.TakenAt));
+                    <li>
+                        <a class="shelf-tile" href="shelf/@tile.Photo.Id" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shelf.TileLabel, day)">
+                            <span class="shelf-tile-photo">
+                                <PhotoImage PhotoId="tile.Photo.Id" Framed="false" />
+                            </span>
+                            <span class="shelf-tile-meta">@day · @(tile.Marks == 0 ? Strings.Shelf.TileNoneMarked : Plural.Of(tile.Marks, Strings.Shelf.TileMarked_One, Strings.Shelf.TileMarked_Other))</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}
+
+<button type="button" class="fab" @onclick="OpenAdd" aria-label="@Strings.Shelf.AddPhoto" title="@Strings.Shelf.AddPhoto">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+</button>
+
+<Sheet Title="@Strings.Shelf.AddTitle" @bind-Open="addOpen">
+    <RoomPicker @bind-Value="placeValue" Rooms="rooms" Label="@Strings.Shelf.AddPlaceLabel" />
+    @if (!HasPlace)
+    {
+        <p class="text-body-secondary small mt-2" role="status">@Strings.Shelf.AddPlaceHint</p>
+    }
+    <div class="composer-row mt-3">
+        <label class="btn btn-outline-primary btn-sm icon-btn @(CanAdd ? null : "disabled")" for="shelf-camera">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+            @Strings.Shelf.AddCamera
+        </label>
+        <input id="shelf-camera" type="file" accept="image/*" capture="environment" class="visually-hidden"
+               @ref="cameraInput" @onchange="() => AddAsync(cameraInput)" disabled="@(!CanAdd)" />
+        <label class="btn btn-outline-primary btn-sm icon-btn @(CanAdd ? null : "disabled")" for="shelf-gallery">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+            @Strings.Shelf.AddGallery
+        </label>
+        <input id="shelf-gallery" type="file" accept="image/*" multiple class="visually-hidden"
+               @ref="galleryInput" @onchange="() => AddAsync(galleryInput)" disabled="@(!CanAdd)" />
+    </div>
+    @if (busy)
+    {
+        <p class="text-body-secondary small mt-2" role="status">@Strings.Shelf.AddSaving</p>
+    }
+    @if (message is not null)
+    {
+        <p class="text-danger small mt-2" role="alert">@message</p>
+    }
+</Sheet>
+
+@code {
+    /// <summary>Shows one room or spot only, from the Plants list filtered on it.</summary>
+    [SupplyParameterFromQuery(Name = "place")]
+    public Guid? PlaceFilter { get; set; }
+
+    private IReadOnlyList<ShelfGroup>? groups;
+    private IReadOnlyList<Room> rooms = [];
+    private Places places = Places.None;
+    private bool addOpen;
+    private string? placeValue;
+    private bool busy;
+    private string? message;
+    private Guid? presetFor;
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    private bool HasPlace => !string.IsNullOrWhiteSpace(placeValue);
+    private bool CanAdd => HasPlace && !busy;
+
+    // The groups the filter lets through. A room includes its spots.
+    private IReadOnlyList<ShelfGroup> Shown =>
+        groups is null ? []
+        : PlaceFilter is not { } id ? groups
+        : [.. groups.Where(g => g.Place is not null && places.IsIn(g.Place.Id, id))];
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        places = await RoomService.GetPlacesAsync();
+        rooms = await RoomService.GetAllAsync();
+        groups = await Shelf.GetGroupsAsync();
+
+        // The sheet starts on the place the list is filtered on, once for each place
+        if (presetFor != PlaceFilter)
+        {
+            presetFor = PlaceFilter;
+            placeValue = places.NameOf(PlaceFilter);
+        }
+    }
+
+    private void OpenAdd()
+    {
+        message = null;
+        addOpen = true;
+    }
+
+    private async Task AddAsync(ElementReference input)
+    {
+        if (!HasPlace)
+            return;
+
+        busy = true;
+        message = null;
+        try
+        {
+            // The room or spot is made here when it was typed in the sheet
+            var placeId = await RoomService.PlaceIdAsync(placeValue);
+            if (placeId is null)
+                return;
+
+            var result = await Photos.SaveFromInputAsync(input, SubjectType.Place, placeId.Value);
+            message = result.Message(guessesMatter: false);
+            if (result.Saved.Count == 1 && result.Failed == 0)
+            {
+                // One photo is for marking the plants in it, so it opens ready for that
+                Navigation.NavigateTo($"shelf/{result.Saved[0].Id}?marking=true");
+                return;
+            }
+
+            if (result.Saved.Count > 0)
+            {
+                addOpen = false;
+                await LoadAsync();
+            }
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

@@ -14,6 +14,7 @@ using Stikling.Core.Pots;
 using Stikling.Core.Products;
 using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
+using Stikling.Core.Shelves;
 using Stikling.Core.Sellers;
 using Stikling.Core.Settings;
 using Stikling.Core.Sharing;
@@ -197,6 +198,18 @@ public sealed class IndexedDbLeafRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<Leaf>(db, time, Stores.Leaves), ILeafRepository
 {
     protected override IReadOnlyList<string> Validate(Leaf leaf) => leaf.Validate(Today);
+}
+
+public sealed class IndexedDbPhotoMarkRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<PhotoMark>(db, time, Stores.PhotoMarks), IPhotoMarkRepository
+{
+    public async Task<IReadOnlyList<PhotoMark>> GetForPhotoAsync(Guid photoId) =>
+        (await GetAllAsync()).Where(m => m.PhotoId == photoId).ToList();
+
+    public async Task<IReadOnlyList<PhotoMark>> GetForSubjectAsync(Guid subjectId) =>
+        (await GetAllAsync()).Where(m => m.SubjectId == subjectId).ToList();
+
+    protected override IReadOnlyList<string> Validate(PhotoMark mark) => mark.Validate();
 }
 
 public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)

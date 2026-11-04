@@ -1,0 +1,281 @@
+.shelf-date {
+    margin: -0.25rem 0 0.75rem;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+/* On a phone a landscape photo is tall enough to tap a crowded shelf and scrolls sideways.
+   A portrait one fits the column. The padding leaves room for a dot at the very edge. */
+.shelf-scroll {
+    overflow-x: auto;
+    padding: 0.6rem;
+    margin-inline: -0.6rem;
+}
+
+.shelf-box {
+    position: relative;
+    aspect-ratio: var(--ar);
+    border-radius: 0.5rem;
+    background: var(--pa-green-soft);
+}
+
+.shelf-box.landscape {
+    height: 65dvh;
+    width: calc(65dvh * var(--ar));
+}
+
+.shelf-box.portrait {
+    width: min(100%, calc(75dvh * var(--ar)));
+}
+
+.shelf-box.marking {
+    cursor: crosshair;
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.shelf-box ::deep img,
+.shelf-box ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 0.5rem;
+}
+
+/* A dot sits on a photo in both themes, so its colours are the light ones on purpose */
+.shelf-mark {
+    position: absolute;
+    width: 0;
+    height: 0;
+    z-index: 1;
+}
+
+.shelf-mark.open {
+    z-index: 3;
+}
+
+/* The tap area is 44px, the dot inside it 1.1rem */
+.shelf-dot {
+    position: absolute;
+    left: -1.375rem;
+    top: -1.375rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+}
+
+.shelf-dot:focus-visible {
+    outline: 2px solid #1f5a37;
+    outline-offset: 0;
+}
+
+.shelf-dot-ring {
+    box-sizing: border-box;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    border: 2px solid #2f7d4f;
+    background: #ffffff;
+}
+
+.shelf-dot.picked .shelf-dot-ring {
+    border-width: 3px;
+}
+
+/* A plant that has left the collection */
+.shelf-mark.faded .shelf-dot-ring {
+    opacity: 0.55;
+    border-style: dashed;
+    border-color: #5f6b63;
+}
+
+.shelf-provisional {
+    position: absolute;
+    box-sizing: border-box;
+    width: 1.1rem;
+    height: 1.1rem;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 2px dashed #2f7d4f;
+    background: rgb(255 255 255 / 0.35);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.shelf-label {
+    position: absolute;
+    left: 0.95rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0.3rem 0.15rem 0.6rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.shelf-label.to-left {
+    left: auto;
+    right: 0.95rem;
+}
+
+.shelf-label.at-top {
+    top: -0.4rem;
+    transform: none;
+}
+
+.shelf-label.at-bottom {
+    top: auto;
+    bottom: -0.4rem;
+    transform: none;
+}
+
+.shelf-label.names-only {
+    padding: 0.2rem 0.6rem;
+    pointer-events: none;
+}
+
+.shelf-label-name {
+    max-width: 11rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shelf-label-action {
+    /* A tap area of 44px around a small word */
+    padding: 0.7rem 0.4rem;
+    margin-block: -0.7rem;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--pa-green-dark);
+    text-decoration: none;
+}
+
+.shelf-label-action:hover,
+.shelf-label-action:focus-visible {
+    text-decoration: underline;
+}
+
+.shelf-names-switch {
+    margin-top: 0.75rem;
+}
+
+/* Mark plants stays above the navigation on a phone and sits beside the photo on a wide screen */
+.shelf-bar {
+    position: fixed;
+    inset: auto 0 var(--pa-nav-bottom) var(--pa-nav-side);
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem var(--pa-column-inset);
+    background: var(--pa-surface);
+    border-top: 1px solid var(--pa-border);
+    box-shadow: 0 -4px 12px rgb(0 0 0 / 0.08);
+}
+
+.shelf-bar .btn {
+    flex: 1 1 auto;
+    min-height: 2.75rem;
+}
+
+.shelf-bar-hint {
+    flex: 1 1 auto;
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
+
+.shelf-bar-hint + .btn {
+    flex: none;
+}
+
+.shelf-list-heading {
+    margin: 1.25rem 0 0.5rem;
+}
+
+.shelf-empty {
+    padding: 1.25rem 1rem;
+}
+
+.shelf-pick {
+    list-style: none;
+    margin: 0.75rem 0;
+    padding: 0;
+    max-height: 50dvh;
+    overflow-y: auto;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.shelf-pick li + li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.shelf-pick-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 3.5rem;
+    padding: 0.4rem 0.6rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    text-align: left;
+}
+
+.shelf-pick-row:hover,
+.shelf-pick-row:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+.shelf-pick-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+@media (min-width: 64rem) {
+    .shelf-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    /* The whole photo, as tall as the screen allows */
+    .shelf-scroll {
+        overflow: visible;
+    }
+
+    .shelf-box.landscape,
+    .shelf-box.portrait {
+        height: auto;
+        width: min(100%, calc(75dvh * var(--ar)));
+    }
+
+    .shelf-bar {
+        position: static;
+        padding: 0;
+        margin-bottom: 0.5rem;
+        background: none;
+        border-top: 0;
+        box-shadow: none;
+    }
+}

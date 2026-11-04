@@ -148,12 +148,13 @@ public class BackupTests
             OwnFields = [new OwnField { Name = "Clone name" }, new OwnField { Name = "Old", DeletedAt = Now }],
             Orders = [new Order { SellerName = "Plantorama" }, new Order { DeletedAt = Now }],
             OrderItems = [new OrderItem { Name = "Monstera" }, new OrderItem { Name = "Old", DeletedAt = Now }],
-            Leaves = [new Leaf { Rating = Variegation.High }, new Leaf { DeletedAt = Now }]
+            Leaves = [new Leaf { Rating = Variegation.High }, new Leaf { DeletedAt = Now }],
+            PhotoMarks = [new PhotoMark { X = 0.5, Y = 0.5 }, new PhotoMark { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -180,6 +181,7 @@ public class BackupTests
         Assert.Empty(data.Orders);
         Assert.Empty(data.OrderItems);
         Assert.Empty(data.Leaves);
+        Assert.Empty(data.PhotoMarks);
     }
 
     [Fact]
@@ -342,6 +344,39 @@ public class BackupTests
 
         var later = JsonSerializer.Deserialize<BackupData>(json.Replace("AllWhite", "Sparkly"), options)!;
         Assert.Null(Assert.Single(later.Leaves).Rating);
+    }
+
+    [Fact]
+    public void Marks_on_shelf_photos_survive_a_backup_and_a_shelf_photo_keeps_its_place_as_its_subject()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var photo = new Photo { SubjectType = SubjectType.Place, SubjectId = Guid.NewGuid(), Width = 4000, Height = 3000, UpdatedAt = Now };
+        var mark = new PhotoMark
+        {
+            PhotoId = photo.Id, SubjectType = SubjectType.Propagation, SubjectId = Guid.NewGuid(), X = 0.1234, Y = 0.9, UpdatedAt = Now
+        };
+
+        var json = JsonSerializer.Serialize(new BackupData { Photos = [photo], PhotoMarks = [mark, new PhotoMark { DeletedAt = Now }] }, options);
+        Assert.Contains("\"Propagation\"", json);
+        Assert.Contains("\"Place\"", json);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        Assert.Equal(SubjectType.Place, Assert.Single(back.Photos).SubjectType);
+        Assert.Equal(2, back.PhotoMarks.Count);
+        var restored = back.PhotoMarks.Single(m => m.Id == mark.Id);
+        Assert.Equal((photo.Id, SubjectType.Propagation, mark.SubjectId, 0.1234, 0.9),
+            (restored.PhotoId, restored.SubjectType, restored.SubjectId, restored.X, restored.Y));
+        Assert.Equal(1, back.Counts.PhotoMarks);
+        Assert.Equal(2, BackupMerge.Merge<PhotoMark>([], back.PhotoMarks).Added);
+        Assert.Equal(0, BackupMerge.Merge([mark], [restored]).Added);
+    }
+
+    [Fact]
+    public void A_backup_from_before_shelf_photos_restores_with_no_marks()
+    {
+        var back = JsonSerializer.Deserialize<BackupData>("""{"version":1,"plants":[]}""", new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+        Assert.Empty(back.PhotoMarks);
+        Assert.Equal(0, back.Counts.PhotoMarks);
     }
 
     [Fact]

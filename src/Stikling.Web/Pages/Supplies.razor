@@ -11,6 +11,7 @@
 @inject ProblemService ProblemService
 @inject SellerService SellerService
 @inject Stikling.Core.Orders.OrderService OrderService
+@inject ShelfService ShelfService
 
 <PageTitle>@Strings.Supplies.SuppliesPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -46,6 +47,9 @@
     <SettingsRow Href="treatment-plans" Title="@Strings.Supplies.SuppliesPlans" Detail="@PlanSummary">
         <Icon><circle cx="6" cy="6" r="2" /><circle cx="6" cy="12" r="2" /><circle cx="6" cy="18" r="2" /><path d="M11 6h9M11 12h9M11 18h6" /></Icon>
     </SettingsRow>
+    <SettingsRow Href="shelf" Title="@Strings.Shelf.SuppliesRow" Detail="@ShelfDetail">
+        <Icon><path d="M3.5 4.5h17v15h-17Z" /><path d="M3.5 12h17" /><circle cx="8" cy="8.250" r="1.250" /><circle cx="15" cy="8.750" r="1.250" /><circle cx="11.500" cy="15.750" r="1.250" /></Icon>
+    </SettingsRow>
 </div>
 
 @* Pests has its own tab only while a case or a problem is open, so this is the way in the rest of the time *@
@@ -67,6 +71,7 @@
     private int treatmentPlans;
     private IReadOnlyList<PestCase> pestCases = [];
     private int openProblems;
+    private int shelfPhotos;
 
     protected override async Task OnInitializedAsync() => await LoadDataAsync();
 
@@ -81,10 +86,15 @@
         recipes = (await RecipeRepository.GetAllAsync()).Count;
         treatmentPlans = (await PlanRepository.GetAllAsync()).Count;
         pestCases = await PestCaseRepository.GetAllAsync();
+        shelfPhotos = await ShelfService.CountAsync();
         var plants = await PlantRepository.GetAllAsync();
         openProblems = (await ProblemService.AllAsync())
             .Count(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.InCollection));
     }
+
+    private string ShelfDetail => shelfPhotos == 0
+        ? Strings.Shelf.SuppliesNone
+        : Plural.Of(shelfPhotos, Strings.Shelf.SuppliesCount_One, Strings.Shelf.SuppliesCount_Other);
 
     private string OrdersDetail => ordersOnTheWay == 0
         ? Strings.Orders.SuppliesOrdersNone

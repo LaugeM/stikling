@@ -99,6 +99,18 @@
     min-height: 2.75rem;
 }
 
+/* A quiet line under the filters when a room or spot is picked, with a tap area of 44px that takes no room */
+.shelf-link {
+    margin: 0 0 0.25rem;
+    font-size: 0.875rem;
+}
+
+.shelf-link a {
+    display: inline-block;
+    padding-block: 0.7rem;
+    margin-block: -0.7rem;
+}
+
 /* Opens the column picker, as tall as the view buttons beside it */
 .columns-button {
     min-height: 2.75rem;

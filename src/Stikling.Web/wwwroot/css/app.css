@@ -1085,7 +1085,8 @@ a.item-card:active {
 .family-focus-photo,
 .pot-photo,
 .pot-thumb,
-.chip-photo {
+.chip-photo,
+.shelf-history-photo {
     position: relative;
     container-type: size;
 }
@@ -2692,6 +2693,22 @@ main.app-content.with-banner:has(.page-dock) {
 main.app-content:has(.page-dock) ~ .update-banner,
 main.app-content:has(.page-dock) ~ .first-sync-banner {
     bottom: calc(var(--pa-nav-bottom) + 3.75rem);
+}
+
+/* The Mark plants bar of a shelf photo is fixed on a phone only. On a wide screen it sits beside the photo. */
+@media (max-width: 63.999rem) {
+    main.app-content:has(.shelf-bar) {
+        padding-bottom: calc(8.75rem + env(safe-area-inset-bottom));
+    }
+
+    main.app-content.with-banner:has(.shelf-bar) {
+        padding-bottom: calc(12.25rem + env(safe-area-inset-bottom));
+    }
+
+    main.app-content:has(.shelf-bar) ~ .update-banner,
+    main.app-content:has(.shelf-bar) ~ .first-sync-banner {
+        bottom: calc(var(--pa-nav-bottom) + 3.75rem);
+    }
 }
 
 main.app-content:has(.form-bar) ~ .update-banner,
