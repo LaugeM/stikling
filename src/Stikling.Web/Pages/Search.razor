@@ -6,6 +6,7 @@
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
 @inject PlantNameService Names
+@inject DictionaryService Dictionary
 @inject DeviceFiles Device
 @inject NavigationManager Navigation
 @inject TimeProvider Time
@@ -47,12 +48,18 @@
                 </ul>
             </section>
         }
+
+        <div class="settings-rows mt-4">
+            <SettingsRow Href="@DictionaryLinks.Index" Title="@Strings.Dictionary.Title" Detail="@Strings.Dictionary.SearchRowDetail">
+                <Icon><DictionaryIcon /></Icon>
+            </SettingsRow>
+        </div>
     }
     else if (index is null)
     {
         <p class="text-body-secondary">@Strings.Shared.Loading</p>
     }
-    else if (results.IsEmpty)
+    else if (results.IsEmpty && DictionaryCount == 0)
     {
         <div class="empty-state">
             <p class="mb-1">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchNothing, query.Trim())</p>
@@ -63,7 +70,7 @@
     else
     {
         var groups = results.NonEmpty.ToList();
-        var rows = groups.Count(g => g.Kind != SearchKind.Note) + 1;
+        var rows = groups.Count(g => g.Kind != SearchKind.Note) + 1 + (DictionaryCount > 0 ? 1 : 0);
         <div class="search-results @(results.Notes.Count > 0 ? "has-notes" : null)" style="--search-rows: @rows">
             @foreach (var (kind, items) in groups)
             {
@@ -82,6 +89,30 @@
                         <button type="button" class="btn btn-link btn-sm link-action search-more search-stop" aria-expanded="@(open ? "true" : "false")"
                                 @onclick="() => ToggleGroup(kind)">@(open ? Strings.Shared.SearchShowFewer : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchShowAll, items.Count))</button>
                     }
+                </section>
+            }
+
+            @if (DictionaryCount > 0)
+            {
+                <section class="search-group" aria-labelledby="group-dictionary">
+                    <h2 class="section-label" id="group-dictionary">@Strings.Dictionary.SearchGroup · @DictionaryCount</h2>
+                    <ul class="item-list">
+                        @foreach (var group in groupHits)
+                        {
+                            <li>
+                                <a class="item-card search-stop" href="@DictionaryLinks.Group(group.Group)" @onclick="OpenedAsync">
+                                    <div class="item-text">
+                                        <div class="item-name">@DictionaryLinks.Label(group.Group)</div>
+                                        <div class="item-meta">@DictionaryLinks.CountsLine(group.Genera, group.Species)</div>
+                                    </div>
+                                </a>
+                            </li>
+                        }
+                        @foreach (var hit in nameHits)
+                        {
+                            <li><DictionaryHitRow Hit="hit" Class="search-stop" OnOpen="OpenedAsync" /></li>
+                        }
+                    </ul>
                 </section>
             }
 
@@ -124,6 +155,12 @@
     private IReadOnlyList<string> recent = [];
     private IReadOnlyDictionary<Guid, Guid?> covers = new Dictionary<Guid, Guid?>();
     private EverydayNameBook? everyday;
+    private DictionaryBrowser? dictionaryBrowser;
+    private NameSuggester? suggester;
+    private IReadOnlyList<GroupSummary> groupHits = [];
+    private IReadOnlyList<DictionaryHit> nameHits = [];
+
+    private int DictionaryCount => groupHits.Count + nameHits.Count;
 
     private bool Searching => !string.IsNullOrWhiteSpace(query);
 
@@ -162,9 +199,27 @@
             photos[propagation.Id] = Covers.Shown(propagation.CoverPhotoId);
         covers = photos;
         Refresh();
+
+        // The dictionary is big, so what it finds turns up after the rest
+        dictionaryBrowser = await Dictionary.GetBrowserAsync();
+        suggester = await Names.GetSuggesterAsync();
+        Refresh();
     }
 
-    private void Refresh() => results = index?.Find(query) ?? SearchResults.Empty;
+    private void Refresh()
+    {
+        results = index?.Find(query) ?? SearchResults.Empty;
+
+        var text = query.Trim();
+        if (dictionaryBrowser is null || suggester is null || text.Length == 0)
+        {
+            groupHits = [];
+            nameHits = [];
+            return;
+        }
+        groupHits = DictionaryLinks.GroupsMatching(dictionaryBrowser, text);
+        nameHits = DictionaryLinks.NamesMatching(suggester, dictionaryBrowser, text, 8).Take(Preview).ToList();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

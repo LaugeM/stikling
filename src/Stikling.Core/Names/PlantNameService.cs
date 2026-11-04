@@ -79,6 +79,22 @@ public sealed class PlantNameService(
     }
 
     /// <summary>
+    /// The names that come with the app as they are in the file, read once. If they can't be read
+    /// there are none this time and the next call tries again.
+    /// </summary>
+    public async Task<PlantNameData> GetDataAsync()
+    {
+        try
+        {
+            return data ??= await source.LoadAsync();
+        }
+        catch (Exception)
+        {
+            return PlantNameData.Empty;
+        }
+    }
+
+    /// <summary>
     /// The everyday names to show on plants, which only needs the small files of everyday names, not
     /// the botanical ones. Read once and shared by every list and page.
     /// </summary>
