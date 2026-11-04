@@ -133,6 +133,38 @@ public class PotTests
     }
 
     [Fact]
+    public void The_inside_is_the_outside_less_the_rim_on_both_sides()
+    {
+        var pot = Nursery();
+        pot.TopCm = 10;
+        pot.RimMm = 6;
+
+        Assert.Equal(8.8m, pot.InsideTopCm);
+    }
+
+    [Theory]
+    [InlineData(null, 6)]
+    [InlineData(10, null)]
+    public void The_inside_needs_both_the_size_and_the_rim(int? top, int? rim)
+    {
+        var pot = Nursery();
+        pot.TopCm = top;
+        pot.RimMm = rim;
+
+        Assert.Null(pot.InsideTopCm);
+    }
+
+    [Fact]
+    public void Validate_rejects_a_rim_as_wide_as_the_pot()
+    {
+        var pot = Nursery();
+        pot.TopCm = 10;
+        pot.RimMm = 50;
+
+        Assert.Contains("The rim can't take up the whole width of the pot.", pot.Validate());
+    }
+
+    [Fact]
     public void A_pot_without_a_rim_cannot_hang()
     {
         Assert.False(Nursery().HasRim);

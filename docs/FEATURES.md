@@ -285,6 +285,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
 | ✅ | **Pot suggestions**: a plant's pot is picked from your pot library, on the plant form and when potting up. A propagation's container is picked from the containers for propagating, kept as their own list in the pot library with how many are in use | 3 | S | v1.x |
+| ✅ | **Inside of a pot**: a pot is measured on the outside, the way pots are sold, and the rim or wall seen from above gives the width inside, shown on the Pots page | 3 | S | v1.x |
 | ✅ | **How much bigger the pot is**: on Pot up, the sheet shows the old and new pot widths and says when the new one is much wider, since that keeps the soil wet longer. It only says so above a width that can be changed in Settings, and any pot can still be picked | 5 | S | v1.x |
 | ☐ | **Supplies stock**: LECA, PON, perlite, sphagnum, fertilisers, sticky traps, alcohol, pots | 5 | M | v1.x |
 | ☐ | **Shopping list**: mark a supply as running low and it lands on a list to open in the shop | 5 | S | v1.x |
@@ -292,7 +293,7 @@ while a case is open is covered too. Treatments are logged on the case, so one s
 | ✅ | See which of your pots are in use and which are free, so it's clear what's available before repotting. A plant that died frees its pots, and giving a plant away or selling it asks which of its pots went with it | 7 | S | v1.x |
 | ✅ | **Photos of a pot**: one or more photos on a pot, shown on the Pots page, on the chips when picking a pot and on the plant that uses it, so an outer pot can be told apart from the others. Photos belong to the pot, not the plant, so they stay when a pot moves to another plant. They go through backup and sync like any other photo, and deleting a pot deletes them | 6 | M | v1.x |
 | ✅ | The Pots page lists one kind at a time (nursery, outer, on its own), since they are used so differently, and remembers on the device which one was open | 6 | S | v1.x |
-| ☐ | **Does it fit?**: given a nursery pot, which of your free outer pots it would go in. Compares the tops, allows for a rim only having to clear the opening, and says when the bottom is the tighter measurement | 4 | M | v1.x |
+| ☐ | **Does it fit?**: given a nursery pot, which of your free outer pots it would go in. Compares the nursery pot's top with the width inside the outer pot, allows for a rim only having to clear the opening, and says when the bottom is the tighter measurement | 4 | M | v1.x |
 | ✅ | **Orchid bark** as a medium next to soil, LECA and the others, for orchids potted in bark with little or no soil | 4 | S | v1.x |
 | ✅ | Default medium per pot kind: picking a self-watering pot for a new plant or when potting up suggests LECA, so potting up is one tap less | 8 | S | v1.x |
 | ☐ | Money spent on plants and supplies, per year, to see what the hobby costs. On a plant's page, **What a plant has given** also shows what the plant cost and what its cuttings have brought in when any were sold. It only shows when there is a price on either side | 6 | S | v1.x |
