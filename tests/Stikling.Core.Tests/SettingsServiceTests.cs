@@ -125,4 +125,16 @@ public class SettingsServiceTests
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.SetBackListLengthAsync(4));
     }
+
+    [Fact]
+    public async Task The_ghost_opacity_is_null_until_chosen_and_stays_within_the_slider()
+    {
+        Assert.Null((await service.GetAsync()).GhostOpacity);
+
+        await service.SetGhostOpacityAsync(50);
+        Assert.Equal(50, (await service.GetAsync()).GhostOpacity);
+
+        await service.SetGhostOpacityAsync(95);
+        Assert.Equal(70, (await service.GetAsync()).GhostOpacity);
+    }
 }
