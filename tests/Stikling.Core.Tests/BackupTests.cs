@@ -147,12 +147,13 @@ public class BackupTests
             TreatmentPlans = [new TreatmentPlan { Name = "Mites" }, new TreatmentPlan { Name = "Old", DeletedAt = Now }],
             OwnFields = [new OwnField { Name = "Clone name" }, new OwnField { Name = "Old", DeletedAt = Now }],
             Orders = [new Order { SellerName = "Plantorama" }, new Order { DeletedAt = Now }],
-            OrderItems = [new OrderItem { Name = "Monstera" }, new OrderItem { Name = "Old", DeletedAt = Now }]
+            OrderItems = [new OrderItem { Name = "Monstera" }, new OrderItem { Name = "Old", DeletedAt = Now }],
+            Leaves = [new Leaf { Rating = Variegation.High }, new Leaf { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -178,6 +179,7 @@ public class BackupTests
         Assert.Empty(data.CareIntervals);
         Assert.Empty(data.Orders);
         Assert.Empty(data.OrderItems);
+        Assert.Empty(data.Leaves);
     }
 
     [Fact]
@@ -315,6 +317,31 @@ public class BackupTests
         Assert.Equal(1, BackupMerge.Merge<Order>([], back.Orders).Added);
         Assert.Equal(2, BackupMerge.Merge<OrderItem>([], back.OrderItems).Added);
         Assert.Equal(0, BackupMerge.Merge([order], back.Orders).Added);
+    }
+
+    [Fact]
+    public void Leaves_survive_a_backup_and_one_with_an_unknown_rating_reads_as_unrated()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var leaf = new Leaf
+        {
+            SubjectId = Guid.NewGuid(), On = new DateOnly(2026, 11, 1), Rating = Variegation.AllWhite,
+            Note = "Big one", TimelineEntryId = Guid.NewGuid(), UpdatedAt = Now
+        };
+
+        var json = JsonSerializer.Serialize(new BackupData { Leaves = [leaf] }, options);
+        Assert.Contains("\"AllWhite\"", json);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        var restored = Assert.Single(back.Leaves);
+        Assert.Equal((leaf.SubjectId, leaf.On, Variegation.AllWhite, "Big one", leaf.TimelineEntryId),
+            (restored.SubjectId, restored.On, restored.Rating, restored.Note, restored.TimelineEntryId));
+        Assert.Equal(1, back.Counts.Leaves);
+        Assert.Equal(1, BackupMerge.Merge<Leaf>([], back.Leaves).Added);
+        Assert.Equal(0, BackupMerge.Merge([leaf], back.Leaves).Added);
+
+        var later = JsonSerializer.Deserialize<BackupData>(json.Replace("AllWhite", "Sparkly"), options)!;
+        Assert.Null(Assert.Single(later.Leaves).Rating);
     }
 
     [Fact]

@@ -65,7 +65,10 @@ public enum TimelineEvent
     Problem,
 
     /// <summary>A name that was unsure (cf., aff., sp. or lost) was found out.</summary>
-    Identified
+    Identified,
+
+    /// <summary>A new leaf was logged with how variegated it is.</summary>
+    NewLeaf
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>

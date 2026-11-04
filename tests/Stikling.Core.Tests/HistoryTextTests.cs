@@ -177,6 +177,7 @@ public class HistoryTextTests
         (L("ProblemUpdateEmpty"), "Update on the problem"),
         (L("ProblemClosed", ProblemOutcome.GotBetter), "Problem over: got better"),
         (L("ProblemReopened"), "The problem came back"),
+        (L("NewLeaf", Variegation.AllWhite), "New leaf: All white"),
         (L("LookedOver"), "Looked over"),
         (L("ReceivedFrom", "Anna"), "From Anna"),
         (L("TextLine", "A note about it"), "A note about it"),
