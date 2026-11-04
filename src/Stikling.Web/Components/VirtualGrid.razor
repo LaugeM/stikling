@@ -35,6 +35,7 @@
     private DotNetObjectReference<VirtualGrid<TItem>>? self;
     private IJSObjectReference? module;
     private bool observing;
+    private bool disposed;
 
     private int columns = 1;
 
@@ -64,6 +65,12 @@
         {
             self = DotNetObjectReference.Create(this);
             module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/virtualgrid.js");
+            // The page may have been left while the module loaded, and then there is nothing to watch
+            if (disposed)
+            {
+                await module.DisposeAsync();
+                return;
+            }
             await module.InvokeVoidAsync("observe", element, self, MinColumnWidth);
             observing = true;
         }
@@ -86,6 +93,7 @@
 
     public async ValueTask DisposeAsync()
     {
+        disposed = true;
         try
         {
             if (module is not null && observing)
