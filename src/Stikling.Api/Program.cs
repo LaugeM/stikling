@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
@@ -14,6 +15,11 @@ using Stikling.Api.Photos;
 using Stikling.Api.Reports;
 using Stikling.Api.Sharing;
 using Stikling.Api.Sync;
+
+// The share pages and notifications are English, whatever culture the machine runs with. Without this
+// the text comes from the Danish resources on a Danish machine, and dates are formatted the Danish way.
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en");
+CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = new CultureInfo("en");
 
 // The Container Apps job that sends the daily notifications. It is the same image with this argument,
 // and runs as a plain host instead of the web app.

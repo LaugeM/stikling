@@ -61,7 +61,7 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label" for="pot-name">@Strings.Supplies.Name</label>
+            <label class="form-label" for="pot-name">@(IsContainer ? Strings.Supplies.Name : Strings.Supplies.PotsNameOptional)</label>
             @if (Names.Count > 0)
             {
                 <div class="chip-row mb-2" role="group" aria-label="@Strings.Supplies.PotsNamesInUse">
@@ -72,7 +72,7 @@
                     }
                 </div>
             }
-            <input id="pot-name" class="form-control" placeholder="@(IsContainer ? Strings.Supplies.PotsContainerPlaceholder : Strings.Supplies.PotsPotPlaceholder)" autocomplete="off"
+            <input id="pot-name" class="form-control" placeholder="@NamePlaceholder" autocomplete="off"
                    value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
             @if (IsContainer)
             {
@@ -134,7 +134,18 @@
                 @foreach (var material in Enum.GetValues<PotMaterial>())
                 {
                     <button type="button" class="chip @Picked(draft.Material == material)"
-                            @onclick="() => draft.Material = material">@Labels.For(material)</button>
+                            @onclick="() => PickMaterial(material)">@Labels.For(material)</button>
+                }
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label">@Strings.Supplies.PotsColour</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Supplies.PotsColourLabel">
+                @foreach (var colour in Enum.GetValues<PotColour>())
+                {
+                    <button type="button" class="chip @Picked(draft.Colour == colour)"
+                            @onclick="() => draft.Colour = draft.Colour == colour ? null : colour">@Labels.For(colour)</button>
                 }
             </div>
         </div>
@@ -252,7 +263,7 @@ else
     <section class="settings-section">
         <h2 class="visually-hidden">@Labels.Heading(kind)</h2>
 
-        @foreach (var family in Shown.GroupBy(use => use.Pot.Name, StringComparer.CurrentCultureIgnoreCase))
+        @foreach (var family in Shown.GroupBy(use => use.Pot.FamilyName, StringComparer.CurrentCultureIgnoreCase))
         {
             <h3 class="pot-family">@family.Key</h3>
             <ul class="pot-list supply-grid">
@@ -422,6 +433,23 @@ else
 
     private bool IsContainer => draft?.ForPropagation == true;
 
+    private string NamePlaceholder => draft?.Kind switch
+    {
+        PotKind.Propagation => Strings.Supplies.PotsContainerPlaceholder,
+        PotKind.Outer => Strings.Supplies.PotsOuterPlaceholder,
+        PotKind.Standalone => Strings.Supplies.PotsStandalonePlaceholder,
+        _ => Strings.Supplies.PotsPotPlaceholder
+    };
+
+    /// <summary>Whether the person has picked the material of the pot being added, so a change of kind stops guessing it.</summary>
+    private bool materialPicked;
+
+    private void PickMaterial(PotMaterial material)
+    {
+        materialPicked = true;
+        draft!.Material = material;
+    }
+
     /// <summary>Picking a kind sets both fields. A container is a standalone pot marked for propagation.</summary>
     private void SetDraftKind(PotKind picked)
     {
@@ -434,6 +462,10 @@ else
         };
         if (draft.ForPropagation)
             draft.RimMm = null;
+
+        // A new outer pot is most often ceramic. Never touches a saved pot, or a material the person picked
+        if (editing is null && !materialPicked)
+            draft.Material = picked == PotKind.Outer ? PotMaterial.Ceramic : PotMaterial.Plastic;
     }
 
     /// <summary>
@@ -474,6 +506,7 @@ else
         errors = [];
         confirming = null;
         detailsOpen = false;
+        materialPicked = like is not null;
         if (like is null)
         {
             draft = new Pot();

@@ -406,7 +406,7 @@
     <value>Hvorfor siger I dag at jeg skal tømme yderpotten?</value>
   </data>
   <data name="WhyTodaySayEmptyOuterA1" xml:space="preserve">
-    <value>En plante i en yderpotte står i det vand der løber igennem når den bliver vandet, og rødder der står i vand i flere dage, kan rådne. En time efter du har logget en vanding, beder I dag dig om at hælde det ud, for planter med en yderpotte hvor du ikke har vand med vilje. Tryk på &lt;em&gt;Tømt&lt;/em&gt; på planten eller på &lt;em&gt;Alle tømt&lt;/em&gt; for dem alle. Under &lt;em&gt;Mind mig om at tømme yderpotten&lt;/em&gt; i Indstillinger kan du ændre ventetiden eller slå det fra.</value>
+    <value>En plante i en yderpotte står i det vand der løber igennem når den bliver vandet, og rødder der står i vand i flere dage, kan rådne. En time efter du har logget en vanding, beder I dag dig om at hælde det ud, for planter med en yderpotte hvor du ikke har vand med vilje (potten står i det, eller med en væge). Tryk på &lt;em&gt;Tømt&lt;/em&gt; på planten eller på &lt;em&gt;Alle tømt&lt;/em&gt; for dem alle. Under &lt;em&gt;Mind mig om at tømme yderpotten&lt;/em&gt; i Indstillinger kan du ændre ventetiden eller slå det fra.</value>
   </data>
   <data name="KeepTrackPlantMovingLECAQ" xml:space="preserve">
     <value>Hvordan holder jeg styr på en plante der skifter til LECA eller PON?</value>
@@ -801,6 +801,18 @@
   <data name="ChangePhotoAtTopOrA1" xml:space="preserve">
     <value>Tryk på billedet øverst på siden, eller på et billede i historikken, for at se det i fuld skærm. Der gør &lt;em&gt;Brug som profilbillede&lt;/em&gt; det til billedet øverst og på kortene. Med &lt;em&gt;Beskær&lt;/em&gt; kan du trække i billedet og zoome ind, så planten sidder godt der hvor billedet bliver beskåret, på kort, øverst på siden og i historikken. Selve billedet bliver ikke ændret, og i fuld skærm ser du altid hele billedet.</value>
   </data>
+  <data name="AddPhotosFromGalleryQ" xml:space="preserve">
+    <value>Kan jeg tilføje billeder fra mit galleri til en plante på en gang?</value>
+  </data>
+  <data name="AddPhotosFromGalleryA1" xml:space="preserve">
+    <value>Ja. Åbn &lt;em&gt;Tilføj billeder&lt;/em&gt; fra kameraknappen på Planter. Vælg billeder fra dit galleri, fjern fluebenet ved dem du ikke vil have, vælg den plante eller formering de hører til, og tryk &lt;em&gt;Tilføj&lt;/em&gt;. Eller start en &lt;em&gt;Ny plante&lt;/em&gt; eller &lt;em&gt;Ny formering&lt;/em&gt; ud fra dem. Hvert billede lander på den dag det blev taget.</value>
+  </data>
+  <data name="AddPhotosFromGalleryA2" xml:space="preserve">
+    <value>På Android kan du også dele billeder direkte til Stikling fra galleriets delingsmenu. Det virker kun når appen er installeret fra Chrome, Edge eller Samsung Internet. Brave og Firefox laver ikke den slags installation, så der kan appen ikke stå i delingsmenuen. &lt;em&gt;Tilføj billeder&lt;/em&gt; virker alle steder.</value>
+  </data>
+  <data name="AddPhotosFromGalleryA3" xml:space="preserve">
+    <value>Billeder der venter, bliver på denne enhed og er hverken med i en sikkerhedskopi eller synkroniseret, før du har sorteret dem. &lt;em&gt;Kassér&lt;/em&gt; tager dem kun af ventelisten, originalerne bliver i dit galleri. I dag minder dig om det, så længe der er nogle der venter.</value>
+  </data>
   <data name="AddOldPhotosFromBeforeQ" xml:space="preserve">
     <value>Kan jeg tilføje gamle billeder fra før jeg begyndte at bruge appen?</value>
   </data>
@@ -988,7 +1000,7 @@
     <value>Hvad er inderpotter og yderpotter?</value>
   </data>
   <data name="NurseryPotsOuterPotsA1" xml:space="preserve">
-    <value>En inderpotte er den enkle potte planten faktisk står i, og en yderpotte er den pæne uden hul i bunden som den står i. Nogle potter er ingen af delene og står for sig selv. Siden Potter viser én slags ad gangen og viser hvilke af dine der er i brug, og hvilke der er ledige. Beholdere til formering, fx en boks med låg, har deres egen fane. Vælger du en selvvandende potte til en plante, bliver "Vokser i" sat til LECA, og det kan du ændre bagefter.</value>
+    <value>En inderpotte er den enkle potte planten faktisk står i, og en yderpotte er den pæne uden hul i bunden som den står i. Nogle potter er ingen af delene og står for sig selv. Siden Potter viser én slags ad gangen og viser hvilke af dine der er i brug, og hvilke der er ledige. Beholdere til formering, fx en boks med låg, har deres egen fane. Vælger du en selvvandende potte til en plante, bliver "Vokser i" sat til LECA, og det kan du ændre bagefter. En potte behøver kun et navn hvis den er en beholder til formering. Til de andre kan du vælge en farve i stedet, og så navngiver appen den for dig, fx "Hvid yderpotte i keramik". Hvis du bevidst har vand i en yderpotte, enten fordi potten står i vandet eller fordi en væge går ned i det, sætter du kryds ved det på planten og vælger hvilken slags.</value>
   </data>
   <data name="MeasurePotQ" xml:space="preserve">
     <value>Hvordan måler jeg en potte?</value>
@@ -1075,7 +1087,7 @@
     <value>Hvad er et samlingsnummer?</value>
   </data>
   <data name="CollectionNumberA1" xml:space="preserve">
-    <value>Det korte nummer som nogle skriver på hver potte, fx 117. Det er valgfrit. Du sætter det i feltet &lt;em&gt;Samlingsnummer&lt;/em&gt; i plantens redigeringsformular, hvor det næste ledige nummer er et tryk væk. En stikling af plante 117 får 117a og så 117b, så etiketten på glasset viser hvor den kommer fra. Når en stikling bliver pottet op, beholder planten sit nummer. Bliver flere pottet op samtidig, får de 117c1, 117c2 og så videre. Vil du nummerere de planter du allerede har, med de ældste først, åbner du &lt;em&gt;Samlingsnumre&lt;/em&gt; i Indstillinger. Har to planter samme nummer, bliver det vist, men Stikling ændrer aldrig et nummer for dig.</value>
+    <value>Det korte nummer som nogle skriver på hver potte, fx 117. Det er valgfrit. Du sætter det i feltet &lt;em&gt;Samlingsnummer&lt;/em&gt; i plantens redigeringsformular, hvor det næste ledige nummer er et tryk væk. En stikling af plante 117 får 117a og så 117b, så dens etiket viser hvor den kommer fra. Når en stikling bliver pottet op, beholder planten sit nummer. Bliver flere pottet op samtidig, får de 117c1, 117c2 og så videre. Vil du nummerere de planter du allerede har, med de ældste først, åbner du &lt;em&gt;Samlingsnumre&lt;/em&gt; i Indstillinger. Har to planter samme nummer, bliver det vist, men Stikling ændrer aldrig et nummer for dig.</value>
   </data>
   <data name="PrintLabelsQ" xml:space="preserve">
     <value>Hvordan udskriver jeg etiketter?</value>

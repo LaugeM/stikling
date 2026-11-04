@@ -7,7 +7,8 @@ self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
 // Only the app's own files go through the worker. Calls to the API, Clerk and Sentry go straight to the
 // network, so they never keep an old worker busy and hold up a new version taking over.
 self.addEventListener('fetch', event => {
-    if (event.request.url.startsWith(baseUrl.href)) event.respondWith(onFetch(event));
+    if (isShareTarget(event.request)) event.respondWith(onShareTarget(event.request));
+    else if (event.request.url.startsWith(baseUrl.href)) event.respondWith(onFetch(event));
 });
 
 // The app shows a "new version ready" bar; this lets its Reload button take over straight away
@@ -49,6 +50,42 @@ self.addEventListener('notificationclick', event => {
         await self.clients.openWindow(target);
     })());
 });
+
+// Photos shared to the app from Android's share menu arrive as a POST to share-target. They wait in
+// the stikling-share-inbox cache (named without the offline-cache- prefix, so an update leaves it alone)
+// until the person sends them to a plant on the Add photos page. The bytes are kept as they came, so
+// the camera date survives.
+async function onShareTarget(request) {
+    const scope = self.registration.scope;
+    let partial = false;
+    try {
+        const form = await request.formData();
+        const cache = await caches.open('stikling-share-inbox');
+        for (const file of form.getAll('photos')) {
+            if (!(file instanceof File) || !file.type.startsWith('image/')) continue;
+            // One file that can't be kept (a full disk, say) must not drop the ones after it
+            try {
+                await cache.put(`${scope}share-inbox/${crypto.randomUUID()}`, new Response(file, {
+                    headers: {
+                        'Content-Type': file.type,
+                        'X-File-Name': encodeURIComponent(file.name),
+                        'X-Last-Modified': String(file.lastModified)
+                    }
+                }));
+            } catch (error) {
+                partial = true;
+                console.warn('Service worker: could not store a shared photo', error);
+            }
+        }
+    } catch (error) {
+        partial = true;
+        console.warn('Service worker: could not read shared photos', error);
+    }
+    return Response.redirect(scope + (partial ? 'add-photos?partial=1' : 'add-photos'), 303);
+}
+
+const isShareTarget = request =>
+    request.method === 'POST' && request.url.split('?')[0] === `${self.registration.scope}share-target`;
 
 const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;

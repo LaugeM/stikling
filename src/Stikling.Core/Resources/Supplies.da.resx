@@ -51,14 +51,8 @@
   <data name="MixAmountNegative" xml:space="preserve">
     <value>En mængde kan ikke være under 0.</value>
   </data>
-  <data name="PotDefaultName" xml:space="preserve">
-    <value>Potte</value>
-  </data>
   <data name="PotNeedsNameContainer" xml:space="preserve">
     <value>Giv beholderen et navn, fx "Klar boks med låg".</value>
-  </data>
-  <data name="PotNeedsNamePot" xml:space="preserve">
-    <value>Giv potten et navn, fx "Klar inderpotte".</value>
   </data>
   <data name="PotNeedsOne" xml:space="preserve">
     <value>Du skal have mindst én.</value>
@@ -128,5 +122,71 @@
   </data>
   <data name="IngredientCharcoal" xml:space="preserve">
     <value>Trækul</value>
+  </data>
+  <data name="PotNameColourMaterial" xml:space="preserve">
+    <value>{0} {2} i {1}</value>
+  </data>
+  <data name="PotNameColour" xml:space="preserve">
+    <value>{0} {2}</value>
+  </data>
+  <data name="PotNameMaterial" xml:space="preserve">
+    <value>{2} i {1}</value>
+  </data>
+  <data name="PotNameKind" xml:space="preserve">
+    <value>{2}</value>
+  </data>
+  <data name="PotKindInnerName" xml:space="preserve">
+    <value>inderpotte</value>
+  </data>
+  <data name="PotKindOuterName" xml:space="preserve">
+    <value>yderpotte</value>
+  </data>
+  <data name="PotKindStandaloneName" xml:space="preserve">
+    <value>potte</value>
+  </data>
+  <data name="MaterialPlasticName" xml:space="preserve">
+    <value>plastik</value>
+  </data>
+  <data name="MaterialCeramicName" xml:space="preserve">
+    <value>keramik</value>
+  </data>
+  <data name="MaterialTerracottaName" xml:space="preserve">
+    <value>terrakotta</value>
+  </data>
+  <data name="MaterialGlassName" xml:space="preserve">
+    <value>glas</value>
+  </data>
+  <data name="MaterialMetalName" xml:space="preserve">
+    <value>metal</value>
+  </data>
+  <data name="PotColourWhite" xml:space="preserve">
+    <value>Hvid</value>
+  </data>
+  <data name="PotColourBlack" xml:space="preserve">
+    <value>Sort</value>
+  </data>
+  <data name="PotColourGrey" xml:space="preserve">
+    <value>Grå</value>
+  </data>
+  <data name="PotColourClear" xml:space="preserve">
+    <value>Klar</value>
+  </data>
+  <data name="PotColourBeige" xml:space="preserve">
+    <value>Beige</value>
+  </data>
+  <data name="PotColourBrown" xml:space="preserve">
+    <value>Brun</value>
+  </data>
+  <data name="PotColourGreen" xml:space="preserve">
+    <value>Grøn</value>
+  </data>
+  <data name="PotColourBlue" xml:space="preserve">
+    <value>Blå</value>
+  </data>
+  <data name="PotColourPink" xml:space="preserve">
+    <value>Lyserød</value>
+  </data>
+  <data name="PotColourPatterned" xml:space="preserve">
+    <value>Mønstret</value>
   </data>
 </root>

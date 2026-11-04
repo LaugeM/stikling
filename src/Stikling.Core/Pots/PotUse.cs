@@ -45,7 +45,7 @@ public sealed record PotUse(Pot Pot, int InUse, int Gone)
                 ? new PotUse(pot, inContainer.GetValueOrDefault(pot.Id), 0)
                 : new PotUse(pot, alive.Count(p => p.Uses(pot.Id)), alive.Count(p => p.TookAway(pot.Id))))
             .OrderBy(use => use.Pot.Kind)
-            .ThenBy(use => use.Pot.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(use => use.Pot.FamilyName, StringComparer.CurrentCultureIgnoreCase)
             .ThenBy(use => use.Pot.TopCm ?? decimal.MaxValue)
             .ToList();
     }
@@ -68,7 +68,7 @@ public sealed record PotUse(Pot Pot, int InUse, int Gone)
         }
         return all
             .OrderByDescending(u => latest.GetValueOrDefault(u.Pot.Id))
-            .ThenBy(u => u.Pot.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(u => u.Pot.FamilyName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
     }
 

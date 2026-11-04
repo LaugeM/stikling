@@ -58,6 +58,8 @@ public static partial class HistoryText
         Add("PotsStayed");
         Add("WateredInOuterPot");
         Add("NotWateredInOuterPot");
+        Add("OuterPotWick");
+        Add("OuterPotSubmerged");
         Add("Tagged", Txt());
         Add("Untagged", Txt());
         Add("PutInQuarantine");

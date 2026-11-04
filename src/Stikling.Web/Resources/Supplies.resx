@@ -559,7 +559,7 @@
     <value>Identical containers are one entry. Say how many you have below.</value>
   </data>
   <data name="PotsPotNameHint" xml:space="preserve">
-    <value>Every size of the same pot shares a name, so they stay together in the list.</value>
+    <value>Every size of the same pot shares a name, so they stay together in the list. Leave it empty and the pot is named from its colour and material, like "White ceramic outer pot".</value>
   </data>
   <data name="PotsPhotos" xml:space="preserve">
     <value>Photos</value>
@@ -670,7 +670,7 @@
     <value>Add the ones you use most first. A set of nursery pots is one entry per size, with how many of that size you have.</value>
   </data>
   <data name="PotsHintOuter" xml:space="preserve">
-    <value>An outer pot has no hole in the bottom and holds a nursery pot. Give each one a photo, so similar ones are easy to tell apart when you pick one for a plant.</value>
+    <value>An outer pot has no hole in the bottom and holds a nursery pot. Give each one a photo or a colour, so similar ones are easy to tell apart when you pick one for a plant.</value>
   </data>
   <data name="PotsHintStandalone" xml:space="preserve">
     <value>A pot with a hole and a saucer, or a self-watering pot, that needs nothing around it.</value>
@@ -973,5 +973,24 @@
   <data name="FeedsDeleteGiven" xml:space="preserve">
     <value>Delete {0}? It's been given to {1}, and those entries keep what was in it.</value>
     <comment>{0} is the name of the feed and {1} a number of plants.</comment>
+  </data>
+  <data name="PotsNameOptional" xml:space="preserve">
+    <value>Name (optional)</value>
+    <comment>Label of the name box for a pot that is not a container. Containers need a name.</comment>
+  </data>
+  <data name="PotsOuterPlaceholder" xml:space="preserve">
+    <value>e.g. Blue glazed</value>
+    <comment>Placeholder for the name of an outer pot.</comment>
+  </data>
+  <data name="PotsStandalonePlaceholder" xml:space="preserve">
+    <value>e.g. Terracotta with saucer</value>
+    <comment>Placeholder for the name of a pot that stands on its own.</comment>
+  </data>
+  <data name="PotsColour" xml:space="preserve">
+    <value>Colour</value>
+  </data>
+  <data name="PotsColourLabel" xml:space="preserve">
+    <value>The colour of the pot</value>
+    <comment>Read out by a screen reader. Tapping the colour that is picked clears it.</comment>
   </data>
 </root>

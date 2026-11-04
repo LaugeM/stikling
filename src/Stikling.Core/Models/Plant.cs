@@ -180,6 +180,19 @@ public sealed class Plant : Entity
     public bool WaterInOuterPot { get; set; }
 
     /// <summary>
+    /// How the plant takes up the water kept in the outer pot: standing in it, or with a wick
+    /// running down into it from a nursery pot that hangs above. Only means something when
+    /// <see cref="WaterInOuterPot"/> is true. Null is read as Submerged, which is what every plant
+    /// ticked before this field existed has. Use <see cref="OuterPotWateringShown"/>.
+    /// </summary>
+    public PotWatering? OuterPotWatering { get; set; }
+
+    /// <summary>The kind of water kept in the outer pot, or null when none is. Null in the field reads as Submerged.</summary>
+    [JsonIgnore]
+    public PotWatering? OuterPotWateringShown =>
+        WaterInOuterPot ? OuterPotWatering ?? PotWatering.Submerged : null;
+
+    /// <summary>
     /// Whether Today reminds you to water it, once the app has learned its pace from the care log.
     /// On unless turned off, and a plant saved before this existed reads as on.
     /// </summary>

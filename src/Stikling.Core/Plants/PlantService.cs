@@ -494,6 +494,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         plant.InnerPotId = into.InnerPotId;
         plant.OuterPotId = into.OuterPotId;
         plant.WaterInOuterPot = into.WaterInOuterPot;
+        plant.OuterPotWatering = into.OuterPotWatering;
         plant.SoilMixId = into.SoilMixId;
         plant.PlaceId = into.PlaceId;
         await UpdateAsync(before, plant, label, potName, mixName, placeName);
@@ -542,6 +543,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         plant.InnerPotId = innerPotId;
         plant.OuterPotId = null;
         plant.WaterInOuterPot = false;
+        plant.OuterPotWatering = null;
         await UpdateAsync(before, plant, label, potName);
 
         var at = time.MomentOn(date);

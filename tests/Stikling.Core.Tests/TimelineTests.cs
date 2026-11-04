@@ -133,6 +133,40 @@ public class PlantChangesTests
     }
 
     [Fact]
+    public void Switching_the_outer_pot_water_to_a_wick_is_written_down()
+    {
+        var before = Original.Copy();
+        before.OuterPotId = Guid.NewGuid();
+        before.WaterInOuterPot = true;
+        var edited = before.Copy();
+        edited.OuterPotWatering = PotWatering.Wick;
+
+        Assert.Equal(["Now has a wick into the outer pot's water"], PlantChanges.Describe(before, edited, Label));
+        Assert.Equal(["Now sits in the outer pot's water"], PlantChanges.Describe(edited, before, Label));
+    }
+
+    [Fact]
+    public void Choosing_submerged_on_a_plant_that_never_chose_is_no_change()
+    {
+        var before = Original.Copy();
+        before.WaterInOuterPot = true;
+        var edited = before.Copy();
+        edited.OuterPotWatering = PotWatering.Submerged;
+
+        Assert.Empty(PlantChanges.Describe(before, edited, Label));
+    }
+
+    [Fact]
+    public void Turning_the_outer_pot_water_on_with_a_wick_says_both()
+    {
+        var edited = Original.Copy();
+        edited.WaterInOuterPot = true;
+        edited.OuterPotWatering = PotWatering.Wick;
+
+        Assert.Equal(["Now watered in the outer pot", "Now has a wick into the outer pot's water"], PlantChanges.Describe(Original, edited, Label));
+    }
+
+    [Fact]
     public void Moving_a_plant_into_a_saved_mix_is_written_down()
     {
         var edited = Original.Copy();
