@@ -23,7 +23,7 @@
 }
 else
 {
-    <EditForm Model="propagation" OnSubmit="SaveAsync" class="edit-form" novalidate>
+    <EditForm Model="propagation" OnSubmit="SaveAsync" class="edit-form form-split" novalidate>
         @if (errors.Count > 0)
         {
             <div id="form-errors" class="alert alert-danger" role="alert" tabindex="-1">
@@ -34,6 +34,7 @@ else
             </div>
         }
 
+        <div class="form-split-main">
         @if (IsNew)
         {
             <p class="form-text">@Strings.Propagations.EditIntro</p>
@@ -221,6 +222,9 @@ else
             </fieldset>
         }
 
+        </div>
+
+        <div class="form-split-more">
         <h2 class="section-label">@Strings.Propagations.EditMoreDetails</h2>
         <div class="more-details mb-4">
             <FormSection Title="@Strings.Propagations.EditWhere" Summary="@form!.Location" Open="openWhere">
@@ -430,6 +434,7 @@ else
                     </div>
                 }
             </FormSection>
+        </div>
         </div>
 
         <div class="form-actions form-bar">
