@@ -6,6 +6,7 @@
 @inject PlantService PlantService
 @inject PlantCareService CommonCare
 @inject PhotoService Photos
+@inject ShareInbox Inbox
 @inject GooglePhotosService Google
 @inject NavigationManager Navigation
 @inject TimeProvider Time
@@ -589,6 +590,9 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // Not only the first render: that one comes at the first await in OnParametersSetAsync, before the form exists
+        await TakeInboxPhotosAsync();
+
         if (!showErrors)
             return;
         showErrors = false;
@@ -610,6 +614,45 @@ else
     /// <summary>Starts from a wish on the wishlist, from Got it. Once the plant is saved the wish moves to Got.</summary>
     [SupplyParameterFromQuery(Name = "wish")]
     public Guid? WishId { get; set; }
+
+    /// <summary>The waiting photos to start from, as ids in the share inbox separated by commas, from Add photos.</summary>
+    [SupplyParameterFromQuery(Name = "inbox")]
+    public string? InboxIds { get; set; }
+
+    // The inbox photos that were saved with the form. They leave the inbox once the plant is saved
+    private List<string> inboxSaved = [];
+    private bool inboxTaken;
+
+    private async Task TakeInboxPhotosAsync()
+    {
+        if (inboxTaken || !IsNew || plant is null || string.IsNullOrWhiteSpace(InboxIds))
+            return;
+        inboxTaken = true;
+
+        busy = true;
+        photoStatus = Strings.PlantEdit.SavingPhotos;
+        StateHasChanged();
+
+        try
+        {
+            var ids = InboxIds.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var saved = await Inbox.SaveAsync(ids, SubjectType.Plant, plant.Id);
+            photos.AddRange(saved.Result.Saved);
+            inboxSaved.AddRange(saved.SavedIds);
+            if (saved.Result.Failed > 0 || saved.Result.Saved.Count != ids.Length)
+                Logger.LogWarning("Waiting photos for a new plant: asked for {Asked}, saved {Saved}, failed {Failed}", ids.Length, saved.Result.Saved.Count, saved.Result.Failed);
+            photoStatus = saved.Result.Message(guessesMatter: true);
+            FollowPhotoDates();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding waiting photos to a plant failed");
+            photoStatus = F(Strings.PlantEdit.PhotosFailed, ex.Message);
+        }
+
+        busy = false;
+        StateHasChanged();
+    }
 
     /// <summary>The names to start a new plant with, from the plant dictionary.</summary>
     [SupplyParameterFromQuery(Name = "genus")]
@@ -1056,6 +1099,22 @@ else
             LeaveOffer();
     }
 
+    // Only once the plant is saved do the photos stop waiting. A failure here is not a failed save
+    private async Task RemoveFromInboxAsync()
+    {
+        if (inboxSaved.Count == 0)
+            return;
+        try
+        {
+            await Inbox.RemoveAsync(inboxSaved);
+            inboxSaved = [];
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Taking the photos out of the share inbox failed");
+        }
+    }
+
     private async Task SaveAsync()
     {
         if (form is null)
@@ -1074,7 +1133,10 @@ else
             }
 
             if (result.Created)
+            {
                 photos.Clear(); // they belong to the saved plant now
+                await RemoveFromInboxAsync();
+            }
             // The plant is saved by now, so a wish that can't be moved or a history line that failed is logged, not a failed save
             if (result.LaterError is { } later)
                 Logger.LogError(later, "A step after saving the plant failed");

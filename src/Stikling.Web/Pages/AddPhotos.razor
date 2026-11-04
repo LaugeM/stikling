@@ -1,0 +1,380 @@
+@page "/add-photos"
+@layout WideLayout
+@using System.Globalization
+@using System.Net
+@implements IAsyncDisposable
+@inject ShareInbox Inbox
+@inject SubjectPhotos SubjectPhotos
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject CoverPhotos Covers
+@inject ILogger<AddPhotos> Logger
+
+<PageTitle>@Strings.AddPhotos.PageTitle</PageTitle>
+<ReloadOnSync Reload="LoadDestinationsAsync" />
+
+<a class="back-link" href="plants">@Strings.Common.Back</a>
+<h1>@Strings.AddPhotos.Title</h1>
+
+@if (Partial == "1")
+{
+    <div class="alert alert-danger" role="alert">@Strings.AddPhotos.SharePartial</div>
+}
+
+@* One input for every "Choose" button on the page, so choosing from the empty state and choosing more work the same *@
+<input id="@inputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1"
+       @ref="galleryInput" @onchange="ChooseAsync" disabled="@busy" />
+
+@if (waiting is null)
+{
+    <p class="text-body-secondary">@Strings.AddPhotos.Loading</p>
+}
+else if (waiting.Count == 0)
+{
+    @if (error is not null)
+    {
+        <div class="alert alert-danger" role="alert">@error</div>
+    }
+
+    @if (allSorted && addedTo is { } done)
+    {
+        <div class="empty-state ap-sorted" role="status">
+            <h2 class="ap-sorted-title">@Strings.AddPhotos.AllSorted</h2>
+            <p>@Added</p>
+            @if (notice is not null)
+            {
+                <p>@notice</p>
+            }
+            <div class="ap-sorted-links">
+                <a class="btn btn-primary" href="@SubjectThumb.LinkTo(done)">@string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.GoToSubject, NameOf(done))</a>
+                <a class="btn btn-outline-primary" href="">@Strings.AddPhotos.GoToToday</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>@Strings.AddPhotos.EmptyText</p>
+            <div class="ap-empty-action">
+                <label class="btn btn-primary @(busy ? "disabled" : null)" for="@inputId">@Strings.AddPhotos.ChooseFromGallery</label>
+            </div>
+            <p class="ap-muted">@ShareMenuNote</p>
+        </div>
+    }
+}
+else
+{
+    <div class="ap">
+        <section class="ap-photos" aria-labelledby="ap-waiting">
+            <h2 class="section-label" id="ap-waiting">@Plural.Of(waiting.Count, Strings.AddPhotos.Waiting_One, Strings.AddPhotos.Waiting_Other)</h2>
+
+            @if (addedTo is not null)
+            {
+                <p class="ap-status" role="status">@Added</p>
+            }
+            @if (notice is not null)
+            {
+                <p class="ap-status" role="status">@notice</p>
+            }
+
+            <div class="ap-tiles">
+                @foreach (var (photo, number) in waiting.Select((p, i) => (p, i + 1)))
+                {
+                    var isTicked = ticked.Contains(photo.Id);
+                    <button type="button" role="checkbox" aria-checked="@(isTicked ? "true" : "false")"
+                            aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.TileLabel, number)"
+                            class="ap-tile @(isTicked ? "ticked" : "left-out")" disabled="@busy"
+                            @onclick="() => Toggle(photo.Id)">
+                        <img src="@photo.Url" alt="" />
+                        @if (isTicked)
+                        {
+                            <svg class="ap-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9" /></svg>
+                        }
+                    </button>
+                }
+            </div>
+
+            <div class="ap-photo-actions">
+                <label class="btn btn-outline-primary @(busy ? "disabled" : null)" for="@inputId">@Strings.AddPhotos.ChooseMore</label>
+                @if (!confirmingDiscard)
+                {
+                    <button type="button" class="btn btn-link link-action text-danger" disabled="@(busy || ticked.Count == 0)" @onclick="() => confirmingDiscard = true">@Strings.AddPhotos.Discard</button>
+                }
+            </div>
+
+            @if (confirmingDiscard)
+            {
+                <div class="confirm-card confirm-card-danger" role="alert">
+                    <p class="mb-2">@Plural.Of(ticked.Count, Strings.AddPhotos.DiscardConfirm_One, Strings.AddPhotos.DiscardConfirm_Other)</p>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-danger" disabled="@busy" @onclick="DiscardAsync">@Strings.AddPhotos.Discard</button>
+                        <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => confirmingDiscard = false">@Strings.Common.Cancel</button>
+                    </div>
+                </div>
+            }
+        </section>
+
+        <section class="ap-dest" aria-labelledby="ap-where">
+            <h2 class="section-label ap-where" id="ap-where">@Strings.AddPhotos.WhereLabel</h2>
+
+            <input type="search" class="form-control ap-search" aria-label="@Strings.AddPhotos.SearchPlaceholder"
+                   placeholder="@Strings.AddPhotos.SearchPlaceholder" autocomplete="off" enterkeyhint="search"
+                   @bind="Search" @bind:event="oninput" />
+
+            <div class="ap-new">
+                <a class="btn btn-outline-primary @(ticked.Count == 0 ? "disabled" : null)" href="@NewUrl("plants/new")"
+                   aria-disabled="@(ticked.Count == 0 ? "true" : null)" tabindex="@(ticked.Count == 0 ? -1 : null)">@Strings.AddPhotos.NewPlant</a>
+                <a class="btn btn-outline-primary @(ticked.Count == 0 ? "disabled" : null)" href="@NewUrl("propagations/new")"
+                   aria-disabled="@(ticked.Count == 0 ? "true" : null)" tabindex="@(ticked.Count == 0 ? -1 : null)">@Strings.AddPhotos.NewPropagation</a>
+            </div>
+
+            @if (destinations.Count == 0)
+            {
+                <div class="empty-state ap-none">
+                    <p>@(string.IsNullOrWhiteSpace(search) ? Strings.AddPhotos.NoDestinations : Strings.AddPhotos.NoMatch)</p>
+                </div>
+            }
+            else
+            {
+                <ul class="item-list ap-list">
+                    @foreach (var subject in destinations)
+                    {
+                        var isSelected = subject.Id == selectedId;
+                        <li>
+                            <button type="button" class="item-card ap-row @(isSelected ? "selected" : null)" aria-pressed="@(isSelected ? "true" : "false")"
+                                    @onclick="() => Select(subject.Id)">
+                                <SubjectThumb Subject="subject" />
+                                <span class="item-text">
+                                    <span class="item-name">@NameOf(subject)</span>
+                                    <span class="ap-kind">@(subject is Plant ? Strings.AddPhotos.KindPlant : Strings.AddPhotos.KindPropagation)</span>
+                                </span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            }
+
+            <div class="form-bar ap-bar">
+                <button type="button" class="btn btn-primary" disabled="@(busy || ticked.Count == 0 || Selected is null)" @onclick="SendAsync">
+                    @(busy ? Strings.AddPhotos.Adding : ticked.Count == 0 ? Strings.AddPhotos.Add_None : Plural.Of(ticked.Count, Strings.AddPhotos.Add_One, Strings.AddPhotos.Add_Other))
+                </button>
+                @if (error is not null)
+                {
+                    <div class="alert alert-danger ap-error" role="alert">@error</div>
+                }
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    /// <summary>"1" when the share menu handed over photos that couldn't all be kept.</summary>
+    [SupplyParameterFromQuery(Name = "partial")]
+    public string? Partial { get; set; }
+
+    private readonly string inputId = $"ap-input-{Guid.NewGuid():N}";
+    private ElementReference galleryInput;
+
+    private IReadOnlyList<WaitingPhoto>? waiting;
+    private readonly HashSet<string> ticked = [];
+
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Propagation> propagations = [];
+    private IReadOnlyList<Entity> destinations = [];
+    private Guid? selectedId;
+    private string search = "";
+
+    private bool busy;
+    private bool confirmingDiscard;
+    private string? error;
+    private string? notice;
+
+    // What the last send did, for the line that says so and for the All sorted page
+    private Entity? addedTo;
+    private int addedCount;
+    private bool allSorted;
+
+    private string Search
+    {
+        get => search;
+        set
+        {
+            search = value;
+            Filter();
+        }
+    }
+
+    private Entity? Selected => destinations.FirstOrDefault(d => d.Id == selectedId);
+
+    private static string NameOf(Entity subject) =>
+        subject is Propagation propagation ? propagation.ListName : ((Plant)subject).DisplayName;
+
+    private MarkupString Added
+    {
+        get
+        {
+            if (addedTo is not { } subject)
+                return new MarkupString("");
+
+            // The name is something a person typed, so it is encoded. The rest comes from the resource files
+            var link = $"<a href=\"{SubjectThumb.LinkTo(subject)}\">{WebUtility.HtmlEncode(NameOf(subject))}</a>";
+            var text = string.Format(CultureInfo.CurrentCulture,
+                addedCount == 1 ? Strings.AddPhotos.Added_One : Strings.AddPhotos.Added_Other, addedCount, link);
+            return new MarkupString(text);
+        }
+    }
+
+    private MarkupString ShareMenuNote
+    {
+        get
+        {
+            var link = $"<a href=\"help\">{WebUtility.HtmlEncode(Strings.AddPhotos.ShareMenuNoteLink)}</a>";
+            return new MarkupString(string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.ShareMenuNote, link));
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDestinationsAsync();
+        await LoadWaitingAsync(tickAll: true);
+    }
+
+    private async Task LoadDestinationsAsync()
+    {
+        plants = await PlantRepository.GetAllAsync();
+        propagations = await PropagationRepository.GetAllAsync();
+        await Covers.EnsureLoadedAsync();
+        Filter();
+        if (selectedId is { } id && !destinations.Any(d => d.Id == id) && string.IsNullOrWhiteSpace(search))
+            selectedId = null;
+    }
+
+    private void Filter() => destinations = PhotoDestinations.Pick(plants, propagations, search);
+
+    private async Task LoadWaitingAsync(bool tickAll)
+    {
+        try
+        {
+            var found = await Inbox.ListAsync();
+            var known = waiting?.Select(w => w.Id).ToHashSet() ?? [];
+            var ids = found.Select(w => w.Id).ToHashSet();
+            ticked.RemoveWhere(id => !ids.Contains(id));
+            foreach (var photo in found.Where(w => tickAll || !known.Contains(w.Id)))
+                ticked.Add(photo.Id);
+            waiting = found;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Reading the share inbox failed");
+            waiting ??= [];
+            error = string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.ReadFailed, ex.Message);
+        }
+    }
+
+    private void Toggle(string id)
+    {
+        if (!ticked.Remove(id))
+            ticked.Add(id);
+        confirmingDiscard = false;
+    }
+
+    private void Select(Guid id) => selectedId = selectedId == id ? null : id;
+
+    private string? NewUrl(string page) =>
+        ticked.Count == 0 || waiting is null
+            ? null
+            : $"{page}?inbox={string.Join(",", waiting.Where(w => ticked.Contains(w.Id)).Select(w => w.Id))}";
+
+    private async Task ChooseAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await Inbox.AddFromInputAsync(galleryInput);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding photos to the share inbox failed");
+            error = string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.ChooseFailed, ex.Message);
+        }
+
+        allSorted = false;
+        await LoadWaitingAsync(tickAll: false);
+        busy = false;
+    }
+
+    private async Task SendAsync()
+    {
+        if (Selected is not { } subject || waiting is null || ticked.Count == 0)
+            return;
+
+        busy = true;
+        error = null;
+        notice = null;
+        addedTo = null;
+        allSorted = false;
+        confirmingDiscard = false;
+
+        try
+        {
+            var ids = waiting.Where(w => ticked.Contains(w.Id)).Select(w => w.Id).ToList();
+            var type = subject is Plant ? SubjectType.Plant : SubjectType.Propagation;
+            var saved = await Inbox.SaveAsync(ids, type, subject.Id);
+            var (_, any) = await SubjectPhotos.FinishAsync(subject, saved.Result);
+
+            // Only what was saved leaves the inbox, so a photo that couldn't be read stays waiting
+            if (any)
+            {
+                await Inbox.RemoveAsync(saved.SavedIds);
+                addedTo = subject;
+                addedCount = saved.Result.Saved.Count;
+            }
+            notice = saved.Result.Message(guessesMatter: true);
+
+            await LoadWaitingAsync(tickAll: true);
+            allSorted = any && waiting is { Count: 0 };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding waiting photos failed");
+            error = string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.SaveFailed, ex.Message);
+        }
+
+        busy = false;
+    }
+
+    private async Task DiscardAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await Inbox.RemoveAsync(ticked.ToList());
+            confirmingDiscard = false;
+            addedTo = null;
+            notice = null;
+            allSorted = false;
+            await LoadWaitingAsync(tickAll: true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Discarding waiting photos failed");
+            error = string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.DiscardFailed, ex.Message);
+        }
+
+        busy = false;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await Inbox.ReleaseAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+    }
+}

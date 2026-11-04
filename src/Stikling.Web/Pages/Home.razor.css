@@ -27,6 +27,12 @@
     min-width: 12rem;
 }
 
+.reminder .reminder-btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
 .reminder b {
     font-family: var(--pa-font-display);
 }
