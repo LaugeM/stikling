@@ -129,7 +129,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
     {
         var plan = PhotoFolders.Plan(
             await db.GetAllAsync<Plant>(Stores.Plants), await db.GetAllAsync<Propagation>(Stores.Propagations),
-            await db.GetAllAsync<Pot>(Stores.Pots), await db.GetAllAsync<Photo>(Stores.Photos), options, time.LocalTimeZone);
+            await db.GetAllAsync<Pot>(Stores.Pots), await db.GetAllAsync<Photo>(Stores.Photos), options, time.LocalTimeZone,
+            new Stikling.Core.Rooms.Places(await db.GetAllAsync<Place>(Stores.Places)));
 
         if (plan.Count == 0)
             return new PhotoFolderSummary(0, 0);
