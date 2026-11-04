@@ -31,16 +31,18 @@ function stopTracks(video) {
         video.srcObject = null;
 }
 
-// Returns false when the camera was stopped while it was waiting for permission
+// Returns "ok", "stopped" when the camera was stopped while it waited for permission, or "hidden"
+// when the tab went to the background meanwhile
 async function open(video) {
     const seen = stops;
     const opened = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: { facingMode: { ideal: "environment" }, width: { ideal: 2560 }, height: { ideal: 1920 } }
     });
-    if (seen !== stops) {
+    // Stopped meanwhile, or the tab went to the background while waiting: the tab coming back starts it again
+    if (seen !== stops || document.hidden) {
         opened.getTracks().forEach(track => track.stop());
-        return false;
+        return seen !== stops ? "stopped" : "hidden";
     }
 
     stream = opened;
@@ -48,7 +50,7 @@ async function open(video) {
     video.playsInline = true;
     video.srcObject = opened;
     await video.play();
-    return true;
+    return "ok";
 }
 
 // The camera is released when the tab is hidden, so it isn't left on in the background
@@ -72,7 +74,7 @@ export async function start(video) {
     try {
         if (!navigator.mediaDevices?.getUserMedia)
             return "none";
-        if (!await open(video))
+        if (await open(video) === "stopped")
             return "failed";
         active = video;
         document.addEventListener("visibilitychange", onVisibility);
@@ -112,7 +114,15 @@ export async function capture(video) {
 
         const file = new File([blob], "camera.jpg", { type: "image/jpeg", lastModified: Date.now() });
         const details = await saveFile(file);
-        return details ? { saved: [details], failed: 0 } : { saved: [], failed: 1 };
+        if (!details)
+            return { saved: [], failed: 1 };
+
+        // The camera date in the EXIF form, local time, so the photo isn't counted as undated
+        const now = new Date();
+        const two = n => String(n).padStart(2, "0");
+        details.cameraDate = `${now.getFullYear()}:${two(now.getMonth() + 1)}:${two(now.getDate())} `
+            + `${two(now.getHours())}:${two(now.getMinutes())}:${two(now.getSeconds())}`;
+        return { saved: [details], failed: 0 };
     } catch {
         return { saved: [], failed: 1 };
     }

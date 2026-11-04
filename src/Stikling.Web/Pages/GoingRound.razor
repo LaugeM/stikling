@@ -542,8 +542,9 @@ else
     private async Task CameraTakenAsync(PhotoSaveResult shot)
     {
         cameraOpen = false;
-        if (busy)
-            return;
+        // The shot is stored already, so it is never dropped: it waits for what is running
+        while (busy)
+            await Task.Delay(50);
         busy = true;
         status = Strings.Care.PhotoRowSaving;
         try
