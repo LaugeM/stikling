@@ -825,4 +825,60 @@
     <value>You can download everything the server holds about you with &lt;em&gt;Download your data&lt;/em&gt; on the Account page in Settings. It's a ZIP with your plants and everything else you added, deleted things as they are kept, your photos, your settings, and what Clerk has about you. A backup, under Backup and storage, has what is on the device you make it on. You can change anything in the app, and delete your account whenever you like. For anything else, like a question about what is kept, write to &lt;a href="mailto:support@stikling.app"&gt;support@stikling.app&lt;/a&gt;. If you think your data is handled wrongly, you can complain to the Danish Data Protection Agency, &lt;a href="https://www.datatilsynet.dk"&gt;Datatilsynet&lt;/a&gt;.</value>
     <comment>Contains HTML. Keep the tags and the addresses. The Danish Data Protection Agency is Datatilsynet in Danish.</comment>
   </data>
+  <data name="PasskeysHeading" xml:space="preserve">
+    <value>Passkeys</value>
+    <comment>Sub-heading on the Account page.</comment>
+  </data>
+  <data name="PasskeysHint" xml:space="preserve">
+    <value>Sign in with your fingerprint, face or screen lock instead of typing anything.</value>
+  </data>
+  <data name="PasskeyDefaultName" xml:space="preserve">
+    <value>Passkey</value>
+    <comment>Shown for a passkey that has no name.</comment>
+  </data>
+  <data name="PasskeyAdded" xml:space="preserve">
+    <value>Added {0}</value>
+    <comment>Under a passkey. {0} is a date.</comment>
+  </data>
+  <data name="PasskeyAddedLastUsed" xml:space="preserve">
+    <value>Added {0} · Last used {1}</value>
+    <comment>Under a passkey that has been used. {0} and {1} are dates.</comment>
+  </data>
+  <data name="PasskeyLastUsed" xml:space="preserve">
+    <value>Last used {0}</value>
+    <comment>Under a passkey with no date for when it was added. {0} is a date.</comment>
+  </data>
+  <data name="PasskeyRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="PasskeyRemoveHeading" xml:space="preserve">
+    <value>Remove this passkey?</value>
+  </data>
+  <data name="PasskeyRemoveExplain" xml:space="preserve">
+    <value>You can still sign in the other ways you set up. Remove it from your device's password manager too if you no longer want it there.</value>
+  </data>
+  <data name="PasskeyAdd" xml:space="preserve">
+    <value>Add a passkey</value>
+  </data>
+  <data name="PasskeyAddedMessage" xml:space="preserve">
+    <value>Passkey added. Next time, choose the passkey option when you sign in.</value>
+    <comment>Shown after adding a passkey.</comment>
+  </data>
+  <data name="PasskeyExists" xml:space="preserve">
+    <value>This device already has a passkey for Stikling.</value>
+  </data>
+  <data name="PasskeyAddAgain" xml:space="preserve">
+    <value>Thanks. Tap Add a passkey once more to finish.</value>
+    <comment>Shown after the person confirmed it's them, since the browser needs a new tap to make the passkey.</comment>
+  </data>
+  <data name="PasskeyAddFailed" xml:space="preserve">
+    <value>Couldn't add the passkey. Try again.</value>
+  </data>
+  <data name="PasskeyRemoveFailed" xml:space="preserve">
+    <value>Couldn't remove the passkey. Try again.</value>
+  </data>
+  <data name="PasskeyReverify" xml:space="preserve">
+    <value>Sign out and in again, then try once more.</value>
+    <comment>Shown when the sign-in is too old to change passkeys and the confirmation couldn't be shown.</comment>
+  </data>
 </root>
