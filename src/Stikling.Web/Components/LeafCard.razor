@@ -1,0 +1,60 @@
+@* The Leaves card on a plant's or cutting's page: the newest leaf's trend as one plain line, then the
+   leaves newest first. A row opens that leaf for changing. Shown only when there is a leaf. *@
+@if (Leaves.Count > 0)
+{
+    <section class="detail-card">
+        <h2>@Strings.Shared.LeafHeading</h2>
+        @if (trend != LeafTrend.None)
+        {
+            <p class="leaf-trend">@(trend == LeafTrend.NewestReverted ? Strings.Shared.LeafNewestReverted : Strings.Shared.LeafLessTwice)</p>
+        }
+        <ul class="flowering-rows leaf-rows">
+            @foreach (var item in (showAll ? Leaves : Leaves.Take(Fewer)))
+            {
+                var shown = item;
+                <li>
+                    <button type="button" class="flowering-row leaf-row" @onclick="() => OnOpen.InvokeAsync(shown.Leaf)">
+                        @if (Thumbnail(shown.Leaf) is { } photoId)
+                        {
+                            <span class="leaf-thumb"><PhotoImage PhotoId="photoId" Alt="@Strings.Shared.LeafPhotoOf" /></span>
+                        }
+                        <b>@(shown.Leaf.Rating is { } rating ? LeafText.Rating(rating) : "")</b>
+                        <span class="text-body-secondary">@Labels.Date(shown.Leaf.On)</span>
+                        @if (shown.AsCutting)
+                        {
+                            <span class="text-body-secondary small">@Strings.Shared.LeafAsCutting</span>
+                        }
+                    </button>
+                </li>
+            }
+        </ul>
+        @if (Leaves.Count > Fewer && !showAll)
+        {
+            <p class="family-hint">
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => showAll = true">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.LeafShowAll, Leaves.Count)</button>
+            </p>
+        }
+    </section>
+}
+
+@code {
+    private const int Fewer = 6;
+
+    /// <summary>Newest first, the leaves of the page's subject and any carried over from its cutting.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<LoggedLeaf> Leaves { get; set; } = [];
+
+    /// <summary>The photo to show small on a leaf's row, if its history line has one.</summary>
+    [Parameter]
+    public Func<Leaf, Guid?>? PhotoOf { get; set; }
+
+    [Parameter]
+    public EventCallback<Leaf> OnOpen { get; set; }
+
+    private bool showAll;
+    private LeafTrend trend;
+
+    protected override void OnParametersSet() => trend = LeafTrends.Of(Leaves.Select(l => l.Leaf));
+
+    private Guid? Thumbnail(Leaf leaf) => PhotoOf?.Invoke(leaf);
+}

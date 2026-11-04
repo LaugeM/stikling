@@ -1366,4 +1366,64 @@ Maybe</value>
     <value>{0} photos had no date saved in them, so their days are a guess. Check that they landed on the right days.</value>
     <comment>Shown after adding photos. {0} is how many photos had no date.</comment>
   </data>
+  <data name="LeafPhotoHint" xml:space="preserve">
+    <value>A photo of the new leaf helps you compare later.</value>
+    <comment>Hint under the photo buttons when logging a new leaf.</comment>
+  </data>
+  <data name="LeafHowVariegated" xml:space="preserve">
+    <value>How variegated is it?</value>
+    <comment>Label above the five choices from Reverted to All white.</comment>
+  </data>
+  <data name="LeafDay" xml:space="preserve">
+    <value>Day</value>
+    <comment>Label of the day a new leaf is logged for.</comment>
+  </data>
+  <data name="LeafAddNote" xml:space="preserve">
+    <value>Add a note</value>
+    <comment>Button that shows the note field when logging a leaf.</comment>
+  </data>
+  <data name="LeafNote" xml:space="preserve">
+    <value>Note</value>
+    <comment>Label of the note on a leaf.</comment>
+  </data>
+  <data name="LeafRemoveConfirm" xml:space="preserve">
+    <value>Remove this leaf? Its photos stay in the history.</value>
+    <comment>Asked before a logged leaf is removed.</comment>
+  </data>
+  <data name="LeafMenuTitle" xml:space="preserve">
+    <value>New leaf</value>
+    <comment>Entry in the More menu and title of the sheet for logging a leaf.</comment>
+  </data>
+  <data name="LeafMenuHint" xml:space="preserve">
+    <value>Log a leaf and how variegated it is</value>
+    <comment>Small text under New leaf in the More menu.</comment>
+  </data>
+  <data name="LeafThisLeaf" xml:space="preserve">
+    <value>This leaf</value>
+    <comment>Title of the sheet for changing a logged leaf.</comment>
+  </data>
+  <data name="LeafHeading" xml:space="preserve">
+    <value>Leaves</value>
+    <comment>Heading of the card listing the logged leaves.</comment>
+  </data>
+  <data name="LeafNewestReverted" xml:space="preserve">
+    <value>The newest leaf reverted.</value>
+    <comment>Line on the Leaves card when the newest leaf is plain green.</comment>
+  </data>
+  <data name="LeafLessTwice" xml:space="preserve">
+    <value>The last two leaves had less variegation.</value>
+    <comment>Line on the Leaves card when each of the last two leaves was less variegated.</comment>
+  </data>
+  <data name="LeafShowAll" xml:space="preserve">
+    <value>Show all ({0})</value>
+    <comment>Button that shows every leaf. {0} is how many there are.</comment>
+  </data>
+  <data name="LeafAsCutting" xml:space="preserve">
+    <value>as a cutting</value>
+    <comment>Muted text on a leaf that was logged on the cutting the plant came from.</comment>
+  </data>
+  <data name="LeafPhotoOf" xml:space="preserve">
+    <value>Photo of the leaf</value>
+    <comment>Alt text of a leaf's thumbnail.</comment>
+  </data>
 </root>
