@@ -2672,9 +2672,8 @@ a.tag-label:hover {
 
 /* Same angle: only the icon, round, next to Photo */
 .page-dock > .btn.dock-angle {
-    /* The only button that gives way when a phone is narrow, so the labelled ones keep their words */
-    flex: 0 1 2.75rem;
-    min-width: 2.25rem;
+    flex: 0 0 2.75rem;
+    min-width: 2.75rem;
     padding: 0;
     border-radius: 50%;
 }

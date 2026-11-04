@@ -248,7 +248,6 @@
         error = null;
         forNote = false;
         open = true;
-        StateHasChanged();
 
         try
         {
@@ -263,6 +262,9 @@
         }
 
         CloseIfEmpty();
+
+        // The page called this, so nothing else draws the sheet with the shot in it
+        StateHasChanged();
     }
 
     /// <summary>
