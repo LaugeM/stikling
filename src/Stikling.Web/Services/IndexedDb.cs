@@ -33,6 +33,7 @@ public static class Stores
     public const string Orders = "orders";
     public const string OrderItems = "orderItems";
     public const string Leaves = "leaves";
+    public const string PhotoMarks = "photoMarks";
     public const string PropagationCareLogs = "propagationCareLogs";
     public const string Settings = "settings";
     public const string PutOffs = "putOffs";

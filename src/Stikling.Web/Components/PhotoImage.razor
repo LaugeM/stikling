@@ -37,6 +37,13 @@ else
     [Parameter]
     public bool Framed { get; set; } = true;
 
+    /// <summary>
+    /// A crop to use instead of the photo's own frame, like a close look at one spot in a bigger photo.
+    /// Only used where <see cref="Framed"/> is on.
+    /// </summary>
+    [Parameter]
+    public PhotoFrame? FrameOverride { get; set; }
+
     private string? url;
     private bool missing;
     private bool small;
@@ -44,6 +51,7 @@ else
     private PhotoFrame? frame;
     private double aspect;
     private Guid? frameFor;
+    private PhotoFrame? overrideFor;
 
     protected override void OnInitialized()
     {
@@ -54,9 +62,10 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Framed && frameFor != PhotoId)
+        if (Framed && (frameFor != PhotoId || overrideFor != FrameOverride))
         {
             frameFor = PhotoId;
+            overrideFor = FrameOverride;
             UseFrameOf(await Photos.GetDetailsAsync(PhotoId));
         }
 
@@ -118,7 +127,7 @@ else
 
     private void UseFrameOf(Photo? photo)
     {
-        frame = photo?.Frame;
+        frame = FrameOverride ?? photo?.Frame;
         aspect = photo is { Width: > 0, Height: > 0 } ? (double)photo.Width / photo.Height : 0;
     }
 
@@ -131,7 +140,7 @@ else
         _ = InvokeAsync(async () =>
         {
             var photo = await Photos.GetDetailsAsync(PhotoId);
-            if (photo?.Frame == frame)
+            if ((FrameOverride ?? photo?.Frame) == frame)
                 return;
 
             UseFrameOf(photo);

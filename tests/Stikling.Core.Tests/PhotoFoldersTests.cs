@@ -181,4 +181,29 @@ public class PhotoFoldersTests
         Assert.Equal(["Plants/Fern/2026-10-01 12-00", "Plants/Fern/Reference/2026-10-02 12-00"], all.Select(p => p.Path));
         Assert.Equal(["Plants/Fern/2026-10-01 12-00"], without.Select(p => p.Path));
     }
+
+    [Fact]
+    public void Shelf_photos_get_a_folder_for_each_place_by_its_whole_name()
+    {
+        var room = new Place { Name = "Living room", CreatedAt = Created };
+        var spot = new Place { Name = "On top of the PC", RoomId = room.Id, CreatedAt = Created.AddDays(1) };
+        var old = new Place { Name = "Lounge", CreatedAt = Created.AddDays(2), MergedIntoId = room.Id, DeletedAt = Created.AddDays(3) };
+        var places = new Stikling.Core.Rooms.Places([room, spot, old]);
+        var gone = Guid.NewGuid();
+
+        var plan = PhotoFolders.Plan([], [], [],
+            [
+                APhoto(SubjectType.Place, spot.Id, At(10, 0)),
+                APhoto(SubjectType.Place, old.Id, At(11, 0)),
+                APhoto(SubjectType.Place, gone, At(12, 0))
+            ], All, Zone, places);
+
+        Assert.Equal(
+            [
+                "Shelf photos/Living room On top of the PC/2026-10-15 12-00",
+                "Shelf photos/Living room/2026-10-15 13-00",
+                "Shelf photos/Place removed/2026-10-15 14-00"
+            ],
+            plan.Select(p => p.Path));
+    }
 }
