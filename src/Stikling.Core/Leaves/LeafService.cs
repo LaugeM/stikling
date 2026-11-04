@@ -30,7 +30,10 @@ public sealed class LeafService(ILeafRepository leaves, ITimelineRepository time
         var found = all.Where(l => l.SubjectId == plant.Id).Select(l => new LoggedLeaf(l, false)).ToList();
         if (plant.FromPropagationId is { } propagationId)
         {
-            var pottedUp = plant.AcquiredOn?.Start;
+            // The last day of the month or year when the date is only that loose
+            var pottedUp = plant.AcquiredOn is { } on
+                ? on.Day is not null ? on.Start : on.Month is not null ? on.Start.AddMonths(1).AddDays(-1) : on.Start.AddYears(1).AddDays(-1)
+                : (DateOnly?)null;
             found.AddRange(all.Where(l => l.SubjectId == propagationId && (pottedUp is null || l.On <= pottedUp))
                 .Select(l => new LoggedLeaf(l, true)));
         }

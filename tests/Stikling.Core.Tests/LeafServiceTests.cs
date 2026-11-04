@@ -131,6 +131,22 @@ public class LeafServiceTests
     }
 
     [Fact]
+    public async Task A_pot_up_date_of_only_a_month_counts_the_whole_month()
+    {
+        var s = new Setup();
+        var cutting = Guid.NewGuid();
+        var plant = new Plant { Id = s.PlantId, FromPropagationId = cutting, AcquiredOn = LooseDate.Of(2026, 10) };
+        var late = await s.Service.AddAsync(SubjectType.Propagation, cutting, Variegation.High, new DateOnly(2026, 10, 31), null, []);
+        // In November the cutting was already a plant
+        var after = new Leaf { SubjectType = SubjectType.Propagation, SubjectId = cutting, Rating = Variegation.Low, On = new DateOnly(2026, 11, 1) };
+        await s.Leaves.SaveAsync(after);
+
+        var shown = await s.Service.ForPlantAsync(plant);
+
+        Assert.Equal([late.Id], shown.Select(l => l.Leaf.Id));
+    }
+
+    [Fact]
     public async Task Without_a_pot_up_day_a_plant_shows_all_of_the_cuttings_leaves()
     {
         var s = new Setup();
