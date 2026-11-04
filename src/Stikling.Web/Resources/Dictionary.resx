@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Plant dictionary</value>
+    <comment>Heading of the plant dictionary page, the name of its row in Settings and Search, and the title of its link on a plant's page.</comment>
+  </data>
+  <data name="BackToSettings" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Back link on the plant dictionary page.</comment>
+  </data>
+  <data name="Intro" xml:space="preserve">
+    <value>Every genus and species of the groups below, with where they grow wild.</value>
+    <comment>One line under the heading of the plant dictionary page.</comment>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search the dictionary</value>
+    <comment>Placeholder of the search box on the plant dictionary page.</comment>
+  </data>
+  <data name="GroupsHeading" xml:space="preserve">
+    <value>Groups</value>
+    <comment>Heading over the groups of plants on the plant dictionary page.</comment>
+  </data>
+  <data name="FamiliesHeading" xml:space="preserve">
+    <value>All families</value>
+    <comment>Heading over the list of plant families on the plant dictionary page.</comment>
+  </data>
+  <data name="GroupAroids" xml:space="preserve">
+    <value>Aroids</value>
+    <comment>Name of a group in the plant dictionary: the arum family, like Monstera and Philodendron.</comment>
+  </data>
+  <data name="GroupPrayerPlants" xml:space="preserve">
+    <value>Prayer plants</value>
+    <comment>Name of a group in the plant dictionary: the Marantaceae, like Calathea and Maranta.</comment>
+  </data>
+  <data name="GroupBegonias" xml:space="preserve">
+    <value>Begonias</value>
+    <comment>Name of a group in the plant dictionary.</comment>
+  </data>
+  <data name="GroupCarnivorous" xml:space="preserve">
+    <value>Carnivorous plants</value>
+    <comment>Name of a group in the plant dictionary: pitcher plants, sundews and the like.</comment>
+  </data>
+  <data name="GroupCacti" xml:space="preserve">
+    <value>Cacti</value>
+    <comment>Name of a group in the plant dictionary.</comment>
+  </data>
+  <data name="GroupSucculents" xml:space="preserve">
+    <value>Succulents</value>
+    <comment>Name of a group in the plant dictionary.</comment>
+  </data>
+  <data name="GroupOrchids" xml:space="preserve">
+    <value>Orchids</value>
+    <comment>Name of a group in the plant dictionary.</comment>
+  </data>
+  <data name="GroupBromeliads" xml:space="preserve">
+    <value>Bromeliads</value>
+    <comment>Name of a group in the plant dictionary.</comment>
+  </data>
+  <data name="GroupOther" xml:space="preserve">
+    <value>Other houseplants</value>
+    <comment>Name of a group in the plant dictionary: everything that is not in the other groups.</comment>
+  </data>
+  <data name="Genus_One" xml:space="preserve">
+    <value>{0:N0} genus</value>
+    <comment>Count of genera, like 1 genus. {0} is the number.</comment>
+  </data>
+  <data name="Genus_Other" xml:space="preserve">
+    <value>{0:N0} genera</value>
+    <comment>Count of genera, like 316 genera. {0} is the number.</comment>
+  </data>
+  <data name="Species_One" xml:space="preserve">
+    <value>{0:N0} species</value>
+    <comment>Count of species, like 1 species. The word is the same in the plural in English. {0} is the number.</comment>
+  </data>
+  <data name="Species_Other" xml:space="preserve">
+    <value>{0:N0} species</value>
+    <comment>Count of species, like 4,120 species. {0} is the number.</comment>
+  </data>
+  <data name="Cultivar_One" xml:space="preserve">
+    <value>{0:N0} cultivar</value>
+    <comment>Count of cultivars, like 1 cultivar. {0} is the number.</comment>
+  </data>
+  <data name="Cultivar_Other" xml:space="preserve">
+    <value>{0:N0} cultivars</value>
+    <comment>Count of cultivars, like 8 cultivars. {0} is the number.</comment>
+  </data>
+  <data name="CountsLine" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>How many genera and species a group or family has, like 316 genera · 4,120 species. {0} is the genera, {1} the species.</comment>
+  </data>
+  <data name="YouHave" xml:space="preserve">
+    <value>You have {0}</value>
+    <comment>On a row of the plant dictionary: how many plants and cuttings of it you have. {0} is the number.</comment>
+  </data>
+  <data name="YouHaveShort" xml:space="preserve">
+    <value>you have {0}</value>
+    <comment>At the end of a line of counts on the plant dictionary, like 316 genera · you have 7. {0} is the number.</comment>
+  </data>
+  <data name="SearchNothing" xml:space="preserve">
+    <value>Nothing in the dictionary matches “{0}”.</value>
+    <comment>Shown when a search in the plant dictionary finds nothing. {0} is what was typed.</comment>
+  </data>
+  <data name="SearchClear" xml:space="preserve">
+    <value>Clear search</value>
+    <comment>Button under the nothing found text of the plant dictionary search.</comment>
+  </data>
+  <data name="CouldNotLoad" xml:space="preserve">
+    <value>The plant dictionary couldn't be loaded. Try again when you're online.</value>
+    <comment>Shown on the plant dictionary pages when the names file couldn't be read, like offline before it was ever downloaded.</comment>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>The dictionary has no page for that name.</value>
+    <comment>Shown when the address of a dictionary page names a group, family, genus, species or cultivar that isn't in it.</comment>
+  </data>
+  <data name="BackToDictionary" xml:space="preserve">
+    <value>Go to the plant dictionary</value>
+    <comment>Button under the not found text on a plant dictionary page.</comment>
+  </data>
+  <data name="GroupEmpty" xml:space="preserve">
+    <value>Nothing in this group yet.</value>
+    <comment>Shown on a group page that has no genera.</comment>
+  </data>
+  <data name="PartOf" xml:space="preserve">
+    <value>Part of {0}</value>
+    <comment>Line under a family's name. {0} is a link with the name of its group, like Aroids.</comment>
+  </data>
+  <data name="OldGenus" xml:space="preserve">
+    <value>{0} is an old name. It is now part of {1}.</value>
+    <comment>Note on the page of an old genus name. {0} is the old name, {1} a link with the genus it is part of now.</comment>
+  </data>
+  <data name="OldIsNow" xml:space="preserve">
+    <value>{0} is now {1}</value>
+    <comment>A line under Old names: an old name and what it is called now. Both are botanical names, {1} is a link.</comment>
+  </data>
+  <data name="OldNamesHeading" xml:space="preserve">
+    <value>Old names</value>
+    <comment>Heading over the list of old names on a genus page.</comment>
+  </data>
+  <data name="FactFamily" xml:space="preserve">
+    <value>Family</value>
+    <comment>Label of the plant family in the facts of a dictionary page.</comment>
+  </data>
+  <data name="FactGroup" xml:space="preserve">
+    <value>Group</value>
+    <comment>Label of the group, like Aroids, in the facts of a dictionary page.</comment>
+  </data>
+  <data name="FactSpecies" xml:space="preserve">
+    <value>Species</value>
+    <comment>Label of the number of species in the facts of a genus page.</comment>
+  </data>
+  <data name="FactCultivars" xml:space="preserve">
+    <value>Cultivars</value>
+    <comment>Label of the number of cultivars in the facts of a genus page.</comment>
+  </data>
+  <data name="FactGrowsWild" xml:space="preserve">
+    <value>Grows wild in</value>
+    <comment>Label of the areas where a species grows wild, in the facts of a species page.</comment>
+  </data>
+  <data name="FactAlsoKnownAs" xml:space="preserve">
+    <value>Also known as</value>
+    <comment>Label of the old names of a species, in the facts of a species page.</comment>
+  </data>
+  <data name="SpeciesHeading" xml:space="preserve">
+    <value>Species · {0:N0}</value>
+    <comment>Heading over the species of a genus. {0} is how many.</comment>
+  </data>
+  <data name="CultivarsHeading" xml:space="preserve">
+    <value>Cultivars · {0:N0}</value>
+    <comment>Heading over the cultivars of a genus or species. {0} is how many.</comment>
+  </data>
+  <data name="FilterSpecies" xml:space="preserve">
+    <value>Filter the species</value>
+    <comment>Placeholder of the filter box over the species of a genus.</comment>
+  </data>
+  <data name="FilterNothing" xml:space="preserve">
+    <value>No species match “{0}”.</value>
+    <comment>Shown when the filter over a genus's species matches none. {0} is what was typed.</comment>
+  </data>
+  <data name="RangeShort" xml:space="preserve">
+    <value>{0} +{1}</value>
+    <comment>Where a species grows wild on a row, cut short: the first two areas and how many more, like Brazil, Peru +3. {0} is the two areas, {1} the number left out.</comment>
+  </data>
+  <data name="AddAsPlant" xml:space="preserve">
+    <value>Add as plant</value>
+    <comment>Button on a dictionary page that opens Add a plant with the names filled in.</comment>
+  </data>
+  <data name="AddToWishlist" xml:space="preserve">
+    <value>Add to wishlist</value>
+    <comment>Button on a dictionary page that opens a new wish with the names filled in.</comment>
+  </data>
+  <data name="DockLabel" xml:space="preserve">
+    <value>Add {0}</value>
+    <comment>Screen reader name of the two buttons on a dictionary page. {0} is the name of the plant.</comment>
+  </data>
+  <data name="YouHaveHeading" xml:space="preserve">
+    <value>You have</value>
+    <comment>Heading of the card on a dictionary page with the plants, cuttings and wishes you have of it.</comment>
+  </data>
+  <data name="OnWishlist" xml:space="preserve">
+    <value>On your wishlist</value>
+    <comment>Line under a wish in the You have card of a dictionary page.</comment>
+  </data>
+  <data name="SeeInDictionary" xml:space="preserve">
+    <value>See it in the plant dictionary</value>
+    <comment>Link on a plant's or cutting's page to its page in the plant dictionary.</comment>
+  </data>
+  <data name="BrowseLink" xml:space="preserve">
+    <value>Browse the plant dictionary</value>
+    <comment>Link under the heading of the Collection page.</comment>
+  </data>
+  <data name="SettingsRowDetail" xml:space="preserve">
+    <value>Browse every genus and species, and where they grow wild</value>
+    <comment>Line under the Plant dictionary row in Settings.</comment>
+  </data>
+  <data name="SearchRowDetail" xml:space="preserve">
+    <value>Browse every genus and species</value>
+    <comment>Line under the Plant dictionary row on the Search page.</comment>
+  </data>
+  <data name="SearchGroup" xml:space="preserve">
+    <value>In the dictionary</value>
+    <comment>Heading of the group of search results from the plant dictionary. A number follows it.</comment>
+  </data>
+</root>

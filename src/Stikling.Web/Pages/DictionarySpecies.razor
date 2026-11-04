@@ -1,0 +1,149 @@
+@page "/dictionary/{Genus}/{Species}"
+@layout WideLayout
+@using System.Globalization
+@inject DictionaryService Dictionary
+@inject PlantRegionService Regions
+
+<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, entry is null ? Strings.Dictionary.Title : $"{entry.Genus} {entry.Name}")</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+@if (browser is null)
+{
+    <a class="back-link" href="@DictionaryLinks.Index">@Strings.Dictionary.Title</a>
+    <h1>@Strings.Dictionary.Title</h1>
+    <p class="text-body-secondary">@Strings.Plants.Loading</p>
+}
+else if (ReferenceEquals(browser, DictionaryBrowser.Empty))
+{
+    <a class="back-link" href="@DictionaryLinks.Index">@Strings.Dictionary.Title</a>
+    <h1>@Strings.Dictionary.Title</h1>
+    <div class="empty-state mt-3">
+        <p>@Strings.Dictionary.CouldNotLoad</p>
+    </div>
+}
+else if (entry is null)
+{
+    <a class="back-link" href="@DictionaryLinks.Index">@Strings.Dictionary.Title</a>
+    <h1>@Strings.Dictionary.Title</h1>
+    <div class="empty-state mt-3">
+        <p>@Strings.Dictionary.NotFound</p>
+        @if (browser.Genus(Genus ?? "") is { } genusEntry)
+        {
+            <a class="btn btn-outline-primary mt-3" href="@DictionaryLinks.Genus(genusEntry.Name)"><i>@genusEntry.Name</i></a>
+        }
+        else
+        {
+            <a class="btn btn-outline-primary mt-3" href="@DictionaryLinks.Index">@Strings.Dictionary.BackToDictionary</a>
+        }
+    </div>
+}
+else
+{
+    var full = $"{entry.Genus} {entry.Name}";
+    <a class="back-link" href="@DictionaryLinks.Genus(entry.Genus)"><i>@entry.Genus</i></a>
+
+    <DictionaryEntry Name="@full" Genus="@entry.Genus" Species="@entry.Name" Yours="yours">
+        <Title><i>@full</i></Title>
+        <Subtitle>
+            @if (entry.Everyday is { } called)
+            {
+                <p class="detail-sub everyday-name">@called</p>
+            }
+        </Subtitle>
+        <Facts>
+            @if (entry.Family is { } family)
+            {
+                <dt>@Strings.Dictionary.FactFamily</dt>
+                <dd><a href="@DictionaryLinks.Family(family)">@family</a></dd>
+            }
+            <dt>@Strings.Dictionary.FactGroup</dt>
+            <dd><a href="@DictionaryLinks.Group(entry.Group)">@DictionaryLinks.Label(entry.Group)</a></dd>
+            @if (areaNames.Count > 0)
+            {
+                <dt>@Strings.Dictionary.FactGrowsWild</dt>
+                <dd>
+                    @string.Join(", ", showAllAreas || areaNames.Count <= ShownAreas ? areaNames : areaNames.Take(ShownAreas))@if (!showAllAreas && areaNames.Count > ShownAreas)
+                    {
+                        @(" ")<button type="button" class="btn btn-link btn-sm link-action" @onclick="() => showAllAreas = true">@Plural.Of(areaNames.Count - ShownAreas, Strings.PlantDetail.NativeMore_One, Strings.PlantDetail.NativeMore_Other)</button>
+                    }
+                </dd>
+            }
+            @if (entry.OldNames.Count > 0)
+            {
+                <dt>@Strings.Dictionary.FactAlsoKnownAs</dt>
+                <dd>@((MarkupString)string.Join(", ", entry.OldNames.Select(DictionaryLinks.Italic)))</dd>
+            }
+        </Facts>
+        <ChildContent>
+            @if (entry.Cultivars.Count > 0)
+            {
+                <section class="dict-section" aria-labelledby="dict-cultivars">
+                    <h2 class="section-label" id="dict-cultivars">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CultivarsHeading, entry.Cultivars.Count)</h2>
+                    <div class="dict-rows">
+                        <Virtualize Items="cultivars" ItemSize="RowSize" Context="cultivar">
+                            <a class="item-card dict-row" href="@DictionaryLinks.Cultivar(entry.Genus, cultivar.Name)" @key="cultivar.Name">
+                                <span class="item-text">
+                                    <span class="item-name dict-name"><BotanicalName Cultivar="@cultivar.Name" /></span>
+                                    @if (cultivar.Everyday is not null)
+                                    {
+                                        <span class="item-meta">@cultivar.Everyday</span>
+                                    }
+                                </span>
+                            </a>
+                        </Virtualize>
+                    </div>
+                </section>
+            }
+        </ChildContent>
+    </DictionaryEntry>
+}
+
+@code {
+    /// <summary>Like the plant page, the first few areas, and a button for the rest.</summary>
+    private const int ShownAreas = 6;
+
+    /// <summary>The height of a row and the space under it in pixels, which Virtualize needs to know. See .dict-row.</summary>
+    private const float RowSize = 81.6f;
+
+    [Parameter]
+    public string? Genus { get; set; }
+
+    [Parameter]
+    public string? Species { get; set; }
+
+    private DictionaryBrowser? browser;
+    private SpeciesEntry? entry;
+    private Yours? yours;
+    private List<CultivarSummary> cultivars = [];
+    private IReadOnlyList<string> areaNames = [];
+    private bool showAllAreas;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        showAllAreas = false;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        browser = await Dictionary.GetBrowserAsync();
+        entry = browser.Species(Genus ?? "", Species ?? "");
+        yours = entry is null ? null : await Dictionary.GetYoursAsync(entry.Genus, entry.Name);
+        cultivars = entry is null ? [] : [.. entry.Cultivars];
+        areaNames = [];
+    }
+
+    // After the page is on screen, since the page should not wait for where the plant grows wild
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (entry is null || areaNames.Count > 0)
+            return;
+
+        var found = (await Regions.GetBookAsync()).Find(entry.Genus, entry.Name, null);
+        if (found is { Areas.Count: > 0 })
+        {
+            areaNames = RegionNames.Of(found.Areas);
+            StateHasChanged();
+        }
+    }
+}

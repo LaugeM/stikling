@@ -1,0 +1,15 @@
+/* Botanical names are italic, which Bricolage has none of, so they use the system font */
+.hit-name {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+}
+
+.item-text,
+.item-name,
+.item-meta {
+    display: block;
+}
+
+.item-text {
+    min-width: 0;
+}

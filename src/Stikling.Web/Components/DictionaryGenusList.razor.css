@@ -1,0 +1,33 @@
+/* Genus names are italic, which Bricolage has none of, so they use the system font */
+.dict-genus {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+}
+
+.dict-genera .item-text {
+    min-width: 0;
+}
+
+.dict-genera .item-text,
+.dict-genera .item-name,
+.dict-genera .item-meta {
+    display: block;
+}
+
+/* What you have of it, kept at the end of the row so a long line never cuts it off */
+.dict-have {
+    flex: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
+
+/* Where the letter strip jumps to, just under the header */
+.dict-genera > li[id] {
+    scroll-margin-top: var(--pa-header-height);
+}
+
+/* The letter strip's buttons reach over the right edge of the list, so rows stop short of them */
+.dict-genera.has-letters {
+    padding-right: 1.75rem;
+}

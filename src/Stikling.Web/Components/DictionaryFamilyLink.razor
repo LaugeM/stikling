@@ -1,0 +1,21 @@
+@* A family name that opens its page in the plant dictionary, or is just the name when the dictionary has no page for it *@
+@inject DictionaryService Dictionary
+
+@if (exists)
+{
+    <a href="@DictionaryLinks.Family(Name)">@Name</a>
+}
+else
+{
+    @Name
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = "";
+
+    private bool exists;
+
+    protected override async Task OnParametersSetAsync() =>
+        exists = (await Dictionary.GetBrowserAsync()).GeneraInFamily(Name).Count > 0;
+}

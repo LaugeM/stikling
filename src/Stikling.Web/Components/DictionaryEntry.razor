@@ -1,0 +1,102 @@
+@* The shape of a genus, species or cultivar page in the plant dictionary: who it is and what you have of it on
+   the left, and what is under it (species, cultivars, old names) on the right. On a phone the two buttons sit
+   in a bar above the navigation, like the plant page's. On a wide screen the bar sits under the name. *@
+@using System.Globalization
+@inject CoverPhotos Covers
+
+<div class="profile-layout">
+    <div class="profile-side">
+        <header class="detail-header">
+            <div class="min-w-0">
+                <h1>@Title</h1>
+                @Subtitle
+            </div>
+        </header>
+
+        <div class="page-dock" role="group" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.DockLabel, Name)">
+            <a class="btn btn-primary icon-btn" href="@DictionaryLinks.AddHref("plants/new", Genus, Species, Cultivar)">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                @Strings.Dictionary.AddAsPlant
+            </a>
+            <a class="btn btn-outline-primary icon-btn" href="@DictionaryLinks.AddHref("wishlist/new", Genus, Species, Cultivar)">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.500C5 15.500 3.500 12 3.500 9a4.500 4.500 0 0 1 8.500-2 4.500 4.500 0 0 1 8.500 2c0 3-1.500 6.500-8.500 11.500Z" /></svg>
+                @Strings.Dictionary.AddToWishlist
+            </a>
+        </div>
+
+        @if (Facts is not null)
+        {
+            <section class="detail-card">
+                <dl class="detail-list">@Facts</dl>
+            </section>
+        }
+
+        @if (Yours is { } yours && (yours.Plants.Count + yours.Propagations.Count + yours.Wishes.Count) > 0)
+        {
+            <section class="detail-card" aria-labelledby="dict-yours">
+                <h2 id="dict-yours">@Strings.Dictionary.YouHaveHeading</h2>
+                <ul class="item-list">
+                    @foreach (var plant in yours.Plants)
+                    {
+                        <li><PlantCard Plant="plant" /></li>
+                    }
+                    @foreach (var propagation in yours.Propagations)
+                    {
+                        <li><PropagationCard Propagation="propagation" /></li>
+                    }
+                    @foreach (var wish in yours.Wishes)
+                    {
+                        <li>
+                            <a class="item-card" href="wishlist/@wish.Id/edit">
+                                <span class="item-text">
+                                    <span class="item-name">@wish.DisplayName</span>
+                                    <span class="item-meta">@Strings.Dictionary.OnWishlist</span>
+                                </span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+    </div>
+
+    <div class="profile-history">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public RenderFragment Title { get; set; } = null!;
+
+    /// <summary>The line under the name, like the everyday name.</summary>
+    [Parameter]
+    public RenderFragment? Subtitle { get; set; }
+
+    /// <summary>The rows of the facts list, as dt and dd.</summary>
+    [Parameter]
+    public RenderFragment? Facts { get; set; }
+
+    [Parameter]
+    public Yours? Yours { get; set; }
+
+    /// <summary>The name as it is read out for the buttons.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = "";
+
+    /// <summary>The names the two buttons fill in on the form they open.</summary>
+    [Parameter, EditorRequired]
+    public string Genus { get; set; } = "";
+
+    [Parameter]
+    public string? Species { get; set; }
+
+    [Parameter]
+    public string? Cultivar { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // The covers the cards show, loaded when the page is first shown and when changes come in
+    protected override async Task OnParametersSetAsync() => await Covers.EnsureLoadedAsync();
+}

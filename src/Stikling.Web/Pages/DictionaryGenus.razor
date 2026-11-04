@@ -1,0 +1,253 @@
+@page "/dictionary/{Genus}"
+@layout WideLayout
+@using System.Globalization
+@inject DictionaryService Dictionary
+@inject PlantRegionService Regions
+
+<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, entry?.Name ?? Strings.Dictionary.Title)</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+@if (browser is null)
+{
+    <a class="back-link" href="@DictionaryLinks.Index">@Strings.Dictionary.Title</a>
+    <h1>@Strings.Dictionary.Title</h1>
+    <p class="text-body-secondary">@Strings.Plants.Loading</p>
+}
+else if (ReferenceEquals(browser, DictionaryBrowser.Empty))
+{
+    <a class="back-link" href="@DictionaryLinks.Index">@Strings.Dictionary.Title</a>
+    <h1>@Strings.Dictionary.Title</h1>
+    <div class="empty-state mt-3">
+        <p>@Strings.Dictionary.CouldNotLoad</p>
+    </div>
+}
+else if (entry is null)
+{
+    <a class="back-link" href="@DictionaryLinks.Index">@Strings.Dictionary.Title</a>
+    <h1>@Strings.Dictionary.Title</h1>
+    <div class="empty-state mt-3">
+        <p>@Strings.Dictionary.NotFound</p>
+        <a class="btn btn-outline-primary mt-3" href="@DictionaryLinks.Index">@Strings.Dictionary.BackToDictionary</a>
+    </div>
+}
+else if (entry.Now is { } now)
+{
+    @* An old genus name: it only says what it is now, and which species names it had *@
+    <a class="back-link" href="@DictionaryLinks.Index">@Strings.Dictionary.Title</a>
+    <h1><i>@entry.Name</i></h1>
+    <p class="dict-note">@DictionaryLinks.Html(Strings.Dictionary.OldGenus, DictionaryLinks.Italic(entry.Name), DictionaryLinks.Anchor(DictionaryLinks.Genus(now), now, italic: true))</p>
+    @if (entry.OldNames.Count > 0)
+    {
+        <section aria-labelledby="dict-old">
+            <h2 class="section-label" id="dict-old">@Strings.Dictionary.OldNamesHeading</h2>
+            <ul class="dict-old-names">
+                @foreach (var old in entry.OldNames)
+                {
+                    <li>@OldLine(entry.Name, old)</li>
+                }
+            </ul>
+        </section>
+    }
+}
+else
+{
+    <a class="back-link" href="@DictionaryLinks.Group(entry.Group)">@DictionaryLinks.Label(entry.Group)</a>
+
+    <DictionaryEntry Name="@entry.Name" Genus="@entry.Name" Yours="yours">
+        <Title><i>@entry.Name</i></Title>
+        <Subtitle>
+            @if (entry.Everyday is { } called)
+            {
+                <p class="detail-sub everyday-name">@called</p>
+            }
+        </Subtitle>
+        <Facts>
+            @if (entry.Family is { } family)
+            {
+                <dt>@Strings.Dictionary.FactFamily</dt>
+                <dd><a href="@DictionaryLinks.Family(family)">@family</a></dd>
+            }
+            <dt>@Strings.Dictionary.FactGroup</dt>
+            <dd><a href="@DictionaryLinks.Group(entry.Group)">@DictionaryLinks.Label(entry.Group)</a></dd>
+            <dt>@Strings.Dictionary.FactSpecies</dt>
+            <dd>@entry.Species.Count.ToString("N0", CultureInfo.CurrentCulture)</dd>
+            @if (entry.Cultivars.Count > 0)
+            {
+                <dt>@Strings.Dictionary.FactCultivars</dt>
+                <dd>@entry.Cultivars.Count.ToString("N0", CultureInfo.CurrentCulture)</dd>
+            }
+        </Facts>
+        <ChildContent>
+            @if (entry.Species.Count > 0)
+            {
+                <section class="dict-section" aria-labelledby="dict-species">
+                    <h2 class="section-label" id="dict-species">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.SpeciesHeading, entry.Species.Count)</h2>
+                    @if (entry.Species.Count > FilterFrom)
+                    {
+                        <div class="search-box">
+                            <input type="search" class="form-control" placeholder="@Strings.Dictionary.FilterSpecies" aria-label="@Strings.Dictionary.FilterSpecies"
+                                   autocomplete="off" spellcheck="false" value="@filter" @oninput="OnFilter" />
+                        </div>
+                    }
+                    @if (shownSpecies.Count == 0)
+                    {
+                        <p class="text-body-secondary">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.FilterNothing, filter.Trim())</p>
+                    }
+                    else
+                    {
+                        <div class="dict-rows">
+                            <Virtualize Items="shownSpecies" ItemSize="RowSize" Context="species">
+                                <a class="item-card dict-row" href="@DictionaryLinks.Species(entry.Name, species.Name)" @key="species.Name">
+                                    <span class="item-text">
+                                        <span class="item-name dict-name"><BotanicalName Genus="@entry.Name" Species="@species.Name" /></span>
+                                        @if (RowLine(species) is { } line)
+                                        {
+                                            <span class="item-meta">@line</span>
+                                        }
+                                    </span>
+                                    @if (owned.Species(entry.Name, species.Name) is > 0 and var have)
+                                    {
+                                        <span class="dict-have">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.YouHave, have)</span>
+                                    }
+                                </a>
+                            </Virtualize>
+                        </div>
+                    }
+                </section>
+            }
+
+            @if (entry.Cultivars.Count > 0)
+            {
+                <section class="dict-section" aria-labelledby="dict-cultivars">
+                    <h2 class="section-label" id="dict-cultivars">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CultivarsHeading, entry.Cultivars.Count)</h2>
+                    <div class="dict-rows">
+                        <Virtualize Items="cultivars" ItemSize="RowSize" Context="cultivar">
+                            <a class="item-card dict-row" href="@DictionaryLinks.Cultivar(entry.Name, cultivar.Name)" @key="cultivar.Name">
+                                <span class="item-text">
+                                    <span class="item-name dict-name"><BotanicalName Cultivar="@cultivar.Name" /></span>
+                                    @if (cultivar.Species is not null || cultivar.Everyday is not null)
+                                    {
+                                        <span class="item-meta">
+                                            @if (cultivar.Species is not null)
+                                            {
+                                                <i>@entry.Name @cultivar.Species</i>
+                                            }
+                                            @if (cultivar.Species is not null && cultivar.Everyday is not null)
+                                            {
+                                                <text> · </text>
+                                            }
+                                            @cultivar.Everyday
+                                        </span>
+                                    }
+                                </span>
+                            </a>
+                        </Virtualize>
+                    </div>
+                </section>
+            }
+
+            @if (entry.OldNames.Count > 0)
+            {
+                <section class="dict-section" aria-labelledby="dict-old">
+                    <h2 class="section-label" id="dict-old">@Strings.Dictionary.OldNamesHeading</h2>
+                    <ul class="dict-old-names">
+                        @foreach (var old in entry.OldNames)
+                        {
+                            <li>@OldLine(entry.Name, old)</li>
+                        }
+                    </ul>
+                </section>
+            }
+        </ChildContent>
+    </DictionaryEntry>
+}
+
+@code {
+    /// <summary>A filter box over the species shows when there are more than this.</summary>
+    private const int FilterFrom = 30;
+
+    /// <summary>The height of a row and the space under it in pixels, which Virtualize needs to know. See .dict-row.</summary>
+    private const float RowSize = 81.6f;
+
+    [Parameter]
+    public string? Genus { get; set; }
+
+    private DictionaryBrowser? browser;
+    private GenusEntry? entry;
+    private OwnedCounts owned = new();
+    private Yours? yours;
+    private PlantRegionBook? regionBook;
+    private string filter = "";
+
+    // Virtualize needs lists it can count and index, so the lists are made when the entry or the filter changes
+    private List<SpeciesSummary> shownSpecies = [];
+    private List<CultivarSummary> cultivars = [];
+
+    private void OnFilter(ChangeEventArgs e)
+    {
+        filter = e.Value?.ToString() ?? "";
+        Filter();
+    }
+
+    private void Filter()
+    {
+        var text = filter.Trim();
+        shownSpecies = entry is null ? [] : [.. entry.Species.Where(s =>
+            text.Length == 0
+            || s.Name.Contains(text, StringComparison.CurrentCultureIgnoreCase)
+            || (s.Everyday?.Contains(text, StringComparison.CurrentCultureIgnoreCase) ?? false))];
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        filter = "";
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        browser = await Dictionary.GetBrowserAsync();
+        entry = browser.Genus(Genus ?? "");
+        owned = await Dictionary.GetOwnedCountsAsync();
+        yours = entry is null || entry.Now is not null ? null : await Dictionary.GetYoursAsync(entry.Name);
+        cultivars = entry is null ? [] : [.. entry.Cultivars];
+        Filter();
+    }
+
+    // After the page is on screen, since the list of species should not wait for where each one grows wild
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (regionBook is not null || entry is null)
+            return;
+
+        regionBook = await Regions.GetBookAsync();
+        StateHasChanged();
+    }
+
+    /// <summary>The everyday name and where it grows wild, up to two areas and how many more. Nothing while the areas load or when they are unknown.</summary>
+    private string? RowLine(SpeciesSummary species)
+    {
+        var parts = new List<string>();
+        if (species.Everyday is not null)
+            parts.Add(species.Everyday);
+
+        if (regionBook?.Find(entry!.Name, species.Name, null) is { Areas.Count: > 0 } found)
+        {
+            var names = RegionNames.Of(found.Areas);
+            parts.Add(names.Count <= 2
+                ? string.Join(", ", names)
+                : string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.RangeShort, string.Join(", ", names.Take(2)), names.Count - 2));
+        }
+
+        return parts.Count == 0 ? null : string.Join(" · ", parts);
+    }
+
+    private MarkupString OldLine(string genus, OldName old)
+    {
+        var now = $"{old.NowGenus} {old.NowSpecies}";
+        var link = browser!.Species(old.NowGenus, old.NowSpecies) is not null
+            ? DictionaryLinks.Anchor(DictionaryLinks.Species(old.NowGenus, old.NowSpecies), now, italic: true)
+            : DictionaryLinks.Italic(now);
+        return DictionaryLinks.Html(Strings.Dictionary.OldIsNow, DictionaryLinks.Italic($"{genus} {old.Old}"), link);
+    }
+}

@@ -1,0 +1,63 @@
+@page "/dictionary/family/{Name}"
+@layout WideLayout
+@using System.Globalization
+@inject DictionaryService Dictionary
+
+<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, found?.Name ?? Strings.Dictionary.Title)</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="@DictionaryLinks.Index">@Strings.Dictionary.Title</a>
+
+@if (browser is null)
+{
+    <h1>@Strings.Dictionary.Title</h1>
+    <p class="text-body-secondary">@Strings.Plants.Loading</p>
+}
+else if (ReferenceEquals(browser, DictionaryBrowser.Empty))
+{
+    <h1>@Strings.Dictionary.Title</h1>
+    <div class="empty-state mt-3">
+        <p>@Strings.Dictionary.CouldNotLoad</p>
+    </div>
+}
+else if (found is not { } family)
+{
+    <h1>@Strings.Dictionary.Title</h1>
+    <div class="empty-state mt-3">
+        <p>@Strings.Dictionary.NotFound</p>
+        <a class="btn btn-outline-primary mt-3" href="@DictionaryLinks.Index">@Strings.Dictionary.BackToDictionary</a>
+    </div>
+}
+else
+{
+    var genera = browser.GeneraInFamily(family.Name);
+    var have = genera.Sum(g => owned.Genus(g.Name));
+    <h1>@family.Name</h1>
+    <p class="settings-hint">
+        @DictionaryLinks.CountsLine(family.Genera, family.Species)@if (have > 0)
+        {
+            <text> · @string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.YouHaveShort, have)</text>
+        }
+    </p>
+    <p class="settings-hint mb-3">@DictionaryLinks.Html(Strings.Dictionary.PartOf, DictionaryLinks.Anchor(DictionaryLinks.Group(family.Group), DictionaryLinks.Label(family.Group)))</p>
+
+    <DictionaryGenusList Genera="genera" Owned="owned" ShowFamily="false" />
+}
+
+@code {
+    [Parameter]
+    public string? Name { get; set; }
+
+    private DictionaryBrowser? browser;
+    private OwnedCounts owned = new();
+    private FamilySummary? found;
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        browser = await Dictionary.GetBrowserAsync();
+        owned = await Dictionary.GetOwnedCountsAsync();
+        found = browser.Families.FirstOrDefault(f => string.Equals(f.Name, Name?.Trim(), StringComparison.OrdinalIgnoreCase));
+    }
+}
