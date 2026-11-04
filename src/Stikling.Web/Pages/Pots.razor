@@ -263,10 +263,12 @@ else
     <section class="settings-section">
         <h2 class="visually-hidden">@Labels.Heading(kind)</h2>
 
+        <div class="pot-families">
         @foreach (var family in Shown.GroupBy(use => use.Pot.FamilyName, StringComparer.CurrentCultureIgnoreCase))
         {
+            <div class="pot-family-card">
             <h3 class="pot-family">@family.Key</h3>
-            <ul class="pot-list supply-grid">
+            <ul class="pot-list">
                 @foreach (var use in family)
                 {
                     <li id="item-@use.Pot.Id">
@@ -314,7 +316,9 @@ else
                     </li>
                 }
             </ul>
+            </div>
         }
+        </div>
     </section>
 }
 
