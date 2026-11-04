@@ -66,6 +66,26 @@ public class PlantFormTests
         settingsRepository.Settings[UserSettings.SettingsId] = new UserSettings { QuarantineNewPlants = on };
 
     [Fact]
+    public async Task Taking_the_outer_pot_away_clears_the_water_kept_in_it()
+    {
+        var source = await Stored(p =>
+        {
+            p.OuterPotId = Guid.NewGuid();
+            p.WaterInOuterPot = true;
+            p.OuterPotWatering = PotWatering.Wick;
+        });
+        var form = (await Forms().EditAsync(source.Id, Label))!;
+
+        form.SetOuterPot(Guid.NewGuid());
+        Assert.True(form.Plant.WaterInOuterPot);
+        Assert.Equal(PotWatering.Wick, form.Plant.OuterPotWatering);
+
+        form.SetOuterPot(null);
+        Assert.False(form.Plant.WaterInOuterPot);
+        Assert.Null(form.Plant.OuterPotWatering);
+    }
+
+    [Fact]
     public async Task A_copy_is_a_duplicate_dated_today()
     {
         var source = await Stored(p =>

@@ -39,9 +39,17 @@
             </div>
         }
 
+        <div class="chip-row mt-2" role="group" aria-label="@Strings.Shared.PotPickerColourLabel">
+            @foreach (var colour in Enum.GetValues<PotColour>())
+            {
+                <button type="button" class="chip @Picked(draftColour == colour)"
+                        @onclick="() => draftColour = draftColour == colour ? null : colour">@Labels.For(colour)</button>
+            }
+        </div>
+
         <div class="row g-2 mt-2">
             <div class="col-8">
-                <input class="form-control" placeholder="@Strings.Shared.PotPickerNamePlaceholder" autocomplete="off"
+                <input class="form-control" placeholder="@NamePlaceholder" autocomplete="off"
                        aria-label="@Strings.Shared.PotPickerNameLabel" value="@draftName" @oninput="e => draftName = e.Value?.ToString()"
                        @ref="draftInput" />
             </div>
@@ -100,6 +108,7 @@
     private bool busy;
     private string? draftName;
     private decimal? draftSize;
+    private PotColour? draftColour;
     private string? error;
     private ElementReference draftInput;
     private bool focusDraft;
@@ -129,6 +138,13 @@
         _ => PotKind.Standalone
     });
 
+    private string NamePlaceholder => Groups[0] switch
+    {
+        PotGroup.Inner => Strings.Shared.PotPickerNamePlaceholder,
+        PotGroup.Outer => Strings.Shared.PotPickerNamePlaceholderOuter,
+        _ => Strings.Shared.PotPickerNamePlaceholderStandalone
+    };
+
     private Task PickAsync(Guid? id)
     {
         adding = false;
@@ -143,6 +159,7 @@
         error = null;
         draftName = null;
         draftSize = null;
+        draftColour = null;
         focusDraft = true;
     }
 
@@ -157,7 +174,9 @@
         var pot = new Pot
         {
             Group = Groups[0],
-            Name = draftName?.Trim(),
+            // No name is fine for these, the pot is named from its colour and material
+            Name = string.IsNullOrWhiteSpace(draftName) ? null : draftName.Trim(),
+            Colour = draftColour,
             TopCm = draftSize,
             // A guess that matches the slot, and is the one thing most worth correcting later
             Material = Groups[0] == PotGroup.Outer ? PotMaterial.Ceramic : PotMaterial.Plastic

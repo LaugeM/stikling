@@ -52,7 +52,7 @@ public static class PhotoFolders
             .Select(p => (p.Id, p.CreatedAt, Name: $"{p.DisplayName} {p.StartedOn.ToString("yyyy-MM", CultureInfo.InvariantCulture)}")));
         AddFolders(folders, SubjectType.Pot, "Pots", pots
             .Where(p => !p.IsDeleted)
-            .Select(p => (p.Id, p.CreatedAt, Name: string.IsNullOrWhiteSpace(p.Name) ? "Pot" : p.Name)));
+            .Select(p => (p.Id, p.CreatedAt, Name: p.FamilyName)));
 
         AddFolders(folders, SubjectType.Place, "Shelf photos", placeSubjects);
 

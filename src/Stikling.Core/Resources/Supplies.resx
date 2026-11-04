@@ -64,17 +64,9 @@
     <value>An amount can't be less than 0.</value>
     <comment>Error when saving a soil mix.</comment>
   </data>
-  <data name="PotDefaultName" xml:space="preserve">
-    <value>Pot</value>
-    <comment>Name shown for a pot that has no name.</comment>
-  </data>
   <data name="PotNeedsNameContainer" xml:space="preserve">
     <value>Give the container a name, like "Clear box with lid".</value>
     <comment>Error when saving a container for propagation.</comment>
-  </data>
-  <data name="PotNeedsNamePot" xml:space="preserve">
-    <value>Give the pot a name, like "Clear nursery pot".</value>
-    <comment>Error when saving a pot.</comment>
   </data>
   <data name="PotNeedsOne" xml:space="preserve">
     <value>You have to have at least one of it.</value>
@@ -163,5 +155,84 @@
   <data name="IngredientCharcoal" xml:space="preserve">
     <value>Charcoal</value>
     <comment>A suggestion when adding an ingredient to a soil mix.</comment>
+  </data>
+  <data name="PotNameColourMaterial" xml:space="preserve">
+    <value>{0} {1} {2}</value>
+    <comment>Name made for a pot with no name: colour, material, kind, like "White ceramic outer pot".</comment>
+  </data>
+  <data name="PotNameColour" xml:space="preserve">
+    <value>{0} {2}</value>
+    <comment>Name made for a pot with no name and no material: colour and kind, like "White outer pot". {0} colour, {2} kind.</comment>
+  </data>
+  <data name="PotNameMaterial" xml:space="preserve">
+    <value>{1} {2}</value>
+    <comment>Name made for a pot with no name and no colour, like "Terracotta pot". {1} material, {2} kind.</comment>
+  </data>
+  <data name="PotNameKind" xml:space="preserve">
+    <value>{2}</value>
+    <comment>Name made for a pot with no name, colour or material, like "Outer pot". {2} kind.</comment>
+  </data>
+  <data name="PotKindInnerName" xml:space="preserve">
+    <value>nursery pot</value>
+    <comment>Kind of pot, in lower case, used inside a made-up pot name.</comment>
+  </data>
+  <data name="PotKindOuterName" xml:space="preserve">
+    <value>outer pot</value>
+    <comment>Kind of pot, in lower case, used inside a made-up pot name.</comment>
+  </data>
+  <data name="PotKindStandaloneName" xml:space="preserve">
+    <value>pot</value>
+    <comment>A pot that stands on its own, in lower case, used inside a made-up pot name.</comment>
+  </data>
+  <data name="MaterialPlasticName" xml:space="preserve">
+    <value>plastic</value>
+    <comment>Material, in lower case, used inside a made-up pot name.</comment>
+  </data>
+  <data name="MaterialCeramicName" xml:space="preserve">
+    <value>ceramic</value>
+    <comment>Material, in lower case, used inside a made-up pot name.</comment>
+  </data>
+  <data name="MaterialTerracottaName" xml:space="preserve">
+    <value>terracotta</value>
+    <comment>Material, in lower case, used inside a made-up pot name.</comment>
+  </data>
+  <data name="MaterialGlassName" xml:space="preserve">
+    <value>glass</value>
+    <comment>Material, in lower case, used inside a made-up pot name.</comment>
+  </data>
+  <data name="MaterialMetalName" xml:space="preserve">
+    <value>metal</value>
+    <comment>Material, in lower case, used inside a made-up pot name.</comment>
+  </data>
+  <data name="PotColourWhite" xml:space="preserve">
+    <value>White</value>
+    <comment>Colour of a pot. Also used first in a made-up pot name.</comment>
+  </data>
+  <data name="PotColourBlack" xml:space="preserve">
+    <value>Black</value>
+  </data>
+  <data name="PotColourGrey" xml:space="preserve">
+    <value>Grey</value>
+  </data>
+  <data name="PotColourClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="PotColourBeige" xml:space="preserve">
+    <value>Beige</value>
+  </data>
+  <data name="PotColourBrown" xml:space="preserve">
+    <value>Brown</value>
+  </data>
+  <data name="PotColourGreen" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="PotColourBlue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="PotColourPink" xml:space="preserve">
+    <value>Pink</value>
+  </data>
+  <data name="PotColourPatterned" xml:space="preserve">
+    <value>Patterned</value>
   </data>
 </root>

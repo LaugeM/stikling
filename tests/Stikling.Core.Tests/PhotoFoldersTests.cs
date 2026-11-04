@@ -53,14 +53,14 @@ public class PhotoFoldersTests
     }
 
     [Fact]
-    public void A_pot_folder_has_its_name_or_Pot_without_one()
+    public void A_pot_folder_has_its_name_or_the_one_made_for_it()
     {
         var named = new Pot { Name = "Clear nursery pot", CreatedAt = Created };
-        var unnamed = new Pot { Name = null, CreatedAt = Created.AddDays(1) };
+        var unnamed = new Pot { Name = null, Group = PotGroup.Outer, Material = PotMaterial.Ceramic, Colour = PotColour.White, CreatedAt = Created.AddDays(1) };
         var paths = Paths(pots: [named, unnamed],
             photos: [APhoto(SubjectType.Pot, named.Id, At(8, 0)), APhoto(SubjectType.Pot, unnamed.Id, At(9, 0))]);
 
-        Assert.Equal(["Pots/Clear nursery pot/2026-10-15 10-00", "Pots/Pot/2026-10-15 11-00"], paths);
+        Assert.Equal(["Pots/Clear nursery pot/2026-10-15 10-00", "Pots/White ceramic outer pot/2026-10-15 11-00"], paths);
     }
 
     [Theory]

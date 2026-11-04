@@ -72,7 +72,14 @@ public static class PlantChanges
             changes.Add(PotsTakenLine(after));
 
         if (before.WaterInOuterPot != after.WaterInOuterPot)
+        {
             changes.Add(Line(after.WaterInOuterPot ? "WateredInOuterPot" : "NotWateredInOuterPot"));
+            // Standing in the water is what the line above already means, so only a wick needs saying
+            if (after.OuterPotWateringShown == PotWatering.Wick)
+                changes.Add(Line("OuterPotWick"));
+        }
+        else if (before.OuterPotWateringShown != after.OuterPotWateringShown && after.OuterPotWateringShown is { } shown)
+            changes.Add(Line(shown == PotWatering.Wick ? "OuterPotWick" : "OuterPotSubmerged"));
 
         AddTags(changes, before.Tags, after.Tags);
 

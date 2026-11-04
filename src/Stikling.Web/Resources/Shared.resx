@@ -1343,7 +1343,7 @@ Maybe</value>
     <comment>Button that adds the new pot.</comment>
   </data>
   <data name="PotPickerHint" xml:space="preserve">
-    <value>It joins your pot library. The rest of its details can be filled in under Supplies, then Pots.</value>
+    <value>It joins your pot library. A name is optional, a colour helps tell pots apart. The rest of its details can be filled in under Supplies, then Pots.</value>
     <comment>Hint under the box for a new pot. Supplies and Pots are the names of a page and a list in the app.</comment>
   </data>
   <data name="ShareFormatSquare" xml:space="preserve">
@@ -1429,5 +1429,17 @@ Maybe</value>
   <data name="LeafPhotoOf" xml:space="preserve">
     <value>Photo of the leaf</value>
     <comment>Alt text of a leaf's thumbnail.</comment>
+  </data>
+  <data name="PotPickerNamePlaceholderOuter" xml:space="preserve">
+    <value>e.g. Blue glazed</value>
+    <comment>Placeholder for the name of a new outer pot. The name can be left empty.</comment>
+  </data>
+  <data name="PotPickerNamePlaceholderStandalone" xml:space="preserve">
+    <value>e.g. Terracotta with saucer</value>
+    <comment>Placeholder for the name of a new pot that stands on its own. The name can be left empty.</comment>
+  </data>
+  <data name="PotPickerColourLabel" xml:space="preserve">
+    <value>Colour</value>
+    <comment>Name of the choices of colour for a new pot, read out by a screen reader.</comment>
   </data>
 </root>
