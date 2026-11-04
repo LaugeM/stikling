@@ -9,8 +9,8 @@ Blazor WebAssembly PWA. Everything is stored on the device in IndexedDB. When so
 - `src/Stikling.Api`: the ASP.NET Core API for accounts and sync, with EF Core on SQL Server.
 - `tests/Stikling.Core.Tests`: xUnit, run with `dotnet test Stikling.slnx`. The services are tested against the in-memory repositories in `Fakes.cs`.
 - `tests/Stikling.Api.Tests`: the API's endpoints, run against a real SQL Server and Azurite that Testcontainers starts in Docker. Docker Desktop has to be running for `dotnet test Stikling.slnx`.
-- `tools/plant-names`: the script that builds `wwwroot/data/plant-names.json`, the names the genus, species and cultivar fields suggest. Its README says where the names come from and how to add more. Never edit the JSON by hand.
-- `infra`: the Azure resources for the hosted API, in Bicep. `docs/ops/hosting.md` says what they are and how to deploy them. The workflow only deploys new versions of the API, and changes to the Bicep are deployed by hand.
+- `tools/plant-names`: builds `wwwroot/data/plant-names.json`, the names the genus, species and cultivar fields suggest. Its README says how to add names. Never edit the JSON by hand.
+- `infra`: the hosted API's Azure resources, in Bicep, deployed by hand (the workflow only deploys new versions of the API). `docs/ops/hosting.md` has the details.
 
 Photos are resized, stored, read, and sent to and fetched from the API entirely in JavaScript. The image data only crosses into C# when a backup is written or restored.
 
@@ -23,6 +23,9 @@ The impeccable skill is for real design work, not a check on every change, since
 - **New kind of record** (a new IndexedDB store): follow every step in `docs/dev/new-record.md`. A missed step quietly leaves the records out of backups or sync.
 - **API or sync code** (`src/Stikling.Api`, `Core/Sync`, `SyncRunner`, how `db.js` saves records, or settings that differ between local and hosted): read `docs/dev/api.md` first. It has the auth rules every endpoint follows, how records and photos are stored, and how a sync runs.
 - **Sign-in, or testing while signed in** (Clerk, `account.js`, `AccountService`, `StiklingApi`, or checking a screen or a sync with an account): read `docs/dev/sign-in.md`.
+- **Help page or front page** (adding or changing an answer, `Help.razor`, `FrontPage.razor`): read `docs/dev/help-page.md`. They are also rendered without a browser.
+- **Testing with the real collection** (a change to stored data or restore, or a screen that needs a full collection to judge): read `docs/dev/test-collection.md` first.
+- **Build passes locally but fails in CI**: run `git status --ignored` first. The .NET gitignore template ignores `Backup*/`, and the exception for `src/Stikling.Core/Backup` is at the end of `.gitignore`.
 
 ## Data conventions
 
@@ -36,13 +39,14 @@ People keep their real plants in the app, so their data has to survive every cha
 
 - Ids are made on the device, and deletes are soft (`DeletedAt`). A restore can then tell the difference between something deleted and something never seen.
 - Enums are stored as text, so backups stay readable and reordering the values can't change what old data means.
+- A new value in an existing enum stops older versions of the app reading every record that uses it, since they fail on a name they don't know. Give the new meaning a field of its own, as own kinds of care do on `CareLog`, or read an optional enum with `TolerantNullableEnumConverter`.
 - Restoring a backup merges instead of replacing. A newer version wins, deletions in the backup carry over, and anything deleted here comes back if the backup still has it.
 
 ## Keep it ready for sync
 
-Accounts and sync between devices are being added in steps, so people don't have to move backups around by hand. Sign-in goes through Clerk, and an ASP.NET Core API does the sync. The app stays fully usable without an account. New code should be written so it won't have to be redone:
+Signed-in devices sync through the API, and the app stays fully usable without an account. New code is written for sync from the start:
 
-- Data belongs to a collection, not to a person, since people can be added to a collection. That covers plants, pots, propagations, rooms and spots, care logs, feeds, pest cases, photos, products, soil mixes, treatment recipes and what is put off on Today.
+- Data belongs to a collection, not to a person, since people can be added to a collection. That covers every record the app keeps, down to what is put off on Today.
 - Settings the person expects on every device belong to the person, in `UserSettings`. The theme is one of them. `theme.js` keeps a copy on the device only so the first paint has the right colours.
 - Every one of these is an `Entity` in its own store behind a repository. localStorage (`DeviceFiles`) is only for things that really belong to one device, like when it last took a backup.
 - All writes go through the repositories, so `UpdatedAt` is always set. Records are soft deleted. The one exception is deleting an account, which really erases the person's data and photos from the server.
@@ -56,13 +60,11 @@ Accounts and sync between devices are being added in steps, so people don't have
 
 ## Text people see
 
-All text people see goes in `Resources/*.resx`, English in `Name.resx` and Danish in `Name.da.resx`, and is used as `Strings.Name.Key`. Never write it inline in a Razor page or a C# file, and add the Danish with the English. Dates and counts have helpers for it. `docs/dev/translating.md` has the rules, the Danish word list and how to add an area file.
+All text people see goes in `Resources/*.resx`, English in `Name.resx` and Danish in `Name.da.resx`, and is used as `Strings.Name.Key`. Add the Danish with the English. Dates and counts have helpers for it. `docs/dev/translating.md` has the rules, the Danish word list and how to add an area file.
 
 ## The Help page
 
-`Pages/Help.razor` answers the questions someone new asks, and has a few answers for each part of the app. The text is in `Resources/Help.resx` and `Help.da.resx`, and the page lists the keys. It has to describe the app as it is. When a change adds or changes a feature, update the answers it affects in the same pull request, and add one when the feature raises a question of its own. Check the empty states on the screens involved too, since they tell a new user what to do next and go stale the same way.
-
-The deploy also renders the page to plain HTML for search engines, and into `llms.txt` for AI tools (`tools/static-pages/render.cs`), so it has to render without a browser: anything that calls JavaScript goes in `OnAfterRenderAsync`. The front page answers a few of the same questions, so check those too. It is `StaticPages/FrontPage.razor`, with its text in `Resources/FrontPage.resx` and `FrontPage.da.resx`, and the deploy puts it into `index.html` (the `wwwroot/index.html` in the repository has no front page of its own).
+`Pages/Help.razor` answers the questions someone new asks, and has to describe the app as it is. When a change adds or changes a feature, update the answers it affects in the same pull request, and add one when the feature raises a question of its own. Check the empty states on the screens involved too, since they tell a new user what to do next and go stale the same way.
 
 When a change is something people using the app would notice, add a line for it at the top of the current month in `Pages/WhatsNew.razor`, in the same pull request. The line is a key in `Resources/WhatsNew.resx` with its Danish in `WhatsNew.da.resx`. The older lines stay English.
 
@@ -70,35 +72,21 @@ When a change is something people using the app would notice, add a line for it 
 
 `docs/FEATURES.md` is the record of what is built, not only a roadmap. The first column on every row is the status: ✅ is shipped and in the app, ◐ is partly built with the row saying what is missing, and ☐ is not started. Check it before proposing a feature, because the list is long and a lot of it already exists.
 
-## One trap
-
-The .NET gitignore template ignores `Backup*/`, which hid `src/Stikling.Core/Backup` until the build failed in CI on missing types. There is an exception for that folder at the end of `.gitignore`. If a build passes locally but fails in CI, check `git status --ignored` first.
-
 ## Choosing how to build
 
-Plan on Opus. Once I approve a plan, don't ask me to switch models. Write a brief and hand the build to the `worker` agent (`.claude/agents/worker.md`), which runs on Sonnet 5.5, then check what it did. The `coordinate` skill has the steps, including how to write a brief the worker can finish without coming back with questions. A worker is cheaper than switching this session's model: a switch writes the whole planning conversation to the cache again, and every build turn re-reads it.
+Plan on Opus. Once I approve a plan, don't ask me to switch models. Write a brief and hand the build to the `worker` agent (`.claude/agents/worker.md`), which runs on Sonnet 5.5, then check what it did. The `coordinate` skill has the steps, including how to write a brief the worker can finish without coming back with questions. A worker is cheaper than switching this session's model, which writes the whole planning conversation to the cache again.
 
 Build in this session instead when the change is one or two files, or when the work is mostly judgment, like a data migration or tuning a screen together with me. For a batch of small features that touch different parts of the app, suggest `/coordinate`, which runs workers in parallel.
 
 ## Before opening a pull request
 
-Build, run the tests, and check any UI change in a browser at phone width. The dev server is `stikling-web` in `.claude/launch.json`. It runs on port 5170, or on another free port when a session running at the same time already has 5170.
+Build, run the tests, and check any UI change in a browser at phone width. The dev server is `stikling-web` in `.claude/launch.json`.
 
-Hand the browser check to the `browser-check` agent (`.claude/agents/browser-check.md`) instead of driving the browser in this session. Every turn in a long session re-reads its whole context, so a check done here costs several times more than one done by an agent that starts small. Tell it what changed, which screens to open and how to get to them. It checks phone, desktop and dark mode, reports in a few lines and leaves one screenshot in the pane. Check in the main session only when the judgment about how it looks is part of the design work.
+Hand the browser check to the `browser-check` agent (`.claude/agents/browser-check.md`) instead of driving the browser in this session, where a check costs several times more. Tell it what changed, which screens to open and how to get to them. It checks phone, desktop and dark mode, reports in a few lines and leaves one screenshot in the pane. Check in the main session only when the judgment about how it looks is part of the design work.
 
 Clear the test data afterwards. The app has no button for it, so delete the database from the page with `indexedDB.deleteDatabase("stikling")` and reload. The `browser-check` agent does this itself for data it added.
 
-Then run the `reviewer` agent (`.claude/agents/reviewer.md`) on the branch, with a sentence on what the change is for. It reads the diff with a fresh context and checks it against this file and `DESIGN.md`. Fix what it finds that holds up, and say in the chat what it found and what was left alone and why.
+Then run the `reviewer` agent (`.claude/agents/reviewer.md`) on the branch, with a sentence on what the change is for. Fix what it finds that holds up, and say in the chat what it found and what was left alone and why.
 
 In the pull request text, say how the change was checked (which tests ran, what was looked at in the browser) and whether reverting it would undo it. Most changes revert cleanly. Some can't, because devices or the server keep what the new version wrote: raising `DB_VERSION`, migrating stored data, a server migration, or anything that deletes. Say that near the top, along with what it affects.
 
-## A real collection to test with
-
-A `stikling-testdata` folder next to the stikling checkout holds backups of my real collection, named `stikling-backup-<date>.zip`. It is outside the repository on purpose. Older ones stay when a new one is added, so they double as backups from older versions of the app.
-
-Use it when a change touches stored data or restore (a migration, raising `DB_VERSION`, a converter), when a screen needs a full collection to judge (long lists, the desktop layout, plants with a long history), or to check that older backups still restore. For anything else, a few records added by hand are quicker.
-
-- `stikling-testdata` in `.claude/launch.json` serves the folder on localhost, so a page can restore from it without a file picker. It runs on Node. `.claude/agents/browser-check.md` has the snippet that does it.
-- Never sign in while it's restored. A sync would upload the collection to that account.
-- Never copy its plant names, notes, places or photos into commits, pull requests, the Help page or anything else in the repository.
-- Clear the database afterwards, as in the section before.
