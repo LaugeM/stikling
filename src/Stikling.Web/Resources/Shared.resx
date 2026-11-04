@@ -1378,6 +1378,10 @@ Maybe</value>
     <value>Day</value>
     <comment>Label of the day a new leaf is logged for.</comment>
   </data>
+  <data name="LeafDayInFuture" xml:space="preserve">
+    <value>The day can't be in the future.</value>
+    <comment>Shown under the day of a new leaf when it is after today.</comment>
+  </data>
   <data name="LeafAddNote" xml:space="preserve">
     <value>Add a note</value>
     <comment>Button that shows the note field when logging a leaf.</comment>
