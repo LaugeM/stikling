@@ -370,7 +370,7 @@ A pot with a photo shows it wherever the pot is named, so an outer pot can be to
 
 - On the Pots page, a 3rem tile at 0.6rem radius starts the row, on Clay Soft while it loads, since a pot is the clay colour's own subject. Tapping it opens the pot's photos in the full-screen viewer, where the shown one is chosen, framed or deleted.
 - On a plant page, a 1.75rem tile sits in the line of text before the pot's name, with a tap area that reaches 44px. It opens the viewer to look only: the viewer drops its action bar when the page gives it no actions.
-- In the pot picker, a round photo starts the chip.
+- In the pot picker, pots with a photo are a grid of square tiles, 5.5rem or wider at 0.75rem radius, with the photo at 0.5rem radius on Clay Soft and the name under it in two lines at most. A picked tile takes the picked chip's Leaf Tint and a 2px Potting Green edge. Pots without a photo stay chips in the row under the grid, between None and New pot.
 
 The Pots page lists one kind at a time under a segmented control (Nursery, Outer, On its own) that keeps to 26rem on a wide screen, because nursery and outer pots are used for different things and are never looked through together.
 

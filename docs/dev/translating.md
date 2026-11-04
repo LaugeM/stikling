@@ -80,7 +80,7 @@ Read the English for what it means, then write the sentence the way a Dane would
 | sync | synkronisere |
 | theme | tema |
 | light, dark | lyst, mørkt |
-| everyday names | daglige navne |
+| everyday names | populærnavne |
 | outer pot | yderpotte |
 | nursery pot | inderpotte |
 | tag | tag (plural tags) |
