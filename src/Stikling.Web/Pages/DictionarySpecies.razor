@@ -81,7 +81,7 @@ else
                     <h2 class="section-label" id="dict-cultivars">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CultivarsHeading, entry.Cultivars.Count)</h2>
                     <div class="dict-rows">
                         <Virtualize Items="cultivars" ItemSize="RowSize" Context="cultivar">
-                            <a class="item-card dict-row" href="@DictionaryLinks.Cultivar(entry.Genus, cultivar.Name)" @key="cultivar.Name">
+                            <a class="item-card dict-row" href="@DictionaryLinks.Cultivar(entry.Genus, cultivar.Name, cultivar.Species)">
                                 <span class="item-text">
                                     <span class="item-name dict-name"><BotanicalName Cultivar="@cultivar.Name" /></span>
                                     @if (cultivar.Everyday is not null)

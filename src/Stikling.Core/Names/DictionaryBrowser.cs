@@ -160,12 +160,14 @@ public sealed class DictionaryBrowser
             oldNamesOf.TryGetValue((NameKey.Of(names.Name), key), out var old) ? old : []);
     }
 
-    public CultivarEntry? Cultivar(string genus, string name)
+    /// <param name="species">Picks between cultivars of the same name on different species; the first is used without it.</param>
+    public CultivarEntry? Cultivar(string genus, string name, string? species = null)
     {
         if (!byKey.TryGetValue(NameKey.Of(genus), out var names))
             return null;
         var key = NameKey.Of(name);
-        var found = names.Cultivars.FirstOrDefault(c => NameKey.Of(c.Name) == key);
+        var same = names.Cultivars.Where(c => NameKey.Of(c.Name) == key).ToList();
+        var found = same.FirstOrDefault(c => species is not null && NameKey.Of(c.Species) == NameKey.Of(species)) ?? same.FirstOrDefault();
         if (found is null)
             return null;
 

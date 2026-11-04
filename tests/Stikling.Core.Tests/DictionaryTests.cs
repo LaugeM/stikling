@@ -191,4 +191,26 @@ public class DictionaryTests
         Assert.Equal(2, browser.GeneraIn(DictionaryGroup.Aroids).Count);
         Assert.Same(browser, await service.GetBrowserAsync());
     }
+
+    [Fact]
+    public void Cultivar_with_the_same_name_on_two_species_is_picked_by_species()
+    {
+        var data = new PlantNameData
+        {
+            Genera =
+            [
+                new GenusNames
+                {
+                    Name = "Monstera",
+                    Species = ["deliciosa", "adansonii"],
+                    Cultivars = [new CultivarName("Aurea", "deliciosa"), new CultivarName("Aurea", "adansonii")],
+                },
+            ],
+        };
+        var browser = new DictionaryBrowser(data, EverydayNameBook.Empty);
+
+        Assert.Equal("adansonii", browser.Cultivar("Monstera", "Aurea", "adansonii")!.Species);
+        Assert.Equal("deliciosa", browser.Cultivar("Monstera", "Aurea")!.Species);
+        Assert.Equal("deliciosa", browser.Cultivar("Monstera", "Aurea", "unknown")!.Species);
+    }
 }

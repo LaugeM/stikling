@@ -72,6 +72,9 @@ else
     [Parameter]
     public string? Name { get; set; }
 
+    [SupplyParameterFromQuery(Name = "species")]
+    public string? SpeciesName { get; set; }
+
     private DictionaryBrowser? browser;
     private CultivarEntry? entry;
     private Yours? yours;
@@ -81,7 +84,7 @@ else
     private async Task LoadAsync()
     {
         browser = await Dictionary.GetBrowserAsync();
-        entry = browser.Cultivar(Genus ?? "", Name ?? "");
+        entry = browser.Cultivar(Genus ?? "", Name ?? "", SpeciesName);
         yours = entry is null ? null : await Dictionary.GetYoursAsync(entry.Genus, entry.Species, entry.Name);
     }
 }

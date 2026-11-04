@@ -27,15 +27,16 @@ public static class DictionaryLinks
     /// <param name="species">The part after the genus, as in the file.</param>
     public static string Species(string genus, string species) => $"dictionary/{Escape(genus)}/{Escape(species)}";
 
-    public static string Cultivar(string genus, string name) => $"dictionary/cultivar/{Escape(genus)}/{Escape(name)}";
+    public static string Cultivar(string genus, string name, string? species = null) =>
+        $"dictionary/cultivar/{Escape(genus)}/{Escape(name)}" + (string.IsNullOrWhiteSpace(species) ? "" : $"?species={Escape(species)}");
 
     /// <summary>The page for the most specific part of the name that the dictionary has, or null when the genus isn't in it.</summary>
     public static string? MostSpecific(DictionaryBrowser browser, string? genus, string? species, string? cultivar)
     {
         if (PlantNames.Genus(genus) is not { } g || browser.Genus(g) is null)
             return null;
-        if (PlantNames.Cultivar(cultivar) is { } c && browser.Cultivar(g, c) is not null)
-            return Cultivar(g, c);
+        if (PlantNames.Cultivar(cultivar) is { } c && browser.Cultivar(g, c, species) is { } found)
+            return Cultivar(g, c, found.Species);
         if (PlantNames.Species(species) is { } s && browser.Species(g, s) is not null)
             return Species(g, s);
         return Genus(g);
@@ -91,7 +92,9 @@ public static class DictionaryLinks
     public static string Italic(string text) => $"<i>{WebUtility.HtmlEncode(text)}</i>";
 
     public static string CountsLine(int genera, int species) =>
-        string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CountsLine,
+        species == 0
+            ? Plural.Of(genera, Strings.Dictionary.Genus_One, Strings.Dictionary.Genus_Other)
+            : string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CountsLine,
             Plural.Of(genera, Strings.Dictionary.Genus_One, Strings.Dictionary.Genus_Other),
             Plural.Of(species, Strings.Dictionary.Species_One, Strings.Dictionary.Species_Other));
 }
