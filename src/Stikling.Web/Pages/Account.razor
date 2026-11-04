@@ -89,6 +89,43 @@ else if (account is { SignedIn: true })
         <p class="settings-hint" role="status">
             @(downloading ? Strings.Account.AccountDownloadPreparing : Strings.Account.AccountDownloadHint)
         </p>
+        @if (passkeysSupported)
+        {
+            <h2 class="h6 mt-4">@Strings.Account.PasskeysHeading</h2>
+            <p class="settings-hint">@Strings.Account.PasskeysHint</p>
+            @foreach (var passkey in passkeys)
+            {
+                <div class="room-row">
+                    <span class="room-name">@(passkey.Name ?? Strings.Account.PasskeyDefaultName)</span>
+                    <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@passkeyBusy"
+                            @onclick="() => removingPasskey = passkey.Id">@Strings.Account.PasskeyRemove</button>
+                </div>
+                <p class="settings-hint mt-0">@PasskeyDates(passkey)</p>
+                @if (removingPasskey == passkey.Id)
+                {
+                    <div class="confirm-card">
+                        <p>
+                            <strong>@Strings.Account.PasskeyRemoveHeading</strong><br />
+                            @Strings.Account.PasskeyRemoveExplain
+                        </p>
+                        <div class="settings-actions">
+                            <button type="button" class="btn btn-danger" disabled="@passkeyBusy"
+                                    @onclick="() => RemovePasskeyAsync(passkey.Id)">@Strings.Account.PasskeyRemove</button>
+                            <button type="button" class="btn btn-link" disabled="@passkeyBusy"
+                                    @onclick="() => removingPasskey = null">@Strings.Common.Cancel</button>
+                        </div>
+                    </div>
+                }
+            }
+            <div class="settings-actions">
+                <button type="button" class="btn btn-outline-primary" @onclick="AddPasskeyAsync"
+                        disabled="@passkeyBusy">@Strings.Account.PasskeyAdd</button>
+            </div>
+            @if (passkeyMessage is not null)
+            {
+                <p class="settings-message" role="status">@passkeyMessage</p>
+            }
+        }
     }
 
     <hr class="account-divider" />
@@ -165,6 +202,11 @@ else
     private bool removeHereToo;
     private bool downloading;
     private PhotoUsage? photoUsage;
+    private bool passkeysSupported;
+    private IReadOnlyList<PasskeyInfo> passkeys = [];
+    private bool passkeyBusy;
+    private string? removingPasskey; // the id of the passkey the question about removing is open for
+    private string? passkeyMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -204,6 +246,90 @@ else
         {
             photoUsage = await Sync.GetPhotoUsageAsync();
             StateHasChanged();
+            await LoadPasskeysAsync();
+        }
+    }
+
+    private async Task LoadPasskeysAsync()
+    {
+        try
+        {
+            passkeysSupported = await Accounts.PasskeysSupportedAsync();
+            passkeys = passkeysSupported ? await Accounts.GetPasskeysAsync() : [];
+        }
+        catch (JSException)
+        {
+            passkeysSupported = false;
+        }
+
+        StateHasChanged();
+    }
+
+    private string PasskeyDates(PasskeyInfo passkey)
+    {
+        var culture = System.Globalization.CultureInfo.CurrentCulture;
+        string Day(DateTimeOffset at) => Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime));
+        return (passkey.CreatedAt, passkey.LastUsedAt) switch
+        {
+            ({ } added, { } used) => string.Format(culture, Strings.Account.PasskeyAddedLastUsed, Day(added), Day(used)),
+            ({ } added, null) => string.Format(culture, Strings.Account.PasskeyAdded, Day(added)),
+            (null, { } used) => string.Format(culture, Strings.Account.PasskeyLastUsed, Day(used)),
+            _ => ""
+        };
+    }
+
+    private async Task AddPasskeyAsync()
+    {
+        passkeyBusy = true;
+        passkeyMessage = null;
+        removingPasskey = null;
+        try
+        {
+            var result = await Accounts.CreatePasskeyAsync();
+            passkeys = result.Passkeys;
+            passkeyMessage = result.ProblemKind switch
+            {
+                null => Strings.Account.PasskeyAddedMessage,
+                PasskeyProblem.Cancelled => null,
+                PasskeyProblem.Exists => Strings.Account.PasskeyExists,
+                PasskeyProblem.Again => Strings.Account.PasskeyAddAgain,
+                PasskeyProblem.Reverify => Strings.Account.PasskeyReverify,
+                _ => Strings.Account.PasskeyAddFailed
+            };
+        }
+        catch (JSException)
+        {
+            passkeyMessage = Strings.Account.PasskeyAddFailed;
+        }
+        finally
+        {
+            passkeyBusy = false;
+        }
+    }
+
+    private async Task RemovePasskeyAsync(string id)
+    {
+        passkeyBusy = true;
+        passkeyMessage = null;
+        try
+        {
+            var result = await Accounts.DeletePasskeyAsync(id);
+            passkeys = result.Passkeys;
+            removingPasskey = null;
+            passkeyMessage = result.ProblemKind switch
+            {
+                null or PasskeyProblem.Cancelled => null,
+                PasskeyProblem.Reverify => Strings.Account.PasskeyReverify,
+                _ => Strings.Account.PasskeyRemoveFailed
+            };
+        }
+        catch (JSException)
+        {
+            passkeyMessage = Strings.Account.PasskeyRemoveFailed;
+        }
+        finally
+        {
+            passkeyBusy = false;
         }
     }
 
@@ -255,6 +381,12 @@ else
         accountMessage = null;
         signOut = null;
         deleting = false;
+        removingPasskey = null;
+        passkeyMessage = null;
+        if (state.SignedIn)
+            await InvokeAsync(LoadPasskeysAsync);
+        else
+            passkeys = [];
         await InvokeAsync(StateHasChanged);
     }
 
