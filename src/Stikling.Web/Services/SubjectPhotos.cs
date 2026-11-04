@@ -21,22 +21,25 @@ public sealed class SubjectPhotos(
     {
         var subjectType = subject is Plant ? SubjectType.Plant : SubjectType.Propagation;
         var result = await photos.SaveFromInputAsync(input, subjectType, subject.Id);
-        return (result.Message(guessesMatter: false), await FinishAsync(subject, result));
+        return await FinishAsync(subject, result);
     }
 
     /// <summary>
-    /// What follows saving photos of <paramref name="subject"/>: they go on its history, and the first
-    /// one becomes its cover when it has none. Returns whether anything was saved.
+    /// Puts photos that are already stored on the subject's history, the second half of
+    /// <see cref="TakeAsync"/>, for the camera and the share inbox that store them themselves. The
+    /// first photo of something becomes its cover. Returns what to tell the person and whether
+    /// anything was saved.
     /// </summary>
-    public async Task<bool> FinishAsync(Entity subject, PhotoSaveResult result)
+    public async Task<(string? Message, bool Saved)> FinishAsync(Entity subject, PhotoSaveResult result)
     {
+        var message = result.Message(guessesMatter: false);
         if (result.Saved.Count == 0)
-            return false;
+            return (message, false);
 
         var subjectType = subject is Plant ? SubjectType.Plant : SubjectType.Propagation;
         await timeline.AddPhotosAsync(subjectType, subject.Id, result.Saved);
         await SetCoverAsync(subject, PhotoEntries.Cover(result.Saved).Id);
-        return true;
+        return (message, true);
     }
 
     private async Task SetCoverAsync(Entity subject, Guid photoId)

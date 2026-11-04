@@ -1,0 +1,278 @@
+@* Stikling's own camera, full screen, for taking a photo at the same angle as an earlier one. A faint copy
+   of that photo lies over the live picture. It uses the browser's camera, so it has no HDR or night mode,
+   and the Photo button still opens the phone's own. The shot is stored in JavaScript and handed on as it
+   is; the page decides where it goes. *@
+@using Stikling.Core.Settings
+@using Stikling.Core.Timeline
+@inject CameraService Camera
+@inject IPhotoRepository PhotoRepository
+@inject SettingsService SettingsService
+@inject ILogger<GhostCamera> Logger
+@implements IAsyncDisposable
+
+@if (Open)
+{
+    <div class="camera" role="dialog" aria-modal="true" aria-label="@Strings.Camera.DialogLabel" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
+        <div class="camera-stage">
+            <video class="camera-video" @ref="video" autoplay muted playsinline></video>
+            @if (ghostOn && Selected is { } ghost)
+            {
+                <div class="camera-ghost" style="--ghost:@Fraction" aria-hidden="true">
+                    <PhotoImage PhotoId="ghost.Id" Thumbnail="false" Eager="true" Framed="false" />
+                </div>
+            }
+            @if (result is null)
+            {
+                <p class="camera-starting" role="status">@Strings.Camera.Starting</p>
+            }
+            <button type="button" class="camera-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
+        </div>
+
+        <div class="camera-panel">
+            @if (result is CameraStart.Denied or CameraStart.None or CameraStart.Failed)
+            {
+                <p class="camera-message" role="alert">@(result == CameraStart.Denied ? Strings.Camera.Denied : Strings.Camera.Unavailable)</p>
+                <div class="camera-message-actions">
+                    @if (result == CameraStart.Denied)
+                    {
+                        <button type="button" class="camera-btn camera-btn-primary" @onclick="TryAgainAsync">@Strings.Camera.TryAgain</button>
+                    }
+                    @if (!string.IsNullOrEmpty(PickerInputId))
+                    {
+                        <button type="button" class="camera-btn camera-btn-outline" @onclick="UsePickerAsync">@Strings.Camera.UsePicker</button>
+                    }
+                </div>
+            }
+            else
+            {
+                @if (choices.Count > 1)
+                {
+                    <ul class="camera-strip" aria-label="@Strings.Camera.EarlierPhotos">
+                        @foreach (var choice in choices)
+                        {
+                            var current = choice.Id == selectedId;
+                            <li>
+                                <button type="button" class="camera-choice @(current ? "current" : null)" aria-pressed="@(current ? "true" : "false")"
+                                        aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Camera.EarlierPhoto, Labels.Date(DateOnly.FromDateTime(choice.TakenAt.LocalDateTime)))"
+                                        @onclick="() => selectedId = choice.Id">
+                                    <PhotoImage PhotoId="choice.Id" />
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                @if (choices.Count > 0)
+                {
+                    <div class="camera-ghost-row">
+                        <button type="button" class="camera-toggle" aria-pressed="@(ghostOn ? "true" : "false")" @onclick="() => ghostOn = !ghostOn">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M6 20V11a6 6 0 0 1 12 0v9l-2.25-2-1.9 2-1.85-2-1.85 2-1.9-2Z" />
+                                <circle cx="10" cy="11" r="0.6" />
+                                <circle cx="14" cy="11" r="0.6" />
+                                @if (!ghostOn)
+                                {
+                                    <path d="M4 4l16 16" />
+                                }
+                            </svg>
+                            @Strings.Camera.Ghost
+                        </button>
+                        <input type="range" class="camera-slider" min="10" max="70" step="5" value="@opacity" disabled="@(!ghostOn)"
+                               aria-label="@Strings.Camera.GhostStrength" @oninput="OnSlide" @onchange="SaveOpacityAsync" />
+                    </div>
+                }
+
+                @if (error is not null)
+                {
+                    <p class="camera-message" role="alert">@error</p>
+                }
+
+                <button type="button" class="camera-shutter" aria-label="@Strings.Camera.Shutter" aria-busy="@(busy ? "true" : "false")"
+                        disabled="@(busy || result != CameraStart.Ok)" @onclick="TakeAsync"><span aria-hidden="true"></span></button>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public SubjectType SubjectType { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    /// <summary>Does nothing until this is true. The camera starts when it becomes true and stops when it goes back.</summary>
+    [Parameter]
+    public bool Open { get; set; }
+
+    /// <summary>Raised when the camera was closed without a shot, by the close button or Escape.</summary>
+    [Parameter]
+    public EventCallback OnClosed { get; set; }
+
+    /// <summary>Raised with the photo once it is stored. The camera is stopped, and the page closes it.</summary>
+    [Parameter]
+    public EventCallback<PhotoSaveResult> OnTaken { get; set; }
+
+    /// <summary>The id of the file input to fall back on, when the camera can't be used.</summary>
+    [Parameter]
+    public string? PickerInputId { get; set; }
+
+    private IReadOnlyList<Photo> choices = [];
+    private Guid? selectedId;
+    private bool ghostOn = true;
+    private int opacity = UserSettings.DefaultGhostOpacity;
+
+    // Null while the camera is starting
+    private CameraStart? result;
+    private bool busy;
+    private bool opened;
+    private bool startPending;
+    private bool running;
+    private string? error;
+    private ElementReference video;
+    private ElementReference dialog;
+
+    private Photo? Selected => choices.FirstOrDefault(p => p.Id == selectedId);
+
+    private string Fraction => (opacity / 100.0).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Open && !opened)
+        {
+            opened = true;
+            result = null;
+            error = null;
+            busy = false;
+            ghostOn = true;
+            startPending = true;
+            opacity = Math.Clamp((await SettingsService.GetAsync()).GhostOpacity ?? UserSettings.DefaultGhostOpacity, 10, 70);
+            choices = PhotoKinds.GhostChoices(await PhotoRepository.GetForAsync(SubjectId));
+            selectedId = choices.FirstOrDefault()?.Id;
+        }
+        else if (!Open && opened)
+        {
+            opened = false;
+            await StopAsync();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!startPending || !Open)
+            return;
+
+        startPending = false;
+        await dialog.FocusAsync();
+        await StartAsync();
+    }
+
+    private async Task StartAsync()
+    {
+        result = null;
+        running = true;
+        try
+        {
+            result = await Camera.StartAsync(video);
+        }
+        catch (Exception ex) when (ex is JSException or InvalidOperationException)
+        {
+            Logger.LogWarning(ex, "Starting the camera failed");
+            result = CameraStart.Failed;
+        }
+        StateHasChanged();
+    }
+
+    private async Task StopAsync()
+    {
+        if (!running)
+            return;
+
+        running = false;
+        await Camera.StopAsync(video);
+    }
+
+    private Task TryAgainAsync() => StartAsync();
+
+    private async Task CloseAsync()
+    {
+        await StopAsync();
+        await OnClosed.InvokeAsync();
+    }
+
+    private async Task UsePickerAsync()
+    {
+        await CloseAsync();
+        if (!string.IsNullOrEmpty(PickerInputId))
+            await Camera.ClickInputAsync(PickerInputId);
+    }
+
+    private async Task TakeAsync()
+    {
+        if (busy || result != CameraStart.Ok)
+            return;
+
+        busy = true;
+        error = null;
+        try
+        {
+            var shot = await Camera.CaptureAsync(video, SubjectType, SubjectId);
+            if (shot.Saved.Count == 0)
+            {
+                error = Strings.Camera.SaveFailed;
+                busy = false;
+                return;
+            }
+
+            await StopAsync();
+            busy = false;
+            await OnTaken.InvokeAsync(shot);
+            return;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Taking a photo with the camera failed");
+            error = Strings.Camera.SaveFailed;
+        }
+
+        busy = false;
+    }
+
+    private void OnSlide(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var percent))
+            opacity = Math.Clamp(percent, 10, 70);
+    }
+
+    private async Task SaveOpacityAsync()
+    {
+        try
+        {
+            await SettingsService.SetGhostOpacityAsync(opacity);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Saving the ghost opacity failed");
+        }
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            await CloseAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await StopAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away, and the camera with it
+        }
+    }
+}

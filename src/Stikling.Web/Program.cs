@@ -133,6 +133,7 @@ builder.Services.AddScoped<SpreadsheetImportService>();
 builder.Services.AddScoped<PropagationCareService>();
 builder.Services.AddScoped<PhotoService>();
 builder.Services.AddScoped<ShareInbox>();
+builder.Services.AddScoped<CameraService>();
 builder.Services.AddScoped<IExamplePhotos, ExamplePhotos>();
 builder.Services.AddScoped<ExampleService>();
 builder.Services.AddScoped<TourService>();

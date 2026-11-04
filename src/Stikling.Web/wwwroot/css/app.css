@@ -2690,6 +2690,14 @@ a.tag-label:hover {
     padding: 0;
 }
 
+/* Same angle: only the icon, round, next to Photo */
+.page-dock > .btn.dock-angle {
+    flex: 0 0 2.75rem;
+    min-width: 2.75rem;
+    padding: 0;
+    border-radius: 50%;
+}
+
 .page-dock svg {
     width: 1.2rem;
     height: 1.2rem;

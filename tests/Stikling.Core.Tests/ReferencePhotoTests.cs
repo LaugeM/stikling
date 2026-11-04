@@ -28,6 +28,21 @@ public class ReferencePhotoTests
     }
 
     [Fact]
+    public void Ghost_choices_are_the_own_photos_newest_first_without_references_or_deleted_ones()
+    {
+        var plantId = Guid.NewGuid();
+        var oldest = PhotoOf(plantId, At(9, 1));
+        var newest = PhotoOf(plantId, At(9, 9));
+        var middle = PhotoOf(plantId, At(9, 5));
+        var reference = PhotoOf(plantId, At(9, 12), reference: true);
+        var deleted = PhotoOf(plantId, At(9, 11));
+        deleted.DeletedAt = At(9, 12);
+
+        Assert.Equal([newest, middle, oldest], PhotoKinds.GhostChoices([oldest, reference, newest, deleted, middle]));
+        Assert.Empty(PhotoKinds.GhostChoices([reference]));
+    }
+
+    [Fact]
     public void References_are_the_live_reference_photos_newest_first()
     {
         var plantId = Guid.NewGuid();

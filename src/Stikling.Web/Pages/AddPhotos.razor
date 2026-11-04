@@ -321,7 +321,7 @@ else
             var ids = waiting.Where(w => ticked.Contains(w.Id)).Select(w => w.Id).ToList();
             var type = subject is Plant ? SubjectType.Plant : SubjectType.Propagation;
             var saved = await Inbox.SaveAsync(ids, type, subject.Id);
-            var any = await SubjectPhotos.FinishAsync(subject, saved.Result);
+            var (_, any) = await SubjectPhotos.FinishAsync(subject, saved.Result);
 
             // Only what was saved leaves the inbox, so a photo that couldn't be read stays waiting
             if (any)
