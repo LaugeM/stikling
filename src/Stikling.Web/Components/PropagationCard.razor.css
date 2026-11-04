@@ -3,6 +3,7 @@
 .item-card.selectable {
     cursor: pointer;
     margin: 0;
+    user-select: none;
 }
 
 .item-card.selected {

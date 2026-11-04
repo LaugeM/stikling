@@ -4091,3 +4091,40 @@ main.app-content.with-tour.tour-closing {
         margin-top: 0;
     }
 }
+
+/* Photo files dragged over a plant or propagation page, or a row in a list (drop.js) */
+.drop-overlay {
+    position: fixed;
+    inset: 0.5rem;
+    z-index: 1040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--pa-green);
+    border-radius: 1rem;
+    background-color: rgba(47, 125, 79, 0.12);
+    pointer-events: none;
+}
+
+.drop-overlay[hidden] {
+    display: none;
+}
+
+.drop-overlay span {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background-color: var(--bs-body-bg);
+    color: var(--pa-green-dark);
+    font-weight: 600;
+}
+
+.drop-target {
+    outline: 3px solid var(--pa-green);
+    outline-offset: -2px;
+    border-radius: 0.75rem;
+    background-color: var(--pa-green-soft);
+}
+
+tr.drop-target {
+    border-radius: 0;
+}

@@ -1,18 +1,19 @@
 @* One row in a propagation list: "3× corm · LECA · day 24". In select mode the card is a checkbox instead of a link. *@
 @using System.Globalization
+@using Stikling.Core.Selection
 @inject TimeProvider Time
 @inject PlantNameService Names
 
 @if (Selectable)
 {
-    <label class="item-card selectable @(Selected ? "selected" : null)">
-        <input type="checkbox" class="form-check-input plant-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Propagation)" />
+    <label data-drop-subject="propagations/@Propagation.Id" class="item-card selectable @(Selected ? "selected" : null)">
+        <input type="checkbox" class="form-check-input plant-check" checked="@Selected" @onclick="e => OnToggle.InvokeAsync(new SelectClick(Propagation.Id, e.ShiftKey))" />
         @Content
     </label>
 }
 else
 {
-    <a class="item-card" href="propagations/@Propagation.Id">
+    <a data-drop-subject="propagations/@Propagation.Id" class="item-card" href="propagations/@Propagation.Id">
         @Content
     </a>
 }
@@ -47,7 +48,7 @@ else
     public bool Selected { get; set; }
 
     [Parameter]
-    public EventCallback<Propagation> OnToggle { get; set; }
+    public EventCallback<SelectClick> OnToggle { get; set; }
 
     private DateOnly Today => Time.Today();
 

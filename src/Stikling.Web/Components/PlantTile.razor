@@ -1,18 +1,19 @@
 @* A plant as a tile with a large square photo, for grids. In select mode the tile is a checkbox instead of a link.
    Anything in ChildContent is shown as the last line. *@
+@using Stikling.Core.Selection
 @inject CoverPhotos Covers
 @inject PlantNameService Names
 
 @if (Selectable)
 {
-    <label class="plant-tile selectable @(Selected ? "selected" : null) @(Faded ? "faded" : null)">
-        <input type="checkbox" class="form-check-input tile-check" checked="@Selected" @onchange="() => OnToggle.InvokeAsync(Plant)" />
+    <label data-drop-subject="plants/@Plant.Id" class="plant-tile selectable @(Selected ? "selected" : null) @(Faded ? "faded" : null)">
+        <input type="checkbox" class="form-check-input tile-check" checked="@Selected" @onclick="e => OnToggle.InvokeAsync(new SelectClick(Plant.Id, e.ShiftKey))" />
         @Content
     </label>
 }
 else
 {
-    <a class="plant-tile @(Faded ? "faded" : null)" href="@(Href ?? $"plants/{Plant.Id}")">
+    <a data-drop-subject="plants/@Plant.Id" class="plant-tile @(Faded ? "faded" : null)" href="@(Href ?? $"plants/{Plant.Id}")">
         @Content
     </a>
 }
@@ -32,7 +33,7 @@ else
     public bool Selected { get; set; }
 
     [Parameter]
-    public EventCallback<Plant> OnToggle { get; set; }
+    public EventCallback<SelectClick> OnToggle { get; set; }
 
     /// <summary>Open pest cases covering this plant.</summary>
     [Parameter]

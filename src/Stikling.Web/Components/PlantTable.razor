@@ -1,6 +1,7 @@
 @* The plant list as a table, one column per detail. Tapping a heading sorts by it. The name column stays in
    place when the rest scrolls sideways. In select mode a row is a checkbox instead of a link. *@
 @using System.Globalization
+@using Stikling.Core.Selection
 @using CoreTable = Stikling.Core.Plants.PlantTable
 @inject CoverPhotos Covers
 
@@ -34,13 +35,13 @@
             {
                 var plant = row.Plant;
                 var selected = Selected.Contains(plant.Id);
-                <tr class="@(selected ? "selected" : null)" @onclick="() => Clicked(plant)">
+                <tr data-drop-subject="plants/@plant.Id" class="@(selected ? "selected" : null)" @onclick="e => Clicked(plant, e)">
                     @if (Selectable)
                     {
                         <td class="check-col">
                             <input type="checkbox" class="form-check-input" checked="@selected"
                                    aria-label="@CoreTable.NameFor(plant, cultivarShown)"
-                                   @onclick="() => OnToggle.InvokeAsync(plant)" @onclick:stopPropagation="true" />
+                                   @onclick="e => OnToggle.InvokeAsync(new SelectClick(plant.Id, e.ShiftKey))" @onclick:stopPropagation="true" />
                         </td>
                     }
                     @foreach (var column in Columns)
@@ -82,7 +83,7 @@
     public IReadOnlySet<Guid> Selected { get; set; } = new HashSet<Guid>();
 
     [Parameter]
-    public EventCallback<Plant> OnToggle { get; set; }
+    public EventCallback<SelectClick> OnToggle { get; set; }
 
     private static string F(string format, params object?[] args) =>
         string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
@@ -91,7 +92,7 @@
 
     private Task SortBy(TableColumn column) => SortChanged.InvokeAsync(CoreTable.Tap(Sort, column));
 
-    private Task Clicked(Plant plant) => Selectable ? OnToggle.InvokeAsync(plant) : Task.CompletedTask;
+    private Task Clicked(Plant plant, MouseEventArgs e) => Selectable ? OnToggle.InvokeAsync(new SelectClick(plant.Id, e.ShiftKey)) : Task.CompletedTask;
 
     private string? CellClass(TableColumn tableColumn)
     {

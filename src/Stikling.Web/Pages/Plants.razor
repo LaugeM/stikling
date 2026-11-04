@@ -10,6 +10,7 @@
 @inject ProblemService ProblemService
 @inject IFloweringMarkRepository FloweringRepository
 @inject IPestTreatmentRepository PestTreatmentRepository
+@using Stikling.Core.Selection
 @using Stikling.Core.Settings
 @inject SettingsService SettingsService
 @inject ITimelineRepository Entries
@@ -24,6 +25,7 @@
 
 <PageTitle>@Strings.Plants.ListPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
+<RowPhotoDrop />
 
 @* page-full: on a wide screen the list takes the whole width beside the menu, in every view *@
 <div class="page-heading page-full">
@@ -737,6 +739,7 @@ else
 
     private bool selecting;
     private readonly HashSet<Guid> selected = [];
+    private Guid? selectAnchor;
     private string bulkStatus = ""; // the "Set status…" dropdown, reset after each use
     private PlantStatus? leaving; // given away or sold, waiting for which pots went too
     private bool bulkNoteOpen;
@@ -1100,6 +1103,7 @@ else
     {
         selecting = !selecting;
         selected.Clear();
+        selectAnchor = null;
         bulkNoteOpen = false;
         bulkCareOpen = false;
         bulkTagOpen = false;
@@ -1292,10 +1296,13 @@ else
         bulkMessage = null;
     }
 
-    private void Toggle(Plant plant)
+    // A click in Select mode; shift picks every row between the last one clicked and this one, as shown
+    private void Toggle(SelectClick click)
     {
-        if (!selected.Remove(plant.Id))
-            selected.Add(plant.Id);
+        IReadOnlyList<Guid> shown = view == PlantView.Table
+            ? tableRows.Select(r => r.Plant.Id).ToList()
+            : visible.Select(p => p.Id).ToList();
+        selectAnchor = SelectionRange.Apply(shown, selected, selectAnchor, click.Id, click.Shift);
         bulkMessage = null;
     }
 
