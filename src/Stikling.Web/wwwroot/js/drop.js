@@ -31,13 +31,14 @@ function keepInPage() {
 }
 
 // The whole page takes the files for one subject. Returns something to call dispose() on.
-export function attachPage(inputId, name) {
+// label is the text shown over the page, already in the app's language
+export function attachPage(inputId, label) {
     const overlay = document.createElement("div");
     overlay.className = "drop-overlay";
     overlay.hidden = true;
-    const label = document.createElement("span");
-    label.textContent = `Drop to add to ${name}`;
-    overlay.append(label);
+    const text = document.createElement("span");
+    text.textContent = label;
+    overlay.append(text);
     document.body.append(overlay);
 
     let depth = 0;

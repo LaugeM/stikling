@@ -1,5 +1,6 @@
 @* Lets photo files be dropped anywhere on a plant's or propagation's page, to add them to it. Put it on the
    page next to the EntryComposer, and give it the id of the composer's file input. *@
+@using System.Globalization
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
@@ -18,7 +19,7 @@
         if (!firstRender)
             return;
         module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/drop.js");
-        attached = await module.InvokeAsync<IJSObjectReference>("attachPage", InputId, Name);
+        attached = await module.InvokeAsync<IJSObjectReference>("attachPage", InputId, string.Format(CultureInfo.CurrentCulture, Strings.Shared.PhotoDropLabel, Name));
     }
 
     public async ValueTask DisposeAsync()
