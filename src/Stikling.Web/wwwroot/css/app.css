@@ -4080,13 +4080,13 @@ main.app-content.with-tour.tour-closing {
         grid-column: 1 / -1;
     }
 
-    /* The heading has no top margin of its own, so it lines up with the top of the first fieldset */
     .form-split-main,
     .form-split-more {
         min-width: 0;
         align-self: start;
     }
 
+    /* The More details heading lines up with the top of the first fieldset */
     .form-split-more > .section-label {
         margin-top: 0;
     }
