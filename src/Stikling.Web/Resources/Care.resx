@@ -1140,13 +1140,31 @@
     <value>Push a finger a few centimetres into the soil. Tap Dry or Still damp.</value>
   </data>
   <data name="WaterRoundFeed" xml:space="preserve">
-    <value>Feed this round</value>
+    <value>Feed for the rest</value>
   </data>
   <data name="WaterNoFeed" xml:space="preserve">
     <value>No feed</value>
   </data>
+  <data name="WaterRoundNoFeed" xml:space="preserve">
+    <value>None</value>
+  </data>
   <data name="WaterRoundFeedHelp" xml:space="preserve">
-    <value>Goes with every watering you log here, unless a plant has its own feed due.</value>
+    <value>Goes with every watering you log here.</value>
+  </data>
+  <data name="WaterRoundFeedOwn_One" xml:space="preserve">
+    <value>{0} plant here gets its own feed.</value>
+  </data>
+  <data name="WaterRoundFeedOwn_Other" xml:space="preserve">
+    <value>{0} plants here get their own feed.</value>
+  </data>
+  <data name="WaterRoundFeedRest_One" xml:space="preserve">
+    <value>The feed you pick goes to the other plant.</value>
+  </data>
+  <data name="WaterRoundFeedRest_Other" xml:space="preserve">
+    <value>The feed you pick goes to the other {0}.</value>
+  </data>
+  <data name="WaterRoundFeedAllOwn" xml:space="preserve">
+    <value>Every plant here already gets its own feed.</value>
   </data>
   <data name="WaterNoPlants" xml:space="preserve">
     <value>No plants here.</value>
