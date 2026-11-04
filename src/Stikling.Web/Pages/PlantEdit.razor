@@ -29,7 +29,7 @@
 }
 else
 {
-    <EditForm Model="plant" OnSubmit="SaveAsync" class="edit-form" novalidate>
+    <EditForm Model="plant" OnSubmit="SaveAsync" class="edit-form form-split" novalidate>
         @if (errors.Count > 0)
         {
             <div id="form-errors" class="alert alert-danger" role="alert" tabindex="-1">
@@ -40,6 +40,7 @@ else
             </div>
         }
 
+        <div class="form-split-main">
         @* Starting from old photos, from the first screen: they come first, and the rest is the usual form *@
         @if (FromPhotos)
         {
@@ -217,6 +218,9 @@ else
             </fieldset>
         }
 
+        </div>
+
+        <div class="form-split-more">
         <h2 class="section-label">@Strings.PlantEdit.MoreDetails</h2>
         <div class="more-details mb-4">
             @if (ShowArrival)
@@ -546,6 +550,7 @@ else
                 }
                 <div class="form-text mb-3">@Strings.PlantEdit.OwnFieldsHelp</div>
             </FormSection>
+        </div>
         </div>
 
         <div class="form-actions form-bar">

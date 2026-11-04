@@ -18,14 +18,14 @@ Do not edit, create or delete files in the repository, and do not commit. Use Ba
 
    ```js
    const base = 'http://localhost:5171/';
-   const name = (await fetch(base).then(r => r.json())).filter(n => n.endsWith('.zip')).sort().at(-1);
+   const name = (await fetch(base).then(r => r.json())).filter(n => n.startsWith('stikling-backup-') && n.endsWith('.zip')).sort().at(-1);
    const blob = await fetch(base + encodeURIComponent(name)).then(r => r.blob());
    const dt = new DataTransfer(); dt.items.add(new File([blob], name, { type: 'application/zip' }));
    const input = document.getElementById('restore-file'); input.files = dt.files;
    input.dispatchEvent(new Event('change', { bubbles: true })); name
    ```
 
-   That picks the newest backup. For an older one, use its file name. It is a real person's collection: don't sign in while it's there, don't quote plant names, notes or places in your report, and delete the database at the end like any data you added.
+   That picks the newest backup. The folder also holds other zips, like the photos in folders (`stikling-data-`), which aren't backups. For an older one, use its file name. It is a real person's collection: don't sign in while it's there, don't quote plant names, notes or places in your report, and delete the database at the end like any data you added.
 
 ## Sizes
 
