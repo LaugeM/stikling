@@ -1,0 +1,210 @@
+@page "/dictionary"
+@layout WideLayout
+@implements IDisposable
+@using System.Globalization
+@inject DictionaryService Service
+@inject PlantNameService Names
+@inject NavigationManager Navigation
+
+<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, Strings.Dictionary.Title)</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="settings?section=about">@Strings.Dictionary.BackToSettings</a>
+<h1>@Strings.Dictionary.Title</h1>
+<p class="settings-hint">@Strings.Dictionary.Intro</p>
+
+@if (browser is null)
+{
+    <p class="text-body-secondary mt-3">@Strings.Plants.Loading</p>
+}
+else if (ReferenceEquals(browser, DictionaryBrowser.Empty))
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Dictionary.CouldNotLoad</p>
+    </div>
+}
+else
+{
+    <div class="search-box dict-search">
+        <input type="search" class="form-control" placeholder="@Strings.Dictionary.SearchPlaceholder" aria-label="@Strings.Dictionary.SearchPlaceholder"
+               autocomplete="off" spellcheck="false" enterkeyhint="search" value="@query" @oninput="OnInput" />
+    </div>
+
+    @if (!Searching)
+    {
+        <section aria-labelledby="dict-groups">
+            <h2 class="section-label" id="dict-groups">@Strings.Dictionary.GroupsHeading</h2>
+            <div class="settings-rows">
+                @foreach (var group in browser.Groups)
+                {
+                    <SettingsRow Href="@DictionaryLinks.Group(group.Group)" Title="@DictionaryLinks.Label(group.Group)" Detail="@GroupLine(group)">
+                        <Icon><GroupIcon Group="group.Group" /></Icon>
+                    </SettingsRow>
+                }
+            </div>
+        </section>
+
+        <section class="dict-families-section" aria-labelledby="dict-families">
+            <h2 class="section-label" id="dict-families">@Strings.Dictionary.FamiliesHeading</h2>
+            <div class="dict-families-block">
+                <ul class="dict-families">
+                    @foreach (var family in browser.Families)
+                    {
+                        <li>
+                            <a class="dict-family" href="@DictionaryLinks.Family(family.Name)">
+                                <span class="dict-family-name">@family.Name</span>
+                                <span class="dict-family-line">@DictionaryLinks.CountsLine(family.Genera, family.Species)</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </section>
+    }
+    else if (groupHits.Count == 0 && familyHits.Count == 0 && nameHits.Count == 0)
+    {
+        <div class="empty-state">
+            <p class="mb-1">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.SearchNothing, query.Trim())</p>
+            <button type="button" class="btn btn-outline-primary mt-2" @onclick="ClearSearch">@Strings.Dictionary.SearchClear</button>
+        </div>
+    }
+    else
+    {
+        <ul class="item-list list-grid">
+            @foreach (var group in groupHits)
+            {
+                <li>
+                    <a class="item-card" href="@DictionaryLinks.Group(group.Group)">
+                        <span class="item-text">
+                            <span class="item-name">@DictionaryLinks.Label(group.Group)</span>
+                            <span class="item-meta">@GroupLine(group)</span>
+                        </span>
+                    </a>
+                </li>
+            }
+            @foreach (var family in familyHits)
+            {
+                <li>
+                    <a class="item-card" href="@DictionaryLinks.Family(family.Name)">
+                        <span class="item-text">
+                            <span class="item-name">@family.Name</span>
+                            <span class="item-meta">@DictionaryLinks.CountsLine(family.Genera, family.Species)</span>
+                        </span>
+                    </a>
+                </li>
+            }
+            @foreach (var hit in nameHits)
+            {
+                <li><DictionaryHitRow Hit="hit" /></li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private const int MostNames = 30;
+
+    /// <summary>The search, kept in the address so Back to this page shows the same results.</summary>
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? Q { get; set; }
+
+    private DictionaryBrowser? browser;
+    private OwnedCounts owned = new();
+    private NameSuggester? suggester;
+    private string query = "";
+    private string lastPushed = "";
+    private bool started;
+    private CancellationTokenSource? pushDelay;
+    private IReadOnlyList<GroupSummary> groupHits = [];
+    private IReadOnlyList<FamilySummary> familyHits = [];
+    private IReadOnlyList<DictionaryHit> nameHits = [];
+
+    private bool Searching => !string.IsNullOrWhiteSpace(query);
+
+    protected override void OnParametersSet()
+    {
+        // The address changing under a search that was typed here is that search being written to it
+        if (started && (Q ?? "") == lastPushed)
+            return;
+
+        query = Q ?? "";
+        lastPushed = query;
+        if (started)
+            Refresh();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        started = true;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        browser = await Service.GetBrowserAsync();
+        owned = await Service.GetOwnedCountsAsync();
+        suggester = await Names.GetSuggesterAsync();
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        var text = query.Trim();
+        if (browser is null || text.Length == 0)
+        {
+            groupHits = [];
+            familyHits = [];
+            nameHits = [];
+            return;
+        }
+
+        groupHits = DictionaryLinks.GroupsMatching(browser, text);
+        familyHits = DictionaryLinks.FamiliesMatching(browser, text);
+        nameHits = suggester is null ? [] : DictionaryLinks.NamesMatching(suggester, browser, text, MostNames);
+    }
+
+    private string GroupLine(GroupSummary group)
+    {
+        var line = DictionaryLinks.CountsLine(group.Genera, group.Species);
+        var have = browser!.GeneraIn(group.Group).Sum(g => owned.Genus(g.Name));
+        return have > 0 ? $"{line} · {string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.YouHaveShort, have)}" : line;
+    }
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        query = e.Value?.ToString() ?? "";
+        Refresh();
+        _ = PushQueryAsync();
+    }
+
+    private void ClearSearch()
+    {
+        query = "";
+        Refresh();
+        _ = PushQueryAsync();
+    }
+
+    // The address follows the box a moment after typing stops, since every change of address makes the
+    // menu look at the pests again
+    private async Task PushQueryAsync()
+    {
+        pushDelay?.Cancel();
+        pushDelay = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(400, pushDelay.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        var text = query.Trim();
+        if (text == lastPushed)
+            return;
+        lastPushed = text;
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("q", text.Length == 0 ? null : text), replace: true);
+    }
+
+    public void Dispose() => pushDelay?.Cancel();
+}

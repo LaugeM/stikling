@@ -351,6 +351,8 @@ else
                             </dd>
                         }
 
+                        <DictionaryLink Genus="@propagation.Genus" Species="@propagation.Species" Cultivar="@propagation.Cultivar" Qualifier="@propagation.NameQualifier" />
+
                         @if (lastWatered is { } watered)
                         {
                             <dt>@Strings.Propagations.DetLastWatered</dt>

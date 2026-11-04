@@ -418,7 +418,7 @@ else
                         @if (origin?.Family is { Length: > 0 } family)
                         {
                             <dt>@Strings.PlantDetail.BotanicalFamily</dt>
-                            <dd>@family</dd>
+                            <dd><DictionaryFamilyLink Name="@family" /></dd>
                         }
                         @if (origin is { Areas.Count: > 0 } wild)
                         {
@@ -431,6 +431,7 @@ else
                                 }
                             </dd>
                         }
+                        <DictionaryLink Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" />
 
                         @if (careBook.IsEmpty is false && !string.IsNullOrWhiteSpace(plant.Genus))
                         {

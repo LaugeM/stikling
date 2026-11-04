@@ -91,6 +91,11 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5h15v3.5h-15Z" /><path d="M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8" /></svg>
             <span>@Strings.Layout.Supplies</span>
         </NavLink>
+        @* Only in the side menu on a wide screen: a sixth tab would crowd the bottom bar, and on a phone Settings and Search lead here *@
+        <NavLink class="app-nav-link app-nav-wide" href="dictionary">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><DictionaryIcon /></svg>
+            <span>@Strings.Layout.Dictionary</span>
+        </NavLink>
         <div class="app-nav-end">
             <NavLink class="app-nav-link" href="help">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" /><path d="M12 17h.01" /></svg>
