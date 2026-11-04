@@ -8,20 +8,30 @@
 <div class="pot-picker">
     <div class="form-label">@LabelText</div>
 
-    <div class="chip-row" role="group" aria-label="@LabelText">
+    @* Pots with a photo are tiles big enough to tell similar pots apart. The rest stay chips,
+       since a pot without a photo gets no placeholder. *@
+    @if (WithPhoto.Count > 0)
+    {
+        <div class="pot-tiles" role="group" aria-label="@LabelText">
+            @foreach (var pot in WithPhoto)
+            {
+                var picked = !adding && Value == pot.Id;
+                <button type="button" class="pot-tile @Picked(picked)" aria-pressed="@(picked ? "true" : "false")"
+                        @onclick="() => PickAsync(pot.Id)">
+                    <span class="pot-tile-photo" aria-hidden="true"><PhotoImage PhotoId="covers[pot.Id].Id" /></span>
+                    <span class="pot-tile-name">@pot.DisplayName</span>
+                </button>
+            }
+        </div>
+    }
+
+    <div class="chip-row @(WithPhoto.Count > 0 ? "mt-2" : null)" role="group" aria-label="@LabelText">
         <button type="button" class="chip @Picked(Value is null && !adding)"
                 @onclick="() => PickAsync(null)">@NoneTextShown</button>
-        @foreach (var pot in Choices)
+        @foreach (var pot in Choices.Where(pot => !covers.ContainsKey(pot.Id)))
         {
-            var cover = covers.GetValueOrDefault(pot.Id);
-            <button type="button" class="chip @Picked(!adding && Value == pot.Id) @(cover is null ? null : "with-photo")"
-                    @onclick="() => PickAsync(pot.Id)">
-                @if (cover is not null)
-                {
-                    <span class="chip-photo" aria-hidden="true"><PhotoImage PhotoId="cover.Id" /></span>
-                }
-                @pot.DisplayName
-            </button>
+            <button type="button" class="chip @Picked(!adding && Value == pot.Id)"
+                    @onclick="() => PickAsync(pot.Id)">@pot.DisplayName</button>
         }
         <button type="button" class="chip new @Picked(adding)" @onclick="StartAdding">@Strings.Shared.PotPickerNew</button>
     </div>
@@ -130,6 +140,8 @@
                 : offered;
         }
     }
+
+    private List<Pot> WithPhoto => [.. Choices.Where(pot => covers.ContainsKey(pot.Id))];
 
     private IReadOnlyList<string> Names => PotUse.Names(Pots, Groups[0] switch
     {

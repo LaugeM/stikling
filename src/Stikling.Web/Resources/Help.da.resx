@@ -274,7 +274,7 @@
     <value>Kan jeg tilføje mange planter på én gang?</value>
   </data>
   <data name="AddLotPlantsAtOnceA1" xml:space="preserve">
-    <value>Ja. På siden Tilføj en plante, eller i I dag før du har tilføjet noget, trykker du på &lt;em&gt;Hurtig tilføjelse&lt;/em&gt; eller &lt;em&gt;Tilføj flere på én gang&lt;/em&gt;. Skriv eller indsæt så en liste med navne, ét pr. linje eller adskilt med komma. Navne appen kender, både botaniske og daglige som svigermors tunge, bliver udfyldt som slægt, art og kultivar, og det der står efter dem, kommer i noterne. Et navn den ikke kender, bliver til kælenavnet, og det samme sker med et dagligt navn som to planter deler, fx pengetræ, så du kan vælge hvilken det er. Tjek listen, fjern det du ikke vil have med, og tryk på knappen for at tilføje dem alle.</value>
+    <value>Ja. På siden Tilføj en plante, eller i I dag før du har tilføjet noget, trykker du på &lt;em&gt;Hurtig tilføjelse&lt;/em&gt; eller &lt;em&gt;Tilføj flere på én gang&lt;/em&gt;. Skriv eller indsæt så en liste med navne, ét pr. linje eller adskilt med komma. Navne appen kender, både botaniske og populærnavne som svigermors tunge, bliver udfyldt som slægt, art og kultivar, og det der står efter dem, kommer i noterne. Et navn den ikke kender, bliver til kælenavnet, og det samme sker med et populærnavn som to planter deler, fx pengetræ, så du kan vælge hvilken det er. Tjek listen, fjern det du ikke vil have med, og tryk på knappen for at tilføje dem alle.</value>
   </data>
   <data name="FindPlantLongListQ" xml:space="preserve">
     <value>Hvordan finder jeg en plante i en lang liste?</value>
@@ -340,7 +340,7 @@
     <value>Hvad er navnet under min plantes botaniske navn?</value>
   </data>
   <data name="NameUnderPlantSBotanicalA1" xml:space="preserve">
-    <value>Det er dens navn i daglig tale, fx Svigermors tunge under &lt;em&gt;Dracaena trifasciata&lt;/em&gt;. Det vises på planter uden kælenavn. Navnene følger med appen, fra Wikidata og fra lister der er samlet i hånden, og har appen ikke et dagligt navn til en plante, viser den kun det botaniske. Under Daglige navne i Indstillinger kan du skifte mellem engelske og danske navne.</value>
+    <value>Det er dens populærnavn, det den kaldes i daglig tale, fx Svigermors tunge under &lt;em&gt;Dracaena trifasciata&lt;/em&gt;. Det vises på planter uden kælenavn. Navnene følger med appen, fra Wikidata og fra lister der er samlet i hånden, og har appen ikke et populærnavn til en plante, viser den kun det botaniske. Under Populærnavne i Indstillinger kan du skifte mellem engelske og danske navne.</value>
   </data>
   <data name="WhereFamilyAndNativeComeFromQ" xml:space="preserve">
     <value>Hvor ved appen plantefamilien og de vilde voksesteder fra?</value>
@@ -365,6 +365,12 @@
   </data>
   <data name="HappensWhenPlantDiesOrA1" xml:space="preserve">
     <value>Åbn planten, tryk på de tre prikker ved siden af &lt;em&gt;Billede&lt;/em&gt; og &lt;em&gt;Note&lt;/em&gt;, og vælg &lt;em&gt;Den døde&lt;/em&gt; eller &lt;em&gt;Gav den væk eller solgte den&lt;/em&gt;. Vil du gøre det for flere på én gang, bruger du &lt;em&gt;Vælg&lt;/em&gt; på plantelisten. Planten forsvinder fra listen, men beholder sin historik, og du kan stadig finde den under &lt;em&gt;Væk&lt;/em&gt;. Når du markerer en plante som død, kan du skrive en note om hvad der skete. Den vises på planten og i listen &lt;em&gt;Væk&lt;/em&gt;, så du kan læse den før du køber den samme plante igen. Under &lt;em&gt;Væk&lt;/em&gt; kan du vælge &lt;em&gt;Død&lt;/em&gt; for kun at se de planter der døde, og hvorfor. Tilføjer du en plante med samme navn som en der døde, minder formularen dig om den og om hvad der gik galt. For en plante du har givet væk eller solgt, kan du notere hvem der fik den, og hvad du fik for den, fx en pris eller den plante du fik i bytte. Et afkom der er givet væk eller solgt, viser hvem der fik det, i listen over familien. Kommer planten tilbage, eller valgte du forkert, finder du &lt;em&gt;Tilbage i samlingen&lt;/em&gt; samme sted. Sletter du en plante, forsvinder den sammen med sin historik, så det er som regel bedre at skrive hvad der skete.</value>
+  </data>
+  <data name="DeletePlantByMistakeQ" xml:space="preserve">
+    <value>Hvordan sletter jeg en plante jeg har tilføjet ved en fejl?</value>
+  </data>
+  <data name="DeletePlantByMistakeA1" xml:space="preserve">
+    <value>Åbn planten, gå ned i bunden af dens oplysninger under Familie, og tryk på &lt;em&gt;Slet plante&lt;/em&gt;. Den spørger én gang til før noget bliver slettet. Linket ligger dernede så man ikke kommer til at trykke på det. Sletter du planten, forsvinder dens billeder, noter og historik også, så det er til en plante der er tilføjet to gange eller ved en fejl. Er den død eller givet væk, så brug de tre prikker i stedet, som ovenfor. En formering har det samme link i bunden af sin side. Sletter du den forkerte, kan du få den tilbage ved at gendanne en backup fra før.</value>
   </data>
   <data name="HaveTwoSamePlantTypeQ" xml:space="preserve">
     <value>Jeg har to af den samme plante. Skal jeg skrive det hele ind to gange?</value>
@@ -1141,7 +1147,7 @@
     <value>Hvordan deler jeg min planteliste?</value>
   </data>
   <data name="SharePlantListA1" xml:space="preserve">
-    <value>Tryk på Del som tekst på siden Planter. Den deler det der vises, så søgning og filtre gælder, eller kun de planter du har valgt under Vælg. Hver plante skrives med sit botaniske navn og sit daglige navn i parentes, flere af den samme plante skrives én gang med ×2, og en plante der er markeret til bytte, står som til bytte. En plante uden botanisk navn bruger sit kælenavn, og ellers er kælenavne ikke med medmindre du slår dem til. Rum, priser, hvor en plante kom fra, og tags kommer aldrig med. Den sidste linje, "Samlet i Stikling, stikling.app", kan du slå fra før du deler. På en telefon går teksten til delemenuen, og på en computer bliver den kopieret.</value>
+    <value>Tryk på Del som tekst på siden Planter. Den deler det der vises, så søgning og filtre gælder, eller kun de planter du har valgt under Vælg. Hver plante skrives med sit botaniske navn og sit populærnavn i parentes, flere af den samme plante skrives én gang med ×2, og en plante der er markeret til bytte, står som til bytte. En plante uden botanisk navn bruger sit kælenavn, og ellers er kælenavne ikke med medmindre du slår dem til. Rum, priser, hvor en plante kom fra, og tags kommer aldrig med. Den sidste linje, "Samlet i Stikling, stikling.app", kan du slå fra før du deler. På en telefon går teksten til delemenuen, og på en computer bliver den kopieret.</value>
   </data>
   <data name="LikesForQ" xml:space="preserve">
     <value>Hvad bruger jeg "Hvad den kan lide" til?</value>

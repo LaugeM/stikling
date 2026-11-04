@@ -1,27 +1,61 @@
-/* A pot with a photo shows it at the start of its chip, round to follow the pill's end */
-.chip.with-photo {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    /* Thinner top and bottom, so the photo doesn't make the chip taller than the others */
-    padding-top: 0.2rem;
-    padding-bottom: 0.2rem;
-    padding-left: 0.25rem;
+/* Pots with a photo: square tiles with the name under, so similar pots can be told apart */
+.pot-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: 0.5rem;
 }
 
-.chip-photo {
-    flex: none;
-    width: 1.5rem;
-    height: 1.5rem;
+.pot-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0.35rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    background: var(--pa-surface);
+    color: var(--pa-text);
+    font-size: 0.85rem;
+    line-height: 1.25;
+    text-align: left;
+    transition: border-color 0.15s ease-out;
+}
+
+.pot-tile:hover {
+    border-color: var(--pa-green);
+}
+
+/* Picked like a chip, with an inset ring so the edge reads at a glance without moving the tile */
+.pot-tile.picked {
+    border-color: var(--pa-green);
+    box-shadow: inset 0 0 0 1px var(--pa-green);
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+    font-weight: 600;
+}
+
+.pot-tile-photo {
+    position: relative;
+    container-type: size;
+    aspect-ratio: 1;
     overflow: hidden;
-    border-radius: 50%;
+    border-radius: 0.5rem;
     background: var(--pa-clay-soft);
 }
 
-.chip-photo ::deep img,
-.chip-photo ::deep .photo-placeholder {
+.pot-tile-photo ::deep img,
+.pot-tile-photo ::deep .photo-placeholder {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.pot-tile-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    padding-inline: 0.15rem;
 }
