@@ -36,6 +36,10 @@
     <value>When the app is installed from Chrome, Edge or Samsung Internet, it also shows up in your phone's share menu. {0}</value>
     <comment>Small line under the empty state. {0} is the link to the Help page.</comment>
   </data>
+  <data name="SharePartial" xml:space="preserve">
+    <value>Some of the shared photos couldn't be kept here, probably because the device is short of space. They are still in your gallery.</value>
+    <comment>Alert at the top of the Add photos page when the share menu handed over photos that could not all be stored.</comment>
+  </data>
   <data name="ShareMenuNoteLink" xml:space="preserve">
     <value>More in Help</value>
     <comment>Link text at the end of the share menu note, {0} in it.</comment>

@@ -57,23 +57,31 @@ self.addEventListener('notificationclick', event => {
 // the camera date survives.
 async function onShareTarget(request) {
     const scope = self.registration.scope;
+    let partial = false;
     try {
         const form = await request.formData();
         const cache = await caches.open('stikling-share-inbox');
         for (const file of form.getAll('photos')) {
             if (!(file instanceof File) || !file.type.startsWith('image/')) continue;
-            await cache.put(`${scope}share-inbox/${crypto.randomUUID()}`, new Response(file, {
-                headers: {
-                    'Content-Type': file.type,
-                    'X-File-Name': encodeURIComponent(file.name),
-                    'X-Last-Modified': String(file.lastModified)
-                }
-            }));
+            // One file that can't be kept (a full disk, say) must not drop the ones after it
+            try {
+                await cache.put(`${scope}share-inbox/${crypto.randomUUID()}`, new Response(file, {
+                    headers: {
+                        'Content-Type': file.type,
+                        'X-File-Name': encodeURIComponent(file.name),
+                        'X-Last-Modified': String(file.lastModified)
+                    }
+                }));
+            } catch (error) {
+                partial = true;
+                console.warn('Service worker: could not store a shared photo', error);
+            }
         }
     } catch (error) {
-        console.warn('Service worker: could not store shared photos', error);
+        partial = true;
+        console.warn('Service worker: could not read shared photos', error);
     }
-    return Response.redirect(scope + 'add-photos', 303);
+    return Response.redirect(scope + (partial ? 'add-photos?partial=1' : 'add-photos'), 303);
 }
 
 const isShareTarget = request =>

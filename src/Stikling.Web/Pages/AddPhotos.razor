@@ -16,6 +16,11 @@
 <a class="back-link" href="plants">@Strings.Common.Back</a>
 <h1>@Strings.AddPhotos.Title</h1>
 
+@if (Partial == "1")
+{
+    <div class="alert alert-danger" role="alert">@Strings.AddPhotos.SharePartial</div>
+}
+
 @* One input for every "Choose" button on the page, so choosing from the empty state and choosing more work the same *@
 <input id="@inputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1"
        @ref="galleryInput" @onchange="ChooseAsync" disabled="@busy" />
@@ -163,6 +168,10 @@ else
 }
 
 @code {
+    /// <summary>"1" when the share menu handed over photos that couldn't all be kept.</summary>
+    [SupplyParameterFromQuery(Name = "partial")]
+    public string? Partial { get; set; }
+
     private readonly string inputId = $"ap-input-{Guid.NewGuid():N}";
     private ElementReference galleryInput;
 
