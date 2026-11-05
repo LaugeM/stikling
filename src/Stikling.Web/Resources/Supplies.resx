@@ -993,4 +993,59 @@
     <value>The colour of the pot</value>
     <comment>Read out by a screen reader. Tapping the colour that is picked clears it.</comment>
   </data>
+  <data name="PotFitLink" xml:space="preserve">
+    <value>Does it fit?</value>
+  </data>
+  <data name="PotFitTitle" xml:space="preserve">
+    <value>Does it fit?</value>
+    <comment>The title of the sheet on the Pots page that checks which outer pots a nursery pot goes in.</comment>
+  </data>
+  <data name="PotFitNursery" xml:space="preserve">
+    <value>Nursery pot</value>
+    <comment>Label of the choice of nursery pot in the Does it fit? sheet.</comment>
+  </data>
+  <data name="PotFitTypeWidth" xml:space="preserve">
+    <value>Type a width</value>
+    <comment>Last choice in the nursery pot list: type a width instead, for a pot seen in a shop.</comment>
+  </data>
+  <data name="PotFitGoesIn" xml:space="preserve">
+    <value>Goes in</value>
+    <comment>Heading over the outer pots a nursery pot goes inside.</comment>
+  </data>
+  <data name="PotFitHangs" xml:space="preserve">
+    <value>Hangs on its rim</value>
+    <comment>Heading over the outer pots a nursery pot hangs in by its rim.</comment>
+  </data>
+  <data name="PotFitTooNarrow" xml:space="preserve">
+    <value>Too narrow</value>
+    <comment>Heading over the outer pots that are too narrow.</comment>
+  </data>
+  <data name="PotFitSpare" xml:space="preserve">
+    <value>{0} to spare</value>
+    <comment>{0} is a length, like 1.5 cm.</comment>
+  </data>
+  <data name="PotFitTight" xml:space="preserve">
+    <value>A tight fit</value>
+  </data>
+  <data name="PotFitOutside" xml:space="preserve">
+    <value>Going by the outside width, since the rim isn't filled in.</value>
+  </data>
+  <data name="PotFitBottomTighter" xml:space="preserve">
+    <value>The bottom is the tight spot, so it may stop before reaching the floor.</value>
+  </data>
+  <data name="PotFitTaller" xml:space="preserve">
+    <value>Stands {0} taller than the pot.</value>
+    <comment>{0} is a length, like 1.5 cm.</comment>
+  </data>
+  <data name="PotFitNoSize_One" xml:space="preserve">
+    <value>{0} outer pot without a size isn't included.</value>
+    <comment>{0} is the number.</comment>
+  </data>
+  <data name="PotFitNoSize_Other" xml:space="preserve">
+    <value>{0} outer pots without a size aren't included.</value>
+    <comment>{0} is the number.</comment>
+  </data>
+  <data name="PotFitNoneFree" xml:space="preserve">
+    <value>None of your outer pots are free.</value>
+  </data>
 </root>
