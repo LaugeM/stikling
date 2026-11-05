@@ -36,13 +36,13 @@ public static class SitterSheetText
     };
 
     /// <summary>"23 December".</summary>
-    public static string Day(DateOnly date) => date.ToString(Strings.Care.SitterDayFormat, TextCulture.ForDates);
+    public static string Day(DateOnly date) => TextCulture.Date(date, Strings.Care.SitterDayFormat);
 
     /// <summary>"Tuesday 23 December".</summary>
-    public static string LongDay(DateOnly date) => date.ToString(Strings.Care.SitterLongDayFormat, TextCulture.ForDates);
+    public static string LongDay(DateOnly date) => TextCulture.Date(date, Strings.Care.SitterLongDayFormat);
 
     /// <summary>"Tue 23".</summary>
-    public static string ShortDay(DateOnly date) => date.ToString(Strings.Care.SitterShortDayFormat, TextCulture.ForDates);
+    public static string ShortDay(DateOnly date) => TextCulture.Date(date, Strings.Care.SitterShortDayFormat);
 
     /// <summary>The sheet as plain text, in the order it is printed.</summary>
     public static string Write(SitterSheetView sheet)

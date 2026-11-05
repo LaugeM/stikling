@@ -49,7 +49,7 @@ public static class OwnFieldValues
     /// <summary>The value as shown on the plant's page. A value that doesn't fit its kind shows as it was written.</summary>
     public static string Display(OwnFieldKind kind, string stored) =>
         kind == OwnFieldKind.Date && TryReadDate(stored, out var date)
-            ? date.ToString(Strings.Shared.FieldDateFormat, TextCulture.ForDates)
+            ? TextCulture.Date(date, Strings.Shared.FieldDateFormat)
             : stored;
 
     /// <summary>True when the stored text reads as this kind. Text and choices always do.</summary>

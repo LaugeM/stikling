@@ -592,7 +592,7 @@
     <comment>Read out by a screen reader.</comment>
   </data>
   <data name="PotsAcrossTop" xml:space="preserve">
-    <value>Across the top, outside (cm)</value>
+    <value>Across the top, outside ({0})</value>
   </data>
   <data name="PotsHowMany" xml:space="preserve">
     <value>How many</value>
@@ -601,22 +601,22 @@
     <value>More measurements</value>
   </data>
   <data name="PotsAcrossBottom" xml:space="preserve">
-    <value>Across the bottom, outside (cm)</value>
+    <value>Across the bottom, outside ({0})</value>
   </data>
   <data name="PotsHeight" xml:space="preserve">
-    <value>Height (cm)</value>
+    <value>Height ({0})</value>
   </data>
   <data name="PotsMeasurementsHint" xml:space="preserve">
     <value>Measure on the outside, the same way pots are sold.</value>
   </data>
   <data name="PotsRim" xml:space="preserve">
-    <value>Rim or wall (mm)</value>
+    <value>Rim or wall ({0})</value>
   </data>
   <data name="PotsRimHint" xml:space="preserve">
     <value>How wide the edge is when you look down on the pot, from the outer edge to the inner edge. A rim that sticks out also lets a nursery pot hang on an outer pot.</value>
   </data>
   <data name="PotsInsideResult" xml:space="preserve">
-    <value>That makes it {0} cm wide inside.</value>
+    <value>That makes it {0} wide inside.</value>
     <comment>Under the rim field on the pot form. {0} is the width inside the pot.</comment>
   </data>
   <data name="PotsWatersItself" xml:space="preserve">
@@ -687,22 +687,22 @@
     <value>No size</value>
   </data>
   <data name="PotsSizeCm" xml:space="preserve">
-    <value>{0} cm</value>
-    <comment>{0} is a width.</comment>
+    <value>{0}</value>
+    <comment>{0} is a width with its unit, like 13 cm or 5.12 in.</comment>
   </data>
   <data name="PotsSelfWatering" xml:space="preserve">
     <value>self-watering ({0})</value>
     <comment>{0} is how, like wick, in lower case.</comment>
   </data>
   <data name="PotsRimMm" xml:space="preserve">
-    <value>{0} mm rim</value>
+    <value>{0} rim</value>
   </data>
   <data name="PotsInsideCm" xml:space="preserve">
-    <value>{0} cm inside</value>
+    <value>{0} inside</value>
     <comment>Part of the muted line beside a pot in the list.</comment>
   </data>
   <data name="PotsTallCm" xml:space="preserve">
-    <value>{0} cm tall</value>
+    <value>{0} tall</value>
   </data>
   <data name="PotsPhotosFailed" xml:space="preserve">
     <value>Couldn't save the photos: {0}</value>

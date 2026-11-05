@@ -400,7 +400,7 @@ public static class Labels
     public static string Plants(int count) => Plural.Of(count, Strings.Common.Plant_One, Strings.Common.Plant_Other);
 
     public static string Time(DateTimeOffset moment) =>
-        moment.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture);
+        TextCulture.TimeOf(moment.ToLocalTime());
 
     // English reads "19 Sep 2026" (en-GB would write "Sept"), see TextCulture
     public static string Date(DateOnly date) => Format(date, Strings.Labels.DateFormat);
@@ -426,7 +426,7 @@ public static class Labels
     public static string DayShort(Weekday day) =>
         TextCulture.ForDates.DateTimeFormat.GetAbbreviatedDayName(Enum.Parse<DayOfWeek>(day.ToString()));
 
-    private static string Format(DateOnly date, string pattern) => date.ToString(pattern, TextCulture.ForDates);
+    private static string Format(DateOnly date, string pattern) => TextCulture.Date(date, pattern);
 
     public static string For(PotKind group) => group switch
     {

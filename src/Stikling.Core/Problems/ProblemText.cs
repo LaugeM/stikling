@@ -114,10 +114,10 @@ public static class ProblemText
             : null;
 
     /// <summary>"12 Oct".</summary>
-    public static string ShortDay(DateOnly day) => day.ToString(Strings.Pests.DayMonthFormat, TextCulture.ForDates);
+    public static string ShortDay(DateOnly day) => TextCulture.Date(day, Strings.Pests.DayMonthFormat);
 
     /// <summary>"Mar 2026".</summary>
-    public static string MonthYear(DateOnly day) => day.ToString(Strings.Pests.ShortMonthYearFormat, TextCulture.ForDates);
+    public static string MonthYear(DateOnly day) => TextCulture.Date(day, Strings.Pests.ShortMonthYearFormat);
 
     /// <summary>"1 day", "9 days", "3 weeks", "2 months", "1 year".</summary>
     public static string Duration(int days) => days switch

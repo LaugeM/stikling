@@ -172,6 +172,11 @@ public static partial class HistoryText
             values[i] = value;
         }
 
+        // Shown in inches when asked, but never in the English text that is saved, which is written with the invariant culture
+        if (line.Key == "CormSize" && Lengths.IsInches && !culture.Equals(CultureInfo.InvariantCulture)
+            && line.Args[0].Number is { } mm && Res("CormSizeShown") is { } shown)
+            return string.Format(culture, shown, Lengths.Mm(mm));
+
         var name = template.PluralArg < 0 ? template.Key
             : line.Args[template.PluralArg].Number == 1 ? template.Key + "_One" : template.Key + "_Other";
         return Res(name) is { } pattern ? string.Format(culture, pattern, values) : null;
@@ -186,7 +191,10 @@ public static partial class HistoryText
             case Kind.Number:
                 return arg.Number is { } number ? Number(number, culture) : null;
             case Kind.Day:
-                return arg.Day?.ToString(Res("DayFormat"), DateCulture(culture));
+                return arg.Day?.ToString(
+                    // The English text kept on the entry is written with the invariant culture and never follows the date style.
+                    culture.Equals(CultureInfo.InvariantCulture) ? Res("DayFormat") : TextCulture.Styled(Res("DayFormat")!),
+                    DateCulture(culture));
             case Kind.Month:
                 return arg.Day?.ToString(Res("MonthFormat"), DateCulture(culture));
             case Kind.Enum or Kind.EnumLower or Kind.EnumLowerFirst:

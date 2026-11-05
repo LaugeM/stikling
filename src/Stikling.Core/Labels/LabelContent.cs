@@ -31,7 +31,7 @@ public sealed record LabelContent(string? Number, string Name, string? Botanical
         BotanicalIfDifferent(propagation.BotanicalName, propagation.DisplayName),
         propagation.StartedOn == default
             ? null
-            : string.Format(CultureInfo.CurrentCulture, Strings.Shared.LabelStarted, propagation.StartedOn.ToString(Strings.Shared.LabelDayFormat, TextCulture.ForDates)));
+            : string.Format(CultureInfo.CurrentCulture, Strings.Shared.LabelStarted, TextCulture.Date(propagation.StartedOn, Strings.Shared.LabelDayFormat)));
 
     private static string? BotanicalIfDifferent(string? botanical, string name) =>
         string.IsNullOrWhiteSpace(botanical) || string.Equals(botanical.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase)
@@ -41,8 +41,8 @@ public sealed record LabelContent(string? Number, string Name, string? Botanical
     // The precision of the date decides how much of it is said: "3 Mar 2025", "Mar 2025" or "2025"
     private static string Got(LooseDate date) => date.Precision switch
     {
-        DatePrecision.Day => date.Start.ToString(Strings.Shared.LabelDayFormat, TextCulture.ForDates),
-        DatePrecision.Month => date.Start.ToString(Strings.Shared.LabelMonthFormat, TextCulture.ForDates),
+        DatePrecision.Day => TextCulture.Date(date.Start, Strings.Shared.LabelDayFormat),
+        DatePrecision.Month => TextCulture.Date(date.Start, Strings.Shared.LabelMonthFormat),
         _ => date.Year.ToString("D4", CultureInfo.InvariantCulture)
     };
 

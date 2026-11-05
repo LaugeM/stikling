@@ -56,6 +56,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped<ThemeService>();
 builder.Services.AddScoped<LanguageService>();
+builder.Services.AddScoped<DisplayPreferences>();
 builder.Services.AddScoped<IAppLanguage>(services => services.GetRequiredService<LanguageService>());
 builder.Services.AddScoped<ErrorReports>();
 builder.Services.AddScoped<IndexedDb>();
@@ -185,6 +186,16 @@ try
 catch (Exception)
 {
     // Without it the app is in English
+}
+
+// Lengths, dates and the clock come from the saved settings, so the first screen is written the right way
+try
+{
+    await host.Services.GetRequiredService<DisplayPreferences>().ApplySavedAsync();
+}
+catch (Exception)
+{
+    // Without it everything is shown the default way
 }
 
 await host.RunAsync();

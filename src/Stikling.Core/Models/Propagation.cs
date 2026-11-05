@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
@@ -413,7 +414,7 @@ public sealed class Propagation : Entity
         if (FirstGerminatedOn > today)
             errors.Add(Strings.Propagations.ErrSeedFuture);
         if (CormSizeMm is <= 0 or > 200)
-            errors.Add(Strings.Propagations.ErrCormSize);
+            errors.Add(Lengths.IsInches ? Strings.Propagations.ErrCormSize_Inches : Strings.Propagations.ErrCormSize);
         if (DormantSince > today)
             errors.Add(Strings.Propagations.ErrDormantFuture);
         if (SpareCount < 0)

@@ -64,8 +64,8 @@
                        @ref="draftInput" />
             </div>
             <div class="col-4">
-                <input class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
-                       placeholder="@Strings.Shared.PotPickerSizePlaceholder" aria-label="@Strings.Shared.PotPickerSizeLabel" @bind="draftSize" />
+                <LengthInput class="form-control" min="0"
+                             placeholder="@Lengths.UnitName" aria-label="@Strings.Shared.PotPickerSizeLabel" @bind-Value="draftSize" />
             </div>
         </div>
 

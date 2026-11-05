@@ -1,0 +1,48 @@
+@using System.Globalization
+
+@* A box for a length that is stored in cm or mm. It shows the number in the unit chosen in Settings and
+   gives back the stored one. Text that is left as it was shown is not given back, so opening and saving
+   a 13 cm pot while lengths are in inches leaves exactly 13. *@
+
+<input type="number" step="any" inputmode="decimal" value="@Shown" @onchange="ChangedAsync" @attributes="Attributes" />
+
+@code {
+    /// <summary>The length as stored: cm, or mm when <see cref="Millimetres"/> is set.</summary>
+    [Parameter]
+    public decimal? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<decimal?> ValueChanged { get; set; }
+
+    /// <summary>The length is stored in mm, not cm.</summary>
+    [Parameter]
+    public bool Millimetres { get; set; }
+
+    /// <summary>Id, class, aria-label, min and the rest go on the input.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? Attributes { get; set; }
+
+    /// <summary>What the box shows for the stored length. Worked out on every render, so it follows the value the page keeps.</summary>
+    private string Shown => Format(Value);
+
+    private string Format(decimal? stored) => stored is not { } value ? ""
+        : (Millimetres ? Lengths.MmToInput(value) : Lengths.CmToInput(value)).ToString("0.####", CultureInfo.InvariantCulture);
+
+    private async Task ChangedAsync(ChangeEventArgs e)
+    {
+        var text = e.Value?.ToString()?.Trim() ?? "";
+        if (text == Shown)
+            return;
+
+        if (text.Length == 0)
+        {
+            await ValueChanged.InvokeAsync(null);
+            return;
+        }
+
+        if (!decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var typed))
+            return;
+
+        await ValueChanged.InvokeAsync(Millimetres ? Lengths.MmFromInput(typed) : Lengths.CmFromInput(typed));
+    }
+}

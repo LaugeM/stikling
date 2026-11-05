@@ -3,6 +3,7 @@
 @inject IndexedDb Db
 @inject ThemeService Theme
 @inject LanguageService Language
+@inject DisplayPreferences Display
 @inject ErrorReports ErrorReports
 @inject SyncRunner Sync
 @inject CoverPhotos Covers
@@ -255,6 +256,7 @@
         // The saved theme counts, the copy in localStorage is only for the first paint
         await Theme.ApplySavedAsync();
         await Language.ApplySavedAsync();
+        await Display.ApplySavedAsync();
         await ErrorReports.ApplySavedAsync();
         await ErrorReports.SetReleaseAsync();
 

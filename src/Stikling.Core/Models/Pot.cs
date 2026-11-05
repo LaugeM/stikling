@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
 
 namespace Stikling.Core.Models;
@@ -151,9 +152,16 @@ public sealed class Pot : Entity
     [JsonIgnore]
     public string FamilyName => string.IsNullOrWhiteSpace(Name) ? Generated() : Name.Trim();
 
-    /// <summary>"Clear nursery pot, 13 cm".</summary>
+    /// <summary>"Clear nursery pot, 13 cm", or "5.12 in" when lengths are shown in inches.</summary>
     [JsonIgnore]
-    public string DisplayName => TopCm is { } top ? $"{FamilyName}, {Size(top)} cm" : FamilyName;
+    public string DisplayName => TopCm is { } top ? $"{FamilyName}, {Lengths.Cm(top)}" : FamilyName;
+
+    /// <summary>
+    /// The name in cm whatever the unit setting is. This is the one to write into a history line, since
+    /// nothing saved on a record may depend on the setting.
+    /// </summary>
+    [JsonIgnore]
+    public string StoredName => TopCm is { } top ? $"{FamilyName}, {Size(top)} cm" : FamilyName;
 
     /// <summary>
     /// The words go in a format of their own for each combination, because the Danish order differs

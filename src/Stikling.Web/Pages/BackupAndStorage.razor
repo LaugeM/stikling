@@ -9,6 +9,7 @@
 @inject OwnFieldService OwnFieldBook
 @inject ThemeService Theme
 @inject LanguageService Language
+@inject DisplayPreferences Display
 @inject ErrorReports ErrorReports
 @inject PlantNameService Names
 @inject IndexedDb Db
@@ -325,6 +326,7 @@
             var summary = await Backup.ImportAsync(file.Zip);
             await Theme.ApplySavedAsync();
             await Language.ApplySavedAsync();
+            await Display.ApplySavedAsync();
             await ErrorReports.ApplySavedAsync();
             Names.SettingsChanged();
             message = summary switch

@@ -512,7 +512,7 @@
                     <th class="plant" scope="col">@Strings.Care.SitterChartPlant</th>
                     @foreach (var date in sheetView.Visits)
                     {
-                        <th scope="col">@date.ToString(Strings.Care.SitterChartWeekdayFormat, TextCulture.ForDates)<small>@date.ToString(Strings.Care.SitterChartDateFormat, TextCulture.ForDates)</small></th>
+                        <th scope="col">@TextCulture.Date(date, Strings.Care.SitterChartWeekdayFormat)<small>@TextCulture.Date(date, Strings.Care.SitterChartDateFormat)</small></th>
                     }
                     <th class="how" scope="col">@Strings.Care.SitterChartHow</th>
                 </tr>

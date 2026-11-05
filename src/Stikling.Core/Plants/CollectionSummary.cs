@@ -16,7 +16,7 @@ public sealed record LongestHeld(Plant Plant, DateOnly Since, bool YearOnly, boo
     /// <summary>"Since 14 March 2019, 7 years", with only the month or the year when that is all that is known.</summary>
     public string Text(DateOnly today)
     {
-        var since = Since.ToString(YearOnly ? "yyyy" : MonthOnly ? "MMMM yyyy" : Strings.Plants.LongestDayFormat, TextCulture.ForDates);
+        var since = TextCulture.Date(Since, YearOnly ? "yyyy" : MonthOnly ? "MMMM yyyy" : Strings.Plants.LongestDayFormat);
         var months = (today.Year - Since.Year) * 12 + today.Month - Since.Month - (today.Day < Since.Day ? 1 : 0);
         var length = months >= 12 ? Plural.Of(months / 12, Strings.Plants.LongestYears_One, Strings.Plants.LongestYears_Other)
             : months >= 1 ? Plural.Of(months, Strings.Plants.LongestMonths_One, Strings.Plants.LongestMonths_Other)

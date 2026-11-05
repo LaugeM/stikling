@@ -5,6 +5,7 @@
 @using Stikling.Core.Sync
 @inject ThemeService Theme
 @inject LanguageService Language
+@inject DisplayPreferences Display
 @inject ErrorReports ErrorReports
 @inject RoomService RoomService
 @inject IPlantRepository Plants
@@ -90,7 +91,25 @@
                     <p class="settings-hint">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.TranslatedBy, translators)</p>
                 }
             }
-            <div class="theme-label @(Language.Offered.Count > 1 ? "mt-4" : null)" id="theme-label">@Strings.Settings.Theme</div>
+            <label class="theme-label @(Language.Offered.Count > 1 ? "mt-4" : null)" for="lengths">@Strings.Settings.Lengths</label>
+            <select id="lengths" class="form-select w-auto" @onchange="SetLengthsAsync">
+                <option value="@LengthUnit.Centimetres" selected="@(Lengths.Unit == LengthUnit.Centimetres)">@Strings.Settings.LengthsCentimetres</option>
+                <option value="@LengthUnit.Inches" selected="@(Lengths.Unit == LengthUnit.Inches)">@Strings.Settings.LengthsInches</option>
+            </select>
+            <label class="theme-label mt-4" for="dates">@Strings.Settings.Dates</label>
+            <select id="dates" class="form-select w-auto" @onchange="SetDatesAsync">
+                @foreach (var style in Enum.GetValues<DateStyle>())
+                {
+                    <option value="@style" selected="@(TextCulture.Style == style)">@DateExample(style)</option>
+                }
+            </select>
+            <p class="settings-hint">@Strings.Settings.DatesHint</p>
+            <label class="theme-label mt-4" for="clock">@Strings.Settings.Clock</label>
+            <select id="clock" class="form-select w-auto" @onchange="SetClockAsync">
+                <option value="@ClockStyle.TwentyFourHour" selected="@(TextCulture.Clock == ClockStyle.TwentyFourHour)">@Strings.Settings.Clock24</option>
+                <option value="@ClockStyle.TwelveHour" selected="@(TextCulture.Clock == ClockStyle.TwelveHour)">@Strings.Settings.Clock12</option>
+            </select>
+            <div class="theme-label mt-4" id="theme-label">@Strings.Settings.Theme</div>
             <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="theme-label">
                 @foreach (var option in options)
                 {
@@ -212,9 +231,9 @@
             <label class="theme-label mt-4" for="pot-up-warn">@Strings.Settings.PotUpWarn</label>
             <div class="input-group">
                 <span class="input-group-text">@Strings.Settings.PotUpWarnBefore</span>
-                <input id="pot-up-warn" type="number" class="form-control" inputmode="decimal" min="1" max="20" step="0.5"
-                       value="@Pot.Size(potUpWarnCm)" @onchange="SetPotUpWarnCmAsync" />
-                <span class="input-group-text">@Strings.Settings.PotUpWarnAfter</span>
+                <LengthInput @key="potUpWarnKey" id="pot-up-warn" class="form-control"
+                             Value="potUpWarnCm" ValueChanged="SetPotUpWarnCmAsync" />
+                <span class="input-group-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.PotUpWarnAfter, Lengths.UnitName)</span>
             </div>
             <p class="settings-hint">
                 @Strings.Settings.PotUpWarnHint
@@ -265,7 +284,7 @@
                 <select id="notify-at" class="form-select w-auto" @onchange="SetNotifyAtAsync">
                     @foreach (var time in notifyTimes)
                     {
-                        <option value="@time.ToString("HH:mm")" selected="@(time == notifyAt)">@time.ToString("HH:mm")</option>
+                        <option value="@time.ToString("HH:mm")" selected="@(time == notifyAt)">@TextCulture.TimeOf(time)</option>
                     }
                 </select>
                 <div class="theme-label mt-4" id="notify-days-label">@Strings.Settings.NotifyDays</div>
@@ -775,13 +794,14 @@
         await Notifications.UploadAsync(force: true);
     }
 
-    private async Task SetPotUpWarnCmAsync(ChangeEventArgs e)
+    private int potUpWarnKey;
+
+    private async Task SetPotUpWarnCmAsync(decimal? typed)
     {
-        if (!decimal.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Number,
-                System.Globalization.CultureInfo.InvariantCulture, out var cm))
-        {
+        // A new key makes the box show the clamped value even when it is the same as before
+        potUpWarnKey++;
+        if (typed is not { } cm)
             return;
-        }
         potUpWarnCm = Math.Clamp(cm, 1, 20);
         await SettingsService.SetPotUpWarnCmAsync(potUpWarnCm);
     }
@@ -846,6 +866,37 @@
     {
         if (e.Value?.ToString() is { } code && code != Language.Current)
             await Language.SetAsync(code);
+    }
+
+    /// <summary>Today's date as the style writes it, for the options of the date choice.</summary>
+    private string DateExample(DateStyle style) =>
+        Time.Today().ToString(TextCulture.Styled(Strings.Labels.DateFormat, style), TextCulture.ForDates);
+
+    private async Task SetLengthsAsync(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<LengthUnit>(e.Value?.ToString(), out var unit))
+        {
+            await SettingsService.SetLengthsAsync(unit);
+            await Display.ApplySavedAsync();
+        }
+    }
+
+    private async Task SetDatesAsync(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<DateStyle>(e.Value?.ToString(), out var style))
+        {
+            await SettingsService.SetDatesAsync(style);
+            await Display.ApplySavedAsync();
+        }
+    }
+
+    private async Task SetClockAsync(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<ClockStyle>(e.Value?.ToString(), out var clock))
+        {
+            await SettingsService.SetClockAsync(clock);
+            await Display.ApplySavedAsync();
+        }
     }
 
     private async Task SetModeAsync(ThemeMode newMode)
