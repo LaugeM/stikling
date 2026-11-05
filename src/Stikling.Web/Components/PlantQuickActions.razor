@@ -1,0 +1,150 @@
+@* The sheet that opens when a plant in the Plants list is pressed and held, or right-clicked: water it, add a
+   note, or open it. Put it once on the page. Rows in the list carry data-quick-plant, which quickactions.js
+   listens for. *@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<Sheet Title="@(plant?.DisplayName ?? "")" Open="open" OpenChanged="SheetChanged">
+    @if (plant is not null && watering)
+    {
+        <CareSheet PlantIds="@(new[] { plant.Id })" Form="WateringForms.Of(plant, id => Pots.GetValueOrDefault(id))"
+                   OnLogged="LoggedAsync" OnCancel="CloseAsync" />
+    }
+    else if (plant is not null)
+    {
+        <ul class="sheet-actions">
+            <li>
+                <button type="button" class="sheet-action" @onclick="() => watering = true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c3 4 5.5 6.8 5.5 10a5.5 5.5 0 0 1-11 0c0-3.2 2.5-6 5.5-10Z" /></svg>
+                    <span class="sheet-action-text"><b>@Strings.Plants.QuickWater</b></span>
+                </button>
+            </li>
+            <li>
+                <button type="button" class="sheet-action" @onclick="AddNoteAsync">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5Z" /><path d="M8.5 9h7M8.5 13h7M8.5 17h4" /></svg>
+                    <span class="sheet-action-text"><b>@Strings.Plants.QuickNote</b></span>
+                </button>
+            </li>
+            <li>
+                <a class="sheet-action" href="plants/@plant.Id">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    <span class="sheet-action-text"><b>@Strings.Plants.QuickOpen</b></span>
+                </a>
+            </li>
+        </ul>
+    }
+</Sheet>
+
+@if (noteFor is { } noteId)
+{
+    <EntryComposer @key="noteId" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="noteId" PhotoInputId="@inputId" OnAdded="ChangedAsync" />
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Plant> Plants { get; set; } = [];
+
+    [Parameter]
+    public IReadOnlyDictionary<Guid, Pot> Pots { get; set; } = new Dictionary<Guid, Pot>();
+
+    /// <summary>Something was logged, so the list should be read again.</summary>
+    [Parameter]
+    public EventCallback OnChanged { get; set; }
+
+    private readonly string inputId = $"quick-photo-{Guid.NewGuid():N}";
+    private IJSObjectReference? module;
+    private IJSObjectReference? attached;
+    private DotNetObjectReference<PlantQuickActions>? self;
+    private EntryComposer? composer;
+    private Plant? plant;
+    private Guid? noteFor;
+    private bool open;
+    private bool watering;
+    private bool openNoteWhenReady;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/quickactions.js");
+            self = DotNetObjectReference.Create(this);
+            attached = await module.InvokeAsync<IJSObjectReference>("init", self);
+        }
+
+        if (openNoteWhenReady && composer is not null)
+        {
+            openNoteWhenReady = false;
+            composer.OpenNote();
+        }
+    }
+
+    /// <summary>Called from quickactions.js with the id of the plant that was pressed.</summary>
+    [JSInvokable]
+    public async Task Open(string id)
+    {
+        // A plant that is gone, deleted on another device, just doesn't open
+        if (!Guid.TryParse(id, out var guid) || Plants.FirstOrDefault(p => p.Id == guid) is not { } found)
+            return;
+        await InvokeAsync(() =>
+        {
+            plant = found;
+            watering = false;
+            open = true;
+            StateHasChanged();
+        });
+    }
+
+    private void SheetChanged(bool value)
+    {
+        open = value;
+        if (!value)
+            watering = false;
+    }
+
+    private Task CloseAsync()
+    {
+        open = false;
+        watering = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task LoggedAsync()
+    {
+        await CloseAsync();
+        await OnChanged.InvokeAsync();
+    }
+
+    private Task AddNoteAsync()
+    {
+        if (plant is null)
+            return Task.CompletedTask;
+        open = false;
+        noteFor = plant.Id;
+        openNoteWhenReady = true;
+        return Task.CompletedTask;
+    }
+
+    private async Task ChangedAsync()
+    {
+        noteFor = null;
+        await OnChanged.InvokeAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (attached is not null)
+            {
+                await attached.InvokeVoidAsync("dispose");
+                await attached.DisposeAsync();
+            }
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        self?.Dispose();
+    }
+}

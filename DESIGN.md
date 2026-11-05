@@ -315,6 +315,8 @@ The signature component, shared by plants and propagations. A 3.5rem tinted thum
 
 The thumbnail holds either a photo cropped to fill or, when there is no photo, a stroked icon: a sprout in Clay on Clay Soft for a plant, a glass in Potting Green on Leaf Tint for a finished propagation (one still going shows its day count instead), and a bug in Alert on Alert Soft for an open pest case. Rows separate by 0.6rem of space, and a row scales to 98.5% while pressed.
 
+On the Plants list, in the list and grid views, a press and hold on a phone or a right-click opens the quick actions sheet: the plant's name as the title, then Water, Add a note and Open plant as the usual full-width sheet rows. Water swaps the sheet to the care form on watering. Select mode and the table view don't have it.
+
 A propagation that is still going shows how many days it has been going in its tile, on Today and on the Propagations list. With no photo, the tile holds the number in Count type and Deep Moss with "days" under it in small Muted Ink, in place of the glass icon. With a photo, the photo stays and a small "14d" label sits in its bottom left corner on a solid Leaf Tint patch, so any photo keeps it readable. It is the one number worth reading from arm's length, and keeping it inside the tile leaves the full width for the name and one line of meta on a phone. The meta line does not repeat it: on Today, a propagation with nothing noted since it started says "no notes yet" instead of "last seen" with the same number.
 
 ### Plant Table
