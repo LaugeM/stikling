@@ -128,13 +128,12 @@ else
 
         <fieldset>
             <legend>@Strings.Care.IntervalEditCovers</legend>
-            <div class="btn-group segmented mb-3" role="radiogroup" aria-label="@Strings.Care.IntervalEditWhatItCovers">
+            <div class="chip-row mb-3" role="group" aria-label="@Strings.Care.IntervalEditWhatItCovers">
                 @foreach (var (value, semiHydro, label) in scopeOptions)
                 {
-                    var id = semiHydro ? "scope-SemiHydro" : $"scope-{value}";
-                    <input type="radio" class="btn-check" name="scope" id="@id"
-                           checked="@(item.Scope == value && item.OnlySemiHydro == semiHydro)" @onchange="() => SetScope(value, semiHydro)" />
-                    <label class="btn btn-outline-primary" for="@id">@label</label>
+                    var picked = item.Scope == value && item.OnlySemiHydro == semiHydro;
+                    <button type="button" class="chip @(picked ? "picked" : null)" aria-pressed="@(picked ? "true" : "false")"
+                            @onclick="() => SetScope(value, semiHydro)">@label</button>
                 }
             </div>
 
