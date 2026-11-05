@@ -1,0 +1,165 @@
+@* Which of the free outer pots a nursery pot would go in, from the pots on the page or from a width typed
+   in a shop. It only compares the sizes already entered and stores nothing. *@
+@using System.Globalization
+@using Stikling.Core.Text
+
+<Sheet Title="@Strings.Supplies.PotFitTitle" Open="Open" OpenChanged="OpenChanged">
+    @if (NurseryPots.Count > 0)
+    {
+        <div class="mb-3">
+            <label class="form-label" for="pot-fit-nursery">@Strings.Supplies.PotFitNursery</label>
+            <select id="pot-fit-nursery" class="form-select" value="@SelectedValue" @onchange="Picked">
+                @foreach (var use in NurseryPots)
+                {
+                    <option value="@use.Pot.Id">@use.Pot.DisplayName</option>
+                }
+                <option value="@TypedValue">@Strings.Supplies.PotFitTypeWidth</option>
+            </select>
+        </div>
+    }
+
+    @if (Typing)
+    {
+        <div class="mb-3">
+            <label class="form-label" for="pot-fit-width">@string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PotsAcrossTop, Lengths.UnitName)</label>
+            <LengthInput id="pot-fit-width" class="form-control" min="0" @bind-Value="typedWidth" />
+        </div>
+    }
+
+    @if (!AnyFree)
+    {
+        <p class="pot-fit-note">@Strings.Supplies.PotFitNoneFree</p>
+    }
+    else if (Nursery is not null)
+    {
+        @foreach (var group in Groups)
+        {
+            <section class="pot-fit-group">
+                <h3 class="pot-fit-heading">@group.Heading</h3>
+                <ul class="pot-fit-list">
+                    @foreach (var result in group.Results)
+                    {
+                        <li>
+                            <span class="pot-fit-name">@result.Outer.Pot.DisplayName</span>
+                            @if (Detail(result) is { Length: > 0 } detail)
+                            {
+                                <span class="pot-fit-detail">@detail</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+        @if (WithoutSize > 0)
+        {
+            <p class="pot-fit-note">@Plural.Of(WithoutSize, Strings.Supplies.PotFitNoSize_One, Strings.Supplies.PotFitNoSize_Other)</p>
+        }
+    }
+</Sheet>
+
+@code {
+    private const string TypedValue = "typed";
+
+    /// <summary>Every pot on the page, with what is in use.</summary>
+    [Parameter]
+    public IReadOnlyList<PotUse> Uses { get; set; } = [];
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>The nursery pot to start on when the sheet opens. Without one, the first in the list.</summary>
+    [Parameter]
+    public Guid? StartPotId { get; set; }
+
+    private Guid? picked;
+    private bool typing;
+    private decimal? typedWidth;
+    private bool wasOpen;
+
+    private IReadOnlyList<PotUse> NurseryPots =>
+        Uses.Where(use => use.Pot.Kind == PotKind.Inner && use.Pot.TopCm is not null).ToList();
+
+    private bool Typing => NurseryPots.Count == 0 || typing;
+
+    /// <summary>The nursery pot picked, or the first when the picked one is gone. Null when typing a width.</summary>
+    private PotUse? SelectedPot => Typing ? null : NurseryPots.FirstOrDefault(use => use.Pot.Id == picked) ?? NurseryPots[0];
+
+    private string SelectedValue => SelectedPot is { } use ? use.Pot.Id.ToString() : TypedValue;
+
+    private NurserySize? Nursery => SelectedPot is { } use
+        ? NurserySize.Of(use.Pot)
+        : typedWidth is > 0 and { } width ? NurserySize.Width(width) : null;
+
+    private bool AnyFree => Uses.Any(use => use.Pot.Group == PotGroup.Outer && use.Free > 0);
+
+    private int WithoutSize => PotFits.CountWithoutSize(Uses);
+
+    private IEnumerable<(string Heading, List<PotFitResult> Results)> Groups
+    {
+        get
+        {
+            var results = Nursery is { } nursery ? PotFits.List(nursery, Uses) : [];
+            var headings = new (PotFitKind Kind, string Heading)[]
+            {
+                (PotFitKind.GoesIn, Strings.Supplies.PotFitGoesIn),
+                (PotFitKind.HangsOnRim, Strings.Supplies.PotFitHangs),
+                (PotFitKind.TooNarrow, Strings.Supplies.PotFitTooNarrow)
+            };
+            foreach (var (kind, heading) in headings)
+            {
+                var ofKind = results.Where(r => r.Kind == kind).ToList();
+                if (ofKind.Count > 0)
+                    yield return (heading, ofKind);
+            }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        // Each time the sheet opens it starts on the pot that was asked for, and a typed width starts empty
+        if (Open && !wasOpen)
+        {
+            picked = StartPotId;
+            typing = false;
+            typedWidth = null;
+        }
+        wasOpen = Open;
+    }
+
+    private void Picked(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        if (value == TypedValue)
+        {
+            typing = true;
+        }
+        else if (Guid.TryParse(value, out var id))
+        {
+            typing = false;
+            picked = id;
+        }
+    }
+
+    private static string Detail(PotFitResult result)
+    {
+        if (result.Kind == PotFitKind.TooNarrow)
+            return "";
+
+        var parts = new List<string>
+        {
+            result.Tight
+                ? Strings.Supplies.PotFitTight
+                : string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PotFitSpare, Lengths.Cm(result.SpareCm))
+        };
+        if (result.OpeningIsOutside)
+            parts.Add(Strings.Supplies.PotFitOutside);
+        if (result.BottomTighter)
+            parts.Add(Strings.Supplies.PotFitBottomTighter);
+        if (result.TallerByCm is { } taller)
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PotFitTaller, Lengths.Cm(taller)));
+        return string.Join(" ", parts);
+    }
+}
