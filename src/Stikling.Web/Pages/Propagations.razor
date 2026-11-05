@@ -7,6 +7,10 @@
 @inject TimeProvider Time
 @inject PlantNameService Names
 @inject NavigationManager Navigation
+@inject IPhotoRepository PhotoRepository
+@inject ExperimentCardService Cards
+@inject ShareCardService ShareCard
+@implements IAsyncDisposable
 
 <PageTitle>@Strings.Propagations.ListPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -136,7 +140,16 @@ else
     {
         var longest = Math.Max(1, experiment.Entries.Max(e => BarDays(e) ?? 0));
         <section class="stage-group">
-            <h2>@experiment.Name <span class="text-body-secondary">(@Plural.Of(experiment.Entries.Count, Strings.Propagations.ListBatches_One, Strings.Propagations.ListBatches_Other))</span></h2>
+            <div class="experiment-heading">
+                <h2>@experiment.Name <span class="text-body-secondary">(@Plural.Of(experiment.Entries.Count, Strings.Propagations.ListBatches_One, Strings.Propagations.ListBatches_Other))</span></h2>
+                @if (ExperimentCardService.CanShare(experiment))
+                {
+                    var name = experiment.Name;
+                    <button type="button" class="btn btn-link btn-sm link-action experiment-share"
+                            aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ExpShareLabel, name)"
+                            @onclick="() => OpenShareAsync(name)">@Strings.Shared.ShareButton</button>
+                }
+            </div>
             <ul class="item-list experiment-list">
                 @foreach (var entry in experiment.Entries)
                 {
@@ -244,6 +257,39 @@ else
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
     </a>
 }
+
+<Sheet Title="@Strings.Shared.SwapShareTitle" Open="shareOpen" OpenChanged="ShareOpenChangedAsync">
+    <div class="experiment-label" id="experiment-format-label">@Strings.Shared.SwapSize</div>
+    <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="experiment-format-label">
+        @foreach (var (value, label) in ShareCardService.Formats)
+        {
+            var id = $"experiment-format-{value}";
+            <input type="radio" class="btn-check" name="experiment-format" id="@id"
+                   checked="@(format == value)" @onchange="() => SetFormatAsync(value)" />
+            <label class="btn btn-outline-primary" for="@id">@label</label>
+        }
+    </div>
+    <div class="experiment-picture" style="@AspectStyle" aria-busy="@(drawn is null ? "true" : null)">
+        @if (drawn is not null)
+        {
+            <img src="@drawn.Url" alt="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ExpCardAlt, shareName)" />
+        }
+    </div>
+    @if (drawn is { Missing: > 0 })
+    {
+        <p class="experiment-note">@Plural.Of(drawn.Missing, Strings.Shared.SwapMissingPhotos_One, Strings.Shared.SwapMissingPhotos_Other)</p>
+    }
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" disabled="@(drawn is null)" @onclick="SharePictureAsync">@Strings.Shared.ShareButton</button>
+        <button type="button" class="btn btn-outline-primary" disabled="@(drawn is null)" @onclick="SavePictureAsync">@Strings.Shared.SwapSave</button>
+        @if (status.Length > 0)
+        {
+            <span class="experiment-status" role="status">@status</span>
+        }
+    </div>
+</Sheet>
+
+<canvas @ref="canvas" hidden aria-hidden="true"></canvas>
 
 @code {
     private static readonly (ProgressFilter Value, string Label)[] progressOptions =
@@ -362,6 +408,131 @@ else
             return null;
         var text = string.Join(" · ", parts);
         return char.ToUpperInvariant(text[0]) + text[1..];
+    }
+
+    // ---- An experiment's result as a picture ----
+
+    private bool shareOpen;
+    private bool disposed;
+    private string shareName = "";
+    private string format = "square";
+    private string status = "";
+    private SwapCardDrawn? drawn;
+    private ElementReference canvas;
+    private int drawRun;
+
+    private string AspectStyle => format switch
+    {
+        "square" => "--aspect: 1 / 1;",
+        "portrait" => "--aspect: 4 / 5;",
+        _ => "--aspect: 9 / 16;",
+    };
+
+    private async Task OpenShareAsync(string name)
+    {
+        shareName = name;
+        status = "";
+        drawn = null;
+        shareOpen = true;
+        format = await ShareCard.GetFormatAsync();
+        await DrawAsync();
+    }
+
+    private async Task ShareOpenChangedAsync(bool open)
+    {
+        shareOpen = open;
+        if (!open)
+        {
+            drawRun++;
+            drawn = null;
+            await Cards.ReleaseAsync();
+        }
+    }
+
+    private async Task SetFormatAsync(string value)
+    {
+        format = value;
+        status = "";
+        await ShareCard.SetFormatAsync(value);
+        await DrawAsync();
+    }
+
+    // The result is worked out from every batch with that name, whatever the list's filters show
+    private async Task DrawAsync()
+    {
+        var run = ++drawRun;
+        drawn = null;
+        await Cards.ReleaseAsync();
+        StateHasChanged();
+
+        var group = Experiments.Group(all ?? [], Time.Today())
+            .FirstOrDefault(g => string.Equals(g.Name, shareName, StringComparison.OrdinalIgnoreCase));
+        if (group is null)
+        {
+            // Its last batch was deleted or renamed on another device while the sheet was open
+            status = Strings.Shared.SwapDrawFailed;
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            var photos = await PhotoRepository.GetOfKindAsync(SubjectType.Propagation);
+            var spec = ExperimentCardService.SpecFor(group, Experiments.Result(group, photos), format);
+            var result = await Cards.DrawAsync(canvas, spec);
+            if (run != drawRun || disposed)
+            {
+                // The sheet closed while it was drawing, so let go of the picture it just made.
+                // A newer draw on the canvas makes this one come back null, and there is nothing to let go of.
+                if (result is not null)
+                    await Cards.ReleaseAsync();
+                return;
+            }
+            drawn = result;
+        }
+        catch (JSException)
+        {
+            // Share and Save stay off, so say why. Picking another size draws it again
+            status = Strings.Shared.SwapDrawFailed;
+        }
+        StateHasChanged();
+    }
+
+    private string FileName => ExperimentCardService.FileNameFor(shareName);
+
+    private async Task SharePictureAsync() => await ShowStatusAsync(await Cards.ShareAsync(FileName) switch
+    {
+        "saved" => Strings.Shared.SwapSaved,
+        "failed" => Strings.Shared.ShareFailed,
+        _ => ""
+    });
+
+    private async Task SavePictureAsync() => await ShowStatusAsync(await Cards.SaveAsync(FileName) switch
+    {
+        "saved" => Strings.Shared.SwapSaved,
+        _ => Strings.Shared.ShareFailed
+    });
+
+    private async Task ShowStatusAsync(string text)
+    {
+        status = text;
+        if (status.Length == 0)
+            return;
+
+        StateHasChanged();
+        await Task.Delay(3000);
+        if (!disposed && status == text)
+        {
+            status = "";
+            StateHasChanged();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        drawRun++;
+        await Cards.ReleaseAsync();
     }
 
     private string? ParentName(Propagation propagation) =>

@@ -149,6 +149,7 @@ builder.Services.AddScoped<ShareCardService>();
 builder.Services.AddScoped<LabelPrinter>();
 builder.Services.AddScoped<YearCardService>();
 builder.Services.AddScoped<SwapCardService>();
+builder.Services.AddScoped<ExperimentCardService>();
 builder.Services.AddScoped<TimelapseService>();
 builder.Services.AddScoped<DeviceFiles>();
 builder.Services.AddScoped<AppBadge>();

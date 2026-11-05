@@ -208,4 +208,135 @@ public class ExperimentTests
 
         static string Labels(Enum value) => value.ToString();
     }
+
+    // ---- The result, for the picture ----
+
+    private static Propagation Counted(GrowingMedium medium, int count, int failed, DateOnly? rootedOn, Guid? cover = null, string experiment = "Test")
+    {
+        var batch = Batch(experiment, medium, Started, rootedOn);
+        batch.InitialCount = count;
+        batch.FailedCount = failed;
+        batch.CoverPhotoId = cover;
+        return batch;
+    }
+
+    private static ExperimentResult ResultOf(IEnumerable<Propagation> batches, IEnumerable<Photo>? photos = null) =>
+        Experiments.Result(Experiments.Group(batches, Today).Single(), photos ?? []);
+
+    [Fact]
+    public void A_rooted_batch_counts_what_it_started_with_minus_what_failed()
+    {
+        var result = ResultOf([Counted(GrowingMedium.Leca, 5, 2, Started.AddDays(10)), Counted(GrowingMedium.Perlite, 3, 0, null)]);
+
+        var leca = result.Rows.Single(r => r.Medium == GrowingMedium.Leca);
+        Assert.Equal(3, leca.Rooted);
+        Assert.Equal(5, leca.Total);
+    }
+
+    [Fact]
+    public void A_batch_that_has_not_rooted_counts_none_and_never_less_than_none()
+    {
+        var result = ResultOf([
+            Counted(GrowingMedium.Leca, 4, 1, null),
+            Counted(GrowingMedium.Perlite, 2, 5, Started.AddDays(7))]);
+
+        Assert.Equal(0, result.Rows.Single(r => r.Medium == GrowingMedium.Leca).Rooted);
+        Assert.Equal(0, result.Rows.Single(r => r.Medium == GrowingMedium.Perlite).Rooted);
+        Assert.Null(result.Rows.Single(r => r.Medium == GrowingMedium.Leca).AverageDays);
+    }
+
+    [Fact]
+    public void The_average_is_over_the_batches_that_rooted_and_is_rounded()
+    {
+        var result = ResultOf([
+            Counted(GrowingMedium.Leca, 1, 0, Started.AddDays(10)),
+            Counted(GrowingMedium.Leca, 1, 0, Started.AddDays(11)),
+            Counted(GrowingMedium.Leca, 1, 0, null),
+            Counted(GrowingMedium.Perlite, 1, 0, Started.AddDays(4))]);
+
+        var leca = result.Rows.Single(r => r.Medium == GrowingMedium.Leca);
+        Assert.Equal(11, leca.AverageDays);
+        Assert.Equal(2, leca.Rooted);
+        Assert.Equal(3, leca.Total);
+    }
+
+    [Fact]
+    public void Several_batches_of_one_medium_make_one_row()
+    {
+        var result = ResultOf([
+            Counted(GrowingMedium.Leca, 4, 0, Started.AddDays(20)),
+            Counted(GrowingMedium.Leca, 6, 1, Started.AddDays(30)),
+            Counted(GrowingMedium.Perlite, 2, 0, null)]);
+
+        Assert.Equal(2, result.Rows.Count);
+        var leca = result.Rows.Single(r => r.Medium == GrowingMedium.Leca);
+        Assert.Equal(9, leca.Rooted);
+        Assert.Equal(10, leca.Total);
+        Assert.Equal(25, leca.AverageDays);
+    }
+
+    [Fact]
+    public void The_photo_is_the_fastest_rooted_batch_with_one_else_the_first_with_one()
+    {
+        var slow = new Photo { Id = Guid.NewGuid(), Frame = new PhotoFrame(0.2, 0.3, 2) };
+        var fast = new Photo { Id = Guid.NewGuid() };
+        var other = new Photo { Id = Guid.NewGuid() };
+        var unrooted = new Photo { Id = Guid.NewGuid() };
+
+        var result = ResultOf([
+            Counted(GrowingMedium.Leca, 1, 0, Started.AddDays(30), slow.Id),
+            Counted(GrowingMedium.Leca, 1, 0, Started.AddDays(5), fast.Id),
+            Counted(GrowingMedium.Perlite, 1, 0, null, unrooted.Id),
+            Counted(GrowingMedium.Sphagnum, 1, 0, Started.AddDays(9), null)], [slow, fast, other, unrooted]);
+
+        Assert.Equal(fast.Id, result.Rows.Single(r => r.Medium == GrowingMedium.Leca).PhotoId);
+        Assert.Equal(unrooted.Id, result.Rows.Single(r => r.Medium == GrowingMedium.Perlite).PhotoId);
+        Assert.Null(result.Rows.Single(r => r.Medium == GrowingMedium.Sphagnum).PhotoId);
+    }
+
+    [Fact]
+    public void The_photo_carries_its_frame_and_skips_reference_photos()
+    {
+        var reference = new Photo { Id = Guid.NewGuid(), IsReference = true };
+        var framed = new Photo { Id = Guid.NewGuid(), Frame = new PhotoFrame(0.2, 0.3, 2) };
+
+        var result = ResultOf([
+            Counted(GrowingMedium.Leca, 1, 0, Started.AddDays(3), reference.Id),
+            Counted(GrowingMedium.Leca, 1, 0, Started.AddDays(8), framed.Id),
+            Counted(GrowingMedium.Perlite, 1, 0, Started.AddDays(8), reference.Id)], [reference, framed]);
+
+        var leca = result.Rows.Single(r => r.Medium == GrowingMedium.Leca);
+        Assert.Equal(framed.Id, leca.PhotoId);
+        Assert.Equal(framed.Frame, leca.Frame);
+        Assert.Null(result.Rows.Single(r => r.Medium == GrowingMedium.Perlite).PhotoId);
+    }
+
+    [Fact]
+    public void The_best_medium_comes_first_then_the_fastest_then_by_name()
+    {
+        var result = ResultOf([
+            Counted(GrowingMedium.Sphagnum, 4, 0, Started.AddDays(20)),
+            Counted(GrowingMedium.Perlite, 4, 0, Started.AddDays(12)),
+            Counted(GrowingMedium.Water, 4, 2, Started.AddDays(5)),
+            Counted(GrowingMedium.Leca, 4, 0, null),
+            Counted(GrowingMedium.Soil, 4, 0, null)]);
+
+        Assert.Equal(
+            [GrowingMedium.Perlite, GrowingMedium.Sphagnum, GrowingMedium.Water, GrowingMedium.Leca, GrowingMedium.Soil],
+            result.Rows.Select(r => r.Medium));
+    }
+
+    [Fact]
+    public void The_result_is_still_running_while_a_batch_is_active()
+    {
+        var running = ResultOf([Counted(GrowingMedium.Leca, 1, 0, Started.AddDays(5)), Counted(GrowingMedium.Perlite, 1, 0, null)]);
+        Assert.True(running.StillRunning);
+        Assert.Equal("Test", running.Name);
+        Assert.Equal(Started, running.StartedOn);
+
+        var finished = new[] { Counted(GrowingMedium.Leca, 1, 0, Started.AddDays(5)), Counted(GrowingMedium.Perlite, 1, 0, Started.AddDays(9)) };
+        foreach (var batch in finished)
+            batch.Stage = PropagationStage.Done;
+        Assert.False(ResultOf(finished).StillRunning);
+    }
 }

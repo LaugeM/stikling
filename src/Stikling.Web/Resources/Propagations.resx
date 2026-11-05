@@ -1748,6 +1748,46 @@
     <value>New leaf</value>
     <comment>Kind of an entry on the timeline: a new leaf was logged.</comment>
   </data>
+  <data name="ExpShareLabel" xml:space="preserve">
+    <value>Share {0} as a picture</value>
+    <comment>Name read out for the Share button on an experiment on the Propagations list. {0} is the experiment's name.</comment>
+  </data>
+  <data name="ExpCardKickerRooted" xml:space="preserve">
+    <value>How many rooted</value>
+    <comment>Small heading at the top of the picture of an experiment's result. Shown in upper case.</comment>
+  </data>
+  <data name="ExpCardKickerRootedSoFar" xml:space="preserve">
+    <value>How many rooted so far</value>
+    <comment>Same heading while a batch in the experiment is still going.</comment>
+  </data>
+  <data name="ExpCardKickerSprouted" xml:space="preserve">
+    <value>How many sprouted</value>
+    <comment>Same heading when every batch in the experiment is seeds.</comment>
+  </data>
+  <data name="ExpCardKickerSproutedSoFar" xml:space="preserve">
+    <value>How many sprouted so far</value>
+    <comment>Same heading for seeds while a batch is still going.</comment>
+  </data>
+  <data name="ExpCardResult" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>How a medium did on the picture, when none have rooted yet. {0} rooted of {1} started.</comment>
+  </data>
+  <data name="ExpCardResultDays_One" xml:space="preserve">
+    <value>{0} of {1}, {2} day</value>
+    <comment>How a medium did on the picture. {0} rooted of {1} started, and the average days it took. 1 day.</comment>
+  </data>
+  <data name="ExpCardResultDays_Other" xml:space="preserve">
+    <value>{0} of {1}, {2} days</value>
+    <comment>How a medium did on the picture. {0} rooted of {1} started, and the average days it took.</comment>
+  </data>
+  <data name="ExpCardMore" xml:space="preserve">
+    <value>and {0} more</value>
+    <comment>Last line on the picture when not every medium fits. {0} is how many were left out.</comment>
+  </data>
+  <data name="ExpCardAlt" xml:space="preserve">
+    <value>Picture of the result of {0}</value>
+    <comment>Description of the preview of the picture. {0} is the experiment's name.</comment>
+  </data>
   <data name="MomentFirstRoot" xml:space="preserve">
     <value>First root, day {0}</value>
     <comment>Title of the short moment after logging a first root. {0} is the days since the propagation started.</comment>
