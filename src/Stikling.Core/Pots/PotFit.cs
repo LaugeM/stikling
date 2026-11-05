@@ -36,6 +36,12 @@ public static class PotFits
 {
     private const decimal TightBelowCm = 0.5m;
 
+    /// <summary>
+    /// The form's rim field also takes the wall of a plain pot. Under this it is taken to be a wall, which
+    /// has nothing to hang from.
+    /// </summary>
+    private const decimal MinHangingRimMm = 4m;
+
     public static PotFitResult Check(NurserySize nursery, PotUse outer) => Check(nursery, outer.Pot, outer);
 
     public static PotFitResult Check(NurserySize nursery, Pot outer) => Check(nursery, outer, new PotUse(outer, 0, 0));
@@ -53,7 +59,7 @@ public static class PotFits
             kind = PotFitKind.GoesIn;
             spare = opening - nursery.TopCm;
         }
-        else if (nursery.RimMm is > 0 and { } rim && nursery.TopCm - rim / 5 is var below && below <= opening)
+        else if (nursery.RimMm is >= MinHangingRimMm and { } rim && nursery.TopCm - rim / 5 is var below && below <= opening)
         {
             kind = PotFitKind.HangsOnRim;
             spare = opening - below;

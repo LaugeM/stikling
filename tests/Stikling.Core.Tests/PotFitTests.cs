@@ -59,6 +59,15 @@ public class PotFitTests
     }
 
     [Fact]
+    public void A_thin_wall_entered_as_the_rim_has_nothing_to_hang_from()
+    {
+        var nursery = new NurserySize(13.3m, null, null, 2); // 12.9 inside the wall
+        var result = PotFits.Check(nursery, Outer(13, rimMm: null));
+
+        Assert.Equal(PotFitKind.TooNarrow, result.Kind);
+    }
+
+    [Fact]
     public void A_rim_that_still_does_not_fit_is_too_narrow()
     {
         var nursery = new NurserySize(16, null, null, 10); // 14 below the rim
