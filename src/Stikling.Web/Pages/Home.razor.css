@@ -657,3 +657,15 @@
     gap: 0.5rem;
     margin-top: 0.5rem;
 }
+
+/* One row for every plant that has been with someone another year */
+.anniversary-plants {
+    margin: 0 0 0.25rem;
+    color: var(--pa-muted);
+}
+
+.anniversary-plant a {
+    display: inline-block;
+    padding-block: 0.625rem;
+    font-weight: 600;
+}

@@ -69,6 +69,12 @@ public sealed class PutOffs
     /// </summary>
     public static string PlanStep(Guid caseId, Guid stepId) => $"step:{caseId}:{stepId}";
 
+    /// <summary>
+    /// The key for a plant's anniversary. The year the window started is part of it, so next
+    /// year's anniversary isn't still hidden.
+    /// </summary>
+    public static string Anniversary(Guid plantId, int year) => $"anniversary:{plantId}:{year}";
+
     /// <summary>The key for a pest case whose plan has run its last step, so Today can wait with asking.</summary>
     public static string PlanDone(Guid caseId) => $"plandone:{caseId}";
 

@@ -1788,4 +1788,30 @@
     <value>Picture of the result of {0}</value>
     <comment>Description of the preview of the picture. {0} is the experiment's name.</comment>
   </data>
+  <data name="MomentFirstRoot" xml:space="preserve">
+    <value>First root, day {0}</value>
+    <comment>Title of the short moment after logging a first root. {0} is the days since the propagation started.</comment>
+  </data>
+  <data name="MomentFirstSeedling" xml:space="preserve">
+    <value>First seedling, day {0}</value>
+    <comment>Title of the short moment after logging a first seedling. {0} is the days since the seeds were sown.</comment>
+  </data>
+  <data name="MomentFirstLeaf" xml:space="preserve">
+    <value>First leaf, day {0}</value>
+    <comment>Title of the short moment after logging a first leaf. {0} is the days since the propagation started.</comment>
+  </data>
+  <data name="MomentNowPlant" xml:space="preserve">
+    <value>Now a plant</value>
+    <comment>Title of the short moment after the first potting up of a propagation made one plant.</comment>
+  </data>
+  <data name="MomentNowPlants" xml:space="preserve">
+    <value>Now {0} plants</value>
+    <comment>Title of the short moment after the first potting up of a propagation made several plants. {0} is how many, 2 or more.</comment>
+  </data>
+  <data name="MomentAfterDays_One" xml:space="preserve">
+    <value>After {0} day</value>
+  </data>
+  <data name="MomentAfterDays_Other" xml:space="preserve">
+    <value>After {0} days</value>
+  </data>
 </root>
