@@ -61,6 +61,15 @@
     margin-top: 0.6rem;
 }
 
+.moment-actions .btn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+}
+
+.moment-actions .moment-close {
+    padding-inline: 0.75rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .moment-leaf {
         animation: none;
