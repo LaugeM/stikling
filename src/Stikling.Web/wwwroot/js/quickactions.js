@@ -65,7 +65,8 @@ export function init(dotnet) {
             return;
         }
         event.preventDefault();
-        if (!opened) {
+        // The keyboard's menu key has no pointerdown to start a new press from
+        if (!opened || !touching) {
             open(element);
         }
     };
