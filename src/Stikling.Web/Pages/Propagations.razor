@@ -468,7 +468,12 @@ else
         var group = Experiments.Group(all ?? [], Time.Today())
             .FirstOrDefault(g => string.Equals(g.Name, shareName, StringComparison.OrdinalIgnoreCase));
         if (group is null)
+        {
+            // Its last batch was deleted or renamed on another device while the sheet was open
+            status = Strings.Shared.SwapDrawFailed;
+            StateHasChanged();
             return;
+        }
 
         try
         {
@@ -476,7 +481,13 @@ else
             var spec = ExperimentCardService.SpecFor(group, Experiments.Result(group, photos), format);
             var result = await Cards.DrawAsync(canvas, spec);
             if (run != drawRun || disposed)
+            {
+                // The sheet closed while it was drawing, so let go of the picture it just made.
+                // A newer draw on the canvas makes this one come back null, and there is nothing to let go of.
+                if (result is not null)
+                    await Cards.ReleaseAsync();
                 return;
+            }
             drawn = result;
         }
         catch (JSException)

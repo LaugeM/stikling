@@ -98,8 +98,8 @@
 }
 
 .experiment-share {
-    min-height: 2rem;
-    padding-block: 0;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
 }
 
 /* The picture that will be shared, small, in the size picked */
@@ -113,7 +113,7 @@
 }
 
 .experiment-picture {
-    width: min(100%, 14rem);
+    width: min(100%, 20rem);
     margin: 0.9rem 0 0.75rem;
     aspect-ratio: var(--aspect);
     overflow: hidden;
