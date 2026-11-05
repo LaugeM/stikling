@@ -135,7 +135,7 @@
     <comment>A choice above the list of propagations.</comment>
   </data>
   <data name="ListMilestoneCorm" xml:space="preserve">
-    <value>corm {0} mm</value>
+    <value>corm {0}</value>
     <comment>Part of a line about a batch. {0} is the size of the corm. The line starts with a capital.</comment>
   </data>
   <data name="ListMilestoneRoot" xml:space="preserve">
@@ -930,7 +930,7 @@
     <comment>Unit for how long a cut end dried.</comment>
   </data>
   <data name="EditCormSize" xml:space="preserve">
-    <value>Corm size (mm)</value>
+    <value>Corm size ({0})</value>
   </data>
   <data name="EditCormHint" xml:space="preserve">
     <value>Measured across when you started it. Handy for comparing bigger and smaller corms in an experiment.</value>
@@ -1126,8 +1126,8 @@
     <value>Corm size</value>
   </data>
   <data name="DetMm" xml:space="preserve">
-    <value>{0} mm</value>
-    <comment>{0} is a size in millimetres.</comment>
+    <value>{0}</value>
+    <comment>{0} is a size with its unit, like 12 mm or 0.47 in.</comment>
   </data>
   <data name="DetSeeds" xml:space="preserve">
     <value>Seeds</value>

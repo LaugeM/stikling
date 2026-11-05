@@ -26,6 +26,27 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    public async Task SetLengthsAsync(LengthUnit unit)
+    {
+        var current = await GetAsync();
+        current.Lengths = unit;
+        await settings.SaveAsync(current);
+    }
+
+    public async Task SetDatesAsync(DateStyle style)
+    {
+        var current = await GetAsync();
+        current.Dates = style;
+        await settings.SaveAsync(current);
+    }
+
+    public async Task SetClockAsync(ClockStyle clock)
+    {
+        var current = await GetAsync();
+        current.Clock = clock;
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetPhotoReminderAsync(bool on)
     {
         var current = await GetAsync();

@@ -69,7 +69,7 @@ else
                         <div class="item-text">
                             <div class="item-name">@(stretch.Kind == AwayKind.Away ? Strings.Care.AwayKindAway : Strings.Care.AwayKindQuiet)</div>
                             <div class="item-meta">
-                                <span>@string.Format(CultureInfo.CurrentCulture, Strings.Care.AwayRange, Stikling.Core.Away.SitterSheetText.Day(stretch.From), stretch.Until.ToString(Strings.Care.DayMonthYearLongFormat, Stikling.Core.Text.TextCulture.ForDates))</span>
+                                <span>@string.Format(CultureInfo.CurrentCulture, Strings.Care.AwayRange, Stikling.Core.Away.SitterSheetText.Day(stretch.From), Stikling.Core.Text.TextCulture.Date(stretch.Until, Strings.Care.DayMonthYearLongFormat))</span>
                                 @if (stretch.IsOn(Today))
                                 {
                                     <span>@Strings.Care.AwayOnNow</span>

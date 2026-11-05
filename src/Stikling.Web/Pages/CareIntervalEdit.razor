@@ -419,7 +419,7 @@ else
     }
 
     private string Day(DateOnly day) =>
-        day.ToString(day.Year != Today.Year ? Strings.Care.DayMonthYearLongFormat : Strings.Care.DayMonthLongFormat, TextCulture.ForDates);
+        TextCulture.Date(day, day.Year != Today.Year ? Strings.Care.DayMonthYearLongFormat : Strings.Care.DayMonthLongFormat);
 
     private async Task SaveAsync()
     {

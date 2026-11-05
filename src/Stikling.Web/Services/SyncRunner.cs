@@ -22,6 +22,7 @@ public sealed class SyncRunner(
     IndexedDb db,
     ThemeService theme,
     LanguageService language,
+    DisplayPreferences display,
     ErrorReports errorReports,
     ILogger<SyncRunner> logger,
     PlantNameService names,
@@ -358,6 +359,7 @@ public sealed class SyncRunner(
             {
                 await theme.ApplySavedAsync();
                 await language.ApplySavedAsync();
+                await display.ApplySavedAsync();
                 await errorReports.ApplySavedAsync();
                 names.SettingsChanged();
                 Received?.Invoke();

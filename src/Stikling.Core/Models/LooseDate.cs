@@ -76,7 +76,7 @@ public sealed record LooseDate
     {
         DatePrecision.Year => Year.ToString("D4", CultureInfo.InvariantCulture),
         DatePrecision.Month => Start.ToString("MMMM yyyy", Stikling.Core.Text.TextCulture.ForDates),
-        _ => Start.ToString(Strings.Plants.LooseDayFormat, Stikling.Core.Text.TextCulture.ForDates)
+        _ => Stikling.Core.Text.TextCulture.Date(Start, Strings.Plants.LooseDayFormat)
     };
 
     /// <summary>The same as <see cref="Text"/>, always in English. For text that is saved with a record.</summary>

@@ -302,8 +302,8 @@ else
                 @if (propagation.Type == PropagationType.Corm)
                 {
                     <div class="mb-3">
-                        <label class="form-label" for="corm-size">@Strings.Propagations.EditCormSize</label>
-                        <InputNumber id="corm-size" class="form-control" @bind-Value="propagation.CormSizeMm" min="0" max="200" step="any" inputmode="decimal" />
+                        <label class="form-label" for="corm-size">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditCormSize, Lengths.SmallUnitName)</label>
+                        <LengthInput id="corm-size" class="form-control" Millimetres="true" min="0" @bind-Value="propagation.CormSizeMm" />
                         <div class="form-text">@Strings.Propagations.EditCormHint</div>
                     </div>
                 }

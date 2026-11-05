@@ -152,9 +152,8 @@
 
         <div class="row g-2 mb-3 align-items-end">
             <div class="col-6">
-                <label class="form-label" for="pot-top">@Strings.Supplies.PotsAcrossTop</label>
-                <input id="pot-top" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
-                       @bind="draft.TopCm" />
+                <label class="form-label" for="pot-top">@F(Strings.Supplies.PotsAcrossTop, Lengths.UnitName)</label>
+                <LengthInput id="pot-top" class="form-control" min="0" @bind-Value="draft.TopCm" />
             </div>
             <div class="col-6">
                 <label class="form-label" for="pot-owned">@Strings.Supplies.PotsHowMany</label>
@@ -168,14 +167,12 @@
 
             <div class="row g-2 mt-2 align-items-end">
                 <div class="col-6">
-                    <label class="form-label" for="pot-bottom">@Strings.Supplies.PotsAcrossBottom</label>
-                    <input id="pot-bottom" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
-                           @bind="draft.BottomCm" />
+                    <label class="form-label" for="pot-bottom">@F(Strings.Supplies.PotsAcrossBottom, Lengths.UnitName)</label>
+                    <LengthInput id="pot-bottom" class="form-control" min="0" @bind-Value="draft.BottomCm" />
                 </div>
                 <div class="col-6">
-                    <label class="form-label" for="pot-height">@Strings.Supplies.PotsHeight</label>
-                    <input id="pot-height" class="form-control" type="number" inputmode="decimal" min="0" step="0.1"
-                           @bind="draft.HeightCm" />
+                    <label class="form-label" for="pot-height">@F(Strings.Supplies.PotsHeight, Lengths.UnitName)</label>
+                    <LengthInput id="pot-height" class="form-control" min="0" @bind-Value="draft.HeightCm" />
                 </div>
             </div>
             <div class="form-text">
@@ -185,12 +182,11 @@
             @if (!IsContainer)
             {
                 <div class="mt-3">
-                    <label class="form-label" for="pot-rim">@Strings.Supplies.PotsRim</label>
-                    <input id="pot-rim" class="form-control" type="number" inputmode="decimal" min="0" step="0.5"
-                           @bind="draft.RimMm" />
+                    <label class="form-label" for="pot-rim">@F(Strings.Supplies.PotsRim, Lengths.SmallUnitName)</label>
+                    <LengthInput id="pot-rim" class="form-control" min="0" Millimetres="true" @bind-Value="draft.RimMm" />
                     @if (draft.InsideTopCm is { } inside)
                     {
-                        <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsInsideResult, Pot.Size(inside))</div>
+                        <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsInsideResult, Lengths.Cm(inside))</div>
                     }
                     <div class="form-text">@Strings.Supplies.PotsRimHint</div>
                 </div>
@@ -484,8 +480,11 @@ else
     private static bool Same(string? a, string? b) =>
         string.Equals(a?.Trim(), b?.Trim(), StringComparison.OrdinalIgnoreCase);
 
+    private static string F(string format, params object[] args) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
+
     private static string SizeText(Pot pot) => pot.TopCm is { } top
-        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsSizeCm, Pot.Size(top))
+        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsSizeCm, Lengths.Cm(top))
         : Strings.Supplies.PotsNoSize;
 
     /// <summary>The muted line beside a pot: what it's made of, and anything unusual about it.</summary>
@@ -495,11 +494,11 @@ else
         if (pot.SelfWatering is { } watering)
             parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsSelfWatering, Labels.For(watering).ToLowerInvariant()));
         if (pot.HasRim)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsRimMm, Pot.Size(pot.RimMm!.Value)));
+            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsRimMm, Lengths.Mm(pot.RimMm!.Value)));
         if (pot.InsideTopCm is { } inside)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsInsideCm, Pot.Size(inside)));
+            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsInsideCm, Lengths.Cm(inside)));
         if (pot.HeightCm is { } height)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsTallCm, Pot.Size(height)));
+            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsTallCm, Lengths.Cm(height)));
         return string.Join(" · ", parts);
     }
 

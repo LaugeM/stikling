@@ -297,7 +297,7 @@ else
                         @if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } cormSize)
                         {
                             <dt>@Strings.Propagations.DetCormSize</dt>
-                            <dd>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMm, cormSize.ToString("0.##", CultureInfo.CurrentCulture))</dd>
+                            <dd>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMm, Lengths.Mm(cormSize))</dd>
                         }
 
                         @if (propagation.Type == PropagationType.Seed && propagation.SeedsGerminated is { } up)

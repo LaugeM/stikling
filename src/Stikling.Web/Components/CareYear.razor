@@ -40,7 +40,7 @@
                         <ul class="cal-entries">
                             @foreach (var day in marked)
                             {
-                                <li>@F(Strings.Plants.CalendarDayMark, day.Date.ToString(Strings.Plants.CalendarDayFormat, TextCulture.ForDates), MarkText(day.Mark))</li>
+                                <li>@F(Strings.Plants.CalendarDayMark, TextCulture.Date(day.Date, Strings.Plants.CalendarDayFormat), MarkText(day.Mark))</li>
                             }
                         </ul>
                     }
