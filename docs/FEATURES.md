@@ -40,7 +40,7 @@ In the order I would build them, with the ones that belong together built togeth
 The first group was for the people a post brings in, and it is built, so the posts on Reddit (r/propagation, r/houseplants and the collector subreddits) can go up. Those who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. Danish is in, so every feature from now on is written in both languages from the start, and the Danish Facebook groups can be asked. The group for collectors is built too: the larger plant dictionary with a page to browse it, the leaf log for variegated plants, generation and orders.
 
 1. **Translating**: a way for others to help translate Stikling.
-2. **Everyday shortcuts and details**: quick actions and Does it fit?
+2. **Everyday shortcuts and details**: Does it fit?
 3. **Showing it off**: anniversaries and small celebrations, an experiment's result as an image, your year as a video, and a plant's story to print.
 4. **When something is wrong**: the symptom check, and built-in guides that open from the place they are about.
 5. **On the server**: plant identification from a photo, the plant facts card and a public read-only collection page. Identification services name the species, not the cultivar, so a variegated or lab-made cultivar still has to be picked by hand, from the dictionary. Check that Trefle is still kept up before planning the facts card.
@@ -407,7 +407,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
 | ✅ | **Home-screen shortcuts**: long-press the app icon for Add plant, New propagation, Water plants and Pest cases | 5 | S | v1.x |
-| ☐ | **Quick actions**: long-press a plant card to log watering or a note without opening it | 4 | M | v1.x |
+| ✅ | **Quick actions**: press and hold a plant in the Plants list on a phone, or right-click it on a computer, to open a sheet with Water, Add a note and Open plant, so something can be logged without opening the plant. Not in Select mode or the table view, and only on the Plants list | 4 | M | v1.x |
 | ✅ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
 | ✅ | Pick photos from Google Photos, including ones only in the cloud, through Google's Photos Picker. Turned on in Settings. Photo on a plant or propagation page then asks phone or Google Photos, and the add and edit pages get a Google Photos button. The photos go straight from Google to the device. The phone's own chooser only reaches photos stored on the phone, which is why it needs Google's picker | 4 | S | v1.x |
 | ☐ | **Copy a plant's link** for an NFC sticker or a label. Write it to a sticker with any NFC app, and tapping the phone on the pot opens the plant | 8 | S | v1.x |

@@ -1023,4 +1023,16 @@
     <value>{0} gen.</value>
     <comment>Small text on a plant in the family tree. {0} is an ordinal like 3rd.</comment>
   </data>
+  <data name="QuickWater" xml:space="preserve">
+    <value>Water</value>
+    <comment>Row in the sheet that opens when a plant in the Plants list is pressed and held. Opens the care form on watering.</comment>
+  </data>
+  <data name="QuickNote" xml:space="preserve">
+    <value>Add a note</value>
+    <comment>Row in the same sheet. Opens the note form for the plant.</comment>
+  </data>
+  <data name="QuickOpen" xml:space="preserve">
+    <value>Open plant</value>
+    <comment>Row in the same sheet. Goes to the plant's page.</comment>
+  </data>
 </root>

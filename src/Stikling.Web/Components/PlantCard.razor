@@ -13,7 +13,7 @@
 }
 else
 {
-    <a data-drop-subject="plants/@Plant.Id" class="item-card" href="plants/@Plant.Id">
+    <a data-drop-subject="plants/@Plant.Id" data-quick-plant="@(QuickActions ? Plant.Id : null)" class="item-card" href="plants/@Plant.Id">
         @Content
     </a>
 }
@@ -31,6 +31,10 @@ else
 
     [Parameter]
     public bool Selected { get; set; }
+
+    /// <summary>Press and hold, or right-click, opens the quick actions sheet. Only the Plants list turns it on.</summary>
+    [Parameter]
+    public bool QuickActions { get; set; }
 
     [Parameter]
     public EventCallback<SelectClick> OnToggle { get; set; }

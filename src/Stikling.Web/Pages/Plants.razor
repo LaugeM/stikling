@@ -26,6 +26,7 @@
 <PageTitle>@Strings.Plants.ListPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 <RowPhotoDrop />
+<PlantQuickActions Plants="@(all ?? [])" Pots="pots" OnChanged="LoadAsync" />
 
 @* page-full: on a wide screen the list takes the whole width beside the menu, in every view *@
 <div class="page-heading page-full">
@@ -1069,12 +1070,12 @@ else
     private RenderFragment<Plant> ListRow => plant => @<li id="@(ShowLetters ? letterAnchors.GetValueOrDefault(plant.Id) : null)">
         <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
                    OnToggle="Toggle" Moisture="@MoistureFor(plant)" LastWater="@LastWaterFor(plant)" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)"
-                   OpenProblem="@problemPlants.Contains(plant.Id)" Location="@places.NameOf(plant.PlaceId)" PottedWith="@PottedWithName(plant)" />
+                   OpenProblem="@problemPlants.Contains(plant.Id)" Location="@places.NameOf(plant.PlaceId)" PottedWith="@PottedWithName(plant)" QuickActions="true" />
     </li>;
 
     private RenderFragment<Plant> GridRow => plant => @<li id="@(ShowLetters ? letterAnchors.GetValueOrDefault(plant.Id) : null)">
         <PlantTile Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
-                   OnToggle="Toggle" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)" OpenProblem="@problemPlants.Contains(plant.Id)" PottedWith="@PottedWithName(plant)" />
+                   OnToggle="Toggle" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)" OpenProblem="@problemPlants.Contains(plant.Id)" PottedWith="@PottedWithName(plant)" QuickActions="true" />
     </li>;
 
     private RenderFragment GroupHeading(PlantGroup group, int index) => @<li class="group-heading" role="presentation" id="group-@index">
