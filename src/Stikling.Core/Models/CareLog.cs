@@ -73,6 +73,13 @@ public sealed class CareLog : Entity
     /// <summary>The own kind's name as it was that day, so removing the kind leaves the entry readable.</summary>
     public string? OwnKindName { get; set; }
 
+    /// <summary>
+    /// How full the reservoir was, 0 to 100. Only on a reservoir reading, which is an entry with
+    /// <see cref="OwnKindId"/> set to <see cref="CareKinds.ReservoirReadingId"/>. A top-level field
+    /// so an older version that saves the record keeps it.
+    /// </summary>
+    public int? ReservoirLevel { get; set; }
+
     public string? Notes { get; set; }
 
     /// <summary>
@@ -104,6 +111,18 @@ public sealed class CareLog : Entity
                 errors.Add(Strings.Care.LogOwnKindNeedsName);
             if (Kind is not (CareKind.Rotated or CareKind.Watered or CareKind.Fertilised))
                 errors.Add(Strings.Care.LogOwnKindCountsAs);
+        }
+
+        if (CareKinds.IsReservoirReading(this))
+        {
+            if (ReservoirLevel is null)
+                errors.Add(Strings.Care.LogReservoirNeedsLevel);
+            else if (ReservoirLevel is < 0 or > 100)
+                errors.Add(Strings.Care.LogReservoirRange);
+        }
+        else if (ReservoirLevel is not null)
+        {
+            errors.Add(Strings.Care.LogOnlyReservoirHasLevel);
         }
 
         if (Kind == CareKind.MoistureReading)
@@ -152,6 +171,16 @@ public sealed class CareLog : Entity
 /// <summary>Which kinds of care are worth a line in the plant's history.</summary>
 public static class CareKinds
 {
+    /// <summary>
+    /// The fixed id of the own kind a reservoir reading carries. No <see cref="OwnCareKind"/> record
+    /// is behind it, so it is never listed as a kind of your own, and an older version shows the
+    /// reading as an entry of the name stored on it.
+    /// </summary>
+    public static readonly Guid ReservoirReadingId = new("3271b0ba-716f-4e1d-9872-565911c5d149");
+
+    /// <summary>Whether the entry is a note of how full the reservoir was. It counts as neither watering nor feeding.</summary>
+    public static bool IsReservoirReading(CareLog entry) => entry.OwnKindId == ReservoirReadingId;
+
     /// <summary>
     /// Repotting, flushing and pruning change the plant enough to belong in its story. Watering
     /// and the rest would bury the photos and notes within a month, so they stay in the care log.

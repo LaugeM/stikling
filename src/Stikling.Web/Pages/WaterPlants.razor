@@ -642,7 +642,7 @@ else
                 }
                 else if (row.Form != WateringForm.TopWatered)
                 {
-                    <span class="pass-meta">@(row.Form == WateringForm.InWater ? Strings.Care.WaterCheckWater : Strings.Care.WaterCheckReservoir)@(lastWater is { } topped ? $" · {WateringText.LastWater(topped, row.Form)}" : null)</span>
+                    <span class="pass-meta">@(row.Form == WateringForm.InWater ? Strings.Care.WaterCheckWater : Strings.Care.WaterCheckReservoir)@(row.Form == WateringForm.Reservoir && row.Plant.ReservoirFillCm is { } fill ? $" · {string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.ReservoirFillMeta, Lengths.Cm(fill))}" : null)@(lastWater is { } topped ? $" · {WateringText.LastWater(topped, row.Form)}" : null)</span>
                     @FeedAndButton(row, WateringText.DoneLabel(row.Form), primary: true, busy, feed, open)
                 }
                 else

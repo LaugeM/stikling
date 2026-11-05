@@ -26,11 +26,11 @@
     {
         <div class="put-off" role="group" aria-label="@AnswerGroupLabel">
             <span class="put-off-label">@AnswerLabel</span>
-            @* The numbers 0 to 10 sit in two rows of six, each big enough to tap *@
+            @* The numbers 0 to 10 sit in two rows of six, each big enough to tap. Words, like how full a reservoir is, sit in one row *@
             <div class="answer-grid">
                 @foreach (var choice in AnswerChoices)
                 {
-                    <button type="button" class="chip" disabled="@busy" @onclick="() => AnswerAsync(choice)">@choice</button>
+                    <button type="button" class="chip" disabled="@busy" @onclick="() => AnswerAsync(choice)">@(AnswerChoiceLabel is null ? choice.ToString() : AnswerChoiceLabel(choice))</button>
                 }
             </div>
             @if (AnswerNoneLabel is not null)
@@ -92,6 +92,10 @@
     /// <summary>Numbers to pick from under the row when the answer button is tapped.</summary>
     [Parameter]
     public IReadOnlyList<int>? AnswerChoices { get; set; }
+
+    /// <summary>What a chip says when the number isn't what to show, e.g. "Half" for 50. Without it the chips show the numbers.</summary>
+    [Parameter]
+    public Func<int, string>? AnswerChoiceLabel { get; set; }
 
     /// <summary>The chip after the numbers, for answering without one, e.g. "No meter".</summary>
     [Parameter]

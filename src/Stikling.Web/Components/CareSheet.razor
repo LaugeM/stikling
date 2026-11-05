@@ -20,6 +20,10 @@
                 {
                     <option value="@value">@KindLabel(value)</option>
                 }
+                @if (OffersReservoir)
+                {
+                    <option value="@ReservoirChoice">@Strings.Care.SheetReservoirLevel</option>
+                }
                 @if (ownKinds.Count > 0)
                 {
                     <optgroup label="@Strings.Care.SheetYourOwn">
@@ -47,6 +51,21 @@
             <div class="care-actions">
                 <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(newName))" @onclick="AddKindAsync">@Strings.Common.Add</button>
                 <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="CancelAdd">@Strings.Common.Cancel</button>
+            </div>
+        </div>
+    }
+
+    @if (IsReservoir)
+    {
+        <div class="mt-2">
+            <div class="form-label">@Strings.Care.SheetHowFull</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Care.SheetHowFull">
+                @foreach (var level in ReservoirLevels.Choices)
+                {
+                    <button type="button" class="chip @(reservoirLevel == level ? "picked" : null)"
+                            aria-pressed="@(reservoirLevel == level ? "true" : "false")"
+                            @onclick="() => reservoirLevel = level">@ReservoirLevels.Text(level)</button>
+                }
             </div>
         </div>
     }
@@ -146,7 +165,7 @@
     </div>
 
     <div class="care-actions">
-        <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || PlantIds.Count == 0)" @onclick="LogAsync">
+        <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || PlantIds.Count == 0 || (IsReservoir && reservoirLevel is null))" @onclick="LogAsync">
             @SubmitText
         </button>
         @if (OnCancel.HasDelegate)
@@ -175,6 +194,8 @@
 
     private const string OwnPrefix = "own:";
     private const string AddChoice = "add";
+    // Not a CareKind: a reservoir reading is stored as an own kind with a fixed id, see CareKinds.ReservoirReadingId
+    private const string ReservoirChoice = "reservoir";
 
     // What the select shows: a built-in kind's name, "own:" and the id of one of your own, or "add"
     private string choice = nameof(CareKind.Watered);
@@ -189,6 +210,7 @@
     private bool newOnHistory;
     private DateOnly occurredOn;
     private int? moisture;
+    private int? reservoirLevel;
     private IReadOnlyList<Product> products = [];
     private IReadOnlyList<Feed> feeds = [];
     // The feed the doses came from, if one was picked. The doses can still be changed for this entry.
@@ -205,6 +227,11 @@
     private bool busy;
 
     private DateOnly Today => Time.Today();
+
+    // Noting how full a reservoir is only makes sense for one plant that has one
+    private bool OffersReservoir => PlantIds.Count == 1 && Form == WateringForm.Reservoir;
+
+    private bool IsReservoir => choice == ReservoirChoice && OffersReservoir;
 
     private string SubmitText =>
         PlantIds.Count == 1 ? Strings.Care.SheetLogIt : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SheetLogFor, Labels.Plants(PlantIds.Count));
@@ -247,6 +274,15 @@
         }
 
         adding = false;
+        if (choice == ReservoirChoice)
+        {
+            own = null;
+            kind = CareKind.Rotated;
+            previousChoice = choice;
+            KindChanged();
+            return;
+        }
+
         own = choice.StartsWith(OwnPrefix, StringComparison.Ordinal) && Guid.TryParse(choice[OwnPrefix.Length..], out var id)
             ? ownKinds.FirstOrDefault(k => k.Id == id)
             : null;
@@ -296,6 +332,8 @@
     {
         if (kind != CareKind.MoistureReading)
             moisture = null;
+        if (!IsReservoir)
+            reservoirLevel = null;
         if (!CareKinds.TakesProducts(kind))
         {
             doses.Clear();
@@ -353,10 +391,15 @@
         error = null;
         try
         {
-            await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, e => e is CareKind k ? KindLabel(k) : Labels.For(e), moisture, doses,
-                feed, water > 0 ? water : null, ec, ph, own?.Id, own?.Name);
+            Func<Enum, string> label = e => e is CareKind k ? KindLabel(k) : Labels.For(e);
+            if (IsReservoir && reservoirLevel is { } level)
+                await CareService.LogReservoirAsync(PlantIds[0], level, label, occurredOn, notes);
+            else
+                await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, label, moisture, doses,
+                    feed, water > 0 ? water : null, ec, ph, own?.Id, own?.Name);
             notes = null;
             moisture = null;
+            reservoirLevel = null;
             doses.Clear();
             feed = null;
             water = null;

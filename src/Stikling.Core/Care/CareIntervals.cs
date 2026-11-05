@@ -44,7 +44,9 @@ public static class CareIntervals
 
         var covered = interval.Scope switch
         {
-            CareScope.Everywhere => here,
+            CareScope.Everywhere => interval.OnlySemiHydro
+                ? here.Where(p => p.Medium is GrowingMedium.Leca or GrowingMedium.Pon)
+                : here,
             CareScope.Room => here.Where(p => places.IsIn(p.PlaceId, interval.PlaceId)),
             CareScope.Tag => here.Where(p => PlantTags.Has(p, interval.Tag)),
             _ => here.Where(p => interval.PlantIds.Contains(p.Id))
@@ -134,7 +136,7 @@ public static class CareIntervals
     /// </summary>
     public static bool Matches(CareInterval interval, CareLog entry)
     {
-        if (entry.IsDeleted)
+        if (entry.IsDeleted || CareKinds.IsReservoirReading(entry))
             return false;
         if (interval.OwnKindId is { } own)
             return entry.OwnKindId == own;

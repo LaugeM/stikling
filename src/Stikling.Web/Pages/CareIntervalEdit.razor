@@ -129,11 +129,11 @@ else
         <fieldset>
             <legend>@Strings.Care.IntervalEditCovers</legend>
             <div class="btn-group segmented mb-3" role="radiogroup" aria-label="@Strings.Care.IntervalEditWhatItCovers">
-                @foreach (var (value, label) in scopeOptions)
+                @foreach (var (value, semiHydro, label) in scopeOptions)
                 {
-                    var id = $"scope-{value}";
+                    var id = semiHydro ? "scope-SemiHydro" : $"scope-{value}";
                     <input type="radio" class="btn-check" name="scope" id="@id"
-                           checked="@(item.Scope == value)" @onchange="() => SetScope(value)" />
+                           checked="@(item.Scope == value && item.OnlySemiHydro == semiHydro)" @onchange="() => SetScope(value, semiHydro)" />
                     <label class="btn btn-outline-primary" for="@id">@label</label>
                 }
             </div>
@@ -185,7 +185,7 @@ else
             }
             else
             {
-                <p class="text-body-secondary mb-1">@Strings.Care.IntervalEditEveryPlant</p>
+                <p class="text-body-secondary mb-1">@(item.OnlySemiHydro ? Strings.Care.IntervalEditSemiHydro : Strings.Care.IntervalEditEveryPlant)</p>
             }
 
             <p class="covers-count" aria-live="polite">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditCoversNow, Labels.Plants(Covered.Count)))</p>
@@ -245,12 +245,18 @@ else
     [SupplyParameterFromQuery(Name = "kind")]
     public string? KindName { get; set; }
 
-    private static (CareScope Value, string Label)[] scopeOptions =>
+    /// <summary>1 to start with the plants in LECA or PON. The plant is then only for the way back.</summary>
+    [SupplyParameterFromQuery(Name = "semihydro")]
+    public string? SemiHydro { get; set; }
+
+    /// <summary>Plants in LECA or PON is not a scope of its own: it is everywhere with <see cref="CareInterval.OnlySemiHydro"/> set.</summary>
+    private static (CareScope Value, bool SemiHydro, string Label)[] scopeOptions =>
     [
-        (CareScope.PickedPlants, Strings.Care.IntervalEditScopePick),
-        (CareScope.Room, Strings.Care.IntervalEditScopeRoom),
-        (CareScope.Tag, Strings.Care.IntervalEditScopeTag),
-        (CareScope.Everywhere, Strings.Care.IntervalEditScopeAll)
+        (CareScope.PickedPlants, false, Strings.Care.IntervalEditScopePick),
+        (CareScope.Room, false, Strings.Care.IntervalEditScopeRoom),
+        (CareScope.Tag, false, Strings.Care.IntervalEditScopeTag),
+        (CareScope.Everywhere, true, Strings.Care.IntervalEditScopeSemiHydro),
+        (CareScope.Everywhere, false, Strings.Care.IntervalEditScopeAll)
     ];
 
     private static string UnitLabel(IntervalUnit unit) => unit switch
@@ -308,7 +314,9 @@ else
         if (IsNew)
         {
             item = new CareInterval { StartsOn = Today };
-            if (FromPlant)
+            if (SemiHydro == "1")
+                item.OnlySemiHydro = true;
+            else if (FromPlant)
             {
                 item.Scope = CareScope.PickedPlants;
                 item.PlantIds.Add(PlantId!.Value);
@@ -360,12 +368,13 @@ else
 
     private void SetPartOfYear(ChangeEventArgs e) => partOfYear = e.Value is true;
 
-    private void SetScope(CareScope scope)
+    private void SetScope(CareScope scope, bool semiHydro)
     {
         if (item is null)
             return;
 
         item.Scope = scope;
+        item.OnlySemiHydro = semiHydro;
         if (scope != CareScope.Room)
             room = null;
         if (scope != CareScope.PickedPlants)

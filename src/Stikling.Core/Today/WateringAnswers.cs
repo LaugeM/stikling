@@ -42,6 +42,18 @@ public sealed class WateringAnswers(
     }
 
     /// <summary>
+    /// "Not yet" for a plant that takes water from a reservoir: logs how full it is when a level was
+    /// picked, then puts the row off the way <see cref="NotYetAsync"/> does without a reading.
+    /// </summary>
+    public async Task<(string Key, DateOnly Until)?> ReservoirAsync(
+        Plant plant, WateringGuess guess, int? level, Func<Enum, string> label)
+    {
+        if (level is { } value)
+            await care.LogReservoirAsync(plant.Id, value, label);
+        return await NotYetAsync(plant, guess, null, false, label);
+    }
+
+    /// <summary>
     /// "Still wet" with a meter reading, or "No meter" / "Not yet" with none. The reading is logged
     /// when <paramref name="logReading"/> is set, and not when the caller has logged it already.
     /// A reading moves a guess that is made from the meter. For one made from the days between

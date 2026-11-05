@@ -436,4 +436,11 @@
     <value>With a wick</value>
     <comment>Choice for how a plant takes up water kept in the outer pot: a wick runs down into it.</comment>
   </data>
+  <data name="ReservoirFill" xml:space="preserve">
+    <value>Fill reservoir to ({0})</value>
+    <comment>Label of the fill line on a plant that gets water from a reservoir. {0} is the unit, cm or inches.</comment>
+  </data>
+  <data name="ReservoirFillHelp" xml:space="preserve">
+    <value>How high the water should come. Optional.</value>
+  </data>
 </root>

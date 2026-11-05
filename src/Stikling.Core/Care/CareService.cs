@@ -52,6 +52,26 @@ public sealed class CareService(
     }
 
     /// <summary>
+    /// Logs a note of how full a plant's reservoir is, 0 to 100, for a day. It counts as neither
+    /// watering nor feeding, so it is stored as Rotated with the fixed reservoir reading own kind,
+    /// which an older version shows as an entry named like the one stored on it.
+    /// </summary>
+    public async Task<CareLog> LogReservoirAsync(Guid plantId, int level, Func<Enum, string> label, DateOnly? on = null, string? notes = null)
+    {
+        var entry = Start(plantId, CareKind.Rotated);
+        entry.OwnKindId = CareKinds.ReservoirReadingId;
+        entry.OwnKindName = Strings.Care.ReservoirReadingName;
+        entry.ReservoirLevel = level;
+        entry.Notes = Clean(notes);
+        if (on is { } day)
+            entry.OccurredOn = day;
+        if (entry.Validate(Today).FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+        await LogAsync(entry, label);
+        return entry;
+    }
+
+    /// <summary>
     /// The same thing done to several plants at once, e.g. "fertilised all the semi-hydro
     /// plants". Each plant gets its own entry so its own history stays right.
     /// </summary>
@@ -185,7 +205,7 @@ public sealed class CareService(
     public Task DeleteAsync(Guid id) => logs.DeleteAsync(id);
 
     /// <summary>
-    /// Fixes an entry typed in wrong. Only the date, reading, water, EC, pH and note change; what was
+    /// Fixes an entry typed in wrong. Only the date, reading, reservoir level, water, EC, pH and note change; what was
     /// done, the plant, the products and the feed stay as stored. The plant's history is left alone.
     /// </summary>
     public async Task UpdateAsync(CareLog entry, DateOnly today)
@@ -197,6 +217,7 @@ public sealed class CareService(
         var changed = stored.Copy();
         changed.OccurredOn = entry.OccurredOn;
         changed.Moisture = entry.Moisture;
+        changed.ReservoirLevel = entry.ReservoirLevel;
         changed.WaterLitres = entry.WaterLitres;
         changed.Ec = entry.Ec;
         changed.Ph = entry.Ph;

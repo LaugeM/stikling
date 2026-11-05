@@ -8,6 +8,9 @@ public sealed record LastCare(CareKind Kind, DateOnly On, int DaysAgo, string? N
 /// <summary>The newest moisture meter reading and when it was taken.</summary>
 public sealed record MoistureReading(int Value, DateOnly On, int DaysAgo);
 
+/// <summary>The newest note of how full the reservoir was, 0 to 100, and when it was made.</summary>
+public sealed record ReservoirReading(int Level, DateOnly On, int DaysAgo);
+
 /// <summary>
 /// Reading the care log back. This is the part that makes logging worth the effort: the
 /// numbers here are what the plant page and the cards show.
@@ -54,6 +57,13 @@ public static class CareSummary
         For(logs, plantId).FirstOrDefault(l => l.Kind == CareKind.MoistureReading && l.Moisture is not null)
             is { Moisture: { } value } entry
             ? new MoistureReading(value, entry.OccurredOn, DaysBetween(entry.OccurredOn, today))
+            : null;
+
+    /// <summary>The newest reservoir reading for a plant, or null if there isn't one.</summary>
+    public static ReservoirReading? LatestReservoir(IEnumerable<CareLog> logs, Guid plantId, DateOnly today) =>
+        For(logs, plantId).FirstOrDefault(l => CareKinds.IsReservoirReading(l) && l.ReservoirLevel is not null)
+            is { ReservoirLevel: { } level } entry
+            ? new ReservoirReading(level, entry.OccurredOn, DaysBetween(entry.OccurredOn, today))
             : null;
 
     private static LastCare Describe(CareLog entry, DateOnly today) =>

@@ -424,7 +424,7 @@
     <value>Hvad gør "Stadig fugtig" og "Ingen fugtmåler" i I dag?</value>
   </data>
   <data name="StillWetNoMeterOnA1" xml:space="preserve">
-    <value>For en plante du vander fra oven, trykker du på &lt;em&gt;Stadig fugtig&lt;/em&gt; og vælger hvad måleren viser, fra 0 til 10. Målingen bliver gemt i plantens pleje, og planten kommer igen senere når den har haft tid til at tørre. &lt;em&gt;Ingen fugtmåler&lt;/em&gt; udskyder den i nogle dage uden måling. For andre planter står der &lt;em&gt;Ikke endnu&lt;/em&gt; på knappen, og den gør det samme. Fluebenet logger vanding, påfyldning eller opfyldning for i dag. Uret udskyder rækken en dag eller mere, ligesom de andre rækker.</value>
+    <value>For en plante du vander fra oven, trykker du på &lt;em&gt;Stadig fugtig&lt;/em&gt; og vælger hvad måleren viser, fra 0 til 10. Målingen bliver gemt i plantens pleje, og planten kommer igen senere når den har haft tid til at tørre. &lt;em&gt;Ingen fugtmåler&lt;/em&gt; udskyder den i nogle dage uden måling. For en plante der tager vand fra et reservoir, står der &lt;em&gt;Ikke endnu&lt;/em&gt; på knappen, og den spørger hvor fyldt reservoiret er: vælg &lt;em&gt;Tom&lt;/em&gt;, &lt;em&gt;Lav&lt;/em&gt;, &lt;em&gt;Halv&lt;/em&gt; eller &lt;em&gt;Fuld&lt;/em&gt;, eller &lt;em&gt;Ingen aflæsning&lt;/em&gt;. Det er valgfrit, og planten bliver udskudt i nogle dage uanset hvad. For andre planter står der &lt;em&gt;Ikke endnu&lt;/em&gt; på knappen, og den gør det samme. Fluebenet logger vanding, påfyldning eller opfyldning for i dag. Uret udskyder rækken en dag eller mere, ligesom de andre rækker.</value>
   </data>
   <data name="WaterAtReadingQ" xml:space="preserve">
     <value>Hvad er målingen "Vand ved"?</value>
@@ -1123,7 +1123,7 @@
     <value>Kan appen minde mig om at gøde eller ompotte?</value>
   </data>
   <data name="AppRemindMeFeedOrA1" xml:space="preserve">
-    <value>Ja, med et plejeinterval. Gå til &lt;em&gt;Indstillinger&lt;/em&gt; og så &lt;em&gt;Plejeintervaller&lt;/em&gt;, eller tryk på &lt;em&gt;Tilføj et plejeinterval&lt;/em&gt; under Pleje på en plante. Vælg hvad det er, fx gødning, ompotning, beskæring eller en af dine egne plejetyper, og hvor tit: hver så mange dage, uger, måneder eller år. Med &lt;em&gt;Kun en del af året&lt;/em&gt; kan du begrænse det, fx fra april til oktober eller fra oktober til marts hen over nytår. Vælg så hvilke planter det gælder: udvalgte planter, et rum, et tag som det på dine semi-hydro-planter eller dem alle. Et rum eller et tag følger planterne, så en plante der bliver flyttet eller får tagget senere, er med fra da af.</value>
+    <value>Ja, med et plejeinterval. Gå til &lt;em&gt;Indstillinger&lt;/em&gt; og så &lt;em&gt;Plejeintervaller&lt;/em&gt;, eller tryk på &lt;em&gt;Tilføj et plejeinterval&lt;/em&gt; under Pleje på en plante. Vælg hvad det er, fx gødning, ompotning, beskæring eller en af dine egne plejetyper, og hvor tit: hver så mange dage, uger, måneder eller år. Med &lt;em&gt;Kun en del af året&lt;/em&gt; kan du begrænse det, fx fra april til oktober eller fra oktober til marts hen over nytår. Vælg så hvilke planter det gælder: udvalgte planter, et rum, et tag som det på dine semi-hydro-planter, planterne i LECA eller PON eller dem alle. Et rum, et tag eller planterne i LECA eller PON følger planterne, så en plante der bliver flyttet, får tagget eller kommer i LECA eller PON senere, er med fra da af.</value>
   </data>
   <data name="AppRemindMeFeedOrA2" xml:space="preserve">
     <value>Så får I dag et afsnit, &lt;em&gt;Pleje&lt;/em&gt;, med det der skal gøres, samlet efter hvad der skal gøres. Tryk på fluebenet for at logge en enkelt plante, eller på &lt;em&gt;Gjort for alle&lt;/em&gt; for at logge hele gruppen, og &lt;em&gt;Fortryd&lt;/em&gt; tager det tilbage. Udskyd-knappen skjuler en i en dag, 3 dage eller en uge. Hver plante skal have det ét interval efter sidste gang du loggede det. En plante uden noget logget kommer først op ét interval efter du satte intervallet, så en ny er stille i starten. En plante hvor den seneste post allerede ligger længere tilbage end intervallet, kommer op med det samme. Gødning holder pause mens en plante hviler, og starter igen når den vågner. Har du sat rundedage, kommer plejen op på rundedagen før den skal gøres.</value>
@@ -1250,5 +1250,14 @@
   </data>
   <data name="UseInchesA1" xml:space="preserve">
     <value>Ja. I Indstillinger, under Udseende, kan du vise længder i centimeter eller tommer, skrive datoer med dagen, måneden eller året først og bruge et 24-timers eller 12-timers ur. Når du er logget ind, følger valgene med til dine andre enheder. Størrelser gemmes altid i centimeter, så du mister ikke noget ved at skifte tilbage. Doser beholder enhederne fra flasken, milliliter og liter, og datovælgere følger din browser.</value>
+  </data>
+  <data name="KeepTrackSemiHydroReservoirQ" xml:space="preserve">
+    <value>Hvordan holder jeg styr på reservoiret hos en semi-hydro-plante?</value>
+  </data>
+  <data name="KeepTrackSemiHydroReservoirA1" xml:space="preserve">
+    <value>På plantens redigeringsside, under &lt;em&gt;Vanding&lt;/em&gt;, er &lt;em&gt;Fyld reservoiret til&lt;/em&gt; den højde vandet skal stå i, fx 3 cm. Den vises for en plante i LECA eller PON, eller en med vand i yderpotten, og plantens side, Vand planter og plantesitterarket siger den. Når du ser til en plante i I dag, trykker du på &lt;em&gt;Ikke endnu&lt;/em&gt; og vælger &lt;em&gt;Tom&lt;/em&gt;, &lt;em&gt;Lav&lt;/em&gt;, &lt;em&gt;Halv&lt;/em&gt; eller &lt;em&gt;Fuld&lt;/em&gt; for at notere hvor fyldt reservoiret er, eller &lt;em&gt;Ingen aflæsning&lt;/em&gt; for at springe det over. Du kan også vælge &lt;em&gt;Vandstand&lt;/em&gt; under plantens Pleje. Den seneste står under Pleje, med hvor længe siden den er.</value>
+  </data>
+  <data name="KeepTrackSemiHydroReservoirA2" xml:space="preserve">
+    <value>Vil du minde om at skylle, trykker du på &lt;em&gt;Mind mig om at skylle&lt;/em&gt; under plantens Pleje. For en plante i LECA eller PON sætter det ét interval op for dem alle, og planter der kommer i LECA eller PON senere, er med fra da af. Du kan også vælge &lt;em&gt;Planter i LECA eller PON&lt;/em&gt; under &lt;em&gt;Plejeintervaller&lt;/em&gt;. Der kommer ikke noget i I dag før du har sat et op.</value>
   </data>
 </root>

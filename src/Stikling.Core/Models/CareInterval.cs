@@ -58,6 +58,13 @@ public sealed class CareInterval : Entity
 
     public CareScope Scope { get; set; } = CareScope.Everywhere;
 
+    /// <summary>
+    /// Narrows <see cref="CareScope.Everywhere"/> to the plants in LECA or PON, worked out from the
+    /// plants as they are now. A field of its own rather than a scope, so an older version reads the
+    /// interval as covering every plant instead of failing on a scope it doesn't know.
+    /// </summary>
+    public bool OnlySemiHydro { get; set; }
+
     /// <summary>The room or spot. Only on <see cref="CareScope.Room"/>.</summary>
     public Guid? PlaceId { get; set; }
 
@@ -118,6 +125,9 @@ public sealed class CareInterval : Entity
             errors.Add(Strings.Care.IntervalBothMonths);
         else if (FromMonth is < 1 or > 12 || ToMonth is < 1 or > 12)
             errors.Add(Strings.Care.IntervalMonthRange);
+
+        if (OnlySemiHydro && Scope != CareScope.Everywhere)
+            errors.Add(Strings.Care.IntervalSemiHydroEverywhere);
 
         if (Scope == CareScope.Room && PlaceId is null)
             errors.Add(Strings.Care.IntervalPickRoom);

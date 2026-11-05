@@ -522,4 +522,44 @@
     <value>Push a finger about an inch into the soil. Water only if it's dry all the way down. If it's damp, or you're not sure, leave it. It's safe to wait until your next visit.</value>
     <comment>Used instead of SitterFinger when lengths are shown in inches.</comment>
   </data>
+  <data name="LogReservoirNeedsLevel" xml:space="preserve">
+    <value>Say how full the reservoir is.</value>
+  </data>
+  <data name="LogReservoirRange" xml:space="preserve">
+    <value>How full the reservoir is goes from 0 to 100.</value>
+  </data>
+  <data name="LogOnlyReservoirHasLevel" xml:space="preserve">
+    <value>Only a reservoir reading has a level.</value>
+  </data>
+  <data name="IntervalSemiHydroEverywhere" xml:space="preserve">
+    <value>Plants in LECA or PON can only be chosen on its own.</value>
+  </data>
+  <data name="ReservoirReadingName" xml:space="preserve">
+    <value>Reservoir level</value>
+    <comment>The name stored on a reservoir reading, so an older version of the app can show it.</comment>
+  </data>
+  <data name="ReservoirReadingNamed" xml:space="preserve">
+    <value>Reservoir: {0}</value>
+    <comment>A reservoir reading in the care log. {0} is the level in lower case, like half.</comment>
+  </data>
+  <data name="ReservoirEmpty" xml:space="preserve">
+    <value>Empty</value>
+    <comment>How full a reservoir is.</comment>
+  </data>
+  <data name="ReservoirLow" xml:space="preserve">
+    <value>Low</value>
+    <comment>How full a reservoir is.</comment>
+  </data>
+  <data name="ReservoirHalf" xml:space="preserve">
+    <value>Half</value>
+    <comment>How full a reservoir is.</comment>
+  </data>
+  <data name="ReservoirFull" xml:space="preserve">
+    <value>Full</value>
+    <comment>How full a reservoir is.</comment>
+  </data>
+  <data name="SitterTopUpReservoirTo" xml:space="preserve">
+    <value>Top up the reservoir to {0}</value>
+    <comment>On the sitter sheet for a plant with a fill line. {0} is the height, like 3 cm.</comment>
+  </data>
 </root>
