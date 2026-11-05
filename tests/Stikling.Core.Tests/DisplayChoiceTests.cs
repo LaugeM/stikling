@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Text.Json;
 using Stikling.Core.Models;
 using Stikling.Core.Pots;
+using Stikling.Core.Timeline;
 using Stikling.Core.Text;
 
 namespace Stikling.Core.Tests;
@@ -12,12 +14,19 @@ public sealed class DisplayChoicesCollection;
 [Collection("Display choices")]
 public sealed class DisplayChoiceTests : IDisposable
 {
+    private readonly CultureInfo was = CultureInfo.CurrentCulture;
+
     public DisplayChoiceTests() => Reset();
 
-    public void Dispose() => Reset();
+    public void Dispose()
+    {
+        Reset();
+        CultureInfo.CurrentCulture = was;
+    }
 
     private static void Reset()
     {
+        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-GB");
         TextCulture.Style = DateStyle.DayFirst;
         TextCulture.Clock = ClockStyle.TwentyFourHour;
         Lengths.Unit = LengthUnit.Centimetres;
@@ -198,5 +207,79 @@ public sealed class DisplayChoiceTests : IDisposable
         Assert.Equal(LengthUnit.Inches, read.Lengths);
         Assert.Equal(DateStyle.YearFirst, read.Dates);
         Assert.Equal(ClockStyle.TwelveHour, read.Clock);
+    }
+
+    [Fact]
+    public void Danish_keeps_its_decimal_comma_in_lengths_but_not_in_stored_names()
+    {
+        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("da-DK");
+        var pot = new Pot { Name = "Pot", TopCm = 5.8m };
+
+        Assert.Equal("5,8 cm", Lengths.Cm(5.8m));
+        Assert.Equal("12,5 mm", Lengths.Mm(12.5m));
+        Assert.Equal("Pot, 5.8 cm", pot.StoredName);
+        Assert.Equal("5.8", Pot.Size(5.8m));
+        Lengths.Unit = LengthUnit.Inches;
+        Assert.Equal("2,28 in", Lengths.Cm(5.8m));
+    }
+
+    private static TimelineEntry CormEntry(Action<TimelineEntry>? change = null)
+    {
+        var entry = new TimelineEntry { Kind = TimelineKind.Change };
+        HistoryText.Set(entry, [HistoryText.Line("CormSize", HistoryArg.Of(25.4m))]);
+        change?.Invoke(entry);
+        return entry;
+    }
+
+    private static string Show(TimelineEntry entry) =>
+        HistoryText.Show(entry, e => e.ToString(), e => e.ToString(), CultureInfo.GetCultureInfo("en-GB"));
+
+    [Fact]
+    public void The_saved_english_text_never_follows_the_choices()
+    {
+        TextCulture.Style = DateStyle.MonthFirst;
+        Lengths.Unit = LengthUnit.Inches;
+
+        var entry = CormEntry();
+
+        Assert.Equal("Corm size: 25.4 mm", entry.Text);
+        Assert.Equal("Corm size: 25.4 mm", HistoryText.English(entry.Lines![0], e => e.ToString()));
+    }
+
+    [Fact]
+    public void An_english_reader_sees_the_saved_text_until_a_choice_is_made()
+    {
+        var entry = CormEntry(e => e.Text = "Saved wording");
+
+        Assert.Equal("Saved wording", Show(entry));
+    }
+
+    [Fact]
+    public void An_english_reader_sees_inches_from_the_lines()
+    {
+        Lengths.Unit = LengthUnit.Inches;
+        var entry = CormEntry();
+
+        Assert.Equal("Corm size: 1 in", Show(entry));
+        Assert.Equal("Corm size: 25.4 mm", entry.Text);
+    }
+
+    [Fact]
+    public void An_english_reader_with_a_choice_keeps_the_text_of_an_entry_without_lines()
+    {
+        Lengths.Unit = LengthUnit.Inches;
+        TextCulture.Style = DateStyle.MonthFirst;
+        var entry = new TimelineEntry { Kind = TimelineKind.Change, Text = "Corm size: 25.4 mm" };
+
+        Assert.Equal("Corm size: 25.4 mm", Show(entry));
+    }
+
+    [Fact]
+    public void An_english_reader_keeps_the_text_when_a_line_cannot_be_shown()
+    {
+        Lengths.Unit = LengthUnit.Inches;
+        var entry = CormEntry(e => e.Lines = [HistoryText.Line("NoSuchKey")]);
+
+        Assert.Equal("Corm size: 25.4 mm", Show(entry));
     }
 }

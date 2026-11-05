@@ -24,13 +24,15 @@ public static class Lengths
     /// <summary>The unit of a field stored in mm: "mm" or the word for inches.</summary>
     public static string SmallUnitName => IsInches ? Strings.Shared.UnitInch : "mm";
 
+    // Cm and Mm are for showing, with the decimal sign of the language. Never save them: Pot.StoredName and Pot.Size are the invariant ones.
+
     /// <summary>A length stored in cm with its unit, like "13 cm" or "5.12 in".</summary>
     public static string Cm(decimal cm) =>
-        IsInches ? Number(cm / CmPerInch) + " " + UnitName : Pot.Size(cm) + " cm";
+        Number(IsInches ? cm / CmPerInch : cm) + " " + UnitName;
 
     /// <summary>A length stored in mm with its unit, like "4 mm" or "0.16 in".</summary>
     public static string Mm(decimal mm) =>
-        IsInches ? Number(mm / MmPerInch) + " " + SmallUnitName : Pot.Size(mm) + " mm";
+        Number(IsInches ? mm / MmPerInch : mm) + " " + SmallUnitName;
 
     /// <summary>The number for an input box showing a length stored in cm.</summary>
     public static decimal CmToInput(decimal cm) => IsInches ? Math.Round(cm / CmPerInch, 2) : cm;
@@ -44,5 +46,5 @@ public static class Lengths
     /// <summary>The mm to store for a number typed in an input box.</summary>
     public static decimal MmFromInput(decimal typed) => IsInches ? typed * MmPerInch : typed;
 
-    private static string Number(decimal value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+    private static string Number(decimal value) => value.ToString("0.##", CultureInfo.CurrentCulture);
 }
