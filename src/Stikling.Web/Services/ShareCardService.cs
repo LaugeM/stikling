@@ -41,6 +41,7 @@ public enum ShareFileKind
     Photo,
     BeforeAfter,
     Timelapse,
+    ExperimentResult,
 }
 
 /// <summary>
@@ -113,6 +114,8 @@ public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : IAsyncD
             slug = slug[..40].TrimEnd('-');
         if (kind == ShareFileKind.Timelapse)
             return slug.Length == 0 ? "stikling-timelapse.mp4" : $"stikling-{slug}-timelapse.mp4";
+        if (kind == ShareFileKind.ExperimentResult)
+            return slug.Length == 0 ? "stikling-experiment-result.jpg" : $"stikling-{slug}-result.jpg";
         var tail = kind == ShareFileKind.BeforeAfter ? "-before-after" : "";
         return slug.Length == 0 ? $"stikling-card{tail}.jpg" : $"stikling-{slug}{tail}.jpg";
     }
