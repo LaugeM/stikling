@@ -630,6 +630,31 @@ else
                               propagations.Where(p => !p.IsDeleted && p.ParentPlantId == memory.Plant.Id).ToList(), Today)" />
     }
 
+    @if (!sections.Away && anniversaries.Count > 0)
+    {
+        <section class="today-section anniversary">
+            <h2>@(anniversaries.Count == 1
+                    ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayAnniversary_One, anniversaries[0].Plant.DisplayName)
+                    : Plural.Of(anniversaries.Count, Strings.Care.TodayAnniversary_One, Strings.Care.TodayAnniversary_Other))</h2>
+            <p class="anniversary-plants">
+                @for (var i = 0; i < Math.Min(anniversaries.Count, AnniversariesListed); i++)
+                {
+                    var item = anniversaries[i];
+                    @if (i > 0)
+                    {
+                        <text> · </text>
+                    }
+                    <span class="anniversary-plant"><a href="plants/@item.Plant.Id">@item.Plant.DisplayName</a>, @Plural.Of(item.Years, Strings.Care.TodayAnniversaryYears_One, Strings.Care.TodayAnniversaryYears_Other)</span>
+                }
+                @if (anniversaries.Count > AnniversariesListed)
+                {
+                    <text> · </text><span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayAnniversaryMore, anniversaries.Count - AnniversariesListed)</span>
+                }
+            </p>
+            <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="DismissAnniversariesAsync">@Strings.Care.TodayAnniversaryDismiss</button>
+        </section>
+    }
+
     @if (comingBack.Count > 0)
     {
         <section class="today-section coming-back">
@@ -839,6 +864,8 @@ else
     private string? backupReminder;
     private int waitingPhotos;
     private Memory? memory;
+    private IReadOnlyList<Anniversary> anniversaries = [];
+    private const int AnniversariesListed = 5;
     private IReadOnlyList<NoteComingBack> comingBack = [];
     private bool shareOpen;
     private bool showRound;
@@ -1085,6 +1112,7 @@ else
 
         var plantPhotos = await PhotoRepository.GetOfKindAsync(SubjectType.Plant);
         memory = Memories.Pick(plants, plantPhotos, Today, Time.LocalDay);
+        anniversaries = Anniversaries.For(plants, Today, data.PutOffs);
         comingBack = NotesComingBack.For(data.ComingBack, plants, propagations, Today);
         await FindYearAsync(data.Settings, plantPhotos);
 
@@ -1293,6 +1321,20 @@ else
         // Putting off a room, or the round, moves it on to the next room or takes it away
         Recompute();
         await Badge.SetAsync(DueCount);
+    }
+
+    // Hides every anniversary on the row, also the ones not listed, until the day after each one ends
+    private async Task DismissAnniversariesAsync()
+    {
+        foreach (var item in anniversaries)
+        {
+            var key = PutOffs.Anniversary(item.Plant.Id, item.WindowYear);
+            var until = item.ShowUntil.AddDays(1);
+            data.PutOffs.PutOff(key, until);
+            await PutOffService.PutOffAsync(key, until);
+        }
+
+        anniversaries = Anniversaries.For(plants, Today, data.PutOffs);
     }
 
     private void LookAt(LookAgain item, ProblemTrend trend)

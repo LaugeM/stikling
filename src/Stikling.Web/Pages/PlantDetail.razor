@@ -158,6 +158,11 @@ else
                 </div>
             </header>
 
+            @if (moment is { } justNow)
+            {
+                <MomentCard Title="@justNow.Title" Line="@justNow.Line" OnShare="OpenShare" OnClose="() => moment = null" />
+            }
+
                 @if (floweringNow is { Stale: true } stale && plant.InCollection)
                 {
                     <div class="still-card">
@@ -1712,6 +1717,7 @@ else
             more = More.None;
             careOpen = false;
             detailsOpen = false;
+            moment = null;
         }
         detailsOpen |= Tab == "props";
         scrollToFamily |= Tab == "props";
@@ -2456,8 +2462,18 @@ else
             OpenTransitionStep(step, name, day);
             return Task.CompletedTask;
         }
-        return ChangeAsync(() => PlantService.SetTransitionStepAsync(plant!, step, Today, Labels.For));
+        return ChangeAsync(async () =>
+        {
+            var hadFirstNewLeaf = plant!.FirstNewLeafOn is not null;
+            await PlantService.SetTransitionStepAsync(plant!, step, Today, Labels.For);
+            if (step == TransitionStep.FirstNewLeaf && !hadFirstNewLeaf && plant.FirstNewLeafOn is not null)
+                moment = new(Strings.PlantDetail.MomentFirstNewLeaf, plant.DisplayName);
+        });
     }
+
+    // The short moment after ticking the first new leaf. Page state only, so it isn't there after a reload.
+    private sealed record Moment(string Title, string? Line);
+    private Moment? moment;
 
     private void OpenTransitionStep(TransitionStep step, string name, DateOnly day)
     {
