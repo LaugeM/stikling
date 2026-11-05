@@ -198,7 +198,7 @@ public sealed class PlantForm
                 PotSizeChange.WarnLimit(Settings))
             : null;
 
-    public string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.DisplayName;
+    public string? PotName(Guid id) => pots.FirstOrDefault(p => p.Id == id)?.StoredName;
 
     public string? MixName(Guid id) => Mixes.FirstOrDefault(m => m.Id == id)?.Name;
 

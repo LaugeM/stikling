@@ -39,7 +39,7 @@ public static class FloweringText
     /// </summary>
     public static string Date(LooseDate date, int contextYear) =>
         date.Precision == DatePrecision.Day && date.Year == contextYear
-            ? date.Start.ToString(Strings.Pests.DayMonthFormat, TextCulture.ForDates)
+            ? TextCulture.Date(date.Start, Strings.Pests.DayMonthFormat)
             : Written(date);
 
     /// <summary>"In bud since 3 Mar" or "In flower since 10 Apr", for a flowering that is still going.</summary>
@@ -100,7 +100,7 @@ public static class FloweringText
     private static string Written(LooseDate date) => date.Precision switch
     {
         DatePrecision.Year => date.Year.ToString("D4", CultureInfo.InvariantCulture),
-        DatePrecision.Month => date.Start.ToString(Strings.Pests.MonthYearFormat, TextCulture.ForDates),
-        _ => date.Start.ToString(Strings.Pests.DayMonthYearFormat, TextCulture.ForDates)
+        DatePrecision.Month => TextCulture.Date(date.Start, Strings.Pests.MonthYearFormat),
+        _ => TextCulture.Date(date.Start, Strings.Pests.DayMonthYearFormat)
     };
 }

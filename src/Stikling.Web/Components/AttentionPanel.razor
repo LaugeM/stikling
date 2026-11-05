@@ -166,7 +166,7 @@ else if (Current is { } flag)
             var culture = TextCulture.ForDates;
             var options = new List<(string Value, string Label)>();
             if (NextRoundDay is { } round)
-                options.Add((RoundChoice, string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AttentionNextRoundDay, round.ToString(Strings.Propagations.AttentionRoundDayFormat, TextCulture.ForDates))));
+                options.Add((RoundChoice, string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AttentionNextRoundDay, TextCulture.Date(round, Strings.Propagations.AttentionRoundDayFormat))));
             var first = new DateOnly(Today.Year, Today.Month, 1).AddMonths(1);
             for (var i = 0; i < MonthsOffered; i++)
             {

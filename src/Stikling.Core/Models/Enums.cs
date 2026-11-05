@@ -210,6 +210,31 @@ public enum EverydayNameLanguage
     Danish
 }
 
+/// <summary>The unit lengths are shown and typed in. Sizes are always stored in cm and mm.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<LengthUnit>))]
+public enum LengthUnit
+{
+    Centimetres,
+    Inches
+}
+
+/// <summary>The order dates are written in. DayFirst is the language's own pattern.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<DateStyle>))]
+public enum DateStyle
+{
+    DayFirst,
+    MonthFirst,
+    YearFirst
+}
+
+/// <summary>Whether the time of day is written on a 24-hour or a 12-hour clock.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<ClockStyle>))]
+public enum ClockStyle
+{
+    TwentyFourHour,
+    TwelveHour
+}
+
 /// <summary>How someone checks whether a plant needs water on the Water plants screen.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<WaterCheck>))]
 public enum WaterCheck

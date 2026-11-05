@@ -259,12 +259,12 @@ public static class SitterSheetBuilder
             check =
             [
                 where is null ? Strings.Care.SitterMeter : CareText.F(Strings.Care.SitterMeterIn, where),
-                Strings.Care.SitterNoReading
+                Lengths.IsInches ? Strings.Care.SitterNoReading_Inches : Strings.Care.SitterNoReading
             ];
         }
         else
         {
-            check = [Strings.Care.SitterFinger];
+            check = [Lengths.IsInches ? Strings.Care.SitterFinger_Inches : Strings.Care.SitterFinger];
         }
 
         var steps = new List<SitterStep>();

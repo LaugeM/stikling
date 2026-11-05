@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Stikling.Core.Models;
 
 /// <summary>
@@ -130,4 +132,24 @@ public sealed class UserSettings : Entity
     /// percent. Null means <see cref="DefaultGhostOpacity"/>. Older settings without it read as null.
     /// </summary>
     public int? GhostOpacity { get; set; }
+
+    /// <summary>
+    /// The unit lengths are shown and typed in. Sizes stay stored in cm and mm. Null means centimetres.
+    /// Older settings without it read as null.
+    /// </summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<LengthUnit>))]
+    public LengthUnit? Lengths { get; set; }
+
+    /// <summary>
+    /// The order dates are written in. Null means <see cref="DateStyle.DayFirst"/>, the language's own
+    /// pattern. Older settings without it read as null.
+    /// </summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<DateStyle>))]
+    public DateStyle? Dates { get; set; }
+
+    /// <summary>
+    /// The clock times are shown on. Null means 24-hour. Older settings without it read as null.
+    /// </summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<ClockStyle>))]
+    public ClockStyle? Clock { get; set; }
 }

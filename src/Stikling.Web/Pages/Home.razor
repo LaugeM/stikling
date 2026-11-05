@@ -37,7 +37,7 @@
 <div class="@(loaded && !FirstRun ? "page-full" : null)">
 <div class="page-heading">
     <h1>@Strings.Care.TodayTitle</h1>
-    <span class="today-date">@Today.ToString(Strings.Care.TodayLongDayFormat, TextCulture.ForDates)</span>
+    <span class="today-date">@TextCulture.Date(Today, Strings.Care.TodayLongDayFormat)</span>
 </div>
 
 @if (!loaded)
@@ -110,7 +110,7 @@ else
     @if (upcoming is not null)
     {
         <div class="reminder">
-            <span><b>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayAwayFrom, upcoming.From.ToString(Strings.Care.TodayLongDayFormat, TextCulture.ForDates)))</b> @Strings.Care.TodayAwayLeaveSheet</span>
+            <span><b>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayAwayFrom, TextCulture.Date(upcoming.From, Strings.Care.TodayLongDayFormat)))</b> @Strings.Care.TodayAwayLeaveSheet</span>
             <a class="btn btn-outline-primary" href="sitter-sheet">@Strings.Care.TodaySitterSheet</a>
         </div>
     }
@@ -132,17 +132,17 @@ else
                 <span class="away-bar-now" style="left: @Percent(dayNumber - 0.5, total)"></span>
             </div>
             <div class="away-ends">
-                <span>@span.From.ToString(Strings.Care.TodayShortDayFormat, TextCulture.ForDates)</span>
+                <span>@TextCulture.Date(span.From, Strings.Care.TodayShortDayFormat)</span>
                 @if (visitDates.Count > 0)
                 {
                     <span class="away-key">@Strings.Care.TodayDotsKey</span>
                 }
-                <span>@(isAway ? Strings.Care.TodayBack : Strings.Care.TodayUntil) <b>@span.Until.ToString(Strings.Care.TodayShortDayFormat, TextCulture.ForDates)</b></span>
+                <span>@(isAway ? Strings.Care.TodayBack : Strings.Care.TodayUntil) <b>@TextCulture.Date(span.Until, Strings.Care.TodayShortDayFormat)</b></span>
             </div>
             <p class="away-note">
                 @(isAway
                     ? Strings.Care.TodayNothingAsksAway
-                    : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayNothingAsksQuiet, span.Until.ToString(Strings.Care.TodayLongDayFormat, TextCulture.ForDates)))
+                    : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayNothingAsksQuiet, TextCulture.Date(span.Until, Strings.Care.TodayLongDayFormat)))
             </p>
             <div class="away-actions">
                 <button type="button" class="btn btn-primary" disabled="@awayBusy" @onclick="ImBackAsync">@Strings.Care.TodayImBack</button>
@@ -535,7 +535,7 @@ else
                 <details class="today-hint">
                     <summary>@Strings.Care.TodayHowToTell</summary>
                     <ul>
-                        <li>@Strings.Care.TodayHintFinger</li>
+                        <li>@(Lengths.IsInches ? Strings.Care.TodayHintFinger_Inches : Strings.Care.TodayHintFinger)</li>
                         <li>@Strings.Care.TodayHintSkewer</li>
                         <li>@Strings.Care.TodayHintLift</li>
                         <li>@Strings.Care.TodayHintMeter</li>
@@ -728,7 +728,7 @@ else
                         </div>
                         <div class="item-text">
                             <div class="item-name">@Plural.Of(sections.PhotosDue.Count, Strings.Care.TodayPhotosToTake_One, Strings.Care.TodayPhotosToTake_Other)</div>
-                            <div class="item-meta">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayPhotosFor, Today.ToString(Strings.Care.TodayMonthFormat, TextCulture.ForDates)))</div>
+                            <div class="item-meta">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayPhotosFor, TextCulture.Date(Today, Strings.Care.TodayMonthFormat)))</div>
                         </div>
                         <svg class="round-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
                     </button>
@@ -1181,8 +1181,8 @@ else
 
     private string BarLabel(AwaySpan span, int dayNumber, int total)
     {
-        var from = span.From.ToString(Strings.Care.DayMonthLongFormat, TextCulture.ForDates);
-        var until = span.Until.ToString(Strings.Care.DayMonthLongFormat, TextCulture.ForDates);
+        var from = TextCulture.Date(span.From, Strings.Care.DayMonthLongFormat);
+        var until = TextCulture.Date(span.Until, Strings.Care.DayMonthLongFormat);
         return visitDates.Count > 0
             ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayBarLabelVisits, from, until, dayNumber, total,
                 Plural.Of(visitDates.Count, Strings.Care.TodayVisits_One, Strings.Care.TodayVisits_Other))
@@ -1240,7 +1240,7 @@ else
         {
             case BackReason.Pest:
                 <span class="pest-due now">@Labels.For(row.Pest!.Value)</span>
-                <span> · @(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayBackCase, row.CaseStart!.Value.ToString(Strings.Care.DayMonthLongFormat, TextCulture.ForDates)))</span>
+                <span> · @(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayBackCase, TextCulture.Date(row.CaseStart!.Value, Strings.Care.DayMonthLongFormat)))</span>
                 break;
             case BackReason.InWater:
                 <span>@Plural.Of(row.DaysSinceLogged ?? 0, Strings.Care.TodayBackInWater_One, Strings.Care.TodayBackInWater_Other)</span>

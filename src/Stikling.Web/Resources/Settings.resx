@@ -293,8 +293,8 @@
     <comment>Before the number field, like more than 5 cm wider.</comment>
   </data>
   <data name="PotUpWarnAfter" xml:space="preserve">
-    <value>cm wider</value>
-    <comment>After the number field, like more than 5 cm wider.</comment>
+    <value>{0} wider</value>
+    <comment>After the number field, like more than 5 cm wider. {0} is the unit, cm or the word for inches.</comment>
   </data>
   <data name="PotUpWarnHint" xml:space="preserve">
     <value>When you pick a new pot for a plant or a cutting, a note says if it is this much wider across the top than the old one. A wide pot keeps the soil wet longer.</value>
@@ -539,5 +539,33 @@
   <data name="DevelopmentBuild" xml:space="preserve">
     <value>Development build</value>
     <comment>Shown instead of the version when running a local build</comment>
+  </data>
+  <data name="Lengths" xml:space="preserve">
+    <value>Lengths</value>
+    <comment>Label of the choice between centimetres and inches, under Look.</comment>
+  </data>
+  <data name="LengthsCentimetres" xml:space="preserve">
+    <value>Centimetres</value>
+  </data>
+  <data name="LengthsInches" xml:space="preserve">
+    <value>Inches</value>
+  </data>
+  <data name="Dates" xml:space="preserve">
+    <value>Dates</value>
+    <comment>Label of the choice of how dates are written. Each option shows today's date in that style.</comment>
+  </data>
+  <data name="DatesHint" xml:space="preserve">
+    <value>Date pickers follow your browser.</value>
+    <comment>Under the choice of how dates are written.</comment>
+  </data>
+  <data name="Clock" xml:space="preserve">
+    <value>Clock</value>
+    <comment>Label of the choice between a 24-hour and a 12-hour clock.</comment>
+  </data>
+  <data name="Clock24" xml:space="preserve">
+    <value>24-hour</value>
+  </data>
+  <data name="Clock12" xml:space="preserve">
+    <value>12-hour</value>
   </data>
 </root>

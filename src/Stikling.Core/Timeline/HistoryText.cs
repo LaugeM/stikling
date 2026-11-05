@@ -69,16 +69,20 @@ public static partial class HistoryText
 
     /// <summary>One line in the given language. A key this version doesn't know comes back as the key.</summary>
     public static string Render(HistoryLine line, Func<Enum, string> label, CultureInfo culture) =>
-        InCulture(culture, () => TryRender(line, label, culture)) ?? line.Key;
+        InCulture(culture, () => TryRender(line, label, culture, saved: false)) ?? line.Key;
+
+    // The English text that is saved with an entry. It never follows the date style or the length unit.
+    private static string RenderSaved(HistoryLine line, Func<Enum, string> label) =>
+        InCulture(CultureInfo.InvariantCulture, () => TryRender(line, label, CultureInfo.InvariantCulture, saved: true)) ?? line.Key;
 
     /// <summary>The lines in English, one on each line. This is what goes into <see cref="TimelineEntry.Text"/>.</summary>
     /// <param name="englishLabel">Turns an enum value into its English label. It is called with English as the language of the app,
     /// so a label from the UI works too.</param>
     public static string English(IEnumerable<HistoryLine> lines, Func<Enum, string> englishLabel) =>
-        string.Join("\n", lines.Select(line => Render(line, englishLabel, CultureInfo.InvariantCulture)));
+        string.Join("\n", lines.Select(line => RenderSaved(line, englishLabel)));
 
     public static string English(HistoryLine line, Func<Enum, string> englishLabel) =>
-        Render(line, englishLabel, CultureInfo.InvariantCulture);
+        RenderSaved(line, englishLabel);
 
     // ---- showing ----
 
@@ -91,8 +95,24 @@ public static partial class HistoryText
     public static string Show(TimelineEntry entry, Func<Enum, string> label, Func<Enum, string> englishLabel, CultureInfo culture)
     {
         var text = entry.Text ?? "";
-        if (entry.Kind is TimelineKind.Note or TimelineKind.Photo || IsEnglish(culture) || text.Length == 0 && entry.Lines is not { Count: > 0 })
+        if (entry.Kind is TimelineKind.Note or TimelineKind.Photo || text.Length == 0 && entry.Lines is not { Count: > 0 })
             return text;
+
+        if (IsEnglish(culture))
+        {
+            // Nothing changes for anyone who hasn't chosen a date style or inches: the saved text is shown
+            if (TextCulture.Style == DateStyle.DayFirst && !Lengths.IsInches || entry.Lines is not { Count: > 0 } english)
+                return text;
+            var shownInEnglish = new List<string>();
+            foreach (var line in english)
+            {
+                var rendered = InCulture(culture, () => TryRender(line, label, culture, saved: false));
+                if (rendered is null)
+                    return text;
+                shownInEnglish.Add(rendered);
+            }
+            return string.Join("\n", shownInEnglish);
+        }
 
         var stored = text.Split('\n');
         if (entry.Lines is { Count: > 0 } lines)
@@ -101,7 +121,7 @@ public static partial class HistoryText
             for (var i = 0; i < lines.Count; i++)
             {
                 var line = lines[i];
-                var rendered = InCulture(culture, () => TryRender(line, label, culture));
+                var rendered = InCulture(culture, () => TryRender(line, label, culture, saved: false));
                 if (rendered is null)
                 {
                     if (stored.Length != lines.Count)
@@ -120,7 +140,7 @@ public static partial class HistoryText
         for (var i = 0; i < stored.Length; i++)
         {
             var line = i < read ? parsed[i] : null;
-            result[i] = line is null ? stored[i] : InCulture(culture, () => TryRender(line, label, culture)) ?? stored[i];
+            result[i] = line is null ? stored[i] : InCulture(culture, () => TryRender(line, label, culture, saved: false)) ?? stored[i];
         }
         return string.Join("\n", result);
     }
@@ -157,7 +177,7 @@ public static partial class HistoryText
 
     private static string? Res(string name) => Strings.History.ResourceManager.GetString(name, CultureInfo.CurrentUICulture);
 
-    private static string? TryRender(HistoryLine line, Func<Enum, string> label, CultureInfo culture)
+    private static string? TryRender(HistoryLine line, Func<Enum, string> label, CultureInfo culture, bool saved)
     {
         if (line.Key == CareKey)
             return RenderCare(line, label, culture);
@@ -167,17 +187,22 @@ public static partial class HistoryText
         var values = new object[template.Args.Length];
         for (var i = 0; i < values.Length; i++)
         {
-            if (Format(line.Args[i], template.Args[i], label, culture) is not { } value)
+            if (Format(line.Args[i], template.Args[i], label, culture, saved) is not { } value)
                 return null;
             values[i] = value;
         }
+
+        // Shown in inches when asked, but never in the English text that is saved, which is written with the invariant culture
+        if (line.Key == "CormSize" && Lengths.IsInches && !saved
+            && line.Args[0].Number is { } mm && Res("CormSizeShown") is { } shown)
+            return string.Format(culture, shown, Lengths.Mm(mm));
 
         var name = template.PluralArg < 0 ? template.Key
             : line.Args[template.PluralArg].Number == 1 ? template.Key + "_One" : template.Key + "_Other";
         return Res(name) is { } pattern ? string.Format(culture, pattern, values) : null;
     }
 
-    private static string? Format(HistoryArg arg, Arg kind, Func<Enum, string> label, CultureInfo culture)
+    private static string? Format(HistoryArg arg, Arg kind, Func<Enum, string> label, CultureInfo culture, bool saved)
     {
         switch (kind.Kind)
         {
@@ -186,7 +211,10 @@ public static partial class HistoryText
             case Kind.Number:
                 return arg.Number is { } number ? Number(number, culture) : null;
             case Kind.Day:
-                return arg.Day?.ToString(Res("DayFormat"), DateCulture(culture));
+                return arg.Day?.ToString(
+                    // The English text kept on the entry is written with the invariant culture and never follows the date style.
+                    saved ? Res("DayFormat") : TextCulture.Styled(Res("DayFormat")!),
+                    DateCulture(culture));
             case Kind.Month:
                 return arg.Day?.ToString(Res("MonthFormat"), DateCulture(culture));
             case Kind.Enum or Kind.EnumLower or Kind.EnumLowerFirst:

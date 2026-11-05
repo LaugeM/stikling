@@ -220,8 +220,8 @@ public static class YearCards
         var plant = grown.Plant;
         var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameQualifier, plant.NameNote);
         var line = string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearGrownLine, grown.DaysApart);
-        var before = localDay(grown.First.TakenAt).ToString(Strings.Shared.YearGrownDayFormat, TextCulture.ForDates);
-        var after = localDay(grown.Last.TakenAt).ToString(Strings.Shared.YearGrownDayFormat, TextCulture.ForDates);
+        var before = TextCulture.Date(localDay(grown.First.TakenAt), Strings.Shared.YearGrownDayFormat);
+        var after = TextCulture.Date(localDay(grown.Last.TakenAt), Strings.Shared.YearGrownDayFormat);
         return new YearCard("grown", YearCardKind.Pair, "plant", kicker, plant.DisplayName, latin, cultivar, line,
             NoFigures, null, ofPhoto(grown.First), ofPhoto(grown.Last), before, after, NoPhotos,
             string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearGrownAlt, kicker, plant.DisplayName, before, after, line));

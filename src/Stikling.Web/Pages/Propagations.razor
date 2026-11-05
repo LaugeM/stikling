@@ -353,7 +353,7 @@ else
     {
         var parts = new List<string>(3);
         if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } size)
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListMilestoneCorm, size.ToString("0.##", CultureInfo.CurrentCulture)));
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListMilestoneCorm, Lengths.Mm(size)));
         if (propagation.DaysToFirstRoot is { } root)
             parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListMilestoneRoot, root));
         if (propagation.DaysToFirstLeaf is { } leaf)

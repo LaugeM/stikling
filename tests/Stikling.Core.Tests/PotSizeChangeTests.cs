@@ -34,7 +34,16 @@ public class PotSizeChangeTests
     [Fact]
     public void Shows_decimals_only_when_not_whole()
     {
-        Assert.Equal("From 8.5 cm to 10 cm across the top.", PotSizeChange.Between(P(8.5m), P(10))!.Text);
+        var was = System.Globalization.CultureInfo.CurrentCulture;
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en-GB");
+        try
+        {
+            Assert.Equal("From 8.5 cm to 10 cm across the top.", PotSizeChange.Between(P(8.5m), P(10))!.Text);
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = was;
+        }
     }
 
     [Fact]

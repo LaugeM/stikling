@@ -99,7 +99,7 @@ public static class CareIntervals
 
     /// <summary>"18 Oct", or "18 Oct 2028" when it is not this year.</summary>
     public static string DayText(DateOnly day, DateOnly today) =>
-        day.ToString(day.Year == today.Year ? Strings.Care.DayMonthFormat : Strings.Care.DayMonthYearFormat, TextCulture.ForDates);
+        TextCulture.Date(day, day.Year == today.Year ? Strings.Care.DayMonthFormat : Strings.Care.DayMonthYearFormat);
 
     /// <summary>The day plus the interval. AddMonths stops at the end of a short month, so 31 January plus a month is 28 February.</summary>
     public static DateOnly Add(DateOnly day, int every, IntervalUnit unit) => unit switch

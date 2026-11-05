@@ -2245,13 +2245,13 @@ else
         if (pottingInto is not { } id || await Repository.GetAsync(id) is not { } into)
             throw new InvalidOperationException(Strings.PlantDetail.PlantGone);
         await PlantService.PotTogetherAsync(plant!, into, since, Labels.For,
-            potId => pots.FirstOrDefault(p => p.Id == potId)?.DisplayName,
+            potId => pots.FirstOrDefault(p => p.Id == potId)?.StoredName,
             mixId => mixes.FirstOrDefault(m => m.Id == mixId)?.Name,
             placeId => places.NameOf(placeId));
     });
 
     private Task TakeOutAsync() => SaveChangeAsync(() =>
-        PlantService.TakeOutAsync(plant!, since, takeOutPot, Labels.For, potId => pots.FirstOrDefault(p => p.Id == potId)?.DisplayName));
+        PlantService.TakeOutAsync(plant!, since, takeOutPot, Labels.For, potId => pots.FirstOrDefault(p => p.Id == potId)?.StoredName));
 
     private async Task SaveSomeAsync()
     {
