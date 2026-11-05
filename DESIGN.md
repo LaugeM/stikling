@@ -438,6 +438,12 @@ A week before an away stretch the same Leaf Tint strip the backup reminder uses 
 
 On the day back, a panel awaiting a decision opens Today: a 1px Potting Green edge on Surface at the 0.75rem corner. "Welcome back" is in Bricolage at the Count size, a Muted Ink lead line under it, and then numbered rows divided by hairlines. The number is Bricolage in Deep Moss, then the 2.75rem thumbnail, the name and one meta line, then the round tick button used on Today's rows. A pest's name in the meta line is Alert and nothing else on the row is. The panel ends with a hairline, a primary Go round these and a text link, Done with this list, pushed to the right. The words overdue and water are never used on it, apart from a cutting that is in water.
 
+### Anniversary on Today
+One row under A year ago, not a card and not a to-do. The heading is a Headline-sized line like the other sections ("3 plants have an anniversary", or "Monstera has an anniversary" for one). Under it the plants run on one line in Muted Ink, separated by middle dots, each name a link at weight 600 followed by its years ("Monstera, 2 years"). After five it says "and 3 more" in plain text. Dismiss is a text button at the left edge. There are no icons, no confetti and no count: it never adds to the number on the app icon.
+
+### Moment Card
+The short card straight after logging a first root, seedling, leaf or new leaf, or a cutting's first potting up, under the hero of the plant or propagation page. Leaf Tint at the 0.75rem corner with no border, the small stroked leaf in Potting Green at the left, the title in Bricolage 600 at 1.1875rem and one line in Muted Ink under it. Share is an outline small button and Close a small text link. It has `role="status"`. The leaf rises 0.4rem and settles once in 0.4s, and with reduced motion it stays still. It is page state, so it is gone on reload, and a newer one replaces it.
+
 ### Sitter Sheet
 The page for whoever waters the plants while someone is away, at `/sitter-sheet`. Above it sit the options, in the usual form controls and chips, with Print or save as PDF as the primary button and Share as text as an outline one, in the bottom bar on a phone and next to the title on a wide screen. The sheet itself is paper: always white, with the light-theme ink, Border and Leaf Tint written as the light values on the element, so the preview and the print look the same in dark mode, and `print-color-adjust: exact` keeps the tints on the page. A print hides the app's header, menu and banners and sets A4 with a 12mm margin.
 

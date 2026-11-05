@@ -209,6 +209,11 @@ else
                 </p>
             }
 
+            @if (moment is { } justNow)
+            {
+                <MomentCard Title="@justNow.Title" Line="@justNow.Line" OnShare="OpenShare" OnClose="() => moment = null" />
+            }
+
             @if (message is not null)
             {
                 <p class="action-message" role="status">
@@ -1042,6 +1047,10 @@ else
     private FailedForm? failed;
     private GiveAwayForm? gave;
     private string? message;
+
+    // The short moment after logging a milestone on this page. Page state only, so it isn't there after a reload.
+    private sealed record Moment(string Title, string? Line);
+    private Moment? moment;
     private IReadOnlyList<Plant> madePlants = [];
 
     private DateOnly Today => Time.Today();
@@ -1135,6 +1144,7 @@ else
         {
             confirmDelete = false;
             detailsOpen = false;
+            moment = null;
             stageView = StageView.None;
             more = More.None;
             message = null;
@@ -1283,7 +1293,10 @@ else
         busy = true;
         try
         {
+            var hadFirstRoot = propagation.FirstRootOn is not null;
             await PropagationService.SetStageAsync(propagation, stage, Labels.For(propagation), seenToday: true);
+            if (!hadFirstRoot && propagation.FirstRootOn is not null && propagation.DaysToFirstRoot is { } rootDay)
+                moment = new(string.Format(CultureInfo.CurrentCulture, propagation.Type == PropagationType.Seed ? Strings.Propagations.MomentFirstSeedling : Strings.Propagations.MomentFirstRoot, rootDay), propagation.DisplayName);
             message = null;
             historyVersion++;
             stageView = StageView.None;
@@ -1301,7 +1314,10 @@ else
         busy = true;
         try
         {
+            var hadFirstLeaf = propagation.FirstLeafOn is not null;
             await PropagationService.RecordMilestoneAsync(propagation, Milestone.FirstLeaf, Labels.For(propagation));
+            if (!hadFirstLeaf && propagation.FirstLeafOn is not null && propagation.DaysToFirstLeaf is { } leafDay)
+                moment = new(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.MomentFirstLeaf, leafDay), propagation.DisplayName);
             message = null;
             historyVersion++;
             stageView = StageView.None;
@@ -1419,10 +1435,14 @@ else
         busy = true;
         try
         {
+            var firstPotUp = propagation.PottedUpCount == 0;
             var result = await form.SaveAsync();
             stageView = StageView.None;
             await LoadAsync();
             madePlants = result.Plants;
+            if (firstPotUp && madePlants.Count > 0 && propagation is { } potted)
+                moment = new(madePlants.Count == 1 ? Strings.Propagations.MomentNowPlant : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.MomentNowPlants, madePlants.Count),
+                    Plural.Of(potted.DaysSinceStart(Today), Strings.Propagations.MomentAfterDays_One, Strings.Propagations.MomentAfterDays_Other));
             if (result.LaterError is { } later)
             {
                 Logger.LogError(later, "A step after potting up the propagation failed");

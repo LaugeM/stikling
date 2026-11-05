@@ -1771,4 +1771,28 @@
     <value>Every plant in LECA or PON, including ones moved there later.</value>
     <comment>Under the choice of which plants a care interval covers, for the plants in LECA or PON.</comment>
   </data>
+  <data name="TodayAnniversary_One" xml:space="preserve">
+    <value>{0} has an anniversary</value>
+    <comment>Heading of the anniversary row on Today when one plant has been with someone another year. {0} is the plant's name.</comment>
+  </data>
+  <data name="TodayAnniversary_Other" xml:space="preserve">
+    <value>{0} plants have an anniversary</value>
+    <comment>Heading of the anniversary row on Today. {0} is how many plants, 2 or more.</comment>
+  </data>
+  <data name="TodayAnniversaryYears_One" xml:space="preserve">
+    <value>{0} year</value>
+    <comment>After a plant's name in the anniversary row on Today: how long it has been with someone.</comment>
+  </data>
+  <data name="TodayAnniversaryYears_Other" xml:space="preserve">
+    <value>{0} years</value>
+    <comment>After a plant's name in the anniversary row on Today: how long it has been with someone.</comment>
+  </data>
+  <data name="TodayAnniversaryMore" xml:space="preserve">
+    <value>and {0} more</value>
+    <comment>Ends the list of plants in the anniversary row on Today when there are more than five. {0} is how many are left out.</comment>
+  </data>
+  <data name="TodayAnniversaryDismiss" xml:space="preserve">
+    <value>Dismiss</value>
+    <comment>Button on the anniversary row on Today that hides it until next year.</comment>
+  </data>
 </root>

@@ -1,0 +1,68 @@
+/* A Leaf Tint card at the card radius, with the leaf rising and settling once as it appears */
+.moment {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: var(--pa-green-soft);
+    border-radius: 0.75rem;
+}
+
+.moment-leaf {
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-top: 0.1rem;
+    fill: none;
+    stroke: var(--pa-green);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: moment-rise 0.4s ease-out;
+}
+
+@keyframes moment-rise {
+    from {
+        opacity: 0;
+        transform: translateY(0.4rem);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-0.1rem);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.moment-text {
+    min-width: 0;
+}
+
+.moment-title {
+    margin: 0;
+    font-family: var(--pa-font-display);
+    font-size: 1.1875rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+.moment-line {
+    margin: 0.1rem 0 0;
+    color: var(--pa-muted);
+}
+
+.moment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .moment-leaf {
+        animation: none;
+    }
+}
