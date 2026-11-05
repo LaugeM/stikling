@@ -231,7 +231,7 @@
             <label class="theme-label mt-4" for="pot-up-warn">@Strings.Settings.PotUpWarn</label>
             <div class="input-group">
                 <span class="input-group-text">@Strings.Settings.PotUpWarnBefore</span>
-                <LengthInput @key="potUpWarnKey" id="pot-up-warn" class="form-control"
+                <LengthInput @key="(potUpWarnKey, Lengths.Unit)" id="pot-up-warn" class="form-control"
                              Value="potUpWarnCm" ValueChanged="SetPotUpWarnCmAsync" />
                 <span class="input-group-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.PotUpWarnAfter, Lengths.UnitName)</span>
             </div>
