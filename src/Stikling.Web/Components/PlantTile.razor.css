@@ -3,3 +3,15 @@
 .plant-tile.selectable {
     user-select: none;
 }
+
+/* A long press opens the quick actions, so the phone's own menu and text selection stay out of the way */
+@media (pointer: coarse) {
+    [data-quick-plant] {
+        -webkit-touch-callout: none;
+        user-select: none;
+    }
+
+    [data-quick-plant] ::deep img {
+        -webkit-user-drag: none;
+    }
+}
