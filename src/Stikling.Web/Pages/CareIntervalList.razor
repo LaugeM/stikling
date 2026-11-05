@@ -85,7 +85,8 @@ else
         var count = CareIntervals.PlantsIn(interval, plants, places).Count;
         return interval.Scope switch
         {
-            CareScope.Everywhere => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalCoversAll, count),
+            CareScope.Everywhere => string.Format(System.Globalization.CultureInfo.CurrentCulture,
+                interval.OnlySemiHydro ? Strings.Care.IntervalCoversSemiHydro : Strings.Care.IntervalCoversAll, count),
             CareScope.Room => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalCoversRoom, places.NameOf(interval.PlaceId) ?? Strings.Care.IntervalCoversARoom, count),
             CareScope.Tag => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalCoversTag, interval.Tag, Labels.Plants(count)),
             _ => Labels.Plants(count)

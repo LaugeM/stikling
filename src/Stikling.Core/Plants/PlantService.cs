@@ -495,6 +495,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         plant.OuterPotId = into.OuterPotId;
         plant.WaterInOuterPot = into.WaterInOuterPot;
         plant.OuterPotWatering = into.OuterPotWatering;
+        plant.ReservoirFillCm = into.ReservoirFillCm ?? plant.ReservoirFillCm;
         plant.SoilMixId = into.SoilMixId;
         plant.PlaceId = into.PlaceId;
         await UpdateAsync(before, plant, label, potName, mixName, placeName);

@@ -29,6 +29,21 @@
         </div>
     }
 
+    @if (CareKinds.IsReservoirReading(Entry))
+    {
+        <div class="mt-2">
+            <div class="form-label">@Strings.Care.SheetHowFull</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Care.SheetHowFull">
+                @foreach (var level in ReservoirLevels.Choices)
+                {
+                    <button type="button" class="chip @(IsLevel(level) ? "picked" : null)"
+                            aria-pressed="@(IsLevel(level) ? "true" : "false")"
+                            @onclick="() => reservoirLevel = level">@ReservoirLevels.Text(level)</button>
+                }
+            </div>
+        </div>
+    }
+
     @if (CareKinds.TakesProducts(Entry.Kind))
     {
         @if (!string.IsNullOrWhiteSpace(Entry.FeedName) || Entry.Products.Count > 0)
@@ -99,6 +114,7 @@
 
     private DateOnly occurredOn;
     private int? moisture;
+    private int? reservoirLevel;
     private decimal? water;
     private decimal? ec;
     private decimal? ph;
@@ -108,6 +124,9 @@
     private bool confirming;
 
     private DateOnly Today => Time.Today();
+
+    // A level saved as a finer value than the four steps lights up the step it reads as
+    private bool IsLevel(int level) => reservoirLevel is { } stored && ReservoirLevels.Nearest(stored) == level;
 
     private string Used
     {
@@ -123,6 +142,7 @@
     {
         occurredOn = Entry.OccurredOn;
         moisture = Entry.Moisture;
+        reservoirLevel = Entry.ReservoirLevel;
         water = Entry.WaterLitres;
         ec = Entry.Ec;
         ph = Entry.Ph;
@@ -146,6 +166,7 @@
                 Id = Entry.Id,
                 OccurredOn = occurredOn,
                 Moisture = moisture,
+                ReservoirLevel = reservoirLevel,
                 WaterLitres = water > 0 ? water : null,
                 Ec = ec,
                 Ph = ph,

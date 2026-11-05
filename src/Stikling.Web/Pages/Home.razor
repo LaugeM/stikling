@@ -794,9 +794,10 @@ else
         var form = due.Guess.Form;
         <TodayRow @key="due.Plant.Id" DoneLabel="@WateringText.DoneLabel(form)" OnDone="() => WaterDoneAsync(due)"
                   AnswerLabel="@WateringText.NotYetLabel(form)" OnAnswer="reading => NotYetAsync(due, reading)"
-                  AnswerChoices="form == WateringForm.TopWatered ? MeterReadings : null"
-                  AnswerNoneLabel="@(form == WateringForm.TopWatered ? Strings.Care.TodayNoMeter : null)"
-                  AnswerGroupLabel="@Strings.Care.RoundMeterReading"
+                  AnswerChoices="form == WateringForm.TopWatered ? MeterReadings : form == WateringForm.Reservoir ? ReservoirLevels.Choices : null"
+                  AnswerChoiceLabel="form == WateringForm.Reservoir ? ReservoirLevels.Text : null"
+                  AnswerNoneLabel="@(form == WateringForm.TopWatered ? Strings.Care.TodayNoMeter : form == WateringForm.Reservoir ? Strings.Care.TodayNoReservoirReading : null)"
+                  AnswerGroupLabel="@(form == WateringForm.Reservoir ? Strings.Care.TodayReservoirLevel : Strings.Care.RoundMeterReading)"
                   OnPutOff="days => PutOffWaterAsync(due, days)">
             <a class="item-card" href="plants/@due.Plant.Id">
                 <SubjectThumb Subject="due.Plant" />
@@ -1276,7 +1277,10 @@ else
     // "Still wet" with a meter reading, or "No meter" / "Not yet" with none
     private async Task NotYetAsync(WateringDue due, int? reading)
     {
-        if (await Answers.NotYetAsync(due.Plant, due.Guess, reading, logReading: true, Labels.For) is { } putOff)
+        var putOffAfter = due.Guess.Form == WateringForm.Reservoir
+            ? await Answers.ReservoirAsync(due.Plant, due.Guess, reading, Labels.For)
+            : await Answers.NotYetAsync(due.Plant, due.Guess, reading, logReading: true, Labels.For);
+        if (putOffAfter is { } putOff)
             data.PutOffs.PutOff(putOff.Key, putOff.Until);
 
         await WateringAnsweredAsync();

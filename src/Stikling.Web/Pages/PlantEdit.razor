@@ -405,6 +405,17 @@ else
                     @(form.Settings.WateringReminder ? Strings.PlantEdit.RemindNote : Strings.PlantEdit.RemindNoteOff)
                 </div>
 
+                @* Kept when the plant stops being a reservoir plant, so it is back if it becomes one again *@
+                @if (WateringForms.Of(plant, form.FindPot) == WateringForm.Reservoir)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="reservoir-fill">@F(Strings.PlantEdit.ReservoirFill, Lengths.UnitName)</label>
+                        <LengthInput id="reservoir-fill" class="form-control" min="0" aria-describedby="reservoir-fill-help"
+                                     @bind-Value="plant.ReservoirFillCm" />
+                        <div id="reservoir-fill-help" class="form-text">@Strings.PlantEdit.ReservoirFillHelp</div>
+                    </div>
+                }
+
                 @if (WateringForms.Of(plant, form.FindPot) == WateringForm.TopWatered)
                 {
                     <div class="mb-3">

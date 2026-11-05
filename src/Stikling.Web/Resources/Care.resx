@@ -1727,4 +1727,48 @@
     <value>Push a finger about an inch into the soil. Tap Dry or Still damp.</value>
     <comment>Used instead of WaterLeadSoil when lengths are shown in inches.</comment>
   </data>
+  <data name="ReservoirFillMeta" xml:space="preserve">
+    <value>fill to {0}</value>
+    <comment>Added to the line under a reservoir plant on Water plants. {0} is the height, like 3 cm.</comment>
+  </data>
+  <data name="ReservoirFillLine" xml:space="preserve">
+    <value>Fill to {0}</value>
+    <comment>On the plant page for a plant with a fill line. {0} is the height, like 3 cm.</comment>
+  </data>
+  <data name="ReservoirLatest" xml:space="preserve">
+    <value>Reservoir: {0} · {1}</value>
+    <comment>On the plant page: the latest note of how full the reservoir is. {0} is the level in lower case, like half, and {1} is how long ago, like 3 days ago.</comment>
+  </data>
+  <data name="TodayReservoirLevel" xml:space="preserve">
+    <value>How full is the reservoir?</value>
+    <comment>What the chips are for when Not yet is tapped on a reservoir plant on Today.</comment>
+  </data>
+  <data name="TodayNoReservoirReading" xml:space="preserve">
+    <value>No reading</value>
+    <comment>The last choice after Empty, Low, Half and Full, for answering without noting how full the reservoir is.</comment>
+  </data>
+  <data name="SheetReservoirLevel" xml:space="preserve">
+    <value>Reservoir level</value>
+    <comment>A choice in What you did on the care sheet, for a plant with a reservoir.</comment>
+  </data>
+  <data name="SheetHowFull" xml:space="preserve">
+    <value>How full is it?</value>
+    <comment>Above the chips Empty, Low, Half and Full on the care sheet.</comment>
+  </data>
+  <data name="RemindFlush" xml:space="preserve">
+    <value>Remind me to flush</value>
+    <comment>A link on the plant page of a semi-hydro plant with no flush reminder.</comment>
+  </data>
+  <data name="IntervalEditScopeSemiHydro" xml:space="preserve">
+    <value>Plants in LECA or PON</value>
+    <comment>A choice of which plants a care interval covers.</comment>
+  </data>
+  <data name="IntervalCoversSemiHydro" xml:space="preserve">
+    <value>Plants in LECA or PON ({0})</value>
+    <comment>What an interval covers when it is for the plants in LECA or PON. {0} is a number of plants.</comment>
+  </data>
+  <data name="IntervalEditSemiHydro" xml:space="preserve">
+    <value>Every plant in LECA or PON, including ones moved there later.</value>
+    <comment>Under the choice of which plants a care interval covers, for the plants in LECA or PON.</comment>
+  </data>
 </root>

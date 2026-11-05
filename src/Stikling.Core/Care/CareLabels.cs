@@ -21,6 +21,12 @@ public static class CareLabels
     /// <summary>What an entry with an own kind is called, by the rules of <see cref="For"/>. Null for an entry of a built-in kind.</summary>
     public static string? OwnName(CareLog entry, IReadOnlyDictionary<Guid, OwnCareKind>? ownKinds)
     {
+        // Follows the app language, so the name stored on the entry isn't used
+        if (CareKinds.IsReservoirReading(entry))
+            return entry.ReservoirLevel is { } level
+                ? CareText.F(Strings.Care.ReservoirReadingNamed, ReservoirLevels.Text(level).ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                : Strings.Care.ReservoirReadingName;
+
         if (entry.OwnKindId is { } id)
         {
             if (ownKinds is not null && ownKinds.TryGetValue(id, out var kind) && !kind.IsDeleted

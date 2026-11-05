@@ -193,6 +193,12 @@ public sealed class Plant : Entity
         WaterInOuterPot ? OuterPotWatering ?? PotWatering.Submerged : null;
 
     /// <summary>
+    /// The height to fill the reservoir or outer pot to, in cm. Null when not set. Only shown for a
+    /// plant that gets its water from a reservoir, but kept when it stops being one.
+    /// </summary>
+    public decimal? ReservoirFillCm { get; set; }
+
+    /// <summary>
     /// Whether Today reminds you to water it, once the app has learned its pace from the care log.
     /// On unless turned off, and a plant saved before this existed reads as on.
     /// </summary>
@@ -549,6 +555,8 @@ public sealed class Plant : Entity
             errors.Add(Strings.Plants.ErrOwnParent);
         if (Plants.CollectionNumbers.Normalize(CollectionNumber) is { } code && !Plants.CollectionNumbers.IsValid(code))
             errors.Add(Plants.CollectionNumbers.NotValidText);
+        if (ReservoirFillCm <= 0)
+            errors.Add(Strings.Plants.ErrReservoirFill);
         if (PricePaid < 0)
             errors.Add(Strings.Plants.ErrPriceNegative);
         if (AcquiredOn is { } acquired && acquired.Start > today)

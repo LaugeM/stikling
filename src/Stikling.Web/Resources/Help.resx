@@ -561,7 +561,7 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="StillWetNoMeterOnA1" xml:space="preserve">
-    <value>For a plant you water from the top, tap &lt;em&gt;Still wet&lt;/em&gt; and pick what the meter reads, from 0 to 10. The reading is saved with the plant's care, and the plant comes back later, once it has had time to dry. &lt;em&gt;No meter&lt;/em&gt; puts it off for a few days without a reading. For the other plants the button says &lt;em&gt;Not yet&lt;/em&gt; and does the same. The tick logs the watering, refill or top up for today. The clock puts the row off for a day or more, like the other rows.</value>
+    <value>For a plant you water from the top, tap &lt;em&gt;Still wet&lt;/em&gt; and pick what the meter reads, from 0 to 10. The reading is saved with the plant's care, and the plant comes back later, once it has had time to dry. &lt;em&gt;No meter&lt;/em&gt; puts it off for a few days without a reading. For a plant that takes water from a reservoir the button says &lt;em&gt;Not yet&lt;/em&gt; and asks how full the reservoir is: pick &lt;em&gt;Empty&lt;/em&gt;, &lt;em&gt;Low&lt;/em&gt;, &lt;em&gt;Half&lt;/em&gt; or &lt;em&gt;Full&lt;/em&gt;, or &lt;em&gt;No reading&lt;/em&gt;. It is optional, and the plant is put off for a few days either way. For the other plants the button says &lt;em&gt;Not yet&lt;/em&gt; and does the same. The tick logs the watering, refill or top up for today. The clock puts the row off for a day or more, like the other rows.</value>
     <comment>Answer to "What do Still wet and No meter do on Today?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="WaterAtReadingQ" xml:space="preserve">
@@ -1493,7 +1493,7 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="AppRemindMeFeedOrA1" xml:space="preserve">
-    <value>Yes, with a care interval. Go to &lt;em&gt;Settings&lt;/em&gt;, then &lt;em&gt;Care intervals&lt;/em&gt;, or tap &lt;em&gt;Set care to come back&lt;/em&gt; in a plant's Care. Pick what it is, like fertilise, repot, prune or a kind of your own, and how often: every so many days, weeks, months or years. &lt;em&gt;Only part of the year&lt;/em&gt; limits it, like April to October, or October to March over the new year. Then say who it covers: picked plants, a room, a tag like the one on your semi-hydro plants, or all of them. A room or a tag follows the plants, so one that is moved or tagged later is covered from then on.</value>
+    <value>Yes, with a care interval. Go to &lt;em&gt;Settings&lt;/em&gt;, then &lt;em&gt;Care intervals&lt;/em&gt;, or tap &lt;em&gt;Set care to come back&lt;/em&gt; in a plant's Care. Pick what it is, like fertilise, repot, prune or a kind of your own, and how often: every so many days, weeks, months or years. &lt;em&gt;Only part of the year&lt;/em&gt; limits it, like April to October, or October to March over the new year. Then say who it covers: picked plants, a room, a tag like the one on your semi-hydro plants, the plants in LECA or PON, or all of them. A room, a tag or the plants in LECA or PON follows the plants, so one that is moved, tagged or put in LECA or PON later is covered from then on.</value>
     <comment>Answer to "Can the app remind me to feed or repot?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="AppRemindMeFeedOrA2" xml:space="preserve">
@@ -1671,6 +1671,18 @@
   <data name="UseInchesA1" xml:space="preserve">
     <value>Yes. In Settings, under Look, you can show lengths in centimetres or inches, write dates with the day, the month or the year first, and use a 24-hour or a 12-hour clock. When you're signed in, the choices follow you to your other devices. Sizes are always kept in centimetres, so switching back loses nothing. Doses keep the units from the bottle, millilitres and litres, and date pickers follow your browser.</value>
     <comment>Answer to "Can I use inches, or write dates another way?" on the Help page.</comment>
+  </data>
+  <data name="KeepTrackSemiHydroReservoirQ" xml:space="preserve">
+    <value>How do I keep track of a semi-hydro reservoir?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="KeepTrackSemiHydroReservoirA1" xml:space="preserve">
+    <value>On the plant's edit page, under &lt;em&gt;Watering&lt;/em&gt;, &lt;em&gt;Fill reservoir to&lt;/em&gt; is the height the water should come to, like 3 cm. It shows for a plant in LECA or PON, or one with water in its outer pot, and the plant page, Water plants and the sitter sheet say it. When you check a plant on Today, tap &lt;em&gt;Not yet&lt;/em&gt; and pick &lt;em&gt;Empty&lt;/em&gt;, &lt;em&gt;Low&lt;/em&gt;, &lt;em&gt;Half&lt;/em&gt; or &lt;em&gt;Full&lt;/em&gt; to note how full the reservoir is, or &lt;em&gt;No reading&lt;/em&gt; to skip it. You can also pick &lt;em&gt;Reservoir level&lt;/em&gt; in the plant's Care. The latest one shows in its Care with how long ago it was.</value>
+    <comment>Answer to "How do I keep track of a semi-hydro reservoir?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="KeepTrackSemiHydroReservoirA2" xml:space="preserve">
+    <value>To be reminded to flush, tap &lt;em&gt;Remind me to flush&lt;/em&gt; in the plant's Care. For a plant in LECA or PON it sets up one interval for all of them, and plants moved to LECA or PON later are covered from then on. You can also pick &lt;em&gt;Plants in LECA or PON&lt;/em&gt; under &lt;em&gt;Care intervals&lt;/em&gt;. Nothing is added to Today until you set one.</value>
+    <comment>Answer to "How do I keep track of a semi-hydro reservoir?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="PotFitQ" xml:space="preserve">
     <value>How do I see which outer pot a nursery pot fits?</value>

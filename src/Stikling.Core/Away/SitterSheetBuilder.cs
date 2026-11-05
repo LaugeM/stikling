@@ -143,7 +143,9 @@ public static class SitterSheetBuilder
         // How to water is only said when it differs from the way the sheet usually does it
         string? how = null;
         if (item.Form == WateringForm.Reservoir)
-            how = Strings.Care.SitterTopUpReservoir;
+            how = item.Entity is Plant { ReservoirFillCm: { } fill }
+                ? CareText.F(Strings.Care.SitterTopUpReservoirTo, Lengths.Cm(fill))
+                : Strings.Care.SitterTopUpReservoir;
         else if (item.Form == WateringForm.InWater)
             how = Strings.Care.SitterTopUpWater;
         else if (item.IsPlant && DiffersFromUsual(item.WaterBy, sheet, ownWords))

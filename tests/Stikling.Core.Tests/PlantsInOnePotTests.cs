@@ -32,6 +32,23 @@ public class PlantsInOnePotTests
 
     private IEnumerable<string> Texts(Plant plant) => timeline.Entries.Where(e => e.SubjectId == plant.Id).Select(e => e.Text);
 
+    [Fact]
+    public async Task Potting_with_a_plant_takes_its_fill_line_and_keeps_its_own_when_it_has_none()
+    {
+        var a = Add("A");
+        a.ReservoirFillCm = 3;
+        var b = Add("B");
+        b.ReservoirFillCm = 5;
+        await service.PotTogetherAsync(b, a, Today, Label);
+        Assert.Equal(3, b.ReservoirFillCm);
+
+        var c = Add("C");
+        var d = Add("D");
+        d.ReservoirFillCm = 4;
+        await service.PotTogetherAsync(d, c, Today, Label);
+        Assert.Equal(4, d.ReservoirFillCm);
+    }
+
     // The model
 
     [Fact]

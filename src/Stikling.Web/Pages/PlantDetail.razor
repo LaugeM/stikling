@@ -816,6 +816,17 @@ else
             {
                 <p class="care-moisture mb-0">@F(Strings.PlantDetail.Moisture, reading.Value, Labels.DaysAgo(reading.DaysAgo))</p>
             }
+            @if (WaterForm == WateringForm.Reservoir)
+            {
+                @if (reservoir is { } level)
+                {
+                    <p class="care-moisture mb-0">@F(Strings.Care.ReservoirLatest, ReservoirLevels.Text(level.Level).ToLower(System.Globalization.CultureInfo.CurrentCulture), Labels.DaysAgo(level.DaysAgo))</p>
+                }
+                @if (plant.ReservoirFillCm is { } fill)
+                {
+                    <p class="care-moisture mb-0">@F(Strings.Care.ReservoirFillLine, Lengths.Cm(fill))</p>
+                }
+            }
         </div>
 
         @if (plant.InCollection)
@@ -835,6 +846,12 @@ else
                 else
                 {
                     <a class="comes-back-add" href="care-intervals/new?plant=@plant.Id">@Strings.PlantDetail.SetCareToComeBack</a>
+                }
+                @if (offerFlushReminder)
+                {
+                    <div>
+                        <a class="comes-back-add" href="@FlushReminderLink">@Strings.Care.RemindFlush</a>
+                    </div>
                 }
             </div>
         }
@@ -1542,6 +1559,7 @@ else
     private LastCare? lastWater;
     private IReadOnlyDictionary<Guid, OwnCareKind> ownKindLookup = new Dictionary<Guid, OwnCareKind>();
     private MoistureReading? moisture;
+    private ReservoirReading? reservoir;
     private CareCalendar? careCalendar;
     private IReadOnlyList<PestCase> pests = [];
     private DateOnly? lastChecked;
@@ -2054,15 +2072,25 @@ else
 
     private IReadOnlyList<ComesBack> comesBack = [];
 
+    // A reservoir plant that no flush reminder covers yet is offered one. The plants in LECA or PON all get it from one interval.
+    private bool offerFlushReminder;
+
+    private string FlushReminderLink => plant!.Medium is GrowingMedium.Leca or GrowingMedium.Pon
+        ? $"care-intervals/new?kind=Flushed&semihydro=1&plant={plant.Id}"
+        : $"care-intervals/new?kind=Flushed&plant={plant.Id}";
+
     private async Task LoadComesBackAsync(IReadOnlyList<CareLog> all)
     {
         if (plant is null || !plant.InCollection)
         {
             comesBack = [];
+            offerFlushReminder = false;
             return;
         }
 
         var intervals = CareIntervals.CoveringPlant(plant, await CareIntervalRepository.GetAllAsync(), places, all, ownKindLookup.Values, Time);
+        offerFlushReminder = WaterForm == WateringForm.Reservoir
+            && !intervals.Any(i => i.Kind == CareKind.Flushed && i.OwnKindId is null);
         var feeds = (await FeedRepository.GetAllAsync()).ToDictionary(f => f.Id);
         comesBack = [.. intervals.Select(interval =>
         {
@@ -2087,7 +2115,8 @@ else
         var all = await CareLogRepository.GetAllAsync();
         care = CareSummary.For(all, plant.Id);
         ownKindLookup = CareLabels.Lookup(await OwnKindRepository.GetAllAsync());
-        // Always show the headline kinds, even the ones never done, so "never flushed" is visible
+        // Always show the headline kinds, even the ones never done, so "never watered" is visible. Flushing only
+        // belongs to a reservoir plant, or one that has been flushed, so soil plants don't show "Flushed: Never".
         // Water comes first in the way the plant gets it now (watered, or refilled and topped up),
         // and the other way only when it has been logged, e.g. waterings from before a self-watering pot
         var doneKind = WateringForms.DoneKind(WaterForm);
@@ -2096,10 +2125,12 @@ else
             .SelectMany(kind => kind == CareKind.Watered ? new[] { doneKind, otherKind } : [kind])
             .Select(kind => (kind, CareSummary.Latest(all, plant.Id, kind, Today)))
             .Where(h => h.kind != otherKind || h.Item2 is not null)
+            .Where(h => h.kind != CareKind.Flushed || WaterForm == WateringForm.Reservoir || h.Item2 is not null)
             .ToList();
         await LoadComesBackAsync(all);
         lastWater = CareSummary.LastWater(all, plant.Id, Today);
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
+        reservoir = CareSummary.LatestReservoir(all, plant.Id, Today);
         careCalendar = CareCalendar.Build(all, plant.Id, Today);
         await ReloadWateringLineAsync(all);
         recentChanges = RecentChanges.Of(
