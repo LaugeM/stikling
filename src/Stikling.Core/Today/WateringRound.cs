@@ -37,6 +37,10 @@ public static class WateringRound
     /// </summary>
     /// <param name="timeline">Timeline entries for any subject, for telling when plants were dormant.</param>
     /// <param name="pot">Finds a pot by id, to see whether it waters itself.</param>
+    /// <param name="lookAheadDays">
+    /// For a look further ahead than Today's: every plant that comes up within this many days, also
+    /// one that is put off, which then comes up on the day it comes back. Leave it out for Today.
+    /// </param>
     public static IReadOnlyList<WateringDue> Due(
         IEnumerable<Plant> plants,
         IEnumerable<CareLog> logs,
@@ -48,7 +52,8 @@ public static class WateringRound
         Hemisphere hemisphere,
         TimeProvider time,
         PutOffs putOffs,
-        IReadOnlyList<Weekday>? roundDays = null)
+        IReadOnlyList<Weekday>? roundDays = null,
+        int? lookAheadDays = null)
     {
         var today = time.Today();
         var nextRound = RoundSchedule.Next(roundDays, today);
@@ -61,7 +66,8 @@ public static class WateringRound
             var guess = setup.GuessOf(plant, pot, hemisphere);
             if (guess.Mode == WateringMode.Learning || guess.CheckOn is not { } checkOn)
                 continue;
-            if (putOffs.IsPutOff(PutOffs.Water(plant.Id, guess.LastWatered), today))
+            var waterKey = PutOffs.Water(plant.Id, guess.LastWatered);
+            if (lookAheadDays is null && putOffs.IsPutOff(waterKey, today))
                 continue;
 
             var showOn = checkOn;
@@ -72,8 +78,16 @@ public static class WateringRound
                 showOn = RoundSchedule.ShowOn(roundDays, checkOn, Earliest(plant, guess, logList, putOffs), guess.UsualDays);
             }
 
+            if (lookAheadDays is { } ahead)
+            {
+                if (putOffs.IsPutOff(waterKey, today))
+                    showOn = Later(showOn, putOffs.EndedOn(waterKey)!.Value);
+                if (showOn > today.AddDays(ahead))
+                    continue;
+            }
+
             var dueNow = showOn <= today;
-            if (!dueNow && (gathered ? showOn > nextRound : checkOn > today.AddDays(ComingUpDays)))
+            if (lookAheadDays is null && !dueNow && (gathered ? showOn > nextRound : checkOn > today.AddDays(ComingUpDays)))
                 continue;
 
             due.Add(new WateringDue(plant, guess, dueNow, showOn, gathered));
