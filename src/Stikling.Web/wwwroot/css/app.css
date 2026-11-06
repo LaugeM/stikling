@@ -3247,6 +3247,34 @@ main.app-content:has(.form-bar) {
     }
 }
 
+/* A plant's story prints only its page, on the A4 set above. */
+@media print {
+    :root:has(.story-page),
+    body:has(.story-page) {
+        background: #ffffff !important;
+        color: #1d2520;
+    }
+
+    body:has(.story-page) .app-header,
+    body:has(.story-page) .app-nav,
+    body:has(.story-page) .update-banner,
+    body:has(.story-page) .first-sync-banner {
+        display: none !important;
+    }
+
+    body:has(.story-page) .app-shell {
+        display: block !important;
+        min-height: 0 !important;
+    }
+
+    body:has(.story-page) .app-content,
+    body:has(.story-page) .page-wide {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
+
 /* The Labels page prints only the labels. The page rule for their size is added by labels.js. */
 @media print {
     :root:has(.labels-page),

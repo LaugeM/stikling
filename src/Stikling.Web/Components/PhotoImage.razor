@@ -8,11 +8,11 @@
 
 @if (url is not null)
 {
-    <img src="@url" alt="@Alt" class="@ImageClass" style="@FrameStyle" loading="@(Eager ? "eager" : "lazy")" decoding="async" />
+    <img src="@url" alt="@Alt" class="@ImageClass" style="@FrameStyle" loading="@(Eager ? "eager" : "lazy")" decoding="async" data-pending="@(fetching ? "true" : null)" />
 }
 else
 {
-    <span class="@Class photo-placeholder" role="img" aria-label="@(missing ? Strings.Shared.PhotoImageMissing : Strings.Shared.PhotoImageLoading)"></span>
+    <span class="@Class photo-placeholder" role="img" aria-label="@(missing ? Strings.Shared.PhotoImageMissing : Strings.Shared.PhotoImageLoading)" data-pending="@(!missing || fetching ? "true" : null)"></span>
 }
 
 @code {
@@ -47,6 +47,7 @@ else
     private string? url;
     private bool missing;
     private bool small;
+    private bool fetching;
     private (Guid, bool) loadedFor;
     private PhotoFrame? frame;
     private double aspect;
@@ -94,8 +95,23 @@ else
 
     private async Task FetchFullAsync(Guid id)
     {
-        if (!await Sync.FetchPhotoAsync(id, PhotoSize.Full) || loadedFor != (id, false))
+        // A print waits while this is on, so the photo goes on the page at full size
+        fetching = true;
+        bool fetched;
+        try
+        {
+            fetched = await Sync.FetchPhotoAsync(id, PhotoSize.Full);
+        }
+        finally
+        {
+            fetching = false;
+        }
+
+        if (!fetched || loadedFor != (id, false))
+        {
+            StateHasChanged();
             return;
+        }
 
         url = await Photos.GetUrlAsync(id, false) ?? url;
         missing = url is null;
