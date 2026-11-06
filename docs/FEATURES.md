@@ -409,7 +409,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Quick actions**: press and hold a plant in the Plants list on a phone, or right-click it on a computer, to open a sheet with Water, Add a note and Open plant, so something can be logged without opening the plant. Not in Select mode or the table view, and only on the Plants list | 4 | M | v1.x |
 | ✅ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
 | ✅ | Pick photos from Google Photos, including ones only in the cloud, through Google's Photos Picker. Turned on in Settings. Photo on a plant or propagation page then asks phone or Google Photos, and the add and edit pages get a Google Photos button. The photos go straight from Google to the device. The phone's own chooser only reaches photos stored on the phone, which is why it needs Google's picker | 4 | S | v1.x |
-| ☐ | **Copy a plant's link** for an NFC sticker or a label. Write it to a sticker with any NFC app, and tapping the phone on the pot opens the plant | 8 | S | v1.x |
+| ✅ | **Copy a plant's link** for an NFC sticker or a label. Write it to a sticker with any NFC app, and tapping the phone on the pot opens the plant | 8 | S | v1.x |
 
 ## 7c. Help & first visit
 

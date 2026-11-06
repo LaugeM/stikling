@@ -34,6 +34,7 @@
 @inject AccountService Account
 @inject CameraService Camera
 @inject IPhotoRepository PhotoRepository
+@inject ShareCardService Cards
 
 <PageTitle>@F(Strings.PlantDetail.PageTitle, plant?.DisplayName ?? Strings.PlantDetail.PlantFallback)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -946,6 +947,7 @@ else
                                 <span class="sheet-action-text"><b>@Strings.PlantDetail.PrintLabel</b><small>@Strings.PlantDetail.PrintLabelHint</small></span>
                             </a>
                         </li>
+                        @CopyLinkAction
                         <li>
                             <button type="button" class="sheet-action" @onclick="OpenFlowering">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.2" /><path d="M12 9.800C10.600 7.500 10.600 5 12 3.500c1.400 1.500 1.400 4 0 6.300Z" /><path d="M12 14.200c1.400 2.300 1.400 4.800 0 6.300-1.400-1.500-1.400-4 0-6.300Z" /><path d="M9.800 12C7.500 10.600 5 10.600 3.500 12c1.500 1.400 4 1.400 6.300 0Z" /><path d="M14.200 12c2.300 1.400 4.800 1.400 6.300 0-1.500-1.400-4-1.400-6.300 0Z" /></svg>
@@ -1046,6 +1048,7 @@ else
                                 <span class="sheet-action-text"><b>@Strings.PlantDetail.PrintLabel</b><small>@Strings.PlantDetail.PrintLabelHint</small></span>
                             </a>
                         </li>
+                        @CopyLinkAction
                         <li>
                             <button type="button" class="sheet-action" @onclick="OpenTakeOut">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H8M12 7l-5 5 5 5" /><path d="M4 5v14" /></svg>
@@ -1061,6 +1064,7 @@ else
                                 <span class="sheet-action-text"><b>@Strings.PlantDetail.PrintLabel</b><small>@Strings.PlantDetail.PrintLabelHint</small></span>
                             </a>
                         </li>
+                        @CopyLinkAction
                         <li>
                             <button type="button" class="sheet-action" @onclick="() => OpenStatus(plant.Status)">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
@@ -2231,7 +2235,33 @@ else
         builder.AddContent(2, format[(at + 3)..]);
     };
 
-    private void OpenMore(More what) => more = what;
+    private void OpenMore(More what)
+    {
+        linkCopied = null;
+        more = what;
+    }
+
+    // Null until tried, then whether the link made it to the clipboard
+    private bool? linkCopied;
+
+    private string PlantLink => Navigation.ToAbsoluteUri($"plants/{plant?.Id}").ToString();
+
+    private async Task CopyLinkAsync() => linkCopied = await Cards.CopyTextAsync(PlantLink);
+
+    private RenderFragment CopyLinkAction => __builder =>
+    {
+        <li>
+            <button type="button" class="sheet-action" @onclick="CopyLinkAsync">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 6 .4l3-3a4 4 0 0 0-5.700-5.700l-1.300 1.300" /><path d="M14 10a4 4 0 0 0-6-.4l-3 3a4 4 0 0 0 5.700 5.700l1.300-1.300" /></svg>
+                <span class="sheet-action-text" role="status"><b>@Strings.PlantDetail.CopyLink</b><small>@(linkCopied switch
+                {
+                    true => Strings.PlantDetail.CopyLinkDone,
+                    false => F(Strings.PlantDetail.CopyLinkFailed, PlantLink),
+                    _ => Strings.PlantDetail.CopyLinkHint
+                })</small></span>
+            </button>
+        </li>
+    };
 
     private void OpenPotTogether()
     {
