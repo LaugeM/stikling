@@ -1229,7 +1229,7 @@
     <value>First seedling up</value>
   </data>
   <data name="DetSawLeaf" xml:space="preserve">
-    <value>Saw a new leaf today</value>
+    <value>Saw a new leaf</value>
   </data>
   <data name="DetWrongDate" xml:space="preserve">
     <value>Wrong date? Change it under {0}.</value>
@@ -1897,5 +1897,17 @@
   <data name="DetDiffNoWater" xml:space="preserve">
     <value>No water changes logged here. Days between changes on the {0} of them with changes logged: about {1}.</value>
     <comment>{0} how many rooted batches have changes logged, at least 3, {1} the usual days between changes.</comment>
+  </data>
+  <data name="TlConfirmClearsFirstLeaf" xml:space="preserve">
+    <value>The first leaf date goes too.</value>
+    <comment>Added to the delete question on a history line of a propagation. Follows Delete this entry?</comment>
+  </data>
+  <data name="TlConfirmClearsFirstRoot" xml:space="preserve">
+    <value>The first root date goes too.</value>
+    <comment>Added to the delete question on a history line of a propagation. Follows Delete this entry?</comment>
+  </data>
+  <data name="TlConfirmClearsBoth" xml:space="preserve">
+    <value>The first root and first leaf dates go too.</value>
+    <comment>Added to the delete question on a history line of a propagation. Follows Delete this entry?</comment>
   </data>
 </root>

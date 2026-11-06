@@ -9,3 +9,9 @@
         display: none;
     }
 }
+
+/* The day picked for "Saw a new leaf": the field and both buttons get a 44px tap area */
+.leaf-day .form-control,
+.leaf-day .btn {
+    min-height: 2.75rem;
+}

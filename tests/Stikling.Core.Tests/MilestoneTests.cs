@@ -245,4 +245,123 @@ public class MilestoneTests
 
         Assert.Contains("\"rootingAids\":[\"RootingPowder\"]", json);
     }
+
+    private static bool Live(TimelineEntry e) => !e.IsDeleted;
+
+    [Fact]
+    public async Task A_first_leaf_can_be_recorded_on_a_chosen_day()
+    {
+        var corms = Corms();
+
+        await service.RecordMilestoneAsync(corms, Milestone.FirstLeaf, Label, Today.AddDays(-5));
+
+        Assert.Equal(Today.AddDays(-5), corms.FirstLeafOn);
+        Assert.Equal("First leaf on day 7", Assert.Single(timeline.Entries).Text);
+    }
+
+    [Theory]
+    [InlineData(-13)]
+    [InlineData(1)]
+    public async Task A_first_leaf_before_the_start_or_in_the_future_is_refused(int daysFromToday)
+    {
+        var corms = Corms();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.RecordMilestoneAsync(corms, Milestone.FirstLeaf, Label, Today.AddDays(daysFromToday)));
+
+        Assert.Null(corms.FirstLeafOn);
+        Assert.Empty(timeline.Entries);
+    }
+
+    [Fact]
+    public async Task Deleting_the_entry_of_a_first_leaf_clears_the_date()
+    {
+        var corms = Corms();
+        await propagations.SaveAsync(corms);
+        await service.RecordMilestoneAsync(corms, Milestone.FirstLeaf, Label, Today.AddDays(-5));
+        var entry = Assert.Single(timeline.Entries);
+
+        Assert.Equal([Milestone.FirstLeaf], await service.UndoneByDeleteAsync(entry));
+        var cleared = await service.DeleteEntryAsync(entry);
+
+        Assert.Equal([Milestone.FirstLeaf], cleared);
+        Assert.Null(propagations.Propagations[corms.Id].FirstLeafOn);
+        Assert.True(entry.IsDeleted);
+        Assert.Single(timeline.Entries);
+    }
+
+    [Fact]
+    public async Task Deleting_the_entry_with_the_first_root_clears_it_and_keeps_the_stage()
+    {
+        var corms = Corms();
+        await propagations.SaveAsync(corms);
+        await service.SetStageAsync(corms, PropagationStage.Rooting, Label, seenToday: true);
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Contains("First root on day 12", entry.Text);
+
+        var cleared = await service.DeleteEntryAsync(entry);
+
+        Assert.Equal([Milestone.FirstRoot], cleared);
+        Assert.Null(corms.FirstRootOn);
+        Assert.Equal(PropagationStage.Rooting, corms.Stage);
+        Assert.True(entry.IsDeleted);
+        Assert.Single(timeline.Entries);
+    }
+
+    [Fact]
+    public async Task A_date_changed_since_is_left_alone_when_the_entry_goes()
+    {
+        var corms = Corms();
+        await propagations.SaveAsync(corms);
+        await service.RecordMilestoneAsync(corms, Milestone.FirstLeaf, Label, Today.AddDays(-5));
+        var entry = timeline.Entries.Single(Live);
+        var before = corms.Copy();
+        corms.FirstLeafOn = Today.AddDays(-3);
+        await service.UpdateAsync(before, corms, Label);
+
+        Assert.Empty(await service.UndoneByDeleteAsync(entry));
+        var cleared = await service.DeleteEntryAsync(entry);
+
+        Assert.Empty(cleared);
+        Assert.Equal(Today.AddDays(-3), corms.FirstLeafOn);
+        Assert.True(entry.IsDeleted);
+    }
+
+    [Fact]
+    public async Task An_older_entry_with_only_its_text_is_matched()
+    {
+        var corms = Corms();
+        corms.FirstLeafOn = Today.AddDays(-2);
+        await propagations.SaveAsync(corms);
+        var entry = new TimelineEntry
+        {
+            SubjectType = SubjectType.Propagation,
+            SubjectId = corms.Id,
+            Kind = TimelineKind.Change,
+            Text = HistoryText.English(HistoryText.Line("FirstLeafOnDay", HistoryArg.Of(10)), Label)
+        };
+        await timeline.AddAsync(entry);
+        Assert.Null(entry.Lines);
+
+        var cleared = await service.DeleteEntryAsync(entry);
+
+        Assert.Equal([Milestone.FirstLeaf], cleared);
+        Assert.Null(corms.FirstLeafOn);
+    }
+
+    [Fact]
+    public async Task Deleting_a_note_clears_nothing_and_adds_no_entry()
+    {
+        var corms = Corms();
+        corms.FirstLeafOn = Today.AddDays(-2);
+        await propagations.SaveAsync(corms);
+        var note = new TimelineEntry { SubjectType = SubjectType.Propagation, SubjectId = corms.Id, Kind = TimelineKind.Note, Text = "First leaf on day 10" };
+        await timeline.AddAsync(note);
+
+        var cleared = await service.DeleteEntryAsync(note);
+
+        Assert.Empty(cleared);
+        Assert.NotNull(corms.FirstLeafOn);
+        Assert.Single(timeline.Entries);
+    }
 }
