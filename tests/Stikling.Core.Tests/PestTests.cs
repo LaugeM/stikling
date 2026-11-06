@@ -506,4 +506,34 @@ public class PestTests
         Assert.Single(item.PlantIds);
         Assert.Equal(2, copy.PlantIds.Count);
     }
+
+    [Fact]
+    public void Every_pest_has_a_usual_interval_of_at_least_a_day()
+    {
+        foreach (var pest in Enum.GetValues<Pest>())
+            Assert.True(pest.UsualIntervalDays() >= 1, pest.ToString());
+    }
+
+    [Fact]
+    public void A_new_case_starts_with_the_spider_mites_interval()
+    {
+        var item = PestService.Start(Today);
+
+        Assert.Equal(Pest.SpiderMites, item.Pest);
+        Assert.Equal(Pest.SpiderMites.UsualIntervalDays(), item.IntervalDays);
+    }
+
+    // Searching the plants to pick
+
+    [Fact]
+    public void Picking_search_needs_every_word_somewhere_ignoring_case_and_accents()
+    {
+        var plant = new Plant { Genus = "Monstera", Species = "deliciosa", Cultivar = "Thai Constellation", Tags = ["Blå"] };
+
+        Assert.True(PlantPickSearch.Matches(plant, "Stuen", "thai MONSTERA"));
+        Assert.True(PlantPickSearch.Matches(plant, "Stuen", "stuen bla"));
+        Assert.True(PlantPickSearch.Matches(plant, null, "  "));
+        Assert.False(PlantPickSearch.Matches(plant, "Stuen", "thai alocasia"));
+        Assert.False(PlantPickSearch.Matches(plant, "Stuen", "køkken"));
+    }
 }

@@ -37,7 +37,7 @@ else
             <div class="row g-2 mb-3">
                 <div class="col-7">
                     <label class="form-label" for="pest">@Strings.Pests.CaseEditPest</label>
-                    <InputSelect id="pest" class="form-select" @bind-Value="item.Pest">
+                    <InputSelect id="pest" class="form-select" @bind-Value="item.Pest" @bind-Value:after="PestChanged">
                         @foreach (var pest in Enum.GetValues<Pest>())
                         {
                             <option value="@pest">@Labels.For(pest)</option>
@@ -92,8 +92,27 @@ else
             }
             else if (item.Scope == PestScope.PickedPlants)
             {
+                @if (plants.Count > SearchFrom)
+                {
+                    <input type="search" class="form-control mb-2" autocomplete="off"
+                           placeholder="@Strings.Pests.CaseEditSearchPlants" aria-label="@Strings.Pests.CaseEditSearchPlants"
+                           @bind="search" @bind:event="oninput" />
+                }
+                @if (item.PlantIds.Count > 0)
+                {
+                    <div class="form-text mb-2">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseEditPicked, item.PlantIds.Count)</div>
+                }
+                @if (shown.Count == 0)
+                {
+                    <p class="text-body-secondary mb-0">
+                        @Strings.Pests.CaseEditNoPlantsMatch
+                        <button type="button" class="btn btn-link p-0 align-baseline" @onclick="ClearSearch">@Strings.Pests.CaseEditClearSearch</button>
+                    </p>
+                }
+                else
+                {
                 <ul class="item-list pick-list">
-                    @foreach (var plant in plants)
+                    @foreach (var plant in shown)
                     {
                         <li>
                             <label class="item-card selectable @(item.PlantIds.Contains(plant.Id) ? "selected" : null)">
@@ -110,6 +129,7 @@ else
                         </li>
                     }
                 </ul>
+                }
             }
             else
             {
@@ -154,7 +174,7 @@ else
             }
             else
             {
-                <div class="form-text">@Strings.Pests.CaseEditSpiderMites</div>
+                <div class="form-text">@Labels.TreatHint(item.Pest)</div>
             }
         </fieldset>
 
@@ -198,6 +218,30 @@ else
     private string? room; // as picked, "Living room"; made into a room when saving
 
     private bool IsNew => Id is null;
+
+    // The search box only shows once the list is long enough to need one
+    private const int SearchFrom = 8;
+
+    private string? search;
+
+    // Plants in the list, still alphabetical, so ticking one doesn't move it
+    private IReadOnlyList<Plant> shown =>
+        plants.Count > SearchFrom ? [.. plants.Where(p => PlantPickSearch.Matches(p, places.NameOf(p.PlaceId), search))] : plants;
+
+    private void ClearSearch() => search = null;
+
+    // The interval follows the pest on a new case, unless the person already typed their own number
+    private Pest lastPest = Pest.SpiderMites;
+
+    private void PestChanged()
+    {
+        if (item is null)
+            return;
+
+        if (IsNew && item.IntervalDays == lastPest.UsualIntervalDays())
+            item.IntervalDays = item.Pest.UsualIntervalDays();
+        lastPest = item.Pest;
+    }
 
     // The status the form opened with, since changing it in the form shouldn't hide the plan line
     private bool FollowingPlan =>

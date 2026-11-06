@@ -26,6 +26,22 @@ public static class PestTraits
     /// </summary>
     public static bool CaughtOnTrap(this Pest pest) =>
         pest is Pest.Thrips or Pest.FungusGnats or Pest.Whitefly;
+
+    /// <summary>
+    /// Days between treatments that usually suit the pest. A starting point for a new case,
+    /// changed freely on the form.
+    /// </summary>
+    public static int UsualIntervalDays(this Pest pest) => pest switch
+    {
+        Pest.SpiderMites => 4,
+        Pest.Thrips => 5,
+        Pest.FungusGnats => 7,
+        Pest.Mealybugs => 7,
+        Pest.Scale => 7,
+        Pest.Aphids => 5,
+        Pest.Whitefly => 5,
+        _ => 7
+    };
 }
 
 /// <summary>
