@@ -55,7 +55,7 @@ public class PlantFactsTests(ApiFactory api)
         new(300, [3, 4], "Vine", [new FactSource("Kew", "https://kew.example/")]);
 
     // A genus of its own for each test, so answers kept by one don't reach another
-    private static string NewGenus() => "Genus" + string.Concat(Guid.NewGuid().ToString("N").Where(char.IsLetter)).Substring(0, 8);
+    private static string NewGenus() => "Genus" + string.Concat(Guid.NewGuid().ToString("N").Take(12).Select(c => (char)('a' + Convert.ToInt32(c.ToString(), 16))));
 
     private WebApplicationFactory<Program> WithTrefle() =>
         api.InEnvironment("Testing", new() { ["PlantFacts:TrefleToken"] = "test-token" });
@@ -196,13 +196,13 @@ public class PlantFactsTests(ApiFactory api)
 
         Assert.Equal(HttpStatusCode.BadGateway, (await client.GetAsync($"/plant-facts?genus={genus}&species=species")).StatusCode);
 
-        // A failure isn't kept, so the next request asks again
-        await client.GetAsync($"/plant-facts?genus={genus}&species=species");
-        Assert.Equal(2, api.Wikipedia.CallsFor(genus));
+        // The failure is remembered for a few minutes, so a source that is down isn't asked again at once
+        Assert.Equal(HttpStatusCode.BadGateway, (await client.GetAsync($"/plant-facts?genus={genus}&species=species")).StatusCode);
+        Assert.Equal(1, api.Wikipedia.CallsFor(genus));
     }
 
     [Fact]
-    public async Task Facts_from_trefle_are_answered_even_when_wikipedia_failed_but_are_not_kept()
+    public async Task Facts_from_trefle_are_answered_even_when_wikipedia_failed_but_not_kept_by_the_browser()
     {
         var genus = NewGenus();
         api.Wikipedia.Answers[genus] = SourceResult<WikipediaSummary>.Error;
@@ -215,13 +215,14 @@ public class PlantFactsTests(ApiFactory api)
         var facts = await ReadAsync(response);
         Assert.Null(facts.Summary);
         Assert.NotNull(facts.Facts);
+        Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
 
         await client.GetAsync($"/plant-facts?genus={genus}&species=species");
-        Assert.Equal(2, api.Wikipedia.CallsFor(genus));
+        Assert.Equal(1, api.Wikipedia.CallsFor(genus));
     }
 
     [Fact]
-    public async Task Wikipedia_alone_is_enough_when_trefle_failed_but_the_answer_is_not_kept()
+    public async Task Wikipedia_alone_is_enough_when_trefle_failed_but_the_answer_is_no_store()
     {
         var genus = NewGenus();
         api.Wikipedia.Answers[genus] = SourceResult<WikipediaSummary>.Found(Article);
@@ -232,8 +233,12 @@ public class PlantFactsTests(ApiFactory api)
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull((await ReadAsync(response)).Summary);
-        await client.GetAsync($"/plant-facts?genus={genus}&species=species");
-        Assert.Equal(2, api.Wikipedia.CallsFor(genus));
+        Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
+
+        // Remembered for a few minutes on the server, and still sent as no-store
+        var again = await client.GetAsync($"/plant-facts?genus={genus}&species=species");
+        Assert.Equal("no-store", again.Headers.CacheControl?.ToString());
+        Assert.Equal(1, api.Wikipedia.CallsFor(genus));
     }
 
     [Fact]
@@ -241,8 +246,8 @@ public class PlantFactsTests(ApiFactory api)
     {
         var server = api.InEnvironment("Testing", new()
         {
-            ["RequestLimits:PublicBurst"] = "3",
-            ["RequestLimits:PublicPerMinute"] = "60",
+            ["RequestLimits:FactsBurst"] = "3",
+            ["RequestLimits:FactsPerMinute"] = "60",
         });
         var client = server.CreateClient();
         var genus = NewGenus();
@@ -265,8 +270,8 @@ public class PlantFactsTests(ApiFactory api)
     {
         var server = api.InEnvironment("Testing", new()
         {
-            ["RequestLimits:PublicBurst"] = "1",
-            ["RequestLimits:PublicPerMinute"] = "60",
+            ["RequestLimits:FactsBurst"] = "1",
+            ["RequestLimits:FactsPerMinute"] = "60",
         });
         var client = server.CreateClient();
         client.DefaultRequestHeaders.Authorization = new("Bearer", api.TokenFor(ApiFactory.NewClerkUserId()));

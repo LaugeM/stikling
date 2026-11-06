@@ -212,6 +212,7 @@ public class PlantFactsParsingTests
     [InlineData("", false)]
     [InlineData("   ", false)]
     [InlineData(null, false)]
+    [InlineData("deliciosa var. borsigiana", false)]
     [InlineData("Monstera1", false)]
     [InlineData("Monstera/deliciosa", false)]
     [InlineData("Mon<b>stera", false)]

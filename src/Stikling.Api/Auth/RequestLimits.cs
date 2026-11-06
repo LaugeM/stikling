@@ -15,11 +15,17 @@ public sealed class RequestLimitOptions
     /// <summary>How many more requests they get each minute after that.</summary>
     public int PerMinute { get; set; } = 600;
 
-    /// <summary>How many requests to the public share pages and the plant facts one address can send at once.</summary>
+    /// <summary>How many requests to the public share pages one address can send at once.</summary>
     public int PublicBurst { get; set; } = 300;
 
-    /// <summary>How many more requests to those that address gets each minute after that.</summary>
+    /// <summary>How many more requests to the share pages that address gets each minute after that.</summary>
     public int PublicPerMinute { get; set; } = 300;
+
+    /// <summary>How many requests to the plant facts one address can send at once. They ask other sites, so the limit is lower.</summary>
+    public int FactsBurst { get; set; } = 30;
+
+    /// <summary>How many more requests to the plant facts that address gets each minute after that.</summary>
+    public int FactsPerMinute { get; set; } = 30;
 }
 
 /// <summary>
@@ -45,16 +51,23 @@ public static class RequestLimits
                 // The Clerk user id, or the test person's in Development
                 if (context.User.Identity is not { IsAuthenticated: true, Name: { } person })
                 {
-                    // The share pages and the plant facts each get a bucket per address, with the same limits
-                    var bucket = context.Request.Path.StartsWithSegments("/s") ? "ip:"
-                        : context.Request.Path.StartsWithSegments("/plant-facts") ? "facts-ip:"
-                        : null;
-                    if (bucket is null)
-                        return RateLimitPartition.GetNoLimiter("");
-
                     // The address behind the ingress, read from X-Forwarded-For
                     var address = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-                    return RateLimitPartition.GetTokenBucketLimiter(bucket + address, _ => new TokenBucketRateLimiterOptions
+
+                    // The plant facts ask other sites, so they get a lower limit of their own
+                    if (context.Request.Path.StartsWithSegments("/plant-facts"))
+                        return RateLimitPartition.GetTokenBucketLimiter("facts-ip:" + address, _ => new TokenBucketRateLimiterOptions
+                        {
+                            TokenLimit = options.FactsBurst,
+                            TokensPerPeriod = 1,
+                            ReplenishmentPeriod = TimeSpan.FromSeconds(60.0 / Math.Max(1, options.FactsPerMinute)),
+                            QueueLimit = 0,
+                        });
+
+                    if (!context.Request.Path.StartsWithSegments("/s"))
+                        return RateLimitPartition.GetNoLimiter("");
+
+                    return RateLimitPartition.GetTokenBucketLimiter("ip:" + address, _ => new TokenBucketRateLimiterOptions
                     {
                         TokenLimit = options.PublicBurst,
                         TokensPerPeriod = Math.Max(1, options.PublicPerMinute / 60),

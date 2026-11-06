@@ -23,7 +23,7 @@ public static class PlantFactsEndpoints
             if (language is not (null or "en" or "da"))
                 return Results.Problem("The language must be en or da.", statusCode: StatusCodes.Status400BadRequest);
 
-            var answer = await facts.GetAsync(
+            var (answer, complete) = await facts.GetAsync(
                 PlantFactNames.Genus(genus!),
                 species is null ? null : PlantFactNames.Species(species),
                 language ?? "en",
@@ -32,7 +32,8 @@ public static class PlantFactsEndpoints
             if (answer is null)
                 return Results.Problem("Wikipedia couldn't be reached.", statusCode: StatusCodes.Status502BadGateway);
 
-            http.Response.Headers.CacheControl = "public, max-age=86400";
+            // An answer with a gap from a failed source isn't kept by the browser either
+            http.Response.Headers.CacheControl = complete ? "public, max-age=86400" : "no-store";
             return Results.Ok(answer);
         });
 

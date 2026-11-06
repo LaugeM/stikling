@@ -7,7 +7,9 @@ namespace Stikling.Api.PlantFacts;
 /// <summary>
 /// Asks Wikipedia, and Trefle for a species, and keeps the answer. The cache is the server's, with
 /// room for 5000 answers: one found is kept 7 days and one that found nothing 1 day, so a new article
-/// shows up in time. An answer where a source failed is not kept, so the next request tries again.
+/// shows up in time. When a source failed the answer goes out as it is, marked as incomplete so the
+/// browser doesn't keep it, and the failure is remembered for 5 minutes so a source that is down
+/// isn't asked again by every request.
 /// </summary>
 public sealed class PlantFactsService(
     IWikipediaSource wikipedia, ITrefleSource trefle, IOptions<PlantFactsOptions> options) : IDisposable
@@ -15,15 +17,21 @@ public sealed class PlantFactsService(
     public const int CacheSize = 5000;
     public static readonly TimeSpan FoundFor = TimeSpan.FromDays(7);
     public static readonly TimeSpan NotFoundFor = TimeSpan.FromDays(1);
+    public static readonly TimeSpan FailedFor = TimeSpan.FromMinutes(5);
+
+    private sealed record Entry(Facts? Answer, bool Complete);
 
     private readonly MemoryCache cache = new(new MemoryCacheOptions { SizeLimit = CacheSize });
 
-    /// <returns>The answer, or null when Wikipedia failed and there is nothing from Trefle either.</returns>
-    public async Task<Facts?> GetAsync(string genus, string? species, string language, CancellationToken cancellationToken)
+    /// <returns>
+    /// The answer, which is null when Wikipedia failed and there is nothing from Trefle either, and
+    /// whether it is complete. A source failing makes it incomplete, and the browser shouldn't keep it.
+    /// </returns>
+    public async Task<(Facts? Answer, bool Complete)> GetAsync(string genus, string? species, string language, CancellationToken cancellationToken)
     {
         var key = $"{language}|{genus}|{species}".ToLowerInvariant();
-        if (cache.TryGetValue(key, out Facts? kept))
-            return kept;
+        if (cache.TryGetValue(key, out Entry? kept) && kept is not null)
+            return (kept.Answer, kept.Complete);
 
         var article = wikipedia.FindAsync(genus, species, language, cancellationToken);
         var data = species is not null && options.Value.TrefleOn
@@ -34,22 +42,17 @@ public sealed class PlantFactsService(
         var summary = article.Result;
         var facts = data.Result;
         var answer = new Facts(summary.Value, facts.Value);
+        var complete = !summary.Failed && !facts.Failed;
+        Facts? result = summary.Failed && facts.Value is null ? null : answer;
 
-        if (summary.Failed && facts.Value is null)
-            return null;
-
-        // A failed source leaves a gap that the next request may fill
-        if (!summary.Failed && !facts.Failed)
+        var found = answer.Summary is not null || answer.Facts is not null;
+        cache.Set(key, new Entry(result, complete), new MemoryCacheEntryOptions
         {
-            var found = answer.Summary is not null || answer.Facts is not null;
-            cache.Set(key, answer, new MemoryCacheEntryOptions
-            {
-                Size = 1,
-                AbsoluteExpirationRelativeToNow = found ? FoundFor : NotFoundFor,
-            });
-        }
+            Size = 1,
+            AbsoluteExpirationRelativeToNow = !complete ? FailedFor : found ? FoundFor : NotFoundFor,
+        });
 
-        return answer;
+        return (result, complete);
     }
 
     public void Dispose() => cache.Dispose();

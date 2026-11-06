@@ -1,6 +1,7 @@
 @* A row for a details list: the small link "About this species" (or "About this genus"), which opens the facts
    card in a sheet. It shows nothing without a genus, or in a build with no API. An old name is followed to the
    one it goes by now first. Nothing is fetched until the link is tapped. *@
+@using Stikling.Core.PlantFacts
 @inject AccountService Account
 @inject PlantNameService Names
 
@@ -32,14 +33,22 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        genus = species = null;
         if (!Account.IsAvailable || string.IsNullOrWhiteSpace(Genus))
+        {
+            genus = species = null;
             return;
+        }
 
+        // Worked out on the side and set all at once. Clearing the names first would take the row, and
+        // an open sheet with it, off the page while the dictionary loads
         var dictionary = await Names.GetDictionaryAsync();
         var now = dictionary.Current(Genus.Trim(), string.IsNullOrWhiteSpace(Species) ? null : Species.Trim());
-        genus = now.Genus;
-        species = string.IsNullOrWhiteSpace(now.Species) ? null : now.Species;
-        language = (await Names.GetEverydayNamesAsync()).Language;
+        var newLanguage = (await Names.GetEverydayNamesAsync()).Language;
+
+        // A name the server would refuse (like "deliciosa var. borsigiana") falls back to the genus, and
+        // a genus it would refuse has no card at all
+        genus = PlantFactNames.IsValid(now.Genus) ? now.Genus : null;
+        species = genus is not null && PlantFactNames.IsValid(now.Species) ? now.Species : null;
+        language = newLanguage;
     }
 }

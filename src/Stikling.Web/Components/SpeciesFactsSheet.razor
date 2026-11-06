@@ -119,21 +119,43 @@
     // Trefle's facts are only shown when there is something in them
     private TrefleFacts? TrefleData => facts?.Facts;
 
-    protected override async Task OnInitializedAsync()
+    // What the last load was for, so an answer that arrives after the names changed or the sheet was
+    // opened again is ignored instead of replacing the state of a newer load
+    private string? loadedFor;
+    private int request;
+
+    protected override async Task OnParametersSetAsync()
     {
+        var wanted = $"{Genus}|{Species}|{Language}";
+        if (wanted == loadedFor)
+            return;
+
+        loadedFor = wanted;
+        var mine = ++request;
+        state = Load.Loading;
+        facts = null;
+
+        Load result;
+        PlantFacts? answer = null;
         try
         {
-            facts = await Api.GetPlantFactsAsync(Genus, Species, Language);
-            state = Load.Done;
+            answer = await Api.GetPlantFactsAsync(Genus, Species, Language);
+            result = Load.Done;
         }
         catch (Exception e) when (e is TaskCanceledException || e is HttpRequestException { StatusCode: null })
         {
-            state = Load.Offline;
+            result = Load.Offline;
         }
-        catch (Exception e) when (e is HttpRequestException or System.Text.Json.JsonException or NotSupportedException)
+        catch (Exception)
         {
-            state = Load.Failed;
+            result = Load.Failed;
         }
+
+        if (mine != request)
+            return;
+
+        facts = answer;
+        state = result;
     }
 
     private static string? HabitText(string? habit) => habit switch
