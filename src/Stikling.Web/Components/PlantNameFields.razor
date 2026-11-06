@@ -1,4 +1,4 @@
-@* A search box that takes everyday or botanical names and fills in the fields under it, then the
+﻿@* A search box that takes everyday or botanical names and fills in the fields under it, then the
    genus, species and cultivar fields, with names to tap under the one being typed in. Chips
    rather than a datalist, which a phone won't show. Anything can still be typed. The chips keep
    the field focused when tapped (mousedown is cancelled), so the keyboard stays up. The search
@@ -159,7 +159,7 @@ else
     [Parameter]
     public EventCallback<string?> NoteChanged { get; set; }
 
-    /// <summary>Offers "Identify from a photo". Only the plant and propagation forms turn it on.</summary>
+    /// <summary>Offers "Find the name from a photo". Only the plant and propagation forms turn it on.</summary>
     [Parameter]
     public bool ShowIdentify { get; set; }
 

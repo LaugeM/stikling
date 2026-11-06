@@ -113,6 +113,7 @@ Read the English for what it means, then write the sentence the way a Dane would
 | history (on a plant) | historik |
 | note | note |
 | photo | billede |
+| identify (a plant from a photo) | genkende, genkendelse. Never "bestemme", which reads as "decide" outside botany |
 | share | del |
 | search | søg |
 | import | importere |
