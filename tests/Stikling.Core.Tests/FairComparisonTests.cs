@@ -73,7 +73,7 @@ public class FairComparisonTests
     {
         var differing = FairComparison.InExperiment(Group(
             Batch(GrowingMedium.Water, change: p => { p.PlaceId = Room.Id; p.Species = "deliciosa"; }),
-            Batch(GrowingMedium.Perlite, genus: "", change: p => p.Nickname = "Unnamed")));
+            Batch(GrowingMedium.Perlite, genus: "", change: p => p.Nickname = "Unnamed")), Known);
 
         Assert.Equal([ComparedThing.Medium], differing);
     }
@@ -85,7 +85,7 @@ public class FairComparisonTests
         var places = new Places([Room, other]);
         var differing = FairComparison.InExperiment(Group(
             Batch(GrowingMedium.Water, change: p => { p.RootingAids = [RootingAid.HumidityDome]; p.DriedForHours = 30; p.PlaceId = Room.Id; }),
-            Batch(GrowingMedium.Water, change: p => { p.Type = PropagationType.Leaf; p.PlaceId = other.Id; })));
+            Batch(GrowingMedium.Water, change: p => { p.Type = PropagationType.Leaf; p.PlaceId = other.Id; })), places);
 
         Assert.Equal([ComparedThing.Type, ComparedThing.RootingAids, ComparedThing.Drying, ComparedThing.Place], differing);
     }
@@ -136,7 +136,7 @@ public class FairComparisonTests
     [Fact]
     public void A_single_batch_has_nothing_to_differ_from()
     {
-        Assert.Empty(FairComparison.InExperiment(Group(Batch(GrowingMedium.Water))), Known);
+        Assert.Empty(FairComparison.InExperiment(Group(Batch(GrowingMedium.Water)), Known));
     }
 
     [Fact]
@@ -193,9 +193,9 @@ public class FairComparisonTests
     {
         var differing = FairComparison.AcrossRootingAids(
         [
-            Batch(GrowingMedium.Sphagnum, change: p => p.RootingAids = [RootingAid.HumidityDome], Known),
+            Batch(GrowingMedium.Sphagnum, change: p => p.RootingAids = [RootingAid.HumidityDome]),
             Batch(GrowingMedium.Water)
-        ]);
+        ], Known);
 
         Assert.Equal([ComparedThing.Medium], differing);
     }
@@ -205,9 +205,9 @@ public class FairComparisonTests
     {
         Assert.Empty(FairComparison.AcrossRootingAids(
         [
-            Batch(GrowingMedium.Sphagnum, change: p => p.RootingAids = [RootingAid.HumidityDome], Known),
+            Batch(GrowingMedium.Sphagnum, change: p => p.RootingAids = [RootingAid.HumidityDome]),
             Batch(GrowingMedium.Water, change: p => p.RootingAids = [RootingAid.HumidityDome])
-        ]));
+        ], Known));
     }
 
     [Fact]
