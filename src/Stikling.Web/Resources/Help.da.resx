@@ -1101,6 +1101,15 @@
   <data name="CollectionNumberA1" xml:space="preserve">
     <value>Det korte nummer som nogle skriver på hver potte, fx 117. Det er valgfrit. Du sætter det i feltet &lt;em&gt;Samlingsnummer&lt;/em&gt; i plantens redigeringsformular, hvor det næste ledige nummer er et tryk væk. En stikling af plante 117 får 117a og så 117b, så dens etiket viser hvor den kommer fra. Når en stikling bliver pottet op, beholder planten sit nummer. Bliver flere pottet op samtidig, får de 117c1, 117c2 og så videre. Vil du nummerere de planter du allerede har, med de ældste først, åbner du &lt;em&gt;Samlingsnumre&lt;/em&gt; i Indstillinger. Har to planter samme nummer, bliver det vist, men Stikling ændrer aldrig et nummer for dig.</value>
   </data>
+  <data name="PrintStoryQ" xml:space="preserve">
+    <value>Kan jeg skrive en plantes historie ud?</value>
+  </data>
+  <data name="PrintStoryA1" xml:space="preserve">
+    <value>Ja, til at give en plante væk med dens historie eller til at gemme. Åbn <b>Mere</b> på plantens side, og vælg <b>Skriv dens historie ud</b>. Du får én side med dens billeder efter dato, dens noter, hvor den kom fra og hvad der er kommet fra den, og du vælger selv hvad der skal med. Der er plads til et par ord fra dig øverst.</value>
+  </data>
+  <data name="PrintStoryA2" xml:space="preserve">
+    <value><b>Print eller gem som PDF</b> åbner browserens printvindue, hvor du også kan gemme som PDF. En lang historie med mange billeder fortsætter på flere sider. Hvad den kostede, og hvem du har givet planter til, kommer ikke med, og det du vælger, bliver ikke gemt.</value>
+  </data>
   <data name="PrintLabelsQ" xml:space="preserve">
     <value>Hvordan udskriver jeg etiketter?</value>
   </data>
@@ -1283,5 +1292,17 @@
   </data>
   <data name="KeyboardShortcutsA1" xml:space="preserve">
     <value>Ja, på en computer. Tryk på ? på en hvilken som helst side for at se dem. / åbner Søg, og N tilføjer en plante. W åbner plejeformularen på vanding for planten, hvis side er åben, eller den du har valgt i listen eller gitteret under Planter, og der logges ikke noget, før du bekræfter i formularen. Esc lukker det, der er åbent oven på siden. Tryk på Tab for at komme til en række i en liste, så flytter piletasterne dig videre derfra. De gør ingenting, mens du skriver i et felt, og / og N venter, mens du er ved at udfylde en formular.</value>
+  </data>
+  <data name="CompareMediumsLikeWaterPerliteA2" xml:space="preserve">
+    <value>Er batchene forskellige på mere end ét punkt, fx et andet vækstmedie og en anden måned, siger en linje under eksperimentets overskrift hvad der er forskelligt, så en forskel i resultatet ikke læses som vækstmediets alene. Et plantenavn eller en placering der er tom, tæller ikke som en forskel.</value>
+  </data>
+  <data name="OnResultsPageA3" xml:space="preserve">
+    <value>Grupperne på siden er det du nu engang har gjort, ikke en test. Hvor batchene i grupperne for det meste også er forskellige i noget andet, fx måneden de blev startet, siger en linje under overskriften det.</value>
+  </data>
+  <data name="FailedDifferedQ" xml:space="preserve">
+    <value>Hvad er listen på en formering der mislykkedes?</value>
+  </data>
+  <data name="FailedDifferedA1" xml:space="preserve">
+    <value>Når du har mindst 3 batches af samme type der slog rødder, viser en mislykket formering hvad der var anderledes end dem: et vækstmedie, en rodhjælp eller en startmåned som få af dem havde, en rodhjælp som de fleste af dem havde, eller vand der blev skiftet meget oftere eller sjældnere. Den bruger kun det du selv har noteret, og siger det hvis intet skiller sig ud. Den viser hvad der var anderledes, ikke hvorfor det mislykkedes.</value>
   </data>
 </root>
