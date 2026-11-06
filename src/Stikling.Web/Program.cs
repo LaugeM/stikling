@@ -155,6 +155,7 @@ builder.Services.AddScoped<TimelapseService>();
 builder.Services.AddScoped<DeviceFiles>();
 builder.Services.AddScoped<AppBadge>();
 builder.Services.AddScoped<SitterSheetActions>();
+builder.Services.AddScoped<PlantStoryActions>();
 builder.Services.AddScoped<BackupService>();
 builder.Services.AddSingleton(AccountSettings.From(builder.Configuration, builder.HostEnvironment.IsDevelopment()));
 builder.Services.AddScoped<AccountService>();
