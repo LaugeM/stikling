@@ -193,6 +193,9 @@ public sealed class TimelineEntry : Entity
     /// <summary>The pest case a line is about, shown as a link. Null on every other entry.</summary>
     public Guid? PestCaseId { get; set; }
 
+    /// <summary>The pest treatment or check a line with photos belongs to. Null on every other entry, including the line for where a pest was found.</summary>
+    public Guid? PestTreatmentId { get; set; }
+
     /// <summary>
     /// The day a note comes back on Today ("Bring it back"). Only on notes, and null on every entry
     /// from before this was kept. Changing it isn't a correction, so it adds nothing to <see cref="Edits"/>.

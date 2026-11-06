@@ -178,6 +178,33 @@ public class PestFoundTests
     }
 
     [Fact]
+    public async Task Unmarking_leaves_a_treatment_photo_line_alone()
+    {
+        var s = new Setup();
+        var item = s.Case();
+        await s.Service.MarkAsync(item, s.Monstera, Today);
+        var treatmentLine = new TimelineEntry
+        {
+            SubjectType = SubjectType.Plant,
+            SubjectId = s.Monstera.Id,
+            Kind = TimelineKind.Change,
+            Event = TimelineEvent.Pest,
+            PestCaseId = item.Id,
+            PestTreatmentId = Guid.NewGuid(),
+            PhotoIds = [Guid.NewGuid()]
+        };
+        s.Timeline.Entries.Add(treatmentLine);
+
+        await s.Service.UnmarkAsync(item, s.Monstera.Id);
+
+        Assert.Equal(TimelineKind.Change, treatmentLine.Kind);
+        Assert.Equal(TimelineEvent.Pest, treatmentLine.Event);
+        Assert.Equal(item.Id, treatmentLine.PestCaseId);
+        Assert.NotNull(treatmentLine.PestTreatmentId);
+        Assert.False(treatmentLine.IsDeleted);
+    }
+
+    [Fact]
     public async Task Saving_a_new_case_marks_the_plants_on_the_day_it_started()
     {
         var s = new Setup();

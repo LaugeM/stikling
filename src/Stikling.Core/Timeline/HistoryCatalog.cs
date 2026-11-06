@@ -141,6 +141,9 @@ public static partial class HistoryText
         Add("ProblemClosed", EnLowerFirst(typeof(ProblemOutcome)));
         Add("ProblemReopened");
         Add("PestFound", En(typeof(Pest)));
+        Add("PestTreatedWith", EnLowerFirst(typeof(Pest)), Txt());
+        Add("PestTreated", EnLowerFirst(typeof(Pest)));
+        Add("PestChecked", EnLowerFirst(typeof(Pest)));
         Add("NewLeaf", En(typeof(Variegation)));
         Add("LookedOver");
         Add("ReceivedFrom", Txt());

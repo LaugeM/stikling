@@ -46,3 +46,44 @@
 .plan-date {
     max-width: 11rem;
 }
+
+/* Photos of the case: a row across the top, and each treatment's own under it */
+.case-photos {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
+.case-photos .log-photo {
+    flex: none;
+    width: 5.5rem;
+}
+
+.log-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+}
+
+.log-photo {
+    padding: 0;
+    border: 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: var(--pa-green-soft);
+}
+
+.log-photo ::deep img,
+.log-photo ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-treatment {
+    margin-top: 0.25rem;
+}

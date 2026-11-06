@@ -351,7 +351,7 @@ else
     {
         var allEntries = await Entries.GetForAsync(SubjectId);
         pestCaseIds = allEntries.Any(e => !e.IsDeleted && e.PestCaseId is not null)
-            ? (await PestCases.GetAllAsync()).Select(c => c.Id).ToHashSet()
+            ? (await PestCases.GetAllAsync()).Where(c => !c.IsDeleted).Select(c => c.Id).ToHashSet()
             : [];
         var allStored = await PhotoRepository.GetForAsync(SubjectId);
         references = PhotoKinds.References(allStored);

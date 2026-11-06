@@ -106,7 +106,7 @@ public sealed class PestFoundService(IPestCaseRepository cases, ITimelineReposit
     private async Task TakeOffLine(PestCase item, Guid plantId)
     {
         var lines = (await timeline.GetForAsync(plantId))
-            .Where(e => !e.IsDeleted && e.PestCaseId == item.Id && e.Event == TimelineEvent.Pest)
+            .Where(e => !e.IsDeleted && e.PestCaseId == item.Id && e.Event == TimelineEvent.Pest && e.PestTreatmentId is null)
             .ToList();
 
         foreach (var entry in lines)
