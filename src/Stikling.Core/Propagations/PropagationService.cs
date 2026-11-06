@@ -146,12 +146,73 @@ public sealed class PropagationService(
         await UpdateAsync(before, propagation, label);
     }
 
-    /// <summary>Records that the first root or leaf showed today.</summary>
-    public async Task RecordMilestoneAsync(Propagation propagation, Milestone milestone, Func<Enum, string> label)
+    /// <summary>Records that the first root or leaf showed on a day, today when none is given.</summary>
+    public async Task RecordMilestoneAsync(Propagation propagation, Milestone milestone, Func<Enum, string> label, DateOnly? on = null)
     {
+        var day = on ?? Today;
+        if (day < propagation.StartedOn)
+            throw new InvalidOperationException(Strings.Propagations.ErrSignBeforeStart);
+        if (day > Today)
+            throw new InvalidOperationException(Strings.Propagations.ErrSignFuture);
         var before = propagation.Copy();
-        propagation.RecordMilestone(milestone, Today);
+        propagation.RecordMilestone(milestone, day);
         await UpdateAsync(before, propagation, label);
+    }
+
+    /// <summary>
+    /// The first root and first leaf dates that go when this history entry is deleted: the ones its
+    /// "First root on day N" or "First leaf on day N" line noted, if the date still stands at day N.
+    /// A date changed or cleared since is left alone.
+    /// </summary>
+    public async Task<IReadOnlyList<Milestone>> UndoneByDeleteAsync(TimelineEntry entry)
+    {
+        if (entry.SubjectType != SubjectType.Propagation || await propagations.GetAsync(entry.SubjectId) is not { } propagation)
+            return [];
+        return Undone(entry, propagation);
+    }
+
+    /// <summary>
+    /// Deletes a history entry of a propagation. The dates its lines noted are cleared first (see
+    /// <see cref="UndoneByDeleteAsync"/>), so a failed save deletes nothing. The clearing adds no line of its own.
+    /// </summary>
+    /// <returns>The milestones that were cleared.</returns>
+    public async Task<IReadOnlyList<Milestone>> DeleteEntryAsync(TimelineEntry entry)
+    {
+        IReadOnlyList<Milestone> cleared = [];
+        if (entry.SubjectType == SubjectType.Propagation && await propagations.GetAsync(entry.SubjectId) is { } propagation)
+        {
+            cleared = Undone(entry, propagation);
+            if (cleared.Count > 0)
+            {
+                if (cleared.Contains(Milestone.FirstRoot))
+                    propagation.FirstRootOn = null;
+                if (cleared.Contains(Milestone.FirstLeaf))
+                    propagation.FirstLeafOn = null;
+                await propagations.SaveAsync(propagation);
+            }
+        }
+        await timeline.DeleteAsync(entry.Id);
+        return cleared;
+    }
+
+    /// <summary>Which milestones the lines of an entry noted, by the day number in the line.</summary>
+    public static IReadOnlyList<Milestone> Undone(TimelineEntry entry, Propagation propagation)
+    {
+        // The two lines hold only a number, so any label does for reading an older entry's text
+        // A note is the person's own words, so only a change entry is read from its text
+        IEnumerable<HistoryLine?> lines = entry.Lines
+            ?? (entry.Kind == TimelineKind.Change ? HistoryText.Parse(entry.Text ?? "", e => e.ToString()) : []);
+        var result = new List<Milestone>();
+        foreach (var line in lines)
+        {
+            if (line is not { Args: [{ Number: { } number }] })
+                continue;
+            if (line.Key == "FirstRootOnDay" && propagation.DaysToFirstRoot == number && !result.Contains(Milestone.FirstRoot))
+                result.Add(Milestone.FirstRoot);
+            else if (line.Key == "FirstLeafOnDay" && propagation.DaysToFirstLeaf == number && !result.Contains(Milestone.FirstLeaf))
+                result.Add(Milestone.FirstLeaf);
+        }
+        return result;
     }
 
     /// <summary>

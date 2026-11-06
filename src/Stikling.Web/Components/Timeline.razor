@@ -6,6 +6,7 @@
 @inject PhotoService Photos
 @inject ShelfService Shelf
 @inject TimeProvider Time
+@inject PropagationService PropagationService
 @using System.Globalization
 @using Stikling.Core.Sharing
 @using Stikling.Core.Propagations
@@ -97,7 +98,7 @@ else
                                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
                                             </button>
                                         }
-                                        <button type="button" class="entry-action" @onclick="() => confirmDeleteId = entry.Id"
+                                        <button type="button" class="entry-action" @onclick="() => AskDeleteAsync(entry)"
                                                 aria-label="@Strings.Propagations.TlDelete" title="@Strings.Propagations.TlDelete">
                                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
                                         </button>
@@ -195,7 +196,7 @@ else
                             @if (confirmDeleteId == entry.Id)
                             {
                                 <div class="entry-confirm">
-                                    <span>@(entryPhotos.Count > 0 ? Strings.Propagations.TlConfirmWithPhotos : Strings.Propagations.TlConfirm)</span>
+                                    <span>@(entryPhotos.Count > 0 ? Strings.Propagations.TlConfirmWithPhotos : Strings.Propagations.TlConfirm)@ClearsText</span>
                                     <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteEntryAsync(entry)">@Strings.Common.Delete</button>
                                     <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmDeleteId = null">@Strings.Common.Cancel</button>
                                 </div>
@@ -291,6 +292,10 @@ else
     /// <summary>Raised when the cover photo should change (null = no cover).</summary>
     [Parameter]
     public EventCallback<Guid?> OnCoverChanged { get; set; }
+
+    /// <summary>Raised when deleting an entry changed the subject itself, like clearing a first leaf date.</summary>
+    [Parameter]
+    public EventCallback OnSubjectChanged { get; set; }
 
     private readonly string referenceId = $"reference-{Guid.NewGuid():N}";
     private readonly string beforeId = $"before-{Guid.NewGuid():N}";
@@ -419,13 +424,37 @@ else
         return rows.OrderByDescending(r => r.At);
     }
 
+    private IReadOnlyList<Milestone> clearsOnDelete = [];
+
+    private string ClearsText => clearsOnDelete switch
+    {
+        [] => "",
+        [Milestone.FirstLeaf] => " " + Strings.Propagations.TlConfirmClearsFirstLeaf,
+        [Milestone.FirstRoot] => " " + Strings.Propagations.TlConfirmClearsFirstRoot,
+        _ => " " + Strings.Propagations.TlConfirmClearsBoth
+    };
+
+    private async Task AskDeleteAsync(TimelineEntry entry)
+    {
+        clearsOnDelete = entry.SubjectType == SubjectType.Propagation
+            ? await PropagationService.UndoneByDeleteAsync(entry)
+            : [];
+        confirmDeleteId = entry.Id;
+    }
+
     private async Task DeleteEntryAsync(TimelineEntry entry)
     {
         confirmDeleteId = null;
         foreach (var photoId in entry.PhotoIds)
             await RemovePhotoAsync(photoId);
-        await Entries.DeleteAsync(entry.Id);
+        IReadOnlyList<Milestone> cleared = [];
+        if (entry.SubjectType == SubjectType.Propagation)
+            cleared = await PropagationService.DeleteEntryAsync(entry);
+        else
+            await Entries.DeleteAsync(entry.Id);
         await LoadAsync();
+        if (cleared.Count > 0)
+            await OnSubjectChanged.InvokeAsync();
     }
 
     private async Task DeletePhotoAsync(Photo photo)

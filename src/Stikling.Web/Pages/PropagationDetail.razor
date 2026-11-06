@@ -319,9 +319,9 @@ else
 
                         @if (propagation.Type != PropagationType.Seed)
                         {
-                            @MilestoneRow(Strings.Propagations.EditFirstRoot, propagation.FirstRootOn, propagation.DaysToFirstRoot)
+                            @MilestoneRow(Strings.Propagations.EditFirstRoot, propagation.FirstRootOn, propagation.DaysToFirstRoot, "first-root")
                         }
-                        @MilestoneRow(Strings.Propagations.EditFirstLeaf, propagation.FirstLeafOn, propagation.DaysToFirstLeaf)
+                        @MilestoneRow(Strings.Propagations.EditFirstLeaf, propagation.FirstLeafOn, propagation.DaysToFirstLeaf, "first-leaf")
 
                         @if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } cormSize)
                         {
@@ -520,7 +520,7 @@ else
             @* The key reloads the history after stage changes and potting up *@
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
                       CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)"
-                      EmptyText="@Strings.Propagations.DetEmptyTimeline" />
+                      OnSubjectChanged="LoadAsync" EmptyText="@Strings.Propagations.DetEmptyTimeline" />
         </div>
     </div>
 
@@ -562,7 +562,7 @@ else
             <PropagationCareSheet Propagation="propagation" Logs="careLogs" OnLogged="CareLoggedAsync" OnRemoved="LoadAsync" />
         </Sheet>
 
-        <Sheet Title="@StageTitle" Open="stageView != StageView.None" OpenChanged="open => { if (!open) stageView = StageView.None; }">
+        <Sheet Title="@StageTitle" Open="stageView != StageView.None" OpenChanged="open => { if (!open) { stageView = StageView.None; askLeafDay = false; } }">
             @switch (stageView)
             {
                 case StageView.Stage:
@@ -613,7 +613,7 @@ else
                             <dd>
                                 @if (propagation.FirstRootOn is { } root)
                                 {
-                                    @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(root), propagation.DaysToFirstRoot)
+                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=first-root">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(root), propagation.DaysToFirstRoot)</a>
                                 }
                                 else
                                 {
@@ -626,13 +626,23 @@ else
                         <dd>
                             @if (propagation.FirstLeafOn is { } leaf)
                             {
-                                @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(leaf), propagation.DaysToFirstLeaf)
+                                <a class="link-action" href="propagations/@propagation.Id/edit?field=first-leaf">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(leaf), propagation.DaysToFirstLeaf)</a>
+                            }
+                            else if (askLeafDay)
+                            {
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <label class="visually-hidden" for="first-leaf-day">@Strings.Propagations.EditFirstLeaf</label>
+                                    <input id="first-leaf-day" type="date" class="form-control form-control-sm w-auto" @bind="sawLeafDay" @bind:format="yyyy-MM-dd"
+                                           min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="RecordFirstLeafAsync">@Strings.Common.Save</button>
+                                    <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => askLeafDay = false">@Strings.Common.Cancel</button>
+                                </div>
                             }
                             else
                             {
                                 <span class="text-body-secondary">@Strings.Propagations.DetNotYet</span>
                                 <button type="button" class="btn btn-link btn-sm link-action ms-2 align-baseline" disabled="@busy"
-                                        @onclick="RecordFirstLeafAsync">@Strings.Propagations.DetSawLeaf</button>
+                                        @onclick="AskLeafDay">@Strings.Propagations.DetSawLeaf</button>
                             }
                         </dd>
 
@@ -1137,7 +1147,7 @@ else
     private string HowManyLeft => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetHowManyLeft, propagation!.RemainingCount);
 
     // Only the date, or "Not yet". Recording a milestone happens in the stage sheet.
-    private RenderFragment MilestoneRow(string name, DateOnly? date, int? days) => __builder =>
+    private RenderFragment MilestoneRow(string name, DateOnly? date, int? days, string field) => __builder =>
     {
         if (date is null && !propagation!.IsActive)
             return;
@@ -1145,7 +1155,7 @@ else
         <dd>
             @if (date is { } on)
             {
-                @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(on), days)
+                <a class="link-action" href="propagations/@propagation!.Id/edit?field=@field">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(on), days)</a>
             }
             else
             {
@@ -1324,6 +1334,7 @@ else
     private void OpenStage()
     {
         message = null;
+        askLeafDay = false;
         stageView = StageView.Stage;
     }
 
@@ -1348,6 +1359,15 @@ else
         }
     }
 
+    private bool askLeafDay;
+    private DateOnly sawLeafDay;
+
+    private void AskLeafDay()
+    {
+        sawLeafDay = Today;
+        askLeafDay = true;
+    }
+
     private async Task RecordFirstLeafAsync()
     {
         if (propagation is null)
@@ -1356,11 +1376,18 @@ else
         try
         {
             var hadFirstLeaf = propagation.FirstLeafOn is not null;
-            await PropagationService.RecordMilestoneAsync(propagation, Milestone.FirstLeaf, Labels.For(propagation));
-            if (!hadFirstLeaf && propagation.FirstLeafOn is not null && propagation.DaysToFirstLeaf is { } leafDay)
-                moment = new(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.MomentFirstLeaf, leafDay), propagation.DisplayName);
+            await PropagationService.RecordMilestoneAsync(propagation, Milestone.FirstLeaf, Labels.For(propagation), sawLeafDay);
+            if (!hadFirstLeaf && propagation.FirstLeafOn is not null && propagation.DaysToFirstLeaf is { } leafDays)
+                moment = new(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.MomentFirstLeaf, leafDays), propagation.DisplayName);
             message = null;
             historyVersion++;
+            askLeafDay = false;
+            stageView = StageView.None;
+        }
+        catch (InvalidOperationException ex)
+        {
+            message = ex.Message;
+            askLeafDay = false;
             stageView = StageView.None;
         }
         finally

@@ -16,6 +16,15 @@ export function showAlert(id) {
     element.focus({ preventScroll: true });
 }
 
+// Brings a field into view and focuses it, for a link that is about changing that one field
+export function focusField(id) {
+    const element = document.getElementById(id);
+    if (!element)
+        return;
+    element.scrollIntoView({ behavior: "instant", block: "center" });
+    element.focus({ preventScroll: true });
+}
+
 // Brings a section that was just opened on the page into view
 export function scrollToId(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });

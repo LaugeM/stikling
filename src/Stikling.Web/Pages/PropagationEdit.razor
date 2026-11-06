@@ -461,12 +461,26 @@ else
         // Not only the first render: that one comes at the first await in OnParametersSetAsync, before the form exists
         await TakeInboxPhotosAsync();
 
+        if (focusFieldId is { } fieldId && propagation is not null)
+        {
+            focusFieldId = null;
+            await using var focusModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+            await focusModule.InvokeVoidAsync("focusField", fieldId);
+        }
+
         if (!showErrors)
             return;
         showErrors = false;
         await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
         await module.InvokeVoidAsync("showAlert", "form-errors");
     }
+
+    /// <summary>The one field to open and focus, "first-root" or "first-leaf", from a date on the propagation's page.</summary>
+    [SupplyParameterFromQuery(Name = "field")]
+    public string? Field { get; set; }
+
+    // The field to focus once the form is drawn. Set when loading, cleared after it was focused
+    private string? focusFieldId;
 
     /// <summary>The waiting photos to start from, as ids in the share inbox separated by commas, from Add photos.</summary>
     [SupplyParameterFromQuery(Name = "inbox")]
@@ -675,6 +689,11 @@ else
         openWhere = !isNew && !string.IsNullOrWhiteSpace(form.Location);
         openSetup = isNew || HasSetup(propagation);
         openProgress = !isNew && HasProgress(propagation);
+        if (!isNew && Field is "first-root" or "first-leaf")
+        {
+            openProgress = true;
+            focusFieldId = Field;
+        }
         openSitter = !isNew && !string.IsNullOrWhiteSpace(propagation.SitterNote);
         openSwap = !isNew && propagation.SpareCount is > 0;
     }
