@@ -12,6 +12,7 @@
 @inject DeviceFiles Files
 @inject SettingsService SettingsService
 @inject GooglePhotosService Google
+@inject IdentificationService Identification
 @inject TimeProvider Time
 @inject AccountService Account
 @inject SyncRunner Sync
@@ -212,6 +213,12 @@
                     @Strings.Settings.GooglePhotosHint
                 </p>
             }
+            <label class="form-label mt-4" for="plantnet-key">@Strings.Settings.PlantNetKey</label>
+            <input id="plantnet-key" class="form-control" value="@plantNetKey" autocomplete="off" autocapitalize="off" spellcheck="false"
+                   @onchange="SetPlantNetKeyAsync" />
+            <p class="settings-hint">
+                @Strings.Settings.PlantNetKeyHint
+            </p>
             <div class="settings-rows mt-4">
                 <SettingsRow Href="fields" Title="@Strings.Settings.YourFields" Detail="@OwnFieldsLine" />
             </div>
@@ -576,6 +583,7 @@
         accountChecking = Account.IsAvailable && await Account.WasSignedInAsync();
         accountHintRead = true;
         lastBackup = await Files.GetLastBackupAsync();
+        plantNetKey = await Identification.GetKeyAsync();
         await LoadDataAsync();
     }
 
@@ -617,6 +625,15 @@
     {
         photoReminder = e.Value is true;
         await SettingsService.SetPhotoReminderAsync(photoReminder);
+    }
+
+    // On this device only: it is not a setting that follows the person, so it is not in UserSettings
+    private string? plantNetKey;
+
+    private async Task SetPlantNetKeyAsync(ChangeEventArgs e)
+    {
+        plantNetKey = string.IsNullOrWhiteSpace(e.Value?.ToString()) ? null : e.Value!.ToString()!.Trim();
+        await Identification.SetKeyAsync(plantNetKey);
     }
 
     private async Task SetGooglePhotosAsync(ChangeEventArgs e)

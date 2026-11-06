@@ -16,6 +16,7 @@ param apiMinReplicas int
 param sentryDsn string
 param vapidPublicKey string
 param plantFactsTrefleOn bool = false
+param identificationOn bool
 
 // Storage account and SQL server names are global, so they get a part that is fixed per resource group
 var suffix = uniqueString(resourceGroup().id)
@@ -356,6 +357,26 @@ var plantFactsSecrets = plantFactsTrefleOn
     ]
   : []
 
+// Plant identification is off until the Pl@ntNet key is in the vault. Only the API reads it, not the job
+var identificationEnv = identificationOn
+  ? [
+      {
+        name: 'Identification__PlantNetApiKey'
+        secretRef: 'plantnet-api-key'
+      }
+    ]
+  : []
+
+var identificationSecrets = identificationOn
+  ? [
+      {
+        name: 'plantnet-api-key'
+        keyVaultUrl: '${vault.properties.vaultUri}secrets/plantnet-api-key'
+        identity: apiIdentity.id
+      }
+    ]
+  : []
+
 resource api 'Microsoft.App/containerApps@2024-03-01' = {
   name: 'stikling-api'
   location: location
@@ -370,7 +391,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
     workloadProfileName: 'Consumption'
     configuration: {
       activeRevisionsMode: 'Single'
-      secrets: concat(notificationSecrets, plantFactsSecrets)
+      secrets: concat(notificationSecrets, plantFactsSecrets, identificationSecrets)
       ingress: {
         external: true
         targetPort: 8080
@@ -387,7 +408,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.25')
             memory: '0.5Gi'
           }
-          env: concat(sharedEnv, apiEnv, notificationEnv, plantFactsEnv)
+          env: concat(sharedEnv, apiEnv, notificationEnv, plantFactsEnv, identificationEnv)
         }
       ]
       scale: {

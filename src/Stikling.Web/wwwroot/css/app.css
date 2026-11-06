@@ -1340,7 +1340,9 @@ img.framed {
 
 .detail-list {
     display: grid;
-    grid-template-columns: max-content 1fr;
+    /* The value column may shrink below its content (a plain 1fr won't), so a long link or word wraps
+       instead of widening the page. The label column only gives way when it passes half the width. */
+    grid-template-columns: fit-content(50%) minmax(0, 1fr);
     gap: 0.4rem 1rem;
     margin: 0;
 }
@@ -1348,10 +1350,12 @@ img.framed {
 .detail-list dt {
     font-weight: 500;
     color: var(--pa-muted);
+    overflow-wrap: anywhere;
 }
 
 .detail-list dd {
     margin: 0;
+    overflow-wrap: anywhere;
 }
 
 .detail-notes {
@@ -2326,6 +2330,39 @@ a.tag-label:hover {
 .name-result-sub {
     color: var(--pa-muted);
     font-size: 0.875rem;
+}
+
+/* The sheet that names a plant from a photo: the ways to pick a photo, then what came back */
+.identify-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.identify-button {
+    min-height: 2.75rem;
+}
+
+.identify-thumb {
+    padding: 0;
+    border: 0;
+}
+
+.identify-thumb:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.identify-heading {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.identify-credit {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
 }
 
 /* Shared by Settings and the pages that came out of it */

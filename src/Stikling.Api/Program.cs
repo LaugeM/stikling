@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Auth;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
+using Stikling.Api.Identification;
 using Stikling.Api.Notifications;
 using Stikling.Api.People;
 using Stikling.Api.PlantFacts;
@@ -61,6 +62,7 @@ builder.Services.AddRequestLimits(builder.Configuration);
 builder.Services.Configure<ShareOptions>(builder.Configuration.GetSection(ShareOptions.Section));
 builder.Services.Configure<NotificationOptions>(builder.Configuration.GetSection(NotificationOptions.Section));
 builder.Services.AddSingleton<IPushSender, WebPushSender>();
+builder.Services.AddIdentification(builder.Configuration);
 
 // The plant facts card: Wikipedia, and Trefle when a token is set. Neither client logs its requests,
 // since Trefle's token is in its address, and both give up after 10 seconds.
@@ -139,6 +141,7 @@ app.MapShareLinks();
 app.MapSharePages();
 app.MapNotifications();
 app.MapPlantFacts();
+app.MapIdentification();
 
 app.Run();
 return 0;

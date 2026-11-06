@@ -20,6 +20,10 @@ param vapidPublicKey = 'BCSzcrpqLL3Aob9erhGgfZrdgqGXji_5WMR3TvYaU0pNJuI2mKzTYMp4
 // Whether the plant facts card also asks Trefle. Needs the trefle-token secret in the Key Vault, see docs/ops/hosting.md
 param plantFactsTrefleOn = false
 
+// Plant identification from a photo. Turn it on once the plantnet-api-key secret is in the Key Vault,
+// see docs/ops/hosting.md.
+param identificationOn = false
+
 // In Danish kroner, since that is the subscription's currency. 50 kr. is about $8, so about $100 a year,
 // which is what the student credit covers
 param monthlyBudget = 50
