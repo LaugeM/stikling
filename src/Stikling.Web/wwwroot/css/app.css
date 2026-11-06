@@ -277,7 +277,7 @@ h1 {
 .form-control:focus,
 .form-select:focus {
     border-color: var(--pa-green);
-    box-shadow: 0 0 0 0.2rem rgb(var(--bs-primary-rgb) / 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
 .form-control::placeholder {
@@ -383,7 +383,7 @@ a.item-card:focus-visible {
 a.item-card:focus-visible,
 a.plant-tile:focus-visible,
 a.plant-name:focus-visible {
-    box-shadow: 0 0 0 0.2rem rgb(var(--bs-primary-rgb) / 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
 a.item-card,
