@@ -1,0 +1,148 @@
+@* The inside of the About this species sheet: a short text from Wikipedia and a few facts from Trefle, with their
+   credits. It is only on the page while the sheet is open, so nothing is fetched before someone asks. The text is
+   shown as plain text, never as markup. Nothing is stored on the device. *@
+@using System.Globalization
+@using Stikling.Core.Flowering
+@using Stikling.Core.PlantFacts
+@inject StiklingApi Api
+
+<div class="species-facts">
+    @switch (state)
+    {
+        case Load.Loading:
+            <p class="text-body-secondary">@Strings.Plants.Loading</p>
+            break;
+        case Load.Offline:
+            <p class="text-body-secondary">@Strings.Common.FactsOffline</p>
+            break;
+        case Load.Failed:
+            <p class="text-body-secondary">@Strings.Common.FactsFailed</p>
+            break;
+        default:
+            @if (facts is not { Summary: not null } && TrefleData is null)
+            {
+                <p class="text-body-secondary">@Strings.Common.FactsNothing</p>
+            }
+            else
+            {
+                @if (facts?.Summary is { } summary)
+                {
+                    @* lang so a screen reader reads the English article in English *@
+                    <p class="species-facts-text" lang="@summary.Language">@summary.Text</p>
+                    @if (summary.Language != Language)
+                    {
+                        <p class="detail-sub">@Strings.Common.FactsInEnglish</p>
+                    }
+                }
+
+                @if (TrefleData is { } trefle)
+                {
+                    <dl class="detail-list species-facts-list">
+                        @if (trefle.MaxHeightCm is { } height)
+                        {
+                            <dt>@Strings.Common.FactsHeight</dt>
+                            <dd>@string.Format(CultureInfo.CurrentCulture, Strings.Common.FactsHeightUpTo, Lengths.Cm(height))</dd>
+                        }
+                        @if (trefle.BloomMonths.Count > 0)
+                        {
+                            <dt>@Strings.Common.FactsBloom</dt>
+                            <dd>@string.Join(", ", trefle.BloomMonths.Select(FloweringText.MonthName))</dd>
+                        }
+                        @if (HabitText(trefle.GrowthHabit) is { } habit)
+                        {
+                            <dt>@Strings.Common.FactsHabit</dt>
+                            <dd>@habit</dd>
+                        }
+                    </dl>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Cultivar))
+                {
+                    <p class="detail-sub">@string.Format(CultureInfo.CurrentCulture, Strings.Common.FactsCultivarNote, Cultivar)</p>
+                }
+
+                <p class="species-facts-credits">
+                    @if (facts?.Summary is { } article)
+                    {
+                        <span><a href="@article.PageUrl" target="_blank" rel="noopener">@Strings.Common.FactsWikipediaCredit<span class="visually-hidden"> @Strings.Common.OpensInNewTab</span></a></span>
+                    }
+                    @if (TrefleData is { } data)
+                    {
+                        <span>
+                            <a href="https://trefle.io/" target="_blank" rel="noopener">@Strings.Common.FactsTrefleCredit<span class="visually-hidden"> @Strings.Common.OpensInNewTab</span></a>@if (data.Sources.Count > 0)
+                            {
+                                <text>: </text>
+                                @for (var i = 0; i < data.Sources.Count; i++)
+                                {
+                                    var source = data.Sources[i];
+                                    @(i > 0 ? ", " : "")
+                                    @if (source.Url is { } url)
+                                    {
+                                        <a href="@url" target="_blank" rel="noopener">@source.Name<span class="visually-hidden"> @Strings.Common.OpensInNewTab</span></a>
+                                    }
+                                    else
+                                    {
+                                        @source.Name
+                                    }
+                                }
+                            }
+                        </span>
+                    }
+                </p>
+            }
+            break;
+    }
+</div>
+
+@code {
+    private enum Load { Loading, Done, Offline, Failed }
+
+    /// <summary>The genus, as it goes by now.</summary>
+    [Parameter, EditorRequired]
+    public string Genus { get; set; } = "";
+
+    /// <summary>The species as it goes by now. Null asks about the genus.</summary>
+    [Parameter]
+    public string? Species { get; set; }
+
+    /// <summary>The plant's cultivar, which only adds the line saying the card is about the species.</summary>
+    [Parameter]
+    public string? Cultivar { get; set; }
+
+    /// <summary>"en" or "da": the app's language.</summary>
+    [Parameter]
+    public string Language { get; set; } = "en";
+
+    private Load state = Load.Loading;
+    private PlantFacts? facts;
+
+    // Trefle's facts are only shown when there is something in them
+    private TrefleFacts? TrefleData => facts?.Facts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            facts = await Api.GetPlantFactsAsync(Genus, Species, Language);
+            state = Load.Done;
+        }
+        catch (Exception e) when (e is TaskCanceledException || e is HttpRequestException { StatusCode: null })
+        {
+            state = Load.Offline;
+        }
+        catch (Exception e) when (e is HttpRequestException or System.Text.Json.JsonException or NotSupportedException)
+        {
+            state = Load.Failed;
+        }
+    }
+
+    private static string? HabitText(string? habit) => habit switch
+    {
+        "Tree" => Strings.Common.FactsHabitTree,
+        "Shrub" => Strings.Common.FactsHabitShrub,
+        "Subshrub" => Strings.Common.FactsHabitSubshrub,
+        "Vine" => Strings.Common.FactsHabitVine,
+        "Forb/herb" => Strings.Common.FactsHabitHerb,
+        _ => null,
+    };
+}

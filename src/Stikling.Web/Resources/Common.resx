@@ -78,4 +78,76 @@
     <value>(opens in a new tab)</value>
     <comment>Read out by screen readers after a link that opens a new tab</comment>
   </data>
+  <data name="AboutSpecies" xml:space="preserve">
+    <value>About this species</value>
+    <comment>Small link on a plant's page and on a dictionary species page. Opens a short card about the species from Wikipedia and Trefle.</comment>
+  </data>
+  <data name="AboutGenus" xml:space="preserve">
+    <value>About this genus</value>
+    <comment>Same link, for a plant that is only known by its genus.</comment>
+  </data>
+  <data name="FactsInEnglish" xml:space="preserve">
+    <value>In English</value>
+    <comment>Line on the About this species card, shown when the article in the app's language wasn't found and the English one is shown.</comment>
+  </data>
+  <data name="FactsCultivarNote" xml:space="preserve">
+    <value>About the species. {0} can look different.</value>
+    <comment>Line on the About this species card for a plant with a cultivar. {0} is the cultivar's name.</comment>
+  </data>
+  <data name="FactsNothing" xml:space="preserve">
+    <value>Nothing found about this plant yet.</value>
+    <comment>Shown on the About this species card when neither source had anything.</comment>
+  </data>
+  <data name="FactsOffline" xml:space="preserve">
+    <value>This needs a connection.</value>
+    <comment>Shown on the About this species card when the device is offline.</comment>
+  </data>
+  <data name="FactsFailed" xml:space="preserve">
+    <value>Couldn't load this right now.</value>
+    <comment>Shown on the About this species card when the server or a source failed.</comment>
+  </data>
+  <data name="FactsWikipediaCredit" xml:space="preserve">
+    <value>From Wikipedia, CC BY-SA 4.0</value>
+    <comment>Credit under the text on the About this species card. The whole line links to the Wikipedia article.</comment>
+  </data>
+  <data name="FactsTrefleCredit" xml:space="preserve">
+    <value>Data: Trefle.io (CC BY 4.0)</value>
+    <comment>Credit under the facts on the About this species card. It links to trefle.io, and the names of the sources it got the data from follow.</comment>
+  </data>
+  <data name="FactsHeight" xml:space="preserve">
+    <value>Height</value>
+    <comment>Label on the About this species card.</comment>
+  </data>
+  <data name="FactsHeightUpTo" xml:space="preserve">
+    <value>Up to {0}</value>
+    <comment>Value of Height on the About this species card. {0} is a length with its unit.</comment>
+  </data>
+  <data name="FactsBloom" xml:space="preserve">
+    <value>Flowers</value>
+    <comment>Label on the About this species card, before the months the plant flowers in the wild.</comment>
+  </data>
+  <data name="FactsHabit" xml:space="preserve">
+    <value>Grows as</value>
+    <comment>Label on the About this species card, before Tree, Shrub and the like.</comment>
+  </data>
+  <data name="FactsHabitTree" xml:space="preserve">
+    <value>Tree</value>
+    <comment>Value of Grows as on the About this species card.</comment>
+  </data>
+  <data name="FactsHabitShrub" xml:space="preserve">
+    <value>Shrub</value>
+    <comment>Value of Grows as on the About this species card.</comment>
+  </data>
+  <data name="FactsHabitSubshrub" xml:space="preserve">
+    <value>Small shrub</value>
+    <comment>Value of Grows as on the About this species card.</comment>
+  </data>
+  <data name="FactsHabitVine" xml:space="preserve">
+    <value>Climber</value>
+    <comment>Value of Grows as on the About this species card.</comment>
+  </data>
+  <data name="FactsHabitHerb" xml:space="preserve">
+    <value>Herb</value>
+    <comment>Value of Grows as on the About this species card. A herbaceous plant, not a kitchen herb.</comment>
+  </data>
 </root>

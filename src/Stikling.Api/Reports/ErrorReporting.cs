@@ -27,8 +27,20 @@ public static class ErrorReporting
         options.AddExceptionFilterForType<AccountDeletedException>();
         options.AddExceptionFilterForType<OperationCanceledException>();
 
+        // Trefle's token is in the address of its requests, so a report never holds the outgoing requests
+        // (the SDK's breadcrumbs for HttpClient, or a report made of a failed one)
+        options.CaptureFailedRequests = false;
+        options.SetBeforeBreadcrumb(ScrubBreadcrumb);
         options.SetBeforeSend(Scrub);
     }
+
+    /// <summary>Drops the breadcrumbs the SDK makes for outgoing HTTP requests, which hold their addresses with the query.</summary>
+    public static Breadcrumb? ScrubBreadcrumb(Breadcrumb breadcrumb, SentryHint hint) =>
+        string.Equals(breadcrumb.Type, "http", StringComparison.OrdinalIgnoreCase)
+            || breadcrumb.Category?.Contains("http", StringComparison.OrdinalIgnoreCase) == true
+            || breadcrumb.Data?.Keys.Any(k => k.Contains("url", StringComparison.OrdinalIgnoreCase) || k.Contains("query", StringComparison.OrdinalIgnoreCase)) == true
+            ? null
+            : breadcrumb;
 
     /// <summary>Takes out who the request was from and anything the caller sent along.</summary>
     public static SentryEvent? Scrub(SentryEvent e, SentryHint hint)

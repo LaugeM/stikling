@@ -15,10 +15,10 @@ public sealed class RequestLimitOptions
     /// <summary>How many more requests they get each minute after that.</summary>
     public int PerMinute { get; set; } = 600;
 
-    /// <summary>How many requests to the public share pages one address can send at once.</summary>
+    /// <summary>How many requests to the public share pages and the plant facts one address can send at once.</summary>
     public int PublicBurst { get; set; } = 300;
 
-    /// <summary>How many more requests to the share pages that address gets each minute after that.</summary>
+    /// <summary>How many more requests to those that address gets each minute after that.</summary>
     public int PublicPerMinute { get; set; } = 300;
 }
 
@@ -28,8 +28,8 @@ public sealed class RequestLimitOptions
 /// refills each second. A first sync with a lot of photos can go past the burst, and the app then
 /// waits and carries on. Requests without a sign-in aren't counted: they are turned away before
 /// they reach the database, and the health check has to answer whatever happens. The one exception
-/// is the public share pages under /s/, which anyone can open and which do read the database. Each
-/// address gets a bucket of its own there.
+/// are the public share pages under /s/, which anyone can open and which do read the database, and the
+/// plant facts, which ask other sites. Each address gets a bucket of its own there, one for each.
 /// </summary>
 public static class RequestLimits
 {
@@ -45,12 +45,16 @@ public static class RequestLimits
                 // The Clerk user id, or the test person's in Development
                 if (context.User.Identity is not { IsAuthenticated: true, Name: { } person })
                 {
-                    if (!context.Request.Path.StartsWithSegments("/s"))
+                    // The share pages and the plant facts each get a bucket per address, with the same limits
+                    var bucket = context.Request.Path.StartsWithSegments("/s") ? "ip:"
+                        : context.Request.Path.StartsWithSegments("/plant-facts") ? "facts-ip:"
+                        : null;
+                    if (bucket is null)
                         return RateLimitPartition.GetNoLimiter("");
 
                     // The address behind the ingress, read from X-Forwarded-For
                     var address = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-                    return RateLimitPartition.GetTokenBucketLimiter("ip:" + address, _ => new TokenBucketRateLimiterOptions
+                    return RateLimitPartition.GetTokenBucketLimiter(bucket + address, _ => new TokenBucketRateLimiterOptions
                     {
                         TokenLimit = options.PublicBurst,
                         TokensPerPeriod = Math.Max(1, options.PublicPerMinute / 60),

@@ -4237,3 +4237,26 @@ tr.drop-target {
     border-radius: 999px;
 }
 
+/* The About this species sheet: the article's text, a few facts, and the credits in small type */
+.species-facts-text {
+    margin: 0 0 0.5rem;
+    line-height: 1.55;
+}
+
+.species-facts-list {
+    margin-block: 0.75rem;
+}
+
+.species-facts-credits {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 1rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--pa-muted);
+}
+
+.species-facts-credits a {
+    color: inherit;
+    text-decoration: underline;
+}

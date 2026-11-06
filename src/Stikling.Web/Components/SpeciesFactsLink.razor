@@ -1,0 +1,45 @@
+@* A row for a details list: the small link "About this species" (or "About this genus"), which opens the facts
+   card in a sheet. It shows nothing without a genus, or in a build with no API. An old name is followed to the
+   one it goes by now first. Nothing is fetched until the link is tapped. *@
+@inject AccountService Account
+@inject PlantNameService Names
+
+@if (genus is not null)
+{
+    <dd class="dict-link-row">
+        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => open = true">@(species is null ? Strings.Common.AboutGenus : Strings.Common.AboutSpecies)</button>
+        <Sheet Title="@(species is null ? genus : $"{genus} {species}")" Open="open" OpenChanged="value => open = value">
+            <SpeciesFactsSheet Genus="@genus" Species="@species" Cultivar="@Cultivar" Language="@language" />
+        </Sheet>
+    </dd>
+}
+
+@code {
+    [Parameter]
+    public string? Genus { get; set; }
+
+    /// <summary>The species to look up, which is null for a plant with an unsure species (see <c>Plant.KnownSpecies</c>).</summary>
+    [Parameter]
+    public string? Species { get; set; }
+
+    [Parameter]
+    public string? Cultivar { get; set; }
+
+    private string? genus;
+    private string? species;
+    private string language = "en";
+    private bool open;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        genus = species = null;
+        if (!Account.IsAvailable || string.IsNullOrWhiteSpace(Genus))
+            return;
+
+        var dictionary = await Names.GetDictionaryAsync();
+        var now = dictionary.Current(Genus.Trim(), string.IsNullOrWhiteSpace(Species) ? null : Species.Trim());
+        genus = now.Genus;
+        species = string.IsNullOrWhiteSpace(now.Species) ? null : now.Species;
+        language = (await Names.GetEverydayNamesAsync()).Language;
+    }
+}

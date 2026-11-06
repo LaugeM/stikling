@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Stikling.Api.Data;
 using Stikling.Api.Notifications;
+using Stikling.Api.PlantFacts;
 using Testcontainers.Azurite;
 using Testcontainers.MsSql;
 
@@ -50,6 +51,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     /// <summary>Stands in for the push services, and records what the API sent.</summary>
     public FakePushSender Push { get; } = new();
+
+    /// <summary>Stand in for Wikipedia and Trefle, which the plant facts ask.</summary>
+    public FakeWikipedia Wikipedia { get; } = new();
+
+    public FakeTrefle Trefle { get; } = new();
 
     private static (string, string) MakeVapidKeys()
     {
@@ -86,6 +92,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         {
             services.RemoveAll<IPushSender>();
             services.AddSingleton<IPushSender>(Push);
+            services.RemoveAll<IWikipediaSource>();
+            services.AddSingleton<IWikipediaSource>(Wikipedia);
+            services.RemoveAll<ITrefleSource>();
+            services.AddSingleton<ITrefleSource>(Trefle);
             services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, jwt =>
             {
                 // Stands in for the OpenID configuration the API would fetch from Clerk

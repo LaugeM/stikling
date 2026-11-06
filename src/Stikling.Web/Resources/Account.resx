@@ -735,7 +735,7 @@
     <comment>Heading of the page. This page is a privacy statement and is translated as it is.</comment>
   </data>
   <data name="PrivacyUpdated" xml:space="preserve">
-    <value>Last changed 11 October 2026</value>
+    <value>Last changed 6 November 2026</value>
     <comment>Update the date together with the English text.</comment>
   </data>
   <data name="PrivacyIntro" xml:space="preserve">
@@ -880,5 +880,11 @@
   <data name="PasskeyReverify" xml:space="preserve">
     <value>Sign out and in again, then try once more.</value>
     <comment>Shown when the sign-in is too old to change passkeys and the confirmation couldn't be shown.</comment>
+  </data>
+  <data name="PrivacyFactsHeading" xml:space="preserve">
+    <value>About this species</value>
+  </data>
+  <data name="PrivacyFacts1" xml:space="preserve">
+    <value>When you open About this species on a plant or in the dictionary, the app sends the plant's genus and species to Stikling's server, which asks Wikipedia and Trefle about it. Nothing about you, your account or your plants is sent along, and nothing is asked until you tap the link. The server keeps the answers for a few days, so the same name doesn't have to be looked up again, and doesn't keep who asked. As with the public pages, it uses the IP address for a moment to limit how often the card can be loaded, and doesn't keep it.</value>
   </data>
 </root>
