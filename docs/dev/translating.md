@@ -57,7 +57,7 @@ Read the English for what it means, then write the sentence the way a Dane would
 | --- | --- |
 | plant | plante |
 | cutting | stikling |
-| propagation | stikling, also for seeds, corms and offsets. The Propagations page is Stiklinger. Use no noun where the line reads fine without one ("Slet", "3 i gang"). Never "formering" as a countable noun |
+| propagation | stikling, also for seeds, corms and offsets. The Propagations page is Stiklinger. Use no noun where the line reads fine without one ("3 i gang"). Never "formering" as a countable noun |
 | propagation of the Other type | ny plante ("Ny plante af {0}") |
 | Today | I dag |
 | water plants | vand planter |
