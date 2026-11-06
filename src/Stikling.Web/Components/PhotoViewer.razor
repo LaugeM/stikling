@@ -4,7 +4,7 @@
 {
     <div class="viewer" role="dialog" aria-modal="true" aria-label="@Strings.Shared.PhotoViewerLabel" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
         <div class="viewer-bar">
-            <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))@PhotoDayCount.Suffix(PhotoAge?.Invoke(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime)))</span>
+            <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))@PhotoDayCount.Suffix(PhotoAge?.Invoke(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime)))@(Caption?.Invoke(photo) is { Length: > 0 } caption ? $" · {caption}" : null)</span>
             <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
         </div>
 
@@ -83,6 +83,10 @@
     /// <summary>The day the photos count from (day 0). Without it, no day count is shown.</summary>
     [Parameter]
     public Func<DateOnly, string?>? PhotoAge { get; set; }
+
+    /// <summary>Text shown after the date for a photo, like the plant it shows. Nothing is added when it returns null or empty.</summary>
+    [Parameter]
+    public Func<Photo, string?>? Caption { get; set; }
 
     [Parameter]
     public EventCallback<Photo> OnSetCover { get; set; }

@@ -442,7 +442,7 @@
     <value>Føj til sagen</value>
   </data>
   <data name="CaseDeleteConfirm" xml:space="preserve">
-    <value>Vil du slette sagen og dens behandlinger? Er den overstået, så markér den hellere som løst, så det du har gjort, bliver gemt.</value>
+    <value>Vil du slette sagen og dens behandlinger? Er den overstået, så markér den hellere som løst, så det du har gjort, bliver gemt. Billederne bliver på planternes historik.</value>
   </data>
   <data name="CaseDelete" xml:space="preserve">
     <value>Slet sag</value>
@@ -950,5 +950,35 @@
   </data>
   <data name="CaseEditRemoveSeen" xml:space="preserve">
     <value>Fjern {0}</value>
+  </data>
+  <data name="PhotoPlantLabel" xml:space="preserve">
+    <value>Billeder af</value>
+  </data>
+  <data name="PhotoOtherPlants" xml:space="preserve">
+    <value>Andre planter</value>
+  </data>
+  <data name="PhotoMarksSeen" xml:space="preserve">
+    <value>Når du gemmer, markeres den som set her.</value>
+  </data>
+  <data name="CaseEditPhotos" xml:space="preserve">
+    <value>Billeder</value>
+  </data>
+  <data name="CasePhotos" xml:space="preserve">
+    <value>Billeder</value>
+  </data>
+  <data name="CaseOpenPhotoOf" xml:space="preserve">
+    <value>Åbn billede af {0}</value>
+  </data>
+  <data name="CaseRemoveTreatmentConfirm" xml:space="preserve">
+    <value>Vil du fjerne denne behandling?</value>
+  </data>
+  <data name="CaseRemoveCheckConfirm" xml:space="preserve">
+    <value>Vil du fjerne dette tjek?</value>
+  </data>
+  <data name="CaseRemoveTrapCountConfirm" xml:space="preserve">
+    <value>Vil du fjerne denne optælling?</value>
+  </data>
+  <data name="CaseRemovePhotosStay" xml:space="preserve">
+    <value>Billederne bliver på plantens historik.</value>
   </data>
 </root>

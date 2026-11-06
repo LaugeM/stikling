@@ -580,7 +580,7 @@
     <comment>Button that adds a neighbour plant to the pest case.</comment>
   </data>
   <data name="CaseDeleteConfirm" xml:space="preserve">
-    <value>Delete this case and its treatments? If it is over, mark it resolved instead so what you did is kept.</value>
+    <value>Delete this case and its treatments? If it is over, mark it resolved instead so what you did is kept. Photos stay on the plants' histories.</value>
     <comment>Asks before deleting a pest case.</comment>
   </data>
   <data name="CaseDelete" xml:space="preserve">
@@ -1252,5 +1252,45 @@
   <data name="CaseEditRemoveSeen" xml:space="preserve">
     <value>Remove {0}</value>
     <comment>Screen reader name of the button that takes a plant off the Seen on list. {0} is the name of the plant.</comment>
+  </data>
+  <data name="PhotoPlantLabel" xml:space="preserve">
+    <value>Photos of</value>
+    <comment>Label of the list for picking which plant the photos picked for a pest case show.</comment>
+  </data>
+  <data name="PhotoOtherPlants" xml:space="preserve">
+    <value>Other plants</value>
+    <comment>Group in the list of plants the photos can be of: the plants the pest wasn't seen on.</comment>
+  </data>
+  <data name="PhotoMarksSeen" xml:space="preserve">
+    <value>Saving marks it as seen here.</value>
+    <comment>Under the list of plants for photos on a new pest case, when the plant picked isn't marked as seen here yet. "it" is the plant.</comment>
+  </data>
+  <data name="CaseEditPhotos" xml:space="preserve">
+    <value>Photos</value>
+    <comment>Heading of the photos part of the form for a new pest case.</comment>
+  </data>
+  <data name="CasePhotos" xml:space="preserve">
+    <value>Photos</value>
+    <comment>Heading of the card with the photos of a pest case.</comment>
+  </data>
+  <data name="CaseOpenPhotoOf" xml:space="preserve">
+    <value>Open photo of {0}</value>
+    <comment>Screen reader name of a photo on a pest case. {0} is the name of the plant it shows.</comment>
+  </data>
+  <data name="CaseRemoveTreatmentConfirm" xml:space="preserve">
+    <value>Remove this treatment?</value>
+    <comment>Asks before removing a treatment from a pest case.</comment>
+  </data>
+  <data name="CaseRemoveCheckConfirm" xml:space="preserve">
+    <value>Remove this check?</value>
+    <comment>Asks before removing a check from a pest case.</comment>
+  </data>
+  <data name="CaseRemoveTrapCountConfirm" xml:space="preserve">
+    <value>Remove this trap count?</value>
+    <comment>Asks before removing a sticky trap count from a pest case.</comment>
+  </data>
+  <data name="CaseRemovePhotosStay" xml:space="preserve">
+    <value>Its photos stay on the plant's history.</value>
+    <comment>Added to the question about removing a treatment or check that has photos.</comment>
   </data>
 </root>

@@ -2,6 +2,7 @@
 @page "/pests/{Id:guid}/edit"
 @inject IPestCaseRepository PestCases
 @inject PestFoundService PestFound
+@inject PestPhotoService PestPhotos
 @inject ILogger<PestCaseEdit> Logger
 @inject IPlantRepository PlantRepository
 @inject ITreatmentPlanRepository PlanRepository
@@ -169,6 +170,14 @@ else
             }
         </fieldset>
 
+        @if (IsNew && PhotoPlants.Count > 0)
+        {
+            <fieldset>
+                <legend>@Strings.Pests.CaseEditPhotos <span class="text-body-secondary fw-normal">@Strings.Pests.Optional</span></legend>
+                <PestPhotoPick @ref="picker" Plants="PhotoPlants" FoundOnIds="item.FoundOnPlantIds" MarksSeen="true" BusyChanged="SetPhotosBusy" />
+            </fieldset>
+        }
+
         <fieldset>
             <legend>@Strings.Pests.CaseEditTreatment</legend>
             @if (IsNew && plans.Count > 0)
@@ -216,7 +225,7 @@ else
         </fieldset>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary" disabled="@saving">@(IsNew ? Strings.Pests.CaseEditOpen : Strings.Common.Save)</button>
+            <button type="submit" class="btn btn-primary" disabled="@(saving || photosBusy)">@(IsNew ? Strings.Pests.CaseEditOpen : Strings.Common.Save)</button>
             <a class="btn btn-link" href="@BackUrl">@Strings.Common.Cancel</a>
         </div>
     </EditForm>
@@ -251,6 +260,21 @@ else
     private string? room; // as picked, "Living room"; made into a room when saving
 
     private bool IsNew => Id is null;
+
+    private PestPhotoPick? picker;
+    private bool photosBusy;
+
+    // Kept when saving stopped partway, so the next try carries on from there
+    private bool caseSaved;
+    private (Guid PlantId, IReadOnlyList<Guid> Ids)? recorded;
+
+    private void SetPhotosBusy(bool value) => photosBusy = value;
+
+    // The plants the photos can be of: the case's own plants when they were picked, otherwise every plant.
+    // The ones the pest was seen on come first, then alphabetical (the list is already in that order).
+    private IReadOnlyList<Plant> PhotoPlants =>
+        item is null ? [] : [.. (item.Scope == PestScope.PickedPlants ? plants.Where(p => item.PlantIds.Contains(p.Id)) : plants)
+            .OrderBy(p => item.FoundOnPlantIds.Contains(p.Id) ? 0 : 1)];
 
     // The search box only shows once the list is long enough to need one
     private const int SearchFrom = 8;
@@ -388,13 +412,29 @@ else
             if (errors.Count > 0)
                 return;
 
-            if (loadedStatus is { } from)
-                PestService.StatusChanged(item, from, Today, caseTreatments);
+            // Trying again after the photo step failed only finishes the photos, since the case is saved
+            if (!caseSaved)
+            {
+                if (loadedStatus is { } from)
+                    PestService.StatusChanged(item, from, Today, caseTreatments);
 
-            if (IsNew && plans.FirstOrDefault(p => p.Id == pickedPlan) is { } plan)
-                item.StartPlan(plan, item.StartedOn);
+                if (IsNew && plans.FirstOrDefault(p => p.Id == pickedPlan) is { } plan)
+                    item.StartPlan(plan, item.StartedOn);
 
-            await PestFound.SaveAsync(item, foundBefore, plants, Labels.English);
+                // A photo of a plant means the pest was seen there
+                if (IsNew && picker is { HasPhotos: true, PlantId: { } photoPlant } && !item.FoundOnPlantIds.Contains(photoPlant))
+                    item.FoundOnPlantIds.Add(photoPlant);
+
+                await PestFound.SaveAsync(item, foundBefore, plants, Labels.English);
+                caseSaved = true;
+            }
+
+            if (IsNew && picker is { HasPhotos: true, PlantId: { } plantId })
+                recorded = (plantId, await picker.RecordAsync());
+
+            if (recorded is { } done)
+                await PestPhotos.AddToFoundLineAsync(item, done.PlantId, done.Ids, Labels.English);
+
             Navigation.NavigateTo($"pests/{item.Id}", replace: IsNew);
         }
         catch (Exception ex)

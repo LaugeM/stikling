@@ -134,6 +134,7 @@ builder.Services.AddScoped<SitterSheetService>();
 builder.Services.AddScoped<FloweringService>();
 builder.Services.AddScoped<ProblemService>();
 builder.Services.AddScoped<PestFoundService>();
+builder.Services.AddScoped<PestPhotoService>();
 builder.Services.AddScoped<WishService>();
 builder.Services.AddScoped<CareService>();
 builder.Services.AddScoped<SearchService>();

@@ -12,6 +12,8 @@
 @inject PutOffService PutOffService
 @inject TimeProvider Time
 @inject PestFoundService PestFound
+@inject PestPhotoService PestPhotos
+@inject IPhotoRepository PhotoRepository
 
 <PageTitle>@(view is null ? Strings.Pests.CasePageTitle : Labels.For(view.Case.Pest)) · Stikling</PageTitle>
 <ReloadOnSync Reload="ReloadAsync" />
@@ -79,6 +81,23 @@ else
     @if (message is not null)
     {
         <p class="action-message" role="status">@message</p>
+    }
+
+    @if (casePhotos.Count > 0)
+    {
+        <section class="detail-card">
+            <h2>@Strings.Pests.CasePhotos</h2>
+            <div class="case-photos">
+                @foreach (var photo in casePhotos)
+                {
+                    var open = photo;
+                    <button type="button" class="log-photo" @onclick="() => viewerIndex = photoIndex[open.Id]"
+                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseOpenPhotoOf, PlantOf(open))">
+                        <PhotoImage PhotoId="open.Id" />
+                    </button>
+                }
+            </div>
+        </section>
     }
 
     @if (view.Case.IsOpen && view.CleanDays >= view.CleanTarget)
@@ -166,6 +185,7 @@ else
         <section class="detail-card">
             <h2>@(view.IsCheck ? Strings.Pests.CaseLogCheck : Strings.Pests.CaseLogTreatment)</h2>
             <TreatmentSheet @key="@((view.Case.Status, view.Step?.Id))" Case="view.Case" Existing="treatments" Check="view.IsCheck"
+                            Plants="FoundFirst.ToList()" FoundOnIds="view.Case.FoundOnPlantIds"
                             Step="@(view.Case.PlanRunning ? view.Step : null)"
                             OnLogged="LoggedAsync" OnCancel="() => logging = false" />
         </section>
@@ -383,6 +403,31 @@ else
                             @* The recipe as it was that day, not as it is now *@
                             <div class="treatment-recipe">@string.Join(" · ", treatment.Ingredients)</div>
                         }
+                        @if (treatmentPhotos.TryGetValue(treatment.Id, out var rowPhotos))
+                        {
+                            <div class="log-photos">
+                                @foreach (var photoId in rowPhotos)
+                                {
+                                    var open = photoId;
+                                    <button type="button" class="log-photo" @onclick="() => viewerIndex = photoIndex[open]"
+                                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseOpenPhotoOf, PlantOf(open))">
+                                        <PhotoImage PhotoId="open" />
+                                    </button>
+                                }
+                            </div>
+                        }
+                        @if (removing == treatment.Id)
+                        {
+                            <div class="problem-confirm remove-treatment">
+                                <span>@RemoveQuestion(treatment)@(removingPhotos > 0 ? $" {Strings.Pests.CaseRemovePhotosStay}" : null)</span>
+                                <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="() => RemoveAsync(treatment)">@Strings.Common.Remove</button>
+                                <button type="button" class="btn btn-link btn-sm" @onclick="() => removing = null">@Strings.Common.Cancel</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-link btn-sm link-action text-danger remove-treatment" disabled="@busy" @onclick="() => AskRemoveAsync(treatment)">@Strings.Common.Remove</button>
+                        }
                     </li>
                 }
             </ul>
@@ -461,6 +506,8 @@ else
 
     </div>
 
+    <PhotoViewer PhotoList="casePhotos" @bind-Index="viewerIndex" Caption="PlantOf" />
+
     <section class="danger-zone">
         @if (confirmDelete)
         {
@@ -508,6 +555,13 @@ else
     private bool confirmStop;
     private IReadOnlyList<Neighbour> neighbours = [];
     private PutOffs putOffs = PutOffs.Empty();
+    private IReadOnlyList<Photo> casePhotos = [];
+    private Dictionary<Guid, int> photoIndex = [];
+    private Dictionary<Guid, string> photoPlants = [];
+    private Dictionary<Guid, List<Guid>> treatmentPhotos = [];
+    private int? viewerIndex;
+    private Guid? removing;
+    private int removingPhotos;
 
     private DateOnly Today => Time.Today();
 
@@ -521,6 +575,7 @@ else
         following = false;
         movingStep = null;
         confirmStop = false;
+        removing = null;
         message = null;
         await ReloadAsync();
         loaded = true;
@@ -547,6 +602,81 @@ else
             .ToList();
         view = PestService.Describe(item, plants, all, places, Today, settings.CleanWeeks ?? PestService.DefaultCleanWeeks, putOffs);
         neighbours = PestService.Neighbours(item, plants, await CaseRepository.GetAllAsync(), all, places);
+        await LoadPhotosAsync(item, plants);
+    }
+
+    // The photos on the lines of the case, newest line first, each as the plant it shows. A line of a
+    // plant that is gone, and a photo that is gone, are left out.
+    private async Task LoadPhotosAsync(PestCase item, IReadOnlyList<Plant> plants)
+    {
+        var names = plants.Where(p => !p.IsDeleted).ToDictionary(p => p.Id, p => p.DisplayName);
+        var list = new List<Photo>();
+        var index = new Dictionary<Guid, int>();
+        var named = new Dictionary<Guid, string>();
+        var byTreatment = new Dictionary<Guid, List<Guid>>();
+
+        foreach (var line in await PestPhotos.LinesForAsync(item.Id))
+        {
+            if (!names.TryGetValue(line.SubjectId, out var plantName))
+                continue;
+
+            foreach (var photoId in line.PhotoIds)
+            {
+                if (index.ContainsKey(photoId) || await PhotoRepository.GetAsync(photoId) is not { } photo)
+                    continue;
+
+                index[photoId] = list.Count;
+                named[photoId] = plantName;
+                list.Add(photo);
+
+                if (line.PestTreatmentId is { } treatmentId)
+                {
+                    if (!byTreatment.TryGetValue(treatmentId, out var ids))
+                        byTreatment[treatmentId] = ids = [];
+                    ids.Add(photoId);
+                }
+            }
+        }
+
+        casePhotos = list;
+        photoIndex = index;
+        photoPlants = named;
+        treatmentPhotos = byTreatment;
+        if (viewerIndex >= list.Count)
+            viewerIndex = null;
+    }
+
+    private string? PlantOf(Photo photo) => PlantOf(photo.Id);
+
+    private string? PlantOf(Guid photoId) => photoPlants.GetValueOrDefault(photoId);
+
+    private string RemoveQuestion(PestTreatment treatment) => treatment.Kind switch
+    {
+        PestTreatmentKind.Checked => Strings.Pests.CaseRemoveCheckConfirm,
+        PestTreatmentKind.TrapCount => Strings.Pests.CaseRemoveTrapCountConfirm,
+        _ => Strings.Pests.CaseRemoveTreatmentConfirm
+    };
+
+    // One row asks at a time
+    private async Task AskRemoveAsync(PestTreatment treatment)
+    {
+        removingPhotos = await PestPhotos.PhotoCountAsync(treatment);
+        removing = treatment.Id;
+    }
+
+    private async Task RemoveAsync(PestTreatment treatment)
+    {
+        busy = true;
+        try
+        {
+            await PestPhotos.RemoveTreatmentAsync(treatment);
+            removing = null;
+            await ReloadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     private async Task CleanAsync(Plant plant)
@@ -928,10 +1058,11 @@ else
 
     private async Task DeleteAsync()
     {
-        foreach (var treatment in treatments)
-            await Treatments.DeleteAsync(treatment.Id);
+        if (view is null)
+            return;
 
-        await Repository.DeleteAsync(Id);
+        // The photos stay on the plants' histories as plain photo entries
+        await PestPhotos.DeleteCaseAsync(view.Case);
         Navigation.NavigateTo("pests", replace: true);
     }
 }

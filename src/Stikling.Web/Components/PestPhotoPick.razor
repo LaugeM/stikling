@@ -1,0 +1,238 @@
+@* Photos for a pest case, with the plant they show. Only the image data is stored when a photo is
+   picked. The page calls RecordAsync once what they belong to is saved, which writes the records
+   for the chosen plant. Photos left unrecorded when the form goes away are removed again, and so are
+   the ones left by a reload or a closed tab. *@
+@inject PhotoService Photos
+@inject DeviceFiles Device
+@inject IPlantRepository PlantRepository
+@inject ILogger<PestPhotoPick> Logger
+@implements IAsyncDisposable
+
+@if (Plants.Count > 0)
+{
+    <div class="pest-photo-pick">
+        @if (photos.Count > 0)
+        {
+            <div class="photo-picks">
+                @foreach (var photo in photos)
+                {
+                    <div class="photo-pick">
+                        <PhotoImage PhotoId="photo.Id" Alt="@Strings.Pests.SheetPhotoToAdd" />
+                        <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
+                                aria-label="@Strings.Pests.SheetRemovePhoto" title="@Strings.Pests.SheetRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                    </div>
+                }
+            </div>
+        }
+        <div class="composer-row">
+            <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                @Strings.Pests.SheetCamera
+            </label>
+            <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                   @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
+            <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                @Strings.Pests.SheetGallery
+            </label>
+            <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
+                   @ref="galleryInput" @onchange="() => AddPhotosAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+        </div>
+        @if (photoStatus is not null)
+        {
+            <p class="form-text mb-0" role="status">@photoStatus</p>
+        }
+
+        @if (photos.Count > 0)
+        {
+            <div class="mt-2">
+                <label class="form-label" for="@selectId">@Strings.Pests.PhotoPlantLabel</label>
+                <select id="@selectId" class="form-select form-select-sm" value="@chosen" @onchange="PlantChanged">
+                    @if (FoundOn.Count > 0)
+                    {
+                        <optgroup label="@Strings.Pests.CaseSeenHere">
+                            @foreach (var plant in FoundOn)
+                            {
+                                <option value="@plant.Id">@plant.DisplayName</option>
+                            }
+                        </optgroup>
+                        @if (Others.Count > 0)
+                        {
+                            <optgroup label="@Strings.Pests.PhotoOtherPlants">
+                                @foreach (var plant in Others)
+                                {
+                                    <option value="@plant.Id">@plant.DisplayName</option>
+                                }
+                            </optgroup>
+                        }
+                    }
+                    else
+                    {
+                        @foreach (var plant in Plants)
+                        {
+                            <option value="@plant.Id">@plant.DisplayName</option>
+                        }
+                    }
+                </select>
+                @if (MarksSeen && chosen is { } picked && !FoundOnIds.Contains(picked))
+                {
+                    <div class="form-text">@Strings.Pests.PhotoMarksSeen</div>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>The plants the photos can be of, in the order to show them.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Plant> Plants { get; set; } = [];
+
+    /// <summary>The plants the pest was seen on. They come first in the list.</summary>
+    [Parameter]
+    public IReadOnlyCollection<Guid> FoundOnIds { get; set; } = [];
+
+    /// <summary>Saving marks a plant that isn't seen here yet as seen here, so the list says so.</summary>
+    [Parameter]
+    public bool MarksSeen { get; set; }
+
+    /// <summary>Raised with true when photos start saving and false when they are done, so the page can hold its save button.</summary>
+    [Parameter]
+    public EventCallback<bool> BusyChanged { get; set; }
+
+    private const string DraftKey = "pest-draft-photos";
+
+    private readonly string cameraId = $"pest-camera-{Guid.NewGuid():N}";
+    private readonly string galleryId = $"pest-gallery-{Guid.NewGuid():N}";
+    private readonly string selectId = $"pest-photo-plant-{Guid.NewGuid():N}";
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+    private readonly List<Photo> photos = [];
+    private string? photoStatus;
+    private bool busy;
+    private Guid? chosen;
+
+    public bool HasPhotos => photos.Count > 0;
+
+    /// <summary>The plant the photos are of, or null when no plant can be chosen.</summary>
+    public Guid? PlantId => chosen;
+
+    private IReadOnlyList<Plant> FoundOn => [.. Plants.Where(p => FoundOnIds.Contains(p.Id))];
+
+    private IReadOnlyList<Plant> Others => [.. Plants.Where(p => !FoundOnIds.Contains(p.Id))];
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Photos left by a reload or a closed tab have no records, so only the image data goes
+        try
+        {
+            if (await Device.GetAsync(DraftKey) is { Length: > 0 } left)
+            {
+                foreach (var id in left.Split(',').Select(Guid.Parse))
+                    await Photos.RemoveBytesAsync(id);
+                await Device.SetAsync(DraftKey, null);
+            }
+        }
+        catch (Exception ex) when (ex is FormatException or JSException)
+        {
+            // Nothing to clear up
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (chosen is { } id && Plants.Any(p => p.Id == id))
+            return;
+
+        chosen = (FoundOn.FirstOrDefault() ?? Plants.FirstOrDefault())?.Id;
+    }
+
+    private void PlantChanged(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var id) && Plants.Any(p => p.Id == id))
+            chosen = id;
+    }
+
+    private async Task AddPhotosAsync(ElementReference input, bool fromCamera)
+    {
+        busy = true;
+        photoStatus = Strings.Pests.SheetSavingPhotos;
+        await BusyChanged.InvokeAsync(true);
+
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType.Plant, Guid.Empty, record: false);
+            photos.AddRange(result.Saved);
+            await RememberDraftAsync();
+            photoStatus = result.Message(guessesMatter: !fromCamera);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding photos to a pest case failed");
+            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetPhotosFailed, ex.Message);
+        }
+
+        busy = false;
+        await BusyChanged.InvokeAsync(false);
+    }
+
+    private async Task RemovePhotoAsync(Photo photo)
+    {
+        photos.Remove(photo);
+        photoStatus = null;
+        await Photos.RemoveBytesAsync(photo.Id);
+        await RememberDraftAsync();
+    }
+
+    // Kept on the device too, so photos left by a reload or a closed tab are cleared next time
+    private Task RememberDraftAsync() =>
+        Device.SetAsync(DraftKey, photos.Count == 0 ? null : string.Join(",", photos.Select(p => p.Id)));
+
+    /// <summary>
+    /// Writes the records of the picked photos as photos of the chosen plant, gives the plant a cover
+    /// when it has none, and empties the list. Returns the ids, in the order they were picked.
+    /// </summary>
+    public async Task<IReadOnlyList<Guid>> RecordAsync()
+    {
+        if (photos.Count == 0 || chosen is not { } plantId)
+            return [];
+
+        foreach (var photo in photos)
+            photo.SubjectId = plantId;
+        await Photos.RecordSavedAsync(photos);
+
+        // Recorded photos are no longer drafts, so nothing clears their image data from here on
+        var recorded = photos.ToList();
+        photos.Clear();
+        await RememberDraftAsync();
+
+        if (await PlantRepository.GetAsync(plantId) is { } plant && plant.CoverPhotoId is null)
+        {
+            plant.CoverPhotoId = PhotoEntries.Cover(recorded).Id;
+            await PlantRepository.SaveAsync(plant);
+        }
+
+        var ids = recorded.Select(p => p.Id).ToList();
+        StateHasChanged();
+        return ids;
+    }
+
+    /// <summary>Photos picked but never saved belong to nothing, so they go when the form does.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        if (photos.Count == 0)
+            return;
+
+        try
+        {
+            foreach (var photo in photos)
+                await Photos.RemoveBytesAsync(photo.Id);
+            photos.Clear();
+            await RememberDraftAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away; the photos go with it
+        }
+    }
+}

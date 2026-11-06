@@ -2,11 +2,14 @@
    Changing it here is how you get a different gap without changing the interval itself.
    With Check set it logs a look for pests on a case being watched: only a date and notes.
    A saved recipe is picked from chips and copied onto the treatment. Anything else is typed.
-   With Step set the sheet starts filled from that step of the case's plan and saves it as done. *@
+   With Step set the sheet starts filled from that step of the case's plan and saves it as done.
+   Photos can be added to a treatment or a check and are of one plant picked from Plants. They are
+   written as photos of that plant once the treatment is saved, on a line in its history. *@
 @inject IPestTreatmentRepository Repository
 @inject ILogger<TreatmentSheet> Logger
 @inject ITreatmentRecipeRepository Recipes
 @inject TimeProvider Time
+@inject PestPhotoService PestPhotos
 
 <div class="care-sheet">
     @if (error is not null)
@@ -98,8 +101,10 @@
                @bind="notes" @bind:event="oninput" />
     </div>
 
+    <PestPhotoPick @ref="picker" Plants="Plants" FoundOnIds="FoundOnIds" BusyChanged="SetPhotosBusy" />
+
     <div class="care-actions">
-        <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="LogAsync">@(Check ? Strings.Pests.CaseLogCheck : Strings.Pests.CaseLogTreatment)</button>
+        <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || photosBusy)" @onclick="LogAsync">@(Check ? Strings.Pests.CaseLogCheck : Strings.Pests.CaseLogTreatment)</button>
         @if (OnCancel.HasDelegate)
         {
             <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="OnCancel">@Strings.Common.Cancel</button>
@@ -129,6 +134,23 @@
     /// <summary>The step of the case's running plan this treatment is for.</summary>
     [Parameter]
     public PlanStep? Step { get; set; }
+
+    /// <summary>The plants photos can be of, in the order to show them. Without any, photos can't be added.</summary>
+    [Parameter]
+    public IReadOnlyList<Plant> Plants { get; set; } = [];
+
+    /// <summary>The plants the pest was seen on, which come first in the list of plants for photos.</summary>
+    [Parameter]
+    public IReadOnlyCollection<Guid> FoundOnIds { get; set; } = [];
+
+    private PestPhotoPick? picker;
+    private bool photosBusy;
+
+    // Kept when saving stopped partway, so the next try carries on from there
+    private PestTreatment? saved;
+    private (Guid PlantId, IReadOnlyList<Guid> Ids)? recorded;
+
+    private void SetPhotosBusy(bool value) => photosBusy = value;
 
     private bool offPlan;
     private bool OnStep => Step is not null && !offPlan;
@@ -198,21 +220,35 @@
         error = null;
         try
         {
-            var entry = Check ? PestService.StartCheck(Case, occurredOn) : new PestTreatment
+            // Trying again after the photo step failed finishes the treatment already saved
+            // instead of saving a second one
+            if (saved is null)
             {
-                CaseId = Case.Id,
-                OccurredOn = occurredOn,
-                What = Clean(what),
-                // Only a date that isn't the plain interval is worth storing, so changing the
-                // interval later still moves the cases that never had a gap set by hand
-                NextDueOn = OnStep || nextDue == Default(occurredOn) ? null : nextDue,
-                PlanStepId = OnStep ? Step!.Id : null
-            };
-            if (!Check && Picked is { } recipe)
-                entry.Use(recipe);
-            entry.Notes = Clean(notes);
-            await Repository.SaveAsync(entry);
+                var entry = Check ? PestService.StartCheck(Case, occurredOn) : new PestTreatment
+                {
+                    CaseId = Case.Id,
+                    OccurredOn = occurredOn,
+                    What = Clean(what),
+                    // Only a date that isn't the plain interval is worth storing, so changing the
+                    // interval later still moves the cases that never had a gap set by hand
+                    NextDueOn = OnStep || nextDue == Default(occurredOn) ? null : nextDue,
+                    PlanStepId = OnStep ? Step!.Id : null
+                };
+                if (!Check && Picked is { } recipe)
+                    entry.Use(recipe);
+                entry.Notes = Clean(notes);
+                await Repository.SaveAsync(entry);
+                saved = entry;
+            }
 
+            if (picker is { HasPhotos: true, PlantId: { } plantId })
+                recorded = (plantId, await picker.RecordAsync());
+
+            if (recorded is { } done)
+                await PestPhotos.AddLineAsync(Case, saved, done.PlantId, done.Ids, Labels.English);
+
+            saved = null;
+            recorded = null;
             Reset();
             await OnLogged.InvokeAsync();
         }

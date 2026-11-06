@@ -464,6 +464,18 @@
     <value>{0} found</value>
     <comment>A pest was found on a plant, as part of a pest case. {0} is the pest, like "Spider mites".</comment>
   </data>
+  <data name="PestTreatedWith" xml:space="preserve">
+    <value>Treated for {0}: {1}</value>
+    <comment>A pest treatment was logged with photos. {0} is the pest in lower case, like "spider mites", and {1} what was used.</comment>
+  </data>
+  <data name="PestTreated" xml:space="preserve">
+    <value>Treated for {0}</value>
+    <comment>A pest treatment was logged with photos and nothing written about what was used. {0} is the pest in lower case.</comment>
+  </data>
+  <data name="PestChecked" xml:space="preserve">
+    <value>Checked for {0}</value>
+    <comment>A check for a pest was logged with photos. {0} is the pest in lower case.</comment>
+  </data>
   <data name="ProblemOpened" xml:space="preserve">
     <value>Something's wrong: {0}</value>
     <comment>A problem was opened on a plant. {0} is a list of what was seen, in lower case.</comment>
