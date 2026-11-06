@@ -27,7 +27,8 @@ public static class ErrorReporting
         options.AddExceptionFilterForType<AccountDeletedException>();
         options.AddExceptionFilterForType<OperationCanceledException>();
 
-        // A failed outgoing request is reported with its address, and Pl@ntNet's key is in its address
+        // Pl@ntNet's key and Trefle's token are in the address of their requests, and a failed outgoing
+        // request is reported with its address
         options.CaptureFailedRequests = false;
 
         options.SetBeforeSend(Scrub);
@@ -35,14 +36,16 @@ public static class ErrorReporting
     }
 
     /// <summary>
-    /// A breadcrumb about a request to Pl@ntNet is dropped, since the address it holds has the key in it.
-    /// The client has no logging of its own either (<c>AddIdentification</c>), so this is the second lock.
+    /// A breadcrumb about a request to Pl@ntNet or Trefle is dropped, since the address it holds has the key or
+    /// token in it. Their clients have no logging of their own either, so this is the second lock.
     /// </summary>
     public static Breadcrumb? ScrubBreadcrumb(Breadcrumb breadcrumb, SentryHint hint)
     {
         static bool Holds(string? text) =>
             text is not null && (text.Contains("api-key", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("plantnet.org", StringComparison.OrdinalIgnoreCase));
+                || text.Contains("token=", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("plantnet.org", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("trefle.io", StringComparison.OrdinalIgnoreCase));
 
         return Holds(breadcrumb.Message) || (breadcrumb.Data?.Values.Any(Holds) ?? false) ? null : breadcrumb;
     }

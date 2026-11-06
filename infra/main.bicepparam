@@ -17,6 +17,9 @@ param sentryDsn = 'https://b03541a8513be443b7fde8b1c48bbe73@o4512239109799936.in
 // see docs/ops/hosting.md.
 param vapidPublicKey = 'BCSzcrpqLL3Aob9erhGgfZrdgqGXji_5WMR3TvYaU0pNJuI2mKzTYMp4spLXZcCcbQzZ9n0H0GZwun00mwIzOUc'
 
+// Whether the plant facts card also asks Trefle. Needs the trefle-token secret in the Key Vault, see docs/ops/hosting.md
+param plantFactsTrefleOn = false
+
 // Plant identification from a photo. Turn it on once the plantnet-api-key secret is in the Key Vault,
 // see docs/ops/hosting.md.
 param identificationOn = false

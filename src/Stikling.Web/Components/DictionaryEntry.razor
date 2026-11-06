@@ -27,7 +27,10 @@
         @if (Facts is not null)
         {
             <section class="detail-card">
-                <dl class="detail-list">@Facts</dl>
+                <dl class="detail-list">
+                    @Facts
+                    <SpeciesFactsLink Genus="@Genus" Species="@Species" Cultivar="@Cultivar" />
+                </dl>
             </section>
         }
 

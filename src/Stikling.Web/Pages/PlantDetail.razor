@@ -445,6 +445,7 @@ else
                             </dd>
                         }
                         <DictionaryLink Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" />
+                        <SpeciesFactsLink Genus="@plant.Genus" Species="@plant.KnownSpecies" Cultivar="@plant.Cultivar" />
 
                         @if (careBook.IsEmpty is false && !string.IsNullOrWhiteSpace(plant.Genus))
                         {

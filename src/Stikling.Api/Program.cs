@@ -12,6 +12,7 @@ using Stikling.Api.Data;
 using Stikling.Api.Identification;
 using Stikling.Api.Notifications;
 using Stikling.Api.People;
+using Stikling.Api.PlantFacts;
 using Stikling.Api.Photos;
 using Stikling.Api.Reports;
 using Stikling.Api.Sharing;
@@ -62,6 +63,17 @@ builder.Services.Configure<ShareOptions>(builder.Configuration.GetSection(ShareO
 builder.Services.Configure<NotificationOptions>(builder.Configuration.GetSection(NotificationOptions.Section));
 builder.Services.AddSingleton<IPushSender, WebPushSender>();
 builder.Services.AddIdentification(builder.Configuration);
+
+// The plant facts card: Wikipedia, and Trefle when a token is set. Neither client logs its requests,
+// since Trefle's token is in its address, and both give up after 10 seconds.
+builder.Services.Configure<PlantFactsOptions>(builder.Configuration.GetSection(PlantFactsOptions.Section));
+builder.Services.AddHttpClient<IWikipediaSource, WikipediaSource>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd(WikipediaSource.UserAgent);
+}).RemoveAllLoggers();
+builder.Services.AddHttpClient<ITrefleSource, TrefleSource>(client => client.Timeout = TimeSpan.FromSeconds(10)).RemoveAllLoggers();
+builder.Services.AddSingleton<PlantFactsService>();
 
 // Writes the HTML of the share pages. Text is encoded as HTML, but letters like ø and · are left as
 // they are instead of numbered references.
@@ -128,6 +140,7 @@ app.MapPhotos();
 app.MapShareLinks();
 app.MapSharePages();
 app.MapNotifications();
+app.MapPlantFacts();
 app.MapIdentification();
 
 app.Run();

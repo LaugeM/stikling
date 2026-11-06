@@ -1776,6 +1776,14 @@
     <value>Yes. Under Rooms and tags in Settings, History on a room or spot lists the plants that have stood there, for how long, and whether each is still there, moved on, died there or left from there. It comes from the room changes in each plant's history, so nothing extra has to be entered. History lines keep the name a room had at the time, so a stay from before a rename shows when another line says which room the old name was. A plant added with no move logged counts from the day it was added. The list only says what happened and doesn't rate the place.</value>
     <comment>Answer to "Can I see which plants have stood in a room?" on the Help page.</comment>
   </data>
+  <data name="SpeciesFactsQ" xml:space="preserve">
+    <value>Where does About this species come from?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="SpeciesFactsA1" xml:space="preserve">
+    <value>From Wikipedia, with a few facts like the height from Trefle, an open plant database. The app asks Stikling's server for them only when you tap the link, and sends only the plant's name, so it needs a connection and works signed in or not. It is about the species, not your cultivar, and about the genus when that's all the plant has. Care advice is never taken from there.</value>
+    <comment>Answer on the Help page.</comment>
+  </data>
   <data name="IdentifyFromPhotoQ" xml:space="preserve">
     <value>Can Stikling tell me what plant it is?</value>
     <comment>Question in the "Plants" part of the Help page.</comment>

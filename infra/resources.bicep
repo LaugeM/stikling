@@ -15,6 +15,7 @@ param apiImage string
 param apiMinReplicas int
 param sentryDsn string
 param vapidPublicKey string
+param plantFactsTrefleOn bool = false
 param identificationOn bool
 
 // Storage account and SQL server names are global, so they get a part that is fixed per resource group
@@ -336,6 +337,26 @@ var notificationSecrets = notificationsOn
     ]
   : []
 
+// The plant facts card asks Trefle too once its token is in the vault. Without it the card is Wikipedia only.
+var plantFactsEnv = plantFactsTrefleOn
+  ? [
+      {
+        name: 'PlantFacts__TrefleToken'
+        secretRef: 'trefle-token'
+      }
+    ]
+  : []
+
+var plantFactsSecrets = plantFactsTrefleOn
+  ? [
+      {
+        name: 'trefle-token'
+        keyVaultUrl: '${vault.properties.vaultUri}secrets/trefle-token'
+        identity: apiIdentity.id
+      }
+    ]
+  : []
+
 // Plant identification is off until the Pl@ntNet key is in the vault. Only the API reads it, not the job
 var identificationEnv = identificationOn
   ? [
@@ -370,7 +391,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
     workloadProfileName: 'Consumption'
     configuration: {
       activeRevisionsMode: 'Single'
-      secrets: concat(notificationSecrets, identificationSecrets)
+      secrets: concat(notificationSecrets, plantFactsSecrets, identificationSecrets)
       ingress: {
         external: true
         targetPort: 8080
@@ -387,7 +408,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.25')
             memory: '0.5Gi'
           }
-          env: concat(sharedEnv, apiEnv, notificationEnv, identificationEnv)
+          env: concat(sharedEnv, apiEnv, notificationEnv, plantFactsEnv, identificationEnv)
         }
       ]
       scale: {
