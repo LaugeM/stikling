@@ -533,8 +533,12 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="WateringReminderWorkA1" xml:space="preserve">
-    <value>Turn it on under &lt;em&gt;Watering reminder&lt;/em&gt; in Settings. It learns how often each plant gets water from what you have logged, and asks you to check the plant on Today when it is probably dry. It never tells you to water, and it never uses a care guide or a fixed number of days. It says nothing about a plant until it has seen a few waterings, so the first weeks are quiet. Until then the plant's page says how many more it needs. Log waterings as you do them and it gets better. It leans later when unsure, since a plant that is checked a day too late is better off than one watered too soon. When a plant watered from the top is due a check, Today has a &lt;em&gt;How to tell if it needs water&lt;/em&gt; note under Water with a few ways to check.</value>
+    <value>Turn it on under &lt;em&gt;Watering reminder&lt;/em&gt; in Settings. It learns how often each plant gets water from what you have logged, and asks you to check the plant on Today when it is probably dry. It never tells you to water, and it never uses a care guide or a fixed number of days. It says nothing about a plant until it has seen a few waterings, so the first weeks are quiet. Until then the plant's page says how many more it needs. Log waterings as you do them and it gets better. It leans later when unsure, since a plant that is checked a day too late is better off than one watered too soon. When a plant watered from the top is due a check, Today has a &lt;em&gt;How to tell if it needs water&lt;/em&gt; note under Water with a few ways to check, and a line for each way of watering when you have set how those plants are watered on their edit form.</value>
     <comment>Answer to "How does the watering reminder work?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="WateringReminderWorkA3" xml:space="preserve">
+    <value>With the reminder on, once a plant has a few waterings in both the brighter and the darker half of the year, its page also says how long it has gone between them in each half, like 9 to 12 days and 15 to 24 days. That only says what has happened, and the reminder doesn't go by it. A plant under a grow light doesn't get this line, since the time of year says little about it, and a gap with a rest in it isn't counted.</value>
+    <comment>Answer to "How does the watering reminder work?" on the Help page.</comment>
   </data>
   <data name="WateringReminderWorkA2" xml:space="preserve">
     <value>If you log meter readings, it learns how long the plant takes to dry down to the level you water at, and that works as soon as one watering has been followed by a dry reading. This is for plants you water from the top. Semi-hydro (LECA and PON), corm risers, self-watering pots and plants with an outer pot you keep water in count how long the reservoir lasts instead, and the row says &lt;em&gt;Refilled&lt;/em&gt; when you tick it. A plant in water is topped up, and the row says &lt;em&gt;Topped up&lt;/em&gt;. When the way a plant gets water changes, like moving from soil to LECA, it starts learning again, since the old waterings say nothing about the new way. A gap across a trip or quiet time you have added under &lt;em&gt;Away and quiet time&lt;/em&gt; isn't learned from either, unless a watering was logged during it.</value>
@@ -1707,6 +1711,24 @@
   </data>
   <data name="PotFitA1" xml:space="preserve">
     <value>Open Does it fit? on the Pots page and pick a nursery pot, or type a width if you are in a shop. It lists your free outer pots by whether the pot goes in, hangs on its rim or is too narrow. It only compares the sizes you have entered, so it is most exact when the rim is filled in.</value>
+  </data>
+  <data name="PlantLinkQ" xml:space="preserve">
+    <value>How do I open a plant by tapping my phone on the pot?</value>
+  </data>
+  <data name="PlantLinkA1" xml:space="preserve">
+    <value>Stick an NFC sticker on the pot or the label. They cost little and need no battery. On the plant's page, open &lt;em&gt;More&lt;/em&gt; and tap &lt;em&gt;Copy this plant's link&lt;/em&gt;. Then write the link to the sticker with any NFC app, such as NFC Tools, by adding a URL record and pasting the link. From then on, holding your phone to the sticker opens the plant.</value>
+  </data>
+  <data name="PlantLinkA2" xml:space="preserve">
+    <value>The link only opens the plant on a device that has it, so one that is signed in to your account or where you added it. Anyone else who taps it just gets a page saying the plant wasn't found, and the link tells them nothing about it. It opens in the browser the phone uses for links, which may not be the one you installed the app from. You can also put the link in a QR code or on a label.</value>
+  </data>
+  <data name="WeekAheadQ" xml:space="preserve">
+    <value>Can I see what's coming up this week?</value>
+  </data>
+  <data name="WeekAheadA1" xml:space="preserve">
+    <value>Tap &lt;em&gt;The week ahead&lt;/em&gt; at the end of the to-do list on Today. It shows what comes up today and over the next seven days, day by day: plants worth a check for water and care from your intervals. Each is listed once, on the next day it comes up. The days are estimates from what you have logged and move as you log more, so it isn't a schedule to water by. Something you put off is on the day it comes back, and what comes up on a day you are away or have quiet time moves to the first day after it.</value>
+  </data>
+  <data name="WeekAheadA2" xml:space="preserve">
+    <value>&lt;em&gt;Mark day as done&lt;/em&gt; lists everything on that day and asks before logging anything. Untick what you didn't do, and &lt;em&gt;Undo&lt;/em&gt; takes it back afterwards. It is logged as done today, also for a later day. For a later day, plants due a check aren't ticked, so tick one only once you have checked it and given it water.</value>
   </data>
   <data name="CompareMediumsLikeWaterPerliteA2" xml:space="preserve">
     <value>If the batches differ in more than one thing, like a different medium and a different month, a line under the experiment's heading says what differs, so a difference in results isn't read as being down to the medium alone. A plant name or place left empty doesn't count as different.</value>

@@ -49,6 +49,17 @@ public static class Seasons
         return hemisphere == Hemisphere.Northern ? northShortening : !northShortening;
     }
 
+    /// <summary>
+    /// True in the half of the year with more daylight: from 21 March up to 21 September in the
+    /// north, and the other half of the year in the south.
+    /// </summary>
+    public static bool InBrighterHalf(DateOnly day, Hemisphere hemisphere)
+    {
+        var key = day.Month * 100 + day.Day;
+        var northBrighter = key >= 321 && key < 921;
+        return hemisphere == Hemisphere.Northern ? northBrighter : !northBrighter;
+    }
+
     /// <summary>True when two dates fall within some days of each other in the year, wrapping round new year.</summary>
     public static bool SameTimeOfYear(DateOnly a, DateOnly b, int withinDays = 30)
     {

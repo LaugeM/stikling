@@ -138,6 +138,18 @@
   <data name="WateringSummaryInWater" xml:space="preserve">
     <value>Vandet bliver som regel fyldt op omkring {0}, ud fra {1}.</value>
   </data>
+  <data name="WateringSeasonsTop" xml:space="preserve">
+    <value>Der er gået {0} mellem vandingerne i sommerhalvåret og {1} i vinterhalvåret.</value>
+  </data>
+  <data name="WateringSeasonsReservoir" xml:space="preserve">
+    <value>Der er gået {0} mellem påfyldningerne i sommerhalvåret og {1} i vinterhalvåret.</value>
+  </data>
+  <data name="WateringSeasonsInWater" xml:space="preserve">
+    <value>Der er gået {0} mellem opfyldningerne i sommerhalvåret og {1} i vinterhalvåret.</value>
+  </data>
+  <data name="WateringRangeDays" xml:space="preserve">
+    <value>{0} til {1} dage</value>
+  </data>
   <data name="WateringLonger" xml:space="preserve">
     <value>Længere nu hvor dagene er kortere.</value>
   </data>
@@ -1583,5 +1595,56 @@
   </data>
   <data name="TodayAnniversaryDismiss" xml:space="preserve">
     <value>Skjul</value>
+  </data>
+  <data name="WeekTitle" xml:space="preserve">
+    <value>Ugen, der kommer</value>
+  </data>
+  <data name="WeekTomorrow" xml:space="preserve">
+    <value>I morgen</value>
+  </data>
+  <data name="WeekEstimates" xml:space="preserve">
+    <value>Dagene er skøn ud fra det, du har logget, og de flytter sig, når du logger mere. Hver plante står på den næste dag, den er aktuel. En plante kan være klar før eller senere, så tjek den, før du vander.</value>
+  </data>
+  <data name="WeekCheckWater" xml:space="preserve">
+    <value>Værd at tjekke for vand</value>
+  </data>
+  <data name="WeekAway" xml:space="preserve">
+    <value>Væk eller stille tid, så der bliver ikke bedt om noget.</value>
+  </data>
+  <data name="WeekEmpty" xml:space="preserve">
+    <value>Der er ikke noget i den kommende uge. Vandingspåmindelsen og dine plejeintervaller fylder siden, når de har noget at sige.</value>
+  </data>
+  <data name="WeekMarkDay" xml:space="preserve">
+    <value>Markér dagen som klaret</value>
+  </data>
+  <data name="WeekMarkTitle" xml:space="preserve">
+    <value>Markér {0} som klaret?</value>
+  </data>
+  <data name="WeekMarkToday" xml:space="preserve">
+    <value>Alt, du sætter flueben ved, bliver logget som klaret i dag. Fjern fluebenet ved det, du ikke har gjort.</value>
+  </data>
+  <data name="WeekMarkLater" xml:space="preserve">
+    <value>Alt, du sætter flueben ved, bliver logget som klaret i dag, ikke {0}. Fjern fluebenet ved det, du ikke har gjort.</value>
+  </data>
+  <data name="WeekMarkWaterNote" xml:space="preserve">
+    <value>Planter, der skal tjekkes den dag, har ikke flueben. Sæt kun flueben, hvis du har tjekket planten og givet den vand.</value>
+  </data>
+  <data name="WeekLog_One" xml:space="preserve">
+    <value>Log {0}</value>
+  </data>
+  <data name="WeekLog_Other" xml:space="preserve">
+    <value>Log {0}</value>
+  </data>
+  <data name="WeekLogged_One" xml:space="preserve">
+    <value>{0} logget i dag.</value>
+  </data>
+  <data name="WeekLogged_Other" xml:space="preserve">
+    <value>{0} logget i dag.</value>
+  </data>
+  <data name="WeekUndo" xml:space="preserve">
+    <value>Fortryd</value>
+  </data>
+  <data name="WeekToday" xml:space="preserve">
+    <value>i dag</value>
   </data>
 </root>

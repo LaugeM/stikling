@@ -157,6 +157,22 @@
     <value>The water is usually topped up about {0}, learned from {1}.</value>
     <comment>{0} is how often, like "every 3 days", {1} a number.</comment>
   </data>
+  <data name="WateringSeasonsTop" xml:space="preserve">
+    <value>It has gone {0} between waterings in the brighter half of the year, {1} in the darker half.</value>
+    <comment>On a plant's page, from its own log. {0} and {1} are ranges of days, like "9 to 12 days". States the past, so never word it as advice.</comment>
+  </data>
+  <data name="WateringSeasonsReservoir" xml:space="preserve">
+    <value>It has gone {0} between refills in the brighter half of the year, {1} in the darker half.</value>
+    <comment>Same as WateringSeasonsTop, for a plant with a reservoir.</comment>
+  </data>
+  <data name="WateringSeasonsInWater" xml:space="preserve">
+    <value>It has gone {0} between top-ups in the brighter half of the year, {1} in the darker half.</value>
+    <comment>Same as WateringSeasonsTop, for a plant standing in water.</comment>
+  </data>
+  <data name="WateringRangeDays" xml:space="preserve">
+    <value>{0} to {1} days</value>
+    <comment>A range of days, like "9 to 12 days".</comment>
+  </data>
   <data name="WateringLonger" xml:space="preserve">
     <value>Longer now the days are shorter.</value>
   </data>
@@ -1794,5 +1810,56 @@
   <data name="TodayAnniversaryDismiss" xml:space="preserve">
     <value>Dismiss</value>
     <comment>Button on the anniversary row on Today that hides it until next year.</comment>
+  </data>
+  <data name="WeekTitle" xml:space="preserve">
+    <value>The week ahead</value>
+  </data>
+  <data name="WeekTomorrow" xml:space="preserve">
+    <value>Tomorrow</value>
+  </data>
+  <data name="WeekEstimates" xml:space="preserve">
+    <value>The days are estimates from what you have logged, and they move as you log more. Each plant is listed on the next day it comes up. A plant can be ready sooner or later, so check it before you water.</value>
+  </data>
+  <data name="WeekCheckWater" xml:space="preserve">
+    <value>Worth a check for water</value>
+  </data>
+  <data name="WeekAway" xml:space="preserve">
+    <value>Away or quiet time, so nothing is asked for.</value>
+  </data>
+  <data name="WeekEmpty" xml:space="preserve">
+    <value>Nothing is due over the next week. The watering reminder and your care intervals fill this page once they have something to say.</value>
+  </data>
+  <data name="WeekMarkDay" xml:space="preserve">
+    <value>Mark day as done</value>
+  </data>
+  <data name="WeekMarkTitle" xml:space="preserve">
+    <value>Mark {0} as done?</value>
+  </data>
+  <data name="WeekMarkToday" xml:space="preserve">
+    <value>Each one you tick is logged as done today. Untick what you didn't do.</value>
+  </data>
+  <data name="WeekMarkLater" xml:space="preserve">
+    <value>Each one you tick is logged as done today, not {0}. Untick what you didn't do.</value>
+  </data>
+  <data name="WeekMarkWaterNote" xml:space="preserve">
+    <value>Plants due a check that day aren't ticked. Tick one only if you have checked it and given it water.</value>
+  </data>
+  <data name="WeekLog_One" xml:space="preserve">
+    <value>Log {0}</value>
+  </data>
+  <data name="WeekLog_Other" xml:space="preserve">
+    <value>Log {0}</value>
+  </data>
+  <data name="WeekLogged_One" xml:space="preserve">
+    <value>Logged {0} for today.</value>
+  </data>
+  <data name="WeekLogged_Other" xml:space="preserve">
+    <value>Logged {0} for today.</value>
+  </data>
+  <data name="WeekUndo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="WeekToday" xml:space="preserve">
+    <value>today</value>
   </data>
 </root>

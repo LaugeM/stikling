@@ -125,6 +125,7 @@ builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<PutOffService>();
 builder.Services.AddScoped<WateringAnswers>();
 builder.Services.AddScoped<TodayService>();
+builder.Services.AddScoped<WeekAheadService>();
 builder.Services.AddScoped<SubjectPhotos>();
 builder.Services.AddScoped<GrowLightService>();
 builder.Services.AddScoped<AwayService>();
