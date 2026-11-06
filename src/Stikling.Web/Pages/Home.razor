@@ -615,6 +615,48 @@ else
         </p>
     }
 
+    @if (!sections.Away && !sections.Holding)
+    {
+    <section class="today-section worth-a-look">
+        <h2>@Strings.Care.TodayWorthALook</h2>
+        @if (NextRoundChecksLine is { } nextChecks)
+        {
+            <p class="today-next-round"><span>@nextChecks</span></p>
+        }
+        @if (sections.ChecksNow.Count == 0 && NextRoundChecksLine is null)
+        {
+            <p class="text-body-secondary mb-0">
+                @(active.Count == 0
+                    ? Strings.Care.TodayNoPropagations
+                    : sections.Checks.Count > 0
+                        ? Strings.Care.TodayNothingElse
+                        : Strings.Care.TodayNothingWaiting)
+            </p>
+        }
+        else if (sections.ChecksNow.Count > 0)
+        {
+            <ul class="item-list">
+                @foreach (var check in sections.ChecksNow)
+                {
+                    <TodayRow @key="check.Propagation.Id"
+                              OnPutOff="days => PutOffAsync(PutOffs.Check(check.Propagation.Id), Today.AddDays(days))">
+                        <a class="item-card" href="propagations/@check.Propagation.Id">
+                            <PropagationThumb Propagation="check.Propagation" Days="check.Propagation.DaysSinceStart(Today)" />
+                            <div class="item-text">
+                                <div class="item-name">@check.Propagation.ListName</div>
+                                <div class="item-meta">
+                                    <StageBadge Stage="check.Propagation.Stage" Type="check.Propagation.Type" />
+                                    <span>@Labels.Summary(check.Propagation) · @LastSeen(check)</span>
+                                </div>
+                            </div>
+                        </a>
+                    </TodayRow>
+                }
+            </ul>
+        }
+    </section>
+    }
+
     </div>
     <div class="today-rest">
     @if (memory is not null)
@@ -709,48 +751,6 @@ else
             <button type="button" class="btn btn-link btn-sm link-action year-hide" @onclick="HideYearAsync">@Strings.Care.TodayHideYear</button>
             <canvas @ref="yearCanvas" hidden aria-hidden="true"></canvas>
         </section>
-    }
-
-    @if (!sections.Away && !sections.Holding)
-    {
-    <section class="today-section worth-a-look">
-        <h2>@Strings.Care.TodayWorthALook</h2>
-        @if (NextRoundChecksLine is { } nextChecks)
-        {
-            <p class="today-next-round"><span>@nextChecks</span></p>
-        }
-        @if (sections.ChecksNow.Count == 0 && NextRoundChecksLine is null)
-        {
-            <p class="text-body-secondary mb-0">
-                @(active.Count == 0
-                    ? Strings.Care.TodayNoPropagations
-                    : sections.Checks.Count > 0
-                        ? Strings.Care.TodayNothingElse
-                        : Strings.Care.TodayNothingWaiting)
-            </p>
-        }
-        else if (sections.ChecksNow.Count > 0)
-        {
-            <ul class="item-list">
-                @foreach (var check in sections.ChecksNow)
-                {
-                    <TodayRow @key="check.Propagation.Id"
-                              OnPutOff="days => PutOffAsync(PutOffs.Check(check.Propagation.Id), Today.AddDays(days))">
-                        <a class="item-card" href="propagations/@check.Propagation.Id">
-                            <PropagationThumb Propagation="check.Propagation" Days="check.Propagation.DaysSinceStart(Today)" />
-                            <div class="item-text">
-                                <div class="item-name">@check.Propagation.ListName</div>
-                                <div class="item-meta">
-                                    <StageBadge Stage="check.Propagation.Stage" Type="check.Propagation.Type" />
-                                    <span>@Labels.Summary(check.Propagation) · @LastSeen(check)</span>
-                                </div>
-                            </div>
-                        </a>
-                    </TodayRow>
-                }
-            </ul>
-        }
-    </section>
     }
 
     @if (!sections.Away && sections.PhotoRoundShows)
