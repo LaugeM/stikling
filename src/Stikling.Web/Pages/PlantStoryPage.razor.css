@@ -1,0 +1,418 @@
+/* The choices, which are left out of a print */
+
+.story-note {
+    margin: 0 0 0.75rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.6rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+    font-size: 0.9rem;
+}
+
+.story-options fieldset {
+    border: 0;
+    padding: 0;
+}
+
+.story-options legend {
+    float: none;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Checkboxes: the whole row is the tap area, 44px tall */
+.story-options .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    margin: 0;
+    padding-left: 0;
+}
+
+.story-options .form-check-input {
+    float: none;
+    flex: none;
+    margin: 0;
+}
+
+.story-options .form-check-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    min-height: 2.75rem;
+}
+
+.story-all-none {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.4rem;
+}
+
+.story-all-none .btn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding-inline: 0.25rem;
+}
+
+.story-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+    gap: 0.4rem;
+}
+
+.story-pick {
+    position: relative;
+    aspect-ratio: 1;
+    padding: 0;
+    overflow: hidden;
+    container-type: size;
+    border: 0;
+    border-radius: 0.5rem;
+    background: var(--pa-green-soft);
+}
+
+.story-pick ::deep img,
+.story-pick ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.45;
+}
+
+.story-pick.on ::deep img,
+.story-pick.on ::deep .photo-placeholder {
+    opacity: 1;
+}
+
+.story-pick.on {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 1px;
+}
+
+/* A round mark so a picked photo doesn't rely on the colour or the dimming */
+.story-tick {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    display: grid;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border: 1.5px solid #ffffff;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.35);
+}
+
+.story-pick.on .story-tick {
+    background: var(--pa-green);
+}
+
+.story-tick svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.story-note-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.story-note-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.story-note-list li:first-child {
+    border-top: 0;
+}
+
+.story-note-list .form-check-input {
+    flex: none;
+    margin: 0.75rem 0 0;
+}
+
+.story-note-list label {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding-block: 0.5rem;
+}
+
+.story-note-list small {
+    display: block;
+    color: var(--pa-muted);
+    font-size: 0.8rem;
+}
+
+.story-note-list span {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow-wrap: anywhere;
+}
+
+/* The action: in the bar at the bottom on a phone, beside the choices on a wide screen */
+.story-actions {
+    display: none;
+}
+
+.story-bar {
+    gap: 0.5rem;
+}
+
+.story-bar .btn {
+    flex: 1 1 auto;
+    min-height: 2.75rem;
+}
+
+/* The page. It is paper, so it keeps the light colours in either theme and on the printer, and it
+   says everything in black, sizes and rules, so it reads the same on a black and white printer. */
+
+.story-paper {
+    color-scheme: light;
+    margin-top: 1rem;
+    padding: 1.5rem 1.25rem;
+    border: 1px solid #dde3dc;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    color: #1d2520;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.story-paper h2,
+.story-paper h3,
+.story-paper p,
+.story-paper dd,
+.story-paper li {
+    color: #1d2520;
+}
+
+.story-paper h2,
+.story-paper h3 {
+    font-family: var(--pa-font-display);
+}
+
+.story-paper p {
+    margin: 0.2rem 0 0;
+}
+
+.story-top {
+    padding-bottom: 0.7rem;
+    border-bottom: 2px solid #1d2520;
+}
+
+.story-paper .story-kicker {
+    margin: 0;
+    color: #4a554e;
+    font-size: 0.85rem;
+}
+
+.story-name {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 700;
+    font-stretch: 92%;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+}
+
+.story-paper .story-botanical {
+    margin-top: 0.25rem;
+    color: #4a554e;
+    font-size: 1rem;
+}
+
+.story-paper .story-words {
+    margin: 1rem 0 0;
+    font-size: 1rem;
+    font-style: italic;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.story-part {
+    margin-top: 1.1rem;
+}
+
+.story-part h3 {
+    margin: 0 0 0.35rem;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid #1d2520;
+    font-size: 1rem;
+    font-weight: 600;
+    break-after: avoid;
+}
+
+.story-text {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.story-muted,
+.story-paper li .story-muted {
+    color: #4a554e;
+}
+
+.story-photos {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.story-photos.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.story-photos.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.story-photos.one {
+    grid-template-columns: minmax(0, 28rem);
+}
+
+.story-photo {
+    margin: 0;
+    break-inside: avoid;
+}
+
+.story-photo-frame {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    container-type: size;
+    border-radius: 0.4rem;
+    background: #eef0ed;
+}
+
+.story-photo-frame ::deep img,
+.story-photo-frame ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.story-photo figcaption {
+    margin-top: 0.15rem;
+    color: #4a554e;
+    font-size: 0.78rem;
+}
+
+.story-notes {
+    margin: 0;
+}
+
+.story-note-row {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding-block: 0.3rem;
+    break-inside: avoid;
+}
+
+.story-note-row dt {
+    color: #4a554e;
+    font-size: 0.82rem;
+    font-weight: 400;
+    line-height: 1.75;
+}
+
+.story-note-row dd {
+    margin: 0;
+}
+
+.story-offspring {
+    margin: 0.3rem 0 0;
+    padding: 0;
+    list-style: none;
+    columns: 2;
+    column-gap: 1rem;
+}
+
+.story-offspring li {
+    break-inside: avoid;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 30rem) {
+    .story-note-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .story-offspring {
+        columns: 1;
+    }
+}
+
+/* Choices on the left and the page beside them, so a wide screen shows both at once */
+@media (min-width: 64rem) {
+    .story-layout {
+        display: grid;
+        grid-template-columns: minmax(20rem, 26rem) minmax(0, 52rem);
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .story-paper {
+        margin-top: 0;
+        padding: 2.5rem;
+    }
+
+    .story-actions {
+        display: block;
+        flex: none;
+    }
+
+    .story-bar {
+        display: none;
+    }
+}
+
+@media print {
+    .story-layout {
+        display: block;
+    }
+
+    .story-screen,
+    .story-bar {
+        display: none !important;
+    }
+
+    .story-paper {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        font-size: 10.5pt;
+    }
+
+    /* A photo that isn't on this device is left out instead of printing as a hole */
+    .story-photo:has(.photo-placeholder) {
+        display: none;
+    }
+
+    .story-note-row {
+        grid-template-columns: 7.5rem minmax(0, 1fr);
+        gap: 0.75rem;
+    }
+
+    .story-offspring {
+        columns: 2;
+    }
+}
