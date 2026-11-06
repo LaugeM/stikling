@@ -156,6 +156,7 @@ builder.Services.AddScoped<SwapCardService>();
 builder.Services.AddScoped<ExperimentCardService>();
 builder.Services.AddScoped<TimelapseService>();
 builder.Services.AddScoped<DeviceFiles>();
+builder.Services.AddScoped<IdentificationService>();
 builder.Services.AddScoped<AppBadge>();
 builder.Services.AddScoped<SitterSheetActions>();
 builder.Services.AddScoped<PlantStoryActions>();

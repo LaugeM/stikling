@@ -1,0 +1,230 @@
+@* Names the plant in a photo. A photo is taken or picked here, or one of the photos already on the form
+   is used, and up to 5 suggestions come back. Tapping one hands it to the name fields through
+   OnPicked, and nothing is ever filled in without that tap. *@
+@using Stikling.Core.Identification
+@inject IdentificationService Identification
+@inject PlantNameService Names
+
+<Sheet Title="@Strings.Identify.SheetTitle" Open="Open" OpenChanged="SheetOpenChangedAsync">
+    <div class="identify-sheet">
+        <ul class="sheet-actions">
+            <li>
+                <label class="sheet-action" for="@cameraId">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                    <span class="sheet-action-text"><b>@Strings.Identify.TakePhoto</b></span>
+                </label>
+                <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
+                       @ref="cameraInput" @onchange="() => IdentifyInputAsync(cameraInput, fromCamera: true)" disabled="@busy" />
+            </li>
+            <li>
+                <label class="sheet-action" for="@galleryId">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                    <span class="sheet-action-text"><b>@Strings.Identify.ChoosePhoto</b></span>
+                </label>
+                <input id="@galleryId" type="file" accept="image/*" class="visually-hidden"
+                       @ref="galleryInput" @onchange="() => IdentifyInputAsync(galleryInput, fromCamera: false)" disabled="@busy" />
+            </li>
+        </ul>
+
+        @if (Photos is { Count: > 0 } own)
+        {
+            <p class="form-text mb-1">@Strings.Identify.OrPickOne</p>
+            <div class="photo-picks">
+                @foreach (var photo in own)
+                {
+                    <button type="button" class="photo-pick identify-thumb" disabled="@busy" @onclick="() => IdentifyPhotoAsync(photo)">
+                        <PhotoImage PhotoId="photo.Id" Alt="@Strings.Identify.PhotoAlt" />
+                    </button>
+                }
+            </div>
+        }
+
+        <div class="identify-state" aria-live="polite">
+            @if (busy)
+            {
+                <p class="composer-status" role="status">@Strings.Identify.Identifying</p>
+            }
+            else if (outcome is { Problem: IdentificationProblem.NeedsAccount })
+            {
+                <div class="alert alert-secondary py-2 px-3 mb-0">
+                    <p class="mb-1">@Strings.Identify.NeedsAccount</p>
+                    @* Opened apart, so a form that is half filled in stays as it is *@
+                    <a class="link-action" href="sign-in" target="_blank" rel="noopener">@Strings.Identify.NeedsAccountSignIn</a>
+                    &middot;
+                    <a class="link-action" href="settings?section=plants" target="_blank" rel="noopener">@Strings.Identify.NeedsAccountSettings</a>
+                </div>
+            }
+            else if (outcome is { Succeeded: false } failed)
+            {
+                <div class="alert alert-danger py-2 px-3 mb-0" role="alert">@ProblemText(failed.Problem)</div>
+            }
+            else if (outcome is { Suggestions.Count: 0 })
+            {
+                <p class="form-text mb-0">@Strings.Identify.NoMatch</p>
+            }
+            else if (outcome is { } found)
+            {
+                <h3 class="identify-heading">@Strings.Identify.ResultsHeading</h3>
+                @if (CanKeepPhoto && lastInput is not null)
+                {
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="@keepId" @bind="keepPhoto" />
+                        <label class="form-check-label" for="@keepId">@Strings.Identify.KeepPhoto</label>
+                    </div>
+                }
+                <div class="name-results mt-0" role="group" aria-label="@Strings.Identify.ResultsHeading">
+                    @foreach (var suggestion in found.Suggestions)
+                    {
+                        <button type="button" class="name-result" @onclick="() => PickAsync(suggestion)">
+                            @if (EverydayName(suggestion) is { } everyday)
+                            {
+                                <span class="name-result-main">@everyday</span>
+                                <span class="name-result-sub"><BotanicalName Genus="@suggestion.Genus" Species="@suggestion.Species" /> &middot; @MatchText(suggestion.Score)</span>
+                            }
+                            else
+                            {
+                                <span class="name-result-main"><BotanicalName Genus="@suggestion.Genus" Species="@suggestion.Species" /></span>
+                                <span class="name-result-sub">@MatchText(suggestion.Score)</span>
+                            }
+                        </button>
+                    }
+                </div>
+                <p class="form-text">@Strings.Identify.SpeciesOnly</p>
+            }
+        </div>
+
+        <p class="identify-credit">
+            @{
+                var at = Strings.Identify.Credit.IndexOf("{0}", StringComparison.Ordinal);
+            }
+            @Strings.Identify.Credit[..at]<a href="https://plantnet.org" target="_blank" rel="noopener">@Strings.Identify.CreditName</a>@Strings.Identify.Credit[(at + 3)..]
+        </p>
+    </div>
+</Sheet>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>The photos the form already has, to pick one from.</summary>
+    [Parameter]
+    public IReadOnlyList<Photo>? Photos { get; set; }
+
+    /// <summary>True where a photo taken here can be kept on the plant: the plant form.</summary>
+    [Parameter]
+    public bool CanKeepPhoto { get; set; }
+
+    [Parameter]
+    public EventCallback<IdentifyPick> OnPicked { get; set; }
+
+    private readonly string cameraId = $"identify-camera-{Guid.NewGuid():N}";
+    private readonly string galleryId = $"identify-gallery-{Guid.NewGuid():N}";
+    private readonly string keepId = $"identify-keep-{Guid.NewGuid():N}";
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    private EverydayNameBook? everyday;
+    private IdentificationOutcome? outcome;
+    private bool busy;
+    private bool wasOpen;
+    private bool keepPhoto = true;
+
+    // The input the photo came from, kept so it can be saved on the plant, and not cleared before
+    private ElementReference? lastInput;
+    private bool lastFromCamera;
+
+    // An answer that comes after the sheet was closed or another photo was picked belongs to nobody
+    private int run;
+
+    protected override async Task OnInitializedAsync() =>
+        everyday = await Names.GetEverydayNamesAsync();
+
+    protected override void OnParametersSet()
+    {
+        if (wasOpen && !Open)
+            Reset();
+        wasOpen = Open;
+    }
+
+    private void Reset()
+    {
+        run++;
+        outcome = null;
+        busy = false;
+        lastInput = null;
+        keepPhoto = true;
+    }
+
+    private async Task SheetOpenChangedAsync(bool open)
+    {
+        if (!open)
+            Reset();
+        await OpenChanged.InvokeAsync(open);
+    }
+
+    private async Task IdentifyInputAsync(ElementReference input, bool fromCamera)
+    {
+        var mine = Start();
+        lastInput = input;
+        lastFromCamera = fromCamera;
+        Finish(mine, await Identification.IdentifyInputAsync(input));
+    }
+
+    private async Task IdentifyPhotoAsync(Photo photo)
+    {
+        var mine = Start();
+        lastInput = null;
+        Finish(mine, await Identification.IdentifyPhotoAsync(photo.Id));
+    }
+
+    private int Start()
+    {
+        busy = true;
+        outcome = null;
+        StateHasChanged();
+        return ++run;
+    }
+
+    private void Finish(int mine, IdentificationOutcome result)
+    {
+        if (mine != run)
+            return;
+
+        outcome = result;
+        busy = false;
+        StateHasChanged();
+    }
+
+    private async Task PickAsync(IdentificationSuggestion suggestion)
+    {
+        var keep = CanKeepPhoto && keepPhoto ? lastInput : null;
+        await OnPicked.InvokeAsync(new IdentifyPick(suggestion, keep, lastFromCamera));
+        await SheetOpenChangedAsync(false);
+    }
+
+    // Our own everyday name first, then Pl@ntNet's first one, otherwise none
+    private string? EverydayName(IdentificationSuggestion s) =>
+        everyday?.For(s.Genus, s.Species, null) ?? s.CommonNames.FirstOrDefault();
+
+    private static string MatchText(double score) => IdentificationRules.Match(score) switch
+    {
+        IdentificationMatch.Good => Strings.Identify.MatchGood,
+        IdentificationMatch.Possible => Strings.Identify.MatchPossible,
+        _ => Strings.Identify.MatchLongShot,
+    };
+
+    private static string ProblemText(IdentificationProblem problem) => problem switch
+    {
+        IdentificationProblem.Offline => Strings.Identify.Offline,
+        IdentificationProblem.NotAvailable => Strings.Identify.NotAvailable,
+        IdentificationProblem.PersonLimit => Strings.Identify.PersonLimit,
+        IdentificationProblem.TotalLimit => Strings.Identify.TotalLimit,
+        IdentificationProblem.KeyRejected => Strings.Identify.KeyRejected,
+        IdentificationProblem.KeyLimit => Strings.Identify.KeyLimit,
+        IdentificationProblem.Missing => Strings.Identify.Missing,
+        _ => Strings.Identify.Failed,
+    };
+}

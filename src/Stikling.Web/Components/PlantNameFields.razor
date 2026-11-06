@@ -4,7 +4,9 @@
    the field focused when tapped (mousedown is cancelled), so the keyboard stays up. The search
    results don't: picking one is the end of the search, so the keyboard can go away. *@
 @implements IAsyncDisposable
+@using Stikling.Core.Identification
 @inject PlantNameService Names
+@inject IdentificationService Identification
 @inject IJSRuntime JS
 
 <div class="mb-3">
@@ -39,6 +41,15 @@
     else if (suggester is not null && NameKeyLength >= NameSuggester.MinLettersWithoutGenus)
     {
         <div id="@(IdPrefix)name-results" class="form-text">@Strings.Plants.NameNothing</div>
+    }
+    @if (ShowIdentify && identifyOffered)
+    {
+        <div class="mt-2">
+            <button type="button" class="btn btn-outline-primary btn-sm icon-btn" @onclick="() => identifyOpen = true">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                @Strings.Identify.Button
+            </button>
+        </div>
     }
 </div>
 <div class="row g-2 mb-3">
@@ -79,6 +90,10 @@
         <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NameEveryday, called)</div>
     }
 </div>
+@if (ShowIdentify && identifyOffered)
+{
+    <IdentifySheet @bind-Open="identifyOpen" Photos="IdentifyPhotos" CanKeepPhoto="OnKeepPhoto.HasDelegate" OnPicked="PickIdentifiedAsync" />
+}
 @if (!unsureOpen)
 {
     <div class="mb-1">
@@ -144,6 +159,21 @@ else
     [Parameter]
     public EventCallback<string?> NoteChanged { get; set; }
 
+    /// <summary>Offers "Identify from a photo". Only the plant and propagation forms turn it on.</summary>
+    [Parameter]
+    public bool ShowIdentify { get; set; }
+
+    /// <summary>The photos the form already has, which the identify sheet offers to use.</summary>
+    [Parameter]
+    public IReadOnlyList<Photo>? IdentifyPhotos { get; set; }
+
+    /// <summary>
+    /// Called when a suggestion is picked with a photo that was taken or chosen in the sheet and should be
+    /// kept: the form saves it from the file input, which is not cleared before. Leave it out where there is no photo to keep.
+    /// </summary>
+    [Parameter]
+    public EventCallback<IdentifyPick> OnKeepPhoto { get; set; }
+
     [Parameter]
     public string GenusPlaceholder { get; set; } = Strings.Plants.NameGenusPlaceholder;
 
@@ -168,6 +198,8 @@ else
         return QualifierChanged.InvokeAsync(Qualifier);
     }
 
+    private bool identifyOffered;
+    private bool identifyOpen;
     private NameSuggester? suggester;
     private EverydayNameBook? everyday;
     private string? query;
@@ -184,6 +216,8 @@ else
     {
         everyday = await Names.GetEverydayNamesAsync();
         suggester = await Names.GetSuggesterAsync();
+        if (ShowIdentify)
+            identifyOffered = await Identification.IsOfferedAsync();
     }
 
     // Searched again only when the words change, not each time a field below is typed in
@@ -208,6 +242,24 @@ else
         await SetGenusAsync(found.Genus);
         await SetSpeciesAsync(found.Species);
         await SetCultivarAsync(found.Cultivar);
+    }
+
+    // Old names become current, like a found plant. The cultivar stays only when the species does. The
+    // qualifier and the note are left as they are, and the photo is kept after the name is filled in.
+    private async Task PickIdentifiedAsync(IdentifyPick pick)
+    {
+        var (genus, species) = (await Names.GetDictionaryAsync()).Current(pick.Suggestion.Genus, pick.Suggestion.Species);
+        genus ??= pick.Suggestion.Genus;
+        species ??= pick.Suggestion.Species;
+
+        var cultivar = IdentificationRules.CultivarAfterPick(Genus, Species, Cultivar, genus, species);
+        query = null;
+        await SetGenusAsync(genus);
+        await SetSpeciesAsync(species);
+        await SetCultivarAsync(cultivar);
+
+        if (pick.PhotoInput is not null && OnKeepPhoto.HasDelegate)
+            await OnKeepPhoto.InvokeAsync(pick);
     }
 
     private IReadOnlyList<NameSuggestion> Suggestions =>

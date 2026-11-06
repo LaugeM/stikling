@@ -2328,6 +2328,35 @@ a.tag-label:hover {
     font-size: 0.875rem;
 }
 
+/* The sheet that names a plant from a photo: the ways to pick a photo, then what came back */
+.identify-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.identify-thumb {
+    padding: 0;
+    border: 0;
+}
+
+.identify-thumb:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.identify-heading {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.identify-credit {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
 /* Shared by Settings and the pages that came out of it */
 .settings-section {
     margin-bottom: 1.75rem;
