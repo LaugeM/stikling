@@ -2985,6 +2985,28 @@ main.app-content:has(.form-bar) {
     color: var(--pa-muted);
 }
 
+.outcome-differed {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.outcome-differed-title {
+    margin: 0 0 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pa-text);
+}
+
+.outcome-differed p {
+    margin: 0;
+}
+
+.outcome-differed ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.1rem;
+}
+
 .outcome-plants {
     margin: 0.6rem 0 0;
     padding: 0;
