@@ -200,3 +200,8 @@
 .problem-foot p {
     flex-basis: 100%;
 }
+
+/* Three actions can be more than a phone is wide */
+.detail-actions {
+    flex-wrap: wrap;
+}

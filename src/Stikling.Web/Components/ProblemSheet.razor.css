@@ -1,0 +1,14 @@
+/* The signs in groups, each under a quiet label */
+.sign-group + .sign-group {
+    margin-top: 0.75rem;
+}
+
+.sign-group-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
