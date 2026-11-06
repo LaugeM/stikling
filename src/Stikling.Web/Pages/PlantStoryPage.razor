@@ -1,0 +1,378 @@
+@page "/plants/{Id:guid}/story"
+@layout WideLayout
+@using System.Globalization
+@using Stikling.Core.Plants
+@using Stikling.Core.Propagations
+@using Stikling.Core.Sharing
+@inject IPlantRepository Plants
+@inject IPropagationRepository Propagations
+@inject ITimelineRepository Entries
+@inject IPhotoRepository PhotoRepository
+@inject IReceivedHistoryRepository ReceivedHistories
+@inject SellerService SellerService
+@inject PlantStoryActions StoryActions
+@inject TimeProvider Time
+
+<PageTitle>@(plant is null ? Strings.PlantStory.Heading : F(Strings.PlantStory.PageTitle, plant.DisplayName))</PageTitle>
+
+@* No ReloadOnSync: like an edit page, nothing should change under someone choosing what goes on it *@
+
+<div class="story-page">
+    @if (plant is null)
+    {
+        <a class="back-link" href="plants">@Strings.Plants.ListTitle</a>
+        <p class="text-body-secondary">@(loaded ? Strings.PlantDetail.NotFound : Strings.Plants.Loading)</p>
+    }
+    else
+    {
+        <div class="story-layout">
+            <div class="story-screen">
+                <a class="back-link" href="plants/@plant.Id">@plant.DisplayName</a>
+                <div class="page-heading">
+                    <h1>@Strings.PlantStory.Heading</h1>
+                </div>
+                <p class="text-body-secondary">@Strings.PlantStory.Intro</p>
+
+                @if (photos.Count == 0 && notes.Count == 0)
+                {
+                    <p class="story-note">@Strings.PlantStory.NothingYet</p>
+                }
+
+                <section class="story-options" aria-label="@Strings.PlantStory.OptionsLabel">
+                    <div class="mb-3">
+                        <label class="form-label" for="story-words">@Strings.PlantStory.YourWords</label>
+                        <textarea id="story-words" class="form-control" rows="3" @bind="words" @bind:event="oninput"></textarea>
+                        <div class="form-text">@Strings.PlantStory.YourWordsHint</div>
+                    </div>
+
+                    <fieldset class="mb-3">
+                        <legend class="form-label">@Strings.PlantStory.WhatGoesOn</legend>
+                        @if (photos.Count > 0)
+                        {
+                            @Show("story-photos", Strings.PlantStory.Photos, showPhotos, on => showPhotos = on)
+                        }
+                        @if (notes.Count > 0)
+                        {
+                            @Show("story-notes", Strings.PlantStory.Notes, showNotes, on => showNotes = on)
+                        }
+                        @if (!string.IsNullOrWhiteSpace(plant.Notes))
+                        {
+                            @Show("story-about", Strings.PlantDetail.AboutIt, showAbout, on => showAbout = on)
+                        }
+                        @if (cameFrom.Count > 0)
+                        {
+                            @Show("story-from", Strings.PlantStory.CameFrom, showCameFrom, on => showCameFrom = on)
+                        }
+                        @if (HasComeFromIt)
+                        {
+                            @Show("story-given", Strings.PlantStory.ComeFromIt, showComeFromIt, on => showComeFromIt = on)
+                        }
+                    </fieldset>
+
+                    @if (photos.Count > 0 && showPhotos)
+                    {
+                        <FormSection Title="@Strings.PlantStory.ChoosePhotos" Summary="@Counted(pickedPhotos.Count, photos.Count)" Open="true">
+                            <div class="story-all-none">
+                                <button type="button" class="btn btn-link link-action" @onclick="() => pickedPhotos = [.. photos.Select(p => p.Id)]">@Strings.PlantStory.ChooseAll</button>
+                                <button type="button" class="btn btn-link link-action" @onclick="() => pickedPhotos = []">@Strings.PlantStory.ChooseNone</button>
+                            </div>
+                            <div class="story-picker">
+                                @foreach (var photo in photos)
+                                {
+                                    var on = pickedPhotos.Contains(photo.Id);
+                                    <button type="button" class="story-pick @(on ? "on" : null)" aria-pressed="@(on ? "true" : "false")"
+                                            aria-label="@F(Strings.PlantStory.PhotoFrom, Labels.Date(photo.Day))" @key="photo.Id"
+                                            @onclick="() => Toggle(pickedPhotos, photo.Id)">
+                                        <PhotoImage PhotoId="photo.Id" />
+                                        <span class="story-tick" aria-hidden="true">
+                                            @if (on)
+                                            {
+                                                <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.500" /></svg>
+                                            }
+                                        </span>
+                                    </button>
+                                }
+                            </div>
+                        </FormSection>
+                    }
+
+                    @if (notes.Count > 0 && showNotes)
+                    {
+                        <FormSection Title="@Strings.PlantStory.ChooseNotes" Summary="@Counted(pickedNotes.Count, notes.Count)" Open="true">
+                            <div class="story-all-none">
+                                <button type="button" class="btn btn-link link-action" @onclick="() => pickedNotes = [.. notes.Select(n => n.Key)]">@Strings.PlantStory.ChooseAll</button>
+                                <button type="button" class="btn btn-link link-action" @onclick="() => pickedNotes = []">@Strings.PlantStory.ChooseNone</button>
+                            </div>
+                            <ul class="story-note-list">
+                                @foreach (var note in notes)
+                                {
+                                    var id = $"story-note-{note.Key}";
+                                    <li @key="note.Key">
+                                        <input class="form-check-input" type="checkbox" id="@id" checked="@pickedNotes.Contains(note.Key)"
+                                               @onchange="() => Toggle(pickedNotes, note.Key)" />
+                                        <label for="@id">
+                                            <small>@Labels.Date(note.Day)</small>
+                                            <span>@note.Text</span>
+                                        </label>
+                                    </li>
+                                }
+                            </ul>
+                        </FormSection>
+                    }
+                </section>
+
+                @if (missingPhotos > 0)
+                {
+                    <p class="story-note" role="status">@Plural.Of(missingPhotos, Strings.PlantStory.PhotosMissing_One, Strings.PlantStory.PhotosMissing_Other)</p>
+                }
+
+                <div class="story-actions">
+                    @PrintButton
+                </div>
+            </div>
+
+            <article class="story-paper" aria-label="@Strings.PlantStory.PaperLabel">
+                <header class="story-top">
+                    <p class="story-kicker">@Strings.PlantStory.TheStoryOf</p>
+                    <h2 class="story-name">
+                        @if (string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
+                        {
+                            <BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" Note="@plant.NameNote" />
+                        }
+                        else
+                        {
+                            @plant.DisplayName
+                        }
+                    </h2>
+                    @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
+                    {
+                        <p class="story-botanical"><BotanicalName Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" Note="@plant.NameNote" /></p>
+                    }
+                </header>
+
+                @if (!string.IsNullOrWhiteSpace(words))
+                {
+                    <p class="story-words">@words.Trim()</p>
+                }
+
+                @if (showCameFrom && cameFrom.Count > 0)
+                {
+                    <section class="story-part">
+                        <h3>@Strings.PlantStory.CameFrom</h3>
+                        @foreach (var line in cameFrom)
+                        {
+                            <p>@line</p>
+                        }
+                    </section>
+                }
+
+                @if (showAbout && !string.IsNullOrWhiteSpace(plant.Notes))
+                {
+                    <section class="story-part">
+                        <h3>@Strings.PlantDetail.AboutIt</h3>
+                        <p class="story-text">@plant.Notes.Trim()</p>
+                    </section>
+                }
+
+                @if (showPhotos && PhotosOnPaper.Count > 0)
+                {
+                    <section class="story-part">
+                        <h3>@Strings.PlantStory.Photos</h3>
+                        <div class="story-photos @PhotoColumns">
+                            @foreach (var photo in PhotosOnPaper)
+                            {
+                                <figure class="story-photo" @key="photo.Id">
+                                    <div class="story-photo-frame">
+                                        <PhotoImage PhotoId="photo.Id" Thumbnail="false" Eager="true" Alt="@F(Strings.PlantStory.PhotoFrom, Labels.Date(photo.Day))" />
+                                    </div>
+                                    <figcaption>@Labels.Date(photo.Day)</figcaption>
+                                </figure>
+                            }
+                        </div>
+                    </section>
+                }
+
+                @if (showNotes && NotesOnPaper.Count > 0)
+                {
+                    <section class="story-part">
+                        <h3>@Strings.PlantStory.Notes</h3>
+                        <dl class="story-notes">
+                            @foreach (var note in NotesOnPaper)
+                            {
+                                <div class="story-note-row" @key="note.Key">
+                                    <dt>@Labels.Date(note.Day)</dt>
+                                    <dd class="story-text">@note.Text</dd>
+                                </div>
+                            }
+                        </dl>
+                    </section>
+                }
+
+                @if (showComeFromIt && HasComeFromIt)
+                {
+                    <section class="story-part">
+                        <h3>@Strings.PlantStory.ComeFromIt</h3>
+                        @if (givenParts.Count > 0)
+                        {
+                            <p>@string.Join(" · ", givenParts)</p>
+                        }
+                        @if (offspring.Count > 0)
+                        {
+                            <ul class="story-offspring">
+                                @foreach (var child in offspring)
+                                {
+                                    @* Who a plant went to stays out, since this page is passed on *@
+                                    <li>
+                                        @child.DisplayName@if (!child.InCollection)
+                                        {
+                                            <span class="story-muted"> · @Labels.StatusOf(child)</span>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </section>
+                }
+            </article>
+        </div>
+
+        <div class="form-actions form-bar story-bar">
+            @PrintButton
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private Plant? plant;
+    private bool loaded;
+    private IReadOnlyList<StoryPhoto> photos = [];
+    private IReadOnlyList<StoryNote> notes = [];
+    private IReadOnlyList<string> cameFrom = [];
+    private IReadOnlyList<string> givenParts = [];
+    private IReadOnlyList<Plant> offspring = [];
+
+    private HashSet<Guid> pickedPhotos = [];
+    private HashSet<string> pickedNotes = [];
+    private string? words;
+    private bool showPhotos = true;
+    private bool showNotes = true;
+    private bool showAbout = true;
+    private bool showCameFrom = true;
+    private bool showComeFromIt = true;
+    private bool printing;
+    private int missingPhotos;
+
+    private bool HasComeFromIt => givenParts.Count > 0 || offspring.Count > 0;
+
+    private IReadOnlyList<StoryPhoto> PhotosOnPaper => [.. photos.Where(p => pickedPhotos.Contains(p.Id))];
+
+    private IReadOnlyList<StoryNote> NotesOnPaper => [.. notes.Where(n => pickedNotes.Contains(n.Key))];
+
+    // One photo gets the width, and two or four sit in even rows. The rest fill rows of three
+    private string PhotoColumns => PhotosOnPaper.Count switch
+    {
+        1 => "one",
+        2 or 4 => "two",
+        _ => "three"
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var all = await Plants.GetAllAsync();
+        plant = all.FirstOrDefault(p => p.Id == Id);
+        loaded = true;
+        if (plant is null)
+            return;
+
+        var allPropagations = await Propagations.GetAllAsync();
+        var cutting = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
+        var entries = await Entries.GetForAsync(plant.Id);
+        var until = cutting is null ? (DateOnly?)null : CarriedPhotos.PotUpDay(plant, entries, Time);
+
+        photos = PlantStory.Photos(
+            await PhotoRepository.GetForAsync(plant.Id),
+            cutting is null ? [] : await PhotoRepository.GetForAsync(cutting.Id),
+            until, Time);
+        notes = PlantStory.Notes(
+            entries,
+            cutting is null ? [] : await Entries.GetForAsync(cutting.Id),
+            until,
+            await ReceivedHistories.GetForAsync(plant.Id),
+            Time);
+
+        pickedPhotos = [.. PlantStory.Spread(photos, PlantStory.PhotosAtFirst).Select(p => p.Id)];
+        pickedNotes = [.. PlantStory.Spread(notes, PlantStory.NotesAtFirst).Select(n => n.Key)];
+
+        cameFrom = CameFromLines(plant, all, cutting, await SellerService.GetSellersAsync());
+        givenParts = [.. PlantGivenText.Parts(PlantLineage.Given(plant, all, allPropagations))];
+        offspring = PlantLineage.Offspring(plant, all).Where(p => p.Id != plant.Id).ToList();
+    }
+
+    // How it was got, without what it cost, and the plant it grew from
+    private static IReadOnlyList<string> CameFromLines(Plant plant, IReadOnlyList<Plant> all, Propagation? cutting, SellerList sellers)
+    {
+        var lines = new List<string>();
+
+        var got = new List<string> { Labels.For(plant.Origin) };
+        if (plant.AsksHowRaised && plant.RaisedAs is { } raised)
+            got.Add(Labels.For(raised));
+        if (plant.AcquiredOn is { } date)
+            got.Add(Labels.Date(date));
+        if (sellers.For(plant.SellerId, plant.Source)?.Name is { } seller)
+            got.Add(seller);
+        else if (!string.IsNullOrWhiteSpace(plant.Source))
+            got.Add(plant.Source.Trim());
+        if (plant.Origin != PlantOrigin.Unknown || got.Count > 1)
+            lines.Add(string.Join(" · ", got));
+
+        var ancestors = PlantLineage.Ancestors(plant, all);
+        if (ancestors.Count > 0 && cutting is not null)
+            lines.Add(F(Strings.PlantStory.GrownFromTypeOf, PlantDetail.TypeWithArticle(cutting.Type), ancestors[0].DisplayName));
+        else if (ancestors.Count > 0)
+            lines.Add(F(Strings.PlantStory.GrownFromPlant, ancestors[0].DisplayName));
+        else if (cutting is not null)
+            lines.Add(F(Strings.PlantStory.GrownFromType, PlantDetail.TypeWithArticle(cutting.Type)));
+
+        if (PlantLineage.GenerationOf(plant, all) is { Number: >= 2 } generation)
+            lines.Add(F(Strings.PlantStory.GenerationFrom, F(Strings.PlantDetail.FactGeneration, Ordinal.Of(generation.Number)), generation.Oldest.DisplayName));
+
+        return lines;
+    }
+
+    private static void Toggle<T>(HashSet<T> picked, T item)
+    {
+        if (!picked.Remove(item))
+            picked.Add(item);
+    }
+
+    private async Task PrintAsync()
+    {
+        printing = true;
+        missingPhotos = 0;
+        StateHasChanged();
+        try
+        {
+            missingPhotos = await StoryActions.PrintAsync();
+        }
+        finally
+        {
+            printing = false;
+        }
+    }
+
+    private static string Counted(int picked, int all) => F(Strings.PlantStory.PickedOf, picked, all);
+
+    private static string F(string format, params object[] args) => string.Format(CultureInfo.CurrentCulture, format, args);
+
+    private RenderFragment PrintButton => @<button type="button" class="btn btn-primary" disabled="@printing" @onclick="PrintAsync">
+        @(printing ? Strings.PlantStory.GettingReady : Strings.Care.SitterPrint)
+    </button>;
+
+    private RenderFragment Show(string id, string label, bool on, Action<bool> set) => @<div class="form-check">
+        <input class="form-check-input" type="checkbox" id="@id" checked="@on" @onchange="e => set(e.Value is true)" />
+        <label class="form-check-label" for="@id">@label</label>
+    </div>;
+}
