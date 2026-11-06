@@ -543,35 +543,8 @@
     cursor: pointer;
 }
 
-/* Worth a look sits at the end of what needs doing in the markup, so it stays in the wide column
-   on a computer whether or not anything is due. Until the columns sit side by side, it goes back
-   to its place after the year card, with Photos and Lately after it. */
-@media (max-width: 79.999rem) {
-    .today-columns {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .today-todo,
-    .today-rest {
-        display: contents;
-    }
-
-    .worth-a-look,
-    .today-rest > ::deep * {
-        order: 2;
-    }
-
-    .today-rest > .memory,
-    .today-rest > .anniversary,
-    .today-rest > .coming-back,
-    .today-rest > .year-section {
-        order: 1;
-    }
-}
-
 /* A computer or a tablet held sideways: what needs doing in a wide column, the rest beside it.
-   The order stays the phone order, so nothing here changes below 64rem. */
+   The markup keeps the phone order, so nothing here changes below 64rem. */
 @media (min-width: 64rem) {
     /* Nothing asks for anything and there is no Worth a look: the rest is the one column it is on a phone */
     .today-columns:not(:has(.today-todo .today-section)):not(:has(.worth-a-look)) {
