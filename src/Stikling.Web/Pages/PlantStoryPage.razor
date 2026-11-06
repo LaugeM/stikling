@@ -30,6 +30,10 @@
                 <a class="back-link" href="plants/@plant.Id">@plant.DisplayName</a>
                 <div class="page-heading">
                     <h1>@Strings.PlantStory.Heading</h1>
+                    @* On a wide screen the action sits here, on a phone it is in the bar at the bottom *@
+                    <div class="story-actions">
+                        @PrintButton
+                    </div>
                 </div>
                 <p class="text-body-secondary">@Strings.PlantStory.Intro</p>
 
@@ -46,7 +50,10 @@
                     </div>
 
                     <fieldset class="mb-3">
-                        <legend class="form-label">@Strings.PlantStory.WhatGoesOn</legend>
+                        @if (photos.Count > 0 || notes.Count > 0 || !string.IsNullOrWhiteSpace(plant.Notes) || cameFrom.Count > 0 || HasComeFromIt)
+                        {
+                            <legend class="form-label">@Strings.PlantStory.WhatGoesOn</legend>
+                        }
                         @if (photos.Count > 0)
                         {
                             @Show("story-photos", Strings.PlantStory.Photos, showPhotos, on => showPhotos = on)
@@ -125,10 +132,6 @@
                 {
                     <p class="story-note" role="status">@Plural.Of(missingPhotos, Strings.PlantStory.PhotosMissing_One, Strings.PlantStory.PhotosMissing_Other)</p>
                 }
-
-                <div class="story-actions">
-                    @PrintButton
-                </div>
             </div>
 
             <article class="story-paper" aria-label="@Strings.PlantStory.PaperLabel">
