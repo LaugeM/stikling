@@ -1716,4 +1716,20 @@
   <data name="WeekAheadA2" xml:space="preserve">
     <value>&lt;em&gt;Mark day as done&lt;/em&gt; lists everything on that day and asks before logging anything. Untick what you didn't do, and &lt;em&gt;Undo&lt;/em&gt; takes it back afterwards. It is logged as done today, also for a later day. For a later day, plants due a check aren't ticked, so tick one only once you have checked it and given it water.</value>
   </data>
+  <data name="CompareMediumsLikeWaterPerliteA2" xml:space="preserve">
+    <value>If the batches differ in more than one thing, like a different medium and a different month, a line under the experiment's heading says what differs, so a difference in results isn't read as being down to the medium alone. A plant name or place left empty doesn't count as different.</value>
+    <comment>Answer to "How do I compare mediums, like water and perlite?" on the Help page.</comment>
+  </data>
+  <data name="OnResultsPageA3" xml:space="preserve">
+    <value>The groups on the page are whatever you happened to do, not a test. Where the batches in the groups mostly also differ in something else, like the month they were started, a line under the heading says so.</value>
+    <comment>Answer to "What is on the results page?" on the Help page.</comment>
+  </data>
+  <data name="FailedDifferedQ" xml:space="preserve">
+    <value>What is the list on a propagation that failed?</value>
+    <comment>Question in the "Propagations" part of the Help page.</comment>
+  </data>
+  <data name="FailedDifferedA1" xml:space="preserve">
+    <value>Once you have at least 3 rooted batches of the same type, a failed propagation lists what was different from them: a medium, a rooting aid or a start month few of them had, an aid most of them had, or water changed much more or less often. It only uses what you have recorded, and says so when nothing stands out. It shows what was different, not why it failed.</value>
+    <comment>Answer to "What is the list on a propagation that failed?" on the Help page.</comment>
+  </data>
 </root>
