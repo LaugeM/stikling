@@ -13,10 +13,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ListPageTitle" xml:space="preserve">
-    <value>Formeringer · Stikling</value>
+    <value>Stiklinger · Stikling</value>
   </data>
   <data name="ListTitle" xml:space="preserve">
-    <value>Formeringer</value>
+    <value>Stiklinger</value>
   </data>
   <data name="ListShownOf" xml:space="preserve">
     <value>{0} af {1}</value>
@@ -37,22 +37,22 @@
     <value>Indlæser…</value>
   </data>
   <data name="ListEmptyTitle" xml:space="preserve">
-    <value>Ingen formeringer endnu</value>
+    <value>Ingen stiklinger endnu</value>
   </data>
   <data name="ListEmptyWhat" xml:space="preserve">
-    <value>En formering er en ny plante du laver ud fra en du har, fx en stikling i vand eller nogle frø.</value>
+    <value>Her samler du det du er ved at gøre til nye planter, fx en stikling i vand eller nogle frø.</value>
   </data>
   <data name="ListEmptyHow" xml:space="preserve">
     <value>Åbn en plante og tryk på &lt;em&gt;Formér&lt;/em&gt;, eller start en uden moderplante, fx med frø.</value>
   </data>
   <data name="ListHelpLink" xml:space="preserve">
-    <value>Mere om formeringer i Hjælp</value>
+    <value>Mere om stiklinger i Hjælp</value>
   </data>
   <data name="ListSearchPlaceholder" xml:space="preserve">
     <value>Søg på navn…</value>
   </data>
   <data name="ListSearchLabel" xml:space="preserve">
-    <value>Søg i formeringer</value>
+    <value>Søg i stiklinger</value>
   </data>
   <data name="ListProgressLabel" xml:space="preserve">
     <value>Fremgang</value>
@@ -64,7 +64,7 @@
     <value>Ryd</value>
   </data>
   <data name="ListNoMatch" xml:space="preserve">
-    <value>Ingen formeringer passer.</value>
+    <value>Ingen stiklinger passer.</value>
   </data>
   <data name="ListClearSearch" xml:space="preserve">
     <value>Ryd søgning</value>
@@ -73,7 +73,7 @@
     <value>Ingen er i gang. Dem der er pottet op eller mislykkedes, ligger under "Færdige".</value>
   </data>
   <data name="ListNoneFinished" xml:space="preserve">
-    <value>Ingen er færdige endnu. En formering er færdig når det hele er pottet op eller mislykkedes.</value>
+    <value>Ingen er færdige endnu. En stikling er færdig når det hele er pottet op eller mislykkedes.</value>
   </data>
   <data name="ListBatches_One" xml:space="preserve">
     <value>{0} batch</value>
@@ -94,7 +94,7 @@
     <value>langsom</value>
   </data>
   <data name="ListBulkLabel" xml:space="preserve">
-    <value>Handlinger for valgte formeringer</value>
+    <value>Handlinger for valgte stiklinger</value>
   </data>
   <data name="ListSelectedCount" xml:space="preserve">
     <value>{0} valgt</value>
@@ -121,7 +121,7 @@
     <value>første blad på dag {0}</value>
   </data>
   <data name="ListStart" xml:space="preserve">
-    <value>Start en formering</value>
+    <value>Start en stikling</value>
   </data>
   <data name="CardFrom" xml:space="preserve">
     <value>fra {0}</value>
@@ -193,13 +193,13 @@
     <value>Succesraten tæller enheder, så en batch med 5 knolde hvor 4 klarede den, tæller som 4 af 5. En enhed har klaret den når den er pottet op, eller når dens batch har slået rødder. Enheder der stadig er på vej, tæller hverken med eller imod. Under {0} enheder vises antallet i stedet for en procent, fordi 2 af 2 siger mere end 100 %. Dage til rødder bruger kun batches der er markeret som har slået rødder, så en batch der blev pottet op med det samme, er ikke med.</value>
   </data>
   <data name="StatsEmptyTitle" xml:space="preserve">
-    <value>Ingen formeringer endnu.</value>
+    <value>Ingen stiklinger endnu.</value>
   </data>
   <data name="StatsEmptyHow" xml:space="preserve">
     <value>Når du har startet nogle, kan du se her hvor godt hvert vækstmedie og hver type klarer sig: hvor mange der klarede den, og hvor længe de var om at slå rødder.</value>
   </data>
   <data name="StatsAllHeading" xml:space="preserve">
-    <value>Alle formeringer</value>
+    <value>Alle stiklinger</value>
   </data>
   <data name="StatsByMedium" xml:space="preserve">
     <value>Efter vækstmedie</value>
@@ -211,7 +211,7 @@
     <value>Rodhjælp</value>
   </data>
   <data name="StatsAidsNone" xml:space="preserve">
-    <value>Vælg den rodhjælp du brugte, når du redigerer en formering. Så bliver hver slags sammenlignet her med de batches der var uden.</value>
+    <value>Vælg den rodhjælp du brugte, når du redigerer en stikling. Så bliver hver slags sammenlignet her med de batches der var uden.</value>
   </data>
   <data name="StatsAidsHow" xml:space="preserve">
     <value>Hver slags rodhjælp sammenlignet med alle batches der var uden, uanset type eller vækstmedie.</value>
@@ -457,7 +457,7 @@
     <value>Reference · ikke denne plante</value>
   </data>
   <data name="TlReferencePropagation" xml:space="preserve">
-    <value>Reference · ikke denne formering</value>
+    <value>Reference · ikke denne stikling</value>
   </data>
   <data name="TlOpenReference" xml:space="preserve">
     <value>Åbn referencebillede</value>
@@ -559,7 +559,7 @@
     <value>Slet post</value>
   </data>
   <data name="TlOpenPropagation" xml:space="preserve">
-    <value>Åbn formering</value>
+    <value>Åbn stikling</value>
   </data>
   <data name="TlOpenPhoto" xml:space="preserve">
     <value>Åbn billede</value>
@@ -625,19 +625,19 @@
     <value>Billederne kunne ikke gemmes: {0}</value>
   </data>
   <data name="EditPageTitleNew" xml:space="preserve">
-    <value>Start formering · Stikling</value>
+    <value>Start stikling · Stikling</value>
   </data>
   <data name="EditPageTitleEdit" xml:space="preserve">
-    <value>Rediger formering · Stikling</value>
+    <value>Rediger stikling · Stikling</value>
   </data>
   <data name="EditTitleNew" xml:space="preserve">
-    <value>Start formering</value>
+    <value>Start stikling</value>
   </data>
   <data name="EditTitleEdit" xml:space="preserve">
-    <value>Rediger formering</value>
+    <value>Rediger stikling</value>
   </data>
   <data name="EditNotFound" xml:space="preserve">
-    <value>Den formering findes ikke.</value>
+    <value>Den stikling findes ikke.</value>
   </data>
   <data name="EditIntro" xml:space="preserve">
     <value>En stikling, en knold, frø eller noget andet der skal blive til en ny plante.</value>
@@ -727,7 +727,7 @@
     <value>Brug i dag i stedet</value>
   </data>
   <data name="EditPhotoAlt" xml:space="preserve">
-    <value>Billede af den nye formering</value>
+    <value>Billede af den nye stikling</value>
   </data>
   <data name="EditCamera" xml:space="preserve">
     <value>Kamera</value>
@@ -883,10 +883,10 @@
     <value>Om den</value>
   </data>
   <data name="DetFallbackTitle" xml:space="preserve">
-    <value>Formering</value>
+    <value>Stikling</value>
   </data>
   <data name="DetNotFound" xml:space="preserve">
-    <value>Den formering findes ikke eller blev slettet.</value>
+    <value>Den stikling findes ikke eller blev slettet.</value>
   </data>
   <data name="DetOpenCover" xml:space="preserve">
     <value>Åbn profilbilledet</value>
@@ -1018,7 +1018,7 @@
     <value>Slet &lt;strong&gt;{0}&lt;/strong&gt;? Planter der er pottet op fra den, bliver. Hvis den ikke klarede den, kan du i stedet bruge &lt;em&gt;Markér som mislykket&lt;/em&gt; under trinknappen, så beholder den sin historik.</value>
   </data>
   <data name="DetDelete" xml:space="preserve">
-    <value>Slet formering</value>
+    <value>Slet stikling</value>
   </data>
   <data name="DetAddTo" xml:space="preserve">
     <value>Føj til {0}</value>
@@ -1027,7 +1027,7 @@
     <value>Trin: {0}. Skift trin</value>
   </data>
   <data name="DetMoreLabel" xml:space="preserve">
-    <value>Flere valg for denne formering</value>
+    <value>Flere valg for denne stikling</value>
   </data>
   <data name="DetFromDevice" xml:space="preserve">
     <value>Fra denne enhed</value>
@@ -1093,7 +1093,7 @@
     <value>Den bliver en plante for sig.</value>
   </data>
   <data name="DetPotUpHelp" xml:space="preserve">
-    <value>Dem der har slået rødder, bliver planter for sig. Du kan give hver sin egen potte, sætte dem alle i én potte som én plante eller potte dem sammen med en plante du allerede har. Formeringen beholder sin historik, og de nye planter peger tilbage på den.</value>
+    <value>Dem der har slået rødder, bliver planter for sig. Du kan give hver sin egen potte, sætte dem alle i én potte som én plante eller potte dem sammen med en plante du allerede har. Stiklingen beholder sin historik, og de nye planter peger tilbage på den.</value>
   </data>
   <data name="DetEachOwnPot" xml:space="preserve">
     <value>Hver i sin egen potte</value>
@@ -1258,7 +1258,7 @@
     <value>Kunne ikke markere som givet væk: {0}</value>
   </data>
   <data name="DetKeepsHistory" xml:space="preserve">
-    <value>Formeringen beholder sin historik.</value>
+    <value>Stiklingen beholder sin historik.</value>
   </data>
   <data name="DetTopicPotUp" xml:space="preserve">
     <value>"Potte op"</value>
@@ -1270,7 +1270,7 @@
     <value>(valgfrit)</value>
   </data>
   <data name="DetFinishes" xml:space="preserve">
-    <value>Så er formeringen færdig.</value>
+    <value>Så er stiklingen færdig.</value>
   </data>
   <data name="DetMarkAsFailed" xml:space="preserve">
     <value>Markér som mislykket</value>
@@ -1405,13 +1405,13 @@
     <value>Opret forbindelse til internettet for at slå linket fra.</value>
   </data>
   <data name="ShLinkNoteSignedOutPropagation" xml:space="preserve">
-    <value>Et link åbner en side som alle kan se, med denne formerings billeder. Det kræver en konto, fordi siden vises fra serveren.</value>
+    <value>Et link åbner en side som alle kan se, med denne stiklings billeder. Det kræver en konto, fordi siden vises fra serveren.</value>
   </data>
   <data name="ShLinkNoteSignedOutPlant" xml:space="preserve">
     <value>Et link åbner en side som alle kan se, med denne plantes billeder. Det kræver en konto, fordi siden vises fra serveren.</value>
   </data>
   <data name="ShLinkNotePropagation" xml:space="preserve">
-    <value>Siden viser denne formerings billeder og dens noter, hvis du lader dem være med. Den viser aldrig rummet, priser eller hvor den kom fra.</value>
+    <value>Siden viser denne stiklings billeder og dens noter, hvis du lader dem være med. Den viser aldrig rummet, priser eller hvor den kom fra.</value>
   </data>
   <data name="ShLinkNotePlant" xml:space="preserve">
     <value>Siden viser denne plantes billeder og dens noter, hvis du lader dem være med. Den viser aldrig rummet, priser eller hvor den kom fra.</value>

@@ -61,7 +61,7 @@
     <value>ved ikke</value>
   </data>
   <data name="ErrFinished" xml:space="preserve">
-    <value>Formeringen er færdig.</value>
+    <value>Stiklingen er færdig.</value>
   </data>
   <data name="ErrDateFuture" xml:space="preserve">
     <value>Datoen ligger i fremtiden.</value>
@@ -70,7 +70,7 @@
     <value>Datoen kan ikke ligge i fremtiden.</value>
   </data>
   <data name="ErrDateBeforeStart" xml:space="preserve">
-    <value>Datoen kan ikke ligge før formeringen startede.</value>
+    <value>Datoen kan ikke ligge før stiklingen startede.</value>
   </data>
   <data name="ErrPotWithMissing" xml:space="preserve">
     <value>Planten de skal dele potte med, er ikke i samlingen.</value>
@@ -82,7 +82,7 @@
     <value>Vælg mellem 1 og {0}.</value>
   </data>
   <data name="ErrNeedName" xml:space="preserve">
-    <value>Giv formeringen et kælenavn eller en slægt.</value>
+    <value>Giv stiklingen et kælenavn eller en slægt.</value>
   </data>
   <data name="ErrCountsNegative" xml:space="preserve">
     <value>Antal pottet op, givet væk eller mislykket kan ikke være negativt.</value>
@@ -97,7 +97,7 @@
     <value>Den kan ikke have slået rødder før den blev startet.</value>
   </data>
   <data name="ErrSignBeforeStart" xml:space="preserve">
-    <value>Der kan ikke komme en rod eller et blad før formeringen startede.</value>
+    <value>Der kan ikke komme en rod eller et blad før stiklingen startede.</value>
   </data>
   <data name="ErrSignFuture" xml:space="preserve">
     <value>En rod eller et blad kan ikke have en dato i fremtiden.</value>
@@ -124,7 +124,7 @@
     <value>Antallet til bytte kan ikke være negativt.</value>
   </data>
   <data name="ErrCareNeedsPropagation" xml:space="preserve">
-    <value>En plejepost skal høre til en formering.</value>
+    <value>En plejepost skal høre til en stikling.</value>
   </data>
   <data name="ErrReadingNeedsNumber" xml:space="preserve">
     <value>Giv fugtmålingen et tal fra 0 til 10.</value>
@@ -178,7 +178,7 @@
     <value>Navn ukendt</value>
   </data>
   <data name="UnnamedPropagation" xml:space="preserve">
-    <value>Formering uden navn</value>
+    <value>Stikling uden navn</value>
   </data>
   <data name="ListOfCutting" xml:space="preserve">
     <value>Stikling af {0}</value>
@@ -202,7 +202,7 @@
     <value>Bladstikling af {0}</value>
   </data>
   <data name="ListOfOther" xml:space="preserve">
-    <value>Formering af {0}</value>
+    <value>Ny plante af {0}</value>
   </data>
   <data name="ListUnnamedCutting" xml:space="preserve">
     <value>Stikling uden navn</value>
@@ -226,7 +226,7 @@
     <value>Bladstikling uden navn</value>
   </data>
   <data name="ListUnnamedOther" xml:space="preserve">
-    <value>Formering uden navn</value>
+    <value>Ny plante uden navn</value>
   </data>
   <data name="PhotoDay" xml:space="preserve">
     <value>dag {0}</value>
@@ -286,7 +286,7 @@
     <value>Bladstikling</value>
   </data>
   <data name="ShareTypeOther" xml:space="preserve">
-    <value>Formering</value>
+    <value>Ny plante</value>
   </data>
   <data name="ShareTypeFromMy" xml:space="preserve">
     <value>{0} fra {1}</value>
@@ -370,10 +370,10 @@
     <value>dage indtil nu</value>
   </data>
   <data name="FigurePropagation_One" xml:space="preserve">
-    <value>formering</value>
+    <value>stikling</value>
   </data>
   <data name="FigurePropagation_Other" xml:space="preserve">
-    <value>formeringer</value>
+    <value>stiklinger</value>
   </data>
   <data name="FigureDaysWithMe_One" xml:space="preserve">
     <value>dag hos mig</value>
@@ -499,7 +499,7 @@
     <value>Der blev taget en bladstikling</value>
   </data>
   <data name="PropagatedOther" xml:space="preserve">
-    <value>Der blev startet en formering</value>
+    <value>Der blev startet en ny plante</value>
   </data>
   <data name="ShareNotOnServer" xml:space="preserve">
     <value>Den er ikke på serveren endnu. Synkroniser og prøv igen.</value>

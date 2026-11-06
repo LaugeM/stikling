@@ -25,10 +25,10 @@
     <value>{0} billeder</value>
   </data>
   <data name="Propagation_One" xml:space="preserve">
-    <value>{0} formering</value>
+    <value>{0} stikling</value>
   </data>
   <data name="Propagation_Other" xml:space="preserve">
-    <value>{0} formeringer</value>
+    <value>{0} stiklinger</value>
   </data>
   <data name="Change_One" xml:space="preserve">
     <value>{0} ændring</value>
@@ -346,13 +346,13 @@
     <value>Dine billeder i mapper</value>
   </data>
   <data name="BackupPhotosIntro" xml:space="preserve">
-    <value>Alle billeder, med en mappe til hver plante, formering, potte og plads med hyldebilleder og navngivet efter hvornår de blev taget. Til at gemme eller kigge i uden for appen. Vil du flytte din samling til en anden enhed, så brug en sikkerhedskopi.</value>
+    <value>Alle billeder, med en mappe til hver plante, stikling, potte og plads med hyldebilleder og navngivet efter hvornår de blev taget. Til at gemme eller kigge i uden for appen. Vil du flytte din samling til en anden enhed, så brug en sikkerhedskopi.</value>
   </data>
   <data name="BackupNoPhotos" xml:space="preserve">
     <value>Ingen billeder endnu.</value>
   </data>
   <data name="BackupIncludeGone" xml:space="preserve">
-    <value>Tag også planter der er væk, og afsluttede formeringer med</value>
+    <value>Tag også planter der er væk, og afsluttede stiklinger med</value>
   </data>
   <data name="BackupIncludeReferences" xml:space="preserve">
     <value>Tag referencebilleder med i deres egen mappe, Reference</value>
@@ -367,13 +367,13 @@
     <value>Til et regneark</value>
   </data>
   <data name="BackupSpreadsheetIntro" xml:space="preserve">
-    <value>En kopi af dine planter eller formeringer som du kan åbne i Excel eller Google Sheets, eller en liste over planter du vil hente ind. En CSV-fil er ikke en sikkerhedskopi. Billeder, historik og pleje får du kun tilbage fra en sikkerhedskopi.</value>
+    <value>En kopi af dine planter eller stiklinger som du kan åbne i Excel eller Google Sheets, eller en liste over planter du vil hente ind. En CSV-fil er ikke en sikkerhedskopi. Billeder, historik og pleje får du kun tilbage fra en sikkerhedskopi.</value>
   </data>
   <data name="BackupPlantsCsv" xml:space="preserve">
     <value>Planter som CSV</value>
   </data>
   <data name="BackupPropagationsCsv" xml:space="preserve">
-    <value>Formeringer som CSV</value>
+    <value>Stiklinger som CSV</value>
   </data>
   <data name="BackupImportPlants" xml:space="preserve">
     <value>Importér planter</value>
@@ -685,7 +685,7 @@
     <value>&lt;strong&gt;Log ind&lt;/strong&gt; klares af &lt;a href="https://clerk.com/legal/privacy"&gt;Clerk&lt;/a&gt;, et firma i USA. Clerk gemmer din e-mailadresse og, hvis du logger ind med Google, Facebook eller Discord, dit navn og profilbillede. Clerk gemmer også hvornår du loggede ind, og for hver enhed du er logget ind på, dens browser, IP-adresse og omtrentlige placering. Logger du ind med din e-mail, sender Clerk koden dertil.</value>
   </data>
   <data name="PrivacyWithData" xml:space="preserve">
-    <value>&lt;strong&gt;Det du tilføjer i appen&lt;/strong&gt;, fx planter, formeringer, pleje, skadedyr, billeder og indstillinger, bliver sendt til Stikling-serveren så dine andre enheder også får det. Serveren kører på Microsoft Azure i Polen. Kun folk i din samling kan komme til det gennem appen, og indtil videre er det kun dig. Som den der driver serveren, kan jeg teknisk set komme til databasen, men jeg kigger kun i den for at rette et problem du har fortalt mig om.</value>
+    <value>&lt;strong&gt;Det du tilføjer i appen&lt;/strong&gt;, fx planter, stiklinger, pleje, skadedyr, billeder og indstillinger, bliver sendt til Stikling-serveren så dine andre enheder også får det. Serveren kører på Microsoft Azure i Polen. Kun folk i din samling kan komme til det gennem appen, og indtil videre er det kun dig. Som den der driver serveren, kan jeg teknisk set komme til databasen, men jeg kigger kun i den for at rette et problem du har fortalt mig om.</value>
   </data>
   <data name="PrivacyWithNotifications" xml:space="preserve">
     <value>&lt;strong&gt;Notifikationer&lt;/strong&gt;: Slår du dem til, får serveren din tidszone og det tidspunkt du har valgt, teksten til de næste 30 dages notifikationer, som kan nævne dine planter, og din enheds push-adresse. Teksten bliver lavet på din enhed. Serveren gemmer den så den kan sende dagens notifikation på dit tidspunkt, også når appen ikke er åben. Beskeden går gennem din browsers pushtjeneste (Mozilla, Google eller Apple), som sender den krypteret og ikke kan læse den. Slår du notifikationer fra på en enhed, bliver dens push-adresse fjernet fra serveren, og sletter du din konto, bliver det hele fjernet.</value>
@@ -706,7 +706,7 @@
     <value>Offentlige sider</value>
   </data>
   <data name="PrivacyPublic1" xml:space="preserve">
-    <value>Er du logget ind, kan du slå et link til for en plante eller formering. Alle med linket kan åbne dens side uden en konto. Siden viser navnet, linjen under det, billeder og milepæle og dine noter om den hvis du lader dem være slået til. Linjen er først den samme som på delekortet og kan nævne den plante den er taget fra, eller at den var en gave, og du kan ændre den. Siden viser aldrig rummet, prisen, butikken eller personen den kom fra, hvem den gik til, tags, potter eller pleje. Billeder du har valgt fra, er ikke med.</value>
+    <value>Er du logget ind, kan du slå et link til for en plante eller stikling. Alle med linket kan åbne dens side uden en konto. Siden viser navnet, linjen under det, billeder og milepæle og dine noter om den hvis du lader dem være slået til. Linjen er først den samme som på delekortet og kan nævne den plante den er taget fra, eller at den var en gave, og du kan ændre den. Siden viser aldrig rummet, prisen, butikken eller personen den kom fra, hvem den gik til, tags, potter eller pleje. Billeder du har valgt fra, er ikke med.</value>
   </data>
   <data name="PrivacyPublic2" xml:space="preserve">
     <value>Siden følger planten, så nye billeder og noter dukker op på den efter næste synkronisering. Søgemaskiner bliver bedt om ikke at vise den. Slår du linket fra eller sletter planten, holder siden op med at virke inden for få minutter, men et websted der har vist et eksempel på linket, kan have gemt sin kopi af billedet. For at beskytte serveren bruger den et øjeblik IP-adressen på den der åbner en side, til at begrænse hvor ofte sider kan hentes, og gemmer den ikke.</value>
