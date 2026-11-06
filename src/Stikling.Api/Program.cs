@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Auth;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
+using Stikling.Api.Identification;
 using Stikling.Api.Notifications;
 using Stikling.Api.People;
 using Stikling.Api.Photos;
@@ -60,6 +61,7 @@ builder.Services.AddRequestLimits(builder.Configuration);
 builder.Services.Configure<ShareOptions>(builder.Configuration.GetSection(ShareOptions.Section));
 builder.Services.Configure<NotificationOptions>(builder.Configuration.GetSection(NotificationOptions.Section));
 builder.Services.AddSingleton<IPushSender, WebPushSender>();
+builder.Services.AddIdentification(builder.Configuration);
 
 // Writes the HTML of the share pages. Text is encoded as HTML, but letters like ø and · are left as
 // they are instead of numbered references.
@@ -126,6 +128,7 @@ app.MapPhotos();
 app.MapShareLinks();
 app.MapSharePages();
 app.MapNotifications();
+app.MapIdentification();
 
 app.Run();
 return 0;

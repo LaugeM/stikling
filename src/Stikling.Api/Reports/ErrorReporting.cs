@@ -27,7 +27,24 @@ public static class ErrorReporting
         options.AddExceptionFilterForType<AccountDeletedException>();
         options.AddExceptionFilterForType<OperationCanceledException>();
 
+        // A failed outgoing request is reported with its address, and Pl@ntNet's key is in its address
+        options.CaptureFailedRequests = false;
+
         options.SetBeforeSend(Scrub);
+        options.SetBeforeBreadcrumb(ScrubBreadcrumb);
+    }
+
+    /// <summary>
+    /// A breadcrumb about a request to Pl@ntNet is dropped, since the address it holds has the key in it.
+    /// The client has no logging of its own either (<c>AddIdentification</c>), so this is the second lock.
+    /// </summary>
+    public static Breadcrumb? ScrubBreadcrumb(Breadcrumb breadcrumb, SentryHint hint)
+    {
+        static bool Holds(string? text) =>
+            text is not null && (text.Contains("api-key", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("plantnet.org", StringComparison.OrdinalIgnoreCase));
+
+        return Holds(breadcrumb.Message) || (breadcrumb.Data?.Values.Any(Holds) ?? false) ? null : breadcrumb;
     }
 
     /// <summary>Takes out who the request was from and anything the caller sent along.</summary>

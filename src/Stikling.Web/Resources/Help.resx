@@ -1776,4 +1776,16 @@
     <value>Yes. Under Rooms and tags in Settings, History on a room or spot lists the plants that have stood there, for how long, and whether each is still there, moved on, died there or left from there. It comes from the room changes in each plant's history, so nothing extra has to be entered. History lines keep the name a room had at the time, so a stay from before a rename shows when another line says which room the old name was. A plant added with no move logged counts from the day it was added. The list only says what happened and doesn't rate the place.</value>
     <comment>Answer to "Can I see which plants have stood in a room?" on the Help page.</comment>
   </data>
+  <data name="IdentifyFromPhotoQ" xml:space="preserve">
+    <value>Can Stikling tell me what plant it is?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="IdentifyFromPhotoA1" xml:space="preserve">
+    <value>Yes, from a photo. On the add plant and add propagation pages, tap &lt;em&gt;Identify from a photo&lt;/em&gt; under the name search, take a photo or pick one, and Stikling shows up to five suggestions with how good a match each is. Tap one to fill in the genus and species. Nothing is filled in until you tap. It names the species, not the cultivar, so pick a cultivar in the name fields if you know it.</value>
+    <comment>Answer to "Can Stikling tell me what plant it is?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="IdentifyFromPhotoA2" xml:space="preserve">
+    <value>The photo is sent to Pl@ntNet, a plant identification service, and isn't kept. When you're signed in you can identify 10 a day. Without an account, add a free Pl@ntNet key of your own in Settings under Plants, and the photo goes straight from your device to Pl@ntNet.</value>
+    <comment>Second paragraph of the answer to "Can Stikling tell me what plant it is?" on the Help page.</comment>
+  </data>
 </root>

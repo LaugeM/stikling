@@ -16,6 +16,7 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     public DbSet<DeletedAccount> DeletedAccounts => Set<DeletedAccount>();
     public DbSet<ShareLink> ShareLinks => Set<ShareLink>();
     public DbSet<StoredPushSubscription> PushSubscriptions => Set<StoredPushSubscription>();
+    public DbSet<IdentificationUse> IdentificationUses => Set<IdentificationUse>();
     public DbSet<NotificationSchedule> NotificationSchedules => Set<NotificationSchedule>();
 
     /// <summary>
@@ -117,6 +118,13 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
             schedule.Property(s => s.TimeZone).HasMaxLength(100);
             schedule.HasIndex(s => s.NextSendAt);
             schedule.HasOne<Person>().WithOne().HasForeignKey<NotificationSchedule>(s => s.PersonId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        model.Entity<IdentificationUse>(use =>
+        {
+            use.HasKey(u => new { u.PersonId, u.Day });
+            use.HasIndex(u => u.Day);
+            use.HasOne<Person>().WithMany().HasForeignKey(u => u.PersonId).OnDelete(DeleteBehavior.Cascade);
         });
 
         model.Entity<DeletedAccount>(deleted =>
