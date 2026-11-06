@@ -5,6 +5,7 @@ using Stikling.Core.Plants;
 using Stikling.Core.Pests;
 using Stikling.Core.Pots;
 using Stikling.Core.Propagations;
+using Stikling.Core.Rooms;
 using Stikling.Core.SoilMixes;
 using Strings = Stikling.Web.Resources;
 
@@ -261,6 +262,20 @@ public static class Labels
         PestScope.Room => view.Room ?? Strings.Labels.ScopeARoom,
         _ => Plants(view.Plants.Count)
     };
+
+    /// <summary>The same for a case without the plants worked out, as on a plant's page.</summary>
+    public static string Scope(PestCase item, Places places) => item.Scope switch
+    {
+        PestScope.Everywhere => Strings.Labels.ScopeAllPlants,
+        PestScope.Room => places.NameOf(item.PlaceId) ?? Strings.Labels.ScopeARoom,
+        _ => Plants(item.PlantIds.Count)
+    };
+
+    /// <summary>The pest on a plant's badge: "Spider mites seen" when the pest was seen on this plant, the pest alone otherwise.</summary>
+    public static string PestBadge(PestCase item, Guid plantId) =>
+        PestService.IsFoundOn(item, plantId)
+            ? string.Format(CultureInfo.CurrentCulture, Strings.Labels.PestSeen, For(item.Pest))
+            : For(item.Pest);
 
     /// <summary>"Living room · 4 plants", or just "2 plants" when the case covers picked plants.</summary>
     public static string ScopeAndCount(PestCaseView view) =>

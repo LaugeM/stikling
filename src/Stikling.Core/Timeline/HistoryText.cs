@@ -41,7 +41,7 @@ public static partial class HistoryText
     {
         typeof(PlantStatus), typeof(GrowingMedium), typeof(LightLevel), typeof(PropagationStage), typeof(PropagationType),
         typeof(RootingAid), typeof(CareKind), typeof(FailReason), typeof(ProblemSign), typeof(ProblemAction),
-        typeof(ProblemTrend), typeof(ProblemOutcome), typeof(Variegation)
+        typeof(ProblemTrend), typeof(ProblemOutcome), typeof(Variegation), typeof(Pest)
     }.ToDictionary(t => t.Name);
 
     /// <summary>The keys of the templates, for checking them against the resource files.</summary>

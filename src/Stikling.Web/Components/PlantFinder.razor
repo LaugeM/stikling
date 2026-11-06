@@ -1,0 +1,56 @@
+@* A search box that lists the plants matching it, each with an Add button. For adding a plant outside a list that is already shown, like the plants a pest was seen on. *@
+<div class="plant-finder">
+    <input type="search" class="form-control" autocomplete="off"
+           placeholder="@Strings.Pests.CaseEditSearchPlants" aria-label="@Strings.Pests.CaseEditSearchPlants"
+           @bind="query" @bind:event="oninput" />
+    @if (matches.Count > 0)
+    {
+        <ul class="neighbour-list">
+            @foreach (var plant in matches)
+            {
+                <li @key="plant.Id">
+                    <div class="neighbour-text">
+                        @plant.DisplayName
+                        @if (Places.NameOf(plant.PlaceId) is { } location)
+                        {
+                            <span class="text-body-secondary small"> · @location</span>
+                        }
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => PickAsync(plant)">@Strings.Common.Add</button>
+                </li>
+            }
+        </ul>
+    }
+    else if (!string.IsNullOrWhiteSpace(query))
+    {
+        <p class="text-body-secondary small mt-2 mb-0">@Strings.Pests.CaseEditNoPlantsMatch</p>
+    }
+</div>
+
+@code {
+    /// <summary>The plants that can be found.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Plant> Plants { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public Places Places { get; set; } = Places.None;
+
+    [Parameter]
+    public EventCallback<Plant> OnPick { get; set; }
+
+    private const int MostShown = 6;
+
+    private string? query;
+
+    // Nothing is listed before something is typed, so the box adds no length to the page
+    private IReadOnlyList<Plant> matches =>
+        string.IsNullOrWhiteSpace(query)
+            ? []
+            : [.. Plants.Where(p => PlantPickSearch.Matches(p, Places.NameOf(p.PlaceId), query)).Take(MostShown)];
+
+    private async Task PickAsync(Plant plant)
+    {
+        query = null;
+        await OnPick.InvokeAsync(plant);
+    }
+}

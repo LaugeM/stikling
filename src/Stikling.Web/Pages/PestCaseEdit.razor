@@ -1,6 +1,7 @@
 @page "/pests/new"
 @page "/pests/{Id:guid}/edit"
-@inject IPestCaseRepository Repository
+@inject IPestCaseRepository PestCases
+@inject PestFoundService PestFound
 @inject ILogger<PestCaseEdit> Logger
 @inject IPlantRepository PlantRepository
 @inject ITreatmentPlanRepository PlanRepository
@@ -125,6 +126,14 @@ else
                                         <div class="item-meta"><span>@location</span></div>
                                     }
                                 </div>
+                                @if (item.PlantIds.Contains(plant.Id))
+                                {
+                                    var seen = item.FoundOnPlantIds.Contains(plant.Id);
+                                    <button type="button" class="btn btn-sm seen-toggle @(seen ? "btn-primary" : "btn-outline-primary")"
+                                            aria-pressed="@(seen ? "true" : "false")"
+                                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseSeenHereOn, plant.DisplayName)"
+                                            @onclick="() => ToggleSeen(plant.Id)" @onclick:preventDefault @onclick:stopPropagation>@if (seen) { <svg class="seen-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg> }@Strings.Pests.CaseSeenHere</button>
+                                }
                             </label>
                         </li>
                     }
@@ -134,6 +143,29 @@ else
             else
             {
                 <p class="text-body-secondary mb-0">@Strings.Pests.CaseEditEverywhere</p>
+            }
+
+            @if (item.Scope != PestScope.PickedPlants)
+            {
+                <div class="mt-3">
+                    <div class="form-label">@Strings.Pests.CaseEditSeenOn</div>
+                    <div class="form-text mb-2">@Strings.Pests.CaseEditSeenOnHint</div>
+                    @if (SeenPlants.Count > 0)
+                    {
+                        <ul class="neighbour-list">
+                            @foreach (var plant in SeenPlants)
+                            {
+                                <li @key="plant.Id">
+                                    <div class="neighbour-text">@plant.DisplayName</div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm"
+                                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseEditRemoveSeen, plant.DisplayName)"
+                                            @onclick="() => ToggleSeen(plant.Id)">@Strings.Common.Remove</button>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    <PlantFinder Plants="NotSeenYet" Places="places" OnPick="plant => ToggleSeen(plant.Id)" />
+                </div>
             }
         </fieldset>
 
@@ -206,6 +238,7 @@ else
     ];
 
     private PestCase? item;
+    private List<Guid> foundBefore = [];
     private bool notFound;
     private bool saving;
     private List<string> errors = [];
@@ -229,6 +262,19 @@ else
         plants.Count > SearchFrom ? [.. plants.Where(p => PlantPickSearch.Matches(p, places.NameOf(p.PlaceId), search))] : plants;
 
     private void ClearSearch() => search = null;
+
+    // The plants the pest was seen on, as listed on the Everywhere and Room forms
+    private IReadOnlyList<Plant> SeenPlants =>
+        item is null ? [] : [.. plants.Where(p => item.FoundOnPlantIds.Contains(p.Id))];
+
+    private IReadOnlyList<Plant> NotSeenYet =>
+        item is null ? [] : [.. plants.Where(p => !item.FoundOnPlantIds.Contains(p.Id))];
+
+    private void ToggleSeen(Guid plantId)
+    {
+        if (item is not null && !item.FoundOnPlantIds.Remove(plantId))
+            item.FoundOnPlantIds.Add(plantId);
+    }
 
     // The interval follows the pest on a new case, unless the person already typed their own number
     private Pest lastPest = Pest.SpiderMites;
@@ -275,11 +321,14 @@ else
             {
                 item.Scope = PestScope.PickedPlants;
                 item.PlantIds.Add(PlantId!.Value);
+                item.FoundOnPlantIds.Add(PlantId!.Value);
             }
+            foundBefore = [];
         }
         else
         {
-            item = (await Repository.GetAsync(Id!.Value))?.Copy();
+            item = (await PestCases.GetAsync(Id!.Value))?.Copy();
+            foundBefore = [.. item?.FoundOnPlantIds ?? []];
             notFound = item is null;
             loadedStatus = item?.Status;
             caseTreatments = item is null ? [] : PestService.TreatmentsFor(await TreatmentRepository.GetAllAsync(), item.Id);
@@ -298,6 +347,8 @@ else
             room = null;
         if (scope != PestScope.PickedPlants)
             item.PlantIds.Clear();
+        else
+            item.PlantIds.AddRange(item.FoundOnPlantIds.Where(id => !item.PlantIds.Contains(id)));
     }
 
     private void Toggle(Guid plantId)
@@ -305,7 +356,10 @@ else
         if (item is null)
             return;
 
-        if (!item.PlantIds.Remove(plantId))
+        // A plant taken out of the case isn't one the pest was seen on any more
+        if (item.PlantIds.Remove(plantId))
+            item.FoundOnPlantIds.Remove(plantId);
+        else
             item.PlantIds.Add(plantId);
     }
 
@@ -340,7 +394,7 @@ else
             if (IsNew && plans.FirstOrDefault(p => p.Id == pickedPlan) is { } plan)
                 item.StartPlan(plan, item.StartedOn);
 
-            await Repository.SaveAsync(item);
+            await PestFound.SaveAsync(item, foundBefore, plants, Labels.English);
             Navigation.NavigateTo($"pests/{item.Id}", replace: IsNew);
         }
         catch (Exception ex)

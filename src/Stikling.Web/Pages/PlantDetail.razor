@@ -12,6 +12,7 @@
 @inject FloweringService FloweringService
 @inject LeafService LeafBook
 @inject ProblemService ProblemService
+@inject PestFoundService PestFound
 @inject IPotRepository PotRepository
 @inject PotService PotService
 @inject ISoilMixRepository MixRepository
@@ -123,7 +124,7 @@ else
                         }
                         @foreach (var item in pests)
                         {
-                            <a class="badge pest-badge" href="pests/@item.Id">@Labels.For(item.Pest)</a>
+                            <a class="badge pest-badge" href="pests/@item.Id">@Labels.PestBadge(item, plant.Id)</a>
                         }
                         @if (openProblems.Count > 0)
                         {
@@ -561,7 +562,7 @@ else
                                 <li>
                                     <a href="pests/@item.Id">@Labels.For(item.Pest)</a>
                                     <span class="text-body-secondary small">
-                                        · @F(Strings.PlantDetail.PestSince, Labels.For(item.Status).ToLower(System.Globalization.CultureInfo.CurrentCulture), Labels.Date(item.StartedOn))
+                                        · @F(PestLineKey(item), Labels.For(item.Status).ToLower(System.Globalization.CultureInfo.CurrentCulture), Labels.Date(item.StartedOn))
                                     </span>
                                 </li>
                             }
@@ -1008,10 +1009,20 @@ else
                             </button>
                         </li>
                         <li>
-                            <a class="sheet-action" href="pests/new?plant=@plant.Id">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
-                                <span class="sheet-action-text"><b>@Strings.PlantDetail.FoundPests</b><small>@Strings.PlantDetail.FoundPestsHint</small></span>
-                            </a>
+                            @if (openCases.Count > 0)
+                            {
+                                <button type="button" class="sheet-action" @onclick="() => more = More.FoundPests">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+                                    <span class="sheet-action-text"><b>@Strings.PlantDetail.FoundPests</b><small>@Strings.PlantDetail.FoundPestsHint</small></span>
+                                </button>
+                            }
+                            else
+                            {
+                                <a class="sheet-action" href="pests/new?plant=@plant.Id">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+                                    <span class="sheet-action-text"><b>@Strings.PlantDetail.FoundPests</b><small>@Strings.PlantDetail.FoundPestsHint</small></span>
+                                </a>
+                            }
                         </li>
                         <li>
                             <button type="button" class="sheet-action" @onclick="OpenPotTogether">
@@ -1409,7 +1420,32 @@ else
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-primary" disabled="@(busy || since > Today)" @onclick="SavePestCheckAsync">@Strings.PlantDetail.NoSigns</button>
-                    <a class="btn btn-link link-action" href="pests/new?plant=@plant.Id">@Strings.PlantDetail.FoundSome</a>
+                    @if (openCases.Count > 0)
+                    {
+                        <button type="button" class="btn btn-link link-action" @onclick="() => more = More.FoundPests">@Strings.PlantDetail.FoundSome</button>
+                    }
+                    else
+                    {
+                        <a class="btn btn-link link-action" href="pests/new?plant=@plant.Id">@Strings.PlantDetail.FoundSome</a>
+                    }
+                    <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">@Strings.Common.Back</button>
+                </div>
+                break;
+
+            case More.FoundPests:
+                <p class="form-text">@Strings.PlantDetail.FoundPestsPick</p>
+                <ul class="sheet-actions">
+                    @foreach (var open in openCases)
+                    {
+                        <li>
+                            <button type="button" class="sheet-action" disabled="@busy" @onclick="() => FoundOnCaseAsync(open)">
+                                <span class="sheet-action-text"><b>@Labels.For(open.Pest) · @Labels.Scope(open, places)</b></span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+                <div class="form-actions">
+                    <a class="btn btn-link link-action" href="pests/new?plant=@plant.Id">@Strings.PlantDetail.FoundPestsNewCase</a>
                     <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">@Strings.Common.Back</button>
                 </div>
                 break;
@@ -1489,7 +1525,7 @@ else
     [SupplyParameterFromQuery(Name = "entry")]
     public Guid? Entry { get; set; }
 
-    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, Transition, TransitionStep, PestCheck, Status, PassOn, Flowering, ThisFlowering, Leaf, ThisLeaf, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
+    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, Transition, TransitionStep, PestCheck, FoundPests, Status, PassOn, Flowering, ThisFlowering, Leaf, ThisLeaf, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
     private bool shareOpen;
     private bool shareOnLink;
 
@@ -1593,6 +1629,8 @@ else
     private ReservoirReading? reservoir;
     private CareCalendar? careCalendar;
     private IReadOnlyList<PestCase> pests = [];
+    private IReadOnlyList<PestCase> openCases = [];
+    private IReadOnlyList<PestTreatment> pestTreatments = [];
     private DateOnly? lastChecked;
     private string? checkNotes;
     private string? actionNote;
@@ -1714,6 +1752,7 @@ else
         More.Transition => Strings.PlantDetail.MovingToSemiHydro,
         More.TransitionStep => Strings.PlantDetail.ChangeDay,
         More.PestCheck => Strings.PlantDetail.CheckForPests,
+        More.FoundPests => Strings.PlantDetail.FoundPests,
         More.Problem => Strings.PlantDetail.SomethingWrong,
         More.ProblemUpdate => Strings.PlantDetail.HowDoesItLook,
         More.Status when status == PlantStatus.Died => Strings.PlantDetail.ItDied,
@@ -1846,7 +1885,9 @@ else
             ownFields = await OwnFieldBook.GetAllAsync();
             var allCases = await PestCaseRepository.GetAllAsync();
             pests = PestService.CasesFor(plant, allCases, places);
-            lastChecked = PestService.LastChecked(plant, allCases, await PestTreatmentRepository.GetAllAsync(), places);
+            pestTreatments = await PestTreatmentRepository.GetAllAsync();
+            openCases = allCases.Where(c => !c.IsDeleted && c.IsOpen).OrderByDescending(c => c.StartedOn).ToList();
+            lastChecked = PestService.LastChecked(plant, allCases, pestTreatments, places);
             pots = await PotRepository.GetAllAsync();
             potCovers = await PotService.GetCoversAsync();
             mixes = await MixRepository.GetAllAsync();
@@ -2359,6 +2400,28 @@ else
         transitionTo = plant?.Medium is GrowingMedium.Leca or GrowingMedium.Pon ? plant.Medium : GrowingMedium.Leca;
         transitionWeeks = Plant.DefaultTransitionCheckWeeks;
         more = More.Transition;
+    }
+
+    // A case with nobody marked as seen is an older one, and keeps its text as it was
+    private string PestLineKey(PestCase item) =>
+        item.FoundOnPlantIds.Count == 0 ? Strings.PlantDetail.PestSince
+        : PestService.IsFoundOn(item, plant!.Id) ? Strings.PlantDetail.PestSeenSince
+        : Strings.PlantDetail.PestTreatedWithRest;
+
+    // Marks the plant on a case that is already open, putting it back to treating if it was being watched
+    private async Task FoundOnCaseAsync(PestCase open)
+    {
+        busy = true;
+        try
+        {
+            await PestFound.MarkAsync(open, plant!, Today, PestService.TreatmentsFor(pestTreatments, open.Id), Labels.English);
+            more = More.None;
+            Navigation.NavigateTo($"pests/{open.Id}");
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     private void OpenPestCheck()

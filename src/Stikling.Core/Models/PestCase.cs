@@ -106,6 +106,12 @@ public sealed class PestCase : Entity
     /// <summary>The plants the case covers. Only on <see cref="PestScope.PickedPlants"/>.</summary>
     public List<Guid> PlantIds { get; set; } = [];
 
+    /// <summary>
+    /// The plants the pest was seen on. The rest of the case is still treated. Empty means it isn't
+    /// known, which is every case from before this was kept. Only <c>PestFoundService</c> changes it.
+    /// </summary>
+    public List<Guid> FoundOnPlantIds { get; set; } = [];
+
     /// <summary>Days between treatments, e.g. 4 for "every 4 days".</summary>
     public int IntervalDays { get; set; } = 4;
 
@@ -151,6 +157,7 @@ public sealed class PestCase : Entity
     {
         var copy = (PestCase)MemberwiseClone();
         copy.PlantIds = [.. PlantIds];
+        copy.FoundOnPlantIds = [.. FoundOnPlantIds];
         copy.PlanSteps = [.. PlanSteps.Select(s => s.Copy())];
         return copy;
     }

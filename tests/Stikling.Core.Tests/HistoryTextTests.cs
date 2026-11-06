@@ -26,12 +26,14 @@ public class HistoryTextTests
         CareKind.MoistureReading => "Moisture reading",
         PlantStatus.GivenAway => "Given away",
         LightLevel.BrightIndirect => "Bright indirect",
+        Pest.SpiderMites => "Spider mites",
         _ => value.ToString()
     };
 
     private static string DanishLabel(Enum value) => value switch
     {
         PlantStatus.Active => "Aktiv",
+        Pest.SpiderMites => "Spindemider",
         PlantStatus.Died => "Død",
         GrowingMedium.Soil => "Jord",
         GrowingMedium.Leca => "LECA",
@@ -180,6 +182,7 @@ public class HistoryTextTests
         (L("ProblemClosed", ProblemOutcome.GotBetter), "Problem over: got better"),
         (L("ProblemReopened"), "The problem came back"),
         (L("NewLeaf", Variegation.AllWhite), "New leaf: All white"),
+        (L("PestFound", Pest.SpiderMites), "Spider mites found"),
         (L("LookedOver"), "Looked over"),
         (L("ReceivedFrom", "Anna"), "From Anna"),
         (L("TextLine", "A note about it"), "A note about it"),
@@ -257,6 +260,7 @@ public class HistoryTextTests
         Assert.Equal("Vandet med Aroid feed (2 L)",
             HistoryText.Render(HistoryText.CareLine(new CareLog { Kind = CareKind.Watered, FeedName = "Aroid feed", WaterLitres = 2m }, null, null), DanishLabel, Danish));
         Assert.Equal("2 mislykkedes: skimmel", HistoryText.Render(L("FailedWithReason", 2, FailReason.Mould), DanishLabel, Danish));
+        Assert.Equal("Spindemider fundet", HistoryText.Render(L("PestFound", Pest.SpiderMites), DanishLabel, Danish));
     }
 
     [Fact]

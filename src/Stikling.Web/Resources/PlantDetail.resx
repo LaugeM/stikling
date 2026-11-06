@@ -919,4 +919,20 @@
   <data name="CopyLinkFailed" xml:space="preserve">
     <value>Couldn't copy here. The link is {0}</value>
   </data>
+  <data name="PestSeenSince" xml:space="preserve">
+    <value>Seen here · {0} since {1}</value>
+    <comment>On the plant page, after the link to a pest case the pest was seen on this plant in. {0} is the state of the case, like treating, {1} a date.</comment>
+  </data>
+  <data name="PestTreatedWithRest" xml:space="preserve">
+    <value>Treated with the rest · {0} since {1}</value>
+    <comment>On the plant page, after the link to a pest case that covers the plant, where the pest was seen on other plants of the case. {0} is the state of the case, like treating, {1} a date.</comment>
+  </data>
+  <data name="FoundPestsPick" xml:space="preserve">
+    <value>Add it to a case you're already treating, or start a new one.</value>
+    <comment>Hint in the Found pests sheet, above the open pest cases.</comment>
+  </data>
+  <data name="FoundPestsNewCase" xml:space="preserve">
+    <value>New case</value>
+    <comment>Link in the Found pests sheet that opens the form for a new pest case.</comment>
+  </data>
 </root>
