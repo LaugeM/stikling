@@ -93,6 +93,7 @@ else
 
         return (stay.From, stay.To) switch
         {
+            ({ } from, { } to) when from == to => Labels.Date(from),
             ({ } from, { } to) => stay.FromLogged
                 ? Text(Strings.Shared.SpotHistoryFromTo, Labels.Date(from), Labels.Date(to))
                 : Text(Strings.Shared.SpotHistoryAtLeastFromTo, Labels.Date(from), Labels.Date(to)),
