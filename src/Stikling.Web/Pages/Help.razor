@@ -33,6 +33,8 @@
     </div>
 }
 
+<p class="help-guides"><GuideLink Text="@Strings.Help.GuidesLink" /></p>
+
 <nav class="help-toc" aria-label="@Strings.Help.TopicsNav">
     @foreach (var (id, title) in topics)
     {
@@ -107,6 +109,12 @@
     <details class="help-item">
         <summary>@Strings.Help.SearchEverythingAtOnceQ</summary>
         <p>@((MarkupString)Strings.Help.SearchEverythingAtOnceA1)</p>
+    </details>
+
+    <details class="help-item" id="guides">
+        <summary>@Strings.Help.GuidesQ</summary>
+        <p>@Strings.Help.GuidesA1</p>
+        <p><GuideLink Text="@Strings.Guides.LinkAll" /></p>
     </details>
 
     <details class="help-item">

@@ -258,6 +258,7 @@ else
                             </li>
                         }
                     </ul>
+                    <div class="mb-2"><GuideLink Guide="@GuideBook.SemiHydro" From="@GuideLinks.FromPlant(plant.Id)" /></div>
                     @if (settled)
                     {
                         // Nothing to stop once it has settled
@@ -488,6 +489,10 @@ else
                                 <div class="detail-sub">
                                     @StandingIn(outer)
                                 </div>
+                                @if (plant.OuterPotWateringShown == PotWatering.Wick)
+                                {
+                                    <div class="detail-sub"><GuideLink Guide="@GuideBook.Wick" From="@GuideLinks.FromPlant(plant.Id)" /></div>
+                                }
                             }
 
                             @if (Mix is { } mix)
@@ -1396,7 +1401,8 @@ else
                     <label class="form-label" for="transition-weeks">@Strings.PlantDetail.TransitionWeeksLabel</label>
                     <input id="transition-weeks" type="number" class="form-control" min="1" max="52" inputmode="numeric" @bind="transitionWeeks" />
                 </div>
-                <div class="form-text mb-3">@Strings.PlantDetail.TransitionWeeksNote</div>
+                <div class="form-text mb-2">@Strings.PlantDetail.TransitionWeeksNote</div>
+                <div class="mb-3"><GuideLink Guide="@GuideBook.SemiHydro" From="@GuideLinks.FromPlant(plant!.Id)" /></div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-primary" disabled="@(busy || transitionWeeks is < 1 or > 52)" @onclick="StartTransitionAsync">@Strings.PlantDetail.StartTracking</button>
                     <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">@Strings.Common.Back</button>
@@ -1536,6 +1542,12 @@ else
     /// </summary>
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
+
+    /// <summary>Set by the semi-hydro guide: opens the sheet that starts tracking the move to semi-hydro.</summary>
+    [SupplyParameterFromQuery(Name = "track")]
+    public bool Track { get; set; }
+
+    private Guid trackOpenedFor;
 
     /// <summary>A history entry, or with tab=care a care entry, to scroll to and mark. Set by Search.</summary>
     [SupplyParameterFromQuery(Name = "entry")]
@@ -1808,6 +1820,11 @@ else
         await LoadAsync();
         await RefreshGhostAsync();
         loaded = true;
+        if (Track && trackOpenedFor != Id && plant is { TransitionSince: null })
+        {
+            trackOpenedFor = Id;
+            OpenTransition();
+        }
     }
 
     private EverydayNameBook? everyday;

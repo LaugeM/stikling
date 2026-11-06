@@ -433,8 +433,8 @@ Questions come up that the app can't answer from your own data: how long a cutti
 |---|---|---|---|---|
 | ☐ | **Reference links**: a short, checked list of outside pages (care by genus, pest identification, semi-hydro, soil), opened in the browser | 6 | S | v1.x |
 | ☐ | Links where they apply: a pest case links to a page about that pest, a plant links to a care page for its genus | 7 | M | v1.x |
-| ☐ | **Built-in guides** that work offline: taking a cutting, converting to semi-hydro, treating thrips, mixing soil. Short, part of the app, no backend and no network | 4 | L | v1.x |
-| ☐ | A guide opens from the place it is about, e.g. the stages on a propagation link to the cutting guide | 4 | S | v1.x |
+| ◐ | **Built-in guides** that work offline, at /guides: taking a cutting, moving a plant to semi-hydro, watering through a wick and mixing soil. Each is written from sources it lists at the end (extension services, the RHS, makers of the products), says "many growers" or "some growers" where only growers stand behind a line, and shows the common ways side by side where growers disagree, never marking one best. On a phone a switch picks the method, and from 64rem the methods sit in columns. The two guides with thin sources say so under the first paragraph. Found from Help, Supplies and Search. Still to come: guides for pests like thrips (part b) and by plant group (part c) | 4 | L | v1.x |
+| ◐ | A guide opens from the place it is about: a cutting's stage sheet and page and the empty Propagations page open the cutting guide, a plant's medium set to LECA or PON, its moving card and tracking sheet open the semi-hydro guide, a self-watering pot with a wick (on the Pots page, the plant form and the plant page) opens the wick guide, and Soil mixes opens the mixing guide. The back link names where it was opened from and the guide opens on the method that fits. The semi-hydro guide can start tracking the move for the plant it was opened from. Pests and plant groups are still to come | 4 | S | v1.x |
 
 ## 8. Sharing & later versions
 

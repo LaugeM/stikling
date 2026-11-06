@@ -1,0 +1,181 @@
+/* The text of a guide reads in a column of its own, also on a wide screen. Only the methods use the width. */
+.guide-body {
+    margin-top: 0.75rem;
+}
+
+.guide-body > p,
+.guide-body > .guide-where,
+.guide-body > .guide-section:not(.guide-methods) {
+    max-width: 44rem;
+}
+
+.guide-lead {
+    font-size: 1.0625rem;
+}
+
+.guide-where {
+    margin: 1rem 0;
+    padding: 0.7rem 0.9rem;
+    background: var(--pa-green-soft);
+    border-radius: 0.6rem;
+}
+
+.guide-where p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.guide-section {
+    margin-top: 1.5rem;
+}
+
+.guide-heading {
+    margin: 0 0 0.5rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.guide-list {
+    padding-left: 1.25rem;
+}
+
+.guide-list li + li {
+    margin-top: 0.35rem;
+}
+
+/* The number is in the display face and Deep Moss, the step in body text */
+.guide-steps {
+    list-style: none;
+    counter-reset: guide-step;
+    margin: 0;
+    padding: 0;
+}
+
+.guide-steps li {
+    counter-increment: guide-step;
+    display: grid;
+    grid-template-columns: 1.75rem 1fr;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+}
+
+.guide-steps li::before {
+    content: counter(guide-step);
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--pa-green-dark);
+}
+
+.guide-field {
+    margin: 0.6rem 0 0;
+}
+
+.guide-field strong {
+    font-weight: 600;
+}
+
+/* Ingredients: the name, then what it does */
+.guide-ingredients {
+    margin: 0;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.guide-ingredients > div {
+    padding: 0.6rem 0.9rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.guide-ingredients > div:first-child {
+    border-top: 0;
+}
+
+.guide-ingredients dt {
+    font-weight: 600;
+}
+
+.guide-ingredients dd {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.guide-sources ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: 0.875rem;
+}
+
+.guide-sources li + li {
+    margin-top: 0.3rem;
+}
+
+/* The ways of doing it. On a phone the switch picks one, and the rest wait. */
+.guide-methods-note {
+    margin: 0 0 0.6rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.guide-switch .btn {
+    white-space: normal;
+    line-height: 1.25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.guide-method-grid {
+    margin-top: 0.5rem;
+}
+
+.guide-method:not(.is-picked) {
+    display: none;
+}
+
+.guide-method-title {
+    display: none;
+    margin: 0 0 0.25rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.guide-method-detail {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+/* From the computer layout the methods sit side by side and there is no switch */
+@media (min-width: 64rem) {
+    .guide-switch {
+        display: none !important;
+    }
+
+    .guide-method-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+        gap: 0.75rem;
+        align-items: start;
+    }
+
+    .guide-method:not(.is-picked),
+    .guide-method {
+        display: block;
+        min-width: 0;
+        padding: 0.8rem 1rem 1rem;
+        background: var(--pa-surface);
+        border: 1px solid var(--pa-border);
+        border-radius: 0.75rem;
+    }
+
+    .guide-method-title {
+        display: block;
+    }
+}
