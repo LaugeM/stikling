@@ -51,6 +51,10 @@ public sealed class IdentificationService(
     public async Task<IdentificationOutcome> IdentifyInputAsync(ElementReference input) =>
         await RunAsync(async (module, route) => await module.InvokeAsync<Reply>("identifyInput", input, route));
 
+    /// <summary>Empties a file input, so the same file can be chosen again.</summary>
+    public async Task ClearInputAsync(ElementReference input) =>
+        await (await Module).InvokeVoidAsync("clearInput", input);
+
     /// <summary>Identifies a photo kept on this device, fetching its full size first when only the thumbnail is here.</summary>
     public async Task<IdentificationOutcome> IdentifyPhotoAsync(Guid photoId) =>
         await RunAsync(async (module, route) =>

@@ -37,6 +37,8 @@ public static class IdentificationEndpoints
         app.MapPost("/identify", IdentifyAsync)
             .RequireAuthorization()
             .DisableAntiforgery()
+            // The photo is kept in memory, never buffered to a temp file. Just over the 10 MB we accept, so a larger one still gets our 400
+            .WithFormOptions(memoryBufferThreshold: (int)MaxImageBytes + 64 * 1024, multipartBodyLengthLimit: MaxImageBytes + 64 * 1024)
             // Without a key there is nothing to ask
             .AddEndpointFilter(async (context, next) =>
                 context.HttpContext.RequestServices.GetRequiredService<IOptions<IdentificationOptions>>().Value.IsConfigured
@@ -76,29 +78,36 @@ public static class IdentificationEndpoints
         // Nothing older than yesterday is of use, so it goes whenever someone identifies
         await db.IdentificationUses.Where(u => u.Day < today.AddDays(-1)).ExecuteDeleteAsync(cancellation);
 
-        var mine = await db.IdentificationUses
-            .Where(u => u.PersonId == person.Id && u.Day == today)
-            .Select(u => u.Count)
-            .SingleOrDefaultAsync(cancellation);
-        if (mine >= settings.DailyLimitPerPerson)
+        // The use is reserved before Pl@ntNet is asked, so calls sent at once can't all pass the same check
+        if (!await ReserveAsync(db, person.Id, today, settings.DailyLimitPerPerson))
             return TooMany("person");
 
-        var everyone = await db.IdentificationUses.Where(u => u.Day == today).SumAsync(u => u.Count, cancellation);
-        if (everyone >= settings.DailyLimitTotal)
-            return TooMany("total");
-
-        var answer = await identifier.IdentifyAsync(bytes, contentType, lang == "da" ? "da" : "en", cancellation);
-        switch (answer.Status)
+        var kept = false;
+        try
         {
-            case PlantNetStatus.Ok:
-            case PlantNetStatus.NotFound:
-                await CountAsync(db, person.Id, today, cancellation);
-                return Results.Ok(new IdentificationResponse(answer.Suggestions.Take(IdentificationRules.MaxSuggestions).ToList()));
-            case PlantNetStatus.TooMany:
-                // Pl@ntNet's own quota for the day is gone, whatever our count says
+            var everyone = await db.IdentificationUses.Where(u => u.Day == today).SumAsync(u => u.Count, CancellationToken.None);
+            if (everyone > settings.DailyLimitTotal)
                 return TooMany("total");
-            default:
-                return Results.Problem("Pl@ntNet couldn't identify the photo.", statusCode: StatusCodes.Status502BadGateway);
+
+            var answer = await identifier.IdentifyAsync(bytes, contentType, lang == "da" ? "da" : "en", cancellation);
+            switch (answer.Status)
+            {
+                case PlantNetStatus.Ok:
+                case PlantNetStatus.NotFound:
+                    kept = true;
+                    return Results.Ok(new IdentificationResponse(answer.Suggestions.Take(IdentificationRules.MaxSuggestions).ToList()));
+                case PlantNetStatus.TooMany:
+                    // Pl@ntNet's own quota for the day is gone, whatever our count says
+                    return TooMany("total");
+                default:
+                    return Results.Problem("Pl@ntNet couldn't identify the photo.", statusCode: StatusCodes.Status502BadGateway);
+            }
+        }
+        finally
+        {
+            // Only an answer from Pl@ntNet counts. This runs even when the caller has gone, so it doesn't use their token
+            if (!kept)
+                await ReleaseAsync(db, person.Id, today);
         }
     }
 
@@ -108,28 +117,37 @@ public static class IdentificationEndpoints
             statusCode: StatusCodes.Status429TooManyRequests,
             extensions: new Dictionary<string, object?> { ["reason"] = reason });
 
-    private static async Task CountAsync(StiklingDbContext db, Guid personId, DateOnly day, CancellationToken cancellation)
+    /// <summary>Adds one to the person's day if that stays within the limit. False when it is already used up.</summary>
+    private static async Task<bool> ReserveAsync(StiklingDbContext db, Guid personId, DateOnly day, int limit)
     {
-        if (await AddOneAsync(db, personId, day, cancellation))
-            return;
+        if (await AddOneWithinAsync(db, personId, day, limit))
+            return true;
+        if (limit <= 0 || await db.IdentificationUses.AnyAsync(u => u.PersonId == personId && u.Day == day, CancellationToken.None))
+            return false;
 
         try
         {
             db.IdentificationUses.Add(new IdentificationUse { PersonId = personId, Day = day, Count = 1 });
-            await db.SaveChangesAsync(cancellation);
+            await db.SaveChangesAsync(CancellationToken.None);
+            return true;
         }
         catch (DbUpdateException e) when (e.InnerException is SqlException { Number: 2601 or 2627 })
         {
             // Another identification by the same person made the row first
             db.ChangeTracker.Clear();
-            await AddOneAsync(db, personId, day, cancellation);
+            return await AddOneWithinAsync(db, personId, day, limit);
         }
     }
 
-    private static async Task<bool> AddOneAsync(StiklingDbContext db, Guid personId, DateOnly day, CancellationToken cancellation) =>
+    private static async Task<bool> AddOneWithinAsync(StiklingDbContext db, Guid personId, DateOnly day, int limit) =>
         await db.IdentificationUses
-            .Where(u => u.PersonId == personId && u.Day == day)
-            .ExecuteUpdateAsync(set => set.SetProperty(u => u.Count, u => u.Count + 1), cancellation) > 0;
+            .Where(u => u.PersonId == personId && u.Day == day && u.Count < limit)
+            .ExecuteUpdateAsync(set => set.SetProperty(u => u.Count, u => u.Count + 1), CancellationToken.None) > 0;
+
+    private static async Task ReleaseAsync(StiklingDbContext db, Guid personId, DateOnly day) =>
+        await db.IdentificationUses
+            .Where(u => u.PersonId == personId && u.Day == day && u.Count > 0)
+            .ExecuteUpdateAsync(set => set.SetProperty(u => u.Count, u => u.Count - 1), CancellationToken.None);
 
     /// <summary>"image/jpeg" or "image/png" by how the bytes start, otherwise null.</summary>
     internal static string? ImageType(byte[] bytes)

@@ -87,3 +87,9 @@ export async function identifyStored(id, route) {
     const blob = await getBlob(id);
     return blob ? await identify(blob, route) : { status: 0, body: null };
 }
+
+// Lets the same file be chosen again after an identification that gave no suggestions, which
+// would otherwise not fire "change". Not called after a success, where the file is still needed.
+export function clearInput(input) {
+    input.value = "";
+}

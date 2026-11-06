@@ -26,6 +26,9 @@ public class FakePlantIdentifier : IPlantIdentifier
     public static readonly IReadOnlyList<IdentificationSuggestion> Fiddle =
         [new("Ficus", "lyrata", 0.82, ["Fiddle-leaf fig"]), new("Ficus", "elastica", 0.12, [])];
 
+    /// <summary>How long it takes to answer, so calls can overlap.</summary>
+    public TimeSpan Delay { get; set; }
+
     public PlantNetAnswer Answer { get; set; } = new(PlantNetStatus.Ok, Fiddle);
 
     public List<Asked> Requests
@@ -37,12 +40,15 @@ public class FakePlantIdentifier : IPlantIdentifier
     {
         lock (_lock) _asked.Clear();
         Answer = new(PlantNetStatus.Ok, Fiddle);
+        Delay = TimeSpan.Zero;
     }
 
-    public Task<PlantNetAnswer> IdentifyAsync(byte[] image, string contentType, string language, CancellationToken cancellationToken)
+    public async Task<PlantNetAnswer> IdentifyAsync(byte[] image, string contentType, string language, CancellationToken cancellationToken)
     {
         lock (_lock) _asked.Add(new(image.Length, contentType, language));
-        return Task.FromResult(Answer);
+        if (Delay > TimeSpan.Zero)
+            await Task.Delay(Delay, CancellationToken.None);
+        return Answer;
     }
 }
 
@@ -205,6 +211,20 @@ public class IdentificationTests : IDisposable
         // Someone else has their own ten
         var other = await SignIn();
         Assert.Equal(HttpStatusCode.OK, (await other.Client.PostAsync("/identify", Form(Jpeg))).StatusCode);
+    }
+
+    [Fact]
+    public async Task Calls_sent_at_once_cannot_get_past_the_limit()
+    {
+        var me = await SignIn();
+        api.Identifier.Delay = TimeSpan.FromMilliseconds(300);
+
+        var responses = await Task.WhenAll(Enumerable.Range(0, 30).Select(_ => me.Client.PostAsync("/identify", Form(Jpeg))));
+
+        Assert.Equal(10, responses.Count(r => r.StatusCode == HttpStatusCode.OK));
+        Assert.Equal(20, responses.Count(r => r.StatusCode == HttpStatusCode.TooManyRequests));
+        Assert.Equal(10, api.Identifier.Requests.Count);
+        Assert.Equal(10, await UsedToday(me.PersonId));
     }
 
     [Fact]

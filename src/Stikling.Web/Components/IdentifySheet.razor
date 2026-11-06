@@ -170,7 +170,17 @@
         var mine = Start();
         lastInput = input;
         lastFromCamera = fromCamera;
-        Finish(mine, await Identification.IdentifyInputAsync(input));
+        var result = await Identification.IdentifyInputAsync(input);
+
+        // Anything but suggestions: empty the input so the same file can be picked again. On success
+        // it stays, since keeping the photo needs it.
+        if (!result.Succeeded || result.Suggestions.Count == 0)
+        {
+            lastInput = null;
+            await Identification.ClearInputAsync(input);
+        }
+
+        Finish(mine, result);
     }
 
     private async Task IdentifyPhotoAsync(Photo photo)
