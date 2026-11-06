@@ -359,6 +359,10 @@ else
                         <dt>@Strings.Propagations.EditGrowsIn</dt>
                         <dd>
                             @Labels.For(propagation.Medium)
+                            @if (propagation.Type == PropagationType.Cutting)
+                            {
+                                <div class="detail-sub"><GuideLink Guide="@GuideBook.Cutting" From="@GuideLinks.FromPropagation(propagation.Id)" /></div>
+                            }
                             @if (ContainerName is { } container)
                             {
                                 <text> · @container</text>
@@ -598,6 +602,10 @@ else
                             <label class="btn btn-outline-primary @(stage < propagation.Stage ? "passed" : null)" for="@id">@Labels.Stage(stage, propagation.Type)</label>
                         }
                     </div>
+                    @if (propagation.Type == PropagationType.Cutting)
+                    {
+                        <div class="mb-3"><GuideLink Guide="@GuideBook.Cutting" From="@GuideLinks.FromPropagation(propagation.Id)" /></div>
+                    }
 
                     <dl class="detail-list mb-2">
                         <dt>@Strings.Propagations.DetStarted</dt>

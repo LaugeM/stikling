@@ -1,0 +1,258 @@
+@page "/guides/{GuideId}"
+@layout WideLayout
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+
+@* A guide. The structure is in Core (GuideBook) and the text in Resources/Guides.resx. It says the same to everyone:
+   where it is opened from only changes the back link, the method it opens on and the end of the semi-hydro guide. *@
+
+@if (guide is null)
+{
+    <PageTitle>@Strings.Guides.PageTitle</PageTitle>
+    <a class="back-link" href="guides">@Strings.Guides.BackToGuides</a>
+    <p class="mt-4">@Strings.Shared.NotFoundTitle</p>
+}
+else
+{
+    <PageTitle>@GuideLinks.Text(guide.TitleKey)</PageTitle>
+
+    <a class="back-link" href="@backHref">@backText</a>
+    <h1>@GuideLinks.Text(guide.TitleKey)</h1>
+
+    <div class="guide-body">
+        <p class="guide-lead">@GuideLinks.Text(guide.LeadKey)</p>
+
+        @if (guide.WhereKey is { } whereKey)
+        {
+            <aside class="guide-where" aria-labelledby="guide-where-title">
+                <h2 class="section-label" id="guide-where-title">@Strings.Guides.WhereThisComesFrom</h2>
+                <p>@GuideLinks.Text(whereKey)</p>
+            </aside>
+        }
+
+        @Render(guide.Blocks)
+
+        <section class="guide-section guide-sources" aria-labelledby="guide-sources-title">
+            <h2 class="section-label" id="guide-sources-title">@Strings.Guides.WrittenFrom</h2>
+            <ul>
+                @foreach (var source in guide.Sources)
+                {
+                    <li>
+                        <a href="@source.Url" target="_blank" rel="noopener">@source.Title<span class="visually-hidden"> @Strings.Common.OpensInNewTab</span></a><span lang="en">, @source.Publisher</span>
+                    </li>
+                }
+            </ul>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string GuideId { get; set; } = "";
+
+    /// <summary>Where the guide was opened from, see <see cref="GuideLinks.Href"/>.</summary>
+    [SupplyParameterFromQuery(Name = "from")]
+    public string? From { get; set; }
+
+    private Guide? guide;
+    private string backHref = GuideLinks.Index;
+    private string backText = Strings.Guides.BackToGuides;
+    private Plant? plant;
+    private GrowingMedium? medium;
+
+    /// <summary>The method picked in each set of methods, by the key of its label.</summary>
+    private readonly Dictionary<string, string> picked = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        guide = GuideBook.Find(GuideId);
+        backHref = GuideLinks.Index;
+        backText = Strings.Guides.BackToGuides;
+        plant = null;
+        medium = null;
+        picked.Clear();
+        if (guide is null)
+            return;
+
+        // The first method of each set shows while the place it was opened from is looked up
+        PickMethods();
+        await ResolveFromAsync();
+        PickMethods();
+    }
+
+    private void PickMethods()
+    {
+        var start = GuideBook.StartMethod(guide!.Id, medium);
+        foreach (var methods in AllMethods(guide.Blocks))
+            picked[methods.LabelKey] = methods.Methods.Any(m => m.Id == start) ? start! : methods.Methods[0].Id;
+    }
+
+    /// <summary>Names the place the guide was opened from in the back link, when it is still there.</summary>
+    private async Task ResolveFromAsync()
+    {
+        var (kind, id) = SplitFrom(From);
+        switch (kind)
+        {
+            case "plant" when id is { } plantId && await PlantRepository.GetAsync(plantId) is { IsDeleted: false } found:
+                plant = found;
+                medium = found.Medium;
+                (backHref, backText) = ($"plants/{plantId}", Back(found.DisplayName));
+                break;
+            case "propagation" when id is { } propagationId && await PropagationRepository.GetAsync(propagationId) is { IsDeleted: false } cutting:
+                medium = cutting.Medium;
+                (backHref, backText) = ($"propagations/{propagationId}", Back(cutting.DisplayName));
+                break;
+            case "pots":
+                (backHref, backText) = ("pots", Back(Strings.Supplies.SuppliesPots));
+                break;
+            case "soil-mixes":
+                (backHref, backText) = ("soil-mixes", Back(Strings.Supplies.SuppliesSoilMixes));
+                break;
+            case "propagations":
+                (backHref, backText) = ("propagations", Back(Strings.Propagations.ListTitle));
+                break;
+            case "help":
+                (backHref, backText) = ("help", Strings.Guides.BackToHelp);
+                break;
+        }
+    }
+
+    private static string Back(string name) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Guides.BackTo, name);
+
+    private static (string? Kind, Guid? Id) SplitFrom(string? from)
+    {
+        if (string.IsNullOrEmpty(from))
+            return (null, null);
+        var parts = from.Split(':', 2);
+        return (parts[0], parts.Length == 2 && Guid.TryParse(parts[1], out var id) ? id : null);
+    }
+
+    private static IEnumerable<GuideMethods> AllMethods(IEnumerable<GuideBlock> blocks) =>
+        blocks.SelectMany<GuideBlock, GuideMethods>(b => b switch
+        {
+            GuideSection section => AllMethods(section.Blocks),
+            GuideMethods methods => [methods],
+            _ => []
+        });
+
+    private RenderFragment Render(IReadOnlyList<GuideBlock> blocks) => @<text>
+        @foreach (var block in blocks)
+        {
+            @RenderBlock(block)
+        }
+    </text>;
+
+    private RenderFragment RenderBlock(GuideBlock block) => @<text>
+        @switch (block)
+        {
+            case GuideText text:
+                <p>@GuideLinks.Text(text.Key)</p>
+                break;
+            case GuideSection section:
+                <section class="guide-section">
+                    <h2 class="guide-heading">@GuideLinks.Text(section.TitleKey)</h2>
+                    @Render(section.Blocks)
+                </section>
+                break;
+            case GuideList { Numbered: true } steps:
+                <ol class="guide-steps">
+                    @foreach (var key in steps.Keys)
+                    {
+                        <li>@GuideLinks.Text(key)</li>
+                    }
+                </ol>
+                break;
+            case GuideList list:
+                <ul class="guide-list">
+                    @foreach (var key in list.Keys)
+                    {
+                        <li>@GuideLinks.Text(key)</li>
+                    }
+                </ul>
+                break;
+            case GuideField field:
+                <p class="guide-field"><strong>@GuideLinks.Text(field.LabelKey)</strong> @GuideLinks.Text(field.TextKey)</p>
+                break;
+            case GuideTable table:
+                <dl class="guide-ingredients">
+                    @foreach (var (name, does) in table.Rows)
+                    {
+                        <div>
+                            <dt>@GuideLinks.Text(name)</dt>
+                            <dd>@GuideLinks.Text(does)</dd>
+                        </div>
+                    }
+                </dl>
+                break;
+            case GuideSeeAlso seeAlso:
+                <p>@GuideLinks.Text(seeAlso.TextKey) <GuideLink Guide="@seeAlso.GuideId" From="@From" Text="@(GuideBook.Find(seeAlso.GuideId) is { } other ? GuideLinks.Text(other.TitleKey) : null)" /></p>
+                break;
+            case GuideMethods methods:
+                @RenderMethods(methods)
+                break;
+            case GuideTrack:
+                @RenderTrack()
+                break;
+        }
+    </text>;
+
+    private RenderFragment RenderMethods(GuideMethods methods) => @<text>
+        @{
+            var labelId = $"methods-{methods.LabelKey}";
+            var current = picked[methods.LabelKey];
+        }
+        <section class="guide-section guide-methods">
+            <h2 class="section-label" id="@labelId">@GuideLinks.Text(methods.LabelKey)</h2>
+            @if (methods.NoteKey is { } noteKey)
+            {
+                <p class="guide-methods-note">@GuideLinks.Text(noteKey)</p>
+            }
+            <div class="btn-group segmented w-100 guide-switch" role="radiogroup" aria-labelledby="@labelId">
+                @foreach (var method in methods.Methods)
+                {
+                    var inputId = $"{labelId}-{method.Id}";
+                    <input type="radio" class="btn-check" name="@labelId" id="@inputId" checked="@(current == method.Id)"
+                           @onchange="() => picked[methods.LabelKey] = method.Id" />
+                    <label class="btn btn-outline-primary" for="@inputId">@GuideLinks.Text(method.TitleKey)</label>
+                }
+            </div>
+            <div class="guide-method-grid @(methods.Methods.Count == 4 ? "four" : null)">
+                @foreach (var method in methods.Methods)
+                {
+                    <div class="guide-method @(current == method.Id ? "is-picked" : null)">
+                        <h3 class="guide-method-title">@GuideLinks.Text(method.TitleKey)</h3>
+                        @if (method.DetailKey is { } detailKey)
+                        {
+                            <p class="guide-method-detail">@GuideLinks.Text(detailKey)</p>
+                        }
+                        @Render(method.Blocks)
+                    </div>
+                }
+            </div>
+        </section>
+    </text>;
+
+    /// <summary>The end of the semi-hydro guide: start tracking the move for the plant it was opened from.</summary>
+    private RenderFragment RenderTrack() => @<text>
+        @if (plant is not { TransitionSettled: true })
+        {
+        <section class="guide-section">
+            <h2 class="guide-heading">@Strings.Guides.TrackHeading</h2>
+            @if (plant is null)
+            {
+                <p>@Strings.Guides.TrackFromList</p>
+            }
+            else if (plant.TransitionSince is { } since && !plant.TransitionSettled)
+            {
+                <p>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Guides.TrackMoving, plant.DisplayName, Labels.Date(since))
+                    <a href="plants/@plant.Id">@Strings.Guides.TrackMovingLink</a></p>
+            }
+            else if (plant.TransitionSince is null)
+            {
+                <a class="btn btn-primary guide-track" href="plants/@plant.Id?track=true">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Guides.TrackStart, plant.DisplayName)</a>
+            }
+        </section>
+        }
+    </text>;
+}

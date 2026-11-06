@@ -59,7 +59,7 @@
     {
         <p class="text-body-secondary">@Strings.Shared.Loading</p>
     }
-    else if (results.IsEmpty && DictionaryCount == 0)
+    else if (results.IsEmpty && DictionaryCount == 0 && guideHits.Count == 0)
     {
         <div class="empty-state">
             <p class="mb-1">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchNothing, query.Trim())</p>
@@ -70,7 +70,7 @@
     else
     {
         var groups = results.NonEmpty.ToList();
-        var rows = groups.Count(g => g.Kind != SearchKind.Note) + 1 + (DictionaryCount > 0 ? 1 : 0);
+        var rows = groups.Count(g => g.Kind != SearchKind.Note) + 1 + (DictionaryCount > 0 ? 1 : 0) + (guideHits.Count > 0 ? 1 : 0);
         <div class="search-results @(results.Notes.Count > 0 ? "has-notes" : null)" style="--search-rows: @rows">
             @foreach (var (kind, items) in groups)
             {
@@ -111,6 +111,26 @@
                         @foreach (var hit in nameHits)
                         {
                             <li><DictionaryHitRow Hit="hit" Class="search-stop" OnOpen="OpenedAsync" /></li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            @if (guideHits.Count > 0)
+            {
+                <section class="search-group" aria-labelledby="group-guides">
+                    <h2 class="section-label" id="group-guides">@Strings.Guides.SearchGroup · @guideHits.Count</h2>
+                    <ul class="item-list">
+                        @foreach (var guide in guideHits)
+                        {
+                            <li>
+                                <a class="item-card search-stop" href="@GuideLinks.Href(guide.Id)" @onclick="OpenedAsync">
+                                    <div class="item-text">
+                                        <div class="item-name">@GuideLinks.Text(guide.TitleKey)</div>
+                                        <div class="item-meta">@GuideLinks.Text(guide.RowKey)</div>
+                                    </div>
+                                </a>
+                            </li>
                         }
                     </ul>
                 </section>
@@ -162,6 +182,8 @@
 
     private int DictionaryCount => groupHits.Count + nameHits.Count;
 
+    private IReadOnlyList<Guide> guideHits = [];
+
     private bool Searching => !string.IsNullOrWhiteSpace(query);
 
     private string HelpHref => $"help?q={Uri.EscapeDataString(query.Trim())}";
@@ -211,6 +233,7 @@
         results = index?.Find(query) ?? SearchResults.Empty;
 
         var text = query.Trim();
+        guideHits = GuideLinks.Matching(text);
         if (dictionaryBrowser is null || suggester is null || text.Length == 0)
         {
             groupHits = [];

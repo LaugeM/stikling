@@ -335,6 +335,10 @@ else
                     {
                         <div id="medium-help" class="form-text">@mediumHelp</div>
                     }
+                    @if (plant.Medium is GrowingMedium.Leca or GrowingMedium.Pon)
+                    {
+                        <div class="mt-2"><GuideLink Guide="@GuideBook.SemiHydro" From="@GuideLinks.FromPlant(plant.Id)" NewTab="true" /></div>
+                    }
                     @if (form.OffersTransition)
                     {
                         <div class="form-check mt-2">
@@ -383,6 +387,10 @@ else
                                 <button type="button" class="chip @(outerWatering == PotWatering.Wick ? "picked" : null)"
                                         @onclick="() => plant.OuterPotWatering = PotWatering.Wick">@Strings.PlantEdit.OuterWateringWick</button>
                             </div>
+                            @if (outerWatering == PotWatering.Wick)
+                            {
+                                <div class="mt-2"><GuideLink Guide="@GuideBook.Wick" From="@GuideLinks.FromPlant(plant.Id)" NewTab="true" /></div>
+                            }
                         }
                     }
                 </div>

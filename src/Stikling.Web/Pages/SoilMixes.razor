@@ -14,6 +14,7 @@
 <p class="settings-hint">
     @Strings.Supplies.MixesIntro
 </p>
+<div class="mt-2"><GuideLink Guide="@GuideBook.Mixing" From="soil-mixes" /></div>
 
 @if (errors.Count > 0)
 {
@@ -145,6 +146,7 @@ else if (uses.Count == 0)
         <p class="text-body-secondary">
             @Strings.Supplies.MixesEmptyHint
         </p>
+        <GuideLink Guide="@GuideBook.Mixing" From="soil-mixes" />
     </div>
 }
 else

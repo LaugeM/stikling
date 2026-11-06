@@ -1,0 +1,21 @@
+@page "/guides"
+
+<PageTitle>@Strings.Guides.PageTitle</PageTitle>
+
+<a class="back-link" href="help">@Strings.Guides.BackToHelp</a>
+<h1>@Strings.Guides.Title</h1>
+
+<p class="settings-hint">@Strings.Guides.Intro</p>
+
+@foreach (var group in GuideBook.All.GroupBy(g => g.Group))
+{
+    <h2 class="section-label mt-4">@GuideLinks.Text("Group" + group.Key)</h2>
+    <div class="settings-rows">
+        @foreach (var guide in group)
+        {
+            <SettingsRow Href="@GuideLinks.Href(guide.Id)" Title="@GuideLinks.Text(guide.TitleKey)" Detail="@GuideLinks.Text(guide.RowKey)">
+                <Icon><path d="M12 6.500C10.500 5 8 4.500 4.500 4.500v13c3.500 0 6 .5 7.500 2 1.500-1.500 4-2 7.500-2v-13c-3.500 0-6 .5-7.500 2Z" /><path d="M12 6.500v13" /></Icon>
+            </SettingsRow>
+        }
+    </div>
+}

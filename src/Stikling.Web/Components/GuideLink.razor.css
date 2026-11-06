@@ -1,0 +1,25 @@
+.guide-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    text-decoration: none;
+    /* 0.75rem above and below makes the tap area 44px, and the negative margin keeps the layout */
+    padding-block: 0.75rem;
+    margin-block: -0.75rem;
+}
+
+.guide-link:hover span {
+    text-decoration: underline;
+}
+
+.guide-link svg {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
