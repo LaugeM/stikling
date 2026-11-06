@@ -293,6 +293,24 @@
     color: var(--pa-green-dark);
 }
 
+.year-actions > :only-child {
+    grid-column: 1 / -1;
+}
+
+.year-video {
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.year-video .btn {
+    min-height: 2.75rem;
+    margin-top: 0.5rem;
+}
+
+.year-video-ready {
+    margin-top: 0.5rem;
+}
+
 .year-message {
     margin: 0.25rem 0 0;
     text-align: center;

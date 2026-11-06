@@ -4178,3 +4178,30 @@ main.app-content.with-tour.tour-closing {
 tr.drop-target {
     border-radius: 0;
 }
+/* While a video is made: the share sheet and the year page */
+.share-progress {
+    display: block;
+    width: 100%;
+    height: 0.6rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--pa-green-soft);
+    color: var(--pa-green);
+    appearance: none;
+    overflow: hidden;
+}
+
+.share-progress::-webkit-progress-bar {
+    background: var(--pa-green-soft);
+}
+
+.share-progress::-webkit-progress-value {
+    background: var(--pa-green);
+    border-radius: 999px;
+}
+
+.share-progress::-moz-progress-bar {
+    background: var(--pa-green);
+    border-radius: 999px;
+}
+
