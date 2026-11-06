@@ -1,4 +1,4 @@
-// Keys for the Search page and the / key that opens it.
+// Keys for the Search page. The / key that opens it is in shortcuts.js.
 
 // The box and the results: Arrow down goes from the box into the results, Arrow up and down move between
 // them, Arrow up on the first goes back to the box, and Escape empties the box, from a result too. Every row to
@@ -49,25 +49,4 @@ export function attach(input, root) {
             root.removeEventListener("keydown", onKey);
         }
     };
-}
-
-// The / key opens Search from any page, unless the person is typing somewhere. Shift is allowed, since
-// on some keyboards / is a shifted key. Calls OpenSearch on the .NET object, or focuses the box when
-// the page is already there.
-export function installSlash(dotnet) {
-    const onKey = event => {
-        if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey || event.defaultPrevented)
-            return;
-        const target = event.target;
-        if (target?.isContentEditable || target?.closest?.("input, textarea, select, [contenteditable]"))
-            return;
-        event.preventDefault();
-        const box = document.querySelector("[data-search-input]");
-        if (box)
-            box.focus();
-        else
-            dotnet.invokeMethodAsync("OpenSearch");
-    };
-    document.addEventListener("keydown", onKey);
-    return { dispose: () => document.removeEventListener("keydown", onKey) };
 }

@@ -389,7 +389,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Pest cases and problems in two columns on a wide screen**, like plant pages: the case and its facts on the left, the updates beside them | 6 | S | v1.x |
 | ✅ | **Supplies as grids on a wide screen**: Pots, Products, Soil mixes, Feeds and Sellers flow into columns the way the Plants list does, instead of one long list in the middle. On Pots each name is one card, with its sizes as rows inside | 3 | S | v1.x |
 | ✅ | **Drop photos onto a plant on a computer**: drag one or more photo files onto a plant or propagation page, or onto its row in a list, to add them, the same as picking them with Photo | 5 | S | v1.x |
-| ☐ | **Keyboard shortcuts**: N for a new plant, W to water, Esc to close a sheet, arrow keys through lists and `?` for a sheet that lists them all. Only `/` for Search exists so far | 6 | S | v1.x |
+| ✅ | **Keyboard shortcuts**: `/` for Search, N for a new plant, W to open the care form on watering where one plant is meant, Esc to close a sheet, arrow keys through lists and `?` for a sheet that lists them all | 6 | S | v1.x |
 | ✅ | **Shift-click to select a range** of plants or propagations in Select and in the table, instead of picking them one at a time | 6 | S | v1.x |
 | ☐ | **The list and a plant side by side**: on a wide screen, clicking a plant opens it in a pane next to the list, so you can go through plants without going back each time. Has to fit with the plant page's own two columns | 7 | M | v1.x |
 | ✅ | **Settings in two panes on a wide screen**: the sections down the left and the open one on the right. The App section is split into Look, Today and care, and Plants, on the phone too | 7 | S | v1.x |

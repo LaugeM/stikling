@@ -93,6 +93,15 @@ export function init(dotnet) {
         }
     };
 
+    // From the W key in shortcuts.js: straight to the care form, since the plant and the action are both known
+    const onWater = event => {
+        const element = plantOf(event.target);
+        if (element) {
+            dotnet.invokeMethodAsync("OpenWatering", element.dataset.quickPlant);
+        }
+    };
+
+    document.addEventListener("stikling-quick-water", onWater);
     document.addEventListener("pointerdown", onDown);
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onEnd);
@@ -105,6 +114,7 @@ export function init(dotnet) {
     return {
         dispose() {
             cancel();
+            document.removeEventListener("stikling-quick-water", onWater);
             document.removeEventListener("pointerdown", onDown);
             document.removeEventListener("pointermove", onMove);
             document.removeEventListener("pointerup", onEnd);

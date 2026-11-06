@@ -277,7 +277,12 @@
         height: 1.2rem;
     }
 
-    .app-nav ::deep .app-nav-search kbd {
+    .app-nav-end ::deep .app-nav-link kbd {
+        margin-left: auto;
+    }
+
+    .app-nav ::deep .app-nav-search kbd,
+    .app-nav-end ::deep .app-nav-link kbd {
         padding: 0.05rem 0.4rem;
         border: 1px solid var(--pa-border);
         border-radius: 0.3rem;
@@ -286,6 +291,13 @@
         font-family: inherit;
         font-size: 0.75rem;
         line-height: 1.4;
+    }
+
+    /* A device with only a touchscreen has no keys to press, so no hints for them */
+    @media (hover: none) and (pointer: coarse) {
+        .app-nav ::deep kbd {
+            display: none;
+        }
     }
 
     .app-nav-end {
