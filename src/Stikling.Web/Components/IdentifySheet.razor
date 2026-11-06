@@ -4,6 +4,7 @@
 @using Stikling.Core.Identification
 @inject IdentificationService Identification
 @inject PlantNameService Names
+@inject IPhotoRepository PhotoRepository
 
 <Sheet Title="@Strings.Identify.SheetTitle" Open="Open" OpenChanged="SheetOpenChangedAsync">
     <div class="identify-sheet">
@@ -26,7 +27,7 @@
             </li>
         </ul>
 
-        @if (Photos is { Count: > 0 } own)
+        @if (Shown is { Count: > 0 } own)
         {
             <p class="form-text mb-1">@Strings.Identify.OrPickOne</p>
             <div class="photo-picks">
@@ -113,6 +114,10 @@
     [Parameter]
     public IReadOnlyList<Photo>? Photos { get; set; }
 
+    /// <summary>The plant or propagation being edited, when it is already saved. Its saved photos are offered too.</summary>
+    [Parameter]
+    public Guid? SubjectId { get; set; }
+
     /// <summary>True where a photo taken here can be kept on the plant: the plant form.</summary>
     [Parameter]
     public bool CanKeepPhoto { get; set; }
@@ -146,8 +151,23 @@
     {
         if (wasOpen && !Open)
             Reset();
+        if (Open && !wasOpen && SubjectId is { } subject)
+            _ = LoadSavedAsync(subject);
         wasOpen = Open;
     }
+
+    // The photos the subject already has, not deleted and not reference photos, newest first
+    private IReadOnlyList<Photo> saved = [];
+
+    private async Task LoadSavedAsync(Guid subject)
+    {
+        saved = (await PhotoRepository.GetForAsync(subject)).Where(p => !p.IsReference).ToList();
+        StateHasChanged();
+    }
+
+    // Photos added while the form is open come first, then the saved ones
+    private IReadOnlyList<Photo> Shown =>
+        [.. (Photos ?? []).Reverse().Concat(saved.Where(s => !(Photos ?? []).Any(p => p.Id == s.Id)))];
 
     private void Reset()
     {

@@ -45,7 +45,7 @@
     @if (ShowIdentify && identifyOffered)
     {
         <div class="mt-2">
-            <button type="button" class="btn btn-outline-primary btn-sm icon-btn" @onclick="() => identifyOpen = true">
+            <button type="button" class="btn btn-outline-primary icon-btn identify-button" @onclick="() => identifyOpen = true">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
                 @Strings.Identify.Button
             </button>
@@ -92,7 +92,7 @@
 </div>
 @if (ShowIdentify && identifyOffered)
 {
-    <IdentifySheet @bind-Open="identifyOpen" Photos="IdentifyPhotos" CanKeepPhoto="OnKeepPhoto.HasDelegate" OnPicked="PickIdentifiedAsync" />
+    <IdentifySheet @bind-Open="identifyOpen" Photos="IdentifyPhotos" SubjectId="IdentifySubjectId" CanKeepPhoto="OnKeepPhoto.HasDelegate" OnPicked="PickIdentifiedAsync" />
 }
 @if (!unsureOpen)
 {
@@ -166,6 +166,10 @@ else
     /// <summary>The photos the form already has, which the identify sheet offers to use.</summary>
     [Parameter]
     public IReadOnlyList<Photo>? IdentifyPhotos { get; set; }
+
+    /// <summary>The saved plant or propagation, whose photos the sheet offers as well. Null for a new one.</summary>
+    [Parameter]
+    public Guid? IdentifySubjectId { get; set; }
 
     /// <summary>
     /// Called when a suggestion is picked with a photo that was taken or chosen in the sheet and should be
