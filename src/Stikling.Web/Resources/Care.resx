@@ -157,6 +157,22 @@
     <value>The water is usually topped up about {0}, learned from {1}.</value>
     <comment>{0} is how often, like "every 3 days", {1} a number.</comment>
   </data>
+  <data name="WateringSeasonsTop" xml:space="preserve">
+    <value>It has gone {0} between waterings in the brighter half of the year, {1} in the darker half.</value>
+    <comment>On a plant's page, from its own log. {0} and {1} are ranges of days, like "9 to 12 days". States the past, so never word it as advice.</comment>
+  </data>
+  <data name="WateringSeasonsReservoir" xml:space="preserve">
+    <value>It has gone {0} between refills in the brighter half of the year, {1} in the darker half.</value>
+    <comment>Same as WateringSeasonsTop, for a plant with a reservoir.</comment>
+  </data>
+  <data name="WateringSeasonsInWater" xml:space="preserve">
+    <value>It has gone {0} between top-ups in the brighter half of the year, {1} in the darker half.</value>
+    <comment>Same as WateringSeasonsTop, for a plant standing in water.</comment>
+  </data>
+  <data name="WateringRangeDays" xml:space="preserve">
+    <value>{0} to {1} days</value>
+    <comment>A range of days, like "9 to 12 days".</comment>
+  </data>
   <data name="WateringLonger" xml:space="preserve">
     <value>Longer now the days are shorter.</value>
   </data>
