@@ -219,10 +219,11 @@ else
     // The fields work straight away. Suggestions turn up once the names are read.
     protected override async Task OnInitializedAsync()
     {
-        everyday = await Names.GetEverydayNamesAsync();
-        suggester = await Names.GetSuggesterAsync();
+        // The camera button first, so the search box doesn't shrink after the names are read
         if (ShowIdentify)
             identifyOffered = await Identification.IsOfferedAsync();
+        everyday = await Names.GetEverydayNamesAsync();
+        suggester = await Names.GetSuggesterAsync();
     }
 
     // Searched again only when the words change, not each time a field below is typed in
