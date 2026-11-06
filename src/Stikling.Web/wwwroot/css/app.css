@@ -2985,6 +2985,28 @@ main.app-content:has(.form-bar) {
     color: var(--pa-muted);
 }
 
+.outcome-differed {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.outcome-differed-title {
+    margin: 0 0 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pa-text);
+}
+
+.outcome-differed p {
+    margin: 0;
+}
+
+.outcome-differed ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.1rem;
+}
+
 .outcome-plants {
     margin: 0.6rem 0 0;
     padding: 0;
@@ -3219,6 +3241,34 @@ main.app-content:has(.form-bar) {
     }
 
     body:has(.sitter-page) .app-content {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
+
+/* A plant's story prints only its page, on the A4 set above. */
+@media print {
+    :root:has(.story-page),
+    body:has(.story-page) {
+        background: #ffffff !important;
+        color: #1d2520;
+    }
+
+    body:has(.story-page) .app-header,
+    body:has(.story-page) .app-nav,
+    body:has(.story-page) .update-banner,
+    body:has(.story-page) .first-sync-banner {
+        display: none !important;
+    }
+
+    body:has(.story-page) .app-shell {
+        display: block !important;
+        min-height: 0 !important;
+    }
+
+    body:has(.story-page) .app-content,
+    body:has(.story-page) .page-wide {
         max-width: none !important;
         margin: 0 !important;
         padding: 0 !important;
