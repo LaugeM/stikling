@@ -405,6 +405,9 @@
   <data name="WateringReminderWorkA1" xml:space="preserve">
     <value>Slå den til under &lt;em&gt;Vandingspåmindelse&lt;/em&gt; i Indstillinger. Den lærer hvor ofte hver plante får vand, ud fra det du har logget, og beder dig tjekke planten i I dag når den sandsynligvis er tør. Den siger aldrig at du skal vande, og den bruger aldrig en plejeguide eller et fast antal dage. Den siger ingenting om en plante før den har set nogle vandinger, så de første uger er der stille. Indtil da står der på plantens side hvor mange den mangler. Log vandingerne når du giver dem, så bliver den bedre. Er den i tvivl, foreslår den hellere for sent end for tidligt, for en plante der bliver tjekket en dag for sent, har det bedre end en der bliver vandet for tidligt. Når en plante der vandes fra oven, skal tjekkes, har I dag en note under Vand, &lt;em&gt;Sådan kan du se, om den skal have vand&lt;/em&gt;, med nogle måder at tjekke på.</value>
   </data>
+  <data name="WateringReminderWorkA3" xml:space="preserve">
+    <value>Med påmindelsen slået til: når en plante har fået nogle vandinger i både sommerhalvåret og vinterhalvåret, står der også på dens side hvor lang tid der er gået mellem dem i hvert halvår, fx 9 til 12 dage og 15 til 24 dage. Det siger kun hvad der er sket, og påmindelsen går ikke efter det. En plante under en plantelampe får ikke den linje, for årstiden siger ikke så meget om den, og et hul hvor planten hvilede, tæller ikke med.</value>
+  </data>
   <data name="WateringReminderWorkA2" xml:space="preserve">
     <value>Logger du fugtmålinger, lærer den hvor lang tid planten er om at tørre ned til det niveau du vander ved, og det virker så snart en vanding er blevet fulgt af en tør måling. Det gælder planter du vander fra oven. Semi-hydro (LECA og PON), knoldstativer, selvvandende potter og planter i en yderpotte med vand i tæller i stedet hvor længe reservoiret holder, og rækken siger &lt;em&gt;Fyldt på&lt;/em&gt; når du sætter hak. En plante i vand bliver fyldt op, og der står &lt;em&gt;Fyldt op&lt;/em&gt; på rækken. Når måden en plante får vand på, ændrer sig, fx fra jord til LECA, begynder den at lære forfra, for de gamle vandinger siger ikke noget om den nye måde. Den lærer heller ikke af et hul hen over en rejse eller pause du har tilføjet under &lt;em&gt;Ude og pause&lt;/em&gt;, medmindre der blev logget en vanding i perioden.</value>
   </data>
@@ -1100,6 +1103,15 @@
   </data>
   <data name="CollectionNumberA1" xml:space="preserve">
     <value>Det korte nummer som nogle skriver på hver potte, fx 117. Det er valgfrit. Du sætter det i feltet &lt;em&gt;Samlingsnummer&lt;/em&gt; i plantens redigeringsformular, hvor det næste ledige nummer er et tryk væk. En stikling af plante 117 får 117a og så 117b, så dens etiket viser hvor den kommer fra. Når en stikling bliver pottet op, beholder planten sit nummer. Bliver flere pottet op samtidig, får de 117c1, 117c2 og så videre. Vil du nummerere de planter du allerede har, med de ældste først, åbner du &lt;em&gt;Samlingsnumre&lt;/em&gt; i Indstillinger. Har to planter samme nummer, bliver det vist, men Stikling ændrer aldrig et nummer for dig.</value>
+  </data>
+  <data name="PrintStoryQ" xml:space="preserve">
+    <value>Kan jeg skrive en plantes historie ud?</value>
+  </data>
+  <data name="PrintStoryA1" xml:space="preserve">
+    <value>Ja, til at give en plante væk med dens historie eller til at gemme. Åbn <b>Mere</b> på plantens side, og vælg <b>Skriv dens historie ud</b>. Du får én side med dens billeder efter dato, dens noter, hvor den kom fra og hvad der er kommet fra den, og du vælger selv hvad der skal med. Der er plads til et par ord fra dig øverst.</value>
+  </data>
+  <data name="PrintStoryA2" xml:space="preserve">
+    <value><b>Print eller gem som PDF</b> åbner browserens printvindue, hvor du også kan gemme som PDF. En lang historie med mange billeder fortsætter på flere sider. Hvad den kostede, og hvem du har givet planter til, kommer ikke med, og det du vælger, bliver ikke gemt.</value>
   </data>
   <data name="PrintLabelsQ" xml:space="preserve">
     <value>Hvordan udskriver jeg etiketter?</value>
