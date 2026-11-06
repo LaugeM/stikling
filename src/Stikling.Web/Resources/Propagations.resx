@@ -1814,4 +1814,88 @@
   <data name="MomentAfterDays_Other" xml:space="preserve">
     <value>After {0} days</value>
   </data>
+  <data name="ThingMedium" xml:space="preserve">
+    <value>medium</value>
+    <comment>One of the things batches can differ in, used in a list inside a sentence.</comment>
+  </data>
+  <data name="ThingType" xml:space="preserve">
+    <value>type of propagation</value>
+    <comment>One of the things batches can differ in, used in a list inside a sentence.</comment>
+  </data>
+  <data name="ThingPlant" xml:space="preserve">
+    <value>plant</value>
+    <comment>One of the things batches can differ in, used in a list inside a sentence.</comment>
+  </data>
+  <data name="ThingStartMonth" xml:space="preserve">
+    <value>month started</value>
+    <comment>One of the things batches can differ in, used in a list inside a sentence.</comment>
+  </data>
+  <data name="ThingRootingAids" xml:space="preserve">
+    <value>rooting aids</value>
+    <comment>One of the things batches can differ in, used in a list inside a sentence.</comment>
+  </data>
+  <data name="ThingDrying" xml:space="preserve">
+    <value>how long the cut end dried</value>
+    <comment>One of the things batches can differ in, used in a list inside a sentence.</comment>
+  </data>
+  <data name="ThingPlace" xml:space="preserve">
+    <value>where they stood</value>
+    <comment>One of the things batches can differ in, used in a list inside a sentence.</comment>
+  </data>
+  <data name="ListExperimentNotFair" xml:space="preserve">
+    <value>These batches differ in more than one thing: {0}. So a difference in results can't be put down to any one of them.</value>
+    <comment>Under an experiment's heading. {0} is the list of things that differ.</comment>
+  </data>
+  <data name="StatsFairMedium" xml:space="preserve">
+    <value>The batches in these mediums mostly also differ in {0}, so a difference here can't be put down to the medium alone.</value>
+    <comment>On the results page, under By medium. {0} is the list of things that differ.</comment>
+  </data>
+  <data name="StatsFairAids" xml:space="preserve">
+    <value>The batches with and without an aid mostly also differ in {0}, so a difference here can't be put down to the aid alone.</value>
+    <comment>On the results page, under rooting aids. {0} is the list of things that differ.</comment>
+  </data>
+  <data name="StatsFairDrying" xml:space="preserve">
+    <value>These groups mostly also differ in {0}, so a difference here can't be put down to the drying alone.</value>
+    <comment>On the results page, under drying. {0} is the list of things that differ.</comment>
+  </data>
+  <data name="DetDiffTitle" xml:space="preserve">
+    <value>How it differed from the ones that rooted</value>
+    <comment>Heading on a failed propagation's page.</comment>
+  </data>
+  <data name="DetDiffCompared" xml:space="preserve">
+    <value>Compared with your {0} rooted batches of the same type. From your own records, and it shows what was different, not why it failed.</value>
+    <comment>{0} is at least 3.</comment>
+  </data>
+  <data name="DetDiffTooFew" xml:space="preserve">
+    <value>Not enough to compare with yet: it takes at least {0} rooted batches of the same type, and you have {1}.</value>
+    <comment>{0} is the number needed, {1} how many there are.</comment>
+  </data>
+  <data name="DetDiffNothing" xml:space="preserve">
+    <value>Nothing stands out. Its medium, rooting aids, start month and water changes were much like those of your {0} rooted batches of the same type.</value>
+    <comment>{0} is at least 3.</comment>
+  </data>
+  <data name="DetDiffMedium" xml:space="preserve">
+    <value>Medium: {0} here. {1} of them used it, {2} used {3}.</value>
+    <comment>{0} this batch's medium, {1} rooted batches in it, {2} rooted batches in the most used medium {3}.</comment>
+  </data>
+  <data name="DetDiffAidUsed" xml:space="preserve">
+    <value>Rooting aid: {0} here. {1} of them used it.</value>
+    <comment>{0} the aid, {1} rooted batches that had it.</comment>
+  </data>
+  <data name="DetDiffAidNotUsed" xml:space="preserve">
+    <value>Rooting aid: {0} not used here. {1} of them used it.</value>
+    <comment>{0} the aid, {1} rooted batches that had it.</comment>
+  </data>
+  <data name="DetDiffMonth" xml:space="preserve">
+    <value>Started in {0}. {1} of them around then ({2} to {3}), {4} in {5}.</value>
+    <comment>{0} the month it started, {1} rooted batches started from month {2} to month {3}, {4} rooted batches started in the most used month {5}.</comment>
+  </data>
+  <data name="DetDiffWater" xml:space="preserve">
+    <value>Days between water changes: {0} here, about {1} on the {2} of them with changes logged.</value>
+    <comment>{0} this batch, {1} the usual on the rooted batches, {2} how many of those have changes logged, at least 3.</comment>
+  </data>
+  <data name="DetDiffNoWater" xml:space="preserve">
+    <value>No water changes logged here. Days between changes on the {0} of them with changes logged: about {1}.</value>
+    <comment>{0} how many rooted batches have changes logged, at least 3, {1} the usual days between changes.</comment>
+  </data>
 </root>

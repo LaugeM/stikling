@@ -45,6 +45,10 @@ else
 
     <section class="results-section">
         <h2>@Strings.Propagations.StatsByMedium</h2>
+        @if (acrossMediums.Count > 0)
+        {
+            <p class="aid-note">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsFairMedium, Labels.List(acrossMediums))</p>
+        }
         <ul class="results-list">
             @foreach (var result in byMedium)
             {
@@ -72,6 +76,10 @@ else
         else
         {
             <p class="aid-note">@Strings.Propagations.StatsAidsHow</p>
+            @if (acrossAids.Count > 0)
+            {
+                <p class="aid-note">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsFairAids, Labels.List(acrossAids))</p>
+            }
             <ul class="results-list">
                 @foreach (var result in byAid)
                 {
@@ -97,6 +105,10 @@ else
         <section class="results-section">
             <h2>@Strings.Propagations.StatsDryingHeading</h2>
             <p class="aid-note">@Strings.Propagations.StatsDryingHow</p>
+            @if (acrossDrying.Count > 0)
+            {
+                <p class="aid-note">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsFairDrying, Labels.List(acrossDrying))</p>
+            }
             <ul class="results-list">
                 @foreach (var group in byDrying)
                 {
@@ -116,6 +128,9 @@ else
     private IReadOnlyList<DryingResult> byDrying = [];
     private IReadOnlyDictionary<GrowingMedium, FailureSummary> lostByMedium = new Dictionary<GrowingMedium, FailureSummary>();
     private FailureSummary? overallLost;
+    private IReadOnlyList<ComparedThing> acrossMediums = [];
+    private IReadOnlyList<ComparedThing> acrossAids = [];
+    private IReadOnlyList<ComparedThing> acrossDrying = [];
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
@@ -127,6 +142,9 @@ else
         byType = PropagationResults.ByType(all);
         byAid = PropagationResults.ByRootingAid(all);
         byDrying = PropagationResults.ByDrying(all);
+        acrossMediums = FairComparison.AcrossMediums(all);
+        acrossAids = FairComparison.AcrossRootingAids(all);
+        acrossDrying = FairComparison.AcrossDrying(all);
 
         var entries = new Dictionary<Guid, IReadOnlyList<TimelineEntry>>();
         foreach (var p in all.Where(p => !p.IsDeleted && p.FailedCount > 0))

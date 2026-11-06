@@ -4,6 +4,7 @@ using Stikling.Core.Text;
 using Stikling.Core.Plants;
 using Stikling.Core.Pests;
 using Stikling.Core.Pots;
+using Stikling.Core.Propagations;
 using Stikling.Core.SoilMixes;
 using Strings = Stikling.Web.Resources;
 
@@ -158,6 +159,27 @@ public static class Labels
     {
         PropagationType.AirLayer => Strings.Labels.ExplainAirLayer,
         _ => null
+    };
+
+    /// <summary>The things batches differ in, as a list to put inside a sentence: "medium and month started".</summary>
+    public static string List(IReadOnlyList<ComparedThing> things)
+    {
+        var names = things.Select(For).ToList();
+        return names.Count <= 1
+            ? string.Concat(names)
+            : string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.ListAnd, string.Join(", ", names.SkipLast(1)), names[^1]);
+    }
+
+    public static string For(ComparedThing thing) => thing switch
+    {
+        ComparedThing.Medium => Strings.Propagations.ThingMedium,
+        ComparedThing.Type => Strings.Propagations.ThingType,
+        ComparedThing.Plant => Strings.Propagations.ThingPlant,
+        ComparedThing.StartMonth => Strings.Propagations.ThingStartMonth,
+        ComparedThing.RootingAids => Strings.Propagations.ThingRootingAids,
+        ComparedThing.Drying => Strings.Propagations.ThingDrying,
+        ComparedThing.Place => Strings.Propagations.ThingPlace,
+        _ => thing.ToString()
     };
 
     public static string For(RootingAid aid) => aid switch

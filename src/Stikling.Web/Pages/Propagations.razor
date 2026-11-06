@@ -150,6 +150,10 @@ else
                             @onclick="() => OpenShareAsync(name)">@Strings.Shared.ShareButton</button>
                 }
             </div>
+            @if (FairComparison.InExperiment(experiment) is var differing && FairComparison.IsMoreThanOne(differing))
+            {
+                <p class="experiment-note">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListExperimentNotFair, Labels.List(differing))</p>
+            }
             <ul class="item-list experiment-list">
                 @foreach (var entry in experiment.Entries)
                 {
