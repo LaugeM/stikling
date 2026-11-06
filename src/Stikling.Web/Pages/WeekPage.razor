@@ -26,7 +26,7 @@ else
         <div class="alert alert-danger py-2 px-3" role="alert">@error</div>
     }
     <div role="status">
-        @if (done is not null)
+        @if (done is { Count: > 0 })
         {
             <p class="week-done">
                 <span>@Plural.Of(done.Count, Strings.Care.WeekLogged_One, Strings.Care.WeekLogged_Other)</span>
@@ -200,17 +200,15 @@ else
     {
         busy = true;
         error = null;
-        try
+        var marked = await WeekService.MarkDoneAsync(
+            day.Water.Where(d => ticked.Contains(WaterKey(d))),
+            day.Care.SelectMany(g => g.Items).Where(i => ticked.Contains(CareKey(i))),
+            Labels.For);
+        done = done?.And(marked) ?? marked;
+        if (marked.Failure is { } failure)
         {
-            done = await WeekService.MarkDoneAsync(
-                day.Water.Where(d => ticked.Contains(WaterKey(d))),
-                day.Care.SelectMany(g => g.Items).Where(i => ticked.Contains(CareKey(i))),
-                Labels.For);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Marking a day of the week ahead as done failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayCareLogFailed, ex.Message);
+            Logger.LogError(failure, "Marking a day of the week ahead as done failed");
+            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayCareLogFailed, failure.Message);
         }
         asking = null;
         await RefreshAsync();

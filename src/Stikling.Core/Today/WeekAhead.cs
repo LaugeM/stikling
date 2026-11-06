@@ -25,7 +25,8 @@ public static class WeekAhead
 
     /// <summary>
     /// Today and the next seven days, leaving out days with nothing on them. Anything overdue is on
-    /// today, and something put off is on the day it comes back.
+    /// today, something put off is on the day it comes back, and what comes up during an away or
+    /// quiet stretch is on the first day after it, as long as that is within the week.
     /// </summary>
     public static IReadOnlyList<WeekDay> For(TodayData data, DateOnly today, TimeProvider time)
     {
@@ -45,6 +46,13 @@ public static class WeekAhead
             : CareIntervals.Plan(data.CareIntervals, data.Plants, data.Places, data.CareLogs, data.OwnCareKinds, data.Feeds,
                 clock, settings.RoundDays, putOffs);
 
+        DateOnly AfterAway(DateOnly day)
+        {
+            while (day <= last && AwayTime.IsOn(data.Stretches, day))
+                day = day.AddDays(1);
+            return day;
+        }
+
         var days = new List<WeekDay>();
         for (var day = today; day <= last; day = day.AddDays(1))
         {
@@ -54,8 +62,8 @@ public static class WeekAhead
                 continue;
             }
 
-            var waterOn = water.Where(d => Later(d.ShowOn, today) == day).ToList();
-            var careOn = CareIntervals.Group(care.Where(i => CareDay(i, putOffs, today) == day));
+            var waterOn = water.Where(d => AfterAway(Later(d.ShowOn, today)) == day).ToList();
+            var careOn = CareIntervals.Group(care.Where(i => AfterAway(CareDay(i, putOffs, today)) == day));
             if (waterOn.Count > 0 || careOn.Count > 0)
                 days.Add(new WeekDay(day, waterOn, careOn, false));
         }
@@ -74,10 +82,14 @@ public static class WeekAhead
     private static DateOnly Later(DateOnly a, DateOnly b) => a > b ? a : b;
 }
 
-/// <summary>The entries made by marking a day as done, so they can be taken back.</summary>
-public sealed record WeekDone(IReadOnlyList<Guid> Waterings, IReadOnlyList<Guid> Care)
+/// <summary>The entries made by marking days as done, so they can be taken back.</summary>
+/// <param name="Failure">What stopped it partway. The entries listed were still saved.</param>
+public sealed record WeekDone(IReadOnlyList<Guid> Waterings, IReadOnlyList<Guid> Care, Exception? Failure = null)
 {
     public int Count => Waterings.Count + Care.Count;
+
+    /// <summary>This and what was marked after it, so one Undo takes back both.</summary>
+    public WeekDone And(WeekDone later) => new([.. Waterings, .. later.Waterings], [.. Care, .. later.Care], later.Failure);
 }
 
 /// <summary>Marks what was picked from a day of the week ahead as done, with ordinary care entries dated today.</summary>
@@ -87,12 +99,20 @@ public sealed class WeekAheadService(WateringAnswers answers, CareService care, 
         IEnumerable<WateringDue> water, IEnumerable<IntervalItem> items, Func<Enum, string> label)
     {
         var waterings = new List<Guid>();
-        foreach (var due in water)
-            waterings.Add((await answers.WaterAsync(due.Plant.Id, due.Guess.Form, label)).Id);
-
         var logged = new List<Guid>();
-        foreach (var group in CareIntervals.Group(items))
-            logged.AddRange(await intervals.LogAsync(group, group.Items.Select(i => i.Plant.Id), label));
+        try
+        {
+            foreach (var due in water)
+                waterings.Add((await answers.WaterAsync(due.Plant.Id, due.Guess.Form, label)).Id);
+
+            foreach (var group in CareIntervals.Group(items))
+                logged.AddRange(await intervals.LogAsync(group, group.Items.Select(i => i.Plant.Id), label));
+        }
+        catch (Exception ex)
+        {
+            // What was saved before it stopped can still be taken back
+            return new WeekDone(waterings, logged, ex);
+        }
 
         return new WeekDone(waterings, logged);
     }

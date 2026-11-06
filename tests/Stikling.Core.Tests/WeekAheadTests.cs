@@ -159,15 +159,64 @@ public class WeekAheadTests
     }
 
     [Fact]
-    public void An_away_day_asks_for_nothing()
+    public void What_comes_up_on_an_away_day_moves_to_the_first_day_after_it()
     {
         Weekly("Soon", Today.AddDays(-3));
         stretches.Add(new AwayStretch { From = Today.AddDays(4), Until = Today.AddDays(5) });
 
-        var away = Week().Single(d => d.Day == Today.AddDays(4));
+        var week = Week();
 
+        var away = week.Single(d => d.Day == Today.AddDays(4));
         Assert.True(away.Away);
         Assert.Equal(0, away.Count);
+        var firstBack = week.First(d => !d.Away);
+        Assert.Equal("Soon", firstBack.Water.Single().Plant.Nickname);
+        Assert.True(firstBack.Day > Today.AddDays(4));
+    }
+
+    [Fact]
+    public async Task What_was_saved_before_a_failure_can_still_be_taken_back()
+    {
+        var repo = new FakeCareLogRepository();
+        var feeds = new FakeFeedRepository();
+        var products = new FakeProductRepository();
+        var kinds = new FakeOwnCareKindRepository();
+        var care = new CareService(repo, new FakeTimelineRepository(), new FakePlantRepository(), feeds, products, kinds, Time);
+        var service = new WeekAheadService(
+            new WateringAnswers(care, repo, new PutOffService(new FakePutOffRepository()), Time),
+            care,
+            new CareIntervalService(care, repo, feeds, products, kinds, Time));
+
+        Weekly("Soon", Today.AddDays(-3));
+        var water = Week().SelectMany(d => d.Water).ToList();
+
+        var done = await service.MarkDoneAsync(water, Failing(), Label);
+
+        Assert.NotNull(done.Failure);
+        Assert.Equal(water.Count, done.Waterings.Count);
+
+        await service.UndoAsync(done);
+        Assert.DoesNotContain(await repo.GetAllAsync(), l => !l.IsDeleted);
+
+        static IEnumerable<IntervalItem> Failing()
+        {
+            throw new InvalidOperationException("Stopped");
+#pragma warning disable CS0162 // The yield is what makes this run only once it is read
+            yield break;
+#pragma warning restore CS0162
+        }
+    }
+
+    [Fact]
+    public void Marking_a_second_day_keeps_the_first_for_undo()
+    {
+        var first = new WeekDone([Guid.NewGuid()], []);
+        var second = new WeekDone([], [Guid.NewGuid()]);
+
+        var both = first.And(second);
+
+        Assert.Equal(2, both.Count);
+        Assert.Null(both.Failure);
     }
 
     [Fact]
