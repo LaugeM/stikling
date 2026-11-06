@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-26T00:00:00.000Z",
+  "generatedAt": "2026-11-06T00:00:00.000Z",
   "title": "Design System: Stikling",
   "extensions": {
     "colorMeta": {
@@ -200,31 +200,39 @@
     "typographyMeta": {
       "headline": {
         "displayName": "Headline",
-        "purpose": "The page title, one per screen, in Bricolage Grotesque. On a detail page the name is 1.75rem and wraps rather than truncating."
+        "purpose": "The page title, one per screen, in Bricolage at 92% width. On a detail page the name is 1.75rem and wraps rather than truncating, because a cultivar name is allowed to be long."
+      },
+      "count": {
+        "displayName": "Count",
+        "purpose": "The day count in a propagation row's tile, and 2.25rem in the tile on a propagation page. Bricolage at 80% width with tabular figures, so three digits still fit."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Card headings and form fieldset legends, in Bricolage Grotesque."
+        "purpose": "Card headings and form fieldset legends, in Bricolage."
+      },
+      "name": {
+        "displayName": "Name",
+        "purpose": "The name on a list row, in Bricolage."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Everything read as prose. Notes preserve their line breaks."
+        "purpose": "Everything read as prose, in the system font. Notes preserve their line breaks."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "The section marker, uppercase and muted. Groupings on Today, stage groups, subheadings in a detail card, timeline date headings."
+        "purpose": "The section marker: uppercase, 0.03em tracking, Muted Ink. Groupings on Today, stage groups, subheadings in a detail card, timeline date headings."
       },
       "caption": {
         "displayName": "Caption",
         "purpose": "Supporting lines. The species line under a plant name is set in italic here."
       },
-      "count": {
-        "displayName": "Count",
-        "purpose": "The day count in a propagation row's tile and in the tile on a propagation page. Narrow Bricolage with tabular figures."
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "The small line on a list row, timeline entry heads and the day on an activity line. The smallest size anything is read at."
       },
-      "name": {
-        "displayName": "Name",
-        "purpose": "The name on a list row, in Bricolage Grotesque."
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Only for words under something bigger that are never read on their own, like the tab labels in the bottom bar and \"days\" under a day count."
       }
     },
     "shadows": [
@@ -236,18 +244,51 @@
       {
         "name": "anchored-bar",
         "value": "0 -4px 12px rgb(0 0 0 / 0.08)",
-        "purpose": "Bars pinned above the bottom navigation: the update banner and the bulk action bar. Points upward because the bar sits below the content it covers."
+        "purpose": "Bars pinned above the bottom navigation, like the update banner and the bulk action bar, and the tour card. Points upward because the bar sits below the content it covers."
       },
       {
         "name": "focus-ring",
         "value": "0 0 0 0.2rem rgb(47 125 79 / 0.25)",
-        "purpose": "Every focused input and control. A state rather than elevation, and never to be removed."
+        "purpose": "Every focused input and control. A state rather than elevation, and never to be removed. Uses the primary green, so it follows the dark theme's lighter green."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Things that settle: a pressed list row springing back, the active tab's pill, the side menu's rows."
+      },
+      {
+        "name": "state-fast",
+        "value": "0.15s ease-out",
+        "purpose": "Border and background changes on hover and focus: list rows, Settings rows."
+      },
+      {
+        "name": "press-scale",
+        "value": "scale(0.985)",
+        "purpose": "A list row while pressed, over 0.2s with ease-out-expo."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Every movement (bars growing in, the moment card's leaf, the tour card, the year deck) drops out. Colour changes may stay."
       }
     ],
     "breakpoints": [
       {
+        "name": "hero",
+        "value": "48rem",
+        "purpose": "The detail hero stops bleeding to the screen edges and takes a radius."
+      },
+      {
         "name": "wide",
-        "value": "48rem"
+        "value": "64rem",
+        "purpose": "The one width where the layout changes: the tabs become a 14rem side menu, the header goes, the gutter grows to 2rem, and pages that ask for it widen to 72rem or the full width."
+      },
+      {
+        "name": "wider",
+        "value": "80rem",
+        "purpose": "Lists get a filter column, Today gets its side column, and the plant and propagation forms split in two."
       }
     ]
   },
@@ -256,49 +297,49 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The committing action on a screen: save, add, promote.",
+      "description": "The committing action on a screen: save, add, promote. One per screen, so solid green keeps its meaning.",
       "html": "<button class=\"ds-btn-primary\">Save plant</button>",
-      "css": ".ds-btn-primary { background: var(--pa-green, #2f7d4f); color: #fff; font: 600 1rem/1.5 'Bricolage Grotesque', system-ui, sans-serif; padding: 0.375rem 0.75rem; border: 1px solid var(--pa-green, #2f7d4f); border-radius: 0.6rem; cursor: pointer; transition: background 0.15s ease-in-out, border-color 0.15s ease-in-out; } .ds-btn-primary:hover { background: var(--pa-green-dark, #1f5a37); border-color: var(--pa-green-dark, #1f5a37); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); } .ds-btn-primary:active { background: var(--pa-green-dark, #1f5a37); }"
+      "css": ".ds-btn-primary { background: var(--pa-green, #2f7d4f); color: #fff; font: 600 1rem/1.5 'Bricolage Grotesque', system-ui, sans-serif; padding: 0.375rem 0.75rem; border: 1px solid var(--pa-green, #2f7d4f); border-radius: 0.6rem; cursor: pointer; transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out; } .ds-btn-primary:hover, .ds-btn-primary:active { background: var(--pa-green-dark, #1f5a37); border-color: var(--pa-green-dark, #1f5a37); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); } .ds-btn-primary:disabled { opacity: 0.45; cursor: default; }"
     },
     {
       "name": "Outline Button",
       "kind": "button",
       "refersTo": "button-outline",
       "description": "The secondary action beside a primary one, and the default for a row of equal choices.",
-      "html": "<button class=\"ds-btn-outline\">Cancel</button>",
-      "css": ".ds-btn-outline { background: transparent; color: var(--pa-green-dark, #1f5a37); font: 600 1rem/1.5 'Bricolage Grotesque', system-ui, sans-serif; padding: 0.375rem 0.75rem; border: 1px solid var(--pa-green, #2f7d4f); border-radius: 0.6rem; cursor: pointer; transition: background 0.15s ease-in-out, color 0.15s ease-in-out; } .ds-btn-outline:hover { background: var(--pa-green, #2f7d4f); color: #fff; } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); }"
-    },
-    {
-      "name": "List Row",
-      "kind": "card",
-      "refersTo": "item-card",
-      "description": "The signature component. One plant or propagation in a list: tinted thumbnail, name, italic species line, and a meta line of small facts. Every line truncates so row height never varies.",
-      "html": "<a class=\"ds-item-card\" href=\"#\"><span class=\"ds-item-thumb\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 21V11\"/><path d=\"M12 13c0-4 3-7 8-7 0 5-3 8-8 8z\"/><path d=\"M12 16c0-3-2-5-6-5 0 4 2 6 6 6z\"/></svg></span><span class=\"ds-item-text\"><span class=\"ds-item-name\">Kitchen window monstera</span><span class=\"ds-item-sub\">Monstera deliciosa</span><span class=\"ds-item-meta\">Living room · Semi-hydro · 3 props</span></span></a>",
-      "css": ".ds-item-card { display: flex; align-items: center; gap: 0.85rem; padding: 0.7rem; background: var(--pa-surface, #fff); border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.75rem; color: var(--pa-text, #1d2520); text-decoration: none; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; transition: border-color 0.15s ease-in-out; } .ds-item-card:hover, .ds-item-card:focus-visible { border-color: var(--pa-green, #2f7d4f); outline: none; } .ds-item-thumb { flex: none; width: 3.5rem; height: 3.5rem; display: grid; place-items: center; border-radius: 0.6rem; background: var(--pa-green-soft, #e6f2ea); color: var(--pa-green, #2f7d4f); } .ds-item-thumb svg { width: 1.75rem; height: 1.75rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; } .ds-item-text { min-width: 0; } .ds-item-name, .ds-item-sub, .ds-item-meta { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-item-name { font-weight: 600; } .ds-item-sub { font-style: italic; font-size: 0.875rem; color: var(--pa-muted, #5f6b63); } .ds-item-meta { margin-top: 0.15rem; font-size: 0.8rem; color: var(--pa-muted, #5f6b63); }"
+      "html": "<button class=\"ds-btn-outline\">Add photos</button>",
+      "css": ".ds-btn-outline { background: transparent; color: var(--pa-green-dark, #1f5a37); font: 600 1rem/1.5 'Bricolage Grotesque', system-ui, sans-serif; padding: 0.375rem 0.75rem; border: 1px solid var(--pa-green, #2f7d4f); border-radius: 0.6rem; cursor: pointer; transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out; } .ds-btn-outline:hover, .ds-btn-outline:active { background: var(--pa-green, #2f7d4f); color: #fff; } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); }"
     },
     {
       "name": "Floating Add Button",
       "kind": "button",
       "refersTo": "fab",
-      "description": "The one action that is always reachable with a thumb. Fixed above the bottom navigation on list screens.",
+      "description": "The round add button, fixed above the bottom navigation on list screens so it is always in reach of a thumb. On a wide screen it becomes a labelled button next to the title.",
       "html": "<button class=\"ds-fab\" aria-label=\"Add plant\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 5v14\"/><path d=\"M5 12h14\"/></svg></button>",
-      "css": ".ds-fab { width: 3.5rem; height: 3.5rem; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--pa-green, #2f7d4f); color: #fff; box-shadow: 0 4px 12px rgb(0 0 0 / 0.25); cursor: pointer; transition: background 0.15s ease-in-out; } .ds-fab:hover, .ds-fab:focus-visible { background: var(--pa-green-dark, #1f5a37); outline: none; } .ds-fab svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; }"
+      "css": ".ds-fab { width: 3.5rem; height: 3.5rem; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--pa-green, #2f7d4f); color: #fff; box-shadow: 0 4px 12px rgb(0 0 0 / 0.25); cursor: pointer; transition: background-color 0.15s ease-in-out; } .ds-fab:hover { background: var(--pa-green-dark, #1f5a37); } .ds-fab:focus-visible { outline: none; background: var(--pa-green-dark, #1f5a37); box-shadow: 0 4px 12px rgb(0 0 0 / 0.25), 0 0 0 0.2rem rgb(47 125 79 / 0.25); } .ds-fab svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.25; }"
     },
     {
       "name": "Text Input",
       "kind": "input",
       "refersTo": null,
-      "description": "A form field. Filled with the card colour rather than the page colour so it does not read as disabled.",
+      "description": "A form field. Filled with the card colour rather than the page colour so it does not read as disabled. Focus turns the edge green and adds the focus ring.",
       "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search plants\" />",
-      "css": ".ds-input { width: 100%; padding: 0.375rem 0.75rem; background: var(--pa-surface, #fff); color: var(--pa-text, #1d2520); font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.375rem; } .ds-input::placeholder { color: var(--pa-muted, #5f6b63); opacity: 0.8; } .ds-input:focus { outline: none; border-color: var(--pa-green, #2f7d4f); box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); }"
+      "css": ".ds-input { width: 100%; padding: 0.375rem 0.75rem; background: var(--pa-surface, #fff); color: var(--pa-text, #1d2520); font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.6rem; transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; } .ds-input::placeholder { color: var(--pa-muted, #5f6b63); opacity: 0.8; } .ds-input:focus { outline: none; border-color: var(--pa-green, #2f7d4f); box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); }"
     },
     {
-      "name": "Bottom Navigation",
-      "kind": "nav",
-      "refersTo": "nav-link-active",
-      "description": "Four fixed destinations. Icon over label, colour and weight carry the active state with no fill, pill or indicator bar.",
-      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link active\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 11l9-7 9 7\"/><path d=\"M5 10v9h14v-9\"/></svg>Today</a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 21V11\"/><path d=\"M12 13c0-4 3-7 8-7 0 5-3 8-8 8z\"/></svg>Plants</a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M7 3v6a5 5 0 0 0 10 0V3\"/><path d=\"M12 14v7\"/></svg>Props</a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M12 3v2m0 14v2M3 12h2m14 0h2\"/></svg>Settings</a></nav>",
-      "css": ".ds-nav { display: flex; justify-content: space-around; background: var(--pa-surface, #fff); border-top: 1px solid var(--pa-border, #dde3dc); } .ds-nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; min-height: 3.5rem; font: 400 0.75rem/1.2 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--pa-muted, #5f6b63); text-decoration: none; } .ds-nav-link.active { color: var(--pa-green-dark, #1f5a37); font-weight: 600; } .ds-nav-link:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); } .ds-nav-link svg { width: 1.5rem; height: 1.5rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }"
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "A choice in a row of pills: rooms, tags, pots without a photo. The picked one is Leaf Tint with a green edge, and a dashed chip adds a new name.",
+      "html": "<div class=\"ds-chip-row\"><button class=\"ds-chip picked\">Living room</button><button class=\"ds-chip\">Bedroom</button><button class=\"ds-chip new\">New room</button></div>",
+      "css": ".ds-chip-row { display: flex; flex-wrap: wrap; gap: 0.35rem; } .ds-chip { min-height: 2.25rem; padding: 0.3rem 0.75rem; border: 1px solid var(--pa-border, #dde3dc); border-radius: 999px; background: var(--pa-surface, #fff); color: var(--pa-text, #1d2520); font: 400 0.9rem/1.3 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; } .ds-chip:hover { border-color: var(--pa-green, #2f7d4f); } .ds-chip:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); } .ds-chip.picked { border-color: var(--pa-green, #2f7d4f); background: var(--pa-green-soft, #e6f2ea); color: var(--pa-green-dark, #1f5a37); font-weight: 600; } .ds-chip.new { border-style: dashed; color: var(--pa-muted, #5f6b63); }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Radio buttons as equal-width segments, for filters and the kind of pot. The picked segment looks like a picked chip, so solid green stays for the main button on a screen.",
+      "html": "<div class=\"ds-segmented\" role=\"radiogroup\"><button class=\"picked\" role=\"radio\" aria-checked=\"true\">Growing</button><button role=\"radio\" aria-checked=\"false\">In collection</button><button role=\"radio\" aria-checked=\"false\">All</button></div>",
+      "css": ".ds-segmented { display: flex; } .ds-segmented button { flex: 1; min-height: 2.75rem; padding: 0 0.5rem; border: 1px solid var(--pa-green, #2f7d4f); margin-left: -1px; background: transparent; color: var(--pa-green-dark, #1f5a37); font: 400 0.875rem/1 'Bricolage Grotesque', system-ui, sans-serif; white-space: nowrap; cursor: pointer; transition: background-color 0.15s ease-in-out; } .ds-segmented button:first-child { margin-left: 0; border-radius: 0.6rem 0 0 0.6rem; } .ds-segmented button:last-child { border-radius: 0 0.6rem 0.6rem 0; } .ds-segmented button:hover, .ds-segmented button.picked { background: var(--pa-green-soft, #e6f2ea); } .ds-segmented button.picked { font-weight: 600; } .ds-segmented button:focus-visible { outline: none; position: relative; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); }"
     },
     {
       "name": "Stage Badge",
@@ -306,46 +347,54 @@
       "refersTo": "stage-badge",
       "description": "A propagation's stage in a Leaf Tint badge, led by three ticks filled up to the stage.",
       "html": "<span class=\"ds-stage-badge\"><span class=\"ds-stage-steps\" data-step=\"2\"><i></i><i></i><i></i></span>Rooting</span>",
-      "css": ".ds-stage-badge { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.35em 0.65em; border-radius: 0.375rem; background: var(--pa-green-soft, #e6f2ea); color: var(--pa-green-dark, #1f5a37); font: 600 0.75rem/1 system-ui, sans-serif; } .ds-stage-steps { display: inline-flex; gap: 2px; } .ds-stage-steps i { width: 0.3rem; height: 0.65rem; border-radius: 1px; background: var(--pa-green, #2f7d4f); opacity: 0.25; } .ds-stage-steps[data-step='1'] i:nth-child(-n+1), .ds-stage-steps[data-step='2'] i:nth-child(-n+2), .ds-stage-steps[data-step='3'] i { opacity: 1; }"
+      "css": ".ds-stage-badge { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.35em 0.65em; border-radius: 0.6rem; background: var(--pa-green-soft, #e6f2ea); color: var(--pa-green-dark, #1f5a37); font: 600 0.75rem/1 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-stage-steps { display: inline-flex; gap: 2px; } .ds-stage-steps i { width: 0.3rem; height: 0.65rem; border-radius: 1px; background: var(--pa-green, #2f7d4f); opacity: 0.25; } .ds-stage-steps[data-step='1'] i:nth-child(-n+1), .ds-stage-steps[data-step='2'] i:nth-child(-n+2), .ds-stage-steps[data-step='3'] i { opacity: 1; }"
     },
     {
-      "name": "Timeline Entry",
+      "name": "Bottom Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link-active",
+      "description": "The tabs along the bottom on a phone: a stroked icon over a Bricolage label. The active tab is Deep Moss at 600, and its icon sits on a Leaf Tint pill so where you are shows before you read. Pests only has a tab while a case or problem is open. From 64rem the same links stand in a menu down the left side.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link active\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/><path d=\"m9 15 2 2 4-4\"/></svg><span>Today</span></a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 21v-9\"/><path d=\"M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z\"/><path d=\"M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z\"/></svg><span>Plants</span></a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z\"/><path d=\"M12 12v4M12 16l-2 2M12 16l2 2\"/></svg><span>Props</span></a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"13\" r=\"4\"/><path d=\"M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3\"/></svg><span>Pests</span></a><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4.5 4.5h15v3.5h-15Z\"/><path d=\"M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8\"/></svg><span>Supplies</span></a></nav>",
+      "css": ".ds-nav { display: flex; justify-content: space-around; background: var(--pa-surface, #fff); border-top: 1px solid var(--pa-border, #dde3dc); } .ds-nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; min-height: 3.5rem; font: 400 0.75rem/1.2 'Bricolage Grotesque', system-ui, sans-serif; color: var(--pa-muted, #5f6b63); text-decoration: none; } .ds-nav-link svg { box-sizing: content-box; width: 1.5rem; height: 1.5rem; padding: 0.2rem 0.9rem; border-radius: 999px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.75; transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-nav-link:hover { color: var(--pa-text, #1d2520); } .ds-nav-link.active { color: var(--pa-green-dark, #1f5a37); font-weight: 600; } .ds-nav-link.active svg { background: var(--pa-green-soft, #e6f2ea); } .ds-nav-link:focus-visible { outline: 2px solid var(--pa-green, #2f7d4f); outline-offset: -2px; }"
+    },
+    {
+      "name": "List Row",
+      "kind": "card",
+      "refersTo": "item-card",
+      "description": "The signature component. One plant or propagation in a list: a 3.5rem tile, the name, an italic species line and a meta line. A plant's tile is Clay, a propagation's is green, and every line truncates so row height never varies. A favourite's star is filled Clay.",
+      "html": "<a class=\"ds-item-card\" href=\"#\"><span class=\"ds-item-thumb potted\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 21v-9\"/><path d=\"M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z\"/><path d=\"M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z\"/></svg></span><span class=\"ds-item-text\"><span class=\"ds-item-name\"><span class=\"ds-item-name-text\">Kitchen window monstera</span><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9Z\"/></svg></span><span class=\"ds-item-sub\">Monstera deliciosa</span><span class=\"ds-item-meta\">Living room · Semi-hydro · 3 cuttings</span></span></a>",
+      "css": ".ds-item-card { display: flex; align-items: center; gap: 0.85rem; padding: 0.7rem; background: var(--pa-surface, #fff); border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.75rem; color: var(--pa-text, #1d2520); text-decoration: none; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; transition: border-color 0.15s ease-out, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); } .ds-item-card:hover { border-color: var(--pa-green, #2f7d4f); } .ds-item-card:focus-visible { outline: none; border-color: var(--pa-green, #2f7d4f); box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); } .ds-item-card:active { transform: scale(0.985); } .ds-item-thumb { flex: none; width: 3.5rem; height: 3.5rem; display: grid; place-items: center; border-radius: 0.6rem; background: var(--pa-green-soft, #e6f2ea); color: var(--pa-green, #2f7d4f); } .ds-item-thumb.potted { background: var(--pa-clay-soft, #f6e6dc); color: var(--pa-clay, #b85c38); } .ds-item-thumb svg { width: 1.75rem; height: 1.75rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.75; } .ds-item-text { min-width: 0; } .ds-item-name, .ds-item-sub, .ds-item-meta { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-item-name { display: flex; align-items: center; font: 600 1.0625rem/1.4 'Bricolage Grotesque', system-ui, sans-serif; } .ds-item-name-text { overflow: hidden; text-overflow: ellipsis; } .ds-item-name svg { flex: none; width: 0.9rem; height: 0.9rem; margin-left: 0.25rem; fill: var(--pa-clay, #b85c38); stroke: var(--pa-clay, #b85c38); stroke-width: 1.5; stroke-linejoin: round; } .ds-item-sub { font-style: italic; font-size: 0.875rem; color: var(--pa-muted, #5f6b63); } .ds-item-meta { margin-top: 0.15rem; font-size: 0.8rem; color: var(--pa-muted, #5f6b63); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Day Tile",
+      "kind": "custom",
+      "refersTo": "day-thumb",
+      "description": "How many days a propagation has been going, in its row's tile when there is no photo. With a photo, a small label sits in the photo's corner on a solid Leaf Tint patch instead.",
+      "html": "<div class=\"ds-day-thumb\"><b>14</b><small>days</small></div>",
+      "css": ".ds-day-thumb { width: 3.5rem; height: 3.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 0.6rem; background: var(--pa-green-soft, #e6f2ea); line-height: 1; color: var(--pa-green-dark, #1f5a37); } .ds-day-thumb b { font: 700 1.4rem/1 'Bricolage Grotesque', system-ui, sans-serif; font-stretch: 80%; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; } .ds-day-thumb small { margin-top: 0.1rem; font-size: 0.7rem; color: var(--pa-muted, #5f6b63); }"
+    },
+    {
+      "name": "Settings Rows",
       "kind": "custom",
       "refersTo": null,
-      "description": "One record on a plant or propagation history. The kind is named in words and carries a stroked icon, accented for something a person wrote and muted for something the app recorded itself.",
-      "html": "<li class=\"ds-entry\"><span class=\"ds-entry-head\"><span class=\"ds-entry-kind\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z\"/></svg>Note</span><span>14:20</span></span><p class=\"ds-entry-text\">Roots 2 cm, first new leaf unfurling.</p></li>",
-      "css": ".ds-entry { list-style: none; padding: 0.6rem 0.75rem; background: var(--pa-surface, #fff); border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.6rem; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--pa-text, #1d2520); } .ds-entry-head { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--pa-muted, #5f6b63); } .ds-entry-kind { display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 600; color: var(--pa-green-dark, #1f5a37); } .ds-entry-kind svg { width: 0.95rem; height: 0.95rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; } .ds-entry-text { margin: 0.3rem 0 0; white-space: pre-line; overflow-wrap: anywhere; }"
+      "description": "Whole-row links to a page one level down, closed up into one bordered block divided by hairlines. Used on Settings, Supplies, the Help page and the dictionary. A row fills with Leaf Tint on hover instead of taking a green border.",
+      "html": "<div class=\"ds-rows\"><a class=\"ds-row\" href=\"#\"><span class=\"ds-row-text\"><b>Pots</b><small>6 pots, 2 free</small></span><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 6 6 6-6 6\"/></svg></a><a class=\"ds-row\" href=\"#\"><span class=\"ds-row-text\"><b>Backup</b><small>Last backup 3 days ago</small></span><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 6 6 6-6 6\"/></svg></a></div>",
+      "css": ".ds-rows { display: flex; flex-direction: column; overflow: hidden; background: var(--pa-surface, #fff); border: 1px solid var(--pa-border, #dde3dc); border-radius: 0.75rem; } .ds-row { display: flex; align-items: center; gap: 0.85rem; padding: 0.7rem; border-top: 1px solid var(--pa-border, #dde3dc); color: var(--pa-text, #1d2520); text-decoration: none; transition: background-color 0.15s ease-out; } .ds-row:first-child { border-top: 0; } .ds-row:hover { background: var(--pa-green-soft, #e6f2ea); } .ds-row:focus-visible { background: var(--pa-green-soft, #e6f2ea); outline: 2px solid var(--pa-green, #2f7d4f); outline-offset: -2px; } .ds-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; } .ds-row-text b { font: 600 1rem/1.4 'Bricolage Grotesque', system-ui, sans-serif; } .ds-row-text small { font: 400 0.8rem/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--pa-muted, #5f6b63); } .ds-row svg { flex: none; width: 1.1rem; height: 1.1rem; color: var(--pa-muted, #5f6b63); fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }"
     },
     {
       "name": "Empty State",
       "kind": "custom",
       "refersTo": "empty-state",
-      "description": "What a screen says before there is anything on it. Dashed so it reads as a placeholder rather than as content.",
-      "html": "<div class=\"ds-empty\"><p>No propagations yet. Take a cutting and it will show up here.</p></div>",
-      "css": ".ds-empty { text-align: center; padding: 2.5rem 1rem; background: var(--pa-surface, #fff); color: var(--pa-muted, #5f6b63); border: 1px dashed var(--pa-border, #dde3dc); border-radius: 0.75rem; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-empty p { margin: 0; }"
-    },
-    {
-      "name": "Day Tile",
-      "kind": "data",
-      "refersTo": "day-thumb",
-      "description": "How many days a propagation has been going, in its row's tile when there is no photo. With a photo, a small label sits in the photo's corner instead.",
-      "html": "<div class=\"ds-day-thumb\"><b>14</b><small>days</small></div>",
-      "css": ".ds-day-thumb { width: 3.5rem; height: 3.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 0.6rem; background: var(--pa-green-soft, #e6f2ea); line-height: 1; color: var(--pa-green-dark, #1f5a37); } .ds-day-thumb b { font: 700 1.4rem/1 'Bricolage Grotesque', system-ui, sans-serif; font-stretch: 80%; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; } .ds-day-thumb small { margin-top: 0.1rem; font-size: 0.7rem; color: var(--pa-muted, #5f6b63); }"
-    },
-    {
-      "name": "Experiment Bar",
-      "kind": "data",
-      "refersTo": "experiment-bar",
-      "description": "Days to root on a shared scale inside an experiment group. Dashed while a batch is still going.",
-      "html": "<span class=\"ds-experiment-bar\"><span style=\"--share: 0.6\"></span></span>",
-      "css": ".ds-experiment-bar { display: block; height: 0.5rem; border-radius: 999px; background: var(--pa-green-soft, #e6f2ea); } .ds-experiment-bar span { display: block; width: calc(var(--share) * 100%); height: 100%; border-radius: inherit; background: var(--pa-green, #2f7d4f); }"
+      "description": "What a screen says before there is anything on it. Dashed so it reads as a placeholder, and it always says what to do next. The first-run version is Leaf Tint with a green dashed edge, a drawing and a Bricolage heading.",
+      "html": "<div class=\"ds-empty\"><p>Nothing matches these filters.</p><button class=\"ds-empty-btn\">Clear filters</button></div>",
+      "css": ".ds-empty { text-align: center; padding: 2.5rem 1rem; background: var(--pa-surface, #fff); color: var(--pa-muted, #5f6b63); border: 1px dashed var(--pa-border, #dde3dc); border-radius: 0.75rem; font: 400 1rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-empty p { margin: 0 0 0.75rem; } .ds-empty-btn { background: transparent; color: var(--pa-green-dark, #1f5a37); font: 600 1rem/1.5 'Bricolage Grotesque', system-ui, sans-serif; padding: 0.375rem 0.75rem; border: 1px solid var(--pa-green, #2f7d4f); border-radius: 0.6rem; cursor: pointer; } .ds-empty-btn:hover { background: var(--pa-green, #2f7d4f); color: #fff; } .ds-empty-btn:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem rgb(47 125 79 / 0.25); }"
     }
   ],
   "narrative": {
     "northStar": "The Potting Bench",
     "overview": "A potting bench is a working surface. Things are within reach, nothing is precious, and the person using it knows exactly what they are doing. The expertise shows in the labels and the dates, not in the decoration. Stikling should feel like that bench: warm, hands-on and unbothered, run by someone with soil under their fingernails who still knows precisely how many days that corm has been on the riser.\n\nThe tension that defines this system is warm and precise at the same time. The data is genuinely experimental, with mediums compared and days counted, but nothing about the interface should feel clinical or sterile. Numbers are rendered exactly and never decorated. Everything around them is soft, green and welcoming.\n\nThe first build was quieter than this target: white cards, thin grey borders, small muted labels, and one green used sparingly. The design refresh closed most of that gap with two changes the owner approved. Headings, names, counts and buttons now use a display typeface, Bricolage Grotesque, whose slightly handmade shapes and narrow widths recall the print on a nursery plant label. And clay, the colour of a terracotta pot, joined the green as a second material: green is what grows and what you can tap, clay is the pot a plant lives in. The one confirmed rejection still stands: no neon gradients over black, no glow shadows, no frosted glass.",
     "keyCharacteristics": [
-      "Phone first, one hand, content centred in a 48rem column that never gets wider.",
+      "Phone first, one hand. On a wide screen the tabs become a side menu, and lists and plant pages use the width.",
       "Two materials: green for growth and actions, clay for plants in pots, both against warm neutrals.",
       "A display face for anything read at a glance: titles, names, day counts, buttons.",
       "The days a propagation has been going are the biggest number on its row and its page.",
@@ -357,63 +406,63 @@
     "rules": [
       {
         "name": "The Two Materials Rule",
-        "body": "Green means growing and acting: buttons, links, selection, stages, rooted counts. Clay means a plant in a pot, and nothing else. It never fills a button and never marks a state. Red means pests and danger. A fourth hue has no job to do.",
-        "section": "colors"
+        "section": "colors",
+        "body": "Green means growing and acting: buttons, links, selection, stages, rooted counts. Clay means a plant in a pot, and nothing else. It never fills a button and never marks a state, with one exception: a favourite's star is filled Clay, because a favourite is about the plant itself, and green or red would read as a stage or a problem. Red means pests and danger. A fourth hue has no job to do."
       },
       {
         "name": "The Warm Neutral Rule",
-        "body": "No neutral in this system is a pure grey. Every one of them carries green. A #f5f5f5 or a #888 anywhere in this app is a bug, because it is the fastest way to turn the bench back into a clinic.",
-        "section": "colors"
+        "section": "colors",
+        "body": "No neutral in this system is a pure grey. Every one of them carries green. A `#f5f5f5` or a `#888` anywhere in this app is a bug, because it is the fastest way to turn the bench back into a clinic."
       },
       {
         "name": "The Two Greens Rule",
-        "body": "Potting Green fills, Deep Moss reads. Never set small text in Potting Green, and never fill a large area with Deep Moss.",
-        "section": "colors"
+        "section": "colors",
+        "body": "Potting Green fills, Deep Moss reads. Never set small text in Potting Green, and never fill a large area with Deep Moss."
       },
       {
         "name": "The Quiet Label Rule",
-        "body": "Section headings are small, uppercase and muted. They mark structure without competing with the content beneath them. They are never coloured, never large, and never heavier than 600.",
-        "section": "typography"
+        "section": "typography",
+        "body": "Section headings are small, uppercase and muted. They mark structure without competing with the content beneath them. They are never coloured, never large, and never heavier than 600."
       },
       {
         "name": "The Italic Species Rule",
-        "body": "Genus and species are set in italic wherever they appear. Cultivar names are not.",
-        "section": "typography"
+        "section": "typography",
+        "body": "Genus and species are set in italic wherever they appear. Cultivar names are not."
       },
       {
         "name": "The Glance Rule",
-        "body": "Bricolage is for things read at a glance, the system font for things read line by line. If a new element is a sentence, it is system font.",
-        "section": "typography"
+        "section": "typography",
+        "body": "Bricolage is for things read at a glance, the system font for things read line by line. If a new element is a sentence, it is system font."
       },
       {
         "name": "The Thumb Rule",
-        "body": "Anything tapped often lives in the bottom third. The navigation, the add button and the action bars are all anchored there. The top of the screen is for reading, not for reaching.",
-        "section": "layout"
+        "section": "layout",
+        "body": "On a phone, anything tapped often lives in the bottom third. The navigation, the add button and the action bars are all anchored there. The top of the screen is for reading, not for reaching. A wide screen is used with a mouse or held in two hands, so there the actions sit next to what they act on instead."
       },
       {
         "name": "The Safe Area Rule",
-        "body": "Any element fixed to the bottom adds env(safe-area-inset-bottom) to its own padding, and anything stacked above it offsets by the height of what it sits on. Nothing is allowed to hide under a home indicator.",
-        "section": "layout"
+        "section": "layout",
+        "body": "Any element fixed to the bottom adds `env(safe-area-inset-bottom)` to its own padding, and anything stacked above it offsets by the height of what it sits on. Nothing is allowed to hide under a home indicator."
       },
       {
         "name": "The Flat-By-Default Rule",
-        "body": "Surfaces are flat at rest. If a new component wants a shadow, the honest questions are whether it overlaps other content and whether it would still read in dark mode. If either answer is no, use tone and a hairline instead.",
-        "section": "elevation"
+        "section": "elevation",
+        "body": "Surfaces are flat at rest. If a new component wants a shadow, the honest questions are whether it overlaps other content and whether it would still read in dark mode. If either answer is no, use tone and a hairline instead."
       },
       {
         "name": "The Tonal Depth Rule",
-        "body": "Warmth and depth are added by moving between Paper, Surface and Leaf Tint, not by adding shadows. This is the intended route out of the current restraint.",
-        "section": "elevation"
+        "section": "elevation",
+        "body": "Warmth and depth are added by moving between Paper, Surface and Leaf Tint, not by adding shadows. This is the intended route out of the current restraint."
       },
       {
         "name": "The Stroked Icon Rule",
-        "body": "Every icon is a stroked outline with round caps, drawn inline as SVG and coloured with currentColor. No filled glyphs, no icon fonts, no two-tone icons.",
-        "section": "shapes"
+        "section": "shapes",
+        "body": "Every icon is a stroked outline with round caps, drawn inline as SVG and coloured with `currentColor`. No filled glyphs, no icon fonts, no two-tone icons."
       },
       {
         "name": "The Hairline Rule",
-        "body": "Borders are 1px. A thicker border has to mean something specific, and right now exactly one does: the 2px underline on an active tab.",
-        "section": "shapes"
+        "section": "shapes",
+        "body": "Borders are 1px. A thicker border has to mean something specific, and right now exactly one does: the 2px underline on an active tab."
       }
     ],
     "dos": [
@@ -432,7 +481,7 @@
       "Don't use neon gradients over black, glow shadows or frosted glass. This is the one confirmed rejection.",
       "Don't add a shadow to a resting surface. Use tone and a hairline.",
       "Don't introduce a third font family or a fourth hue.",
-      "Don't fill a button or mark a state with clay.",
+      "Don't fill a button or mark a state with clay. The favourite star is the one exception.",
       "Don't set small text in Potting Green, or fill a large area with Deep Moss.",
       "Don't use a pure grey anywhere.",
       "Don't let a fixed element cover the last row of a list; lists reserve 5rem at the end.",
