@@ -1212,6 +1212,14 @@
     <value>One outbreak, like spider mites in the living room. A case covers the whole collection, one room, or the plants you pick, because pests spread and are treated together. You say how often to treat, and Today shows when the next round is due.</value>
     <comment>Answer to "What is a pest case?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
+  <data name="ChangeCasePlantsQ" xml:space="preserve">
+    <value>Can I change which plants a case covers?</value>
+    <comment>Question in the "Pests and problems" part of the Help page.</comment>
+  </data>
+  <data name="ChangeCasePlantsA1" xml:space="preserve">
+    <value>Yes. Tap &lt;em&gt;Edit&lt;/em&gt; on the case to tick or untick plants, or switch it to one room or all plants. A case on picked plants also lists the other plants in the same rooms under &lt;em&gt;Check the neighbours&lt;/em&gt; while it is being treated, with &lt;em&gt;Add to case&lt;/em&gt;. A plant taken off the case is no longer part of its treatments and checks.</value>
+    <comment>Answer to "Can I change which plants a case covers?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
   <data name="WherePestsWhenHaveNothingQ" xml:space="preserve">
     <value>Where is Pests when I have nothing open?</value>
     <comment>Question in the "Pests and problems" part of the Help page.</comment>
@@ -1297,7 +1305,7 @@
     <comment>Question in the "Pests and problems" part of the Help page.</comment>
   </data>
   <data name="StickyTrapCountsA1" xml:space="preserve">
-    <value>Count what is on a yellow or blue sticky trap now and then, and the app works out how many were caught since last time. The chart of the catch per week shows whether the treatment is working. Thrips, fungus gnats and whitefly fly into traps, so their cases show the trap straight away. Other pests rarely end up on one, but if you have a trap up anyway, tap &lt;em&gt;Count a sticky trap&lt;/em&gt; on the case.</value>
+    <value>Count what is on a yellow or blue sticky trap now and then, and the app works out how many were caught since last time. The chart of the catch per week shows whether the treatment is working. Thrips, fungus gnats and whitefly fly into traps, so their cases offer the trap straight away, and a case works the same without one. Other pests rarely end up on one, but if you have a trap up anyway, tap &lt;em&gt;Count a sticky trap&lt;/em&gt; on the case.</value>
     <comment>Answer to "What are sticky trap counts?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="SectionPotsMixesFertilisers" xml:space="preserve">

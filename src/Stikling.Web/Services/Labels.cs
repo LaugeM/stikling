@@ -233,6 +233,19 @@ public static class Labels
         _ => pest.ToString()
     };
 
+    /// <summary>The hint under "Treat every" on the pest case form, which differs by pest.</summary>
+    public static string TreatHint(Pest pest) => pest switch
+    {
+        Pest.SpiderMites => Strings.Pests.CaseEditHintSpiderMites,
+        Pest.Thrips => Strings.Pests.CaseEditHintThrips,
+        Pest.FungusGnats => Strings.Pests.CaseEditHintFungusGnats,
+        Pest.Mealybugs => Strings.Pests.CaseEditHintMealybugs,
+        Pest.Scale => Strings.Pests.CaseEditHintScale,
+        Pest.Aphids => Strings.Pests.CaseEditHintAphids,
+        Pest.Whitefly => Strings.Pests.CaseEditHintWhitefly,
+        _ => Strings.Pests.CaseEditHintOther
+    };
+
     public static string For(PestCaseStatus status) => status switch
     {
         PestCaseStatus.Active => Strings.Labels.CaseTreating,

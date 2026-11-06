@@ -204,8 +204,29 @@
   <data name="CaseEditFollowing" xml:space="preserve">
     <value>Følger {0}. Intervallet bruges hvis du stopper planen.</value>
   </data>
-  <data name="CaseEditSpiderMites" xml:space="preserve">
-    <value>Spindemider skal behandles hver 3. til 5. dag, så næste runde kommer før æggene klækker.</value>
+  <data name="CaseEditHintSpiderMites" xml:space="preserve">
+    <value>Spindemider skal behandles hver 3. til 5. dag i en varm stue, så næste runde kommer før æggene klækker.</value>
+  </data>
+  <data name="CaseEditHintThrips" xml:space="preserve">
+    <value>Trips skal behandles cirka hver 5. til 7. dag i mindst 4 uger. De forpupper sig i toppen af potten, hvor sprayen ikke når, så runderne rammer dem, når de kommer op. Det gælder også planter i LECA eller pon.</value>
+  </data>
+  <data name="CaseEditHintFungusGnats" xml:space="preserve">
+    <value>Sørgemyg lever som larver i fugtig jord, så runderne skal i jorden cirka en gang om ugen, og det hjælper at lade toppen tørre. Planter i semi-hydro får dem sjældent.</value>
+  </data>
+  <data name="CaseEditHintMealybugs" xml:space="preserve">
+    <value>Uldlus skal have cirka en uge mellem runderne. Æggene sidder i det hvide fnug, så kig i bladhjørnerne og under bladene hver gang.</value>
+  </data>
+  <data name="CaseEditHintScale" xml:space="preserve">
+    <value>Skjoldlus skal have 7 til 10 dage. Skjoldet beskytter de voksne, så runderne rammer de unge, når de kravler ud.</value>
+  </data>
+  <data name="CaseEditHintAphids" xml:space="preserve">
+    <value>Bladlus formerer sig hurtigt og skal have cirka 5 til 7 dage mellem runderne.</value>
+  </data>
+  <data name="CaseEditHintWhitefly" xml:space="preserve">
+    <value>Hvide fluer skal have cirka 5 til 7 dage. Æg og unge sidder under bladene, så tag undersiden med hver gang.</value>
+  </data>
+  <data name="CaseEditHintOther" xml:space="preserve">
+    <value>De fleste skadedyr skal have et par runder med cirka en uge imellem, så dem, der klækker efter en runde, også bliver ramt. Følg produktets etiket, hvis der står noget andet.</value>
   </data>
   <data name="CaseEditNotes" xml:space="preserve">
     <value>Noter</value>
@@ -215,6 +236,18 @@
   </data>
   <data name="CaseEditPickPlants" xml:space="preserve">
     <value>Vælg planter</value>
+  </data>
+  <data name="CaseEditSearchPlants" xml:space="preserve">
+    <value>Søg i planter</value>
+  </data>
+  <data name="CaseEditPicked" xml:space="preserve">
+    <value>{0} valgt</value>
+  </data>
+  <data name="CaseEditNoPlantsMatch" xml:space="preserve">
+    <value>Ingen planter passer.</value>
+  </data>
+  <data name="CaseEditClearSearch" xml:space="preserve">
+    <value>Ryd søgning</value>
   </data>
   <data name="CaseEditOneRoom" xml:space="preserve">
     <value>Ét rum</value>
@@ -352,7 +385,7 @@
     <value>Tæl fælde</value>
   </data>
   <data name="CaseTrapIntro" xml:space="preserve">
-    <value>{0} bliver fanget på en gul eller blå limfælde. Tæl den en gang imellem, så kan du se om behandlingen virker.</value>
+    <value>Har du en gul eller blå limfælde oppe? {0} bliver fanget på den, så når du tæller den en gang imellem, kan du se om behandlingen virker. Uden en limfælde kan du bare lade det her være.</value>
   </data>
   <data name="CaseNewTrapUp" xml:space="preserve">
     <value>Der er sat en ny fælde op. Tæl den næste gang du kigger efter.</value>

@@ -267,9 +267,37 @@
     <value>Following {0}. The interval is used if you stop the plan.</value>
     <comment>Hint under the interval field. {0} is the name of the treatment plan.</comment>
   </data>
-  <data name="CaseEditSpiderMites" xml:space="preserve">
-    <value>Spider mites want 3 to 5 days, so the next round lands before the eggs hatch.</value>
-    <comment>Hint under the interval field.</comment>
+  <data name="CaseEditHintSpiderMites" xml:space="preserve">
+    <value>Spider mites want 3 to 5 days in a warm room, so the next round lands before the eggs hatch.</value>
+    <comment>Shown under "Treat every" on the pest case form when SpiderMites is picked.</comment>
+  </data>
+  <data name="CaseEditHintThrips" xml:space="preserve">
+    <value>Thrips want about 5 to 7 days, for at least 4 weeks. They pupate in the top of the pot, where a spray doesn't reach, so the rounds catch them as they come up. That goes for plants in LECA or pon too.</value>
+    <comment>Shown under "Treat every" on the pest case form when Thrips is picked.</comment>
+  </data>
+  <data name="CaseEditHintFungusGnats" xml:space="preserve">
+    <value>Fungus gnats live as larvae in damp potting soil, so the rounds go into the soil about once a week, and letting the top dry out helps. Plants in semi-hydro rarely get them.</value>
+    <comment>Shown under "Treat every" on the pest case form when FungusGnats is picked.</comment>
+  </data>
+  <data name="CaseEditHintMealybugs" xml:space="preserve">
+    <value>Mealybugs want about a week between rounds. Their eggs sit in the white fluff, so look in the leaf joints and under the leaves each time.</value>
+    <comment>Shown under "Treat every" on the pest case form when Mealybugs is picked.</comment>
+  </data>
+  <data name="CaseEditHintScale" xml:space="preserve">
+    <value>Scale wants 7 to 10 days. The shells protect the adults, so the rounds catch the young ones as they crawl out.</value>
+    <comment>Shown under "Treat every" on the pest case form when Scale is picked.</comment>
+  </data>
+  <data name="CaseEditHintAphids" xml:space="preserve">
+    <value>Aphids multiply fast and want about 5 to 7 days between rounds.</value>
+    <comment>Shown under "Treat every" on the pest case form when Aphids is picked.</comment>
+  </data>
+  <data name="CaseEditHintWhitefly" xml:space="preserve">
+    <value>Whitefly wants about 5 to 7 days. The eggs and young sit under the leaves, so get the undersides each time.</value>
+    <comment>Shown under "Treat every" on the pest case form when Whitefly is picked.</comment>
+  </data>
+  <data name="CaseEditHintOther" xml:space="preserve">
+    <value>Most pests need a few rounds about a week apart, so the ones that hatch after a round are caught too. Go by the product's label when it says something else.</value>
+    <comment>Shown under "Treat every" on the pest case form when Other is picked.</comment>
   </data>
   <data name="CaseEditNotes" xml:space="preserve">
     <value>Notes</value>
@@ -282,6 +310,22 @@
   <data name="CaseEditPickPlants" xml:space="preserve">
     <value>Pick plants</value>
     <comment>Choice of what a pest case covers.</comment>
+  </data>
+  <data name="CaseEditSearchPlants" xml:space="preserve">
+    <value>Search plants</value>
+    <comment>Label of the search box above the plants to pick on the pest case form.</comment>
+  </data>
+  <data name="CaseEditPicked" xml:space="preserve">
+    <value>{0} picked</value>
+    <comment>Line above the plants to pick on the pest case form. {0} is how many are ticked, including ones the search hides.</comment>
+  </data>
+  <data name="CaseEditNoPlantsMatch" xml:space="preserve">
+    <value>No plants match.</value>
+    <comment>Shown on the pest case form instead of the plants to pick when the search finds none.</comment>
+  </data>
+  <data name="CaseEditClearSearch" xml:space="preserve">
+    <value>Clear search</value>
+    <comment>Button under the no match line on the pest case form that empties the search box.</comment>
   </data>
   <data name="CaseEditOneRoom" xml:space="preserve">
     <value>One room</value>
@@ -460,7 +504,7 @@
     <comment>Button on the sticky trap card that opens the form for counting.</comment>
   </data>
   <data name="CaseTrapIntro" xml:space="preserve">
-    <value>{0} get caught on a yellow or blue sticky trap. Count it now and then to see whether the treatment is working.</value>
+    <value>Got a yellow or blue sticky trap up? {0} get caught on one, so counting it now and then shows whether the treatment is working. Without a trap, just leave this.</value>
     <comment>Shown on the sticky trap card before anything is counted. {0} is the name of the pest, like 'Spider mites'.</comment>
   </data>
   <data name="CaseNewTrapUp" xml:space="preserve">
