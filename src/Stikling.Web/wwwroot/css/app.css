@@ -379,6 +379,19 @@ a.item-card:focus-visible {
     border-color: var(--pa-green);
 }
 
+/* Arrow keys move focus along a list (shortcuts.js): the ring stays visible and clear of the header and menu */
+a.item-card:focus-visible,
+a.plant-tile:focus-visible,
+a.plant-name:focus-visible {
+    box-shadow: 0 0 0 0.2rem rgb(var(--bs-primary-rgb) / 0.25);
+}
+
+a.item-card,
+a.plant-tile,
+a.plant-name {
+    scroll-margin-block: 5.5rem;
+}
+
 a.item-card:active {
     transform: scale(0.985);
 }

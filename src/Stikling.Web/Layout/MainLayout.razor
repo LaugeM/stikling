@@ -47,6 +47,8 @@
     @* While the tour is on, a card sits above the bottom navigation on every page *@
     <TourCard />
 
+    <ShortcutsSheet @bind-Open="shortcutsOpen" />
+
     <UpdateBanner ReadyChanged="ready => updateReady = ready" />
 
     @* On a device where someone just signed in, the lists stay empty until the first sync brings
@@ -101,6 +103,7 @@
             <NavLink class="app-nav-link" href="help">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" /><path d="M12 17h.01" /></svg>
                 <span>@Strings.Layout.Help</span>
+                <kbd aria-hidden="true">?</kbd>
             </NavLink>
             <NavLink class="app-nav-link" href="settings" aria-label="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : null)">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>
@@ -218,12 +221,25 @@
     }
 
     private DotNetObjectReference<MainLayout>? self;
-    private IJSObjectReference? searchModule;
-    private IJSObjectReference? slash;
+    private IJSObjectReference? shortcutsModule;
+    private IJSObjectReference? shortcuts;
+    private bool shortcutsOpen;
 
     /// <summary>Called by the / key when the person isn't typing and Search isn't open.</summary>
     [JSInvokable]
     public void OpenSearch() => Navigation.NavigateTo("search");
+
+    /// <summary>Called by the N key when the person isn't typing or in the middle of a form.</summary>
+    [JSInvokable]
+    public void NewPlant() => Navigation.NavigateTo("plants/new");
+
+    /// <summary>Called by the ? key when the person isn't typing.</summary>
+    [JSInvokable]
+    public void ShowShortcuts()
+    {
+        shortcutsOpen = true;
+        StateHasChanged();
+    }
 
     public async ValueTask DisposeAsync()
     {
@@ -234,13 +250,13 @@
         Tour.Changed -= OnTourChanged;
         try
         {
-            if (slash is not null)
+            if (shortcuts is not null)
             {
-                await slash.InvokeVoidAsync("dispose");
-                await slash.DisposeAsync();
+                await shortcuts.InvokeVoidAsync("dispose");
+                await shortcuts.DisposeAsync();
             }
-            if (searchModule is not null)
-                await searchModule.DisposeAsync();
+            if (shortcutsModule is not null)
+                await shortcutsModule.DisposeAsync();
         }
         catch (JSDisconnectedException)
         {
@@ -274,12 +290,12 @@
         try
         {
             self = DotNetObjectReference.Create(this);
-            searchModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/search.js");
-            slash = await searchModule.InvokeAsync<IJSObjectReference>("installSlash", self);
+            shortcutsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/shortcuts.js");
+            shortcuts = await shortcutsModule.InvokeAsync<IJSObjectReference>("install", self);
         }
         catch (JSException)
         {
-            // Without the key, Search is still opened from the header and the menu
+            // Without the keys, everything they do is still on a button
         }
 
         // After the app is on screen, so a slow or missing connection never holds it back

@@ -1,0 +1,31 @@
+.shortcuts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.75rem 1rem;
+    margin: 0;
+}
+
+.shortcuts dt {
+    font-weight: normal;
+}
+
+.shortcuts dd {
+    margin: 0;
+}
+
+.shortcuts kbd {
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.3rem;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.shortcuts-note {
+    margin: 1rem 0 0;
+    color: var(--pa-muted);
+    font-size: 0.875rem;
+}

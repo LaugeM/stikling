@@ -1,0 +1,27 @@
+@* The sheet the ? key opens, listing the keyboard shortcuts. The keys themselves are in wwwroot/js/shortcuts.js. *@
+
+<Sheet Title="@Strings.Layout.ShortcutsTitle" Open="Open" OpenChanged="OpenChanged">
+    <dl class="shortcuts">
+        <dt><kbd>/</kbd></dt>
+        <dd>@Strings.Layout.ShortcutSearch</dd>
+        <dt><kbd>N</kbd></dt>
+        <dd>@Strings.Layout.ShortcutNewPlant</dd>
+        <dt><kbd>W</kbd></dt>
+        <dd>@Strings.Layout.ShortcutWater</dd>
+        <dt><kbd>Esc</kbd></dt>
+        <dd>@Strings.Layout.ShortcutClose</dd>
+        <dt><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd></dt>
+        <dd>@Strings.Layout.ShortcutArrows</dd>
+        <dt><kbd>?</kbd></dt>
+        <dd>@Strings.Layout.ShortcutShow</dd>
+    </dl>
+    <p class="shortcuts-note">@Strings.Layout.ShortcutNote</p>
+</Sheet>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+}
