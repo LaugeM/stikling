@@ -1,0 +1,243 @@
+@page "/week"
+@* The file isn't called WeekAhead because a page by that name would hide the WeekAhead class in Core *@
+@layout WideLayout
+@inject TodayService TodayService
+@inject WeekAheadService WeekService
+@inject AppBadge Badge
+@inject TimeProvider Time
+@inject ILogger<WeekPage> Logger
+
+<PageTitle>@Strings.Care.WeekTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="">@Strings.Care.RoundBackToday</a>
+<div class="page-heading">
+    <h1>@Strings.Care.WeekTitle</h1>
+</div>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Care.Loading</p>
+}
+else
+{
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3" role="alert">@error</div>
+    }
+    <div role="status">
+        @if (done is { Count: > 0 })
+        {
+            <p class="week-done">
+                <span>@Plural.Of(done.Count, Strings.Care.WeekLogged_One, Strings.Care.WeekLogged_Other)</span>
+                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="UndoAsync">@Strings.Care.WeekUndo</button>
+            </p>
+        }
+    </div>
+
+    @if (days.Count == 0)
+    {
+        <div class="empty-state">
+            <p>@Strings.Care.WeekEmpty</p>
+            <a class="btn btn-outline-primary mt-3" href="care-intervals">@Strings.Care.IntervalListTitle</a>
+        </div>
+    }
+    else
+    {
+        <p class="text-body-secondary">@Strings.Care.WeekEstimates</p>
+        <div class="week-days">
+            @foreach (var day in days)
+            {
+                <section class="week-day" aria-label="@DayName(day.Day)">
+                    <div class="week-day-head">
+                        <h2>@DayName(day.Day)</h2>
+                        @if (!day.Away)
+                        {
+                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => Ask(day)">@Strings.Care.WeekMarkDay</button>
+                        }
+                    </div>
+                    @if (day.Away)
+                    {
+                        <p class="text-body-secondary">@Strings.Care.WeekAway</p>
+                    }
+                    @if (day.Water.Count > 0)
+                    {
+                        <h3 class="today-subhead">@Strings.Care.WeekCheckWater</h3>
+                        <ul class="item-list">
+                            @foreach (var due in day.Water)
+                            {
+                                <li @key="due.Plant.Id">
+                                    <a class="item-card" href="plants/@due.Plant.Id">
+                                        <SubjectThumb Subject="due.Plant" />
+                                        <div class="item-text">
+                                            <div class="item-name">@due.Plant.DisplayName</div>
+                                            <div class="item-meta wraps"><span>@WateringText.Row(due, Today)</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    @foreach (var group in day.Care)
+                    {
+                        <h3 class="today-subhead">@group.Label</h3>
+                        <ul class="item-list">
+                            @foreach (var item in group.Items)
+                            {
+                                <li @key="item.Plant.Id">
+                                    <a class="item-card" href="plants/@item.Plant.Id">
+                                        <SubjectThumb Subject="item.Plant" />
+                                        <div class="item-text">
+                                            <div class="item-name">@item.Plant.DisplayName</div>
+                                            <div class="item-meta wraps"><span>@CareIntervals.EveryText(item.Interval)</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </section>
+            }
+        </div>
+    }
+
+    <Sheet Title="@(asking is { } title ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WeekMarkTitle, DayInText(title.Day)) : "")"
+           Open="asking is not null" OpenChanged="open => { if (!open) asking = null; }">
+        @if (asking is { } day)
+        {
+            <p>@(day.Day == Today
+                    ? Strings.Care.WeekMarkToday
+                    : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WeekMarkLater, DayInText(day.Day)))</p>
+            @if (day.Day != Today && day.Water.Count > 0)
+            {
+                <p class="text-body-secondary">@Strings.Care.WeekMarkWaterNote</p>
+            }
+            <div class="week-ticks">
+                @foreach (var due in day.Water)
+                {
+                    var key = WaterKey(due);
+                    <label class="form-check" @key="key">
+                        <input type="checkbox" class="form-check-input" checked="@ticked.Contains(key)" @onchange="e => Tick(key, e)" />
+                        <span class="form-check-label">@due.Plant.DisplayName <small class="text-body-secondary">@WateringText.DoneLabel(due.Guess.Form)</small></span>
+                    </label>
+                }
+                @foreach (var item in day.Care.SelectMany(g => g.Items))
+                {
+                    var key = CareKey(item);
+                    <label class="form-check" @key="key">
+                        <input type="checkbox" class="form-check-input" checked="@ticked.Contains(key)" @onchange="e => Tick(key, e)" />
+                        <span class="form-check-label">@item.Plant.DisplayName <small class="text-body-secondary">@item.Label</small></span>
+                    </label>
+                }
+            </div>
+            <div class="week-sheet-actions">
+                <button type="button" class="btn btn-primary" disabled="@(busy || ticked.Count == 0)" @onclick="() => MarkAsync(day)">
+                    @Plural.Of(ticked.Count, Strings.Care.WeekLog_One, Strings.Care.WeekLog_Other)
+                </button>
+                <button type="button" class="btn btn-link" @onclick="() => asking = null">@Strings.Common.Cancel</button>
+            </div>
+        }
+    </Sheet>
+}
+
+@code {
+    private TodayData data = new();
+    private IReadOnlyList<WeekDay> days = [];
+    private WeekDay? asking;
+    private readonly HashSet<string> ticked = [];
+    private WeekDone? done;
+    private string? error;
+    private bool busy;
+    private bool loaded;
+
+    private DateOnly Today => Time.Today();
+
+    private static string WaterKey(WateringDue due) => $"water:{due.Plant.Id}";
+
+    private static string CareKey(IntervalItem item) => $"care:{item.Interval.Id}:{item.Plant.Id}";
+
+    private string DayName(DateOnly day) =>
+        day == Today ? Strings.Care.TodayTitle
+        : day == Today.AddDays(1) ? Strings.Care.WeekTomorrow
+        : SitterSheetText.LongDay(day);
+
+    // The day in the middle of a sentence
+    private string DayInText(DateOnly day) =>
+        day == Today ? Strings.Care.WeekToday
+        : day == Today.AddDays(1) ? Strings.Care.TodayTomorrow
+        : SitterSheetText.LongDay(day);
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        data = await TodayService.LoadAsync();
+        days = WeekAhead.For(data, Today, Time);
+        loaded = true;
+    }
+
+    // Care from an interval is ticked to begin with. Water is only ticked on today, when the plant is
+    // due a check now. Further ahead it stays for the person to tick, once they have checked the plant.
+    private void Ask(WeekDay day)
+    {
+        error = null;
+        ticked.Clear();
+        if (day.Day == Today)
+            ticked.UnionWith(day.Water.Select(WaterKey));
+        ticked.UnionWith(day.Care.SelectMany(g => g.Items).Select(CareKey));
+        asking = day;
+    }
+
+    private void Tick(string key, ChangeEventArgs e)
+    {
+        if (e.Value is true)
+            ticked.Add(key);
+        else
+            ticked.Remove(key);
+    }
+
+    private async Task MarkAsync(WeekDay day)
+    {
+        busy = true;
+        error = null;
+        var marked = await WeekService.MarkDoneAsync(
+            day.Water.Where(d => ticked.Contains(WaterKey(d))),
+            day.Care.SelectMany(g => g.Items).Where(i => ticked.Contains(CareKey(i))),
+            Labels.For);
+        done = done?.And(marked) ?? marked;
+        if (marked.Failure is { } failure)
+        {
+            Logger.LogError(failure, "Marking a day of the week ahead as done failed");
+            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayCareLogFailed, failure.Message);
+        }
+        asking = null;
+        await RefreshAsync();
+        busy = false;
+    }
+
+    private async Task UndoAsync()
+    {
+        if (done is null)
+            return;
+        busy = true;
+        error = null;
+        try
+        {
+            await WeekService.UndoAsync(done);
+            done = null;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Undoing a day of the week ahead failed");
+            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayCareUndoFailed, ex.Message);
+        }
+        await RefreshAsync();
+        busy = false;
+    }
+
+    private async Task RefreshAsync()
+    {
+        await LoadAsync();
+        await Badge.SetAsync(TodaySections.For(data, Today, Time).DueCount);
+    }
+}

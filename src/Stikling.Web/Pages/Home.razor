@@ -535,6 +535,10 @@ else
                 <details class="today-hint">
                     <summary>@Strings.Care.TodayHowToTell</summary>
                     <ul>
+                        @foreach (var line in WaterChecks.ByMethod(now.Where(d => d.Guess.Form == WateringForm.TopWatered && d.Guess.Mode != WateringMode.Meter).Select(d => d.Plant)))
+                        {
+                            <li>@line</li>
+                        }
                         <li>@(Lengths.IsInches ? Strings.Care.TodayHintFinger_Inches : Strings.Care.TodayHintFinger)</li>
                         <li>@Strings.Care.TodayHintSkewer</li>
                         <li>@Strings.Care.TodayHintLift</li>
@@ -599,6 +603,16 @@ else
                 }
             }
         </section>
+    }
+
+    @if (!sections.Away && (sections.WateringOn || data.CareIntervals.Count > 0))
+    {
+        <p class="today-week">
+            <a class="today-go-round" href="week">
+                @Strings.Care.WeekTitle
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+            </a>
+        </p>
     }
 
     </div>

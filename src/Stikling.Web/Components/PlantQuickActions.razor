@@ -94,6 +94,18 @@
         });
     }
 
+    /// <summary>Called from quickactions.js when the W key is pressed on a plant in the list.</summary>
+    [JSInvokable]
+    public async Task OpenWatering(string id)
+    {
+        await Open(id);
+        await InvokeAsync(() =>
+        {
+            watering = open;
+            StateHasChanged();
+        });
+    }
+
     private void SheetChanged(bool value)
     {
         open = value;

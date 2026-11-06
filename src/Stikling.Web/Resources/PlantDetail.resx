@@ -907,4 +907,16 @@
     <value>First new leaf</value>
     <comment>Title of the short moment after ticking the first new leaf of a plant moved to LECA or PON.</comment>
   </data>
+  <data name="CopyLink" xml:space="preserve">
+    <value>Copy this plant's link</value>
+  </data>
+  <data name="CopyLinkHint" xml:space="preserve">
+    <value>For an NFC sticker or a label. It opens this page.</value>
+  </data>
+  <data name="CopyLinkDone" xml:space="preserve">
+    <value>Link copied. Paste it into an NFC app.</value>
+  </data>
+  <data name="CopyLinkFailed" xml:space="preserve">
+    <value>Couldn't copy here. The link is {0}</value>
+  </data>
 </root>

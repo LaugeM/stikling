@@ -1082,6 +1082,22 @@ Maybe</value>
     <value>Share all {0}</value>
     <comment>Button that shares all cards as pictures. {0} is how many.</comment>
   </data>
+  <data name="YearMakeVideo" xml:space="preserve">
+    <value>Make a video</value>
+    <comment>Button on Your year that plays the cards one after another as an MP4.</comment>
+  </data>
+  <data name="YearMakingVideo" xml:space="preserve">
+    <value>Making the video on this device. It takes a little while.</value>
+    <comment>Shown while the year's video is made.</comment>
+  </data>
+  <data name="YearVideoUnsupported" xml:space="preserve">
+    <value>This browser can't make videos. You can still share the cards as pictures.</value>
+    <comment>Shown when the browser has no way of making an MP4.</comment>
+  </data>
+  <data name="YearVideoFailed" xml:space="preserve">
+    <value>The video couldn't be made. Try again, or leave out some cards.</value>
+    <comment>Shown when making the year's video went wrong.</comment>
+  </data>
   <data name="YearSaveAll" xml:space="preserve">
     <value>Save all {0}</value>
     <comment>Button that saves all cards as pictures. {0} is how many.</comment>

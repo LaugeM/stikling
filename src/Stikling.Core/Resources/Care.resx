@@ -562,4 +562,13 @@
     <value>Top up the reservoir to {0}</value>
     <comment>On the sitter sheet for a plant with a fill line. {0} is the height, like 3 cm.</comment>
   </data>
+  <data name="CheckBottomWatered" xml:space="preserve">
+    <value>Watered from the bottom: the top of the soil dries first and says little. Feel further down or lift the pot, and see if water is still standing in the saucer or outer pot.</value>
+  </data>
+  <data name="CheckTopWatered" xml:space="preserve">
+    <value>Watered from the top: the surface dries long before the roots do, so feel further down than the top of the soil.</value>
+  </data>
+  <data name="CheckSoaked" xml:space="preserve">
+    <value>Soaked: the whole root ball takes up water at once, so the pot gets much lighter as it dries. Lifting it tells you the most.</value>
+  </data>
 </root>
