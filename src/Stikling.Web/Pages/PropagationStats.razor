@@ -1,6 +1,7 @@
 @page "/propagations/results"
 @using System.Globalization
 @inject IPropagationRepository Repository
+@inject RoomService RoomService
 @inject ITimelineRepository Timeline
 @inject TimeProvider Time
 
@@ -142,9 +143,10 @@ else
         byType = PropagationResults.ByType(all);
         byAid = PropagationResults.ByRootingAid(all);
         byDrying = PropagationResults.ByDrying(all);
-        acrossMediums = FairComparison.AcrossMediums(all);
-        acrossAids = FairComparison.AcrossRootingAids(all);
-        acrossDrying = FairComparison.AcrossDrying(all);
+        var places = await RoomService.GetPlacesAsync();
+        acrossMediums = FairComparison.AcrossMediums(all, places);
+        acrossAids = FairComparison.AcrossRootingAids(all, places);
+        acrossDrying = FairComparison.AcrossDrying(all, places);
 
         var entries = new Dictionary<Guid, IReadOnlyList<TimelineEntry>>();
         foreach (var p in all.Where(p => !p.IsDeleted && p.FailedCount > 0))

@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Propagations;
 
@@ -17,7 +18,8 @@ public enum ComparedThing
 /// <summary>
 /// Whether batches being compared differ in more than the one thing the comparison is about, so a
 /// difference in results isn't read as that one thing's doing. It only says what differs, from what
-/// the batches have recorded. A field left empty, like a place never set, doesn't count as different.
+/// the batches have recorded. A plant name or place left empty doesn't count as different, and a place
+/// merged into another counts as the one it was merged into.
 /// </summary>
 public static class FairComparison
 {
@@ -28,7 +30,7 @@ public static class FairComparison
     /// What differs between the batches of an experiment. A list of two or more means it isn't
     /// comparing one thing at a time. See <see cref="IsMoreThanOne"/>.
     /// </summary>
-    public static IReadOnlyList<ComparedThing> InExperiment(ExperimentGroup group)
+    public static IReadOnlyList<ComparedThing> InExperiment(ExperimentGroup group, Places places)
     {
         var batches = group.Entries.Select(e => e.Propagation).Where(p => !p.IsDeleted).ToList();
         if (batches.Count < 2)
@@ -47,7 +49,7 @@ public static class FairComparison
             differing.Add(ComparedThing.RootingAids);
         if (Varies(batches, DryingKey))
             differing.Add(ComparedThing.Drying);
-        if (Varies(batches, PlaceKey))
+        if (Varies(batches, p => PlaceKey(p, places)))
             differing.Add(ComparedThing.Place);
         return differing;
     }
@@ -55,11 +57,11 @@ public static class FairComparison
     public static bool IsMoreThanOne(IReadOnlyList<ComparedThing> differing) => differing.Count >= 2;
 
     /// <summary>What the mediums on the results page mostly differ in, besides the medium.</summary>
-    public static IReadOnlyList<ComparedThing> AcrossMediums(IEnumerable<Propagation> propagations) =>
-        Between(Live(propagations).GroupBy(p => p.Medium).Select(g => g.ToList()).ToList(), ComparedThing.Medium);
+    public static IReadOnlyList<ComparedThing> AcrossMediums(IEnumerable<Propagation> propagations, Places places) =>
+        Between(Live(propagations).GroupBy(p => p.Medium).Select(g => g.ToList()).ToList(), ComparedThing.Medium, places);
 
     /// <summary>What the batches with a rooting aid and the batches without it mostly differ in, over every aid in use.</summary>
-    public static IReadOnlyList<ComparedThing> AcrossRootingAids(IEnumerable<Propagation> propagations)
+    public static IReadOnlyList<ComparedThing> AcrossRootingAids(IEnumerable<Propagation> propagations, Places places)
     {
         var live = Live(propagations).ToList();
         var differing = Enum.GetValues<RootingAid>()
@@ -69,20 +71,21 @@ public static class FairComparison
                     live.Where(p => p.RootingAids.Contains(aid)).ToList(),
                     live.Where(p => !p.RootingAids.Contains(aid)).ToList()
                 ],
-                ComparedThing.RootingAids))
+                ComparedThing.RootingAids,
+                places))
             .ToHashSet();
         return [.. Enum.GetValues<ComparedThing>().Where(differing.Contains)];
     }
 
     /// <summary>What the groups of batches by how long they dried mostly differ in, besides the drying.</summary>
-    public static IReadOnlyList<ComparedThing> AcrossDrying(IEnumerable<Propagation> propagations) =>
-        Between(Live(propagations).GroupBy(DryingKey).Select(g => g.ToList()).ToList(), ComparedThing.Drying);
+    public static IReadOnlyList<ComparedThing> AcrossDrying(IEnumerable<Propagation> propagations, Places places) =>
+        Between(Live(propagations).GroupBy(DryingKey).Select(g => g.ToList()).ToList(), ComparedThing.Drying, places);
 
     /// <summary>
     /// The things where what is most common in one group is not what is most common in another. A whole
     /// collection is never alike down to the last batch, so a single batch out of line doesn't count.
     /// </summary>
-    private static List<ComparedThing> Between(IReadOnlyList<List<Propagation>> groups, ComparedThing about)
+    private static List<ComparedThing> Between(IReadOnlyList<List<Propagation>> groups, ComparedThing about, Places places)
     {
         var filled = groups.Where(g => g.Count > 0).ToList();
         if (filled.Count < 2)
@@ -93,21 +96,21 @@ public static class FairComparison
         {
             var differs = thing == ComparedThing.StartMonth
                 ? MostCommonDiffer(filled, p => p.StartedOn.Month.ToString(), (a, b) => MonthsApart(int.Parse(a), int.Parse(b)) <= 1)
-                : MostCommonDiffer(filled, KeyFor(thing), (a, b) => a == b);
+                : MostCommonDiffer(filled, KeyFor(thing, places), (a, b) => a == b);
             if (differs)
                 differing.Add(thing);
         }
         return differing;
     }
 
-    private static Func<Propagation, string?> KeyFor(ComparedThing thing) => thing switch
+    private static Func<Propagation, string?> KeyFor(ComparedThing thing, Places places) => thing switch
     {
         ComparedThing.Medium => p => p.Medium.ToString(),
         ComparedThing.Type => p => p.Type.ToString(),
         ComparedThing.Plant => GenusKey,
         ComparedThing.RootingAids => AidsKey,
         ComparedThing.Drying => DryingKey,
-        ComparedThing.Place => PlaceKey,
+        ComparedThing.Place => p => PlaceKey(p, places),
         _ => throw new ArgumentOutOfRangeException(nameof(thing), thing, null)
     };
 
@@ -177,5 +180,5 @@ public static class FairComparison
         _ => "a day or more"
     };
 
-    private static string? PlaceKey(Propagation p) => p.PlaceId?.ToString();
+    private static string? PlaceKey(Propagation p, Places places) => places.Find(p.PlaceId)?.Id.ToString();
 }

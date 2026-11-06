@@ -3,6 +3,7 @@
 @using System.Globalization
 @using Stikling.Core.Selection
 @inject IPropagationRepository Repository
+@inject RoomService RoomService
 @inject IPlantRepository PlantRepository
 @inject TimeProvider Time
 @inject PlantNameService Names
@@ -150,7 +151,7 @@ else
                             @onclick="() => OpenShareAsync(name)">@Strings.Shared.ShareButton</button>
                 }
             </div>
-            @if (FairComparison.InExperiment(experiment) is var differing && FairComparison.IsMoreThanOne(differing))
+            @if (FairComparison.InExperiment(experiment, places) is var differing && FairComparison.IsMoreThanOne(differing))
             {
                 <p class="experiment-note">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListExperimentNotFair, Labels.List(differing))</p>
             }
@@ -308,6 +309,7 @@ else
 
     // Batches in an experiment are shown under it instead of in the stage groups, so nothing appears twice
     private IReadOnlyList<ExperimentGroup> experiments = [];
+    private Places places = new([]);
     private List<Propagation> ungrouped = [];
 
     private Dictionary<Guid, Plant> plants = [];
@@ -328,6 +330,7 @@ else
         everyday = await Names.GetEverydayNamesAsync();
         plants = (await PlantRepository.GetAllAsync()).ToDictionary(p => p.Id);
         all = await Repository.GetAllAsync();
+        places = await RoomService.GetPlacesAsync();
         Refresh();
     }
 
