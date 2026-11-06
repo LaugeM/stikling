@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
@@ -83,6 +83,7 @@ internal sealed class FakePropagationRepository : IPropagationRepository
     {
         if (propagation.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid propagation");
+        Saves++;
         Propagations[propagation.Id] = propagation;
         return Task.CompletedTask;
     }

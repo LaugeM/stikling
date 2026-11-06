@@ -147,6 +147,26 @@ public class ExportTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task The_zip_has_the_public_page_without_the_name_claims()
+    {
+        var me = await SignIn();
+        var made = await me.Client.PostAsJsonAsync($"/collections/{me.CollectionId}/public-page",
+            new Stikling.Core.Sharing.TurnOnPublicPageRequest(null, "da"), ApiFactory.Json);
+        Assert.Equal(HttpStatusCode.Created, made.StatusCode);
+        var named = await me.Client.PutAsJsonAsync($"/collections/{me.CollectionId}/public-page/name",
+            new Stikling.Core.Sharing.SetPublicPageNameRequest("export" + Guid.NewGuid().ToString("N")[..10]), ApiFactory.Json);
+        Assert.Equal(HttpStatusCode.OK, named.StatusCode);
+
+        using var zip = await Export(me);
+
+        var page = Assert.Single(Read(zip, $"collections/{me.CollectionId}/publicPages.json").EnumerateArray());
+        Assert.Equal("da", page.GetProperty("language").GetString());
+        Assert.Equal("Shelves", page.GetProperty("layout").GetString());
+        Assert.StartsWith("export", page.GetProperty("name").GetString());
+        Assert.False(page.TryGetProperty("nameClaims", out _));
+    }
+
+    [Fact]
     public async Task Settings_are_left_out_when_there_are_none()
     {
         var me = await SignIn();

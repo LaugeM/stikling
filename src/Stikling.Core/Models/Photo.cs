@@ -30,6 +30,9 @@ public sealed class Photo : Entity
     /// It stays out of the history, the cover, shared pages and the year.
     /// </summary>
     public bool IsReference { get; set; }
+
+    /// <summary>Kept off the public collection page. Everything shows on it unless this is set, and it never stands for anything else.</summary>
+    public bool HiddenFromPublicPage { get; set; }
 }
 
 /// <summary>

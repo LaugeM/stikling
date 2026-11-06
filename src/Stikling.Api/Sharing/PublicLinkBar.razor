@@ -1,0 +1,20 @@
+@using Stikling.Core.Sharing
+<nav aria-label="@PublicCollectionPage.PartName(PublicPartKind.Plants)">
+    <ul class="pp-bar">
+        @foreach (var link in Context.Links)
+        {
+            <li>
+                <a href="@Context.LinkPrefix/@PublicPagePaths.Segment(link.Kind)" aria-current="@(link.Kind == Current ? "page" : null)">
+                    @PublicCollectionPage.PartName(link.Kind) <span class="n">@link.Total</span>
+                </a>
+            </li>
+        }
+    </ul>
+</nav>
+
+@code {
+    [Parameter, EditorRequired] public PublicPageContext Context { get; set; } = null!;
+
+    /// <summary>The part being looked at, marked in the bar. Null on the front page.</summary>
+    [Parameter] public PublicPartKind? Current { get; set; }
+}

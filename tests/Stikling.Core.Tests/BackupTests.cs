@@ -626,6 +626,30 @@ public class BackupTests
     }
 
     [Fact]
+    public void Hiding_from_the_public_page_survives_a_backup_and_old_records_read_as_shown()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var plant = new Plant { Nickname = "Monstera", HiddenFromPublicPage = true, UpdatedAt = Now };
+        var propagation = new Propagation { Nickname = "Monstera cutting", HiddenFromPublicPage = true, UpdatedAt = Now };
+        var photo = new Photo { HiddenFromPublicPage = true, UpdatedAt = Now };
+        var shown = new Plant { Nickname = "Coleus", UpdatedAt = Now };
+
+        var json = JsonSerializer.Serialize(new BackupData { Plants = [plant, shown], Propagations = [propagation], Photos = [photo] }, options);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        Assert.True(back.Plants.Single(p => p.Id == plant.Id).HiddenFromPublicPage);
+        Assert.False(back.Plants.Single(p => p.Id == shown.Id).HiddenFromPublicPage);
+        Assert.True(Assert.Single(back.Propagations).HiddenFromPublicPage);
+        Assert.True(Assert.Single(back.Photos).HiddenFromPublicPage);
+
+        var old = JsonSerializer.Deserialize<Plant>("""{"id":"7d2d5a2e-0c63-4b5e-8a4c-5e1c0b9a1111","nickname":"Old"}""", options)!;
+        Assert.False(old.HiddenFromPublicPage);
+
+        var merged = BackupMerge.Merge([new Plant { Id = plant.Id, UpdatedAt = Now.AddDays(-3) }], back.Plants.Where(p => p.Id == plant.Id));
+        Assert.True(Assert.Single(merged.ToSave).HiddenFromPublicPage);
+    }
+
+    [Fact]
     public void Treatment_recipes_survive_a_restore()
     {
         var id = Guid.NewGuid();

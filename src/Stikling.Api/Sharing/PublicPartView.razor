@@ -1,0 +1,86 @@
+@using Stikling.Core.Models
+@using Stikling.Core.Sharing
+<!DOCTYPE html>
+<html lang="@Context.Language">
+<head>
+    <PublicHead Context="Context" Heading="@PublicPageText.PartPageTitle(Part.Kind, Context.Title)" />
+</head>
+<body>
+    <main class="pp">
+        <p><a class="pp-back" href="@(Context.LinkPrefix)">@PublicPageText.BackTo(Context.Title)</a></p>
+        <header class="pp-head">
+            <h1>@PublicCollectionPage.PartName(Part.Kind)</h1>
+        </header>
+
+        @if (Context.Layout == PublicPageLayout.PhotoWall)
+        {
+            <PublicLinkBar Context="Context" Current="Part.Kind" />
+        }
+
+        @if (Part.Kind == PublicPartKind.Wishlist)
+        {
+            @if (Part.Lines.Count == 0)
+            {
+                <p class="pp-empty">@PublicPageText.NothingYet</p>
+            }
+            else
+            {
+                <ul class="pp-lines">
+                    @foreach (var line in Part.Lines)
+                    {
+                        <li>@line</li>
+                    }
+                </ul>
+            }
+        }
+        else if (Part.Tiles.Count == 0)
+        {
+            <p class="pp-empty">@PublicPageText.NothingYet</p>
+        }
+        else
+        {
+            <ul class="@(Context.Layout == PublicPageLayout.PhotoWall ? "pp-wall" : "pp-grid")">
+                @foreach (var tile in Part.Tiles)
+                {
+                    <PublicTileView Tile="tile" Context="Context" />
+                }
+            </ul>
+        }
+
+        @if (Part.PageCount > 1)
+        {
+            <nav class="pp-pager">
+                @if (Part.Page > 1)
+                {
+                    <a rel="prev" href="@PageLink(Part.Page - 1)">@PublicPageText.Previous</a>
+                }
+                else
+                {
+                    <span class="off">@PublicPageText.Previous</span>
+                }
+                <span class="of">@PublicPageText.PageOf(Part.Page, Part.PageCount)</span>
+                @if (Part.Page < Part.PageCount)
+                {
+                    <a rel="next" href="@PageLink(Part.Page + 1)">@PublicPageText.Next</a>
+                }
+                else
+                {
+                    <span class="off">@PublicPageText.Next</span>
+                }
+            </nav>
+        }
+
+        <PublicFooter Context="Context" />
+    </main>
+</body>
+</html>
+
+@code {
+    [Parameter, EditorRequired] public PublicPartPage Part { get; set; } = null!;
+
+    [Parameter, EditorRequired] public PublicPageContext Context { get; set; } = null!;
+
+    [Parameter, EditorRequired] public string Segment { get; set; } = "";
+
+    private string PageLink(int page) => $"{Context.LinkPrefix}/{Segment}" + (page > 1 ? $"?page={page}" : "");
+}

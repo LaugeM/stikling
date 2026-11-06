@@ -126,6 +126,9 @@ public sealed class Propagation : Entity
 
     public Guid? CoverPhotoId { get; set; }
 
+    /// <summary>Kept off the public collection page. Everything shows on it unless this is set, and it never stands for anything else.</summary>
+    public bool HiddenFromPublicPage { get; set; }
+
     /// <summary>
     /// The day it went dormant, e.g. a corm sitting still for the winter. Null while it's
     /// growing. A dormant propagation doesn't come up on Today to be checked on.

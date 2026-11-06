@@ -43,6 +43,10 @@ public static class SharePageEndpoints
         {
             http.Response.Headers.CacheControl = "no-cache";
 
+            // Not the token of a share link: it may be the address of a collection's public page
+            if (await IsPublicPageAddressAsync(db, token))
+                return await PublicPagePages.FrontAsync(http, db, options.Value, token, clock);
+
             var looked = await LookUpAsync(db, token, clock);
             if (looked.Status is { } status)
                 return Gone(status);
@@ -91,6 +95,9 @@ public static class SharePageEndpoints
         pages.MapGet("/{token}/photos/{photoId:guid}/{size}", async (
             string token, Guid photoId, string size, HttpContext http, StiklingDbContext db, PhotoStorage storage) =>
         {
+            if (await IsPublicPageAddressAsync(db, token))
+                return await PublicPagePages.PhotoAsync(http, db, storage, token, photoId, size);
+
             var link = await FindAsync(db, token);
             if (link is null)
                 return Results.NotFound();
@@ -125,8 +132,14 @@ public static class SharePageEndpoints
             return image;
         });
 
+        PublicPagePages.Map(pages);
+
         return app;
     }
+
+    // An address starting with @ is a page's name. Otherwise it is a share link's token if there is one, or else a page's token.
+    private static async Task<bool> IsPublicPageAddressAsync(StiklingDbContext db, string address) =>
+        address.StartsWith('@') || (address.Length <= 40 && !await db.ShareLinks.AnyAsync(l => l.Token == address));
 
     // A plant's page also shows the rooting it came from, so those photos of the propagation are served too
     private static async Task<bool> IsRootingPhotoAsync(StiklingDbContext db, ShareLink link, Photo photo)
@@ -170,7 +183,7 @@ public static class SharePageEndpoints
     }
 
     /// <summary>The small page for a link that isn't there (404) or was turned off (410).</summary>
-    private static IResult Gone(int status) => new RazorComponentResult<ShareGone> { StatusCode = status };
+    internal static IResult Gone(int status) => new RazorComponentResult<ShareGone> { StatusCode = status };
 
     private static Task<ShareLink?> FindAsync(StiklingDbContext db, string token) =>
         // A token is 22 characters, so anything much longer is somebody trying things
@@ -178,7 +191,7 @@ public static class SharePageEndpoints
             ? Task.FromResult<ShareLink?>(null)
             : db.ShareLinks.AsNoTracking().SingleOrDefaultAsync(l => l.Token == token);
 
-    private static DateOnly DayIn(DateTimeOffset moment, TimeZoneInfo zone) =>
+    internal static DateOnly DayIn(DateTimeOffset moment, TimeZoneInfo zone) =>
         DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(moment, zone).DateTime);
 
     private static async Task<(Entity Subject, SharePageModel Model)?> PlantPageAsync(
@@ -228,7 +241,7 @@ public static class SharePageEndpoints
     }
 
     // A photo's record syncs before its image does, and a page shouldn't show an image that isn't there yet
-    private static async Task<List<Photo>> WithImagesAsync(StiklingDbContext db, Guid collectionId, List<Photo> photos)
+    internal static async Task<List<Photo>> WithImagesAsync(StiklingDbContext db, Guid collectionId, List<Photo> photos)
     {
         var ids = photos.Select(p => p.Id).ToList();
         var there = await db.PhotoImages.AsNoTracking()
@@ -239,7 +252,7 @@ public static class SharePageEndpoints
         return photos.Where(p => set.Contains(p.Id)).ToList();
     }
 
-    private static async Task<T?> OneAsync<T>(StiklingDbContext db, Guid collectionId, string kind, Guid id) where T : Entity
+    internal static async Task<T?> OneAsync<T>(StiklingDbContext db, Guid collectionId, string kind, Guid id) where T : Entity
     {
         var data = await db.Records.AsNoTracking()
             .Where(r => r.CollectionId == collectionId && r.Kind == kind && r.Id == id && r.DeletedAt == null)
@@ -252,7 +265,7 @@ public static class SharePageEndpoints
     /// The records of one kind whose JSON has this property set to this id, found in SQL so a page
     /// view doesn't read the whole collection. The names are camelCase, as the app stores them.
     /// </summary>
-    private static async Task<List<T>> ByPropertyAsync<T>(StiklingDbContext db, Guid collectionId, string kind, string property, Guid value)
+    internal static async Task<List<T>> ByPropertyAsync<T>(StiklingDbContext db, Guid collectionId, string kind, string property, Guid value)
         where T : Entity
     {
         var path = $"$.{property}";
@@ -266,7 +279,7 @@ public static class SharePageEndpoints
     }
 
     // A record this version can't read, like one from a newer app, is left out instead of breaking the page
-    private static T? Read<T>(string data) where T : class
+    internal static T? Read<T>(string data) where T : class
     {
         try
         {

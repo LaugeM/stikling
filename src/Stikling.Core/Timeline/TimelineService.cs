@@ -51,6 +51,18 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
     }
 
     /// <summary>
+    /// Keeps a photo off the public collection page, or lets it show again. The photo and its place
+    /// on the history stay as they are.
+    /// </summary>
+    public async Task SetPhotoHiddenFromPublicPageAsync(Photo photo, bool hidden)
+    {
+        if (photo.HiddenFromPublicPage == hidden)
+            return;
+        photo.HiddenFromPublicPage = hidden;
+        await photos.UpdateAsync(photo);
+    }
+
+    /// <summary>
     /// Writes that a plant or propagation was looked over, with nothing else to log. It's a
     /// change entry with an event rather than a new kind, so older versions still load it.
     /// </summary>

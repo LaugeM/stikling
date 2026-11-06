@@ -17,6 +17,9 @@ public sealed class ShareOptions
     /// <summary>The address of a page, with the token.</summary>
     public string UrlOf(string token) => $"{BaseUrl.TrimEnd('/')}/{token}";
 
+    /// <summary>The address of a public page by its name, like https://share.stikling.app/@name.</summary>
+    public string NamedUrlOf(string name) => $"{BaseUrl.TrimEnd('/')}/@{name}";
+
     /// <summary>True when the request came in on the share host.</summary>
     public bool IsShareHost(string? host) =>
         !string.IsNullOrWhiteSpace(Host) && string.Equals(host, Host, StringComparison.OrdinalIgnoreCase);

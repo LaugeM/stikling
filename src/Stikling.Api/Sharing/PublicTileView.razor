@@ -1,0 +1,65 @@
+@using Stikling.Core.Models
+@using Stikling.Core.Sharing
+<li class="pp-tile @(Tile.Type == SubjectType.Plant ? "plant" : "cutting") @(Tile.Cover is null ? "bare" : null)">
+    @if (Context.StoriesOn)
+    {
+        <a class="pp-tile-link" href="@Context.LinkPrefix/@(Tile.Type == SubjectType.Plant ? "plants" : "cuttings")/@Tile.Id">@Inner</a>
+    }
+    else
+    {
+        <div class="pp-tile-link">@Inner</div>
+    }
+</li>
+
+@code {
+    [Parameter, EditorRequired] public PublicTile Tile { get; set; } = null!;
+    [Parameter, EditorRequired] public PublicPageContext Context { get; set; } = null!;
+
+    private RenderFragment Inner => __builder =>
+    {
+        <span class="pp-photo">
+            @if (Tile.Cover is { } cover)
+            {
+                <img src="@Context.LinkPrefix/photos/@cover.Id/@(Context.Thumbnails.Contains(cover.Id) ? "thumb" : "full")" alt=""
+                     loading="lazy" style="@Position(cover)">
+            }
+            else
+            {
+                <span class="pp-bare">@Tile.Name</span>
+            }
+        </span>
+        <span class="pp-text">
+            @if (Tile.Cover is not null)
+            {
+                <span class="pp-name">@Tile.Name</span>
+            }
+            @if (Tile.Latin is not null || Tile.Cultivar is not null)
+            {
+                <span class="pp-latin">
+                    @if (Tile.Latin is not null)
+                    {
+                        <i>@Tile.Latin</i>
+                    }
+                    @if (Tile.Latin is not null && Tile.Cultivar is not null)
+                    {
+                        @(" ")
+                    }
+                    @if (Tile.Cultivar is not null)
+                    {
+                        <text>'@Tile.Cultivar'</text>
+                    }
+                </span>
+            }
+            @if (Tile.Caption is not null)
+            {
+                <span class="pp-caption">@Tile.Caption</span>
+            }
+        </span>
+    };
+
+    // Where the photo sits in its crop, from the frame the owner saved
+    private static string? Position(SharePhoto photo) =>
+        photo.Frame is { } frame
+            ? FormattableString.Invariant($"object-position: {frame.X * 100:0.#}% {frame.Y * 100:0.#}%")
+            : null;
+}

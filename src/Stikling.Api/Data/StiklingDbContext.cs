@@ -15,6 +15,8 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     public DbSet<PhotoImage> PhotoImages => Set<PhotoImage>();
     public DbSet<DeletedAccount> DeletedAccounts => Set<DeletedAccount>();
     public DbSet<ShareLink> ShareLinks => Set<ShareLink>();
+    public DbSet<PublicPage> PublicPages => Set<PublicPage>();
+    public DbSet<PublicPageName> PublicPageNames => Set<PublicPageName>();
     public DbSet<StoredPushSubscription> PushSubscriptions => Set<StoredPushSubscription>();
     public DbSet<NotificationSchedule> NotificationSchedules => Set<NotificationSchedule>();
 
@@ -98,6 +100,44 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
 
             link.HasOne<Collection>().WithMany().HasForeignKey(l => l.CollectionId).OnDelete(DeleteBehavior.Cascade);
             link.HasOne<Person>().WithMany().HasForeignKey(l => l.CreatedBy).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        model.Entity<PublicPage>(page =>
+        {
+            // The token is case sensitive
+            page.Property(p => p.Token).HasMaxLength(40).UseCollation("Latin1_General_100_BIN2");
+            page.HasIndex(p => p.Token).IsUnique();
+            page.Property(p => p.Name).HasMaxLength(PublicPageRules.MaxNameLength);
+            page.Property(p => p.Title).HasMaxLength(PublicPageRules.MaxTitleLength);
+            page.Property(p => p.Line).HasMaxLength(PublicPageRules.MaxLineLength);
+            page.Property(p => p.Layout).HasConversion<string>().HasMaxLength(20).HasDefaultValue(PublicPageLayout.Shelves);
+            page.Property(p => p.Order).HasConversion<string>().HasMaxLength(20).HasDefaultValue(PublicPageOrder.Newest);
+            page.Property(p => p.ShowPropagations).HasDefaultValue(true);
+            page.Property(p => p.Language).HasMaxLength(10);
+            page.Property(p => p.TimeZone).HasMaxLength(100);
+            page.Property(p => p.NameClaims)
+                .HasConversion(
+                    claims => JsonSerializer.Serialize(claims, (JsonSerializerOptions?)null),
+                    json => JsonSerializer.Deserialize<List<DateTimeOffset>>(json, (JsonSerializerOptions?)null) ?? new List<DateTimeOffset>(),
+                    new ValueComparer<List<DateTimeOffset>>(
+                        (a, b) => a!.SequenceEqual(b!),
+                        claims => claims.Aggregate(0, (hash, claim) => HashCode.Combine(hash, claim)),
+                        claims => claims.ToList()));
+
+            // A name is used by one page at a time. Pages without one don't count.
+            page.HasIndex(p => p.Name).IsUnique().HasFilter("[Name] IS NOT NULL");
+            // A collection has one page that is on. Two devices asking at once get the same one.
+            page.HasIndex(p => p.CollectionId).IsUnique().HasFilter("[TurnedOffAt] IS NULL");
+            page.HasIndex(p => new { p.CreatedBy, p.CreatedAt });
+
+            page.HasOne<Collection>().WithMany().HasForeignKey(p => p.CollectionId).OnDelete(DeleteBehavior.Cascade);
+            page.HasOne<Person>().WithMany().HasForeignKey(p => p.CreatedBy).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        model.Entity<PublicPageName>(name =>
+        {
+            name.HasKey(n => n.NameHash);
+            name.Property(n => n.NameHash).HasColumnType("char(64)").IsFixedLength();
         });
 
         model.Entity<StoredPushSubscription>(subscription =>

@@ -124,6 +124,7 @@ app.MapCollections();
 app.MapRecords();
 app.MapPhotos();
 app.MapShareLinks();
+app.MapPublicPageSettings();
 app.MapSharePages();
 app.MapNotifications();
 
