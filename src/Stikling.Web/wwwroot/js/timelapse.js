@@ -3,6 +3,9 @@
 // photos and the finished video stay in this file; C# only sends the words and the timing
 // (TimelapsePlan) and gets back progress and a word for how it went.
 //
+// The same encoder makes "Your year" as a video, from the pictures of the cards that are already
+// drawn (makeFromPictures). A picture fills the frame, with nothing laid out around it.
+//
 // Two ways to make the video, picked when someone taps Make video:
 // - WebCodecs, through Mediabunny (lib/mediabunny), which is quick and uses the phone's encoder.
 // - WebAssembly, through h264-mp4-encoder (lib/h264-mp4-encoder), for browsers without WebCodecs,
@@ -71,7 +74,7 @@ class Frames {
         if (index < 0 || index >= this.shots.length || this.bitmaps.has(index))
             return Promise.resolve();
         if (!this.loading.has(index)) {
-            this.loading.set(index, readBitmap(this.shots[index].photoId).then(bitmap => {
+            this.loading.set(index, readShot(this.shots[index]).then(bitmap => {
                 this.loading.delete(index);
                 if (this.closed)
                     bitmap?.close();
@@ -98,10 +101,11 @@ class Frames {
     }
 }
 
-// The full photo, or the small one when that is all that is here
-async function readBitmap(id) {
+// The picture it was given, or the full photo, or the small one when that is all that is here
+async function readShot(shot) {
     try {
-        const blob = (await getBlob(id)) ?? (await getBlob(`${id}:thumb`));
+        const id = shot.photoId;
+        const blob = shot.picture ?? (await getBlob(id)) ?? (await getBlob(`${id}:thumb`));
         return blob ? await createImageBitmap(blob) : null;
     } catch {
         return null;
@@ -125,11 +129,30 @@ function mixAt(spec, t) {
 function drawFrame(ctx, size, spec, frames, t) {
     const { index, next, alpha } = mixAt(spec, t);
     ctx.textBaseline = "alphabetic";
+    if (spec.shots[index].picture) {
+        paintPicture(ctx, size, frames.get(index), 1);
+        if (alpha > 0)
+            paintPicture(ctx, size, frames.get(next), alpha);
+        return;
+    }
     paintPhotoCard(ctx, size, spec, bandTop => {
         paintShot(ctx, size, spec.shots[index], frames.get(index), bandTop, 1);
         if (alpha > 0)
             paintShot(ctx, size, spec.shots[next], frames.get(next), bandTop, alpha);
     });
+}
+
+// A whole card, or plain paper when its picture couldn't be read
+function paintPicture(ctx, size, bitmap, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (bitmap) {
+        ctx.drawImage(bitmap, 0, 0, size.width, size.height);
+    } else {
+        ctx.fillStyle = PAPER;
+        ctx.fillRect(0, 0, size.width, size.height);
+    }
+    ctx.restore();
 }
 
 // A photo and its date, both at the same opacity so they fade together
@@ -293,6 +316,12 @@ export async function make(spec, progress) {
         if (job === mine)
             job = null;
     }
+}
+
+// Makes the video from finished pictures, one Blob for each of the spec's shots, and keeps it here
+// like any other. spec: { format, crossfade, total, shots: [{ start, hold }] }
+export function makeFromPictures(pictures, spec, progress) {
+    return make({ ...spec, shots: spec.shots.map((shot, i) => ({ ...shot, picture: pictures[i] })) }, progress);
 }
 
 export function cancel() {

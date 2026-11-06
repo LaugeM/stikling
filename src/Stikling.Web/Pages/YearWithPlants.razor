@@ -2,7 +2,8 @@
 @page "/year/{Year:int}"
 @* Your year with your plants: the cards of a year as a deck to flick through, leave out and share.
    The words come from YearCards in Core and the pictures are drawn and kept in wwwroot/js/yearcards.js
-   by YearCardService. Nothing on this page is saved, except the size, which stays on this device. *@
+   by YearCardService. The video is made from those pictures with the time-lapse encoder, and stays in
+   wwwroot/js/timelapse.js. Nothing on this page is saved, except the size, which stays on this device. *@
 @using Stikling.Core.Sync
 @using Stikling.Core.Year
 @implements IAsyncDisposable
@@ -11,6 +12,7 @@
 @inject IPhotoRepository PhotoRepository
 @inject ITimelineRepository TimelineRepository
 @inject YearCardService Cards
+@inject TimelapseService Timelapse
 @inject SyncRunner Sync
 @inject NavigationManager Navigation
 @inject TimeProvider Time
@@ -53,7 +55,7 @@ else
             {
                 var id = $"year-format-{value}";
                 <input type="radio" class="btn-check" name="year-format" id="@id"
-                       checked="@(format == value)" @onchange="() => SetFormatAsync(value)" />
+                       checked="@(format == value)" disabled="@makingVideo" @onchange="() => SetFormatAsync(value)" />
                 <label class="btn btn-outline-primary" for="@id">@label</label>
             }
         </div>
@@ -142,7 +144,7 @@ else
     }
 
     <div class="year-actions">
-        <button type="button" class="btn btn-outline-primary" @onclick="ToggleLeftOut">@(leftOut.Contains(front.Id) ? Strings.Shared.YearPutBack : Strings.Shared.YearLeaveOut)</button>
+        <button type="button" class="btn btn-outline-primary" disabled="@makingVideo" @onclick="ToggleLeftOut">@(leftOut.Contains(front.Id) ? Strings.Shared.YearPutBack : Strings.Shared.YearLeaveOut)</button>
         <button type="button" class="btn btn-primary" disabled="@(busy || frontDrawn is null)" @onclick="ShareAsync">@Strings.Shared.ShareButton</button>
     </div>
 
@@ -152,6 +154,33 @@ else
             <button type="button" class="btn btn-link" disabled="@(busy || !AllDrawn)" @onclick="ShareAllAsync">
                 @string.Format(System.Globalization.CultureInfo.CurrentCulture, canShareAll ? Strings.Shared.YearShareAll : Strings.Shared.YearSaveAll, Included.Count)
             </button>
+            @if (CanMakeVideo && !makingVideo && !VideoIsReady)
+            {
+                <button type="button" class="btn btn-link" disabled="@(busy || !AllDrawn)" @onclick="MakeVideoAsync">@Strings.Shared.YearMakeVideo</button>
+            }
+        </div>
+    }
+
+    @if (makingVideo)
+    {
+        <div class="year-video">
+            <p class="form-text mb-1" role="status">@(cancellingVideo ? Strings.Propagations.ShCancelling : Strings.Shared.YearMakingVideo)</p>
+            <progress class="share-progress" max="1" value="@videoProgress.ToString(System.Globalization.CultureInfo.InvariantCulture)" aria-label="@Strings.Propagations.ShMaking"></progress>
+            <button type="button" class="btn btn-outline-primary" disabled="@cancellingVideo" @onclick="CancelVideoAsync">@Strings.Common.Cancel</button>
+        </div>
+    }
+    else if (VideoIsReady)
+    {
+        <div class="year-actions year-video-ready">
+            @if (canShareVideo)
+            {
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="SaveVideoAsync">@Strings.Propagations.ShSaveVideo</button>
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ShareVideoAsync">@Strings.Propagations.ShShareVideo</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveVideoAsync">@Strings.Propagations.ShSaveVideo</button>
+            }
         </div>
     }
 
@@ -213,6 +242,12 @@ else
     private bool loaded;
     private bool busy;
     private bool canShareAll;
+    private bool makingVideo;
+    private bool cancellingVideo;
+    private bool canShareVideo;
+    private double videoProgress;
+    private int videoRun;
+    private string? madeKey;
     private bool disposed;
     private DotNetObjectReference<YearWithPlants>? self;
     private IJSObjectReference? deck;
@@ -222,6 +257,11 @@ else
     private List<YearCard> Included => cards.Where(c => !leftOut.Contains(c.Id)).ToList();
 
     private bool AllDrawn => Included.All(c => drawn.ContainsKey(c.Id));
+
+    private bool CanMakeVideo => Included.Count >= YearVideoPlan.MinCards;
+
+    // The video made still shows what the deck shows
+    private bool VideoIsReady => madeKey is not null && CanMakeVideo && madeKey == VideoKey();
 
     private string AspectStyle => format switch
     {
@@ -247,6 +287,7 @@ else
         loadedFor = wanted;
         if (changed)
         {
+            await DropVideoAsync();
             index = 0;
             leftOut.Clear();
             message = null;
@@ -392,6 +433,109 @@ else
             all: true);
     }
 
+    // ---- The video ----
+
+    // What the video is made from: the cards left in, with the words, photos and size they are drawn with
+    private string VideoKey() => year + "|" + System.Text.Json.JsonSerializer.Serialize(
+        Included.Select(c => YearCardSpec.From(c, format, c.Kind == YearCardKind.Collage ? collageShown : null)));
+
+    private async Task MakeVideoAsync()
+    {
+        var run = ++videoRun;
+        var key = VideoKey();
+        var plan = YearVideoPlan.Create(Included.Select(c => c.Id));
+        makingVideo = true;
+        cancellingVideo = false;
+        videoProgress = 0;
+        madeKey = null;
+        message = null;
+        StateHasChanged();
+        try
+        {
+            var result = await Cards.MakeVideoAsync(new YearVideoSpec(format, plan.Crossfade, plan.Total, plan.Shots), fraction =>
+            {
+                if (run != videoRun)
+                    return;
+                videoProgress = fraction;
+                _ = InvokeAsync(StateHasChanged);
+            });
+            if (run != videoRun)
+                return;
+
+            switch (result)
+            {
+                case "done":
+                    canShareVideo = await Timelapse.CanShareAsync();
+                    madeKey = key;
+                    break;
+                case "cancelled":
+                    break;
+                case "offline":
+                    message = Strings.Propagations.ShOfflineMaker;
+                    break;
+                case "unsupported":
+                    message = Strings.Shared.YearVideoUnsupported;
+                    break;
+                default:
+                    message = Strings.Shared.YearVideoFailed;
+                    break;
+            }
+        }
+        catch (JSException)
+        {
+            if (run == videoRun)
+                message = Strings.Shared.YearVideoFailed;
+        }
+        finally
+        {
+            if (run == videoRun)
+                makingVideo = false;
+        }
+    }
+
+    private async Task CancelVideoAsync()
+    {
+        cancellingVideo = true;
+        await Timelapse.CancelAsync();
+    }
+
+    private Task ShareVideoAsync() => RunVideoAsync(() => Timelapse.ShareAsync(YearCardService.VideoFileNameFor(year)));
+
+    private Task SaveVideoAsync() => RunVideoAsync(() => Timelapse.SaveAsync(YearCardService.VideoFileNameFor(year)));
+
+    private async Task RunVideoAsync(Func<Task<string>> action)
+    {
+        busy = true;
+        message = null;
+        try
+        {
+            message = await action() switch
+            {
+                "saved" => Strings.Propagations.ShVideoSaved,
+                "failed" => Strings.Propagations.ShVideoShareFailed,
+                _ => null,
+            };
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // Stops a video being made and lets go of one that is done, when moving to another year or off the page
+    private async Task DropVideoAsync()
+    {
+        var wasMaking = makingVideo;
+        var hadVideo = madeKey is not null;
+        videoRun++;
+        makingVideo = false;
+        madeKey = null;
+        if (wasMaking)
+            await Timelapse.CancelAsync();
+        if (hadVideo)
+            await Timelapse.DiscardAsync();
+    }
+
     private async Task RunAsync(Func<Task<string>> action, bool all)
     {
         busy = true;
@@ -433,7 +577,7 @@ else
     // ---- The collage ----
 
     // Only when there are more photos than the card shows
-    private bool CanSwap(YearCard card) => card.Kind == YearCardKind.Collage && card.Collage.Count > collageShown.Count;
+    private bool CanSwap(YearCard card) => !makingVideo && card.Kind == YearCardKind.Collage && card.Collage.Count > collageShown.Count;
 
     // A tap swaps the photo for the next one that isn't shown, in the collage's order
     private async Task SwapAsync(int cell)
@@ -546,6 +690,7 @@ else
         self?.Dispose();
         try
         {
+            await DropVideoAsync();
             await Cards.ReleaseAsync(cards.Select(c => c.Id));
         }
         catch (JSDisconnectedException)

@@ -11,6 +11,7 @@ import {
     DISPLAY, BODY, MARGIN, PAIR_GAP, PILL_INSET, ICONS,
     setFont, wrap, paintFooter, paintIcon, paintPhotoCard, paintDatePill, drawCover, loadFonts, toBlob, keep,
 } from "./sharecard.js";
+import { makeFromPictures } from "./timelapse.js";
 
 // The picture of each card that was drawn, by card id, for sharing and saving
 const kept = new Map(); // id to { blob, url }
@@ -91,6 +92,16 @@ export function release(ids) {
             kept.delete(id);
         }
     }
+}
+
+// Makes the video of these cards from their pictures, so it shows just what the deck shows. The video
+// stays in timelapse.js, which shares and saves it. "done", "cancelled", "unsupported", "offline" or "failed".
+// spec: { format, crossfade, total, shots: [{ cardId, start, hold }] }
+export async function makeVideo(spec, progress) {
+    const pictures = spec.shots.map(shot => kept.get(shot.cardId)?.blob);
+    if (pictures.some(picture => !picture))
+        return "failed";
+    return await makeFromPictures(pictures, spec, progress);
 }
 
 // ---- Which photos a card needs, and reading them ----
