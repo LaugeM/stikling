@@ -1529,6 +1529,24 @@ img.framed {
     min-height: 2.75rem;
 }
 
+/* The Seen here toggle beside a picked plant on the pest case form */
+.seen-toggle {
+    flex: none;
+    min-height: 2.75rem;
+}
+
+.seen-tick {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.25rem;
+    vertical-align: -0.15em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .pest-badge {
     padding: 0.05rem 0.4rem;
     background: var(--pa-alert-soft);

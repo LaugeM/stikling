@@ -1213,4 +1213,44 @@
     <value>Delete {0}? It's been used {1}, and those treatments keep what was in it.</value>
     <comment>Asks before deleting a treatment recipe that was used. {0} is the name, {1} how many times, like '3 times'.</comment>
   </data>
+  <data name="CaseSeenHere" xml:space="preserve">
+    <value>Seen here</value>
+    <comment>Badge and toggle button on a plant in the pest case: the pest was seen on this plant.</comment>
+  </data>
+  <data name="CaseSeenHereOn" xml:space="preserve">
+    <value>Seen here on {0}</value>
+    <comment>Screen reader name of the Seen here toggle. {0} is the name of the plant.</comment>
+  </data>
+  <data name="CaseMarkedSeen" xml:space="preserve">
+    <value>Marked {0} as seen</value>
+    <comment>Shown after a plant is marked as one the pest was seen on. {0} is the name of the plant.</comment>
+  </data>
+  <data name="CaseSeenHint" xml:space="preserve">
+    <value>Tap Seen here on the plants you found them on. The rest are still treated.</value>
+    <comment>Under the plants of a pest case when none is marked as seen yet.</comment>
+  </data>
+  <data name="CaseWhereTitle" xml:space="preserve">
+    <value>Where did you see them?</value>
+    <comment>Title of the sheet shown when pests are found again on a case that was being watched.</comment>
+  </data>
+  <data name="CaseWhereHint" xml:space="preserve">
+    <value>Tick the plants you found them on. The case goes back to treating.</value>
+    <comment>Hint in the sheet that asks where the pests were seen again.</comment>
+  </data>
+  <data name="CaseBackToTreating" xml:space="preserve">
+    <value>Back to treating</value>
+    <comment>Button that marks the ticked plants and puts the case back to treating.</comment>
+  </data>
+  <data name="CaseEditSeenOn" xml:space="preserve">
+    <value>Seen on</value>
+    <comment>Label of the field on the pest case form listing the plants the pest was seen on.</comment>
+  </data>
+  <data name="CaseEditSeenOnHint" xml:space="preserve">
+    <value>Optional. The plants you found them on. The rest are still treated.</value>
+    <comment>Hint under the Seen on field of the pest case form.</comment>
+  </data>
+  <data name="CaseEditRemoveSeen" xml:space="preserve">
+    <value>Remove {0}</value>
+    <comment>Screen reader name of the button that takes a plant off the Seen on list. {0} is the name of the plant.</comment>
+  </data>
 </root>

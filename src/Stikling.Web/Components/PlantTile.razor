@@ -139,7 +139,7 @@ else
                     }
                     @foreach (var pest in Pests)
                     {
-                        <span class="badge pest-badge">@Labels.For(pest.Pest)</span>
+                        <span class="badge pest-badge">@Labels.PestBadge(pest, Plant.Id)</span>
                     }
                     @if (OpenProblem && Plant.InCollection)
                     {

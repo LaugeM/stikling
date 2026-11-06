@@ -11,6 +11,7 @@
 @inject ITreatmentPlanRepository PlanRepository
 @inject PutOffService PutOffService
 @inject TimeProvider Time
+@inject PestFoundService PestFound
 
 <PageTitle>@(view is null ? Strings.Pests.CasePageTitle : Labels.For(view.Case.Pest)) · Stikling</PageTitle>
 <ReloadOnSync Reload="ReloadAsync" />
@@ -120,6 +121,42 @@ else
             <div class="care-actions">
                 <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || pickedPlan is null)" @onclick="StartPlanAsync">@Strings.Pests.CaseStartPlan</button>
                 <button type="button" class="btn btn-link btn-sm" @onclick="() => following = false">@Strings.Common.Cancel</button>
+            </div>
+        </section>
+    }
+
+    @if (asking && view.IsCheck)
+    {
+        <section class="detail-card">
+            <h2>@Strings.Pests.CaseWhereTitle</h2>
+            <p class="text-body-secondary">@Strings.Pests.CaseWhereHint</p>
+            @if (view.Plants.Count > 0 || extra.Count > 0)
+            {
+                <ul class="item-list pick-list">
+                    @foreach (var plant in view.Plants.Concat(extra))
+                    {
+                        <li @key="plant.Id">
+                            <label class="item-card selectable @(ticked.Contains(plant.Id) ? "selected" : null)">
+                                <input type="checkbox" class="form-check-input plant-check"
+                                       checked="@ticked.Contains(plant.Id)" @onchange="() => TickPlant(plant.Id)" />
+                                <div class="item-text">
+                                    <div class="item-name">@plant.DisplayName</div>
+                                    @if (places.NameOf(plant.PlaceId) is { } location)
+                                    {
+                                        <div class="item-meta"><span>@location</span></div>
+                                    }
+                                </div>
+                            </label>
+                        </li>
+                    }
+                </ul>
+            }
+            <div class="mt-3">
+                <PlantFinder Plants="Outside" Places="places" OnPick="PickOutside" />
+            </div>
+            <div class="care-actions mt-3">
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="BackToTreatingAsync">@Strings.Pests.CaseBackToTreating</button>
+                <button type="button" class="btn btn-link" @onclick="() => asking = false">@Strings.Common.Cancel</button>
             </div>
         </section>
     }
@@ -304,7 +341,7 @@ else
                     @* New ones on the trap while the case is only watched: offer to go back to treating *@
                     <div class="trap-ask">
                         <p>@(catches[^1].Caught == 1 ? Strings.Pests.CaseTreatAgainOne : Strings.Pests.CaseTreatAgainMany)</p>
-                        <button type="button" class="btn btn-primary btn-sm" @onclick="FoundSomeAsync">@Strings.Pests.CaseTreatAgain</button>
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="TreatAgainAsync">@Strings.Pests.CaseTreatAgain</button>
                         <button type="button" class="btn btn-link btn-sm" @onclick="() => askTreatAgain = false">@Strings.Pests.CaseNotNow</button>
                     </div>
                 }
@@ -364,18 +401,36 @@ else
         }
         else
         {
-            <ul class="family-list">
-                @foreach (var plant in view.Plants)
+            <ul class="neighbour-list">
+                @foreach (var plant in FoundFirst)
                 {
-                    <li>
-                        <a href="plants/@plant.Id">@plant.DisplayName</a>
-                        @if (places.NameOf(plant.PlaceId) is { } location)
+                    var seen = PestService.IsFoundOn(view.Case, plant.Id);
+                    <li @key="plant.Id">
+                        <div class="neighbour-text">
+                            <a href="plants/@plant.Id">@plant.DisplayName</a>
+                            @if (seen)
+                            {
+                                <span class="badge pest-badge ms-1">@Strings.Pests.CaseSeenHere</span>
+                            }
+                            @if (places.NameOf(plant.PlaceId) is { } location)
+                            {
+                                <span class="text-body-secondary small"> · @location</span>
+                            }
+                        </div>
+                        @if (view.Case.IsOpen)
                         {
-                            <span class="text-body-secondary small"> · @location</span>
+                            <button type="button" class="btn btn-sm @(seen ? "btn-primary" : "btn-outline-primary")"
+                                    aria-pressed="@(seen ? "true" : "false")"
+                                    aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseSeenHereOn, plant.DisplayName)"
+                                    disabled="@busy" @onclick="() => ToggleSeenAsync(plant)">@if (seen) { <svg class="seen-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg> }@Strings.Pests.CaseSeenHere</button>
                         }
                     </li>
                 }
             </ul>
+            @if (view.Case.IsOpen && view.Case.FoundOnPlantIds.Count == 0)
+            {
+                <p class="family-hint">@Strings.Pests.CaseSeenHint</p>
+            }
             @if (view.Case.Scope != PestScope.PickedPlants)
             {
                 <p class="family-hint">@Strings.Pests.CasePlantsHint</p>
@@ -436,6 +491,10 @@ else
     private bool logging;
     private bool counting;
     private bool askTreatAgain;
+    private bool asking;
+    private HashSet<Guid> ticked = [];
+    private List<Plant> extra = [];
+    private IReadOnlyList<Plant> inCollection = [];
     private bool confirmDelete;
     private string? message;
     private bool busy;
@@ -458,6 +517,7 @@ else
         logging = false;
         counting = false;
         askTreatAgain = false;
+        asking = false;
         following = false;
         movingStep = null;
         confirmStop = false;
@@ -479,6 +539,7 @@ else
         catches = PestService.Catches(item, all);
         places = await RoomService.GetPlacesAsync();
         var plants = await PlantRepository.GetAllAsync();
+        inCollection = [.. plants.Where(p => !p.IsDeleted && p.InCollection)];
         var settings = await SettingsService.GetAsync();
         putOffs = await PutOffService.GetAsync(Today);
         plans = (await PlanRepository.GetAllAsync())
@@ -557,6 +618,7 @@ else
         logging = !logging;
         counting = false;
         following = false;
+        asking = false;
         message = null;
     }
 
@@ -564,6 +626,7 @@ else
     {
         counting = true;
         logging = false;
+        asking = false;
         askTreatAgain = false;
         message = null;
     }
@@ -608,7 +671,100 @@ else
         _ => Strings.Pests.CaseWhatTreated
     };
 
-    private async Task FoundSomeAsync()
+    private IEnumerable<Plant> FoundFirst =>
+        view is null ? [] : view.Plants.OrderBy(p => PestService.IsFoundOn(view.Case, p.Id) ? 0 : 1);
+
+    // Plants the search can add: in the collection, but not in the case yet
+    private IReadOnlyList<Plant> Outside =>
+        [.. inCollection.Where(p => view is not null && view.Plants.All(x => x.Id != p.Id) && extra.All(x => x.Id != p.Id))];
+
+    private async Task ToggleSeenAsync(Plant plant)
+    {
+        if (view is null)
+            return;
+
+        busy = true;
+        try
+        {
+            if (PestService.IsFoundOn(view.Case, plant.Id))
+            {
+                await PestFound.UnmarkAsync(view.Case, plant.Id);
+                message = null;
+            }
+            else
+            {
+                await PestFound.MarkAsync(view.Case, plant, Today, treatments, Labels.English);
+                message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseMarkedSeen, plant.DisplayName);
+            }
+            await ReloadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // Found some on a case being watched: ask where first, then go back to treating
+    private void FoundSomeAsync()
+    {
+        if (view is null)
+            return;
+
+        ticked = [.. view.Case.FoundOnPlantIds.Where(id => view.Plants.Any(p => p.Id == id))];
+        extra = [];
+        asking = true;
+        logging = false;
+        counting = false;
+        following = false;
+        askTreatAgain = false;
+        message = null;
+    }
+
+    private void TickPlant(Guid plantId)
+    {
+        if (!ticked.Remove(plantId))
+            ticked.Add(plantId);
+    }
+
+    private void PickOutside(Plant plant)
+    {
+        extra.Add(plant);
+        ticked.Add(plant.Id);
+    }
+
+    private async Task BackToTreatingAsync()
+    {
+        if (view is null)
+            return;
+
+        busy = true;
+        try
+        {
+            foreach (var plant in view.Plants.Concat(extra).ToList())
+            {
+                var seen = PestService.IsFoundOn(view.Case, plant.Id);
+                if (ticked.Contains(plant.Id) && !seen)
+                    await PestFound.MarkAsync(view.Case, plant, Today, treatments, Labels.English);
+                else if (!ticked.Contains(plant.Id) && seen)
+                    await PestFound.UnmarkAsync(view.Case, plant.Id);
+            }
+
+            // Nothing ticked is allowed, so the case may still be waiting to go back
+            await PestFound.ResumeAsync(view.Case, treatments);
+            await ReloadAsync();
+            asking = false;
+            extra = [];
+            logging = true;
+            message = null;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // Treat again on the trap card: the new catch says it, so no question about where
+    private async Task TreatAgainAsync()
     {
         if (view is null)
             return;
@@ -647,6 +803,7 @@ else
         following = !following;
         logging = false;
         counting = false;
+        asking = false;
         message = null;
         planStart = Today;
         pickedPlan ??= plans.Count == 1 ? plans[0].Id : null;
@@ -689,6 +846,7 @@ else
         logging = true;
         counting = false;
         following = false;
+        asking = false;
         message = null;
     }
 

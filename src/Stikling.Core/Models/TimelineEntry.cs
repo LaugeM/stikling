@@ -71,7 +71,10 @@ public enum TimelineEvent
     Identified,
 
     /// <summary>A new leaf was logged with how variegated it is.</summary>
-    NewLeaf
+    NewLeaf,
+
+    /// <summary>A pest was found on the plant, as part of a pest case.</summary>
+    Pest
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>
@@ -186,6 +189,9 @@ public sealed class TimelineEntry : Entity
     public SubjectType? RelatedType { get; set; }
 
     public Guid? RelatedId { get; set; }
+
+    /// <summary>The pest case a line is about, shown as a link. Null on every other entry.</summary>
+    public Guid? PestCaseId { get; set; }
 
     /// <summary>
     /// The day a note comes back on Today ("Bring it back"). Only on notes, and null on every entry

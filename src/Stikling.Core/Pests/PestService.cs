@@ -70,6 +70,7 @@ public static class PestService
     /// <summary>
     /// The plants a case covers. Everywhere and Room are worked out from the plants as they
     /// are now, so a plant moved into the room mid-outbreak is covered from then on.
+    /// Plants the pest was seen on are part of it even when the scope doesn't reach them any more.
     /// Plants that are no longer in the collection are left out either way.
     /// </summary>
     public static IReadOnlyList<Plant> PlantsIn(PestCase item, IEnumerable<Plant> plants, Places places)
@@ -83,10 +84,17 @@ public static class PestService
             _ => here.Where(p => item.PlantIds.Contains(p.Id))
         };
 
+        // A plant the pest was seen on stays part of the case when the scope no longer reaches it
+        if (item.FoundOnPlantIds.Count > 0)
+            covered = covered.Concat(here.Where(p => item.FoundOnPlantIds.Contains(p.Id))).DistinctBy(p => p.Id);
+
         return covered
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
     }
+
+    /// <summary>Whether the pest was seen on the plant, as marked on the case.</summary>
+    public static bool IsFoundOn(PestCase item, Guid plantId) => item.FoundOnPlantIds.Contains(plantId);
 
     /// <summary>The open cases covering one plant, so its card and page can say so.</summary>
     public static IReadOnlyList<PestCase> CasesFor(Plant plant, IEnumerable<PestCase> cases, Places places) =>
@@ -425,7 +433,7 @@ public static class PestService
             !t.Skipped && (t.Kind != PestTreatmentKind.TrapCount
             || (item.Status == PestCaseStatus.Monitoring && t.OnTrap is not null)));
 
-    private static bool Covers(PestCase item, Plant plant, Places places) => item.Scope switch
+    private static bool Covers(PestCase item, Plant plant, Places places) => IsFoundOn(item, plant.Id) || item.Scope switch
     {
         PestScope.Everywhere => true,
         PestScope.Room => places.IsIn(plant.PlaceId, item.PlaceId),

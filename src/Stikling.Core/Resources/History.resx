@@ -460,6 +460,10 @@
     <value>Done flowering</value>
     <comment>A plant finished flowering.</comment>
   </data>
+  <data name="PestFound" xml:space="preserve">
+    <value>{0} found</value>
+    <comment>A pest was found on a plant, as part of a pest case. {0} is the pest, like "Spider mites".</comment>
+  </data>
   <data name="ProblemOpened" xml:space="preserve">
     <value>Something's wrong: {0}</value>
     <comment>A problem was opened on a plant. {0} is a list of what was seen, in lower case.</comment>
