@@ -78,6 +78,8 @@ Plan on Opus. Once I approve a plan, don't ask me to switch models. Write a brie
 
 Build in this session instead when the change is one or two files, or when the work is mostly judgment, like a data migration or tuning a screen together with me. For a batch of small features that touch different parts of the app, suggest `/coordinate`, which runs workers in parallel.
 
+When starting or proposing another session, always set both its model and its effort. Use Sonnet 5.5 at medium for building and fixes, and low for docs and mechanical work. Left out, the effort is copied from this session, so a Sonnet session started from Opus on high also runs on high. A session can't be started above this session's own effort.
+
 ## Before opening a pull request
 
 Build, run the tests, and check any UI change in a browser at phone width. The dev server is `stikling-web` in `.claude/launch.json`.
