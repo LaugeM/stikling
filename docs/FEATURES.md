@@ -344,7 +344,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Photo reminder**: once a month, Today lists the plants and propagations that haven't had a photo taken that month, room by room, with a camera button on each that puts the photo straight on its history. Dormant ones are left out. Off until turned on in Settings | 5 | S | v1.x |
 | ✅ | Plants due a watering or a check today, and the ones due in the next couple of days under Coming up, when the watering reminder is turned on | 3 | S | v1.x |
 | ✅ | **How to check**: where Today says a plant is due a check, one line on how to tell whether it needs water: a finger in the soil, a wooden skewer, lifting the pot, or the meter | 4 | S | v1.x |
-| ☐ | **How to check by how it's watered**: Today's line on how to check a plant also uses how it is watered (from the bottom, from the top or soaked), as set on its edit form for the plant-sitter sheet | 6 | S | v1.x |
+| ✅ | **How to check by how it's watered**: Today's line on how to check a plant also uses how it is watered (from the bottom, from the top or soaked), as set on its edit form for the plant-sitter sheet | 6 | S | v1.x |
 | ✅ | **A daily round**: Today suggests the room that has gone longest without anything logged, working round the home a room a day. It can be put off to show another room or skipped for the day. Off until turned on in Settings | 6 | S | v1.x |
 | ✅ | **Going round**: open a room or spot and go through its plants one card at a time, then its propagations: a meter reading, watered, looked over, a photo, or skip. Opening it again the same day starts at the first one with nothing logged. Looked over goes on the history. Started from Today's round, Go round these in Water, the Plants list filtered to a room, or Rooms and tags | 4 | M | v1.x |
 | ☐ | **Your own walking order** for a round, set per room by dragging the cards | 6 | S | v1.x |
@@ -359,7 +359,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Move What a plant has given under the plant's name** instead of behind Details, so cuttings taken, rooted and passed on show first | 3 | S | v1.x |
 | ☐ | **Today in your calendar**: a private link to add to any calendar app, which then shows what is due. It works on every phone and in every browser without notifications, and turning it off makes the old link stop working | 8 | L | v2 |
 | ✅ | Care intervals due (if set) | 4 | S | v1.x |
-| ☐ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |
+| ✅ | **The week ahead**: what is due over the next 7 days as well as today, grouped by day, with a way to mark a whole day as done. Most useful once care intervals exist | 7 | S | v1.x |
 
 ## 7. Data, backup & settings
 
@@ -409,7 +409,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Quick actions**: press and hold a plant in the Plants list on a phone, or right-click it on a computer, to open a sheet with Water, Add a note and Open plant, so something can be logged without opening the plant. Not in Select mode or the table view, and only on the Plants list | 4 | M | v1.x |
 | ✅ | **Badge on the app icon** with the number of things due today | 7 | S | v1.x |
 | ✅ | Pick photos from Google Photos, including ones only in the cloud, through Google's Photos Picker. Turned on in Settings. Photo on a plant or propagation page then asks phone or Google Photos, and the add and edit pages get a Google Photos button. The photos go straight from Google to the device. The phone's own chooser only reaches photos stored on the phone, which is why it needs Google's picker | 4 | S | v1.x |
-| ☐ | **Copy a plant's link** for an NFC sticker or a label. Write it to a sticker with any NFC app, and tapping the phone on the pot opens the plant | 8 | S | v1.x |
+| ✅ | **Copy a plant's link** for an NFC sticker or a label. Write it to a sticker with any NFC app, and tapping the phone on the pot opens the plant | 8 | S | v1.x |
 
 ## 7c. Help & first visit
 
