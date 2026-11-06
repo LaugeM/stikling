@@ -520,7 +520,7 @@ else
             @* The key reloads the history after stage changes and potting up *@
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
                       CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)"
-                      OnSubjectChanged="LoadAsync" EmptyText="@Strings.Propagations.DetEmptyTimeline" />
+                      OnSubjectChanged="HistoryChangedDatesAsync" EmptyText="@Strings.Propagations.DetEmptyTimeline" />
         </div>
     </div>
 
@@ -630,12 +630,12 @@ else
                             }
                             else if (askLeafDay)
                             {
-                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                <div class="leaf-day d-flex flex-wrap align-items-center gap-2">
                                     <label class="visually-hidden" for="first-leaf-day">@Strings.Propagations.EditFirstLeaf</label>
-                                    <input id="first-leaf-day" type="date" class="form-control form-control-sm w-auto" @bind="sawLeafDay" @bind:format="yyyy-MM-dd"
+                                    <input id="first-leaf-day" type="date" class="form-control w-auto" @bind="sawLeafDay" @bind:format="yyyy-MM-dd"
                                            min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
-                                    <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="RecordFirstLeafAsync">@Strings.Common.Save</button>
-                                    <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => askLeafDay = false">@Strings.Common.Cancel</button>
+                                    <button type="button" class="btn btn-primary" disabled="@(busy || sawLeafDay < propagation.StartedOn || sawLeafDay > Today)" @onclick="RecordFirstLeafAsync">@Strings.Common.Save</button>
+                                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => askLeafDay = false">@Strings.Common.Cancel</button>
                                 </div>
                             }
                             else
@@ -1357,6 +1357,13 @@ else
         {
             busy = false;
         }
+    }
+
+    // Deleting a history line cleared a first root or leaf date, so a moment about it no longer holds
+    private async Task HistoryChangedDatesAsync()
+    {
+        moment = null;
+        await LoadAsync();
     }
 
     private bool askLeafDay;
