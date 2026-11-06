@@ -156,7 +156,7 @@ Growers keep it at different heights, and all of these are common:
 
 - About a third of the pot's height. *growers*
 - Just touching the bottom of the pebbles, so they wick the water up. *growers*
-- Some let the reservoir run empty for a few days before filling it again, so the roots get air. LECHUZA's instructions do the same, with a dry phase of about 1 to 2 weeks. Others keep it topped up all the time. [lechuza] *growers*
+- Some let the reservoir run empty for a few days before filling it again, so the roots get air. LECHUZA's instructions do the same, with a dry phase of about 1 to 2 weeks. Others top it up so the level stays the same. [lechuza] *growers*
 
 Never so high that the water reaches where the stem meets the roots, and the plant shouldn't stand in water all the time. [compo] *growers*
 

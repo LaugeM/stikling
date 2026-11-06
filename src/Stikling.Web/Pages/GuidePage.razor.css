@@ -178,4 +178,15 @@
     .guide-method-title {
         display: block;
     }
+
+    /* Four methods in two rows of two, rather than three and one left alone */
+    .guide-method-grid.four {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.guide-track {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
 }

@@ -74,13 +74,17 @@ else
         if (guide is null)
             return;
 
+        // The first method of each set shows while the place it was opened from is looked up
+        PickMethods();
         await ResolveFromAsync();
+        PickMethods();
+    }
 
+    private void PickMethods()
+    {
+        var start = GuideBook.StartMethod(guide!.Id, medium);
         foreach (var methods in AllMethods(guide.Blocks))
-        {
-            var start = GuideBook.StartMethod(guide.Id, medium);
             picked[methods.LabelKey] = methods.Methods.Any(m => m.Id == start) ? start! : methods.Methods[0].Id;
-        }
     }
 
     /// <summary>Names the place the guide was opened from in the back link, when it is still there.</summary>
@@ -213,7 +217,7 @@ else
                     <label class="btn btn-outline-primary" for="@inputId">@GuideLinks.Text(method.TitleKey)</label>
                 }
             </div>
-            <div class="guide-method-grid">
+            <div class="guide-method-grid @(methods.Methods.Count == 4 ? "four" : null)">
                 @foreach (var method in methods.Methods)
                 {
                     <div class="guide-method @(current == method.Id ? "is-picked" : null)">
@@ -231,6 +235,8 @@ else
 
     /// <summary>The end of the semi-hydro guide: start tracking the move for the plant it was opened from.</summary>
     private RenderFragment RenderTrack() => @<text>
+        @if (plant is not { TransitionSettled: true })
+        {
         <section class="guide-section">
             <h2 class="guide-heading">@Strings.Guides.TrackHeading</h2>
             @if (plant is null)
@@ -244,8 +250,9 @@ else
             }
             else if (plant.TransitionSince is null)
             {
-                <a class="btn btn-primary" href="plants/@plant.Id?track=true">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Guides.TrackStart, plant.DisplayName)</a>
+                <a class="btn btn-primary guide-track" href="plants/@plant.Id?track=true">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Guides.TrackStart, plant.DisplayName)</a>
             }
         </section>
+        }
     </text>;
 }
