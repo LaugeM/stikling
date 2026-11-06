@@ -16,6 +16,7 @@ import base64
 import hashlib
 import html as htmllib
 import json
+import os
 import pathlib
 import re
 import shutil
@@ -154,6 +155,14 @@ def make_page(code, name, title, description, body):
     page = fill(r'(<div class="error-ui-body">\s*<span>)[^<]*(</span>)', element_text(text["shellError"]), page)
     page = fill(r'(class="reload btn btn-primary btn-sm">)[^<]*(</a>)', element_text(text["shellReload"]), page)
     page = fill(r'(class="dismiss btn btn-link btn-sm">)[^<]*(</button>)', element_text(text["shellClose"]), page)
+
+    page = fill(r'(<p class="start-failed-text">)[^<]*(</p>)', element_text(text["shellStartFailed"]), page)
+    page = fill(r'(<p class="start-unsupported-text">)[^<]*(</p>)', element_text(text["shellUnsupported"]), page)
+    page = fill(r'(class="start-failed-retry">)[^<]*(</button>)', element_text(text["shellTryAgain"]), page)
+
+    # The version, so error reports from the browser side say which one they came from. It is the full commit,
+    # like the release the .NET side reports.
+    page = fill(r'(<meta name="stikling-release" content=")[^"]*(" />)', attribute(os.environ.get("GITHUB_SHA", "")), page)
 
     body = keep_in_language(plain_characters(body), code)
     if name == "":

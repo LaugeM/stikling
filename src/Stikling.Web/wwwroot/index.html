@@ -18,6 +18,8 @@
     <meta property="og:image:alt" content="Two screens from Stikling: a pothos cutting rooting in a jar of water on day 14, and the plant it was taken from" />
     <meta name="twitter:card" content="summary_large_image" />
     <base href="/" />
+    <!-- The version of the app, filled in by the deploy (prepare-pages.py). errors.js reports it with errors from before the app has started -->
+    <meta name="stikling-release" content="" />
     <script src="js/theme.js"></script>
     <script src="js/language.js"></script>
     <script defer src="lib/sentry/bundle.min.js"></script>
@@ -746,6 +748,88 @@
             display: block;
             width: min(16rem, 70vw);
         }
+
+        /* The app couldn't start, or the browser can't run it. The start script sets the class on <html>, and
+           the bar says so at the bottom of the screen in place of the progress */
+        #start-failed,
+        .start-failed-text,
+        .start-unsupported-text,
+        .start-failed-retry {
+            display: none;
+        }
+
+        .start-failed #start-failed,
+        .start-unsupported #start-failed {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 20;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem 1rem;
+            padding: 0.75rem 1rem max(0.75rem, env(safe-area-inset-bottom));
+            padding-right: max(1rem, env(safe-area-inset-right));
+            padding-left: max(1rem, env(safe-area-inset-left));
+            border-top: 1px solid var(--intro-border);
+            background: var(--intro-surface);
+            color: var(--intro-ink);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        #start-failed p {
+            flex: 1 1 18rem;
+            margin: 0;
+        }
+
+        .start-failed .start-failed-text,
+        .start-unsupported .start-unsupported-text {
+            display: block;
+        }
+
+        .start-failed .start-failed-retry {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            min-height: 2.75rem;
+            padding: 0.5rem 1.125rem;
+            border: 0;
+            border-radius: 0.6rem;
+            background: var(--intro-green);
+            color: var(--intro-on-green);
+            font-family: var(--intro-display);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .start-failed .start-failed-retry:hover {
+            background: var(--intro-moss);
+        }
+
+        .start-failed .start-failed-retry:focus-visible {
+            outline: 2px solid var(--intro-green);
+            outline-offset: 2px;
+        }
+
+        .start-failed .intro-loading,
+        .start-failed .intro-quiet .intro-bar,
+        .start-failed .intro-quiet-text,
+        .start-unsupported .intro-loading,
+        .start-unsupported .intro-quiet .intro-bar,
+        .start-unsupported .intro-quiet-text {
+            display: none;
+        }
+
+        .start-failed #blazor-error-ui,
+        .start-unsupported #blazor-error-ui {
+            display: none !important;
+        }
     </style>
     <link rel="preload" id="webassembly" />
     <link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin />
@@ -815,6 +899,14 @@
             <button type="button" class="dismiss btn btn-link btn-sm">Close</button>
         </div>
     </div>
+
+    <!-- Shown by the start script when the app can't start. It comes after the error bar, since prepare-pages.py
+         replaces everything from #app to the error bar on the static pages -->
+    <div id="start-failed" role="alert">
+        <p class="start-failed-text">Stikling couldn't finish downloading. Check your connection and try again.</p>
+        <p class="start-unsupported-text">This browser can't run Stikling. Updating it may help. On an iPhone or iPad, Lockdown Mode also stops it.</p>
+        <button type="button" class="start-failed-retry">Try again</button>
+    </div>
     <script>
         // On a first visit the app starts underneath the page above and opens once it has rendered. Someone
         // who has scrolled down to read isn't pulled away mid-sentence: the app waits for them to tap Open.
@@ -883,10 +975,123 @@
                 set("#blazor-error-ui .error-ui-body span", shell.error);
                 set("#blazor-error-ui .reload", shell.reload);
                 set("#blazor-error-ui .dismiss", shell.close);
+                set(".start-failed-text", shell.startfailed);
+                set(".start-unsupported-text", shell.unsupported);
+                set(".start-failed-retry", shell.tryagain);
             } catch (e) { /* the text just stays English */ }
         })();
     </script>
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js" autostart="false"></script>
+    <script>
+        // Starts the app, so that a start that fails can be reported, tried once more, and then explained
+        (function () {
+            var retryKey = "stikling-start-retry";
+            var fiveMinutes = 5 * 60 * 1000;
+            var root = document.documentElement;
+
+            function recentRetry() {
+                try {
+                    var time = parseInt(sessionStorage.getItem(retryKey), 10);
+                    return !isNaN(time) && Date.now() - time < fiveMinutes;
+                } catch (e) { return false; }
+            }
+
+            var startup = window.stiklingStartup = {
+                started: false,
+                hidden: document.hidden,
+                retried: recentRetry(),
+                // .NET's runtime here needs WebAssembly with SIMD. Lockdown Mode on iPhone turns WebAssembly off.
+                canRun: function () {
+                    try {
+                        return typeof WebAssembly === "object" && WebAssembly.validate(new Uint8Array(
+                            [0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
+                    } catch (e) { return false; }
+                }
+            };
+
+            document.addEventListener("visibilitychange", function () {
+                if (document.hidden && !startup.started) startup.hidden = true;
+            });
+
+            var retry = document.querySelector(".start-failed-retry");
+            if (retry) retry.addEventListener("click", function () { location.reload(); });
+
+            var failedOnce = false;
+            // reported: Sentry's own handler for unhandled errors already sent it
+            function failed(error, reported) {
+                if (failedOnce || startup.started) return;
+                failedOnce = true;
+                function show() {
+                    // A retry only makes sense once, and only if it can be remembered that it was tried
+                    var again = false;
+                    try {
+                        var last = parseInt(sessionStorage.getItem(retryKey), 10);
+                        if (isNaN(last) || Date.now() - last >= fiveMinutes) {
+                            sessionStorage.setItem(retryKey, String(Date.now()));
+                            again = true;
+                        }
+                    } catch (e) { /* no storage: the message is shown instead */ }
+                    if (again) location.reload();
+                    else root.classList.add("start-failed");
+                }
+                // errors.js may still be setting up reports, so this waits for it, but no more than a few seconds
+                whenReportsReady(function () {
+                    try {
+                        if (window.Sentry && Sentry.getClient && Sentry.getClient()) {
+                            if (!reported) Sentry.captureException(error);
+                            Promise.resolve(Sentry.flush(2000)).then(show, show);
+                            return;
+                        }
+                    } catch (e) { /* the report is lost, the rest carries on */ }
+                    show();
+                });
+            }
+
+            function whenReportsReady(then) {
+                var done = false;
+                function go() {
+                    if (!done) { done = true; then(); }
+                }
+                setTimeout(go, 3000);
+                function wait() {
+                    var errors = window.stiklingErrors;
+                    if (errors && errors.ready) errors.ready.then(go, go);
+                    else go();
+                }
+                // errors.js is deferred, so it may not have run yet
+                if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wait);
+                else wait();
+            }
+
+            if (!startup.canRun()) {
+                root.classList.add("start-unsupported");
+                return;
+            }
+            // Blazor's start promise never settles when the start fails (it runs the start as a promise's
+            // executor, so the error is left unhandled), so the failure is caught as that unhandled error. Often it
+            // doesn't get that far: a file the app needs fails to download and the runtime stops there. Files it
+            // can do without fail as "optional download", which isn't a failed start.
+            window.addEventListener("unhandledrejection", function (event) {
+                var reason = event.reason;
+                var message = reason && typeof reason.message === "string" ? reason.message : "";
+                if (message.indexOf("Failed to start platform.") !== 0 && message.indexOf("download '") !== 0) return;
+                failed(reason, !!(window.Sentry && Sentry.getClient && Sentry.getClient()));
+            });
+            // blazor.webassembly.js itself may not have arrived
+            if (typeof Blazor === "undefined" || !Blazor.start) {
+                failed(new Error("blazor.webassembly.js didn't load"));
+                return;
+            }
+            try {
+                Blazor.start().then(function () {
+                    startup.started = true;
+                    try { sessionStorage.removeItem(retryKey); } catch (e) { }
+                }, failed);
+            } catch (e) {
+                failed(e);
+            }
+        })();
+    </script>
     <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
 </body>
 

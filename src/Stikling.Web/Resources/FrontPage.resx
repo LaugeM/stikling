@@ -68,6 +68,18 @@
     <value>Close</value>
     <comment>Button in that bar.</comment>
   </data>
+  <data name="ShellStartFailed" xml:space="preserve">
+    <value>Stikling couldn't finish downloading. Check your connection and try again.</value>
+    <comment>The bar at the bottom when the app fails to start, even after trying once more.</comment>
+  </data>
+  <data name="ShellUnsupported" xml:space="preserve">
+    <value>This browser can't run Stikling. Updating it may help. On an iPhone or iPad, Lockdown Mode also stops it.</value>
+    <comment>The bar at the bottom when the browser has no WebAssembly with SIMD, which the app needs.</comment>
+  </data>
+  <data name="ShellTryAgain" xml:space="preserve">
+    <value>Try again</value>
+    <comment>Button in the bar about the app failing to start.</comment>
+  </data>
   <data name="NoJavaScript" xml:space="preserve">
     <value>Stikling needs JavaScript turned on to run.</value>
     <comment>Shown when the browser has scripts turned off.</comment>
