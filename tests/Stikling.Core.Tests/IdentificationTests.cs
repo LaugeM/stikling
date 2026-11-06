@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Stikling.Core.Identification;
+using Stikling.Core.Models;
 
 namespace Stikling.Core.Tests;
 
@@ -24,6 +25,28 @@ public class IdentificationTests
     public void A_cultivar_is_kept_only_when_the_species_stays(
         string? genus, string? species, string? cultivar, string newGenus, string newSpecies, string? expected) =>
         Assert.Equal(expected, IdentificationRules.CultivarAfterPick(genus, species, cultivar, newGenus, newSpecies));
+
+    [Theory]
+    [InlineData(null, null, true)]
+    [InlineData("", null, true)]
+    [InlineData("  ", null, true)]
+    [InlineData("Monstera", null, false)]
+    [InlineData("Monstera", NameQualifier.Cf, true)]
+    [InlineData("Monstera", NameQualifier.Aff, true)]
+    [InlineData("Monstera", NameQualifier.Sp, true)]
+    [InlineData("Monstera", NameQualifier.Unknown, true)]
+    [InlineData(null, NameQualifier.Cf, true)]
+    public void A_name_is_wanted_when_missing_or_unsure(string? genus, NameQualifier? qualifier, bool expected) =>
+        Assert.Equal(expected, IdentificationRules.NameWanted(genus, qualifier));
+
+    [Theory]
+    [InlineData(null, NameQualifier.Cf)]
+    [InlineData(NameQualifier.Cf, NameQualifier.Cf)]
+    [InlineData(NameQualifier.Aff, NameQualifier.Aff)]
+    [InlineData(NameQualifier.Sp, NameQualifier.Cf)]
+    [InlineData(NameQualifier.Unknown, NameQualifier.Cf)]
+    public void A_name_picked_on_the_page_is_marked_cf(NameQualifier? before, NameQualifier? expected) =>
+        Assert.Equal(expected, IdentificationRules.QualifierAfterPick(before));
 
     private static string Item(string full, string genus, double score, string? commonNames = "[\"Swiss cheese plant\"]") =>
         $$"""

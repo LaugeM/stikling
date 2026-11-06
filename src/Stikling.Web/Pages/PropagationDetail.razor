@@ -23,6 +23,9 @@
 @inject CameraService Camera
 @inject IPhotoRepository PhotoRepository
 @inject SettingsService SettingsService
+@inject IdentificationService Identification
+@inject SubjectPhotos SubjectPhotos
+@using Stikling.Core.Identification
 @using System.Globalization
 @using Stikling.Core.Propagations
 @using Stikling.Core.Settings
@@ -88,6 +91,13 @@ else
                     else if (everyday?.For(propagation.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(propagation.Species, propagation.NameQualifier), propagation.Cultivar) is { } called)
                     {
                         <p class="detail-sub everyday-name">@called</p>
+                    }
+                    @if (identifyOffered && IdentifyWanted)
+                    {
+                        <button type="button" class="btn btn-link btn-sm link-action identify-link" @onclick="() => identifyOpen = true">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                            @Strings.Identify.Button
+                        </button>
                     }
                     <NumberClashNote Code="@propagation.CollectionNumber" Clashes="numberClashes" />
                     <div class="profile-badges">
@@ -972,6 +982,11 @@ else
     }
 }
 
+@if (identifyOffered)
+{
+    <IdentifySheet @bind-Open="identifyOpen" SubjectId="propagation?.Id" CanKeepPhoto="true" OnPicked="PickIdentifiedAsync" />
+}
+
 @code {
     [Parameter]
     public Guid Id { get; set; }
@@ -1214,8 +1229,57 @@ else
     // What common plants usually like, here only for the Pets row. Empty if it couldn't be read.
     private PlantCareBook careBook = PlantCareBook.Empty;
 
+    private bool identifyOffered;
+    private bool identifyOpen;
+
+    // "Find the name from a photo" under the name of an active propagation that has no name of its own or
+    // its parent's, or whose own name is unsure
+    private bool IdentifyWanted =>
+        propagation is { IsActive: true }
+        && (string.IsNullOrWhiteSpace(propagation.Genus)
+            ? parent is null || string.IsNullOrWhiteSpace(parent.Genus)
+            : IdentificationRules.NameWanted(propagation.Genus, propagation.NameQualifier));
+
+    // A name picked here is saved at once, as a guess. The photo, if the person kept it, goes on the history.
+    private async Task PickIdentifiedAsync(IdentifyPick pick)
+    {
+        if (propagation is null)
+            return;
+        busy = true;
+        try
+        {
+            var before = propagation.Copy();
+            var (genus, species) = (await Names.GetDictionaryAsync()).Current(pick.Suggestion.Genus, pick.Suggestion.Species);
+            genus ??= pick.Suggestion.Genus;
+            species ??= pick.Suggestion.Species;
+            propagation.Cultivar = IdentificationRules.CultivarAfterPick(before.Genus, before.Species, before.Cultivar, genus, species);
+            propagation.Genus = genus;
+            propagation.Species = species;
+            propagation.NameQualifier = IdentificationRules.QualifierAfterPick(before.NameQualifier);
+            await PropagationService.UpdateAsync(before, propagation, Labels.For(propagation));
+
+            message = null;
+            if (pick.PhotoInput is { } input)
+            {
+                var (photoMessage, _) = await SubjectPhotos.TakeAsync(input, propagation);
+                message = photoMessage;
+            }
+            historyVersion++;
+            await LoadAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            message = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
     private async Task LoadAsync()
     {
+        identifyOffered = await Identification.IsOfferedAsync();
         everyday = await Names.GetEverydayNamesAsync();
         careBook = await CommonCare.GetBookAsync();
         await Covers.EnsureLoadedAsync();

@@ -11,9 +11,19 @@
 
 <div class="mb-3">
     <label class="form-label" for="@(IdPrefix)name-search">@Strings.Plants.NameWhatPlant</label>
-    <input id="@(IdPrefix)name-search" type="search" class="form-control" value="@query" placeholder="@Strings.Plants.NameSearchPlaceholder"
-           autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="@(IdPrefix)name-results"
-           @oninput="e => query = e.Value?.ToString()" @ref="searchInput" />
+    @* The same input and group element either way, so the search box isn't rebuilt when the offer turns up late *@
+    <div class="@(ShowIdentify && identifyOffered ? "input-group identify-group" : null)">
+        <input id="@(IdPrefix)name-search" type="search" class="form-control" value="@query" placeholder="@Strings.Plants.NameSearchPlaceholder"
+               autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="@(IdPrefix)name-results"
+               @oninput="e => query = e.Value?.ToString()" @ref="searchInput" />
+        @if (ShowIdentify && identifyOffered)
+        {
+            <button type="button" class="btn btn-outline-primary icon-btn identify-button" title="@Strings.Identify.Button" aria-label="@Strings.Identify.Button" @onclick="() => identifyOpen = true">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                @Strings.Identify.ButtonShort
+            </button>
+        }
+    </div>
     @if (Found is { Count: > 0 } found)
     {
         <div id="@(IdPrefix)name-results" class="name-results" role="group" aria-label="@Strings.Plants.NameFound">
@@ -41,15 +51,6 @@
     else if (suggester is not null && NameKeyLength >= NameSuggester.MinLettersWithoutGenus)
     {
         <div id="@(IdPrefix)name-results" class="form-text">@Strings.Plants.NameNothing</div>
-    }
-    @if (ShowIdentify && identifyOffered)
-    {
-        <div class="mt-2">
-            <button type="button" class="btn btn-outline-primary icon-btn identify-button" @onclick="() => identifyOpen = true">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                @Strings.Identify.Button
-            </button>
-        </div>
     }
 </div>
 <div class="row g-2 mb-3">
