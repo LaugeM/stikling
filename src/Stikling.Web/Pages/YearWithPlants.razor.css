@@ -219,7 +219,7 @@
 .year-arrow:focus-visible {
     outline: none;
     border-color: var(--pa-green);
-    box-shadow: 0 0 0 0.2rem rgb(var(--bs-primary-rgb) / 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
 /* Transparent buttons over each photo of the collage */
