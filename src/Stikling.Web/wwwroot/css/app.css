@@ -1340,7 +1340,9 @@ img.framed {
 
 .detail-list {
     display: grid;
-    grid-template-columns: max-content 1fr;
+    /* The value column may shrink below its content (a plain 1fr won't), so a long link or word wraps
+       instead of widening the page. The label column only gives way when it passes half the width. */
+    grid-template-columns: fit-content(50%) minmax(0, 1fr);
     gap: 0.4rem 1rem;
     margin: 0;
 }
@@ -1348,10 +1350,12 @@ img.framed {
 .detail-list dt {
     font-weight: 500;
     color: var(--pa-muted);
+    overflow-wrap: anywhere;
 }
 
 .detail-list dd {
     margin: 0;
+    overflow-wrap: anywhere;
 }
 
 .detail-notes {
