@@ -140,7 +140,7 @@ Each cause: the signs a source gives it for, what moves it up or down, and what 
 
 ## How they are ranked
 
-Each sign a cause explains gives it 2 points. Each fact or answer that moves it up gives 1, and each that moves it down takes 1. Causes with 3 points or more are listed, the most first, at most 3, with the facts that moved each one up shown under it ("Moved 5 days ago"). Ties keep the order above.
+Each sign a cause explains gives it 2 points. A sign that only one cause explains, like sticky leaves, gives that cause 1 more, so it is listed on its own. Each fact or answer that moves it up gives 1, and each that moves it down takes 1. Causes with 3 points or more are listed, the most first, at most 3, with the facts that moved each one up shown under it ("Moved 5 days ago"). Ties keep the order above.
 
 When no cause reaches 3, or more than 3 tie at the top, it says the answers don't point to one cause and shows the general checks: soil a few centimetres down, the roots, the light where it stands, and the undersides of the leaves.
 

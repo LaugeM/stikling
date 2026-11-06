@@ -175,8 +175,8 @@ public class SymptomCheckTests
     {
         var bright = new SymptomFacts { Light = LightFit.Brighter, Changes = [Change(RecentChangeKind.Moved)] };
 
-        // Leggy: too little light has 2 + moved 1 - brighter 1
-        Assert.Empty(Rank([ProblemSign.Leggy], bright).Causes);
+        // New growth small and pale: too little light has 2 + moved 1 - brighter 1
+        Assert.Empty(Rank([ProblemSign.PaleNewGrowth], bright).Causes);
         Assert.Equal([SymptomCauseKind.TooMuchSun], Kinds(Rank([ProblemSign.Sunburn], bright)));
     }
 
@@ -300,10 +300,10 @@ public class SymptomCheckTests
         Assert.False(facts.Without([SymptomFactKind.DarkerThanItLikes, SymptomFactKind.FedOften]).Has(SymptomFactKind.FedOften));
         Assert.Equal(6, facts.Without(SymptomFactKind.NotFed).FeedingsLast3Months);
 
-        // Too little light on leggy: 2 + darker + moved is listed, and unticking both takes it out
-        Assert.Contains(SymptomCauseKind.TooLittleLight, Kinds(Rank([ProblemSign.Leggy], facts)));
+        // Too little light on new growth small and pale: 2 + darker + moved is listed, and unticking both takes it out
+        Assert.Contains(SymptomCauseKind.TooLittleLight, Kinds(Rank([ProblemSign.PaleNewGrowth], facts)));
         Assert.DoesNotContain(SymptomCauseKind.TooLittleLight,
-            Kinds(Rank([ProblemSign.Leggy], facts.Without([SymptomFactKind.DarkerThanItLikes, SymptomFactKind.Moved]))));
+            Kinds(Rank([ProblemSign.PaleNewGrowth], facts.Without([SymptomFactKind.DarkerThanItLikes, SymptomFactKind.Moved]))));
     }
 
     // Gathering the facts in the service
@@ -586,7 +586,7 @@ public class SymptomCheckTests
     {
         var s = new Setup(p => { p.Light = LightLevel.Low; p.LikesLight = LightLevel.BrightIndirect; });
         var context = await s.Gather();
-        ProblemSign[] signs = [ProblemSign.Leggy];
+        ProblemSign[] signs = [ProblemSign.PaleNewGrowth];
 
         // Darker 1 + darker half of the year 1 on top of 2
         var all = SymptomCheck.Rank(signs, WhichLeaves.NotSure, HowFast.NotSure, SoilNow.NotSure, context.Facts);
@@ -595,5 +595,16 @@ public class SymptomCheckTests
         var ticked = context.Facts.Without([SymptomFactKind.DarkerThanItLikes, SymptomFactKind.DarkerHalf]);
         var rest = SymptomCheck.Rank(signs, WhichLeaves.NotSure, HowFast.NotSure, SoilNow.NotSure, ticked);
         Assert.DoesNotContain(SymptomCauseKind.TooLittleLight, Kinds(rest));
+    }
+
+    [Theory]
+    [InlineData(ProblemSign.Sticky, SymptomCauseKind.Pests)]
+    [InlineData(ProblemSign.Speckled, SymptomCauseKind.Pests)]
+    [InlineData(ProblemSign.Curled, SymptomCauseKind.Pests)]
+    [InlineData(ProblemSign.Leggy, SymptomCauseKind.TooLittleLight)]
+    [InlineData(ProblemSign.RootRot, SymptomCauseKind.TooWet)]
+    public void A_sign_only_one_cause_explains_lists_it_on_its_own(ProblemSign sign, SymptomCauseKind cause)
+    {
+        Assert.Equal([cause], Kinds(Rank([sign])));
     }
 }

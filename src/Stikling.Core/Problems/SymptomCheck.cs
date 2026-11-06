@@ -75,6 +75,9 @@ public static class SymptomScoring
     /// <summary>Points for each sign a cause explains.</summary>
     public const int PerSign = 2;
 
+    /// <summary>Added for each picked sign that this cause is the only one to explain.</summary>
+    public const int PerOnlyCause = 1;
+
     /// <summary>Points for each fact or answer that moves a cause up, and taken off for each that moves it down.</summary>
     public const int PerMove = 1;
 
@@ -237,7 +240,9 @@ public static class SymptomCheck
             if (explained.Count == 0)
                 continue;
 
-            var tally = new Tally(explained.Count * SymptomScoring.PerSign);
+            // A sign that no other cause explains, like sticky leaves, is enough to list this one on its own
+            var onlyCause = explained.Count(e => Signs.Where(o => o.Sign == e.Sign).Select(o => o.Cause).Distinct().Count() == 1);
+            var tally = new Tally(explained.Count * SymptomScoring.PerSign + onlyCause * SymptomScoring.PerOnlyCause);
             Adjust(cause, new Answers(leaves, speed, soil), facts, tally);
             if (tally.Points < SymptomScoring.ListedAt)
                 continue;
