@@ -1442,4 +1442,92 @@ Maybe</value>
     <value>Drop to add to {0}</value>
     <comment>Shown over a plant or propagation page while photo files are dragged over it on a computer. {0} is the plant or propagation name.</comment>
   </data>
+  <data name="RoomsHistory" xml:space="preserve">
+    <value>History</value>
+    <comment>Link on a room or spot to the list of plants that have stood there.</comment>
+  </data>
+  <data name="RoomsHistoryOf" xml:space="preserve">
+    <value>History of {0}</value>
+    <comment>Screen reader name of the link on a room or spot to its history. {0} is the room or spot.</comment>
+  </data>
+  <data name="SpotHistoryPageTitle" xml:space="preserve">
+    <value>What has lived here</value>
+    <comment>Browser tab title of the page listing the plants that have stood in a room or spot.</comment>
+  </data>
+  <data name="SpotHistoryTitle" xml:space="preserve">
+    <value>What has lived in {0}</value>
+    <comment>Heading. {0} is the room or spot.</comment>
+  </data>
+  <data name="SpotHistoryHint" xml:space="preserve">
+    <value>From the room changes in each plant's history. A plant counts from the day it was added when no move here was logged.</value>
+    <comment>Under the heading of the list of plants that have stood in a room or spot.</comment>
+  </data>
+  <data name="SpotHistoryEmpty" xml:space="preserve">
+    <value>No plants have stood here yet</value>
+    <comment>Empty list of plants that have stood in a room or spot.</comment>
+  </data>
+  <data name="SpotHistoryEmptyHint" xml:space="preserve">
+    <value>When you place a plant here or move one here, it shows up in this list and stays on it after it moves on.</value>
+    <comment>Under the empty list of plants that have stood in a room or spot.</comment>
+  </data>
+  <data name="SpotHistoryGone" xml:space="preserve">
+    <value>This room or spot is gone.</value>
+    <comment>The history page of a room or spot that was removed.</comment>
+  </data>
+  <data name="SpotHistoryStillHere" xml:space="preserve">
+    <value>Still here</value>
+    <comment>A plant that still stands in this room or spot.</comment>
+  </data>
+  <data name="SpotHistoryMovedOn" xml:space="preserve">
+    <value>Moved on</value>
+    <comment>A plant that stood in this room or spot and went on to another.</comment>
+  </data>
+  <data name="SpotHistoryDiedHere" xml:space="preserve">
+    <value>Died here</value>
+    <comment>A plant that died while it stood in this room or spot.</comment>
+  </data>
+  <data name="SpotHistoryGivenAway" xml:space="preserve">
+    <value>Given away from here</value>
+    <comment>A plant given away while it stood in this room or spot.</comment>
+  </data>
+  <data name="SpotHistorySold" xml:space="preserve">
+    <value>Sold from here</value>
+    <comment>A plant sold while it stood in this room or spot.</comment>
+  </data>
+  <data name="SpotHistorySince" xml:space="preserve">
+    <value>Since {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="SpotHistorySinceAtLeast" xml:space="preserve">
+    <value>Since at least {0}</value>
+    <comment>{0} is the day the plant was added, since no move here was logged.</comment>
+  </data>
+  <data name="SpotHistoryFromTo" xml:space="preserve">
+    <value>{0} to {1}</value>
+    <comment>{0} and {1} are dates.</comment>
+  </data>
+  <data name="SpotHistoryAtLeastFromTo" xml:space="preserve">
+    <value>From at least {0} to {1}</value>
+    <comment>{0} is the day the plant was added, since no move here was logged. {1} is a date.</comment>
+  </data>
+  <data name="SpotHistoryFrom" xml:space="preserve">
+    <value>From {0}</value>
+    <comment>The day a plant came here, when the day it left is not in its history. {0} is a date.</comment>
+  </data>
+  <data name="SpotHistoryFromAtLeast" xml:space="preserve">
+    <value>From at least {0}</value>
+    <comment>{0} is the day the plant was added. The day it left is not in its history.</comment>
+  </data>
+  <data name="SpotHistoryUntil" xml:space="preserve">
+    <value>Until {0}</value>
+    <comment>The day a plant left here, when the day it came is not in its history. {0} is a date.</comment>
+  </data>
+  <data name="SpotHistoryNoDates" xml:space="preserve">
+    <value>No dates in its history</value>
+    <comment>A plant that stood here, with neither the day it came nor the day it left in its history.</comment>
+  </data>
+  <data name="SpotHistoryAtLeast" xml:space="preserve">
+    <value>at least {0}</value>
+    <comment>{0} is a length of time, like "8 months".</comment>
+  </data>
 </root>

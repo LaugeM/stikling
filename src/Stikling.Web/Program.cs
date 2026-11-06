@@ -109,6 +109,7 @@ builder.Services.AddScoped<PlantCareService>();
 builder.Services.AddScoped<PlantRegionService>();
 builder.Services.AddScoped<DictionaryService>();
 builder.Services.AddScoped<RoomService>();
+builder.Services.AddScoped<SpotHistoryService>();
 builder.Services.AddScoped<SellerService>();
 builder.Services.AddScoped<OwnCareKindService>();
 builder.Services.AddScoped<OwnFieldService>();

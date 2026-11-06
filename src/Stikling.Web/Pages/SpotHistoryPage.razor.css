@@ -1,0 +1,31 @@
+.spot-history {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+}
+
+.spot-history li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.spot-history li:last-child {
+    border-bottom: 0;
+}
+
+.spot-history-plant {
+    font-weight: 600;
+}
+
+.spot-history-stay {
+    margin-top: 0.25rem;
+}
+
+.spot-history-ending {
+    margin-right: 0.5rem;
+}
+
+.spot-history-when {
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
