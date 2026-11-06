@@ -37,6 +37,21 @@ public static class WateringText
         return Season(guess) is { } season ? $"{text} {season}" : text;
     }
 
+    /// <summary>How long it has gone in each half of the year, on the plant's page.</summary>
+    public static string Seasonal(WateringSeasons seasons, WateringForm form)
+    {
+        var format = form switch
+        {
+            WateringForm.TopWatered => Strings.Care.WateringSeasonsTop,
+            WateringForm.Reservoir => Strings.Care.WateringSeasonsReservoir,
+            _ => Strings.Care.WateringSeasonsInWater
+        };
+        return F(format, Range(seasons.Brighter), Range(seasons.Darker));
+    }
+
+    private static string Range(DayRange range) =>
+        range.Low == range.High ? Days(range.High) : F(Strings.Care.WateringRangeDays, range.Low, range.High);
+
     /// <summary>The line under a plant's name on Today.</summary>
     public static string Row(WateringDue due, DateOnly today)
     {

@@ -291,7 +291,7 @@ public sealed record WateringGuess(
     }
 
     // Where the weights add up to the share. On a tie it takes the later one, which leans late.
-    private static double Percentile(List<(int Days, double Weight)> weighted, double share)
+    internal static double Percentile(List<(int Days, double Weight)> weighted, double share)
     {
         var sorted = weighted.OrderBy(w => w.Days).ToList();
         var goal = sorted.Sum(w => w.Weight) * share + 1e-9;

@@ -403,7 +403,10 @@
     <value>Hvordan virker vandingspåmindelsen?</value>
   </data>
   <data name="WateringReminderWorkA1" xml:space="preserve">
-    <value>Slå den til under &lt;em&gt;Vandingspåmindelse&lt;/em&gt; i Indstillinger. Den lærer hvor ofte hver plante får vand, ud fra det du har logget, og beder dig tjekke planten i I dag når den sandsynligvis er tør. Den siger aldrig at du skal vande, og den bruger aldrig en plejeguide eller et fast antal dage. Den siger ingenting om en plante før den har set nogle vandinger, så de første uger er der stille. Indtil da står der på plantens side hvor mange den mangler. Log vandingerne når du giver dem, så bliver den bedre. Er den i tvivl, foreslår den hellere for sent end for tidligt, for en plante der bliver tjekket en dag for sent, har det bedre end en der bliver vandet for tidligt. Når en plante der vandes fra oven, skal tjekkes, har I dag en note under Vand, &lt;em&gt;Sådan kan du se, om den skal have vand&lt;/em&gt;, med nogle måder at tjekke på.</value>
+    <value>Slå den til under &lt;em&gt;Vandingspåmindelse&lt;/em&gt; i Indstillinger. Den lærer hvor ofte hver plante får vand, ud fra det du har logget, og beder dig tjekke planten i I dag når den sandsynligvis er tør. Den siger aldrig at du skal vande, og den bruger aldrig en plejeguide eller et fast antal dage. Den siger ingenting om en plante før den har set nogle vandinger, så de første uger er der stille. Indtil da står der på plantens side hvor mange den mangler. Log vandingerne når du giver dem, så bliver den bedre. Er den i tvivl, foreslår den hellere for sent end for tidligt, for en plante der bliver tjekket en dag for sent, har det bedre end en der bliver vandet for tidligt. Når en plante der vandes fra oven, skal tjekkes, har I dag en note under Vand, &lt;em&gt;Sådan kan du se, om den skal have vand&lt;/em&gt;, med nogle måder at tjekke på, og en linje for hver måde at vande på, når du har sat, hvordan planterne vandes, på deres redigeringsside.</value>
+  </data>
+  <data name="WateringReminderWorkA3" xml:space="preserve">
+    <value>Med påmindelsen slået til: når en plante har fået nogle vandinger i både sommerhalvåret og vinterhalvåret, står der også på dens side hvor lang tid der er gået mellem dem i hvert halvår, fx 9 til 12 dage og 15 til 24 dage. Det siger kun hvad der er sket, og påmindelsen går ikke efter det. En plante under en plantelampe får ikke den linje, for årstiden siger ikke så meget om den, og et hul hvor planten hvilede, tæller ikke med.</value>
   </data>
   <data name="WateringReminderWorkA2" xml:space="preserve">
     <value>Logger du fugtmålinger, lærer den hvor lang tid planten er om at tørre ned til det niveau du vander ved, og det virker så snart en vanding er blevet fulgt af en tør måling. Det gælder planter du vander fra oven. Semi-hydro (LECA og PON), knoldstativer, selvvandende potter og planter i en yderpotte med vand i tæller i stedet hvor længe reservoiret holder, og rækken siger &lt;em&gt;Fyldt på&lt;/em&gt; når du sætter hak. En plante i vand bliver fyldt op, og der står &lt;em&gt;Fyldt op&lt;/em&gt; på rækken. Når måden en plante får vand på, ændrer sig, fx fra jord til LECA, begynder den at lære forfra, for de gamle vandinger siger ikke noget om den nye måde. Den lærer heller ikke af et hul hen over en rejse eller pause du har tilføjet under &lt;em&gt;Ude og pause&lt;/em&gt;, medmindre der blev logget en vanding i perioden.</value>
@@ -697,7 +700,7 @@
     <value>Hvad er "Dit år"?</value>
   </data>
   <data name="YourYearA1" xml:space="preserve">
-    <value>En række billeder af dit år med dine planter, klar til at lægge op: hvor mange planter du har tilføjet, og hvor de kom fra, hvordan dine formeringer klarede sig, hvilken der var hurtigst til at slå rødder, hvilket medie der virkede bedst, hvilken plante du har taget flest billeder af, én plantes første og sidste billede i året side om side, og en collage. Du åbner det fra linket nederst i I dag eller fra Succesrate og dage til rødder under fanen Formering. I december kommer det også selv frem i I dag, indtil midt i januar. Bladr gennem kortene, fjern dem du ikke vil dele, og del dem ét ad gangen eller alle på én gang. Kvadrat og 4:5 passer til et opslag, og 9:16 passer til en story. Tidligere år er der også. Planter der døde i løbet af året, står under kortene og kommer aldrig med på et kort.</value>
+    <value>En række billeder af dit år med dine planter, klar til at lægge op: hvor mange planter du har tilføjet, og hvor de kom fra, hvordan dine formeringer klarede sig, hvilken der var hurtigst til at slå rødder, hvilket medie der virkede bedst, hvilken plante du har taget flest billeder af, én plantes første og sidste billede i året side om side, og en collage. Du åbner det fra linket nederst i I dag eller fra Succesrate og dage til rødder under fanen Formering. I december kommer det også selv frem i I dag, indtil midt i januar. Bladr gennem kortene, fjern dem du ikke vil dele, og del dem ét ad gangen eller alle på én gang. Kvadrat og 4:5 passer til et opslag, og 9:16 passer til en story. &lt;em&gt;Lav en video&lt;/em&gt; afspiller de kort, du har beholdt, efter hinanden som en MP4 til Reels eller TikTok, i den størrelse du har valgt og uden lyd. Den bliver lavet på din enhed, så det tager lidt tid. Ikke alle browsere kan lave en, og den siger til, hvis din ikke kan. Tidligere år er der også. Planter der døde i løbet af året, står under kortene og kommer aldrig med på et kort.</value>
   </data>
   <data name="GetPropagationOffWorthLookQ" xml:space="preserve">
     <value>Hvordan får jeg en formering væk fra "Værd at se på"?</value>
@@ -1292,6 +1295,24 @@
   </data>
   <data name="KeyboardShortcutsA1" xml:space="preserve">
     <value>Ja, på en computer. Tryk på ? på en hvilken som helst side for at se dem. / åbner Søg, og N tilføjer en plante. W åbner plejeformularen på vanding for planten, hvis side er åben, eller den du har valgt i listen eller gitteret under Planter, og der logges ikke noget, før du bekræfter i formularen. Esc lukker det, der er åbent oven på siden. Tryk på Tab for at komme til en række i en liste, så flytter piletasterne dig videre derfra. De gør ingenting, mens du skriver i et felt, og / og N venter, mens du er ved at udfylde en formular.</value>
+  </data>
+  <data name="PlantLinkQ" xml:space="preserve">
+    <value>Hvordan åbner jeg en plante ved at holde telefonen hen til potten?</value>
+  </data>
+  <data name="PlantLinkA1" xml:space="preserve">
+    <value>Sæt et NFC-mærkat på potten eller etiketten. De koster ikke meget og skal ikke have batteri. På plantens side åbner du &lt;em&gt;Mere&lt;/em&gt; og trykker på &lt;em&gt;Kopiér plantens link&lt;/em&gt;. Skriv så linket til mærkatet med en hvilken som helst NFC-app, for eksempel NFC Tools, ved at tilføje en URL og sætte linket ind. Fra da af åbner planten, når du holder telefonen hen til mærkatet.</value>
+  </data>
+  <data name="PlantLinkA2" xml:space="preserve">
+    <value>Linket åbner kun planten på en enhed, der har den, altså en, der er logget ind på din konto, eller hvor du har oprettet den. Alle andre, der holder telefonen hen til det, får bare en side om, at planten ikke blev fundet, og linket fortæller ikke noget om den. Det åbner i den browser, telefonen bruger til links, og det er måske ikke den, du har installeret appen fra. Du kan også sætte linket i en QR-kode eller på en etiket.</value>
+  </data>
+  <data name="WeekAheadQ" xml:space="preserve">
+    <value>Kan jeg se, hvad der kommer i denne uge?</value>
+  </data>
+  <data name="WeekAheadA1" xml:space="preserve">
+    <value>Tryk på &lt;em&gt;Ugen, der kommer&lt;/em&gt; nederst på listen i I dag. Den viser, hvad der kommer i dag og de næste syv dage, dag for dag: planter, der er værd at tjekke for vand, og pleje fra dine intervaller. Hver står der én gang, på den næste dag, den er aktuel. Dagene er skøn ud fra det, du har logget, og flytter sig, når du logger mere, så det er ikke en plan at vande efter. Noget, du har udskudt, står på den dag, det kommer tilbage, og det, der kommer på en dag, hvor du er væk eller har stille tid, flytter til den første dag efter.</value>
+  </data>
+  <data name="WeekAheadA2" xml:space="preserve">
+    <value>&lt;em&gt;Markér dagen som klaret&lt;/em&gt; viser alt på dagen og spørger, før der bliver logget noget. Fjern fluebenet ved det, du ikke har gjort, og &lt;em&gt;Fortryd&lt;/em&gt; tager det tilbage bagefter. Det bliver logget som klaret i dag, også for en senere dag. For en senere dag har planter, der skal tjekkes, ikke flueben, så sæt det kun, når du har tjekket planten og givet den vand.</value>
   </data>
   <data name="CompareMediumsLikeWaterPerliteA2" xml:space="preserve">
     <value>Er batchene forskellige på mere end ét punkt, fx et andet vækstmedie og en anden måned, siger en linje under eksperimentets overskrift hvad der er forskelligt, så en forskel i resultatet ikke læses som vækstmediets alene. Et plantenavn eller en placering der er tom, tæller ikke som en forskel.</value>

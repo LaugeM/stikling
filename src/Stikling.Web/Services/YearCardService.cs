@@ -43,6 +43,10 @@ public sealed record YearCardDrawn(string Url, int Missing, IReadOnlyList<YearCa
 /// <summary>Which photos are only small on this device, and which aren't here at all.</summary>
 public sealed record YearPhotoAvailability(IReadOnlyList<string> Small, IReadOnlyList<string> Missing);
 
+/// <summary>The cards to play as a video and their timing, from <see cref="YearVideoPlan"/>.</summary>
+/// <param name="Format">"square", "portrait" or "story". The cards have to be drawn at this size already.</param>
+public sealed record YearVideoSpec(string Format, double Crossfade, double Total, IReadOnlyList<YearVideoShot> Shots);
+
 /// <summary>
 /// Draws the cards of "Your year" and hands them on. The pictures are made and kept in wwwroot/js/yearcards.js;
 /// only the words and photo ids cross into JavaScript, and nothing comes back but a picture's address.
@@ -93,6 +97,18 @@ public sealed class YearCardService(IJSRuntime js, DeviceFiles files) : IAsyncDi
     public async Task<string> ShareAllAsync(IReadOnlyList<string> ids, IReadOnlyList<string> fileNames) =>
         await (await Module).InvokeAsync<string>("shareAll", ids, fileNames);
 
+    /// <summary>
+    /// Plays the drawn cards one after another as a video, made with the time-lapse encoder. The video stays in
+    /// JavaScript, and <see cref="TimelapseService"/> shares, saves, cancels and drops it like a time-lapse.
+    /// "done", "cancelled", "unsupported" (this browser can't make videos), "offline" (the video maker couldn't
+    /// be downloaded) or "failed". Progress is a fraction from 0 to 1.
+    /// </summary>
+    public async Task<string> MakeVideoAsync(YearVideoSpec spec, Action<double> progress)
+    {
+        using var reference = DotNetObjectReference.Create(new TimelapseProgress(progress));
+        return await (await Module).InvokeAsync<string>("makeVideo", spec, reference);
+    }
+
     /// <summary>Lets the front card on the stage be swiped. The page's <c>Swipe(int direction, double moved)</c> is called.</summary>
     public async Task<IJSObjectReference> AttachDeckAsync<T>(ElementReference stage, DotNetObjectReference<T> page) where T : class =>
         await (await Module).InvokeAsync<IJSObjectReference>("attachDeck", stage, page);
@@ -106,6 +122,9 @@ public sealed class YearCardService(IJSRuntime js, DeviceFiles files) : IAsyncDi
 
     /// <summary>"stikling-2026-plants-added.jpg".</summary>
     public static string FileNameFor(int year, string id) => $"stikling-{year}-{id}.jpg";
+
+    /// <summary>"stikling-2026-year.mp4".</summary>
+    public static string VideoFileNameFor(int year) => $"stikling-{year}-year.mp4";
 
     public async ValueTask DisposeAsync()
     {
