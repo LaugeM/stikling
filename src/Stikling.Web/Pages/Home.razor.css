@@ -592,31 +592,6 @@
         gap: 0 2rem;
         align-items: start;
     }
-
-    /* Nothing asks for anything but Worth a look shows: it takes the main column, so the page keeps its
-       shape. The rest still sits in the side column. The rest's wrapper steps aside so its sections
-       can be placed beside Worth a look, which spans the rows. The last, flexible row takes whatever
-       height Worth a look needs, so a long list doesn't spread the side column's sections apart. */
-    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) {
-        grid-template-rows: repeat(20, auto) 1fr;
-    }
-
-    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) > .today-todo {
-        display: none;
-    }
-
-    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) > .today-rest {
-        display: contents;
-    }
-
-    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) > .today-rest > ::deep * {
-        grid-column: 2;
-    }
-
-    .today-columns:not(:has(.today-todo .today-section)):has(.worth-a-look) > .today-rest > ::deep .worth-a-look {
-        grid-column: 1;
-        grid-row: 1 / -1;
-    }
 }
 
 .coming-back-list {
