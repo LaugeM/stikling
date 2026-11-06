@@ -36,6 +36,9 @@
 @inject CameraService Camera
 @inject IPhotoRepository PhotoRepository
 @inject ShareCardService Cards
+@inject IdentificationService Identification
+@inject SubjectPhotos SubjectPhotos
+@using Stikling.Core.Identification
 
 <PageTitle>@F(Strings.PlantDetail.PageTitle, plant?.DisplayName ?? Strings.PlantDetail.PlantFallback)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -95,6 +98,13 @@ else
                     else if (everyday?.For(plant.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar) is { } called)
                     {
                         <p class="detail-sub everyday-name">@called</p>
+                    }
+                    @if (identifyOffered && IdentifyWanted)
+                    {
+                        <button type="button" class="btn btn-link btn-sm link-action identify-link" @onclick="() => identifyOpen = true">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                            @Strings.Identify.Button
+                        </button>
                     }
                     @if (plant.LivesElsewhere)
                     {
@@ -1507,6 +1517,11 @@ else
     </Sheet>
 }
 
+@if (identifyOffered)
+{
+    <IdentifySheet @bind-Open="identifyOpen" SubjectId="plant?.Id" CanKeepPhoto="true" OnPicked="PickIdentifiedAsync" />
+}
+
 @code {
     [Parameter]
     public Guid Id { get; set; }
@@ -1851,8 +1866,40 @@ else
         return found;
     }
 
+    private bool identifyOffered;
+    private bool identifyOpen;
+
+    // "Find the name from a photo" under the name of an active plant whose name is missing or unsure
+    private bool IdentifyWanted =>
+        plant is { Status: PlantStatus.Active } && IdentificationRules.NameWanted(plant.Genus, plant.NameQualifier);
+
+    // A name picked here is saved at once, as a guess. The photo, if the person kept it, goes on the history.
+    private Task PickIdentifiedAsync(IdentifyPick pick) => ChangeAsync(async () =>
+    {
+        if (plant is null)
+            return;
+        var before = plant.Copy();
+        var (genus, species) = (await Names.GetDictionaryAsync()).Current(pick.Suggestion.Genus, pick.Suggestion.Species);
+        genus ??= pick.Suggestion.Genus;
+        species ??= pick.Suggestion.Species;
+        plant.Cultivar = IdentificationRules.CultivarAfterPick(before.Genus, before.Species, before.Cultivar, genus, species);
+        plant.Genus = genus;
+        plant.Species = species;
+        plant.NameQualifier = IdentificationRules.QualifierAfterPick(before.NameQualifier);
+        await PlantService.UpdateAsync(before, plant, Labels.For);
+
+        actionNote = null;
+        if (pick.PhotoInput is { } input)
+        {
+            var (message, _) = await SubjectPhotos.TakeAsync(input, plant);
+            actionNote = message;
+        }
+        await LoadAsync();
+    });
+
     private async Task LoadAsync()
     {
+        identifyOffered = await Identification.IsOfferedAsync();
         everyday = await Names.GetEverydayNamesAsync();
         careBook = await CommonCare.GetBookAsync();
         await Covers.EnsureLoadedAsync();

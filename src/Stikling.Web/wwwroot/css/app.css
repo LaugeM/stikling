@@ -2341,6 +2341,32 @@ a.tag-label:hover {
 
 .identify-button {
     min-height: 2.75rem;
+    white-space: nowrap;
+}
+
+/* The camera button sits at the end of the name search; the input keeps its own height */
+.identify-group > .form-control {
+    min-height: 2.75rem;
+    min-width: 0;
+}
+
+/* "Find the name from a photo" under the name on a plant or propagation */
+.identify-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    text-align: left;
+}
+
+.identify-link svg {
+    width: 1.1em;
+    height: 1.1em;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .identify-thumb {
