@@ -2420,6 +2420,7 @@ a.tag-label:hover {
 
 .room-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
     gap: 0.5rem;
 }

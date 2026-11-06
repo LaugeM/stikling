@@ -1,0 +1,117 @@
+@page "/rooms-and-tags/history/{Id:guid}"
+@using System.Globalization
+@using Stikling.Core.Problems
+@inject SpotHistoryService History
+@inject TimeProvider Time
+
+<PageTitle>@Strings.Shared.SpotHistoryPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Pests.Loading</p>
+}
+else if (place is not { } found)
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Shared.SpotHistoryGone</p>
+    </div>
+}
+else
+{
+    <h1>@string.Format(CultureInfo.CurrentCulture, Strings.Shared.SpotHistoryTitle, found.Name)</h1>
+
+    @if (found.Plants.Count == 0)
+    {
+        <div class="empty-state mt-3">
+            <p>@Strings.Shared.SpotHistoryEmpty</p>
+            <p class="text-body-secondary">@Strings.Shared.SpotHistoryEmptyHint</p>
+        </div>
+    }
+    else
+    {
+        <p class="settings-hint">@Strings.Shared.SpotHistoryHint</p>
+        <ul class="spot-history">
+            @foreach (var row in found.Plants)
+            {
+                <li>
+                    <a class="spot-history-plant" href="plants/@row.Plant.Id">@row.Plant.DisplayName</a>
+                    @foreach (var stay in row.Stays)
+                    {
+                        <div class="spot-history-stay">
+                            <span class="spot-history-ending">@Ending(stay.Ending)</span>
+                            <span class="spot-history-when">@When(stay)</span>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private bool loaded;
+    private (Guid Id, string Name, IReadOnlyList<SpotPlant> Plants)? place;
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        place = await History.GetAsync(Id);
+        loaded = true;
+    }
+
+    private static string Ending(SpotStayEnding ending) => ending switch
+    {
+        SpotStayEnding.StillThere => Strings.Shared.SpotHistoryStillHere,
+        SpotStayEnding.Died => Strings.Shared.SpotHistoryDiedHere,
+        SpotStayEnding.GivenAway => Strings.Shared.SpotHistoryGivenAway,
+        SpotStayEnding.Sold => Strings.Shared.SpotHistorySold,
+        _ => Strings.Shared.SpotHistoryMovedOn
+    };
+
+    /// <summary>"Since 3 Mar 2026, 8 months, Windowsill": the time it stood there, and in which spots of a room.</summary>
+    private string When(SpotStay stay)
+    {
+        var parts = new List<string> { Period(stay) };
+        if (Lasted(stay) is { } days && days > 0)
+        {
+            var length = ProblemText.Duration(days);
+            parts.Add(stay.FromLogged ? length : string.Format(CultureInfo.CurrentCulture, Strings.Shared.SpotHistoryAtLeast, length));
+        }
+        parts.AddRange(stay.Spots);
+        return string.Join(", ", parts);
+    }
+
+    private static string Period(SpotStay stay)
+    {
+        static string Text(string template, params object[] days) => string.Format(CultureInfo.CurrentCulture, template, days);
+
+        return (stay.From, stay.To) switch
+        {
+            ({ } from, { } to) when from == to => Labels.Date(from),
+            ({ } from, { } to) => stay.FromLogged
+                ? Text(Strings.Shared.SpotHistoryFromTo, Labels.Date(from), Labels.Date(to))
+                : Text(Strings.Shared.SpotHistoryAtLeastFromTo, Labels.Date(from), Labels.Date(to)),
+            ({ } from, null) when stay.Ending == SpotStayEnding.StillThere => stay.FromLogged
+                ? Text(Strings.Shared.SpotHistorySince, Labels.Date(from))
+                : Text(Strings.Shared.SpotHistorySinceAtLeast, Labels.Date(from)),
+            ({ } from, null) => stay.FromLogged
+                ? Text(Strings.Shared.SpotHistoryFrom, Labels.Date(from))
+                : Text(Strings.Shared.SpotHistoryFromAtLeast, Labels.Date(from)),
+            (null, { } to) => Text(Strings.Shared.SpotHistoryUntil, Labels.Date(to)),
+            _ => Strings.Shared.SpotHistoryNoDates
+        };
+    }
+
+    // How long it stood there. Only known when both ends are, and today is the end while it's still there
+    private int? Lasted(SpotStay stay)
+    {
+        var end = stay.Ending == SpotStayEnding.StillThere ? Time.Today() : stay.To;
+        return stay.From is { } from && end is { } to ? to.DayNumber - from.DayNumber : null;
+    }
+}

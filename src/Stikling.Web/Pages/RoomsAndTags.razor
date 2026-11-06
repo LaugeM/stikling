@@ -42,6 +42,7 @@
                             {
                                 <a class="btn btn-link btn-sm link-action" href="round/@r.Id?from=rooms">@Strings.Shared.RoomsGoRound</a>
                             }
+                            <a class="btn btn-link btn-sm link-action" href="rooms-and-tags/history/@r.Id" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsHistoryOf, r.Name)">@Strings.Shared.RoomsHistory</a>
                             <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                     @onclick="() => renaming = r.Id">@Strings.Shared.RoomsRename</button>
                             @if (r.Total == 0)
@@ -68,6 +69,7 @@
                                 <div class="room-row">
                                     <span class="room-name">@spot.Name</span>
                                     <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
+                                    <a class="btn btn-link btn-sm link-action" href="rooms-and-tags/history/@spot.Id" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsHistoryOf, spot.Place)">@Strings.Shared.RoomsHistory</a>
                                     <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                             @onclick="() => renaming = spot.Id">@Strings.Shared.RoomsRename</button>
                                     @if (spot.Total == 0)

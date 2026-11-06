@@ -99,6 +99,29 @@ public sealed class Places
     /// </summary>
     public IReadOnlySet<Guid> IdsIn(Guid? id) => byId.Keys.Where(k => IsIn(k, id)).ToHashSet();
 
+    /// <summary>
+    /// The names a place still in use goes by or went by, and the place each leads to, for reading a name written
+    /// down earlier. The names as they are now come first, then the names of what was merged. A place that was
+    /// deleted without being merged has none.
+    /// </summary>
+    public IEnumerable<(string Name, Guid PlaceId)> NamesEverUsed()
+    {
+        var ordered = byId.Values.Where(p => Find(p.Id) is not null).OrderBy(p => p.CreatedAt).ThenBy(p => p.Id).ToList();
+
+        var current = ordered
+            .Where(p => Find(p.Id) == p)
+            .Select(p => (Name: NameOf(p.Id), PlaceId: p.Id));
+
+        var earlier = ordered
+            .Select(p => (
+                Name: p.IsSpot ? RoomName.Combine(byId.GetValueOrDefault(p.RoomId!.Value)?.Name, p.Name) : RoomName.Clean(p.Name),
+                PlaceId: Find(p.Id)!.Id));
+
+        foreach (var (name, id) in current.Concat(earlier))
+            if (name is not null)
+                yield return (name, id);
+    }
+
     /// <summary>A room by its name, ignoring case and spacing. The oldest wins if two share it.</summary>
     public Place? RoomNamed(string? name) => Rooms.FirstOrDefault(r => RoomName.Same(r.Name, name));
 
