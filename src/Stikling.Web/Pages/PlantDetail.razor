@@ -299,6 +299,10 @@ else
             {
                 <p class="profile-facts">@wateringLine</p>
             }
+            @if (wateringSeasonsLine is not null)
+            {
+                <p class="profile-facts">@wateringSeasonsLine</p>
+            }
 
             @if (!given.IsEmpty)
             {
@@ -1624,6 +1628,8 @@ else
 
     private string? wateringLine;
 
+    private string? wateringSeasonsLine;
+
     private IReadOnlyList<Feed> feeds = [];
 
     /// <summary>The feed given with the water, or null when it is off or the feed is gone.</summary>
@@ -2131,15 +2137,24 @@ else
     private async Task ReloadWateringLineAsync(IReadOnlyList<CareLog> allCare)
     {
         wateringLine = null;
+        wateringSeasonsLine = null;
         if (plant is not { InCollection: true, WateringReminder: true }
             || !(await SettingsService.GetAsync()).WateringReminder)
             return;
 
+        var timeline = await TimelineRepository.GetPlantChangesAsync();
+        var lights = await LightService.GetAllAsync();
+        var stretches = await AwayService.GetAllAsync();
+        var hemisphere = Seasons.HemisphereOf(TimeZoneInfo.Local);
+
         var guess = WateringRound.GuessFor(
-            plant, await Repository.GetAllAsync(), allCare, await TimelineRepository.GetPlantChangesAsync(),
-            id => pots.FirstOrDefault(p => p.Id == id), await LightService.GetAllAsync(), places,
-            await AwayService.GetAllAsync(), Seasons.HemisphereOf(TimeZoneInfo.Local), Time);
+            plant, await Repository.GetAllAsync(), allCare, timeline,
+            id => pots.FirstOrDefault(p => p.Id == id), lights, places, stretches, hemisphere, Time);
         wateringLine = WateringText.Summary(guess);
+
+        var seasons = WateringSeasons.Of(
+            plant, allCare, timeline, GrowLights.IsLit(plant, lights, places), hemisphere, stretches, Time);
+        wateringSeasonsLine = seasons is null ? null : WateringText.Seasonal(seasons, guess.Form);
     }
 
     // The entry open for fixing in the Care sheet, or null while the history shows
