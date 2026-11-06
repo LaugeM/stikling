@@ -34,7 +34,7 @@ Shown as lines the person can untick if they're wrong. Each one only moves cause
 | Arrived, repotted or moved in the last 4 weeks, and the day | `RecentChanges` with 28 days |
 | Stands darker or brighter than it likes | `CareLikes.Fit` |
 | Likes to dry out, or likes high humidity | What it likes |
-| Last meter reading and its day | Care log |
+| Last meter reading and its day, when it is from the last 7 days and no watering came after it. The dry part is the plant's own water-at level when set | Care log |
 | Days since last watered, against its usual gap | `WateringGuess`, only once it has learned the plant |
 | Last fed, and how often in the last 3 months | Care log |
 | Last repotted more than 2 years ago, or never | Care log and the acquired date |
@@ -49,14 +49,14 @@ Each cause: the signs a source gives it for, what moves it up or down, and what 
 ### Too wet at the roots
 
 - **Signs:** yellow leaves (ucipm, rhs, isu), drooping (ucipm, caes), leaf drop (ucipm, caes), root rot (ucipm), mushy stem (ucipm: "soft stem bases are usually indicative of overwatering"), edema (rhs), spots (caes, ucipm), brown tips (ucipm, rhs).
-- **Up:** soil wet now, a meter reading in the wet part, likes to dry out, rests in this season, repotted lately into a larger pot (rhs: overpotting).
+- **Up:** soil wet now, a meter reading in the wet part, likes to dry out, rests in this season. Overpotting (rhs) isn't used, since a repot doesn't record the pot size.
 - **Down:** soil dry all the way down, in semi-hydro or water (then the check is the roots and the water level, not the soil).
 - **Check:** how wet the soil is a few centimetres down, with a finger or a meter. Whether the pot drains and isn't standing in water. Slide the plant out and look at the roots: healthy ones are firm and light, rotting ones are brown or black, soft, and may smell.
 
 ### Too dry
 
 - **Signs:** drooping (ucipm: "wilting is usually caused by underwatering"), brown tips (ucipm, rhs), leaf drop (ucipm, caes), yellow leaves (rhs, isu), new growth small and pale *new* (caes).
-- **Up:** soil dry now, a meter reading in the dry part, longer since watering than its usual gap, roots fill the pot (dries out fast).
+- **Up:** soil dry now, a meter reading in the dry part, longer since watering than its usual gap, not repotted in over 2 years.
 - **Down:** soil wet now, watered in the last 2 days.
 - **Check:** whether the soil is dry all the way down and the pot feels light. Whether water runs straight through without wetting the soil, which happens when it has dried hard.
 
@@ -109,7 +109,7 @@ Each cause: the signs a source gives it for, what moves it up or down, and what 
 ### Roots fill the pot
 
 - **Signs:** yellow leaves on older leaves (ucipm: "pot-bound growth, compacted soil"), leaf drop (ucipm), drooping (ucipm).
-- **Up:** not repotted in over 2 years or never, dries out quickly.
+- **Up:** not repotted in over 2 years or never.
 - **Check:** whether roots come out of the holes at the bottom or circle the inside of the pot. Whether water runs straight through.
 
 ### Pests
@@ -121,18 +121,20 @@ Each cause: the signs a source gives it for, what moves it up or down, and what 
 ### Leaf spot disease
 
 - **Signs:** spots (ucipm, rhs, caes).
-- **Up:** arrived lately or was outside (ucipm: "rare unless plants have recently come from outdoors or greenhouses"), soil wet now.
+- **Up:** arrived lately (ucipm: "rare unless plants have recently come from outdoors or greenhouses"), soil wet now. Time outdoors isn't stored, so it isn't used.
 - **Check:** whether the spots are dark with a yellow ring, or look wet, and whether they spread to new leaves over a week.
 
 ### Natural ageing
 
-- **Signs:** yellow leaves (rhs: "the odd lower leaf" is normal; isu), leaf drop.
+- **Signs:** yellow leaves (rhs: "the odd lower leaf" is normal; isu).
+- **Up:** the person says older and lower leaves.
 - **Only listed when** the person says older and lower leaves.
 - **Check:** whether it is one or two of the oldest leaves at a time and the new growth is healthy. Then it is usually the plant letting go of old leaves.
 
 ### Going into rest
 
-- **Signs:** yellow leaves, leaf drop, drooping.
+- **Signs:** yellow leaves, leaf drop, drooping. No outside source: this one comes from the plant's own growing season, which the person set.
+- **Up:** it rests in this season or is marked dormant.
 - **Only listed when** the plant has a growing season set and rests in this season, or is marked dormant.
 - **Check:** whether it does this around the same time each year. For a corm, tuber or rhizome, whether it is still firm.
 

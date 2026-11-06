@@ -24,6 +24,12 @@ public static class ProblemText
         ProblemSign.Sunburn => Strings.Pests.SignSunburn,
         ProblemSign.Leggy => Strings.Pests.SignLeggy,
         ProblemSign.Edema => Strings.Pests.SignEdema,
+        ProblemSign.PaleLeaves => Strings.Pests.SignPaleLeaves,
+        ProblemSign.PaleNewGrowth => Strings.Pests.SignPaleNewGrowth,
+        ProblemSign.LostVariegation => Strings.Pests.SignLostVariegation,
+        ProblemSign.Speckled => Strings.Pests.SignSpeckled,
+        ProblemSign.Sticky => Strings.Pests.SignSticky,
+        ProblemSign.Curled => Strings.Pests.SignCurled,
         _ => Strings.Pests.SignOther
     };
 

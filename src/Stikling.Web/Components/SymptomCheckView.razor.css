@@ -1,0 +1,97 @@
+.symptom-intro {
+    margin: 0 0 1rem;
+}
+
+/* The quiet label of the page, over the facts and the causes */
+.symptom-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+/* A fact the app knows, with a box to untick it. The whole line is the tap area. */
+.symptom-fact {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-height: 2.75rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.symptom-fact input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+}
+
+.symptom-none {
+    margin: 0 0 0.5rem;
+}
+
+/* Flat cards, the likeliest first. The order says how likely, so no colour grades them. */
+.symptom-causes {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.symptom-cause {
+    padding: 1rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    background: var(--pa-surface);
+}
+
+.symptom-cause h3 {
+    margin: 0 0 0.4rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+.symptom-small-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.symptom-checks {
+    margin: 0.2rem 0 0.4rem;
+    padding-left: 1.1rem;
+}
+
+.symptom-checks li + li {
+    margin-top: 0.25rem;
+}
+
+.symptom-meta {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.symptom-sources {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.symptom-sources li + li {
+    margin-top: 0.35rem;
+}
+
+.symptom-meta a {
+    color: inherit;
+    text-decoration: underline;
+}
