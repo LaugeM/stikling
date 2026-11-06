@@ -1578,4 +1578,67 @@
   <data name="MomentAfterDays_Other" xml:space="preserve">
     <value>Efter {0} dage</value>
   </data>
+  <data name="ThingMedium" xml:space="preserve">
+    <value>vækstmedie</value>
+  </data>
+  <data name="ThingType" xml:space="preserve">
+    <value>type</value>
+  </data>
+  <data name="ThingPlant" xml:space="preserve">
+    <value>plante</value>
+  </data>
+  <data name="ThingStartMonth" xml:space="preserve">
+    <value>startmåned</value>
+  </data>
+  <data name="ThingRootingAids" xml:space="preserve">
+    <value>rodhjælp</value>
+  </data>
+  <data name="ThingDrying" xml:space="preserve">
+    <value>hvor længe snitfladen tørrede</value>
+  </data>
+  <data name="ThingPlace" xml:space="preserve">
+    <value>hvor de stod</value>
+  </data>
+  <data name="ListExperimentNotFair" xml:space="preserve">
+    <value>Disse batches er forskellige på mere end ét punkt: {0}. En forskel i resultatet kan derfor ikke tilskrives et af dem alene.</value>
+  </data>
+  <data name="StatsFairMedium" xml:space="preserve">
+    <value>Batches i disse vækstmedier er for det meste også forskellige i {0}, så en forskel her kan ikke tilskrives vækstmediet alene.</value>
+  </data>
+  <data name="StatsFairAids" xml:space="preserve">
+    <value>Batches med og uden en rodhjælp er for det meste også forskellige i {0}, så en forskel her kan ikke tilskrives rodhjælpen alene.</value>
+  </data>
+  <data name="StatsFairDrying" xml:space="preserve">
+    <value>Disse grupper er for det meste også forskellige i {0}, så en forskel her kan ikke tilskrives tørringen alene.</value>
+  </data>
+  <data name="DetDiffTitle" xml:space="preserve">
+    <value>Hvad der var anderledes end dem der slog rødder</value>
+  </data>
+  <data name="DetDiffCompared" xml:space="preserve">
+    <value>Sammenlignet med dine {0} batches af samme type der slog rødder. Fra dine egne notater, og det viser hvad der var anderledes, ikke hvorfor det mislykkedes.</value>
+  </data>
+  <data name="DetDiffTooFew" xml:space="preserve">
+    <value>Ikke nok at sammenligne med endnu: det kræver mindst {0} batches af samme type der slog rødder, og du har {1}.</value>
+  </data>
+  <data name="DetDiffNothing" xml:space="preserve">
+    <value>Intet skiller sig ud sammenlignet med dine {0} batches af samme type der slog rødder.</value>
+  </data>
+  <data name="DetDiffMedium" xml:space="preserve">
+    <value>Vækstmedie: {0} her. {1} af dem brugte det, {2} brugte {3}.</value>
+  </data>
+  <data name="DetDiffAidUsed" xml:space="preserve">
+    <value>Rodhjælp: {0} her. {1} af dem brugte det.</value>
+  </data>
+  <data name="DetDiffAidNotUsed" xml:space="preserve">
+    <value>Rodhjælp: {0} ikke brugt her. {1} af dem brugte det.</value>
+  </data>
+  <data name="DetDiffMonth" xml:space="preserve">
+    <value>Startet i {0}. {1} af dem omkring da ({2} til {3}), {4} i {5}.</value>
+  </data>
+  <data name="DetDiffWater" xml:space="preserve">
+    <value>Dage mellem vandskift: {0} her, omkring {1} på de {2} af dem hvor det er noteret.</value>
+  </data>
+  <data name="DetDiffNoWater" xml:space="preserve">
+    <value>Ingen vandskift noteret her. Dage mellem vandskift på de {0} af dem hvor det er noteret: omkring {1}.</value>
+  </data>
 </root>

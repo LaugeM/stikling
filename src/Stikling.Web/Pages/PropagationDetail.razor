@@ -153,6 +153,30 @@ else
                             }
                         </ul>
                     }
+                    @if (differed is { } comparison)
+                    {
+                        <div class="outcome-differed">
+                            <h3 class="outcome-differed-title">@Strings.Propagations.DetDiffTitle</h3>
+                            @if (!comparison.HasEnough)
+                            {
+                                <p>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffTooFew, FailedComparisons.MinimumRooted, comparison.Rooted)</p>
+                            }
+                            else if (comparison.NothingStandsOut)
+                            {
+                                <p>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffNothing, comparison.Rooted)</p>
+                            }
+                            else
+                            {
+                                <p>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffCompared, comparison.Rooted)</p>
+                                <ul>
+                                    @foreach (var difference in comparison.Differences)
+                                    {
+                                        <li>@DifferenceText(difference)</li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    }
                 </section>
             }
             else if (propagation.IsActive)
@@ -1037,6 +1061,21 @@ else
 
     private bool careOpen;
     private IReadOnlyList<PropagationCareLog> careLogs = [];
+    private FailedComparison? differed;
+
+    private static string DifferenceText(FailedDifference difference) => difference switch
+    {
+        MediumDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffMedium, Labels.For(d.Medium), d.Same, d.MostUsedCount, Labels.For(d.MostUsed)),
+        AidUsedDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffAidUsed, Labels.For(d.Aid), d.RootedWith),
+        AidNotUsedDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffAidNotUsed, Labels.For(d.Aid), d.RootedWith),
+        StartMonthDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffMonth,
+            CareIntervals.MonthName(d.Month), d.Around,
+            CareIntervals.MonthName(d.Month == 1 ? 12 : d.Month - 1), CareIntervals.MonthName(d.Month == 12 ? 1 : d.Month + 1),
+            d.MostUsedCount, CareIntervals.MonthName(d.MostUsedMonth)),
+        WaterChangeDifference { DaysHere: { } here } d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffWater, here, d.DaysUsual, d.Compared),
+        WaterChangeDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffNoWater, d.Compared, d.DaysUsual),
+        _ => ""
+    };
     private PropagationCareLatest? lastWatered;
     private PropagationCareLatest? lastWaterChange;
 
@@ -1196,7 +1235,9 @@ else
         outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
-        careLogs = PropagationCareService.For(await CareService.GetAllAsync(), Id);
+        var everyCareLog = await CareService.GetAllAsync();
+        careLogs = PropagationCareService.For(everyCareLog, Id);
+        differed = propagation is null ? null : FailedComparisons.For(propagation, propagations, everyCareLog);
         lastWatered = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.Watered, Today);
         lastWaterChange = PropagationCareService.Latest(careLogs, Id, PropagationCareKind.ChangedWater, Today);
         var settings = await SettingsService.GetAsync();
