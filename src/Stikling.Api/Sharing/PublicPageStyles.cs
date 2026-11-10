@@ -11,7 +11,7 @@ public static class PublicPageStyles
 
         :root { --clay: #b85c38; --clay-soft: #f6e6dc; }
         @media (prefers-color-scheme: dark) { :root { --clay: #e08a64; --clay-soft: #36241b; } }
-        .pp { max-width: 90rem; margin: 0 auto; padding: 0 0 2.5rem; }
+        .pp { max-width: 120rem; margin: 0 auto; padding: 0 0 2.5rem; }
         .pp-head { padding: 1.5rem 1rem 0.5rem; }
         .pp-head h1 { font-size: 2rem; }
         .pp-head .line { max-width: 40rem; }
@@ -34,8 +34,8 @@ public static class PublicPageStyles
         .pp-bare { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0.5rem; text-align: center; font: 700 1rem/1.15 var(--display); color: var(--clay); overflow-wrap: anywhere; }
         .pp-tile.cutting .pp-bare { color: var(--moss); }
         .pp-text { display: block; padding: 0.4rem 0.1rem 0; }
-        .pp-name { display: block; font: 700 0.95rem/1.2 var(--display); overflow-wrap: anywhere; }
-        .pp-latin { display: block; margin-top: 0.1rem; font-size: 0.8rem; line-height: 1.3; color: var(--muted); overflow-wrap: anywhere; }
+        .pp-name { display: block; font: 700 0.95rem/1.2 var(--display); overflow-wrap: break-word; hyphens: auto; }
+        .pp-latin { display: block; margin-top: 0.1rem; font-size: 0.8rem; line-height: 1.3; color: var(--muted); overflow-wrap: break-word; hyphens: auto; }
         .pp-latin i { font-style: italic; }
         .pp-caption { display: block; margin-top: 0.15rem; font-size: 0.8rem; line-height: 1.3; color: var(--moss); }
         a.pp-tile-link:hover .pp-name { text-decoration: underline; }
@@ -76,14 +76,20 @@ public static class PublicPageStyles
           .pp-shelf .pp-tile { flex-basis: 11rem; }
           .pp-grid { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: 1.25rem 1rem; padding: 0 1.5rem; }
           .pp-wall { grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
-          .pp-wall .pp-tile:first-child { grid-column: span 2; grid-row: span 2; }
+          .pp-wall .pp-tile:first-child:not(.bare) { grid-column: span 2; grid-row: span 2; }
           .pp-wall .pp-name { font-size: 1rem; }
           .pp-wall .pp-latin { display: block; }
           .pp-wall .pp-bare { font-size: 1.1rem; }
           .pp .foot { margin-left: 1.5rem; }
         }
-        @media (min-width: 90rem) {
-          .pp-shelf .pp-tile { flex-basis: 12rem; }
+        @media (min-width: 64rem) {
+          .pp-shelf .pp-tile { flex-basis: 13rem; }
+          .pp-grid { grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); }
+          .pp-wall { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
+        }
+        @media (min-width: 100rem) {
+          .pp-shelf .pp-tile { flex-basis: 15rem; }
+          .pp-grid { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
         }
         """;
 }

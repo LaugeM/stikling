@@ -147,3 +147,8 @@
 .pp-switch .settings-hint {
     margin-top: 0;
 }
+
+/* A select is a touch target like the buttons */
+.pp-order {
+    min-height: 2.75rem;
+}

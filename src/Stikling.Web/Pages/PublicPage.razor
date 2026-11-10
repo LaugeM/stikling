@@ -157,7 +157,7 @@ else
                 }
             </div>
             <label class="pp-label pp-sublabel" for="pp-order">@Strings.PublicPage.OrderLabel</label>
-            <select id="pp-order" class="form-select w-auto" @onchange="e => ChangeAsync(page with { Order = Enum.Parse<PublicPageOrder>(e.Value?.ToString() ?? nameof(PublicPageOrder.Newest)) })">
+            <select id="pp-order" class="form-select w-auto pp-order" @onchange="e => ChangeAsync(page with { Order = Enum.Parse<PublicPageOrder>(e.Value?.ToString() ?? nameof(PublicPageOrder.Newest)) })">
                 <option value="@nameof(PublicPageOrder.Newest)" selected="@(page.Order == PublicPageOrder.Newest)">@Strings.PublicPage.OrderNewest</option>
                 <option value="@nameof(PublicPageOrder.Name)" selected="@(page.Order == PublicPageOrder.Name)">@Strings.PublicPage.OrderName</option>
             </select>
