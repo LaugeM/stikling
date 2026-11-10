@@ -67,8 +67,16 @@
                                     {
                                         <li>
                                             <a href="@Image(photo, "full")">
-                                                <img src="@Image(photo, single || !Context.Thumbnails.Contains(photo.Id) ? "full" : "thumb")" alt=""
-                                                     loading="lazy" style="@Position(photo)">
+                                                @if (single)
+                                                {
+                                                    <img src="@Image(photo, "full")" alt="" loading="lazy" style="@Position(photo)">
+                                                }
+                                                else
+                                                {
+                                                    <img src="@Image(photo, "full")" alt=""
+                                                         srcset="@ShareImage.SrcSet(Context.LinkPrefix, photo, Context.Thumbnails.Contains(photo.Id))"
+                                                         sizes="@ShareImage.StorySizes" loading="lazy" style="@Position(photo)">
+                                                }
                                             </a>
                                         </li>
                                     }
