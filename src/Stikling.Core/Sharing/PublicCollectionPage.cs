@@ -277,7 +277,8 @@ public static class PublicCollectionPage
 
     /// <summary>The ids of the plants and cuttings on one numbered page of a part.</summary>
     public static IReadOnlyCollection<Guid> PartIds(PublicSubjects subjects, PublicPartKind kind, int page) =>
-        subjects.IsOn(kind) && page >= 1
+        // A page past the end reads nothing, and a huge number can't wrap around to the first page
+        subjects.IsOn(kind) && page >= 1 && (page == 1 || (long)(page - 1) * PublicPageRules.TilesPerPage < subjects.SubjectsOf(kind).Count)
             ? [.. subjects.SubjectsOf(kind).Skip((page - 1) * PublicPageRules.TilesPerPage).Take(PublicPageRules.TilesPerPage).Select(s => s.Id)]
             : [];
 
@@ -400,7 +401,11 @@ public static class PublicCollectionPage
 
         var photoList = photos.ToList();
         var visibleFrom = from is { IsDeleted: false, HiddenFromPublicPage: false } ? from : null;
-        var visibleTaken = taken.Where(p => !p.IsDeleted && !p.HiddenFromPublicPage).ToList();
+        var takenList = taken.ToList();
+        var visibleTaken = takenList.Where(p => !p.IsDeleted && !p.HiddenFromPublicPage && !ExampleFamily.PropagationIds.Contains(p.Id)).ToList();
+        // A hidden cutting leaves no trace: not in the count, and no Propagated milestone for it
+        var hiddenTaken = takenList.Where(p => !visibleTaken.Contains(p)).Select(p => p.Id).ToHashSet();
+        entries = entries.Where(e => !(e.Kind == TimelineKind.Propagated && e.RelatedId is { } related && hiddenTaken.Contains(related))).ToList();
         var propagations = visibleTaken.ToDictionary(p => p.Id);
         if (visibleFrom is not null)
             propagations[visibleFrom.Id] = visibleFrom;

@@ -58,12 +58,21 @@ public static class PublicPagePages
             return Results.Text($"User-agent: *\nAllow: /\nSitemap: {options.Value.BaseUrl.TrimEnd('/')}/sitemap.xml\n", "text/plain");
         });
 
-        pages.MapGet("/sitemap.xml", async (HttpContext http, StiklingDbContext db, IOptions<ShareOptions> options) =>
+        pages.MapGet("/sitemap.xml", async (HttpContext http, StiklingDbContext db, IOptions<ShareOptions> options, TimeProvider clock) =>
         {
             if (string.IsNullOrWhiteSpace(options.Value.BaseUrl))
                 return Results.NotFound();
             Asked(http);
-            return Results.Text(await SitemapAsync(db, options.Value), "application/xml", Encoding.UTF8);
+
+            // Building it reads every listed collection, so it is kept for a while instead of built on every request
+            var now = clock.GetUtcNow();
+            var kept = sitemap;
+            if (kept is null || now - kept.Value.At >= TimeSpan.FromMinutes(options.Value.SitemapCacheMinutes))
+            {
+                kept = (await SitemapAsync(db, options.Value), now);
+                sitemap = kept;
+            }
+            return Results.Text(kept.Value.Xml, "application/xml", Encoding.UTF8);
         });
 
         foreach (var (segment, kind) in new[]
@@ -411,6 +420,9 @@ public static class PublicPagePages
     }
 
     // The sitemap: the pages that asked to be listed, with their parts and, with stories on, every story
+
+    // The last sitemap built and when. Two requests at once may both build it, which is harmless
+    private static (string Xml, DateTimeOffset At)? sitemap;
 
     private static async Task<string> SitemapAsync(StiklingDbContext db, ShareOptions options)
     {

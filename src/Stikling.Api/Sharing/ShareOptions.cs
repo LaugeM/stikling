@@ -14,6 +14,9 @@ public sealed class ShareOptions
     /// <summary>The host that serves the pages from its root, like share.stikling.app. Unset locally, where /s/... is used.</summary>
     public string? Host { get; set; }
 
+    /// <summary>How long the public pages' sitemap is kept before it is built again. 0 builds it every time, as in the tests.</summary>
+    public int SitemapCacheMinutes { get; set; } = 10;
+
     /// <summary>The address of a page, with the token.</summary>
     public string UrlOf(string token) => $"{BaseUrl.TrimEnd('/')}/{token}";
 

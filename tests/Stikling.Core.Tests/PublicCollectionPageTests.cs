@@ -386,6 +386,35 @@ public class PublicCollectionPageTests
     }
 
     [Fact]
+    public void A_hidden_cutting_leaves_no_milestone_or_count_in_its_parent_plants_story()
+    {
+        var plant = APlant("Monstera");
+        var shown = ACutting("Shown");
+        var hidden = ACutting("Hidden", change: p => p.HiddenFromPublicPage = true);
+        TimelineEntry Propagated(Propagation p, int daysAgo) => new()
+        {
+            SubjectType = SubjectType.Plant, SubjectId = plant.Id, Kind = TimelineKind.Propagated, RelatedId = p.Id,
+            OccurredAt = Now.AddDays(-daysAgo), UpdatedAt = Now
+        };
+
+        var story = PublicCollectionPage.PlantStory(Settings(stories: true), plant, null, null, [shown, hidden], [],
+            [Propagated(shown, 5), Propagated(hidden, 3)], [], TimeZoneInfo.Utc, Today)!;
+
+        Assert.Single(story.Items, i => i.Kind == ShareItemKind.Milestone && i.Day == Today.AddDays(-5));
+        Assert.DoesNotContain(story.Items, i => i.Kind == ShareItemKind.Milestone && i.Day == Today.AddDays(-3));
+    }
+
+    [Fact]
+    public void A_page_number_far_past_the_end_reads_nothing()
+    {
+        var subjects = PublicCollectionPage.Subjects(Settings(), [APlant("Monstera")], [], []);
+
+        Assert.Empty(PublicCollectionPage.PartIds(subjects, PublicPartKind.Plants, int.MaxValue));
+        Assert.Empty(PublicCollectionPage.PartIds(subjects, PublicPartKind.Plants, 2));
+        Assert.Single(PublicCollectionPage.PartIds(subjects, PublicPartKind.Plants, 1));
+    }
+
+    [Fact]
     public void A_story_cannot_be_kept_even_when_units_were_given_away()
     {
         var cutting = ACutting("Cut", change: p => { p.GivenAwayCount = 1; p.InitialCount = 3; });
