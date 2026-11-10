@@ -14,7 +14,7 @@
             </div>
         </a>
         <label class="row-btn @(busy ? "disabled" : null)" for="@inputId" title="@Strings.Care.PhotoRowTakePhoto">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
             <span class="visually-hidden">@F(Strings.Care.PhotoRowTakePhotoOf, Due.Name)</span>
         </label>
         @if (cameraAvailable && Due.LastPhoto is not null)

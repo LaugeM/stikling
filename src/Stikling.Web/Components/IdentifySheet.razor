@@ -11,7 +11,7 @@
         <ul class="sheet-actions">
             <li>
                 <label class="sheet-action" for="@cameraId">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                     <span class="sheet-action-text"><b>@Strings.Identify.TakePhoto</b></span>
                 </label>
                 <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
@@ -19,7 +19,7 @@
             </li>
             <li>
                 <label class="sheet-action" for="@galleryId">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Photo</svg>
                     <span class="sheet-action-text"><b>@Strings.Identify.ChoosePhoto</b></span>
                 </label>
                 <input id="@galleryId" type="file" accept="image/*" class="visually-hidden"

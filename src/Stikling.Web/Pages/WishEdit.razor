@@ -68,14 +68,14 @@ else
                         <div class="photo-pick">
                             <PhotoImage PhotoId="photo.Id" Alt="@Strings.Shared.WishEditPhotoAlt" />
                             <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
-                                    aria-label="@Strings.Shared.WishEditRemovePhoto" title="@Strings.Shared.WishEditRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                                    aria-label="@Strings.Shared.WishEditRemovePhoto" title="@Strings.Shared.WishEditRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
                         </div>
                     }
                 </div>
             }
             <div class="composer-row">
                 <label class="btn btn-outline-primary btn-sm icon-btn" for="wish-photos">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                     @(photos.Count > 0 ? Strings.Shared.WishEditAddMore : Strings.Shared.WishEditAddPhotos)
                 </label>
                 <input id="wish-photos" type="file" accept="image/*" multiple class="visually-hidden"

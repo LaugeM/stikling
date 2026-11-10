@@ -97,7 +97,7 @@
                         <span class="input-group-text">%</span>
                     </div>
                     <button type="button" class="nutrient-remove" aria-label="@F(Strings.Supplies.ProductRemoveNutrient, Labels.For(nutrient))"
-                            @onclick="() => RemoveNutrient(nutrient)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                            @onclick="() => RemoveNutrient(nutrient)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
                 </div>
             }
             @if (adding)

@@ -29,7 +29,7 @@
             </button>
             @* Takes over from the round add button on a wide screen *@
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="propagations/new">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
                 @Strings.Propagations.ListStart
             </a>
         </div>
@@ -78,7 +78,7 @@ else
                 @Strings.Propagations.ListResultsLink
             </a>
             <button type="button" class="btn btn-link btn-sm link-action list-side-link" @onclick="ToggleSelectMode">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="m8.5 12.2 2.4 2.4 4.6-5" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.CheckBox</svg>
                 @(selecting ? Strings.Common.Done : Strings.Propagations.ListSelect)
             </button>
         </div>
@@ -260,7 +260,7 @@ else
 else
 {
     <a class="fab" href="propagations/new" aria-label="@Strings.Propagations.ListStart" title="@Strings.Propagations.ListStart">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
     </a>
 }
 
